@@ -3,6 +3,8 @@
  * @description RPIKit Review Phase - Combined code quality and security review with structured verdicts. Scales review depth to change magnitude. Soft-gating with user autonomy.
  * @inputs { projectRoot?: string, reviewScope?: string, maxIssuesPerCategory?: number }
  * @outputs { success: boolean, codeReview: object, securityReview: object, overallVerdict: string }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

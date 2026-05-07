@@ -3,6 +3,8 @@
  * @description GSD-inspired project initialization with vision capture, research, and roadmap
  * @inputs { projectName: string, projectType?: string, initialIdea?: string }
  * @outputs { success: boolean, vision: object, requirements: object, roadmap: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

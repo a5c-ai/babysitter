@@ -9,6 +9,9 @@ expertise:
   - Self-contained implementation
   - Clean session teardown
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Polecat Agent

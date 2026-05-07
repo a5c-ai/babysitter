@@ -9,6 +9,9 @@ expertise:
   - Integration testing
   - Attribution tracking
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Refinery Agent

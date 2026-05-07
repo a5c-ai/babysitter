@@ -3,6 +3,8 @@
  * @description Standalone constitution establishment for spec-driven development
  * @inputs { projectName: string, scope?: string, existingStandards?: object }
  * @outputs { success: boolean, constitution: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

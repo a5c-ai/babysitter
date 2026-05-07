@@ -1,6 +1,9 @@
 ---
 name: receiving-code-review
 description: Use when receiving code review feedback, before implementing suggestions. Requires technical rigor and verification, not blind implementation.
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Review Reception

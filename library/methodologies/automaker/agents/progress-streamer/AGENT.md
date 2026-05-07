@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Progress Streamer Agent
 
 **Role:** Real-time Updates

@@ -6,6 +6,9 @@ allowed-tools:
   - file-write
   - file-search
   - git-commit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # COG Weekly Reflection Skill

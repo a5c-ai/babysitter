@@ -9,6 +9,9 @@ expertise:
   - Conventional Comments formatting
   - Change magnitude scaling
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Reviewer Agent

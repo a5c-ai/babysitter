@@ -8,6 +8,9 @@ expertise:
   - Binary verdict assessment
   - Evidence-based review
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Reviewer Agent

@@ -3,6 +3,8 @@
  * @description Scrum - Iterative agile framework with sprints, roles, and ceremonies
  * @inputs { projectName: string, productVision: string, sprintDuration: number, sprintCount: number, teamSize: number, backlogItems?: array }
  * @outputs { success: boolean, productBacklog: object, sprints: array, velocityMetrics: object, retrospectives: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

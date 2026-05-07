@@ -2,6 +2,9 @@
 name: test-driven-development
 description: Test-first development practice where test specifications are written before production code, integrated into plan tasks as mandatory first sub-steps.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Test-Driven Development

@@ -11,6 +11,9 @@ expertise:
   - Red team attack simulation
   - 102 static analysis rules
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Security Reviewer Agent

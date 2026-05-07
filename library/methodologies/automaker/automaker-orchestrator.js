@@ -3,6 +3,8 @@
  * @description AutoMaker - Full lifecycle autonomous AI development studio: feature intake, agent assignment, execution in worktrees, review, and ship
  * @inputs { projectName: string, features: array, repoUrl?: string, baseBranch?: string, maxConcurrentAgents?: number, testFramework?: string, reviewPolicy?: string }
  * @outputs { success: boolean, featuresCompleted: array, featuresFailed: array, mergedBranches: array, deploymentResult: object, metrics: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

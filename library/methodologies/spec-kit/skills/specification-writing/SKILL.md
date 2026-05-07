@@ -2,6 +2,9 @@
 name: specification-writing
 description: Write feature specifications as requirements and user stories with acceptance criteria, focusing on business value and testable conditions.
 allowed-tools: Read, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Specification Writing

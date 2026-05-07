@@ -9,6 +9,9 @@ expertise:
   - Long-running task execution
   - Knowledge transfer and handoffs
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Crew Lead Agent

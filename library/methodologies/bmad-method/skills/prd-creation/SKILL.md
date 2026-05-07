@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # PRD Creation
 
 Create Product Requirements Documents through structured discovery using Jobs-to-be-Done framework.

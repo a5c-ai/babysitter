@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # BMad Master Agent
 
 **Name:** BMad Master

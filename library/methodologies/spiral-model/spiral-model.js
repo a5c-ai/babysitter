@@ -3,6 +3,8 @@
  * @description Spiral Model - Risk-driven iterative development with four phases per spiral: Planning, Risk Analysis, Engineering, Evaluation
  * @inputs { projectName: string, projectDescription: string, maxSpirals: number, convergenceCriteria: string, stakeholders?: array, riskTolerance?: string }
  * @outputs { success: boolean, spirals: array, risks: object, prototypes: array, deliverables: object, spiralDiagram: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

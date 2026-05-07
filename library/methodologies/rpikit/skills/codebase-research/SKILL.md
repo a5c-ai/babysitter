@@ -2,6 +2,9 @@
 name: codebase-research
 description: Systematic codebase exploration following the Iron Law - understand the problem before exploring code. Four phases with file-finder and web-researcher agents.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Codebase Research

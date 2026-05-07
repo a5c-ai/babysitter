@@ -2,6 +2,9 @@
 name: research-orchestration
 description: Parallel research agent orchestration dispatching 5-10 concurrent agents for comprehensive multi-source research with synthesis and validation.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Research Orchestration

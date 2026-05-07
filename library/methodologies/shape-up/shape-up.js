@@ -3,6 +3,8 @@
  * @description Shape Up - Basecamp's methodology for building products through 6-week cycles with shaping, betting, and building phases
  * @inputs { projectName: string, workDescription: string, appetite?: string, cycleWeeks?: number, teamSize?: string, phase?: string }
  * @outputs { success: boolean, pitch?: object, scopeMap?: object, hillChart?: object, cycle?: object, summary: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

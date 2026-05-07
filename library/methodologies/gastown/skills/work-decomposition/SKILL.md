@@ -2,6 +2,9 @@
 name: work-decomposition
 description: Decompose goals into MEOWs (Molecular Expressions of Work) - trackable atomic units following Gas Town's bead-based work model.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Work Decomposition

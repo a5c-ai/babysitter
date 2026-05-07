@@ -3,6 +3,8 @@
  * @description Everything Claude Code Security Pipeline - AgentShield audit with 5 scanning categories: secrets detection, permission auditing, hook injection analysis, MCP risk profiling, and agent config review
  * @inputs { projectRoot?: string, scanCategories?: array, redTeamEnabled?: boolean, confidenceThreshold?: number }
  * @outputs { success: boolean, secretsScan: object, permissionAudit: object, hookAnalysis: object, mcpProfiling: object, agentConfigReview: object, overallScore: number, findings: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

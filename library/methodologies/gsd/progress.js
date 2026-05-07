@@ -3,6 +3,8 @@
  * @description Progress check and intelligent routing to next action
  * @inputs { projectDir: string }
  * @outputs { success: boolean, route: string, status: object, recommendation: string }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

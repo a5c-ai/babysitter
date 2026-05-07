@@ -2,6 +2,9 @@
 name: patrol-monitoring
 description: Continuous monitoring using Deacon/Witness patterns for agent health checks, stuck detection, and automated recovery.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Patrol Monitoring

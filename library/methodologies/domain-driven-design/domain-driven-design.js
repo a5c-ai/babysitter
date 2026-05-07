@@ -3,6 +3,8 @@
  * @description Domain-Driven Design (DDD) - Strategic and tactical design patterns for complex business domains
  * @inputs { projectName: string, domainDescription?: string, complexity?: string, phase?: string }
  * @outputs { success: boolean, strategicDesign: object, tacticalDesign: object, domainModel: object, ubiquitousLanguage: object, implementation: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

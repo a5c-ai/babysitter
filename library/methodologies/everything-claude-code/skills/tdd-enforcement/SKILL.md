@@ -2,6 +2,9 @@
 name: tdd-enforcement
 description: Red-Green-Refactor TDD methodology with mandatory failing tests, minimal implementation, quality refactoring, and 80% coverage gating.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # TDD Enforcement

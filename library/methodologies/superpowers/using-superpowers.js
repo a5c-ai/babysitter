@@ -3,6 +3,8 @@
  * @description Using Superpowers - Meta-skill for skill discovery: scan available skills, match to task, invoke before any response
  * @inputs { task: string, skillsDir?: string, forceSkill?: string }
  * @outputs { success: boolean, matchedSkills: array, selectedSkill: object, invoked: boolean }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

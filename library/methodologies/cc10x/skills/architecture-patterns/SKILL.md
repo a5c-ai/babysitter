@@ -2,6 +2,9 @@
 name: architecture-patterns
 description: System and API design guidance covering component boundaries, data flow, integration patterns, and scalability considerations.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Architecture Patterns

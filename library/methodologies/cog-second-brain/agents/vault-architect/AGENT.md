@@ -2,6 +2,9 @@
 name: vault-architect
 description: Designs and maintains the COG vault directory structure, Git integration, and self-healing cross-references
 role: Vault Structure Design & Maintenance
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Vault Architect Agent

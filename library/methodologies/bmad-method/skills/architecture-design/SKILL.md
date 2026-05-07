@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Architecture Design
 
 Design comprehensive system architecture with technology selection and ADRs.

@@ -3,6 +3,8 @@
  * @description Gas Town Patrol - Continuous monitoring using Deacon/Witness patterns for health checks, stuck agent detection, and recovery
  * @inputs { townId?: string, patrolInterval?: number, maxCycles?: number, recoveryMode?: string }
  * @outputs { success: boolean, patrolCycles: number, issues: array, recoveries: array, report: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

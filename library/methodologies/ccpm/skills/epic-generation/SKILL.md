@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Epic Generation
 
 Transform PRD into a technical implementation plan with architecture decisions and dependency mapping.

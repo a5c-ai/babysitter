@@ -2,6 +2,9 @@
 name: formula-authoring
 description: Author TOML-based Formula workflow templates that become Protomolecules and active Molecules in Gas Town's durable workflow system.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Formula Authoring

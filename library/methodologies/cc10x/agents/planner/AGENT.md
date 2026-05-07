@@ -9,6 +9,9 @@ expertise:
   - Risk assessment and mitigation
   - Plan-to-build continuity
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Planner Agent

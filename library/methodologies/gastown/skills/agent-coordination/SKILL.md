@@ -2,6 +2,9 @@
 name: agent-coordination
 description: Coordinate Crew (persistent) and Polecat (transient) agents using Gas Town's hook-based work distribution and GUPP principle.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Agent Coordination

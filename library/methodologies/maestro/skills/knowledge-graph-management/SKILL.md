@@ -2,6 +2,9 @@
 name: knowledge-graph-management
 description: Capture, validate, query, and sync architectural patterns and design decisions in the knowledge graph
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
+graph:
+  domains: [domain:software-engineering]
+
 ---
 # Knowledge Graph Management
 

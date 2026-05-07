@@ -3,6 +3,8 @@
  * @description Gas Town Convoy Lifecycle - Create, assign, track, and land convoys of related beads (atomic work units)
  * @inputs { goal: string, beadSpecs?: array, agentPool?: array, trackingMode?: string, landingStrategy?: string }
  * @outputs { success: boolean, convoyId: string, beads: array, completedBeads: array, landingResult: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

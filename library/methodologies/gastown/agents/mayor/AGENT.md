@@ -9,6 +9,9 @@ expertise:
   - Agent assignment and load balancing
   - Escalation handling
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Mayor Agent

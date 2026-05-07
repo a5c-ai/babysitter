@@ -3,6 +3,8 @@
  * @description Impact Mapping strategic planning technique - connects business goals to features through actors and impacts
  * @inputs { goal: string, timeframe: string, successMetrics: array, constraints: object }
  * @outputs { success: boolean, goal: object, actors: array, impacts: array, deliverables: array, map: object, assumptions: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

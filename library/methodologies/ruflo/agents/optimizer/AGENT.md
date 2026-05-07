@@ -10,6 +10,9 @@ expertise:
   - Resource utilization improvement
   - Routing efficiency optimization
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Optimizer Agent

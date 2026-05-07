@@ -2,6 +2,9 @@
 name: context-engineering
 description: Dynamic context injection, mode switching (dev/review/research), selective loading, and strategic compaction for token optimization.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Context Engineering

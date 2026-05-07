@@ -1,6 +1,9 @@
 ---
 name: systematic-debugging
 description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes. Requires root cause investigation first.
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Systematic Debugging

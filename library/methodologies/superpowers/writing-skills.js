@@ -3,6 +3,8 @@
  * @description Writing Skills - TDD for process documentation: write pressure tests, watch agents fail, write the skill, watch them pass
  * @inputs { skillName: string, triggerConditions: string, pressureScenarios?: array, skillsDir?: string }
  * @outputs { success: boolean, skillPath: string, pressureResults: object, loopholesClosed: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

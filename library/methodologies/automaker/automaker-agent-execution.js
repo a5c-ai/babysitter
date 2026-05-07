@@ -3,6 +3,8 @@
  * @description AutoMaker Agent Execution - Worktree setup, code generation, test running, and real-time streaming
  * @inputs { projectName: string, featurePlan: object, baseBranch?: string, testFramework?: string, maxRetries?: number, streamUpdates?: boolean }
  * @outputs { success: boolean, featureId: string, branch: string, changedFiles: array, testResults: object, streamLog: array, metrics: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -9,6 +9,9 @@ expertise:
   - Build verification after fix
   - Cross-platform package manager support
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Build Resolver Agent

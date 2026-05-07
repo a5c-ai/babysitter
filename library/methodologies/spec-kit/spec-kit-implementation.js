@@ -3,6 +3,8 @@
  * @description Spec Kit implementation workflow: task execution + quality validation + checklist. Executes development tasks against specification with progressive quality gates following GitHub's Spec-Driven Development.
  * @inputs { tasks: array, plan: object, specification: object, constitution: object, customChecks?: array }
  * @outputs { success: boolean, implementation: object, testResults: object, checklist: object, artifacts: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

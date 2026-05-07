@@ -9,6 +9,9 @@ expertise:
   - Evidence-based verification (exit codes, coverage numbers)
   - Convergence loops for coverage thresholds
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # TDD Guide Agent

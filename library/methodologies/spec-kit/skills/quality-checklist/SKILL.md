@@ -2,6 +2,9 @@
 name: quality-checklist
 description: Validate implementation quality through custom checklists, scoring against constitution standards, specification coverage, and producing remediation recommendations.
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Quality Checklist

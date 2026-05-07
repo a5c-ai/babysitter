@@ -9,6 +9,9 @@ expertise:
   - Risk assessment
   - Scalability planning
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Technical Planner Agent

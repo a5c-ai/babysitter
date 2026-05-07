@@ -2,6 +2,9 @@
 name: story-decomposition
 description: Break technical specifications into small, implementable stories with dependency ordering
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
+graph:
+  domains: [domain:software-engineering]
+
 ---
 # Story Decomposition
 

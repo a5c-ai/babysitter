@@ -6,6 +6,9 @@ metadata:
   author: babysitter-sdk
   version: "1.0.0"
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # tdd-enforcer

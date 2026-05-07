@@ -10,6 +10,9 @@ expertise:
   - Architectural drift detection
   - Import structure review
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Architecture Reviewer Agent

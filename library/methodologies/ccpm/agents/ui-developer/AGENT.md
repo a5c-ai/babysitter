@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # UI Developer Agent
 
 **Role:** Component builder, form implementer, and frontend specialist

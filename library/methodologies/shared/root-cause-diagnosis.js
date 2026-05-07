@@ -4,6 +4,8 @@
  *   Enforces: git diff analysis, written hypothesis with 2+ evidence signals,
  *   no code changes during diagnosis.
  * @see https://github.com/a5c-ai/babysitter/issues/88
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

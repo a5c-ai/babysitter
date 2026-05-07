@@ -2,6 +2,9 @@
 name: brainstorming
 description: Clarify vague requirements through exploratory questioning and option generation before committing to research or implementation.
 allowed-tools: Read, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Brainstorming

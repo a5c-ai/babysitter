@@ -2,6 +2,9 @@
 name: consensus-mechanisms
 description: Multi-protocol consensus for agent swarms supporting Raft leader election, Byzantine fault tolerance, Gossip state propagation, and CRDT conflict-free merging.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Consensus Mechanisms

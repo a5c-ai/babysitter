@@ -2,6 +2,9 @@
 name: security-scanning
 description: AgentShield security audit with 5 scanning categories, 102 static analysis rules, and optional red-team simulation.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Security Scanning

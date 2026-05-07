@@ -8,6 +8,9 @@ expertise:
   - Spec-driven coding
   - File scope compliance
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Coder Agent

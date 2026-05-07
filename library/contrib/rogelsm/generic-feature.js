@@ -36,6 +36,8 @@
  * Evidence: Post-bento 3 permission regressions (fix-delete-permissions,
  * fix-plan-button-visibility, admin-trip-access) — 33 minutes of rework
  * preventable with the Phase 5 permission audit.
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

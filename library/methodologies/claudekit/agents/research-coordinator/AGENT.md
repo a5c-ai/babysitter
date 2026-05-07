@@ -10,6 +10,9 @@ expertise:
   - Research gap analysis
   - Confidence-weighted aggregation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Research Coordinator Agent

@@ -9,6 +9,9 @@ expertise:
   - Performance benchmark setting
   - Security constraint definition
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Constitution Architect Agent

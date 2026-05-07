@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Worktree Manager Agent
 
 **Role:** Branch Isolation & Merges

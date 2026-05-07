@@ -2,6 +2,9 @@
 name: external-tool-coordination
 description: Coordinate external AI tool integration (OpenAI Codex, Google Gemini) for cross-model adversarial review and delegated implementation.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # External Tool Coordination

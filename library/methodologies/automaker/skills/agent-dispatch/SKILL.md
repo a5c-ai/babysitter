@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Agent Dispatch
 
 Build dependency-aware, batched dispatch queues for parallel agent execution.

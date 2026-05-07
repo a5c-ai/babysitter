@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Completion Verifier Agent
 
 **Name:** Completion Verifier

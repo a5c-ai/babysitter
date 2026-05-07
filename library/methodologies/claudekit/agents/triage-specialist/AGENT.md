@@ -10,6 +10,9 @@ expertise:
   - Severity assessment
   - Escalation decision making
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Triage Specialist Agent

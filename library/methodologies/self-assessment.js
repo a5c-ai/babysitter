@@ -3,6 +3,8 @@
  * @description Self-Assessment Loop - Execute task, self-evaluate quality, and iteratively improve
  * @inputs { task: string, qualityThreshold: number, maxIterations: number, assessmentCriteria: array }
  * @outputs { success: boolean, iterations: number, finalScore: number, results: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

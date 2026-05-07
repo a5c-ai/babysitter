@@ -2,6 +2,9 @@
 name: pr-shepherding
 description: Monitor PR lifecycle from creation through merge including CI monitoring, review comment handling, thread resolution, and merge readiness verification.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # PR Shepherding

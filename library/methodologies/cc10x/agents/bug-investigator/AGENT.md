@@ -9,6 +9,9 @@ expertise:
   - Bug pattern documentation
   - Evidence collection
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Bug Investigator Agent

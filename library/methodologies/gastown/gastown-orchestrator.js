@@ -3,6 +3,8 @@
  * @description Gas Town Mayor Orchestrator - Global coordinator that initiates Convoys, assigns agents, monitors execution, and handles escalations following the GUPP principle
  * @inputs { goal: string, projectRoot?: string, agentPool?: array, maxConvoys?: number, qualityThreshold?: number }
  * @outputs { success: boolean, convoys: array, agentAttribution: object, mergeResults: array, summary: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

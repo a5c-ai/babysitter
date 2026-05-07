@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Test Engineer Agent
 
 **Name:** Test Engineer

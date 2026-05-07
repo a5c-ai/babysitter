@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Test Runner Agent
 
 **Role:** Test Execution & Analysis

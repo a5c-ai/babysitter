@@ -3,6 +3,8 @@
  * @description Jobs to Be Done (JTBD) - Customer progress-focused product strategy and requirements discovery
  * @inputs { projectName: string, context?: string, researchData?: string, phase?: string }
  * @outputs { success: boolean, jobs: object, forces: object, jobStories: object, solutions: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

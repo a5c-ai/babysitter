@@ -3,6 +3,8 @@
  * @description CC10X Router - Single entry point that detects user intent and dispatches to BUILD, DEBUG, REVIEW, or PLAN workflows with memory persistence and evidence-first validation
  * @inputs { request: string, projectRoot?: string, memoryDir?: string, maxRemediationCycles?: number }
  * @outputs { success: boolean, workflow: string, agentResults: array, memoryUpdated: boolean, evidence: object, summary: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

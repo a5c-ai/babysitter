@@ -3,6 +3,8 @@
  * @description Receiving Code Review - Technically evaluate feedback before implementing: read, understand, verify, evaluate, respond, implement
  * @inputs { feedback: array, branchName?: string, baseSha?: string, headSha?: string }
  * @outputs { success: boolean, evaluations: array, actionsApplied: array, pushbackItems: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

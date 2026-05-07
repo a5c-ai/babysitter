@@ -2,6 +2,9 @@
 name: maintenance-orchestration
 description: Technical debt management including branch cleanup, doc verification, TODO scanning, and dependency auditing
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
+graph:
+  domains: [domain:software-engineering]
+
 ---
 # Maintenance Orchestration
 

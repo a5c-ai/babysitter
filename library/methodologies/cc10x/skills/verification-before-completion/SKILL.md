@@ -2,6 +2,9 @@
 name: verification-before-completion
 description: Evidence requirement enforcement ensuring all claims are backed by logs, test results, or exit codes. Zero = success, non-zero = failure. No guessing allowed.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Verification Before Completion

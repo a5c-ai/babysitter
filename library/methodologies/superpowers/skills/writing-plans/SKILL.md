@@ -1,6 +1,9 @@
 ---
 name: writing-plans
 description: Use when you have a spec or requirements for a multi-step task, before touching code. Creates bite-sized TDD implementation plans with dependency tracking.
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Writing Plans

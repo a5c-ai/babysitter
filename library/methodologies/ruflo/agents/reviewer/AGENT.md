@@ -9,6 +9,9 @@ expertise:
   - Performance anti-pattern identification
   - Specification compliance verification
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Reviewer Agent

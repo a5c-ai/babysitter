@@ -3,6 +3,8 @@
  * @description Brainstorming - Socratic design refinement: explore context, ask questions, propose approaches, get approval before any code
  * @inputs { task: string, projectRoot?: string, maxQuestionRounds?: number, requireDesignDoc?: boolean }
  * @outputs { success: boolean, design: object, designDocPath: string, approaches: array, approved: boolean }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

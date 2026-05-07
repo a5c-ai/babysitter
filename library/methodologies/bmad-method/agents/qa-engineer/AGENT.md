@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Quinn - QA Engineer Agent
 
 **Name:** Quinn

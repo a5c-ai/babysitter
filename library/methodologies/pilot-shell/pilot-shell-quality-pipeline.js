@@ -5,6 +5,8 @@
  * @outputs { success: boolean, quality: object, tdd: object, context: object }
  *
  * Attribution: Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

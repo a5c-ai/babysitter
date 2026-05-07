@@ -2,6 +2,9 @@
 name: agent-booster
 description: WASM-based instant code transforms for simple tasks, achieving 352x speedup over LLM inference with zero cost.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Agent Booster

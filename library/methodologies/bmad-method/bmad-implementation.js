@@ -3,6 +3,8 @@
  * @description BMAD Implementation Phase - Sprint-based development with dev, QA, and SM agents
  * @inputs { projectName: string, epics: object, architecture?: object, sprintCount?: number }
  * @outputs { success: boolean, sprints: array, metrics: object, documentation: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

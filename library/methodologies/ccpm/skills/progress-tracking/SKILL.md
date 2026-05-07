@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Progress Tracking
 
 Status dashboards, standup reports, and blocked task management with GitHub synchronization.

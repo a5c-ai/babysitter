@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # John - Product Manager Agent
 
 **Name:** John

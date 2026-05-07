@@ -3,6 +3,8 @@
  * @description Agile Development Loop - Sprints, iteration cycles, and continuous delivery
  * @inputs { project: string, sprintDuration: number, totalSprints: number, backlog: array }
  * @outputs { success: boolean, sprints: array, deliverables: array, velocity: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

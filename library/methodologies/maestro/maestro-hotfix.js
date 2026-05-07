@@ -3,6 +3,8 @@
  * @description Maestro Hotfix - Fast-path for urgent production issues with Phase 0 root-cause diagnosis: triage, diagnose, implement, test, deploy
  * @inputs { issue: object, projectRoot?: string, severity?: string, qualityThreshold?: number, skipPlanning?: boolean }
  * @outputs { success: boolean, triage: object, fix: object, testResults: object, review: object, deployed: boolean, metrics: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

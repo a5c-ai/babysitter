@@ -3,6 +3,8 @@
  * @description Spec-Kit brownfield development - adding features to existing systems
  * @inputs { featureName: string, existingCodebase: string, existingConstitution?: object }
  * @outputs { success: boolean, analysis: object, specification: object, plan: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

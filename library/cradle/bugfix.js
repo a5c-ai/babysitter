@@ -16,6 +16,8 @@
  * 6. Run Tests & Lint - Verify the fix doesn't break anything
  * 7. Review Breakpoint - Let user review all changes before PR
  * 8. Submit PR - Create pull request from fork to upstream (with breakpoint)
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

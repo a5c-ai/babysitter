@@ -3,6 +3,8 @@
  * @description Maestro Maintenance - Technical debt management: branch cleanup, knowledge sync, doc verification, TODO scanning, test coverage suggestions
  * @inputs { projectRoot?: string, qualityThreshold?: number, skipCleanup?: boolean, focusAreas?: array }
  * @outputs { success: boolean, branchCleanup: object, knowledgeSync: object, docVerification: object, todoScan: object, coverageSuggestions: array, healthScore: number }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

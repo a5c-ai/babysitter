@@ -10,6 +10,9 @@ expertise:
   - Integration test coverage
   - Error path testing
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Testing Specialist Agent

@@ -8,6 +8,9 @@ expertise:
   - Failure diagnosis
   - Test framework detection
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Test Runner Agent

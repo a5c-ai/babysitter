@@ -2,6 +2,9 @@
 name: code-review
 description: Structured code quality assessment with Conventional Comments format, scaled review depth, and soft-gating verdicts preserving user autonomy.
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Review

@@ -3,6 +3,8 @@
  * @description Cleanroom Software Engineering - Formal methods with statistical usage testing for certifiable reliability
  * @inputs { projectName: string, systemDescription: string, reliabilityTarget?: number, criticalComponents?: array, usageProfile?: string }
  * @outputs { success: boolean, specifications: object, implementation: object, verification: object, statisticalTests: object, certification: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

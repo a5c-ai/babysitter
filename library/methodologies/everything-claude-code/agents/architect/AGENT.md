@@ -10,6 +10,9 @@ expertise:
   - Testability-first architecture
   - Immutability and file organization patterns
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Architect Agent

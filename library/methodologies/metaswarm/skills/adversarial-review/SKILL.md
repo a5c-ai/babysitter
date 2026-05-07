@@ -2,6 +2,9 @@
 name: adversarial-review
 description: Fresh adversarial code review with binary PASS/FAIL verdicts, evidence citations, and anchoring bias prevention via fresh reviewer spawning.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Adversarial Review

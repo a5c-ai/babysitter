@@ -3,6 +3,8 @@
  * @description BMAD Party Mode - Multi-agent collaborative sessions for complex decisions
  * @inputs { projectName: string, topic: string, participants?: array, sessionType?: string }
  * @outputs { success: boolean, consensus: object, decisions: array, actionItems: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

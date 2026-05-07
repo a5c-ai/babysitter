@@ -3,6 +3,8 @@
  * @description Feature-Driven Development (FDD) - Five-step process with parking lot tracking
  * @inputs { projectName: string, domainDescription: string, iterationWeeks: number, features?: array }
  * @outputs { success: boolean, domainModel: object, featuresList: object, plan: object, iterations: array, parkingLot: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

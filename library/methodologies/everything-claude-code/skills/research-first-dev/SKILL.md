@@ -2,6 +2,9 @@
 name: research-first-dev
 description: Research-first development methodology that investigates existing solutions, brainstorms alternatives, and evaluates trade-offs before any implementation begins.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Research-First Development

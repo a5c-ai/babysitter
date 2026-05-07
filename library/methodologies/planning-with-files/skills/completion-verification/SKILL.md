@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Completion Verification
 
 Verify all phases are complete with weighted quality scoring before allowing session exit.

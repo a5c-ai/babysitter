@@ -2,6 +2,9 @@
 name: verification
 description: Verification-before-completion discipline ensuring all success criteria are met, tests pass, and reviews complete before declaring work done.
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Verification Before Completion

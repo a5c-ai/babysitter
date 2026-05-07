@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Task Decomposition
 
 Break epics into parallelizable tasks with acceptance criteria, effort estimates, and dependency graphs.

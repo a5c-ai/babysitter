@@ -2,6 +2,9 @@
 name: security-review
 description: Security vulnerability assessment identifying OWASP risks, injection vectors, authentication issues, and data exposure with severity classification.
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Security Review

@@ -2,6 +2,9 @@
 name: security-hardening
 description: AIDefence security layer with prompt injection blocking, input validation, sandboxed execution, output sanitization, and STRIDE threat modeling.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Security Hardening

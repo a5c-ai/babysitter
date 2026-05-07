@@ -9,6 +9,9 @@ expertise:
   - Requirement-to-task mapping
   - Consistency scoring
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Consistency Analyzer Agent

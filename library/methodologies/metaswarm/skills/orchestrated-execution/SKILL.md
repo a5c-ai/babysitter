@@ -2,6 +2,9 @@
 name: orchestrated-execution
 description: Execute work units through the rigorous 4-phase Metaswarm cycle (Implement -> Validate -> Adversarial Review -> Commit) with independent quality gate enforcement.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Orchestrated Execution

@@ -3,6 +3,8 @@
  * @description Requesting Code Review - Dispatch code-reviewer agent to catch issues: get SHAs, dispatch reviewer, act on feedback
  * @inputs { description: string, planPath?: string, baseSha?: string, headSha?: string, reviewType?: string }
  * @outputs { success: boolean, specReview: object, qualityReview: object, allApproved: boolean, issues: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

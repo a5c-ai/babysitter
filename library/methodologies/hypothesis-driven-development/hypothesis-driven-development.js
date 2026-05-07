@@ -3,6 +3,8 @@
  * @description Hypothesis-Driven Development - Treat every feature as an experiment with measurable outcomes
  * @inputs { projectName: string, featureIdea?: string, targetAudience?: string, experimentDuration?: number }
  * @outputs { success: boolean, hypothesis: object, experiment: object, measurement: object, analysis: object, decision: string, learnings: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

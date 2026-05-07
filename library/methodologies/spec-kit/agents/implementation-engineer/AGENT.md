@@ -9,6 +9,9 @@ expertise:
   - Build system integration
   - Specification compliance
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Implementation Engineer Agent

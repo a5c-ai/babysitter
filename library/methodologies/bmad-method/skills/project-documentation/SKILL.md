@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Project Documentation
 
 Generate comprehensive project documentation with source tree analysis and Mermaid diagrams.

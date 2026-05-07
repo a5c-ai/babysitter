@@ -8,6 +8,9 @@ expertise:
   - Regression detection
   - Completion confirmation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Verifier Agent

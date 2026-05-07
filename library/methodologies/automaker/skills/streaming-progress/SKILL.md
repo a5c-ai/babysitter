@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Streaming Progress
 
 Emit real-time progress events for streaming UI consumption.

@@ -3,6 +3,8 @@
  * @description Ruflo Swarm Orchestrator - Main multi-agent coordination pipeline: routing -> agent selection -> swarm formation -> execution -> consensus -> verification
  * @inputs { task: string, taskType: string, projectRoot?: string, maxAgents?: number, consensusStrategy?: string, qualityThreshold?: number }
  * @outputs { success: boolean, phases: array, swarmResult: object, consensusResult: object, verificationResult: object, summary: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

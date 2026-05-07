@@ -1,6 +1,9 @@
 ---
 name: brainstorming
 description: Use when starting any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Brainstorming Ideas Into Designs

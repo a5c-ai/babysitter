@@ -3,6 +3,8 @@
  * @description CCPM Parallel Execution - Dispatch specialized agents per work stream, coordinate commits, sync progress, merge
  * @inputs { projectName: string, featureName: string, tasks: array, streams: array, githubRepo?: string, qualityThreshold?: number }
  * @outputs { success: boolean, streamResults: array, integrationResult: object, conflictsFound: boolean }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

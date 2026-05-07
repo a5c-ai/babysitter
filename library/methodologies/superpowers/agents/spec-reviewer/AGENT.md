@@ -6,6 +6,9 @@ expertise:
   - Spec compliance analysis
   - Over/under-building detection
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Spec Compliance Reviewer Agent

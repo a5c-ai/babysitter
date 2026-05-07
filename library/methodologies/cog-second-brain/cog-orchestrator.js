@@ -3,6 +3,8 @@
  * @description COG Second Brain - Main orchestrator: vault setup, onboarding, daily/weekly/monthly evolution cycles
  * @inputs { userName: string, rolePack?: string, vaultPath?: string, integrations?: object, cycleMode?: string, targetQuality?: number }
  * @outputs { success: boolean, vault: object, profile: object, cycles: object, knowledgeBase: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

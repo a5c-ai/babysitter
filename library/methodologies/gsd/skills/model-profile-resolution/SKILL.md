@@ -7,6 +7,9 @@ metadata:
   version: "1.0.0"
   category: gsd-core
   backlog-id: SK-GSD-009
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # model-profile-resolution

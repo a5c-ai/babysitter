@@ -9,6 +9,9 @@ expertise:
   - Parallelization analysis
   - Critical path identification
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Task Analyst Agent

@@ -3,6 +3,8 @@
  * @description Waterfall - Sequential SDLC methodology with distinct phases: Requirements, Design, Implementation, Testing, Deployment, Maintenance
  * @inputs { projectName: string, projectDescription: string, stakeholders?: array, requirementsSource?: string, testingStrategy?: string, deploymentTarget?: string }
  * @outputs { success: boolean, requirements: object, design: object, implementation: object, testing: object, deployment: object, maintenance: object, artifacts: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

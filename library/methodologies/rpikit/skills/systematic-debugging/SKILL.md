@@ -2,6 +2,9 @@
 name: systematic-debugging
 description: Structured debugging methodology using hypothesis-driven investigation, log analysis, and bisection to isolate and resolve defects.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Systematic Debugging

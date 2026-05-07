@@ -9,6 +9,9 @@ expertise:
   - Dependency analysis
   - File scope declaration
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Architect Agent

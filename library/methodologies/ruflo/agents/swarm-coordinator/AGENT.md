@@ -9,6 +9,9 @@ expertise:
   - Gossip state synchronization
   - Partition detection and recovery
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Swarm Coordinator Agent

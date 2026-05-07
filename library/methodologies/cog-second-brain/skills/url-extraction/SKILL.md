@@ -7,6 +7,9 @@ allowed-tools:
   - web-fetch
   - file-search
   - git-commit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # COG URL Extraction Skill

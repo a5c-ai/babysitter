@@ -3,6 +3,8 @@
  * @description Metaswarm Knowledge Cycle - Context priming before work (bd prime) and self-reflection after completion to extract patterns, gotchas, decisions, and anti-patterns into the knowledge base
  * @inputs { workType?: string, issueDescription?: string, completedWorkUnits?: array, reviewResults?: array, mode: string }
  * @outputs { success: boolean, knowledgeItems: array, contextLoaded?: object, reflections?: object, summary: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

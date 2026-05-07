@@ -8,6 +8,9 @@ expertise:
   - Developer experience evaluation
   - Interface consistency
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Designer Agent

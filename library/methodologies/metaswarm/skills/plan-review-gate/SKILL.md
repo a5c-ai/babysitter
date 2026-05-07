@@ -2,6 +2,9 @@
 name: plan-review-gate
 description: Adversarial plan review by 3 independent reviewers (Feasibility, Completeness, Scope & Alignment) before presenting to user.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Plan Review Gate

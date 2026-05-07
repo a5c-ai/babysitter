@@ -1,6 +1,9 @@
 ---
 name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session. Dispatches fresh subagent per task.
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Subagent-Driven Development

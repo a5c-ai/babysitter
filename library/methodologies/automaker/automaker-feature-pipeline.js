@@ -3,6 +3,8 @@
  * @description AutoMaker Feature Pipeline - Feature decomposition, planning, prioritization, and agent dispatch
  * @inputs { projectName: string, features: array, prioritizationStrategy?: string, testFramework?: string, maxParallel?: number }
  * @outputs { success: boolean, featurePlans: array, dispatchQueue: array, kanbanState: object, metrics: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

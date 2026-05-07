@@ -2,6 +2,9 @@
 name: code-generation
 description: Minimal, pattern-matching code output. Write the least code that satisfies requirements. Match existing project patterns. Use Write/Edit tools only.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Generation

@@ -3,6 +3,8 @@
  * @description Gas Town Molecule Workflow - Multi-step durable workflow execution from TOML-based Formulas through Protomolecules to active Molecules
  * @inputs { formulaId?: string, formulaSpec?: object, variables?: object, checkpointInterval?: number }
  * @outputs { success: boolean, moleculeId: string, stepsCompleted: number, checkpoints: array, result: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

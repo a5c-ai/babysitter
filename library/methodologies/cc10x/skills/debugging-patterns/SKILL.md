@@ -2,6 +2,9 @@
 name: debugging-patterns
 description: Root cause analysis frameworks including log-first investigation, git bisect correlation, and pattern-based diagnosis with confidence scoring.
 allowed-tools: Read, Bash, Grep, Glob, WebSearch
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Debugging Patterns

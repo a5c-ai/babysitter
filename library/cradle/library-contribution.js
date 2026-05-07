@@ -17,6 +17,8 @@
  * 8. Run Quality Checks - Validate files, lint, check patterns (parallel)
  * 9. Review Breakpoint - Let user review before PR
  * 10. Submit PR - Create pull request (with breakpoint)
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -2,6 +2,9 @@
 name: codebase-mapping
 description: Automatic codebase indexing for invisible context injection. Catalogs project structure, file types, entry points, dependencies, and test layout.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Codebase Mapping

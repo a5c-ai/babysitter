@@ -9,6 +9,9 @@ expertise:
   - Evidence collection and reporting
   - Router Contract generation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Integration Verifier Agent

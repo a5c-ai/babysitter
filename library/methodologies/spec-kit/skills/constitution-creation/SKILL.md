@@ -2,6 +2,9 @@
 name: constitution-creation
 description: Establish project governing principles including dev guidelines, code quality standards, testing policies, UX requirements, performance benchmarks, and security constraints.
 allowed-tools: Read, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Constitution Creation

@@ -7,6 +7,9 @@ expertise:
   - Self-review discipline
   - Clean code practices
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Implementer Agent

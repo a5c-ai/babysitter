@@ -9,6 +9,9 @@ expertise:
   - Data exposure analysis
   - Dependency security evaluation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Security Reviewer Agent

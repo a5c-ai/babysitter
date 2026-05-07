@@ -2,6 +2,9 @@
 name: task-decomposition
 description: Convert technical plans into actionable development tasks with dependency graphs, effort estimates, and parallelization opportunities.
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Task Decomposition

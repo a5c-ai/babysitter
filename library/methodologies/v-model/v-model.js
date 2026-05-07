@@ -3,6 +3,8 @@
  * @description V-Model SDLC - Verification and Validation model with parallel test design
  * @inputs { projectRequirements: string, safetyLevel: string, traceabilityRequired: boolean, testingRigor: string }
  * @outputs { success: boolean, requirements: object, systemDesign: object, architecture: object, moduleDesign: object, implementation: object, testResults: object, traceabilityMatrix: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

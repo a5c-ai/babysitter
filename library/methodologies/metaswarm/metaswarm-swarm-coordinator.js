@@ -3,6 +3,8 @@
  * @description Metaswarm Swarm Coordinator - Meta-orchestrator managing parallel issues across worktrees, spawning Issue Orchestrators, detecting conflicts, and balancing workload
  * @inputs { issues: array, worktrees?: array, maxConcurrent?: number, priorityRules?: object }
  * @outputs { success: boolean, assignments: array, conflicts: array, completedIssues: array, healthReport: object, summary: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

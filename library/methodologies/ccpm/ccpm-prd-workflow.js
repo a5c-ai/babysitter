@@ -3,6 +3,8 @@
  * @description CCPM Product Planning - Brainstorm, draft PRD, review, and finalize with quality gates
  * @inputs { projectName: string, featureName: string, projectDescription: string, targetAudience?: string, constraints?: array }
  * @outputs { success: boolean, prd: object, brainstorm: object, validation: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

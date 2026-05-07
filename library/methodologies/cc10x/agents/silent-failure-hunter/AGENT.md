@@ -9,6 +9,9 @@ expertise:
   - Promise rejection handling checks
   - Null/undefined guard verification
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Silent Failure Hunter Agent

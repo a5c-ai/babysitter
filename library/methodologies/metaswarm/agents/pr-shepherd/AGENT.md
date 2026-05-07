@@ -8,6 +8,9 @@ expertise:
   - Review comment handling
   - Merge readiness verification
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # PR Shepherd Agent

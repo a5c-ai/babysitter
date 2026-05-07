@@ -2,6 +2,9 @@
 name: eval-harness
 description: Evaluation harness for testing agent and skill quality through structured benchmarks, regression tests, and quality scoring.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Eval Harness

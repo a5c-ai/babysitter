@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # PRD Creation
 
 Interactive PRD brainstorming and drafting with quality-gated refinement.

@@ -2,6 +2,9 @@
 name: spec-creation
 description: Feature specification creation from codebase research. Produces requirements, acceptance criteria, architecture decisions, implementation plans, and risk analysis.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Spec Creation

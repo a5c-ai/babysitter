@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # QA Testing
 
 Generate and execute API and E2E tests with quality gate assessment.

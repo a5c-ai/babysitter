@@ -3,6 +3,8 @@
  * @description CCPM Implementation Planning - Parse PRD into technical epic with architecture decisions, tech approach, and dependency mapping
  * @inputs { projectName: string, featureName: string, prd: object, existingCodebase?: object }
  * @outputs { success: boolean, epic: object, architectureDecisions: array, dependencies: array, validation: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

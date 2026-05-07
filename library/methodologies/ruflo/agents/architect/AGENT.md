@@ -9,6 +9,9 @@ expertise:
   - Dependency analysis and management
   - Architecture pattern selection
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Architect Agent

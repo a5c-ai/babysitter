@@ -8,6 +8,9 @@ expertise:
   - Error message investigation
   - Library version compatibility research
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Web Researcher Agent

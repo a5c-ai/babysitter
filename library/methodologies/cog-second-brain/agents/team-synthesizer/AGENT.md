@@ -2,6 +2,9 @@
 name: team-synthesizer
 description: Cross-references GitHub, Linear, Slack, and PostHog data with bidirectional sync for team intelligence
 role: Cross-Platform Integration & Team Intelligence
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Team Synthesizer Agent

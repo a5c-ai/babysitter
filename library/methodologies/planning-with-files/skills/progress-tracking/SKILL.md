@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Progress Tracking
 
 Maintain progress.md with session logs, test results, error records, and phase status indicators.

@@ -2,6 +2,9 @@
 name: reflection-coach
 description: Guides cross-domain pattern analysis, weekly check-ins, and personal/professional strategy evolution
 role: Pattern Analysis & Reflection
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Reflection Coach Agent

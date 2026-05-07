@@ -8,6 +8,9 @@ expertise:
   - Security architecture review
   - Attack surface analysis
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Security Design Agent

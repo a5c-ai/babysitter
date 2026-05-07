@@ -9,6 +9,9 @@ expertise:
   - Code quality scoring
   - Remediation recommendation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Quality Auditor Agent

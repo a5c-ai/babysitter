@@ -2,6 +2,9 @@
 name: checkpoint-management
 description: Git-backed state management for safe rollback. Create and restore checkpoints with tagged commits and metadata tracking.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Checkpoint Management

@@ -2,6 +2,9 @@
 name: plan-writing
 description: Transform research findings into actionable implementation plans with stakes-based rigor, test-first strategy, and granular task decomposition.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Plan Writing

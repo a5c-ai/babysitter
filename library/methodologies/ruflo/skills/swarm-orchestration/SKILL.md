@@ -2,6 +2,9 @@
 name: swarm-orchestration
 description: Multi-agent swarm formation and coordinated execution with topology-aware agent deployment, consensus protocols, and anti-drift enforcement.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Swarm Orchestration

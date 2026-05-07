@@ -9,6 +9,9 @@ expertise:
   - Competitive analysis
   - Documentation synthesis
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # GitHub Researcher Agent

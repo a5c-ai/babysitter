@@ -9,6 +9,9 @@ expertise:
   - Maintainability evaluation (naming, docs, coupling, coverage)
   - Confidence-gated reporting (>= 80% threshold)
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Reviewer Agent

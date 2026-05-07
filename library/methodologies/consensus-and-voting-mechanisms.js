@@ -3,6 +3,8 @@
  * @description Multi-Agent Consensus - Execute task with multiple agents and reach consensus through voting
  * @inputs { task: string, agentCount: number, votingStrategy: string, consensusThreshold: number }
  * @outputs { success: boolean, consensus: object, votes: array, finalDecision: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

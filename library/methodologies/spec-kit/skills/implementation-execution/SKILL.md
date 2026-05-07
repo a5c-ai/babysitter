@@ -2,6 +2,9 @@
 name: implementation-execution
 description: Execute development tasks to build features, producing code, tests, and configuration artifacts that satisfy specification requirements and comply with constitution standards.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Implementation Execution

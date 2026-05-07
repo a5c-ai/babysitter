@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Architect Agent
 
 **Role:** Solutions architect, technical epic creator, and architecture decision maker

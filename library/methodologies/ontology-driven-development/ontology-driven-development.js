@@ -20,6 +20,8 @@
  * - METHONTOLOGY enhanced with agile practices
  * - NeOn methodology for networked ontologies
  * - Enterprise Knowledge Graph Development patterns
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

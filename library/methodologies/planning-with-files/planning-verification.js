@@ -3,6 +3,8 @@
  * @description Planning with Files - Completion verification, progress assessment, and phase validation
  * @inputs { projectPath: string, taskDescription: string, qualityThreshold?: number, strictMode?: boolean }
  * @outputs { success: boolean, finalScore: number, phaseReport: array, unresolvedErrors: array, recommendations: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

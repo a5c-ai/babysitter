@@ -2,6 +2,9 @@
 name: code-review-orchestration
 description: 6-agent parallel code review orchestration covering architecture, security, performance, testing, quality, and documentation dimensions with weighted scoring.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Review Orchestration

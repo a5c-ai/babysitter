@@ -2,6 +2,9 @@
 name: session-management
 description: Manage agent sessions including initialization, handoffs, revival (seance), and persistent identity for Polecats and Crew agents.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Session Management

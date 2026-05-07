@@ -2,6 +2,9 @@
 name: self-optimization
 description: SONA self-optimizing neural architecture with ReasoningBank trajectory learning, EWC++ anti-forgetting, and reinforcement learning feedback loops.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Self-Optimization

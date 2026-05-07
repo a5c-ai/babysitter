@@ -3,6 +3,8 @@
  * @description Test-Driven Development - Iron Law RED-GREEN-REFACTOR: write failing test, verify fail, minimal code, verify pass, refactor
  * @inputs { task: string, testFramework?: string, maxCycles?: number, qualityThreshold?: number }
  * @outputs { success: boolean, cycles: array, totalCycles: number, allTestsPass: boolean, coverage: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

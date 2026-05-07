@@ -2,6 +2,9 @@
 name: framework-builder
 description: Consolidates scattered notes into structured knowledge frameworks with source attribution
 role: Knowledge Consolidation & Framework Building
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Framework Builder Agent

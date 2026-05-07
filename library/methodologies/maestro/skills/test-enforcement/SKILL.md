@@ -2,6 +2,9 @@
 name: test-enforcement
 description: Automated test validation, coverage checking, and quality metrics with aggressive defaults
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
+graph:
+  domains: [domain:software-engineering]
+
 ---
 # Test Enforcement
 

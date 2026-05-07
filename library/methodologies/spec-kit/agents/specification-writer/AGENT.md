@@ -9,6 +9,9 @@ expertise:
   - Business value articulation
   - Edge case identification
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Specification Writer Agent

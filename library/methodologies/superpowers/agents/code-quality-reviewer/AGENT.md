@@ -7,6 +7,9 @@ expertise:
   - Test quality evaluation
   - Architecture patterns
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Quality Reviewer Agent

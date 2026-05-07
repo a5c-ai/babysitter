@@ -3,6 +3,8 @@
  * @description Ad-hoc task execution with GSD guarantees (atomic commits, state tracking) but skip optional agents
  * @inputs { task: string, fullMode: boolean, projectDir: string }
  * @outputs { success: boolean, taskSlug: string, planPath: string, summaryPath: string, commits: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

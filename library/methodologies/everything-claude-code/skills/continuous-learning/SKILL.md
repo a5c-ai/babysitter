@@ -2,6 +2,9 @@
 name: continuous-learning
 description: Pattern extraction, confidence-scored evaluation, skill creation, organization, versioning, and cross-project export pipeline.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Continuous Learning

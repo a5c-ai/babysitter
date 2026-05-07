@@ -21,6 +21,8 @@
  * @see ./serverReachableGate.js
  * @see https://github.com/a5c-ai/babysitter/issues/70
  * @see https://github.com/a5c-ai/babysitter/issues/71
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

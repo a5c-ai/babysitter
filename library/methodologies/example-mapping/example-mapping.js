@@ -3,6 +3,8 @@
  * @description Example Mapping BDD workshop technique - colored cards methodology for exploring requirements
  * @inputs { userStory: string, timeboxMinutes: number, sessionMode: string }
  * @outputs { success: boolean, story: object, rules: array, examples: array, questions: array, gherkinScenarios: array, readiness: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

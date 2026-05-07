@@ -3,6 +3,8 @@
  * @description Dispatching Parallel Agents - One agent per independent problem domain, concurrent investigation and resolution
  * @inputs { problems: array, verifyIntegration?: boolean }
  * @outputs { success: boolean, agentResults: array, integrationResult: object, conflictsFound: boolean }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

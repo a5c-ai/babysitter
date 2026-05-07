@@ -9,6 +9,9 @@ expertise:
   - Review recommendation generation
   - Cross-dimension correlation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Review Coordinator Agent

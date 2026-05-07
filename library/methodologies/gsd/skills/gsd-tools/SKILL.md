@@ -7,6 +7,9 @@ metadata:
   version: "1.0.0"
   category: gsd-core
   backlog-id: SK-GSD-001
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # gsd-tools

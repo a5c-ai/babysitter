@@ -2,6 +2,9 @@
 name: planning-design
 description: Design technical architecture, select technology stack, and define implementation strategy from specifications and constitution constraints.
 allowed-tools: Read, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Planning Design

@@ -3,6 +3,8 @@
  * @description Standalone phase research producing structured RESEARCH.md for downstream planning
  * @inputs { phaseId: string, phaseName: string, projectDir: string, mode: string }
  * @outputs { success: boolean, researchPath: string, approaches: array, recommendation: string, openQuestions: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

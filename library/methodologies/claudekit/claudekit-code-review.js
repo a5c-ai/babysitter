@@ -3,6 +3,8 @@
  * @description ClaudeKit Code Review - 6-agent parallel code review with architecture, security, performance, testing, quality, and documentation analysis. Each agent scores independently and results are aggregated into a weighted final score.
  * @inputs { target: string, projectRoot?: string, changedFiles?: array, baseRef?: string, confidenceThreshold?: number, codebaseMap?: object }
  * @outputs { success: boolean, overallScore: number, dimensions: object, issues: array, agentReports: array, recommendation: string, summary: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

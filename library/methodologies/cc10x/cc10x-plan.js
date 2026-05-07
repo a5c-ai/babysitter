@@ -3,6 +3,8 @@
  * @description CC10X PLAN Workflow - Comprehensive planning with external research, brainstorming, and plan-to-build continuity via docs/plans/
  * @inputs { request: string, projectRoot?: string, memory?: object, includeResearch?: boolean }
  * @outputs { success: boolean, plan: object, planFile: string, researchFindings: object, alternatives: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

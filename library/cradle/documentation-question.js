@@ -14,6 +14,8 @@
  * 5. Compose Issue - Build the GitHub documentation question issue
  * 6. Review Breakpoint - Let user review before submission
  * 7. Submit Issue - Open the issue on a5c-ai/babysitter with documentation label (with breakpoint)
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

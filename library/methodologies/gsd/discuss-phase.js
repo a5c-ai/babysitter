@@ -3,6 +3,8 @@
  * @description GSD phase discussion - capture implementation preferences before planning
  * @inputs { phaseId: string, phaseName: string, requirements: array }
  * @outputs { success: boolean, context: object, preferences: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

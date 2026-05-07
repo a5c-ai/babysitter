@@ -3,6 +3,8 @@
  * @description Extreme Programming (XP) - Agile engineering practices with frequent releases, TDD, pair programming, and continuous integration
  * @inputs { projectName: string, releaseGoal: string, iterationLength?: number, teamSize?: number, velocity?: number, practices?: array }
  * @outputs { success: boolean, release: object, iterations: array, practices: object, metrics: object, artifacts: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

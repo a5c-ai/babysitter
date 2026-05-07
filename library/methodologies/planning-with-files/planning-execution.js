@@ -3,6 +3,8 @@
  * @description Planning with Files - Task execution with 2-action rule, error logging, and findings capture
  * @inputs { taskDescription: string, projectPath: string, phase: object, errorHistory?: array, maxActions?: number }
  * @outputs { success: boolean, completedGoals: array, findings: array, decisions: array, errors: array, actionCount: number }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -12,6 +12,8 @@
  *   breakpointId so users can auto-approve via rules. Reviewer/fixer loops
  *   inside the implementation phase use the robust-rejection escalation
  *   primitive `nStrikesEscalation`.
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 import { defineTask } from '@a5c-ai/babysitter-sdk';
 

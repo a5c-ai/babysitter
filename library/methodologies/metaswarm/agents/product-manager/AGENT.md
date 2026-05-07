@@ -8,6 +8,9 @@ expertise:
   - Scope alignment verification
   - Requirements traceability
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Product Manager Agent

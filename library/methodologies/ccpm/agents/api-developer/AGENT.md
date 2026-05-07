@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # API Developer Agent
 
 **Role:** Service layer architect, endpoint implementer, and API designer

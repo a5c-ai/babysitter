@@ -3,6 +3,8 @@
  * @description Set up babysitter for a user - install deps, interview, build profile, configure tools
  * @inputs { existingProfileDir?: string, socialProfileUrls?: string[], additionalContext?: string }
  * @outputs { success: boolean, profile: object, toolsInstalled: array, configPath: string }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -9,6 +9,9 @@ expertise:
   - Scope management
   - Evidence-backed testing
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Component Builder Agent

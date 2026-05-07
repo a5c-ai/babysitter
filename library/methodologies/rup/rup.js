@@ -3,6 +3,8 @@
  * @description RUP (Rational Unified Process) - Iterative software development framework with four phases (Inception, Elaboration, Construction, Transition) and use-case driven, architecture-centric approach
  * @inputs { projectName: string, projectVision: string, iterationsPerPhase?: object, teamSize?: number, useCaseSource?: string, architectureStyle?: string }
  * @outputs { success: boolean, inceptionResult: object, elaborationResult: object, constructionResult: object, transitionResult: object, useCaseModel: object, architecture: object, artifacts: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

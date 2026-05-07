@@ -26,6 +26,8 @@
  * - harness-integration: Submit harness integration -> fork + PR
  * - library-contribution: Contribute processes/skills/agents -> fork + PR
  * - documentation-answer: Submit docs answer -> fork + PR
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

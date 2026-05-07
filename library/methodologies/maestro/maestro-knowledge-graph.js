@@ -3,6 +3,8 @@
  * @description Maestro Knowledge Graph - Knowledge management: capture patterns, validate updates, sync across stories, query architectural decisions
  * @inputs { projectRoot?: string, operation?: string, query?: string, newPatterns?: array, newDecisions?: array }
  * @outputs { success: boolean, graph: object, queryResults?: array, validationResults?: object, syncReport?: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

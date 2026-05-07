@@ -3,6 +3,8 @@
  * @description GSD work verification - UAT with automated diagnosis and fix planning
  * @inputs { phaseId: string, phaseName: string, deliverables: array }
  * @outputs { success: boolean, approved: boolean, fixes: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

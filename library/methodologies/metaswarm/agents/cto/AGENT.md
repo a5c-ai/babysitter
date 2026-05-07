@@ -8,6 +8,9 @@ expertise:
   - Technical risk analysis
   - Architecture governance
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # CTO Agent

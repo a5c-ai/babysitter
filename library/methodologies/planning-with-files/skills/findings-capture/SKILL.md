@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Findings Capture
 
 Capture and persist research findings, discoveries, and decision rationale to findings.md.

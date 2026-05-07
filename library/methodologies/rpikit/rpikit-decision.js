@@ -3,6 +3,8 @@
  * @description RPIKit Decision Documentation - Create Architecture Decision Records (ADRs) to document significant technical choices. Can be invoked at any point in the RPI workflow.
  * @inputs { title: string, context?: string, projectRoot?: string, status?: string }
  * @outputs { success: boolean, adrPath: string, adrNumber: number, decision: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

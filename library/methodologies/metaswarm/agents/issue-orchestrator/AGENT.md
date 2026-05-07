@@ -9,6 +9,9 @@ expertise:
   - Adversarial review coordination
   - Human checkpoint management
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Issue Orchestrator Agent

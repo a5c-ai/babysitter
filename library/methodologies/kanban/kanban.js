@@ -3,6 +3,8 @@
  * @description Kanban - Visual flow management with WIP limits and continuous improvement
  * @inputs { projectName: string, workflowStages: array, defaultWipLimits: object, initialBacklog: array, cycles?: number }
  * @outputs { success: boolean, board: object, metrics: object, improvements: array, finalState: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

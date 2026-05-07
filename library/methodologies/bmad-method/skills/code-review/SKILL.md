@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Code Review
 
 Multi-dimensional code review across correctness, security, performance, maintainability, and test coverage.

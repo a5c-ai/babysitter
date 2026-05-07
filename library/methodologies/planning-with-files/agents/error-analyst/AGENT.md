@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Error Analyst Agent
 
 **Name:** Error Analyst

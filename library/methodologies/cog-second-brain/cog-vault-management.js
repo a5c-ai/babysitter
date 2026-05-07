@@ -3,6 +3,8 @@
  * @description COG Second Brain - Vault management: update COG, self-healing, cross-reference maintenance
  * @inputs { vaultPath: string, mode: string, updateSource?: string, targetQuality?: number }
  * @outputs { success: boolean, actions: array, healthReport: object, updatesApplied: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

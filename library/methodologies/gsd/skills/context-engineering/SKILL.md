@@ -7,6 +7,9 @@ metadata:
   version: "1.0.0"
   category: gsd-core
   backlog-id: SK-GSD-003
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # context-engineering

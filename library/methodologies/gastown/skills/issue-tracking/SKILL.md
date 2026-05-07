@@ -2,6 +2,9 @@
 name: issue-tracking
 description: Track beads as git-backed issues with persistent attribution, supporting Gas Town's bead lifecycle and convoy progress monitoring.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Issue Tracking

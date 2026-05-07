@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Code Review Gate
 
 Perform code review with quality scoring and configurable threshold enforcement.

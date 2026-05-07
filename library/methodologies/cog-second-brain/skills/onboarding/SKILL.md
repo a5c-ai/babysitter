@@ -7,6 +7,9 @@ allowed-tools:
   - directory-create
   - git-init
   - git-commit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # COG Onboarding Skill

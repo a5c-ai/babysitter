@@ -2,6 +2,9 @@
 name: session-memory
 description: Mandatory memory persistence system across session resets using three markdown surfaces in .claude/cc10x/. Iron law - every workflow must load at start and update at end.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Session Memory

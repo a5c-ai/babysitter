@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Test Automation
 
 Execute Vitest and Playwright test suites with result collection and failure analysis.

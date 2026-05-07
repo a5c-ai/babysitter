@@ -3,6 +3,8 @@
  * @description Everything Claude Code TDD Workflow - Test-driven development with Red-Green-Refactor cycles, coverage enforcement, and convergence verification
  * @inputs { request: string, projectRoot?: string, testFramework?: string, coverageThreshold?: number, maxIterations?: number, architecture?: object }
  * @outputs { success: boolean, redResult: object, greenResult: object, refactorResult: object, coverageResult: object, evidence: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

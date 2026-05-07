@@ -3,6 +3,8 @@
  * @description CCPM Progress Tracking - Standup reports, blocked task management, status dashboard, completion verification
  * @inputs { projectName: string, featureName: string, githubRepo?: string, epic?: object, tasks?: array, executionResults?: array }
  * @outputs { success: boolean, standupReport: object, statusDashboard: object, blockedTasks: array, completionStatus: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

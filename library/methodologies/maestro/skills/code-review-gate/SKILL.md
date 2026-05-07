@@ -2,6 +2,9 @@
 name: code-review-gate
 description: Architect code review with DRY, YAGNI, abstraction, and test coverage principle enforcement
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
+graph:
+  domains: [domain:software-engineering]
+
 ---
 # Code Review Gate
 

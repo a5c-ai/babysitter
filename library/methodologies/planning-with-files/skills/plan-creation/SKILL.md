@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Plan Creation
 
 Create a structured task_plan.md with phases, goals, and checkbox tracking for persistent planning.

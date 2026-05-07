@@ -3,6 +3,8 @@
  * @description Metaswarm PR Shepherd - Monitors PR lifecycle from creation through merge: CI monitoring, review comment handling, thread resolution, and merge readiness verification
  * @inputs { prNumber: number, prUrl?: string, projectRoot?: string, autoResolve?: boolean }
  * @outputs { success: boolean, merged: boolean, ciStatus: object, commentsHandled: number, threadsResolved: number, summary: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

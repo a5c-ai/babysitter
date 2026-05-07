@@ -3,6 +3,8 @@
  * @description Gas Town Refinery Merge Queue - Collect, detect conflicts, resolve, merge, and verify integration of agent work
  * @inputs { convoyId?: string, branches?: array, targetBranch?: string, conflictStrategy?: string, verifyTests?: boolean }
  * @outputs { success: boolean, mergedBranches: array, conflicts: array, verificationResult: object, integrationReport: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

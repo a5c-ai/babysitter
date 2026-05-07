@@ -2,6 +2,9 @@
 name: multi-service-orchestration
 description: PM2 process management, backend/frontend cascade execution, parallel worktree builds, and cross-service integration testing.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Multi-Service Orchestration

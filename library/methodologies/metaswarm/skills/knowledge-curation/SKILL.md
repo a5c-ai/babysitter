@@ -2,6 +2,9 @@
 name: knowledge-curation
 description: Context priming before work (bd prime) and self-reflection after completion to extract patterns, gotchas, and decisions into the knowledge base.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Knowledge Curation

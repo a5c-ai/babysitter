@@ -2,6 +2,9 @@
 name: convoy-management
 description: Create, track, and land convoys of related beads as primary work orders in the Gas Town multi-agent orchestration framework.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Convoy Management

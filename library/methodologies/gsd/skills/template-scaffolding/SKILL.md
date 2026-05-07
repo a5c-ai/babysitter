@@ -7,6 +7,9 @@ metadata:
   version: "1.0.0"
   category: gsd-core
   backlog-id: SK-GSD-004
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # template-scaffolding

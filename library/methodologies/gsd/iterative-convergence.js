@@ -3,6 +3,8 @@
  * @description Quality-gated iterative development with agent scoring
  * @inputs { feature: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, converged: boolean, quality: number }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -2,6 +2,9 @@
 name: work-unit-decomposition
 description: Decompose implementation plans into discrete work units with enumerated DoD items, file scope declarations, dependency mapping, and human checkpoint flags.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Work Unit Decomposition

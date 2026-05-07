@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # UX Design
 
 Create comprehensive UX design with user flows, wireframes, and design systems.

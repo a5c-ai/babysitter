@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Feature Intake
 
 Parse and normalize features from text descriptions, images, and screenshots into structured requirements.

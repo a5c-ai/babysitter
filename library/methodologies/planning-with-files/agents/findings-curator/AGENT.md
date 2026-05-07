@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Findings Curator Agent
 
 **Name:** Findings Curator

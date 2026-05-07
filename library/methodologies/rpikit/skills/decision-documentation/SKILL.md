@@ -2,6 +2,9 @@
 name: decision-documentation
 description: Create Architecture Decision Records (ADRs) documenting significant technical choices with context, options, consequences, and sequential numbering.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Decision Documentation

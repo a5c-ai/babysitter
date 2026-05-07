@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Test Engineer Agent
 
 **Role:** Test suite designer, quality validator, and integration test specialist

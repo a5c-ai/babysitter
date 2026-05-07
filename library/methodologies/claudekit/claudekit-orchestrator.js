@@ -3,6 +3,8 @@
  * @description ClaudeKit Orchestrator - Main entry point that sets up the safety pipeline (hooks, file-guard), executes slash commands, dispatches code review or spec workflows, and manages checkpoints with session-scoped hook control
  * @inputs { request: string, projectRoot?: string, hookConfig?: object, enableFileGuard?: boolean, thinkingLevel?: number, maxCheckpoints?: number }
  * @outputs { success: boolean, pipelineStatus: object, commandResults: array, checkpoints: array, hookProfile: object, summary: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

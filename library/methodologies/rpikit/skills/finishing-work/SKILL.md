@@ -2,6 +2,9 @@
 name: finishing-work
 description: Final completion discipline including summary generation, plan document updates, and confirmation that all success criteria from the original plan are satisfied.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Finishing Work

@@ -1,6 +1,9 @@
 ---
 name: executing-plans
 description: Use when you have a written implementation plan to execute in a separate session with review checkpoints between batches.
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Executing Plans

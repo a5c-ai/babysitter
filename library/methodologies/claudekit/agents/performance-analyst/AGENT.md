@@ -10,6 +10,9 @@ expertise:
   - Async operation optimization
   - Bundle size impact assessment
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Performance Analyst Agent

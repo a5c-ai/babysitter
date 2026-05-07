@@ -3,6 +3,8 @@
  * @description GSD brownfield analysis - understand existing codebase
  * @inputs { codebasePath: string, analysisDepth?: string }
  * @outputs { success: boolean, architecture: object, patterns: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

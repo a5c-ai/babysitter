@@ -9,6 +9,9 @@ expertise:
   - Remediation loop management
   - Session memory persistence
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # CC10X Router Agent

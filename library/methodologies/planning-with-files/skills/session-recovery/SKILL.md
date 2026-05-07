@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Session Recovery
 
 Detect and recover previous planning sessions, reconstructing lost context from persistent planning files.

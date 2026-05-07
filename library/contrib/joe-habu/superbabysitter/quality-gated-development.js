@@ -17,6 +17,8 @@
  *   - `stableKey` on every per-attempt task to keep replay identity stable.
  *   - Reviewer context carries implementer `concerns` + `selfReviewFindings`.
  *   - Every task declares `labels` for observer-dashboard filtering.
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 import { defineTask } from '@a5c-ai/babysitter-sdk';
 import { buildSceneContext, appendToManifest } from '../../../processes/shared/scene-context-builder.js';

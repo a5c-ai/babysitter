@@ -9,6 +9,9 @@ expertise:
   - Multi-language proficiency
   - Agent Booster transform application
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Coder Agent

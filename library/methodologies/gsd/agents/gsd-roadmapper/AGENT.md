@@ -6,6 +6,9 @@ backlog-id: AG-GSD-008
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # gsd-roadmapper

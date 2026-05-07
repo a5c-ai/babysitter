@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Winston - Architect Agent
 
 **Name:** Winston

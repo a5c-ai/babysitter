@@ -3,6 +3,8 @@
  * @description Using Git Worktrees - Create isolated workspaces with systematic directory selection and safety verification
  * @inputs { branchName: string, projectRoot?: string, setupCommand?: string }
  * @outputs { success: boolean, worktreePath: string, branchCreated: boolean, testsPass: boolean, testCount: number }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

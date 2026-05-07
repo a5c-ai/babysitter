@@ -8,6 +8,9 @@ expertise:
   - Pattern recognition
   - Risk area identification
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Researcher Agent

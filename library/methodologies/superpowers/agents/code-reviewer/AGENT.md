@@ -8,6 +8,9 @@ expertise:
   - Plan alignment verification
   - Security review
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Reviewer Agent

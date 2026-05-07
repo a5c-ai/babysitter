@@ -2,6 +2,9 @@
 name: intelligence-analyst
 description: Gathers, verifies, and synthesizes news intelligence with 7-day freshness and 95%+ source accuracy
 role: News & Source Verification
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Intelligence Analyst Agent

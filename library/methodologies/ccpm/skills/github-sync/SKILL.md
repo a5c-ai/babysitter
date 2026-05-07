@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # GitHub Sync
 
 Bidirectional synchronization of epics and tasks with GitHub issues, labels, and relationships.

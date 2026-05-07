@@ -3,6 +3,8 @@
  * @description CC10X DEBUG Workflow - Log-first bug investigation with root cause analysis, targeted fix, code review, and evidence-backed verification. Phase 0: Root-cause diagnosis with git diff analysis, 2+ evidence signals, no code changes.
  * @inputs { request: string, projectRoot?: string, errorOutput?: string, memory?: object, confidenceThreshold?: number }
  * @outputs { success: boolean, rootCause: object, fix: object, reviewResult: object, verificationResult: object, evidence: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

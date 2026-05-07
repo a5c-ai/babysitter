@@ -3,6 +3,8 @@
  * @description Maestro App Factory - Full lifecycle orchestrator: PM interview, architect spec, story dispatch, parallel coder cycles, review, merge
  * @inputs { goal: string, specFile?: string, projectRoot?: string, coderCount?: number, qualityThreshold?: number, mode?: string, maintenanceFrequency?: number }
  * @outputs { success: boolean, specification: object, stories: array, implementations: array, mergeResults: array, knowledgeGraph: object, metrics: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -3,6 +3,8 @@
  * @description Deep Research — multi-stage investigation with divergent exploration, convergent synthesis, and source verification.
  * @inputs { question: string, sources?: Array<string>, depth?: number, domains?: Array<string>, outputFormat?: string }
  * @outputs { success: boolean, question: string, findings: Array<object>, synthesis: string, sources: Array<object>, confidence: string }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

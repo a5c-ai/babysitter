@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Sally - UX Designer Agent
 
 **Name:** Sally

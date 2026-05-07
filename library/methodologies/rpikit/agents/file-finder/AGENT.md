@@ -8,6 +8,9 @@ expertise:
   - Dependency graph traversal
   - Reading order optimization
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # File Finder Agent

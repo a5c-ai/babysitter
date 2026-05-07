@@ -2,6 +2,9 @@
 name: file-guard
 description: PreToolUse protection blocking sensitive file access across 195+ patterns in 12 categories with bash pipeline analysis and multi-tool ignore support.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # File Guard

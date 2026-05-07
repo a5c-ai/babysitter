@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Worktree Isolation
 
 Manage git worktree lifecycle for safe, isolated parallel development.

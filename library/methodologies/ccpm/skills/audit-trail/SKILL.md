@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Audit Trail
 
 Full traceability from PRD to code commit through the CCPM spec-driven pipeline.

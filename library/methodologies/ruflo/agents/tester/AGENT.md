@@ -9,6 +9,9 @@ expertise:
   - Integration and E2E test creation
   - Test framework proficiency (vitest, jest, pytest)
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Tester Agent

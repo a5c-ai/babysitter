@@ -3,6 +3,8 @@
  * @description BMAD Quick Flow - Lean solo-developer workflow for rapid spec-to-implementation
  * @inputs { projectName: string, projectDescription: string, techStack?: string, storyCount?: number }
  * @outputs { success: boolean, techSpec: object, stories: array, implementation: object, review: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -3,6 +3,8 @@
  * @description Top-Down Development - Start with high-level design, decompose, implement details
  * @inputs { task: string, maxDecompositionDepth: number, implementationStrategy: string }
  * @outputs { success: boolean, architecture: object, implementationTree: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

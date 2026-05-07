@@ -2,6 +2,9 @@
 name: test-driven-development
 description: Strict RED-GREEN-REFACTOR cycle enforcement. Tests are never skipped or deferred. Run mode only, never watch mode. Exit code evidence mandatory.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Test-Driven Development

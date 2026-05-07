@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Project Tracker Agent
 
 **Role:** Progress monitor, standup generator, and GitHub sync coordinator

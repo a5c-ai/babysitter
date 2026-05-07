@@ -2,6 +2,9 @@
 name: code-review-patterns
 description: Multi-dimensional code assessment across security, quality, performance, and maintainability with confidence-gated reporting (>=80%) and Router Contract generation.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Review Patterns

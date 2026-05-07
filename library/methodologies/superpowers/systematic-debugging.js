@@ -3,6 +3,8 @@
  * @description Systematic Debugging - 4-phase root cause process with Phase 0 diagnosis gate: investigate, pattern analysis, hypothesis testing, diagnosis review, implementation
  * @inputs { issue: string, errorMessage?: string, stackTrace?: string, maxFixAttempts?: number }
  * @outputs { success: boolean, rootCause: object, hypothesis: object, fix: object, phases: array, architecturalIssue: boolean }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Deployment Engineer Agent
 
 **Role:** Build & Ship

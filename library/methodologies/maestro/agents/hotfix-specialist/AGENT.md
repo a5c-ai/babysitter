@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Hotfix Specialist Agent
 
 **Name:** Hotfix Specialist

@@ -3,6 +3,8 @@
  * @description State Machine Orchestration: Explicit state management with transitions, guards, and entry/exit actions
  * @inputs { task: string, maxTransitions: number, enableStateHistory: boolean }
  * @outputs { success: boolean, finalState: string, stateHistory: array, transitionCount: number }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -2,6 +2,9 @@
 name: knowledge-curator
 description: Classifies, organizes, and curates content across the COG vault with strict domain separation
 role: Content Classification & Curation
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Knowledge Curator Agent

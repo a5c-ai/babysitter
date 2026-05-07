@@ -9,6 +9,9 @@ expertise:
   - Resource allocation strategy
   - Risk assessment and mitigation planning
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Strategic Queen Agent

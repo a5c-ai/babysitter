@@ -7,6 +7,9 @@ allowed-tools:
   - web-search
   - web-fetch
   - git-commit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # COG Daily Intelligence Skill

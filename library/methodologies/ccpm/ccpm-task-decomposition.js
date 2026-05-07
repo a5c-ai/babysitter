@@ -3,6 +3,8 @@
  * @description CCPM Task Decomposition - Break epics into concrete tasks with acceptance criteria, effort estimates, and parallelization flags
  * @inputs { projectName: string, featureName: string, epic: object, prd: object, parallelAgents?: number }
  * @outputs { success: boolean, tasks: array, streams: array, dependencyGraph: object, coverageReport: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

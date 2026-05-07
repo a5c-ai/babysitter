@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Database Engineer Agent
 
 **Role:** Schema designer, migration author, and data layer specialist

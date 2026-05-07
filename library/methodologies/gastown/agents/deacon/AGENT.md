@@ -9,6 +9,9 @@ expertise:
   - System reliability engineering
   - Heartbeat analysis
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Deacon Agent

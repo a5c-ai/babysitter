@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Code Reviewer Agent
 
 **Name:** Code Reviewer

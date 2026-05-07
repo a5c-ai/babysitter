@@ -3,6 +3,8 @@
  * @description Verification Before Completion - Evidence-based completion verification: run tests, check requirements, prove claims
  * @inputs { claims: array, testCommand?: string, requirements?: array, planPath?: string }
  * @outputs { success: boolean, verifications: array, allVerified: boolean, evidenceGaps: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

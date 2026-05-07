@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Paige - Tech Writer Agent
 
 **Name:** Paige

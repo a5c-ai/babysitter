@@ -2,6 +2,9 @@
 name: requirements-interview
 description: Interactive PM interview with expertise-adaptive questioning for requirements elicitation
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
+graph:
+  domains: [domain:software-engineering]
+
 ---
 # Requirements Interview
 

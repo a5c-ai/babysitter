@@ -10,6 +10,9 @@ expertise:
   - Cross-service integration testing
   - Test scenario gap analysis
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # E2E Runner Agent

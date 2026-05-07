@@ -10,6 +10,9 @@ expertise:
   - Implementation phase planning
   - Risk identification and mitigation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Spec Architect Agent

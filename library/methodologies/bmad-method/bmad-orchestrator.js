@@ -3,6 +3,8 @@
  * @description BMAD Method - Full lifecycle AI-driven agile orchestrator with specialized agent personas
  * @inputs { projectName: string, projectDescription: string, complexity?: string, teamMode?: string, phases?: array }
  * @outputs { success: boolean, productBrief: object, prd: object, architecture: object, epics: array, sprints: array, artifacts: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

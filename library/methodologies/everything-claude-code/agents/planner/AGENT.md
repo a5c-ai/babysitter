@@ -10,6 +10,9 @@ expertise:
   - TDD strategy definition per coding phase
   - Plan-to-build continuity via docs/plans/
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Planner Agent

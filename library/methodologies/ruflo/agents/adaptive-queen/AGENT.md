@@ -9,6 +9,9 @@ expertise:
   - Pattern-based optimization
   - Anomaly detection and response
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Adaptive Queen Agent

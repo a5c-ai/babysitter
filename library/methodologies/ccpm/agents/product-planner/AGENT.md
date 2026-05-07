@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Product Planner Agent
 
 **Role:** Product visionary, PRD creator, and user story craftsman

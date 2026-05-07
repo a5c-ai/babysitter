@@ -2,6 +2,9 @@
 name: meeting-analyst
 description: Processes meeting recordings and transcripts into structured decisions, action items, and team dynamics analysis
 role: Transcript Processing & Meeting Intelligence
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Meeting Analyst Agent

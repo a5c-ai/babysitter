@@ -2,6 +2,9 @@
 name: spec-execution
 description: 6-phase iterative specification execution workflow covering implementation, testing, review, improvement, commit, and progress tracking with quality-gated convergence.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Spec Execution

@@ -3,6 +3,8 @@
  * @description Planning with Files - Main orchestrator implementing persistent markdown-based planning with filesystem as extended memory
  * @inputs { taskDescription: string, projectPath: string, sessionId?: string, recoveryMode?: boolean, qualityThreshold?: number }
  * @outputs { success: boolean, planFile: string, findingsFile: string, progressFile: string, completionReport: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

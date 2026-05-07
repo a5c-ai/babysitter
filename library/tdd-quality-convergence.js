@@ -3,6 +3,8 @@
  * @description Advanced TDD workflow with quality convergence, planning, parallelization, and agent scoring
  * @inputs { feature: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, iterations: number, finalQuality: number, artifacts: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

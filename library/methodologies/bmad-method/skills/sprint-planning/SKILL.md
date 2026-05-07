@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Sprint Planning
 
 Plan implementation sprints with story selection, goal definition, and execution ordering.

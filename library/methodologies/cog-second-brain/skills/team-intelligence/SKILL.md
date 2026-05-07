@@ -7,6 +7,9 @@ allowed-tools:
   - web-fetch
   - api-call
   - git-commit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # COG Team Intelligence Skill

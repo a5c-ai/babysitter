@@ -3,6 +3,8 @@
  * @description BDD/Specification by Example - Executable specifications with Given-When-Then scenarios
  * @inputs { projectName: string, feature: string, stakeholders?: array, testFramework?: string, developmentPhase?: string }
  * @outputs { success: boolean, features: array, scenarios: array, stepDefinitions: array, automation: object, documentation: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

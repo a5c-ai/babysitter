@@ -10,6 +10,9 @@ expertise:
   - Dependency CVE analysis
   - CORS and security header evaluation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Security Analyst Agent

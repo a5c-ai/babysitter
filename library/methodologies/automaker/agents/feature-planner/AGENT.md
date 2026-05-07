@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Feature Planner Agent
 
 **Role:** Feature Decomposition & Planning

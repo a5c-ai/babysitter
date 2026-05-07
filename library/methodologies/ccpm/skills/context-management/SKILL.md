@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Context Management
 
 Project context loading, isolation, and persistent state management across CCPM sessions.

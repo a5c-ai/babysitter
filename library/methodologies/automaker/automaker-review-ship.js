@@ -3,6 +3,8 @@
  * @description AutoMaker Review & Ship - Code review, quality gates, merge, deployment, and release
  * @inputs { projectName: string, featureBranches: array, baseBranch?: string, reviewPolicy?: string, deployTarget?: string, qualityThreshold?: number }
  * @outputs { success: boolean, reviewResults: array, mergeResults: array, deploymentResult: object, releaseNotes: string, metrics: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

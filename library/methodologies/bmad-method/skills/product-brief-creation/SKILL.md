@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Product Brief Creation
 
 Create comprehensive product briefs from market, domain, and technical research.

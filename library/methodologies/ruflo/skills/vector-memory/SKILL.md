@@ -2,6 +2,9 @@
 name: vector-memory
 description: HNSW vector search for pattern similarity retrieval and knowledge graph maintenance with PageRank scoring, community detection, and 3-tier memory management.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Vector Memory

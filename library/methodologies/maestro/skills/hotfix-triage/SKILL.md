@@ -2,6 +2,9 @@
 name: hotfix-triage
 description: Urgent issue classification, root cause analysis, and fast-path routing for production hotfixes
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
+graph:
+  domains: [domain:software-engineering]
+
 ---
 # Hotfix Triage
 

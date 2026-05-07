@@ -2,6 +2,9 @@
 name: cross-artifact-analysis
 description: Perform cross-artifact consistency and coverage analysis across constitution, specification, plan, and task artifacts to detect gaps, conflicts, and misalignments before implementation.
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Cross-Artifact Analysis

@@ -2,6 +2,9 @@
 name: design-review-gate
 description: Parallel design review by 6 specialist agents (PM, Architect, Designer, Security Design, UX, CTO) with mandatory unanimous approval.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Design Review Gate

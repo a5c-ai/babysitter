@@ -9,6 +9,9 @@ expertise:
   - Checkpoint enforcement
   - Bottleneck detection and resolution
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Tactical Queen Agent

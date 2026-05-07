@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Bob - Scrum Master Agent
 
 **Name:** Bob

@@ -8,6 +8,9 @@ expertise:
   - Credential detection
   - Security best practices enforcement
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Security Auditor Agent

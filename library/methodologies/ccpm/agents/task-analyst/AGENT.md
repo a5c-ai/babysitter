@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Task Analyst Agent
 
 **Role:** Epic decomposition specialist, effort estimator, and dependency mapper

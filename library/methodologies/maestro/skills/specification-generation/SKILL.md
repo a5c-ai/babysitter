@@ -2,6 +2,9 @@
 name: specification-generation
 description: Convert requirements into structured technical specifications with architecture decisions
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
+graph:
+  domains: [domain:software-engineering]
+
 ---
 # Specification Generation
 

@@ -10,6 +10,9 @@ expertise:
   - Secure coding practices
   - Dependency vulnerability scanning
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Security Auditor Agent

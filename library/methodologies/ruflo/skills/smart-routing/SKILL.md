@@ -2,6 +2,9 @@
 name: smart-routing
 description: Complexity-based task routing with Q-Learning optimization, Agent Booster WASM fast-path, and Mixture-of-Experts model selection.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Smart Routing

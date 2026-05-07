@@ -2,6 +2,9 @@
 name: code-review-pipeline
 description: Multi-dimensional code review across correctness, security, performance, and maintainability with confidence-gated reporting and remediation loops.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Review Pipeline

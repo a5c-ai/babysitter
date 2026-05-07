@@ -9,6 +9,9 @@ expertise:
   - Workload balancing
   - Agent health monitoring
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Swarm Coordinator Agent

@@ -2,6 +2,9 @@
 name: role-advisor
 description: Personalizes COG workflows through role pack selection and configuration
 role: Role Pack Customization & Onboarding
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Role Advisor Agent

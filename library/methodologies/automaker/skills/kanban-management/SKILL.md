@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Kanban Management
 
 Initialize and manage Kanban board state for feature workflow tracking.

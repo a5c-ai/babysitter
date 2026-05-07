@@ -3,6 +3,8 @@
  * @description RPIKit Implementation Phase - Disciplined execution of approved plans with step-by-step verification, stakes-based enforcement, phase checkpoints, and final code/security reviews.
  * @inputs { topic: string, planDocPath?: string, projectRoot?: string, useWorktree?: boolean }
  * @outputs { success: boolean, stepsCompleted: number, phasesCompleted: number, filesChanged: array, reviewResults: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

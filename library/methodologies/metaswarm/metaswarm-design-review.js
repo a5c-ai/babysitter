@@ -3,6 +3,8 @@
  * @description Metaswarm Design Review Gate - Parallel review by 6 specialist agents (PM, Architect, Designer, Security Design, UX, CTO) with mandatory unanimous approval and max 3 iteration retry
  * @inputs { planDocument: string, workUnits: array, issueDescription: string, maxIterations?: number }
  * @outputs { approved: boolean, iterations: number, reviews: array, failedReviewers: array, summary: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

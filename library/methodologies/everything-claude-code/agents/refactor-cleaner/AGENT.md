@@ -11,6 +11,9 @@ expertise:
   - Coupling reduction and cohesion improvement
   - Regression prevention through continuous testing
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Refactor Cleaner Agent

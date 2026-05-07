@@ -2,6 +2,9 @@
 name: planning-patterns
 description: Structured planning methodology with research, brainstorming, phased plan creation, risk assessment, and plan-to-build continuity.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Planning Patterns

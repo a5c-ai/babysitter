@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Mary - Analyst Agent
 
 **Name:** Mary

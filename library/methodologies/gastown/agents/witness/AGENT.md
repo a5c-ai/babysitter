@@ -9,6 +9,9 @@ expertise:
   - Worker health monitoring
   - Rig-level coordination
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Witness Agent

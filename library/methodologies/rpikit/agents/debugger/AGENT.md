@@ -8,6 +8,9 @@ expertise:
   - Log and stack trace interpretation
   - Bisection-based root cause isolation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Debugger Agent

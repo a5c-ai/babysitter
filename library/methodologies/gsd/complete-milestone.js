@@ -3,6 +3,8 @@
  * @description Milestone lifecycle completion: verify audit, archive, evolve PROJECT.md, tag release, cleanup
  * @inputs { projectDir: string, milestoneVersion: string }
  * @outputs { success: boolean, milestoneVersion: string, archivePath: string, gitTag: string, phasesArchived: number }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

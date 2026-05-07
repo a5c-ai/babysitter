@@ -3,6 +3,8 @@
  * @description Finishing a Development Branch - Verify tests, present structured options, execute chosen workflow, clean up
  * @inputs { branchName: string, baseBranch?: string, worktreePath?: string, action?: string }
  * @outputs { success: boolean, action: string, prUrl: string, merged: boolean, cleanedUp: boolean }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

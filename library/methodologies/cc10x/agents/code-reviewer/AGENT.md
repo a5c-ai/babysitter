@@ -9,6 +9,9 @@ expertise:
   - Maintainability evaluation
   - Confidence-scored issue reporting
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Code Reviewer Agent

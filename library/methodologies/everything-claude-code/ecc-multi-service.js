@@ -3,6 +3,8 @@
  * @description Everything Claude Code Multi-Service Orchestration - PM2 process management, backend/frontend cascade, parallel worktree execution, and cross-service coordination
  * @inputs { services: array, projectRoot?: string, executionMode?: string, cascadeOrder?: array, parallelLimit?: number, pm2Config?: object }
  * @outputs { success: boolean, serviceResults: array, cascadeResult: object, pm2Status: object, crossServiceTests: object, summary: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

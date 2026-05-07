@@ -3,6 +3,8 @@
  * @description Adversarial Specification Debates - Two or more agents debate specifications and approaches
  * @inputs { task: string, debateRounds: number, participantRoles: array }
  * @outputs { success: boolean, finalSpec: object, debateHistory: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

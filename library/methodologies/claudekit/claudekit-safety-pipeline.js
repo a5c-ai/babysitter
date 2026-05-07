@@ -3,6 +3,8 @@
  * @description ClaudeKit Safety Pipeline - Hook-driven safety system implementing file-guard (195+ patterns, 12 categories), PostToolUse quality checks (typecheck, lint, test), checkpoint management, and session-scoped hook profiling with color-coded alerts
  * @inputs { projectRoot?: string, hookConfig?: object, fileGuardPatterns?: object, checkpointLabel?: string, enableProfiling?: boolean, sessionId?: string }
  * @outputs { success: boolean, fileGuard: object, qualityChecks: object, checkpoint: object, hookProfile: object, sessionState: object, summary: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

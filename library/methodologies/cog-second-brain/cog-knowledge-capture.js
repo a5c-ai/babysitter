@@ -3,6 +3,8 @@
  * @description COG Second Brain - Knowledge capture: braindump, URL dump, meeting transcript processing
  * @inputs { vaultPath: string, captureType: string, content?: string, urls?: array, transcriptPath?: string, targetQuality?: number }
  * @outputs { success: boolean, captured: object, classifications: array, artifacts: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

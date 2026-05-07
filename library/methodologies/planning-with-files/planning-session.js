@@ -3,6 +3,8 @@
  * @description Planning with Files - Session lifecycle management with init, recovery, and state persistence
  * @inputs { taskDescription: string, projectPath: string, sessionId?: string, previousSessionPath?: string }
  * @outputs { success: boolean, sessionId: string, sessionState: object, recoveryReport?: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

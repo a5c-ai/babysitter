@@ -1,6 +1,9 @@
 ---
 name: using-superpowers
 description: Use when starting any conversation. Establishes how to find and use skills, requiring skill invocation before any response.
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Using Superpowers

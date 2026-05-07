@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Documentation Writer Agent
 
 **Role:** Technical documentation specialist, API doc author, and user guide writer

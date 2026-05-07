@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Parallel Orchestration
 
 Coordinate multiple specialized agents across parallel work streams with quality gates and conflict resolution.

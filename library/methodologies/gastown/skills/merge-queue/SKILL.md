@@ -2,6 +2,9 @@
 name: merge-queue
 description: Process the Refinery merge queue - collect agent work, detect and resolve conflicts, merge in dependency order, and verify integration.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Merge Queue (Refinery)

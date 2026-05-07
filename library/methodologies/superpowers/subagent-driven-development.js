@@ -3,6 +3,8 @@
  * @description Subagent-Driven Development - Fresh agent per task with two-stage review (spec compliance then code quality)
  * @inputs { planPath: string, worktreePath?: string, maxReviewAttempts?: number }
  * @outputs { success: boolean, completedTasks: number, totalTasks: number, taskResults: array, finalReview: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

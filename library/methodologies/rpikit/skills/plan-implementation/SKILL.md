@@ -2,6 +2,9 @@
 name: plan-implementation
 description: Disciplined execution of approved plans with step-by-step verification, phase checkpoints, failure investigation, and mandatory code/security reviews.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Plan Implementation

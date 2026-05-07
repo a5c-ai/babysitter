@@ -3,6 +3,8 @@
  * @description COG Second Brain - Reflection and synthesis: weekly check-in, knowledge consolidation, monthly synthesis
  * @inputs { vaultPath: string, mode: string, userName: string, rolePack?: string, targetQuality?: number }
  * @outputs { success: boolean, reflection: object, frameworks: array, qualityScore: number }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

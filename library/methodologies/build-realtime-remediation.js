@@ -3,6 +3,8 @@
  * @description Build Realtime Remediation - Monitor CI/build state and automatically remediate failures
  * @inputs { buildCommand: string, testCommand: string, maxRemediationAttempts: number, ciProvider: string }
  * @outputs { success: boolean, buildStatus: string, remediationHistory: array }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,3 +1,8 @@
+---
+graph:
+  domains: [domain:software-engineering]
+---
+
 # Session Manager Agent
 
 **Name:** Session Manager

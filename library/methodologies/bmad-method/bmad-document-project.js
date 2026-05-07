@@ -3,6 +3,8 @@
  * @description BMAD Document Project - Comprehensive project documentation with Paige (Tech Writer)
  * @inputs { projectName: string, projectPath: string, documentationType?: string }
  * @outputs { success: boolean, documents: array, projectContext: object, sourceTree: object }
+  * @graph
+ *   domains: [domain:software-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

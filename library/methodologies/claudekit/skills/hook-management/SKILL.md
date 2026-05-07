@@ -2,6 +2,9 @@
 name: hook-management
 description: Session-scoped hook lifecycle management with enable/disable/status controls, execution profiling, and color-coded performance alerts.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Hook Management

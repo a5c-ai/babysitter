@@ -2,6 +2,9 @@
 name: anti-drift
 description: Hierarchical coordination and drift detection with frequent checkpoints, shared memory coherence validation, role specialization enforcement, and short task cycles.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+
 ---
 
 # Anti-Drift
