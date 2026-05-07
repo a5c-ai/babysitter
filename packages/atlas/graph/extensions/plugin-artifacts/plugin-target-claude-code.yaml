@@ -57,6 +57,7 @@ attributes:
     - StopHook
     - Mcp
     - HeadlessPrompt
+  adapterModule: "@a5c-ai/agent-mux-adapters/claude-adapter"
   externalRepo: "a5c-ai/babysitter-claude"
   externalPackageName: null
   generatedSourceDir: "claude-code"

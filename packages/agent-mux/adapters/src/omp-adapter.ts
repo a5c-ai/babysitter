@@ -238,3 +238,7 @@ export class OmpAdapter extends BaseAgentAdapter {
     await writeJsonFileAtomic(filePath, { ...existing, ...rest });
   }
 }
+
+// Self-register in the global adapter registry
+import { registerAdapterFactory } from './base-adapter.js';
+registerAdapterFactory('omp', () => new OmpAdapter());

@@ -52,6 +52,26 @@ export { defaultSpawner } from './base-adapter-helpers.js';
  * Implements SubprocessAdapter from the new multi-adapter architecture.
  * For HTTP/WebSocket/SDK adapters, create separate base classes.
  */
+// ---------------------------------------------------------------------------
+// Global adapter registry — adapters self-register at import time
+// ---------------------------------------------------------------------------
+
+const ADAPTER_FACTORIES = new Map<string, () => SubprocessAdapter>();
+
+export function registerAdapterFactory(name: string, factory: () => SubprocessAdapter): void {
+  ADAPTER_FACTORIES.set(name, factory);
+}
+
+export function getAdapterFactory(name: string): (() => SubprocessAdapter) | undefined {
+  return ADAPTER_FACTORIES.get(name);
+}
+
+export function listRegisteredAdapters(): string[] {
+  return Array.from(ADAPTER_FACTORIES.keys());
+}
+
+// ---------------------------------------------------------------------------
+
 export abstract class BaseAgentAdapter implements SubprocessAdapter {
   // ── Adapter Type ──────────────────────────────────────────────────
 

@@ -406,3 +406,7 @@ export class CodexAdapter extends BaseAgentAdapter {
    * `hooks[hookType] = [{ command }, ...]`. Append without clobbering.
    */
 }
+
+// Self-register in the global adapter registry
+import { registerAdapterFactory } from './base-adapter.js';
+registerAdapterFactory('codex', () => new CodexAdapter());

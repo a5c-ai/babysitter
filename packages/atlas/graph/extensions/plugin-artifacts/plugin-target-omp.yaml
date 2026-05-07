@@ -42,6 +42,7 @@ attributes:
     - SessionBinding
     - StopHook
     - Programmatic
+  adapterModule: "@a5c-ai/agent-mux-adapters/omp-adapter"
   externalRepo: "a5c-ai/babysitter-omp"
   externalPackageName: "@a5c-ai/babysitter-omp"
   generatedSourceDir: "oh-my-pi"

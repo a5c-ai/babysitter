@@ -310,3 +310,7 @@ export class CursorAdapter extends BaseAgentAdapter {
     return mcpUninstallPlugin(this.pluginsPath(), pluginId);
   }
 }
+
+// Self-register in the global adapter registry
+import { registerAdapterFactory } from './base-adapter.js';
+registerAdapterFactory('cursor', () => new CursorAdapter());

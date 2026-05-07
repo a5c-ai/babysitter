@@ -6,8 +6,8 @@
 
 export { type AgentName, type BuiltInAgentName } from '@a5c-ai/agent-mux-core';
 
-// Base adapter classes
-export { BaseAgentAdapter, defaultSpawner } from './base-adapter.js';
+// Base adapter classes and global registry
+export { BaseAgentAdapter, defaultSpawner, registerAdapterFactory, getAdapterFactory, listRegisteredAdapters } from './base-adapter.js';
 export { BaseRemoteAdapter } from './remote-adapter-base.js';
 export { BaseProgrammaticAdapter } from './programmatic-adapter-base.js';
 

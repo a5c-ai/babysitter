@@ -41,6 +41,7 @@ attributes:
     - Programmatic
     - SessionBinding
     - HeadlessPrompt
+  adapterModule: "@a5c-ai/agent-mux-adapters/pi-adapter"
   externalRepo: "a5c-ai/babysitter-pi"
   externalPackageName: "@a5c-ai/babysitter-pi"
   generatedSourceDir: "pi"

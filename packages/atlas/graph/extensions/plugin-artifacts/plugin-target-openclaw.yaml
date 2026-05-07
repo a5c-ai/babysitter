@@ -43,6 +43,7 @@ attributes:
   capabilities:
     - Programmatic
     - HeadlessPrompt
+  adapterModule: "@a5c-ai/agent-mux-adapters/openclaw-adapter"
   externalRepo: "a5c-ai/babysitter-openclaw"
   externalPackageName: "@a5c-ai/babysitter-openclaw"
   generatedSourceDir: "openclaw"

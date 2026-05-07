@@ -645,3 +645,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
     return setupClaudeRuntimeHooks(options, dispatcher);
   }
 }
+
+// Self-register in the global adapter registry
+import { registerAdapterFactory } from './base-adapter.js';
+registerAdapterFactory('claude', () => new ClaudeAdapter());

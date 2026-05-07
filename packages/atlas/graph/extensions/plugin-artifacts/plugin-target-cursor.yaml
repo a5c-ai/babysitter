@@ -49,6 +49,7 @@ attributes:
     - SessionBinding
     - StopHook
     - HeadlessPrompt
+  adapterModule: "@a5c-ai/agent-mux-adapters/cursor-adapter"
   externalRepo: "a5c-ai/babysitter-cursor"
   externalPackageName: "@a5c-ai/babysitter-cursor"
   generatedSourceDir: "cursor"

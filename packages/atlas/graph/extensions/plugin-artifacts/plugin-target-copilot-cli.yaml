@@ -50,6 +50,7 @@ attributes:
     - SessionBinding
     - StopHook
     - HeadlessPrompt
+  adapterModule: "@a5c-ai/agent-mux-adapters/copilot-adapter"
   externalRepo: "a5c-ai/babysitter-github-copilot"
   externalPackageName: "@a5c-ai/babysitter-github"
   generatedSourceDir: "github-copilot"
