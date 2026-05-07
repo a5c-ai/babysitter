@@ -41,6 +41,12 @@ attributes:
     - Programmatic
     - SessionBinding
     - HeadlessPrompt
+  externalRepo: "a5c-ai/babysitter-pi"
+  externalPackageName: "@a5c-ai/babysitter-pi"
+  generatedSourceDir: "pi"
+  marketplaceSpecs: []
+  requiredSurfaceFile: "AGENTS.md"
+
 edges:
   hosted_by:
     - target: agent:pi

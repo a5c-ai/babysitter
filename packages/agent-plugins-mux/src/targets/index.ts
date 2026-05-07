@@ -36,12 +36,13 @@ function toScriptVariants(variants: string[] | undefined): TargetProfile['script
   );
 }
 
-const TARGET_ALIASES: Record<string, string> = {
-  gemini: 'gemini-cli',
-};
-
 function canonicalTargetName(name: string): string {
-  return TARGET_ALIASES[name] ?? name;
+  // Try exact match first; if not found, check if any target's adapterName or cliCommand matches
+  if (getPluginTargetDescriptor(name)) return name;
+  for (const target of listPluginTargetDescriptors()) {
+    if (target.adapterName === name || target.cliCommand === name) return target.targetId;
+  }
+  return name;
 }
 function toTargetProfile(target: PluginTargetDescriptor): TargetProfile {
   return {
@@ -57,6 +58,7 @@ function toTargetProfile(target: PluginTargetDescriptor): TargetProfile {
     hookRegistrationOutputPath: target.hookRegistrationOutputPath ?? null,
     hookRegistrationAliasPaths: target.hookRegistrationAliasPaths ?? [],
     harnessManifestPath: target.harnessManifestPath ?? null,
+    requiredSurfaceFile: target.requiredSurfaceFile ?? null,
     scriptVariants: toScriptVariants(target.scriptVariants),
     npmPublishable: target.npmPublishable,
     adapterFamily: target.adapterFamily ?? 'shell-hook',

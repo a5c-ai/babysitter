@@ -9,27 +9,12 @@
 // Agent Names (§1.4)
 // ---------------------------------------------------------------------------
 
-/** Built-in agent names supported in v1. */
-export type BuiltInAgentName =
-  | 'claude'
-  | 'codex'
-  | 'droid'
-  | 'amp'
-  | 'gemini'
-  | 'copilot'
-  | 'cursor'
-  | 'opencode'
-  | 'pi'
-  | 'omp'
-  | 'openclaw'
-  | 'hermes';
-
 /**
- * Any valid agent name.
- * Built-in names get IDE autocompletion; arbitrary strings are accepted
- * for plugin-registered adapters.
+ * Agent names — derived from Atlas graph at runtime.
+ * Any string is accepted; the adapter registry resolves names to implementations.
  */
-export type AgentName = BuiltInAgentName | (string & {});
+export type BuiltInAgentName = string;
+export type AgentName = string;
 
 // ---------------------------------------------------------------------------
 // Error Codes (§3.1)

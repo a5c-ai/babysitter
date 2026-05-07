@@ -43,6 +43,12 @@ attributes:
   capabilities:
     - Programmatic
     - HeadlessPrompt
+  externalRepo: "a5c-ai/babysitter-openclaw"
+  externalPackageName: "@a5c-ai/babysitter-openclaw"
+  generatedSourceDir: "openclaw"
+  marketplaceSpecs: []
+  requiredSurfaceFile: null
+
 edges:
   hosted_by:
     - target: agent:openclaw

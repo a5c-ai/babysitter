@@ -46,6 +46,14 @@ attributes:
     - SessionBinding
     - StopHook
     - HeadlessPrompt
+  externalRepo: "a5c-ai/babysitter-codex"
+  externalPackageName: "@a5c-ai/babysitter-codex"
+  generatedSourceDir: "codex"
+  marketplaceSpecs:
+    - from: ".agents/plugins/marketplace.json"
+      kind: "codex"
+  requiredSurfaceFile: null
+
 edges:
   hosted_by:
     - target: agent:codex

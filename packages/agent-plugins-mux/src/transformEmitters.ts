@@ -24,17 +24,7 @@ function toOutputPath(value: string): string {
 }
 
 function getRequiredSurfaceFilename(targetProfile: TargetProfile): string | null {
-  switch (targetProfile.name) {
-    case 'gemini':
-    case 'gemini-cli':
-      return 'GEMINI.md';
-    case 'github-copilot':
-    case 'pi':
-    case 'oh-my-pi':
-      return 'AGENTS.md';
-    default:
-      return null;
-  }
+  return targetProfile.requiredSurfaceFile ?? null;
 }
 
 function buildSurfaceFallback(

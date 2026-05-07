@@ -640,6 +640,10 @@ function buildPluginTargetDescriptors(_hooks: HookDescriptor[]): PluginTargetDes
       configPaths: stringArray(node.configPaths),
       processNames: stringArray(node.processNames),
       harnessCapabilities: stringArray(node.capabilities),
+      externalRepo: valueAsString(node.externalRepo) || undefined,
+      externalPackageName: node.externalPackageName === null ? null : valueAsString(node.externalPackageName) || undefined,
+      generatedSourceDir: valueAsString(node.generatedSourceDir) || undefined,
+      requiredSurfaceFile: node.requiredSurfaceFile === null ? null : valueAsString(node.requiredSurfaceFile) || undefined,
       supportedHooks: supportedHooksForTarget(targetId),
       evidenceIds: [],
     };

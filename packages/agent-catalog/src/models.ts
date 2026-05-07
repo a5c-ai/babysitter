@@ -491,6 +491,10 @@ export interface PluginTargetDescriptor {
   configPaths?: string[];
   processNames?: string[];
   harnessCapabilities?: string[];
+  externalRepo?: string;
+  externalPackageName?: string | null;
+  generatedSourceDir?: string;
+  requiredSurfaceFile?: string | null;
   supportedHooks: Record<string, string>;
   evidenceIds: string[];
 }

@@ -57,6 +57,13 @@ attributes:
     - StopHook
     - Mcp
     - HeadlessPrompt
+  externalRepo: "a5c-ai/babysitter-claude"
+  externalPackageName: null
+  generatedSourceDir: "claude-code"
+  marketplaceSpecs:
+    - from: ".claude-plugin/marketplace.json"
+      kind: "claude"
+  requiredSurfaceFile: null
   description: |
     Claude Code as a plugin host — accepts plugin.json + marketplace
     manifests + container/binary plugin artifacts. Native plugin

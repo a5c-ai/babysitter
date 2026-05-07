@@ -16,21 +16,29 @@ const branch = getArg('--branch', process.env.GITHUB_REF_NAME || currentBranch()
 const workDir = resolve(getArg('--work-dir', join(ROOT, 'artifacts', 'external-plugin-repos')));
 const shouldPush = args.has('--push');
 
-const targets = [
-  {
-    id: 'claude',
-    repo: 'a5c-ai/babysitter-claude',
-    sourceDir: 'artifacts/generated-plugins/claude-code',
-    packageName: null,
-    marketplaces: [{ from: 'artifacts/generated-plugins/.claude-plugin/marketplace.json', to: '.claude-plugin/marketplace.json', kind: 'claude' }],
-  },
-  {
-    id: 'codex',
-    repo: 'a5c-ai/babysitter-codex',
-    sourceDir: 'artifacts/generated-plugins/codex',
-    packageName: '@a5c-ai/babysitter-codex',
-    marketplaces: [{ from: 'artifacts/generated-plugins/.agents/plugins/marketplace.json', to: '.agents/plugins/marketplace.json', kind: 'codex' }],
-  },
+// Build targets from agent-catalog (which reads Atlas graph)
+function buildTargetsFromCatalog() {
+  try {
+    const { listPluginTargetDescriptors } = await import(join(ROOT, 'packages', 'agent-catalog', 'dist', 'sdk.js'));
+    return listPluginTargetDescriptors()
+      .filter((t) => t.externalRepo)
+      .map((t) => ({
+        id: t.adapterName || t.targetId,
+        repo: t.externalRepo,
+        sourceDir: `artifacts/generated-plugins/${t.generatedSourceDir || t.targetId}`,
+        packageName: t.externalPackageName || null,
+        marketplaces: [], // marketplace specs handled separately
+      }));
+  } catch {
+    return null;
+  }
+}
+
+const catalogTargets = buildTargetsFromCatalog();
+const targets = catalogTargets ?? [
+  // Fallback when catalog is not built
+  { id: 'claude', repo: 'a5c-ai/babysitter-claude', sourceDir: 'artifacts/generated-plugins/claude-code', packageName: null, marketplaces: [] },
+  { id: 'codex', repo: 'a5c-ai/babysitter-codex', sourceDir: 'artifacts/generated-plugins/codex', packageName: '@a5c-ai/babysitter-codex', marketplaces: [] },
   { id: 'gemini', repo: 'a5c-ai/babysitter-gemini', sourceDir: 'artifacts/generated-plugins/gemini', packageName: '@a5c-ai/babysitter-gemini', marketplaces: [] },
   { id: 'cursor', repo: 'a5c-ai/babysitter-cursor', sourceDir: 'artifacts/generated-plugins/cursor', packageName: '@a5c-ai/babysitter-cursor', marketplaces: [] },
   { id: 'github-copilot', repo: 'a5c-ai/babysitter-github-copilot', sourceDir: 'artifacts/generated-plugins/github-copilot', packageName: '@a5c-ai/babysitter-github', marketplaces: [] },

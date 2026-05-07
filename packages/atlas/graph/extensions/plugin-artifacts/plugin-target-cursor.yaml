@@ -49,6 +49,12 @@ attributes:
     - SessionBinding
     - StopHook
     - HeadlessPrompt
+  externalRepo: "a5c-ai/babysitter-cursor"
+  externalPackageName: "@a5c-ai/babysitter-cursor"
+  generatedSourceDir: "cursor"
+  marketplaceSpecs: []
+  requiredSurfaceFile: null
+
 edges:
   hosted_by:
     - target: agent:cursor

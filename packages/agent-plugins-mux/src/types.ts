@@ -234,6 +234,7 @@ export interface TargetProfile {
   hookRegistrationOutputPath: string | null;
   hookRegistrationAliasPaths: string[];
   harnessManifestPath: string | null;
+  requiredSurfaceFile: string | null;
   scriptVariants: Array<'bash' | 'powershell' | 'javascript' | 'typescript'>;
   npmPublishable: boolean;
   npmPackageName?: string;

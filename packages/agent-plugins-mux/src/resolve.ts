@@ -41,6 +41,7 @@ export function resolve(
         hookRegistrationOutputPath: null,
         hookRegistrationAliasPaths: [],
         harnessManifestPath: null,
+        requiredSurfaceFile: null,
         scriptVariants: [],
         npmPublishable: false,
         adapterFamily: 'shell-hook',
