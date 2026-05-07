@@ -2,7 +2,7 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = new Set(process.argv.slice(2));
@@ -27,7 +27,7 @@ function generatedPluginSourceDir(sourceDir) {
 // Build targets from agent-catalog (which reads Atlas graph)
 async function buildTargetsFromCatalog() {
   try {
-    const { listPluginTargetDescriptors } = await import(join(ROOT, 'packages', 'agent-catalog', 'dist', 'sdk.js'));
+    const { listPluginTargetDescriptors } = await import(pathToFileURL(join(ROOT, 'packages', 'agent-catalog', 'dist', 'sdk.js')).href);
     return listPluginTargetDescriptors()
       .filter((t) => t.externalRepo)
       .map((t) => ({
@@ -42,7 +42,7 @@ async function buildTargetsFromCatalog() {
   }
 }
 
-const targets = buildTargetsFromCatalog();
+const targets = await buildTargetsFromCatalog();
 if (!targets || targets.length === 0) {
   console.error('ERROR: catalog is required for sync-external-plugin-repos. Build agent-catalog first (npm run build -w packages/agent-catalog).');
   process.exit(1);
