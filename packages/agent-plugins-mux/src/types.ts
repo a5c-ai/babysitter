@@ -193,14 +193,8 @@ export interface VerifyResult {
   verificationChecklist: string[];
 }
 
-export type HookRegistrationFormat =
-  | 'claude-code'
-  | 'codex'
-  | 'cursor'
-  | 'gemini'
-  | 'github-copilot'
-  | 'opencode'
-  | 'openclaw';
+// Derived from Atlas PluginTarget.hookRegistrationFormat — no hardcoded list.
+export type HookRegistrationFormat = string;
 
 export type AdapterFamily = 'shell-hook' | 'programmatic';
 export type DistributionModel = 'marketplace' | 'npm-cli' | 'both';

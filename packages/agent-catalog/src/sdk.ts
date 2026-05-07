@@ -61,21 +61,34 @@ import type {
   UiAgentCard,
 } from "./models";
 
-const HARNESS_ALIASES: Record<string, string> = {
-  claude: "claude-code",
-  "claude-code": "claude-code",
-  codex: "codex",
-  cursor: "cursor",
-  gemini: "gemini-cli",
-  "gemini-cli": "gemini-cli",
-  copilot: "github-copilot",
-  "github-copilot": "github-copilot",
-  omp: "oh-my-pi",
-  "oh-my-pi": "oh-my-pi",
-  opencode: "opencode",
-  openclaw: "openclaw",
-  pi: "pi",
-};
+function buildHarnessAliases(): Record<string, string> {
+  const aliases: Record<string, string> = {};
+  try {
+    for (const target of PLUGIN_TARGETS) {
+      aliases[target.targetId] = target.targetId;
+      if (target.adapterName && target.adapterName !== target.targetId) {
+        aliases[target.adapterName] = target.targetId;
+      }
+      if (target.cliCommand && target.cliCommand !== target.targetId && target.cliCommand !== target.adapterName) {
+        aliases[target.cliCommand] = target.targetId;
+      }
+    }
+  } catch {
+    // Catalog unavailable — return empty
+  }
+  return aliases;
+}
+let cachedHarnessAliases: Record<string, string> | undefined;
+const HARNESS_ALIASES: Record<string, string> = new Proxy({} as Record<string, string>, {
+  get(_target, prop: string) {
+    if (!cachedHarnessAliases) cachedHarnessAliases = buildHarnessAliases();
+    return cachedHarnessAliases[prop];
+  },
+  has(_target, prop: string) {
+    if (!cachedHarnessAliases) cachedHarnessAliases = buildHarnessAliases();
+    return prop in cachedHarnessAliases;
+  },
+});
 
 interface SdkState {
   graph: CatalogGraph;

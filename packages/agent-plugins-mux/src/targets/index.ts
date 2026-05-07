@@ -23,18 +23,7 @@ function toCommandFormat(format: string): TargetProfile['commandFormat'] {
 function toHookRegistrationFormat(
   format: string | null | undefined,
 ): TargetProfile['hookRegistrationFormat'] {
-  if (
-    format === 'claude-code' ||
-    format === 'codex' ||
-    format === 'cursor' ||
-    format === 'gemini' ||
-    format === 'github-copilot' ||
-    format === 'opencode' ||
-    format === 'openclaw'
-  ) {
-    return format;
-  }
-  return null;
+  return format || null;
 }
 
 function toScriptVariants(variants: string[] | undefined): TargetProfile['scriptVariants'] {
