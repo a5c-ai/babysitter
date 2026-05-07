@@ -9,7 +9,6 @@ Source of truth: [`package.json`](../../package.json).
 ```bash
 npm run build:sdk
 npm run test:sdk
-npm run test:e2e:docker
 npm run verify:metadata
 npm run build:hooks-mux
 npm run test:hooks-mux

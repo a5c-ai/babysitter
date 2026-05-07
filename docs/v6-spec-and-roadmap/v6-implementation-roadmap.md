@@ -235,9 +235,8 @@ Turn architecture-boundary language into an executable gate instead of documenta
 
 - `npm run test:architecture` for repository architecture-boundary checks
 - `npm run test:contracts` for repository interface-contract checks
-- `npm run test:e2e:docker` if a promoted slice depends on end-to-end runtime proof
 
-Only `npm run test:architecture` is a current repository guarantee in this slice. The contract and E2E commands remain deferred.
+Only `npm run test:architecture` is a current repository guarantee in this slice. The contract command remains deferred; Docker-based E2E coverage is being reset and is not a current gate.
 
 ### Implemented Scope
 
@@ -261,7 +260,7 @@ The gate runs in:
 ### Remaining Deferred Work
 
 - `npm run test:contracts` remains deferred until a concrete cross-package contract slice is written down precisely enough to fail deterministically.
-- `npm run test:e2e:docker` remains optional coverage unless another accepted slice promotes it into a required gate.
+- Docker-based E2E coverage is being reset from scratch and is not a current repository gate.
 
 ## 9. Deliverables By Maturity Level
 

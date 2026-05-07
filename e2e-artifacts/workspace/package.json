@@ -1,9 +1,0 @@
-{
-  "name": "tic-tac-toe-game",
-  "version": "1.0.0",
-  "type": "module",
-  "description": "Modern tic-tac-toe game",
-  "dependencies": {
-    "@a5c-ai/babysitter-sdk": "latest"
-  }
-}

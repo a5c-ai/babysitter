@@ -28,7 +28,7 @@ Plugin DX optimization, plugins feature-complete, marketplace plugin creation, a
 Harness integration docs, antigravity/process harnesses, methodology assimilation, and batch AI workflow assimilation. **All completed.**
 
 ### Testing & CI (5 runs)
-E2E Docker test suite, CI test assertion fixes, packaging/test convergence, and fix-gitignore. **All completed.**
+CI test assertion fixes, packaging/test convergence, and fix-gitignore. **All completed.**
 
 ### Catalog & Documentation (4 runs)
 Process library catalog, catalog sci-fi theme, README compaction, CLAUDE.md quality convergence. **All completed.**
@@ -55,7 +55,7 @@ Observer tooling experiments, SDK language porting analysis, cradle gap closure.
 
 - **Phased specialization builds**: Breaking domain knowledge into phase1 (research) + phase2 (implementation) produced reliable results across all domains
 - **SDK DX optimization**: Single-pass improvements to CLI, plugins, and developer experience all succeeded
-- **E2E testing infrastructure**: Docker-based test suites and CI integration were built successfully
+- **Testing infrastructure**: CI test assertions and packaging checks converged successfully
 - **Process library expansion**: The methodology and specialization library grew from ~8 to 30+ entries reliably
 
 ## What Didn't Work

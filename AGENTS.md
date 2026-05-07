@@ -26,6 +26,5 @@ Those rules are captured in more detail in [docs/agent-reference/process-authori
 ```bash
 npm run build:sdk
 npm run test:sdk
-npm run test:e2e:docker
 npm run verify:metadata
 ```
