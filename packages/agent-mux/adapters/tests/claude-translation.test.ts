@@ -80,15 +80,11 @@ describe('translateForClaude', () => {
   });
 
   describe('foundry provider', () => {
-    it('sets CLAUDE_CODE_USE_FOUNDRY=1', () => {
+    it('routes Foundry through transport-mux with Claude-facing Anthropic transport', () => {
       const result = translateForClaude(makeConfig({ provider: 'foundry', auth: { type: 'api_key', apiKey: 'az-key' } }));
-      expect(result.env['CLAUDE_CODE_USE_FOUNDRY']).toBe('1');
-      expect(result.proxyRequired).toBe(false);
-    });
-
-    it('sets AZURE_API_KEY from auth.apiKey', () => {
-      const result = translateForClaude(makeConfig({ provider: 'foundry', auth: { type: 'api_key', apiKey: 'az-key' } }));
-      expect(result.env['AZURE_API_KEY']).toBe('az-key');
+      expect(result.env).toEqual({});
+      expect(result.proxyRequired).toBe(true);
+      expect(result.proxyExposedTransport).toBe('anthropic');
     });
   });
 

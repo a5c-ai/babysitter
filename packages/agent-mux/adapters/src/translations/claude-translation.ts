@@ -21,9 +21,7 @@ export function translateForClaude(config: ProviderConfig): HarnessProviderTrans
       if (config.params['region']) env['GOOGLE_CLOUD_LOCATION'] = String(config.params['region']);
       return { env, args, proxyRequired: false };
     case 'foundry':
-      env['CLAUDE_CODE_USE_FOUNDRY'] = '1';
-      if (config.auth.apiKey) env['AZURE_API_KEY'] = config.auth.apiKey;
-      return { env, args, proxyRequired: false };
+      return { env, args, proxyRequired: true, proxyExposedTransport: 'anthropic' };
     case 'ollama': {
       const apiBase = config.params['apiBase'] ? String(config.params['apiBase']) : 'http://localhost:11434';
       env['ANTHROPIC_BASE_URL'] = apiBase;

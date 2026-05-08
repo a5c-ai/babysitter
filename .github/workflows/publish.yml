@@ -238,7 +238,7 @@ jobs:
             hook_type: PreToolUse
             native_event: PreToolUse
             expected_phase: tool.before
-            payload_json: '{"session_id":"hmx-claude-1","cwd":"/workspace/claude","model":"sonnet","tool_name":"Bash","tool_call_id":"claude-tool-1","tool_input":{"command":"pwd"}}'
+            payload_json: '{"session_id":"hmx-claude-1","cwd":"/workspace/claude","model":"gpt-5.5","tool_name":"Bash","tool_call_id":"claude-tool-1","tool_input":{"command":"pwd"}}'
           - id: codex
             amux_agent: codex
             hooks_adapter: codex
@@ -407,29 +407,21 @@ jobs:
             scenario:
               id: live.agent-mux.babysitter-agent.foundry-openai.gpt-5.5
           - install_mode:
-              id: babysitter-plugin
-            scenario:
-              id: live.agent-mux.babysitter-agent.anthropic-direct.sonnet
-          - install_mode:
               id: vanilla
             scenario:
               id: live.agent-mux.babysitter-agent.foundry-openai.gpt-5.5
-          - install_mode:
-              id: vanilla
-            scenario:
-              id: live.agent-mux.babysitter-agent.anthropic-direct.sonnet
         scenario:
-          - id: live.agent-mux.claude-code.anthropic-direct.sonnet
+          - id: live.agent-mux.claude-code.foundry-openai.gpt-5.5
             agent_path: agent-mux
             agent: claude-code
             amux_agent: claude
             integration_type: third-party-plugin
-            provider: anthropic-direct
-            amux_provider: anthropic
-            model: sonnet
-            credential_mode: github-org-secrets
-            required_env: ANTHROPIC_API_KEY
-            coverage_layers: anthropic-direct,claude-code
+            provider: foundry-openai
+            amux_provider: foundry
+            model: gpt-5.5
+            credential_mode: github-org-secrets-and-vars
+            required_env: AZURE_API_KEY,AMUX_API_BASE
+            coverage_layers: foundry-openai,claude-code,transport-mux
           - id: live.agent-mux.babysitter-agent.foundry-openai.gpt-5.5
             agent_path: agent-mux
             agent: babysitter-agent
@@ -442,18 +434,6 @@ jobs:
             credential_mode: github-org-secrets-and-vars
             required_env: AZURE_API_KEY,AMUX_API_BASE
             coverage_layers: foundry-openai,babysitter-agent,agent-core
-          - id: live.agent-mux.babysitter-agent.anthropic-direct.sonnet
-            agent_path: agent-mux
-            agent: babysitter-agent
-            amux_agent: babysitter
-            integration_type: third-party-plugin
-            babysitter_harness: agent-core
-            provider: anthropic-direct
-            amux_provider: anthropic
-            model: sonnet
-            credential_mode: github-org-secrets
-            required_env: ANTHROPIC_API_KEY
-            coverage_layers: anthropic-direct,babysitter-agent,agent-core
           - id: live.agent-mux.pi.foundry-openai.gpt-5.5
             agent_path: agent-mux
             agent: pi
@@ -532,7 +512,6 @@ jobs:
           LIVE_STACK_BABYSITTER_AGENT_BIN: ${{ github.workspace }}/packages/babysitter-agent/dist/cli/main.js
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           npm run test:e2e:live-stack:pipeline
           npm run coverage:e2e:live-stack

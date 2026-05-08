@@ -72,6 +72,22 @@ describe('resolveLaunchPlan', () => {
     expect(plan.env['GOOGLE_GENAI_USE_VERTEXAI']).toBe('true');
   });
 
+  it('claude + foundry: proxies through anthropic transport', () => {
+    const plan = resolveLaunchPlan({
+      harness: 'claude',
+      provider: 'foundry',
+      model: 'gpt-5.5',
+      apiKey: 'az-test',
+      apiBase: 'https://foundry.example.test',
+      proxyMode: 'if-needed',
+    });
+    expect(plan.proxyNeeded).toBe(true);
+    expect(plan.proxy?.targetProvider).toBe('foundry');
+    expect(plan.proxy?.targetModel).toBe('gpt-5.5');
+    expect(plan.proxy?.exposedTransport).toBe('anthropic');
+    expect(plan.env['AZURE_API_KEY']).toBeUndefined();
+  });
+
   it('claude + openai: proxy needed with anthropic transport', () => {
     const plan = resolveLaunchPlan({
       harness: 'claude',

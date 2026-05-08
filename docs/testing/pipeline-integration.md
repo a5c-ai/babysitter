@@ -45,7 +45,7 @@ Model-backed jobs must use explicit `if:` guards before setup:
 | Provider or harness | Required signals |
 | --- | --- |
 | Codex | OpenAI credential configured for CI and Codex runtime install available |
-| Claude Code | Anthropic credential configured for CI and Claude Code runtime install available |
+| Claude Code | Foundry/OpenAI credential configured for CI, Claude Code runtime install available, and transport-mux proxy path enabled |
 | Agent-core provider | Backend-specific credential and selected backend metadata |
 | Cloud/provider variants | Environment-specific credentials, region/project metadata, and rate-limit budget |
 

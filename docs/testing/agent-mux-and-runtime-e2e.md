@@ -93,7 +93,7 @@ The model-backed suite should prove that real providers and real harnesses behav
 | Transport-mux + external harness through agent-mux | Claude Code or Codex-compatible harness, provider credential, and `amux launch --with-proxy` or `--with-proxy-if-needed` | Launch starts transport-mux, harness receives proxy env, sentinel traffic uses proxy routes, stream completes, metrics snapshot increments |
 | Transport-mux + agent-core | Provider credential for agent-core backend | Agent-core deltas/final events travel through transport-mux without adapter-only assumptions, including cancellation or timeout evidence |
 | Agent-mux + Codex adapter | Codex CLI or configured Codex runtime and OpenAI credential | Codex output maps to mux protocol events, including final message and usage metadata when available |
-| Agent-mux + Claude Code adapter | Claude Code CLI and Anthropic credential | Claude Code output maps to mux protocol events, including tool-call and stop metadata when available |
+| Agent-mux + Claude Code adapter | Claude Code CLI plus Foundry/OpenAI credential through transport-mux | Claude Code output maps to mux protocol events while model traffic is proxied to GPT-5.5, including tool-call and stop metadata when available |
 | Babysitter-agent full run | Provider credentials or mocked backend already available | `babysitter-agent call/create-run` creates a bounded process, plans, emits a task, posts a result, completes, and records selected backend evidence without running installer commands |
 
 Model-backed runtime tests must upload redacted event logs, provider/harness version metadata, run IDs, and command durations.

@@ -77,27 +77,20 @@ describe('primary live stack runner contract', () => {
     ]);
   });
 
-  it('gives anthropic live lanes a three-turn budget', () => {
+  it('keeps Claude Code live lanes on Foundry GPT-5.5 through transport-mux', () => {
     const scenario = primaryLiveStackScenario();
-    const anthropicScenario = {
-      ...scenario,
-      scenarioId: 'live.agent-mux.claude-code.anthropic-direct.sonnet',
-      model: {
-        ...scenario.model,
-        provider: 'anthropic-direct' as const,
-        amuxProvider: 'anthropic' as const,
-        model: 'sonnet',
-        credentialMode: 'github-org-secrets' as const,
-        requiredEnv: ['ANTHROPIC_API_KEY'],
-      },
-    };
-    const commands = buildPrimaryLiveStackCommands(anthropicScenario, {
+    const commands = buildPrimaryLiveStackCommands(scenario, {
       cwd: '/repo',
       timeoutMs: 1000,
-      env: { ANTHROPIC_API_KEY: 'sk-ant-secret', LIVE_STACK_TRACE_ID: 'trace-1' },
+      env: { AZURE_API_KEY: 'sk-live-secret', AMUX_API_BASE: 'https://foundry.example.test', LIVE_STACK_TRACE_ID: 'trace-1' },
     });
 
-    expect(commands.at(-1)?.args.slice(-2)).toEqual(['--max-turns', '3']);
+    const launch = commands.at(-1);
+    expect(launch?.args).toContain('foundry');
+    expect(launch?.args).toContain('gpt-5.5');
+    expect(launch?.args).toContain('--with-proxy-if-needed');
+    expect(launch?.args).not.toContain('anthropic');
+    expect(launch?.args).not.toContain('sonnet');
   });
 
 
