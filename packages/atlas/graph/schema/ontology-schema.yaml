@@ -33,4 +33,5 @@ nodeKindFiles:
 - schema/node-kinds/library-artifacts.yaml
 - schema/node-kinds/methodologies.yaml
 - schema/node-kinds/deferred.yaml
+- schema/node-kinds/testable-claims.yaml
 edgeKindFile: schema/edge-kinds.yaml

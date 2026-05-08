@@ -55,6 +55,8 @@ attributes:
   reason: "testable claims pattern for ecosystem assertions not designed"
   suggestedBy: todo.md
   createdAt: "2026-05-08"
+  resolvedTo: "node:testable-claim"
+  resolvedAt: "2026-05-08"
 edges:
   deferred_for:
     - domain:qa-testing
