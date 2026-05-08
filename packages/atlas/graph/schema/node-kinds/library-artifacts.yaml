@@ -36,7 +36,12 @@ nodeKinds:
     required: false
   incomingEdges: []
   outgoingEdges:
-  - applies_to
+  - lib_applies_to_domain
+  - lib_requires_skill_area
+  - lib_involves_role
+  - lib_belongs_to_specialization
+  - lib_implements_workflow
+  - lib_covers_topic
   - uses_agent
   - uses_skill
   - follows_methodology
@@ -70,7 +75,11 @@ nodeKinds:
   incomingEdges:
   - used_by_process_skill
   outgoingEdges:
-  - applies_to
+  - lib_applies_to_domain
+  - lib_requires_skill_area
+  - lib_involves_role
+  - lib_belongs_to_specialization
+  - lib_covers_topic
   invariants: []
   examples: []
 - id: node:library-agent
@@ -104,6 +113,10 @@ nodeKinds:
   incomingEdges:
   - used_by_process
   outgoingEdges:
-  - applies_to
+  - lib_applies_to_domain
+  - lib_requires_skill_area
+  - lib_involves_role
+  - lib_belongs_to_specialization
+  - lib_covers_topic
   invariants: []
   examples: []

@@ -951,3 +951,39 @@ attributes:
 edges:
   applies_to:
     - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:spec-kit-brownfield
+attributes:
+  displayName: "Spec Kit (Brownfield)"
+  description: |
+    Brownfield variant of the Spec Kit methodology — specification-driven
+    development applied to existing codebases with legacy constraints.
+  methodologyKind: quality-focused
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:spec-kit-constitution
+attributes:
+  displayName: "Spec Kit (Constitution)"
+  description: |
+    Constitution variant of the Spec Kit methodology — establishes the
+    foundational specification contract for a project before implementation.
+  methodologyKind: quality-focused
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:spec-kit-quality-checklist
+attributes:
+  displayName: "Spec Kit (Quality Checklist)"
+  description: |
+    Quality checklist variant of the Spec Kit methodology — verification-focused
+    specification gates ensuring implementation meets acceptance criteria.
+  methodologyKind: quality-focused
+edges:
+  applies_to:
+    - domain:software-engineering

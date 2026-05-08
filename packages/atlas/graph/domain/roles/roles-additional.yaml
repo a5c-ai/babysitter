@@ -205,3 +205,44 @@ edges:
       level: intermediate
     - target: domain:observability
       level: intermediate
+---
+nodeKind: Role
+id: role:software-engineer
+attributes:
+  displayName: "Software Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    General-purpose software engineer covering full-stack development,
+    system design, and code quality. A broad role encompassing backend,
+    frontend, and infrastructure work without deep specialization in
+    any single area.
+edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:architecture-decision
+    - responsibility:test-strategy
+  requires_skill:
+    - target: domain:software-engineering
+      level: expert
+---
+nodeKind: Role
+id: role:blockchain-engineer
+attributes:
+  displayName: "Blockchain Engineer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Specialist in blockchain protocol development, smart contract engineering,
+    consensus mechanisms, and decentralized application architecture.
+    Bridges cryptography, distributed systems, and financial technology.
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:security-audit
+    - responsibility:code-review
+  requires_skill:
+    - target: domain:security
+      level: expert
+    - target: specialization:cryptography-blockchain
+      level: expert

@@ -306,18 +306,30 @@ function parseFrontmatter(content) {
 // ── Edge generation ─────────────────────────────────────────────────────────
 
 /**
- * Build applies_to edges from graph metadata.
- * If specialization is provided, auto-adds an edge to specialization:<slug>.
+ * Build semantic edges from graph metadata.
+ * Maps target-id prefixes to specific edge kinds instead of the generic applies_to.
+ * If specialization is provided, auto-adds a lib_belongs_to_specialization edge.
  */
 function buildEdges(fromId, graphMeta, specialization) {
   const edges = [];
   const edgeTargetKeys = ["skillAreas", "topics", "domains", "roles", "workflows", "specializations"];
 
+  const edgeKindByPrefix = {
+    'skill-area': 'lib_requires_skill_area',
+    'role': 'lib_involves_role',
+    'specialization': 'lib_belongs_to_specialization',
+    'workflow': 'lib_implements_workflow',
+    'domain': 'lib_applies_to_domain',
+    'topic': 'lib_covers_topic',
+  };
+
   for (const key of edgeTargetKeys) {
     const targets = graphMeta[key];
     if (!Array.isArray(targets)) continue;
     for (const target of targets) {
-      edges.push({ kind: "applies_to", to: target });
+      const prefix = target.split(':')[0];
+      const kind = edgeKindByPrefix[prefix] || 'applies_to';
+      edges.push({ kind, to: target });
     }
   }
 
@@ -325,7 +337,7 @@ function buildEdges(fromId, graphMeta, specialization) {
   if (specialization) {
     const specId = "specialization:" + slugify(specialization);
     if (!edges.some(e => e.to === specId)) {
-      edges.push({ kind: "applies_to", to: specId });
+      edges.push({ kind: "lib_belongs_to_specialization", to: specId });
     }
   }
 

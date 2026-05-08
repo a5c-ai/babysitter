@@ -5474,3 +5474,99 @@ edgeKinds:
   target: [LibraryProcess]
   cardinality: N:N
   inverse: follows_methodology
+- id: edge:lib-requires-skill-area
+  name: lib_requires_skill_area
+  origin: universal
+  description: a library artifact requires expertise in a skill area
+  source: [LibraryProcess, LibrarySkill, LibraryAgent]
+  target: [SkillArea]
+  cardinality: N:N
+  inverse: lib_skill_area_required_by
+- id: edge:lib-skill-area-required-by
+  name: lib_skill_area_required_by
+  origin: universal
+  description: inverse of lib_requires_skill_area
+  source: [SkillArea]
+  target: [LibraryProcess, LibrarySkill, LibraryAgent]
+  cardinality: N:N
+  inverse: lib_requires_skill_area
+- id: edge:lib-involves-role
+  name: lib_involves_role
+  origin: universal
+  description: a library artifact involves or is used by a role
+  source: [LibraryProcess, LibrarySkill, LibraryAgent]
+  target: [Role]
+  cardinality: N:N
+  inverse: lib_role_involved_in
+- id: edge:lib-role-involved-in
+  name: lib_role_involved_in
+  origin: universal
+  description: inverse of lib_involves_role
+  source: [Role]
+  target: [LibraryProcess, LibrarySkill, LibraryAgent]
+  cardinality: N:N
+  inverse: lib_involves_role
+- id: edge:lib-belongs-to-specialization
+  name: lib_belongs_to_specialization
+  origin: universal
+  description: a library artifact belongs to a specialization
+  source: [LibraryProcess, LibrarySkill, LibraryAgent]
+  target: [Specialization]
+  cardinality: N:N
+  inverse: lib_specialization_contains
+- id: edge:lib-specialization-contains
+  name: lib_specialization_contains
+  origin: universal
+  description: inverse of lib_belongs_to_specialization
+  source: [Specialization]
+  target: [LibraryProcess, LibrarySkill, LibraryAgent]
+  cardinality: N:N
+  inverse: lib_belongs_to_specialization
+- id: edge:lib-implements-workflow
+  name: lib_implements_workflow
+  origin: universal
+  description: a library process implements or supports a workflow
+  source: [LibraryProcess]
+  target: [Workflow]
+  cardinality: N:N
+  inverse: lib_workflow_implemented_by
+- id: edge:lib-workflow-implemented-by
+  name: lib_workflow_implemented_by
+  origin: universal
+  description: inverse of lib_implements_workflow
+  source: [Workflow]
+  target: [LibraryProcess]
+  cardinality: N:N
+  inverse: lib_implements_workflow
+- id: edge:lib-applies-to-domain
+  name: lib_applies_to_domain
+  origin: universal
+  description: a library artifact applies to a knowledge domain
+  source: [LibraryProcess, LibrarySkill, LibraryAgent]
+  target: [Domain]
+  cardinality: N:N
+  inverse: lib_domain_applied_by
+- id: edge:lib-domain-applied-by
+  name: lib_domain_applied_by
+  origin: universal
+  description: inverse of lib_applies_to_domain
+  source: [Domain]
+  target: [LibraryProcess, LibrarySkill, LibraryAgent]
+  cardinality: N:N
+  inverse: lib_applies_to_domain
+- id: edge:lib-covers-topic
+  name: lib_covers_topic
+  origin: universal
+  description: a library artifact covers or relates to a topic
+  source: [LibraryProcess, LibrarySkill, LibraryAgent]
+  target: [Topic]
+  cardinality: N:N
+  inverse: lib_topic_covered_by
+- id: edge:lib-topic-covered-by
+  name: lib_topic_covered_by
+  origin: universal
+  description: inverse of lib_covers_topic
+  source: [Topic]
+  target: [LibraryProcess, LibrarySkill, LibraryAgent]
+  cardinality: N:N
+  inverse: lib_covers_topic
