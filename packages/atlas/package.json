@@ -42,7 +42,8 @@
     "prepack": "npm run build",
     "cli": "node dist/cli.js",
     "verify:library-metadata": "node scripts/verify-library-metadata.mjs",
-    "validate:edges": "node scripts/validate-edges.mjs"
+    "validate:edges": "node scripts/validate-edges.mjs",
+    "deferred:list": "node scripts/list-deferred-nodes.mjs"
   },
   "dependencies": {
     "js-yaml": "^4.1.1"

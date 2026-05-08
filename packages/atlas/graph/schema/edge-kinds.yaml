@@ -5575,3 +5575,19 @@ edgeKinds:
   target: [LibraryProcess, LibrarySkill, LibraryAgent]
   cardinality: N:N
   inverse: lib_covers_topic
+- id: edge:deferred-for
+  name: deferred_for
+  origin: universal
+  description: a deferred node is a placeholder for a concept in a particular domain area
+  source: [DeferredNode]
+  target: [Domain, Specialization, Topic, SkillArea]
+  cardinality: N:N
+  inverse: has_deferred
+- id: edge:has-deferred
+  name: has_deferred
+  origin: universal
+  description: inverse of deferred_for
+  source: [Domain, Specialization, Topic, SkillArea]
+  target: [DeferredNode]
+  cardinality: N:N
+  inverse: deferred_for

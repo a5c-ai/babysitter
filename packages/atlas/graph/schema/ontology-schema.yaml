@@ -32,4 +32,5 @@ nodeKindFiles:
 - schema/node-kinds/workflows.yaml
 - schema/node-kinds/library-artifacts.yaml
 - schema/node-kinds/methodologies.yaml
+- schema/node-kinds/deferred.yaml
 edgeKindFile: schema/edge-kinds.yaml
