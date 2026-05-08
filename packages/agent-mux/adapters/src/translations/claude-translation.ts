@@ -22,6 +22,12 @@ export function translateForClaude(config: ProviderConfig): HarnessProviderTrans
       return { env, args, proxyRequired: false };
     case 'foundry':
       env['ANTHROPIC_API_KEY'] = '';
+      if (config.model) {
+        env['ANTHROPIC_MODEL'] = config.model;
+        env['ANTHROPIC_DEFAULT_SONNET_MODEL'] = config.model;
+        env['ANTHROPIC_DEFAULT_OPUS_MODEL'] = config.model;
+        env['ANTHROPIC_DEFAULT_HAIKU_MODEL'] = config.model;
+      }
       return { env, args, proxyRequired: true, proxyExposedTransport: 'anthropic' };
     case 'ollama': {
       const apiBase = config.params['apiBase'] ? String(config.params['apiBase']) : 'http://localhost:11434';
@@ -41,6 +47,12 @@ export function translateForClaude(config: ProviderConfig): HarnessProviderTrans
     }
     default:
       env['ANTHROPIC_API_KEY'] = '';
+      if (config.model) {
+        env['ANTHROPIC_MODEL'] = config.model;
+        env['ANTHROPIC_DEFAULT_SONNET_MODEL'] = config.model;
+        env['ANTHROPIC_DEFAULT_OPUS_MODEL'] = config.model;
+        env['ANTHROPIC_DEFAULT_HAIKU_MODEL'] = config.model;
+      }
       return { env, args, proxyRequired: true, proxyExposedTransport: 'anthropic' };
   }
 }

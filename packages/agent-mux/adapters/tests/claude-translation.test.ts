@@ -81,8 +81,14 @@ describe('translateForClaude', () => {
 
   describe('foundry provider', () => {
     it('routes Foundry through transport-mux with Claude-facing Anthropic transport', () => {
-      const result = translateForClaude(makeConfig({ provider: 'foundry', auth: { type: 'api_key', apiKey: 'az-key' } }));
-      expect(result.env).toEqual({ ANTHROPIC_API_KEY: '' });
+      const result = translateForClaude(makeConfig({ provider: 'foundry', model: 'gpt-5.5', auth: { type: 'api_key', apiKey: 'az-key' } }));
+      expect(result.env).toEqual({
+        ANTHROPIC_API_KEY: '',
+        ANTHROPIC_MODEL: 'gpt-5.5',
+        ANTHROPIC_DEFAULT_SONNET_MODEL: 'gpt-5.5',
+        ANTHROPIC_DEFAULT_OPUS_MODEL: 'gpt-5.5',
+        ANTHROPIC_DEFAULT_HAIKU_MODEL: 'gpt-5.5',
+      });
       expect(result.proxyRequired).toBe(true);
       expect(result.proxyExposedTransport).toBe('anthropic');
     });
@@ -123,10 +129,11 @@ describe('translateForClaude', () => {
       expect(result.proxyExposedTransport).toBe('anthropic');
     });
 
-    it('clears ANTHROPIC_API_KEY for unsupported providers routed through proxy', () => {
-      const result = translateForClaude(makeConfig({ provider: 'openai', auth: { type: 'api_key' } }));
-      expect(result.env).toEqual({ ANTHROPIC_API_KEY: '' });
-      expect(result.args).toEqual([]);
+    it('clears ANTHROPIC_API_KEY and sets model tiers for unsupported providers routed through proxy', () => {
+      const result = translateForClaude(makeConfig({ provider: 'openai', model: 'gpt-4o', auth: { type: 'api_key' } }));
+      expect(result.env.ANTHROPIC_API_KEY).toBe('');
+      expect(result.env.ANTHROPIC_MODEL).toBe('gpt-4o');
+      expect(result.env.ANTHROPIC_DEFAULT_SONNET_MODEL).toBe('gpt-4o');
       expect(result.proxyRequired).toBe(true);
     });
   });
