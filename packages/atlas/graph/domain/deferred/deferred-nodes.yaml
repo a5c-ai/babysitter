@@ -102,6 +102,8 @@ attributes:
   reason: "evidence and experiment tracking not modeled"
   suggestedBy: todo.md
   createdAt: "2026-05-08"
+  resolvedTo: "topic:evidence-based-graph"
+  resolvedAt: "2026-05-08"
 edges:
   deferred_for:
     - domain:data-science
@@ -177,6 +179,8 @@ attributes:
   reason: "process to run testable claim tests on schedule"
   suggestedBy: todo.md
   createdAt: "2026-05-08"
+  resolvedTo: "script:run-testable-claims"
+  resolvedAt: "2026-05-08"
 edges:
   deferred_for:
     - domain:qa-testing
@@ -192,6 +196,8 @@ attributes:
   reason: "process to find untested assumptions and create testable claims"
   suggestedBy: todo.md
   createdAt: "2026-05-08"
+  resolvedTo: "script:find-untested-claims"
+  resolvedAt: "2026-05-08"
 edges:
   deferred_for:
     - domain:qa-testing

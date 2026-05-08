@@ -139,6 +139,7 @@ attributes:
   testType: integration
   category: integration
   priority: high
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.stats.parseErrors===0?0:1)\""
 edges:
   asserts_about:
     - domain:software-engineering
@@ -187,6 +188,7 @@ attributes:
   testType: unit
   category: integration
   priority: low
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.attributes&&e.attributes.weight)?0:1)\""
 edges:
   asserts_about:
     - domain:software-engineering
@@ -252,6 +254,7 @@ attributes:
   testType: smoke
   category: behavior
   priority: low
+  testCommand: "node packages/atlas/scripts/verify-library-metadata.mjs --quiet"
 edges:
   asserts_about:
     - topic:ci-cd
@@ -285,6 +288,7 @@ attributes:
   testType: e2e
   category: performance
   priority: low
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const lib=Object.keys(i.records).filter(k=>k.startsWith('lib-'));process.exit(lib.length>5000?0:1)\""
 edges:
   asserts_about:
     - domain:software-engineering
@@ -301,6 +305,7 @@ attributes:
   testType: unit
   category: compatibility
   priority: high
+  testCommand: "node -e \"const y=require('js-yaml');const d=y.loadAll('---\\na: 1\\n---\\nb: 2');process.exit(d.length===2?0:1)\""
 edges:
   asserts_about:
     - domain:software-engineering
@@ -318,6 +323,7 @@ attributes:
   testType: smoke
   category: compatibility
   priority: medium
+  testCommand: "node -e \"require('./packages/atlas/dist/index.js');console.log('OK')\""
 edges:
   asserts_about:
     - domain:software-engineering

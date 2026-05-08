@@ -43,7 +43,9 @@
     "cli": "node dist/cli.js",
     "verify:library-metadata": "node scripts/verify-library-metadata.mjs",
     "validate:edges": "node scripts/validate-edges.mjs",
-    "deferred:list": "node scripts/list-deferred-nodes.mjs"
+    "deferred:list": "node scripts/list-deferred-nodes.mjs",
+    "claims:run": "node scripts/run-testable-claims.mjs",
+    "claims:untested": "node scripts/find-untested-claims.mjs"
   },
   "dependencies": {
     "js-yaml": "^4.1.1"
