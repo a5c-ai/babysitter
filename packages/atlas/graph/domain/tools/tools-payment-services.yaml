@@ -1,0 +1,52 @@
+---
+nodeKind: Tool
+id: tool:paypal
+attributes:
+  displayName: "PayPal"
+  kind: other
+  description: |
+    Global digital payments platform for online and in-person transactions.
+    Provides REST APIs for payments, subscriptions, invoicing, and
+    payouts supporting multiple currencies and payment methods worldwide.
+edges:
+  tool_used_by:
+    - target: skill-area:payment-processing
+---
+nodeKind: Tool
+id: tool:square
+attributes:
+  displayName: "Square"
+  kind: other
+  description: |
+    Payment and commerce platform for in-person, online, and mobile
+    payments. Provides point-of-sale hardware, e-commerce APIs, invoicing,
+    payroll, and inventory management for small to mid-size businesses.
+edges:
+  tool_used_by:
+    - target: skill-area:payment-processing
+---
+nodeKind: Tool
+id: tool:paddle
+attributes:
+  displayName: "Paddle"
+  kind: other
+  description: |
+    Merchant of record payment infrastructure for SaaS businesses.
+    Handles global tax compliance, subscription billing, and payment
+    processing so vendors avoid managing tax obligations in each country.
+edges:
+  tool_used_by:
+    - target: skill-area:payment-processing
+---
+nodeKind: Tool
+id: tool:braintree
+attributes:
+  displayName: "Braintree"
+  kind: other
+  description: |
+    PayPal-owned full-stack payment platform for accepting credit cards,
+    PayPal, Venmo, and local payment methods. Provides client SDKs,
+    hosted fields, vaulting, and advanced fraud protection tools.
+edges:
+  tool_used_by:
+    - target: skill-area:payment-processing

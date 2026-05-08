@@ -1,0 +1,39 @@
+---
+nodeKind: Tool
+id: tool:flagsmith
+attributes:
+  displayName: "Flagsmith"
+  kind: other
+  description: |
+    Open-source feature flag and remote configuration service. Self-hostable
+    or managed cloud, supporting boolean flags, multivariate flags, and
+    user segments with REST API and edge worker evaluation.
+edges:
+  tool_used_by:
+    - target: skill-area:feature-management
+---
+nodeKind: Tool
+id: tool:unleash
+attributes:
+  displayName: "Unleash"
+  kind: other
+  description: |
+    Open-source feature toggle framework with enterprise edition.
+    Provides client SDKs, activation strategies (gradual rollout, user
+    targeting), and an admin UI. Designed for high-throughput evaluation.
+edges:
+  tool_used_by:
+    - target: skill-area:feature-management
+---
+nodeKind: Tool
+id: tool:split-io
+attributes:
+  displayName: "Split.io"
+  kind: other
+  description: |
+    Feature delivery platform combining feature flags with attribution
+    analytics. Supports safe deployments, experiments, and monitoring
+    with metrics impact analysis tied directly to flag changes.
+edges:
+  tool_used_by:
+    - target: skill-area:feature-management

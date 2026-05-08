@@ -12,6 +12,8 @@ attributes:
   mcpTransports:
   - mcp-transport:stdio
 edges:
+  integrates_with:
+  - target: tool:asana
   lib_applies_to_domain:
   - target: domain:project-management
   - target: domain:software-engineering
@@ -49,6 +51,8 @@ attributes:
   mcpTransports:
   - mcp-transport:stdio
 edges:
+  integrates_with:
+  - target: tool:monday
   lib_applies_to_domain:
   - target: domain:project-management
   - target: domain:operations

@@ -1,0 +1,105 @@
+---
+nodeKind: Tool
+id: tool:confluence
+attributes:
+  displayName: "Confluence"
+  kind: other
+  description: |
+    Atlassian wiki and knowledge management platform for teams.
+    Provides spaces, pages, and templates for technical documentation,
+    runbooks, project specs, and collaborative decision records.
+edges:
+  tool_used_by:
+    - target: skill-area:technical-documentation
+---
+nodeKind: Tool
+id: tool:trello
+attributes:
+  displayName: "Trello"
+  kind: other
+  description: |
+    Kanban-style visual project management tool by Atlassian.
+    Organizes work into boards, lists, and cards with checklists,
+    labels, due dates, and power-ups for lightweight task tracking.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+---
+nodeKind: Tool
+id: tool:clickup
+attributes:
+  displayName: "ClickUp"
+  kind: other
+  description: |
+    All-in-one project management platform combining tasks, docs,
+    goals, and time tracking in a single workspace. Supports multiple
+    views (list, board, Gantt, calendar) and custom workflows.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+---
+nodeKind: Tool
+id: tool:shortcut
+attributes:
+  displayName: "Shortcut"
+  kind: other
+  description: |
+    Agile project management tool (formerly Clubhouse) for software teams.
+    Provides stories, epics, iterations, and team-based workflows designed
+    for engineering teams following agile and scrum methodologies.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+---
+nodeKind: Tool
+id: tool:basecamp
+attributes:
+  displayName: "Basecamp"
+  kind: other
+  description: |
+    All-in-one project management and team collaboration tool.
+    Combines to-dos, message boards, docs, schedules, and group chat
+    into a single organized workspace per project.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+---
+nodeKind: Tool
+id: tool:asana
+attributes:
+  displayName: "Asana"
+  kind: other
+  description: |
+    Work management platform for teams to track tasks, projects, and goals.
+    Offers list, board, timeline, and calendar views with automation,
+    rules, and reporting to coordinate cross-functional work.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+---
+nodeKind: Tool
+id: tool:monday
+attributes:
+  displayName: "Monday.com"
+  kind: other
+  description: |
+    Visual work management platform with highly customizable boards
+    and workflows. Supports CRM, project tracking, and operational
+    use cases through a flexible column-based data model.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+---
+nodeKind: Tool
+id: tool:notion
+attributes:
+  displayName: "Notion"
+  kind: other
+  description: |
+    All-in-one workspace for notes, docs, wikis, and databases.
+    Combines a block-based editor with relational databases, templates,
+    and AI writing assistance for knowledge management and project tracking.
+edges:
+  tool_used_by:
+    - target: skill-area:technical-documentation
+    - target: skill-area:project-planning

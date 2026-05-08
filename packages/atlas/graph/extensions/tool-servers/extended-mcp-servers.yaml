@@ -393,6 +393,8 @@ edges:
   - target: tool-descriptor:notion.update-page
   - target: tool-descriptor:notion.append-block-children
   - target: tool-descriptor:notion.query-database
+  integrates_with:
+  - target: tool:notion
   implements:
   - target: extension-interface:orchestration
   requires_capability:
@@ -437,6 +439,8 @@ edges:
   - target: tool-descriptor:jira.transition-issue
   - target: tool-descriptor:confluence.search
   - target: tool-descriptor:confluence.get-page
+  integrates_with:
+  - target: tool:confluence
   implements:
   - target: extension-interface:orchestration
   requires_capability:
@@ -517,6 +521,8 @@ edges:
   - target: tool-descriptor:cloudflare.list-r2-buckets
   - target: tool-descriptor:cloudflare.r2-list-objects
   - target: tool-descriptor:cloudflare.analytics-query
+  integrates_with:
+  - target: tool:cloudflare-workers
   implements:
   - target: extension-interface:orchestration
   requires_capability:

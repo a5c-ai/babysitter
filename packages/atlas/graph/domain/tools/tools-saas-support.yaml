@@ -1,0 +1,68 @@
+---
+nodeKind: Tool
+id: tool:zendesk
+attributes:
+  displayName: "Zendesk"
+  kind: other
+  description: |
+    Customer service platform for managing support tickets, live chat,
+    and help center content. Provides agent workspaces, automation rules,
+    macros, and analytics for customer support operations.
+edges:
+  tool_used_by:
+    - target: skill-area:customer-support
+---
+nodeKind: Tool
+id: tool:freshdesk
+attributes:
+  displayName: "Freshdesk"
+  kind: other
+  description: |
+    Cloud-based customer support helpdesk by Freshworks. Provides
+    ticketing, omnichannel inbox, automation, SLA management, and
+    a self-service knowledge base for support teams.
+edges:
+  tool_used_by:
+    - target: skill-area:customer-support
+---
+nodeKind: Tool
+id: tool:hubspot
+attributes:
+  displayName: "HubSpot"
+  kind: other
+  description: |
+    CRM platform with integrated marketing, sales, and service hubs.
+    Manages contacts, deals, pipelines, email sequences, and customer
+    support tickets across the full customer lifecycle.
+edges:
+  tool_used_by:
+    - target: skill-area:customer-support
+    - target: skill-area:sales-operations
+---
+nodeKind: Tool
+id: tool:salesforce
+attributes:
+  displayName: "Salesforce"
+  kind: other
+  description: |
+    Enterprise CRM and cloud platform for sales, service, marketing,
+    and analytics. Provides customizable objects, automation via Flow,
+    and an extensive AppExchange ecosystem for B2B and B2C workflows.
+edges:
+  tool_used_by:
+    - target: skill-area:sales-operations
+    - target: skill-area:customer-support
+---
+nodeKind: Tool
+id: tool:servicenow
+attributes:
+  displayName: "ServiceNow"
+  kind: other
+  description: |
+    Enterprise IT service management (ITSM) and workflow automation
+    platform. Provides incident, change, and problem management alongside
+    HR service delivery, security operations, and custom app development.
+edges:
+  tool_used_by:
+    - target: skill-area:itsm
+    - target: skill-area:operations-automation

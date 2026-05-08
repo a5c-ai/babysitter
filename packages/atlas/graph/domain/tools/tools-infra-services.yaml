@@ -1,0 +1,66 @@
+---
+nodeKind: Tool
+id: tool:fastly
+attributes:
+  displayName: "Fastly"
+  kind: other
+  description: |
+    Edge cloud platform providing CDN, WAF, DDoS protection, and edge
+    compute (Compute@Edge). Offers real-time log streaming, instant
+    purging, and Varnish-based VCL configuration for fine-grained caching.
+edges:
+  tool_used_by:
+    - target: skill-area:cdn-edge
+---
+nodeKind: Tool
+id: tool:akamai
+attributes:
+  displayName: "Akamai"
+  kind: other
+  description: |
+    Global CDN and edge security platform serving over a third of internet
+    traffic. Provides web performance optimization, DDoS mitigation, WAF,
+    bot management, and edge computing capabilities.
+edges:
+  tool_used_by:
+    - target: skill-area:cdn-edge
+---
+nodeKind: Tool
+id: tool:ngrok
+attributes:
+  displayName: "ngrok"
+  kind: other
+  description: |
+    Ingress-as-a-service platform for exposing local servers and services
+    to the internet via secure tunnels. Used for webhook development,
+    demo environments, API gateway, and IoT device connectivity.
+edges:
+  tool_used_by:
+    - target: skill-area:local-development
+---
+nodeKind: Tool
+id: tool:tailscale
+attributes:
+  displayName: "Tailscale"
+  kind: other
+  description: |
+    Zero-config VPN built on WireGuard for connecting devices and services
+    across networks. Provides mesh networking, ACLs, MagicDNS, subnet
+    routing, and exit nodes for secure private network access.
+edges:
+  tool_used_by:
+    - target: skill-area:networking
+---
+nodeKind: Tool
+id: tool:cloudflare-workers
+attributes:
+  displayName: "Cloudflare Workers"
+  kind: other
+  description: |
+    Serverless JavaScript/WASM edge compute platform running on Cloudflare's
+    global network. Provides Workers KV, Durable Objects, R2 storage, D1
+    SQLite, and Queue for building distributed edge applications.
+edges:
+  tool_used_by:
+    - target: skill-area:serverless-compute
+    - target: skill-area:cdn-edge

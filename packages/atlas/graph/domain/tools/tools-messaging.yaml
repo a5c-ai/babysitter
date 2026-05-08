@@ -1,0 +1,65 @@
+---
+nodeKind: Tool
+id: tool:rabbitmq
+attributes:
+  displayName: "RabbitMQ"
+  kind: other
+  description: |
+    Open-source AMQP message broker for reliable asynchronous messaging.
+    Supports queues, exchanges, routing keys, and fanout patterns.
+    Provides management UI, clustering, federation, and durable persistence.
+edges:
+  tool_used_by:
+    - target: skill-area:event-driven-architecture
+---
+nodeKind: Tool
+id: tool:nats
+attributes:
+  displayName: "NATS"
+  kind: other
+  description: |
+    High-performance, lightweight pub/sub messaging system for cloud-native
+    architectures. Supports core NATS, JetStream (persistent streaming),
+    and key/value store with low latency and minimal operational overhead.
+edges:
+  tool_used_by:
+    - target: skill-area:event-driven-architecture
+---
+nodeKind: Tool
+id: tool:pulsar
+attributes:
+  displayName: "Apache Pulsar"
+  kind: other
+  description: |
+    Distributed pub-sub messaging and streaming platform from the Apache
+    Software Foundation. Separates compute and storage, supports multi-tenancy,
+    geo-replication, tiered storage, and native schema registry.
+edges:
+  tool_used_by:
+    - target: skill-area:event-driven-architecture
+---
+nodeKind: Tool
+id: tool:zeromq
+attributes:
+  displayName: "ZeroMQ"
+  kind: other
+  description: |
+    Asynchronous messaging library providing socket primitives for distributed
+    and concurrent applications. Supports patterns like push/pull, pub/sub,
+    req/rep, and dealer/router with bindings for 40+ languages.
+edges:
+  tool_used_by:
+    - target: skill-area:event-driven-architecture
+---
+nodeKind: Tool
+id: tool:mosquitto
+attributes:
+  displayName: "Eclipse Mosquitto"
+  kind: other
+  description: |
+    Lightweight open-source MQTT broker for IoT and telemetry messaging.
+    Implements MQTT 3.1, 3.1.1, and 5.0 protocols with TLS support,
+    authentication plugins, and bridging to other MQTT brokers.
+edges:
+  tool_used_by:
+    - target: skill-area:event-driven-architecture

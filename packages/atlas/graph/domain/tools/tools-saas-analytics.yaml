@@ -1,0 +1,104 @@
+---
+nodeKind: Tool
+id: tool:segment
+attributes:
+  displayName: "Segment"
+  kind: other
+  description: |
+    Customer data platform (CDP) for collecting, unifying, and routing
+    user event data. Provides a single API to capture behavioral data
+    and send it to analytics, marketing, and data warehouse destinations.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics
+---
+nodeKind: Tool
+id: tool:mixpanel
+attributes:
+  displayName: "Mixpanel"
+  kind: other
+  description: |
+    Product analytics platform for tracking user interactions and funnels.
+    Enables event-based analysis, cohort segmentation, A/B test measurement,
+    and retention reporting for web and mobile applications.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics
+---
+nodeKind: Tool
+id: tool:amplitude
+attributes:
+  displayName: "Amplitude"
+  kind: other
+  description: |
+    Digital analytics platform focused on product and behavioral analytics.
+    Provides pathfinder analysis, funnel charts, retention curves, and
+    experiment analysis to help teams understand user journeys.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics
+---
+nodeKind: Tool
+id: tool:posthog
+attributes:
+  displayName: "PostHog"
+  kind: other
+  description: |
+    Open-source product analytics suite with event capture, funnels,
+    session recordings, feature flags, and A/B testing. Self-hostable
+    and offers a managed cloud with generous free tier.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics
+---
+nodeKind: Tool
+id: tool:heap
+attributes:
+  displayName: "Heap"
+  kind: other
+  description: |
+    Automatic event-capture analytics platform that retroactively records
+    all user interactions. Eliminates manual instrumentation by capturing
+    clicks, taps, and form submissions without upfront tagging.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics
+---
+nodeKind: Tool
+id: tool:google-analytics
+attributes:
+  displayName: "Google Analytics"
+  kind: other
+  description: |
+    Google's web and app analytics service for tracking traffic, user
+    behavior, and conversions. GA4 uses an event-based model with
+    BigQuery integration for raw data export and custom reporting.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics
+---
+nodeKind: Tool
+id: tool:hotjar
+attributes:
+  displayName: "Hotjar"
+  kind: other
+  description: |
+    Behavioral analytics and user feedback platform providing heatmaps,
+    session recordings, and on-site surveys. Complements quantitative
+    analytics with qualitative insights into user experience.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics
+---
+nodeKind: Tool
+id: tool:fullstory
+attributes:
+  displayName: "FullStory"
+  kind: other
+  description: |
+    Digital experience intelligence platform with session replay, funnel
+    analysis, and frustration signal detection. Automatically indexes all
+    user interactions for retroactive analysis without manual tagging.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics

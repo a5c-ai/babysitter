@@ -1,0 +1,40 @@
+---
+nodeKind: Tool
+id: tool:algolia
+attributes:
+  displayName: "Algolia"
+  kind: other
+  description: |
+    Hosted search and discovery API for building fast, relevant search
+    experiences. Provides typo tolerance, faceting, geo-search, and
+    AI-powered re-ranking with REST API and InstantSearch UI libraries.
+edges:
+  tool_used_by:
+    - target: skill-area:search-infrastructure
+---
+nodeKind: Tool
+id: tool:typesense
+attributes:
+  displayName: "Typesense"
+  kind: other
+  description: |
+    Open-source, typo-tolerant search engine built for speed and simplicity.
+    Designed as a self-hostable Algolia alternative with vector search,
+    faceting, geo-search, and a clean JSON API.
+edges:
+  tool_used_by:
+    - target: skill-area:search-infrastructure
+---
+nodeKind: Tool
+id: tool:opensearch
+attributes:
+  displayName: "OpenSearch"
+  kind: other
+  description: |
+    Apache-licensed fork of Elasticsearch and Kibana maintained by AWS.
+    Provides full-text search, vector search, log analytics, and
+    dashboards with a compatible REST API and managed cloud offering.
+edges:
+  tool_used_by:
+    - target: skill-area:search-infrastructure
+    - target: skill-area:observability-pipeline
