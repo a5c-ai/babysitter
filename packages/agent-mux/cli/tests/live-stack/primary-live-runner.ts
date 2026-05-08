@@ -66,6 +66,49 @@ export function buildPrimaryLiveStackCommands(
     ];
   }
 
+  if (scenario.agent.agent === 'babysitter-agent') {
+    const runCommand = commandExecution(
+      commandEnv,
+      'LIVE_STACK_AMUX_BIN',
+      'amux',
+      [
+        'run',
+        'babysitter',
+        '--model',
+        scenario.model.model,
+        '--cwd',
+        options.cwd,
+        '--output-format',
+        'jsonl',
+        '--env',
+        `BABYSITTER_HARNESS=${scenario.agent.babysitterHarness ?? 'agent-core'}`,
+        '--prompt',
+        prompt,
+        '--max-turns',
+        String(resolveLaunchMaxTurns(scenario)),
+        '--non-interactive',
+        '--json',
+      ],
+      options.cwd,
+      timeoutMs,
+    );
+
+    if (scenario.agent.installMode === 'vanilla') {
+      return [
+        commandExecution(commandEnv, 'LIVE_STACK_AMUX_BIN', 'amux', ['install', 'babysitter', '--json'], options.cwd, timeoutMs),
+        runCommand,
+      ];
+    }
+
+    return [
+      commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['run', 'generate:plugins'], options.cwd, timeoutMs),
+      commandExecution(commandEnv, 'LIVE_STACK_AMUX_BIN', 'amux', ['install', 'babysitter', '--json'], options.cwd, timeoutMs),
+      commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['install', '--global', './packages/sdk'], options.cwd, timeoutMs),
+      generatedPluginInstallCommand(commandEnv, scenario, options.cwd, timeoutMs),
+      runCommand,
+    ];
+  }
+
   const installTarget = scenario.agent.agentMuxAgent;
   const launchCommand = commandExecution(
     commandEnv,
@@ -108,8 +151,8 @@ export function buildPrimaryLiveStackCommands(
 }
 
 function resolveLaunchMaxTurns(scenario: LiveStackScenario): number {
-  if (scenario.agent.agent === 'claude-code' && scenario.model.provider === 'anthropic-direct') {
-    return 2;
+  if (scenario.model.provider === 'anthropic-direct') {
+    return 3;
   }
   return 1;
 }

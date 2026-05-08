@@ -197,13 +197,13 @@ export function assertEvidenceBundleComplete(scenario: LiveStackScenario, bundle
 
 function setupCommandsFor(agentPath: LiveStackAgentPath, agent: LiveStackAgentId, agentMuxAgent: LiveStackAgentMuxAgentId, installMode: LiveStackInstallMode): readonly string[] {
   if (agentPath === 'babysitter-agent') return ['babysitter-agent create-run --harness internal'];
-  if (installMode === 'vanilla') return [`amux install ${agentMuxAgent}`, `amux launch ${agentMuxAgent}`];
+  if (installMode === 'vanilla') return [`amux install ${agentMuxAgent}`, agent === 'babysitter-agent' ? 'amux run babysitter' : `amux launch ${agentMuxAgent}`];
   return [
     'npm run generate:plugins',
     `amux install ${agentMuxAgent}`,
     'npm install --global ./packages/sdk',
     `babysitter harness:install-plugin ${agent}`,
-    `amux launch ${agentMuxAgent}`,
+    agent === 'babysitter-agent' ? 'amux run babysitter' : `amux launch ${agentMuxAgent}`,
   ];
 }
 

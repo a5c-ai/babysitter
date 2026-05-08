@@ -77,7 +77,7 @@ describe('primary live stack runner contract', () => {
     ]);
   });
 
-  it('gives claude anthropic live lanes a two-turn budget', () => {
+  it('gives anthropic live lanes a three-turn budget', () => {
     const scenario = primaryLiveStackScenario();
     const anthropicScenario = {
       ...scenario,
@@ -97,16 +97,16 @@ describe('primary live stack runner contract', () => {
       env: { ANTHROPIC_API_KEY: 'sk-ant-secret', LIVE_STACK_TRACE_ID: 'trace-1' },
     });
 
-    expect(commands.at(-1)?.args.slice(-2)).toEqual(['--max-turns', '2']);
+    expect(commands.at(-1)?.args.slice(-2)).toEqual(['--max-turns', '3']);
   });
 
 
-  it('passes the selected babysitter-agent harness through the agent-mux environment', () => {
+  it('routes babysitter-agent scenarios through amux run with the selected harness', () => {
     const scenario = primaryLiveStackScenario();
     const babysitterScenario = {
       ...scenario,
       scenarioId: 'live.agent-mux.babysitter-agent.foundry-openai.gpt-5.5',
-      agent: { ...scenario.agent, agent: 'babysitter-agent' as const, agentMuxAgent: 'babysitter' as const, installMode: 'vanilla' as const, babysitterHarness: 'agent-core', setupCommands: ['amux install babysitter', 'amux launch babysitter'] },
+      agent: { ...scenario.agent, agent: 'babysitter-agent' as const, agentMuxAgent: 'babysitter' as const, installMode: 'vanilla' as const, babysitterHarness: 'agent-core', setupCommands: ['amux install babysitter', 'amux run babysitter'] },
       requiredTraceIds: ['agentMuxRunId', 'agentMuxSessionId', 'transportTraceId'],
       expectedArtifacts: ['agent-mux-events', 'transport-mux-trace', 'provider-trace-redacted'],
     };
@@ -120,20 +120,22 @@ describe('primary live stack runner contract', () => {
       ['amux', 'install', 'babysitter', '--json'],
       [
         'amux',
-        'launch',
+        'run',
         'babysitter',
-        'foundry',
         '--model',
         'gpt-5.5',
-        '--with-proxy-if-needed',
-        '--proxy-log-level',
-        'debug',
-        '--session-id',
-        'trace-1',
+        '--cwd',
+        '/repo',
+        '--output-format',
+        'jsonl',
+        '--env',
+        'BABYSITTER_HARNESS=agent-core',
         '--prompt',
         'Run a tiny vanilla agent-mux proof for live.agent-mux.babysitter-agent.foundry-openai.gpt-5.5. trace=trace-1; print labels agentMuxSessionId and transportTraceId when observable. Do not invoke Babysitter commands.',
         '--max-turns',
         '1',
+        '--non-interactive',
+        '--json',
       ],
     ]);
     expect(commands[0]?.env['BABYSITTER_HARNESS']).toBe('agent-core');

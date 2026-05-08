@@ -105,7 +105,7 @@ describe('live stack scenario contract primitives', () => {
     expect(scenario.agent.agentMuxAgent).toBe('babysitter');
     expect(scenario.agent.installMode).toBe('vanilla');
     expect(scenario.agent.babysitterHarness).toBe('agent-core');
-    expect(scenario.agent.setupCommands).toEqual(['amux install babysitter', 'amux launch babysitter']);
+    expect(scenario.agent.setupCommands).toEqual(['amux install babysitter', 'amux run babysitter']);
   });
 
   it('separates live model capability gates from deterministic no-credential execution', () => {
