@@ -465,12 +465,25 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
   let proxyRuntime: TransportMuxRuntime | undefined;
   if (plan.proxyNeeded && plan.proxy) {
     try {
+      // When exposed transport differs from target (e.g., anthropic→foundry),
+      // the proxy needs a completion engine to translate request/response formats.
+      let completionEngine;
+      if (plan.proxy.apiBase && plan.proxy.apiKey) {
+        const { createOpenAICompletionEngine } = await import('./launch-completion-engine.js');
+        completionEngine = createOpenAICompletionEngine({
+          apiBase: plan.proxy.apiBase,
+          apiKey: plan.proxy.apiKey,
+          targetModel: plan.proxy.targetModel,
+        });
+      }
+
       proxyRuntime = await startTransportMuxRuntime({
         targetProvider: plan.proxy.targetProvider,
         targetModel: `${plan.proxy.targetProvider}/${plan.proxy.targetModel}`,
         exposedTransport: plan.proxy.exposedTransport,
         port: plan.proxy.port,
         apiBase: plan.proxy.apiBase,
+        completionEngine,
       });
       proxyRuntime.applyHarnessEnv(plan.env);
     } catch (err: unknown) {
