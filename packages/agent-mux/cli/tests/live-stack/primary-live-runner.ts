@@ -523,6 +523,7 @@ function classifySkippableLiveProviderFailure(result: CommandResult): string | u
   if (
     /401\s+incorrect api key provided/i.test(combined) ||
     /invalid api key/i.test(combined) ||
+    /missing bearer or basic authentication in header/i.test(combined) ||
     (/unauthorized/i.test(combined) && /api key|token|credential/i.test(combined))
   ) {
     return 'live provider unavailable: configured credentials were rejected';
