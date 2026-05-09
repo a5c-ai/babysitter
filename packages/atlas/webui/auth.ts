@@ -29,10 +29,22 @@ export const ATLAS_GITHUB_STATE_COOKIE = "atlas_github_oauth_state";
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
 const STATE_TTL_MS = 1000 * 60 * 10;
+const DEV_AUTH_SECRET = "atlas-local-dev-secret";
+const DEV_LOGIN_ENABLED = /^(1|true|yes|on)$/i;
+
+function isExplicitDevLoginEnabled(): boolean {
+  return DEV_LOGIN_ENABLED.test(process.env.ATLAS_DEV_LOGIN ?? "");
+}
 
 function getAuthSecret(): string | null {
   const value = process.env.AUTH_SECRET;
-  return value && value.length > 0 ? value : null;
+  if (value && value.length > 0) {
+    return value;
+  }
+  if (process.env.NODE_ENV === "development" || isExplicitDevLoginEnabled()) {
+    return DEV_AUTH_SECRET;
+  }
+  return null;
 }
 
 function encodeBase64Url(value: string): string {
@@ -100,6 +112,20 @@ export function getGitHubClientConfig(): { clientId: string; clientSecret: strin
   const clientSecret = process.env.GITHUB_CLIENT_SECRET;
   if (!clientId || !clientSecret) return null;
   return { clientId, clientSecret };
+}
+
+export function isDevelopmentMockLoginEnabled(): boolean {
+  return !getGitHubClientConfig() && (process.env.NODE_ENV === "development" || isExplicitDevLoginEnabled());
+}
+
+export function createDevelopmentSessionUser(): AtlasSessionUser {
+  return {
+    id: process.env.ATLAS_DEV_LOGIN_ID?.trim() || "atlas-dev-user",
+    email: process.env.ATLAS_DEV_LOGIN_EMAIL?.trim() || "dev@localhost",
+    name: process.env.ATLAS_DEV_LOGIN_NAME?.trim() || "Atlas Dev",
+    image: null,
+    login: process.env.ATLAS_DEV_LOGIN_HANDLE?.trim() || "atlas-dev",
+  };
 }
 
 export function buildAppOrigin(request: Request): string {

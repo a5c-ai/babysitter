@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AtlasDocsScaffold } from "@/components/AtlasDocsScaffold";
 import { auth } from "@/auth";
+import { isDatabaseConfigured } from "@/lib/server/db";
 import { listUserGraphUploads } from "@/lib/server/user-graphs";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +13,8 @@ export default async function WorkspacePage() {
     redirect("/");
   }
 
-  const uploads = await listUserGraphUploads(session.user.id);
+  const databaseConfigured = isDatabaseConfigured();
+  const uploads = databaseConfigured ? await listUserGraphUploads(session.user.id) : [];
 
   return (
     <AtlasDocsScaffold
@@ -37,15 +39,24 @@ export default async function WorkspacePage() {
       ]}
       chapterMark={{ num: "VII.", subtitle: "Private atlas", context: "Workspace", readingTime: "Authenticated" }}
       articleTitle={<>Private <em>workspace</em></>}
-      lead="Upload private graph overlays, inspect your authenticated Atlas state, and author company blueprints."
-      meta={<><span>User graphs · {uploads.length}</span><span>GitHub login</span><span>PostgreSQL-backed</span></>}
+      lead={
+        databaseConfigured
+          ? "Upload private graph overlays, inspect your authenticated Atlas state, and author company blueprints."
+          : "Local mock login is active. Public Atlas browsing still works, and company builder now uses local file-backed storage until PostgreSQL is configured."
+      }
+      meta={<><span>User graphs · {uploads.length}</span><span>GitHub login</span><span>{databaseConfigured ? "PostgreSQL-backed" : "Builder local fallback"}</span></>}
       marginSections={[
         {
           title: "Routes",
-          items: [
-            <Link key="graphs" href="/workspace/graphs">Manage user graphs</Link>,
-            <Link key="builder" href="/workspace/company-builder">Open company builder</Link>,
-          ],
+          items: databaseConfigured
+            ? [
+                <Link key="graphs" href="/workspace/graphs">Manage user graphs</Link>,
+                <Link key="builder" href="/workspace/company-builder">Open company builder</Link>,
+              ]
+            : [
+                <p key="graphs-disabled" className="atlas-docs-note">User graphs disabled until `DATABASE_URL` is configured.</p>,
+                <Link key="builder" href="/workspace/company-builder">Open company builder</Link>,
+              ],
         },
       ]}
     >
@@ -56,8 +67,17 @@ export default async function WorkspacePage() {
         </section>
 
         <section className="atlas-docs-panel atlas-docs-full">
-          <h3>User graph overlays</h3>
-          {uploads.length === 0 ? (
+          <h3>{databaseConfigured ? "User graph overlays" : "Local mock mode"}</h3>
+          {!databaseConfigured ? (
+            <div className="atlas-docs-stack">
+              <p className="atlas-docs-note">
+                Mock login is working. User graph uploads are still disabled because `DATABASE_URL` is not configured.
+              </p>
+              <p className="atlas-docs-note">
+                Company builder remains available with local file-backed storage. Set `DATABASE_URL`, run `npm run db:init -w @a5c-ai/atlas-webui`, then restart the web UI to enable PostgreSQL-backed uploads and persistence.
+              </p>
+            </div>
+          ) : uploads.length === 0 ? (
             <p className="atlas-docs-note">No private graph uploads yet.</p>
           ) : (
             <ul className="atlas-docs-ledger">

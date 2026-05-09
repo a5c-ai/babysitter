@@ -185,30 +185,56 @@ export default async function KindPage({
         )}
 
         {facets.length > 0 && (
-          <div className="atlas-docs-grid atlas-docs-grid--2 atlas-docs-full">
-            {facets.map((f) => (
-              <div key={f.key} className="atlas-docs-panel">
-                <h3>{f.key}</h3>
-                <div className="atlas-docs-link-list">
-                  {f.values.map(([val, count]) => {
-                    const active = activeFilters.some(([k, v]) => k === f.key && v === val);
-                    return (
-                      <Link
-                        key={val}
-                        href={buildHref({
-                          [`attr.${f.key}`]: active ? undefined : val,
-                          page: undefined,
-                        })}
-                        style={{ color: active ? "var(--tk-cinnabar)" : undefined }}
-                      >
-                        {val} · {count}
-                      </Link>
-                    );
-                  })}
+          <details
+            className="atlas-docs-panel atlas-docs-full"
+            open={activeFilters.length > 0}
+          >
+            <summary
+              style={{
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "1rem",
+                fontWeight: 600,
+                listStyle: "none",
+              }}
+            >
+              <span>Filters & facets</span>
+              <span className="atlas-docs-note">
+                {activeFilters.length > 0
+                  ? `${activeFilters.length} active · ${facets.length} groups`
+                  : `${facets.length} groups`}
+              </span>
+            </summary>
+            <div
+              className="atlas-docs-grid atlas-docs-grid--2"
+              style={{ marginTop: "1rem" }}
+            >
+              {facets.map((f) => (
+                <div key={f.key} className="atlas-docs-panel">
+                  <h3>{f.key}</h3>
+                  <div className="atlas-docs-link-list">
+                    {f.values.map(([val, count]) => {
+                      const active = activeFilters.some(([k, v]) => k === f.key && v === val);
+                      return (
+                        <Link
+                          key={val}
+                          href={buildHref({
+                            [`attr.${f.key}`]: active ? undefined : val,
+                            page: undefined,
+                          })}
+                          style={{ color: active ? "var(--tk-cinnabar)" : undefined }}
+                        >
+                          {val} · {count}
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </details>
         )}
 
         <div className="atlas-docs-toolbar atlas-docs-full">

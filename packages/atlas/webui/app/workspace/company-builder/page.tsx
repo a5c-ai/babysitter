@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AtlasDocsScaffold } from "@/components/AtlasDocsScaffold";
 import { auth } from "@/auth";
+import { isDatabaseConfigured } from "@/lib/server/db";
 import {
   COMPANY_LAYER_DEFS,
   getCompanyBlueprint,
@@ -56,6 +57,7 @@ export default async function CompanyBuilderPage({
     redirect("/");
   }
 
+  const databaseConfigured = isDatabaseConfigured();
   const sp = await searchParams;
   const blueprints = await listCompanyBlueprints(session.user.id);
   const selectedId = typeof sp.blueprint === "string" ? sp.blueprint : blueprints[0]?.id;
@@ -90,7 +92,11 @@ export default async function CompanyBuilderPage({
       chapterMark={{ num: "VIII.", subtitle: "Company graph authoring", context: blueprint?.slug ?? "draft", readingTime: "Authenticated" }}
       articleTitle={<>Company <em>builder</em></>}
       lead="Compose private systems from Atlas layers, company-owned assets, and integrations, then export the result as a YAML graph."
-      meta={<><span>GitHub login</span><span>PostgreSQL-backed</span><span>YAML export</span></>}
+      meta={
+        databaseConfigured
+          ? <><span>GitHub login</span><span>PostgreSQL-backed</span><span>YAML export</span></>
+          : <><span>Local mock mode</span><span>File-backed storage</span><span>YAML export</span></>
+      }
       marginSections={[
         {
           title: "Workspace",
@@ -112,6 +118,17 @@ export default async function CompanyBuilderPage({
       ]}
     >
       <div className="atlas-docs-body">
+        {!databaseConfigured ? (
+          <section className="atlas-docs-panel atlas-docs-full">
+            <p className="atlas-docs-note">
+              Local mock mode is active. Company builder blueprints are stored in a local development file until `DATABASE_URL` is configured.
+            </p>
+            <p className="atlas-docs-note">
+              Configure PostgreSQL and run `npm run db:init -w @a5c-ai/atlas-webui` when you want shared private storage instead of the local fallback.
+            </p>
+          </section>
+        ) : null}
+
         <section className="atlas-docs-panel atlas-docs-full">
           <h3>Create blueprint</h3>
           <form action={createCompanyBlueprintAction} className="atlas-docs-stack">

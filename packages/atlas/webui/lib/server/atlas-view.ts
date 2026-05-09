@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import type { IndexShape } from "@a5c-ai/atlas";
 import { createLocalAtlasGraph, getPublicAtlasGraph, type AtlasGraphLike } from "./atlas-local";
+import { isDatabaseConfigured } from "./db";
 import { getUserOverlayIndex } from "./user-graphs";
 import { mergeIndexes } from "./atlas-overlay";
 
@@ -13,7 +14,7 @@ type AtlasView = {
 export async function getAtlasViewForUser(userId?: string | null): Promise<AtlasView> {
   const publicGraph = getPublicAtlasGraph();
 
-  if (!userId) {
+  if (!userId || !isDatabaseConfigured()) {
     const publicIndex = publicGraph.getIndex();
     return { graph: publicGraph, index: publicIndex, mode: "public" };
   }

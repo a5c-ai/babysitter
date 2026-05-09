@@ -1,7 +1,9 @@
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { dump } from "js-yaml";
 import type { AtlasRecord } from "@a5c-ai/atlas";
-import { execute, queryRow, queryRows } from "./db";
+import { execute, isDatabaseConfigured, queryRow, queryRows } from "./db";
 import { getAtlasViewForUser } from "./atlas-view";
 
 export const COMPANY_LAYER_DEFS = [
@@ -94,6 +96,11 @@ type BlueprintRow = {
   updated_at: string;
 };
 
+type LocalCompanyBlueprintStore = {
+  version: 1;
+  users: Record<string, { blueprints: BlueprintRow[] }>;
+};
+
 export type LayerOption = {
   id: string;
   label: string;
@@ -113,6 +120,109 @@ function slugify(value: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 80) || `company-${Date.now()}`;
+}
+
+function localCompanyBuilderStoreDir(): string {
+  const configured = process.env.ATLAS_LOCAL_STORAGE_DIR?.trim();
+  return configured
+    ? path.resolve(configured)
+    : path.join(process.cwd(), ".atlas-local", "atlas-webui");
+}
+
+async function localCompanyBuilderStorePath(): Promise<string> {
+  const dir = localCompanyBuilderStoreDir();
+  await mkdir(dir, { recursive: true });
+  return path.join(dir, "company-builder.json");
+}
+
+async function readLocalCompanyBuilderStore(): Promise<LocalCompanyBlueprintStore> {
+  const storePath = await localCompanyBuilderStorePath();
+  try {
+    const raw = await readFile(storePath, "utf8");
+    const parsed = JSON.parse(raw) as Partial<LocalCompanyBlueprintStore>;
+    return {
+      version: 1,
+      users: parsed.users ?? {},
+    };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return { version: 1, users: {} };
+    }
+    throw error;
+  }
+}
+
+async function writeLocalCompanyBuilderStore(store: LocalCompanyBlueprintStore): Promise<void> {
+  const storePath = await localCompanyBuilderStorePath();
+  const tempPath = `${storePath}.${process.pid}.${Date.now()}.tmp`;
+  await writeFile(tempPath, JSON.stringify(store, null, 2), "utf8");
+  await rename(tempPath, storePath);
+}
+
+function localUserBlueprints(
+  store: LocalCompanyBlueprintStore,
+  userId: string,
+): BlueprintRow[] {
+  const userEntry = store.users[userId];
+  if (!userEntry) {
+    store.users[userId] = { blueprints: [] };
+    return store.users[userId].blueprints;
+  }
+  if (!Array.isArray(userEntry.blueprints)) {
+    userEntry.blueprints = [];
+  }
+  return userEntry.blueprints;
+}
+
+function sortBlueprintRows(rows: BlueprintRow[]): BlueprintRow[] {
+  return [...rows].sort((a, b) => {
+    const updatedCompare = b.updated_at.localeCompare(a.updated_at);
+    if (updatedCompare !== 0) {
+      return updatedCompare;
+    }
+    return b.created_at.localeCompare(a.created_at);
+  });
+}
+
+async function listLocalBlueprintRows(userId: string): Promise<BlueprintRow[]> {
+  const store = await readLocalCompanyBuilderStore();
+  return sortBlueprintRows(localUserBlueprints(store, userId));
+}
+
+async function getLocalBlueprintRow(userId: string, blueprintId: string): Promise<BlueprintRow | null> {
+  const store = await readLocalCompanyBuilderStore();
+  return localUserBlueprints(store, userId).find((row) => row.id === blueprintId) ?? null;
+}
+
+async function createLocalBlueprintRow(userId: string, row: BlueprintRow): Promise<void> {
+  const store = await readLocalCompanyBuilderStore();
+  localUserBlueprints(store, userId).push(row);
+  await writeLocalCompanyBuilderStore(store);
+}
+
+async function updateLocalBlueprintRow(
+  userId: string,
+  blueprintId: string,
+  mutate: (row: BlueprintRow) => BlueprintRow,
+): Promise<BlueprintRow> {
+  const store = await readLocalCompanyBuilderStore();
+  const blueprints = localUserBlueprints(store, userId);
+  const index = blueprints.findIndex((row) => row.id === blueprintId);
+  if (index === -1) {
+    throw new Error("Blueprint not found.");
+  }
+  const nextRow = mutate(blueprints[index]);
+  blueprints[index] = nextRow;
+  await writeLocalCompanyBuilderStore(store);
+  return nextRow;
+}
+
+async function deleteLocalBlueprintRow(userId: string, blueprintId: string): Promise<void> {
+  const store = await readLocalCompanyBuilderStore();
+  store.users[userId] = {
+    blueprints: localUserBlueprints(store, userId).filter((row) => row.id !== blueprintId),
+  };
+  await writeLocalCompanyBuilderStore(store);
 }
 
 function normalizeDraft(summary: Pick<BlueprintRow, "slug" | "name" | "description" | "status" | "draft_json">): CompanyBlueprintDraft {
@@ -163,6 +273,22 @@ async function updateBlueprintDraft(
   blueprintId: string,
   mutate: (draft: CompanyBlueprintDraft, row: BlueprintRow) => CompanyBlueprintDraft,
 ) {
+  if (!isDatabaseConfigured()) {
+    await updateLocalBlueprintRow(userId, blueprintId, (row) => {
+      const nextDraft = mutate(normalizeDraft(row), row);
+      return {
+        ...row,
+        slug: nextDraft.company.slug,
+        name: nextDraft.company.displayName,
+        description: nextDraft.company.description || null,
+        status: nextDraft.company.status,
+        draft_json: nextDraft,
+        updated_at: new Date().toISOString(),
+      };
+    });
+    return;
+  }
+
   const row = await queryRow<BlueprintRow>(
     `SELECT id, slug, name, description, status, draft_json, last_export_yaml, created_at, updated_at
        FROM atlas_company_blueprints
@@ -194,6 +320,11 @@ async function updateBlueprintDraft(
 }
 
 export async function listCompanyBlueprints(userId: string): Promise<CompanyBlueprintSummary[]> {
+  if (!isDatabaseConfigured()) {
+    const rows = await listLocalBlueprintRows(userId);
+    return rows.map(toSummary);
+  }
+
   const rows = await queryRows<BlueprintRow>(
     `SELECT id, slug, name, description, status, draft_json, last_export_yaml, created_at, updated_at
        FROM atlas_company_blueprints
@@ -205,6 +336,11 @@ export async function listCompanyBlueprints(userId: string): Promise<CompanyBlue
 }
 
 export async function getCompanyBlueprint(userId: string, blueprintId: string): Promise<CompanyBlueprint | null> {
+  if (!isDatabaseConfigured()) {
+    const row = await getLocalBlueprintRow(userId, blueprintId);
+    return row ? toBlueprint(row) : null;
+  }
+
   const row = await queryRow<BlueprintRow>(
     `SELECT id, slug, name, description, status, draft_json, last_export_yaml, created_at, updated_at
        FROM atlas_company_blueprints
@@ -220,6 +356,7 @@ export async function createCompanyBlueprint(userId: string, input: {
 }): Promise<CompanyBlueprintSummary> {
   const id = randomUUID();
   const slug = slugify(input.name);
+  const now = new Date().toISOString();
   const draft: CompanyBlueprintDraft = {
     company: {
       displayName: input.name,
@@ -231,6 +368,22 @@ export async function createCompanyBlueprint(userId: string, input: {
     assets: [],
     integrations: [],
   };
+
+  if (!isDatabaseConfigured()) {
+    const row: BlueprintRow = {
+      id,
+      slug,
+      name: input.name,
+      description: input.description ?? null,
+      status: "draft",
+      draft_json: draft,
+      last_export_yaml: null,
+      created_at: now,
+      updated_at: now,
+    };
+    await createLocalBlueprintRow(userId, row);
+    return toSummary(row);
+  }
 
   await execute(
     `INSERT INTO atlas_company_blueprints
@@ -383,6 +536,11 @@ export async function addCompanyIntegration(userId: string, blueprintId: string,
 }
 
 export async function deleteCompanyBlueprint(userId: string, blueprintId: string) {
+  if (!isDatabaseConfigured()) {
+    await deleteLocalBlueprintRow(userId, blueprintId);
+    return;
+  }
+
   await execute(
     `DELETE FROM atlas_company_blueprints
       WHERE user_id = $1 AND id = $2`,
@@ -531,6 +689,15 @@ export async function exportCompanyBlueprintYaml(userId: string, blueprintId: st
   }
 
   const yaml = buildYamlDocuments(blueprint.draft);
+  if (!isDatabaseConfigured()) {
+    await updateLocalBlueprintRow(userId, blueprintId, (row) => ({
+      ...row,
+      last_export_yaml: yaml,
+      updated_at: new Date().toISOString(),
+    }));
+    return yaml;
+  }
+
   await execute(
     `UPDATE atlas_company_blueprints
         SET last_export_yaml = $3,

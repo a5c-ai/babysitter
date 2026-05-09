@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AtlasDocsScaffold } from "@/components/AtlasDocsScaffold";
 import { auth } from "@/auth";
+import { isDatabaseConfigured } from "@/lib/server/db";
 import { listUserGraphUploads } from "@/lib/server/user-graphs";
 import { deleteUserGraphAction, rebuildUserGraphAction, uploadUserGraphAction } from "./actions";
 
@@ -10,6 +11,44 @@ export default async function WorkspaceGraphsPage() {
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/");
+  }
+
+  const databaseConfigured = isDatabaseConfigured();
+  if (!databaseConfigured) {
+    return (
+      <AtlasDocsScaffold
+        runningLeft={<><span className="folio">vii</span><span>Workspace</span></>}
+        runningTitle={<>Agentic AI Atlas · <em>user graphs</em></>}
+        runningRight={<><span>local mock mode</span><span>a5c.ai</span></>}
+        tocSearchLabel="Search private graphs"
+        tocBookLabel="Atlas · user graphs"
+        tocTitle="Uploads"
+        chapters={[{ num: "VII.", title: "User graphs", pages: "pp. 1 - 1", current: true, items: [{ label: "Uploads", current: true }] }]}
+        chapterMark={{ num: "VII.", subtitle: "Private overlays", context: "User graphs", readingTime: "Authenticated" }}
+        articleTitle={<>User graph <em>uploads</em></>}
+        lead="Private graph uploads require PostgreSQL-backed storage."
+        meta={<><span>Database unavailable</span><span>Mock login active</span></>}
+        marginSections={[
+          {
+            title: "Workspace",
+            items: [
+              <a key="home" href="/workspace">Workspace overview</a>,
+            ],
+          },
+        ]}
+      >
+        <div className="atlas-docs-body">
+          <section className="atlas-docs-panel atlas-docs-full">
+            <p className="atlas-docs-note">
+              `DATABASE_URL` is not configured, so user graph uploads are disabled in local mock mode.
+            </p>
+            <p className="atlas-docs-note">
+              Configure PostgreSQL, run `npm run db:init -w @a5c-ai/atlas-webui`, and restart the app to enable uploads.
+            </p>
+          </section>
+        </div>
+      </AtlasDocsScaffold>
+    );
   }
 
   const uploads = await listUserGraphUploads(session.user.id);

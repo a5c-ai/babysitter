@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const authMock = vi.fn();
+const isDatabaseConfiguredMock = vi.fn();
 const listUserGraphUploadsMock = vi.fn();
 const listCompanyBlueprintsMock = vi.fn();
 const getCompanyBlueprintMock = vi.fn();
@@ -47,6 +48,10 @@ vi.mock("@/auth", () => ({
   auth: authMock,
 }));
 
+vi.mock("@/lib/server/db", () => ({
+  isDatabaseConfigured: isDatabaseConfiguredMock,
+}));
+
 vi.mock("@/lib/server/user-graphs", () => ({
   listUserGraphUploads: listUserGraphUploadsMock,
 }));
@@ -63,6 +68,7 @@ vi.mock("@/lib/server/company-builder", () => ({
 
 function resetWorkspaceMocks() {
   authMock.mockReset();
+  isDatabaseConfiguredMock.mockReset();
   listUserGraphUploadsMock.mockReset();
   listCompanyBlueprintsMock.mockReset();
   getCompanyBlueprintMock.mockReset();
@@ -92,6 +98,7 @@ async function renderCompanyBuilder(searchParams?: { blueprint?: string }) {
 beforeEach(() => {
   vi.resetModules();
   resetWorkspaceMocks();
+  isDatabaseConfiguredMock.mockReturnValue(true);
 });
 
 describe("private workspace pages", () => {
@@ -126,6 +133,24 @@ describe("private workspace pages", () => {
     expect(html).toContain("Signed in as atlas@example.com.");
     expect(html).toContain("Private Overlay");
     expect(html).toContain("12 records");
+  });
+
+  it("renders workspace overview with company builder available in local mock mode", async () => {
+    authMock.mockResolvedValue({
+      user: {
+        id: "user-1",
+        email: "atlas@example.com",
+        name: "Atlas User",
+      },
+    });
+    isDatabaseConfiguredMock.mockReturnValue(false);
+
+    const html = await renderWorkspaceOverview();
+
+    expect(html).toContain("company builder now uses local file-backed storage");
+    expect(html).toContain("Company builder remains available with local file-backed storage");
+    expect(html).toContain("User graph uploads are still disabled");
+    expect(html).toContain("Builder local fallback");
   });
 
   it("redirects unauthenticated workspace graph requests", async () => {
@@ -269,6 +294,38 @@ describe("private workspace pages", () => {
     expect(html).toContain("Customer Ops");
     expect(html).toContain("GitHub org");
     expect(html).toContain("syncs-to");
+    expect(html).toContain("Layer palette");
+    expect(html).toContain("Codex");
+  });
+
+  it("renders company builder in local mock mode when the database is unavailable", async () => {
+    authMock.mockResolvedValue({
+      user: {
+        id: "user-1",
+      },
+    });
+    isDatabaseConfiguredMock.mockReturnValue(false);
+    listCompanyBlueprintsMock.mockResolvedValue([]);
+    getCompanyLayerPaletteMock.mockResolvedValue([
+      {
+        key: "agents",
+        label: "Agents",
+        options: [
+          {
+            id: "agent:codex",
+            label: "Codex",
+            kind: "AgentProduct",
+            description: "Coding agent",
+          },
+        ],
+      },
+    ]);
+
+    const html = await renderCompanyBuilder();
+
+    expect(html).toContain("Local mock mode is active");
+    expect(html).toContain("Create blueprint");
+    expect(html).toContain("File-backed storage");
     expect(html).toContain("Layer palette");
     expect(html).toContain("Codex");
   });

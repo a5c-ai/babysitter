@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildAppOrigin,
+  createDevelopmentSessionUser,
   createOAuthStateToken,
   createSessionToken,
+  isDevelopmentMockLoginEnabled,
   normalizeCallbackUrl,
   verifyOAuthStateToken,
   verifySessionToken,
@@ -59,5 +61,32 @@ describe("atlas auth helpers", () => {
     });
 
     expect(buildAppOrigin(request)).toBe("https://atlas.a5c.ai");
+  });
+
+  it("enables development-only mock login when GitHub OAuth is absent", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("GITHUB_CLIENT_ID", "");
+    vi.stubEnv("GITHUB_CLIENT_SECRET", "");
+
+    expect(isDevelopmentMockLoginEnabled()).toBe(true);
+    expect(createDevelopmentSessionUser()).toEqual({
+      id: "atlas-dev-user",
+      email: "dev@localhost",
+      name: "Atlas Dev",
+      image: null,
+      login: "atlas-dev",
+    });
+  });
+
+  it("allows explicit local mock login outside development mode", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ATLAS_DEV_LOGIN", "1");
+    vi.stubEnv("GITHUB_CLIENT_ID", "");
+    vi.stubEnv("GITHUB_CLIENT_SECRET", "");
+
+    expect(isDevelopmentMockLoginEnabled()).toBe(true);
+    const token = createSessionToken(createDevelopmentSessionUser());
+    expect(token).toBeTruthy();
+    expect(verifySessionToken(token ?? undefined)?.user.id).toBe("atlas-dev-user");
   });
 });
