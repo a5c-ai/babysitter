@@ -24,7 +24,7 @@
  *   specializations: [specialization:code-migration-modernization]
  *   skillAreas: [skill-area:strangler-fig-pattern, skill-area:parallel-run-migration, skill-area:roadmap-management]
  *   roles: [role:architect, role:tech-lead]
- *   workflows: [workflow:technical-debt-reduction]
+ *   workflows: [workflow:technical-debt-reduction, workflow:legacy-migration-sprint]
  *   topics: [topic:refactoring]
  */
 

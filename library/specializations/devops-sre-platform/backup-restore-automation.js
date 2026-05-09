@@ -29,7 +29,7 @@
  * @graph
  *   domains: [domain:devops]
  *   specializations: [specialization:devops-sre-platform]
- *   workflows: [workflow:incident-response]
+ *   workflows: [workflow:incident-response, workflow:rollback-procedure]
  *   roles: [role:sre, role:devops-engineer]
  *   skillAreas: [skill-area:configuration-management]
  *   topics: [topic:chaos-engineering]

@@ -9,3 +9,5 @@ attributes:
 edges:
   belongs_to_language:
     - language:rust
+  library_used_by:
+    - target: skill-area:backend-api-design

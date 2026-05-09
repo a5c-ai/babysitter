@@ -28,6 +28,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:elixir
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:tesla
@@ -42,6 +44,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:elixir
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:absinthe
@@ -72,6 +76,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:elixir
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:nx-elixir
@@ -86,6 +92,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:elixir
+  library_used_by:
+    - target: skill-area:machine-learning-frameworks
 ---
 nodeKind: Library
 id: library:livebook
@@ -100,6 +108,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:elixir
+  library_used_by:
+    - target: skill-area:data-analytics
 ---
 nodeKind: Library
 id: library:devise
@@ -146,6 +156,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:ruby
+  library_used_by:
+    - target: skill-area:authentication-authorization
 ---
 nodeKind: Library
 id: library:pagy
@@ -160,6 +172,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:ruby
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:dry-rb
@@ -174,6 +188,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:ruby
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:rspec
@@ -204,6 +220,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:ruby
+  library_used_by:
+    - target: skill-area:e2e-testing
 ---
 nodeKind: Library
 id: library:rubocop
@@ -218,6 +236,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:ruby
+  library_used_by:
+    - target: skill-area:code-analysis-linting
 ---
 nodeKind: Library
 id: library:sorbet
@@ -232,6 +252,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:ruby
+  library_used_by:
+    - target: skill-area:code-analysis-linting
 ---
 nodeKind: Library
 id: library:stimulus-reflex
@@ -246,6 +268,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:ruby
+  library_used_by:
+    - target: skill-area:frontend-development
 ---
 nodeKind: Library
 id: library:hotwire-turbo
@@ -260,6 +284,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:ruby
+  library_used_by:
+    - target: skill-area:frontend-development
 ---
 nodeKind: Library
 id: library:good-job
@@ -274,3 +300,5 @@ attributes:
 edges:
   belongs_to_language:
     - language:ruby
+  library_used_by:
+    - target: skill-area:backend-api-design

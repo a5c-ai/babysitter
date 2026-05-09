@@ -76,6 +76,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:haskell
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:mtl
@@ -90,6 +92,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:haskell
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:quickcheck
@@ -136,6 +140,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:haskell
+  library_used_by:
+    - target: skill-area:cli-tooling
 ---
 nodeKind: Library
 id: library:cabal-lib
@@ -150,6 +156,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:haskell
+  library_used_by:
+    - target: skill-area:cli-tooling
 ---
 nodeKind: Library
 id: library:mux

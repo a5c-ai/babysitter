@@ -32,7 +32,7 @@
  * @graph
  *   domains: [domain:devops]
  *   specializations: [specialization:devops-sre-platform]
- *   workflows: [workflow:release-management]
+ *   workflows: [workflow:release-management, workflow:feature-flag-rollout]
  *   roles: [role:devops-engineer]
  *   skillAreas: [skill-area:containerization]
  *   topics: [topic:immutable-infrastructure]

@@ -18,7 +18,7 @@
  * - Prompt Engineering Guide: https://www.promptingguide.ai/
  * @graph
  *   domains: [domain:software-engineering]
- *   workflows: [workflow:agent-evaluation-cycle]
+ *   workflows: [workflow:agent-evaluation-cycle, workflow:prompt-engineering-iteration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

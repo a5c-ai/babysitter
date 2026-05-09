@@ -48,7 +48,7 @@
  * - Data Engineering Best Practices: https://github.com/DataTalksClub/data-engineering-zoomcamp
  * @graph
  *   domains: [domain:data-engineering]
- *   workflows: [workflow:data-pipeline-deployment]
+ *   workflows: [workflow:data-pipeline-deployment, workflow:data-backfill-procedure]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

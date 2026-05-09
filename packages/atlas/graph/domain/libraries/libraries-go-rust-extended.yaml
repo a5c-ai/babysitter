@@ -206,6 +206,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:rust
+  library_used_by:
+    - target: skill-area:cli-design
 ---
 nodeKind: Library
 id: library:rayon

@@ -60,6 +60,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:dart
+  library_used_by:
+    - target: skill-area:application-state-management
 ---
 nodeKind: Library
 id: library:dio
@@ -90,6 +92,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:dart
+  library_used_by:
+    - target: skill-area:cli-tooling
 ---
 nodeKind: Library
 id: library:json-serializable
@@ -104,6 +108,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:dart
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:hive
@@ -166,6 +172,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:dart
+  library_used_by:
+    - target: skill-area:frontend-development
 ---
 nodeKind: Library
 id: library:flame
@@ -180,6 +188,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:dart
+  library_used_by:
+    - target: skill-area:game-engines
 ---
 nodeKind: Library
 id: library:flutter-test
@@ -194,6 +204,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:dart
+  library_used_by:
+    - target: skill-area:component-testing
 ---
 nodeKind: Library
 id: library:mockito-dart
@@ -208,6 +220,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:dart
+  library_used_by:
+    - target: skill-area:component-testing
 ---
 nodeKind: Library
 id: library:build-runner
@@ -222,3 +236,5 @@ attributes:
 edges:
   belongs_to_language:
     - language:dart
+  library_used_by:
+    - target: skill-area:cli-tooling

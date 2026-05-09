@@ -18,3 +18,5 @@ edges:
   applies_to_language:
     - target: language:javascript
     - target: language:typescript
+  used_by_skill_area:
+    - target: skill-area:component-testing

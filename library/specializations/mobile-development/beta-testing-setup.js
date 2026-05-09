@@ -22,7 +22,7 @@
  *   specializations: [specialization:mobile-development]
  *   skillAreas: [skill-area:ios-native, skill-area:android-native]
  *   roles: [role:mobile-engineer]
- *   workflows: [workflow:mobile-app-submission, workflow:release-management]
+ *   workflows: [workflow:mobile-app-submission, workflow:release-management, workflow:mobile-beta-testing]
  *   topics: [topic:accessibility]
  */
 

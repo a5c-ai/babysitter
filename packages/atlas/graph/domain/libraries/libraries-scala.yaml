@@ -101,6 +101,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:scala
+  library_used_by:
+    - target: skill-area:backend-data-persistence
 ---
 nodeKind: Library
 id: library:circe
@@ -114,6 +116,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:scala
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:scalatest
@@ -127,6 +131,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:scala
+  library_used_by:
+    - target: skill-area:component-testing
 ---
 nodeKind: Library
 id: library:specs2
@@ -140,6 +146,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:scala
+  library_used_by:
+    - target: skill-area:component-testing
 ---
 nodeKind: Library
 id: library:slick
@@ -153,6 +161,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:scala
+  library_used_by:
+    - target: skill-area:backend-data-persistence
 ---
 nodeKind: Library
 id: library:fs2
@@ -166,6 +176,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:scala
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:tapir
@@ -179,3 +191,5 @@ attributes:
 edges:
   belongs_to_language:
     - language:scala
+  library_used_by:
+    - target: skill-area:backend-api-design

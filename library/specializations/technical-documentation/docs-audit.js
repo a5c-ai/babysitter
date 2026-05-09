@@ -11,7 +11,7 @@
  *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:accessibility-first-design]
  *   roles: [role:technical-writer, role:documentation-engineer]
  *   topics: [topic:accessibility]
- *   workflows: [workflow:code-review]
+ *   workflows: [workflow:code-review, workflow:developer-documentation-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

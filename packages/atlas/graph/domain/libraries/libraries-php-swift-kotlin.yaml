@@ -76,6 +76,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:php
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:laravel-sanctum
@@ -90,6 +92,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:php
+  library_used_by:
+    - target: skill-area:authentication-authorization
 ---
 nodeKind: Library
 id: library:filament
@@ -104,6 +108,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:php
+  library_used_by:
+    - target: skill-area:frontend-development
 ---
 nodeKind: Library
 id: library:inertia-laravel
@@ -118,6 +124,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:php
+  library_used_by:
+    - target: skill-area:frontend-development
 ---
 nodeKind: Library
 id: library:alamofire
@@ -148,6 +156,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:swift
+  library_used_by:
+    - target: skill-area:ios-native
 ---
 nodeKind: Library
 id: library:snapkit
@@ -162,6 +172,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:swift
+  library_used_by:
+    - target: skill-area:ios-native
 ---
 nodeKind: Library
 id: library:combine
@@ -176,6 +188,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:swift
+  library_used_by:
+    - target: skill-area:ios-native
 ---
 nodeKind: Library
 id: library:koin
@@ -190,6 +204,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:kotlin
+  library_used_by:
+    - target: skill-area:android-native
 ---
 nodeKind: Library
 id: library:hilt
@@ -204,6 +220,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:kotlin
+  library_used_by:
+    - target: skill-area:android-native
 ---
 nodeKind: Library
 id: library:room
@@ -234,6 +252,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:kotlin
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:coroutines

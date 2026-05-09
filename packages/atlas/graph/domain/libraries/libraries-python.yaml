@@ -10,6 +10,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:pytest
@@ -219,3 +221,5 @@ attributes:
 edges:
   belongs_to_language:
     - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design

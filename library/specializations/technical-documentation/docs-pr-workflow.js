@@ -10,7 +10,7 @@
  *   specializations: [specialization:technical-documentation]
  *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs]
  *   roles: [role:technical-writer, role:documentation-engineer]
- *   workflows: [workflow:documentation-sprint]
+ *   workflows: [workflow:documentation-sprint, workflow:developer-documentation-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

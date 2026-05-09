@@ -35,7 +35,7 @@
  * @graph
  *   domains: [domain:devops]
  *   specializations: [specialization:devops-sre-platform]
- *   workflows: [workflow:release-management]
+ *   workflows: [workflow:release-management, workflow:feature-flag-rollout, workflow:canary-deployment]
  *   roles: [role:devops-engineer, role:release-manager]
  *   skillAreas: [skill-area:deployment-infrastructure-management]
  *   topics: [topic:continuous-integration, topic:continuous-deployment]

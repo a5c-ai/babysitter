@@ -76,6 +76,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:python-dotenv
@@ -90,6 +92,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:jinja2
@@ -136,6 +140,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:python
+  library_used_by:
+    - target: skill-area:cli-tooling
 ---
 nodeKind: Library
 id: library:copier
@@ -150,6 +156,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:python
+  library_used_by:
+    - target: skill-area:cli-tooling
 ---
 nodeKind: Library
 id: library:bandit
@@ -196,3 +204,5 @@ attributes:
 edges:
   belongs_to_language:
     - language:python
+  library_used_by:
+    - target: skill-area:code-analysis-linting

@@ -32,7 +32,7 @@
  * @graph
  *   domains: [domain:software-engineering]
  *   specializations: [specialization:qa-testing-automation]
- *   workflows: [workflow:feature-development]
+ *   workflows: [workflow:feature-development, workflow:cross-platform-testing]
  *   roles: [role:qa-engineer, role:frontend-engineer]
  *   skillAreas: [skill-area:cross-browser-testing, skill-area:e2e-testing]
  *   topics: [topic:test-driven-development]

@@ -41,6 +41,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:python
+  library_used_by:
+    - target: skill-area:backend-data-persistence
 ---
 nodeKind: Library
 id: library:aiohttp
@@ -69,6 +71,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:click
@@ -172,6 +176,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:python
+  library_used_by:
+    - target: skill-area:date-time-manipulation
 ---
 nodeKind: Library
 id: library:pendulum
@@ -185,6 +191,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:python
+  library_used_by:
+    - target: skill-area:date-time-manipulation
 ---
 nodeKind: Library
 id: library:pillow

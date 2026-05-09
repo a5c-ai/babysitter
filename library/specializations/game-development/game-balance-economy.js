@@ -23,7 +23,7 @@
  *   specializations: [specialization:game-development]
  *   skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
  *   roles: [role:game-developer]
- *   workflows: [workflow:game-prototype-iteration]
+ *   workflows: [workflow:game-prototype-iteration, workflow:playtesting-feedback-loop]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -9,3 +9,5 @@ attributes:
 edges:
   belongs_to_language:
     - language:javascript
+  library_used_by:
+    - target: skill-area:date-time-manipulation

@@ -11,6 +11,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:php
+  used_by_skill_area:
+    - target: skill-area:frontend-development
 ---
 nodeKind: Framework
 id: framework:stimulus
@@ -25,6 +27,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:javascript
+  used_by_skill_area:
+    - target: skill-area:frontend-development
 ---
 nodeKind: Framework
 id: framework:turbo-rails
@@ -39,6 +43,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:ruby
+  used_by_skill_area:
+    - target: skill-area:frontend-development
 ---
 nodeKind: Framework
 id: framework:blazor
@@ -85,6 +91,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:java
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Framework
 id: framework:spark-java
@@ -99,6 +107,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:java
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Framework
 id: framework:javalin
@@ -113,6 +123,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:kotlin
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Framework
 id: framework:vert-x

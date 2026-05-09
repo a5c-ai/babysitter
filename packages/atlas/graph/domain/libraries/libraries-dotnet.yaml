@@ -28,6 +28,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:dapper
@@ -58,6 +60,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:automapper
@@ -72,6 +76,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:fluentvalidation
@@ -86,6 +92,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:serilog
@@ -148,6 +156,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:signalr
@@ -178,6 +188,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:csharp
+  library_used_by:
+    - target: skill-area:authentication-authorization
 ---
 nodeKind: Library
 id: library:xunit
@@ -240,6 +252,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:system-text-json
@@ -254,6 +268,8 @@ attributes:
 edges:
   belongs_to_language:
     - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
 ---
 nodeKind: Library
 id: library:efcore-migrations
@@ -268,3 +284,5 @@ attributes:
 edges:
   belongs_to_language:
     - language:csharp
+  library_used_by:
+    - target: skill-area:backend-data-persistence

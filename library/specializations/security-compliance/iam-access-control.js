@@ -36,7 +36,7 @@
  * - Zero Trust Architecture (NIST SP 800-207): https://csrc.nist.gov/publications/detail/sp/800-207/final
  * @graph
  *   domains: [domain:security]
- *   workflows: [workflow:vulnerability-management]
+ *   workflows: [workflow:vulnerability-management, workflow:access-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

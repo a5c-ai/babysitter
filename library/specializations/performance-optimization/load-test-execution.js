@@ -21,7 +21,7 @@
  *   skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu, skill-area:load-testing]
  *   roles: [role:backend-engineer, role:sre]
  *   topics: [topic:observability-driven-development]
- *   workflows: [workflow:performance-profiling-cycle]
+ *   workflows: [workflow:performance-profiling-cycle, workflow:load-testing-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

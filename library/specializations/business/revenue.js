@@ -11,7 +11,7 @@
  *   domains: [domain:software-engineering]
  *   skillAreas: [skill-area:business-analysis, skill-area:financial-modeling, skill-area:business-model-design, skill-area:strategic-planning]
  *   topics: [topic:developer-experience]
- *   workflows: [workflow:strategic-planning]
+ *   workflows: [workflow:strategic-planning, workflow:pricing-strategy-review]
  *   roles: [role:business-analyst, role:tech-lead, role:product-manager]
  */
 
