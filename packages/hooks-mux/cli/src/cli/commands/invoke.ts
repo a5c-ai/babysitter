@@ -399,6 +399,19 @@ export const invokeCommand: CommandModule<object, InvokeArgs> = {
       decision: merged.decision,
       degradedFields: adapted.degradedFields,
     });
-    process.stdout.write(JSON.stringify(adapted.output, null, args.json ? 2 : 0) + '\n');
+    const finalOutput: Record<string, unknown> = {
+      ...adapted.output,
+      decision: merged.decision,
+    };
+    if (Object.keys(merged.persistEnv).length > 0) {
+      finalOutput.persistEnv = merged.persistEnv;
+    }
+    if (sessionId || args.adapter) {
+      finalOutput.metadata = {
+        ...(sessionId ? { AGENT_SESSION_ID: sessionId } : {}),
+        AGENT_ADAPTER: args.adapter,
+      };
+    }
+    process.stdout.write(JSON.stringify(finalOutput, null, args.json ? 2 : 0) + '\n');
   },
 };

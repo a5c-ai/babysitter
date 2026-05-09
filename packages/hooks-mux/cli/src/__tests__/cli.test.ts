@@ -194,7 +194,13 @@ describe('CLI Commands', () => {
         expect(mockAdaptOutput).toHaveBeenCalled();
 
         const output = stdout.getOutput();
-        expect(output).toContain('{}');
+        const parsed = JSON.parse(output);
+        expect(parsed).toEqual({
+          decision: 'noop',
+          metadata: {
+            AGENT_ADAPTER: 'claude',
+          },
+        });
       } finally {
         stdout.restore();
       }

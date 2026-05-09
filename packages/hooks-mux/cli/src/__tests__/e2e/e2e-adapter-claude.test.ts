@@ -129,6 +129,10 @@ describe('adapter-claude integration via CLI (e2e)', { timeout: 30000 }, () => {
           decision: 'allow',
           reason: 'safe to proceed',
           additionalContext: 'allow context',
+          metadata: {
+            AGENT_ADAPTER: 'claude',
+            AGENT_SESSION_ID: 'e2e-render-allow',
+          },
         },
       },
       {
@@ -142,6 +146,10 @@ describe('adapter-claude integration via CLI (e2e)', { timeout: 30000 }, () => {
           decision: 'deny',
           reason: 'blocked by policy',
           additionalContext: 'deny context',
+          metadata: {
+            AGENT_ADAPTER: 'claude',
+            AGENT_SESSION_ID: 'e2e-render-deny',
+          },
         },
       },
       {
@@ -155,6 +163,10 @@ describe('adapter-claude integration via CLI (e2e)', { timeout: 30000 }, () => {
           decision: 'ask',
           reason: 'needs approval',
           additionalContext: 'ask context',
+          metadata: {
+            AGENT_ADAPTER: 'claude',
+            AGENT_SESSION_ID: 'e2e-render-ask',
+          },
         },
       },
     ] as const;
@@ -214,6 +226,11 @@ describe('adapter-claude integration via CLI (e2e)', { timeout: 30000 }, () => {
       reason: 'Need one more turn',
       followUpMessage: 'Continue and fix tests',
       additionalContext: 'stop context',
+      decision: 'noop',
+      metadata: {
+        AGENT_ADAPTER: 'claude',
+        AGENT_SESSION_ID: 'e2e-claude-stop',
+      },
     });
   });
 
@@ -244,6 +261,11 @@ describe('adapter-claude integration via CLI (e2e)', { timeout: 30000 }, () => {
     expect(result.exitCode).toBe(0);
     expect(parseOutput(result.stdout)).toEqual({
       continue: false,
+      decision: 'noop',
+      metadata: {
+        AGENT_ADAPTER: 'claude',
+        AGENT_SESSION_ID: 'e2e-claude-stop-recursive',
+      },
     });
   });
 

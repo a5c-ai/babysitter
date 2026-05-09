@@ -322,7 +322,13 @@ describe('invoke — full CLI pipeline (e2e)', { timeout: 30000 }, () => {
     expect(result.exitCode).toBe(0);
 
     const output = parseOutput(result.stdout);
-    expect(output).toEqual({ additionalContext: '' });
+    expect(output).toEqual({
+      additionalContext: '',
+      decision: 'noop',
+      metadata: {
+        AGENT_ADAPTER: 'claude',
+      },
+    });
   });
 
   it('invoke with explicit session-id flag overrides stdin session_id', async () => {
@@ -373,7 +379,13 @@ describe('invoke — full CLI pipeline (e2e)', { timeout: 30000 }, () => {
 
     expect(result.exitCode).toBe(0);
     const output = parseOutput(result.stdout);
-    expect(output).toEqual({ additionalContext: '' });
+    expect(output).toEqual({
+      additionalContext: '',
+      decision: 'noop',
+      metadata: {
+        AGENT_ADAPTER: 'claude',
+      },
+    });
   });
 
   it('handler with contextVars updates session contextVars', async () => {
@@ -575,6 +587,11 @@ describe('invoke — full CLI pipeline (e2e)', { timeout: 30000 }, () => {
       decision: 'ask',
       reason: 'Need confirmation',
       additionalContext: 'context from handler',
+      persistEnv: { SHOULD_NOT_RENDER: '1' },
+      metadata: {
+        AGENT_ADAPTER: 'claude',
+        AGENT_SESSION_ID: 'e2e-pretool-renderer',
+      },
     });
   });
 
@@ -605,6 +622,11 @@ describe('invoke — full CLI pipeline (e2e)', { timeout: 30000 }, () => {
     expect(result.exitCode).toBe(0);
     expect(parseOutput(result.stdout)).toEqual({
       additionalContext: 'post-tool context',
+      decision: 'noop',
+      metadata: {
+        AGENT_ADAPTER: 'claude',
+        AGENT_SESSION_ID: 'e2e-posttool-renderer',
+      },
     });
   });
 
@@ -639,6 +661,11 @@ describe('invoke — full CLI pipeline (e2e)', { timeout: 30000 }, () => {
       reason: 'Need one more turn',
       followUpMessage: 'Continue and fix tests',
       additionalContext: 'stop context',
+      decision: 'noop',
+      metadata: {
+        AGENT_ADAPTER: 'claude',
+        AGENT_SESSION_ID: 'e2e-stop-renderer',
+      },
     });
   });
 
@@ -667,6 +694,11 @@ describe('invoke — full CLI pipeline (e2e)', { timeout: 30000 }, () => {
     expect(result.exitCode).toBe(0);
     expect(parseOutput(result.stdout)).toEqual({
       continue: false,
+      decision: 'noop',
+      metadata: {
+        AGENT_ADAPTER: 'claude',
+        AGENT_SESSION_ID: 'e2e-stop-recursion',
+      },
     });
   });
 
@@ -762,6 +794,10 @@ describe('invoke — full CLI pipeline (e2e)', { timeout: 30000 }, () => {
     expect(output).toEqual({
       decision: 'deny',
       reason: expect.any(String),
+      metadata: {
+        AGENT_ADAPTER: 'codex',
+        AGENT_SESSION_ID: 'e2e-codex-loader-path',
+      },
     });
 
     const normalized = JSON.parse(String(output.reason));
