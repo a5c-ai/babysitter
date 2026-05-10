@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import {
   ATLAS_GITHUB_STATE_COOKIE,
   ATLAS_SESSION_COOKIE,
+  type AtlasSessionUser,
   buildAppOrigin,
   createSessionToken,
   getGitHubClientConfig,
@@ -96,6 +97,28 @@ async function getPrimaryGitHubEmail(accessToken: string): Promise<string | null
   return preferred?.email ?? null;
 }
 
+function sessionUserFromGitHubProfile(profile: GitHubUserProfile, email: string | null): AtlasSessionUser {
+  return {
+    id: `github:${profile.id}`,
+    email,
+    name: profile.name?.trim() || profile.login,
+    image: profile.avatar_url,
+    login: profile.login,
+  };
+}
+
+function redirectToAuthError(origin: string, reason: string): NextResponse {
+  const response = NextResponse.redirect(new URL(`/?authError=${encodeURIComponent(reason)}`, origin));
+  response.cookies.set(ATLAS_GITHUB_STATE_COOKIE, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: origin.startsWith("https://"),
+    path: "/",
+    maxAge: 0,
+  });
+  return response;
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -109,20 +132,28 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/", origin));
   }
 
-  const token = await exchangeCodeForToken(request, code);
-  if (!token.access_token) {
-    throw new Error(token.error_description ?? token.error ?? "GitHub OAuth sign-in failed.");
-  }
+  let user: AtlasSessionUser;
+  try {
+    const token = await exchangeCodeForToken(request, code);
+    if (!token.access_token) {
+      return redirectToAuthError(origin, token.error ?? "github_oauth_failed");
+    }
 
-  const profile = await getGitHubProfile(token.access_token);
-  const email = profile.email ?? (await getPrimaryGitHubEmail(token.access_token));
-  const user = await upsertGitHubUser({
-    profile,
-    email,
-    accessToken: token.access_token,
-    scope: token.scope ?? null,
-    tokenType: token.token_type ?? null,
-  });
+    const profile = await getGitHubProfile(token.access_token);
+    const email = profile.email ?? (await getPrimaryGitHubEmail(token.access_token));
+    user = process.env.DATABASE_URL
+      ? await upsertGitHubUser({
+          profile,
+          email,
+          accessToken: token.access_token,
+          scope: token.scope ?? null,
+          tokenType: token.token_type ?? null,
+        })
+      : sessionUserFromGitHubProfile(profile, email);
+  } catch (error) {
+    console.error("Atlas GitHub OAuth callback failed", error);
+    return redirectToAuthError(origin, "github_oauth_failed");
+  }
 
   const sessionToken = createSessionToken(user);
   if (!sessionToken) {
