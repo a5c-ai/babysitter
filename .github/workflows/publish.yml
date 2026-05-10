@@ -25,7 +25,7 @@ jobs:
   build_all:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     name: Build All Packages
-    runs-on: ubuntu-latest-large
+    runs-on: ubuntu-latest-l
     permissions:
       contents: read
     steps:
@@ -89,7 +89,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all
     name: Validate Core Runtime
-    runs-on: ubuntu-latest-large
+    runs-on: ubuntu-latest-l
     permissions:
       contents: read
     steps:
@@ -164,7 +164,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all
     name: Validate Mux Surfaces
-    runs-on: ubuntu-latest-large
+    runs-on: ubuntu-latest-l
     permissions:
       contents: read
     steps:
@@ -259,7 +259,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all
     name: Agent Mux Hooks-Mux (${{ matrix.agent.id }})
-    runs-on: ubuntu-latest-large
+    runs-on: ubuntu-latest-l
     permissions:
       contents: read
     defaults:
@@ -338,7 +338,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all
     name: No-Model Stack (${{ matrix.runtime.id }}, ${{ matrix.agent.id }}, hooks=${{ matrix.hooks.id }})
-    runs-on: ubuntu-latest-large
+    runs-on: ubuntu-latest-l
     permissions:
       contents: read
     defaults:
@@ -416,7 +416,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest-large]
+        os: [ubuntu-latest-l]
         install_mode:
           - id: babysitter-plugin
             layers: agent-mux install,agent-mux invocation,generated Babysitter plugin package,Babysitter SDK installation,plugin babysitter command dispatch,session persistence,native stop hook,hooks-mux normalization,transport-mux route,provider/model trace
@@ -561,7 +561,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all
     name: Validate Cloud Workspace
-    runs-on: ubuntu-latest-large
+    runs-on: ubuntu-latest-l
     permissions:
       contents: read
     steps:
@@ -612,7 +612,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all
     name: Validate Observer And Compiler
-    runs-on: ubuntu-latest-large
+    runs-on: ubuntu-latest-l
     permissions:
       contents: read
     steps:
