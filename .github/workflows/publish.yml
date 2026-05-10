@@ -43,7 +43,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -114,7 +117,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -196,7 +202,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -326,7 +335,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -405,7 +417,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -529,7 +544,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -621,7 +639,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -679,7 +700,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -754,7 +778,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -908,7 +935,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -988,7 +1018,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -1063,7 +1096,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -1150,7 +1186,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -1212,7 +1251,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -1261,7 +1303,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -1323,7 +1368,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -1386,7 +1434,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -1446,7 +1497,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-node20-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -1711,7 +1765,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
@@ -1804,7 +1861,10 @@ jobs:
         id: cache-nm
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/agent-mux/*/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
