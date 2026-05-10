@@ -8,4 +8,6 @@ attributes:
     memory and concurrency primitives, network stacks, and language
     runtimes. Languages typical of the domain include C, C++, Rust, Zig,
     and Go.
-edges: {}
+edges:
+  contains:
+    - specialization:rust-systems

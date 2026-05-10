@@ -18,3 +18,18 @@ edges:
     - specialization:devops-sre-platform
     - specialization:k8s-ops
     - specialization:sre
+    - topic:blue-green-deployment
+    - topic:ci-artifacts
+    - topic:ci-observability
+    - topic:ci-pipeline-design
+    - topic:ci-runners
+    - topic:ci-secrets-management
+    - topic:ci-triggers
+    - topic:deployment-strategies
+    - topic:feature-flags
+    - topic:github-actions-workflows
+    - topic:microservices-architecture
+    - topic:monorepo-ci
+    - topic:remote-dispatch
+    - topic:scheduled-dispatch
+    - topic:sidecar-pattern

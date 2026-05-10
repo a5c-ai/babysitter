@@ -6,7 +6,9 @@ attributes:
   description: |
     Capital markets infrastructure, trading systems, market microstructure,
     and exchange connectivity.
-edges: {}
+edges:
+  contains:
+    - specialization:corporate-finance
 ---
 nodeKind: Domain
 id: domain:quantitative-finance
@@ -15,7 +17,10 @@ attributes:
   description: |
     Quantitative modeling, derivatives pricing, stochastic calculus, and
     financial engineering.
-edges: {}
+edges:
+  contains:
+    - specialization:computational-mathematics
+    - specialization:statistical-methods
 ---
 nodeKind: Domain
 id: domain:algorithmic-trading
@@ -24,7 +29,9 @@ attributes:
   description: |
     Algorithmic and systematic trading strategies, execution algorithms,
     and high-frequency infrastructure.
-edges: {}
+edges:
+  contains:
+    - specialization:algorithms-optimization
 ---
 nodeKind: Domain
 id: domain:portfolio-management
@@ -33,7 +40,9 @@ attributes:
   description: |
     Portfolio construction, asset allocation, rebalancing, and performance
     attribution.
-edges: {}
+edges:
+  contains:
+    - specialization:statistical-methods
 ---
 nodeKind: Domain
 id: domain:financial-risk-management
@@ -42,7 +51,10 @@ attributes:
   description: |
     Market risk, credit risk, liquidity risk, counterparty risk, and
     VaR/CVaR modeling.
-edges: {}
+edges:
+  contains:
+    - specialization:statistical-methods
+    - specialization:computational-mathematics
 ---
 nodeKind: Domain
 id: domain:trading-operations
@@ -50,7 +62,9 @@ attributes:
   displayName: "Trading Operations"
   description: |
     Trade lifecycle, settlement, reconciliation, and post-trade processing.
-edges: {}
+edges:
+  contains:
+    - specialization:operations
 ---
 nodeKind: Domain
 id: domain:market-data
@@ -59,7 +73,9 @@ attributes:
   description: |
     Market data feeds, tick data management, alternative data, and data
     vendor integration.
-edges: {}
+edges:
+  contains:
+    - specialization:data-engineering-analytics
 ---
 nodeKind: Domain
 id: domain:regulatory-finance
@@ -68,4 +84,6 @@ attributes:
   description: |
     Financial regulatory compliance — MiFID II, Dodd-Frank, Basel III/IV,
     and reporting obligations.
-edges: {}
+edges:
+  contains:
+    - specialization:legal-compliance

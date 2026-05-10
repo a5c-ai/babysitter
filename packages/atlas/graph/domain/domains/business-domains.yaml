@@ -15,7 +15,9 @@ attributes:
   displayName: "Sales"
   description: |
     Sales processes, pipeline management, CRM, and revenue operations.
-edges: {}
+edges:
+  contains:
+    - specialization:sales
 ---
 nodeKind: Domain
 id: domain:customer-experience
@@ -23,7 +25,9 @@ attributes:
   displayName: "Customer Experience"
   description: |
     Customer success, support, feedback loops, and satisfaction measurement.
-edges: {}
+edges:
+  contains:
+    - specialization:customer-experience
 ---
 nodeKind: Domain
 id: domain:finance
@@ -61,7 +65,9 @@ attributes:
   displayName: "Operations"
   description: |
     Business operations, process optimization, and supply chain.
-edges: {}
+edges:
+  contains:
+    - specialization:operations
 ---
 nodeKind: Domain
 id: domain:logistics
@@ -69,7 +75,9 @@ attributes:
   displayName: "Logistics"
   description: |
     Supply chain logistics, warehousing, fulfillment, and distribution.
-edges: {}
+edges:
+  contains:
+    - specialization:logistics
 ---
 nodeKind: Domain
 id: domain:business-intelligence
@@ -87,7 +95,9 @@ attributes:
   displayName: "Public Relations"
   description: |
     PR, communications, media relations, and crisis comms.
-edges: {}
+edges:
+  contains:
+    - specialization:public-relations
 ---
 nodeKind: Domain
 id: domain:digital-marketing
@@ -115,7 +125,9 @@ attributes:
   displayName: "Entrepreneurship"
   description: |
     Startup operations, fundraising, product-market fit, and growth.
-edges: {}
+edges:
+  contains:
+    - specialization:entrepreneurship
 ---
 nodeKind: Domain
 id: domain:venture-capital
@@ -123,7 +135,9 @@ attributes:
   displayName: "Venture Capital"
   description: |
     Deal flow, due diligence, portfolio management, and fund operations.
-edges: {}
+edges:
+  contains:
+    - specialization:venture-capital
 ---
 nodeKind: Domain
 id: domain:knowledge-management
@@ -131,7 +145,9 @@ attributes:
   displayName: "Knowledge Management"
   description: |
     Knowledge bases, documentation culture, and organizational learning.
-edges: {}
+edges:
+  contains:
+    - specialization:knowledge-management
 ---
 nodeKind: Domain
 id: domain:advertising
@@ -139,7 +155,9 @@ attributes:
   displayName: "Advertising"
   description: |
     Advertising strategy, media buying, ad-tech, programmatic, creative production, and campaign measurement across channels.
-edges: {}
+edges:
+  contains:
+    - specialization:digital-marketing-strategy
 ---
 nodeKind: Domain
 id: domain:finops
@@ -147,7 +165,9 @@ attributes:
   displayName: "FinOps"
   description: |
     Cloud and AI financial operations — cost visibility, optimization, budgeting, showback/chargeback, and unit economics.
-edges: {}
+edges:
+  contains:
+    - specialization:corporate-finance
 ---
 nodeKind: Domain
 id: domain:business-development
@@ -155,7 +175,10 @@ attributes:
   displayName: "Business Development"
   description: |
     Business development, strategic partnerships, channel sales, alliances, and ecosystem growth.
-edges: {}
+edges:
+  contains:
+    - specialization:sales
+    - specialization:business-strategy
 ---
 nodeKind: Domain
 id: domain:strategy
@@ -173,7 +196,9 @@ attributes:
   displayName: "Community"
   description: |
     Community building, engagement, moderation, events, developer advocacy, and ecosystem health.
-edges: {}
+edges:
+  contains:
+    - specialization:public-relations
 ---
 nodeKind: Domain
 id: domain:procurement
@@ -181,7 +206,9 @@ attributes:
   displayName: "Procurement"
   description: |
     Strategic sourcing, vendor evaluation, contract negotiation, and procurement operations.
-edges: {}
+edges:
+  contains:
+    - specialization:supply-chain-optimization
 ---
 nodeKind: Domain
 id: domain:customer-relations
@@ -189,7 +216,9 @@ attributes:
   displayName: "Customer Relations"
   description: |
     Customer relationship management, account management, retention, and lifecycle marketing.
-edges: {}
+edges:
+  contains:
+    - specialization:customer-experience
 ---
 nodeKind: Domain
 id: domain:revenue-operations
@@ -197,7 +226,10 @@ attributes:
   displayName: "Revenue Operations"
   description: |
     Revenue operations spanning marketing, sales, and customer success — pipeline, forecasting, and GTM alignment.
-edges: {}
+edges:
+  contains:
+    - specialization:sales
+    - specialization:marketing
 ---
 nodeKind: Domain
 id: domain:compliance
@@ -207,7 +239,10 @@ attributes:
     Regulatory compliance, policy management, and audit workflows. Covers
     GDPR, SOX, HIPAA, and industry-specific compliance frameworks alongside
     risk assessment and controls monitoring.
-edges: {}
+edges:
+  contains:
+    - specialization:legal-compliance
+    - specialization:security-compliance
 ---
 nodeKind: Domain
 id: domain:machine-learning
@@ -217,4 +252,8 @@ attributes:
     Machine learning workflows covering model development, training pipelines,
     evaluation, and deployment. Spans supervised, unsupervised, and reinforcement
     learning alongside MLOps practices for production model management.
-edges: {}
+edges:
+  contains:
+    - specialization:data-science-ml
+    - specialization:llm-fine-tuning
+    - specialization:ml-inference-serving

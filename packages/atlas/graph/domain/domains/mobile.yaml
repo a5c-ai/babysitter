@@ -20,3 +20,10 @@ edges:
     - specialization:mobile-ios
     - specialization:react-native-mobile
     - specialization:flutter-mobile
+    - topic:adaptive-design
+    - topic:infinite-scrolling
+    - topic:mvp
+    - topic:mvvm
+    - topic:pull-to-refresh
+    - topic:skeleton-screen
+    - topic:toast-notification

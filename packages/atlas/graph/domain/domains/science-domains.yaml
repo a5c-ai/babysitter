@@ -15,7 +15,9 @@ attributes:
   displayName: "Automotive Engineering"
   description: |
     Vehicle systems, ADAS, powertrain, and automotive software.
-edges: {}
+edges:
+  contains:
+    - specialization:automotive-engineering
 ---
 nodeKind: Domain
 id: domain:biomedical-engineering
@@ -23,7 +25,9 @@ attributes:
   displayName: "Biomedical Engineering"
   description: |
     Medical devices, health informatics, and clinical systems.
-edges: {}
+edges:
+  contains:
+    - specialization:biomedical-engineering
 ---
 nodeKind: Domain
 id: domain:chemical-engineering
@@ -31,7 +35,9 @@ attributes:
   displayName: "Chemical Engineering"
   description: |
     Process design, reaction engineering, and materials processing.
-edges: {}
+edges:
+  contains:
+    - specialization:chemical-engineering
 ---
 nodeKind: Domain
 id: domain:civil-engineering
@@ -39,7 +45,9 @@ attributes:
   displayName: "Civil Engineering"
   description: |
     Structural analysis, construction management, and infrastructure.
-edges: {}
+edges:
+  contains:
+    - specialization:civil-engineering
 ---
 nodeKind: Domain
 id: domain:electrical-engineering
@@ -47,7 +55,9 @@ attributes:
   displayName: "Electrical Engineering"
   description: |
     Circuit design, signal processing, and power systems.
-edges: {}
+edges:
+  contains:
+    - specialization:electrical-engineering
 ---
 nodeKind: Domain
 id: domain:environmental-engineering
@@ -55,7 +65,9 @@ attributes:
   displayName: "Environmental Engineering"
   description: |
     Environmental monitoring, sustainability, and remediation.
-edges: {}
+edges:
+  contains:
+    - specialization:environmental-engineering
 ---
 nodeKind: Domain
 id: domain:industrial-engineering
@@ -63,7 +75,9 @@ attributes:
   displayName: "Industrial Engineering"
   description: |
     Manufacturing systems, quality control, and lean operations.
-edges: {}
+edges:
+  contains:
+    - specialization:industrial-engineering
 ---
 nodeKind: Domain
 id: domain:materials-science
@@ -71,7 +85,9 @@ attributes:
   displayName: "Materials Science"
   description: |
     Material characterization, composites, and advanced materials.
-edges: {}
+edges:
+  contains:
+    - specialization:materials-science
 ---
 nodeKind: Domain
 id: domain:mechanical-engineering
@@ -79,7 +95,9 @@ attributes:
   displayName: "Mechanical Engineering"
   description: |
     Mechanical design, thermodynamics, and manufacturing.
-edges: {}
+edges:
+  contains:
+    - specialization:mechanical-engineering
 ---
 nodeKind: Domain
 id: domain:nanotechnology
@@ -87,7 +105,9 @@ attributes:
   displayName: "Nanotechnology"
   description: |
     Nanofabrication, nano-characterization, and nanomaterials.
-edges: {}
+edges:
+  contains:
+    - specialization:nanotechnology
 ---
 nodeKind: Domain
 id: domain:physics
@@ -95,7 +115,9 @@ attributes:
   displayName: "Physics"
   description: |
     Computational physics, simulation, and experimental data analysis.
-edges: {}
+edges:
+  contains:
+    - specialization:physics
 ---
 nodeKind: Domain
 id: domain:quantum-computing
@@ -103,7 +125,9 @@ attributes:
   displayName: "Quantum Computing"
   description: |
     Quantum algorithms, error correction, and quantum hardware.
-edges: {}
+edges:
+  contains:
+    - specialization:quantum-computing
 ---
 nodeKind: Domain
 id: domain:computer-science

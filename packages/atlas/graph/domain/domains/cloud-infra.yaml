@@ -8,3 +8,9 @@ attributes:
 edges:
   contains:
     - specialization:terraform-iac
+    - topic:api-gateway
+    - topic:blue-green-deployment
+    - topic:ci-runners
+    - topic:deployment-strategies
+    - topic:sidecar-pattern
+    - topic:vertical-scaling

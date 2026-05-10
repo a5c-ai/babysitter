@@ -25,7 +25,9 @@ attributes:
   displayName: "Arts & Culture"
   description: |
     Arts administration, cultural heritage, curation, and creative production.
-edges: {}
+edges:
+  contains:
+    - specialization:arts-culture
 ---
 nodeKind: Domain
 id: domain:media-entertainment
@@ -43,7 +45,9 @@ attributes:
   displayName: "Social Sciences"
   description: |
     Social research methods, behavioral analytics, and policy analysis.
-edges: {}
+edges:
+  contains:
+    - specialization:social-sciences
 ---
 nodeKind: Domain
 id: domain:supply-chain
@@ -61,7 +65,9 @@ attributes:
   displayName: "Decision Intelligence"
   description: |
     Decision analytics, forecasting, simulation, and optimization.
-edges: {}
+edges:
+  contains:
+    - specialization:decision-intelligence
 ---
 nodeKind: Domain
 id: domain:real-estate
@@ -69,7 +75,9 @@ attributes:
   displayName: "Real Estate"
   description: |
     Property technology, facility management, and real estate operations.
-edges: {}
+edges:
+  contains:
+    - specialization:operations
 ---
 nodeKind: Domain
 id: domain:agriculture
@@ -77,7 +85,10 @@ attributes:
   displayName: "Agriculture"
   description: |
     AgTech, precision agriculture, and farm-to-table supply chain.
-edges: {}
+edges:
+  contains:
+    - specialization:environmental-engineering
+    - specialization:supply-chain-optimization
 ---
 nodeKind: Domain
 id: domain:energy
@@ -85,7 +96,10 @@ attributes:
   displayName: "Energy"
   description: |
     Energy systems, grid management, renewable energy, and utilities.
-edges: {}
+edges:
+  contains:
+    - specialization:electrical-engineering
+    - specialization:environmental-engineering
 ---
 nodeKind: Domain
 id: domain:telecommunications
@@ -93,7 +107,10 @@ attributes:
   displayName: "Telecommunications"
   description: |
     Telecom infrastructure, 5G, spectrum management, and network operations.
-edges: {}
+edges:
+  contains:
+    - specialization:network-programming
+    - specialization:electrical-engineering
 ---
 nodeKind: Domain
 id: domain:government
@@ -101,7 +118,10 @@ attributes:
   displayName: "Government"
   description: |
     GovTech, civic technology, public sector digitization, and e-government.
-edges: {}
+edges:
+  contains:
+    - specialization:legal-compliance
+    - specialization:security-compliance
 ---
 nodeKind: Domain
 id: domain:insurance
@@ -109,7 +129,10 @@ attributes:
   displayName: "Insurance"
   description: |
     InsurTech, underwriting, claims processing, and actuarial systems.
-edges: {}
+edges:
+  contains:
+    - specialization:statistical-methods
+    - specialization:legal-compliance
 ---
 nodeKind: Domain
 id: domain:retail
@@ -117,7 +140,10 @@ attributes:
   displayName: "Retail"
   description: |
     Retail operations, e-commerce, point-of-sale, and inventory management.
-edges: {}
+edges:
+  contains:
+    - specialization:supply-chain-optimization
+    - specialization:operations
 ---
 nodeKind: Domain
 id: domain:hospitality
@@ -125,7 +151,10 @@ attributes:
   displayName: "Hospitality"
   description: |
     Hotel and restaurant tech, reservation systems, and guest experience.
-edges: {}
+edges:
+  contains:
+    - specialization:customer-experience
+    - specialization:operations
 ---
 nodeKind: Domain
 id: domain:transportation
@@ -133,7 +162,10 @@ attributes:
   displayName: "Transportation"
   description: |
     Fleet management, route optimization, and mobility platforms.
-edges: {}
+edges:
+  contains:
+    - specialization:logistics
+    - specialization:operations
 ---
 nodeKind: Domain
 id: domain:travel
@@ -144,7 +176,9 @@ attributes:
     accommodation, ground transport, and experiences. Covers OTA platforms, GDS
     integration, dynamic packaging, loyalty programs, and traveler personalization.
     Intersects hospitality, transportation, and consumer mobile product domains.
-edges: {}
+edges:
+  contains:
+    - specialization:travel
 ---
 nodeKind: Domain
 id: domain:philosophy
@@ -182,4 +216,7 @@ attributes:
     Content strategy, production workflows, and editorial operations at scale.
     Covers content governance, taxonomy design, CMS management, and
     content performance measurement across channels.
-edges: {}
+edges:
+  contains:
+    - specialization:media
+    - specialization:digital-marketing-strategy

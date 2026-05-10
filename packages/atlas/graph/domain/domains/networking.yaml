@@ -8,3 +8,5 @@ attributes:
 edges:
   contains:
     - specialization:network-programming
+    - topic:data-in-transit-encryption
+    - topic:load-balancing

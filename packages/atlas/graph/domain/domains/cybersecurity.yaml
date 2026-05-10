@@ -9,3 +9,5 @@ attributes:
 edges:
   contains:
     - specialization:security-compliance
+    - topic:ci-secrets-management
+    - topic:information-trust-tiers

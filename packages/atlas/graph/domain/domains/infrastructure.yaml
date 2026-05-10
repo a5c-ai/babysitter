@@ -14,4 +14,7 @@ attributes:
     and Platform Engineering (developer-facing abstractions built on top).
     Infrastructure-as-Code tools (Terraform, Pulumi, Ansible) are central
     to the discipline.
-edges: {}
+edges:
+  contains:
+    - topic:load-balancing
+    - topic:vertical-scaling

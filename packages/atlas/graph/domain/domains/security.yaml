@@ -17,3 +17,14 @@ edges:
   contains:
     - specialization:security-research
     - specialization:cryptography-blockchain
+    - topic:api-key
+    - topic:csrf-protection
+    - topic:data-at-rest-encryption
+    - topic:data-in-transit-encryption
+    - topic:input-sanitization
+    - topic:oauth-integration
+    - topic:protected-routes
+    - topic:route-guards
+    - topic:secure-storage-pattern
+    - topic:secure-token-pattern
+    - topic:security-headers-implementation

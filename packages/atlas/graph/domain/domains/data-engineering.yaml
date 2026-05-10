@@ -7,4 +7,11 @@ attributes:
     and streaming ETL/ELT, data warehouses and lakes, schema evolution,
     data quality, and the orchestration tooling around them. Distinct from
     Data Science (analysis/modeling) and ML-Ops (model lifecycle).
-edges: {}
+edges:
+  contains:
+    - topic:event-mesh
+    - topic:message-driven-architecture
+    - topic:partitioning
+    - topic:publish-subscribe
+    - topic:publisher-subscriber-pattern
+    - topic:sharding

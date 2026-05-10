@@ -16,3 +16,10 @@ attributes:
 edges:
   contains:
     - specialization:data-engineering-analytics
+    - topic:context-aware-retrieval
+    - topic:evidence-based-graph
+    - topic:experiment-driven-development
+    - topic:graph-clustering
+    - topic:graph-embedding
+    - topic:graph-provenance
+    - topic:sparse-retrieval

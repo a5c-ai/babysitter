@@ -19,6 +19,75 @@ edges:
     - specialization:ai-agents-conversational
     - specialization:go-microservices
     - specialization:rust-systems
+    - topic:adapter-pattern
+    - topic:agent-journal
+    - topic:api-gateway
+    - topic:api-versioning-strategy
+    - topic:auto-discovery
+    - topic:backend-for-frontend
+    - topic:breakpoint-orchestration
+    - topic:builder-pattern
+    - topic:ci-artifacts
+    - topic:ci-observability
+    - topic:ci-pipeline-design
+    - topic:ci-triggers
+    - topic:claude-code-hooks
+    - topic:claude-code-skills
+    - topic:command-pattern
+    - topic:compensating-transaction
+    - topic:context-aware-retrieval
+    - topic:database-per-service
+    - topic:decorator-pattern
+    - topic:deployment-strategies
+    - topic:event-mesh
+    - topic:event-store
+    - topic:evidence-based-graph
+    - topic:experiment-driven-development
+    - topic:factory-pattern
+    - topic:fallback-pattern
+    - topic:feature-flags
+    - topic:finite-state-machine
+    - topic:github-actions-workflows
+    - topic:graph-provenance
+    - topic:graph-query-scoping
+    - topic:harness-integration
+    - topic:hook-driven-automation
+    - topic:information-trust-tiers
+    - topic:inversion-of-control
+    - topic:knowledge-graph-navigation
+    - topic:knowledge-provenance
+    - topic:layered-architecture
+    - topic:lazy-loading
+    - topic:memoization
+    - topic:message-driven-architecture
+    - topic:microservices-architecture
+    - topic:monolithic-architecture
+    - topic:monorepo-ci
+    - topic:multi-source-knowledge-fusion
+    - topic:mvc
+    - topic:mvp
+    - topic:mvvm
+    - topic:observer-pattern
+    - topic:onion-architecture
+    - topic:pair-programming
+    - topic:provider-pattern
+    - topic:publish-subscribe
+    - topic:publisher-subscriber-pattern
+    - topic:rag-pipeline-design
+    - topic:remote-dispatch
+    - topic:repository-pattern
+    - topic:request-reply
+    - topic:saga-pattern
+    - topic:scheduled-dispatch
+    - topic:service-oriented-architecture
+    - topic:shared-database
+    - topic:singleton-pattern
+    - topic:soap
+    - topic:sparse-retrieval
+    - topic:strategy-pattern
+    - topic:throttling
+    - topic:timeout-pattern
+    - topic:unit-of-work
 ---
 nodeKind: Domain
 id: domain:api-development
@@ -27,7 +96,13 @@ attributes:
   description: |
     Design, implementation, and documentation of APIs — REST, GraphQL,
     gRPC, and OpenAPI — including versioning, authentication, and rate limiting.
-edges: {}
+edges:
+  contains:
+    - topic:api-gateway
+    - topic:api-key
+    - topic:api-versioning-strategy
+    - topic:request-reply
+    - topic:soap
 ---
 nodeKind: Domain
 id: domain:serverless
@@ -36,4 +111,7 @@ attributes:
   description: |
     Serverless computing architectures and functions-as-a-service (FaaS)
     including AWS Lambda, Cloudflare Workers, and event-driven workflows.
-edges: {}
+edges:
+  contains:
+    - topic:event-mesh
+    - topic:publish-subscribe
