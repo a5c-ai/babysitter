@@ -25,7 +25,7 @@ jobs:
   build_all:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     name: Build All Packages
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-large
     permissions:
       contents: read
     steps:
@@ -42,7 +42,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
@@ -89,7 +89,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all
     name: Validate Core Runtime
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-large
     permissions:
       contents: read
     steps:
@@ -105,7 +105,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline
 
       - name: Download pre-built dist directories
         uses: actions/download-artifact@v4
@@ -164,7 +164,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all
     name: Validate Mux Surfaces
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-large
     permissions:
       contents: read
     steps:
@@ -180,7 +180,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline
 
       - name: Download pre-built dist directories
         uses: actions/download-artifact@v4
@@ -259,7 +259,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all
     name: Agent Mux Hooks-Mux (${{ matrix.agent.id }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-large
     permissions:
       contents: read
     defaults:
@@ -303,7 +303,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline
 
       - name: Download pre-built dist directories
         uses: actions/download-artifact@v4
@@ -338,7 +338,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all
     name: No-Model Stack (${{ matrix.runtime.id }}, ${{ matrix.agent.id }}, hooks=${{ matrix.hooks.id }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-large
     permissions:
       contents: read
     defaults:
@@ -375,7 +375,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline
 
       - name: Download pre-built dist directories
         uses: actions/download-artifact@v4
@@ -416,7 +416,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest-large]
         install_mode:
           - id: babysitter-plugin
             layers: agent-mux install,agent-mux invocation,generated Babysitter plugin package,Babysitter SDK installation,plugin babysitter command dispatch,session persistence,native stop hook,hooks-mux normalization,transport-mux route,provider/model trace
@@ -492,7 +492,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline
 
       - name: Download pre-built dist directories
         uses: actions/download-artifact@v4
@@ -561,7 +561,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all
     name: Validate Cloud Workspace
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-large
     permissions:
       contents: read
     steps:
@@ -577,7 +577,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline
 
       - name: Download pre-built dist directories
         uses: actions/download-artifact@v4
@@ -612,7 +612,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all
     name: Validate Observer And Compiler
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-large
     permissions:
       contents: read
     steps:
@@ -628,7 +628,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline
 
       - name: Download pre-built dist directories
         uses: actions/download-artifact@v4
@@ -697,7 +697,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
@@ -845,7 +845,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Build Atlas workspace
@@ -918,7 +918,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Build package workspace
@@ -986,7 +986,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Build hooks and agent-mux workspaces
@@ -1069,7 +1069,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Build package workspace
@@ -1124,7 +1124,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Build package workspace
@@ -1166,7 +1166,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Build agent-mux CLI workspace
@@ -1221,7 +1221,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Build agent-mux root workspace
@@ -1277,7 +1277,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Build agent-mux TUI workspace
@@ -1330,7 +1330,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Run docs QA
@@ -1588,7 +1588,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Build cloud workspace
@@ -1674,7 +1674,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Publish babysitter metapackage to npm ($NPM_TAG tag)
