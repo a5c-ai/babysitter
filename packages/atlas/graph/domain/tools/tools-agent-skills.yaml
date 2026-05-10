@@ -1,0 +1,66 @@
+---
+nodeKind: Tool
+id: tool:claude-auto-retry
+attributes:
+  displayName: "Claude Auto Retry"
+  kind: other
+  description: |
+    Automatically retries Claude Code sessions when rate limits or
+    transient errors occur. Wraps the Claude Code CLI with exponential
+    backoff, session state preservation, and configurable retry policies.
+    Eliminates the need for manual re-invocation after rate-limit pauses,
+    keeping long-running agent workflows moving without human babysitting.
+edges:
+  tool_used_by:
+    - target: skill-area:operations-automation
+---
+nodeKind: Tool
+id: tool:micro-skills
+attributes:
+  displayName: "Micro Skills"
+  kind: other
+  description: |
+    Converts agent skills into gated micro-pipelines with hard quality
+    checks at each stage. Breaks down broad skills into discrete,
+    testable steps with pass/fail gates — ensuring each micro-step
+    meets quality criteria before proceeding. Enforces structured
+    execution discipline on otherwise open-ended agent behaviors,
+    reducing hallucination and drift in multi-step workflows.
+edges:
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:code-quality
+---
+nodeKind: Tool
+id: tool:dev-browser
+attributes:
+  displayName: "Dev Browser"
+  kind: other
+  description: |
+    Browser automation skill for AI agents built on Playwright. Provides
+    a high-level API for agents to navigate web pages, fill forms, click
+    elements, extract content, and take screenshots. Designed specifically
+    for agent use cases — includes smart element targeting, automatic
+    waiting, and structured page snapshots that fit within context windows.
+    Useful for web scraping, E2E testing, and browser-based agent tasks.
+edges:
+  tool_used_by:
+    - target: skill-area:browser-automation
+    - target: skill-area:e2e-testing
+---
+nodeKind: Tool
+id: tool:cctop
+attributes:
+  displayName: "cctop"
+  kind: other
+  description: |
+    htop-like terminal dashboard for monitoring Claude Code sessions in
+    real-time. Displays active sessions, token usage, tool calls, costs,
+    and system resource consumption in a TUI interface. Enables developers
+    running multiple concurrent Claude Code sessions to monitor activity,
+    spot runaway sessions, and track aggregate spend from a single
+    terminal pane.
+edges:
+  tool_used_by:
+    - target: skill-area:observability-instrumentation
+    - target: skill-area:developer-experience

@@ -1,0 +1,155 @@
+---
+nodeKind: Tool
+id: tool:agent-message-queue
+attributes:
+  displayName: "Agent Message Queue"
+  kind: other
+  description: |
+    File-based Maildir-style message queue for local agent-to-agent
+    communication. Provides a simple filesystem-backed pub/sub mechanism
+    where agents drop messages as files and receivers poll directories.
+    No external services required — works anywhere with a filesystem.
+    Designed for local multi-agent setups where agents need to coordinate
+    without shared memory or network services.
+edges:
+  tool_used_by:
+    - target: skill-area:event-driven-architecture
+    - target: skill-area:multi-agent-coordination
+  relates_to_topic:
+    - target: topic:multi-agent-knowledge-sharing
+    - target: topic:agent-dispatch
+---
+nodeKind: Tool
+id: tool:utcp-code-mode
+attributes:
+  displayName: "UTCP Code Mode"
+  kind: other
+  description: |
+    Universal Tool Calling Protocol library that enables AI agents to
+    call MCP and UTCP tools via code execution rather than structured
+    tool-use messages. Provides a programmatic interface for discovering,
+    invoking, and composing tool calls from within agent code. Useful for
+    building agent loops that need dynamic tool selection and chaining
+    without relying on the model's native tool-use protocol.
+edges:
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:tool-use
+  relates_to_topic:
+    - target: topic:agent-tool-use
+---
+nodeKind: Tool
+id: tool:napkin
+attributes:
+  displayName: "Napkin"
+  kind: other
+  description: |
+    Local-first file-based knowledge system for AI agents. Uses a
+    progressively disclosed information architecture where agents start
+    with summaries and drill into detail on demand. Knowledge is stored
+    as plain files on disk — no database, no server. Designed for agents
+    that need structured long-term knowledge without external services,
+    with a focus on reducing context window waste through progressive
+    disclosure patterns.
+edges:
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:context-management
+  relates_to_topic:
+    - target: topic:company-brain
+    - target: topic:knowledge-fabric-architecture
+---
+nodeKind: Tool
+id: tool:mempalace
+attributes:
+  displayName: "MemPalace"
+  kind: other
+  description: |
+    Best-benchmarked open-source AI memory system. Provides persistent
+    memory storage with quality scoring, retrieval ranking, and memory
+    consolidation. Agents can store, search, and prune memories with a
+    structured API that tracks memory relevance over time. Benchmarked
+    against other memory systems for accuracy, recall, and context
+    efficiency. Designed for agents that need reliable cross-session
+    memory with measurable quality guarantees.
+edges:
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:organizational-intelligence
+  relates_to_topic:
+    - target: topic:organizational-memory
+    - target: topic:memory-to-knowledge-bridge
+---
+nodeKind: Tool
+id: tool:lunaroute
+attributes:
+  displayName: "LunaRoute"
+  kind: other
+  description: |
+    High-performance local proxy for AI coding assistants. Sits between
+    the coding agent and the LLM API, providing session recording,
+    request/response logging, debugging tools, and traffic inspection.
+    Enables developers to replay agent sessions, analyze token usage,
+    debug prompt construction, and understand agent behavior without
+    modifying the agent itself. Runs as a lightweight local process
+    with no cloud dependency.
+edges:
+  tool_used_by:
+    - target: skill-area:observability-instrumentation
+    - target: skill-area:llm-observability
+  relates_to_topic:
+    - target: topic:agent-context-management
+---
+nodeKind: Tool
+id: tool:token-optimizer
+attributes:
+  displayName: "Token Optimizer"
+  kind: other
+  description: |
+    Tool for finding ghost tokens, fixing context quality decay, and
+    surviving compaction in AI coding sessions. Analyzes token usage
+    patterns to identify wasted context, invisible formatting overhead,
+    and degradation caused by repeated compaction cycles. Provides
+    actionable recommendations for improving prompt efficiency and
+    maintaining context quality over long agent sessions.
+edges:
+  tool_used_by:
+    - target: skill-area:context-management
+    - target: skill-area:embedding-optimization
+---
+nodeKind: Tool
+id: tool:graphify
+attributes:
+  displayName: "Graphify"
+  kind: other
+  description: |
+    Converts code, SQL schemas, documentation, and images into a
+    queryable knowledge graph. Parses source artifacts, extracts
+    entities and relationships, and builds a graph that agents can
+    traverse and query. Supports multiple input formats and produces
+    a unified graph representation that captures cross-artifact
+    dependencies. Useful for codebase understanding, impact analysis,
+    and building navigable knowledge bases from heterogeneous sources.
+edges:
+  tool_used_by:
+    - target: skill-area:knowledge-graph-management
+    - target: skill-area:knowledge-fabric-design
+  relates_to_topic:
+    - target: topic:knowledge-graph-construction
+---
+nodeKind: Tool
+id: tool:tambo
+attributes:
+  displayName: "Tambo"
+  kind: other
+  description: |
+    Generative UI SDK for React that enables dynamic AI-driven component
+    rendering. Provides a framework for building interfaces where AI
+    agents can generate, compose, and update React components in
+    real-time based on conversation context and user intent. Bridges
+    the gap between agent reasoning and visual output, enabling rich
+    interactive experiences beyond plain text responses.
+edges:
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:frontend-development
