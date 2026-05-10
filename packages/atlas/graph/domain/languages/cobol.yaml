@@ -8,4 +8,7 @@ attributes:
   description: |
     COBOL — the Common Business-Oriented Language; the dominant language
     for legacy mainframe transaction processing systems.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:finance
+    - target: domain:software-engineering

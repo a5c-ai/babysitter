@@ -37,6 +37,9 @@ edges:
   uses_stack_part:
     - stack-part:feature-flag-service
     - stack-part:secrets-manager
+  prerequisite_for_learning:
+    - target: skill-area:platform-engineering
+      strength: recommended
 ---
 nodeKind: SkillArea
 id: skill-area:data-validation-sanitization
@@ -294,6 +297,9 @@ edges:
     - tool:vitest
   requires_skill_area:
     - skill-area:unit-testing
+  prerequisite_for_learning:
+    - target: skill-area:e2e-testing
+      strength: recommended
 ---
 nodeKind: SkillArea
 id: skill-area:cross-browser-testing

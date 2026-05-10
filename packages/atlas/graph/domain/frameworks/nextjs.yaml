@@ -4,6 +4,7 @@ attributes:
   displayName: "Next.js"
   belongsToLanguageId: language:typescript
   category: web-fullstack
+  releasedAt: "2016"
   description: |
     The Next.js framework.
 edges:
@@ -14,3 +15,8 @@ edges:
     - target: skill-area:hydration
     - target: skill-area:frontend-development
     - target: skill-area:frontend-performance
+  alternative_to:
+    - target: framework:nuxt
+      comparison: "meta-frameworks — Next.js for React; Nuxt for Vue"
+    - target: framework:sveltekit
+      comparison: "meta-frameworks — Next.js for React; SvelteKit for Svelte"

@@ -313,6 +313,9 @@ edges:
   applies_to:
     - target: domain:data-science
       confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:machine-learning
+      strength: required
 ---
 nodeKind: SkillArea
 id: skill-area:statistical-analysis

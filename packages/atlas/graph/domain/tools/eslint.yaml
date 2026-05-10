@@ -4,6 +4,7 @@ attributes:
   displayName: "ESLint"
   kind: linter
   language: language:javascript
+  releasedAt: "2013"
   description: |
     Pluggable JavaScript and TypeScript linter.
 edges:
@@ -11,3 +12,6 @@ edges:
     - language:javascript
   used_for:
     - skill-area:code-quality
+  alternative_to:
+    - target: tool:biome
+      comparison: "JavaScript linters / formatters"

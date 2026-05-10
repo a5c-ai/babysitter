@@ -13,3 +13,8 @@ edges:
     - target: skill-area:server-side-rendering
     - target: skill-area:frontend-development
     - target: skill-area:frontend-performance
+  alternative_to:
+    - target: framework:nextjs
+      comparison: "meta-frameworks — Nuxt for Vue; Next.js for React"
+    - target: framework:sveltekit
+      comparison: "meta-frameworks — Nuxt for Vue; SvelteKit for Svelte"

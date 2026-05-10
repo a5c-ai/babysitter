@@ -11,4 +11,7 @@ attributes:
     Common Lisp — the ANSI-standardized multi-paradigm Lisp dialect
     (CLOS, condition system, macros) with mature implementations such
     as SBCL.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:computer-science
+    - target: domain:software-engineering

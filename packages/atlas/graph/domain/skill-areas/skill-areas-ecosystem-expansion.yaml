@@ -30,6 +30,9 @@ edges:
   applies_to:
     - target: domain:software-engineering
       confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:ci-cd
+      strength: helpful
 ---
 nodeKind: SkillArea
 id: skill-area:communication
@@ -62,6 +65,9 @@ edges:
   applies_to:
     - target: domain:devops
       confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:deployment-automation
+      strength: required
 ---
 nodeKind: SkillArea
 id: skill-area:model-serving
@@ -126,6 +132,9 @@ edges:
   applies_to:
     - target: domain:cybersecurity
       confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:application-security
+      strength: recommended
 ---
 nodeKind: SkillArea
 id: skill-area:iac-security
@@ -270,6 +279,9 @@ edges:
   applies_to:
     - target: domain:software-engineering
       confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:ci-pipeline-optimization
+      strength: helpful
 ---
 nodeKind: SkillArea
 id: skill-area:e-commerce
@@ -318,6 +330,9 @@ edges:
   applies_to:
     - target: domain:web-development
       confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:react-state-management
+      strength: required
 ---
 nodeKind: SkillArea
 id: skill-area:machine-learning
@@ -334,6 +349,9 @@ edges:
   applies_to:
     - target: domain:data-science
       confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:natural-language-processing
+      strength: required
 ---
 nodeKind: SkillArea
 id: skill-area:data-collection

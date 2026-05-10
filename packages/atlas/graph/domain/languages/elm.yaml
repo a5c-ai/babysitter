@@ -8,4 +8,7 @@ attributes:
   description: |
     Elm — a delightful pure-functional language for the browser frontend
     with strong type inference and no runtime exceptions.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:frontend
+    - target: domain:web-development

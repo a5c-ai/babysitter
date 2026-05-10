@@ -4,6 +4,7 @@ attributes:
   displayName: "Angular"
   belongsToLanguageId: language:typescript
   category: web-frontend
+  releasedAt: "2016"
   description: |
     Angular — Google's batteries-included TypeScript web framework.
     Modern (v17+) supports standalone components, signals, control-flow
@@ -14,3 +15,10 @@ edges:
   used_by_skill_area:
     - target: skill-area:frontend-development
     - target: skill-area:design-systems
+  alternative_to:
+    - target: framework:react
+      comparison: "UI frameworks"
+    - target: framework:vue
+      comparison: "UI frameworks"
+    - target: framework:svelte
+      comparison: "UI frameworks"

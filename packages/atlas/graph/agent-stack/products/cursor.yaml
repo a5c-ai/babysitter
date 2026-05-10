@@ -15,3 +15,6 @@ attributes:
 edges:
   has_version:
     - agentVersion:cursor:ge-0-0-0
+  composed_of:
+    - target: language:typescript
+      role: core

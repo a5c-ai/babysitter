@@ -20,4 +20,7 @@ attributes:
     Distributed.jl and CUDA.jl for GPU kernels. Its type inference and
     specialization produce code competitive with compiled languages for
     numerical workloads.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:scientific-computing
+    - target: domain:data-science

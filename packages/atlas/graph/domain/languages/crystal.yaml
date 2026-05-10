@@ -16,4 +16,7 @@ attributes:
     manager handles dependencies. Popular use cases include high-performance
     CLI tools, web APIs (Kemal, Lucky frameworks), and systems where
     migrating from Ruby while gaining performance is desired.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:web-development
+    - target: domain:software-engineering

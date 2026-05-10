@@ -17,6 +17,13 @@ attributes:
 edges:
   has_version:
     - agent-version:vibe-kanban@current
+  composed_of:
+    - target: language:rust
+      role: core
+    - target: language:typescript
+      role: ui
+    - target: framework:react
+      role: ui
   integrates_with:
     - target: skill-area:project-planning
     - target: skill-area:multi-agent-coordination

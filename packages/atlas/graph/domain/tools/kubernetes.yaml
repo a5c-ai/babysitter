@@ -3,6 +3,7 @@ id: tool:kubernetes
 attributes:
   displayName: "Kubernetes"
   kind: orchestrator
+  releasedAt: "2014"
   description: |
     Open-source container orchestration system for automating deployment, scaling, and management.
 edges:

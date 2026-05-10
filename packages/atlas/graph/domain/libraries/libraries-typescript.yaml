@@ -68,3 +68,10 @@ edges:
     - language:typescript
   used_for:
     - skill-area:backend-data-persistence
+  alternative_to:
+    - target: library:typeorm
+      comparison: "TypeScript ORMs"
+    - target: library:sequelize
+      comparison: "TypeScript ORMs"
+    - target: library:knex
+      comparison: "TypeScript ORMs / query builders"

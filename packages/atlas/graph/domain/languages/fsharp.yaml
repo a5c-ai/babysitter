@@ -17,4 +17,7 @@ attributes:
     custom DSLs. F# scripts (.fsx) and the REPL (FSI) make it productive for
     exploratory data work. It interoperates fully with C# and the NuGet
     ecosystem, and shares the .NET runtime's performance characteristics.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:finance

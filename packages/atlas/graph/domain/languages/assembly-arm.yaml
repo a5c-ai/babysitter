@@ -8,4 +8,7 @@ attributes:
   description: |
     ARM / AArch64 assembly language for ARM Cortex CPUs (mobile, Apple
     Silicon, embedded), assembled with GAS or armasm.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:embedded-systems
+    - target: domain:systems-programming

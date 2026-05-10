@@ -18,4 +18,7 @@ attributes:
     (pwsh) is the modern cross-platform version; Windows PowerShell 5.1
     remains prevalent in enterprise environments. Pester is the standard
     testing framework.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:devops
+    - target: domain:cloud-infra

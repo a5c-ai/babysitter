@@ -18,4 +18,7 @@ attributes:
     includes advanced features such as type families, GADTs, linear types,
     and Template Haskell. Libraries like servant (type-safe APIs), conduit
     (streaming), and optics are widely used in production code.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:computer-science
+    - target: domain:software-engineering

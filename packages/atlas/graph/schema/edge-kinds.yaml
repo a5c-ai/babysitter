@@ -805,7 +805,7 @@ edgeKinds:
 - id: edge:applies-to
   name: applies_to
   origin: universal
-  description: an extension, blueprint, discovery signal, or piece of expertise applies to a domain area or product (source includes Role because Role records author requiredDomains attribute lists in practice; source includes SkillArea because descriptive expertise scope records already author applies_to edges; source includes Methodology because methodologies apply to domains and topics)
+  description: an extension, blueprint, discovery signal, piece of expertise, or language applies to a domain area or product (source includes Role because Role records author requiredDomains attribute lists in practice; source includes SkillArea because descriptive expertise scope records already author applies_to edges; source includes Methodology because methodologies apply to domains and topics; source includes Language because orphan languages use applies_to to connect to their relevant domains)
   source:
   - Skill
   - SkillArea
@@ -816,6 +816,7 @@ edgeKinds:
   - Workflow
   - Role
   - Methodology
+  - Language
   target:
   - Domain
   - Specialization
@@ -854,6 +855,7 @@ edgeKinds:
   - Workflow
   - Role
   - Methodology
+  - Language
   cardinality: N:N
   inverse: applies_to
 - id: edge:addresses
@@ -6027,3 +6029,35 @@ edgeKinds:
   source: [PackageSurface]
   target: [Graph]
   cardinality: N:N
+- id: edge:alternative-to
+  name: alternative_to
+  origin: universal
+  description: two tools/frameworks/libraries that serve the same purpose and are commonly compared
+  source: [Tool, Framework, Library]
+  target: [Tool, Framework, Library]
+  cardinality: N:N
+  attributes:
+  - name: comparison
+    type: string
+    required: false
+  inverse: alternative_to
+- id: edge:prerequisite-for-learning
+  name: prerequisite_for_learning
+  origin: universal
+  description: one skill-area should be learned before another
+  source: [SkillArea]
+  target: [SkillArea]
+  cardinality: N:N
+  attributes:
+  - name: strength
+    type: enum<required,recommended,helpful>
+    required: false
+  inverse: has_learning_prerequisite
+- id: edge:has-learning-prerequisite
+  name: has_learning_prerequisite
+  origin: universal
+  description: inverse of prerequisite_for_learning
+  source: [SkillArea]
+  target: [SkillArea]
+  cardinality: N:N
+  inverse: prerequisite_for_learning

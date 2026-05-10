@@ -11,3 +11,8 @@ edges:
     - language:python
   used_by_skill_area:
     - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:fastapi
+      comparison: "Python web frameworks — Flask is minimal; FastAPI is async-first"
+    - target: framework:django
+      comparison: "Python web frameworks — Flask is minimal; Django is batteries-included"

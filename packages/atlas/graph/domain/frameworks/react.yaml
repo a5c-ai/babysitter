@@ -4,6 +4,7 @@ attributes:
   displayName: "React"
   belongsToLanguageId: language:javascript
   category: web-frontend
+  releasedAt: "2013"
   description: |
     The React framework.
 edges:
@@ -15,3 +16,10 @@ edges:
     - target: skill-area:react-components
     - target: skill-area:frontend-development
     - target: skill-area:design-systems
+  alternative_to:
+    - target: framework:vue
+      comparison: "UI frameworks"
+    - target: framework:angular
+      comparison: "UI frameworks"
+    - target: framework:svelte
+      comparison: "UI frameworks"

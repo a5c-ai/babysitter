@@ -25,6 +25,9 @@ edges:
     - tool:glean
     - tool:danswer
     - tool:haystack
+  prerequisite_for_learning:
+    - target: skill-area:rag-pipeline-engineering
+      strength: recommended
 ---
 nodeKind: SkillArea
 id: skill-area:rag-pipeline-engineering

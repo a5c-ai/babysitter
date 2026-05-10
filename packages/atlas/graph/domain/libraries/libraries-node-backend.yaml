@@ -254,6 +254,9 @@ edges:
     - language:javascript
   used_for:
     - skill-area:observability-instrumentation
+  alternative_to:
+    - target: library:pino
+      comparison: "Node.js loggers — Winston is transport-rich; Pino is low-overhead JSON"
 ---
 nodeKind: Library
 id: library:pino
@@ -270,6 +273,9 @@ edges:
     - language:javascript
   used_for:
     - skill-area:observability-instrumentation
+  alternative_to:
+    - target: library:winston
+      comparison: "Node.js loggers — Pino is low-overhead JSON; Winston is transport-rich"
 ---
 nodeKind: Library
 id: library:dotenv

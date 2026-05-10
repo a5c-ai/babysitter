@@ -17,4 +17,7 @@ attributes:
     6 was reimagined as Raku, a separate language. Despite declining
     popularity, Perl remains deeply embedded in genomics tooling (BioPerl),
     network automation, and long-lived IT operations scripts.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:bioinformatics
+    - target: domain:software-engineering

@@ -19,3 +19,10 @@ edges:
   has_version:
     - agentVersion:claude:ge-0-0-0
   accepts_plugin: []
+  composed_of:
+    - target: language:typescript
+      role: core
+    - target: framework:react
+      role: ui
+    - target: tool:npm
+      role: platform

@@ -17,3 +17,8 @@ edges:
   has_version:
     - agentVersion:codex:ge-0-0-0-lt-0-119-0
     - agentVersion:codex:ge-0-119-0
+  composed_of:
+    - target: language:rust
+      role: core
+    - target: language:typescript
+      role: runtime

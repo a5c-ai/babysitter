@@ -18,4 +18,7 @@ attributes:
     narrative. Shiny builds interactive web applications directly from R.
     R is commonly used alongside Python in data science teams, with
     reticulate enabling interoperability.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:data-science
+    - target: domain:bioinformatics

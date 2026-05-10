@@ -36,6 +36,9 @@ edges:
       confidence: primary
     - target: domain:web-development
       confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:authentication-authorization
+      strength: required
 ---
 nodeKind: SkillArea
 id: skill-area:transactional-email

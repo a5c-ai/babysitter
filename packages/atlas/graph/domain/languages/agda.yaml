@@ -9,4 +9,7 @@ attributes:
   description: |
     Agda — a dependently-typed functional language and interactive
     proof assistant developed at Chalmers / Gothenburg.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:computer-science
+    - target: domain:mathematics

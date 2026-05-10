@@ -18,4 +18,7 @@ attributes:
     infrastructure, and system administration contexts. For complex logic,
     Python or Go is often preferred, but Bash remains essential for
     environment setup, build scripts, and one-liners.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:devops
+    - target: domain:software-engineering

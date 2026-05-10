@@ -4,6 +4,7 @@ attributes:
   displayName: "Vue"
   belongsToLanguageId: language:javascript
   category: web-frontend
+  releasedAt: "2014"
   description: |
     Vue.js — progressive front-end JavaScript framework. Stub created
     in catalog update to close dangling refs.
@@ -14,3 +15,10 @@ edges:
     - target: skill-area:vue-components
     - target: skill-area:frontend-development
     - target: skill-area:design-systems
+  alternative_to:
+    - target: framework:react
+      comparison: "UI frameworks"
+    - target: framework:angular
+      comparison: "UI frameworks"
+    - target: framework:svelte
+      comparison: "UI frameworks"

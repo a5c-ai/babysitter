@@ -7,4 +7,7 @@ attributes:
   description: |
     Reason — an OCaml-derived syntax targeting JavaScript via BuckleScript /
     ReScript, designed for React-friendly frontend development.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:frontend
+    - target: domain:web-development

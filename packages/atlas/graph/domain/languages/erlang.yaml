@@ -17,4 +17,7 @@ attributes:
     its operational model. It underpins WhatsApp, RabbitMQ, CouchDB, and
     Ejabberd. Elixir is a modern, Ruby-inspired language that compiles to
     BEAM bytecode and shares the entire Erlang/OTP ecosystem.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:telecommunications
+    - target: domain:software-engineering

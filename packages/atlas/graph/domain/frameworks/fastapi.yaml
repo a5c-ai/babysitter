@@ -4,6 +4,7 @@ attributes:
   displayName: "FastAPI"
   belongsToLanguageId: language:python
   category: web-backend
+  releasedAt: "2018"
   description: |
     The FastAPI framework.
 edges:
@@ -11,3 +12,8 @@ edges:
     - language:python
   used_by_skill_area:
     - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:django
+      comparison: "Python web frameworks — FastAPI is async-first; Django is batteries-included"
+    - target: framework:flask
+      comparison: "Python web frameworks — FastAPI is async-first; Flask is minimal"

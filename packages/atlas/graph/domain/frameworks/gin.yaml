@@ -11,3 +11,6 @@ edges:
     - language:go
   used_by_skill_area:
     - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:echo
+      comparison: "Go web frameworks"

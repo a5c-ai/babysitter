@@ -10,4 +10,7 @@ attributes:
     Lean — a dependently-typed functional programming language and
     theorem prover (Lean 4) developed by Microsoft Research / the Lean
     FRO, paired with the mathlib mathematics library.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:mathematics
+    - target: domain:computer-science

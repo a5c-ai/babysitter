@@ -18,4 +18,7 @@ attributes:
     systems programming, CLI tooling, and embedded contexts where both
     expressiveness and performance matter. The Nimble package manager and
     the Karax web frontend framework round out its ecosystem.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:systems-programming
+    - target: domain:software-engineering

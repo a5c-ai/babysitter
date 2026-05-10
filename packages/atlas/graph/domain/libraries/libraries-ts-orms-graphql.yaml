@@ -14,6 +14,13 @@ edges:
     - language:typescript
   used_for:
     - skill-area:backend-data-persistence
+  alternative_to:
+    - target: library:prisma
+      comparison: "TypeScript ORMs / query builders"
+    - target: library:typeorm
+      comparison: "TypeScript ORMs / query builders"
+    - target: library:sequelize
+      comparison: "TypeScript ORMs / query builders"
 ---
 nodeKind: Library
 id: library:sequelize
@@ -30,6 +37,13 @@ edges:
     - language:typescript
   used_for:
     - skill-area:backend-data-persistence
+  alternative_to:
+    - target: library:prisma
+      comparison: "TypeScript ORMs"
+    - target: library:typeorm
+      comparison: "TypeScript ORMs"
+    - target: library:knex
+      comparison: "TypeScript ORMs / query builders"
 ---
 nodeKind: Library
 id: library:typeorm
@@ -46,6 +60,13 @@ edges:
     - language:typescript
   used_for:
     - skill-area:backend-data-persistence
+  alternative_to:
+    - target: library:prisma
+      comparison: "TypeScript ORMs"
+    - target: library:sequelize
+      comparison: "TypeScript ORMs"
+    - target: library:knex
+      comparison: "TypeScript ORMs / query builders"
 ---
 nodeKind: Library
 id: library:mikro-orm

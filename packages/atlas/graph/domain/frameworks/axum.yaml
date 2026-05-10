@@ -11,3 +11,6 @@ edges:
     - language:rust
   used_by_skill_area:
     - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:actix-web
+      comparison: "Rust web frameworks — Axum is Tokio-native; Actix Web is actor-based"

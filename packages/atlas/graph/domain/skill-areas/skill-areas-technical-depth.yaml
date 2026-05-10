@@ -166,6 +166,9 @@ edges:
   applies_to:
     - target: specialization:observability
       confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:distributed-tracing
+      strength: recommended
 ---
 nodeKind: SkillArea
 id: skill-area:alerting-oncall
@@ -303,6 +306,11 @@ edges:
   applies_to:
     - target: specialization:backend-development
       confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:graphql-schema-design
+      strength: recommended
+    - target: skill-area:backend-async-processing
+      strength: recommended
 ---
 nodeKind: SkillArea
 id: skill-area:backend-data-persistence
@@ -320,6 +328,9 @@ edges:
   applies_to:
     - target: specialization:backend-development
       confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:caching-strategies
+      strength: recommended
 ---
 nodeKind: SkillArea
 id: skill-area:backend-auth

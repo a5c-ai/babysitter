@@ -4,6 +4,7 @@ attributes:
   displayName: "npm"
   kind: package-manager
   language: language:javascript
+  releasedAt: "2010"
   description: |
     Node package manager - default JavaScript package registry and CLI.
 edges:
@@ -11,3 +12,10 @@ edges:
     - language:javascript
   used_for:
     - target: skill-area:developer-environment
+  alternative_to:
+    - target: tool:pnpm
+      comparison: "JavaScript package managers"
+    - target: tool:yarn
+      comparison: "JavaScript package managers"
+    - target: tool:bun
+      comparison: "JavaScript package managers / runtimes"

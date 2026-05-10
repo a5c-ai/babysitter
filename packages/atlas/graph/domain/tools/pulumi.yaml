@@ -8,3 +8,8 @@ attributes:
 edges:
   tool_used_by:
     - target: skill-area:terraform-infrastructure
+  alternative_to:
+    - target: tool:terraform
+      comparison: "IaC — Pulumi uses general-purpose languages; Terraform uses HCL"
+    - target: tool:opentofu
+      comparison: "IaC tools"

@@ -14,6 +14,11 @@ edges:
     - language:typescript
   used_for:
     - skill-area:application-state-management
+  alternative_to:
+    - target: library:jotai
+      comparison: "React state management — Zustand is flux-like; Jotai is atomic"
+    - target: library:recoil
+      comparison: "React state management — Zustand is flux-like; Recoil is graph-based"
 ---
 nodeKind: Library
 id: library:jotai
@@ -30,6 +35,11 @@ edges:
     - language:typescript
   used_for:
     - skill-area:application-state-management
+  alternative_to:
+    - target: library:zustand
+      comparison: "React state management — Jotai is atomic; Zustand is flux-like"
+    - target: library:recoil
+      comparison: "React state management — Jotai is atomic; Recoil is graph-based"
 ---
 nodeKind: Library
 id: library:recoil
@@ -46,6 +56,11 @@ edges:
     - language:typescript
   used_for:
     - skill-area:application-state-management
+  alternative_to:
+    - target: library:zustand
+      comparison: "React state management — Recoil is graph-based; Zustand is flux-like"
+    - target: library:jotai
+      comparison: "React state management — Recoil is graph-based; Jotai is atomic"
 ---
 nodeKind: Library
 id: library:framer-motion

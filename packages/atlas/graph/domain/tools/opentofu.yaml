@@ -10,3 +10,8 @@ edges:
     - target: language:hcl
   used_for:
     - target: skill-area:deployment-automation
+  alternative_to:
+    - target: tool:terraform
+      comparison: "IaC — OpenTofu is an open-source fork of Terraform"
+    - target: tool:pulumi
+      comparison: "IaC tools"
