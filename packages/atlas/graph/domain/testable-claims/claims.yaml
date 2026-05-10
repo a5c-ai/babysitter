@@ -358,3 +358,276 @@ attributes:
 edges:
   asserts_about:
     - agent-core-impl:codex.core@1.x
+---
+nodeKind: TestableClaim
+id: claim:codex-lacks-auto-memory
+attributes:
+  displayName: "Codex has no auto-memory extraction"
+  description: |
+    Codex CLI's memory system (memory-system:codex-agents-md) has autoExtraction=false
+    and consolidation=none. There is no background memory consolidation or auto-dream
+    phase. Claude Code has autoExtraction=true and consolidation=auto-dream. In
+    orchestration loops that benefit from session-to-session learned context, Codex
+    requires manual AGENTS.md authoring whereas Claude Code accumulates context
+    automatically. The architectural reason is that Codex runs in a sandboxed
+    environment where writes outside the sandbox boundary are prohibited.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: high
+edges:
+  asserts_about:
+    - agentVersion:codex:ge-0-119-0
+---
+nodeKind: TestableClaim
+id: claim:cursor-lacks-cli-mode
+attributes:
+  displayName: "Cursor has no standalone CLI mode"
+  description: |
+    Cursor (agent:cursor) is distributed exclusively as an IDE application
+    (install:manual, cliCommand: cursor launches the IDE). It has no headless
+    --print / non-interactive scripted execution path equivalent to Claude Code's
+    claude -p or Codex's codex --quiet / --output-last-message flags. Gemini CLI
+    and Codex support stdin-injection for pipeline use; Cursor does not expose an
+    equivalent non-GUI execution surface.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: high
+edges:
+  asserts_about:
+    - agentVersion:cursor:ge-0-0-0
+---
+nodeKind: TestableClaim
+id: claim:gemini-lacks-plugins
+attributes:
+  displayName: "Gemini CLI has no plugin marketplace"
+  description: |
+    Gemini CLI (@current) has no supports edge for capability:supports-plugin-marketplaces.
+    Claude Code supports /plugin marketplace add|list|update|remove plus
+    capability:supports-plugin-marketplaces (full). Gemini CLI exposes tool-use and
+    skills but lacks a first-party installable plugin ecosystem with install.md-driven
+    distribution. Extensions exist but are not a discoverable marketplace surface
+    comparable to Claude Code's plugin registry.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: medium
+edges:
+  asserts_about:
+    - agentVersion:gemini:ge-0-0-0
+---
+nodeKind: TestableClaim
+id: claim:codex-lacks-mcp-client
+attributes:
+  displayName: "Codex MCP support is runtime-only, not native agent-version capability"
+  description: |
+    Codex MCP capability (capability:supports-mcp, level:full) is declared on
+    agent-runtime-impl:codex.runtime@1.x, not on the agentVersion node directly.
+    Claude Code declares capability:supports-mcp at the agentVersion level with full
+    level. The runtime-only declaration means MCP connectivity depends on the runtime
+    being present; stripped or embedded deployments may lack MCP client support.
+    Additionally, mcp-streamable-http is only partial for Codex vs full for Claude Code.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: medium
+edges:
+  asserts_about:
+    - agentVersion:codex:ge-0-119-0
+---
+nodeKind: TestableClaim
+id: claim:cursor-lacks-subagent-dispatch
+attributes:
+  displayName: "Cursor has no built-in subagent dispatch capability"
+  description: |
+    Cursor (agentVersion:cursor:ge-0-0-0) has no supports edge for
+    capability:supports-subagent-dispatch. Claude Code declares this at full level
+    (Task tool, up to 10 parallel subagents). Codex declares it on the runtime
+    (handoff primitive). Cursor's architecture is IDE-bound; there is no documented
+    mechanism for Cursor to spawn parallel or serial child agent sessions
+    programmatically as part of the same task graph.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: high
+edges:
+  asserts_about:
+    - agentVersion:cursor:ge-0-0-0
+---
+nodeKind: TestableClaim
+id: claim:codex-sandbox-only
+attributes:
+  displayName: "Codex default launch uses native sandboxing"
+  description: |
+    Codex CLI's runtime (agent-runtime-impl:codex.runtime@1.x) sets
+    subprocessSandboxStrategy=native-sandbox. The --full-auto flag equates to
+    --sandbox workspace-write. To bypass sandboxing, operators must pass
+    --dangerously-bypass-approvals-and-sandbox, which the CLI help marks as
+    "extremely dangerous." Claude Code has no equivalent default sandbox constraint
+    on filesystem access; it uses a permission-mode model (plan/bypass-permissions/default)
+    without process-level sandboxing.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: high
+edges:
+  asserts_about:
+    - agentVersion:codex:ge-0-119-0
+---
+nodeKind: TestableClaim
+id: claim:claude-code-has-auto-dream
+attributes:
+  displayName: "Claude Code consolidates memory via auto-dream"
+  description: |
+    memory-system:claude-code-auto-memory has autoExtraction=true and
+    consolidation=auto-dream. A post-session background pass merges, deduplicates,
+    and reorganizes extracted memories stored under ~/.claude/projects/<hash>/memory/.
+    No other primary CLI agent (Codex, Gemini CLI, OpenClaw, Cursor) has an
+    equivalent automated background consolidation pass. This gives Claude Code a
+    compounding learned-context advantage across repeated sessions on the same project.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: high
+edges:
+  asserts_about:
+    - agentVersion:claude:ge-0-0-0
+---
+nodeKind: TestableClaim
+id: claim:claude-code-has-hooks
+attributes:
+  displayName: "Claude Code exposes PreToolUse/PostToolUse/Stop hooks"
+  description: |
+    agent-core-impl:claude-code.core@1.x fires hook-surface:pre-tool-use,
+    hook-surface:post-tool-use, hook-surface:stop, hook-surface:user-prompt-submit,
+    hook-surface:claude.subagent-start, hook-surface:subagent-stop, and
+    hook-surface:pre-compact. The agentVersion node carries capability:runtime-hooks
+    and capability:stop-hook both at level:full. This hook surface enables
+    babysitter-style orchestration wrappers. Codex fires only codex.on-tool-call
+    and codex.on-stop; Gemini CLI fires pre-prompt, post-response, and tool-call
+    pre/post but lacks a pre-compact or subagent-stop equivalent.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: high
+edges:
+  asserts_about:
+    - agentVersion:claude:ge-0-0-0
+---
+nodeKind: TestableClaim
+id: claim:codex-has-sandbox
+attributes:
+  displayName: "Codex provides secure sandboxed execution"
+  description: |
+    Codex CLI's runtime sets subprocessSandboxStrategy=native-sandbox and the
+    default --full-auto launch enforces --sandbox workspace-write. The sandbox
+    restricts filesystem writes to the workspace boundary and restricts network
+    access, providing security isolation not offered by Claude Code or Gemini CLI
+    out of the box. This is a notable strength for multi-tenant or untrusted-code
+    scenarios where escape from the agent's working directory must be prevented.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: medium
+edges:
+  asserts_about:
+    - agentVersion:codex:ge-0-119-0
+---
+nodeKind: TestableClaim
+id: claim:windsurf-learns-codebase
+attributes:
+  displayName: "Windsurf automatically learns codebase patterns"
+  description: |
+    memory-system:windsurf-memories has autoExtraction=true, consolidation=periodic,
+    and persistence=user-scoped. Unlike file-based manual systems (Cursor Notepads,
+    AGENTS.md), Windsurf Memories operates server-side as a proprietary opaque
+    learned-context layer that captures coding patterns, naming conventions, and
+    architecture preferences without user intervention. The trade-off is that the
+    memory cannot be manually inspected, edited, or exported.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: medium
+edges:
+  asserts_about:
+    - agent-version:windsurf@current
+---
+nodeKind: TestableClaim
+id: claim:gemini-has-1m-context
+attributes:
+  displayName: "Gemini CLI supports 1M token context window"
+  description: |
+    agent-core-impl:gemini-cli.core@current documents compactionTriggerNotes:
+    "Gemini CLI relies on the model's 1M-token context window directly; no in-CLI
+    compaction is performed for the @current pin." Claude Code compacts at ~70%
+    fill (PreCompact hook); Codex uses rolling-summary compaction. Gemini's
+    1M-token native window means large codebases can be ingested without
+    compaction loss, at the cost of higher token spend per turn.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: high
+edges:
+  asserts_about:
+    - agentVersion:gemini:ge-0-0-0
+---
+nodeKind: TestableClaim
+id: claim:cursor-has-codebase-index
+attributes:
+  displayName: "Cursor indexes entire codebase into a vector store for RAG"
+  description: |
+    knowledge-fabric-impl:cursor.knowledge@current describes that Cursor indexes
+    the entire codebase into a vector store for semantic code search, enabling
+    RAG-style retrieval of relevant code snippets during conversations. Context
+    pinning via @-mentions lets users anchor specific files, docs, or web pages
+    as knowledge sources. Claude Code and Gemini CLI do not include built-in
+    whole-codebase vector indexing; they rely on explicit file reads and tool
+    calls to retrieve code context.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: high
+edges:
+  asserts_about:
+    - agentVersion:cursor:ge-0-0-0
+---
+nodeKind: TestableClaim
+id: claim:openclaw-has-soul-md
+attributes:
+  displayName: "OpenClaw uses SOUL.md for persistent agent identity"
+  description: |
+    memory-system:openclaw-soul-memory implements a dual-file pattern: SOUL.md
+    defines the agent's personality, communication style, and core behaviors (the
+    "who am I" file), while MEMORY.md captures learned facts and session
+    observations (the "what have I learned" file). No other primary CLI agent
+    models identity separately from knowledge. This pattern enables the same agent
+    persona to be reused across projects while keeping project-specific memories
+    local and separate from behavioral configuration.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: medium
+edges:
+  asserts_about:
+    - agentVersion:openclaw:ge-0-0-0
+---
+nodeKind: TestableClaim
+id: claim:amp-has-code-intelligence
+attributes:
+  displayName: "Amp leverages Sourcegraph code intelligence for cross-repo context"
+  description: |
+    memory-system:amp-memory combines AGENTS.md instruction files with Sourcegraph's
+    code intelligence context, providing cross-repository symbol search, definition
+    lookup, and historical code context as a hybrid memory layer. agent-core-impl:amp.core@current
+    supports Oracle and Librarian as first-party specialized subagents (up to 8
+    concurrent via maxParallelTasks). No other primary CLI agent bundles a live
+    cross-repository code intelligence backend; Claude Code and Codex rely on
+    filesystem reads within the working directory.
+  testStatus: passing
+  testType: manual
+  category: compatibility
+  priority: high
+edges:
+  asserts_about:
+    - agent-version:amp@current
