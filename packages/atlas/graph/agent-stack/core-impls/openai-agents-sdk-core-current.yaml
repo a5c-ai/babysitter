@@ -56,6 +56,18 @@ edges:
     - target: capability:can-multi-turn
       versionRange: '>=0.1.0'
       level: full
+    - target: capability:supports-guardrails
+      versionRange: '>=0.1.0'
+      level: full
+      notes: InputGuardrail and OutputGuardrail run in parallel with the agent loop.
+    - target: capability:supports-handoffs
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Handoffs modeled as tool calls transferring control to another Agent.
+    - target: capability:supports-tracing
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Built-in trace spans for LLM calls, tool invocations, and handoffs.
   supports_effort_level:
     - target: effort-level:low
     - target: effort-level:medium

@@ -460,3 +460,24 @@ edges:
     - target: capability:can-multi-turn
       versionRange: '>=0.1.0'
       level: full
+    - target: capability:supports-guardrails
+      versionRange: '>=0.1.0'
+      level: full
+      notes: |
+        Input and output guardrails run in parallel with agent execution.
+        InputGuardrail validates user input; OutputGuardrail validates
+        agent responses. Guardrails can tripwire to halt execution.
+    - target: capability:supports-handoffs
+      versionRange: '>=0.1.0'
+      level: full
+      notes: |
+        Structured agent-to-agent handoffs modeled as tool calls. Handoff
+        transfers conversation ownership to another Agent instance with
+        defined input filters and output types.
+    - target: capability:supports-tracing
+      versionRange: '>=0.1.0'
+      level: full
+      notes: |
+        Built-in tracing captures the full execution flow — LLM calls,
+        tool invocations, handoffs, and guardrail checks. Traces are
+        exportable to external backends for debugging and observability.

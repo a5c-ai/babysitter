@@ -1,0 +1,31 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:vibe-kanban.ui@current
+attributes:
+  displayName: "Vibe Kanban UI (current) — web-only"
+  agentVersionId: agent-version:vibe-kanban@current
+  packageRef: source-ref:vibe-kanban-github
+  uiKind: web-only
+  presentationsBundled:
+    - presentation:vibe-kanban-web
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  notes: |
+    Vibe Kanban is a web-only kanban board. The UI layer wraps the
+    presentation and exposes drag-and-drop task management, agent
+    dispatch controls, and parallel progress views.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:prompt-input
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:vibe-kanban-task-card
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:vibe-kanban-agent-picker
+      attributes:
+        mechanism: ui-control

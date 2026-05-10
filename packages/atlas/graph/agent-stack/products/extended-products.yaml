@@ -282,3 +282,4 @@ edges:
     - target: skill-area:ai-agent-development
     - target: skill-area:multi-agent-coordination
     - target: skill-area:tool-use
+    - target: skill-area:agentic-loops

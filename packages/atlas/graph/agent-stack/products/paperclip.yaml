@@ -15,9 +15,14 @@ attributes:
     to code development and deployment — without human intervention.
     Designed for fully autonomous business workflows with agent-to-agent
     delegation, persistent state, and goal-driven task decomposition.
+  aliases:
+    - "paperclip"
 edges:
   has_version:
     - agent-version:paperclip@current
+  integrates_with:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:multi-agent-coordination
 ---
 nodeKind: AgentVersion
 id: agent-version:paperclip@current
@@ -26,14 +31,31 @@ attributes:
   versionRange: '>=0.1.0'
   releasedAt: '2025-01-01'
   installMethods:
-  - install:manual
+    - install:manual
   minSchemaVersion: 6.0.0
 edges:
   version_of:
-  - agent:paperclip
+    - agent:paperclip
+  composed_of:
+    - target: agent-core-impl:paperclip.core@current
+      role: core
+    - target: agent-runtime-impl:paperclip.runtime@current
+      role: runtime
   sourced_from: []
   supports:
-  - target: capability:can-multi-turn
-    versionRange: '>=0.1.0'
-    level: full
-    notes: Paperclip agents maintain persistent multi-turn state across workflows.
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Paperclip agents maintain persistent multi-turn state across workflows.
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Multi-agent delegation for end-to-end autonomous business operations.
+    - target: capability:supports-parallel-execution
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Concurrent agent execution for parallel business workflow steps.
+    - target: capability:streaming
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Streams agent output in the web UI.

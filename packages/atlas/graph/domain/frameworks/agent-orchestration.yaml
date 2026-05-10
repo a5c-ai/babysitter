@@ -168,6 +168,22 @@ edges:
     - target: skill-area:agentic-loops
   integrates_with:
     - target: topic:a2a-protocol
+    - target: topic:parallel-agent-execution
+  supports:
+    - target: capability:supports-subagent-dispatch
+      level: full
+      notes: |
+        ADK's sub_agents parameter enables agent-to-agent delegation via
+        sequential, parallel, and loop agent compositions.
+    - target: capability:supports-tool-use
+      level: full
+      notes: |
+        Built-in tool calling with automatic schema generation from Python
+        function signatures and Pydantic models.
+    - target: capability:supports-mcp
+      level: full
+      notes: |
+        Native MCP tool server integration for external tool access.
 ---
 nodeKind: Framework
 id: framework:vercel-ai-sdk
@@ -197,3 +213,8 @@ edges:
     - target: skill-area:server-side-rendering
     - target: skill-area:tool-use
     - target: skill-area:agentic-loops
+    - target: skill-area:multi-agent-coordination
+    - target: skill-area:retrieval-augmented-generation
+  integrates_with:
+    - target: presentation:ai-elements
+    - target: framework:react

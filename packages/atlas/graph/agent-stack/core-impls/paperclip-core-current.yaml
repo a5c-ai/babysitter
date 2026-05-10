@@ -1,0 +1,53 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:paperclip.core@current
+attributes:
+  displayName: "Paperclip Core (current)"
+  agentVersionId: agent-version:paperclip@current
+  packageRef: source-ref:paperclip-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    Multi-agent tool-use loop for autonomous business operations. Each
+    agent runs its own loop with goal-driven task decomposition and
+    agent-to-agent delegation for cross-functional workflows.
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: |
+    Long-running autonomous workflows rely on persistent state and
+    goal decomposition rather than in-context memory alone.
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: |
+    Agents delegate to other agents via structured handoffs for
+    cross-functional business operations (e.g., customer service
+    agent delegates to engineering agent).
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Each agent produces structured output consumed by downstream
+    agents or surfaced in the web dashboard.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: paperclip-internal
+  supportedTransportProtocols:
+    - model-transport:openai-responses
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:paperclip
+      role: core
+  speaks:
+    - target: model-transport:openai-responses
+  supports:
+    - target: capability:streaming
+      versionRange: '>=0.1.0'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=0.1.0'
+      level: full
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Agent-to-agent delegation for multi-agent business workflows.
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full

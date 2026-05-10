@@ -1,0 +1,40 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:pikiclaw-voice-input
+attributes:
+  displayName: "PikiClaw Voice Input"
+  description: |
+    Mobile voice input primitive for the PikiClaw agent platform.
+    Tap-to-speak interface that captures voice input via device
+    microphone, transcribes to text, and submits as agent prompts.
+    Optimized for mobile usage patterns where typing is inconvenient.
+  kind: multimodal-input
+  surface: multimodal-input
+  category: interaction-primitive-category:content-input
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:content-input
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:pikiclaw-plugin-marketplace
+attributes:
+  displayName: "PikiClaw Plugin Marketplace"
+  description: |
+    In-app plugin discovery and installation interface for PikiClaw.
+    Browse, search, and install plugins from the PikiClaw marketplace
+    directly within the mobile app. Supports plugin ratings, reviews,
+    and one-tap installation.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:configuration

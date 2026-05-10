@@ -1,0 +1,64 @@
+---
+nodeKind: Capability
+id: capability:supports-guardrails
+attributes:
+  displayName: "Supports guardrails"
+  description: |
+    The framework or agent supports input/output validation guardrails
+    that run in parallel with agent execution. Guardrails can inspect
+    and validate user input before processing and agent output before
+    delivery, enabling safety and compliance enforcement.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: safety
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-handoffs
+attributes:
+  displayName: "Supports handoffs"
+  description: |
+    The framework supports structured agent-to-agent handoffs where
+    control transfers from one agent to another within a run. Distinct
+    from general subagent dispatch — handoffs imply a formal transfer
+    of conversation ownership with defined input/output contracts.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: subagents
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-tracing
+attributes:
+  displayName: "Supports tracing"
+  description: |
+    The framework provides built-in tracing and observability for agent
+    runs. Traces capture the full execution flow including LLM calls,
+    tool invocations, handoffs, and guardrail checks for debugging
+    and performance analysis.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: telemetry
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-telephony
+attributes:
+  displayName: "Supports telephony"
+  description: |
+    The tool or service provides telephony capabilities — voice calls,
+    SMS, and phone-based interactions. Enables agents to make/receive
+    calls and send/receive text messages as part of their workflows.
+  appliesToNodeKinds: ["ToolServer", "Tool"]
+  category: modality
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-voice-io
+attributes:
+  displayName: "Supports voice input/output"
+  description: |
+    The tool or agent supports voice as both an input and output modality.
+    Can accept spoken input (via microphone/phone) and produce voice
+    output (via text-to-speech or direct audio). Distinct from vision-input
+    which handles image modality.
+  appliesToNodeKinds: ["ToolServer", "Tool", "AgentVersion"]
+  category: modality
+edges: {}

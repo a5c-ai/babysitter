@@ -23,5 +23,22 @@ edges:
     - target: framework:vercel-ai-sdk
     - target: framework:react
     - target: library:shadcn
+  supports_interaction_primitive:
+    - target: interaction-primitive:ai-elements-chat
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:ai-elements-tool-call-card
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:ai-elements-streaming-response
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:prompt-input
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:file-attachment
+      attributes:
+        mechanism: ui-control
   lib_applies_to_domain:
     - target: domain:software-engineering
+    - target: skill-area:ai-agent-development

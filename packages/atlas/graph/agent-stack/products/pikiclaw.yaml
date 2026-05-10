@@ -14,9 +14,14 @@ attributes:
     agents on the go, with plugin extensibility for custom tools,
     workflows, and integrations. Targets developers who need agent
     access from mobile devices with touch-optimized UI.
+  aliases:
+    - "pikiclaw"
 edges:
   has_version:
     - agent-version:pikiclaw@current
+  integrates_with:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:tool-use
 ---
 nodeKind: AgentVersion
 id: agent-version:pikiclaw@current
@@ -25,12 +30,46 @@ attributes:
   versionRange: '>=1.0.0'
   releasedAt: '2025-01-01'
   installMethods:
-  - install:manual
+    - install:manual
   minSchemaVersion: 6.0.0
 edges:
   version_of:
-  - agent:pikiclaw
+    - agent:pikiclaw
+  composed_of:
+    - target: agent-core-impl:pikiclaw.core@current
+      role: core
+    - target: agent-runtime-impl:pikiclaw.runtime@current
+      role: runtime
+    - target: agent-platform-impl:pikiclaw.platform@current
+      role: platform
+    - target: agent-ui-impl:pikiclaw.ui@current
+      role: ui
   sourced_from: []
+  supports:
+    - target: capability:supports-mcp
+      versionRange: '>=1.0.0'
+      level: full
+      notes: MCP tool server support via backend proxy.
+    - target: capability:supports-plugins
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Plugin marketplace with installable extensions.
+    - target: capability:vision-input
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Mobile camera and photo library as vision input sources.
+    - target: capability:streaming
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Streams model output to mobile UI.
+    - target: capability:can-multi-turn
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Multi-turn conversations with persistent session state.
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Tool calling via registered plugins and MCP servers.
 ---
 nodeKind: Presentation
 id: presentation:pikiclaw-mobile
@@ -40,7 +79,8 @@ attributes:
   description: |
     Native mobile presentation layer for the PikiClaw agent platform.
     Touch-optimized interface for agent interaction, plugin management,
-    and workflow execution on iOS and Android devices.
+    and workflow execution on iOS and Android devices. Supports voice
+    input, camera-based vision input, and a built-in plugin marketplace.
   renderingTechnology: native
   themeSupport: light-dark
   accessibilitySupport: basic
