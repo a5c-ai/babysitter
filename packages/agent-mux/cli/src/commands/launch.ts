@@ -487,12 +487,13 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       });
       proxyRuntime.applyHarnessEnv(plan.env);
 
-      // Pi ignores OPENAI_BASE_URL env var and has no --base-url CLI flag.
-      // Write a models.json config that points Pi at the local proxy.
+      // Pi ignores OPENAI_BASE_URL — write a models.json config that registers
+      // a custom provider pointing to the local proxy.
       if (plan.harness === 'pi') {
         const { writeFileSync, mkdirSync } = await import('node:fs');
         const { join } = await import('node:path');
-        const piConfigDir = join(process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp', '.pi', 'agent');
+        const piConfigDir = process.env['PI_CODING_AGENT_DIR']
+          ?? join(process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp', '.pi', 'agent');
         mkdirSync(piConfigDir, { recursive: true });
         const modelsConfig = {
           providers: {
@@ -500,7 +501,14 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
               baseUrl: proxyRuntime.url,
               api: 'openai-completions',
               apiKey: proxyRuntime.authToken ?? 'proxy-token',
-              models: [{ id: plan.model }],
+              models: [{
+                id: plan.model,
+                reasoning: false,
+                input: ['text'],
+                cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+                contextWindow: 128000,
+                maxTokens: 16384,
+              }],
             },
           },
         };

@@ -30,13 +30,6 @@ describe('pipeline-owned live stack scenario execution', () => {
       return;
     }
 
-    // Provider routing incompatibilities (e.g., harness doesn't support custom endpoints)
-    // are acceptable skips — the test verified the plumbing works up to the provider boundary.
-    if (result.status === 'skipped' && result.skipReason?.includes('provider routing not supported')) {
-      expect(result.artifactPath).toBeDefined();
-      return;
-    }
-
     expect(result.status, result.failure ?? result.skipReason).toBe('passed');
     expect(result.missingTraceIds).toEqual([]);
     expect(result.missingArtifacts ?? []).toEqual([]);
@@ -46,7 +39,7 @@ describe('pipeline-owned live stack scenario execution', () => {
     const fs = await import('node:fs/promises');
     const artifactContent = await fs.readFile(result.artifactPath!, 'utf8');
     const artifact = JSON.parse(artifactContent);
-    expect(artifact.status).toMatch(/^(passed|skipped)$/);
+    expect(artifact.status).toBe('passed');
   }, Number(process.env['LIVE_STACK_TEST_TIMEOUT_MS'] ?? 25 * 60 * 1000));
 
   it('keeps local non-live runs cheap and explicit', async () => {

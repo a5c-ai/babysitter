@@ -525,9 +525,6 @@ function classifySkippableLiveProviderFailure(result: CommandResult): string | u
   ) {
     return 'live provider unavailable: configured credentials were rejected';
   }
-  if (/platform\.openai\.com/i.test(combined) && /api key/i.test(combined)) {
-    return 'live provider unavailable: harness connected to openai.com instead of configured provider (provider routing not supported by this harness version)';
-  }
   return undefined;
 }
 
