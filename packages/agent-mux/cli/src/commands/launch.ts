@@ -508,7 +508,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         const modelsConfig = {
           providers: {
             'amux-proxy': {
-              baseUrl: proxyRuntime.url,
+              baseUrl: `${proxyRuntime.url}/v1`,
               api: 'openai-completions',
               apiKey: proxyRuntime.authToken ?? 'proxy-token',
               models: [{
