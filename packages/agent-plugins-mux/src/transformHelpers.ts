@@ -152,13 +152,15 @@ export function generateHarnessManifest(
 
 export function generateTeamInstall(
   manifest: A5cPluginManifest,
-  _targetProfile: TargetProfile
+  _targetProfile: TargetProfile,
+  ext = '.js',
 ): string {
+  const sharedRequire = ext === '.js' ? '../bin/install-shared' : `../bin/install-shared${ext}`;
   return `#!/usr/bin/env node
 'use strict';
 
 var path = require('path');
-var shared = require('../bin/install-shared');
+var shared = require('${sharedRequire}');
 
 var workspace = process.cwd();
 for (var i = 0; i < process.argv.length; i++) {

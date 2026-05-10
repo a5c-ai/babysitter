@@ -345,7 +345,7 @@ export function generateExtraFiles(
     files.push({ path: `bin/install${ext}`, content: generateInstallScript(manifest, targetProfile), executable: true });
     files.push({ path: `bin/uninstall${ext}`, content: generateUninstallScript(manifest, targetProfile), executable: true });
     files.push({ path: `bin/install-shared${ext}`, content: generateInstallShared(manifest, targetProfile, sourceDir) });
-    files.push({ path: `scripts/team-install${ext}`, content: generateTeamInstall(manifest, targetProfile), executable: true });
+    files.push({ path: `scripts/team-install${ext}`, content: generateTeamInstall(manifest, targetProfile, ext), executable: true });
 
     if (packageMetadata.emitCjsWrappers && ext !== '.cjs') {
       files.push({ path: 'bin/cli.cjs', content: generateCjsWrapper('cli'), executable: true });
