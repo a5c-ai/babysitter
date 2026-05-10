@@ -33,6 +33,8 @@ edges:
       role: platform
     - target: agent-ui-impl:opencode.ui@current
       role: ui
+    - target: knowledge-fabric-impl:opencode.knowledge@current
+      role: knowledge-fabric
   sourced_from: []
   supports:
     - target: capability:skills

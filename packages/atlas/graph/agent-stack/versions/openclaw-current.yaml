@@ -31,6 +31,8 @@ edges:
       role: platform
     - target: agent-ui-impl:openclaw.ui@current
       role: ui
+    - target: knowledge-fabric-impl:openclaw.knowledge@current
+      role: knowledge-fabric
   sourced_from: []
   supports:
     - target: capability:skills

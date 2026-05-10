@@ -11,6 +11,9 @@ attributes:
 edges:
   version_of:
   - agent:aider
+  composed_of:
+  - target: knowledge-fabric-impl:aider.knowledge@current
+    role: knowledge-fabric
   sourced_from: []
   supports:
   - target: capability:streaming
@@ -35,6 +38,9 @@ attributes:
 edges:
   version_of:
   - agent:continue
+  composed_of:
+  - target: knowledge-fabric-impl:continue.knowledge@current
+    role: knowledge-fabric
   sourced_from: []
   supports:
   - target: capability:streaming
@@ -63,6 +69,9 @@ attributes:
 edges:
   version_of:
   - agent:cline
+  composed_of:
+  - target: knowledge-fabric-impl:cline.knowledge@current
+    role: knowledge-fabric
   sourced_from: []
   supports:
   - target: capability:streaming
@@ -91,6 +100,9 @@ attributes:
 edges:
   version_of:
   - agent:roo-code
+  composed_of:
+  - target: knowledge-fabric-impl:roo-code.knowledge@current
+    role: knowledge-fabric
   sourced_from: []
   supports:
   - target: capability:streaming
@@ -202,6 +214,9 @@ attributes:
 edges:
   version_of:
   - agent:windsurf
+  composed_of:
+  - target: knowledge-fabric-impl:windsurf.knowledge@current
+    role: knowledge-fabric
   sourced_from: []
   supports:
   - target: capability:streaming

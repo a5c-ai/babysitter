@@ -1,0 +1,104 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:notion-fabric
+attributes:
+  displayName: "Notion as Organizational Knowledge Fabric"
+  description: |
+    Notion as a human-facing organizational knowledge fabric. Databases,
+    pages, relations, and rollups create a structured knowledge graph that
+    humans maintain collaboratively. The Notion API enables programmatic
+    access for agent-driven knowledge retrieval and updates. Templates,
+    synced blocks, and database views provide multiple entry points into the
+    same knowledge. As a knowledge fabric, Notion excels at human-curated
+    organizational knowledge — wikis, runbooks, project docs, meeting notes,
+    and decision logs — with an API surface that makes it agent-accessible.
+  knowledgeFileFormats:
+    - notion-blocks
+    - notion-databases
+    - markdown (export)
+  retrievalStrategy: api-query
+  knowledgePersistence: cloud-saas
+  knowledgeScopes:
+    - organization
+    - team
+  autoExtractionSupport: false
+  notes: |
+    Notion's relational database model is uniquely powerful for knowledge
+    fabrics — properties, relations, and rollups create a structured
+    knowledge graph that pure document-based systems lack. The trade-off
+    is vendor lock-in and the impedance mismatch between Notion's block
+    model and the plain text that LLMs consume. Many teams bridge this
+    with Notion-to-vector-store pipelines for RAG access.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:notion
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:confluence-fabric
+attributes:
+  displayName: "Confluence as Enterprise Knowledge Fabric"
+  description: |
+    Confluence as an enterprise knowledge fabric. Spaces, pages, labels,
+    and macros organize knowledge with Atlassian's permission model for
+    access control. REST API and Forge apps enable programmatic access.
+    Confluence's strength is enterprise adoption — it is often the system
+    of record for technical documentation, runbooks, postmortems, and
+    architectural decisions in large organizations. As a knowledge fabric,
+    Confluence provides the human-maintained knowledge layer that agents
+    can query via API or RAG pipeline.
+  knowledgeFileFormats:
+    - confluence-storage-format
+    - markdown (export)
+  retrievalStrategy: api-query
+  knowledgePersistence: cloud-saas
+  knowledgeScopes:
+    - organization
+    - enterprise
+  autoExtractionSupport: false
+  notes: |
+    Confluence's main knowledge fabric advantage is ubiquity — it is already
+    the knowledge system in most enterprises. The challenge is knowledge
+    quality — Confluence wikis often become graveyards of outdated pages.
+    Effective knowledge fabric use requires active curation, page ownership,
+    and staleness detection. Many enterprise RAG systems use Confluence as
+    a primary connector for exactly this reason.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:confluence
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:glean-fabric
+attributes:
+  displayName: "Glean as Enterprise AI Search Fabric"
+  description: |
+    Glean as an enterprise AI search knowledge fabric. Cross-tool indexing
+    across Confluence, Slack, Google Drive, GitHub, Jira, Notion, and 100+
+    integrations. Permissions-aware search respects source system access
+    controls. Deep learning models personalize ranking based on user role,
+    team, and activity. The generative AI assistant answers questions grounded
+    in company knowledge with citations. As a knowledge fabric, Glean is the
+    unified search layer that surfaces knowledge regardless of where it lives
+    in the organization's tool ecosystem.
+  knowledgeFileFormats:
+    - cross-tool-index
+  retrievalStrategy: semantic-search
+  knowledgePersistence: managed-index
+  knowledgeScopes:
+    - organization
+    - enterprise
+  autoExtractionSupport: true
+  notes: |
+    Glean's distinguishing feature is cross-tool knowledge unification —
+    it indexes knowledge from wherever it lives (wikis, chat, code, tickets)
+    and makes it searchable through a single surface. The permissions-aware
+    model is critical for enterprise adoption — unlike a simple RAG pipeline,
+    Glean respects who can see what. This makes it a true enterprise
+    knowledge fabric rather than just a search engine.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:glean

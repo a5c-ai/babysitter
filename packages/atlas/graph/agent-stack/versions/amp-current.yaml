@@ -20,4 +20,6 @@ edges:
       role: platform
     - target: agent-ui-impl:amp.ui@current
       role: ui
+    - target: knowledge-fabric-impl:amp.knowledge@current
+      role: knowledge-fabric
   sourced_from: []

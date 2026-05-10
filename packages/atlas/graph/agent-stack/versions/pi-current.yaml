@@ -31,6 +31,8 @@ edges:
       role: platform
     - target: agent-ui-impl:pi.ui@current
       role: ui
+    - target: knowledge-fabric-impl:pi.knowledge@current
+      role: knowledge-fabric
   sourced_from: []
   supports:
     - target: capability:skills
