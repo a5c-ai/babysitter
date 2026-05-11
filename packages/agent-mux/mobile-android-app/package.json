@@ -17,10 +17,10 @@
     "expo-camera": "~15.0.16",
     "expo-haptics": "~13.0.1",
     "expo-notifications": "~0.28.19",
-    "react": "18.2.0",
-    "react-native": "0.74.5"
+    "react": "^19.1.0",
+    "react-native": "^0.78.0"
   },
   "devDependencies": {
-    "@types/react": "^18.2.79"
+    "@types/react": "^19.1.0"
   }
 }

@@ -66,12 +66,13 @@ export async function tuiCommand(
   }
 
   const { render } = await import('ink');
+  // Type assertion bridges Ink 5.x (React 18 types) with React 19's stricter ReactNode
   render(
     React.createElement(tui.App as never, {
       client: client as never,
       plugins: plugins as never,
       defaultAgent,
-    }),
+    }) as any,
   );
   return ExitCode.SUCCESS;
 }

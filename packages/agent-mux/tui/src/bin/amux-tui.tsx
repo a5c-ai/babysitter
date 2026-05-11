@@ -60,13 +60,14 @@ if (invokedAsScript) {
       }
     },
     renderApp: ({ client, plugins }) => {
+      // Type assertion bridges Ink 5.x (React 18 types) with React 19's stricter ReactNode
       render(
         React.createElement(App, {
           client,
           plugins,
           initialViewId: initialViewId(),
           disableChatAutoPrompt: chatAutoPromptDisabled(),
-        }),
+        }) as any,
       );
     },
   }).catch((error: unknown) => {
