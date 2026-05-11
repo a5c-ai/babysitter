@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:paypal
 attributes:
   displayName: "PayPal"
+  homepageUrl: "https://developer.paypal.com"
   kind: other
   description: |
     Global digital payments platform for online and in-person transactions.
@@ -27,6 +28,7 @@ nodeKind: Tool
 id: tool:square
 attributes:
   displayName: "Square"
+  homepageUrl: "https://squareup.com"
   kind: other
   description: |
     Payment and commerce platform for in-person, online, and mobile
@@ -51,6 +53,7 @@ nodeKind: Tool
 id: tool:paddle
 attributes:
   displayName: "Paddle"
+  homepageUrl: "https://www.paddle.com"
   kind: other
   description: |
     Merchant of record payment infrastructure for SaaS businesses.
@@ -75,6 +78,7 @@ nodeKind: Tool
 id: tool:braintree
 attributes:
   displayName: "Braintree"
+  homepageUrl: "https://www.braintreepayments.com"
   kind: other
   description: |
     PayPal-owned full-stack payment platform for accepting credit cards,

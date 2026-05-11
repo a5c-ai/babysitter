@@ -381,6 +381,10 @@ edges:
   applies_to:
     - target: domain:data-science
       confidence: primary
+    - target: specialization:statistical-methods
+      confidence: secondary
+    - target: specialization:scientific-research-methods
+      confidence: secondary
   requires_skill_area:
     - skill-area:data-analysis
 ---
@@ -398,6 +402,10 @@ edges:
   applies_to:
     - target: domain:data-science
       confidence: primary
+    - target: specialization:civil-engineering
+      confidence: secondary
+    - target: specialization:environmental-engineering
+      confidence: secondary
   requires_skill_area:
     - skill-area:data-analysis
 ---

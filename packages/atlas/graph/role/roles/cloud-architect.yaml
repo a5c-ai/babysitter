@@ -10,6 +10,10 @@ attributes:
   description: |
     Designs cloud architectures and reference patterns across a multi-account / multi-cloud estate.
 edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:capacity-planning
+    - responsibility:cost-optimization
   requires_expertise:
     - target: skill-area:terraform-infrastructure
     - target: skill-area:dns-design

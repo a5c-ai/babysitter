@@ -34,6 +34,10 @@ edges:
       confidence: primary
     - target: domain:software-engineering
       confidence: secondary
+    - target: specialization:terraform-iac
+      confidence: secondary
+    - target: specialization:common-utilities
+      confidence: secondary
   uses_stack_part:
     - stack-part:feature-flag-service
     - stack-part:secrets-manager
@@ -626,6 +630,12 @@ edges:
     - target: domain:software-engineering
       confidence: primary
     - target: specialization:performance-optimization
+      confidence: secondary
+    - target: specialization:rust-systems
+      confidence: secondary
+    - target: specialization:go-microservices
+      confidence: secondary
+    - target: specialization:computer-science
       confidence: secondary
 ---
 nodeKind: SkillArea

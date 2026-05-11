@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:opentofu
 attributes:
   displayName: "OpenTofu"
+  homepageUrl: "https://opentofu.org"
   kind: iac
   description: |
     Open-source fork of Terraform under the Linux Foundation.

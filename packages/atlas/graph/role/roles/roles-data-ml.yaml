@@ -9,6 +9,10 @@ attributes:
   description: |
     Builds and operates ETL/ELT, warehouse models, lineage, and data quality.
 edges:
+  holds_responsibility:
+    - responsibility:data-quality
+    - responsibility:data-quality-monitoring
+    - responsibility:documentation
   requires_expertise:
     - target: skill-area:etl-pipelines
     - target: skill-area:data-warehouse-modeling
@@ -29,6 +33,10 @@ attributes:
     Productionizes models: fine-tuning, eval harnesses, prompt and retrieval pipelines, GPU performance.
     (Convergent-catalog update; complements the canonical `role:ml-engineer` example with explicit SkillArea expertise edges.)
 edges:
+  holds_responsibility:
+    - responsibility:model-validation
+    - responsibility:performance-optimization
+    - responsibility:documentation
   requires_expertise:
     - target: skill-area:ml-fine-tuning
     - target: skill-area:prompt-engineering

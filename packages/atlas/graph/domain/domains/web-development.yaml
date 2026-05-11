@@ -87,3 +87,32 @@ edges:
     - topic:uncontrolled-forms
     - topic:virtual-dom
     - topic:windowing-virtualization
+    - topic:accessibility
+    - topic:progressive-web-application
+    - topic:static-site-generation
+    - topic:incremental-static-regeneration
+    - topic:code-splitting
+    - topic:micro-frontend-architecture
+    - topic:jamstack-architecture
+    - topic:offline-first
+    - topic:component-based-architecture
+    - topic:atomic-design
+    - topic:composition-pattern
+    - topic:css-modules
+    - topic:css-in-js
+    - topic:utility-first-css
+    - topic:tree-shaking
+    - topic:custom-hooks
+    - topic:flux-architecture
+    - topic:streaming-ssr
+    - topic:styled-components-pattern
+    - topic:asset-optimization
+    - topic:form-validation
+    - topic:cache-aside-pattern
+    - topic:flux-pattern
+    - topic:redux-pattern
+    - topic:form-state-management
+    - topic:responsive-design
+    - topic:mobile-first-design
+    - topic:progressive-enhancement
+    - topic:serverless-architecture

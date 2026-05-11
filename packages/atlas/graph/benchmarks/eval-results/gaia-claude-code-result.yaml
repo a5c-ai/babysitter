@@ -10,3 +10,5 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:gaia.claude-code.2025
+  scored_against:
+    - target: benchmark:gaia

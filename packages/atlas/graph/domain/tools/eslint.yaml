@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:eslint
 attributes:
   displayName: "ESLint"
+  homepageUrl: "https://eslint.org"
   kind: linter
   language: language:javascript
   releasedAt: "2013"

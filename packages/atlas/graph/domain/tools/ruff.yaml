@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:ruff
 attributes:
   displayName: "Ruff"
+  homepageUrl: "https://github.com/astral-sh/ruff"
   kind: linter
   language: language:python
   description: |

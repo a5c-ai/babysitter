@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:prometheus
 attributes:
   displayName: "Prometheus"
+  homepageUrl: "https://prometheus.io"
   kind: observability
   description: |
     Open-source systems monitoring and alerting toolkit with a multi-dimensional time-series model.

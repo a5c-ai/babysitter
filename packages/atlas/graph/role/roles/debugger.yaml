@@ -14,6 +14,9 @@ attributes:
     traces; favours small, evidence-based hypotheses over speculative
     rewrites.
 edges:
+  holds_responsibility:
+    - responsibility:incident-response
+    - responsibility:performance-optimization
   requires_expertise:
     - target: skill-area:bug-fixing-from-issues
     - target: skill-area:tool-use

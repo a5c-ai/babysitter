@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:prettier
 attributes:
   displayName: "Prettier"
+  homepageUrl: "https://prettier.io"
   kind: formatter
   language: language:javascript
   description: |

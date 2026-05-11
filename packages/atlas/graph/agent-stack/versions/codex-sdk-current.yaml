@@ -17,5 +17,18 @@ edges:
     - target: agent-runtime-impl:codex-sdk.runtime@current
       role: runtime
   sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Codex SDK provides a programmatic multi-turn agent loop.
+    - target: capability:supports-text-streaming
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Codex SDK streams model output.
+    - target: capability:programmatic-tool-calling
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Codex SDK exposes tool-calling APIs for developers.
   uses_memory_system:
     - target: memory-system:codex-agents-md

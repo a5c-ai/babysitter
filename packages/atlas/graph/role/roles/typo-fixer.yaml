@@ -11,6 +11,9 @@ attributes:
   description: |
     Agent that finds and corrects typos in code and documentation.
 edges:
+  holds_responsibility:
+    - responsibility:documentation
+    - responsibility:code-review
   requires_capability:
     - target: capability:supports-tool-use
     - target: capability:supports-text-streaming

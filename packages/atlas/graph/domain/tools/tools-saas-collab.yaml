@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:confluence
 attributes:
   displayName: "Confluence"
+  homepageUrl: "https://www.atlassian.com/software/confluence"
   kind: other
   description: |
     Atlassian wiki and knowledge management platform for teams.
@@ -30,6 +31,7 @@ nodeKind: Tool
 id: tool:trello
 attributes:
   displayName: "Trello"
+  homepageUrl: "https://trello.com"
   kind: other
   description: |
     Kanban-style visual project management tool by Atlassian.
@@ -56,6 +58,7 @@ nodeKind: Tool
 id: tool:clickup
 attributes:
   displayName: "ClickUp"
+  homepageUrl: "https://clickup.com"
   kind: other
   description: |
     All-in-one project management platform combining tasks, docs,
@@ -82,6 +85,7 @@ nodeKind: Tool
 id: tool:shortcut
 attributes:
   displayName: "Shortcut"
+  homepageUrl: "https://shortcut.com"
   kind: other
   description: |
     Agile project management tool (formerly Clubhouse) for software teams.
@@ -100,6 +104,7 @@ nodeKind: Tool
 id: tool:basecamp
 attributes:
   displayName: "Basecamp"
+  homepageUrl: "https://basecamp.com"
   kind: other
   description: |
     All-in-one project management and team collaboration tool.
@@ -120,6 +125,7 @@ nodeKind: Tool
 id: tool:asana
 attributes:
   displayName: "Asana"
+  homepageUrl: "https://asana.com"
   kind: other
   description: |
     Work management platform for teams to track tasks, projects, and goals.
@@ -148,6 +154,7 @@ nodeKind: Tool
 id: tool:monday
 attributes:
   displayName: "Monday.com"
+  homepageUrl: "https://monday.com"
   kind: other
   description: |
     Visual work management platform with highly customizable boards
@@ -174,6 +181,7 @@ nodeKind: Tool
 id: tool:notion
 attributes:
   displayName: "Notion"
+  homepageUrl: "https://www.notion.so"
   kind: other
   description: |
     All-in-one workspace for notes, docs, wikis, and databases.

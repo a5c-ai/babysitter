@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:mailgun
 attributes:
   displayName: "Mailgun"
+  homepageUrl: "https://www.mailgun.com"
   kind: other
   description: |
     Email API service for sending, receiving, and tracking transactional
@@ -29,6 +30,7 @@ nodeKind: Tool
 id: tool:postmark
 attributes:
   displayName: "Postmark"
+  homepageUrl: "https://postmarkapp.com"
   kind: other
   description: |
     Transactional email delivery service focused on speed and inbox
@@ -55,12 +57,15 @@ nodeKind: Tool
 id: tool:resend
 attributes:
   displayName: "Resend"
+  homepageUrl: "https://resend.com"
   kind: other
   description: |
     Developer-first email API with React Email template support.
     Provides clean REST API, domain authentication, webhooks, and
     a modern dashboard. Designed for modern full-stack applications.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:transactional-email
   used_for:
@@ -81,6 +86,7 @@ nodeKind: Tool
 id: tool:aws-ses
 attributes:
   displayName: "Amazon SES"
+  homepageUrl: "https://aws.amazon.com/ses/"
   kind: other
   description: |
     AWS Simple Email Service for sending transactional, marketing, and
@@ -107,6 +113,7 @@ nodeKind: Tool
 id: tool:sparkpost
 attributes:
   displayName: "SparkPost"
+  homepageUrl: "https://www.sparkpost.com"
   kind: other
   description: |
     Email delivery service with advanced analytics and predictive inbox

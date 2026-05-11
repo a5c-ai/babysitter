@@ -12,6 +12,12 @@ edges:
   applies_to:
     - target: domain:quantitative-finance
       confidence: primary
+    - target: specialization:nanotechnology
+      confidence: secondary
+    - target: specialization:chemical-engineering
+      confidence: secondary
+    - target: specialization:industrial-engineering
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:algorithmic-trading
@@ -54,6 +60,8 @@ edges:
   applies_to:
     - target: domain:financial-risk-management
       confidence: primary
+    - target: specialization:corporate-finance
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:market-data-engineering
@@ -96,6 +104,8 @@ edges:
   applies_to:
     - target: domain:regulatory-finance
       confidence: primary
+    - target: specialization:legal
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:technical-analysis

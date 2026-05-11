@@ -7,7 +7,10 @@ attributes:
     Third-party integrations, API connectors, and data exchange patterns
     between systems. Covers webhook design, event-driven integration,
     and iPaaS platforms for enterprise connectivity.
-edges: {}
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:api-development
 ---
 nodeKind: Topic
 id: topic:package-management
@@ -17,7 +20,10 @@ attributes:
     Managing software dependencies through package registries, lock files,
     and versioning strategies. Covers npm, pip, cargo, and monorepo
     dependency management with security scanning.
-edges: {}
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:devops
 ---
 nodeKind: Topic
 id: topic:slo-sli
@@ -27,7 +33,10 @@ attributes:
     Service Level Objectives and Service Level Indicators for reliability
     engineering. Covers error budgets, reliability targets, alerting policy
     design, and SLO-driven incident management.
-edges: {}
+edges:
+  applies_to:
+    - domain:observability
+    - domain:devops
 ---
 nodeKind: Topic
 id: topic:incident-management
@@ -37,7 +46,10 @@ attributes:
     Incident response workflows covering detection, escalation, resolution,
     and post-incident review. Includes on-call rotation design, runbook
     development, and blameless postmortem culture.
-edges: {}
+edges:
+  applies_to:
+    - domain:observability
+    - domain:devops
 ---
 nodeKind: Topic
 id: topic:quality-assurance
@@ -47,7 +59,10 @@ attributes:
     QA processes covering test planning, defect tracking, regression testing,
     and quality gate enforcement. Bridges manual testing practices with
     automated test frameworks and CI/CD pipelines.
-edges: {}
+edges:
+  applies_to:
+    - domain:qa-testing
+    - domain:software-engineering
 ---
 nodeKind: Topic
 id: topic:knowledge-management
@@ -57,7 +72,9 @@ attributes:
     Organizational knowledge capture, documentation, and retrieval strategies.
     Covers wiki design, internal search, knowledge graphs, and practices
     for preserving institutional memory across team changes.
-edges: {}
+edges:
+  applies_to:
+    - domain:knowledge-management
 ---
 nodeKind: Topic
 id: topic:progressive-enhancement
@@ -67,7 +84,10 @@ attributes:
     Web development strategy that builds accessible baseline experiences
     and layers richer functionality for capable browsers. Ensures content
     reachability while delivering modern UX for supported environments.
-edges: {}
+edges:
+  applies_to:
+    - domain:web-development
+    - domain:frontend
 ---
 nodeKind: Topic
 id: topic:documentation
@@ -77,7 +97,10 @@ attributes:
     Technical documentation practices covering API docs, developer guides,
     tutorials, and architecture decision records. Includes docs-as-code,
     automated reference generation, and content freshness strategies.
-edges: {}
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:content-operations
 ---
 nodeKind: Topic
 id: topic:aws
@@ -87,7 +110,9 @@ attributes:
     Amazon Web Services cloud platform covering compute, storage, networking,
     and managed services. Includes AWS-specific architecture patterns,
     IAM, cost optimization, and multi-region deployment strategies.
-edges: {}
+edges:
+  applies_to:
+    - domain:cloud-infra
 ---
 nodeKind: Topic
 id: topic:azure
@@ -97,7 +122,9 @@ attributes:
     Microsoft Azure cloud platform covering IaaS, PaaS, and SaaS offerings.
     Includes Azure-specific services, Active Directory integration, hybrid
     cloud patterns, and Azure DevOps pipeline integration.
-edges: {}
+edges:
+  applies_to:
+    - domain:cloud-infra
 ---
 nodeKind: Topic
 id: topic:gcp
@@ -107,7 +134,9 @@ attributes:
     Google Cloud Platform covering compute, data analytics, ML infrastructure,
     and managed services. Includes GCP-specific architecture patterns,
     BigQuery, Kubernetes Engine, and GCP IAM best practices.
-edges: {}
+edges:
+  applies_to:
+    - domain:cloud-infra
 ---
 nodeKind: Topic
 id: topic:ci-cd
@@ -117,7 +146,10 @@ attributes:
     Continuous integration and continuous delivery pipelines for automated
     build, test, and deployment workflows. Covers pipeline design, artifact
     management, deployment strategies, and rollback mechanisms.
-edges: {}
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
 ---
 nodeKind: Topic
 id: topic:release-management
@@ -127,4 +159,7 @@ attributes:
     Managing software releases through versioning, changelog generation,
     and coordinated deployment workflows. Covers release trains, feature
     flags, semantic versioning, and release gate criteria.
-edges: {}
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering

@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:clippy
 attributes:
   displayName: "Clippy"
+  homepageUrl: "https://github.com/rust-lang/rust-clippy"
   kind: linter
   language: language:rust
   description: |

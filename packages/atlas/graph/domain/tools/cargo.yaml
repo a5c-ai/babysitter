@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:cargo
 attributes:
   displayName: "Cargo"
+  homepageUrl: "https://doc.rust-lang.org/cargo/"
   kind: package-manager
   language: language:rust
   description: |

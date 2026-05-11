@@ -82,3 +82,9 @@ edges:
       confidence: primary
     - target: domain:knowledge-management
       confidence: secondary
+    - target: specialization:education
+      confidence: secondary
+    - target: specialization:instructional-design
+      confidence: secondary
+    - target: specialization:knowledge-management
+      confidence: secondary

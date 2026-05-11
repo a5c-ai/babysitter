@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:insomnia
 attributes:
   displayName: "Insomnia"
+  homepageUrl: "https://insomnia.rest"
   kind: api-tool
   description: |
     Open-source API client and design platform for REST, GraphQL, gRPC, and WebSockets.

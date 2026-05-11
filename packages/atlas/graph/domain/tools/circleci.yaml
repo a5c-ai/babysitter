@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:circleci
 attributes:
   displayName: "CircleCI"
+  homepageUrl: "https://circleci.com"
   kind: ci
   description: |
     CI/CD platform with parallelism, caching, and orb ecosystem.

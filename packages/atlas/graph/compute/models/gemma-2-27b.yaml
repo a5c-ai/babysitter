@@ -25,6 +25,8 @@ attributes:
   regions:
   - global
 edges:
+  belongs_to_family:
+    - target: model-family:gemma-2
   realizes:
     - target: layer:1-model
   version_of:

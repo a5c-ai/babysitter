@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:black
 attributes:
   displayName: "Black"
+  homepageUrl: "https://github.com/psf/black"
   kind: formatter
   language: language:python
   description: |

@@ -2,12 +2,15 @@ nodeKind: Tool
 id: tool:homebrew
 attributes:
   displayName: "Homebrew"
+  homepageUrl: "https://brew.sh"
   kind: package-manager
   description: |
     The missing package manager for macOS (and Linux), installable via a single shell script.
     Manages thousands of open-source formulae and casks, handling dependencies, upgrades,
     and linking so developers can install CLI tools and desktop apps with a single command.
 edges:
+  belongs_to_language:
+    - language:ruby
   tool_used_by:
     - target: skill-area:developer-environment
   used_for:
@@ -28,12 +31,15 @@ nodeKind: Tool
 id: tool:chocolatey
 attributes:
   displayName: "Chocolatey"
+  homepageUrl: "https://chocolatey.org"
   kind: package-manager
   description: |
     Windows package manager that automates software installation, upgrade, and removal
     through a central repository of over 9,000 community-maintained packages.
     Supports silent installs, version pinning, and enterprise deployment via PowerShell.
 edges:
+  belongs_to_language:
+    - language:csharp
   tool_used_by:
     - target: skill-area:developer-environment
   used_for:
@@ -50,12 +56,15 @@ nodeKind: Tool
 id: tool:scoop
 attributes:
   displayName: "Scoop"
+  homepageUrl: "https://scoop.sh"
   kind: package-manager
   description: |
     Command-line installer for Windows that installs programs to the user's home folder,
     eliminating UAC permission prompts and keeping the PATH clean.
     Organizes packages into buckets and handles shims, making it ideal for developer tools.
 edges:
+  belongs_to_language:
+    - language:powershell
   tool_used_by:
     - target: skill-area:developer-environment
   used_for:
@@ -72,6 +81,7 @@ nodeKind: Tool
 id: tool:winget
 attributes:
   displayName: "winget"
+  homepageUrl: "https://github.com/microsoft/winget-cli"
   kind: package-manager
   description: |
     Microsoft's official Windows Package Manager CLI, built into Windows 10/11 and backed
@@ -94,6 +104,7 @@ nodeKind: Tool
 id: tool:nix
 attributes:
   displayName: "Nix"
+  homepageUrl: "https://nixos.org"
   kind: package-manager
   description: |
     Purely functional cross-platform package manager that provides reproducible, declarative,
@@ -101,6 +112,8 @@ attributes:
     Each package lives in an isolated store path ensuring no dependency conflicts and enabling
     reliable rollbacks, development shells, and system-level configuration via NixOS.
 edges:
+  belongs_to_language:
+    - language:cpp
   tool_used_by:
     - target: skill-area:developer-environment
   used_for:
@@ -115,6 +128,7 @@ nodeKind: Tool
 id: tool:apt
 attributes:
   displayName: "apt"
+  homepageUrl: "https://wiki.debian.org/Apt"
   kind: package-manager
   description: |
     Advanced Package Tool — the primary package manager for Debian-based Linux distributions
@@ -136,6 +150,7 @@ nodeKind: Tool
 id: tool:hoppscotch
 attributes:
   displayName: "Hoppscotch"
+  homepageUrl: "https://hoppscotch.io"
   kind: api-tool
   description: |
     Open-source, lightweight API development suite available as a web app and self-hosted
@@ -143,6 +158,8 @@ attributes:
     Provides realtime collaboration, collections, environments, and a PWA for offline use
     — positioned as a privacy-friendly alternative to Postman.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:api-design
   used_for:
@@ -162,6 +179,7 @@ nodeKind: Tool
 id: tool:httpie
 attributes:
   displayName: "HTTPie"
+  homepageUrl: "https://httpie.io"
   kind: api-tool
   description: |
     Modern command-line HTTP client designed for human-readable interaction with APIs,
@@ -169,6 +187,8 @@ attributes:
     Also ships HTTPie Desktop, a cross-platform GUI client for exploring and debugging
     REST, GraphQL, and other HTTP-based APIs without leaving the terminal workflow.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:api-design
   used_for:
@@ -188,6 +208,7 @@ nodeKind: Tool
 id: tool:bruno
 attributes:
   displayName: "Bruno"
+  homepageUrl: "https://www.usebruno.com"
   kind: api-tool
   description: |
     Fast, git-friendly, offline-first open-source API client that stores collections
@@ -195,6 +216,8 @@ attributes:
     Supports REST, GraphQL, and scripting with JavaScript, making collections version-
     controllable alongside the code they test.
 edges:
+  belongs_to_language:
+    - language:javascript
   tool_used_by:
     - target: skill-area:api-design
   used_for:
@@ -214,6 +237,7 @@ nodeKind: Tool
 id: tool:rapidapi
 attributes:
   displayName: "RapidAPI"
+  homepageUrl: "https://rapidapi.com"
   kind: api-tool
   description: |
     World's largest API hub and marketplace where developers discover, test, and connect
@@ -236,6 +260,7 @@ nodeKind: Tool
 id: tool:swagger-editor
 attributes:
   displayName: "Swagger Editor"
+  homepageUrl: "https://swagger.io/tools/swagger-editor/"
   kind: api-tool
   description: |
     Browser-based and desktop editor for designing, writing, and validating OpenAPI

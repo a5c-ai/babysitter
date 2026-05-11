@@ -3,11 +3,14 @@ nodeKind: Tool
 id: tool:tilt
 attributes:
   displayName: "Tilt"
+  homepageUrl: "https://tilt.dev"
   kind: orchestrator
   description: |
     Multi-service local Kubernetes dev tool that watches source files
     and rebuilds/redeploys with live-reload semantics.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:containerization
   used_for:
@@ -21,11 +24,14 @@ nodeKind: Tool
 id: tool:skaffold
 attributes:
   displayName: "Skaffold"
+  homepageUrl: "https://skaffold.dev"
   kind: orchestrator
   description: |
     Google CLI for continuous Kubernetes development — build, push,
     deploy, and tail logs in a watch loop.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:containerization
   used_for:
@@ -39,11 +45,14 @@ nodeKind: Tool
 id: tool:colima
 attributes:
   displayName: "Colima"
+  homepageUrl: "https://github.com/abiosoft/colima"
   kind: container
   description: |
     Container runtime for macOS/Linux backed by Lima; Docker- and
     containerd-compatible without Docker Desktop.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:containerization
   used_for:

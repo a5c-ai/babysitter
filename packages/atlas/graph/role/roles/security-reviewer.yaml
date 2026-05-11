@@ -10,6 +10,10 @@ attributes:
   description: |
     The Security Reviewer role.
 edges:
+  holds_responsibility:
+    - responsibility:security-review
+    - responsibility:security-audit
+    - responsibility:threat-modeling
   requires_expertise:
     - target: skill-area:threat-modeling
     - target: skill-area:sast

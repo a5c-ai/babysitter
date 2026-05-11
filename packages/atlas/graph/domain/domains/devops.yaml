@@ -33,3 +33,7 @@ edges:
     - topic:remote-dispatch
     - topic:scheduled-dispatch
     - topic:sidecar-pattern
+    - topic:chaos-engineering
+    - topic:observability-driven-development
+    - topic:platform-engineering-practices
+    - topic:rate-limiting

@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:gitlab-ci
 attributes:
   displayName: "GitLab CI/CD"
+  homepageUrl: "https://docs.gitlab.com/ee/ci/"
   kind: ci
   description: |
     CI/CD service built into GitLab - pipelines defined in .gitlab-ci.yml.

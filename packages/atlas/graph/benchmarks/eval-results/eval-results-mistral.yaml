@@ -11,6 +11,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:mmlu.mistral-large-2.2024-07
+  scored_against:
+    - target: benchmark:mmlu
 ---
 nodeKind: EvalResult
 id: eval-result:human-eval.mistral-large-2.001
@@ -24,6 +26,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:human-eval.mistral-large-2.2024-07
+  scored_against:
+    - target: benchmark:human-eval
 ---
 nodeKind: EvalResult
 id: eval-result:human-eval.codestral-25-01.001
@@ -37,6 +41,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:human-eval.codestral-25-01.2025-01
+  scored_against:
+    - target: benchmark:human-eval
 ---
 nodeKind: EvalResult
 id: eval-result:multipl-e.codestral-25-01.001
@@ -50,3 +56,5 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:multipl-e.codestral-25-01.2025-01
+  scored_against:
+    - target: benchmark:multipl-e

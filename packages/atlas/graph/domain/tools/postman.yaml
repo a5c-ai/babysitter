@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:postman
 attributes:
   displayName: "Postman"
+  homepageUrl: "https://www.postman.com"
   kind: api-tool
   description: |
     Collaboration platform for API development - request building, collections, and tests.

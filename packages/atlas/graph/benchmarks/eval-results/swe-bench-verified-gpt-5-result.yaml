@@ -10,3 +10,5 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:swe-bench-verified.gpt-5.2025-08
+  scored_against:
+    - target: benchmark:swe-bench-verified

@@ -14,3 +14,10 @@ edges:
     - topic:deployment-strategies
     - topic:sidecar-pattern
     - topic:vertical-scaling
+    - topic:auto-scaling
+    - topic:horizontal-scaling
+    - topic:aws
+    - topic:azure
+    - topic:gcp
+    - topic:immutable-infrastructure
+    - topic:infrastructure-as-code

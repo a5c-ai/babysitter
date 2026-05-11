@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:bun
 attributes:
   displayName: "Bun"
+  homepageUrl: "https://bun.sh"
   kind: package-manager
   language: language:javascript
   releasedAt: "2022"

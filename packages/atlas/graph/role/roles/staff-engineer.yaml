@@ -10,6 +10,11 @@ attributes:
   description: |
     Cross-team senior IC — drives multi-team technical strategy and large initiatives.
 edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:code-review
+    - responsibility:mentoring
+    - responsibility:knowledge-sharing
   requires_expertise:
     - target: skill-area:c4-modeling
     - target: skill-area:adr-writing

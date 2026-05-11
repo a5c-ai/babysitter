@@ -43,6 +43,10 @@ edges:
       confidence: primary
     - target: domain:entrepreneurship
       confidence: secondary
+    - target: specialization:entrepreneurship
+      confidence: secondary
+    - target: specialization:venture-capital
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:competitive-intelligence
@@ -63,6 +67,8 @@ edges:
     - target: domain:strategy
       confidence: primary
     - target: domain:marketing
+      confidence: secondary
+    - target: specialization:marketing
       confidence: secondary
   prerequisite_for_learning:
     - target: skill-area:market-sizing
@@ -130,4 +136,8 @@ edges:
     - target: domain:strategy
       confidence: primary
     - target: domain:human-resources
+      confidence: secondary
+    - target: specialization:human-resources
+      confidence: secondary
+    - target: specialization:talent-management
       confidence: secondary

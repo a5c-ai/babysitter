@@ -11,6 +11,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:mmlu.phi-3-medium.2024-05
+  scored_against:
+    - target: benchmark:mmlu
 ---
 nodeKind: EvalResult
 id: eval-result:mmlu.gemma-2-27b.001
@@ -24,6 +26,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:mmlu.gemma-2-27b.2024-06
+  scored_against:
+    - target: benchmark:mmlu
 ---
 nodeKind: EvalResult
 id: eval-result:gsm8k.gemma-2-27b.001
@@ -37,6 +41,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:gsm8k.gemma-2-27b.2024-06
+  scored_against:
+    - target: benchmark:gsm8k
 ---
 nodeKind: EvalResult
 id: eval-result:mmlu.command-r-plus.001
@@ -50,3 +56,5 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:mmlu.command-r-plus.2024-08
+  scored_against:
+    - target: benchmark:mmlu

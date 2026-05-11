@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:glean
 attributes:
   displayName: "Glean"
+  homepageUrl: "https://www.glean.com"
   kind: other
   description: |
     Enterprise AI search platform that connects to all company tools —
@@ -27,6 +28,7 @@ nodeKind: Tool
 id: tool:guru
 attributes:
   displayName: "Guru"
+  homepageUrl: "https://www.getguru.com"
   kind: other
   description: |
     AI-powered knowledge management platform that organizes company
@@ -51,6 +53,7 @@ nodeKind: Tool
 id: tool:danswer
 attributes:
   displayName: "Danswer (Onyx)"
+  homepageUrl: "https://github.com/onyx-dot-app/onyx"
   kind: other
   description: |
     Open-source enterprise question-answering system (rebranded as Onyx)
@@ -61,6 +64,8 @@ attributes:
     cross-encoder re-ranking. Includes document-level access control
     that respects source permissions.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:knowledge-fabric-design
     - target: skill-area:rag-pipeline-engineering
@@ -77,6 +82,7 @@ nodeKind: Tool
 id: tool:quivr
 attributes:
   displayName: "Quivr"
+  homepageUrl: "https://github.com/QuivrHQ/quivr"
   kind: other
   description: |
     Open-source second brain platform for teams that combines RAG with
@@ -86,6 +92,8 @@ attributes:
     and multi-user workspaces. Built with Python/FastAPI backend and
     Next.js frontend.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:knowledge-fabric-design
     - target: skill-area:rag-pipeline-engineering
@@ -102,6 +110,7 @@ nodeKind: Tool
 id: tool:private-gpt
 attributes:
   displayName: "PrivateGPT"
+  homepageUrl: "https://github.com/zylon-ai/private-gpt"
   kind: other
   description: |
     Fully local, privacy-first document Q&A system that runs entirely
@@ -112,6 +121,8 @@ attributes:
     environments, regulated industries, and sensitive document analysis
     where cloud APIs are not permitted.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:knowledge-fabric-design
     - target: skill-area:rag-pipeline-engineering
@@ -128,6 +139,7 @@ nodeKind: Tool
 id: tool:kapa-ai
 attributes:
   displayName: "Kapa.ai"
+  homepageUrl: "https://www.kapa.ai"
   kind: other
   description: |
     Developer documentation to AI assistant platform that turns docs,
@@ -152,6 +164,7 @@ nodeKind: Tool
 id: tool:dashworks
 attributes:
   displayName: "Dashworks"
+  homepageUrl: "https://www.dashworks.ai"
   kind: other
   description: |
     AI-powered enterprise search that unifies knowledge across SaaS
@@ -175,6 +188,7 @@ nodeKind: Tool
 id: tool:haystack
 attributes:
   displayName: "Haystack"
+  homepageUrl: "https://haystack.deepset.ai"
   kind: other
   description: |
     Open-source NLP framework by deepset for building production-grade
@@ -185,6 +199,8 @@ attributes:
     backends. Pipeline-as-code design with YAML serialization for
     reproducibility and deployment.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:knowledge-fabric-design
     - target: skill-area:rag-pipeline-engineering
@@ -201,6 +217,7 @@ nodeKind: Tool
 id: tool:cognita
 attributes:
   displayName: "Cognita"
+  homepageUrl: "https://github.com/truefoundry/cognita"
   kind: other
   description: |
     Open-source RAG framework by TrueFoundry for building production-ready
@@ -210,6 +227,8 @@ attributes:
     stores, embedding models, and LLMs. Designed for teams that need
     to iterate on RAG configurations without rewriting pipeline code.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:knowledge-fabric-design
     - target: skill-area:rag-pipeline-engineering
@@ -226,6 +245,7 @@ nodeKind: Tool
 id: tool:verba
 attributes:
   displayName: "Verba"
+  homepageUrl: "https://github.com/weaviate/Verba"
   kind: other
   description: |
     Weaviate's open-source RAG application — a turnkey retrieval-augmented
@@ -236,6 +256,8 @@ attributes:
     Useful as a reference implementation for building RAG apps with
     Weaviate and as a rapid prototyping tool for knowledge Q&A.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:knowledge-fabric-design
     - target: skill-area:rag-pipeline-engineering

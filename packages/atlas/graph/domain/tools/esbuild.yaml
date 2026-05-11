@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:esbuild
 attributes:
   displayName: "esbuild"
+  homepageUrl: "https://esbuild.github.io"
   kind: bundler
   description: |
     Extremely fast JavaScript bundler and minifier written in Go.

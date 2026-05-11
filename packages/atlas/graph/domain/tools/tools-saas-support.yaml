@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:zendesk
 attributes:
   displayName: "Zendesk"
+  homepageUrl: "https://www.zendesk.com"
   kind: other
   description: |
     Customer service platform for managing support tickets, live chat,
@@ -25,6 +26,7 @@ nodeKind: Tool
 id: tool:freshdesk
 attributes:
   displayName: "Freshdesk"
+  homepageUrl: "https://www.freshworks.com/freshdesk/"
   kind: other
   description: |
     Cloud-based customer support helpdesk by Freshworks. Provides
@@ -47,6 +49,7 @@ nodeKind: Tool
 id: tool:hubspot
 attributes:
   displayName: "HubSpot"
+  homepageUrl: "https://www.hubspot.com"
   kind: other
   description: |
     CRM platform with integrated marketing, sales, and service hubs.
@@ -70,6 +73,7 @@ nodeKind: Tool
 id: tool:salesforce
 attributes:
   displayName: "Salesforce"
+  homepageUrl: "https://www.salesforce.com"
   kind: other
   description: |
     Enterprise CRM and cloud platform for sales, service, marketing,
@@ -93,6 +97,7 @@ nodeKind: Tool
 id: tool:servicenow
 attributes:
   displayName: "ServiceNow"
+  homepageUrl: "https://www.servicenow.com"
   kind: other
   description: |
     Enterprise IT service management (ITSM) and workflow automation

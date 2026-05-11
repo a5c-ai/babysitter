@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:vscode
 attributes:
   displayName: "Visual Studio Code"
+  homepageUrl: "https://code.visualstudio.com"
   kind: other
   description: |
     Cross-platform extensible code editor by Microsoft with a rich
@@ -25,6 +26,7 @@ nodeKind: Tool
 id: tool:jetbrains-idea
 attributes:
   displayName: "JetBrains IntelliJ IDEA"
+  homepageUrl: "https://www.jetbrains.com/idea/"
   kind: other
   description: |
     JVM-focused IDE with deep refactoring, language plugins, and an
@@ -47,6 +49,7 @@ nodeKind: Tool
 id: tool:vim
 attributes:
   displayName: "Vim"
+  homepageUrl: "https://www.vim.org"
   kind: other
   description: |
     Modal terminal editor descended from vi; ubiquitous on Unix
@@ -69,6 +72,7 @@ nodeKind: Tool
 id: tool:neovim
 attributes:
   displayName: "Neovim"
+  homepageUrl: "https://neovim.io"
   kind: other
   description: |
     Vim fork focused on extensibility and embeddability with native
@@ -91,6 +95,7 @@ nodeKind: Tool
 id: tool:emacs
 attributes:
   displayName: "GNU Emacs"
+  homepageUrl: "https://www.gnu.org/software/emacs/"
   kind: other
   description: |
     Extensible self-documenting editor with Emacs Lisp scripting;
@@ -111,6 +116,7 @@ nodeKind: Tool
 id: tool:helix
 attributes:
   displayName: "Helix"
+  homepageUrl: "https://helix-editor.com"
   kind: other
   description: |
     Post-modern modal terminal editor with built-in LSP, tree-sitter

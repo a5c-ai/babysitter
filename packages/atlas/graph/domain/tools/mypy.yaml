@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:mypy
 attributes:
   displayName: "mypy"
+  homepageUrl: "https://mypy-lang.org"
   kind: linter
   language: language:python
   description: |

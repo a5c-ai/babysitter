@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:jest
 attributes:
   displayName: "Jest"
+  homepageUrl: "https://jestjs.io"
   kind: test-runner
   language: language:javascript
   releasedAt: "2014"

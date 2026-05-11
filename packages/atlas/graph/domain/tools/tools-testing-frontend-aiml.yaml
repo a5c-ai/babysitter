@@ -4,6 +4,7 @@ nodeKind: Tool
 id: tool:k6
 attributes:
   displayName: "k6"
+  homepageUrl: "https://k6.io"
   kind: test-runner
   description: |
     Open-source load testing tool built for developer-centric performance
@@ -12,6 +13,8 @@ attributes:
     Prometheus, and many other backends. Supports threshold assertions,
     scenarios, and distributed cloud execution via Grafana Cloud k6.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:performance-testing
   used_for:
@@ -26,6 +29,7 @@ nodeKind: Tool
 id: tool:locust
 attributes:
   displayName: "Locust"
+  homepageUrl: "https://locust.io"
   kind: test-runner
   description: |
     Python-based open-source load testing framework where user behaviour is
@@ -33,6 +37,8 @@ attributes:
     web-UI-driven test runs with real-time statistics. Highly extensible via
     event hooks; integrates naturally with pytest and CI pipelines.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:performance-testing
   used_for:
@@ -47,6 +53,7 @@ nodeKind: Tool
 id: tool:artillery
 attributes:
   displayName: "Artillery"
+  homepageUrl: "https://www.artillery.io"
   kind: test-runner
   description: |
     Modern, developer-friendly load-testing and smoke-testing toolkit for
@@ -54,6 +61,8 @@ attributes:
     declared in YAML with JavaScript hooks for custom logic. Artillery Cloud
     provides distributed execution and trend dashboards.
 edges:
+  belongs_to_language:
+    - language:javascript
   tool_used_by:
     - target: skill-area:performance-testing
   used_for:
@@ -68,6 +77,7 @@ nodeKind: Tool
 id: tool:pact
 attributes:
   displayName: "Pact"
+  homepageUrl: "https://pact.io"
   kind: test-runner
   description: |
     Consumer-driven contract testing framework that ensures services can
@@ -90,6 +100,7 @@ nodeKind: Tool
 id: tool:wiremock
 attributes:
   displayName: "WireMock"
+  homepageUrl: "https://wiremock.org"
   kind: test-runner
   description: |
     Flexible HTTP service virtualisation and API mocking tool for development
@@ -97,6 +108,8 @@ attributes:
     or the REST Admin API. Supports request matching, response templating,
     fault injection, stateful scenarios, and record/playback of real traffic.
 edges:
+  belongs_to_language:
+    - language:java
   tool_used_by:
     - target: skill-area:integration-testing
     - target: skill-area:api-testing
@@ -112,6 +125,7 @@ nodeKind: Tool
 id: tool:testcontainers
 attributes:
   displayName: "Testcontainers"
+  homepageUrl: "https://testcontainers.com"
   kind: test-runner
   description: |
     Library for spinning up real, throwaway Docker containers inside automated
@@ -119,6 +133,8 @@ attributes:
     and cloud service emulators. Available for Java, Go, Python, .NET, Node.js,
     and Rust; integrates with JUnit, pytest, and other test frameworks.
 edges:
+  belongs_to_language:
+    - language:java
   tool_used_by:
     - target: skill-area:integration-testing
   used_for:
@@ -134,6 +150,7 @@ nodeKind: Tool
 id: tool:chromatic
 attributes:
   displayName: "Chromatic"
+  homepageUrl: "https://www.chromatic.com"
   kind: other
   description: |
     Cloud-based visual testing and review platform purpose-built for Storybook.
@@ -156,6 +173,7 @@ nodeKind: Tool
 id: tool:percy
 attributes:
   displayName: "Percy"
+  homepageUrl: "https://percy.io"
   kind: other
   description: |
     Visual testing and review platform by BrowserStack that captures full-page
@@ -178,6 +196,7 @@ nodeKind: Tool
 id: tool:vllm
 attributes:
   displayName: "vLLM"
+  homepageUrl: "https://github.com/vllm-project/vllm"
   kind: other
   description: |
     High-throughput and memory-efficient LLM inference engine implementing the
@@ -186,6 +205,8 @@ attributes:
     tensor parallelism across multiple GPUs. A common production serving
     backend for self-hosted open-source language models.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:model-serving
     - target: skill-area:llm-infrastructure
@@ -204,6 +225,7 @@ nodeKind: Tool
 id: tool:tensorrt
 attributes:
   displayName: "TensorRT"
+  homepageUrl: "https://developer.nvidia.com/tensorrt"
   kind: other
   description: |
     NVIDIA's SDK for high-performance deep-learning inference on GPU. Optimises
@@ -212,6 +234,8 @@ attributes:
     Integrates with PyTorch via torch-tensorrt, ONNX import, and the Triton
     Inference Server backend ecosystem.
 edges:
+  belongs_to_language:
+    - language:cpp
   tool_used_by:
     - target: skill-area:model-serving
     - target: skill-area:model-optimisation
@@ -230,6 +254,7 @@ nodeKind: Tool
 id: tool:triton-inference
 attributes:
   displayName: "Triton Inference Server"
+  homepageUrl: "https://github.com/triton-inference-server/server"
   kind: other
   description: |
     NVIDIA's open-source inference serving platform that hosts models from
@@ -238,6 +263,8 @@ attributes:
     concurrent model execution, and Kubernetes-native deployment with Prometheus
     metrics out of the box.
 edges:
+  belongs_to_language:
+    - language:cpp
   tool_used_by:
     - target: skill-area:model-serving
     - target: skill-area:llm-infrastructure
@@ -256,6 +283,7 @@ nodeKind: Tool
 id: tool:onnx-runtime
 attributes:
   displayName: "ONNX Runtime"
+  homepageUrl: "https://onnxruntime.ai"
   kind: other
   description: |
     Cross-platform, high-performance ML inference engine for ONNX models.
@@ -264,6 +292,8 @@ attributes:
     trained in PyTorch, TensorFlow, or scikit-learn after export to the open
     ONNX interchange format.
 edges:
+  belongs_to_language:
+    - language:cpp
   tool_used_by:
     - target: skill-area:model-serving
     - target: skill-area:model-optimisation
@@ -282,6 +312,7 @@ nodeKind: Tool
 id: tool:langsmith
 attributes:
   displayName: "LangSmith"
+  homepageUrl: "https://smith.langchain.com"
   kind: other
   description: |
     Observability and evaluation platform for LLM applications from LangChain.
@@ -290,6 +321,8 @@ attributes:
     playground. Integrates seamlessly with LangChain and LangGraph but works
     with any LLM framework via the langsmith SDK.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:llm-observability
     - target: skill-area:ai-evaluation
@@ -307,6 +340,7 @@ nodeKind: Tool
 id: tool:langfuse
 attributes:
   displayName: "Langfuse"
+  homepageUrl: "https://langfuse.com"
   kind: other
   description: |
     Open-source LLM engineering platform providing tracing, prompt management,
@@ -315,6 +349,8 @@ attributes:
     dataset-driven regression testing. Can be self-hosted or used via Langfuse
     Cloud; provides SDKs for Python, TypeScript, and OpenAI-compatible wrappers.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:llm-observability
     - target: skill-area:ai-evaluation
@@ -332,6 +368,7 @@ nodeKind: Tool
 id: tool:ragas
 attributes:
   displayName: "Ragas"
+  homepageUrl: "https://github.com/explodinggradients/ragas"
   kind: other
   description: |
     Open-source framework for evaluating Retrieval-Augmented Generation (RAG)
@@ -340,6 +377,8 @@ attributes:
     test datasets automatically and integrates with LangSmith, Langfuse, and
     other observability backends for continuous quality monitoring.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:ai-evaluation
     - target: skill-area:retrieval-augmented-generation

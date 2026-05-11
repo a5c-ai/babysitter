@@ -28,3 +28,15 @@ edges:
     - topic:secure-storage-pattern
     - topic:secure-token-pattern
     - topic:security-headers-implementation
+    - topic:oauth-openid-connect
+    - topic:defense-in-depth
+    - topic:zero-trust-architecture
+    - topic:content-security-policy
+    - topic:xss-prevention
+    - topic:secure-authentication-patterns
+    - topic:permission-based-access
+    - topic:hmac-signing
+    - topic:jwt-handling
+    - topic:oauth-flows
+    - topic:ssl-certs
+    - topic:webhook-verification

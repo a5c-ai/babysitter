@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:pnpm
 attributes:
   displayName: "pnpm"
+  homepageUrl: "https://pnpm.io"
   kind: package-manager
   language: language:javascript
   releasedAt: "2017"

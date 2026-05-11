@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:jupyter
 attributes:
   displayName: "Jupyter"
+  homepageUrl: "https://jupyter.org"
   kind: other
   description: |
     Interactive notebook ecosystem (JupyterLab, Notebook, Hub) for

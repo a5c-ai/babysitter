@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:agent-message-queue
 attributes:
   displayName: "Agent Message Queue"
+  homepageUrl: "https://github.com/nichochar/agent-message-queue"
   kind: other
   description: |
     File-based Maildir-style message queue for local agent-to-agent
@@ -25,6 +26,7 @@ nodeKind: Tool
 id: tool:utcp-code-mode
 attributes:
   displayName: "UTCP Code Mode"
+  homepageUrl: "https://github.com/anthropics/utcp"
   kind: other
   description: |
     Universal Tool Calling Protocol library that enables AI agents to
@@ -46,6 +48,7 @@ nodeKind: Tool
 id: tool:napkin
 attributes:
   displayName: "Napkin"
+  homepageUrl: "https://github.com/nichochar/napkin"
   kind: other
   description: |
     Local-first file-based knowledge system for AI agents. Uses a
@@ -67,6 +70,7 @@ nodeKind: Tool
 id: tool:mempalace
 attributes:
   displayName: "MemPalace"
+  homepageUrl: "https://github.com/mempalace/mempalace"
   kind: other
   description: |
     Best-benchmarked open-source AI memory system. Provides persistent
@@ -99,6 +103,7 @@ nodeKind: Tool
 id: tool:lunaroute
 attributes:
   displayName: "LunaRoute"
+  homepageUrl: "https://github.com/lunaroute/lunaroute"
   kind: other
   description: |
     High-performance local proxy for AI coding assistants. Sits between
@@ -120,6 +125,7 @@ nodeKind: Tool
 id: tool:token-optimizer
 attributes:
   displayName: "Token Optimizer"
+  homepageUrl: "https://github.com/token-optimizer/token-optimizer"
   kind: other
   description: |
     Tool for finding ghost tokens, fixing context quality decay, and
@@ -140,6 +146,7 @@ nodeKind: Tool
 id: tool:graphify
 attributes:
   displayName: "Graphify"
+  homepageUrl: "https://github.com/graphify-ai/graphify"
   kind: other
   description: |
     Converts code, SQL schemas, documentation, and images into a
@@ -160,6 +167,7 @@ nodeKind: Tool
 id: tool:tambo
 attributes:
   displayName: "Tambo"
+  homepageUrl: "https://github.com/tambo-ai/tambo"
   kind: other
   description: |
     Generative UI SDK for React that enables dynamic AI-driven component
@@ -177,6 +185,7 @@ nodeKind: Tool
 id: tool:cloudflare-agent-memory
 attributes:
   displayName: "Cloudflare Agent Memory"
+  homepageUrl: "https://developers.cloudflare.com/agents/api-reference/store/"
   kind: other
   description: |
     Cloudflare's managed persistent memory service for AI agents. Built on
@@ -212,6 +221,7 @@ nodeKind: Tool
 id: tool:memories-sh
 attributes:
   displayName: "memories.sh"
+  homepageUrl: "https://github.com/nichochar/memories"
   kind: other
   description: |
     Local-first durable state layer for coding agents. Implements four
@@ -224,6 +234,8 @@ attributes:
     agent with filesystem access can use. Source as a shell library
     (source memories.sh) or use the memories CLI.
 edges:
+  belongs_to_language:
+    - language:bash
   tool_used_by:
     - target: skill-area:ai-agent-development
     - target: skill-area:context-management
@@ -247,6 +259,7 @@ nodeKind: Tool
 id: tool:memori-labs
 attributes:
   displayName: "Memori Labs"
+  homepageUrl: "https://www.memorilabs.com"
   kind: other
   description: |
     Agent-native memory infrastructure that structures memory from agent
@@ -282,6 +295,7 @@ nodeKind: Tool
 id: tool:vercel-ai-memory
 attributes:
   displayName: "Vercel AI SDK Memory"
+  homepageUrl: "https://ai-sdk.dev/docs/agents/memory"
   kind: other
   description: |
     Built-in memory system for Vercel AI SDK agent applications. Integrates

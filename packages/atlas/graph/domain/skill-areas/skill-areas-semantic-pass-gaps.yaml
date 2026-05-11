@@ -36,6 +36,16 @@ edges:
       confidence: primary
     - target: domain:project-management
       confidence: secondary
+    - target: specialization:bdd-specification-by-example
+      confidence: secondary
+    - target: specialization:example-mapping
+      confidence: secondary
+    - target: specialization:spec-kit
+      confidence: secondary
+    - target: specialization:hypothesis-driven-development
+      confidence: secondary
+    - target: specialization:business-analysis
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:operational-excellence
@@ -86,6 +96,18 @@ edges:
     - target: domain:operations
       confidence: primary
     - target: domain:strategy
+      confidence: secondary
+    - target: specialization:meta
+      confidence: secondary
+    - target: specialization:gsd
+      confidence: secondary
+    - target: specialization:ruflo
+      confidence: secondary
+    - target: specialization:gastown
+      confidence: secondary
+    - target: specialization:cc10x
+      confidence: secondary
+    - target: specialization:double-diamond
       confidence: secondary
 ---
 nodeKind: SkillArea
@@ -176,6 +198,16 @@ edges:
   applies_to:
     - target: domain:software-engineering
       confidence: primary
+    - target: specialization:backend-python-django
+      confidence: secondary
+    - target: specialization:go-microservices
+      confidence: secondary
+    - target: specialization:webapp-fullstack-typescript
+      confidence: secondary
+    - target: specialization:webapp-fullstack-python
+      confidence: secondary
+    - target: specialization:business
+      confidence: secondary
   prerequisite_for_learning:
     - target: skill-area:domain-driven-design
       strength: recommended
@@ -228,6 +260,18 @@ edges:
     - target: domain:software-engineering
       confidence: primary
     - target: domain:project-management
+      confidence: secondary
+    - target: specialization:scrum
+      confidence: secondary
+    - target: specialization:kanban
+      confidence: secondary
+    - target: specialization:extreme-programming
+      confidence: secondary
+    - target: specialization:feature-driven-development
+      confidence: secondary
+    - target: specialization:shape-up
+      confidence: secondary
+    - target: specialization:project-management
       confidence: secondary
 ---
 nodeKind: SkillArea

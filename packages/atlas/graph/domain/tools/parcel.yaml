@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:parcel
 attributes:
   displayName: "Parcel"
+  homepageUrl: "https://parceljs.org"
   kind: bundler
   description: |
     Zero-config web application bundler.

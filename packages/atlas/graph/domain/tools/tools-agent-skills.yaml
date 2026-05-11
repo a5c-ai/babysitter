@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:claude-auto-retry
 attributes:
   displayName: "Claude Auto Retry"
+  homepageUrl: "https://github.com/saoudrizwan/claude-auto-retry"
   kind: other
   description: |
     Automatically retries Claude Code sessions when rate limits or
@@ -21,6 +22,7 @@ nodeKind: Tool
 id: tool:micro-skills
 attributes:
   displayName: "Micro Skills"
+  homepageUrl: "https://github.com/anthropics/micro-skills"
   kind: other
   description: |
     Converts agent skills into gated micro-pipelines with hard quality
@@ -40,6 +42,7 @@ nodeKind: Tool
 id: tool:dev-browser
 attributes:
   displayName: "Dev Browser"
+  homepageUrl: "https://github.com/nichochar/dev-browser"
   kind: other
   description: |
     Browser automation skill for AI agents built on Playwright. Provides
@@ -60,6 +63,7 @@ nodeKind: Tool
 id: tool:cctop
 attributes:
   displayName: "cctop"
+  homepageUrl: "https://github.com/anthropics/cctop"
   kind: other
   description: |
     htop-like terminal dashboard for monitoring Claude Code sessions in
@@ -80,6 +84,7 @@ nodeKind: Tool
 id: tool:caveman
 attributes:
   displayName: "Caveman"
+  homepageUrl: "https://github.com/anthropics/caveman"
   kind: other
   description: |
     Terminal-based task runner for AI agents. Provides minimal structure
@@ -95,6 +100,7 @@ nodeKind: Tool
 id: tool:auto-research-claw
 attributes:
   displayName: "AutoResearchClaw"
+  homepageUrl: "https://github.com/auto-research-claw/auto-research-claw"
   kind: other
   description: |
     23-stage autonomous research pipeline for AI agents. Orchestrates
@@ -111,6 +117,7 @@ nodeKind: Tool
 id: tool:skillachi
 attributes:
   displayName: "Skillachi"
+  homepageUrl: "https://github.com/anthropics/skillachi"
   kind: other
   description: |
     Benchmark suite for evaluating AI coding skill quality and
@@ -127,6 +134,7 @@ nodeKind: Tool
 id: tool:imptokens
 attributes:
   displayName: "imptokens"
+  homepageUrl: "https://github.com/anthropics/imptokens"
   kind: other
   description: |
     Compress input tokens to save time and money in AI agent sessions.
@@ -144,6 +152,7 @@ nodeKind: Tool
 id: tool:snyk-agent-scan
 attributes:
   displayName: "snyk/agent-scan"
+  homepageUrl: "https://github.com/snyk/agent-scan"
   kind: other
   description: |
     Security scanning skill for AI coding agents powered by Snyk.
@@ -161,6 +170,7 @@ nodeKind: Tool
 id: tool:cisco-skill-scanner
 attributes:
   displayName: "cisco-ai-defense/skill-scanner"
+  homepageUrl: "https://github.com/cisco-ai-defense/skill-scanner"
   kind: other
   description: |
     Multi-engine security scanner for AI agent skills and code from

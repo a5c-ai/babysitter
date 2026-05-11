@@ -11,6 +11,9 @@ attributes:
   description: |
     Agent that authors and applies database schema migrations.
 edges:
+  holds_responsibility:
+    - responsibility:data-quality
+    - responsibility:deployment-management
   requires_capability:
     - target: capability:supports-tool-use
     - target: capability:supports-text-streaming

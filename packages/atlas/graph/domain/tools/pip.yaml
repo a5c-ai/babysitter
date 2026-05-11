@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:pip
 attributes:
   displayName: "pip"
+  homepageUrl: "https://pip.pypa.io"
   kind: package-manager
   language: language:python
   description: |

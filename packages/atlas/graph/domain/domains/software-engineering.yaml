@@ -88,6 +88,42 @@ edges:
     - topic:throttling
     - topic:timeout-pattern
     - topic:unit-of-work
+    - topic:api-design
+    - topic:architecture-decisions
+    - topic:circuit-breakers
+    - topic:cqrs
+    - topic:clean-architecture
+    - topic:retry-pattern
+    - topic:rest
+    - topic:bulkhead-pattern
+    - topic:data-mapper
+    - topic:active-record
+    - topic:observable-pattern
+    - topic:proxy-pattern
+    - topic:dependency-injection
+    - topic:event-driven-architecture
+    - topic:event-sourcing
+    - topic:graphql-schema-design
+    - topic:microservices
+    - topic:monolith-to-microservices
+    - topic:design-patterns
+    - topic:domain-driven-design
+    - topic:twelve-factor-app
+    - topic:service-mesh
+    - topic:refactoring
+    - topic:technical-debt
+    - topic:code-review-best-practices
+    - topic:test-driven-development
+    - topic:developer-experience
+    - topic:trunk-based-development
+    - topic:gitflow
+    - topic:integrations
+    - topic:package-management
+    - topic:documentation
+    - topic:continuous-integration
+    - topic:continuous-deployment
+    - topic:ci-cd
+    - topic:release-management
 ---
 nodeKind: Domain
 id: domain:api-development

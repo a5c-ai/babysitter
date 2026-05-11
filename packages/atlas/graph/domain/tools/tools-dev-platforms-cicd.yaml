@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:replit
 attributes:
   displayName: "Replit"
+  homepageUrl: "https://replit.com"
   kind: other
   description: |
     Browser-based collaborative IDE and cloud execution environment that
@@ -28,6 +29,7 @@ nodeKind: Tool
 id: tool:gitpod
 attributes:
   displayName: "Gitpod"
+  homepageUrl: "https://www.gitpod.io"
   kind: other
   description: |
     On-demand cloud development environment platform (now rebranded as Ona)
@@ -53,6 +55,7 @@ nodeKind: Tool
 id: tool:codespaces
 attributes:
   displayName: "GitHub Codespaces"
+  homepageUrl: "https://github.com/features/codespaces"
   kind: other
   description: |
     GitHub's hosted development environment service that provisions instant,
@@ -78,6 +81,7 @@ nodeKind: Tool
 id: tool:stackblitz
 attributes:
   displayName: "StackBlitz"
+  homepageUrl: "https://stackblitz.com"
   kind: other
   description: |
     In-browser full-stack development environment powered by WebContainers
@@ -103,6 +107,7 @@ nodeKind: Tool
 id: tool:codesandbox
 attributes:
   displayName: "CodeSandbox"
+  homepageUrl: "https://codesandbox.io"
   kind: other
   description: |
     Cloud sandbox platform for rapid web prototyping and collaboration;
@@ -128,6 +133,7 @@ nodeKind: Tool
 id: tool:cursor
 attributes:
   displayName: "Cursor"
+  homepageUrl: "https://www.cursor.com"
   kind: other
   description: |
     AI-first code editor built on VS Code that embeds a large-language-model
@@ -151,6 +157,7 @@ nodeKind: Tool
 id: tool:windsurf
 attributes:
   displayName: "Windsurf"
+  homepageUrl: "https://windsurf.com"
   kind: other
   description: |
     AI-powered IDE by Codeium (formerly Codeium Editor) that provides
@@ -174,6 +181,7 @@ nodeKind: Tool
 id: tool:buildkite
 attributes:
   displayName: "Buildkite"
+  homepageUrl: "https://buildkite.com"
   kind: ci
   description: |
     Hybrid CI/CD platform that runs pipeline agents on your own
@@ -199,6 +207,7 @@ nodeKind: Tool
 id: tool:drone-ci
 attributes:
   displayName: "Drone CI"
+  homepageUrl: "https://www.drone.io"
   kind: ci
   description: |
     Container-native CI/CD platform where every pipeline step runs in an
@@ -218,6 +227,7 @@ nodeKind: Tool
 id: tool:woodpecker
 attributes:
   displayName: "Woodpecker CI"
+  homepageUrl: "https://woodpecker-ci.org"
   kind: ci
   description: |
     Community-maintained open-source fork of Drone CI that adds multi-platform
@@ -237,12 +247,15 @@ nodeKind: Tool
 id: tool:earthly
 attributes:
   displayName: "Earthly"
+  homepageUrl: "https://earthly.dev"
   kind: ci
   description: |
     Build automation tool that combines Makefile and Dockerfile concepts into
     reproducible, containerised builds expressed in an Earthfile; runs
     identically on local machines and any CI system.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:ci-cd
   used_for:
@@ -256,12 +269,15 @@ nodeKind: Tool
 id: tool:dagger
 attributes:
   displayName: "Dagger"
+  homepageUrl: "https://dagger.io"
   kind: ci
   description: |
     Programmable CI/CD engine that runs pipelines inside containers using a
     typed module system (Daggerverse); pipelines run identically on a laptop
     or in any CI provider, with built-in caching and LLM/MCP integration.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:ci-cd
   used_for:

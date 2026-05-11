@@ -15,6 +15,20 @@ edges:
   applies_to:
     - target: domain:project-management
       confidence: primary
+    - target: specialization:waterfall
+      confidence: secondary
+    - target: specialization:ccpm
+      confidence: secondary
+    - target: specialization:rup
+      confidence: secondary
+    - target: specialization:spiral-model
+      confidence: secondary
+    - target: specialization:v-model
+      confidence: secondary
+    - target: specialization:impact-mapping
+      confidence: secondary
+    - target: specialization:jobs-to-be-done
+      confidence: secondary
     - target: domain:software-engineering
       confidence: secondary
   prerequisite_for_learning:
@@ -209,6 +223,10 @@ edges:
   applies_to:
     - target: domain:software-engineering
       confidence: primary
+    - target: specialization:communication
+      confidence: secondary
+    - target: specialization:authoring
+      confidence: secondary
   prerequisite_for_learning:
     - target: skill-area:api-doc-generation
       strength: recommended
@@ -238,6 +256,8 @@ edges:
   applies_to:
     - target: domain:sales
       confidence: primary
+    - target: specialization:sales
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:frontend-performance

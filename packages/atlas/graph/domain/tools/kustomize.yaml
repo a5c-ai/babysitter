@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:kustomize
 attributes:
   displayName: "Kustomize"
+  homepageUrl: "https://kustomize.io"
   kind: orchestrator
   description: |
     Kubernetes-native configuration management with template-free YAML customization.

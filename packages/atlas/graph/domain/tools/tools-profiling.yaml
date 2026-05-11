@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:perf
 attributes:
   displayName: "perf"
+  homepageUrl: "https://perf.wiki.kernel.org"
   kind: profiler
   description: |
     Linux performance counters tool for sampling CPU profiles, tracing
@@ -22,11 +23,14 @@ nodeKind: Tool
 id: tool:flamegraph
 attributes:
   displayName: "FlameGraph"
+  homepageUrl: "https://github.com/brendangregg/FlameGraph"
   kind: profiler
   description: |
     Brendan Gregg's tooling for turning sampled stack traces into
     interactive flame-graph SVGs.
 edges:
+  belongs_to_language:
+    - language:perl
   tool_used_by:
     - target: skill-area:profiling-cpu
   used_for:
@@ -41,6 +45,7 @@ nodeKind: Tool
 id: tool:py-spy
 attributes:
   displayName: "py-spy"
+  homepageUrl: "https://github.com/benfred/py-spy"
   kind: profiler
   language: language:python
   description: |

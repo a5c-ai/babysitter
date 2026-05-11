@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:segment
 attributes:
   displayName: "Segment"
+  homepageUrl: "https://segment.com"
   kind: other
   description: |
     Customer data platform (CDP) for collecting, unifying, and routing
@@ -28,6 +29,7 @@ nodeKind: Tool
 id: tool:mixpanel
 attributes:
   displayName: "Mixpanel"
+  homepageUrl: "https://mixpanel.com"
   kind: other
   description: |
     Product analytics platform for tracking user interactions and funnels.
@@ -53,6 +55,7 @@ nodeKind: Tool
 id: tool:amplitude
 attributes:
   displayName: "Amplitude"
+  homepageUrl: "https://amplitude.com"
   kind: other
   description: |
     Digital analytics platform focused on product and behavioral analytics.
@@ -78,6 +81,7 @@ nodeKind: Tool
 id: tool:posthog
 attributes:
   displayName: "PostHog"
+  homepageUrl: "https://posthog.com"
   kind: other
   description: |
     Open-source product analytics suite with event capture, funnels,
@@ -103,6 +107,7 @@ nodeKind: Tool
 id: tool:heap
 attributes:
   displayName: "Heap"
+  homepageUrl: "https://www.heap.io"
   kind: other
   description: |
     Automatic event-capture analytics platform that retroactively records
@@ -128,6 +133,7 @@ nodeKind: Tool
 id: tool:google-analytics
 attributes:
   displayName: "Google Analytics"
+  homepageUrl: "https://analytics.google.com"
   kind: other
   description: |
     Google's web and app analytics service for tracking traffic, user
@@ -149,6 +155,7 @@ nodeKind: Tool
 id: tool:hotjar
 attributes:
   displayName: "Hotjar"
+  homepageUrl: "https://www.hotjar.com"
   kind: other
   description: |
     Behavioral analytics and user feedback platform providing heatmaps,
@@ -170,6 +177,7 @@ nodeKind: Tool
 id: tool:fullstory
 attributes:
   displayName: "FullStory"
+  homepageUrl: "https://www.fullstory.com"
   kind: other
   description: |
     Digital experience intelligence platform with session replay, funnel

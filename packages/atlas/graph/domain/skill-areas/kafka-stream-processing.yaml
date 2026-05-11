@@ -20,6 +20,8 @@ edges:
   applies_to:
     - target: domain:data-engineering
       confidence: primary
+    - target: specialization:redis-ops
+      confidence: secondary
     - target: topic:event-driven-architecture
       confidence: secondary
   uses_stack_part:

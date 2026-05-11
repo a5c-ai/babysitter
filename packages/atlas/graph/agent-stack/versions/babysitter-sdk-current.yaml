@@ -17,5 +17,18 @@ edges:
     - target: agent-runtime-impl:babysitter-sdk.runtime@current
       role: runtime
   sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=5.0.0'
+      level: full
+      notes: babysitter-sdk enables multi-turn process orchestration.
+    - target: capability:supports-text-streaming
+      versionRange: '>=5.0.0'
+      level: full
+      notes: babysitter-sdk streams output from orchestrated agents.
+    - target: capability:programmatic-tool-calling
+      versionRange: '>=5.0.0'
+      level: full
+      notes: babysitter-sdk exposes programmatic task and tool-calling APIs.
   uses_memory_system:
     - target: memory-system:instruction-file-hierarchy

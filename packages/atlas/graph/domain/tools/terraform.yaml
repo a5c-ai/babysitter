@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:terraform
 attributes:
   displayName: "Terraform"
+  homepageUrl: "https://www.terraform.io"
   kind: iac
   releasedAt: "2014"
   description: |

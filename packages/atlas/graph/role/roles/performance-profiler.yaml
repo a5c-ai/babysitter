@@ -11,6 +11,9 @@ attributes:
   description: |
     Agent that profiles code paths and proposes performance fixes.
 edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:performance-budget-tracking
   requires_capability:
     - target: capability:supports-tool-use
     - target: capability:supports-text-streaming

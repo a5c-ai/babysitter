@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:honeycomb
 attributes:
   displayName: "Honeycomb"
+  homepageUrl: "https://www.honeycomb.io"
   kind: observability
   description: |
     Observability platform for high-cardinality, wide-event analytics on production systems.

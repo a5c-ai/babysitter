@@ -2,11 +2,14 @@ nodeKind: Tool
 id: tool:kubernetes
 attributes:
   displayName: "Kubernetes"
+  homepageUrl: "https://kubernetes.io"
   kind: orchestrator
   releasedAt: "2014"
   description: |
     Open-source container orchestration system for automating deployment, scaling, and management.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:k8s-operator-development
     - target: skill-area:gitops

@@ -3,11 +3,14 @@ nodeKind: Tool
 id: tool:opentelemetry-collector
 attributes:
   displayName: "OpenTelemetry Collector"
+  homepageUrl: "https://opentelemetry.io/docs/collector/"
   kind: observability
   description: |
     Vendor-neutral agent/gateway for receiving, processing, and
     exporting traces, metrics, and logs.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:observability-pipeline
   used_for:
@@ -24,11 +27,14 @@ nodeKind: Tool
 id: tool:fluent-bit
 attributes:
   displayName: "Fluent Bit"
+  homepageUrl: "https://fluentbit.io"
   kind: observability
   description: |
     Lightweight log and metrics processor/forwarder; common Kubernetes
     log shipper with broad input/output plugin set.
 edges:
+  belongs_to_language:
+    - language:c
   tool_used_by:
     - target: skill-area:observability-pipeline
   used_for:

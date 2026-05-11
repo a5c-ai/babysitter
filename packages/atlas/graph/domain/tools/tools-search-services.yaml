@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:algolia
 attributes:
   displayName: "Algolia"
+  homepageUrl: "https://www.algolia.com"
   kind: other
   description: |
     Hosted search and discovery API for building fast, relevant search
@@ -25,6 +26,7 @@ nodeKind: Tool
 id: tool:typesense
 attributes:
   displayName: "Typesense"
+  homepageUrl: "https://typesense.org"
   kind: other
   description: |
     Open-source, typo-tolerant search engine built for speed and simplicity.
@@ -47,6 +49,7 @@ nodeKind: Tool
 id: tool:opensearch
 attributes:
   displayName: "OpenSearch"
+  homepageUrl: "https://opensearch.org"
   kind: other
   description: |
     Apache-licensed fork of Elasticsearch and Kibana maintained by AWS.

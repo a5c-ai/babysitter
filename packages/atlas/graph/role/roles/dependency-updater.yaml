@@ -11,6 +11,9 @@ attributes:
   description: |
     Agent that proposes and verifies dependency upgrades.
 edges:
+  holds_responsibility:
+    - responsibility:dependency-audit
+    - responsibility:security-review
   requires_capability:
     - target: capability:supports-tool-use
     - target: capability:supports-text-streaming

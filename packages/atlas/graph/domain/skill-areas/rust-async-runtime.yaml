@@ -18,6 +18,8 @@ edges:
   applies_to:
     - target: domain:systems-programming
       confidence: primary
+    - target: specialization:rust-systems
+      confidence: secondary
   uses_language:
     - language:rust
     - target: language:rust

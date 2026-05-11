@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:webpack
 attributes:
   displayName: "webpack"
+  homepageUrl: "https://webpack.js.org"
   kind: bundler
   releasedAt: "2014"
   description: |

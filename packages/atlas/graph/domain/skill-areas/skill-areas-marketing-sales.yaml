@@ -14,6 +14,10 @@ edges:
       confidence: primary
     - target: domain:digital-marketing
       confidence: secondary
+    - target: specialization:digital-marketing
+      confidence: secondary
+    - target: specialization:digital-marketing-strategy
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:content-marketing
@@ -30,6 +34,10 @@ edges:
       confidence: primary
     - target: domain:digital-marketing
       confidence: secondary
+    - target: specialization:marketing
+      confidence: secondary
+    - target: specialization:authoring
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:marketing-automation
@@ -44,6 +52,8 @@ edges:
   applies_to:
     - target: domain:marketing
       confidence: primary
+    - target: specialization:digital-marketing-strategy
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:sales-methodology

@@ -280,5 +280,19 @@ edges:
   applies_to:
     - target: specialization:ai-agents-conversational
       confidence: primary
+    - target: specialization:claudekit
+      confidence: secondary
+    - target: specialization:everything-claude-code
+      confidence: secondary
+    - target: specialization:superpowers
+      confidence: secondary
+    - target: specialization:cog-second-brain
+      confidence: secondary
+    - target: specialization:pilot-shell
+      confidence: secondary
+    - target: specialization:planning-with-files
+      confidence: secondary
+    - target: specialization:automaker
+      confidence: secondary
   requires_skill_area:
     - skill-area:prompt-engineering

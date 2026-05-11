@@ -11,6 +11,10 @@ attributes:
   description: |
     The Code Reviewer role.
 edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:code-review-coverage
+    - responsibility:knowledge-sharing
   requires_expertise:
     - target: skill-area:code-review-practice
     - target: skill-area:sast

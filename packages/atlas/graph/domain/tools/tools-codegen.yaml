@@ -3,11 +3,14 @@ nodeKind: Tool
 id: tool:openapi-generator
 attributes:
   displayName: "OpenAPI Generator"
+  homepageUrl: "https://openapi-generator.tech"
   kind: api-tool
   description: |
     Generates client SDKs, server stubs, and docs from OpenAPI 2.0/3.x
     specs across 50+ languages and frameworks.
 edges:
+  belongs_to_language:
+    - language:java
   tool_used_by:
     - target: skill-area:sdk-codegen
   alternative_to:
@@ -22,11 +25,14 @@ nodeKind: Tool
 id: tool:graphql-codegen
 attributes:
   displayName: "GraphQL Code Generator"
+  homepageUrl: "https://the-guild.dev/graphql/codegen"
   kind: api-tool
   description: |
     Plugin-based codegen that produces typed clients, hooks, and
     resolvers from GraphQL schemas and operations.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:sdk-codegen
   alternative_to:

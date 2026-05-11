@@ -55,6 +55,10 @@ edges:
   applies_to:
     - target: domain:marketing
       confidence: primary
+    - target: specialization:marketing
+      confidence: secondary
+    - target: specialization:public-relations
+      confidence: secondary
     - target: domain:public-relations
       confidence: secondary
 ---
@@ -77,6 +81,8 @@ edges:
   applies_to:
     - target: domain:digital-marketing
       confidence: primary
+    - target: specialization:digital-marketing-strategy
+      confidence: secondary
     - target: domain:business-intelligence
       confidence: secondary
   prerequisite_for_learning:
@@ -102,5 +108,7 @@ edges:
   applies_to:
     - target: domain:digital-marketing
       confidence: primary
+    - target: specialization:digital-marketing
+      confidence: secondary
     - target: domain:marketing
       confidence: secondary

@@ -10,6 +10,10 @@ attributes:
     Authors and maintains user-facing and engineering-facing docs, tutorials, and reference material.
     (Convergent-catalog update; complements the canonical `role:technical-writer` example with explicit SkillArea expertise edges.)
 edges:
+  holds_responsibility:
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+    - responsibility:write-user-docs
   requires_expertise:
     - target: skill-area:tutorial-design
     - target: skill-area:reference-docs

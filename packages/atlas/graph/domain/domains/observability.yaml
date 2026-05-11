@@ -8,3 +8,5 @@ attributes:
 edges:
   contains:
     - specialization:observability
+    - topic:slo-sli
+    - topic:incident-management

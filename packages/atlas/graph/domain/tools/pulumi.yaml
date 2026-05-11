@@ -2,10 +2,13 @@ nodeKind: Tool
 id: tool:pulumi
 attributes:
   displayName: "Pulumi"
+  homepageUrl: "https://www.pulumi.com"
   kind: iac
   description: |
     Infrastructure-as-code in general-purpose programming languages.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:terraform-infrastructure
   alternative_to:

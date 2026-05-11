@@ -148,6 +148,34 @@ attributes:
 edges:
   contains:
     - specialization:knowledge-management
+    - topic:knowledge-management
+    - topic:company-brain
+    - topic:knowledge-fabric-architecture
+    - topic:knowledge-graph-construction
+    - topic:organizational-memory
+    - topic:semantic-chunking
+    - topic:chunking-strategies
+    - topic:embedding-pipeline
+    - topic:dense-retrieval
+    - topic:hybrid-retrieval
+    - topic:re-ranking
+    - topic:graph-rag
+    - topic:multi-agent-knowledge-sharing
+    - topic:knowledge-freshness
+    - topic:knowledge-access-control
+    - topic:knowledge-feedback-loop
+    - topic:agentic-rag
+    - topic:memory-to-knowledge-bridge
+    - topic:context-to-fabric-sync
+    - topic:auto-memory
+    - topic:memory-consolidation
+    - topic:memory-scoping
+    - topic:memory-security
+    - topic:memory-deduplication
+    - topic:instruction-file-standard
+    - topic:unified-agent-memory
+    - topic:cloud-agent-memory
+    - topic:memory-type-taxonomy
 ---
 nodeKind: Domain
 id: domain:advertising

@@ -26,6 +26,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:human-eval.qwen-2-5-72b.2024-09
+  scored_against:
+    - target: benchmark:human-eval
 ---
 nodeKind: EvalResult
 id: eval-result:human-eval.qwen-2-5-coder-32b.001
@@ -39,6 +41,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:human-eval.qwen-2-5-coder-32b.2024-11
+  scored_against:
+    - target: benchmark:human-eval
 ---
 nodeKind: EvalResult
 id: eval-result:livecodebench.qwen-2-5-coder-32b.001
@@ -52,6 +56,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:livecodebench.qwen-2-5-coder-32b.2024-11
+  scored_against:
+    - target: benchmark:livecodebench
 ---
 nodeKind: EvalResult
 id: eval-result:mbpp.qwen-2-5-coder-32b.001
@@ -65,3 +71,5 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:mbpp.qwen-2-5-coder-32b.2024-11
+  scored_against:
+    - target: benchmark:mbpp

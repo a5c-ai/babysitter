@@ -11,6 +11,9 @@ attributes:
   description: |
     Agent that authors unit, integration, and regression tests for existing code.
 edges:
+  holds_responsibility:
+    - responsibility:test-strategy
+    - responsibility:code-review
   requires_capability:
     - target: capability:supports-tool-use
     - target: capability:supports-text-streaming

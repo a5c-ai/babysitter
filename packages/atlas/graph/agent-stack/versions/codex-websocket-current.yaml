@@ -19,5 +19,18 @@ edges:
     - target: agent-platform-impl:codex.platform@1.x
       role: platform
   sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=0.121.0'
+      level: full
+      notes: Codex WebSocket transport enables multi-turn sessions.
+    - target: capability:supports-text-streaming
+      versionRange: '>=0.121.0'
+      level: full
+      notes: Codex streams output over WebSocket.
+    - target: capability:supports-tool-use
+      versionRange: '>=0.121.0'
+      level: full
+      notes: Codex dispatches sandboxed tool calls.
   uses_memory_system:
     - target: memory-system:codex-agents-md

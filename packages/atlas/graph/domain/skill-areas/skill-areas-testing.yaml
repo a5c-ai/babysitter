@@ -192,6 +192,10 @@ edges:
   applies_to:
     - target: specialization:qa-testing-automation
       confidence: primary
+    - target: specialization:atdd-tdd
+      confidence: secondary
+    - target: specialization:cleanroom
+      confidence: secondary
   requires_skill_area:
     - skill-area:e2e-testing
 ---

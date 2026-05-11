@@ -3,11 +3,14 @@ nodeKind: Tool
 id: tool:argocd
 attributes:
   displayName: "Argo CD"
+  homepageUrl: "https://argoproj.github.io/cd/"
   kind: ci
   description: |
     Declarative GitOps continuous-delivery controller for Kubernetes;
     syncs cluster state from Git repositories.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:gitops
   used_for:
@@ -22,11 +25,14 @@ nodeKind: Tool
 id: tool:flux
 attributes:
   displayName: "Flux"
+  homepageUrl: "https://fluxcd.io"
   kind: ci
   description: |
     CNCF GitOps toolkit for Kubernetes — Source/Kustomize/Helm/Image
     controllers and progressive delivery via Flagger.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:gitops
   used_for:
@@ -41,6 +47,7 @@ nodeKind: Tool
 id: tool:tekton
 attributes:
   displayName: "Tekton"
+  homepageUrl: "https://tekton.dev"
   kind: ci
   description: |
     Kubernetes-native CI/CD framework with Tasks, Pipelines, and

@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:flagsmith
 attributes:
   displayName: "Flagsmith"
+  homepageUrl: "https://www.flagsmith.com"
   kind: other
   description: |
     Open-source feature flag and remote configuration service. Self-hostable
@@ -25,6 +26,7 @@ nodeKind: Tool
 id: tool:unleash
 attributes:
   displayName: "Unleash"
+  homepageUrl: "https://www.getunleash.io"
   kind: other
   description: |
     Open-source feature toggle framework with enterprise edition.
@@ -47,6 +49,7 @@ nodeKind: Tool
 id: tool:split-io
 attributes:
   displayName: "Split.io"
+  homepageUrl: "https://www.split.io"
   kind: other
   description: |
     Feature delivery platform combining feature flags with attribution

@@ -21,5 +21,22 @@ edges:
     - target: agent-platform-impl:opencode.platform@1.x
       role: platform
   sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+      notes: OpenCode HTTP server hosts multi-turn sessions.
+    - target: capability:supports-text-streaming
+      versionRange: '>=0.1.0'
+      level: full
+      notes: OpenCode streams model output via HTTP.
+    - target: capability:supports-tool-use
+      versionRange: '>=0.1.0'
+      level: full
+      notes: OpenCode dispatches tool calls in sandboxed sessions.
+    - target: capability:supports-mcp
+      versionRange: '>=0.1.0'
+      level: full
+      notes: OpenCode supports MCP server integration.
   uses_memory_system:
     - target: memory-system:file-based-markdown-pattern

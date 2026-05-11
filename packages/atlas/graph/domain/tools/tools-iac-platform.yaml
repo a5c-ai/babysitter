@@ -4,6 +4,7 @@ nodeKind: Tool
 id: tool:terraform-cloud
 attributes:
   displayName: "Terraform Cloud"
+  homepageUrl: "https://app.terraform.io"
   kind: iac
   description: |
     HashiCorp's managed service for Terraform — provides remote state storage,
@@ -25,6 +26,7 @@ nodeKind: Tool
 id: tool:pulumi-cloud
 attributes:
   displayName: "Pulumi Cloud"
+  homepageUrl: "https://www.pulumi.com/product/pulumi-cloud/"
   kind: iac
   description: |
     Pulumi's SaaS control plane for infrastructure-as-code — hosts stack state,
@@ -46,12 +48,15 @@ nodeKind: Tool
 id: tool:crossplane
 attributes:
   displayName: "Crossplane"
+  homepageUrl: "https://www.crossplane.io"
   kind: iac
   description: |
     CNCF project that extends Kubernetes with Composite Resource Definitions and
     Managed Resources, enabling platform teams to build internal cloud APIs and
     provision external infrastructure declaratively from the Kubernetes control plane.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:gitops
   used_for:
@@ -69,12 +74,15 @@ nodeKind: Tool
 id: tool:backstage
 attributes:
   displayName: "Backstage"
+  homepageUrl: "https://backstage.io"
   kind: orchestrator
   description: |
     CNCF open-source developer portal platform by Spotify — provides a software
     catalog, TechDocs, scaffolder templates, and plugin ecosystem for building
     unified internal developer portals that improve developer experience.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:platform-engineering
   used_for:
@@ -94,6 +102,7 @@ nodeKind: Tool
 id: tool:port-dev
 attributes:
   displayName: "Port"
+  homepageUrl: "https://www.getport.io"
   kind: orchestrator
   description: |
     Developer portal and internal developer platform (IDP) — provides a software
@@ -118,12 +127,15 @@ nodeKind: Tool
 id: tool:helmfile
 attributes:
   displayName: "Helmfile"
+  homepageUrl: "https://github.com/helmfile/helmfile"
   kind: orchestrator
   description: |
     Declarative spec for deploying Helm charts across environments — supports
     templating, layered values, selective sync, and diff previews, enabling
     GitOps-style management of multi-chart Kubernetes deployments.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:gitops
   used_for:
@@ -140,12 +152,15 @@ nodeKind: Tool
 id: tool:docker-compose
 attributes:
   displayName: "Docker Compose"
+  homepageUrl: "https://docs.docker.com/compose/"
   kind: container
   description: |
     YAML-based tool for defining and running multi-container Docker applications
     locally or in CI — manages service dependencies, networking, volumes, and
     environment configuration in a single compose file.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:containerization
   used_for:
@@ -165,12 +180,15 @@ nodeKind: Tool
 id: tool:k3s
 attributes:
   displayName: "K3s"
+  homepageUrl: "https://k3s.io"
   kind: container
   description: |
     CNCF-certified lightweight Kubernetes distribution by Rancher/SUSE — designed
     for edge, IoT, and resource-constrained environments; ships as a single binary
     with embedded SQLite or etcd and minimal memory footprint.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:containerization
   used_for:
@@ -190,12 +208,15 @@ nodeKind: Tool
 id: tool:kind
 attributes:
   displayName: "kind"
+  homepageUrl: "https://kind.sigs.k8s.io"
   kind: container
   description: |
     Kubernetes IN Docker — runs multi-node Kubernetes clusters inside Docker
     containers, primarily used for local development and CI testing of Kubernetes
     controllers, operators, and admission webhooks.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:containerization
   used_for:
@@ -213,12 +234,15 @@ nodeKind: Tool
 id: tool:minikube
 attributes:
   displayName: "minikube"
+  homepageUrl: "https://minikube.sigs.k8s.io"
   kind: container
   description: |
     Local Kubernetes cluster tool that provisions a single-node cluster using VM
     or container drivers — offers add-ons for ingress, dashboard, metrics-server,
     and GPU support, ideal for developer iteration and local testing.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:containerization
   used_for:
@@ -236,12 +260,15 @@ nodeKind: Tool
 id: tool:rancher
 attributes:
   displayName: "Rancher"
+  homepageUrl: "https://www.rancher.com"
   kind: orchestrator
   description: |
     SUSE's open-source Kubernetes management platform — provides a multi-cluster
     management UI, role-based access control, App Catalog (Helm charts), Fleet
     GitOps engine, and integrations for RKE2 and K3s cluster provisioning.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:containerization
   used_for:
@@ -261,12 +288,15 @@ nodeKind: Tool
 id: tool:nomad
 attributes:
   displayName: "Nomad"
+  homepageUrl: "https://www.nomadproject.io"
   kind: orchestrator
   description: |
     HashiCorp's flexible workload orchestrator — schedules containerized, VM,
     and bare-metal jobs across cloud and on-prem; integrates natively with Consul
     for service mesh and Vault for secrets, supporting diverse deployment patterns.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:containerization
   used_for:

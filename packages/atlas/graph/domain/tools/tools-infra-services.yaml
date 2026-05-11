@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:fastly
 attributes:
   displayName: "Fastly"
+  homepageUrl: "https://www.fastly.com"
   kind: other
   description: |
     Edge cloud platform providing CDN, WAF, DDoS protection, and edge
@@ -21,6 +22,7 @@ nodeKind: Tool
 id: tool:akamai
 attributes:
   displayName: "Akamai"
+  homepageUrl: "https://www.akamai.com"
   kind: other
   description: |
     Global CDN and edge security platform serving over a third of internet
@@ -39,12 +41,15 @@ nodeKind: Tool
 id: tool:ngrok
 attributes:
   displayName: "ngrok"
+  homepageUrl: "https://ngrok.com"
   kind: other
   description: |
     Ingress-as-a-service platform for exposing local servers and services
     to the internet via secure tunnels. Used for webhook development,
     demo environments, API gateway, and IoT device connectivity.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:local-development
   used_for:
@@ -57,12 +62,15 @@ nodeKind: Tool
 id: tool:tailscale
 attributes:
   displayName: "Tailscale"
+  homepageUrl: "https://tailscale.com"
   kind: other
   description: |
     Zero-config VPN built on WireGuard for connecting devices and services
     across networks. Provides mesh networking, ACLs, MagicDNS, subnet
     routing, and exit nodes for secure private network access.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:networking
   used_for:
@@ -75,12 +83,15 @@ nodeKind: Tool
 id: tool:cloudflare-workers
 attributes:
   displayName: "Cloudflare Workers"
+  homepageUrl: "https://workers.cloudflare.com"
   kind: other
   description: |
     Serverless JavaScript/WASM edge compute platform running on Cloudflare's
     global network. Provides Workers KV, Durable Objects, R2 storage, D1
     SQLite, and Queue for building distributed edge applications.
 edges:
+  belongs_to_language:
+    - language:javascript
   tool_used_by:
     - target: skill-area:serverless-compute
     - target: skill-area:cdn-edge

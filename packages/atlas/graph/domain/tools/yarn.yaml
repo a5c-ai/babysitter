@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:yarn
 attributes:
   displayName: "Yarn"
+  homepageUrl: "https://yarnpkg.com"
   kind: package-manager
   language: language:javascript
   releasedAt: "2016"

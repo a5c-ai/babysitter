@@ -10,6 +10,10 @@ attributes:
   description: |
     Developer Relations — bridges product and developer community via docs, talks, and samples.
 edges:
+  holds_responsibility:
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+    - responsibility:ai-knowledge-sharing
   requires_expertise:
     - target: skill-area:tutorial-design
     - target: skill-area:reference-docs

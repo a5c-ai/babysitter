@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:babel
 attributes:
   displayName: "Babel"
+  homepageUrl: "https://babeljs.io"
   kind: transpiler
   language: language:javascript
   description: |

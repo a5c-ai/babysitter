@@ -133,7 +133,7 @@ const libLangCoverage = pct(libsWithLang.size, libs.length);
 
 // Roles with at least one responsibility edge
 const roles = byKind('Role');
-const rolesWithResp = new Set(edges.filter(e => e.kind === 'has_responsibility' && roles.some(r => r.id === e.from)).map(e => e.from));
+const rolesWithResp = new Set(edges.filter(e => (e.kind === 'has_responsibility' || e.kind === 'holds_responsibility') && roles.some(r => r.id === e.from)).map(e => e.from));
 const roleRespCoverage = pct(rolesWithResp.size, roles.length);
 
 // Workflows with at least one step or involves edge
@@ -218,10 +218,11 @@ const benchmarks = byKind('Benchmark');
 const evalResults = byKind('EvalResult');
 const evalRuns = byKind('EvalRun');
 
-const benchWithResults = new Set(edges.filter(e => e.kind === 'evaluated_on' || e.kind === 'has_eval_result' || e.kind === 'benchmarked_on').flatMap(e => [e.from, e.to]).filter(id => benchmarks.some(b => b.id === id)));
+const benchEdgeKinds = ['evaluated_on', 'has_eval_result', 'benchmarked_on', 'scored_against', 'for_benchmark', 'belongs_to_benchmark'];
+const benchWithResults = new Set(edges.filter(e => benchEdgeKinds.includes(e.kind)).flatMap(e => [e.from, e.to]).filter(id => benchmarks.some(b => b.id === id)));
 const benchResultCoverage = pct(benchWithResults.size, benchmarks.length);
 
-const evalRunsWithBench = new Set(edges.filter(e => (e.kind === 'evaluated_on' || e.kind === 'benchmarked_on') && evalRuns.some(r => r.id === e.from)).map(e => e.from));
+const evalRunsWithBench = new Set(edges.filter(e => (benchEdgeKinds.includes(e.kind)) && evalRuns.some(r => r.id === e.from)).map(e => e.from));
 const evalRunBenchCoverage = pct(evalRunsWithBench.size, evalRuns.length);
 
 // ═══════════════════════════════════════════

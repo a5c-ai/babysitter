@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:github-actions
 attributes:
   displayName: "GitHub Actions"
+  homepageUrl: "https://github.com/features/actions"
   kind: ci
   description: |
     CI/CD platform integrated with GitHub repositories - workflows defined in YAML.

@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:grafana
 attributes:
   displayName: "Grafana"
+  homepageUrl: "https://grafana.com"
   kind: observability
   description: |
     Open-source analytics and interactive visualization platform for metrics and logs.

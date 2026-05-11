@@ -11,6 +11,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:gpqa.gemini-2-5-pro.2025-06
+  scored_against:
+    - target: benchmark:mmlu
 ---
 nodeKind: EvalResult
 id: eval-result:livecodebench.gemini-2-5-pro.001
@@ -24,6 +26,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:livecodebench.gemini-2-5-pro.2025-06
+  scored_against:
+    - target: benchmark:livecodebench
 ---
 nodeKind: EvalResult
 id: eval-result:swe-bench-verified.gemini-2-5-flash.001
@@ -37,6 +41,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:swe-bench-verified.gemini-2-5-flash.2025-06
+  scored_against:
+    - target: benchmark:swe-bench-verified
 ---
 nodeKind: EvalResult
 id: eval-result:gpqa-diamond.gemini-2-5-pro.001
@@ -50,6 +56,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:gpqa-diamond.gemini-2-5-pro.2025-06
+  scored_against:
+    - target: benchmark:gpqa
 ---
 nodeKind: EvalResult
 id: eval-result:android-world.gemini-2-5-pro.001
@@ -63,6 +71,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:android-world.gemini-2-5-pro.2025-06
+  scored_against:
+    - target: benchmark:android-world
 ---
 nodeKind: EvalResult
 id: eval-result:mgsm.gemini-2-5-pro.001
@@ -76,6 +86,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:mgsm.gemini-2-5-pro.2025-06
+  scored_against:
+    - target: benchmark:mgsm
 ---
 nodeKind: EvalResult
 id: eval-result:gpqa-diamond.gemini-3-1-pro.2026-02-19.accuracy
@@ -89,6 +101,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:gpqa-diamond.gemini-3-1-pro.2026-02-19
+  scored_against:
+    - target: benchmark:gpqa
 ---
 nodeKind: EvalResult
 id: eval-result:gpqa-diamond.gemini-3-pro.2025-11-18.accuracy
@@ -102,3 +116,5 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:gpqa-diamond.gemini-3-pro.2025-11-18
+  scored_against:
+    - target: benchmark:gpqa

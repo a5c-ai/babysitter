@@ -9,6 +9,10 @@ attributes:
   description: |
     The Planner role.
 edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:sprint-planning
+    - responsibility:stakeholder-communication
   requires_expertise:
     - target: skill-area:adr-writing
     - target: skill-area:c4-modeling

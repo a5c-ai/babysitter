@@ -51,6 +51,22 @@ edges:
     - target: specialization:ai-agents-conversational
     - target: specialization:llm-fine-tuning
     - target: specialization:ml-inference-serving
+    - target: topic:claude-code-mcp
+    - target: topic:agent-context-management
+    - target: topic:agent-tool-use
+    - target: topic:multi-agent-orchestration
+    - target: topic:vibe-kanban
+    - target: topic:agent-run-lifecycle
+    - target: topic:parallel-agent-execution
+    - target: topic:agent-process-library
+    - target: topic:agent-effect-system
+    - target: topic:agent-plugin-system
+    - target: topic:a2a-protocol
+    - target: topic:agent-dispatch
+    - target: topic:event-driven-dispatch
+    - target: topic:human-in-the-loop
+    - target: topic:agent-session-management
+    - target: topic:agent-orchestration-products
 ---
 nodeKind: Domain
 id: domain:qa-testing
@@ -63,6 +79,7 @@ attributes:
 edges:
   contains:
     - target: specialization:qa-testing-automation
+    - target: topic:quality-assurance
 ---
 nodeKind: Domain
 id: domain:blockchain

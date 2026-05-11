@@ -9,6 +9,10 @@ attributes:
   description: |
     Owns backlog priority, acceptance criteria, and stakeholder alignment for a product area.
 edges:
+  holds_responsibility:
+    - responsibility:backlog-grooming
+    - responsibility:stakeholder-communication
+    - responsibility:sprint-planning
   requires_expertise:
     - target: skill-area:adr-writing
     - target: skill-area:reference-docs

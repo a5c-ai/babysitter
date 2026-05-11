@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:poetry
 attributes:
   displayName: "Poetry"
+  homepageUrl: "https://python-poetry.org"
   kind: package-manager
   language: language:python
   description: |

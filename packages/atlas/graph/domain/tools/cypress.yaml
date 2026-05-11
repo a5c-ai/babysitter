@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:cypress
 attributes:
   displayName: "Cypress"
+  homepageUrl: "https://www.cypress.io"
   kind: test-runner
   language: language:javascript
   description: |

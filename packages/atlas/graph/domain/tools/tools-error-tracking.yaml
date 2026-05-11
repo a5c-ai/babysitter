@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:bugsnag
 attributes:
   displayName: "Bugsnag"
+  homepageUrl: "https://www.bugsnag.com"
   kind: observability
   description: |
     Error monitoring and crash reporting platform for web and mobile apps.
@@ -25,6 +26,7 @@ nodeKind: Tool
 id: tool:rollbar
 attributes:
   displayName: "Rollbar"
+  homepageUrl: "https://rollbar.com"
   kind: observability
   description: |
     Real-time error tracking and debugging platform with AI-assisted
@@ -47,6 +49,7 @@ nodeKind: Tool
 id: tool:airbrake
 attributes:
   displayName: "Airbrake"
+  homepageUrl: "https://airbrake.io"
   kind: observability
   description: |
     Error and performance monitoring platform integrating exception
@@ -69,6 +72,7 @@ nodeKind: Tool
 id: tool:logrocket
 attributes:
   displayName: "LogRocket"
+  homepageUrl: "https://logrocket.com"
   kind: observability
   description: |
     Frontend monitoring platform combining session replay, logging,

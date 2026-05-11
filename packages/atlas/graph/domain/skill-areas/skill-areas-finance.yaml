@@ -18,6 +18,12 @@ edges:
   applies_to:
     - target: domain:finance
       confidence: primary
+    - target: specialization:corporate-finance
+      confidence: secondary
+    - target: specialization:finance-accounting
+      confidence: secondary
+    - target: specialization:venture-capital
+      confidence: secondary
     - target: domain:venture-capital
       confidence: secondary
   prerequisite_for_learning:

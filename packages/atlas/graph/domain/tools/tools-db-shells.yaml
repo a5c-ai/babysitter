@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:redis-cli
 attributes:
   displayName: "redis-cli"
+  homepageUrl: "https://redis.io/docs/latest/develop/tools/cli/"
   kind: sql-tool
   description: |
     Official command-line client for Redis: interactive REPL,
@@ -15,6 +16,7 @@ nodeKind: Tool
 id: tool:mongosh
 attributes:
   displayName: "MongoDB Shell (mongosh)"
+  homepageUrl: "https://www.mongodb.com/docs/mongodb-shell/"
   kind: sql-tool
   description: |
     Modern MongoDB shell — Node.js-based REPL with full driver API,

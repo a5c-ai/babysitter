@@ -19,3 +19,16 @@ edges:
     - target: agent-platform-impl:claude-code.platform@1.x
       role: platform
   sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=2.1.0'
+      level: full
+      notes: Remote control sessions are multi-turn by design.
+    - target: capability:supports-text-streaming
+      versionRange: '>=2.1.0'
+      level: full
+      notes: Remote control streams Claude Code output.
+    - target: capability:supports-tool-use
+      versionRange: '>=2.1.0'
+      level: full
+      notes: Remote control inherits tool-use from Claude Code.

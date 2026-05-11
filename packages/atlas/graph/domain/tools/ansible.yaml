@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:ansible
 attributes:
   displayName: "Ansible"
+  homepageUrl: "https://github.com/ansible/ansible"
   kind: config-mgmt
   description: |
     Agentless IT automation - configuration management, application deployment, and orchestration.

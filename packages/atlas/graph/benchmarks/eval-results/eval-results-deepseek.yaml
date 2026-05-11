@@ -11,6 +11,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:mmlu.deepseek-v3.2024-12
+  scored_against:
+    - target: benchmark:mmlu
 ---
 nodeKind: EvalResult
 id: eval-result:human-eval.deepseek-v3.001
@@ -24,6 +26,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:human-eval.deepseek-v3.2024-12
+  scored_against:
+    - target: benchmark:human-eval
 ---
 nodeKind: EvalResult
 id: eval-result:swe-bench.deepseek-v3.001
@@ -37,6 +41,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:swe-bench.deepseek-v3.2024-12
+  scored_against:
+    - target: benchmark:swe-bench-verified
 ---
 nodeKind: EvalResult
 id: eval-result:mmlu.deepseek-r1.001
@@ -50,6 +56,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:mmlu.deepseek-r1.2025-01
+  scored_against:
+    - target: benchmark:mmlu
 ---
 nodeKind: EvalResult
 id: eval-result:math.deepseek-r1.001
@@ -63,6 +71,8 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:math.deepseek-r1.2025-01
+  scored_against:
+    - target: benchmark:math
 ---
 nodeKind: EvalResult
 id: eval-result:gpqa.deepseek-r1.001
@@ -76,3 +86,5 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:gpqa.deepseek-r1.2025-01
+  scored_against:
+    - target: benchmark:gpqa

@@ -113,6 +113,14 @@ edges:
   applies_to:
     - target: domain:software-engineering
       confidence: primary
+    - target: specialization:humanities
+      confidence: secondary
+    - target: specialization:social-sciences
+      confidence: secondary
+    - target: specialization:applied-ethics
+      confidence: secondary
+    - target: specialization:philosophy
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:stakeholder-management

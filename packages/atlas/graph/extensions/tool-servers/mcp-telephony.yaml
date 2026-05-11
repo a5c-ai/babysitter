@@ -33,6 +33,7 @@ nodeKind: Tool
 id: tool:saperly
 attributes:
   displayName: "Saperly"
+  homepageUrl: "https://saperly.com"
   kind: other
   description: |
     Cloud telephony platform that provides AI agents with phone numbers

@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:vite
 attributes:
   displayName: "Vite"
+  homepageUrl: "https://vite.dev"
   kind: bundler
   releasedAt: "2020"
   description: |

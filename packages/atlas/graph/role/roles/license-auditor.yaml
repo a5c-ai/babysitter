@@ -11,6 +11,10 @@ attributes:
   description: |
     Agent that audits dependency licenses for policy compliance.
 edges:
+  holds_responsibility:
+    - responsibility:compliance-monitoring
+    - responsibility:dependency-audit
+    - responsibility:risk-assessment
   requires_capability:
     - target: capability:supports-tool-use
     - target: capability:supports-text-streaming

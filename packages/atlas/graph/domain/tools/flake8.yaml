@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:flake8
 attributes:
   displayName: "flake8"
+  homepageUrl: "https://github.com/PyCQA/flake8"
   kind: linter
   language: language:python
   description: |

@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:datadog
 attributes:
   displayName: "Datadog"
+  homepageUrl: "https://www.datadoghq.com"
   kind: observability
   description: |
     Monitoring and analytics platform for cloud-scale infrastructure and applications.

@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:rollup
 attributes:
   displayName: "Rollup"
+  homepageUrl: "https://rollupjs.org"
   kind: bundler
   description: |
     Module bundler for JavaScript that compiles small pieces of code into something larger.

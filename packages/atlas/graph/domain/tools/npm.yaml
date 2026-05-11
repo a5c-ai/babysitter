@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:npm
 attributes:
   displayName: "npm"
+  homepageUrl: "https://www.npmjs.com"
   kind: package-manager
   language: language:javascript
   releasedAt: "2010"

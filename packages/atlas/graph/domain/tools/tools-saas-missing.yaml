@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:slack
 attributes:
   displayName: "Slack"
+  homepageUrl: "https://slack.com"
   kind: other
   description: |
     Team messaging and collaboration platform for real-time communication.
@@ -23,6 +24,7 @@ nodeKind: Tool
 id: tool:discord
 attributes:
   displayName: "Discord"
+  homepageUrl: "https://discord.com"
   kind: other
   description: |
     Communication platform combining text, voice, and video chat for communities.
@@ -43,6 +45,7 @@ nodeKind: Tool
 id: tool:figma
 attributes:
   displayName: "Figma"
+  homepageUrl: "https://www.figma.com"
   kind: other
   description: |
     Collaborative interface design tool for building UI and UX workflows.
@@ -58,6 +61,7 @@ nodeKind: Tool
 id: tool:stripe
 attributes:
   displayName: "Stripe"
+  homepageUrl: "https://stripe.com"
   kind: other
   description: |
     Payment processing platform and developer-first financial infrastructure.
@@ -82,6 +86,7 @@ nodeKind: Tool
 id: tool:zoom
 attributes:
   displayName: "Zoom"
+  homepageUrl: "https://zoom.us"
   kind: other
   description: |
     Video conferencing and online meeting platform for remote collaboration.
@@ -100,6 +105,7 @@ nodeKind: Tool
 id: tool:calendly
 attributes:
   displayName: "Calendly"
+  homepageUrl: "https://calendly.com"
   kind: other
   description: |
     Scheduling automation platform for managing meeting bookings.
@@ -118,6 +124,7 @@ nodeKind: Tool
 id: tool:snyk
 attributes:
   displayName: "Snyk"
+  homepageUrl: "https://snyk.io"
   kind: other
   description: |
     Developer security platform for finding and fixing vulnerabilities.
@@ -144,6 +151,7 @@ nodeKind: Tool
 id: tool:sonarqube
 attributes:
   displayName: "SonarQube"
+  homepageUrl: "https://www.sonarsource.com/products/sonarqube/"
   kind: other
   description: |
     Static code analysis platform for continuous code quality inspection.
@@ -166,6 +174,7 @@ nodeKind: Tool
 id: tool:intercom
 attributes:
   displayName: "Intercom"
+  homepageUrl: "https://www.intercom.com"
   kind: other
   description: |
     Customer messaging and engagement platform for support and sales teams.
@@ -184,6 +193,7 @@ nodeKind: Tool
 id: tool:shopify
 attributes:
   displayName: "Shopify"
+  homepageUrl: "https://www.shopify.com"
   kind: other
   description: |
     E-commerce platform for building and managing online stores.
@@ -199,6 +209,7 @@ nodeKind: Tool
 id: tool:outlook
 attributes:
   displayName: "Microsoft Outlook"
+  homepageUrl: "https://www.microsoft.com/en-us/microsoft-365/outlook"
   kind: other
   description: |
     Email client and personal information manager from Microsoft.
@@ -214,6 +225,7 @@ nodeKind: Tool
 id: tool:todoist
 attributes:
   displayName: "Todoist"
+  homepageUrl: "https://todoist.com"
   kind: other
   description: |
     Task management and to-do list application for personal productivity.
@@ -234,6 +246,7 @@ nodeKind: Tool
 id: tool:airtable
 attributes:
   displayName: "Airtable"
+  homepageUrl: "https://www.airtable.com"
   kind: other
   description: |
     No-code database and spreadsheet hybrid for building custom apps.
@@ -254,6 +267,7 @@ nodeKind: Tool
 id: tool:render
 attributes:
   displayName: "Render"
+  homepageUrl: "https://render.com"
   kind: other
   description: |
     Cloud platform for deploying web services, static sites, and databases.
@@ -269,6 +283,7 @@ nodeKind: Tool
 id: tool:pagerduty
 attributes:
   displayName: "PagerDuty"
+  homepageUrl: "https://www.pagerduty.com"
   kind: other
   description: |
     Digital operations management platform for incident response.
@@ -284,12 +299,15 @@ nodeKind: Tool
 id: tool:storybook
 attributes:
   displayName: "Storybook"
+  homepageUrl: "https://storybook.js.org"
   kind: other
   description: |
     Open-source tool for building UI components in isolation.
     Provides a sandbox for developing, documenting, and visually testing
     React, Vue, Angular, and other frontend components independently.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:frontend-development
   used_for:
@@ -304,6 +322,7 @@ nodeKind: Tool
 id: tool:huggingface
 attributes:
   displayName: "Hugging Face"
+  homepageUrl: "https://huggingface.co"
   kind: other
   description: |
     AI model hub and platform for building machine learning applications.
@@ -319,12 +338,15 @@ nodeKind: Tool
 id: tool:firecrawl
 attributes:
   displayName: "Firecrawl"
+  homepageUrl: "https://www.firecrawl.dev"
   kind: other
   description: |
     Web scraping and crawling API for extracting structured data from websites.
     Turns websites into clean markdown or JSON by handling JavaScript rendering,
     pagination, sitemaps, and structured extraction at scale.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:data-collection
   used_for:
@@ -334,6 +356,7 @@ nodeKind: Tool
 id: tool:context7
 attributes:
   displayName: "Context7"
+  homepageUrl: "https://context7.com"
   kind: other
   description: |
     Library documentation service providing up-to-date developer documentation.
@@ -349,6 +372,7 @@ nodeKind: Tool
 id: tool:microsoft-teams
 attributes:
   displayName: "Microsoft Teams"
+  homepageUrl: "https://www.microsoft.com/en-us/microsoft-teams/"
   kind: other
   description: |
     Enterprise collaboration platform from Microsoft combining chat, meetings, and apps.

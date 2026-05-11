@@ -11,6 +11,9 @@ attributes:
   description: |
     Agent that generates and maintains code documentation, READMEs, and reference material.
 edges:
+  holds_responsibility:
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
   requires_capability:
     - target: capability:supports-tool-use
     - target: capability:supports-text-streaming

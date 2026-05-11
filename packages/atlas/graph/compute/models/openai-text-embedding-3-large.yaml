@@ -24,6 +24,8 @@ attributes:
   regions:
     - global
 edges:
+  belongs_to_family:
+    - target: model-family:openai-text-embedding-3
   realizes:
     - target: layer:1-model
   version_of:

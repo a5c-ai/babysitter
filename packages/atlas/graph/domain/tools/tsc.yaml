@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:tsc
 attributes:
   displayName: "TypeScript Compiler"
+  homepageUrl: "https://www.typescriptlang.org"
   kind: transpiler
   language: language:typescript
   description: |

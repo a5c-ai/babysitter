@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:n8n
 attributes:
   displayName: "n8n"
+  homepageUrl: "https://n8n.io"
   kind: other
   description: |
     Open-source workflow automation platform with a visual node-based
@@ -13,6 +14,8 @@ attributes:
     and tool-use capabilities. Supports custom code nodes (JavaScript/
     Python) for advanced logic.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:operations-automation
   used_for:
@@ -37,6 +40,7 @@ nodeKind: Tool
 id: tool:zapier
 attributes:
   displayName: "Zapier"
+  homepageUrl: "https://zapier.com"
   kind: other
   description: |
     Cloud-based workflow automation platform connecting 7,000+ apps
@@ -61,6 +65,7 @@ nodeKind: Tool
 id: tool:make
 attributes:
   displayName: "Make (Integromat)"
+  homepageUrl: "https://www.make.com"
   kind: other
   description: |
     Visual workflow automation platform (formerly Integromat) with a

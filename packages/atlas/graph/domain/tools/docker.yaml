@@ -2,11 +2,14 @@ nodeKind: Tool
 id: tool:docker
 attributes:
   displayName: "Docker"
+  homepageUrl: "https://www.docker.com"
   kind: container
   releasedAt: "2013"
   description: |
     Platform for developing, shipping, and running applications in containers.
 edges:
+  belongs_to_language:
+    - language:go
   tool_used_by:
     - target: skill-area:container-security
     - target: skill-area:containerization

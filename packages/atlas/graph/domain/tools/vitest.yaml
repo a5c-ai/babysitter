@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:vitest
 attributes:
   displayName: "Vitest"
+  homepageUrl: "https://vitest.dev"
   kind: test-runner
   language: language:javascript
   releasedAt: "2021"

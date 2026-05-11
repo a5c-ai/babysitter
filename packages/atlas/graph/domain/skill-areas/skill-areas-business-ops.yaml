@@ -12,6 +12,10 @@ edges:
   applies_to:
     - target: domain:finance
       confidence: primary
+    - target: specialization:corporate-finance
+      confidence: secondary
+    - target: specialization:finance-accounting
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:procurement-management
@@ -26,6 +30,12 @@ edges:
   applies_to:
     - target: domain:procurement
       confidence: primary
+    - target: specialization:supply-chain-optimization
+      confidence: secondary
+    - target: specialization:sourcing
+      confidence: secondary
+    - target: specialization:supply-chain
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:community-management
@@ -40,6 +50,8 @@ edges:
   applies_to:
     - target: domain:community
       confidence: primary
+    - target: specialization:public-relations
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:customer-success
@@ -54,6 +66,10 @@ edges:
   applies_to:
     - target: domain:customer-experience
       confidence: primary
+    - target: specialization:customer-experience
+      confidence: secondary
+    - target: specialization:sales
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:business-analysis
@@ -69,6 +85,10 @@ edges:
     - target: domain:operations
       confidence: primary
     - target: domain:business-intelligence
+      confidence: secondary
+    - target: specialization:business-analysis
+      confidence: secondary
+    - target: specialization:operations
       confidence: secondary
   prerequisite_for_learning:
     - target: skill-area:data-analytics
@@ -95,6 +115,8 @@ edges:
   applies_to:
     - target: domain:business-intelligence
       confidence: primary
+    - target: specialization:decision-intelligence
+      confidence: secondary
 ---
 nodeKind: SkillArea
 id: skill-area:strategic-planning
@@ -109,6 +131,12 @@ edges:
   applies_to:
     - target: domain:strategy
       confidence: primary
+    - target: specialization:strategic-consulting
+      confidence: secondary
+    - target: specialization:business-strategy
+      confidence: secondary
+    - target: specialization:business-strategy-advanced
+      confidence: secondary
   prerequisite_for_learning:
     - target: skill-area:business-analysis
       strength: recommended
@@ -146,3 +174,7 @@ edges:
   applies_to:
     - target: domain:operations
       confidence: primary
+    - target: specialization:operations
+      confidence: secondary
+    - target: specialization:logistics
+      confidence: secondary

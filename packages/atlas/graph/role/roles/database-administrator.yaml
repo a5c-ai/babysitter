@@ -10,6 +10,11 @@ attributes:
   description: |
     Operates production databases — backups, replication, performance, and schema migrations.
 edges:
+  holds_responsibility:
+    - responsibility:data-quality
+    - responsibility:performance-optimization
+    - responsibility:disaster-recovery
+    - responsibility:capacity-planning
   requires_expertise:
     - target: skill-area:postgres-tuning
     - target: skill-area:database-migrations-zero-downtime

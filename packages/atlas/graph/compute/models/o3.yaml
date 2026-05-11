@@ -34,6 +34,8 @@ attributes:
   regions:
   - global
 edges:
+  belongs_to_family:
+    - target: model-family:o-reasoning-series
   realizes:
     - target: layer:1-model
   version_of:

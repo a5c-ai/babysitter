@@ -23,3 +23,4 @@ edges:
     - topic:sharding
     - topic:shared-database
     - topic:unit-of-work
+    - topic:database-sharding

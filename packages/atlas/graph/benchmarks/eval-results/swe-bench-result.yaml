@@ -10,3 +10,5 @@ attributes:
 edges:
   belongs_to_eval_run:
     - eval-run:swe-bench.claude-code@1.x.2025-04-29
+  scored_against:
+    - target: benchmark:swe-bench-verified

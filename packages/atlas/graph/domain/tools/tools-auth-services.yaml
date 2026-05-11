@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:auth0
 attributes:
   displayName: "Auth0"
+  homepageUrl: "https://auth0.com"
   kind: other
   description: |
     Identity-as-a-service platform by Okta for authentication and authorization.
@@ -27,6 +28,7 @@ nodeKind: Tool
 id: tool:clerk
 attributes:
   displayName: "Clerk"
+  homepageUrl: "https://clerk.com"
   kind: other
   description: |
     Developer-first authentication and user management service.
@@ -51,6 +53,7 @@ nodeKind: Tool
 id: tool:keycloak
 attributes:
   displayName: "Keycloak"
+  homepageUrl: "https://www.keycloak.org"
   kind: other
   description: |
     Open-source identity and access management (IAM) solution by Red Hat.
@@ -75,6 +78,7 @@ nodeKind: Tool
 id: tool:firebase-auth
 attributes:
   displayName: "Firebase Authentication"
+  homepageUrl: "https://firebase.google.com/products/auth"
   kind: other
   description: |
     Google Firebase's managed authentication service supporting email/password,
@@ -99,6 +103,7 @@ nodeKind: Tool
 id: tool:okta
 attributes:
   displayName: "Okta"
+  homepageUrl: "https://www.okta.com"
   kind: other
   description: |
     Enterprise identity cloud for workforce and customer identity management.

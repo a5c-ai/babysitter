@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:litellm
 attributes:
   displayName: "LiteLLM"
+  homepageUrl: "https://github.com/BerriAI/litellm"
   kind: other
   description: |
     Python proxy and SDK that provides a unified OpenAI-compatible
@@ -11,6 +12,8 @@ attributes:
     fallbacks, spend tracking, rate limiting, and a proxy server mode
     that lets any OpenAI-compatible client talk to any backend.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:ai-agent-development
     - target: skill-area:model-serving-operations
@@ -26,6 +29,7 @@ nodeKind: Tool
 id: tool:openrouter
 attributes:
   displayName: "OpenRouter"
+  homepageUrl: "https://openrouter.ai"
   kind: other
   description: |
     API gateway service that routes requests to Claude, GPT-4, Llama,
@@ -50,6 +54,7 @@ nodeKind: Tool
 id: tool:portkey-ai
 attributes:
   displayName: "Portkey AI"
+  homepageUrl: "https://portkey.ai"
   kind: other
   description: |
     AI gateway that sits between applications and LLM providers, adding
@@ -73,6 +78,7 @@ nodeKind: Tool
 id: tool:helicone
 attributes:
   displayName: "Helicone"
+  homepageUrl: "https://www.helicone.ai"
   kind: other
   description: |
     LLM observability and proxy platform that captures requests, latency,
@@ -96,6 +102,7 @@ nodeKind: Tool
 id: tool:braintrust-proxy
 attributes:
   displayName: "Braintrust Proxy"
+  homepageUrl: "https://www.braintrust.dev"
   kind: other
   description: |
     AI proxy from the Braintrust evaluation platform that adds logging,

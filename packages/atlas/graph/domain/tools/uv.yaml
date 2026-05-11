@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:uv
 attributes:
   displayName: "uv"
+  homepageUrl: "https://github.com/astral-sh/uv"
   kind: package-manager
   language: language:python
   description: |

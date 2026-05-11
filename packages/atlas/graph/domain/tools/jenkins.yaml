@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:jenkins
 attributes:
   displayName: "Jenkins"
+  homepageUrl: "https://www.jenkins.io"
   kind: ci
   description: |
     Open-source automation server for building, testing, and deploying software.

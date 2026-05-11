@@ -3,6 +3,7 @@ nodeKind: Tool
 id: tool:aider
 attributes:
   displayName: "Aider"
+  homepageUrl: "https://github.com/Aider-AI/aider"
   kind: other
   description: |
     AI pair programming tool that runs in the terminal and edits code
@@ -12,6 +13,8 @@ attributes:
     and linting integration. Designed for developers who want AI
     assistance without leaving their terminal workflow.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:ai-agent-development
     - target: skill-area:autonomous-coding-engagement
@@ -39,6 +42,7 @@ nodeKind: Tool
 id: tool:continue-dev
 attributes:
   displayName: "Continue"
+  homepageUrl: "https://github.com/continuedev/continue"
   kind: other
   description: |
     Open-source AI code assistant that integrates into VS Code and
@@ -48,6 +52,8 @@ attributes:
     custom slash commands. Designed as an open alternative to Copilot
     with full model flexibility.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:ai-agent-development
     - target: skill-area:editor-fluency
@@ -56,6 +62,7 @@ nodeKind: Tool
 id: tool:cline
 attributes:
   displayName: "Cline"
+  homepageUrl: "https://github.com/cline/cline"
   kind: other
   description: |
     Autonomous AI coding agent that runs as a VS Code extension,
@@ -64,6 +71,8 @@ attributes:
     with a human-in-the-loop approval flow for each action. Excels at
     multi-file refactoring and feature implementation within the IDE.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:ai-agent-development
     - target: skill-area:autonomous-coding-engagement
@@ -72,6 +81,7 @@ nodeKind: Tool
 id: tool:sweep
 attributes:
   displayName: "Sweep"
+  homepageUrl: "https://github.com/sweepai/sweep"
   kind: other
   description: |
     AI developer that turns GitHub issues into pull requests. Reads the
@@ -80,6 +90,8 @@ attributes:
     like bug fixes, feature additions, and refactors that can be fully
     specified in an issue description. Integrates via GitHub App.
 edges:
+  belongs_to_language:
+    - language:python
   tool_used_by:
     - target: skill-area:ai-agent-development
     - target: skill-area:bug-fixing-from-issues
@@ -88,6 +100,7 @@ nodeKind: Tool
 id: tool:bolt-new
 attributes:
   displayName: "Bolt.new"
+  homepageUrl: "https://bolt.new"
   kind: other
   description: |
     AI-powered web application builder by StackBlitz that generates,
@@ -97,6 +110,8 @@ attributes:
     Next.js, Vue, and other frameworks with real-time preview and
     iterative refinement via chat.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:ai-agent-development
     - target: skill-area:prototyping
@@ -105,6 +120,7 @@ nodeKind: Tool
 id: tool:lovable
 attributes:
   displayName: "Lovable"
+  homepageUrl: "https://lovable.dev"
   kind: other
   description: |
     AI full-stack application generator that builds production-ready
@@ -114,6 +130,8 @@ attributes:
     one-click deployment. Targets non-technical founders and designers
     who need functional prototypes quickly.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:ai-agent-development
     - target: skill-area:prototyping
@@ -122,6 +140,7 @@ nodeKind: Tool
 id: tool:v0-dev
 attributes:
   displayName: "v0"
+  homepageUrl: "https://v0.dev"
   kind: other
   description: |
     Vercel's generative UI tool that creates React components from text
@@ -131,6 +150,8 @@ attributes:
     displays — rather than full-stack application scaffolding. Integrates
     with Vercel's deployment pipeline.
 edges:
+  belongs_to_language:
+    - language:typescript
   tool_used_by:
     - target: skill-area:ai-agent-development
     - target: skill-area:prototyping

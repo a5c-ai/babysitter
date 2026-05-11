@@ -15,6 +15,8 @@ edges:
   applies_to:
     - target: domain:ml-ops
       confidence: primary
+    - target: specialization:llm-fine-tuning
+      confidence: secondary
   uses_language:
     - language:python
     - target: language:python

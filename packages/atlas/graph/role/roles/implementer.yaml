@@ -13,6 +13,9 @@ attributes:
     working code. Writes implementation, runs the test loop, and iterates
     until acceptance criteria pass.
 edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:documentation
   requires_capability:
     - target: capability:supports-tool-use
     - target: capability:supports-text-streaming

@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:biome
 attributes:
   displayName: "Biome"
+  homepageUrl: "https://biomejs.dev"
   kind: linter
   language: language:javascript
   releasedAt: "2023"

@@ -2,6 +2,7 @@ nodeKind: Tool
 id: tool:rustfmt
 attributes:
   displayName: "rustfmt"
+  homepageUrl: "https://github.com/rust-lang/rustfmt"
   kind: formatter
   language: language:rust
   description: |
