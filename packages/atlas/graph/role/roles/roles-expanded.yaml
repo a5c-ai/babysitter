@@ -1,0 +1,576 @@
+---
+nodeKind: Role
+id: role:release-engineer
+attributes:
+  displayName: "Release Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Owns the release pipeline — build systems, artifact signing, release trains,
+    and rollback procedures. Ensures reproducible, auditable releases.
+edges:
+  holds_responsibility:
+    - responsibility:release-coordination
+    - responsibility:release-cadence
+    - responsibility:deployment-management
+  requires_expertise:
+    - target: skill-area:ci-cd
+    - target: skill-area:deployment-automation
+    - target: skill-area:github-actions-authoring
+  applies_to:
+    - target: domain:devops
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:build-engineer
+attributes:
+  displayName: "Build Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Maintains build systems, compilation pipelines, and developer toolchains.
+    Optimizes build times, manages hermetic build environments, and ensures
+    reproducible artifacts.
+edges:
+  holds_responsibility:
+    - responsibility:dx-tooling-maintenance
+    - responsibility:release-coordination
+  requires_expertise:
+    - target: skill-area:ci-pipeline-optimization
+    - target: skill-area:containerization
+    - target: skill-area:ci-cd
+  applies_to:
+    - target: domain:devops
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:chaos-engineer
+attributes:
+  displayName: "Chaos Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs and runs controlled failure experiments to discover systemic
+    weaknesses before they cause outages. Drives resilience improvements
+    from gameday findings.
+edges:
+  holds_responsibility:
+    - responsibility:platform-reliability
+    - responsibility:incident-response
+  requires_expertise:
+    - target: skill-area:chaos-engineering
+    - target: skill-area:observability-pipeline
+    - target: skill-area:incident-response
+  applies_to:
+    - target: domain:site-reliability
+    - target: domain:infrastructure
+---
+nodeKind: Role
+id: role:performance-engineer
+attributes:
+  displayName: "Performance Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Specializes in profiling, benchmarking, and optimizing application and
+    infrastructure performance. Owns load testing, capacity modeling, and
+    latency budgets.
+edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:capacity-planning
+  requires_expertise:
+    - target: skill-area:performance-testing
+    - target: skill-area:load-testing
+    - target: skill-area:profiling-cpu
+    - target: skill-area:profiling-memory
+  applies_to:
+    - target: domain:performance-engineering
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:infrastructure-engineer
+attributes:
+  displayName: "Infrastructure Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds and maintains the foundational cloud and on-prem infrastructure —
+    compute, storage, networking, and IaC. Bridges platform engineering
+    and operations.
+edges:
+  holds_responsibility:
+    - responsibility:capacity-planning
+    - responsibility:platform-reliability
+    - responsibility:disaster-recovery
+  requires_expertise:
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:containerization
+    - target: skill-area:cloud-infrastructure
+  applies_to:
+    - target: domain:infrastructure
+    - target: domain:cloud-infra
+---
+nodeKind: Role
+id: role:api-engineer
+attributes:
+  displayName: "API Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs, builds, and governs public and internal APIs. Owns API contracts,
+    versioning strategy, rate limiting, and developer-facing documentation.
+edges:
+  holds_responsibility:
+    - responsibility:api-design-governance
+    - responsibility:documentation
+  requires_expertise:
+    - target: skill-area:api-design
+    - target: skill-area:api-contract-testing
+    - target: skill-area:breaking-change-management
+    - target: skill-area:deprecation-policy
+  applies_to:
+    - target: domain:api-development
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:sdk-engineer
+attributes:
+  displayName: "SDK Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds and maintains client SDKs across multiple languages. Responsible for
+    SDK ergonomics, code generation, versioning, and cross-platform testing.
+edges:
+  holds_responsibility:
+    - responsibility:sdk-quality
+    - responsibility:documentation
+    - responsibility:release-coordination
+  requires_expertise:
+    - target: skill-area:sdk-codegen
+    - target: skill-area:api-design
+    - target: skill-area:breaking-change-management
+    - target: skill-area:semver-discipline
+  applies_to:
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:distinguished-engineer
+attributes:
+  displayName: "Distinguished Engineer"
+  isAgentic: false
+  seniority: executive
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Highest individual-contributor technical rank. Sets org-wide technical
+    direction, mentors principal engineers, and represents the company
+    in the broader technical community.
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:mentoring
+    - responsibility:knowledge-sharing
+  requires_expertise:
+    - target: skill-area:technical-leadership
+    - target: skill-area:solution-architecture
+    - target: skill-area:cross-team-coordination
+  applies_to:
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:data-architect
+attributes:
+  displayName: "Data Architect"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:data-engineering
+  description: |
+    Designs the organization-wide data architecture — data models, warehouse
+    schemas, data mesh topologies, and governance frameworks.
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:data-quality
+  requires_expertise:
+    - target: skill-area:data-warehouse-modeling
+    - target: skill-area:data-governance
+    - target: skill-area:data-lineage
+    - target: skill-area:schema-evolution
+  applies_to:
+    - target: domain:data-engineering
+    - target: domain:databases
+---
+nodeKind: Role
+id: role:business-intelligence-analyst
+attributes:
+  displayName: "Business Intelligence Analyst"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Creates dashboards, reports, and data models that translate raw data into
+    actionable business insights. Partners with stakeholders to define KPIs.
+edges:
+  holds_responsibility:
+    - responsibility:metric-definition
+    - responsibility:data-quality
+  requires_expertise:
+    - target: skill-area:data-analysis
+    - target: skill-area:data-warehouse-modeling
+    - target: skill-area:dbt-modeling
+  applies_to:
+    - target: domain:business-intelligence
+    - target: domain:data-science
+---
+nodeKind: Role
+id: role:data-governance-lead
+attributes:
+  displayName: "Data Governance Lead"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Establishes and enforces data governance policies — data classification,
+    retention, access controls, privacy compliance, and lineage standards.
+edges:
+  holds_responsibility:
+    - responsibility:data-quality
+    - responsibility:regulatory-compliance
+    - responsibility:data-pipeline-reliability
+  requires_expertise:
+    - target: skill-area:data-governance
+    - target: skill-area:data-quality
+    - target: skill-area:compliance-automation
+  applies_to:
+    - target: domain:data-engineering
+---
+nodeKind: Role
+id: role:ai-researcher
+attributes:
+  displayName: "AI Researcher"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:ml-ai
+  description: |
+    Conducts fundamental and applied AI/ML research — publishes papers,
+    develops novel architectures, and prototypes techniques that advance
+    the state of the art.
+edges:
+  holds_responsibility:
+    - responsibility:research-design
+    - responsibility:knowledge-sharing
+  requires_expertise:
+    - target: skill-area:deep-learning-libraries
+    - target: skill-area:machine-learning-frameworks
+    - target: skill-area:eval-driven-development
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:machine-learning
+---
+nodeKind: Role
+id: role:prompt-engineer
+attributes:
+  displayName: "Prompt Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs, tests, and optimizes prompts and prompt chains for LLM-powered
+    features. Owns prompt regression testing, eval harnesses, and prompt
+    governance.
+edges:
+  holds_responsibility:
+    - responsibility:prompt-quality-assurance
+    - responsibility:model-quality-assurance
+  requires_expertise:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:eval-driven-development
+    - target: skill-area:retrieval-augmented-generation
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:ml-ops
+---
+nodeKind: Role
+id: role:ml-infrastructure-engineer
+attributes:
+  displayName: "ML Infrastructure Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds the platform for training, serving, and monitoring ML models —
+    GPU clusters, experiment tracking, model registries, and inference
+    pipelines at scale.
+edges:
+  holds_responsibility:
+    - responsibility:platform-reliability
+    - responsibility:model-quality-assurance
+    - responsibility:capacity-planning
+  requires_expertise:
+    - target: skill-area:containerization
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:machine-learning-frameworks
+  applies_to:
+    - target: domain:ml-ops
+    - target: domain:infrastructure
+---
+nodeKind: Role
+id: role:ai-ethics-researcher
+attributes:
+  displayName: "AI Ethics Researcher"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Evaluates AI systems for fairness, accountability, and transparency.
+    Designs bias audits, develops ethical guidelines, and advises product
+    teams on responsible AI practices.
+edges:
+  holds_responsibility:
+    - responsibility:model-quality-assurance
+    - responsibility:regulatory-compliance
+  requires_expertise:
+    - target: skill-area:bias-fairness-analysis
+    - target: skill-area:explainability-interpretation
+    - target: skill-area:eval-driven-development
+  applies_to:
+    - target: domain:ml-ai
+---
+nodeKind: Role
+id: role:ai-product-manager
+attributes:
+  displayName: "AI Product Manager"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Drives product strategy for AI/ML-powered features — defines success
+    metrics, manages eval-driven iteration, and bridges research teams
+    with product engineering.
+edges:
+  holds_responsibility:
+    - responsibility:stakeholder-communication
+    - responsibility:metric-definition
+  requires_expertise:
+    - target: skill-area:product-strategy
+    - target: skill-area:eval-driven-development
+    - target: skill-area:product-analytics
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:ui-designer
+attributes:
+  displayName: "UI Designer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Crafts visual interfaces — layout, typography, color systems, iconography,
+    and visual hierarchy. Works closely with design systems and brand guidelines.
+edges:
+  holds_responsibility:
+    - responsibility:documentation
+    - responsibility:accessibility-compliance
+  requires_expertise:
+    - target: skill-area:visual-design
+    - target: skill-area:design-systems
+    - target: skill-area:prototyping
+  applies_to:
+    - target: domain:frontend
+---
+nodeKind: Role
+id: role:interaction-designer
+attributes:
+  displayName: "Interaction Designer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs micro-interactions, animation, navigation flows, and gesture-based
+    interfaces. Focuses on how users experience transitions and feedback.
+edges:
+  holds_responsibility:
+    - responsibility:user-research
+    - responsibility:accessibility-compliance
+  requires_expertise:
+    - target: skill-area:interaction-design
+    - target: skill-area:prototyping
+    - target: skill-area:user-research
+  applies_to:
+    - target: domain:frontend
+---
+nodeKind: Role
+id: role:design-systems-engineer
+attributes:
+  displayName: "Design Systems Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds and maintains the shared design system — component libraries,
+    design tokens, documentation, and tooling that ensures visual consistency
+    across products.
+edges:
+  holds_responsibility:
+    - responsibility:documentation
+    - responsibility:dx-tooling-maintenance
+  requires_expertise:
+    - target: skill-area:design-systems
+    - target: skill-area:web-accessibility
+    - target: skill-area:css-architecture
+  applies_to:
+    - target: domain:frontend
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:growth-engineer
+attributes:
+  displayName: "Growth Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds and instruments growth features — onboarding flows, referral
+    systems, A/B testing infrastructure, and conversion funnels. Works at
+    the intersection of product, data, and engineering.
+edges:
+  holds_responsibility:
+    - responsibility:metric-definition
+    - responsibility:performance-optimization
+  requires_expertise:
+    - target: skill-area:a-b-testing
+    - target: skill-area:product-analytics
+    - target: skill-area:feature-management
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:digital-marketing
+---
+nodeKind: Role
+id: role:chief-product-officer
+attributes:
+  displayName: "Chief Product Officer"
+  isAgentic: false
+  seniority: executive
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Executive owner of product strategy, roadmap, and vision across the
+    organization. Aligns product teams with business outcomes and market
+    opportunities.
+edges:
+  holds_responsibility:
+    - responsibility:strategic-planning
+    - responsibility:stakeholder-communication
+    - responsibility:budget-management
+  requires_expertise:
+    - target: skill-area:product-strategy
+    - target: skill-area:stakeholder-management
+    - target: skill-area:cross-team-coordination
+  applies_to:
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:chief-data-officer
+attributes:
+  displayName: "Chief Data Officer"
+  isAgentic: false
+  seniority: executive
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Executive responsible for data strategy, governance, and monetization.
+    Ensures data quality, compliance, and organizational data literacy.
+edges:
+  holds_responsibility:
+    - responsibility:strategic-planning
+    - responsibility:data-quality
+    - responsibility:regulatory-compliance
+  requires_expertise:
+    - target: skill-area:data-governance
+    - target: skill-area:stakeholder-management
+    - target: skill-area:data-warehouse-modeling
+  applies_to:
+    - target: domain:data-engineering
+    - target: domain:data-science
+---
+nodeKind: Role
+id: role:chief-security-officer
+attributes:
+  displayName: "Chief Security Officer"
+  isAgentic: false
+  seniority: executive
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Executive accountable for the organization's security posture — policies,
+    incident response, compliance frameworks, and security culture.
+edges:
+  holds_responsibility:
+    - responsibility:security-audit
+    - responsibility:risk-assessment
+    - responsibility:regulatory-compliance
+  requires_expertise:
+    - target: skill-area:threat-modeling
+    - target: skill-area:risk-assessment
+    - target: skill-area:stakeholder-management
+  applies_to:
+    - target: domain:security
+    - target: domain:cybersecurity
+---
+nodeKind: Role
+id: role:revenue-operations-manager
+attributes:
+  displayName: "Revenue Operations Manager"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Aligns sales, marketing, and customer success operations — owns CRM
+    data quality, pipeline reporting, forecasting models, and go-to-market
+    process optimization.
+edges:
+  holds_responsibility:
+    - responsibility:metric-definition
+    - responsibility:stakeholder-communication
+    - responsibility:vendor-evaluation
+  requires_expertise:
+    - target: skill-area:revenue-operations
+    - target: skill-area:data-analysis
+    - target: skill-area:stakeholder-management
+  applies_to:
+    - target: domain:revenue-operations
+    - target: domain:sales
+---
+nodeKind: Role
+id: role:customer-experience-manager
+attributes:
+  displayName: "Customer Experience Manager"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Owns end-to-end customer experience — NPS programs, journey mapping,
+    voice-of-customer synthesis, and cross-functional CX improvements.
+edges:
+  holds_responsibility:
+    - responsibility:customer-journey-mapping
+    - responsibility:stakeholder-communication
+  requires_expertise:
+    - target: skill-area:customer-success
+    - target: skill-area:user-research
+    - target: skill-area:data-analysis
+  applies_to:
+    - target: domain:customer-experience
