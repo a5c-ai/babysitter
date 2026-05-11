@@ -2,6 +2,7 @@ import { createKubernetesResourceGateway } from './kubernetes-resource-gateway.j
 import { createPermissionReviewer } from './agent-permission-review.js';
 import { createAgentDispatchController } from './agent-dispatch-controller.js';
 import { createAgentApprovalController } from './agent-approval-controller.js';
+import { createAgentTriggerController } from './agent-trigger-controller.js';
 
 export const KRATE_API_CONTROLLER_BOUNDARY = {
   role: 'krate-api-controller',
@@ -92,6 +93,17 @@ export function createKrateApiController(options = {}) {
         ...input,
         decision: 'deny',
         resources: snapshot.resources
+      });
+    },
+    async processWebhookEvent(input) {
+      const snapshot = await this.snapshot();
+      const dispatchController = createAgentDispatchController(input.controllerOptions || {});
+      const triggerController = createAgentTriggerController({ dispatchController });
+      return triggerController.processEvent({
+        event: input.event,
+        resources: snapshot.resources,
+        namespace: input.namespace || namespace,
+        organizationRef: input.organizationRef || 'default',
       });
     }
   };

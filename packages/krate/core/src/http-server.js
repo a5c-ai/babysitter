@@ -99,6 +99,14 @@ export function createKrateHttpHandler({ runtime = createKrateRuntime(), control
           : await scopedController.denyAgentAction(input);
         return send(response, result.error ? 400 : 200, result);
       }
+      const agentTriggerProcessMatch = url.pathname.match(/^\/api\/orgs\/([^/]+)\/agents\/triggers\/process$/);
+      if (request.method === 'POST' && agentTriggerProcessMatch) {
+        const org = agentTriggerProcessMatch[1];
+        const scopedController = createKrateApiController({ namespace: orgNamespaceName(org) });
+        const body = await readJson(request);
+        const result = await scopedController.processWebhookEvent({ ...body, organizationRef: org });
+        return send(response, 200, result);
+      }
       return send(response, 404, { error: 'not_found', method: request.method, path: url.pathname });
     } catch (error) {
       return send(response, 400, { error: 'bad_request', message: error.message });
