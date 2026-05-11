@@ -471,6 +471,10 @@ jobs:
         interaction_mode:
           - id: non-interactive
             use_amux_run: false
+            interactive: false
+          - id: interactive
+            use_amux_run: false
+            interactive: true
         install_mode:
           - id: babysitter-plugin
             layers: agent-mux install,agent-mux invocation,generated Babysitter plugin package,Babysitter SDK installation,plugin babysitter command dispatch,session persistence,native stop hook,hooks-mux normalization,transport-mux route,provider/model trace
@@ -485,6 +489,14 @@ jobs:
         exclude:
           - install_mode:
               id: babysitter-plugin
+            scenario:
+              id: live.agent-mux.babysitter-agent.foundry-openai.gpt-5.5
+          - install_mode:
+              id: vanilla
+            interaction_mode:
+              id: interactive
+          - interaction_mode:
+              id: interactive
             scenario:
               id: live.agent-mux.babysitter-agent.foundry-openai.gpt-5.5
         scenario:
@@ -567,6 +579,10 @@ jobs:
       - name: Extract dist directories
         run: tar xzf /tmp/build-all-dist.tar.gz
 
+      - name: Install node-pty for interactive tests
+        if: matrix.interaction_mode.interactive == true
+        run: npm install node-pty --no-save
+
       - name: Link workspace CLIs to PATH
         run: |
           mkdir -p "$HOME/.local/bin"
@@ -593,6 +609,7 @@ jobs:
           LIVE_STACK_INSTALL_MODE: ${{ matrix.install_mode.id }}
           LIVE_STACK_INTERACTION_MODE: ${{ matrix.interaction_mode.id }}
           LIVE_STACK_USE_AMUX_RUN: ${{ matrix.interaction_mode.use_amux_run }}
+          LIVE_STACK_INTERACTIVE: ${{ matrix.interaction_mode.interactive }}
           LIVE_STACK_PROVIDER: ${{ matrix.scenario.provider }}
           LIVE_STACK_AMUX_PROVIDER: ${{ matrix.scenario.amux_provider }}
           LIVE_STACK_MODEL: ${{ matrix.scenario.model }}

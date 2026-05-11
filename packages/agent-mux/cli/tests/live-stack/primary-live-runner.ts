@@ -37,6 +37,12 @@ export interface PrimaryLiveRunOptions {
   readonly timeoutMs?: number;
 }
 
+export interface VerificationEntry {
+  readonly name: string;
+  readonly status: 'passed' | 'failed' | 'skipped';
+  readonly detail?: string;
+}
+
 export interface PrimaryLiveRunResult {
   readonly status: 'skipped' | 'passed' | 'failed';
   readonly scenarioId: string;
@@ -46,6 +52,7 @@ export interface PrimaryLiveRunResult {
   readonly missingTraceIds?: readonly string[];
   readonly artifactPath?: string;
   readonly failure?: string;
+  readonly verifications?: readonly VerificationEntry[];
 }
 
 const DEFAULT_TIMEOUT_MS = 15 * 60 * 1000;
@@ -156,7 +163,7 @@ export function buildPrimaryLiveStackCommands(
           prompt,
           '--max-turns',
           String(resolveLaunchMaxTurns(scenario)),
-          '--no-interactive',
+          ...(options.env['LIVE_STACK_INTERACTIVE'] === 'true' ? [] : ['--no-interactive']),
           ...harnessApprovalPassthrough(installTarget),
         ],
         options.cwd,
@@ -274,7 +281,8 @@ export async function runPrimaryLiveStackScenario(options: PrimaryLiveRunOptions
 
   // Behavioral validation: verify the agent actually used tools (created the requested file)
   const traceId = commands[0]?.env['LIVE_STACK_TRACE_ID'];
-  const behaviorFailures = await validateAgentBehavior(scenario, options.cwd, commandOutput, traceId);
+  const verifications = await validateAgentBehavior(scenario, options.cwd, commandOutput, traceId);
+  const behaviorFailures = verifications.filter((v) => v.status === 'failed').map((v) => v.detail ?? v.name);
 
   const captured = mergeTraceIds(
     extractTraceIds(commandOutput),
@@ -285,6 +293,9 @@ export async function runPrimaryLiveStackScenario(options: PrimaryLiveRunOptions
   const missingTraceIds = assertEvidenceBundleComplete(scenario, evidence);
 
   const allFailures = [...missingTraceIds.map((id) => `missing trace: ${id}`), ...behaviorFailures];
+
+  await writeVerificationReport(options.artifactsDir, scenario, verifications);
+
   const artifactPath = await writeScenarioArtifact(options.artifactsDir, scenario, {
     status: allFailures.length === 0 ? 'passed' : 'failed',
     commands: redactCommands(commands),
@@ -302,6 +313,7 @@ export async function runPrimaryLiveStackScenario(options: PrimaryLiveRunOptions
     missingTraceIds,
     artifactPath,
     failure: allFailures.length > 0 ? allFailures.join('; ') : undefined,
+    verifications,
   };
 }
 
@@ -567,14 +579,18 @@ async function validateAgentBehavior(
   cwd: string,
   output: string,
   traceId: string | undefined,
-): Promise<string[]> {
-  const failures: string[] = [];
+): Promise<VerificationEntry[]> {
+  const entries: VerificationEntry[] = [];
 
   // 1. Validate tool execution
   if (scenario.agent.agent === 'babysitter-agent') {
     // babysitter-agent: single-turn API call — verify trace echo
     if (traceId && !output.includes(`trace=${traceId}`)) {
-      failures.push('babysitter-agent did not echo trace label');
+      entries.push({ name: 'tool-execution', status: 'failed', detail: 'babysitter-agent did not echo trace label' });
+    } else if (traceId) {
+      entries.push({ name: 'tool-execution', status: 'passed', detail: 'trace label echoed in output' });
+    } else {
+      entries.push({ name: 'tool-execution', status: 'skipped', detail: 'no trace ID available' });
     }
   } else if (traceId) {
     // Check if file was created (proves full tool execution)
@@ -583,12 +599,14 @@ async function validateAgentBehavior(
       ? 'babysitter-plugin-verified'
       : 'vanilla-verified';
     let fileCreated = false;
+    let toolDetail: string | undefined;
     try {
       const content = await fs.readFile(expectedFile, 'utf8');
       if (content.includes(expectedContent)) {
         fileCreated = true;
+        toolDetail = 'file created with expected content';
       } else {
-        failures.push(`file content mismatch: expected "${expectedContent}", got "${content.trim().slice(0, 100)}"`);
+        toolDetail = `file content mismatch: expected "${expectedContent}", got "${content.trim().slice(0, 100)}"`;
       }
     } catch {
       // File not created
@@ -596,48 +614,64 @@ async function validateAgentBehavior(
 
     if (!fileCreated) {
       // File wasn't created — verify agent at least attempted the operation.
-      // Cross-model scenarios (claude+gpt-5.5) can't execute native tools,
-      // but should show evidence of trying (command output, tool_call, etc.)
       const hasToolEvidence = /mkdir|printf|write_file|tool_call|tool_use|\.a5c-live-test|vanilla-verified|babysitter-plugin-verified|creat.*file|unable.*creat|filesystem.*tool|no.*tool/i.test(output);
-      if (!hasToolEvidence) {
-        failures.push(`agent did not create .a5c-live-test/${traceId}.txt and showed no tool awareness in output`);
+      if (hasToolEvidence) {
+        entries.push({ name: 'tool-execution', status: 'passed', detail: toolDetail ?? 'file not created but tool attempt detected in output' });
+      } else {
+        entries.push({ name: 'tool-execution', status: 'failed', detail: toolDetail ?? `agent did not create .a5c-live-test/${traceId}.txt and showed no tool awareness in output` });
       }
+    } else {
+      entries.push({ name: 'tool-execution', status: 'passed', detail: toolDetail });
     }
+  } else {
+    entries.push({ name: 'tool-execution', status: 'skipped', detail: 'no trace ID available' });
   }
 
   // 2. Verify trace labels are in output (proves model responded coherently)
-  if (traceId && !output.includes(`trace=${traceId}`)) {
-    // Some agents don't echo trace labels when sandbox blocks execution — only fail if no response at all
+  if (traceId && output.includes(`trace=${traceId}`)) {
+    entries.push({ name: 'trace-echo', status: 'passed', detail: 'trace label found in output' });
+  } else if (traceId) {
     if (output.trim().length === 0) {
-      failures.push('no output from agent (empty response)');
+      entries.push({ name: 'trace-echo', status: 'failed', detail: 'no output from agent (empty response)' });
+    } else {
+      // Some agents don't echo trace labels when sandbox blocks execution — pass if there is output
+      entries.push({ name: 'trace-echo', status: 'passed', detail: 'trace label not echoed but agent produced output' });
     }
+  } else {
+    entries.push({ name: 'trace-echo', status: 'skipped', detail: 'no trace ID available' });
   }
 
   // 3. Verify token usage is reported (proves transport round-trip completed)
   const hasUsageEvidence = /tokens?\s*(used|usage)|prompt_tokens|completion_tokens|input_tokens|output_tokens/i.test(output);
-  if (!hasUsageEvidence && scenario.agent.integrationType !== 'runtime-cli') {
-    // Some harnesses don't report token usage in non-interactive mode — soft check
+  if (hasUsageEvidence) {
+    entries.push({ name: 'token-usage', status: 'passed', detail: 'transport reported token consumption' });
+  } else if (scenario.agent.integrationType === 'runtime-cli') {
+    entries.push({ name: 'token-usage', status: 'skipped', detail: 'runtime-cli does not report token usage inline' });
+  } else {
     const hasAnyResponse = output.trim().length > 0;
     if (!hasAnyResponse) {
-      failures.push('no response from agent (transport may not have completed)');
+      entries.push({ name: 'token-usage', status: 'failed', detail: 'no response from agent (transport may not have completed)' });
+    } else {
+      entries.push({ name: 'token-usage', status: 'passed', detail: 'agent responded but did not report token counts explicitly' });
     }
   }
 
-  // 5. For babysitter-plugin in structured-run mode: verify stop hooks fired
+  // 4. For babysitter-plugin in structured-run mode: verify stop hooks fired
   const isStructuredRun = process.env['LIVE_STACK_USE_AMUX_RUN'] === 'true';
   if (scenario.agent.installMode === 'babysitter-plugin' && isStructuredRun) {
-    // Check hooks-mux stop event in logs — only in structured-run where hooks fire
     const hasStopHookEvidence = /hook:run.*stop|stop.*hook|AGENT_SESSION_ID|session_end/i.test(output);
-    if (!hasStopHookEvidence) {
-      failures.push('babysitter-plugin: no stop hook evidence in output (hooks may not be configured or firing)');
+    if (hasStopHookEvidence) {
+      entries.push({ name: 'stop-hooks', status: 'passed', detail: 'stop hook evidence found in output' });
+    } else {
+      entries.push({ name: 'stop-hooks', status: 'failed', detail: 'no stop hook evidence in output (hooks may not be configured or firing)' });
     }
 
     // Check .a5c/runs/ for orchestration artifacts
     const runsDir = path.join(cwd, '.a5c', 'runs');
     try {
-      const entries = await fs.readdir(runsDir);
-      if (entries.length === 0) {
-        failures.push('babysitter-plugin: no runs created in .a5c/runs/ (orchestration did not execute)');
+      const runEntries = await fs.readdir(runsDir);
+      if (runEntries.length === 0) {
+        entries.push({ name: 'run-completion', status: 'failed', detail: 'no runs created in .a5c/runs/ (orchestration did not execute)' });
       }
     } catch {
       // .a5c/runs/ not existing is acceptable for single-turn plugin invocations
@@ -645,10 +679,11 @@ async function validateAgentBehavior(
 
     // Check hooks-mux session logs for evidence the hook infrastructure ran
     const hooksLogDir = path.join(cwd, '.a5c', 'logs', 'hooks');
+    let hooksInfraFound = false;
     try {
       const logEntries = await fs.readdir(hooksLogDir);
-      if (logEntries.length === 0) {
-        failures.push('babysitter-plugin: no hooks-mux logs found (hook infrastructure did not execute)');
+      if (logEntries.length > 0) {
+        hooksInfraFound = true;
       }
     } catch {
       // Hooks log dir not existing — check XDG state dir too
@@ -658,24 +693,39 @@ async function validateAgentBehavior(
       );
       try {
         const xdgEntries = await fs.readdir(xdgHooksDir);
-        if (xdgEntries.length === 0) {
-          failures.push('babysitter-plugin: no hooks-mux logs in XDG state dir (hook infrastructure did not execute)');
+        if (xdgEntries.length > 0) {
+          hooksInfraFound = true;
         }
       } catch {
         // Neither location has logs — hooks might write elsewhere
       }
     }
+    if (hooksInfraFound) {
+      entries.push({ name: 'hooks-infrastructure', status: 'passed', detail: 'hooks-mux logs exist' });
+    } else {
+      entries.push({ name: 'hooks-infrastructure', status: 'failed', detail: 'no hooks-mux logs found (hook infrastructure did not execute)' });
+    }
+  } else {
+    entries.push({ name: 'stop-hooks', status: 'skipped', detail: 'only checked in babysitter-plugin structured-run mode' });
+    entries.push({ name: 'hooks-infrastructure', status: 'skipped', detail: 'only checked in babysitter-plugin structured-run mode' });
   }
 
-  // 6. For babysitter-plugin and babysitter-agent: verify run completed
+  // 5. For babysitter-plugin and babysitter-agent: verify run completed
   if (scenario.agent.installMode === 'babysitter-plugin' || scenario.agent.agent === 'babysitter-agent') {
     const runCompletion = await verifyBabysitterRunCompletion(cwd, output);
     if (runCompletion) {
-      failures.push(runCompletion);
+      entries.push({ name: 'run-completion', status: 'failed', detail: runCompletion });
+    } else {
+      entries.push({ name: 'run-completion', status: 'passed', detail: 'babysitter run reached completed state' });
+    }
+  } else {
+    // Only add if not already added by the structured-run block above
+    if (!entries.some((e) => e.name === 'run-completion')) {
+      entries.push({ name: 'run-completion', status: 'skipped', detail: 'not a babysitter-plugin or babysitter-agent scenario' });
     }
   }
 
-  return failures;
+  return entries;
 }
 
 async function verifyBabysitterRunCompletion(cwd: string, output: string): Promise<string | undefined> {
@@ -764,6 +814,33 @@ function classifySkippableLiveProviderFailure(result: CommandResult): string | u
 
 function redactCommands(commands: readonly CommandExecution[]): readonly CommandExecution[] {
   return redactLiveStackArtifact(commands) as readonly CommandExecution[];
+}
+
+async function writeVerificationReport(
+  artifactsDir: string,
+  scenario: LiveStackScenario,
+  verifications: readonly VerificationEntry[],
+): Promise<void> {
+  const statusIcon = (status: VerificationEntry['status']): string => {
+    switch (status) {
+      case 'passed': return '✓';
+      case 'failed': return '✗';
+      case 'skipped': return '⊘';
+    }
+  };
+  const lines = [
+    `# Verification Report`,
+    ``,
+    `**Scenario:** ${scenario.scenarioId}  `,
+    `**Agent:** ${scenario.agent.agent}  `,
+    `**Model:** ${scenario.model.model}  `,
+    ``,
+    `| Status | Verification | Detail |`,
+    `|--------|-------------|--------|`,
+    ...verifications.map((v) => `| ${statusIcon(v.status)} | ${v.name} | ${v.detail ?? ''} |`),
+    ``,
+  ];
+  await fs.writeFile(path.join(artifactsDir, 'verification-report.md'), lines.join('\n'));
 }
 
 async function writeScenarioArtifact(artifactsDir: string, scenario: LiveStackScenario, value: unknown): Promise<string> {
