@@ -1,0 +1,1030 @@
+# Deep Stack Profiles — Volume 3
+# 20 richly-connected application and server stack profiles covering
+# SaaS, dashboards, social, marketplace, project-management, CRM, LMS,
+# fintech, chat, analytics, high-perf APIs, WebSocket servers, job queues,
+# serverless, gRPC mesh, static sites, multi-tenant, event-sourcing,
+# headless CMS, and auth/identity platforms.
+---
+nodeKind: StackProfile
+id: stack-profile:saas-starter
+attributes:
+  displayName: "SaaS Starter Stack (Next.js, Prisma, Stripe, Auth.js, Tailwind)"
+  description: |
+    Full-featured SaaS application starter combining Next.js for the
+    frontend and API layer, Prisma for type-safe database access, Stripe
+    for subscription billing, and Auth.js for passwordless and social
+    authentication. Tailwind CSS and shadcn/ui provide a polished component
+    library out of the box. Deployed on Vercel or similar edge-capable
+    platforms with a managed PostgreSQL backend. Optimized for rapid MVP
+    development with production-grade auth, payments, and database from
+    day one. The tradeoff is tight coupling to the Next.js ecosystem — teams
+    needing a separate backend may outgrow this pattern quickly.
+  composes:
+    - framework:nextjs
+    - library:prisma
+    - tool:stripe
+    - library:next-auth
+    - library:tailwindcss
+    - library:shadcn
+    - language:typescript
+    - library:zod
+edges:
+  composed_of:
+    - framework:nextjs
+    - library:prisma
+    - tool:stripe
+    - library:next-auth
+    - library:tailwindcss
+    - library:shadcn
+    - language:typescript
+    - library:zod
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:product-manager
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:startup-mvp-validation
+  applies_to:
+    - domain:web-development
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:frontend-development
+    - skill-area:backend-api-design
+    - skill-area:authentication
+    - skill-area:payment-integration
+    - skill-area:server-side-rendering
+---
+nodeKind: StackProfile
+id: stack-profile:internal-dashboard
+attributes:
+  displayName: "Internal Dashboard Stack (React, Recharts, Express, PostgreSQL, Redis)"
+  description: |
+    An internal business intelligence and operations dashboard combining
+    React with Recharts for interactive data visualization, Express as
+    the API server, and PostgreSQL for relational storage. Redis provides
+    caching for expensive queries and session management. Docker Compose
+    enables one-command local development and consistent staging deploys.
+    Targeted at internal tools teams building admin panels, operations
+    dashboards, and reporting interfaces where design polish matters less
+    than data accuracy and rapid iteration. The tradeoff is that this stack
+    lacks built-in auth and role-based access — teams must layer on their
+    own authorization middleware.
+  composes:
+    - framework:react
+    - library:recharts
+    - library:express
+    - language:typescript
+    - library:ioredis
+    - tool:docker
+    - library:prisma
+edges:
+  composed_of:
+    - framework:react
+    - library:recharts
+    - library:express
+    - language:typescript
+    - library:ioredis
+    - tool:docker
+    - tool:docker-compose
+    - library:prisma
+  used_by_role:
+    - role:fullstack-engineer
+    - role:data-analyst
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:dashboard-development-cycle
+    - workflow:feature-development
+  applies_to:
+    - domain:business-intelligence
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:data-visualization
+    - skill-area:frontend-development
+    - skill-area:backend-api-design
+    - skill-area:caching-strategies
+    - skill-area:containerization
+---
+nodeKind: StackProfile
+id: stack-profile:social-media-platform
+attributes:
+  displayName: "Social Media Platform Stack (React, GraphQL, PostgreSQL, Redis, Elasticsearch)"
+  description: |
+    A social media and content-sharing platform architecture using React
+    for the web client, GraphQL (via Yoga or Apollo) for a flexible query
+    layer that lets mobile and web clients fetch exactly the data they need,
+    and PostgreSQL for core relational data (users, posts, relationships).
+    Redis handles feeds, caching, and real-time presence, while Elasticsearch
+    powers full-text search over user-generated content. TypeScript provides
+    end-to-end type safety across client and server. This stack scales
+    horizontally but requires careful denormalization of social-graph queries
+    and a robust moderation pipeline. The primary tradeoff is operational
+    complexity — feed ranking, content moderation, and abuse prevention
+    add significant infrastructure beyond the core data layer.
+  composes:
+    - framework:react
+    - language:graphql
+    - language:typescript
+    - library:ioredis
+    - tool:elasticsearch
+    - library:yoga
+    - library:prisma
+edges:
+  composed_of:
+    - framework:react
+    - language:graphql
+    - language:typescript
+    - library:ioredis
+    - tool:elasticsearch
+    - library:yoga
+    - library:prisma
+    - tool:docker
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+    - role:mobile-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:design-review
+  applies_to:
+    - domain:web-development
+    - domain:media-entertainment
+  requires_skill_area:
+    - skill-area:graphql-schema-design
+    - skill-area:search-indexing
+    - skill-area:caching-strategies
+    - skill-area:backend-api-design
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:marketplace-platform
+attributes:
+  displayName: "Marketplace / Two-Sided Platform Stack (Next.js, Stripe, Elasticsearch, Redis)"
+  description: |
+    A two-sided marketplace architecture for connecting buyers and sellers,
+    hosts and guests, or service providers and consumers. Next.js handles
+    server-rendered product pages optimized for SEO and fast page loads.
+    Stripe Connect manages multi-party payments, payouts to sellers, and
+    platform fees. Elasticsearch powers faceted search and filtering across
+    listings, while Redis caches hot listing data and manages shopping carts.
+    Prisma with PostgreSQL stores users, listings, orders, and reviews.
+    The key tradeoff is payment complexity — Stripe Connect's onboarding
+    flows and payout timing require significant integration effort, and
+    marketplace trust-and-safety (fraud, disputes, chargebacks) adds an
+    ongoing operational burden beyond the initial build.
+  composes:
+    - framework:nextjs
+    - tool:stripe
+    - tool:elasticsearch
+    - library:ioredis
+    - library:prisma
+    - language:typescript
+    - library:next-auth
+edges:
+  composed_of:
+    - framework:nextjs
+    - tool:stripe
+    - tool:elasticsearch
+    - library:ioredis
+    - library:prisma
+    - language:typescript
+    - library:next-auth
+    - tool:docker
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+    - role:product-manager
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:startup-mvp-validation
+  applies_to:
+    - domain:retail
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:payment-integration
+    - skill-area:search-indexing
+    - skill-area:backend-api-design
+    - skill-area:authentication
+    - skill-area:e-commerce
+---
+nodeKind: StackProfile
+id: stack-profile:project-management-app
+attributes:
+  displayName: "Project Management App Stack (React, WebSocket, PostgreSQL, Redis, Docker)"
+  description: |
+    A collaborative project management application inspired by tools like
+    Linear and Asana. React with Zustand provides a responsive, real-time
+    UI where changes propagate instantly via WebSocket connections managed
+    by Socket.io. PostgreSQL stores the core domain model (projects, tasks,
+    sprints, comments) while Redis handles pub/sub for real-time
+    collaboration, caching, and rate limiting. TypeScript ensures end-to-end
+    type safety from database schema to UI components. Docker Compose
+    orchestrates the full local development stack. The tradeoff is that
+    real-time synchronization and conflict resolution across concurrent
+    editors adds significant complexity — eventual consistency bugs are
+    subtle and hard to reproduce.
+  composes:
+    - framework:react
+    - library:socket-io
+    - library:zustand
+    - library:prisma
+    - library:ioredis
+    - language:typescript
+    - tool:docker
+edges:
+  composed_of:
+    - framework:react
+    - library:socket-io
+    - library:zustand
+    - library:prisma
+    - library:ioredis
+    - language:typescript
+    - tool:docker
+    - tool:docker-compose
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:product-designer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:design-sprint
+  applies_to:
+    - domain:project-management
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:websocket-design
+    - skill-area:frontend-development
+    - skill-area:backend-api-design
+    - skill-area:react-state-management
+    - skill-area:backend-data-persistence
+---
+nodeKind: StackProfile
+id: stack-profile:crm-customer-platform
+attributes:
+  displayName: "CRM / Customer Platform Stack (Next.js, PostgreSQL, Redis, Elasticsearch, Stripe)"
+  description: |
+    A customer relationship management platform for tracking contacts,
+    deals, interactions, and billing. Next.js provides server-rendered
+    pages with fast navigation between customer records. PostgreSQL stores
+    the relational CRM data model (contacts, companies, deals, activities,
+    custom fields) while Elasticsearch enables instant search across all
+    customer data. Redis caches frequently-accessed records and powers
+    real-time activity feeds. Stripe handles subscription billing for the
+    CRM product itself. TypeScript with Zod provides runtime validation
+    for complex CRM forms and API payloads. The primary tradeoff is schema
+    flexibility — CRM users expect custom fields and configurable
+    workflows, which requires a dynamic schema layer on top of PostgreSQL.
+  composes:
+    - framework:nextjs
+    - library:prisma
+    - library:ioredis
+    - tool:elasticsearch
+    - tool:stripe
+    - language:typescript
+    - library:zod
+edges:
+  composed_of:
+    - framework:nextjs
+    - library:prisma
+    - library:ioredis
+    - tool:elasticsearch
+    - tool:stripe
+    - language:typescript
+    - library:zod
+    - library:next-auth
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+    - role:product-manager
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:schema-migration
+  applies_to:
+    - domain:customer-relations
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:search-indexing
+    - skill-area:backend-data-persistence
+    - skill-area:frontend-development
+    - skill-area:payment-integration
+    - skill-area:domain-driven-design
+---
+nodeKind: StackProfile
+id: stack-profile:learning-management-system
+attributes:
+  displayName: "Learning Management System Stack (Next.js, PostgreSQL, S3, Stripe, React)"
+  description: |
+    A learning management system for delivering courses, quizzes, and
+    video content to students. Next.js handles course catalog pages with
+    SSR for SEO and the authenticated student dashboard. PostgreSQL stores
+    courses, lessons, enrollments, quiz results, and progress tracking.
+    Sharp handles image processing for course thumbnails and avatars.
+    Stripe manages course purchases, subscriptions, and instructor payouts.
+    React with Tailwind CSS delivers a polished student-facing experience
+    with video players, progress bars, and interactive quizzes. The main
+    tradeoff is media management — video transcoding, adaptive bitrate
+    streaming, and storage costs grow quickly with course catalog size.
+    Teams must decide early between self-hosted media or a managed video
+    platform.
+  composes:
+    - framework:nextjs
+    - library:prisma
+    - library:sharp
+    - tool:stripe
+    - framework:react
+    - library:tailwindcss
+    - language:typescript
+edges:
+  composed_of:
+    - framework:nextjs
+    - library:prisma
+    - library:sharp
+    - tool:stripe
+    - framework:react
+    - library:tailwindcss
+    - language:typescript
+    - library:next-auth
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:product-manager
+  follows_workflow:
+    - workflow:lms-content-deployment
+    - workflow:feature-development
+  applies_to:
+    - domain:edtech
+    - domain:education
+  requires_skill_area:
+    - skill-area:frontend-development
+    - skill-area:backend-api-design
+    - skill-area:payment-integration
+    - skill-area:authentication
+    - skill-area:media-encoding
+---
+nodeKind: StackProfile
+id: stack-profile:fintech-payments-platform
+attributes:
+  displayName: "Fintech / Payments Platform Stack (Go, PostgreSQL, Redis, Kafka, Vault, gRPC)"
+  description: |
+    A high-reliability payment processing platform built on Go for its
+    concurrency model, low GC pauses, and predictable latency. gRPC (via
+    grpc-js or tonic for polyglot services) provides efficient binary
+    communication between microservices. PostgreSQL stores ledger entries,
+    accounts, and transaction history with serializable isolation for
+    double-entry bookkeeping. Redis handles rate limiting, idempotency
+    key deduplication, and session caching. HashiCorp Vault manages
+    encryption keys, API secrets, and PCI-DSS-compliant secret rotation.
+    Docker and Kubernetes orchestrate the deployment. The key tradeoff is
+    correctness over speed-to-market — financial systems demand extensive
+    audit logging, regulatory compliance, and deterministic failure modes
+    that slow development compared to typical web applications.
+  composes:
+    - language:go
+    - library:chi
+    - library:ioredis
+    - library:grpc-js
+    - tool:vault
+    - tool:docker
+    - tool:kubernetes
+edges:
+  composed_of:
+    - language:go
+    - library:chi
+    - library:ioredis
+    - library:grpc-js
+    - tool:vault
+    - tool:docker
+    - tool:kubernetes
+    - tool:prometheus
+  used_by_role:
+    - role:backend-engineer
+    - role:security-engineer
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:payment-reconciliation-audit
+    - workflow:production-readiness-review
+  applies_to:
+    - domain:fintech
+    - domain:finance
+  requires_skill_area:
+    - skill-area:backend-security
+    - skill-area:payment-processing
+    - skill-area:backend-api-design
+    - skill-area:containerization
+    - skill-area:identity-security
+---
+nodeKind: StackProfile
+id: stack-profile:chat-messaging-platform
+attributes:
+  displayName: "Chat / Messaging Platform Stack (React, Socket.io, Redis, PostgreSQL, TypeScript)"
+  description: |
+    A real-time chat and messaging platform where low-latency message
+    delivery is the primary design constraint. React provides the client
+    with optimistic UI updates and infinite-scroll message history.
+    Socket.io manages persistent WebSocket connections with automatic
+    reconnection and room-based routing for channels and direct messages.
+    Redis pub/sub enables horizontal scaling across multiple Socket.io
+    server instances, while Redis sorted sets power unread counts and
+    typing indicators. PostgreSQL stores message history, user profiles,
+    and channel metadata. Sharp handles image thumbnails for file
+    attachments. The primary tradeoff is connection management at scale —
+    each concurrent user holds an open WebSocket, so connection limits,
+    heartbeats, and graceful reconnection require careful engineering.
+  composes:
+    - framework:react
+    - library:socket-io
+    - library:ioredis
+    - library:prisma
+    - language:typescript
+    - library:sharp
+    - library:zustand
+edges:
+  composed_of:
+    - framework:react
+    - library:socket-io
+    - library:ioredis
+    - library:prisma
+    - language:typescript
+    - library:sharp
+    - library:zustand
+    - tool:docker
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+    - role:frontend-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:backend-performance-profiling
+  applies_to:
+    - domain:web-development
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:websocket-design
+    - skill-area:streaming-realtime-processing
+    - skill-area:caching-strategies
+    - skill-area:frontend-development
+    - skill-area:backend-api-design
+---
+nodeKind: StackProfile
+id: stack-profile:analytics-dashboard
+attributes:
+  displayName: "Analytics Dashboard Stack (React, D3, Recharts, Python, FastAPI, Grafana)"
+  description: |
+    A data analytics dashboard combining React with D3 and Recharts for
+    rich, interactive visualizations — from time-series charts and
+    heatmaps to custom SVG-based diagrams. Python with FastAPI serves as
+    the analytics API layer, running complex aggregation queries and
+    statistical computations. Pandas and NumPy handle server-side data
+    processing. Grafana provides complementary operational dashboards for
+    monitoring data pipeline health. PostgreSQL or a columnar store holds
+    the aggregated analytics data. The tradeoff is a split-language stack —
+    TypeScript on the frontend, Python on the backend — which requires
+    careful API contract management and two separate build pipelines, but
+    unlocks Python's superior data science ecosystem on the server side.
+  composes:
+    - framework:react
+    - library:d3
+    - library:recharts
+    - language:python
+    - framework:fastapi
+    - tool:grafana
+    - library:pandas
+    - language:typescript
+edges:
+  composed_of:
+    - framework:react
+    - library:d3
+    - library:recharts
+    - language:python
+    - framework:fastapi
+    - tool:grafana
+    - library:pandas
+    - language:typescript
+    - library:numpy
+  used_by_role:
+    - role:data-analyst
+    - role:frontend-engineer
+    - role:data-scientist
+  follows_workflow:
+    - workflow:dashboard-development-cycle
+    - workflow:analytics-instrumentation-audit
+  applies_to:
+    - domain:data-science
+    - domain:business-intelligence
+  requires_skill_area:
+    - skill-area:data-visualization
+    - skill-area:data-analysis
+    - skill-area:frontend-development
+    - skill-area:backend-api-design
+    - skill-area:python-data-pipelines
+---
+nodeKind: StackProfile
+id: stack-profile:high-perf-api-server
+attributes:
+  displayName: "High-Performance API Server Stack (Go, Chi, PostgreSQL, Redis, Prometheus)"
+  description: |
+    A low-latency, high-throughput REST API server built on Go and the
+    Chi router for its lightweight middleware chain and stdlib-compatible
+    handler signatures. PostgreSQL with the pgx driver provides connection
+    pooling and prepared-statement caching for sub-millisecond query
+    latency. Redis handles response caching, rate limiting, and distributed
+    locks. Prometheus and Grafana deliver real-time observability with
+    p99 latency histograms and error-rate alerts. Docker enables consistent
+    builds and deployment to Kubernetes or bare-metal. This stack excels
+    when throughput matters — Go's goroutine scheduler handles tens of
+    thousands of concurrent connections with minimal memory overhead. The
+    tradeoff is a smaller ecosystem of ready-made libraries compared to
+    Node.js or Python, so teams must build more plumbing themselves.
+  composes:
+    - language:go
+    - library:chi
+    - library:pgx
+    - library:ioredis
+    - tool:prometheus
+    - tool:grafana
+    - tool:docker
+edges:
+  composed_of:
+    - language:go
+    - library:chi
+    - library:pgx
+    - library:ioredis
+    - tool:prometheus
+    - tool:grafana
+    - tool:docker
+    - library:zap
+  used_by_role:
+    - role:backend-engineer
+    - role:platform-engineer
+    - role:sre
+  follows_workflow:
+    - workflow:backend-performance-profiling
+    - workflow:production-readiness-review
+  applies_to:
+    - domain:backend
+    - domain:api-development
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:caching-strategies
+    - skill-area:observability-instrumentation
+    - skill-area:backend-data-persistence
+    - skill-area:containerization
+---
+nodeKind: StackProfile
+id: stack-profile:realtime-websocket-server
+attributes:
+  displayName: "Real-Time WebSocket Server Stack (Node.js, Socket.io, Redis, PostgreSQL, TypeScript)"
+  description: |
+    A dedicated real-time server for pushing live updates to connected
+    clients — suitable for collaborative editing, live dashboards, gaming
+    lobbies, and notification systems. Socket.io provides the transport
+    layer with automatic fallback from WebSocket to long-polling and
+    built-in room/namespace management. Redis Adapter enables horizontal
+    scaling by syncing events across multiple Socket.io instances via
+    pub/sub. PostgreSQL stores persistent state (user sessions, message
+    history) while Redis handles ephemeral real-time data (presence,
+    typing indicators). Pino provides structured JSON logging for
+    debugging connection lifecycle events. The key tradeoff is statefulness —
+    WebSocket servers hold long-lived connections, complicating zero-downtime
+    deploys and requiring sticky sessions or Redis-backed session migration.
+  composes:
+    - language:typescript
+    - library:socket-io
+    - library:ioredis
+    - library:prisma
+    - library:pino
+    - tool:docker
+edges:
+  composed_of:
+    - language:typescript
+    - library:socket-io
+    - library:ioredis
+    - library:prisma
+    - library:pino
+    - tool:docker
+    - library:zod
+  used_by_role:
+    - role:backend-engineer
+    - role:fullstack-engineer
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:backend-performance-profiling
+    - workflow:feature-development
+  applies_to:
+    - domain:backend
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:websocket-design
+    - skill-area:streaming-realtime-processing
+    - skill-area:caching-strategies
+    - skill-area:backend-api-design
+    - skill-area:observability-instrumentation
+---
+nodeKind: StackProfile
+id: stack-profile:job-queue-worker-pool
+attributes:
+  displayName: "Job Queue / Worker Pool Stack (Node.js, BullMQ, Redis, PostgreSQL, Docker)"
+  description: |
+    A background job processing system using BullMQ for reliable, Redis-backed
+    task queues with automatic retries, exponential backoff, rate limiting,
+    and priority scheduling. Workers run in separate Node.js processes or
+    containers, enabling independent scaling of producers and consumers.
+    PostgreSQL stores job results, audit logs, and configuration while
+    Redis manages the queue state, delayed jobs, and repeatable schedules.
+    Pino provides structured logging for tracing job execution across
+    distributed workers. Docker Compose orchestrates the local development
+    stack with Redis, PostgreSQL, and multiple worker replicas. This stack
+    is ideal for email sending, report generation, data imports, and any
+    workload that must be decoupled from the HTTP request cycle. The
+    tradeoff is Redis as a single point of failure for queue state.
+  composes:
+    - language:typescript
+    - library:bullmq
+    - library:ioredis
+    - library:prisma
+    - library:pino
+    - tool:docker
+edges:
+  composed_of:
+    - language:typescript
+    - library:bullmq
+    - library:ioredis
+    - library:prisma
+    - library:pino
+    - tool:docker
+    - tool:docker-compose
+    - library:zod
+  used_by_role:
+    - role:backend-engineer
+    - role:platform-engineer
+    - role:devops-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:release-management
+  applies_to:
+    - domain:backend
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:background-job-processing
+    - skill-area:messaging-queuing
+    - skill-area:backend-async-processing
+    - skill-area:containerization
+    - skill-area:error-handling-exception-management
+---
+nodeKind: StackProfile
+id: stack-profile:serverless-api-multicloud
+attributes:
+  displayName: "Serverless API Stack (TypeScript, SST, DynamoDB, Lambda, CloudFront)"
+  description: |
+    A serverless-first API architecture using SST (Serverless Stack) for
+    infrastructure-as-code with a developer-friendly local development
+    experience. TypeScript provides type-safe Lambda handlers with Zod
+    for request validation. The API is fronted by CloudFront for edge
+    caching and global distribution. DynamoDB delivers single-digit
+    millisecond reads at any scale with a pay-per-request pricing model.
+    SST's Live Lambda Dev enables instant feedback during development
+    without waiting for CloudFormation deployments. This stack minimizes
+    operational overhead — no servers to patch, no capacity planning, and
+    costs scale to zero during idle periods. The tradeoff is vendor
+    lock-in to AWS primitives and the cold-start latency penalty on
+    infrequently-invoked functions, which can be mitigated with
+    provisioned concurrency at additional cost.
+  composes:
+    - language:typescript
+    - tool:sst
+    - library:zod
+    - tool:docker
+edges:
+  composed_of:
+    - language:typescript
+    - tool:sst
+    - library:zod
+    - tool:docker
+    - library:prisma
+    - tool:vitest
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+    - role:cloud-architect
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:startup-mvp-validation
+  applies_to:
+    - domain:serverless
+    - domain:api-development
+  requires_skill_area:
+    - skill-area:serverless-compute
+    - skill-area:serverless-cold-start-optimization
+    - skill-area:backend-api-design
+    - skill-area:cloud-infrastructure
+    - skill-area:data-validation-sanitization
+---
+nodeKind: StackProfile
+id: stack-profile:grpc-microservice-mesh
+attributes:
+  displayName: "gRPC Microservice Mesh Stack (Go, gRPC, Kubernetes, PostgreSQL, Prometheus)"
+  description: |
+    A polyglot microservice architecture using gRPC and Protocol Buffers
+    for strongly-typed, high-performance inter-service communication. Go
+    is the primary service language for its low overhead and fast compile
+    times. Kubernetes orchestrates service deployment, scaling, and
+    service discovery. PostgreSQL provides per-service databases following
+    the database-per-service pattern. Prometheus and Grafana deliver
+    service-level metrics (request rates, error rates, latencies) across
+    the mesh. Protobuf schemas serve as the single source of truth for
+    API contracts, enabling automated client code generation in any
+    language. The tradeoff is significant upfront complexity — teams
+    must manage Protobuf schema versioning, gRPC interceptor chains,
+    distributed tracing, and Kubernetes networking before shipping their
+    first feature.
+  composes:
+    - language:go
+    - language:protobuf
+    - library:grpc-js
+    - tool:kubernetes
+    - tool:prometheus
+    - tool:grafana
+edges:
+  composed_of:
+    - language:go
+    - language:protobuf
+    - library:grpc-js
+    - tool:kubernetes
+    - tool:prometheus
+    - tool:grafana
+    - tool:docker
+    - tool:helm
+  used_by_role:
+    - role:backend-engineer
+    - role:platform-engineer
+    - role:architect
+  follows_workflow:
+    - workflow:microservice-decomposition
+    - workflow:production-readiness-review
+  applies_to:
+    - domain:platform-engineering
+    - domain:backend
+  requires_skill_area:
+    - skill-area:api-design
+    - skill-area:containerization
+    - skill-area:observability-instrumentation
+    - skill-area:monolith-vs-microservices
+    - skill-area:distributed-tracing
+---
+nodeKind: StackProfile
+id: stack-profile:static-site-cdn
+attributes:
+  displayName: "Static Site + CDN Stack (Astro, Markdown, Cloudflare Workers, TypeScript)"
+  description: |
+    A content-focused static site architecture using Astro for its
+    zero-JavaScript-by-default output and island architecture — only
+    interactive components ship client-side JS. Content is authored in
+    Markdown or MDX, enabling technical writers and developers to
+    contribute via Git-based workflows. Cloudflare Workers provide edge
+    functions for dynamic features like form handling, redirects, and
+    A/B testing without a traditional server. TypeScript ensures type
+    safety across Astro components and worker scripts. Tailwind CSS
+    delivers a utility-first styling approach. This stack produces the
+    fastest possible page loads for documentation sites, blogs, marketing
+    pages, and landing pages. The tradeoff is limited interactivity —
+    complex client-side state management requires adding a framework
+    island (React, Svelte, Vue) which partially negates the performance
+    advantages.
+  composes:
+    - framework:astro
+    - language:typescript
+    - tool:cloudflare-workers
+    - library:tailwindcss
+edges:
+  composed_of:
+    - framework:astro
+    - language:typescript
+    - tool:cloudflare-workers
+    - library:tailwindcss
+    - tool:vite
+    - library:shadcn
+  used_by_role:
+    - role:frontend-engineer
+    - role:technical-writer
+    - role:developer-advocate
+  follows_workflow:
+    - workflow:documentation-publishing
+    - workflow:feature-development
+  applies_to:
+    - domain:web-development
+    - domain:content-operations
+  requires_skill_area:
+    - skill-area:frontend-development
+    - skill-area:frontend-performance
+    - skill-area:cdn-edge
+    - skill-area:core-web-vitals
+    - skill-area:technical-documentation
+---
+nodeKind: StackProfile
+id: stack-profile:multi-tenant-saas-backend
+attributes:
+  displayName: "Multi-Tenant SaaS Backend Stack (NestJS, Prisma, PostgreSQL, Redis, Stripe, Docker)"
+  description: |
+    A multi-tenant SaaS backend using NestJS for its modular architecture,
+    dependency injection, and built-in support for guards, interceptors,
+    and middleware. Prisma provides type-safe database access with tenant
+    isolation via row-level security or schema-per-tenant patterns in
+    PostgreSQL. Redis handles per-tenant rate limiting, caching, and
+    feature flag evaluation. Stripe manages tenant billing, subscription
+    tiers, and usage-based metering. Zod validates API payloads at
+    runtime. Docker enables consistent deployment across environments.
+    This stack is designed for B2B SaaS products where tenant data
+    isolation, per-tenant configuration, and usage-based billing are
+    first-class concerns. The tradeoff is architectural complexity —
+    tenant context must propagate through every layer of the stack, and
+    schema migrations must be tested across all tenant configurations.
+  composes:
+    - framework:nestjs
+    - library:prisma
+    - library:ioredis
+    - tool:stripe
+    - tool:docker
+    - language:typescript
+    - library:zod
+edges:
+  composed_of:
+    - framework:nestjs
+    - library:prisma
+    - library:ioredis
+    - tool:stripe
+    - tool:docker
+    - language:typescript
+    - library:zod
+    - library:passport
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:schema-migration
+    - workflow:feature-development
+  applies_to:
+    - domain:software-engineering
+    - domain:backend
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:authentication
+    - skill-area:payment-integration
+    - skill-area:domain-driven-design
+---
+nodeKind: StackProfile
+id: stack-profile:event-sourcing-cqrs
+attributes:
+  displayName: "Event Sourcing / CQRS Stack (TypeScript, NestJS, PostgreSQL, Redis, Docker)"
+  description: |
+    An event-sourced architecture implementing Command Query Responsibility
+    Segregation (CQRS) where every state change is captured as an immutable
+    event in an append-only event store backed by PostgreSQL. NestJS
+    provides the application framework with its CQRS module for command
+    handlers, event handlers, and sagas. Redis powers the read-side
+    projections for fast query performance and caches materialized views.
+    NATS or RabbitMQ distributes events to downstream consumers for
+    building additional read models or triggering side effects. Docker
+    orchestrates the multi-service deployment. This pattern excels for
+    domains with complex business rules, audit requirements, and temporal
+    queries (what was the state at time T?). The tradeoff is significant
+    cognitive overhead — developers must reason about eventual consistency,
+    event schema evolution, and projection rebuilds.
+  composes:
+    - language:typescript
+    - framework:nestjs
+    - library:prisma
+    - library:ioredis
+    - tool:nats
+    - tool:docker
+edges:
+  composed_of:
+    - language:typescript
+    - framework:nestjs
+    - library:prisma
+    - library:ioredis
+    - tool:nats
+    - tool:docker
+    - library:zod
+    - tool:docker-compose
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+    - role:tech-lead
+  follows_workflow:
+    - workflow:event-driven-architecture-review
+    - workflow:schema-migration
+  applies_to:
+    - domain:software-engineering
+    - domain:backend
+  requires_skill_area:
+    - skill-area:event-sourcing
+    - skill-area:cqrs
+    - skill-area:event-driven-architecture
+    - skill-area:domain-driven-design
+    - skill-area:backend-data-persistence
+---
+nodeKind: StackProfile
+id: stack-profile:headless-cms-ssg
+attributes:
+  displayName: "Headless CMS + SSG Stack (Strapi, Astro, PostgreSQL, Cloudflare Workers, TypeScript)"
+  description: |
+    A content management architecture decoupling the authoring experience
+    from the presentation layer. Strapi provides a self-hosted headless CMS
+    with a visual content-type builder, role-based access control, and a
+    REST/GraphQL API. Astro generates static HTML at build time from CMS
+    content, producing sub-second page loads. Cloudflare Workers handle
+    incremental static regeneration and edge-side personalization. PostgreSQL
+    stores CMS content, media metadata, and user accounts. TypeScript
+    ensures type safety across Astro components and Strapi customizations.
+    This stack is ideal for marketing sites, corporate blogs, documentation
+    portals, and any content-heavy site where editors need a friendly UI
+    and developers need full control over the frontend. The tradeoff is
+    build times — large content catalogs require incremental builds or
+    on-demand regeneration to avoid multi-minute deploy cycles.
+  composes:
+    - framework:strapi
+    - framework:astro
+    - language:typescript
+    - tool:cloudflare-workers
+    - library:tailwindcss
+edges:
+  composed_of:
+    - framework:strapi
+    - framework:astro
+    - language:typescript
+    - tool:cloudflare-workers
+    - library:tailwindcss
+    - tool:docker
+    - library:prisma
+  used_by_role:
+    - role:frontend-engineer
+    - role:fullstack-engineer
+    - role:technical-writer
+  follows_workflow:
+    - workflow:content-release-pipeline
+    - workflow:feature-development
+  applies_to:
+    - domain:content-operations
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:frontend-development
+    - skill-area:server-side-rendering
+    - skill-area:cdn-edge
+    - skill-area:backend-api-design
+    - skill-area:core-web-vitals
+---
+nodeKind: StackProfile
+id: stack-profile:auth-identity-platform
+attributes:
+  displayName: "Auth & Identity Platform Stack (Node.js, Keycloak, PostgreSQL, Redis, OAuth2, Docker)"
+  description: |
+    A centralized authentication and identity platform using Keycloak as
+    the identity provider with support for OIDC, SAML, and social login
+    federation. Node.js with Express or Fastify serves as a lightweight
+    gateway that handles session management, token refresh, and
+    application-specific authorization logic. PostgreSQL stores user
+    profiles, tenant configurations, and audit logs. Redis caches active
+    sessions and revocation lists for sub-millisecond token validation.
+    Passport.js provides strategy-based authentication middleware for
+    custom flows. Docker Compose orchestrates Keycloak, the gateway, and
+    backing services for local development. This stack is designed for
+    organizations that need SSO across multiple applications, fine-grained
+    RBAC, and compliance with standards like SOC 2 and GDPR. The tradeoff
+    is Keycloak's operational complexity — theming, realm configuration,
+    and upgrade migrations require dedicated expertise.
+  composes:
+    - language:typescript
+    - tool:keycloak
+    - library:passport
+    - library:ioredis
+    - library:prisma
+    - tool:docker
+    - library:express
+edges:
+  composed_of:
+    - language:typescript
+    - tool:keycloak
+    - library:passport
+    - library:ioredis
+    - library:prisma
+    - tool:docker
+    - library:express
+    - tool:docker-compose
+  used_by_role:
+    - role:backend-engineer
+    - role:security-engineer
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:access-review
+    - workflow:security-audit
+  applies_to:
+    - domain:security
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:authentication
+    - skill-area:oauth-flows
+    - skill-area:identity-security
+    - skill-area:backend-security
+    - skill-area:containerization

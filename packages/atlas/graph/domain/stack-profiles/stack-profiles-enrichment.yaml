@@ -1,0 +1,615 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Enrichment edges for existing stack profiles that only have composed_of.
+# The indexer always accumulates edges even when a record ID already exists,
+# so these documents add used_by_role, applies_to, and requires_skill_area
+# edges without duplicating the node definitions.
+# ──────────────────────────────────────────────────────────────────────────────
+---
+nodeKind: StackProfile
+id: stack-profile:ml-pipeline-stack
+attributes:
+  displayName: "ML Pipeline Stack (PyTorch/TensorFlow, MLflow, BentoML, K8s)"
+edges:
+  used_by_role:
+    - role:ml-engineer
+    - role:ml-ops-engineer
+    - role:data-scientist
+  applies_to:
+    - domain:ml-ops
+    - domain:machine-learning
+  requires_skill_area:
+    - skill-area:model-serving-deployment
+    - skill-area:machine-learning-frameworks
+    - skill-area:ci-cd-ml-pipelines
+    - skill-area:containerization
+    - skill-area:model-monitoring-drift-detection
+---
+nodeKind: StackProfile
+id: stack-profile:real-time-analytics-stack
+attributes:
+  displayName: "Real-Time Analytics Stack (Kafka, ClickHouse, Grafana, dbt)"
+edges:
+  used_by_role:
+    - role:data-engineer
+    - role:analytics-engineer
+    - role:bi-developer
+  applies_to:
+    - domain:data-engineering
+    - domain:business-intelligence
+  requires_skill_area:
+    - skill-area:kafka-stream-processing
+    - skill-area:streaming-realtime-processing
+    - skill-area:dbt-modeling
+    - skill-area:metrics-dashboarding
+    - skill-area:data-warehouse-modeling
+---
+nodeKind: StackProfile
+id: stack-profile:mobile-first-stack
+attributes:
+  displayName: "Mobile-First Stack (React Native/Flutter, Firebase, GraphQL, Expo)"
+edges:
+  used_by_role:
+    - role:mobile-engineer
+    - role:fullstack-engineer
+    - role:frontend-engineer
+  applies_to:
+    - domain:mobile
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:react-native-development
+    - skill-area:flutter-development
+    - skill-area:mobile-state-management
+    - skill-area:push-notifications
+    - skill-area:graphql-schema-design
+---
+nodeKind: StackProfile
+id: stack-profile:django-htmx
+attributes:
+  displayName: "Django + HTMX"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+  applies_to:
+    - domain:web-development
+    - domain:fullstack
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:elixir-phoenix-liveview
+attributes:
+  displayName: "Elixir + Phoenix LiveView"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+  applies_to:
+    - domain:web-development
+    - domain:fullstack
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:websocket-design
+    - skill-area:streaming-realtime-processing
+    - skill-area:concurrency-multithreading
+---
+nodeKind: StackProfile
+id: stack-profile:go-gin-postgres
+attributes:
+  displayName: "Go + Gin + PostgreSQL"
+edges:
+  used_by_role:
+    - role:backend-engineer
+    - role:platform-engineer
+  applies_to:
+    - domain:backend
+    - domain:api-development
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:postgres-tuning
+    - skill-area:backend-auth
+---
+nodeKind: StackProfile
+id: stack-profile:nextjs-supabase-stripe
+attributes:
+  displayName: "Next.js + Supabase + Stripe"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:product-manager
+  applies_to:
+    - domain:fullstack
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:payment-processing
+    - skill-area:authentication
+    - skill-area:react-components
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:rails-stack
+attributes:
+  displayName: "Ruby on Rails Stack"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+  applies_to:
+    - domain:web-development
+    - domain:fullstack
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:server-side-rendering
+    - skill-area:code-quality
+---
+nodeKind: StackProfile
+id: stack-profile:rust-axum-sqlx
+attributes:
+  displayName: "Rust + Axum + SQLx"
+edges:
+  used_by_role:
+    - role:backend-engineer
+    - role:platform-engineer
+  applies_to:
+    - domain:backend
+    - domain:api-development
+  requires_skill_area:
+    - skill-area:rust-async-runtime
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:concurrency-multithreading
+---
+nodeKind: StackProfile
+id: stack-profile:mern-stack
+attributes:
+  displayName: "MERN Stack (MongoDB, Express, React, Node.js)"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:backend-engineer
+  applies_to:
+    - domain:fullstack
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:react-components
+    - skill-area:backend-api-design
+    - skill-area:application-state-management
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:mean-stack
+attributes:
+  displayName: "MEAN Stack (MongoDB, Express, Angular, Node.js)"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:backend-engineer
+  applies_to:
+    - domain:fullstack
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:frontend-development
+    - skill-area:application-state-management
+    - skill-area:backend-data-persistence
+---
+nodeKind: StackProfile
+id: stack-profile:python-ml-stack
+attributes:
+  displayName: "Python ML Stack (NumPy, Pandas, scikit-learn)"
+edges:
+  used_by_role:
+    - role:data-scientist
+    - role:ml-engineer
+    - role:research-scientist
+  applies_to:
+    - domain:data-science
+    - domain:machine-learning
+  requires_skill_area:
+    - skill-area:machine-learning-frameworks
+    - skill-area:data-preprocessing
+    - skill-area:statistical-analysis
+    - skill-area:data-visualization
+    - skill-area:feature-engineering
+---
+nodeKind: StackProfile
+id: stack-profile:go-grpc-postgres
+attributes:
+  displayName: "Go + gRPC + PostgreSQL"
+edges:
+  used_by_role:
+    - role:backend-engineer
+    - role:platform-engineer
+    - role:architect
+  applies_to:
+    - domain:backend
+    - domain:platform-engineering
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:postgres-tuning
+    - skill-area:event-driven-architecture
+---
+nodeKind: StackProfile
+id: stack-profile:rust-cli-stack
+attributes:
+  displayName: "Rust CLI Stack (clap + tokio)"
+edges:
+  used_by_role:
+    - role:software-engineer
+    - role:devops-engineer
+    - role:platform-engineer
+  applies_to:
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:cli-design
+    - skill-area:command-line-interface-tools
+    - skill-area:rust-async-runtime
+    - skill-area:error-handling-exception-management
+---
+nodeKind: StackProfile
+id: stack-profile:fastapi-postgres
+attributes:
+  displayName: "FastAPI + SQLAlchemy + PostgreSQL"
+edges:
+  used_by_role:
+    - role:backend-engineer
+    - role:data-engineer
+    - role:ml-engineer
+  applies_to:
+    - domain:backend
+    - domain:api-development
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:python-data-pipelines
+    - skill-area:data-validation-sanitization
+---
+nodeKind: StackProfile
+id: stack-profile:sveltekit-stack
+attributes:
+  displayName: "SvelteKit + Tailwind + TypeScript"
+edges:
+  used_by_role:
+    - role:frontend-engineer
+    - role:fullstack-engineer
+  applies_to:
+    - domain:frontend
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:frontend-development
+    - skill-area:web-vitals
+    - skill-area:css-architecture
+---
+nodeKind: StackProfile
+id: stack-profile:spring-boot-stack
+attributes:
+  displayName: "Spring Boot + Java + Hibernate"
+edges:
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+    - role:fullstack-engineer
+  applies_to:
+    - domain:backend
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:object-relational-mapping
+    - skill-area:backend-security
+    - skill-area:middleware-design
+---
+nodeKind: StackProfile
+id: stack-profile:laravel-vue-stack
+attributes:
+  displayName: "Laravel + Vue.js + PHP"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+    - role:frontend-engineer
+  applies_to:
+    - domain:fullstack
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:backend-api-design
+    - skill-area:object-relational-mapping
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:flutter-firebase-stack
+attributes:
+  displayName: "Flutter + Firebase + Dart"
+edges:
+  used_by_role:
+    - role:mobile-engineer
+    - role:fullstack-engineer
+  applies_to:
+    - domain:mobile
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:flutter-development
+    - skill-area:mobile-state-management
+    - skill-area:push-notifications
+    - skill-area:authentication
+---
+nodeKind: StackProfile
+id: stack-profile:rust-actix-postgres
+attributes:
+  displayName: "Rust + Actix Web + Diesel + PostgreSQL"
+edges:
+  used_by_role:
+    - role:backend-engineer
+    - role:platform-engineer
+  applies_to:
+    - domain:backend
+    - domain:api-development
+  requires_skill_area:
+    - skill-area:rust-async-runtime
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:concurrency-multithreading
+---
+nodeKind: StackProfile
+id: stack-profile:elixir-phoenix-postgres
+attributes:
+  displayName: "Elixir + Phoenix + Ecto + PostgreSQL"
+edges:
+  used_by_role:
+    - role:backend-engineer
+    - role:fullstack-engineer
+  applies_to:
+    - domain:backend
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:concurrency-multithreading
+    - skill-area:websocket-design
+    - skill-area:backend-data-persistence
+---
+nodeKind: StackProfile
+id: stack-profile:dotnet-blazor-stack
+attributes:
+  displayName: ".NET Blazor + Entity Framework + SQL Server"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+    - role:frontend-engineer
+  applies_to:
+    - domain:fullstack
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:object-relational-mapping
+    - skill-area:backend-api-design
+    - skill-area:authentication-authorization
+---
+nodeKind: StackProfile
+id: stack-profile:kotlin-ktor-exposed
+attributes:
+  displayName: "Kotlin + Ktor + Exposed + PostgreSQL"
+edges:
+  used_by_role:
+    - role:backend-engineer
+    - role:mobile-engineer
+  applies_to:
+    - domain:backend
+    - domain:api-development
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:concurrency-multithreading
+    - skill-area:backend-auth
+---
+nodeKind: StackProfile
+id: stack-profile:remix-prisma-stack
+attributes:
+  displayName: "Remix + Prisma + PostgreSQL"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+  applies_to:
+    - domain:fullstack
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:frontend-development
+    - skill-area:backend-data-persistence
+    - skill-area:progressive-enhancement
+    - skill-area:web-accessibility
+---
+nodeKind: StackProfile
+id: stack-profile:nuxt-supabase-stack
+attributes:
+  displayName: "Nuxt + Supabase + TypeScript"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+  applies_to:
+    - domain:fullstack
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:vue-components
+    - skill-area:server-side-rendering
+    - skill-area:authentication
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:htmx-go-stack
+attributes:
+  displayName: "Go + HTMX + Templ + SQLite"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+  applies_to:
+    - domain:web-development
+    - domain:fullstack
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:backend-api-design
+    - skill-area:progressive-enhancement
+    - skill-area:backend-data-persistence
+---
+nodeKind: StackProfile
+id: stack-profile:rag-stack
+attributes:
+  displayName: "RAG Application Stack (Python + LangChain + ChromaDB + FastAPI)"
+edges:
+  used_by_role:
+    - role:ml-engineer
+    - role:backend-engineer
+    - role:data-engineer
+  applies_to:
+    - domain:ml-ai
+    - domain:knowledge-management
+  requires_skill_area:
+    - skill-area:retrieval-augmented-generation
+    - skill-area:rag-pipeline-engineering
+    - skill-area:embedding-optimization
+    - skill-area:natural-language-processing
+    - skill-area:backend-api-design
+---
+nodeKind: StackProfile
+id: stack-profile:lamp-stack
+attributes:
+  displayName: "LAMP Stack (Linux, Apache, MySQL, PHP)"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+  applies_to:
+    - domain:web-development
+    - domain:fullstack
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:server-side-rendering
+    - skill-area:deployment
+---
+nodeKind: StackProfile
+id: stack-profile:jamstack
+attributes:
+  displayName: "Jamstack (JavaScript, APIs, Markup)"
+edges:
+  used_by_role:
+    - role:frontend-engineer
+    - role:fullstack-engineer
+    - role:content-strategist
+  applies_to:
+    - domain:frontend
+    - domain:content-operations
+  requires_skill_area:
+    - skill-area:frontend-development
+    - skill-area:cdn-edge
+    - skill-area:server-side-rendering
+    - skill-area:web-performance
+---
+nodeKind: StackProfile
+id: stack-profile:serverless-aws
+attributes:
+  displayName: "Serverless AWS (Lambda, API Gateway, DynamoDB, S3)"
+edges:
+  used_by_role:
+    - role:backend-engineer
+    - role:devops-engineer
+    - role:cloud-architect
+  applies_to:
+    - domain:cloud-infra
+    - domain:serverless
+  requires_skill_area:
+    - skill-area:serverless-compute
+    - skill-area:serverless-cold-start-optimization
+    - skill-area:cloud-deployment
+    - skill-area:backend-api-design
+    - skill-area:event-driven-architecture
+---
+nodeKind: StackProfile
+id: stack-profile:data-lake-stack
+attributes:
+  displayName: "Data Lake Stack (Spark, Object Storage, Delta/Iceberg)"
+edges:
+  used_by_role:
+    - role:data-engineer
+    - role:analytics-engineer
+    - role:data-scientist
+  applies_to:
+    - domain:data-engineering
+    - domain:data-science
+  requires_skill_area:
+    - skill-area:spark-jobs
+    - skill-area:etl-pipelines
+    - skill-area:data-warehouse-modeling
+    - skill-area:columnar-storage
+    - skill-area:python-data-pipelines
+---
+nodeKind: StackProfile
+id: stack-profile:event-driven-stack
+attributes:
+  displayName: "Event-Driven Stack (Kafka, Consumers, Schema Registry)"
+edges:
+  used_by_role:
+    - role:backend-engineer
+    - role:platform-engineer
+    - role:data-engineer
+  applies_to:
+    - domain:backend
+    - domain:data-engineering
+  requires_skill_area:
+    - skill-area:kafka-stream-processing
+    - skill-area:event-driven-architecture
+    - skill-area:event-sourcing
+    - skill-area:messaging-queuing
+    - skill-area:streaming-realtime-processing
+---
+nodeKind: StackProfile
+id: stack-profile:ai-agent-stack
+attributes:
+  displayName: "AI Agent Stack (LLM, Vector DB, Orchestration, Memory)"
+edges:
+  used_by_role:
+    - role:ml-engineer
+    - role:backend-engineer
+    - role:research-engineer
+  applies_to:
+    - domain:ml-ai
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:agentic-loops
+    - skill-area:tool-use
+    - skill-area:prompt-engineering
+    - skill-area:retrieval-augmented-generation
+    - skill-area:multi-agent-coordination
+---
+nodeKind: StackProfile
+id: stack-profile:t3-stack
+attributes:
+  displayName: "T3 Stack (Next.js + tRPC + Prisma + Tailwind)"
+edges:
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+  applies_to:
+    - domain:fullstack
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:react-components
+    - skill-area:server-side-rendering
+    - skill-area:backend-data-persistence
+    - skill-area:frontend-development
+    - skill-area:css-architecture

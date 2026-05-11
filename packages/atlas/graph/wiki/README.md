@@ -16,6 +16,7 @@ Welcome to the readable side of the Atlas graph. This wiki is the easiest way to
 - Looking for process and governance? Start at [`process`](./process/README.md).
 - Checking delivery, testing, or release discipline? Go to [`qa`](./qa/README.md).
 - Want to understand how pages are produced? Open [`generators`](./generators/README.md).
+- Want graph-backed visual templates? Open [`views`](./views/README.md).
 - Need the implementation details of the wiki itself? See [`00-wiki-architecture.md`](./00-wiki-architecture.md) and [`01-derivation-mapping.md`](./01-derivation-mapping.md).
 
 ## Ways to browse
@@ -35,6 +36,7 @@ Welcome to the readable side of the Atlas graph. This wiki is the easiest way to
 | [`qa`](./qa/README.md) | Quality gates, CI/CD, coverage, evidence freshness, and delivery policy. |
 | [`generators`](./generators/README.md) | The derivation layer that turns graph data into docs, types, diagrams, and other artifacts. |
 | [`agent-generate`](./agent-generate/README.md) | Generated references and landscape maps derived from graph data. |
+| [`views`](./views/README.md) | Reusable graph-backed UI templates such as the Service Tower projection. |
 | [`00-wiki-architecture.md`](./00-wiki-architecture.md) | How the wiki is structured, navigated, and published. |
 | [`01-derivation-mapping.md`](./01-derivation-mapping.md) | Which graph queries and generators are responsible for which page types. |
 
