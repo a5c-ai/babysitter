@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:laravel
 attributes:
   displayName: "Laravel"
+  homepageUrl: "https://laravel.com"
   belongsToLanguageId: language:php
   category: web-backend
   description: |

@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:flask
 attributes:
   displayName: "Flask"
+  homepageUrl: "https://flask.palletsprojects.com"
   belongsToLanguageId: language:python
   category: web-backend
   description: |

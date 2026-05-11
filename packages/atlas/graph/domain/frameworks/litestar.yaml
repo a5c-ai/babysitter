@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:litestar
 attributes:
   displayName: "Litestar"
+  homepageUrl: "https://litestar.dev"
   belongsToLanguageId: language:python
   category: web-backend
   description: |

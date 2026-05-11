@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:angular
 attributes:
   displayName: "Angular"
+  homepageUrl: "https://angular.dev"
   belongsToLanguageId: language:typescript
   category: web-frontend
   releasedAt: "2016"

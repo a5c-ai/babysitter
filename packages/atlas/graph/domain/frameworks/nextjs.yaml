@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:nextjs
 attributes:
   displayName: "Next.js"
+  homepageUrl: "https://nextjs.org"
   belongsToLanguageId: language:typescript
   category: web-fullstack
   releasedAt: "2016"

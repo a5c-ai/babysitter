@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:directus
 attributes:
   displayName: "Directus"
+  homepageUrl: "https://directus.io"
   belongsToLanguageId: language:javascript
   category: web-backend
   description: |

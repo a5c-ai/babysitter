@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:fastapi
 attributes:
   displayName: "FastAPI"
+  homepageUrl: "https://fastapi.tiangolo.com"
   belongsToLanguageId: language:python
   category: web-backend
   releasedAt: "2018"

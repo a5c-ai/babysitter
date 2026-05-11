@@ -35,4 +35,5 @@ edges:
       level: full
       notes: Hermes dispatches tool calls per turn.
   uses_memory_system:
+    - target: memory-system:agentmemory-service
     - target: memory-system:file-based-markdown-pattern

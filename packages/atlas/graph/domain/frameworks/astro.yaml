@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:astro
 attributes:
   displayName: "Astro"
+  homepageUrl: "https://astro.build"
   belongsToLanguageId: language:typescript
   category: web-fullstack
   description: |

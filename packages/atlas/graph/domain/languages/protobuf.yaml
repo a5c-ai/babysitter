@@ -20,4 +20,6 @@ attributes:
     (proto3.5+) refine field presence semantics. The buf CLI and BSR (Buf
     Schema Registry) provide modern tooling for schema management and
     breaking-change detection.
-edges: {}
+edges:
+  applies_to:
+    - target: domain:software-engineering

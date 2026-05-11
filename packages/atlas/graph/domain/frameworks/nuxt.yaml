@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:nuxt
 attributes:
   displayName: "Nuxt"
+  homepageUrl: "https://nuxt.com"
   belongsToLanguageId: language:typescript
   category: web-fullstack
   description: |

@@ -18,6 +18,8 @@ edges:
     level: full
     notes: claude-sh implements the full agent loop in bash with multi-turn support.
   uses_memory_system:
+    - target: memory-system:memories-sh
+    - target: memory-system:agentmemory-service
     - target: memory-system:file-based-markdown-pattern
 ---
 nodeKind: AgentVersion

@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:svelte
 attributes:
   displayName: "Svelte"
+  homepageUrl: "https://svelte.dev"
   belongsToLanguageId: language:typescript
   category: web-frontend
   releasedAt: "2016"

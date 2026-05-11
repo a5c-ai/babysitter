@@ -15,6 +15,7 @@ edges:
   - target: knowledge-fabric-impl:aider.knowledge@current
     role: knowledge-fabric
   uses_memory_system:
+    - target: memory-system:cloudflare-agent-memory
   - target: memory-system:aider-memory
   sourced_from: []
   supports:

@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:fastify
 attributes:
   displayName: "Fastify"
+  homepageUrl: "https://fastify.dev"
   belongsToLanguageId: language:javascript
   category: web-backend
   description: |

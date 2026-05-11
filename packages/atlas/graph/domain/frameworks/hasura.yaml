@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:hasura
 attributes:
   displayName: "Hasura"
+  homepageUrl: "https://hasura.io"
   belongsToLanguageId: language:graphql
   category: web-backend
   description: |

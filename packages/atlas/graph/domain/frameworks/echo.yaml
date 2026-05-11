@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:echo
 attributes:
   displayName: "Echo"
+  homepageUrl: "https://echo.labstack.com"
   belongsToLanguageId: language:go
   category: web-backend
   description: |

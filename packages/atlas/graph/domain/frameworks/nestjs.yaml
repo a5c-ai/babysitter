@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:nestjs
 attributes:
   displayName: "NestJS"
+  homepageUrl: "https://nestjs.com"
   belongsToLanguageId: language:typescript
   category: web-backend
   description: |

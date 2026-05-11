@@ -164,6 +164,7 @@ attributes:
   testType: unit
   category: integration
   priority: medium
+testCommand: "node -e "const fs=require("fs");const p="packages/atlas/graph/generated-library/processes.yaml";process.exit(fs.existsSync(p)&&fs.statSync(p).size>100?0:1)""
 edges:
   asserts_about:
     - domain:software-engineering
@@ -283,6 +284,7 @@ attributes:
   testType: manual
   category: performance
   priority: medium
+testCommand: "node -e "const{execSync}=require("child_process");const start=Date.now();execSync("npm run build",{cwd:"packages/atlas",stdio:"pipe"});const elapsed=Date.now()-start;console.log(elapsed+"ms");process.exit(elapsed<60000?0:1)""
 edges:
   asserts_about:
     - domain:software-engineering
@@ -355,6 +357,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: medium
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));const caps=i.edges.filter(e=>e.from.includes("codex")&&e.kind==="supports"&&String(e.to).includes("thinking"));process.exit(caps.length===0?0:1)""
 edges:
   asserts_about:
     - agent-core-impl:codex.core@1.x
@@ -375,6 +378,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: high
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));const mem=i.edges.filter(e=>e.from.includes("codex")&&e.kind==="uses_memory_system"&&String(e.to).includes("auto-memory"));process.exit(mem.length===0?0:1)""
 edges:
   asserts_about:
     - agentVersion:codex:ge-0-119-0
@@ -394,6 +398,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: high
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));const r=i.records["agent:cursor"];process.exit(r&&!String(r.description||"").includes("CLI mode")?0:1)""
 edges:
   asserts_about:
     - agentVersion:cursor:ge-0-0-0
@@ -413,6 +418,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: medium
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));const caps=i.edges.filter(e=>e.from.includes("gemini")&&e.kind==="supports"&&String(e.to).includes("plugin"));process.exit(caps.length===0?0:1)""
 edges:
   asserts_about:
     - agentVersion:gemini:ge-0-0-0
@@ -432,6 +438,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: medium
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));const mcp=i.edges.filter(e=>e.from.includes("codex")&&e.kind==="supports"&&String(e.to).includes("mcp-stdio"));process.exit(mcp.length===0?0:1)""
 edges:
   asserts_about:
     - agentVersion:codex:ge-0-119-0
@@ -451,6 +458,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: high
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));const sub=i.edges.filter(e=>e.from.includes("cursor")&&e.kind==="supports"&&String(e.to).includes("subagent"));process.exit(sub.length===0?0:1)""
 edges:
   asserts_about:
     - agentVersion:cursor:ge-0-0-0
@@ -471,6 +479,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: high
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));const r=i.records["agent:codex"];process.exit(r&&String(r.description||"").toLowerCase().includes("sandbox")?0:1)""
 edges:
   asserts_about:
     - agentVersion:codex:ge-0-119-0
@@ -490,6 +499,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: high
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));process.exit(i.records["background-consolidation:claude-code-auto-dream"]?0:1)""
 edges:
   asserts_about:
     - agentVersion:claude:ge-0-0-0
@@ -511,6 +521,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: high
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));const hooks=i.edges.filter(e=>e.from.includes("claude-code.runtime")&&e.kind==="exposes"&&e.to.includes("hook-surface:"));process.exit(hooks.length>=5?0:1)""
 edges:
   asserts_about:
     - agentVersion:claude:ge-0-0-0
@@ -530,6 +541,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: medium
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));process.exit(i.records["agent:codex"]&&String(i.records["agent:codex"].description||"").includes("sandbox")?0:1)""
 edges:
   asserts_about:
     - agentVersion:codex:ge-0-119-0
@@ -549,6 +561,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: medium
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));process.exit(i.records["memory-system:windsurf-memories"]?0:1)""
 edges:
   asserts_about:
     - agent-version:windsurf@current
@@ -568,6 +581,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: high
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));const r=i.records["agent:gemini-cli"];process.exit(r&&String(r.description||"").includes("1M")?0:1)""
 edges:
   asserts_about:
     - agentVersion:gemini:ge-0-0-0
@@ -588,6 +602,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: high
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));const r=i.records["memory-system:cursor-notepads"];process.exit(r?0:1)""
 edges:
   asserts_about:
     - agentVersion:cursor:ge-0-0-0
@@ -608,6 +623,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: medium
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));process.exit(i.records["memory-system:openclaw-soul-memory"]?0:1)""
 edges:
   asserts_about:
     - agentVersion:openclaw:ge-0-0-0
@@ -628,6 +644,7 @@ attributes:
   testType: manual
   category: compatibility
   priority: high
+testCommand: "node -e "const i=JSON.parse(require("fs").readFileSync("packages/atlas/src/index.json","utf8"));const r=i.records["agent:amp"];process.exit(r&&String(r.description||"").toLowerCase().includes("sourcegraph")?0:1)""
 edges:
   asserts_about:
     - agent-version:amp@current

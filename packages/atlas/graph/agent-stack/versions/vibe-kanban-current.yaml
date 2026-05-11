@@ -50,4 +50,5 @@ edges:
       level: partial
       notes: PR review screenshots and visual diffs available in the review column for agents that support vision.
   uses_memory_system:
+    - target: memory-system:vercel-ai-memory
     - target: memory-system:file-based-markdown-pattern

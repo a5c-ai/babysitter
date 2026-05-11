@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:phoenix
 attributes:
   displayName: "Phoenix"
+  homepageUrl: "https://www.phoenixframework.org"
   belongsToLanguageId: language:elixir
   category: web-backend
   description: |

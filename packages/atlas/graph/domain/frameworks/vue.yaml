@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:vue
 attributes:
   displayName: "Vue"
+  homepageUrl: "https://vuejs.org"
   belongsToLanguageId: language:javascript
   category: web-frontend
   releasedAt: "2014"

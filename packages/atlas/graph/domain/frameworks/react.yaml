@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:react
 attributes:
   displayName: "React"
+  homepageUrl: "https://react.dev"
   belongsToLanguageId: language:javascript
   category: web-frontend
   releasedAt: "2013"

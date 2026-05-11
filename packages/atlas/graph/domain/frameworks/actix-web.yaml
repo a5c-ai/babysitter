@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:actix-web
 attributes:
   displayName: "Actix Web"
+  homepageUrl: "https://actix.rs"
   belongsToLanguageId: language:rust
   category: web-backend
   description: |

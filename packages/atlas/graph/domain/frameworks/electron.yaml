@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:electron
 attributes:
   displayName: "Electron"
+  homepageUrl: "https://www.electronjs.org"
   belongsToLanguageId: language:javascript
   category: desktop
   description: |

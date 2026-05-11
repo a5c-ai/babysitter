@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:django
 attributes:
   displayName: "Django"
+  homepageUrl: "https://www.djangoproject.com"
   belongsToLanguageId: language:python
   category: web-backend
   releasedAt: "2005"

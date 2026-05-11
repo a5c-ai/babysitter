@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:axum
 attributes:
   displayName: "Axum"
+  homepageUrl: "https://github.com/tokio-rs/axum"
   belongsToLanguageId: language:rust
   category: web-backend
   description: |

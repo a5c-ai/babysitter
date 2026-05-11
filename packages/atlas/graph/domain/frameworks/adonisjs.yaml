@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:adonisjs
 attributes:
   displayName: "AdonisJS"
+  homepageUrl: "https://adonisjs.com"
   belongsToLanguageId: language:typescript
   category: web-backend
   description: |

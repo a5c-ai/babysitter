@@ -2,6 +2,7 @@ nodeKind: Framework
 id: framework:flutter
 attributes:
   displayName: "Flutter"
+  homepageUrl: "https://flutter.dev"
   belongsToLanguageId: language:dart
   category: mobile
   description: |
