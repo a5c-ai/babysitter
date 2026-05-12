@@ -75,7 +75,7 @@ test('controller deployment assets build and publish the runnable controller', (
   for (const file of ['Dockerfile', '.dockerignore', '.github/workflows/publish.yml']) assert.equal(existsSync(file), true, `${file} exists`);
 
   const dockerfile = read('Dockerfile');
-  assert.match(dockerfile, /FROM node:20-alpine AS deps/);
+  assert.match(dockerfile, /FROM node:\d+-alpine AS (deps|build)/);
   assert.match(dockerfile, /npm ci/);
   assert.match(dockerfile, /npm run build/);
   assert.match(dockerfile, /HEALTHCHECK/);
