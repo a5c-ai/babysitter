@@ -20,6 +20,7 @@ export function Header() {
           <Link href="/">Overview</Link>
           <Link href="/wiki">Wiki</Link>
           <Link href="/graph">Graph</Link>
+          <Link href="/for-agents">For Agents</Link>
           <Link href="/edges">Edges</Link>
           <Link href="/search">Search</Link>
           <Link href="/workspace">Workspace</Link>
