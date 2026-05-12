@@ -77,7 +77,7 @@ export async function runDaemonLoop(
       pendingRuns: queue.length,
       updatedAt: new Date().toISOString(),
     };
-    const tmpPath = `${statusPath}.tmp-${process.pid}`;
+    const tmpPath = `${statusPath}.tmp-${process.pid}-${Date.now()}`;
     await fs.writeFile(tmpPath, JSON.stringify(status), "utf-8");
     await fs.rename(tmpPath, statusPath);
   }
@@ -170,8 +170,8 @@ export async function runDaemonLoop(
     await Promise.allSettled([...activeRuns]);
   }
 
-  // Write final status after all runs have drained
-  await writeLoopStatus();
+  // Write final status after all runs have drained (best-effort)
+  try { await writeLoopStatus(); } catch { /* directory may be gone in tests */ }
 }
 
 /**
