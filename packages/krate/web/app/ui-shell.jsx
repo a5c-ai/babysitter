@@ -4,6 +4,7 @@ import { fetchControllerUiModel } from '../../core/src/controller-client.js';
 import { CodeEditor, LiveWatchPanel } from './components/code-editor.jsx';
 import { DeploymentManager, RepositoryManager, ResourceApplyPanel, UserManagementPanel } from './components/resource-actions.jsx';
 import { ApprovalDecisionButtons } from './components/approval-actions.jsx';
+import { SessionDetailTabs } from './components/session-tabs.jsx';
 
 export const orgNavigationGroups = [
   {
@@ -34,7 +35,8 @@ export const orgNavigationGroups = [
       ['/agents/rules', 'Trigger rules', 'Trigger rule definitions'],
       ['/agents/approvals', 'Approvals', 'Pending agent approvals'],
       ['/agents/workspaces', 'Workspaces', 'Agent workspaces and runtimes'],
-      ['/agents/projects', 'Projects', 'Agent project boards']
+      ['/agents/projects', 'Projects', 'Agent project boards'],
+      ['/agents/settings', 'Settings', 'Gateway, adapters, and providers']
     ]
   },
   {
@@ -300,6 +302,7 @@ export async function AgentRunDetailPage({ org = null, runId } = {}) {
   const permissionDecision = run?.spec?.permission?.decision || run?.status?.permissionDecision || null;
   const repository = run?.spec?.repository || null;
   const phases = run?.status?.phaseTransitions || run?.status?.history || [];
+  const runTranscripts = agentView.transcripts?.items || [];
   const phaseTone = (phase) => {
     if (!phase || phase === 'Queued' || phase === 'Pending') return 'neutral';
     if (phase === 'Running') return 'warn';
@@ -380,6 +383,12 @@ export async function AgentRunDetailPage({ org = null, runId } = {}) {
         <div className="card">
           <div className="cardTitle"><h3>Timeline</h3><StatusPill tone={phases.length ? 'good' : 'neutral'}>{phases.length} transitions</StatusPill></div>
           {phases.length ? <ul className="compactList">{phases.map((entry, index) => <li key={index}>{entry.timestamp || entry.time || 'unknown'}: {entry.phase || entry.status || 'unknown'}{entry.reason ? ` / ${entry.reason}` : ''}</li>)}</ul> : <p className="emptyText">No phase transitions recorded. Transitions appear as the run progresses through its lifecycle.</p>}
+        </div>
+      </section>
+      <section className="routeGrid one">
+        <div className="card">
+          <div className="cardTitle"><h3>Execution flow</h3><StatusPill tone={run ? 'good' : 'neutral'}>segments</StatusPill></div>
+          <FlowVisualization runs={[run]} transcripts={runTranscripts} />
         </div>
       </section>
     </> : <EmptyState title={`Run ${runId} not found`} text="This dispatch run does not exist in the current workspace. Dispatch runs are created when agent stacks are triggered by rules or manual dispatch." />}
@@ -796,6 +805,82 @@ export async function AgentProjectBoardPage({ org = null, projectId } = {}) {
   </PageFrame>;
 }
 
+export async function AgentSettingsPage({ org = null } = {}) {
+  const ui = await loadKrateUi(org);
+  const activeOrg = ui.model.org?.slug || org || 'default';
+  const agentView = ui.model.agents || { stacks: { count: 0 }, runs: { count: 0 }, rules: { count: 0 }, sessions: { count: 0 }, workspaces: { count: 0 }, approvals: { count: 0 }, adapters: { count: 0, items: [] }, providers: { count: 0, items: [] }, gateway: null };
+  const gateway = agentView.gateway;
+  const adapters = agentView.adapters?.items || [];
+  const providers = agentView.providers?.items || [];
+  const gatewayUrl = gateway?.spec?.gatewayUrl || gateway?.spec?.url || null;
+  const gatewayConditions = gateway?.status?.conditions || [];
+  const gatewayReady = gatewayConditions.find((c) => c.type === 'Ready');
+  const gatewayStatusTone = gateway ? (gatewayReady?.status === 'True' ? 'good' : gatewayReady?.status === 'False' ? 'danger' : 'neutral') : 'neutral';
+  const gatewayStatusLabel = gateway ? (gatewayReady?.status === 'True' ? 'Ready' : gatewayReady?.status === 'False' ? 'Not Ready' : 'Unknown') : 'Not configured';
+  const lastHealthCheck = gateway?.status?.lastHealthCheck || gateway?.status?.lastProbeTime || null;
+  const adapterPhaseTone = (phase) => {
+    if (!phase || phase === 'Pending') return 'neutral';
+    if (phase === 'Active' || phase === 'Ready') return 'good';
+    if (phase === 'Failed') return 'danger';
+    return 'neutral';
+  };
+  const providerPhaseTone = (phase) => {
+    if (!phase || phase === 'Pending') return 'neutral';
+    if (phase === 'Active' || phase === 'Ready' || phase === 'Configured') return 'good';
+    if (phase === 'Failed') return 'danger';
+    return 'neutral';
+  };
+  const agentsEnabled = (agentView.stacks?.count || 0) > 0 || gateway != null;
+  const agentMuxConnected = gateway != null && gatewayReady?.status === 'True';
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent settings" title="Agent settings" text="Gateway connection, adapter bindings, provider configurations, and system resource counts." actions={[['/agents', 'Overview'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/settings', 'Settings']]}>
+    <DegradedBanner model={ui.model} />
+    <div className="card" style={{ borderLeft: `3px solid ${gatewayStatusTone === 'good' ? 'var(--color-good, #22c55e)' : gatewayStatusTone === 'danger' ? 'var(--color-danger, #ef4444)' : 'var(--color-neutral, #9ca3af)'}` }}>
+      <div className="cardTitle"><h2>Gateway connection</h2><StatusPill tone={gatewayStatusTone}>{gatewayStatusLabel}</StatusPill></div>
+      {gateway ? <dl className="kv">
+        <dt>Gateway URL</dt><dd style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '0.875rem' }}>{gatewayUrl || 'not specified'}</dd>
+        <dt>Status</dt><dd><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', marginRight: '0.375rem', backgroundColor: gatewayStatusTone === 'good' ? '#22c55e' : gatewayStatusTone === 'danger' ? '#ef4444' : '#9ca3af' }} />{gatewayStatusLabel}</dd>
+        {lastHealthCheck ? <><dt>Last health check</dt><dd><time dateTime={lastHealthCheck}>{lastHealthCheck}</time></dd></> : null}
+      </dl> : <div style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+        <p style={{ marginBottom: '0.25rem' }}><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', marginRight: '0.375rem', backgroundColor: '#9ca3af' }} />No Agent Mux gateway configured</p>
+        <p style={{ color: '#9ca3af', fontSize: '0.8125rem' }}>Create an AgentGatewayConfig resource to connect the workspace to an Agent Mux gateway for agent dispatch and session management.</p>
+      </div>}
+    </div>
+    <div className="card">
+      <div className="cardTitle"><h2>Adapters</h2><StatusPill tone={adapters.length ? 'good' : 'neutral'}>{adapters.length} adapters</StatusPill></div>
+      {adapters.length ? <div className="resourceTable">{adapters.map((adapter) => <div key={adapter.metadata?.name} className="resourceRow">
+        <strong>{adapter.metadata?.name}</strong>
+        <span>{adapter.spec?.type || 'subprocess'}</span>
+        <span>{adapter.spec?.transport || adapter.spec?.transportBinding || 'default'}</span>
+        <StatusPill tone={adapterPhaseTone(adapter.status?.phase)}>{adapter.status?.phase || 'Pending'}</StatusPill>
+      </div>)}</div> : <EmptyState title="No adapters configured" text="Agent adapters define how the workspace connects to agent runtimes. Create AgentAdapter resources to configure subprocess, remote, or programmatic adapters." />}
+    </div>
+    <div className="card">
+      <div className="cardTitle"><h2>Providers</h2><StatusPill tone={providers.length ? 'good' : 'neutral'}>{providers.length} providers</StatusPill></div>
+      {providers.length ? <div className="resourceTable">{providers.map((provider) => <div key={provider.metadata?.name} className="resourceRow">
+        <strong>{provider.metadata?.name}</strong>
+        <span>{provider.spec?.authType || provider.spec?.auth?.type || 'api-key'}</span>
+        <span>{provider.spec?.defaultModel || provider.spec?.model || 'default'}</span>
+        <StatusPill tone={providerPhaseTone(provider.status?.phase)}>{provider.status?.phase || 'Pending'}</StatusPill>
+      </div>)}</div> : <EmptyState title="No providers configured" text="Model providers define LLM access credentials and default models. Create AgentProviderConfig resources to configure provider access." />}
+    </div>
+    <div className="card">
+      <div className="cardTitle"><h2>System info</h2><StatusPill tone="neutral">overview</StatusPill></div>
+      <div className="metricGrid">
+        <a href={orgHref(activeOrg, '/agents/stacks')}><strong>{agentView.stacks?.count || 0}</strong><span>Stacks</span></a>
+        <a href={orgHref(activeOrg, '/agents/rules')}><strong>{agentView.rules?.count || 0}</strong><span>Rules</span></a>
+        <a href={orgHref(activeOrg, '/agents/sessions')}><strong>{agentView.sessions?.count || 0}</strong><span>Sessions</span></a>
+        <a href={orgHref(activeOrg, '/agents/workspaces')}><strong>{agentView.workspaces?.count || 0}</strong><span>Workspaces</span></a>
+        <a href={orgHref(activeOrg, '/agents/approvals')}><strong>{agentView.approvals?.count || 0}</strong><span>Approvals</span></a>
+        <a href={orgHref(activeOrg, '/agents/runs')}><strong>{agentView.runs?.count || 0}</strong><span>Runs</span></a>
+      </div>
+      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280' }}>
+        <span>Agents: <strong style={{ color: agentsEnabled ? '#22c55e' : '#9ca3af' }}>{agentsEnabled ? 'enabled' : 'disabled'}</strong></span>
+        <span>Agent Mux: <strong style={{ color: agentMuxConnected ? '#22c55e' : '#9ca3af' }}>{agentMuxConnected ? 'connected' : 'not configured'}</strong></span>
+      </div>
+    </div>
+  </PageFrame>;
+}
+
 export async function AgentSessionsPage({ org = null } = {}) {
   const ui = await loadKrateUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
@@ -832,6 +917,9 @@ export async function AgentSessionDetailPage({ org = null, sessionId } = {}) {
   const messages = transcriptRecord?.spec?.messages || [];
   const dispatchRunName = session?.spec?.dispatchRun || null;
   const stackName = session?.spec?.agentStack || session?.spec?.stackRef || null;
+  const allRuns = agentView.runs?.items || [];
+  const allTranscripts = agentView.transcripts?.items || [];
+  const sessionRuns = allRuns.filter((r) => r.status?.sessionRef === sessionId || r.spec?.sessionRef === sessionId || r.metadata?.name === dispatchRunName);
   const phaseTone = (phase) => {
     if (!phase || phase === 'Pending') return 'neutral';
     if (phase === 'Active' || phase === 'Running') return 'warn';
@@ -843,8 +931,16 @@ export async function AgentSessionDetailPage({ org = null, sessionId } = {}) {
     <DegradedBanner model={ui.model} />
     <section className="routeGrid wideLeft">
       <div className="card">
-        <div className="cardTitle"><h3>Transcript</h3><StatusPill tone={messages.length ? 'good' : 'neutral'}>{messages.length} messages</StatusPill></div>
-        {messages.length ? <div className="sessionTranscript">{messages.map((msg, index) => <TranscriptMessage key={`${msg.role}-${index}`} message={msg} />)}</div> : <EmptyState title="No transcript available" text="Session transcript available when Agent Mux is connected and the session has exchanged messages." />}
+        <SessionDetailTabs
+          transcriptContent={<>
+            <div className="cardTitle"><h3>Transcript</h3><StatusPill tone={messages.length ? 'good' : 'neutral'}>{messages.length} messages</StatusPill></div>
+            {messages.length ? <div className="sessionTranscript">{messages.map((msg, index) => <TranscriptMessage key={`${msg.role}-${index}`} message={msg} />)}</div> : <EmptyState title="No transcript available" text="Session transcript available when Agent Mux is connected and the session has exchanged messages." />}
+          </>}
+          flowContent={<>
+            <div className="cardTitle"><h3>Execution flow</h3><StatusPill tone={sessionRuns.length ? 'good' : 'neutral'}>{sessionRuns.length} runs</StatusPill></div>
+            <FlowVisualization runs={sessionRuns} transcripts={allTranscripts} />
+          </>}
+        />
       </div>
       <div className="stack">
         <div className="card">
@@ -875,17 +971,56 @@ export async function AgentSessionDetailPage({ org = null, sessionId } = {}) {
   </PageFrame>;
 }
 
+const TOOL_RENDERERS = {
+  bash: { label: 'Shell', prefix: '>', renderInput: (input) => input?.command || 'command', renderOutput: (output) => typeof output === 'string' ? truncateText(output, 300) : output?.stdout || String(output) },
+  read: { label: 'Read', prefix: '[R]', renderInput: (input) => input?.file_path || input?.path || 'file', renderOutput: (output) => truncateText(String(output), 300) },
+  write: { label: 'Write', prefix: '[W]', renderInput: (input) => input?.file_path || 'file', renderOutput: () => 'File written' },
+  edit: { label: 'Edit', prefix: '[E]', renderInput: (input) => input?.file_path || 'file', renderOutput: () => 'File edited' },
+  glob: { label: 'Search', prefix: '[G]', renderInput: (input) => input?.pattern || 'pattern', renderOutput: (output) => Array.isArray(output) ? output.length + ' matches' : String(output) },
+  grep: { label: 'Grep', prefix: '[?]', renderInput: (input) => input?.pattern || 'pattern', renderOutput: (output) => Array.isArray(output) ? output.length + ' matches' : String(output) },
+  web_fetch: { label: 'Fetch', prefix: '[F]', renderInput: (input) => input?.url || 'url', renderOutput: (output) => truncateText(String(output), 200) },
+  web_search: { label: 'Search', prefix: '[S]', renderInput: (input) => input?.query || 'query', renderOutput: (output) => truncateText(String(output), 200) },
+};
+
+function truncateText(text, maxLen) {
+  if (!text || text.length <= maxLen) return text || '';
+  return text.slice(0, maxLen) + '...';
+}
+
+function resolveToolRenderer(toolName) {
+  const normalized = (toolName || '').toLowerCase().replace(/[^a-z_]/g, '');
+  return TOOL_RENDERERS[normalized] || { label: toolName || 'Tool', prefix: '[T]', renderInput: (i) => truncateText(JSON.stringify(i), 200), renderOutput: (o) => truncateText(JSON.stringify(o), 200) };
+}
+
+function tryParseJson(text) {
+  try { return JSON.parse(text); } catch { return text; }
+}
+
+function ToolCallCard({ toolName, input, output, status }) {
+  const renderer = resolveToolRenderer(toolName);
+  const statusColor = status === 'error' ? '#ef4444' : status === 'completed' ? '#22c55e' : '#f59e0b';
+  const inputPreview = renderer.renderInput(typeof input === 'string' ? tryParseJson(input) : input);
+  const outputPreview = output != null ? renderer.renderOutput(typeof output === 'string' ? tryParseJson(output) : output) : null;
+
+  return (
+    <div style={{ border: '1px solid #e2e8f0', borderLeft: `3px solid ${statusColor}`, borderRadius: 4, padding: '8px 12px', marginBottom: 8, fontSize: 13, backgroundColor: '#fafafa' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: outputPreview ? 4 : 0 }}>
+        <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#6b7280' }}>{renderer.prefix}</span>
+        <strong style={{ fontSize: 12 }}>{renderer.label}</strong>
+        <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#374151', flex: 1 }}>{inputPreview}</span>
+        <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: statusColor, flexShrink: 0 }} />
+      </div>
+      {outputPreview && (
+        <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#6b7280', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{outputPreview}</div>
+      )}
+    </div>
+  );
+}
+
 function TranscriptMessage({ message }) {
   const role = message.role || 'unknown';
   if (role === 'tool' || role === 'tool_use' || role === 'tool_result') {
-    return <div className="transcriptMessage transcriptTool">
-      <div className="transcriptToolHeader">
-        <small className="transcriptRole">tool</small>
-        <strong>{message.toolName || message.name || 'tool call'}</strong>
-        {message.status ? <StatusPill tone={message.status === 'success' ? 'good' : message.status === 'error' ? 'danger' : 'neutral'}>{message.status}</StatusPill> : null}
-      </div>
-      {message.content ? <pre className="transcriptToolContent"><code>{typeof message.content === 'string' ? message.content : JSON.stringify(message.content, null, 2)}</code></pre> : null}
-    </div>;
+    return <ToolCallCard toolName={message.toolName || message.name} input={message.input || message.content} output={message.output} status={message.status || 'completed'} />;
   }
   if (role === 'system' || role === 'thinking') {
     return <div className="transcriptMessage transcriptSystem">
@@ -1189,6 +1324,87 @@ function PlanCard({ title, plan, compact = false, initiallyOpen = false }) {
 
 function InfoList({ title, items }) {
   return <div><h4>{title}</h4><ul className="compactList">{items.map((item) => <li key={item}>{sanitizeCopy(item)}</li>)}</ul></div>;
+}
+
+const SEGMENT_KINDS = {
+  user: { label: 'User', color: '#3b82f6' },
+  assistant: { label: 'Assistant', color: '#6b7280' },
+  thinking: { label: 'Thinking', color: '#a855f7' },
+  tool: { label: 'Tool', color: '#f59e0b' },
+  error: { label: 'Error', color: '#ef4444' },
+  lifecycle: { label: 'Lifecycle', color: '#94a3b8' },
+};
+
+function classifyMessageKind(message) {
+  const role = message.role || 'unknown';
+  if (role === 'user') return 'user';
+  if (role === 'assistant') return 'assistant';
+  if (role === 'thinking') return 'thinking';
+  if (role === 'tool' || role === 'tool_use' || role === 'tool_result') return 'tool';
+  if (role === 'error') return 'error';
+  if (role === 'system' || role === 'lifecycle') return 'lifecycle';
+  return 'lifecycle';
+}
+
+function deriveSegments(messages) {
+  if (!messages || !messages.length) return [];
+  const segments = [];
+  let currentKind = null;
+  let currentCount = 0;
+  for (const msg of messages) {
+    const kind = classifyMessageKind(msg);
+    if (kind === currentKind) {
+      currentCount++;
+    } else {
+      if (currentKind) segments.push({ kind: currentKind, count: currentCount });
+      currentKind = kind;
+      currentCount = 1;
+    }
+  }
+  if (currentKind) segments.push({ kind: currentKind, count: currentCount });
+  return segments;
+}
+
+function FlowLane({ run, transcript }) {
+  const runName = run?.metadata?.name || 'unknown';
+  const stackName = run?.spec?.stackRef || run?.spec?.targetStack || null;
+  const phase = run?.status?.phase || 'Pending';
+  const phaseTone = !phase || phase === 'Queued' || phase === 'Pending' ? 'neutral' : phase === 'Running' ? 'warn' : phase === 'Completed' || phase === 'Succeeded' ? 'good' : phase === 'Failed' ? 'danger' : 'neutral';
+  const messages = transcript?.spec?.messages || [];
+  const segments = deriveSegments(messages);
+  const phaseColor = phaseTone === 'good' ? '#22c55e' : phaseTone === 'warn' ? '#f59e0b' : phaseTone === 'danger' ? '#ef4444' : '#94a3b8';
+
+  return <div style={{ marginBottom: 12 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, fontSize: 13 }}>
+      <strong title={runName} style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{runName}</strong>
+      {stackName ? <span style={{ color: '#6b7280' }}>{stackName}</span> : null}
+      <StatusPill tone={phaseTone}>{phase}</StatusPill>
+    </div>
+    <div style={{ display: 'flex', height: 28, borderRadius: 4, overflow: 'hidden', backgroundColor: '#f1f5f9' }}>
+      {segments.length ? segments.map((seg, index) => {
+        const info = SEGMENT_KINDS[seg.kind] || SEGMENT_KINDS.lifecycle;
+        return <div key={index} className="flowSegment" title={`${info.label}: ${seg.count} messages`} style={{
+          minWidth: 24,
+          flexGrow: seg.count,
+          backgroundColor: info.color,
+          borderTopLeftRadius: index === 0 ? 4 : 0,
+          borderBottomLeftRadius: index === 0 ? 4 : 0,
+          borderTopRightRadius: index === segments.length - 1 ? 4 : 0,
+          borderBottomRightRadius: index === segments.length - 1 ? 4 : 0,
+        }} />;
+      }) : <div style={{ flexGrow: 1, backgroundColor: phaseColor, borderRadius: 4 }} title={`${phase}: no transcript data`} />}
+    </div>
+  </div>;
+}
+
+export function FlowVisualization({ runs = [], transcripts = [] }) {
+  if (!runs.length) return <EmptyState title="No execution flow data" text="Flow visualization appears when dispatch runs have been created for this session." />;
+  return <div>{runs.map((run) => {
+    const runName = run?.metadata?.name;
+    const sessionRef = run?.status?.sessionRef || run?.spec?.sessionRef || null;
+    const transcript = transcripts.find((t) => t.spec?.sessionRef === sessionRef || t.spec?.runRef === runName) || null;
+    return <FlowLane key={runName} run={run} transcript={transcript} />;
+  })}</div>;
 }
 
 function EmptyState({ title, text }) {

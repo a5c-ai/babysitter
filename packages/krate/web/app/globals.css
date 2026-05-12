@@ -1145,3 +1145,7 @@ main { width: 100%; max-width: none; padding: 0 0 48px; }
 .loginBrand { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; margin-bottom: 34px; padding: 8px 14px; border: 1px solid #1a0a02; border-radius: 8px; color: var(--glyph-bone); text-decoration: none; background: var(--mahogany); box-shadow: inset 0 1px 0 rgba(255,220,170,.2); }
 .loginCard h1 { margin: 8px 0 16px; font-size: clamp(2.8rem, 9vw, 5.8rem); }
 .loginNotice { margin: 26px 0 0; padding: 16px 18px; border: 1px solid rgba(224, 166, 58, .48); border-radius: 14px; color: #7c4e1f; background: rgba(224, 166, 58, .16); }
+
+/* Flow visualization */
+.flowSegment { transition: opacity 0.15s; cursor: default; }
+.flowSegment:hover { opacity: 0.8; }
