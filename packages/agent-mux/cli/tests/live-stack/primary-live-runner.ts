@@ -776,8 +776,8 @@ async function validateAgentBehavior(
     }
     entries.push({
       name: 'babysitter-run-completion',
-      status: runCompleted ? 'passed' : (isInteractiveMode ? 'failed' : 'passed'),
-      detail: !runCompleted && !isInteractiveMode ? `${runCompletionDetail} (expected in non-interactive — no orchestration triggered)` : runCompletionDetail,
+      status: runCompleted ? 'passed' : 'failed',
+      detail: runCompletionDetail,
     });
 
     // babysitter-completion-proof: check .a5c/runs/*/state.json for completionProof
@@ -802,8 +802,8 @@ async function validateAgentBehavior(
     }
     entries.push({
       name: 'babysitter-completion-proof',
-      status: completionProofFound ? 'passed' : (isInteractiveMode ? 'failed' : 'passed'),
-      detail: !completionProofFound && !isInteractiveMode ? `${completionProofDetail} (expected in non-interactive)` : completionProofDetail,
+      status: completionProofFound ? 'passed' : 'failed',
+      detail: completionProofDetail,
     });
   }
 
