@@ -1454,6 +1454,9 @@ jobs:
                           port:
                             number: 80
           EOF
+          # Delete pods stuck in Terminating so the rollout can proceed
+          kubectl -n "$KUBE_NAMESPACE" get pods -l app="$APP_NAME" --field-selector=status.phase!=Running -o name \
+            | xargs -r kubectl -n "$KUBE_NAMESPACE" delete --force --grace-period=0 2>/dev/null || true
           kubectl -n "$KUBE_NAMESPACE" rollout status deployment/"$APP_NAME" --timeout=300s
 
   deploy_krate:
@@ -1682,6 +1685,8 @@ jobs:
                           port:
                             number: 80
           EOF
+          kubectl -n "$KUBE_NAMESPACE" get pods -l app="$APP_NAME" --field-selector=status.phase!=Running -o name \
+            | xargs -r kubectl -n "$KUBE_NAMESPACE" delete --force --grace-period=0 2>/dev/null || true
           kubectl -n "$KUBE_NAMESPACE" rollout status deployment/"$APP_NAME" --timeout=300s
 
   deploy_staging_cloud:

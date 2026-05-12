@@ -137,31 +137,77 @@ async function runOnce(
     message: `Spawning ${invocationCmd.command} (mode=${options.invocation?.mode ?? 'local'}, cwd=${invocationCmd.cwd})`,
   });
 
-  let child: ChildProcess;
-  try {
-    child = spawn(invocationCmd.command, invocationCmd.args, {
-      cwd: invocationCmd.cwd,
-      env: { ...process.env, ...invocationCmd.env },
-      shell: invocationCmd.shell,
-      detached: !isWindows,
-      stdio: ['pipe', 'pipe', 'pipe'],
-      windowsHide: true,
-    });
-  } catch (err) {
-    handle.emit({
-      type: 'error',
-      runId: handle.runId,
-      agent: handle.agent,
-      timestamp: Date.now(),
-      code: 'SPAWN_ERROR',
-      message: err instanceof Error ? err.message : String(err),
-      recoverable: false,
-    });
-    finalize('SPAWN_ERROR', 'crashed', null, null);
-    return;
+  let child!: ChildProcess;
+  let ptyProcess: any = null;
+  let ptyLineBuf = '';
+
+  // Interactive mode: spawn via node-pty so the harness gets a real TTY.
+  // Output is tee'd through feedLine for event parsing + hook dispatch.
+  if (options.interactive) {
+    try {
+      const nodePty: any = require('node-pty');
+      ptyProcess = nodePty.spawn(invocationCmd.command, invocationCmd.args, {
+        name: 'xterm-256color',
+        cols: (process.stdout as any).columns || 120,
+        rows: (process.stdout as any).rows || 40,
+        cwd: invocationCmd.cwd,
+        env: { ...process.env, ...invocationCmd.env },
+      });
+
+      // Create a ChildProcess-like facade for the rest of spawn-runner
+      child = {
+        pid: ptyProcess.pid,
+        stdin: null,
+        stdout: null,
+        stderr: null,
+        kill: (sig?: string) => { try { ptyProcess.kill(sig); } catch { /* */ } },
+        on: (event: string, cb: (...args: any[]) => void) => {
+          if (event === 'close' || event === 'exit') {
+            ptyProcess.onExit((e: { exitCode: number; signal?: number }) => cb(e.exitCode, e.signal));
+          }
+          return child;
+        },
+        once: (event: string, cb: (...args: any[]) => void) => {
+          if (event === 'close' || event === 'exit') {
+            ptyProcess.onExit((e: { exitCode: number; signal?: number }) => cb(e.exitCode, e.signal));
+          }
+          return child;
+        },
+        removeListener: () => child,
+        removeAllListeners: () => child,
+      } as unknown as ChildProcess;
+    } catch {
+      ptyProcess = null;
+      // node-pty unavailable — fall through to regular spawn below
+    }
   }
 
-  const active: ActiveSpawn = { child, killTimer: null };
+  if (!ptyProcess) {
+    try {
+      child = spawn(invocationCmd.command, invocationCmd.args, {
+        cwd: invocationCmd.cwd,
+        env: { ...process.env, ...invocationCmd.env },
+        shell: invocationCmd.shell,
+        detached: !isWindows,
+        stdio: ['pipe', 'pipe', 'pipe'],
+        windowsHide: true,
+      });
+    } catch (err) {
+      handle.emit({
+        type: 'error',
+        runId: handle.runId,
+        agent: handle.agent,
+        timestamp: Date.now(),
+        code: 'SPAWN_ERROR',
+        message: err instanceof Error ? err.message : String(err),
+        recoverable: false,
+      });
+      finalize('SPAWN_ERROR', 'crashed', null, null);
+      return;
+    }
+  }
+
+  const active: ActiveSpawn = { child: child!, killTimer: null };
 
   // Transition spawned -> running.
   try {
@@ -171,8 +217,8 @@ async function runOnce(
   }
 
   // ── ProcessTracker registration ─────────────────────────────────────────
-  if (typeof child.pid === 'number') {
-    processTracker.register(child.pid, isWindows ? 0 : child.pid, handle.runId);
+  if (typeof child!.pid === 'number') {
+    processTracker.register(child!.pid, isWindows ? 0 : child!.pid, handle.runId);
   }
 
   // ── StreamAssembler + parseEvent wiring ─────────────────────────────────
@@ -268,12 +314,48 @@ async function runOnce(
     });
   };
 
-  pipeStream(child.stdout, 'stdout');
-  pipeStream(child.stderr, 'stderr');
+  if (ptyProcess) {
+    // Interactive PTY: tee output through feedLine for event parsing AND to terminal
+    ptyProcess.onData((data: string) => {
+      // Pass raw output to user terminal
+      process.stdout.write(data);
+      // Also feed through line parser for structured event extraction
+      ptyLineBuf += data;
+      let idx: number;
+      while ((idx = ptyLineBuf.indexOf('\n')) !== -1) {
+        const line = ptyLineBuf.slice(0, idx).replace(/\r$/, '');
+        ptyLineBuf = ptyLineBuf.slice(idx + 1);
+        // Strip ANSI escape codes before feeding to the event parser
+        const clean = line.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*\x07/g, '');
+        feedLine(clean, 'stdout');
+      }
+    });
+    // Wire user stdin to PTY
+    if ((process.stdin as any).isTTY) (process.stdin as any).setRawMode(true);
+    process.stdin.resume();
+    process.stdin.on('data', (data: Buffer) => {
+      try { ptyProcess.write(data.toString()); } catch { /* */ }
+    });
+    // Handle terminal resize
+    process.stdout.on('resize', () => {
+      try { ptyProcess.resize((process.stdout as any).columns || 120, (process.stdout as any).rows || 40); } catch { /* */ }
+    });
+  } else {
+    pipeStream(child!.stdout, 'stdout');
+    pipeStream(child!.stderr, 'stderr');
+  }
 
   // ── Interaction channel + send() -> stdin ───────────────────────────────
   handle.interaction.setDispatch(async (_id, response) => {
-    if (!child.stdin || child.stdin.destroyed) return;
+    if (ptyProcess) {
+      let text = '';
+      if (response.type === 'approve') text = 'y\n';
+      else if (response.type === 'deny') text = 'n\n';
+      else if (response.type === 'text') text = (response.text ?? '') + '\n';
+      try { ptyProcess.write(text); } catch { /* */ }
+      return;
+    }
+    if (!child!.stdin || child!.stdin.destroyed) return;
     let text = '';
     if (response.type === 'approve') text = 'y\n';
     else if (response.type === 'deny') text = 'n\n';
@@ -287,14 +369,20 @@ async function runOnce(
 
   handle.bindInputTransport(async (text: string) => {
     runtimeHooks.dispatchPrompt(text);
+    if (ptyProcess) {
+      try { ptyProcess.write(text.endsWith('\n') ? text : `${text}\n`); } catch {
+        throw new AgentMuxError('STDIN_NOT_AVAILABLE', 'Failed to write to agent PTY', false);
+      }
+      return;
+    }
     if (!adapter.capabilities.supportsStdinInjection) {
       throw new AgentMuxError('STDIN_NOT_AVAILABLE', `${adapter.agent} does not support stdin injection`, false);
     }
-    if (!child.stdin || child.stdin.destroyed) {
+    if (!child!.stdin || child!.stdin.destroyed) {
       throw new AgentMuxError('STDIN_NOT_AVAILABLE', 'Agent stdin is not available', false);
     }
     try {
-      child.stdin.write(text.endsWith('\n') ? text : `${text}\n`);
+      child!.stdin.write(text.endsWith('\n') ? text : `${text}\n`);
     } catch {
       throw new AgentMuxError('STDIN_NOT_AVAILABLE', 'Failed to write to agent stdin', false);
     }
@@ -303,16 +391,19 @@ async function runOnce(
   const initialPromptText = Array.isArray(options.prompt) ? options.prompt.join('\n') : options.prompt;
 
   // Optional initial stdin from SpawnArgs.
-  if (spawnArgs.stdin && child.stdin) {
+  if (ptyProcess && spawnArgs.stdin) {
     runtimeHooks.dispatchPrompt(initialPromptText);
-    child.stdin.write(spawnArgs.stdin);
+    ptyProcess.write(spawnArgs.stdin);
+  } else if (spawnArgs.stdin && child!.stdin) {
+    runtimeHooks.dispatchPrompt(initialPromptText);
+    child!.stdin.write(spawnArgs.stdin);
     if (options.nonInteractive === true) {
-      child.stdin.end();
+      child!.stdin.end();
     }
   } else {
     runtimeHooks.dispatchPrompt(initialPromptText);
-    if (spawnArgs.closeStdinAfterSpawn === true && child.stdin && !child.stdin.destroyed) {
-      child.stdin.end();
+    if (spawnArgs.closeStdinAfterSpawn === true && child!.stdin && !child!.stdin.destroyed) {
+      child!.stdin.end();
     }
   }
 
@@ -324,10 +415,12 @@ async function runOnce(
   const killChild = (signal: NodeJS.Signals): void => {
     runtimeHooks.abort();
     try {
-      if (!isWindows && typeof child.pid === 'number') {
-        try { process.kill(-child.pid, signal); } catch { child.kill(signal); }
+      if (ptyProcess) {
+        ptyProcess.kill(signal);
+      } else if (!isWindows && typeof child!.pid === 'number') {
+        try { process.kill(-child!.pid, signal); } catch { child!.kill(signal); }
       } else {
-        child.kill(signal);
+        child!.kill(signal);
       }
     } catch {
       /* already dead */
@@ -337,10 +430,12 @@ async function runOnce(
     if (active.killTimer) clearTimeout(active.killTimer);
     active.killTimer = setTimeout(() => {
       try {
-        if (!isWindows && typeof child.pid === 'number') {
-          try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
+        if (ptyProcess) {
+          ptyProcess.kill('SIGKILL');
+        } else if (!isWindows && typeof child!.pid === 'number') {
+          try { process.kill(-child!.pid, 'SIGKILL'); } catch { child!.kill('SIGKILL'); }
         } else {
-          child.kill('SIGKILL');
+          child!.kill('SIGKILL');
         }
       } catch {
         /* ignore */

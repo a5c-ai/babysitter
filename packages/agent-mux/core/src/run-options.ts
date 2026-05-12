@@ -120,6 +120,13 @@ export interface RunOptions {
   /** Force headless one-shot prompt delivery instead of stdin-driven interactive transport. */
   nonInteractive?: boolean;
 
+  /**
+   * Spawn the harness with a real PTY (via node-pty) so it gets a TTY for
+   * interactive features (colors, prompt input, tool approval UIs).
+   * Output is tee'd through the event parser so hooks still fire.
+   */
+  interactive?: boolean;
+
   // --- Environment ---
 
   /** Working directory for the agent process. Must be an absolute path. */

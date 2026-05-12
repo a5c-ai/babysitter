@@ -117,12 +117,12 @@ export function buildPrimaryLiveStackCommands(
   }
 
   const installTarget = scenario.agent.agentMuxAgent;
-  const useAmuxRun = options.env['LIVE_STACK_USE_AMUX_RUN'] === 'true';
+  const isInteractive = options.env['LIVE_STACK_INTERACTIVE'] === 'true';
 
-  // structured-run mode: uses `amux run` which handles the full agent lifecycle
-  // (hooks, sessions, multi-turn) without needing a TTY.
-  // non-interactive mode: uses `amux launch --no-interactive` for single-shot execution.
-  const executionCommand = useAmuxRun
+  // Interactive mode uses `amux run --interactive` which spawns via PTY with
+  // event parsing + hook dispatch (session-start, pre-tool-use, stop).
+  // Non-interactive uses `amux launch --no-interactive` for direct harness spawn.
+  const executionCommand = isInteractive
     ? commandExecution(
         { ...commandEnv, AMUX_PROVIDER: scenario.model.amuxProvider },
         'LIVE_STACK_AMUX_BIN',
@@ -136,7 +136,7 @@ export function buildPrimaryLiveStackCommands(
           prompt,
           '--max-turns',
           String(resolveLaunchMaxTurns(scenario)),
-          '--non-interactive',
+          '--interactive',
           '--output-format',
           'jsonl',
           '--json',
@@ -163,7 +163,7 @@ export function buildPrimaryLiveStackCommands(
           prompt,
           '--max-turns',
           String(resolveLaunchMaxTurns(scenario)),
-          ...(options.env['LIVE_STACK_INTERACTIVE'] === 'true' ? [] : ['--no-interactive']),
+          '--no-interactive',
           ...harnessApprovalPassthrough(installTarget),
         ],
         options.cwd,

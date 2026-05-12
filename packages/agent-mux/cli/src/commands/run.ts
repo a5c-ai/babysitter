@@ -170,6 +170,7 @@ export function buildRunOptions(
     projectId: flagStr(flags, 'project-id'),
     profile: flagStr(flags, 'profile'),
     nonInteractive: flagBool(flags, 'non-interactive') === true && promptFlag !== undefined && !interactiveFlag ? true : undefined,
+    interactive: interactiveFlag ? true : undefined,
   };
 
   // Remove undefined entries
@@ -230,15 +231,8 @@ export async function runCommand(client: AgentMuxClient, args: ParsedArgs): Prom
     ? adapterRegistry.get(effectiveAgent)
     : undefined;
 
-  if (interactiveFlag && selectedAdapter?.capabilities?.supportsInteractiveMode !== true) {
-    const message = `${effectiveAgent} does not support interactive mode in the current agent-mux transport`;
-    if (jsonMode) {
-      printJsonError('VALIDATION_ERROR', message);
-    } else {
-      printError(message);
-    }
-    return ExitCode.USAGE_ERROR;
-  }
+  // Interactive mode is now supported via PTY spawn in spawn-runner.
+  // Pass it through to RunOptions so the spawn layer uses node-pty.
 
   if (!resolvedPrompt) {
     if (jsonMode) {
