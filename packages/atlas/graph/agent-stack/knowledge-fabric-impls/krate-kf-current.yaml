@@ -1,0 +1,31 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:krate.knowledge@current
+attributes:
+  displayName: "Krate Company Brain (current) — org-level agent memory"
+  notes: |
+    Krate's knowledge fabric implementation: the Company Brain. Provides
+    persistent organizational memory that spans agent sessions, dispatch
+    runs, and team members. NOT session-level memory (that's agent-mux) —
+    this is institutional knowledge at the org scope.
+
+    Resources:
+    - AgentMemoryRepository: org-scoped memory store configuration
+    - AgentMemorySource: ingestion sources (repos, wikis, docs, sessions)
+    - AgentMemoryOntology: knowledge graph schema defining entity types,
+      relationships, and inference rules for the org's domain
+    - AgentMemoryAssociation: cross-entity memory links
+    - AgentMemorySnapshot: point-in-time memory state captures
+    - AgentMemoryQuery: vector-backed semantic retrieval requests
+    - AgentMemoryUpdate: memory mutations with mandatory human review
+    - AgentRunMemoryImport: cross-run knowledge extraction from
+      completed dispatch sessions
+
+    The company brain feeds into context assembly: before dispatching
+    an agent, Krate queries relevant memories and injects them into
+    the prompt alongside repo state and issue context.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: platform:krate
+      role: knowledge-fabric
