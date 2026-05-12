@@ -1479,7 +1479,7 @@ jobs:
           kubectl -n "$KUBE_NAMESPACE" get pods -l app="$APP_NAME" --no-headers 2>/dev/null \
             | awk '/Terminating/{print $1}' \
             | xargs -r kubectl -n "$KUBE_NAMESPACE" delete --force --grace-period=0 2>/dev/null || true
-          kubectl -n "$KUBE_NAMESPACE" rollout status deployment/"$APP_NAME" --timeout=300s
+          kubectl -n "$KUBE_NAMESPACE" rollout status deployment/"$APP_NAME" --timeout=600s
 
   deploy_krate:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
