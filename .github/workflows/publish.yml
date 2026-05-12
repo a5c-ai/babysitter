@@ -57,13 +57,13 @@ jobs:
           # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
-      - name: "Build phase 1: hooks-mux + SDK (parallel, no interdependency)"
+      - name: "Build phase 1: SDK then hooks-mux (share atlas build)"
         run: |
           set -euo pipefail
-          npm run build:hooks-mux &
-          PID_HOOKS=$!
+          # SDK and hooks-mux both build atlas — run SDK first, then hooks-mux
+          # (hooks-mux rebuild of atlas is fast since files are already in place)
           npm run build:sdk
-          wait $PID_HOOKS
+          npm run build:hooks-mux
 
       - name: "Build phase 2: agent-mux non-realtime chain (sequential, depends on SDK)"
         run: npm run build:agent-mux:non-realtime
