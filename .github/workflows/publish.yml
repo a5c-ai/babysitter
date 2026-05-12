@@ -419,20 +419,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
-      - name: Cache node_modules
-        id: cache-nm
-        uses: actions/cache@v4
-        with:
-          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          path: |
-            node_modules
-            packages/*/node_modules
-            packages/*/*/node_modules
-            packages/agent-mux/*/node_modules
+          cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        if: steps.cache-nm.outputs.cache-hit != 'true'
         run: |
           npm ci
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu 2>/dev/null || true
@@ -795,7 +785,7 @@ jobs:
       - name: Refresh publish lockfile
         run: |
           set -euo pipefail
-          npm install --package-lock-only --ignore-scripts --workspaces --include-workspace-root --legacy-peer-deps
+          npm install --package-lock-only --ignore-scripts --workspaces --include-workspace-root
 
       - name: Bundle publish workspace
         run: |
