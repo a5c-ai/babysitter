@@ -1,0 +1,746 @@
+# ============================================================================
+# Krate Connectivity — Inbound edges and isolated-entity wiring
+#
+# This file adds edges FROM existing graph entities TO krate entities,
+# and connects the 13 krate entities that previously had zero external
+# connections (presentations, claims, platform-services).
+#
+# Every referenced ID has been verified against index.json.
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# 1. ROLES that work with Krate (uses integrates_with → platform:krate)
+# ---------------------------------------------------------------------------
+---
+nodeKind: Role
+id: role:platform-engineer
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Platform engineers build and operate Krate as their primary forge"
+---
+nodeKind: Role
+id: role:site-reliability-engineer
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "SREs ensure Krate availability, latency, and error budgets"
+---
+nodeKind: Role
+id: role:sre
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "SREs monitor and maintain Krate platform health"
+---
+nodeKind: Role
+id: role:devops-engineer
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "DevOps engineers configure CI pipelines and GitOps on Krate"
+---
+nodeKind: Role
+id: role:infrastructure-engineer
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Infrastructure engineers manage the K8s clusters running Krate"
+---
+nodeKind: Role
+id: role:release-engineer
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Release engineers use Krate pipelines for release management"
+---
+nodeKind: Role
+id: role:build-engineer
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Build engineers maintain Krate CI pipeline definitions"
+---
+nodeKind: Role
+id: role:security-architect
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Security architects design Krate RBAC and policy profiles"
+---
+nodeKind: Role
+id: role:DevSecOps-engineer
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "DevSecOps engineers integrate security scanning into Krate pipelines"
+---
+nodeKind: Role
+id: role:cloud-architect
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Cloud architects design multi-cluster Krate deployments"
+---
+nodeKind: Role
+id: role:head-of-platform
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Heads of platform own Krate adoption strategy and roadmap"
+---
+nodeKind: Role
+id: role:platform-product-manager
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Platform PMs define Krate feature priorities and user workflows"
+---
+nodeKind: Role
+id: role:developer-experience-engineer
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "DX engineers optimize Krate developer workflows and CLI UX"
+---
+nodeKind: Role
+id: role:internal-tools-engineer
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Internal tools engineers build custom integrations on Krate APIs"
+
+# ---------------------------------------------------------------------------
+# 2. WORKFLOWS that run on Krate
+# ---------------------------------------------------------------------------
+---
+nodeKind: Workflow
+id: workflow:feature-development
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Feature development uses Krate repos, branches, and PRs"
+---
+nodeKind: Workflow
+id: workflow:code-review
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Code review happens through Krate pull request reviews"
+---
+nodeKind: Workflow
+id: workflow:release-management
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Releases are cut via Krate pipelines and release resources"
+---
+nodeKind: Workflow
+id: workflow:pull-request-lifecycle
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate natively models the full PR lifecycle as K8s resources"
+---
+nodeKind: Workflow
+id: workflow:incident-response
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Incident response uses Krate hotfix PRs and agent dispatch"
+---
+nodeKind: Workflow
+id: workflow:dependency-update
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Dependency updates dispatch agents on Krate to create update PRs"
+---
+nodeKind: Workflow
+id: workflow:hotfix-deployment
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Hotfixes use Krate fast-track pipelines with reduced approval gates"
+---
+nodeKind: Workflow
+id: workflow:vulnerability-management
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Vulnerability remediation dispatches agents to patch repos on Krate"
+---
+nodeKind: Workflow
+id: workflow:security-audit
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Security audits leverage Krate code search and pipeline scanning"
+---
+nodeKind: Workflow
+id: workflow:change-management
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Change management uses Krate approval gates and policy enforcement"
+---
+nodeKind: Workflow
+id: workflow:bug-triage
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Bug triage uses Krate issues and agent dispatch for investigation"
+---
+nodeKind: Workflow
+id: workflow:canary-deployment
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Canary deployments orchestrated through Krate GitOps pipelines"
+
+# ---------------------------------------------------------------------------
+# 3. SKILL AREAS relevant to Krate
+# ---------------------------------------------------------------------------
+---
+nodeKind: SkillArea
+id: skill-area:kubernetes-operator-development
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: primary
+      notes: "Krate itself is built as a set of Kubernetes operators"
+---
+nodeKind: SkillArea
+id: skill-area:git-forge-administration
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: primary
+      notes: "Krate IS a git forge — all forge admin skills apply directly"
+---
+nodeKind: SkillArea
+id: skill-area:kubernetes-rbac-design
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: primary
+      notes: "Krate extends K8s RBAC with org-scoped role layering"
+---
+nodeKind: SkillArea
+id: skill-area:aggregated-api-server-development
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: primary
+      notes: "Krate's data plane uses a Postgres-backed aggregated API server"
+---
+nodeKind: SkillArea
+id: skill-area:gitops-deployment
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: primary
+      notes: "Krate is deployed and configured via GitOps (ArgoCD)"
+---
+nodeKind: SkillArea
+id: skill-area:gitops
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: secondary
+      notes: "GitOps principles underpin Krate's design philosophy"
+---
+nodeKind: SkillArea
+id: skill-area:ci-cd
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: primary
+      notes: "Krate includes a full CI/CD pipeline engine as a core service"
+---
+nodeKind: SkillArea
+id: skill-area:platform-engineering
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: primary
+      notes: "Krate is a platform engineering product — the primary use case"
+---
+nodeKind: SkillArea
+id: skill-area:k8s-rbac
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: secondary
+      notes: "K8s RBAC foundations are used by Krate identity model"
+---
+nodeKind: SkillArea
+id: skill-area:k8s-operator-development
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: secondary
+      notes: "Krate controllers follow operator development patterns"
+---
+nodeKind: SkillArea
+id: skill-area:container-security
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: secondary
+      notes: "Agent workspaces run as containers with security boundaries"
+---
+nodeKind: SkillArea
+id: skill-area:containerization
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: secondary
+      notes: "All Krate components and agent jobs run as containers"
+---
+nodeKind: SkillArea
+id: skill-area:policy-as-code
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: primary
+      notes: "Krate policy engine uses Kyverno for policy-as-code enforcement"
+---
+nodeKind: SkillArea
+id: skill-area:authentication-authorization
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: secondary
+      notes: "Krate supports OIDC, x509, PAT, and SSH key authentication"
+
+# ---------------------------------------------------------------------------
+# 4. STACK PROFILES that use Krate
+# ---------------------------------------------------------------------------
+---
+nodeKind: StackProfile
+id: stack-profile:kubernetes-platform-engineering
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate is a K8s-native platform engineering product"
+---
+nodeKind: StackProfile
+id: stack-profile:gitops-deployment
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate uses and enables GitOps deployment patterns"
+---
+nodeKind: StackProfile
+id: stack-profile:cicd-platform
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate includes a native CI/CD pipeline engine"
+---
+nodeKind: StackProfile
+id: stack-profile:coding-agent-platform
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate dispatches coding agents as platform-managed jobs"
+---
+nodeKind: StackProfile
+id: stack-profile:multi-agent-orchestration
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate orchestrates multiple agent stacks across repositories"
+---
+nodeKind: StackProfile
+id: stack-profile:autonomous-agent-fleet
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate governs fleets of autonomous coding agents with approval gates"
+---
+nodeKind: StackProfile
+id: stack-profile:ai-code-review-pipeline
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "AI code review agents dispatch through Krate PR workflows"
+
+# ---------------------------------------------------------------------------
+# 5. ADDITIONAL HOSTS — Agent products that Krate can dispatch
+# ---------------------------------------------------------------------------
+---
+nodeKind: Platform
+id: platform:krate
+edges:
+  hosts:
+    - target: agent:aider
+      notes: "Aider agents dispatch into Krate-managed repositories"
+    - target: agent:cline
+      notes: "Cline agents dispatch into Krate-managed repositories"
+    - target: agent:continue
+      notes: "Continue agents dispatch into Krate-managed repositories"
+    - target: agent:windsurf
+      notes: "Windsurf agents dispatch into Krate-managed repositories"
+    - target: agent:devin
+      notes: "Devin agents dispatch into Krate-managed repositories"
+    - target: agent:goose
+      notes: "Goose agents dispatch into Krate-managed repositories"
+    - target: agent:bolt
+      notes: "Bolt agents dispatch into Krate-managed repositories"
+    - target: agent:sweep-ai
+      notes: "Sweep AI agents dispatch into Krate-managed repositories"
+    - target: agent:openhands
+      notes: "OpenHands agents dispatch into Krate-managed repositories"
+    - target: agent:roo-code
+      notes: "Roo Code agents dispatch into Krate-managed repositories"
+    - target: agent:opencode
+      notes: "OpenCode agents dispatch into Krate-managed repositories"
+    - target: agent:hermes
+      notes: "Hermes agents dispatch into Krate-managed repositories"
+
+# ---------------------------------------------------------------------------
+# 6. DOMAINS containing Krate topics
+# ---------------------------------------------------------------------------
+---
+nodeKind: Domain
+id: domain:platform-engineering
+edges:
+  contains:
+    - target: topic:kubernetes-native-forge
+      notes: "Core architectural pattern for K8s-native Git forges"
+    - target: topic:aggregated-api-server
+      notes: "K8s API extension pattern used by platform engineering"
+    - target: topic:org-scoped-tenancy
+      notes: "Multi-tenancy model for platform engineering"
+    - target: topic:declarative-ui-state
+      notes: "Modeling UI state as K8s resources"
+    - target: topic:company-brain-memory
+      notes: "Cross-run agent knowledge persistence"
+---
+nodeKind: Domain
+id: domain:devops
+edges:
+  contains:
+    - target: topic:agent-dispatch-as-ci
+      notes: "Agent dispatch runs as CI/CD pipeline jobs"
+    - target: topic:gitops-transparency
+      notes: "Every UI action has a kubectl equivalent"
+---
+nodeKind: Domain
+id: domain:software-engineering
+edges:
+  contains:
+    - target: topic:company-brain-memory
+      notes: "Organizational memory improves agent-assisted development"
+
+# ---------------------------------------------------------------------------
+# 7. CONNECT ISOLATED PRESENTATIONS to external entities
+# ---------------------------------------------------------------------------
+---
+nodeKind: Presentation
+id: presentation:krate-web-ui
+edges:
+  integrates_with:
+    - target: framework:nextjs
+      notes: "Krate web UI is built on Next.js App Router"
+    - target: framework:react
+      notes: "Krate web UI uses React component library"
+  applies_to:
+    - target: domain:platform-engineering
+    - target: domain:software-engineering
+---
+nodeKind: Presentation
+id: presentation:krate-cli
+edges:
+  integrates_with:
+    - target: tool:kubernetes
+      notes: "Krate CLI wraps kubectl with forge-specific subcommands"
+  applies_to:
+    - target: domain:platform-engineering
+    - target: domain:devops
+---
+nodeKind: Presentation
+id: presentation:krate-api
+edges:
+  integrates_with:
+    - target: tool-server:krate-api
+      notes: "Krate REST API served by the aggregated API server"
+    - target: tool:kubernetes
+      notes: "Krate API is a Kubernetes aggregated API"
+  applies_to:
+    - target: domain:platform-engineering
+
+# ---------------------------------------------------------------------------
+# 8. CONNECT ISOLATED PLATFORM-SERVICES to external tools
+# ---------------------------------------------------------------------------
+---
+nodeKind: PlatformService
+id: platform-service:krate-forge
+edges:
+  integrates_with:
+    - target: tool:gitea
+      notes: "Krate forge uses Gitea as the Git hosting backend"
+    - target: tool:github-actions
+      notes: "Krate forge provides similar CI/CD triggers as GitHub Actions"
+  depends_on:
+    - target: tool:kubernetes
+      notes: "All forge resources are K8s API objects"
+---
+nodeKind: PlatformService
+id: platform-service:krate-ci
+edges:
+  integrates_with:
+    - target: tool:github-actions
+      notes: "Krate CI provides pipeline-as-code similar to GitHub Actions"
+    - target: tool:docker
+      notes: "CI jobs run as Docker containers in K8s"
+  depends_on:
+    - target: tool:kubernetes
+      notes: "Pipeline and Job resources are K8s-native"
+---
+nodeKind: PlatformService
+id: platform-service:krate-company-brain
+edges:
+  integrates_with:
+    - target: memory-system:file-based-markdown-pattern
+      notes: "Company brain imports from file-based markdown memory patterns"
+  depends_on:
+    - target: tool:kubernetes
+      notes: "Memory resources are K8s API objects"
+
+# ---------------------------------------------------------------------------
+# 9. CONNECT ISOLATED CLAIMS with asserts_about to platform:krate
+# ---------------------------------------------------------------------------
+---
+nodeKind: TestableClaim
+id: claim:krate-has-49-resource-kinds
+edges:
+  asserts_about:
+    - target: platform:krate
+      notes: "Asserts Krate has exactly 49 resource kinds across CRDs and aggregated APIs"
+  about_subject:
+    - target: topic:kubernetes-native-forge
+      notes: "The 49-kind count demonstrates the scope of the K8s-native forge"
+---
+nodeKind: TestableClaim
+id: claim:krate-integrates-with-agent-mux
+edges:
+  asserts_about:
+    - target: platform:krate
+      notes: "Asserts Krate integrates with agent-mux for agent dispatch"
+  about_subject:
+    - target: agent:agent-mux
+      notes: "agent-mux is the transport layer for agent dispatch"
+---
+nodeKind: TestableClaim
+id: claim:krate-has-stack-impls
+edges:
+  asserts_about:
+    - target: platform:krate
+      notes: "Asserts Krate has complete stack implementation records"
+  about_subject:
+    - target: stack-profile:krate-platform
+      notes: "The Krate stack profile defines the full technology stack"
+    - target: tool:kubernetes
+      notes: "Stack implementations are built on Kubernetes primitives"
+---
+nodeKind: TestableClaim
+id: claim:krate-company-brain-modeled
+edges:
+  asserts_about:
+    - target: platform:krate
+      notes: "Asserts the company brain feature is fully modeled"
+  about_subject:
+    - target: platform-service:krate-company-brain
+      notes: "Company brain is a distinct platform service"
+    - target: memory-system:file-based-markdown-pattern
+      notes: "Company brain draws from file-based markdown memory patterns"
+---
+nodeKind: TestableClaim
+id: claim:krate-ci-engine-modeled
+edges:
+  asserts_about:
+    - target: platform:krate
+      notes: "Asserts the CI engine is fully modeled"
+  about_subject:
+    - target: platform-service:krate-ci
+      notes: "CI is a distinct platform service"
+    - target: tool:docker
+      notes: "CI jobs run as Docker containers"
+---
+nodeKind: TestableClaim
+id: claim:krate-control-plane-component
+edges:
+  asserts_about:
+    - target: platform:krate
+      notes: "Asserts the control plane component is modeled"
+  about_subject:
+    - target: stack-part:krate-control-plane
+      notes: "Control plane is the core K8s API extension"
+    - target: tool:kubernetes
+      notes: "Control plane extends the Kubernetes API server"
+---
+nodeKind: TestableClaim
+id: claim:krate-git-backend-uses-gitea
+edges:
+  asserts_about:
+    - target: platform:krate
+      notes: "Asserts Krate uses Gitea as its Git backend"
+  about_subject:
+    - target: tool:gitea
+      notes: "Gitea provides repository storage and Git protocol"
+---
+nodeKind: TestableClaim
+id: claim:krate-presentations-exist
+edges:
+  asserts_about:
+    - target: platform:krate
+      notes: "Asserts Krate has web UI, CLI, and API presentation surfaces"
+  about_subject:
+    - target: presentation:krate-web-ui
+      notes: "Web UI is one of three presentation surfaces"
+    - target: framework:nextjs
+      notes: "Web UI presentation is built on Next.js"
+
+# ---------------------------------------------------------------------------
+# 10. METHODOLOGIES that Krate supports
+# ---------------------------------------------------------------------------
+---
+nodeKind: Methodology
+id: methodology:trunk-based-development
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Krate branch protection and fast-forward merge support trunk-based development"
+---
+nodeKind: Methodology
+id: methodology:GitFlow
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Krate branch protection supports GitFlow branching models"
+---
+nodeKind: Methodology
+id: methodology:Google-SRE-methodology
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Krate implements SRE principles: error budgets, SLIs on platform resources"
+---
+nodeKind: Methodology
+id: methodology:chaos-engineering-methodology
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Krate's K8s-native design enables chaos testing of forge components"
+
+# ---------------------------------------------------------------------------
+# 11. RESPONSIBILITIES that apply to Krate
+# ---------------------------------------------------------------------------
+---
+nodeKind: Responsibility
+id: responsibility:repository-governance
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Repository governance is enforced through Krate policy profiles"
+---
+nodeKind: Responsibility
+id: responsibility:agent-dispatch-safety
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Agent dispatch safety is core to Krate's agent orchestration layer"
+---
+nodeKind: Responsibility
+id: responsibility:company-brain-curation
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Company brain curation manages Krate memory repositories"
+---
+nodeKind: Responsibility
+id: responsibility:forge-availability
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Forge availability is the primary SRE responsibility for Krate"
+---
+nodeKind: Responsibility
+id: responsibility:deployment-management
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Deployment management uses Krate's GitOps and pipeline infrastructure"
+---
+nodeKind: Responsibility
+id: responsibility:release-coordination
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Release coordination uses Krate pipelines and release resources"
+---
+nodeKind: Responsibility
+id: responsibility:security-audit
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Security audits cover Krate RBAC, policy profiles, and agent permissions"
+---
+nodeKind: Responsibility
+id: responsibility:access-control
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Access control is managed through Krate's org-scoped RBAC model"
+---
+nodeKind: Responsibility
+id: responsibility:incident-response
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Incident response dispatches agents for emergency fixes on Krate"
+---
+nodeKind: Responsibility
+id: responsibility:disaster-recovery
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Disaster recovery plans cover Krate etcd, Postgres, and Git data"
+---
+nodeKind: Responsibility
+id: responsibility:ai-agent-adoption-strategy
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "AI agent adoption strategy is implemented through Krate agent stacks"
+---
+nodeKind: Responsibility
+id: responsibility:ai-safety-guardrails
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "AI safety guardrails are enforced via Krate permission sets and policies"
+---
+nodeKind: Responsibility
+id: responsibility:ai-agent-usage-review
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Agent usage review uses Krate session transcripts and cost tracking"
+---
+nodeKind: Responsibility
+id: responsibility:cost-optimization
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Cost optimization uses Krate quota profiles and agent compute budgets"
+---
+nodeKind: Responsibility
+id: responsibility:dx-tooling-maintenance
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "DX tooling maintenance covers Krate CLI, web UI, and SDK updates"
