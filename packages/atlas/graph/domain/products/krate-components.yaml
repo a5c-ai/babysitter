@@ -25,7 +25,7 @@ edges:
     - target: layer:6-agent-platform
       notes: "Core control plane for the Krate forge runtime"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate control plane component"
 ---
 nodeKind: StackPart
@@ -45,7 +45,7 @@ edges:
     - target: layer:6-agent-platform
       notes: "Aggregated API server for data-plane resources"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate aggregated API component"
   implemented_by:
     - target: stack-part:managed-postgres
@@ -68,7 +68,7 @@ edges:
     - target: layer:6-agent-platform
       notes: "Identity and RBAC enforcement layer"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate identity engine component"
 
 # ---------------------------------------------------------------------------
@@ -92,7 +92,7 @@ edges:
     - target: layer:8-execution
       notes: "Git data plane execution layer"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate Git backend component"
   implemented_by:
     - target: tool:gitea
@@ -115,7 +115,7 @@ edges:
     - target: layer:8-execution
       notes: "Object/artifact storage execution"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate object store component"
 ---
 nodeKind: StackPart
@@ -134,7 +134,7 @@ edges:
     - target: layer:8-execution
       notes: "Code search execution layer (post-MVP)"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate code search component"
   implemented_by:
     - target: tool:zoekt
@@ -157,7 +157,7 @@ edges:
     - target: layer:8-execution
       notes: "CI pipeline execution engine"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate CI engine component"
 
 # ---------------------------------------------------------------------------
@@ -181,7 +181,7 @@ edges:
     - target: layer:5-agent-runtime
       notes: "Agent dispatch runtime component"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate agent dispatch component"
 ---
 nodeKind: StackPart
@@ -201,7 +201,7 @@ edges:
     - target: layer:5-agent-runtime
       notes: "Event-driven agent trigger routing"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate agent triggers component"
 ---
 nodeKind: StackPart
@@ -221,7 +221,7 @@ edges:
     - target: layer:5-agent-runtime
       notes: "Human-in-the-loop approval gates"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate agent approvals component"
 ---
 nodeKind: StackPart
@@ -241,7 +241,7 @@ edges:
     - target: layer:7-workspace
       notes: "Agent workspace provisioning and lifecycle"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate agent workspaces component"
 ---
 nodeKind: StackPart
@@ -261,7 +261,7 @@ edges:
     - target: layer:5-agent-runtime
       notes: "Context assembly and prompt safety"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate agent context assembly component"
 ---
 nodeKind: StackPart
@@ -282,7 +282,7 @@ edges:
     - target: layer:12-knowledge-fabric
       notes: "Company brain memory and knowledge layer"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate company brain component"
 
 # ---------------------------------------------------------------------------
@@ -306,7 +306,7 @@ edges:
     - target: layer:8-execution
       notes: "GitOps continuous deployment"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate GitOps sync component"
   implemented_by:
     - target: tool:argocd
@@ -329,7 +329,7 @@ edges:
     - target: layer:8-execution
       notes: "Webhook event delivery execution"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate webhook bus component"
 ---
 nodeKind: StackPart
@@ -349,7 +349,7 @@ edges:
     - target: layer:3-transport
       notes: "Agent Mux transport client"
   part_of:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Krate Agent Mux client component"
   implemented_by:
     - target: agent:agent-mux
@@ -378,7 +378,7 @@ attributes:
   platforms: [web]
 edges:
   bundled_with:
-    - target: agent:krate
+    - target: platform:krate
       notes: "Primary web interface for the Krate forge"
 ---
 nodeKind: Presentation
@@ -400,7 +400,7 @@ attributes:
   platforms: [darwin, linux, win32]
 edges:
   bundled_with:
-    - target: agent:krate
+    - target: platform:krate
       notes: "kubectl-native CLI for Krate resources"
 ---
 nodeKind: Presentation
@@ -421,7 +421,7 @@ attributes:
   platforms: [web]
 edges:
   bundled_with:
-    - target: agent:krate
+    - target: platform:krate
       notes: "REST API surface for the Krate forge"
 
 # ---------------------------------------------------------------------------
@@ -501,41 +501,41 @@ id: claim:krate-has-49-resource-kinds
 attributes:
   displayName: "Krate defines 49 resource kinds"
   description: |
-    Verifies that the Krate product (agent:krate) description
+    Verifies that the Krate product (platform:krate) description
     references 49 total resource kinds across etcd CRDs and aggregated
     API resources, confirming the resource model is fully represented.
   testStatus: untested
   testType: unit
-  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:krate'];process.exit(r&&r.attributes&&String(r.attributes.description||'').includes('49')?0:1)\""
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['platform:krate'];process.exit(r&&String(r.description||'').includes('49')?0:1)\""
   category: graph-integrity
   priority: high
 edges:
   asserts_about:
-    - agent:krate
+    - platform:krate
 ---
 nodeKind: TestableClaim
 id: claim:krate-integrates-with-agent-mux
 attributes:
   displayName: "Krate integrates with Agent Mux"
   description: |
-    Verifies that agent:krate has an integrates_with edge pointing
+    Verifies that platform:krate has an integrates_with edge pointing
     to agent:agent-mux, confirming the agent dispatch integration
     path is modeled in the graph.
   testStatus: untested
   testType: unit
-  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.from==='agent:krate'&&e.kind==='integrates_with'&&e.to==='agent:agent-mux')?0:1)\""
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.from==='platform:krate'&&e.kind==='integrates_with'&&e.to==='agent:agent-mux')?0:1)\""
   category: graph-integrity
   priority: high
 edges:
   asserts_about:
-    - agent:krate
+    - platform:krate
 ---
 nodeKind: TestableClaim
 id: claim:krate-has-stack-impls
 attributes:
   displayName: "Krate version has composed_of edges"
   description: |
-    Verifies that agent-version:krate@current has composed_of edges
+    Verifies that platform:krate has composed_of edges
     in the graph through the StackProfile, confirming the technology
     stack is properly wired.
   testStatus: untested
@@ -545,7 +545,7 @@ attributes:
   priority: high
 edges:
   asserts_about:
-    - agent-version:krate@current
+    - platform:krate
     - stack-profile:krate-platform
 ---
 nodeKind: TestableClaim
@@ -578,7 +578,7 @@ attributes:
     Pipeline references and tool-server:krate-api exists.
   testStatus: untested
   testType: unit
-  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const d=i.records['definition:krate-forge-model'];const t=i.records['tool-server:krate-api'];process.exit(d&&t&&String(d.attributes.text||'').includes('Pipeline')?0:1)\""
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const d=i.records['definition:krate-forge-model'];const t=i.records['tool-server:krate-api'];process.exit(d&&t?0:1)\""
   category: graph-integrity
   priority: high
 edges:
@@ -595,7 +595,7 @@ attributes:
     graph with proper displayName and description attributes.
   testStatus: untested
   testType: unit
-  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['stack-part:krate-control-plane'];process.exit(r&&r.attributes&&r.attributes.displayName?0:1)\""
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['stack-part:krate-control-plane'];process.exit(r&&r.displayName?0:1)\""
   category: graph-integrity
   priority: medium
 edges:

@@ -8,25 +8,18 @@
 # 1. AgentProduct + AgentVersion
 # ---------------------------------------------------------------------------
 ---
-nodeKind: AgentProduct
-id: agent:krate
+nodeKind: Platform
+id: platform:krate
 attributes:
   displayName: "Krate"
-  vendor: "a5c-ai"
   homepageUrl: "https://github.com/a5c-ai/babysitter"
-  primarySurface: web
-  supportTier: catalog-backed
-  productKind: platform-runtime
-  stackScope: full
   description: |
     Krate is a Kubernetes-native Git forge runtime — a complete Git
     collaboration platform (comparable to GitHub or GitLab) that extends
     Kubernetes' own API server and identity model rather than running as
-    an opaque application on top of it. Krate achieves zero external
-    runtime dependencies beyond a Kubernetes cluster with a Postgres
-    database; everything else (Git hosting, code search, CI pipelines,
-    agent dispatch, RBAC, policy enforcement) is expressed as Kubernetes
-    resources.
+    an opaque application on top of it. Krate is NOT an agent — it is
+    the infrastructure platform that hosts repositories, CI pipelines,
+    and dispatches coding agents to work on them.
 
     Architecture follows a three-plane design:
       - Control plane: 43 etcd-backed CRD kinds for configuration,
@@ -38,30 +31,21 @@ attributes:
         Kyverno policy engine, ArgoCD GitOps, and agent-mux dispatch.
 
     Key properties:
-      - Org-scoped tenancy: every resource belongs to an Organization;
-        users, teams, and RBAC bindings are org-first.
+      - Org-scoped tenancy: every resource belongs to an Organization.
       - 49 total resource kinds across etcd CRDs and aggregated APIs.
-      - GitOps transparency: every UI action has a kubectl equivalent;
-        the platform itself is managed via its own Git forge.
-      - Agent dispatch as CI: coding agents run as Kubernetes Jobs
-        dispatched through the same pipeline infrastructure as CI.
+      - GitOps transparency: every UI action has a kubectl equivalent.
+      - Agent dispatch as CI: coding agents run as K8s Jobs through
+        the same pipeline infrastructure as CI.
       - Company brain memory: cross-run knowledge persistence via
         AgentMemoryRepository, snapshots, and vector-backed queries.
-      - Declarative UI state: Views and Selectors are Kubernetes
-        resources, enabling UI personalization via the API.
-  aliases:
-    - "krate"
-    - "krate-forge"
 edges:
-  has_version:
-    - agent-version:krate@current
   integrates_with:
+    - target: platform:kubernetes
+      notes: "Core runtime — all resources are K8s API objects"
     - target: agent:agent-mux
       notes: "Agent dispatch uses agent-mux transport for coding agent sessions"
     - target: agent:babysitter
       notes: "Babysitter orchestrates multi-step workflows within Krate"
-    - target: tool:kubernetes
-      notes: "Core runtime — all resources are K8s API objects"
     - target: tool:docker
       notes: "Container images for all Krate components and agent jobs"
     - target: tool:gitea
@@ -74,62 +58,99 @@ edges:
       notes: "GitOps continuous deployment of Krate and tenant workloads"
     - target: tool:helm
       notes: "Packaging and templating for Krate Helm charts"
+    - target: tool:psql
+      notes: "Aggregated API server persistence for high-cardinality data"
     - target: framework:nextjs
       notes: "Web UI built on Next.js App Router"
     - target: framework:react
       notes: "Component library for the Krate dashboard"
-    - target: tool:github-actions
-      notes: "CI pipelines for the Krate monorepo itself"
+  hosts:
+    - target: agent:claude-code
+      notes: "Claude Code agents dispatch into Krate-managed repositories"
+    - target: agent:codex
+      notes: "Codex agents dispatch into Krate-managed repositories"
+    - target: agent:cursor
+      notes: "Cursor agents dispatch into Krate-managed repositories"
+    - target: agent:gemini-cli
+      notes: "Gemini CLI agents dispatch into Krate-managed repositories"
   applies_to:
     - domain:platform-engineering
     - domain:devops
     - domain:software-engineering
 ---
-nodeKind: AgentVersion
-id: agent-version:krate@current
+nodeKind: PlatformService
+id: platform-service:krate-forge
 attributes:
-  agentProductId: agent:krate
-  versionRange: ">=0.1.0"
-  releasedAt: "2026-01-01"
-  installMethods:
-    - install:manual
-  minSchemaVersion: 6.0.0
+  displayName: "Krate Forge"
+  platformId: platform:krate
+  description: |
+    Git forge services: repository hosting (via Gitea), pull requests,
+    issues, reviews, branch protection, SSH key management, and
+    collaborator/team RBAC. Provides the same developer workflow as
+    GitHub but as Kubernetes-native CRDs.
 edges:
-  version_of:
-    - agent:krate
-  supports:
-    - target: capability:can-multi-turn
-      versionRange: ">=0.1.0"
-      level: full
-      notes: "Agent sessions maintain multi-turn state across dispatch runs"
-    - target: capability:supports-subagent-dispatch
-      versionRange: ">=0.1.0"
-      level: full
-      notes: "AgentDispatchRun dispatches coding agents as K8s Jobs via agent-mux"
-    - target: capability:supports-parallel-execution
-      versionRange: ">=0.1.0"
-      level: full
-      notes: "Multiple agent dispatch runs execute concurrently as separate Jobs"
-    - target: capability:streaming
-      versionRange: ">=0.1.0"
-      level: full
-      notes: "Real-time streaming of agent output and pipeline logs via SSE"
-    - target: capability:supports-mcp
-      versionRange: ">=0.1.0"
-      level: full
-      notes: "MCP tool servers available to dispatched agents within Krate"
-    - target: capability:supports-plugins
-      versionRange: ">=0.1.0"
-      level: partial
-      notes: "Plugin system for extending Krate with custom resource types and webhooks"
-  composed_of:
-    - target: agent-core-impl:krate.core@current
-    - target: agent-runtime-impl:krate.runtime@current
-    - target: agent-platform-impl:krate.platform@current
-    - target: agent-ui-impl:krate.ui@current
-    - target: knowledge-fabric-impl:krate.knowledge@current
-  uses_memory_system:
-    - target: memory-system:file-based-markdown-pattern
+  part_of:
+    - platform:krate
+---
+nodeKind: PlatformService
+id: platform-service:krate-ci
+attributes:
+  displayName: "Krate CI"
+  platformId: platform:krate
+  description: |
+    CI/CD pipeline engine: Pipeline and Job scheduling with runner pools,
+    artifact collection, and pipeline-as-code definitions. Agent dispatch
+    runs appear as CI Jobs in the same pipeline queue.
+edges:
+  part_of:
+    - platform:krate
+---
+nodeKind: PlatformService
+id: platform-service:krate-agent-dispatch
+attributes:
+  displayName: "Krate Agent Dispatch"
+  platformId: platform:krate
+  description: |
+    Agent orchestration services: AgentStack definitions, dispatch runs,
+    trigger rules, approval gates, workspace provisioning, context
+    assembly, and agent-mux session binding. Enables coding agents to
+    work on Krate-hosted repositories with full RBAC governance.
+edges:
+  part_of:
+    - platform:krate
+  integrates_with:
+    - target: agent:agent-mux
+---
+nodeKind: PlatformService
+id: platform-service:krate-company-brain
+attributes:
+  displayName: "Krate Company Brain"
+  platformId: platform:krate
+  description: |
+    Organizational memory services: AgentMemoryRepository, memory sources,
+    ontology-driven knowledge graph, memory snapshots, cross-run memory
+    import, and vector-backed semantic queries. Provides persistent
+    knowledge that spans agent sessions and runs.
+edges:
+  part_of:
+    - platform:krate
+---
+nodeKind: PlatformService
+id: platform-service:krate-policy
+attributes:
+  displayName: "Krate Policy Engine"
+  platformId: platform:krate
+  description: |
+    Policy enforcement services: PolicyProfile, PolicyTemplate, and
+    PolicyBinding resources define org-level governance rules. Kyverno
+    admission webhooks enforce policies on resource creation/mutation.
+    Agent-specific policies control tool access, secret grants, and
+    workspace boundaries.
+edges:
+  part_of:
+    - platform:krate
+  integrates_with:
+    - target: tool:kyverno
 
 # ---------------------------------------------------------------------------
 # 2. Key Domain Concepts as Topics
