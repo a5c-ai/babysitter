@@ -16,8 +16,11 @@ export function createOAuthCallbackHandler({ controller, fetchImpl = globalThis.
     const url = new URL(request.url);
     const code = url.searchParams.get('code');
     if (!code) return Response.json({ error: 'missing_code', message: 'Authorization code was not supplied' }, { status: 400 });
+    const forwardedHost = request.headers.get('x-forwarded-host');
+    const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+    const publicUrl = forwardedHost ? `${forwardedProto}://${forwardedHost}${url.pathname}${url.search}` : (process.env.KRATE_PUBLIC_URL ? `${process.env.KRATE_PUBLIC_URL}${url.pathname}${url.search}` : request.url);
     try {
-      const profile = await exchangeOAuthCodeForProfile({ provider: selected, code, requestUrl: request.url, fetchImpl });
+      const profile = await exchangeOAuthCodeForProfile({ provider: selected, code, requestUrl: publicUrl, fetchImpl });
       const registration = await registerLoginProfile({ controller, profile });
       const response = new Response(null, { status: 302, headers: { Location: '/people', 'Set-Cookie': createSessionCookie(config, profile) } });
       response.headers.set('X-Krate-User', registration.user.metadata.name);
