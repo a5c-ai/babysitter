@@ -1841,6 +1841,10 @@ jobs:
                         value: "3000"
                       - name: HOSTNAME
                         value: 0.0.0.0
+                    envFrom:
+                      - secretRef:
+                          name: krate-auth
+                          optional: true
                     readinessProbe:
                       httpGet:
                         path: /
