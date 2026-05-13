@@ -921,7 +921,15 @@ jobs:
           if-no-files-found: warn
 
   prepare_staging_publish:
-    if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
+    if: >-
+      !cancelled()
+      && !contains(github.event.head_commit.message || '', '[skip publish]')
+      && needs.build_all.result == 'success'
+      && needs.validate_core.result == 'success'
+      && needs.validate_mux.result == 'success'
+      && needs.validate_cloud.result == 'success'
+      && needs.validate_krate.result == 'success'
+      && needs.validate_observer_and_compiler.result == 'success'
     name: Prepare Publish
     needs:
       - build_all
