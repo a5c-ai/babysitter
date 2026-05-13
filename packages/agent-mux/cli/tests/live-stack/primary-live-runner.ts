@@ -256,6 +256,11 @@ export async function runPrimaryLiveStackScenario(options: PrimaryLiveRunOptions
 
   const commandOutput = commandResults.map((result) => `${result.stdout}\n${result.stderr}`).join('\n');
 
+  // Write raw agent output for debugging — not redacted, includes full stdout/stderr per command
+  await fs.writeFile(path.join(options.artifactsDir, 'agent-output.txt'), commandResults.map((r, i) =>
+    `=== Command ${i + 1} (exit ${r.status}) ===\n--- stdout (${r.stdout.length} chars) ---\n${r.stdout}\n--- stderr (${r.stderr.length} chars) ---\n${r.stderr}\n`
+  ).join('\n'));
+
   // Behavioral validation: verify the agent actually used tools (created the requested file)
   const traceId = commands[0]?.env['LIVE_STACK_TRACE_ID'];
   const verifications = await validateAgentBehavior(scenario, options.cwd, commandOutput, traceId);
@@ -271,7 +276,7 @@ export async function runPrimaryLiveStackScenario(options: PrimaryLiveRunOptions
 
   const allFailures = [...missingTraceIds.map((id) => `missing trace: ${id}`), ...behaviorFailures];
 
-  await writeVerificationReport(options.artifactsDir, scenario, verifications, options.env);
+  await writeVerificationReport(options.artifactsDir, scenario, verifications, options.env, commandOutput);
 
   const artifactPath = await writeScenarioArtifact(options.artifactsDir, scenario, {
     status: allFailures.length === 0 ? 'passed' : 'failed',
@@ -794,6 +799,7 @@ async function writeVerificationReport(
   scenario: LiveStackScenario,
   verifications: readonly VerificationEntry[],
   env: Record<string, string | undefined>,
+  commandOutput?: string,
 ): Promise<void> {
   const statusIcon = (status: VerificationEntry['status']): string => {
     switch (status) {
@@ -802,11 +808,13 @@ async function writeVerificationReport(
       case 'skipped': return '⊘';
     }
   };
+  const hasFailures = verifications.some((v) => v.status === 'failed');
   const lines = [
     `# Verification Report`,
     ``,
     `**Scenario:** ${scenario.scenarioId}  `,
     `**Agent:** ${scenario.agent.agent}  `,
+    `**Provider:** ${scenario.model.provider}  `,
     `**Model:** ${scenario.model.model}  `,
     ``,
     `| Status | Verification | Detail |`,
@@ -814,11 +822,21 @@ async function writeVerificationReport(
     ...verifications.map((v) => `| ${statusIcon(v.status)} | ${v.name} | ${v.detail ?? ''} |`),
     ``,
   ];
+  if (hasFailures && commandOutput) {
+    const tail = commandOutput.slice(-3000);
+    lines.push(
+      `<details><summary>Agent output (last 3000 chars)</summary>`,
+      ``,
+      '```',
+      tail,
+      '```',
+      `</details>`,
+      ``,
+    );
+  }
   const report = lines.join('\n');
   await fs.writeFile(path.join(artifactsDir, 'verification-report.md'), report);
 
-  // Write to GitHub Actions step summary so it's visible in the Actions UI.
-  // Prefer the env passed from the pipeline options, fall back to process.env.
   const summaryPath = env['GITHUB_STEP_SUMMARY'] ?? process.env['GITHUB_STEP_SUMMARY'];
   if (summaryPath) {
     await fs.appendFile(summaryPath, report + '\n\n');
