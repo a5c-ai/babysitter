@@ -346,6 +346,23 @@ describe("babysitter run:process-assign CLI", () => {
     expect(metadata.processRevision).toBe("v2.1.0");
   });
 
+  it("run:iterate rejects bare run with helpful error", async () => {
+    const { runDir } = await createBareRun();
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:iterate",
+      runDir,
+      "--runs-dir",
+      runsRoot,
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(1);
+    const allOutput = [...logSpy.mock.calls, ...errorSpy.mock.calls].map((c) => String(c[0])).join("\n");
+    expect(allOutput).toContain("no process assigned");
+  });
+
   it("fails when <runDir> positional is missing", async () => {
     const cli = createBabysitterCli();
     const exitCode = await cli.run([

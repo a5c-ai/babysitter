@@ -28,13 +28,13 @@ import type { ParsedArgs } from "./types";
 import { USAGE } from "./usage";
 
 export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
-  if (!parsed.processId) {
-    console.error("--process-id is required for run:create");
+  // --entry is optional for bare runs (no process attached)
+  const isBareRun = !parsed.entrySpecifier;
+  if (!parsed.processId && !isBareRun) {
+    console.error("--process-id is required for run:create (unless creating a bare run without --entry)");
     console.error(USAGE);
     return 1;
   }
-  // --entry is optional for bare runs (no process attached)
-  const isBareRun = !parsed.entrySpecifier;
 
   let entrypoint: { importPath: string; exportName?: string } | undefined;
   if (!isBareRun) {

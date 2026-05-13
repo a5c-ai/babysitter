@@ -10,7 +10,7 @@ export interface BuildEffectIndexOptions {
   events?: JournalEvent[];
 }
 
-type SupportedEventType = "RUN_CREATED" | "RUN_COMPLETED" | "RUN_FAILED" | "EFFECT_REQUESTED" | "EFFECT_RESOLVED" | "EFFECT_CANCELLED" | "EFFECT_PROGRESS" | "COST_TRACKED";
+type SupportedEventType = "RUN_CREATED" | "RUN_COMPLETED" | "RUN_FAILED" | "EFFECT_REQUESTED" | "EFFECT_RESOLVED" | "EFFECT_CANCELLED" | "EFFECT_PROGRESS" | "COST_TRACKED" | "PROCESS_ASSIGNED";
 
 interface EffectRequestedPayload {
   effectId: string;

@@ -2,7 +2,7 @@ import type { HelpSurface } from "./types";
 import { CORE_PROGRAM, type CliProgram } from "./program";
 
 function coreAgentUsage(commandName: string): string {
-  return `  ${commandName} run:create --process-id <id> --entry <path#export> [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--prompt <text>] [--harness <name>] [--session-id <id>] [--non-interactive] [--json] [--dry-run]
+  return `  ${commandName} run:create --process-id <id> [--entry <path#export>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--prompt <text>] [--harness <name>] [--session-id <id>] [--non-interactive] [--json] [--dry-run]
   ${commandName} run:process-assign <runDir> --entry <path#export> [--process-id <id>] [--process-revision <rev>] [--force] [--json] [--dry-run]
   ${commandName} run:status <runDir> [--json]
   ${commandName} run:events <runDir> [--json] [--limit <n>] [--reverse] [--filter-type <type>]

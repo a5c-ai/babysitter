@@ -411,7 +411,7 @@ describe("babysitter run:create CLI", () => {
     const exitCode = await cli.run(["run:create", "--entry", "./process.mjs"]);
 
     expect(exitCode).toBe(1);
-    expect(errorSpy).toHaveBeenCalledWith("--process-id is required for run:create");
+    expect(errorSpy).toHaveBeenCalledWith("--process-id is required for run:create (unless creating a bare run without --entry)");
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("babysitter run:create"));
   });
 
