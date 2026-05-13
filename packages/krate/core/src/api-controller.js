@@ -6,6 +6,7 @@ import { createAgentApprovalController } from './agent-approval-controller.js';
 import { createAgentTriggerController } from './agent-trigger-controller.js';
 import { createAgentWorkspaceController } from './agent-workspace-controller.js';
 import { createAgentMemoryController } from './agent-memory-controller.js';
+import { orgNamespaceName, normalizeOrgSlug } from './org-scoping.js';
 
 export const KRATE_API_CONTROLLER_BOUNDARY = {
   role: 'krate-api-controller',
@@ -18,6 +19,24 @@ export const KRATE_API_CONTROLLER_BOUNDARY = {
 export function createKrateApiController(options = {}) {
   const resourceGateway = options.resourceGateway || createKubernetesResourceGateway(options);
   const namespace = options.namespace || resourceGateway.namespace || process.env.KRATE_NAMESPACE || 'krate-system';
+  const onAuditEvent = typeof options.onAuditEvent === 'function' ? options.onAuditEvent : null;
+
+  function emitAuditEvent(resource, operation) {
+    if (!onAuditEvent) return;
+    try {
+      const org = resource.spec?.organizationRef || resource.metadata?.labels?.['krate.a5c.ai/org'] || '';
+      onAuditEvent({
+        operation,
+        org,
+        namespace: org ? orgNamespaceName(org) : (resource.metadata?.namespace || namespace),
+        kind: resource.kind,
+        name: resource.metadata?.name,
+        timestamp: new Date().toISOString()
+      });
+    } catch {
+      // Audit failures must not crash apply operations
+    }
+  }
 
   return {
     role: 'krate-api-controller',
@@ -39,22 +58,121 @@ export function createKrateApiController(options = {}) {
     async listResource(kindOrPlural) {
       return resourceGateway.list(kindOrPlural);
     },
+    async listResourceForOrg(org, kindOrPlural) {
+      const orgNs = orgNamespaceName(normalizeOrgSlug(org));
+      // Client-side filtering is used because the resource gateway's list()
+      // method does not currently support namespace-scoped listing.  The
+      // gateway aggregates resources across namespaces at snapshot time, so
+      // filtering here is both correct and consistent with the gateway API.
+      const result = await resourceGateway.list(kindOrPlural);
+      const items = normalizeResourceList(result).filter(
+        (item) => item.metadata?.namespace === orgNs
+      );
+      return { ...result, items };
+    },
     async getResource(kindOrPlural, name) {
       return resourceGateway.get(kindOrPlural, name);
     },
     async applyResource(resource) {
+      // Cross-org admission check: if the resource has an organizationRef,
+      // ensure the namespace matches the org's derived namespace.
+      const resourceOrg = resource.spec?.organizationRef;
+      const resourceNs = resource.metadata?.namespace;
+      if (resourceOrg) {
+        const expectedNs = orgNamespaceName(resourceOrg);
+        if (resourceNs && resourceNs !== expectedNs) {
+          // Explicit namespace does not match the org — reject
+          throw new Error(
+            `Cross-org namespace mismatch: resource organizationRef "${resourceOrg}" expects namespace "${expectedNs}" but got "${resourceNs}"`
+          );
+        }
+        if (!resourceNs) {
+          // organizationRef present but no namespace — auto-assign
+          resource = {
+            ...resource,
+            metadata: { ...resource.metadata, namespace: expectedNs }
+          };
+        }
+      }
       const result = await resourceGateway.apply(resource);
       clearSnapshotCache();
+      const appliedResource = result.resource || resource;
+      emitAuditEvent(appliedResource, result.operation || 'apply');
       return result;
+    },
+    async applyResourceForOrg(orgSlug, resource) {
+      const slug = normalizeOrgSlug(orgSlug);
+      const orgNs = orgNamespaceName(slug);
+      const resourceOrg = resource.spec?.organizationRef;
+      if (resourceOrg && normalizeOrgSlug(resourceOrg) !== slug) {
+        throw new Error(
+          `Org mismatch: resource organizationRef "${resourceOrg}" does not match target org "${slug}"`
+        );
+      }
+      const scopedResource = {
+        ...resource,
+        metadata: { ...resource.metadata, namespace: orgNs },
+        spec: { ...resource.spec, organizationRef: slug }
+      };
+      const result = await resourceGateway.apply(scopedResource);
+      clearSnapshotCache();
+      const appliedResource = result.resource || scopedResource;
+      emitAuditEvent(appliedResource, result.operation || 'apply');
+      return { ...result, resource: appliedResource };
     },
     async deleteResource(kindOrPlural, name) {
       const result = await resourceGateway.delete(kindOrPlural, name);
       clearSnapshotCache();
+      emitAuditEvent(
+        { kind: kindOrPlural, metadata: { name, namespace }, spec: {} },
+        'delete'
+      );
       return result;
+    },
+    async deleteResourceForOrg(orgSlug, kindOrPlural, name) {
+      const slug = normalizeOrgSlug(orgSlug);
+      const orgNs = orgNamespaceName(slug);
+      // Verify the resource exists and belongs to the org before deleting
+      const existing = await resourceGateway.get(kindOrPlural, name);
+      const resource = existing?.resource || existing;
+      if (resource) {
+        const resourceNs = resource.metadata?.namespace;
+        if (!resourceNs || resourceNs !== orgNs) {
+          throw new Error(
+            `Cross-org denial: resource "${name}" is in namespace "${resourceNs || '(none)'}" which does not match org "${slug}" namespace "${orgNs}"`
+          );
+        }
+      }
+      const result = await resourceGateway.delete(kindOrPlural, name);
+      clearSnapshotCache();
+      emitAuditEvent(
+        { kind: kindOrPlural, metadata: { name, namespace: orgNs }, spec: { organizationRef: slug } },
+        'delete'
+      );
+      return result;
+    },
+    async getResourceForOrg(orgSlug, kindOrPlural, name) {
+      const slug = normalizeOrgSlug(orgSlug);
+      const orgNs = orgNamespaceName(slug);
+      const existing = await resourceGateway.get(kindOrPlural, name);
+      const resource = existing?.resource || existing;
+      if (resource) {
+        const resourceNs = resource.metadata?.namespace;
+        if (!resourceNs || resourceNs !== orgNs) {
+          throw new Error(
+            `Cross-org denial: resource "${name}" is in namespace "${resourceNs || '(none)'}" which does not match org "${slug}" namespace "${orgNs}"`
+          );
+        }
+      }
+      return existing;
     },
     async createRepository(input) {
       const created = await resourceGateway.createRepository(input);
       const repository = created?.resource || created;
+      emitAuditEvent(
+        repository?.kind ? repository : { kind: 'Repository', metadata: repository?.metadata || { name: input.name || input.metadata?.name }, spec: repository?.spec || input.spec || input },
+        'create-repository'
+      );
       return {
         operation: created?.operation || 'create-repository',
         command: created?.command || 'kubectl apply -f -',
@@ -63,7 +181,13 @@ export function createKrateApiController(options = {}) {
       };
     },
     async createOrganization(input) {
-      return resourceGateway.createOrganization(input);
+      const result = await resourceGateway.createOrganization(input);
+      const orgResource = result?.organization || result?.resource || result;
+      emitAuditEvent(
+        orgResource?.kind ? orgResource : { kind: 'Organization', metadata: orgResource?.metadata || { name: input.slug || input.name || input.metadata?.name }, spec: orgResource?.spec || input.spec || input },
+        'create-organization'
+      );
+      return result;
     },
     watchResource(resourcePath, handlers = {}) {
       return resourceGateway.watch(resourcePath, handlers);
