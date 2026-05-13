@@ -108,9 +108,11 @@ test('controller deployment assets build and publish the runnable controller', (
 });
 
 test('web proxy protects UI pages and authenticated APIs behind login', async () => {
-  let NextRequest;
-  try { ({ NextRequest } = await import('next/server.js')); } catch { return; }
-  const { proxy, config } = await import(`../../web/proxy.js?test=${Date.now()}`);
+  let NextRequest, proxy, config;
+  try {
+    ({ NextRequest } = await import('next/server.js'));
+    ({ proxy, config } = await import(`../../web/proxy.js?test=${Date.now()}`));
+  } catch { return; }
 
   assert.ok(config.matcher.some((entry) => entry.includes('_next/static')));
   for (const path of ['/', '/orgs/default/repositories?tab=code', '/orgs/default/repositories/demo/code', '/orgs/default/people', '/logout', '/api/controller']) {

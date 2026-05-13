@@ -999,7 +999,6 @@ jobs:
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
-        if: steps.nm-cache.outputs.cache-hit != 'true'
         run: |
           npm ci
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu 2>/dev/null || true
