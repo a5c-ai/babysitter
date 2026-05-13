@@ -34,3 +34,29 @@ $CLI session:resume \
   --session-id <id> \{{resumeFlagsLine}}
   --run-id <runId> --json
 ```
+
+**For assigning a process to a bare run:**
+
+If a run was created without `--entry` (a "bare" run), use `run:process-assign` to
+attach a process definition before orchestration can begin:
+
+```bash
+$CLI run:process-assign <runDir> \
+  --entry <absolute-path>#<export>
+```
+
+**Required arguments:**
+- `<runDir>` — path to the existing run directory (positional)
+- `--entry <path>#<export>` — path to the process JS file and its named export
+
+**Optional flags:**
+- `--process-id <id>` — override the process identifier stored in the run (defaults to the existing `processId` from the bare run)
+- `--process-revision <rev>` — pin a specific process revision
+- `--force` — allow re-assigning even if the run already has a process
+- `--dry-run` — validate without writing changes
+- `--json` — emit machine-readable JSON output
+- `--verbose` — log resolved paths and options to stderr
+
+This command rejects if the run already has a process assigned unless `--force` is
+passed. On success it updates `run.json` and appends a `PROCESS_ASSIGNED` journal
+event to the run.

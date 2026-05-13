@@ -17,6 +17,7 @@ Complete reference documentation for the core Babysitter command-line interface.
 - [Global Options](#global-options)
 - [Run Management Commands](#run-management-commands)
   - [run:create](#runcreate)
+  - [run:process-assign](#runprocess-assign)
   - [run:status](#runstatus)
   - [run:events](#runevents)
   - [run:iterate](#runiterate)
@@ -197,6 +198,124 @@ babysitter run:create \
   --entry ./process.js#apiProcess \
   --request "Build REST API with authentication" \
   --prompt "Build REST API with authentication"
+```
+
+---
+
+### run:process-assign
+
+Assigns a process to an existing run.
+
+#### Synopsis
+
+```bash
+babysitter run:process-assign <runDir> \
+  --entry <path>#<export> \
+  [--process-id <id>] \
+  [--process-revision <rev>] \
+  [--force] \
+  [--json] \
+  [--dry-run] \
+  [--verbose]
+```
+
+#### Description
+
+Assigns a process entrypoint to an existing bare run (one created without `--entry`). Updates the run's `entrypoint`, `processPath`, and `processId` fields in `run.json` and appends a `PROCESS_ASSIGNED` journal event. If the run already has a process assigned, the command rejects unless `--force` is provided.
+
+#### Arguments
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `<runDir>` | Yes | Run ID or path to run directory |
+
+#### Options
+
+| Option | Required | Description |
+|--------|----------|-------------|
+| `--entry <path>#<export>` | Yes | Entry point file and export name |
+| `--process-id <id>` | No | Process identifier (retains existing if omitted) |
+| `--process-revision <rev>` | No | Process revision/version |
+| `--force` | No | Override if a process is already assigned |
+| `--json` | No | Output in JSON format |
+| `--dry-run` | No | Preview changes without applying |
+| `--verbose` | No | Enable verbose logging |
+
+#### Output (Human)
+
+```
+[run:process-assign] runId=run-20260125-143012 runDir=.a5c/runs/run-20260125-143012 entry=.a5c/processes/build/main.js#buildProcess processId=dev/build
+```
+
+#### Output (JSON)
+
+```json
+{
+  "runId": "run-20260125-143012",
+  "runDir": ".a5c/runs/run-20260125-143012",
+  "entry": ".a5c/processes/build/main.js#buildProcess",
+  "processId": "dev/build",
+  "previousEntrypoint": {
+    "importPath": "bare-run"
+  },
+  "assigned": true
+}
+```
+
+#### Dry Run Output (JSON)
+
+```json
+{
+  "dryRun": true,
+  "runDir": ".a5c/runs/run-20260125-143012",
+  "runId": "run-20260125-143012",
+  "entry": ".a5c/processes/build/main.js#buildProcess",
+  "processId": "dev/build",
+  "previousEntrypoint": {
+    "importPath": "bare-run"
+  },
+  "force": false
+}
+```
+
+#### Error Responses (JSON)
+
+| Error Code | Condition |
+|------------|-----------|
+| `RUN_NOT_FOUND` | Run directory does not exist |
+| `PROCESS_ALREADY_ASSIGNED` | Run already has a process and `--force` was not provided |
+
+#### Examples
+
+```bash
+# Assign a process to a bare run
+babysitter run:process-assign .a5c/runs/run-20260125-143012 \
+  --entry .a5c/processes/build/main.js#buildProcess \
+  --process-id dev/build
+
+# Assign with JSON output
+babysitter run:process-assign run-20260125-143012 \
+  --entry .a5c/processes/tdd/main.js#tddProcess \
+  --process-id tdd/feature \
+  --json
+
+# Preview without applying
+babysitter run:process-assign run-20260125-143012 \
+  --entry .a5c/processes/build/main.js#buildProcess \
+  --process-id dev/build \
+  --dry-run --json
+
+# Force reassign a process to a run that already has one
+babysitter run:process-assign run-20260125-143012 \
+  --entry .a5c/processes/build/main.js#buildProcess \
+  --process-id dev/build \
+  --force --json
+
+# With process revision
+babysitter run:process-assign run-20260125-143012 \
+  --entry .a5c/processes/build/main.js#buildProcess \
+  --process-id dev/build \
+  --process-revision 2.1.0
 ```
 
 ---
@@ -836,6 +955,9 @@ done
 ```bash
 # Create
 babysitter run:create --process-id <id> --entry <path>#<export> [--prompt <text>] --json
+
+# Assign process to bare run
+babysitter run:process-assign <runDir> --entry <path>#<export> [--process-id <id>] --json
 
 # Status
 babysitter run:status <runId> --json
