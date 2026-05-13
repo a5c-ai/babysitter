@@ -741,24 +741,35 @@ async function validateAgentBehavior(
       detail: runCompletionDetail,
     });
 
-    // babysitter-completion-proof: check .a5c/runs/*/run.json for completionProof in metadata
+    // babysitter-completion-proof: verify run.json has completionProof, status=completed, and a processId
     let completionProofFound = false;
     let completionProofDetail = 'no completionProof found in any run';
     try {
       const runEntries = await fs.readdir(runsDir);
       for (const entry of runEntries.slice(-5)) {
-        // Check run.json metadata (completionProof is set at run creation time)
         const runFile = path.join(runsDir, entry, 'run.json');
         try {
           const runRaw = await fs.readFile(runFile, 'utf8');
           const runMeta = JSON.parse(runRaw) as Record<string, unknown>;
-          const proof = (runMeta['metadata'] as Record<string, unknown> | undefined)?.['completionProof']
-            ?? runMeta['completionProof'];
-          if (proof !== undefined && proof !== null) {
+          const metadata = runMeta['metadata'] as Record<string, unknown> | undefined;
+          const proof = metadata?.['completionProof'] ?? runMeta['completionProof'];
+          const status = runMeta['status'] as string | undefined;
+          const processId = runMeta['processId'] as string | undefined
+            ?? metadata?.['processId'] as string | undefined;
+
+          if (proof === undefined || proof === null) continue;
+
+          const failures: string[] = [];
+          if (status !== 'completed') failures.push(`status=${status ?? 'missing'} (expected completed)`);
+          if (!processId) failures.push('no processId associated');
+
+          if (failures.length === 0) {
             completionProofFound = true;
-            completionProofDetail = `run ${entry} run.json contains completionProof`;
-            break;
+            completionProofDetail = `run ${entry} completed with processId=${processId} and completionProof`;
+          } else {
+            completionProofDetail = `run ${entry} has completionProof but: ${failures.join('; ')}`;
           }
+          break;
         } catch { continue; }
       }
     } catch {
