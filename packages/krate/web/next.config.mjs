@@ -12,7 +12,7 @@ const nextConfig = {
   turbopack: {
     root: monorepoRoot,
     resolveAlias: {
-      '@a5c-ai/krate-sdk': join(webRoot, '../sdk/src/index.js').replace(/\\/g, '/'),
+      '@a5c-ai/krate-sdk': '../sdk/src/index.js',
     },
   },
 };
