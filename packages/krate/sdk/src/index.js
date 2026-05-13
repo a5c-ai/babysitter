@@ -40,3 +40,12 @@ export { findResourceDefinition } from '../../core/src/kubernetes-controller.js'
 
 // Org Scoping
 export { orgNamespaceName, normalizeOrgSlug } from '../../core/src/org-scoping.js';
+
+// Atlas Graph Client
+export {
+  fetchAtlasRecordsByKinds,
+  searchAtlasGraph,
+  STACK_LAYERS,
+  COMPOSITION_FACETS,
+  ALL_LAYER_DEFS
+} from './atlas-graph-client.js';

@@ -6,6 +6,7 @@ import { ApprovalDecisionButtons } from './components/approval-actions.jsx';
 import { SessionDetailTabs } from './components/session-tabs.jsx';
 import { DispatchButton } from './components/dispatch-button.jsx';
 import { StackBuilder } from './components/stack-builder.jsx';
+import { GraphStackBuilder } from './components/stack-builder-graph.jsx';
 import { InteractiveKanbanBoard } from './components/kanban-interactive.jsx';
 import { MemorySearchForm } from './components/memory-search-form.jsx';
 import { LiveUpdates } from './components/live-updates.jsx';
@@ -294,9 +295,10 @@ export async function AgentStackDetailPage({ org = null, name } = {}) {
 export async function AgentStackBuilderPage({ org = null } = {}) {
   const ui = await loadKrateUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent stack" title="New agent stack" text="Configure a new agent stack with a base agent, adapter, model, and prompts." actions={[['/agents/stacks', 'All stacks'], ['/agents', 'Overview']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/stacks', 'Stacks'], ['/agents/stacks/new', 'New']]}>
+  const atlasBaseUrl = process.env.ATLAS_BASE_URL || 'https://atlas-staging.a5c.ai';
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent stack" title="New agent stack" text="Build an agent stack from Atlas knowledge-graph layers. Select models, providers, runtimes, tools, and more from the live catalog." actions={[['/agents/stacks', 'All stacks'], ['/agents', 'Overview']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/stacks', 'Stacks'], ['/agents/stacks/new', 'New']]}>
     <DegradedBanner model={ui.model} />
-    <StackBuilder org={activeOrg} />
+    <GraphStackBuilder org={activeOrg} atlasBaseUrl={atlasBaseUrl} />
   </PageFrame>;
 }
 
