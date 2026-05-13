@@ -1,6 +1,17 @@
-### 2. Create run and bind session (single command):
+### 2. Create run and bind session:
 
-**For new runs:**
+**Check for an existing bare run first.** The session-start hook may have
+already created a bare run (no process attached) inside `.a5c/runs/`. Before
+calling `run:create`, check for a recent bare run:
+
+```bash
+$CLI run:status .a5c/runs/<latest-dir> --json
+```
+
+If a run exists with `entrypoint.importPath === "bare-run"`, assign the process
+to it with `run:assign-process` (see below) instead of creating a new run.
+
+**For new runs (when no bare run exists):**
 
 ```bash
 $CLI run:create \
@@ -35,14 +46,24 @@ $CLI session:resume \
   --run-id <runId> --json
 ```
 
-**For assigning a process to a bare run:**
+**For assigning a process to an existing bare run:**
 
-If a run was created without `--entry` (a "bare" run), use `run:assign-process` to
-attach a process definition before orchestration can begin:
+When the session-start hook has already created a bare run (no `--entry`), use
+`run:assign-process` to attach the process definition, then bind the session:
 
 ```bash
+# 1. Assign the process to the bare run
 $CLI run:assign-process <runDir> \
-  --entry <absolute-path>#<export>
+  --entry <absolute-path>#<export> \
+  --process-id <id> \
+  --json
+
+# 2. Bind the session to the run (if not already bound by session-start)
+$CLI session:associate \
+  --session-id <id> \
+  --run-id <runId> \
+  --state-dir <stateDir> \
+  --json
 ```
 
 **Required arguments:**
@@ -60,3 +81,8 @@ $CLI run:assign-process <runDir> \
 This command rejects if the run already has a process assigned unless `--force` is
 passed. On success it updates `run.json` and appends a `PROCESS_ASSIGNED` journal
 event to the run.
+
+**Common mistakes to avoid:**
+- wrong: Always creating a new run when a bare run already exists from session-start
+- correct: Check `.a5c/runs/` for existing bare runs and use `run:assign-process`
+- wrong: Skipping `run:assign-process` and calling `run:iterate` on a bare run (will fail)
