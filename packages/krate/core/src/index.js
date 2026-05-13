@@ -43,3 +43,7 @@ export * from './agent-memory-import.js';
 export * from './agent-subagent-controller.js';
 export * from './external/provider-adapter.js';
 export * from './external/github/index.js';
+export * from './external/webhook-controller.js';
+export * from './external/sync-controller.js';
+export * from './external/write-controller.js';
+export * from './external/conflict-controller.js';
