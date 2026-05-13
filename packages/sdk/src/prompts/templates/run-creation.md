@@ -1,17 +1,9 @@
 ### 2. Create run and bind session:
 
-**Check for an existing bare run first.** The session-start hook may have
-already created a bare run (no process attached) inside `.a5c/runs/`. Before
-calling `run:create`, check for a recent bare run:
+If an existing bare run is reported in the **Existing Run State** section above,
+use `run:assign-process` (see below) instead of creating a new run.
 
-```bash
-$CLI run:status .a5c/runs/<latest-dir> --json
-```
-
-If a run exists with `entrypoint.importPath === "bare-run"`, assign the process
-to it with `run:assign-process` (see below) instead of creating a new run.
-
-**For new runs (when no bare run exists):**
+**For new runs:**
 
 ```bash
 $CLI run:create \
