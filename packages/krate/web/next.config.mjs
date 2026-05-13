@@ -11,7 +11,15 @@ const nextConfig = {
   outputFileTracingRoot: monorepoRoot,
   turbopack: {
     root: monorepoRoot,
+    resolveAlias: {
+      '@a5c-ai/krate-sdk': join(webRoot, '../sdk/src/index.js').replace(/\\/g, '/'),
+    },
   },
+};
+
+nextConfig.webpack = (config) => {
+  config.resolve.alias['@a5c-ai/krate-sdk'] = join(webRoot, '../sdk/src/index.js');
+  return config;
 };
 
 export default nextConfig;
