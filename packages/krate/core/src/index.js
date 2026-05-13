@@ -41,3 +41,5 @@ export * from './agent-session-transcript-controller.js';
 export * from './agent-writeback-controller.js';
 export * from './agent-memory-import.js';
 export * from './agent-subagent-controller.js';
+export * from './external/provider-adapter.js';
+export * from './external/github/index.js';
