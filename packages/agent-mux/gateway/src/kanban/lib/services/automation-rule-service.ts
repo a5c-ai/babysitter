@@ -1,4 +1,4 @@
-import { monotonicFactory } from 'ulid/dist/index.esm.js';
+import { randomUUID } from 'node:crypto';
 
 import type {
   AutomationExecutionRecord,
@@ -32,7 +32,7 @@ import {
   type KanbanStoragePayload,
 } from './kanban-storage.js';
 
-const createId = monotonicFactory();
+const createId = () => randomUUID();
 
 export const AUTOMATION_RULE_STATES = [
   'draft',

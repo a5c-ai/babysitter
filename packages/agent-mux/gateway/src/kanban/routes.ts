@@ -16,7 +16,7 @@ import type {
 } from '@a5c-ai/agent-mux-core';
 import type { AutomationRuleLifecycleState } from '@a5c-ai/agent-mux-core';
 import type { Hono } from 'hono';
-import { monotonicFactory } from 'ulid/dist/index.esm.js';
+import { randomUUID } from 'node:crypto';
 
 import { getRunCached, getAllCachedDigests, discoverAndCacheAll } from './lib/run-cache.js';
 import { AppError, normalizeError } from './lib/error-handler.js';
@@ -53,7 +53,7 @@ const automationRuleService = new AutomationRuleService();
 const automationWebhookService = new AutomationWebhookService();
 const workspaceService = new WorkspaceLifecycleService();
 const runQueryService = new RunQueryService();
-const nextUlid = monotonicFactory();
+const nextId = () => randomUUID();
 
 function jsonWithHeaders(body: unknown, status = 200, headers?: HeadersInit): Response {
   return Response.json(body, {
@@ -285,7 +285,7 @@ async function appendEffectResolvedJournalEntry(runDir: string, effectId: string
   await fs.mkdir(journalDir, { recursive: true });
 
   const seq = await getNextJournalSeq(journalDir);
-  const ulid = nextUlid();
+  const ulid = nextId();
   const filename = `${seq.toString().padStart(6, '0')}.${ulid}.json`;
   const eventPayload = {
     type: 'EFFECT_RESOLVED',

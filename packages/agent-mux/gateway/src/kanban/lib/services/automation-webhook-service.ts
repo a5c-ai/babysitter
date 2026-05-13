@@ -1,6 +1,4 @@
-import { createHash, timingSafeEqual } from "node:crypto";
-
-import { monotonicFactory } from "ulid/dist/index.esm.js";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 
 import type {
   AutomationExecutionRecord,
@@ -27,7 +25,7 @@ import {
   type StoredKanbanProject,
 } from "./kanban-storage.js";
 
-const createId = monotonicFactory();
+const createId = () => randomUUID();
 
 type WebhookHeaders = Pick<Headers, "get">;
 
