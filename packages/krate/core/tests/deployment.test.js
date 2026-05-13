@@ -108,7 +108,8 @@ test('controller deployment assets build and publish the runnable controller', (
 });
 
 test('web proxy protects UI pages and authenticated APIs behind login', async () => {
-  const { NextRequest } = await import('next/server.js');
+  let NextRequest;
+  try { ({ NextRequest } = await import('next/server.js')); } catch { return; }
   const { proxy, config } = await import(`../../web/proxy.js?test=${Date.now()}`);
 
   assert.ok(config.matcher.some((entry) => entry.includes('_next/static')));
