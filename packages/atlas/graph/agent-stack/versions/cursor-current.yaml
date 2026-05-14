@@ -19,6 +19,23 @@ attributes:
   installMethods:
     - install:manual
   minSchemaVersion: "6.0.0"
+  hookSupport:
+    interactive:
+      sessionStart: native
+      stop: native
+      userPromptSubmit: native
+      preToolUse: native
+      sessionEnd: native
+    nonInteractive:
+      sessionStart: emulated
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: true
+    positionalPrompt: false
 edges:
   version_of:
     - agent:cursor

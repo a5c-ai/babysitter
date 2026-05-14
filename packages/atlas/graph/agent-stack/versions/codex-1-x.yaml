@@ -24,6 +24,23 @@ attributes:
     exitOnNonInteractive: true
     nonInteractiveMode: "exec"
     interactiveMode: ""
+  hookSupport:
+    interactive:
+      sessionStart: native
+      stop: native
+      userPromptSubmit: native
+      preToolUse: native
+      sessionEnd: native
+    nonInteractive:
+      sessionStart: emulated
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: false
+    positionalPrompt: true
 edges:
   version_of:
     - agent:codex
@@ -82,6 +99,23 @@ attributes:
     exitOnNonInteractive: true
     nonInteractiveMode: "exec"
     interactiveMode: ""
+  hookSupport:
+    interactive:
+      sessionStart: native
+      stop: native
+      userPromptSubmit: native
+      preToolUse: native
+      sessionEnd: native
+    nonInteractive:
+      sessionStart: emulated
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: false
+    positionalPrompt: true
 edges:
   version_of:
     - agent:codex

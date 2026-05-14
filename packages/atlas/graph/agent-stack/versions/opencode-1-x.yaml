@@ -21,6 +21,23 @@ attributes:
     - install:brew
     - install:curl
   minSchemaVersion: "6.0.0"
+  hookSupport:
+    interactive:
+      sessionStart: native
+      stop: emulated
+      userPromptSubmit: native
+      preToolUse: native
+      sessionEnd: native
+    nonInteractive:
+      sessionStart: emulated
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: true
+    positionalPrompt: true
 edges:
   version_of:
     - agent:opencode

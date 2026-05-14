@@ -19,6 +19,23 @@ attributes:
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"
+  hookSupport:
+    interactive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+    nonInteractive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: false
+    sessionResume: true
+    positionalPrompt: false
 edges:
   version_of:
     - agent:openclaw

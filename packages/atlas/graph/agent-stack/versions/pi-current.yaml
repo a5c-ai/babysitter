@@ -24,6 +24,18 @@ attributes:
     exitOnNonInteractive: false
     nonInteractiveMode: ""
     interactiveMode: ""
+  hookSupport:
+    interactive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+    nonInteractive: {}
+  bridgeCapabilities:
+    interactiveBridge: false
+    sessionResume: true
+    positionalPrompt: false
 edges:
   version_of:
     - agent:pi
