@@ -762,13 +762,6 @@ export async function AgentProjectsPage({ org = null } = {}) {
     { name: 'description', label: 'Description', placeholder: 'What is this project for?', required: false },
     { name: 'workflow', label: 'Workflow columns', placeholder: 'todo,in-progress,review,done', required: false }
   ];
-  function buildProjectSpec(formData) {
-    return {
-      displayName: formData.get('displayName') || formData.get('name'),
-      description: formData.get('description') || '',
-      workflowColumns: String(formData.get('workflow') || 'todo,in-progress,review,done').split(',').map((c) => c.trim()).filter(Boolean)
-    };
-  }
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent projects" title="Projects" text="Organize agent work into projects with kanban boards, linked stacks, and tracked issues." actions={[['/agents', 'Overview'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/projects', 'Projects']]}>
     <DegradedBanner model={ui.model} />
     <section className="routeGrid two" style={{ alignItems: 'start' }}>
@@ -791,8 +784,7 @@ export async function AgentProjectsPage({ org = null } = {}) {
         kind="AgentProject"
         title="Create project"
         fields={projectFields}
-        buildSpec={buildProjectSpec}
-        successText={(body) => `Created project ${body.resource?.metadata?.name || ''}`}
+        successText="Project created"
       />
     </section>
   </PageFrame>;
@@ -828,12 +820,6 @@ export async function AgentMemoryPage({ org = null } = {}) {
     { name: 'repoUrl', label: 'Repository URL', type: 'url', placeholder: 'https://github.com/acme/memory', required: true },
     { name: 'description', label: 'Description', placeholder: 'What knowledge does this repo store?', required: false }
   ];
-  function buildMemoryRepoSpec(formData) {
-    return {
-      repoUrl: formData.get('repoUrl'),
-      description: formData.get('description') || ''
-    };
-  }
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent memory" title="Memory repositories and imports" text="Manage agent memory repositories, search stored knowledge, review pending imports, and configure ontologies." actions={[['/agents/memory/search', 'Search'], ['/agents/memory/imports', 'Imports'], ['/agents/memory/ontology', 'Ontology']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/memory', 'Memory']]}>
     <DegradedBanner model={ui.model} />
     {hasRepos ? <>
@@ -886,8 +872,7 @@ export async function AgentMemoryPage({ org = null } = {}) {
         kind="AgentMemoryRepository"
         title="Add repository"
         fields={memoryRepoFields}
-        buildSpec={buildMemoryRepoSpec}
-        successText={(body) => `Added repository ${body.resource?.metadata?.name || ''}`}
+        successText="Repository added"
       />
     </section>}
   </PageFrame>;

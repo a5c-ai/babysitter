@@ -116,7 +116,7 @@ export function ResourceActions({ org, apiPath, actions = [], onMutated }) {
  *   buildSpec   {fn}      — (formData) => spec object
  *   successText {fn|str}  — (body) => string, or fixed string
  */
-export function InlineCreateForm({ org, namespace = 'krate-system', kind, apiVersion = 'krate.a5c.ai/v1alpha1', title, fields = [], buildSpec, successText }) {
+export function InlineCreateForm({ org, namespace = 'krate-system', kind, apiVersion = 'krate.a5c.ai/v1alpha1', title, fields = [], successText }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
@@ -127,7 +127,14 @@ export function InlineCreateForm({ org, namespace = 'krate-system', kind, apiVer
     setIsSuccess(false);
     try {
       const name = slugify(formData.get('name') || formData.get(fields[0]?.name) || kind.toLowerCase());
-      const spec = buildSpec ? buildSpec(formData) : buildDefaultSpec(formData, fields, org);
+      const spec = {};
+      for (const field of fields) {
+        if (field.name === 'name') continue;
+        const value = formData.get(field.name);
+        if (value) spec[field.name] = field.name === 'workflow' || field.name === 'workflowColumns'
+          ? String(value).split(',').map(c => c.trim()).filter(Boolean)
+          : value;
+      }
       const resource = {
         apiVersion,
         kind,
