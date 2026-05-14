@@ -2,12 +2,14 @@
   "name": "@a5c-ai/krate-web",
   "version": "5.0.0",
   "private": true,
+  "type": "module",
   "description": "Krate web console — Next.js management UI for the Krate forge platform.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "echo 'no lint configured'"
+    "lint": "echo 'no lint configured'",
+    "test": "node --test tests/build-smoke.test.js"
   },
   "dependencies": {
     "@a5c-ai/krate-sdk": "*",
