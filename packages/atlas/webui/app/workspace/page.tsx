@@ -46,7 +46,7 @@ export default async function WorkspacePage() {
       lead={
         databaseConfigured
           ? "Upload private graph overlays, inspect your authenticated Atlas state, and author company blueprints."
-          : "Private workspace data persists in local SQLite during development until PostgreSQL is configured."
+          : "Private workspace data persists in local SQLite only for ad-hoc local runs; deployed Atlas environments provision PostgreSQL during CI deployment."
       }
       meta={<><span>User graphs · {uploads.length}</span><span>GitHub login</span><span>{databaseConfigured ? "PostgreSQL-backed" : "SQLite-backed local dev"}</span></>}
       marginSections={[
@@ -70,10 +70,10 @@ export default async function WorkspacePage() {
           {!databaseConfigured ? (
             <div className="atlas-docs-stack">
               <p className="atlas-docs-note">
-                Private workspace data is persisting in local SQLite because `DATABASE_URL` is not configured.
+                This local process is using SQLite because `DATABASE_URL` is not configured.
               </p>
               <p className="atlas-docs-note">
-                User graph uploads and company builder remain available locally. Set `DATABASE_URL`, run `npm run db:init -w @a5c-ai/atlas-webui`, then restart the web UI to enable shared PostgreSQL-backed persistence.
+                Development, staging, and production deploy jobs provision Atlas PostgreSQL, initialize the schema, and inject `DATABASE_URL` automatically. For one-off local runs, set `DATABASE_URL` and run `npm run db:init -w @a5c-ai/atlas-webui` before starting the web UI.
               </p>
               {uploads.length === 0 ? <p className="atlas-docs-note">No private graph uploads yet.</p> : null}
               {uploads.length > 0 ? (

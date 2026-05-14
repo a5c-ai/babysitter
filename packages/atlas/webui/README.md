@@ -30,14 +30,14 @@ npm run dev -w @a5c-ai/atlas-webui
 # open http://localhost:3000
 ```
 
-Authenticated Atlas features now rely on:
+Authenticated Atlas features rely on:
 
 - `DATABASE_URL`
 - `GITHUB_CLIENT_ID`
 - `GITHUB_CLIENT_SECRET`
 - `AUTH_SECRET`
 
-Anonymous browsing still works without a login, but private workspace routes, user graph uploads, and company builder persistence require the database and GitHub OAuth app to be configured.
+Anonymous browsing still works without a login. Private workspace routes, user graph uploads, and company builder persistence require PostgreSQL for shared durability; without `DATABASE_URL`, a local process falls back to local SQLite for ad-hoc development only.
 
 ## GitHub OAuth and deployment notes
 
@@ -46,7 +46,9 @@ Anonymous browsing still works without a login, but private workspace routes, us
   - hosted: `https://<your-host>/api/auth/callback/github`
 - `AUTH_SECRET` signs the Atlas session cookie and OAuth state cookie. Use a long random value in every deployed environment.
 - The Atlas auth flow derives its origin from `x-forwarded-proto`, `x-forwarded-host`, or the request URL, so your reverse proxy should forward those headers correctly.
-- Recommended rollout order for a new environment:
+- The repository publish workflow provisions an in-cluster PostgreSQL StatefulSet for Atlas WebUI on the `develop`, `staging`, and `main` deployment branches, stores `DATABASE_URL` in the `atlas-postgres` Kubernetes secret, runs `npm run db:init -w @a5c-ai/atlas-webui`, and injects the same secret into the app deployment.
+- For one-off local development outside that CI deploy path, start PostgreSQL yourself, set `DATABASE_URL`, and run `npm run db:init -w @a5c-ai/atlas-webui` before `npm run dev -w @a5c-ai/atlas-webui`.
+- Recommended rollout order for a new non-CI environment:
   1. provision PostgreSQL and set `DATABASE_URL`
   2. set `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and `AUTH_SECRET`
   3. run `npm run db:init -w @a5c-ai/atlas-webui`

@@ -176,9 +176,9 @@ describe("private workspace pages", () => {
 
     const html = await renderWorkspaceOverview();
 
-    expect(html).toContain("Private workspace data persists in local SQLite");
-    expect(html).toContain("Private workspace data is persisting in local SQLite because `DATABASE_URL` is not configured.");
-    expect(html).toContain("User graph uploads and company builder remain available locally.");
+    expect(html).toContain("Private workspace data persists in local SQLite only for ad-hoc local runs");
+    expect(html).toContain("This local process is using SQLite because `DATABASE_URL` is not configured.");
+    expect(html).toContain("Development, staging, and production deploy jobs provision Atlas PostgreSQL");
     expect(html).toContain("SQLite-backed local dev");
     expect(html).toContain("Local Overlay");
   });
@@ -245,8 +245,9 @@ describe("private workspace pages", () => {
 
     const html = await renderWorkspaceGraphs();
 
-    expect(html).toContain("Private YAML uploads are stored in local SQLite during development");
-    expect(html).toContain("Private workspace uploads are persisting in local SQLite because `DATABASE_URL` is not configured.");
+    expect(html).toContain("Private YAML uploads use local SQLite only for ad-hoc local runs");
+    expect(html).toContain("This local process is using SQLite because `DATABASE_URL` is not configured.");
+    expect(html).toContain("Development, staging, and production deploy jobs provision Atlas PostgreSQL");
     expect(html).toContain("SQLite-backed local dev");
     expect(html).toContain("Ops Overlay");
     expect(html).toContain("Upload graph");
@@ -434,7 +435,8 @@ describe("private workspace pages", () => {
 
     const html = await renderCompanyBuilder();
 
-    expect(html).toContain("Company builder blueprints are persisting in local SQLite because `DATABASE_URL` is not configured.");
+    expect(html).toContain("This local process is using SQLite because `DATABASE_URL` is not configured.");
+    expect(html).toContain("Development, staging, and production deploy jobs provision Atlas PostgreSQL");
     expect(html).toContain("Create company graph");
     expect(html).toContain("SQLite-backed local dev");
     expect(html).toContain("Layer palette");

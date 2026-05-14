@@ -216,10 +216,10 @@ export default async function CompanyBuilderPage({
         {!databaseConfigured ? (
           <section className="atlas-docs-panel atlas-docs-full">
             <p className="atlas-docs-note">
-              Company builder blueprints are persisting in local SQLite because `DATABASE_URL` is not configured.
+              This local process is using SQLite because `DATABASE_URL` is not configured.
             </p>
             <p className="atlas-docs-note">
-              Configure PostgreSQL and run `npm run db:init -w @a5c-ai/atlas-webui` when you want shared private storage instead of the local development database.
+              Development, staging, and production deploy jobs provision Atlas PostgreSQL, initialize the schema, and inject `DATABASE_URL` automatically. For one-off local runs, set `DATABASE_URL` and run `npm run db:init -w @a5c-ai/atlas-webui` before starting the web UI.
             </p>
           </section>
         ) : null}

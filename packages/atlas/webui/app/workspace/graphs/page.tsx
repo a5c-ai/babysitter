@@ -34,7 +34,7 @@ export default async function WorkspaceGraphsPage() {
       lead={
         databaseConfigured
           ? "Private YAML uploads are parsed into overlay indexes and merged with the public atlas for authenticated exploration."
-          : "Private YAML uploads are stored in local SQLite during development and merged into your authenticated Atlas view."
+          : "Private YAML uploads use local SQLite only for ad-hoc local runs; deployed Atlas environments use CI-provisioned PostgreSQL."
       }
       meta={<><span>Uploads · {uploads.length}</span><span>{databaseConfigured ? "POST /api/private/graphs" : "SQLite-backed local dev"}</span></>}
       marginSections={[
@@ -51,10 +51,10 @@ export default async function WorkspaceGraphsPage() {
         {!databaseConfigured ? (
           <section className="atlas-docs-panel atlas-docs-full">
             <p className="atlas-docs-note">
-              Private workspace uploads are persisting in local SQLite because `DATABASE_URL` is not configured.
+              This local process is using SQLite because `DATABASE_URL` is not configured.
             </p>
             <p className="atlas-docs-note">
-              Configure PostgreSQL, run `npm run db:init -w @a5c-ai/atlas-webui`, and restart the app when you want shared private storage instead of the local development database.
+              Development, staging, and production deploy jobs provision Atlas PostgreSQL, initialize the schema, and inject `DATABASE_URL` automatically. For one-off local runs, set `DATABASE_URL` and run `npm run db:init -w @a5c-ai/atlas-webui` before starting the web UI.
             </p>
           </section>
         ) : null}
