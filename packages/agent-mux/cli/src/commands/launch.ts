@@ -163,7 +163,7 @@ export function resolveLaunchPlan(input: LaunchPlanInput): LaunchPlan {
         apiKey: providerConfig.auth.apiKey,
         project: providerConfig.params['project'] ? String(providerConfig.params['project']) : undefined,
         location: providerConfig.params['region'] ? String(providerConfig.params['region']) : undefined,
-        useVertexAi: providerConfig.provider === 'vertex',
+        useVertexAi: providerConfig.provider === 'vertex' || Boolean(providerConfig.params['useVertexAi']),
       }
     : undefined;
 

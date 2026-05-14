@@ -144,7 +144,7 @@ export function buildPrimaryLiveStackCommands(
       prompt,
       '--max-turns',
       String(resolveLaunchMaxTurns(scenario)),
-      ...(isInteractive ? [] : ['--no-interactive']),
+      ...(isInteractive ? [] : ['--no-interactive', ...bridgeFlags(scenario)]),
       ...harnessApprovalPassthrough(installTarget),
     ],
     options.cwd,
@@ -172,8 +172,16 @@ export function buildPrimaryLiveStackCommands(
 }
 
 function harnessApprovalPassthrough(_harness: string): string[] {
-  // Use --yolo on amux launch which maps to harness-specific approval flags
   return ['--yolo'];
+}
+
+function bridgeFlags(scenario: LiveStackScenario): string[] {
+  // Harnesses that need interactive mode for tool use (file creation) use
+  // --bridge-interactive to spawn via PTY internally while presenting
+  // non-interactive NDJSON output externally. Codex doesn't need this
+  // because exec mode has native tool support.
+  const needsBridge = scenario.agent.agentMuxAgent !== 'codex';
+  return needsBridge ? ['--bridge-interactive'] : [];
 }
 
 function resolveLaunchMaxTurns(scenario: LiveStackScenario): number {
