@@ -8,6 +8,8 @@ import { DispatchButton } from './components/dispatch-button.jsx';
 import { StackBuilder } from './components/stack-builder.jsx';
 import { GraphStackBuilder } from './components/stack-builder-graph.jsx';
 import { InteractiveKanbanBoard } from './components/kanban-interactive.jsx';
+import { EnhancedKanbanBoard } from './components/kanban-enhanced.jsx';
+import { WorkspacePanel } from './components/workspace-panel.jsx';
 import { MemorySearchForm } from './components/memory-search-form.jsx';
 import { MemoryOntologyEditor } from './components/memory-ontology-editor.jsx';
 import { MemoryImportReview } from './components/memory-import-review.jsx';
@@ -680,71 +682,11 @@ export async function AgentWorkspaceDetailPage({ org = null, workspaceId } = {})
     if (!path) return '—';
     return path.length > maxLen ? '…' + path.slice(path.length - maxLen + 1) : path;
   };
+  const firstSessionRef = boundSessions.length ? (boundSessions[0]?.sessionRef || boundSessions[0]) : null;
+  const firstSession = firstSessionRef ? (agentView.sessions?.items || []).find((s) => s.metadata?.name === firstSessionRef) || null : null;
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`workspace / ${workspaceId}`} title={workspaceId || 'Workspace detail'} text={workspace ? `Agent workspace for ${workspace.spec?.repository || 'unknown repository'} with phase ${workspace.status?.phase || 'Pending'}.` : 'This agent workspace was not found in the current workspace.'} actions={[['/agents/workspaces', 'All workspaces'], ['/agents/sessions', 'Sessions']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/workspaces', 'Workspaces'], [`/agents/workspaces/${workspaceId}`, workspaceId || 'Detail']]}>
     <DegradedBanner model={ui.model} />
-    {workspace ? <>
-      <section className="routeGrid two">
-        <div className="card">
-          <div className="cardTitle"><h3>{workspaceId}</h3><StatusPill tone={phaseTone(workspace.status?.phase)}>{workspace.status?.phase || 'Pending'}</StatusPill></div>
-          <p>{workspace.spec?.repository || 'No repository'}</p>
-        </div>
-      </section>
-      <section className="routeGrid four">
-        <div className="card">
-          <div className="cardTitle"><h3>Repository</h3></div>
-          <p style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '0.875rem' }}>{workspace.spec?.repository || '—'}</p>
-        </div>
-        <div className="card">
-          <div className="cardTitle"><h3>Path</h3></div>
-          <p title={workspace.spec?.workspacePath || ''} style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{truncatePath(workspace.spec?.workspacePath)}</p>
-        </div>
-        <div className="card">
-          <div className="cardTitle"><h3>Sessions</h3></div>
-          <p><strong>{boundSessions.length}</strong></p>
-        </div>
-        <div className="card">
-          <div className="cardTitle"><h3>Status</h3></div>
-          <p>{runtime ? (runtime.spec?.status || runtime.status?.phase || 'unknown') : 'No runtime'}</p>
-        </div>
-      </section>
-      <section className="routeGrid two">
-        <div className="card">
-          <div className="cardTitle"><h3>Files</h3><StatusPill tone={runtime?.spec?.files ? 'good' : 'neutral'}>{runtime?.spec?.files ? 'available' : 'none'}</StatusPill></div>
-          {runtime?.spec?.files && Array.isArray(runtime.spec.files) && runtime.spec.files.length ? <div style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8125rem', lineHeight: '1.75' }}>{runtime.spec.files.map((file) => <div key={file}>{file}</div>)}</div> : <EmptyState title="File explorer available when workspace is active" text="File listing is provided by the workspace runtime when the worktree is provisioned and active." />}
-        </div>
-        <div className="card">
-          <div className="cardTitle"><h3>Runtime</h3><StatusPill tone={runtime ? 'good' : 'neutral'}>{runtime ? (runtime.status?.phase || 'available') : 'none'}</StatusPill></div>
-          {runtime ? <dl className="kv">
-            <dt>Working directory</dt><dd style={{ fontFamily: 'var(--font-mono, monospace)' }}>{runtime.spec?.cwd || '—'}</dd>
-            <dt>Process status</dt><dd>{runtime.spec?.status || 'unknown'}</dd>
-            {runtime.spec?.env ? <><dt>Environment keys</dt><dd>{Object.keys(runtime.spec.env).map((key) => <span key={key} className="pill neutral" style={{ marginRight: '0.25rem', fontSize: '0.75rem' }}>{key}</span>)}</dd></> : null}
-          </dl> : <EmptyState title="No runtime data" text="Runtime details appear when the workspace has been provisioned with a worktree and process." />}
-        </div>
-      </section>
-      <section className="routeGrid two">
-        <div className="card">
-          <div className="cardTitle"><h3>Sessions</h3><StatusPill tone={boundSessions.length ? 'good' : 'neutral'}>{boundSessions.length} bound</StatusPill></div>
-          {boundSessions.length ? <ul className="resourceList">{boundSessions.map((binding, index) => {
-            const sessionRef = binding.sessionRef || binding;
-            const session = (agentView.sessions?.items || []).find((s) => s.metadata?.name === sessionRef);
-            return <li key={sessionRef || index}>
-              <a href={orgHref(activeOrg, `/agents/sessions/${sessionRef}`)}><strong>{sessionRef}</strong></a>
-              {session ? <StatusPill tone={session.status?.phase === 'Active' || session.status?.phase === 'Running' ? 'warn' : session.status?.phase === 'Completed' ? 'good' : 'neutral'}>{session.status?.phase || 'Pending'}</StatusPill> : null}
-              {binding.boundAt ? <small>Bound: {binding.boundAt}</small> : null}
-              {binding.agent ? <small>Agent: {binding.agent}</small> : null}
-            </li>;
-          })}</ul> : <p className="emptyText">No sessions are bound to this workspace.</p>}
-        </div>
-        <div className="card">
-          <div className="cardTitle"><h3>Work items</h3><StatusPill tone={workItemLinks.length ? 'good' : 'neutral'}>{workItemLinks.length} linked</StatusPill></div>
-          {workItemLinks.length ? <ul className="resourceList">{workItemLinks.map((link) => <li key={link.metadata?.name}>
-            <strong>{link.spec?.workItemRef || link.metadata?.name}</strong>
-            <span>{link.spec?.workItemKind || 'Issue'}</span>
-            <small>{link.status?.phase || 'Active'}{link.status?.createdAt ? ` / ${link.status.createdAt}` : ''}</small>
-          </li>)}</ul> : <p className="emptyText">No work items are linked to this workspace.</p>}
-        </div>
-      </section>
-    </> : <EmptyState title={`Workspace ${workspaceId} not found`} text="This agent workspace does not exist in the current workspace. Agent workspaces are provisioned when dispatch runs create git worktrees." />}
+    {workspace ? <WorkspacePanel workspace={workspace} runtime={runtime} session={firstSession} org={activeOrg} /> : <EmptyState title={`Workspace ${workspaceId} not found`} text="This agent workspace does not exist in the current workspace. Agent workspaces are provisioned when dispatch runs create git worktrees." />}
   </PageFrame>;
 }
 
@@ -817,7 +759,7 @@ export async function AgentProjectBoardPage({ org = null, projectId } = {}) {
     <DegradedBanner model={ui.model} />
     {project ? <div className="card">
       <div className="cardTitle"><h2>Board</h2><StatusPill tone={boardItems.length ? 'good' : 'neutral'}>{boardItems.length} items</StatusPill></div>
-      <InteractiveKanbanBoard project={project} initialIssues={boardItems} org={activeOrg} />
+      <EnhancedKanbanBoard project={project} initialIssues={boardItems} org={activeOrg} />
     </div> : <EmptyState title={`Project ${projectId} not found`} text="This project does not exist in the current workspace. Create it through Krate resource definitions." />}
   </PageFrame>;
 }
