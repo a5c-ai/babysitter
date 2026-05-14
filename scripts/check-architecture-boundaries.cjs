@@ -46,6 +46,7 @@ const packageFamilies = {
     "@a5c-ai/hooks-mux-adapter-copilot",
     "@a5c-ai/hooks-mux-adapter-cursor",
     "@a5c-ai/hooks-mux-adapter-gemini",
+    "@a5c-ai/hooks-mux-adapter-hermes",
     "@a5c-ai/hooks-mux-adapter-oh-my-pi",
     "@a5c-ai/hooks-mux-adapter-openclaw",
     "@a5c-ai/hooks-mux-adapter-opencode",
