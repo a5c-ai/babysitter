@@ -307,8 +307,9 @@ export async function executeChildProcessCommand(execution: CommandExecution): P
       cwd: execution.cwd,
       env: { ...process.env, ...execution.env },
       shell: process.platform === 'win32',
-      stdio: ['ignore', 'pipe', 'pipe'],
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
+    child.stdin?.end();
     let stdout = '';
     let stderr = '';
     const timer = setTimeout(() => {
