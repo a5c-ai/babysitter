@@ -15,11 +15,16 @@ export async function POST(request, { params }) {
   const { org } = await params;
   const namespace = orgNamespaceName(org);
   const controller = createKrateApiController({ namespace });
-  const resource = await request.json();
-  const scoped = {
-    ...resource,
-    metadata: { ...(resource.metadata || {}), namespace: namespace, labels: { ...(resource.metadata?.labels || {}), 'krate.a5c.ai/org': org, 'krate.a5c.ai/namespace': namespace } },
-    spec: { ...(resource.spec || {}), organizationRef: org }
-  };
-  return Response.json(await controller.applyResource(scoped), { status: 201, headers: { 'Cache-Control': 'no-store' } });
+  try {
+    const resource = await request.json();
+    const scoped = {
+      ...resource,
+      metadata: { ...(resource.metadata || {}), namespace: namespace, labels: { ...(resource.metadata?.labels || {}), 'krate.a5c.ai/org': org, 'krate.a5c.ai/namespace': namespace } },
+      spec: { ...(resource.spec || {}), organizationRef: org }
+    };
+    const result = await controller.applyResource(scoped);
+    return Response.json(result, { status: 201, headers: { 'Cache-Control': 'no-store' } });
+  } catch (error) {
+    return Response.json({ error: 'apply_failed', message: error.message }, { status: 400 });
+  }
 }
