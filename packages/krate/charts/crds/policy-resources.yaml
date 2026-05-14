@@ -19,6 +19,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - displayName
@@ -73,6 +74,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - displayName
             - targetKinds
@@ -132,6 +134,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - templateRef
@@ -183,6 +186,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - policyRef

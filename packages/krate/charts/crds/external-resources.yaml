@@ -34,6 +34,7 @@ spec:
           spec:
             type: object
             x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - providerType
@@ -89,6 +90,7 @@ spec:
           spec:
             type: object
             x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - providerRef
@@ -142,6 +144,7 @@ spec:
           spec:
             type: object
             x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - providerRef
@@ -194,6 +197,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
@@ -253,6 +257,7 @@ spec:
           spec:
             type: object
             x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - providerRef
@@ -308,6 +313,7 @@ spec:
           spec:
             type: object
             x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - providerRef
@@ -361,6 +367,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
@@ -418,6 +425,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
@@ -479,6 +487,7 @@ spec:
           spec:
             type: object
             x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - providerRef
@@ -535,6 +544,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef

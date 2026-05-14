@@ -21,6 +21,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             properties:
               organizationRef:
                 type: string
@@ -62,6 +63,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             properties:
               organizationRef:
                 type: string
@@ -98,6 +100,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - displayName
             - namespaceName
@@ -156,6 +159,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - namespace
@@ -200,6 +204,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - scope
@@ -253,6 +258,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - repository
@@ -305,6 +311,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - displayName
@@ -353,6 +360,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - displayName
@@ -401,6 +409,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - email
@@ -450,6 +459,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - user
@@ -499,6 +509,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - type

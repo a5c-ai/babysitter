@@ -20,6 +20,7 @@ spec:
           spec:
             type: object
             x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             properties:
@@ -47,6 +48,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             properties:
               organizationRef:
                 type: string
@@ -80,6 +82,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             properties:
               organizationRef:
                 type: string
@@ -115,6 +118,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - selector
@@ -154,6 +158,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             properties:
               organizationRef:
                 type: string
@@ -189,6 +194,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - repository
@@ -233,6 +239,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - title
@@ -280,6 +287,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - pullRequest
@@ -319,6 +327,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - repository
@@ -354,6 +363,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - pipeline
@@ -389,6 +399,7 @@ spec:
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
             required:
             - organizationRef
             - subscription
