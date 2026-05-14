@@ -609,6 +609,21 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     }
   }
 
+  // Bridge hooks: emulate lifecycle hooks when --bridge-hooks is set
+  let bridgeHookEmulator: import('./launch-bridge-hooks.js').BridgeHookEmulator | undefined;
+  if (bridgeHooks) {
+    const { BridgeHookEmulator } = await import('./launch-bridge-hooks.js');
+    bridgeHookEmulator = new BridgeHookEmulator({
+      harness: plan.harness,
+      cwd: launchCwd,
+      env: plan.env,
+      sessionId: flagStr(args.flags, 'session-id'),
+      runsDir: plan.env['BABYSITTER_RUNS_DIR'] || undefined,
+      verbose: flagBool(args.flags, 'debug') === true,
+    });
+    await bridgeHookEmulator.emulateSessionStart();
+  }
+
   // Spawn harness
 
   let child: import('node:child_process').ChildProcess = null as any;
@@ -929,6 +944,41 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
 
   process.off('SIGINT', forwardSignal);
   process.off('SIGTERM', forwardSignal);
+
+  // Bridge hooks: emulate stop hook and re-spawn if shouldContinue
+  if (bridgeHookEmulator) {
+    let stopResult = await bridgeHookEmulator.emulateStop();
+    while (stopResult.shouldContinue && stopResult.resumeId) {
+      // Re-spawn with --resume to continue the session
+      const resumePlan = { ...plan, args: [...plan.args] };
+      appendHarnessSessionArgs(resumePlan, {
+        resumeId: stopResult.resumeId,
+        interactive: false,
+      });
+
+      const { spawn: resumeSpawn } = await import('node:child_process');
+      const resumeChild = resumeSpawn(resumePlan.command, resumePlan.args, {
+        stdio: ['pipe', 'inherit', 'inherit'],
+        env: { ...process.env, ...resumePlan.env },
+        cwd: launchCwd,
+        shell: process.platform === 'win32',
+      });
+
+      if (resumeChild.stdin) {
+        resumeChild.stdin.end();
+      }
+
+      await new Promise<number>((resolve) => {
+        resumeChild.on('exit', (code: number | null, signal: string | null) => {
+          resolve(signal ? 128 + (signal === 'SIGINT' ? 2 : 15) : (code ?? 1));
+        });
+      });
+
+      stopResult = await bridgeHookEmulator.emulateStop();
+    }
+
+    await bridgeHookEmulator.emulateSessionEnd();
+  }
 
   if (proxyRuntime) {
     await proxyRuntime.stop();
