@@ -37,6 +37,10 @@ spec:
               value: "3080"
             - name: KRATE_NAMESPACE
               value: {{ .Release.Namespace | quote }}
+            - name: KRATE_ADMIN_ORG
+              value: {{ .Values.admin.org | quote }}
+            - name: KRATE_ADMIN_USERNAME
+              value: {{ .Values.admin.username | quote }}
             - name: KRATE_KUBEVELA_NAMESPACE
               value: {{ $kubevelaNamespace | quote }}
             - name: KRATE_KYVERNO_MODE
@@ -164,6 +168,10 @@ spec:
               value: "3080"
             - name: KRATE_NAMESPACE
               value: {{ .Release.Namespace | quote }}
+            - name: KRATE_ADMIN_ORG
+              value: {{ .Values.admin.org | quote }}
+            - name: KRATE_ADMIN_USERNAME
+              value: {{ .Values.admin.username | quote }}
             - name: KRATE_KUBEVELA_NAMESPACE
               value: {{ $kubevelaNamespace | quote }}
             - name: KRATE_KYVERNO_MODE
