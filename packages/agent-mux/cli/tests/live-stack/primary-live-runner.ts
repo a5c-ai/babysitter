@@ -767,12 +767,14 @@ async function validateAgentBehavior(
 
           const isBareRun = processId === 'bare-run' || !processId;
 
-          if (isBareRun) {
-            // Bare runs (created by live-stack for session/hooks verification)
-            // only need to exist with a completionProof — they are not expected
-            // to have RUN_COMPLETED or a real processId.
+          if (isBareRun && !isBabysitterPlugin) {
+            // Vanilla bare runs (session scaffolding) just need to exist
             completionProofFound = true;
             completionProofDetail = `run ${entry} is a bare run with completionProof (session scaffolding)`;
+          } else if (isBareRun && isBabysitterPlugin) {
+            // babysitter-plugin runs must NOT be bare — the babysitter skill
+            // should assign a real process via run:assign-process
+            completionProofDetail = `run ${entry} is still a bare run — babysitter-plugin should have assigned a process`;
           } else if (hasRunCompleted) {
             completionProofFound = true;
             completionProofDetail = `run ${entry} completed with processId=${processId} and completionProof`;
