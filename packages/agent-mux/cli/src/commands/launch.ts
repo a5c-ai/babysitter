@@ -685,14 +685,24 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         cwd: launchCwd,
         env: { ...process.env, ...plan.env } as Record<string, string>,
       });
-      console.error(`[amux launch] PTY spawned: pid=${ptyProcess.pid} cmd=${plan.command} args=${plan.args.length}`);
-      let ptyBytes = 0;
+      const ptyOutput: string[] = [];
       ptyProcess.onData((data: string) => {
-        ptyBytes += data.length;
-        process.stdout.write(data);
+        ptyOutput.push(data);
+        // Write to stderr to avoid stdout pipe backpressure deadlock
+        if (!process.stdout.isTTY) {
+          process.stderr.write(data);
+        } else {
+          process.stdout.write(data);
+        }
       });
-      ptyProcess.onExit(({ exitCode: code }: { exitCode: number }) => {
-        console.error(`[amux launch] PTY exited: code=${code} totalBytes=${ptyBytes}`);
+      ptyProcess.onExit(() => {
+        // Flush buffered PTY output to stdout on exit
+        if (!process.stdout.isTTY && ptyOutput.length > 0) {
+          const combined = ptyOutput.join('');
+          // Strip ANSI for piped consumers
+          const clean = combined.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*\x07/g, '');
+          process.stdout.write(clean);
+        }
       });
       child = { pid: ptyProcess.pid, kill: (sig: string) => ptyProcess.kill(sig) } as any;
     } catch (err) {
