@@ -180,7 +180,7 @@ function resolveLaunchMaxTurns(scenario: LiveStackScenario): number {
   if (scenario.agent.agent === 'babysitter-agent') {
     return 1;
   }
-  return 5;
+  return 30;
 }
 
 
@@ -391,17 +391,17 @@ function withWorkspaceBinOnPath(env: Record<string, string | undefined>, cwd: st
 }
 
 function buildPrompt(scenario: LiveStackScenario, traceId: string): string {
-  const fileTask = `Write a 4-paragraph summary of Homer's Odyssey (at least 600 words). Save it to .a5c-live-test/${traceId}-odyssey.md`;
+  const coreTask = `Write a 12-paragraph summary of Homer's Odyssey. Then translate each paragraph to Greek (do translations in parallel if possible). Concatenate the English and Greek versions into one markdown document and save the final result to .a5c-live-test/${traceId}-odyssey.md`;
 
   if (scenario.agent.agent === 'babysitter-agent') {
-    return `Write a 4-paragraph summary of Homer's Odyssey (at least 600 words).`;
+    return `Write a 12-paragraph summary of Homer's Odyssey, then translate each paragraph to Greek.`;
   }
 
   if (scenario.agent.installMode === 'babysitter-plugin') {
-    return `/babysitter:call ${fileTask}`;
+    return `Use the babysitter skill to orchestrate the following task: ${coreTask}`;
   }
 
-  return fileTask;
+  return coreTask;
 }
 
 function extractTraceIds(output: string): Partial<LiveStackEvidenceBundle> {
