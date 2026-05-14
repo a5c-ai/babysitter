@@ -757,10 +757,21 @@ async function validateAgentBehavior(
 
           if (proof === undefined || proof === null) continue;
 
+          // Check journal for RUN_COMPLETED event (status is derived from journal, not stored in run.json)
+          let hasRunCompleted = false;
+          try {
+            const journalDir = path.join(runsDir, entry, 'journal');
+            const jEntries = await fs.readdir(journalDir);
+            for (const jf of jEntries) {
+              const jContent = await fs.readFile(path.join(journalDir, jf), 'utf8');
+              if (jContent.includes('RUN_COMPLETED')) { hasRunCompleted = true; break; }
+            }
+          } catch { /* no journal */ }
+
           const failures: string[] = [];
-          if (status !== 'completed') failures.push(`status=${status ?? 'missing'} (expected completed)`);
+          if (!hasRunCompleted) failures.push('no RUN_COMPLETED event in journal');
           if (!processId) failures.push('no processId associated');
-          if (processId && /bare[-_]?run/i.test(processId)) failures.push(`processId="${processId}" is a bare run (no real process)`);
+          if (processId && /bare[-_]?run/i.test(processId)) failures.push(`processId="${processId}" is still a bare run — run:assign-process was not called by the babysitter skill`);
 
           if (failures.length === 0) {
             completionProofFound = true;
