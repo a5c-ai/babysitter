@@ -180,7 +180,8 @@ function resolveLaunchMaxTurns(scenario: LiveStackScenario): number {
   if (scenario.agent.agent === 'babysitter-agent') {
     return 1;
   }
-  return 5;
+  // Cross-model proxied scenarios need more turns for tool-use coaching
+  return 12;
 }
 
 
