@@ -180,7 +180,7 @@ function resolveLaunchMaxTurns(scenario: LiveStackScenario): number {
   if (scenario.agent.agent === 'babysitter-agent') {
     return 1;
   }
-  return 3;
+  return 15;
 }
 
 
