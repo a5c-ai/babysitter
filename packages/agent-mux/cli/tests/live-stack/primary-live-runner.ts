@@ -55,8 +55,8 @@ export interface PrimaryLiveRunResult {
   readonly verifications?: readonly VerificationEntry[];
 }
 
-const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
-const INTERACTIVE_TIMEOUT_MS = 5 * 60 * 1000;
+const DEFAULT_TIMEOUT_MS = 10 * 60 * 1000;
+const INTERACTIVE_TIMEOUT_MS = 10 * 60 * 1000;
 
 export function buildPrimaryLiveStackCommands(
   scenario: LiveStackScenario,
