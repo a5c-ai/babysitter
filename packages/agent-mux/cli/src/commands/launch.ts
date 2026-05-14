@@ -52,6 +52,8 @@ export const LAUNCH_FLAGS: Record<string, FlagDef> = {
   'workspace-repo': { type: 'string', repeatable: true },
   'workspace-name': { type: 'string' },
   'yolo': { type: 'boolean' },
+  'bridge-interactive': { type: 'boolean' },
+  'bridge-hooks': { type: 'boolean' },
 };
 
 // ---------------------------------------------------------------------------
@@ -457,6 +459,39 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
   // Resolve interactive mode (default: true)
   const interactiveFlag = flagBool(args.flags, 'interactive');
   const isInteractive = interactiveFlag !== false;
+
+  // Bridge flags: --bridge-interactive and --bridge-hooks
+  const bridgeInteractive = flagBool(args.flags, 'bridge-interactive') === true;
+  const bridgeHooks = flagBool(args.flags, 'bridge-hooks') === true;
+
+  if (bridgeInteractive && isInteractive) {
+    const msg = '--bridge-interactive requires --no-interactive';
+    if (jsonMode) printJsonError('VALIDATION_ERROR', msg);
+    else printError(msg);
+    return ExitCode.USAGE_ERROR;
+  }
+
+  if (bridgeHooks && isInteractive) {
+    const msg = '--bridge-hooks requires --no-interactive';
+    if (jsonMode) printJsonError('VALIDATION_ERROR', msg);
+    else printError(msg);
+    return ExitCode.USAGE_ERROR;
+  }
+
+  if (bridgeInteractive) {
+    try {
+      const { getBridgeCapabilities } = await import('@a5c-ai/agent-catalog');
+      const caps = getBridgeCapabilities(plan.harness);
+      if (!caps?.interactiveBridge) {
+        const msg = `${plan.harness} does not support interactive bridging`;
+        if (jsonMode) printJsonError('CAPABILITY_ERROR', msg);
+        else printError(msg);
+        return ExitCode.USAGE_ERROR;
+      }
+    } catch {
+      // agent-catalog not available — skip capability check
+    }
+  }
 
   // Append session/prompt args
   const prompt = flagStr(args.flags, 'prompt');
