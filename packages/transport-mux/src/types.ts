@@ -52,6 +52,8 @@ export interface CompletionResult {
   text: string;
   finishReason: string;
   usage: CompletionUsage;
+  toolCalls?: Array<{ id: string; name: string; arguments: string }>;
+  costRecord?: { inputTokens: number; outputTokens: number; cacheReadTokens?: number; cacheWriteTokens?: number };
 }
 
 export interface TokenCountResult {
