@@ -9,6 +9,7 @@ const packageRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(packageRoot, '..', '..');
 const indexPath = path.join(packageRoot, 'src', 'index.json');
 const crdDir = path.join(repoRoot, 'packages', 'krate', 'charts', 'crds');
+const krateWebApiDir = path.join(repoRoot, 'packages', 'krate', 'web', 'app', 'api');
 
 const EXPECTED_FAMILY_COUNTS = {
   agent: 22,
@@ -26,6 +27,7 @@ const EXPECTED_COUNTS = {
   controllerReconciles: 89,
   governanceEdges: 13,
   externalMappings: 46,
+  krateWebApiEndpoints: 46,
   scopedDuplicateIds: 0,
   danglingKrateTypedEdges: 0,
 };
@@ -45,6 +47,7 @@ const SCOPED_GRAPH_FILES = [
   'packages/atlas/graph/domain/products/krate-controllers.yaml',
   'packages/atlas/graph/agent-stack/platform-impls/krate-platform-current.yaml',
   'packages/atlas/graph/agent-stack/interaction-primitives/krate-orchestration.yaml',
+  'packages/atlas/graph/extensions/api-endpoints/krate-web-api-endpoints.yaml',
 ];
 
 const KRATE_TYPED_EDGE_KINDS = new Set([
@@ -127,6 +130,31 @@ function getSourceCrdKinds() {
   return kinds;
 }
 
+function getSourceKrateWebApiEndpoints() {
+  const endpoints = [];
+  function visit(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const absolute = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        visit(absolute);
+        continue;
+      }
+      if (entry.name !== 'route.js') continue;
+      const relative = path.relative(repoRoot, absolute).replace(/\\/g, '/');
+      const source = fs.readFileSync(absolute, 'utf8');
+      const routeDir = path.dirname(relative).replace(/\\/g, '/').split('/app/api/')[1];
+      const route = ('/api/' + routeDir)
+        .replace(/\[\[\.\.\.([^\]]+)\]\]/g, ':$1*?')
+        .replace(/\[\.\.\.([^\]]+)\]/g, ':$1*')
+        .replace(/\[([^\]]+)\]/g, ':$1');
+      for (const match of source.matchAll(/export\s+async\s+function\s+(GET|POST|PUT|DELETE|PATCH)\b/g)) {
+        endpoints.push({ file: relative, method: match[1], path: route });
+      }
+    }
+  }
+  visit(krateWebApiDir);
+  return endpoints.sort((a, b) => (a.method + ' ' + a.path).localeCompare(b.method + ' ' + b.path));
+}
 function kebab(value) {
   return String(value)
     .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
@@ -211,6 +239,26 @@ assertEqual(
   EXPECTED_COUNTS.externalMappings,
 );
 
+const sourceKrateWebApiEndpoints = getSourceKrateWebApiEndpoints();
+assertEqual('sourceKrateWebApiEndpoints', sourceKrateWebApiEndpoints.length, EXPECTED_COUNTS.krateWebApiEndpoints);
+const krateWebApiEndpointRecords = Object.entries(records)
+  .filter(([id, record]) => id.startsWith('api-endpoint:krate-web-') && record._kind === 'APIEndpoint')
+  .map(([id, record]) => ({ id, ...record }));
+assertEqual('krateWebApiEndpoints', krateWebApiEndpointRecords.length, EXPECTED_COUNTS.krateWebApiEndpoints);
+const endpointKeys = new Set(krateWebApiEndpointRecords.map((record) => record.method + ' ' + record.path));
+const missingKrateWebApiEndpoints = sourceKrateWebApiEndpoints
+  .filter((endpoint) => !endpointKeys.has(endpoint.method + ' ' + endpoint.path));
+if (missingKrateWebApiEndpoints.length) {
+  fail('missing Krate web APIEndpoint records for source routes', JSON.stringify(missingKrateWebApiEndpoints.slice(0, 10)));
+}
+const krateWebEndpointEdges = edges.filter((edge) => edge.kind === 'exposed_by'
+  && String(edge.from).startsWith('api-endpoint:krate-web-')
+  && edge.to === 'package:a5c-ai-krate-web');
+assertEqual('krateWebApiEndpointExposedByEdges', krateWebEndpointEdges.length, EXPECTED_COUNTS.krateWebApiEndpoints);
+for (const record of krateWebApiEndpointRecords) {
+  if (!record.description?.includes('Source: packages/krate/web/app/api/')) fail('missing source route citation on Krate web endpoint', record.id);
+}
+
 const danglingKrateTypedEdges = edges.filter((edge) => {
   return KRATE_TYPED_EDGE_KINDS.has(edge.kind)
     && (String(edge.from).includes('krate') || String(edge.to).includes('krate'))
@@ -250,6 +298,9 @@ console.log(JSON.stringify({
   controllerReconciles: details.controllerReconciles,
   governanceEdges: details.governanceEdges,
   externalMappings: details.externalMappings,
+  krateWebApiEndpoints: details.krateWebApiEndpoints,
+  sourceKrateWebApiEndpoints: details.sourceKrateWebApiEndpoints,
+  krateWebApiEndpointExposedByEdges: details.krateWebApiEndpointExposedByEdges,
   danglingKrateTypedEdges: details.danglingKrateTypedEdges,
   scopedDuplicateIds: details.scopedDuplicateIds,
 }, null, 2));
