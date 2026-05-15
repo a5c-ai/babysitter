@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "echo 'no lint configured'",
-    "test": "node --test tests/build-smoke.test.js"
+    "test": "node --test tests/build-smoke.test.js tests/api-auth.test.js tests/status-tones.test.js"
   },
   "dependencies": {
     "@a5c-ai/krate-sdk": "*",

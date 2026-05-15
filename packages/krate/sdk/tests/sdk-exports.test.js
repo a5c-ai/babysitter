@@ -266,3 +266,110 @@ test('createAgentSecretGrantController creates a grant', () => {
   assert.equal(result.grant.kind, 'AgentSecretGrant');
   assert.equal(result.grant.metadata.name, 'my-grant');
 });
+
+// ---------------------------------------------------------------------------
+// New exports: runner controller, notification controller, Gitea service,
+// provider registry, and event bus
+// ---------------------------------------------------------------------------
+
+test('createRunnerController exists and is function', () => {
+  assert.equal(typeof sdk.createRunnerController, 'function');
+});
+
+test('createRunnerController returns a controller with expected methods', () => {
+  const ctrl = sdk.createRunnerController();
+  assert.equal(typeof ctrl.validateRunnerPool, 'function');
+  assert.equal(typeof ctrl.createRunner, 'function');
+  assert.equal(typeof ctrl.scheduleJob, 'function');
+  assert.equal(typeof ctrl.generatePodSpec, 'function');
+  assert.equal(typeof ctrl.getCapacity, 'function');
+  assert.equal(typeof ctrl.terminateRunner, 'function');
+  assert.equal(typeof ctrl.getPoolStatus, 'function');
+});
+
+test('createNotificationController exists and is function', () => {
+  assert.equal(typeof sdk.createNotificationController, 'function');
+});
+
+test('createNotificationController returns a controller with expected methods', () => {
+  const ctrl = sdk.createNotificationController();
+  assert.equal(typeof ctrl.createNotification, 'function');
+  assert.equal(typeof ctrl.listNotifications, 'function');
+  assert.equal(typeof ctrl.markAsRead, 'function');
+  assert.equal(typeof ctrl.markAllAsRead, 'function');
+  assert.equal(typeof ctrl.getUnreadCount, 'function');
+  assert.equal(typeof ctrl.getPreferences, 'function');
+  assert.equal(typeof ctrl.updatePreferences, 'function');
+});
+
+test('createGiteaService exists and is function', () => {
+  assert.equal(typeof sdk.createGiteaService, 'function');
+});
+
+test('createGiteaService returns null when no giteaUrl configured', () => {
+  // Without KRATE_GITEA_HTTP_URL set, the service must return null
+  const savedUrl = process.env.KRATE_GITEA_HTTP_URL;
+  delete process.env.KRATE_GITEA_HTTP_URL;
+  const service = sdk.createGiteaService({});
+  assert.equal(service, null, 'createGiteaService must return null when giteaUrl is absent');
+  if (savedUrl !== undefined) process.env.KRATE_GITEA_HTTP_URL = savedUrl;
+});
+
+test('createGiteaService returns a service object with available: true when giteaUrl provided', () => {
+  const service = sdk.createGiteaService({ giteaUrl: 'http://localhost:3000', fetchImpl: () => {} });
+  assert.ok(service, 'service must not be null when giteaUrl is given');
+  assert.equal(service.available, true);
+  assert.equal(typeof service.listTree, 'function');
+  assert.equal(typeof service.getBlob, 'function');
+  assert.equal(typeof service.listBranches, 'function');
+  assert.equal(typeof service.getFileContent, 'function');
+  assert.equal(typeof service.createRepository, 'function');
+});
+
+test('createDefaultProviderRegistry exists and is function', () => {
+  assert.equal(typeof sdk.createDefaultProviderRegistry, 'function');
+});
+
+test('createDefaultProviderRegistry returns a registry object', () => {
+  const registry = sdk.createDefaultProviderRegistry();
+  assert.ok(registry, 'registry must not be null');
+  assert.equal(typeof registry, 'object');
+});
+
+test('createEventBus exists and is function', () => {
+  assert.equal(typeof sdk.createEventBus, 'function');
+});
+
+test('createEventBus returns bus with subscribe, unsubscribe, emit, emitResourceChange', () => {
+  const bus = sdk.createEventBus();
+  assert.equal(typeof bus.subscribe, 'function');
+  assert.equal(typeof bus.unsubscribe, 'function');
+  assert.equal(typeof bus.emit, 'function');
+  assert.equal(typeof bus.emitResourceChange, 'function');
+});
+
+test('globalEventBus is exported and is an event bus instance', () => {
+  assert.ok(sdk.globalEventBus, 'globalEventBus must be exported');
+  assert.equal(typeof sdk.globalEventBus.emit, 'function');
+  assert.equal(typeof sdk.globalEventBus.subscribe, 'function');
+});
+
+// ---------------------------------------------------------------------------
+// Comprehensive export count verification (50+ exports)
+// ---------------------------------------------------------------------------
+
+test('SDK exports at least 50 named symbols', () => {
+  const exportKeys = Object.keys(sdk);
+  assert.ok(
+    exportKeys.length >= 50,
+    `SDK must export at least 50 named symbols; found ${exportKeys.length}: ${exportKeys.join(', ')}`
+  );
+});
+
+test('SDK exports all external controller factory functions', () => {
+  assert.equal(typeof sdk.createSyncController, 'function');
+  assert.equal(typeof sdk.createWebhookController, 'function');
+  assert.equal(typeof sdk.createWriteController, 'function');
+  assert.equal(typeof sdk.createConflictController, 'function');
+  assert.equal(typeof sdk.createExternalBackendProvider, 'function');
+});

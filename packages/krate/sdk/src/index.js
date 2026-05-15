@@ -6,7 +6,7 @@ export { fetchControllerUiModel } from '../../core/src/controller-client.js';
 export { clearSnapshotCache } from '../../core/src/snapshot-cache.js';
 
 // Controller UI Model
-export { createControllerUiModel } from '../../core/src/controller-ui.js';
+export { createControllerUiModel, issueProjectRefs, issueRepositoryRefs } from '../../core/src/controller-ui.js';
 
 // Authentication
 export {
@@ -194,6 +194,18 @@ export {
   createDeliveryQueue,
   createCheckpointer
 } from '../../core/src/async-controller.js';
+
+// Runner Controller
+export {
+  createRunnerController,
+  RUNNER_CONTROLLER_BOUNDARY
+} from '../../core/src/runner-controller.js';
+
+// Notification Controller
+export {
+  createNotificationController,
+  NOTIFICATION_CONTROLLER_BOUNDARY
+} from '../../core/src/notification-controller.js';
 
 // Gitea Service
 export { createGiteaService } from '../../core/src/gitea-service.js';
