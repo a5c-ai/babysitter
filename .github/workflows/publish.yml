@@ -443,37 +443,6 @@ jobs:
             packages/agent-mux/webui/.tmp/playwright-test-results
           if-no-files-found: warn
 
-
-  dispatch_live_stack:
-    if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
-    needs: build_all
-    name: Dispatch Live Stack
-    runs-on: ubuntu-latest-l
-    permissions:
-      actions: write
-      contents: read
-    steps:
-      - name: Dispatch live-stack workflow
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PUBLISH_RUN_ID: ${{ github.run_id }}
-          PUBLISH_HEAD_SHA: ${{ github.sha }}
-          PUBLISH_REF: ${{ github.ref_name }}
-        run: |
-          set -euo pipefail
-          workflow_id="$(gh api "repos/${{ github.repository }}/actions/workflows/live-stack.yml" --jq .id 2>/tmp/live-stack-workflow.err || true)"
-          if [[ -z "$workflow_id" ]]; then
-            echo "::warning::Live Stack workflow is not registered on the default branch yet; skipping dispatch for this Publish run."
-            cat /tmp/live-stack-workflow.err || true
-            exit 0
-          fi
-
-          gh api --method POST "repos/${{ github.repository }}/actions/workflows/$workflow_id/dispatches" \
-            -f ref="$PUBLISH_REF" \
-            -f inputs[publish_run_id]="$PUBLISH_RUN_ID" \
-            -f inputs[publish_head_sha]="$PUBLISH_HEAD_SHA" \
-            -f inputs[publish_ref]="$PUBLISH_REF"
-
   validate_cloud:
     if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
     needs: build_all

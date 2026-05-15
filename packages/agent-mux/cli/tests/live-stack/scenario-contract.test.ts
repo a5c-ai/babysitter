@@ -201,12 +201,21 @@ describe('live stack scenario contract primitives', () => {
   it('keeps Publish decoupled from live-stack matrix execution', () => {
     const publish = fs.readFileSync('.github/workflows/publish.yml', 'utf8');
 
-    expect(publish).toContain('actions/workflows/live-stack.yml');
-    expect(publish).toContain('dispatches');
     expect(publish).not.toContain('Run selected live stack E2E');
     expect(publish).not.toContain('live_stack_babysitter_plugin');
     expect(publish).not.toContain('live_stack_babysitter_agent');
     expect(publish).not.toContain('live_stack_vanilla');
+    expect(publish).not.toContain('live-stack.yml');
+  });
+
+  it('keeps Live Stack independently triggered and self-contained', () => {
+    const workflow = fs.readFileSync('.github/workflows/live-stack.yml', 'utf8');
+
+    expect(workflow).toContain('push:');
+    expect(workflow).toContain('workflow_dispatch:');
+    expect(workflow).toContain('build_all:');
+    expect(workflow).toContain('name: build-all-dist');
+    expect(workflow).not.toContain('publish_run_id');
   });
 
 });

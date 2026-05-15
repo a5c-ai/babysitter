@@ -1,26 +1,17 @@
 name: Live Stack
 
-run-name: Live Stack for ${{ inputs.publish_ref }} @ ${{ inputs.publish_head_sha }}
+run-name: Live Stack for ${{ github.ref_name }} @ ${{ github.sha }}
 
 on:
+  push:
+    branches:
+      - main
+      - staging
+      - develop
   workflow_dispatch:
-    inputs:
-      publish_run_id:
-        description: Publish workflow run ID that produced build-all-dist
-        required: true
-        type: string
-      publish_head_sha:
-        description: Commit SHA to test
-        required: true
-        type: string
-      publish_ref:
-        description: Branch or ref that dispatched this live-stack run
-        required: true
-        type: string
 
 permissions:
   contents: read
-  actions: read
 
 env:
   NPM_CONFIG_AUDIT: "false"
@@ -29,11 +20,140 @@ env:
   NPM_CONFIG_PREFER_OFFLINE: "true"
 
 concurrency:
-  group: live-stack-${{ inputs.publish_run_id }}
+  group: live-stack-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
+  build_all:
+    if: ${{ !contains(github.event.head_commit.message || '', '[skip publish]') }}
+    name: Build All
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.nm-cache.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Restore build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/**/tsconfig.tsbuildinfo
+            packages/**/.tsbuildinfo
+            packages/agent-mux/webui/node_modules/.vite
+            packages/atlas/webui/.next/cache
+            packages/krate/web/.next/cache
+          key: build-${{ runner.os }}-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            build-${{ runner.os }}-${{ github.ref_name }}-
+            build-${{ runner.os }}-
+
+      - name: "Build phase 1: shared catalog foundation"
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/agent-catalog
+
+
+      - name: "Build phase 2: parallel independents and agent-mux critical path"
+        run: |
+          set -euo pipefail
+          PIDS=()
+          run_bg() {
+            "$@" &
+            PIDS+=("$!")
+          }
+          wait_all() {
+            local fail=0
+            for pid in "${PIDS[@]}"; do
+              wait "$pid" || fail=1
+            done
+            PIDS=()
+            [ "$fail" -eq 0 ] || exit 1
+          }
+
+          run_bg bash -lc '
+            set -euo pipefail
+            npm run build --workspace=@a5c-ai/hooks-mux-core
+            # Adapters are independent (only depend on core) — build in parallel
+            for adapter in claude codex gemini copilot cursor pi oh-my-pi opencode openclaw hermes; do
+              npm run build --workspace=@a5c-ai/hooks-mux-adapter-$adapter &
+            done
+            wait
+            npm run build --workspace=@a5c-ai/hooks-mux-cli
+          '
+          run_bg npm run build --workspace=@a5c-ai/agent-plugins-mux
+          run_bg npm run build --workspace=@a5c-ai/triggers
+          run_bg npm run build:observer
+          run_bg npm run build:cloud
+          run_bg bash -lc 'cd packages/krate/core && npm run build && cd ../web && npm run build'
+
+          # agent-mux critical path (sequential — each depends on previous)
+          npm run build --workspace=@a5c-ai/agent-mux-observability
+          npm run build --workspace=@a5c-ai/agent-mux-core
+
+          leaf_pids=()
+          npm run build --workspace=@a5c-ai/agent-mux-adapters & leaf_pids+=("$!")
+          npm run build --workspace=@a5c-ai/agent-mux-harness-mock & leaf_pids+=("$!")
+          npm run build --workspace=@a5c-ai/transport-mux & leaf_pids+=("$!")
+          leaf_fail=0
+          for pid in "${leaf_pids[@]}"; do
+            wait "$pid" || leaf_fail=1
+          done
+          [ "$leaf_fail" -eq 0 ] || exit 1
+
+          npm run build --workspace=@a5c-ai/agent-mux-gateway
+          npm run build --workspace=@a5c-ai/agent-mux-cli
+          npm run build --workspace=@a5c-ai/agent-mux
+          npm run build:local --workspace=@a5c-ai/agent-mux-tui
+          # webui depends on core + ui — must be after agent-mux chain
+          npm run build --workspace=@a5c-ai/agent-mux-webui
+
+          # SDK, agent-core, babysitter-agent: prerequisites (atlas, agent-catalog,
+          # agent-mux chain) are already built above — call tsc directly to avoid
+          # redundant rebuilds through chained npm scripts.
+          npm run build --workspace=@a5c-ai/babysitter-sdk
+          (cd packages/agent-core && npx tsc --build --force tsconfig.json)
+          (cd packages/babysitter-agent && npx tsc --build tsconfig.json)
+
+          wait_all
+
+      - name: Package dist directories
+        run: find packages -path '*/dist' -type d | tar czf /tmp/build-all-dist.tar.gz -T -
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-all-dist
+          path: /tmp/build-all-dist.tar.gz
+          if-no-files-found: error
+
   live_stack_babysitter_plugin:
+    if: ${{ !contains(github.event.head_commit.message || '', '[skip publish]') }}
+    needs: build_all
     name: Live Stack (babysitter-plugin, ${{ matrix.scenario.id }}, ${{ matrix.interaction_mode.id }}, os=ubuntu-latest-l)
     runs-on: ubuntu-latest-l
     permissions:
@@ -96,7 +216,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.publish_head_sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -123,8 +242,6 @@ jobs:
         with:
           name: build-all-dist
           path: /tmp
-          run-id: ${{ inputs.publish_run_id }}
-          github-token: ${{ github.token }}
 
       - name: Extract build artifacts
         run: tar xzf /tmp/build-all-dist.tar.gz
@@ -190,12 +307,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-stack-${{ inputs.publish_run_id }}-${{ matrix.install_mode.id }}-${{ matrix.interaction_mode.id }}-${{ matrix.scenario.id }}
+          name: live-stack-${{ github.run_id }}-${{ matrix.install_mode.id }}-${{ matrix.interaction_mode.id }}-${{ matrix.scenario.id }}
           path: artifacts/live-stack
           if-no-files-found: error
 
   live_stack_babysitter_agent:
     if: false
+    needs: build_all
     name: Live Stack (babysitter-agent, ${{ matrix.scenario.id }}, ${{ matrix.interaction_mode.id }}, os=ubuntu-latest-l)
     runs-on: ubuntu-latest-l
     permissions:
@@ -230,7 +348,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.publish_head_sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -257,8 +374,6 @@ jobs:
         with:
           name: build-all-dist
           path: /tmp
-          run-id: ${{ inputs.publish_run_id }}
-          github-token: ${{ github.token }}
 
       - name: Extract build artifacts
         run: tar xzf /tmp/build-all-dist.tar.gz
@@ -320,11 +435,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-stack-${{ inputs.publish_run_id }}-${{ matrix.install_mode.id }}-${{ matrix.interaction_mode.id }}-${{ matrix.scenario.id }}
+          name: live-stack-${{ github.run_id }}-${{ matrix.install_mode.id }}-${{ matrix.interaction_mode.id }}-${{ matrix.scenario.id }}
           path: artifacts/live-stack
           if-no-files-found: error
 
   live_stack_vanilla:
+    if: ${{ !contains(github.event.head_commit.message || '', '[skip publish]') }}
+    needs: build_all
     name: Live Stack (vanilla, ${{ matrix.scenario.id }}, ${{ matrix.interaction_mode.id }}, os=ubuntu-latest-l)
     runs-on: ubuntu-latest-l
     permissions:
@@ -387,7 +504,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.publish_head_sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -414,8 +530,6 @@ jobs:
         with:
           name: build-all-dist
           path: /tmp
-          run-id: ${{ inputs.publish_run_id }}
-          github-token: ${{ github.token }}
 
       - name: Extract build artifacts
         run: tar xzf /tmp/build-all-dist.tar.gz
@@ -481,6 +595,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-stack-${{ inputs.publish_run_id }}-${{ matrix.install_mode.id }}-${{ matrix.interaction_mode.id }}-${{ matrix.scenario.id }}
+          name: live-stack-${{ github.run_id }}-${{ matrix.install_mode.id }}-${{ matrix.interaction_mode.id }}-${{ matrix.scenario.id }}
           path: artifacts/live-stack
           if-no-files-found: error
