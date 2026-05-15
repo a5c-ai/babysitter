@@ -3579,6 +3579,51 @@ edgeKinds:
   target: [JournalEvent]
   cardinality: 1:1
   inverse: aliased_by_run_journal_event
+- id: edge:has-out-of-scope-reason
+  name: has_out_of_scope_reason
+  origin: derived
+  originContext: Derived from ScopeBoundary.outOfScopeReasonIds attributes.
+  description: a scope boundary cites an out-of-scope reason for excluded behavior, surfaces, or data
+  source: [ScopeBoundary]
+  target: [OutOfScopeReason]
+  cardinality: N:N
+  inverse: out_of_scope_reason_for
+- id: edge:install-method-requires
+  name: install_method_requires
+  origin: derived
+  originContext: Derived from InstallMethod.kind and prerequisiteCheck fields.
+  description: an install method requires a concrete tool or language/toolchain to execute its command
+  source: [InstallMethod]
+  target: [Tool, Language]
+  cardinality: N:1
+  inverse: required_by_install_method
+- id: edge:owned-by-package-surface
+  name: owned_by_package_surface
+  origin: derived
+  originContext: Derived from ProcessDescriptor.ownerPackage attributes.
+  description: a process descriptor is owned by a package surface
+  source: [ProcessDescriptor]
+  target: [PackageSurface]
+  cardinality: N:1
+  inverse: owns_process_descriptor
+- id: edge:deployment-target-uses-infrastructure
+  name: deployment_target_uses_infrastructure
+  origin: derived
+  originContext: Derived from DeploymentTarget.targetType attributes.
+  description: a deployment target uses a platform service or tool as its backing infrastructure
+  source: [DeploymentTarget]
+  target: [PlatformService, Tool]
+  cardinality: N:1
+  inverse: infrastructure_for_deployment_target
+- id: edge:hardening-guidance-applies-to
+  name: hardening_guidance_applies_to
+  origin: derived
+  originContext: Derived from HarnessHardeningGuidance.appliesTo attributes.
+  description: harness hardening guidance applies to a topic or operational subject area
+  source: [HarnessHardeningGuidance]
+  target: [Topic]
+  cardinality: N:N
+  inverse: has_hardening_guidance
 - id: edge:uses-agent
   name: uses_agent
   origin: universal

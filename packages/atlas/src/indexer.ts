@@ -120,6 +120,42 @@ function providerProductId(providerId: string): string {
   return providerId.startsWith("provider:") ? providerId : `provider:${providerId}`;
 }
 
+function packageSurfaceId(packageName: string): string {
+  return `package:${packageName.replace(/^@/, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+}
+
+function installMethodRequirement(record: AtlasRecord): string | undefined {
+  switch (record.kind) {
+    case "cargo":
+      return "tool:cargo";
+    case "go-install":
+      return "language:go";
+    case "nix":
+      return "tool:nix";
+    case "scoop":
+      return "tool:scoop";
+    case "winget":
+      return "tool:winget";
+    default:
+      return undefined;
+  }
+}
+
+function deploymentInfrastructure(record: AtlasRecord): string | undefined {
+  switch (record.targetType) {
+    case "eks":
+      return "platform-service:aws-eks";
+    case "minikube":
+      return "tool:minikube";
+    default:
+      return undefined;
+  }
+}
+
+function hardeningAppliesTo(record: AtlasRecord): string | undefined {
+  return record.appliesTo === "agent-session" ? "topic:agent-session-management" : undefined;
+}
+
 function deriveAttributeEdges(record: AtlasRecord, recordEdges: Edge[], recordIds?: Set<string>): Edge[] {
   const derived: Edge[] = [];
   const add = (kind: string, to: string): void => {
@@ -137,6 +173,31 @@ function deriveAttributeEdges(record: AtlasRecord, recordEdges: Edge[], recordId
     for (const evidenceRef of asStringList(record.evidenceRefs)) {
       add("has_evidence_source", evidenceSourceId(evidenceRef));
     }
+  }
+
+  if (record._kind === "ScopeBoundary") {
+    for (const reasonId of asStringList(record.outOfScopeReasonIds)) {
+      add("has_out_of_scope_reason", reasonId);
+    }
+  }
+
+  if (record._kind === "InstallMethod") {
+    const required = installMethodRequirement(record);
+    if (required) add("install_method_requires", required);
+  }
+
+  if (record._kind === "ProcessDescriptor" && typeof record.ownerPackage === "string") {
+    add("owned_by_package_surface", packageSurfaceId(record.ownerPackage));
+  }
+
+  if (record._kind === "DeploymentTarget") {
+    const infrastructure = deploymentInfrastructure(record);
+    if (infrastructure) add("deployment_target_uses_infrastructure", infrastructure);
+  }
+
+  if (record._kind === "HarnessHardeningGuidance") {
+    const topic = hardeningAppliesTo(record);
+    if (topic) add("hardening_guidance_applies_to", topic);
   }
 
   if (record._kind === "AgentVersion") {
