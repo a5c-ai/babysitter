@@ -44,12 +44,28 @@ export function AppSettingsForm() {
   const [density, setDensity] = useState('default');
   const [saved, setSaved] = useState(false);
 
+  // Notification preferences
+  const [notifyRuns, setNotifyRuns] = useState(true);
+  const [notifyApprovals, setNotifyApprovals] = useState(true);
+  const [notifyConflicts, setNotifyConflicts] = useState(true);
+  const [notifyWorkspaces, setNotifyWorkspaces] = useState(true);
+  const [notifySound, setNotifySound] = useState(false);
+  const [desktopPermission, setDesktopPermission] = useState('default');
+
   useEffect(() => {
     setTheme(getStoredValue('krate-theme', 'light'));
     setLocale(getStoredValue('krate-locale', 'en'));
     setSseEnabled(getStoredValue('krate-sse-enabled', 'true') === 'true');
     setCacheTtl(getStoredValue('krate-cache-ttl', '300'));
     setDensity(getStoredValue('krate-density', 'default'));
+    setNotifyRuns(getStoredValue('krate-notify-runs', 'true') === 'true');
+    setNotifyApprovals(getStoredValue('krate-notify-approvals', 'true') === 'true');
+    setNotifyConflicts(getStoredValue('krate-notify-conflicts', 'true') === 'true');
+    setNotifyWorkspaces(getStoredValue('krate-notify-workspaces', 'true') === 'true');
+    setNotifySound(getStoredValue('krate-notify-sound', 'false') === 'true');
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setDesktopPermission(Notification.permission);
+    }
 
     const storedTheme = getStoredValue('krate-theme', 'light');
     applyTheme(storedTheme);
@@ -85,6 +101,21 @@ export function AppSettingsForm() {
     setDensity(newDensity);
     localStorage.setItem('krate-density', newDensity);
     flashSaved();
+  }
+
+  function handleNotifyToggle(key, setter, current) {
+    const next = !current;
+    setter(next);
+    localStorage.setItem(key, String(next));
+    flashSaved();
+  }
+
+  function handleRequestDesktopPermission() {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      Notification.requestPermission().then((permission) => {
+        setDesktopPermission(permission);
+      });
+    }
   }
 
   function flashSaved() {
@@ -167,6 +198,57 @@ export function AppSettingsForm() {
             style={{ ...inputStyle, maxWidth: '200px' }}
           />
           <p style={descStyle}>Duration in seconds that snapshot data is cached before a refresh is required. Set to 0 to disable caching.</p>
+        </div>
+      </div>
+
+      <div className="card" style={cardStyle}>
+        <div className="cardTitle"><h2>Notifications</h2></div>
+        <div>
+          <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
+            <input type="checkbox" checked={notifyRuns} onChange={() => handleNotifyToggle('krate-notify-runs', setNotifyRuns, notifyRuns)} />
+            Run completions
+          </label>
+          <p style={descStyle}>Notify when agent dispatch runs complete or fail.</p>
+        </div>
+        <div>
+          <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
+            <input type="checkbox" checked={notifyApprovals} onChange={() => handleNotifyToggle('krate-notify-approvals', setNotifyApprovals, notifyApprovals)} />
+            Approval requests
+          </label>
+          <p style={descStyle}>Notify when an agent requests approval for an action.</p>
+        </div>
+        <div>
+          <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
+            <input type="checkbox" checked={notifyConflicts} onChange={() => handleNotifyToggle('krate-notify-conflicts', setNotifyConflicts, notifyConflicts)} />
+            Sync conflicts
+          </label>
+          <p style={descStyle}>Notify when external sync conflicts are detected.</p>
+        </div>
+        <div>
+          <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
+            <input type="checkbox" checked={notifyWorkspaces} onChange={() => handleNotifyToggle('krate-notify-workspaces', setNotifyWorkspaces, notifyWorkspaces)} />
+            Workspace updates
+          </label>
+          <p style={descStyle}>Notify when workspaces are claimed or released.</p>
+        </div>
+        <div>
+          <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
+            <input type="checkbox" checked={notifySound} onChange={() => handleNotifyToggle('krate-notify-sound', setNotifySound, notifySound)} />
+            Sound
+          </label>
+          <p style={descStyle}>Play a sound when notifications arrive.</p>
+        </div>
+        <div>
+          <p style={{ ...descStyle, marginTop: 0 }}>Desktop notifications: <strong>{desktopPermission}</strong></p>
+          {typeof window !== 'undefined' && 'Notification' in window && desktopPermission === 'default' && (
+            <button
+              type="button"
+              onClick={handleRequestDesktopPermission}
+              style={{ marginTop: '0.5rem', padding: '0.375rem 0.75rem', borderRadius: '0.375rem', border: '1px solid var(--line)', background: 'var(--surface)', cursor: 'pointer', fontSize: '0.8125rem', color: 'var(--ink-pigment)' }}
+            >
+              Request desktop notifications permission
+            </button>
+          )}
         </div>
       </div>
 

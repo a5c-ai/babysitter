@@ -35,6 +35,9 @@ import { RepoRuns } from './components/repo-runs.jsx';
 import { WebhookManager } from './components/webhook-manager.jsx';
 import { DeploymentPipeline } from './components/deployment-pipeline.jsx';
 import { RunnerPoolManager } from './components/runner-pool-manager.jsx';
+import { NotificationBell } from './components/notification-bell.jsx';
+import { ActivityFeed } from './components/activity-feed.jsx';
+import { HealthMonitor } from './components/health-monitor.jsx';
 
 export const orgNavigationGroups = [
   {
@@ -164,6 +167,7 @@ export function AppShell({ children, org = 'default', orgs = [], currentPath = '
       <a className="brandMark" href={orgHref(org, '/')} aria-label="a5c.ai Krate home"><span className="brandSigil">K</span><span className="brandWordmark"><strong>Kr<span>ate</span></strong><em>a5c.ai</em></span></a>
       <label className="globalSearch"><span>Search or jump to...</span><input aria-label="Search or jump to" placeholder="Search code, reviews, people, deployments..." /></label>
       <nav className="topbarNav" aria-label="Global actions"><a href="/orgs">Switch organization</a><a href={orgHref(org, '/repositories')}>New repository</a><a href={orgHref(org, '/inbox')}>Review queue</a></nav>
+      <NotificationBell org={org} />
       <div className="topbarAccount" aria-label={signedInName ? 'Signed-in user' : 'Account'}>{signedInName ? <><a className="userChip" href={orgHref(org, '/people')}><span className="userAvatar" aria-hidden="true">{userInitial}</span><span className="userName">{signedInName}</span></a><a className="signOutLink" href="/api/auth/logout">Sign out</a></> : <a className="signInLink" href="/login">Sign in</a>}</div>
     </header>
     <div className="appBody"><aside className="appSidebar" aria-label="Krate sections"><div className="sidebarSectionTitle">Workspace</div><details className="orgSwitcher"><summary><span>Organization</span><strong>{currentOrg?.displayName || currentOrg?.slug || currentOrg?.name || org}</strong></summary><div>{visibleOrgs.map((item) => <a key={item.slug || item.name} href={`/orgs/${item.slug || item.name}`} aria-current={(item.slug || item.name) === org ? 'page' : undefined}>{item.displayName || item.slug || item.name}</a>)}<a href="/orgs">View all organizations</a></div></details><nav className="sidebarNav">{orgNavigationGroups.map((group) => <section className="sidebarNavGroup" key={group.title}><h2>{group.title}</h2>{group.items.map(([href, label, description]) => <a key={href} href={orgHref(org, href)} aria-current={href === currentHref ? 'page' : undefined}><span>{label}</span><small>{description}</small></a>)}</section>)}<details className="advancedNav"><summary>Advanced</summary><a href={orgHref(org, '/advanced-plans')} aria-current={currentHref === '/advanced-plans' ? 'page' : undefined}>Resource details</a><a href={orgHref(org, '/controller-api')} aria-current={currentHref === '/controller-api' ? 'page' : undefined}>API diagnostics</a></details></nav></aside><div className="appContent">{children}</div></div>
@@ -195,6 +199,10 @@ export async function DashboardPage({ org = null } = {}) {
     <section className="routeGrid two"><DashboardMetrics model={model} /><RepositoryManager namespace={model.namespace} org={activeOrg} repositories={repositories.map(publicResource)} /></section>
     <ForgeFlowRail repository={repository} model={model} />
     <section className="routeGrid two"><ResourceList model={model} /><PlanCard title="Repository details" plan={repositoryResource?.yaml} command="Save repository changes" /></section>
+    <section style={{ marginTop: '1.5rem' }}>
+      <h3 style={{ fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--ink-pigment)' }}>Live Activity</h3>
+      <ActivityFeed org={activeOrg} />
+    </section>
   </PageFrame>;
 }
 
@@ -226,7 +234,13 @@ export async function InboxPage({ org = null } = {}) { return <SectionPage org={
 export async function RunsPage({ org = null } = {}) { return <SectionPage org={org} section="runs" />; }
 export async function RunnersCiPage({ org = null } = {}) { return <SectionPage org={org} section="runners-ci" />; }
 export async function HooksEventsPage({ org = null } = {}) { return <SectionPage org={org} section="hooks-events" />; }
-export async function InsightsPage({ org = null } = {}) { return <SectionPage org={org} section="insights" />; }
+export async function InsightsPage({ org = null } = {}) {
+  const ui = await loadKrateUi(org);
+  const activeOrg = ui.model.org?.slug || org || 'default';
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/insights" eyebrow="observability" title="System Health & Insights" text="Real-time connectivity status, agent activity, and system health." breadcrumbs={[['/', 'Krate'], ['/insights', 'Insights']]}>
+    <HealthMonitor org={activeOrg} />
+  </PageFrame>;
+}
 export async function OperationsInstallPage({ org = null } = {}) { return <SectionPage org={org} section="operations-install" />; }
 export async function AdvancedPlansPage({ org = null } = {}) { return <SectionPage org={org} section="advanced-plans" />; }
 
