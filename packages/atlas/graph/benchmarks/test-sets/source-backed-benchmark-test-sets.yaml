@@ -176,3 +176,145 @@ attributes:
 edges:
   belongs_to_benchmark:
     - benchmark:toolbench
+---
+nodeKind: TestSet
+id: test-set:osworld-369-computer-tasks
+attributes:
+  displayName: "OSWorld 369 real-computer tasks"
+  benchmarkId: benchmark:os-world
+  caseCount: 369
+  composition: |
+    Source-backed OSWorld task suite of real-world desktop and web
+    computer-use tasks with reproducible setup and execution-based
+    evaluation across operating-system and productivity workflows.
+  homepageUrl: "https://os-world.github.io/"
+  description: |
+    Canonical OSWorld artifact for multimodal desktop-computer control
+    agent evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:os-world
+---
+nodeKind: TestSet
+id: test-set:androidworld-programmatic-tasks
+attributes:
+  displayName: "AndroidWorld programmatic task suite"
+  benchmarkId: benchmark:android-world
+  caseCount: 116
+  composition: |
+    AndroidWorld's reproducible mobile-agent task suite covers real
+    Android apps with programmatic rewards and dynamically-instantiated
+    natural-language tasks.
+  homepageUrl: "https://google-research.github.io/android_world/"
+  description: |
+    Canonical AndroidWorld artifact for autonomous Android UI-control
+    evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:android-world
+---
+nodeKind: TestSet
+id: test-set:appworld-750-cross-app-tasks
+attributes:
+  displayName: "AppWorld 750 cross-app tasks"
+  benchmarkId: benchmark:appworld
+  caseCount: 750
+  composition: |
+    AppWorld's benchmark task suite exercises natural, diverse, and
+    challenging autonomous-agent tasks across a simulated world of
+    day-to-day apps, APIs, and user data.
+  homepageUrl: "https://appworld.dev/"
+  description: |
+    Canonical AppWorld artifact for rich interactive code-generation
+    and multi-app tool-use evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:appworld
+---
+nodeKind: TestSet
+id: test-set:assistantbench-214-web-tasks
+attributes:
+  displayName: "AssistantBench 214 web tasks"
+  benchmarkId: benchmark:assistant-bench
+  caseCount: 214
+  composition: |
+    AssistantBench's realistic web-agent tasks cover time-consuming
+    information-seeking and assistant workflows across many websites
+    and domains, with automatic evaluation.
+  homepageUrl: "https://assistantbench.github.io/"
+  description: |
+    Canonical AssistantBench artifact for web-research and web-agent
+    task completion evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:assistant-bench
+---
+nodeKind: TestSet
+id: test-set:re-bench-ai-rd-tasks
+attributes:
+  displayName: "RE-Bench AI R&D task suite"
+  benchmarkId: benchmark:re-bench
+  caseCount: 7
+  composition: |
+    RE-Bench's staged task suite measures autonomous AI research and
+    development work against human-expert baselines using realistic
+    machine-learning research-engineering tasks.
+  homepageUrl: "https://github.com/METR/RE-Bench"
+  description: |
+    Canonical RE-Bench artifact for frontier AI R&D agent evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:re-bench
+---
+nodeKind: TestSet
+id: test-set:travelplanner-planning-intents
+attributes:
+  displayName: "TravelPlanner planning intents"
+  benchmarkId: benchmark:travelplanner
+  caseCount: 1225
+  composition: |
+    TravelPlanner's benchmark suite provides curated travel-planning
+    intents and reference plans over a rich sandbox of transportation,
+    dining, attraction, and lodging data.
+  homepageUrl: "https://osu-nlp-group.github.io/TravelPlanner/"
+  description: |
+    Canonical TravelPlanner artifact for constrained real-world planning
+    and tool-use evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:travelplanner
+---
+nodeKind: TestSet
+id: test-set:the-agent-company-workplace-tasks
+attributes:
+  displayName: "TheAgentCompany workplace task suite"
+  benchmarkId: benchmark:the-agent-company
+  composition: |
+    TheAgentCompany's extensible workplace benchmark task suite asks
+    agents to browse, code, run programs, communicate with coworkers,
+    and complete professional digital-worker tasks in a simulated
+    software-company environment.
+  homepageUrl: "https://the-agent-company.com/"
+  description: |
+    Canonical TheAgentCompany artifact for workplace software-agent
+    task completion evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:the-agent-company
+---
+nodeKind: TestSet
+id: test-set:agentclinic-clinical-cases
+attributes:
+  displayName: "AgentClinic clinical case suite"
+  benchmarkId: benchmark:agentclinic
+  composition: |
+    AgentClinic's simulated clinical case suite evaluates agents through
+    patient interactions, multimodal data collection, incomplete
+    information, and tool use across medical specialties and languages.
+  homepageUrl: "https://agentclinic.github.io/"
+  description: |
+    Canonical AgentClinic artifact for multimodal clinical-agent
+    diagnostic reasoning evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:agentclinic
