@@ -38,6 +38,7 @@ export interface CompletionRequest {
   stream: boolean;
   input?: string;
   raw: unknown;
+  thoughtSignatureStore?: Map<string, string>;
 }
 
 export interface CompletionUsage {

@@ -27,7 +27,7 @@ type GoogleContentPart =
   | { functionCall: { name: string; args: Record<string, unknown> }; thoughtSignature?: string }
   | { functionResponse: { name: string; response: { content: string } } };
 
-function translateMessagesToGoogle(messages: CompletionRequest['messages']): Array<{ role: string; parts: GoogleContentPart[] }> {
+function translateMessagesToGoogle(messages: CompletionRequest['messages'], sigStore?: Map<string, string>): Array<{ role: string; parts: GoogleContentPart[] }> {
   const result: Array<{ role: string; parts: GoogleContentPart[] }> = [];
   const toolIdToName = new Map<string, string>();
   for (const msg of messages) {
@@ -47,12 +47,11 @@ function translateMessagesToGoogle(messages: CompletionRequest['messages']): Arr
         const name = String(block['name'] ?? '');
         const id = String(block['id'] ?? '');
         if (id) toolIdToName.set(id, name);
+        const sig = block['thoughtSignature'] ?? (id && sigStore?.get(id)) ?? undefined;
         const part: GoogleContentPart = {
           functionCall: { name, args: (block['input'] as Record<string, unknown>) ?? {} },
         };
-        if (block['thoughtSignature']) {
-          (part as Record<string, unknown>)['thoughtSignature'] = block['thoughtSignature'];
-        }
+        if (sig) (part as Record<string, unknown>)['thoughtSignature'] = sig;
         parts.push(part);
       } else if (block['type'] === 'tool_result') {
         const content = typeof block['content'] === 'string' ? block['content']
@@ -78,8 +77,8 @@ function translateMessagesToGoogle(messages: CompletionRequest['messages']): Arr
   return result;
 }
 
-function buildGoogleBody(messages: CompletionRequest['messages'], tools?: unknown[]): string {
-  const body: Record<string, unknown> = { contents: translateMessagesToGoogle(messages) };
+function buildGoogleBody(messages: CompletionRequest['messages'], tools?: unknown[], sigStore?: Map<string, string>): string {
+  const body: Record<string, unknown> = { contents: translateMessagesToGoogle(messages, sigStore) };
   if (tools && tools.length > 0) {
     body.tools = [{ functionDeclarations: tools.map((t: any) => ({ name: t.function?.name ?? t.name, description: t.function?.description ?? t.description, parameters: t.function?.parameters ?? t.parameters })) }];
   }
@@ -125,16 +124,20 @@ function extractGoogleText(data: GoogleResponseData): string {
     .join('') ?? '';
 }
 
-function extractGoogleToolCalls(data: GoogleResponseData): Array<{ id: string; name: string; arguments: string; metadata?: Record<string, unknown> }> | undefined {
+function extractGoogleToolCalls(data: GoogleResponseData, sigStore?: Map<string, string>): Array<{ id: string; name: string; arguments: string; metadata?: Record<string, unknown> }> | undefined {
   const calls: Array<{ id: string; name: string; arguments: string; metadata?: Record<string, unknown> }> = [];
   for (const candidate of data.candidates ?? []) {
     for (const part of candidate.content?.parts ?? []) {
       if (part.functionCall) {
         const rawPart = part as Record<string, unknown>;
+        const id = `call_${Date.now()}_${calls.length}`;
         const metadata: Record<string, unknown> = {};
-        if (rawPart['thoughtSignature']) metadata['thoughtSignature'] = rawPart['thoughtSignature'];
+        if (rawPart['thoughtSignature']) {
+          metadata['thoughtSignature'] = rawPart['thoughtSignature'];
+          sigStore?.set(id, String(rawPart['thoughtSignature']));
+        }
         calls.push({
-          id: `call_${Date.now()}_${calls.length}`,
+          id,
           name: part.functionCall.name,
           arguments: JSON.stringify(part.functionCall.args ?? {}),
           metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
@@ -211,7 +214,7 @@ export function createGoogleCompletionEngine(options: GoogleCompletionEngineOpti
       const response = await fetch(buildGoogleUrl(options, false), {
         method: 'POST',
         headers: googleHeaders(),
-        body: buildGoogleBody(request.messages, request.tools),
+        body: buildGoogleBody(request.messages, request.tools, request.thoughtSignatureStore),
       });
 
       if (!response.ok) {
@@ -220,7 +223,7 @@ export function createGoogleCompletionEngine(options: GoogleCompletionEngineOpti
       }
 
       const data = await response.json() as GoogleResponseData;
-      const toolCalls = extractGoogleToolCalls(data);
+      const toolCalls = extractGoogleToolCalls(data, request.thoughtSignatureStore);
 
       return {
         id: `google_${Date.now()}`,
@@ -237,7 +240,7 @@ export function createGoogleCompletionEngine(options: GoogleCompletionEngineOpti
       const response = await fetch(buildGoogleUrl(options, true), {
         method: 'POST',
         headers: googleHeaders(),
-        body: buildGoogleBody(request.messages, request.tools),
+        body: buildGoogleBody(request.messages, request.tools, request.thoughtSignatureStore),
       });
 
       if (!response.ok) {

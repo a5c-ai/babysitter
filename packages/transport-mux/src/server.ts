@@ -193,6 +193,7 @@ function buildCompletionRequest(
   body: Record<string, unknown>,
   transport: ProxyConfig['exposedTransport'],
   stream: boolean,
+  thoughtSignatureStore?: Map<string, string>,
 ): CompletionRequest {
   const messages =
     transport === 'google' || transport === 'vertex-native'
@@ -223,13 +224,14 @@ function buildCompletionRequest(
     stream,
     input: transport === 'openai-responses' ? normalizeInput(body.input) : undefined,
     raw: body,
+    thoughtSignatureStore,
   };
 }
 
 async function createExecutionPlan(
   req: Request,
   transport: ProxyConfig['exposedTransport'],
-  options: { forceStreaming?: boolean } = {},
+  options: { forceStreaming?: boolean; thoughtSignatureStore?: Map<string, string> } = {},
 ): Promise<CompletionExecutionPlan | Response> {
   const body = await readJsonBody(req.clone());
   const bodyRequestedStream = isStreamingRequestedByBody(body);
@@ -243,7 +245,7 @@ async function createExecutionPlan(
   const streamRequested = options.forceStreaming === true || bodyRequestedStream;
   return {
     body,
-    request: buildCompletionRequest(body, transport, streamRequested),
+    request: buildCompletionRequest(body, transport, streamRequested, options.thoughtSignatureStore),
     streamRequested,
   };
 }
@@ -940,6 +942,7 @@ async function resolveTokenCount(
 export function createTransportMuxApp({ config, completionEngine }: CreateTransportMuxAppOptions) {
   const app = new Hono();
   const metrics = new MetricsTracker();
+  const thoughtSignatureStore = new Map<string, string>();
 
   app.onError((error, c) => {
     metrics.recordError();
@@ -992,7 +995,7 @@ export function createTransportMuxApp({ config, completionEngine }: CreateTransp
   });
 
   app.post('/v1/messages', async (c) => {
-    const plan = await createExecutionPlan(c.req.raw, 'anthropic');
+    const plan = await createExecutionPlan(c.req.raw, 'anthropic', { thoughtSignatureStore });
     if (plan instanceof Response) {
       return plan;
     }
