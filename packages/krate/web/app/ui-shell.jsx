@@ -36,6 +36,9 @@ import { WebhookManager } from './components/webhook-manager.jsx';
 import { DeploymentPipeline } from './components/deployment-pipeline.jsx';
 import { RunnerPoolManager } from './components/runner-pool-manager.jsx';
 import { NotificationBell } from './components/notification-bell.jsx';
+import { GlobalSearch } from './components/global-search.jsx';
+import { CommandPaletteWrapper } from './components/command-palette.jsx';
+import { KeyboardShortcuts } from './components/keyboard-shortcuts.jsx';
 import { ActivityFeed } from './components/activity-feed.jsx';
 import { HealthMonitor } from './components/health-monitor.jsx';
 
@@ -165,12 +168,14 @@ export function AppShell({ children, org = 'default', orgs = [], currentPath = '
     <a className="skipLink" href="#main-content">Skip to content</a>
     <header className="appTopbar" aria-label="Krate global navigation">
       <a className="brandMark" href={orgHref(org, '/')} aria-label="a5c.ai Krate home"><span className="brandSigil">K</span><span className="brandWordmark"><strong>Kr<span>ate</span></strong><em>a5c.ai</em></span></a>
-      <label className="globalSearch"><span>Search or jump to...</span><input aria-label="Search or jump to" placeholder="Search code, reviews, people, deployments..." /></label>
+      <GlobalSearch org={org} />
       <nav className="topbarNav" aria-label="Global actions"><a href="/orgs">Switch organization</a><a href={orgHref(org, '/repositories')}>New repository</a><a href={orgHref(org, '/inbox')}>Review queue</a></nav>
       <NotificationBell org={org} />
       <div className="topbarAccount" aria-label={signedInName ? 'Signed-in user' : 'Account'}>{signedInName ? <><a className="userChip" href={orgHref(org, '/people')}><span className="userAvatar" aria-hidden="true">{userInitial}</span><span className="userName">{signedInName}</span></a><a className="signOutLink" href="/api/auth/logout">Sign out</a></> : <a className="signInLink" href="/login">Sign in</a>}</div>
     </header>
     <div className="appBody"><aside className="appSidebar" aria-label="Krate sections"><div className="sidebarSectionTitle">Workspace</div><details className="orgSwitcher"><summary><span>Organization</span><strong>{currentOrg?.displayName || currentOrg?.slug || currentOrg?.name || org}</strong></summary><div>{visibleOrgs.map((item) => <a key={item.slug || item.name} href={`/orgs/${item.slug || item.name}`} aria-current={(item.slug || item.name) === org ? 'page' : undefined}>{item.displayName || item.slug || item.name}</a>)}<a href="/orgs">View all organizations</a></div></details><nav className="sidebarNav">{orgNavigationGroups.map((group) => <section className="sidebarNavGroup" key={group.title}><h2>{group.title}</h2>{group.items.map(([href, label, description]) => <a key={href} href={orgHref(org, href)} aria-current={href === currentHref ? 'page' : undefined}><span>{label}</span><small>{description}</small></a>)}</section>)}<details className="advancedNav"><summary>Advanced</summary><a href={orgHref(org, '/advanced-plans')} aria-current={currentHref === '/advanced-plans' ? 'page' : undefined}>Resource details</a><a href={orgHref(org, '/controller-api')} aria-current={currentHref === '/controller-api' ? 'page' : undefined}>API diagnostics</a></details></nav></aside><div className="appContent">{children}</div></div>
+    <CommandPaletteWrapper org={org} />
+    <KeyboardShortcuts org={org} />
   </>;
 }
 
