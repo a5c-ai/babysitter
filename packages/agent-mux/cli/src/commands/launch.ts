@@ -216,8 +216,9 @@ function appendHarnessSessionArgs(plan: LaunchPlan, session: SessionArgs): void 
       if (session.prompt) plan.args.push('--prompt', session.prompt);
       break;
     case 'pi':
-      // Pi doesn't accept --prompt or --max-turns flags.
-      // Prompt is passed via stdin after spawn.
+      if (session.prompt && !interactive) {
+        plan.args.push('--prompt', session.prompt);
+      }
       break;
     case 'opencode':
       if (session.resumeId) plan.args.push('--session', session.resumeId);
@@ -914,7 +915,8 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     process.on('exit', () => { try { ptyProcess.kill('SIGKILL'); } catch { /* */ } });
   }
 
-  if (prompt && child.stdin && !ptyProcess) {
+  const promptPassedAsPiFlag = plan.harness === 'pi' && !isInteractive && plan.args.includes('--prompt');
+  if (prompt && child.stdin && !ptyProcess && !promptPassedAsPiFlag) {
     child.stdin.write(prompt + '\n');
     if (!isInteractive) {
       child.stdin.end();

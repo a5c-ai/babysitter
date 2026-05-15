@@ -12,6 +12,15 @@ import type {
   CompletionStreamEvent,
 } from '../types.js';
 
+type OpenAiFunctionTool = {
+  type: 'function';
+  function: {
+    name: string;
+    description?: string;
+    parameters: Record<string, unknown>;
+  };
+};
+
 function buildUrl(apiBase: string, model: string): string {
   return `${apiBase}/openai/deployments/${model}/chat/completions?api-version=2025-04-01-preview`;
 }
@@ -23,10 +32,72 @@ function buildHeaders(apiKey: string): Record<string, string> {
   };
 }
 
+function toRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined;
+}
+
+function normalizeOpenAiTools(tools?: unknown[]): OpenAiFunctionTool[] | undefined {
+  if (!tools || tools.length === 0) return undefined;
+
+  const normalized: OpenAiFunctionTool[] = [];
+  for (const tool of tools) {
+    const record = toRecord(tool);
+    if (!record) continue;
+
+    const wrapped = toRecord(record['function']);
+    if (record['type'] === 'function' && wrapped && typeof wrapped['name'] === 'string') {
+      normalized.push({
+        type: 'function',
+        function: {
+          name: wrapped['name'],
+          description: typeof wrapped['description'] === 'string' ? wrapped['description'] : undefined,
+          parameters: toRecord(wrapped['parameters']) ?? { type: 'object', properties: {} },
+        },
+      });
+      continue;
+    }
+
+    if (typeof record['name'] === 'string') {
+      normalized.push({
+        type: 'function',
+        function: {
+          name: record['name'],
+          description: typeof record['description'] === 'string' ? record['description'] : undefined,
+          parameters: toRecord(record['parameters']) ?? toRecord(record['input_schema']) ?? { type: 'object', properties: {} },
+        },
+      });
+    }
+  }
+
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+function normalizeOpenAiToolChoice(toolChoice: unknown): unknown {
+  if (toolChoice === undefined) return undefined;
+  if (typeof toolChoice === 'string') return toolChoice;
+
+  const record = toRecord(toolChoice);
+  if (!record) return toolChoice;
+
+  if (record['type'] === 'auto' || record['type'] === 'none' || record['type'] === 'required') {
+    return record['type'];
+  }
+
+  if (record['type'] === 'tool' && typeof record['name'] === 'string') {
+    return { type: 'function', function: { name: record['name'] } };
+  }
+
+  return toolChoice;
+}
+
 function buildBody(messages: Array<{ role: string; content: string }>, model: string, stream: boolean, tools?: unknown[], toolChoice?: unknown): string {
   const body: Record<string, unknown> = { messages, model, stream };
-  if (tools && tools.length > 0) body.tools = tools;
-  if (toolChoice !== undefined) body.tool_choice = toolChoice;
+  const openAiTools = normalizeOpenAiTools(tools);
+  if (openAiTools) body.tools = openAiTools;
+  const openAiToolChoice = normalizeOpenAiToolChoice(toolChoice);
+  if (openAiToolChoice !== undefined) body.tool_choice = openAiToolChoice;
   return JSON.stringify(body);
 }
 

@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -119,7 +121,7 @@ describe('live stack scenario contract primitives', () => {
       LIVE_STACK_INSTALL_MODE: 'vanilla',
       LIVE_STACK_PROVIDER: 'google',
       LIVE_STACK_AMUX_PROVIDER: 'google',
-      LIVE_STACK_MODEL: 'gemini-3.1-pro',
+      LIVE_STACK_MODEL: 'gemini-3.1-pro-preview',
       LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
       LIVE_STACK_REQUIRED_ENV: 'GOOGLE_API_KEY',
       LIVE_STACK_LAYERS: 'agent-mux install,agent-mux invocation,transport-mux route,provider/model trace',
@@ -129,7 +131,7 @@ describe('live stack scenario contract primitives', () => {
 
     expect(scenario.model.provider).toBe('google');
     expect(scenario.model.amuxProvider).toBe('google');
-    expect(scenario.model.model).toBe('gemini-3.1-pro');
+    expect(scenario.model.model).toBe('gemini-3.1-pro-preview');
     expect(scenario.model.requiredEnv).toEqual(['GOOGLE_API_KEY']);
   });
 
@@ -179,5 +181,20 @@ describe('live stack scenario contract primitives', () => {
       nested: { Authorization: '[REDACTED]', endpoint: 'https://example.services.ai.azure.com' },
       events: [{ token: '[REDACTED]' }, { status: 'ok' }],
     });
+  });
+  it('keeps Publish live-stack step timeouts aligned with live test budgets', () => {
+    const workflow = fs.readFileSync('.github/workflows/publish.yml', 'utf8');
+    const liveStepPattern = /- name: Run selected live stack E2E\n(?<body>[\s\S]*?)(?=\n\s*- name:|\n\s{2}\w|$)/g;
+    const liveSteps = Array.from(workflow.matchAll(liveStepPattern));
+
+    expect(liveSteps.length).toBeGreaterThan(0);
+    for (const step of liveSteps) {
+      const body = step.groups?.['body'] ?? '';
+      const timeoutMinutes = Number(/timeout-minutes:\s*(\d+)/.exec(body)?.[1] ?? '0');
+      const testTimeoutMs = Number(/LIVE_STACK_TEST_TIMEOUT_MS:\s*'?(\d+)'?/.exec(body)?.[1] ?? '0');
+      const requiredMinutes = Math.ceil(testTimeoutMs / 60_000);
+
+      expect(timeoutMinutes).toBeGreaterThanOrEqual(requiredMinutes);
+    }
   });
 });

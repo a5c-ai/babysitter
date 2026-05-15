@@ -485,7 +485,7 @@ jobs:
             integration_type: third-party-plugin
             provider: google
             amux_provider: google
-            model: gemini-3.1-pro
+            model: gemini-3.1-pro-preview
             required_env: GOOGLE_API_KEY
           - id: live.agent-mux.codex.foundry-openai.gpt-5.5
             agent_path: agent-mux
@@ -559,7 +559,7 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Run selected live stack E2E
-        timeout-minutes: 12
+        timeout-minutes: 30
         env:
           LIVE_STACK_SCENARIO_ID: ${{ matrix.scenario.id }}
           LIVE_STACK_AGENT_PATH: ${{ matrix.scenario.agent_path }}
@@ -691,7 +691,7 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Run selected live stack E2E
-        timeout-minutes: 12
+        timeout-minutes: 30
         env:
           LIVE_STACK_SCENARIO_ID: ${{ matrix.scenario.id }}
           LIVE_STACK_AGENT_PATH: ${{ matrix.scenario.agent_path }}
@@ -773,7 +773,7 @@ jobs:
             integration_type: third-party-plugin
             provider: google
             amux_provider: google
-            model: gemini-3.1-pro
+            model: gemini-3.1-pro-preview
             required_env: GOOGLE_API_KEY
           - id: live.agent-mux.codex.foundry-openai.gpt-5.5
             agent_path: agent-mux
@@ -847,7 +847,7 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Run selected live stack E2E
-        timeout-minutes: 12
+        timeout-minutes: 30
         env:
           LIVE_STACK_SCENARIO_ID: ${{ matrix.scenario.id }}
           LIVE_STACK_AGENT_PATH: ${{ matrix.scenario.agent_path }}

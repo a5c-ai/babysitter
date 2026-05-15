@@ -1,4 +1,7 @@
 import { EventEmitter } from 'node:events';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { PassThrough } from 'node:stream';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -140,5 +143,86 @@ describe('launchCommand transport-mux integration', () => {
     expect(runtimeStop).toHaveBeenCalledTimes(1);
     expect(child.stdin.write).toHaveBeenCalledWith('hello\n');
     expect(child.stdin.end).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes non-interactive Pi prompts through the Pi CLI prompt flag', async () => {
+    const runtimeStop = vi.fn(async () => {});
+    const originalHome = process.env['HOME'];
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-pi-home-'));
+    process.env['HOME'] = tempHome;
+    startTransportMuxRuntimeMock.mockResolvedValue({
+      url: 'http://127.0.0.1:4011',
+      port: 4011,
+      authToken: 'runtime-token',
+      config: {
+        targetProvider: 'bedrock',
+        targetModel: 'bedrock/anthropic.claude-sonnet-4-20250514-v1:0',
+        exposedTransport: 'openai-responses',
+        host: '127.0.0.1',
+        port: 4011,
+        stream: true,
+      },
+      applyHarnessEnv(env: Record<string, string>) {
+        env['OPENAI_BASE_URL'] = 'http://127.0.0.1:4011';
+        env['OPENAI_API_KEY'] = 'runtime-token';
+        return env;
+      },
+      stop: runtimeStop,
+    });
+
+    const child = new EventEmitter() as EventEmitter & {
+      pid: number;
+      stdin: { write: ReturnType<typeof vi.fn>; end: ReturnType<typeof vi.fn> };
+      stdout: PassThrough;
+      stderr: PassThrough;
+      kill: ReturnType<typeof vi.fn>;
+    };
+    child.pid = 4243;
+    child.stdin = { write: vi.fn(), end: vi.fn() };
+    child.stdout = new PassThrough();
+    child.stderr = new PassThrough();
+    child.kill = vi.fn();
+    spawnMock.mockImplementation(() => {
+      queueMicrotask(() => child.emit('exit', 0, null));
+      return child;
+    });
+
+    const [{ launchCommand, LAUNCH_FLAGS }, { parseArgs }] = await Promise.all([
+      import('../src/commands/launch.js'),
+      import('../src/parse-args.js'),
+    ]);
+
+    const client = {
+      adapters: {
+        get: () => ({
+          agent: 'pi',
+          detectInstallation: async () => ({ installed: true }),
+        }),
+        list: () => [{ agent: 'pi' }],
+      },
+    } as any;
+
+    try {
+      const code = await launchCommand(
+        client,
+        parseArgs(
+          ['launch', 'pi', 'bedrock', '--with-proxy-if-needed', '--prompt', 'write the file', '--no-interactive'],
+          LAUNCH_FLAGS,
+        ),
+      );
+
+      expect(code).toBe(0);
+      expect(spawnMock).toHaveBeenCalledTimes(1);
+      const spawnedArgs = spawnMock.mock.calls[0]?.[1] as string[];
+      expect(spawnedArgs).toContain('--prompt');
+      expect(spawnedArgs).toContain('write the file');
+      expect(child.stdin.write).not.toHaveBeenCalled();
+      expect(child.stdin.end).not.toHaveBeenCalled();
+      expect(runtimeStop).toHaveBeenCalledTimes(1);
+    } finally {
+      if (originalHome === undefined) delete process.env['HOME'];
+      else process.env['HOME'] = originalHome;
+      fs.rmSync(tempHome, { recursive: true, force: true });
+    }
   });
 });

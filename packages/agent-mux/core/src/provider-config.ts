@@ -42,7 +42,7 @@ export interface ProviderDefaults {
 export const PROVIDER_DEFAULTS: Record<ProviderId, ProviderDefaults> = {
   anthropic: { transport: 'anthropic', authType: 'api_key', apiBase: 'https://api.anthropic.com', defaultModel: 'claude-sonnet-4-20250514', envKey: 'ANTHROPIC_API_KEY' },
   openai: { transport: 'openai-responses', authType: 'api_key', apiBase: 'https://api.openai.com', defaultModel: 'gpt-4o', envKey: 'OPENAI_API_KEY' },
-  google: { transport: 'google', authType: 'api_key', apiBase: 'https://generativelanguage.googleapis.com', defaultModel: 'gemini-3.1-pro', envKey: 'GOOGLE_API_KEY' },
+  google: { transport: 'google', authType: 'api_key', apiBase: 'https://generativelanguage.googleapis.com', defaultModel: 'gemini-3.1-pro-preview', envKey: 'GOOGLE_API_KEY' },
   bedrock: { transport: 'anthropic', authType: 'iam', apiBase: 'https://bedrock-runtime.{region}.amazonaws.com', defaultModel: 'anthropic.claude-sonnet-4-20250514-v1:0' },
   vertex: { transport: 'google', authType: 'adc', apiBase: 'https://aiplatform.googleapis.com', defaultModel: 'claude-sonnet-4@20250514', envKey: 'GOOGLE_API_KEY' },
   azure: { transport: 'openai-chat', authType: 'api_key', apiBase: 'https://{resource}.openai.azure.com', defaultModel: '', envKey: 'AZURE_API_KEY' },

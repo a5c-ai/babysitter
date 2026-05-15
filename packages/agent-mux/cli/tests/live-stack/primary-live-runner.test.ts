@@ -35,7 +35,7 @@ describe('primary live stack runner contract', () => {
       LIVE_STACK_INSTALL_MODE: 'vanilla',
       LIVE_STACK_PROVIDER: 'google',
       LIVE_STACK_AMUX_PROVIDER: 'google',
-      LIVE_STACK_MODEL: 'gemini-3.1-pro',
+      LIVE_STACK_MODEL: 'gemini-3.1-pro-preview',
       LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
       LIVE_STACK_REQUIRED_ENV: 'GOOGLE_API_KEY',
       LIVE_STACK_LAYERS: 'agent-mux install,agent-mux invocation,transport-mux route,provider/model trace',
@@ -53,7 +53,7 @@ describe('primary live stack runner contract', () => {
 
     const launch = commands.at(-1);
     expect(launch?.args).toContain('google');
-    expect(launch?.args).toContain('gemini-3.1-pro');
+    expect(launch?.args).toContain('gemini-3.1-pro-preview');
     expect(launch?.env['GOOGLE_API_KEY']).toBe('google-secret');
   });
 
