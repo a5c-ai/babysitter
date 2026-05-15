@@ -157,9 +157,11 @@ describe('bridge-interactive spawn', () => {
     const originalHome = process.env['HOME'];
     const originalUserProfile = process.env['USERPROFILE'];
     const originalCi = process.env['CI'];
+    const originalAnthropicApiKey = process.env['ANTHROPIC_API_KEY'];
     process.env['HOME'] = home;
     process.env['USERPROFILE'] = home;
     process.env['CI'] = 'true';
+    process.env['ANTHROPIC_API_KEY'] = 'sk-ant-api03-test-key-1234567890ABCDEFGHIJ';
 
     try {
       const claudeLaunch = launchCommand(
@@ -176,6 +178,8 @@ describe('bridge-interactive spawn', () => {
       expect(claudeConfig.hasCompletedOnboarding).toBe(true);
       expect(claudeConfig.lastOnboardingVersion).toBe('999.999.999');
       expect(claudeConfig.lastReleaseNotesSeen).toBe('999.999.999');
+      expect(claudeConfig.customApiKeyResponses.approved).toContain('1234567890ABCDEFGHIJ');
+      expect(claudeConfig.customApiKeyResponses.rejected).not.toContain('1234567890ABCDEFGHIJ');
       expect(claudeConfig.projects[projectPath].hasTrustDialogAccepted).toBe(true);
       expect(claudeConfig.projects[projectPath].hasCompletedProjectOnboarding).toBe(true);
       expect(claudeConfig.projects[projectPath].projectOnboardingSeenCount).toBe(1);
@@ -197,6 +201,7 @@ describe('bridge-interactive spawn', () => {
       if (originalHome === undefined) delete process.env['HOME']; else process.env['HOME'] = originalHome;
       if (originalUserProfile === undefined) delete process.env['USERPROFILE']; else process.env['USERPROFILE'] = originalUserProfile;
       if (originalCi === undefined) delete process.env['CI']; else process.env['CI'] = originalCi;
+      if (originalAnthropicApiKey === undefined) delete process.env['ANTHROPIC_API_KEY']; else process.env['ANTHROPIC_API_KEY'] = originalAnthropicApiKey;
     }
   });
 
