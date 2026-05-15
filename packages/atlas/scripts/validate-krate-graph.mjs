@@ -28,6 +28,15 @@ const EXPECTED_COUNTS = {
   governanceEdges: 13,
   externalMappings: 46,
   krateWebApiEndpoints: 46,
+  krateKnowledgeFabricMemorySystems: 1,
+  krateKnowledgeSources: 5,
+  krateKnowledgeDomains: 3,
+  krateRetrievalPipelines: 3,
+  krateKnowledgeFabricUsesMemoryEdges: 1,
+  krateKnowledgeFeedsEdges: 5,
+  krateKnowledgeProvidesEdges: 4,
+  krateKnowledgeRetrievesEdges: 6,
+  krateMemorySystemIntegratesEdges: 3,
   scopedDuplicateIds: 0,
   danglingKrateTypedEdges: 0,
 };
@@ -48,6 +57,8 @@ const SCOPED_GRAPH_FILES = [
   'packages/atlas/graph/agent-stack/platform-impls/krate-platform-current.yaml',
   'packages/atlas/graph/agent-stack/interaction-primitives/krate-orchestration.yaml',
   'packages/atlas/graph/extensions/api-endpoints/krate-web-api-endpoints.yaml',
+  'packages/atlas/graph/agent-stack/knowledge-fabric-impls/krate-kf-current.yaml',
+  'packages/atlas/graph/domain/knowledge-fabric/krate-company-brain-topology.yaml',
 ];
 
 const KRATE_TYPED_EDGE_KINDS = new Set([
@@ -259,6 +270,16 @@ for (const record of krateWebApiEndpointRecords) {
   if (!record.description?.includes('Source: packages/krate/web/app/api/')) fail('missing source route citation on Krate web endpoint', record.id);
 }
 
+assertEqual('krateKnowledgeFabricMemorySystems', Object.keys(records).filter((id) => id === 'memory-system:krate-company-brain').length, EXPECTED_COUNTS.krateKnowledgeFabricMemorySystems);
+assertEqual('krateKnowledgeSources', Object.keys(records).filter((id) => id.startsWith('knowledge-source:krate-')).length, EXPECTED_COUNTS.krateKnowledgeSources);
+assertEqual('krateKnowledgeDomains', Object.keys(records).filter((id) => id.startsWith('knowledge-domain:krate-')).length, EXPECTED_COUNTS.krateKnowledgeDomains);
+assertEqual('krateRetrievalPipelines', Object.keys(records).filter((id) => id.startsWith('retrieval-pipeline:krate-')).length, EXPECTED_COUNTS.krateRetrievalPipelines);
+assertEqual('krateKnowledgeFabricUsesMemoryEdges', edgeCount(index, (edge) => edge.kind === 'uses_memory_system' && edge.from === 'knowledge-fabric-impl:krate.knowledge@current' && edge.to === 'memory-system:krate-company-brain'), EXPECTED_COUNTS.krateKnowledgeFabricUsesMemoryEdges);
+assertEqual('krateKnowledgeFeedsEdges', edgeCount(index, (edge) => edge.kind === 'feeds_knowledge' && String(edge.from).startsWith('knowledge-source:krate-')), EXPECTED_COUNTS.krateKnowledgeFeedsEdges);
+assertEqual('krateKnowledgeProvidesEdges', edgeCount(index, (edge) => edge.kind === 'provides_knowledge_to' && String(edge.from).startsWith('knowledge-domain:krate-')), EXPECTED_COUNTS.krateKnowledgeProvidesEdges);
+assertEqual('krateKnowledgeRetrievesEdges', edgeCount(index, (edge) => edge.kind === 'retrieves_from' && String(edge.from).startsWith('retrieval-pipeline:krate-')), EXPECTED_COUNTS.krateKnowledgeRetrievesEdges);
+assertEqual('krateMemorySystemIntegratesEdges', edgeCount(index, (edge) => edge.kind === 'memory_system_integrates' && edge.from === 'memory-system:krate-company-brain'), EXPECTED_COUNTS.krateMemorySystemIntegratesEdges);
+
 const danglingKrateTypedEdges = edges.filter((edge) => {
   return KRATE_TYPED_EDGE_KINDS.has(edge.kind)
     && (String(edge.from).includes('krate') || String(edge.to).includes('krate'))
@@ -301,6 +322,15 @@ console.log(JSON.stringify({
   krateWebApiEndpoints: details.krateWebApiEndpoints,
   sourceKrateWebApiEndpoints: details.sourceKrateWebApiEndpoints,
   krateWebApiEndpointExposedByEdges: details.krateWebApiEndpointExposedByEdges,
+  krateKnowledgeFabricMemorySystems: details.krateKnowledgeFabricMemorySystems,
+  krateKnowledgeSources: details.krateKnowledgeSources,
+  krateKnowledgeDomains: details.krateKnowledgeDomains,
+  krateRetrievalPipelines: details.krateRetrievalPipelines,
+  krateKnowledgeFabricUsesMemoryEdges: details.krateKnowledgeFabricUsesMemoryEdges,
+  krateKnowledgeFeedsEdges: details.krateKnowledgeFeedsEdges,
+  krateKnowledgeProvidesEdges: details.krateKnowledgeProvidesEdges,
+  krateKnowledgeRetrievesEdges: details.krateKnowledgeRetrievesEdges,
+  krateMemorySystemIntegratesEdges: details.krateMemorySystemIntegratesEdges,
   danglingKrateTypedEdges: details.danglingKrateTypedEdges,
   scopedDuplicateIds: details.scopedDuplicateIds,
 }, null, 2));

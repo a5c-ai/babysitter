@@ -1,7 +1,18 @@
 nodeKind: KnowledgeFabricImpl
 id: knowledge-fabric-impl:krate.knowledge@current
 attributes:
-  displayName: "Krate Company Brain (current) — org-level agent memory"
+  displayName: "Krate Knowledge Fabric (current) — Company Brain"
+  description: |
+    Krate's knowledge-fabric implementation, productized as the Company Brain: an
+    organization-scoped, governed memory layer that persists and retrieves durable
+    knowledge across agent sessions, dispatch runs, repositories, and teams.
+  knowledgeScopes:
+    - enterprise
+    - team
+    - project
+  autoExtractionSupport: false
+  retrievalStrategy: hybrid
+  knowledgePersistence: database
   notes: |
     Krate's knowledge fabric implementation: the Company Brain. Provides
     persistent organizational memory that spans agent sessions, dispatch
@@ -29,3 +40,5 @@ edges:
   composes:
     - target: platform:krate
       role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:krate-company-brain

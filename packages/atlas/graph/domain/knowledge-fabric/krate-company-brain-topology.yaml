@@ -1,0 +1,202 @@
+# Krate Company Brain knowledge-fabric topology.
+# Sources: tracked packages/krate/core/docs/agents/*memory*, *company-brain*, and *context* specifications.
+---
+nodeKind: MemorySystem
+id: memory-system:krate-company-brain
+attributes:
+  displayName: "Krate Company Brain Memory System"
+  description: |
+    Krate's organization-scoped Company Brain memory system. The tracked
+    shared-memory-company-brain, memory-context-integration, memory-ontology,
+    agent-run-memory-import, org-memory payload, and memory operations specs
+    define a governed memory repository where Git/Markdown/YAML records,
+    run memories, ontology files, and operational runbooks are indexed for
+    cross-agent and cross-session retrieval.
+  memoryKind: hybrid
+  persistence: org-scoped
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: markdown
+  privacyFilter: true
+  deduplication: hybrid
+  sourceDocs:
+    - packages/krate/core/docs/agents/shared-memory-company-brain-spec.md
+    - packages/krate/core/docs/agents/memory-context-integration-spec.md
+    - packages/krate/core/docs/agents/memory-ontology-schema-spec.md
+    - packages/krate/core/docs/agents/agent-run-memory-import-spec.md
+    - packages/krate/core/docs/agents/org-memory-api-payload-examples.md
+    - packages/krate/core/docs/agents/memory-operations-runbook.md
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  memory_system_integrates:
+    - target: tool:gitea
+      notes: Company Brain memory is versioned as an inspectable Git repository.
+    - target: tool:psql
+      notes: Aggregated API state stores query, snapshot, and controller state.
+    - target: vector-store:pgvector
+      notes: Memory query specs call for vector-backed semantic retrieval.
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:krate-company-brain-repository
+attributes:
+  displayName: "Krate Company Brain Repository"
+  description: |
+    Git-backed org memory repository described by shared-memory-company-brain-spec.md.
+    It stores graph records, Markdown records, runbooks, decisions, incidents,
+    indexes, and exportable memory artifacts for the organization.
+  sourceKind: code-repository
+  updateFrequency: manual
+  indexingMethod: hybrid
+edges:
+  feeds_knowledge:
+    - target: knowledge-domain:krate-org-memory
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:krate-agent-run-imports
+attributes:
+  displayName: "Krate Agent Run Memory Imports"
+  description: |
+    Agent run memory import sources defined by agent-run-memory-import-spec.md:
+    MEMORY.md files, .a5c run metadata, session summaries, retrospectives,
+    task results, and artifact manifests selected for governed import.
+  sourceKind: conversation-archive
+  updateFrequency: manual
+  indexingMethod: structured-query
+edges:
+  feeds_knowledge:
+    - target: knowledge-domain:krate-agent-run-history
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:krate-memory-ontology-files
+attributes:
+  displayName: "Krate Memory Ontology Files"
+  description: |
+    Ontology and schema files from memory-ontology-schema-spec.md that define
+    stable IDs, node kinds, edge kinds, frontmatter, sensitivity, provenance,
+    and review rules for Company Brain records.
+  sourceKind: document-store
+  updateFrequency: manual
+  indexingMethod: graph-linked
+edges:
+  feeds_knowledge:
+    - target: knowledge-domain:krate-org-memory
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:krate-context-assembly-inputs
+attributes:
+  displayName: "Krate Context Assembly Inputs"
+  description: |
+    Memory-backed context sources described by memory-context-integration-spec.md
+    and context-assembly-spec.md, including graph YAML records, Markdown records,
+    source snippets, dispatch history, and bounded prompt-ready excerpts.
+  sourceKind: api-docs
+  updateFrequency: real-time
+  indexingMethod: hybrid
+edges:
+  feeds_knowledge:
+    - target: knowledge-domain:krate-governed-context
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:krate-memory-operations-docs
+attributes:
+  displayName: "Krate Memory Operations Docs"
+  description: |
+    Operational documentation from memory-operations-runbook.md and org memory
+    vertical-slice docs covering bootstrap, validation, query, update, rollback,
+    payload contracts, controller sequence, UI map, and fixture plans.
+  sourceKind: runbook
+  updateFrequency: manual
+  indexingMethod: full-text
+edges:
+  feeds_knowledge:
+    - target: knowledge-domain:krate-governed-context
+---
+nodeKind: KnowledgeDomain
+id: knowledge-domain:krate-org-memory
+attributes:
+  displayName: "Krate Organization Memory"
+  description: |
+    Durable organization knowledge captured in the Company Brain repository:
+    graph facts, Markdown records, repository context, decisions, runbooks,
+    incidents, and ontology-indexed files.
+  trustLevel: verified
+  staleness: recent
+edges:
+  provides_knowledge_to:
+    - target: retrieval-pipeline:krate-memory-query
+    - target: retrieval-pipeline:krate-context-assembly
+---
+nodeKind: KnowledgeDomain
+id: knowledge-domain:krate-agent-run-history
+attributes:
+  displayName: "Krate Agent Run History"
+  description: |
+    Curated operational memory from agent runs, Babysitter journals, Agent Mux
+    sessions, retrospectives, and task artifacts that can be imported into org
+    memory after review and redaction.
+  trustLevel: verified
+  staleness: recent
+edges:
+  provides_knowledge_to:
+    - target: retrieval-pipeline:krate-memory-import
+---
+nodeKind: KnowledgeDomain
+id: knowledge-domain:krate-governed-context
+attributes:
+  displayName: "Krate Governed Dispatch Context"
+  description: |
+    Permission-reviewed, provenance-preserving, redacted, bounded context used
+    to assemble AgentContextBundle inputs before dispatch.
+  trustLevel: authoritative
+  staleness: fresh
+edges:
+  provides_knowledge_to:
+    - target: retrieval-pipeline:krate-context-assembly
+---
+nodeKind: RetrievalPipeline
+id: retrieval-pipeline:krate-memory-query
+attributes:
+  displayName: "Krate Memory Query Pipeline"
+  description: |
+    Query path for AgentMemoryQuery resources and the /api/orgs/:org/agents/memory/query
+    endpoint. It retrieves graph-linked, full-text, and vector-backed Company
+    Brain records for semantic org memory lookup.
+  pipelineKind: hybrid
+  vectorStore: pgvector
+  chunkingStrategy: document-level
+edges:
+  retrieves_from:
+    - target: knowledge-source:krate-company-brain-repository
+    - target: knowledge-source:krate-memory-ontology-files
+---
+nodeKind: RetrievalPipeline
+id: retrieval-pipeline:krate-context-assembly
+attributes:
+  displayName: "Krate Context Assembly Pipeline"
+  description: |
+    Retrieval path that reads Company Brain sources and memory context specs to
+    add governed memory excerpts to AgentContextBundle resources before agent
+    dispatch.
+  pipelineKind: hybrid
+  vectorStore: pgvector
+  chunkingStrategy: hierarchical
+edges:
+  retrieves_from:
+    - target: knowledge-source:krate-company-brain-repository
+    - target: knowledge-source:krate-context-assembly-inputs
+    - target: knowledge-source:krate-memory-ontology-files
+---
+nodeKind: RetrievalPipeline
+id: retrieval-pipeline:krate-memory-import
+attributes:
+  displayName: "Krate Agent Run Memory Import Pipeline"
+  description: |
+    Import path that turns completed agent run artifacts, sessions, and run
+    journals into reviewed Company Brain records while preserving provenance,
+    redaction state, digests, and review decisions.
+  pipelineKind: graph-traversal
+  chunkingStrategy: document-level
+edges:
+  retrieves_from:
+    - target: knowledge-source:krate-agent-run-imports
