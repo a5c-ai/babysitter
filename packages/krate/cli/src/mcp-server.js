@@ -21,6 +21,133 @@ export const MCP_TOOLS = [
   { name: 'krate_audit_query', description: 'Query audit events with optional org/action/time filters', inputSchema: { type: 'object', properties: { org: { type: 'string' }, action: { type: 'string' }, since: { type: 'string' }, until: { type: 'string' }, limit: { type: 'number' }, offset: { type: 'number' } } } },
 ];
 
+export const MCP_PROMPTS = [
+  {
+    name: 'krate_workspace_setup',
+    description: 'Guide for setting up a new krate workspace',
+  },
+  {
+    name: 'krate_stack_config',
+    description: 'Help configuring an agent stack',
+  },
+  {
+    name: 'krate_troubleshoot',
+    description: 'Diagnose common krate issues',
+  },
+];
+
+export const MCP_RESOURCES = [
+  {
+    uri: 'krate://snapshot',
+    name: 'Workspace Snapshot',
+    description: 'Current org runtime snapshot',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'krate://stacks',
+    name: 'Agent Stacks',
+    description: 'List of configured agent stacks',
+    mimeType: 'application/json',
+  },
+];
+
+const PROMPT_MESSAGES = {
+  krate_workspace_setup: [
+    {
+      role: 'user',
+      content: {
+        type: 'text',
+        text: 'How do I set up a new krate workspace?',
+      },
+    },
+    {
+      role: 'assistant',
+      content: {
+        type: 'text',
+        text: [
+          'To set up a new krate workspace:',
+          '',
+          '1. Install the CLI: npm install -g @a5c-ai/krate-cli',
+          '2. Configure your Kubernetes cluster context: kubectl config use-context <your-cluster>',
+          '3. Apply the Krate CRDs: kubectl apply -f https://krate.a5c.ai/crds/latest',
+          '4. Create an Organization resource: krate apply --file org.yaml',
+          '5. Verify the workspace: krate status',
+          '',
+          'Use `krate help` to see all available commands.',
+        ].join('\n'),
+      },
+    },
+  ],
+  krate_stack_config: [
+    {
+      role: 'user',
+      content: {
+        type: 'text',
+        text: 'How do I configure an agent stack?',
+      },
+    },
+    {
+      role: 'assistant',
+      content: {
+        type: 'text',
+        text: [
+          'To configure an agent stack:',
+          '',
+          '1. Create a YAML file for your AgentStack resource:',
+          '   apiVersion: krate.a5c.ai/v1',
+          '   kind: AgentStack',
+          '   metadata:',
+          '     name: my-stack',
+          '     namespace: krate-org-default',
+          '   spec:',
+          '     organizationRef: default',
+          '     baseAgent: claude-code',
+          '     adapterRef: github',
+          '',
+          '2. Apply it: krate apply --file stack.yaml',
+          '3. List stacks: krate stacks',
+          '4. Dispatch a run: krate dispatch --stack my-stack',
+        ].join('\n'),
+      },
+    },
+  ],
+  krate_troubleshoot: [
+    {
+      role: 'user',
+      content: {
+        type: 'text',
+        text: 'How do I diagnose krate issues?',
+      },
+    },
+    {
+      role: 'assistant',
+      content: {
+        type: 'text',
+        text: [
+          'Common krate troubleshooting steps:',
+          '',
+          '1. Check workspace status: krate status',
+          '   - Verifies connectivity and resource counts',
+          '',
+          '2. Check Kubernetes connectivity:',
+          '   kubectl get namespaces | grep krate',
+          '',
+          '3. Inspect agent stack health:',
+          '   krate stacks',
+          '   krate get AgentStack <name>',
+          '',
+          '4. Check for resource errors:',
+          '   kubectl get agentstacks -A',
+          '   kubectl describe agentstack <name> -n krate-org-default',
+          '',
+          '5. View recent audit events via MCP:',
+          '   Use krate_audit_query tool with your org name',
+        ].join('\n'),
+      },
+    },
+  ],
+};
+
 const SERVER_INFO = {
   name: 'krate',
   version: '0.1.0',
@@ -28,6 +155,8 @@ const SERVER_INFO = {
 
 const SERVER_CAPABILITIES = {
   tools: {},
+  prompts: {},
+  resources: {},
 };
 
 /**
@@ -63,6 +192,49 @@ export function createMcpServer(options = {}) {
 
     if (msg.method === 'tools/list') {
       return jsonrpcResult(id, { tools: MCP_TOOLS });
+    }
+
+    if (msg.method === 'prompts/list') {
+      return jsonrpcResult(id, { prompts: MCP_PROMPTS });
+    }
+
+    if (msg.method === 'prompts/get') {
+      const promptName = msg.params?.name;
+      const prompt = MCP_PROMPTS.find((p) => p.name === promptName);
+      if (!prompt) {
+        return jsonrpcError(id, -32602, `Unknown prompt: ${promptName}`);
+      }
+      const messages = PROMPT_MESSAGES[promptName] || [];
+      return jsonrpcResult(id, {
+        description: prompt.description,
+        messages,
+      });
+    }
+
+    if (msg.method === 'resources/list') {
+      return jsonrpcResult(id, { resources: MCP_RESOURCES });
+    }
+
+    if (msg.method === 'resources/read') {
+      const uri = msg.params?.uri;
+      const resourceDef = MCP_RESOURCES.find((r) => r.uri === uri);
+      if (!resourceDef) {
+        return jsonrpcError(id, -32602, `Unknown resource URI: ${uri}`);
+      }
+      try {
+        const content = await readMcpResource(controller, uri);
+        return jsonrpcResult(id, {
+          contents: [
+            {
+              uri,
+              mimeType: resourceDef.mimeType || 'application/json',
+              text: JSON.stringify(content, null, 2),
+            },
+          ],
+        });
+      } catch (err) {
+        return jsonrpcError(id, -32603, `Failed to read resource ${uri}: ${err.message}`);
+      }
     }
 
     if (msg.method === 'tools/call') {
@@ -261,6 +433,21 @@ async function executeTool(controller, toolName, args) {
 
     default:
       throw new Error(`Tool not implemented: ${toolName}`);
+  }
+}
+
+// --- MCP resource readers ----------------------------------------------------
+
+async function readMcpResource(controller, uri) {
+  switch (uri) {
+    case 'krate://snapshot':
+      return controller.snapshot();
+
+    case 'krate://stacks':
+      return controller.listResource('AgentStack');
+
+    default:
+      throw new Error(`Resource URI not implemented: ${uri}`);
   }
 }
 
