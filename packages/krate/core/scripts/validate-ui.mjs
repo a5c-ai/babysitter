@@ -7,15 +7,27 @@ const required = [
   'apps/web/app/globals.css',
   'apps/web/app/page.jsx',
   'apps/web/app/ui-shell.jsx',
+  'apps/web/app/lib/krate-ui.jsx',
+  'apps/web/app/lib/page-frame.jsx',
+  'apps/web/app/pages/repo-pages.jsx',
+  'apps/web/app/pages/manage-pages.jsx',
+  'apps/web/app/pages/agent-pages.jsx',
+  'apps/web/app/pages/settings-pages.jsx',
+  'apps/web/app/pages/external-pages.jsx',
   'apps/web/proxy.js',
   'apps/web/app/components/code-editor.jsx',
   'apps/web/app/components/resource-actions.jsx',
   'apps/web/app/components/issue-editor.jsx',
+  'apps/web/app/components/repo-code-browser.jsx',
+  'apps/web/app/components/repo-runs.jsx',
+  'apps/web/app/components/krate-loading.jsx',
+  'apps/web/app/loading.jsx',
   'apps/web/app/api/controller/route.js',
   'apps/web/app/api/orgs/[org]/resources/route.js',
   'apps/web/app/api/orgs/[org]/resources/[kind]/[name]/route.js',
   'apps/web/app/api/orgs/[org]/repositories/route.js',
   'apps/web/app/api/orgs/[org]/repositories/[name]/route.js',
+  'apps/web/app/api/orgs/[org]/pipelines/[name]/logs/route.js',
   'apps/web/app/api/orgs/[org]/policies/route.js',
   'apps/web/app/api/orgs/[org]/policy-reports/route.js',
   'apps/web/app/api/orgs/[org]/policy-exception-requests/route.js',
@@ -46,6 +58,12 @@ function resolveRequiredFile(file) {
 }
 
 const files = Object.fromEntries(required.map((file) => [file, readFileSync(resolveRequiredFile(file), 'utf8')]));
+function webUiSource() {
+  return Object.entries(files)
+    .filter(([file]) => file.startsWith('apps/web/app/'))
+    .map(([, source]) => source)
+    .join('\n');
+}
 const failures = [];
 
 for (const [file, source] of Object.entries(files)) {
@@ -107,11 +125,15 @@ for (const token of ['--watch', 'text/event-stream', 'controller.watchResource',
   if (!files['apps/web/app/api/watch/[[...resource]]/route.js'].includes(token)) failures.push(`watch route missing ${token}`);
 }
 for (const token of ['RepositoryManager', 'DeploymentManager', 'ResourceApplyPanel', '/api/orgs/${org}/repositories', '/api/orgs/${org}/resources', 'fetch(', 'Save changes', 'InviteReviewList', 'UserReviewList', 'PermissionReviewList', 'Mark accepted', 'Revoke invite', 'Disable user', 'Restore user', 'Revoke grant', 'SshKeyReviewList', 'Save SSH key', 'Revoke SSH key', 'Create deployment', 'Prepare deployment']) {
-  if (!(files['apps/web/app/components/resource-actions.jsx'] + files['apps/web/app/ui-shell.jsx']).includes(token)) failures.push(`UI management surface missing ${token}`);
+  if (!(files['apps/web/app/components/resource-actions.jsx'] + webUiSource()).includes(token)) failures.push(`UI management surface missing ${token}`);
 }
-for (const token of ['DegradedBanner', 'No repositories are available yet.', 'No resource selected yet.', 'Access checks', 'KRATE_CONTROLLER_URL', 'Krate repositories']) {
-  if (!(files['apps/web/app/ui-shell.jsx'] + files['apps/web/app/components/resource-actions.jsx']).includes(token)) failures.push(`truthful degraded/empty UI missing ${token}`);
+for (const token of ['DegradedBanner', 'No repositories are available yet.', 'No resource selected yet.', 'Access checks', 'Krate repositories']) {
+  if (!(webUiSource() + files['apps/web/app/components/resource-actions.jsx']).includes(token)) failures.push(`truthful degraded/empty UI missing ${token}`);
 }
+for (const token of ['KrateControllerRecovery', 'KrateLoadingView', 'KRATE_LOADING_MESSAGES', '/api/controller', 'window.location.reload']) {
+  if (!(webUiSource() + files['apps/web/app/components/krate-loading.jsx']).includes(token)) failures.push(`recovery loading UI missing ${token}`);
+}
+if ((webUiSource() + files['apps/web/app/components/krate-loading.jsx']).includes('Krate workspace degraded or empty')) failures.push('degraded workspace copy should be replaced by recovery loading UI');
 for (const token of ['duplex', 'KRATE_GITEA_HTTP_URL', 'fetch(target', 'degraded']) {
   if (!files['apps/web/app/api/git-proxy/route.js'].includes(token)) failures.push(`git proxy route missing ${token}`);
 }
@@ -147,7 +169,7 @@ for (const file of Object.keys(pageContracts)) {
 for (const [file, component] of Object.entries(pageContracts)) {
   if (!files[file].includes(component)) failures.push(`${file} does not use dedicated ${component} route component`);
 }
-if (required.some((file) => file.includes('/pipelines'))) failures.push('legacy pipelines route is still required');
+if (required.some((file) => file.includes('/pipelines') && !file.includes('/api/'))) failures.push('legacy pipelines route is still required');
 for (const token of ['KrateProject', 'issues', 'issueSync', 'issueRepositoryRefs', 'issueProjectRefs']) {
   if (!files['src/controller-ui.js'].includes(token)) failures.push(`controller UI issue scoping missing ${token}`);
 }
@@ -159,10 +181,10 @@ for (const [file, token] of [['../charts/crds/agent-resources.yaml', 'repository
 }
 
 for (const token of ['ControllerApiPage', 'RepositoriesPage', 'InboxPage', 'RunsPage', 'RunnersCiPage', 'HooksEventsPage', 'InsightsPage', 'OperationsInstallPage', 'AdvancedPlansPage', 'PeoplePage', 'LoginPage', 'LogoutPage', 'RepositoryCodePage', 'RepositoryPullRequestsPage', 'RepositoryIssuesPage', 'RepositoryIssueDetailPage', 'ProjectIssuesPage', 'ProjectIssueDetailPage', 'IssueScopePage', 'RepositoryRunsPage', 'RepositoryHooksPage', 'RepositorySettingsPage']) {
-  if (!files['apps/web/app/ui-shell.jsx'].includes(token)) failures.push(`ui shell missing dedicated flow component ${token}`);
+  if (!webUiSource().includes(token)) failures.push(`ui shell missing dedicated flow component ${token}`);
 }
 for (const token of ['IssueWorkspace', 'IssueCreateForm', 'IssueViewSwitcher', 'IssueDetailPage', 'IssueDetailView', 'IssueEditor', 'IssueComments', 'issuesForScope', 'issueRepositoryRefs', 'issueProjectRefs', 'Invite people', 'identity links', 'repository permissions', 'Access overview', 'Access readiness', 'Use workspace identity', 'Sign in to Krate', 'Repository home', 'Review inbox', 'Run debugger', 'Capacity designer', 'Automation inspector', 'Clone and refs', 'Repository settings map', 'Advanced architecture details', 'ResourceList', 'PlanCard', 'ForgeFlowRail', 'RepositoryCommandBar', 'breadcrumbs', 'Create → review → merge → deploy', 'Advanced resource details']) {
-  if (!files['apps/web/app/ui-shell.jsx'].includes(token)) failures.push(`ui shell missing forge UX affordance ${token}`);
+  if (!webUiSource().includes(token)) failures.push(`ui shell missing forge UX affordance ${token}`);
 }
 
 const model = createControllerUiModel({
@@ -252,6 +274,7 @@ function fail(failures) {
   console.error(JSON.stringify({ status: 'failed', failures }, null, 2));
   process.exit(1);
 }
+
 
 
 

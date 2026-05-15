@@ -1344,3 +1344,108 @@ main { width: 100%; max-width: none; padding: 0 0 48px; }
 .issueComments .conversation p { margin: 6px 0; }
 .issueEditor .commentComposer { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(91, 56, 23, .12); }
 @media (max-width: 980px) { .issueWorkspace { grid-template-columns: 1fr; } }
+
+.krateRecoveryOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: radial-gradient(circle at 50% 15%, rgba(59, 130, 246, .18), transparent 34%), rgba(8, 13, 23, .96);
+  color: #e5eefb;
+}
+.krateLoadingView {
+  width: min(100%, 420px);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  text-align: center;
+}
+.krateLoadingLogo {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -.05em;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+  background-size: 200% 200%;
+  animation: krateGradient 3s ease infinite, kratePulse 2s ease-in-out infinite;
+}
+.krateLoadingText h2 { margin: 0 0 6px; color: inherit; font-size: clamp(1.25rem, 3vw, 1.75rem); }
+.krateLoadingText p { margin: 0; color: var(--muted); line-height: 1.5; }
+.krateLoadingView.fullPage {
+  min-height: 60vh;
+  margin: 0 auto;
+  padding: 32px;
+}
+.krateRecoveryOverlay .krateLoadingView {
+  color: #e5eefb;
+}
+.krateRecoveryOverlay .krateLoadingText p {
+  color: rgba(229, 238, 251, .72);
+}
+.krateRecoveryOverlay .krateLoadingPhase {
+  color: rgba(229, 238, 251, .84);
+}
+.krateRecoveryOverlay .krateLoadingView small {
+  color: rgba(229, 238, 251, .56);
+}
+.krateLoadingBar {
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, .22);
+}
+.krateLoadingBar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
+  background-size: 220% 100%;
+  animation: krateBarShimmer 1.4s linear infinite;
+  transition: width .22s ease-out;
+}
+.krateLoadingPhase {
+  min-height: 1.35rem;
+  margin: 0;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: .84rem;
+}
+.krateLoadingView small { color: var(--ink-ghost); font-family: var(--mono); }
+.krateRecoveryHint {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+  margin: 0;
+  color: rgba(229, 238, 251, .52);
+  font-family: var(--mono);
+  font-size: .74rem;
+  text-align: center;
+}
+@keyframes krateGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes kratePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, .4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 24px 5px rgba(99, 102, 241, .22); }
+}
+@keyframes krateBarShimmer {
+  0% { background-position: 220% 0; }
+  100% { background-position: -220% 0; }
+}
+
+

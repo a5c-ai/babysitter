@@ -1,6 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { yaml } from '@codemirror/lang-yaml';
+import { EditorView } from '@codemirror/view';
 
 const LANG_MAP = {
   js: 'javascript', jsx: 'javascript', ts: 'typescript', tsx: 'typescript',
@@ -28,6 +32,36 @@ function formatSize(bytes) {
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
+
+function languageExtension(language) {
+  if (language === 'yaml') return yaml();
+  if (['javascript', 'typescript', 'json'].includes(language)) return javascript({ jsx: true, typescript: language === 'typescript' });
+  return [];
+}
+
+const repoCodeTheme = EditorView.theme({
+  '&': {
+    minHeight: '100%',
+    backgroundColor: '#1e1e2e',
+    color: '#cdd6f4',
+  },
+  '.cm-scroller': {
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+    fontSize: '0.8125rem',
+    lineHeight: '1.65',
+  },
+  '.cm-gutters': {
+    backgroundColor: '#181825',
+    color: '#6c7086',
+    borderRight: '1px solid rgba(205, 214, 244, 0.12)',
+  },
+  '.cm-activeLine, .cm-activeLineGutter': {
+    backgroundColor: 'rgba(255,255,255,0.04)',
+  },
+  '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
+    backgroundColor: 'rgba(137, 180, 250, 0.36)',
+  },
+});
 
 export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
   const [branch, setBranch] = useState(defaultBranch);
@@ -126,6 +160,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
   const branchOptions = Array.from(new Set(['main', 'staging', 'develop', defaultBranch, branch].filter(Boolean)));
 
   const language = detectLanguage(selectedFile);
+  const editorExtensions = useMemo(() => [languageExtension(language), repoCodeTheme, EditorView.lineWrapping].flat(), [language]);
 
   return (
     <div
@@ -389,44 +424,14 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
                   Error loading file: {fileError}
                 </p>
               ) : fileContent ? (
-                <pre
+                <CodeMirror
+                  value={fileContent.content || ''}
+                  extensions={editorExtensions}
+                  editable={false}
+                  basicSetup={{ foldGutter: true, highlightActiveLine: true, highlightActiveLineGutter: true }}
+                  theme="dark"
                   aria-label={`File content: ${selectedFile}`}
-                  style={{
-                    margin: 0,
-                    padding: 0,
-                    fontSize: '0.8125rem',
-                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                    lineHeight: 1.65,
-                    background: '#1e1e2e',
-                    color: '#cdd6f4',
-                    minHeight: '100%',
-                  }}
-                >
-                  {(fileContent.content || '').split('\n').map((line, idx) => (
-                    <div
-                      key={idx}
-                      style={{ display: 'flex', minWidth: 0 }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                    >
-                      <span
-                        style={{
-                          minWidth: '3rem',
-                          paddingRight: '1rem',
-                          paddingLeft: '0.75rem',
-                          textAlign: 'right',
-                          color: '#585b70',
-                          userSelect: 'none',
-                          flexShrink: 0,
-                          fontVariantNumeric: 'tabular-nums',
-                        }}
-                      >
-                        {idx + 1}
-                      </span>
-                      <span style={{ flex: 1, whiteSpace: 'pre', paddingRight: '1rem' }}>{line}</span>
-                    </div>
-                  ))}
-                </pre>
+                />
               ) : null}
             </div>
           </>

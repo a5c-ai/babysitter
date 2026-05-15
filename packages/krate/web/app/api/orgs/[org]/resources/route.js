@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
   const controller = createKrateApiController({ namespace });
   const kind = new URL(request.url).searchParams.get('kind') || 'Repository';
   try {
-    return Response.json(await controller.listResource(kind), { headers: { 'Cache-Control': 'no-store' } });
+    return Response.json(await controller.listResourceForOrg(org, kind), { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     return errorResponse(error.message, error.message?.includes('not found') ? 404 : 500);
   }

@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { createAuthProviderConfig, listEnabledAuthProviders, parseSessionCookie, fetchControllerUiModel } from '@a5c-ai/krate-sdk';
+import { KrateControllerRecovery } from '../components/krate-loading.jsx';
 
 export const orgNavigationGroups = [
   {
@@ -191,7 +192,7 @@ export function EmptyState({ title, text, cta, ctaLabel, children, info = false 
 
 export function DegradedBanner({ model }) {
   if (model.status === 'ready') return null;
-  return <section className="card degradedBanner"><div className="cardTitle"><h2>Krate workspace degraded or empty</h2><StatusPill tone="warn">{model.status}</StatusPill></div><p>Connect the Krate workspace service or set <code>KRATE_CONTROLLER_URL</code> for a remote Krate endpoint.</p><ul className="compactList">{(model.controller.connection?.errors || ['No Krate resources returned']).slice(0, 3).map((error) => <li key={error}>{sanitizeCopy(error)}</li>)}</ul></section>;
+  return <KrateControllerRecovery org={model.org?.slug || 'default'} />;
 }
 
 export function InfoList({ title, items }) {
