@@ -1,8 +1,7 @@
+export const metadata = { title: 'Operations Install | Krate' };
 export const dynamic = 'force-dynamic';
 
 import { OperationsInstallPage } from '../../../ui-shell.jsx';
-export const metadata = { title: 'Operations Install | Krate' };
-
 
 export default async function Page({ params }) {
   const routeParams = await params;

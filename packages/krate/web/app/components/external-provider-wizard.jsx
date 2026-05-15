@@ -187,6 +187,8 @@ function Step4Auth({ name, setName, secretRef, setSecretRef, providerType }) {
           value={name}
           onChange={(e) => setName(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
           placeholder={`${providerType}-provider`}
+          required
+          aria-required="true"
           style={inputStyle}
         />
         <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: '#6b7280' }}>Kubernetes resource name (lowercase, hyphens only).</p>
@@ -200,6 +202,8 @@ function Step4Auth({ name, setName, secretRef, setSecretRef, providerType }) {
           value={secretRef}
           onChange={(e) => setSecretRef(e.target.value)}
           placeholder={`${providerType}-credentials`}
+          required
+          aria-required="true"
           style={inputStyle}
         />
         <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: '#6b7280' }}>

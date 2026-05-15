@@ -1,8 +1,7 @@
+export const metadata = { title: 'Hooks & Events | Krate' };
 export const dynamic = 'force-dynamic';
 
 import { HooksEventsPage } from '../../../ui-shell.jsx';
-export const metadata = { title: 'Hooks & Events | Krate' };
-
 
 export default async function Page({ params }) {
   const routeParams = await params;

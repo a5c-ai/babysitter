@@ -1,8 +1,7 @@
+export const metadata = { title: 'Agent Workspace | Krate' };
 export const dynamic = 'force-dynamic';
 
 import { AgentWorkspaceDetailPage } from '../../../../../ui-shell.jsx';
-export const metadata = { title: 'Agent Workspace | Krate' };
-
 
 export default async function Page({ params }) {
   const routeParams = await params;

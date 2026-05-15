@@ -54,8 +54,8 @@ export function DispatchButton({ org, stacks = [] }) {
         </select>
         <label htmlFor="dispatch-repo-input" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>Repository</label>
         <input id="dispatch-repo-input" placeholder="Repository (optional)" value={repository} onChange={e => setRepository(e.target.value)} style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13, width: 180 }} aria-label="Repository (optional)" />
-        <button onClick={handleDispatch} disabled={!selectedStack} style={{ ...primaryStyle, opacity: selectedStack ? 1 : 0.5 }}>Launch</button>
-        <button onClick={() => { setStatus('idle'); setSelectedStack(''); setRepository(''); }} style={secondaryStyle}>Cancel</button>
+        <button onClick={handleDispatch} disabled={!selectedStack} aria-label="Launch dispatch" style={{ ...primaryStyle, opacity: selectedStack ? 1 : 0.5 }}>Launch</button>
+        <button onClick={() => { setStatus('idle'); setSelectedStack(''); setRepository(''); }} aria-label="Cancel dispatch" style={secondaryStyle}>Cancel</button>
       </div>
     );
   }

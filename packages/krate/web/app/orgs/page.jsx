@@ -1,7 +1,5 @@
 import { loadKrateUi, PageFrame, StatusPill, orgHref } from '../ui-shell.jsx';
 export const metadata = { title: 'Organizations | Krate' };
-
-
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
