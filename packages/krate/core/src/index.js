@@ -53,3 +53,4 @@ export * from './audit-controller.js';
 export * from './async-controller.js';
 export * from './event-bus.js';
 export * from './agent-secret-config-grant-controller.js';
+export * from './runner-controller.js';
