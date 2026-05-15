@@ -18,6 +18,8 @@ attributes:
 edges:
   references_path:
     - target: path:krate-core
+  validated_by_ci:
+    - target: ci:a5c-ai-krate
 ---
 nodeKind: PackageSurface
 id: package:a5c-ai-krate-sdk
@@ -37,6 +39,8 @@ attributes:
 edges:
   references_path:
     - target: path:krate-sdk
+  validated_by_ci:
+    - target: ci:a5c-ai-krate-sdk
 ---
 nodeKind: PackageSurface
 id: package:a5c-ai-krate-cli
@@ -56,6 +60,8 @@ attributes:
 edges:
   references_path:
     - target: path:krate-cli
+  validated_by_ci:
+    - target: ci:a5c-ai-krate-cli
 ---
 nodeKind: PackageSurface
 id: package:a5c-ai-krate-web
@@ -75,6 +81,8 @@ attributes:
 edges:
   references_path:
     - target: path:krate-web
+  validated_by_ci:
+    - target: ci:a5c-ai-krate-web
 ---
 nodeKind: PackageSurface
 id: package:krate-helm-chart
@@ -94,3 +102,5 @@ attributes:
 edges:
   references_path:
     - target: path:krate-chart
+  validated_by_ci:
+    - target: ci:krate-helm-chart
