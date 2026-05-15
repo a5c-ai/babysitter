@@ -298,7 +298,15 @@ async function prepareClaudeAutomationState(cwd: string, env: Record<string, str
     ...settings,
     theme: typeof settings['theme'] === 'string' ? settings['theme'] : 'dark',
     skipDangerousModePermissionPrompt: true,
-    permissions: { allow: [], deny: [], ...recordObject(settings['permissions']) },
+    permissions: {
+      allow: [
+        'Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'Glob(*)', 'Grep(*)',
+        'WebFetch(*)', 'WebSearch(*)', 'Agent(*)', 'Skill(*)',
+        'TodoRead', 'TodoWrite',
+      ],
+      deny: [],
+      ...recordObject(settings['permissions']),
+    },
   });
 
   const configPath = join(home, '.claude.json');
@@ -908,6 +916,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     let outputBuf = '';
     let eventCount = 0;
     let apiKeyPromptHandled = false;
+    let bypassPromptHandled = false;
 
     const parseCtx = {
       runId: 'bridge',
@@ -927,12 +936,18 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       // Buffer all PTY output — never write synchronously to stdout (pipe deadlock)
       outputBuf += data;
 
-      // Auto-respond to Claude Code's "Do you want to use this API key?" prompt.
+      // Auto-respond to Claude Code interactive prompts that block automation.
       // ANSI cursor-move codes replace spaces, so stripped text is concatenated.
-      if (!apiKeyPromptHandled && outputBuf.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').includes('usethisAPIkey')) {
+      const stripped = outputBuf.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
+      if (!apiKeyPromptHandled && stripped.includes('usethisAPIkey')) {
         apiKeyPromptHandled = true;
-        // Default selection is "No (recommended)". Send Up arrow then Enter to select "Yes".
+        // Default is "No (recommended)". Send Up arrow + Enter to select "Yes".
         setTimeout(() => ptyProcess.write('\x1b[A\r'), 200);
+      }
+      if (!bypassPromptHandled && stripped.includes('BypassPermissionsmode')) {
+        bypassPromptHandled = true;
+        // Default is "No, exit". Send Down arrow + Enter to select "Yes, I accept".
+        setTimeout(() => ptyProcess.write('\x1b[B\r'), 200);
       }
 
       if (!assembler || !adapter || turnComplete) return;
@@ -978,9 +993,24 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       }
     });
 
-    // Inject prompt as initial input after harness starts (like interactive mode).
+    // Inject prompt after all onboarding prompts are dismissed.
+    // If API key or bypass prompts appear, wait for them before sending the task.
     if (prompt) {
-      setTimeout(() => ptyProcess.write(prompt + '\n'), 500);
+      const injectPrompt = () => ptyProcess.write(prompt + '\n');
+      const checkAndInject = () => {
+        if (apiKeyPromptHandled || bypassPromptHandled) {
+          // Give Claude Code time to process the prompt response before injecting task
+          setTimeout(injectPrompt, 2000);
+        } else {
+          const stripped = outputBuf.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
+          if (outputBuf.length > 0 && !stripped.includes('APIkey') && !stripped.includes('Bypass')) {
+            injectPrompt();
+          } else {
+            setTimeout(checkAndInject, 500);
+          }
+        }
+      };
+      setTimeout(checkAndInject, 500);
     }
 
     // Create a fake ChildProcess-like for signal handling
