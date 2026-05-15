@@ -220,6 +220,9 @@ function appendHarnessSessionArgs(plan: LaunchPlan, session: SessionArgs): void 
       if (session.prompt) plan.args.push('--prompt', session.prompt);
       break;
     case 'pi':
+      if (session.prompt && !interactive && !session.bridgeInteractive) {
+        plan.args.push('--print', session.prompt);
+      }
       break;
     case 'opencode':
       if (session.resumeId) plan.args.push('--session', session.resumeId);
@@ -839,7 +842,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
 
       // Inject prompt as initial input after a short delay for the harness to start
       if (prompt && !plan.args.some(a => a === prompt)) {
-        setTimeout(() => ptyProcess.write(prompt + '\n'), 500);
+        setTimeout(() => ptyProcess.write(prompt + '\r'), 500);
       }
 
       // Create a fake ChildProcess-like for signal handling
@@ -1006,7 +1009,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     // Inject prompt after any observed onboarding prompts are dismissed.
     // Do not require startup output: some harnesses wait silently for input.
     if (prompt) {
-      const injectPrompt = () => ptyProcess.write(prompt + '\n');
+      const injectPrompt = () => ptyProcess.write(prompt + '\r');
       const checkAndInject = () => {
         if (apiKeyPromptHandled || bypassPromptHandled) {
           // Give Claude Code time to process the prompt response before injecting task
@@ -1114,7 +1117,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     process.on('exit', () => { try { ptyProcess.kill('SIGKILL'); } catch { /* */ } });
   }
 
-  const promptPassedAsFlag = (plan.harness === 'pi' && !isInteractive && plan.args.includes('--prompt'));
+  const promptPassedAsFlag = (plan.harness === 'pi' && !isInteractive && plan.args.includes('--print'));
   if (prompt && child.stdin && !ptyProcess && !promptPassedAsFlag) {
     child.stdin.write(prompt + '\n');
     if (!isInteractive) {

@@ -145,7 +145,7 @@ describe('launchCommand transport-mux integration', () => {
     expect(child.stdin.end).toHaveBeenCalledTimes(1);
   });
 
-  it('passes non-interactive Pi prompts through stdin', async () => {
+  it('passes non-interactive Pi prompts through Pi print mode', async () => {
     const runtimeStop = vi.fn(async () => {});
     const originalHome = process.env['HOME'];
     const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-pi-home-'));
@@ -215,8 +215,9 @@ describe('launchCommand transport-mux integration', () => {
       expect(spawnMock).toHaveBeenCalledTimes(1);
       const spawnedArgs = spawnMock.mock.calls[0]?.[1] as string[];
       expect(spawnedArgs).not.toContain('--prompt');
-      expect(spawnedArgs).not.toContain('write the file');
-      expect(child.stdin.write).toHaveBeenCalledWith('write the file\n');
+      expect(spawnedArgs).toContain('--print');
+      expect(spawnedArgs).toContain('write the file');
+      expect(child.stdin.write).not.toHaveBeenCalled();
       expect(child.stdin.end).toHaveBeenCalledTimes(1);
       expect(runtimeStop).toHaveBeenCalledTimes(1);
     } finally {
