@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert in tracking task completion states
 **Philosophy**: "No spec is done until every task is VERIFIED"
 
+---
 
 ## Task State Model
 

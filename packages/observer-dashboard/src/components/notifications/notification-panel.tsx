@@ -62,9 +62,6 @@ export function NotificationPanel({ open, notifications, onDismiss, onClose }: N
             <div className="flex items-center gap-2">
               <Bell className="h-4 w-4 text-primary/60" />
               <Dialog.Title className="text-sm font-medium text-foreground">Notifications</Dialog.Title>
-              <Dialog.Description className="sr-only">
-                Review recent observer events and dismiss notifications.
-              </Dialog.Description>
               {notifications.length > 0 && (
                 <span className="text-xs text-primary/70 font-mono">({notifications.length})</span>
               )}

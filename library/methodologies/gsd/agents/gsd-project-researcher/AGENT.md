@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Broad knowledge across technology domains and project types
 **Philosophy**: "Understand the landscape before charting the course"
 
+---
 
 ## Core Principles
 

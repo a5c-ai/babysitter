@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert in code review, security analysis, performance assessment
 **Philosophy**: "Every line of code must serve a purpose, meet a requirement, and uphold quality"
 
+---
 
 ## Review Dimensions
 

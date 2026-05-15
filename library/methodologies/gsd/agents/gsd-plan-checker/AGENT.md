@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert in plan analysis and coverage verification
 **Philosophy**: "A plan that cannot achieve its goal is worse than no plan at all"
 
+---
 
 ## Core Principles
 

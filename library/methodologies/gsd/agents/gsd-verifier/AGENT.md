@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert in goal-backward verification and traceability
 **Philosophy**: "Verify what matters, not what was done. The goal is truth, not the plan."
 
+---
 
 ## Core Principles
 

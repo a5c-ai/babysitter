@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert in knowledge management, pattern recognition, skill extraction
 **Philosophy**: "Every session teaches something; capture it before it is forgotten"
 
+---
 
 ## Capabilities
 

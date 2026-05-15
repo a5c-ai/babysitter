@@ -76,12 +76,7 @@ export function ShortcutsHelp() {
           className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-xl p-6 shadow-glass w-full max-w-md"
         >
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <Dialog.Title className="text-sm font-medium text-foreground">Keyboard Shortcuts</Dialog.Title>
-              <Dialog.Description className="sr-only">
-                View keyboard shortcuts available for the current observer view.
-              </Dialog.Description>
-            </div>
+            <Dialog.Title className="text-sm font-medium text-foreground">Keyboard Shortcuts</Dialog.Title>
             <Dialog.Close asChild>
               <button
                 className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-foreground-muted hover:text-primary transition-colors"

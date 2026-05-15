@@ -57,7 +57,7 @@
     "@a5c-ai/agent-mux-ui": "5.0.0",
     "@a5c-ai/compendium": "0.1.0",
     "@tanstack/react-virtual": "^3.13.19",
-    "lucide-react": "^0.468.0",
+    "lucide-react": "^0.469.0",
     "qrcode": "^1.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

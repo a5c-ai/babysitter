@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert-level implementation across all technology stacks
 **Philosophy**: "One task, one commit, no deviations without documentation"
 
+---
 
 ## Core Principles
 

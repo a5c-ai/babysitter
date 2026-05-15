@@ -26,20 +26,8 @@ function installTelemetryMocks() {
     ATTR_SERVICE_NAME: 'service.name',
     ATTR_SERVICE_VERSION: 'service.version',
   }));
-  vi.doMock('@opentelemetry/instrumentation-http', () => ({
-    HttpInstrumentation: vi.fn(function HttpInstrumentation() {
-      return { name: 'http' };
-    }),
-  }));
-  vi.doMock('@opentelemetry/instrumentation-undici', () => ({
-    UndiciInstrumentation: vi.fn(function UndiciInstrumentation() {
-      return { name: 'undici' };
-    }),
-  }));
-  vi.doMock('@opentelemetry/instrumentation-pino', () => ({
-    PinoInstrumentation: vi.fn(function PinoInstrumentation() {
-      return { name: 'pino' };
-    }),
+  vi.doMock('@opentelemetry/auto-instrumentations-node', () => ({
+    getNodeAutoInstrumentations: vi.fn((config) => ({ config })),
   }));
   vi.doMock('@opentelemetry/api', () => ({
     metrics: {

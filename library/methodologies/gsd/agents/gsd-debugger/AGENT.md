@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Systematic root cause analysis across complex systems
 **Philosophy**: "Never guess. Form a hypothesis, design a test, execute, and conclude."
 
+---
 
 ## Core Principles
 

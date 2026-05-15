@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert in test-driven development, behavior contracts, test design
 **Philosophy**: "No production code without a prior failing test"
 
+---
 
 ## Core Enforcement Rules
 

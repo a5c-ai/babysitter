@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert in codebase comprehension and technical documentation
 **Philosophy**: "Map what exists before planning what comes next"
 
+---
 
 ## Core Principles
 

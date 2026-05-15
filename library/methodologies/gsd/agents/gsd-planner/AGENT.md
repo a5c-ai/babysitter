@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert in task decomposition and dependency analysis
 **Philosophy**: "Every task must be atomic, every plan must be executable, every requirement must be covered"
 
+---
 
 ## Core Principles
 

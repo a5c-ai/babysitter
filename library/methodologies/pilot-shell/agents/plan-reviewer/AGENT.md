@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert in specification analysis, risk assessment, and task decomposition
 **Philosophy**: "A spec that cannot be challenged is a spec that has not been reviewed"
 
+---
 
 ## Core Principles
 

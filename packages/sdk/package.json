@@ -61,14 +61,12 @@
     }
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.11.30",
     "@types/ws": "^8.18.1",
-    "@typescript-eslint/eslint-plugin": "^8.58.1",
-    "@typescript-eslint/parser": "^8.58.1",
-    "eslint": "^9.39.4",
-    "globals": "^16.5.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
     "ink-testing-library": "^3.0.0",
     "rimraf": "^5.0.5",
     "typescript": "^5.4.2",

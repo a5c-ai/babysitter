@@ -217,12 +217,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             <div className="flex items-center justify-between p-4 border-b border-border">
               <div className="flex items-center gap-2">
                 <Settings className="h-4 w-4 text-foreground-muted" />
-                <div>
-                  <Dialog.Title className="text-sm font-medium text-foreground">Settings</Dialog.Title>
-                  <Dialog.Description className="sr-only">
-                    Configure observer data sources, polling, appearance, retention, and project visibility.
-                  </Dialog.Description>
-                </div>
+                <Dialog.Title className="text-sm font-medium text-foreground">Settings</Dialog.Title>
               </div>
               <Dialog.Close asChild>
                 <button
@@ -234,6 +229,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             </div>
 
             {/* Body */}
+            <Dialog.Description asChild>
               <div className="flex-1 overflow-y-auto p-4">
                 {fetchLoading ? (
                   <div className="flex items-center justify-center py-12 text-foreground-muted">
@@ -466,6 +462,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                   </div>
                 ) : null}
               </div>
+            </Dialog.Description>
 
             {/* Footer */}
             {serverConfig && (

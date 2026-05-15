@@ -42,9 +42,7 @@
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.1",
-    "@opentelemetry/instrumentation-http": "^0.214.0",
-    "@opentelemetry/instrumentation-pino": "^0.60.0",
-    "@opentelemetry/instrumentation-undici": "^0.24.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.72.0",
     "@opentelemetry/resources": "^2.6.1",
     "@opentelemetry/sdk-node": "^0.214.0",
     "@opentelemetry/semantic-conventions": "^1.29.0",

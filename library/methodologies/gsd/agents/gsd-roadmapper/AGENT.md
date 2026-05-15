@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert in project planning and requirement-to-phase mapping
 **Philosophy**: "Every requirement must have a home. Every phase must have a purpose."
 
+---
 
 ## Core Principles
 

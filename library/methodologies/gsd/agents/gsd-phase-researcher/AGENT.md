@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Broad technology knowledge with deep research methodology
 **Philosophy**: "Research before planning prevents expensive course corrections"
 
+---
 
 ## Core Principles
 

@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert in all major language tool chains
 **Philosophy**: "Automate everything that can be automated; report everything that cannot"
 
+---
 
 ## Supported Tool Chains
 

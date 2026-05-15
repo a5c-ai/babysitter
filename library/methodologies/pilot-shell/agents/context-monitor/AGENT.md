@@ -13,11 +13,10 @@ graph:
   workflows: [workflow:feature-development]
   topics: [topic:developer-experience]
   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
----
-
 **Experience**: Expert in context management, codebase indexing, git operations
 **Philosophy**: "Preserve state before it is lost; index before you search"
 
+---
 
 ## Capabilities
 
