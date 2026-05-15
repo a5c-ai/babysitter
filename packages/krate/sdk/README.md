@@ -34,6 +34,168 @@ import { fetchControllerUiModel } from '@a5c-ai/krate-sdk';
 const uiModel = await fetchControllerUiModel({ organization: 'default' });
 ```
 
+## Quick Reference
+
+Code examples for every major SDK export. All examples use `import` (ESM).
+
+### Controller: snapshot, list, apply, delete
+
+```js
+import { createKrateApiController, createResource } from '@a5c-ai/krate-sdk';
+
+const controller = createKrateApiController();
+
+// Snapshot — fetch all resources across all kinds
+const snapshot = await controller.snapshot();
+console.log(snapshot.resources.AgentStack);
+
+// List resources by kind
+const repos = await controller.listResource('Repository');
+
+// Apply (create or update) a resource
+const resource = createResource('Repository', { name: 'my-repo' }, {
+  organizationRef: 'acme',
+  visibility: 'internal'
+});
+const { resource: created } = await controller.applyResource(resource);
+console.log('Applied:', created.metadata.name);
+
+// Delete a resource
+await controller.deleteResource('Repository', 'my-repo');
+```
+
+### Auth: create cookie, parse cookie, register profile
+
+```js
+import {
+  createAuthProviderConfig,
+  createSessionCookie,
+  parseSessionCookie,
+  registerLoginProfile
+} from '@a5c-ai/krate-sdk';
+
+// Build auth config from environment variables
+const config = createAuthProviderConfig();
+
+// Create a signed session cookie (profile → signed JWT-like cookie value)
+const cookie = createSessionCookie(
+  { user: 'alice', email: 'alice@example.com' },
+  config.session.secret
+);
+
+// Parse and verify a session cookie
+const profile = parseSessionCookie(config, cookieValue);
+// → { user: 'alice', email: 'alice@example.com', ... } or null
+
+// Register a login profile in the identity store
+await registerLoginProfile(
+  { user: 'alice', email: 'alice@example.com' },
+  { namespace: 'krate-org-default' }
+);
+```
+
+### Memory: query graph, query grep
+
+```js
+import { queryGraph, queryGrep, queryMemory } from '@a5c-ai/krate-sdk';
+
+// Graph-based traversal over memory records
+const { matches, totalMatches } = queryGraph({
+  records: memoryRecords,         // [{ id, nodeKind, attributes, edges }]
+  query: 'deployment failures',
+  kinds: ['Repository', 'Pipeline'],
+  depth: 2,
+});
+
+// Grep-style search over document content
+const { matches: grepMatches } = queryGrep({
+  documents: memoryDocuments,     // [{ id, content, path }]
+  query: 'AgentStack',
+  maxMatches: 25,
+});
+
+// Combined dispatcher (graph + grep, auto-merged results)
+const { graphMatches, grepMatches: combined } = queryMemory({
+  records: memoryRecords,
+  documents: memoryDocuments,
+  query: 'deployment pipeline failures',
+  mode: 'graph-and-grep',         // 'graph-only' | 'grep-only' | 'graph-and-grep'
+  topK: 10,
+});
+```
+
+### External: sync, resolve conflict, process webhook
+
+```js
+import {
+  createSyncController,
+  createConflictController,
+  createWebhookController
+} from '@a5c-ai/krate-sdk';
+
+// Sync an external binding (e.g. GitHub repository adapter)
+const syncCtrl = createSyncController();
+const syncResult = await syncCtrl.syncBinding('github-binding', {
+  kind: 'Repository',
+  localName: 'my-repo',
+  namespace: 'krate-org-default',
+  spec: {},
+  externalEnvelope: {
+    nativeId: '123456',
+    url: 'https://github.com/org/repo',
+    etag: 'abc123',
+    providerRef: 'github'
+  }
+});
+
+// Resolve a sync conflict
+const conflictCtrl = createConflictController();
+await conflictCtrl.resolveConflict({
+  conflictName: 'repo-conflict-abc',
+  strategy: 'local-wins',
+  resolvedValue: { /* merged spec */ },
+  resources: {}
+});
+
+// Process an incoming webhook event
+const webhookCtrl = createWebhookController();
+await webhookCtrl.processWebhook({
+  type: 'push',
+  source: { kind: 'Repository', name: 'my-repo' },
+  repository: 'my-repo',
+  ref: 'refs/heads/main',
+  actor: 'alice',
+  payload: { commits: [] }
+});
+```
+
+### Audit: log event, query events
+
+```js
+import { createAuditController } from '@a5c-ai/krate-sdk';
+
+const audit = createAuditController();
+
+// Log an audit event
+audit.log({
+  org: 'default',
+  actor: 'alice',
+  action: 'resource.applied',
+  resource: { kind: 'Repository', name: 'my-repo', namespace: 'krate-org-default' },
+});
+
+// Query audit events with filtering
+const { events, total } = audit.query({
+  org: 'default',
+  action: 'resource.applied',
+  since: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+  limit: 50,
+});
+console.log(`Found ${total} events`);
+```
+
+---
+
 ## API Reference
 
 ### API Controller

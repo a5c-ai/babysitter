@@ -86,7 +86,8 @@ export const orgNavigationGroups = [
     title: 'Observe',
     items: [
       ['/insights', 'Insights', 'Health and activity'],
-      ['/operations-install', 'Readiness', 'Install and release checks']
+      ['/operations-install', 'Readiness', 'Install and release checks'],
+      ['/api-docs', 'API Docs', 'HTTP API reference and explorer']
     ]
   },
   {
@@ -244,6 +245,13 @@ export async function InsightsPage({ org = null } = {}) {
   const activeOrg = ui.model.org?.slug || org || 'default';
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/insights" eyebrow="observability" title="System Health & Insights" text="Real-time connectivity status, agent activity, and system health." breadcrumbs={[['/', 'Krate'], ['/insights', 'Insights']]}>
     <HealthMonitor org={activeOrg} />
+  </PageFrame>;
+}
+export async function ApiDocsPage({ org = null } = {}) {
+  const ui = await loadKrateUi(org);
+  const activeOrg = ui.model.org?.slug || org || 'default';
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/api-docs" eyebrow="developer" title="API Reference" text="Interactive documentation for the Krate HTTP API. Try endpoints directly against your organization." breadcrumbs={[['/', 'Krate'], ['/api-docs', 'API Docs']]}>
+    <p className="lede">Use the route at <a href={orgHref(activeOrg, '/api-docs')}>/orgs/{activeOrg}/api-docs</a> for the full interactive API explorer.</p>
   </PageFrame>;
 }
 export async function OperationsInstallPage({ org = null } = {}) { return <SectionPage org={org} section="operations-install" />; }
