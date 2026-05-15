@@ -20,6 +20,7 @@ export * from './api-controller.js';
 export * from './kubernetes-controller.js';
 export * from './kubernetes-resource-gateway.js';
 export * from './gitea-backend.js';
+export * from './gitea-service.js';
 export * from './argocd-gitops.js';
 export * from './agent-permission-review.js';
 export * from './agent-stack-controller.js';

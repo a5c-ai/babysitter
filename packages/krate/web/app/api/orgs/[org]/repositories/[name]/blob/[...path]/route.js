@@ -1,15 +1,16 @@
-// TODO: When Gitea is connected, replace this mock with a real Gitea API call:
-//   GET /api/v1/repos/{owner}/{repo}/raw/{filepath}?ref={branch}
-//   or GET /api/v1/repos/{owner}/{repo}/contents/{filepath}?ref={branch} (returns base64 encoded content)
+import { createGiteaService } from '@a5c-ai/krate';
 
-export async function GET(request, { params }) {
-  const { org, name, path: pathParts } = await params;
-  const filePath = Array.isArray(pathParts) ? pathParts.join('/') : (pathParts || '');
-  const { searchParams } = new URL(request.url);
-  const branch = searchParams.get('branch') || 'main';
-  const raw = searchParams.get('raw') === '1';
+// Lazily created so the service is instantiated per-process rather than per-request
+let _service;
+function getGiteaService() {
+  if (_service === undefined) {
+    _service = createGiteaService(); // returns null when KRATE_GITEA_HTTP_URL is not set
+  }
+  return _service;
+}
 
-  // Mock file contents — replace with real Gitea API when connected
+// Mock file contents used when Gitea is not available
+function getMockContents(name, filePath, branch) {
   const mockContents = {
     'README.md': `# ${name}
 
@@ -195,17 +196,68 @@ CMD ["node", "src/index.js"]
 `,
   };
 
-  const content =
+  return (
     mockContents[filePath] ||
     `// File: ${filePath}
 // Content not available in mock mode.
 // TODO: Wire to real Gitea API to serve actual file content.
 // Gitea endpoint: GET /api/v1/repos/{owner}/{repo}/raw/${filePath}?ref=${branch}
-`;
+`
+  );
+}
 
+export async function GET(request, { params }) {
+  const { org, name, path: pathParts } = await params;
+  const filePath = Array.isArray(pathParts) ? pathParts.join('/') : (pathParts || '');
+  const { searchParams } = new URL(request.url);
+  const branch = searchParams.get('branch') || 'main';
+  const raw = searchParams.get('raw') === '1';
+
+  const service = getGiteaService();
+
+  if (service) {
+    try {
+      // Use getBlob for raw text; getFileContent for metadata + decoded content
+      if (raw) {
+        const content = await service.getBlob(org, name, branch, filePath);
+        if (content !== null) {
+          return new Response(content, {
+            headers: {
+              'Content-Type': 'text/plain; charset=utf-8',
+              'Content-Disposition': `attachment; filename="${filePath.split('/').pop()}"`,
+              'Content-Length': String(Buffer.byteLength(content, 'utf8')),
+            },
+          });
+        }
+      } else {
+        const file = await service.getFileContent(org, name, branch, filePath);
+        if (file !== null) {
+          return Response.json({
+            path: file.path,
+            content: file.content,
+            size: file.size,
+            encoding: file.encoding,
+            lastCommit: file.lastCommit || null,
+            lastCommitMessage: null,
+            lastCommitDate: null,
+            repo: name,
+            org,
+            branch,
+            source: 'gitea',
+          });
+        }
+      }
+      // null from service — file not found in Gitea, fall through to mock
+    } catch (err) {
+      // Gitea unreachable or errored — fall through to mock data
+      console.warn('[krate] Gitea blob request failed, falling back to mock:', err?.message);
+    }
+  }
+
+  // Fallback: mock data
+  const content = getMockContents(name, filePath, branch);
   const size = Buffer.byteLength(content, 'utf8');
 
-  // Return raw file for download
   if (raw) {
     return new Response(content, {
       headers: {
@@ -216,7 +268,6 @@ CMD ["node", "src/index.js"]
     });
   }
 
-  // Return JSON metadata + content
   return Response.json({
     path: filePath,
     content,
@@ -228,5 +279,6 @@ CMD ["node", "src/index.js"]
     repo: name,
     org,
     branch,
+    source: 'mock',
   });
 }
