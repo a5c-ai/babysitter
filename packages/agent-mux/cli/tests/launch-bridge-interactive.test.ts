@@ -167,6 +167,9 @@ describe('bridge-interactive spawn', () => {
     // Verify PTY was spawned (not child_process.spawn)
     expect(ptySpawnMock).toHaveBeenCalledTimes(1);
     expect(spawnMock).not.toHaveBeenCalled();
+    const spawnedArgs = ptySpawnMock.mock.calls[0]?.[1] as string[];
+    expect(spawnedArgs).not.toContain('-p');
+    expect(spawnedArgs).not.toContain('hello world');
 
     // Simulate PTY output with a turn_end event
     for (const cb of ptyDataCallbacks) {

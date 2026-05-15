@@ -501,7 +501,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     sessionId: flagStr(args.flags, 'session-id'),
     prompt,
     maxTurns: flagNum(args.flags, 'max-turns'),
-    interactive: isInteractive,
+    interactive: isInteractive || bridgeInteractive,
   });
 
   // Add --model for harnesses that accept it as a CLI arg
