@@ -1563,11 +1563,29 @@ export function getAdapterMetadata(harness: string): import('./models.js').Adapt
   return agent?.adapterMetadata;
 }
 
-export function getInstallMethods(harness: string): string[] {
+export interface ResolvedInstallMethod {
+  type: string;
+  command: string;
+}
+
+export function getInstallMethods(harness: string): ResolvedInstallMethod[] {
   const agent = getAgentVersion(harness);
   const node = resolveVersionNode(agentVersionNodes(harness));
   const installRefs = node ? stringArray(node.installMethods) : [];
-  return installRefs.map((ref: string) => ref.replace(/^install:/, ''));
+  const sourcePackage = agent?.sourcePackage ?? harness;
+  return installRefs.map((ref: string) => {
+    const type = ref.replace(/^install:/, '');
+    let command: string;
+    switch (type) {
+      case 'npm': command = `npm install -g ${sourcePackage}`; break;
+      case 'gh-extension': command = `gh extension install ${sourcePackage.replace(/^@/, '')}`; break;
+      case 'pip': command = `pip install ${sourcePackage}`; break;
+      case 'brew': command = `brew install ${sourcePackage}`; break;
+      case 'manual': command = `Download from ${sourcePackage}`; break;
+      default: command = `${type} install ${sourcePackage}`; break;
+    }
+    return { type, command };
+  });
 }
 
 export function getAutomationEnv(harness: string): Record<string, string> {

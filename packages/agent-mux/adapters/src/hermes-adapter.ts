@@ -87,7 +87,7 @@ export class HermesAdapter extends BaseAgentAdapter {
     requiresPty: false,
     authMethods: (getAdapterMetadata('hermes')?.authMethods ?? []).map(m => ({ type: m.type, name: m.name })),
     authFiles: getAdapterMetadata('hermes')?.authFiles ?? [],
-    installMethods: getInstallMethods('hermes').map(m => ({ platform: 'all' as const, type: m as InstallMethod['type'], command: m })),
+    installMethods: getInstallMethods('hermes').map(m => ({ platform: 'all' as const, type: m.type as InstallMethod['type'], command: m.command })),
   };
 
   readonly models: ModelCapabilities[] = [

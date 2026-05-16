@@ -87,7 +87,7 @@ export class GeminiAdapter extends BaseAgentAdapter {
     requiresPty: false,
     authMethods: (getAdapterMetadata(this.agent)?.authMethods ?? []).map(m => ({ type: m.type, name: m.name })),
     authFiles: getAdapterMetadata(this.agent)?.authFiles ?? [],
-    installMethods: getInstallMethods(this.agent).map(m => ({ platform: 'all' as const, type: m as InstallMethod['type'], command: m })),
+    installMethods: getInstallMethods(this.agent).map(m => ({ platform: 'all' as const, type: m.type as InstallMethod['type'], command: m.command })),
   };
 
   readonly models: ModelCapabilities[] = [
