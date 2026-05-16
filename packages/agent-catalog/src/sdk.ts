@@ -1642,3 +1642,136 @@ export function getDefaultModelId(harness: string): string | undefined {
   const metadata = getAdapterMetadata(harness);
   return metadata?.defaultModelId;
 }
+
+// ---------------------------------------------------------------------------
+// Provider translation graph queries
+// ---------------------------------------------------------------------------
+
+export interface ProviderTranslationEnvMapping {
+  envVar: string;
+  source: string;
+  condition: string;
+  fallback?: string;
+}
+
+export interface ProviderTranslationRecord {
+  id: string;
+  harness: string;
+  provider: string;
+  proxyRequired: boolean;
+  proxyExposedTransport?: string;
+  staticEnv?: Record<string, string>;
+  envMapping: ProviderTranslationEnvMapping[];
+  args: string[];
+  providerGroup?: string[];
+  harnessUsers?: string[];
+  conditionalLogic?: string;
+  nativeSdk?: string;
+  modelTierEnvVars?: string[];
+  suppressNonAnthropicKey?: boolean;
+  notes?: string;
+}
+
+function parseEnvMapping(raw: unknown): ProviderTranslationEnvMapping[] {
+  if (!Array.isArray(raw)) return [];
+  const result: ProviderTranslationEnvMapping[] = [];
+  for (const entry of raw) {
+    if (!entry || typeof entry !== "object") continue;
+    const obj = entry as Record<string, unknown>;
+    const envVar = String(obj.envVar ?? "");
+    if (!envVar) continue;
+    result.push({
+      envVar,
+      source: String(obj.source ?? ""),
+      condition: String(obj.condition ?? ""),
+      fallback: obj.fallback != null ? String(obj.fallback) : undefined,
+    });
+  }
+  return result;
+}
+
+function parseStaticEnv(raw: unknown): Record<string, string> | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const result: Record<string, string> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    result[key] = String(value ?? "");
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+function toProviderTranslationRecord(node: GraphNode): ProviderTranslationRecord {
+  return {
+    id: node.id,
+    harness: valueAsString(node.harness),
+    provider: valueAsString(node.provider),
+    proxyRequired: Boolean(node.proxyRequired),
+    proxyExposedTransport: node.proxyExposedTransport ? valueAsString(node.proxyExposedTransport) : undefined,
+    staticEnv: parseStaticEnv(node.staticEnv),
+    envMapping: parseEnvMapping(node.envMapping),
+    args: stringArray(node.args),
+    providerGroup: node.providerGroup ? stringArray(node.providerGroup) : undefined,
+    harnessUsers: node.harnessUsers ? stringArray(node.harnessUsers) : undefined,
+    conditionalLogic: node.conditionalLogic ? valueAsString(node.conditionalLogic) : undefined,
+    nativeSdk: node.nativeSdk ? valueAsString(node.nativeSdk) : undefined,
+    modelTierEnvVars: node.modelTierEnvVars ? stringArray(node.modelTierEnvVars) : undefined,
+    suppressNonAnthropicKey: node.suppressNonAnthropicKey === true || node.suppressNonAnthropicKey === "true" ? true : undefined,
+    notes: node.notes ? valueAsString(node.notes) : undefined,
+  };
+}
+
+/**
+ * Returns all ProviderTranslation records from the atlas graph.
+ */
+export function listProviderTranslations(): ProviderTranslationRecord[] {
+  return getSdkState().graph.nodes
+    .filter((node) => node.kind === "ProviderTranslation")
+    .map(toProviderTranslationRecord)
+    .map(clone);
+}
+
+/**
+ * Returns all ProviderTranslation records for a given harness.
+ */
+export function listProviderTranslationsForHarness(harness: string): ProviderTranslationRecord[] {
+  const normalized = normalizeLookup(harness);
+  return getSdkState().graph.nodes
+    .filter((node) => {
+      if (node.kind !== "ProviderTranslation") return false;
+      if (normalizeLookup(valueAsString(node.harness)) === normalized) return true;
+      // Check if this harness is listed in harnessUsers (for generic-openai shared translations)
+      const users = node.harnessUsers;
+      if (Array.isArray(users) && users.some((u) => normalizeLookup(String(u)) === normalized)) return true;
+      return false;
+    })
+    .map(toProviderTranslationRecord)
+    .map(clone);
+}
+
+/**
+ * Resolves the specific ProviderTranslation record for a harness + provider combination.
+ *
+ * Resolution order:
+ * 1. Exact provider match (node.provider === provider)
+ * 2. Provider group match (provider in node.providerGroup)
+ * 3. Default fallback (node.provider === '_default')
+ *
+ * Returns undefined if no translation is found.
+ */
+export function getProviderTranslation(harness: string, provider: string): ProviderTranslationRecord | undefined {
+  const translations = listProviderTranslationsForHarness(harness);
+  const normalizedProvider = normalizeLookup(provider);
+
+  // 1. Exact match on provider field
+  const exact = translations.find((t) => normalizeLookup(t.provider) === normalizedProvider);
+  if (exact) return exact;
+
+  // 2. Match within a provider group
+  const group = translations.find(
+    (t) => t.providerGroup && t.providerGroup.some((p) => normalizeLookup(p) === normalizedProvider),
+  );
+  if (group) return group;
+
+  // 3. Default fallback
+  const fallback = translations.find((t) => t.provider === "_default");
+  return fallback;
+}

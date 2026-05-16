@@ -1,0 +1,111 @@
+nodeKind: ProviderTranslation
+id: provider-translation:codex:openai
+attributes:
+  harness: codex
+  provider: openai
+  proxyRequired: false
+  envMapping:
+    - envVar: OPENAI_API_KEY
+      source: auth.apiKey
+      condition: present
+  args: []
+  notes: Native OpenAI provider for Codex - direct API key pass-through.
+edges:
+  translates_for:
+    - target: agent:codex
+  uses_provider:
+    - target: provider:openai
+---
+nodeKind: ProviderTranslation
+id: provider-translation:codex:ollama
+attributes:
+  harness: codex
+  provider: ollama
+  proxyRequired: false
+  staticEnv:
+    OPENAI_API_KEY: ollama
+  envMapping: []
+  args:
+    - "--oss"
+  notes: >
+    Ollama for Codex requires v0.81.0+ for --oss / custom provider support.
+edges:
+  translates_for:
+    - target: agent:codex
+  uses_provider:
+    - target: provider:ollama
+---
+nodeKind: ProviderTranslation
+id: provider-translation:codex:foundry
+attributes:
+  harness: codex
+  provider: foundry
+  proxyRequired: false
+  staticEnv:
+    ANTHROPIC_API_KEY: ""
+  envMapping:
+    - envVar: AZURE_API_KEY
+      source: auth.apiKey
+      condition: present
+  args: []
+  conditionalLogic: codex-foundry-config-args
+  notes: >
+    Azure AI Foundry for Codex. Has conditional logic: when apiBase is
+    present, pushes -c config args for model_provider, base_url, env_key,
+    and api-version query params.
+edges:
+  translates_for:
+    - target: agent:codex
+  uses_provider:
+    - target: provider:foundry
+---
+nodeKind: ProviderTranslation
+id: provider-translation:codex:openai-compatible
+attributes:
+  harness: codex
+  provider: _group
+  providerGroup:
+    - custom
+    - groq
+    - fireworks
+    - together
+    - deepseek
+    - mistral
+    - cerebras
+    - sambanova
+    - openrouter
+  proxyRequired: false
+  staticEnv:
+    ANTHROPIC_API_KEY: ""
+  envMapping:
+    - envVar: OPENAI_BASE_URL
+      source: params.apiBase
+      condition: present
+    - envVar: OPENAI_API_KEY
+      source: auth.apiKey
+      condition: present
+  args: []
+  notes: >
+    OpenAI-compatible providers for Codex. Sets OPENAI_BASE_URL from
+    apiBase and passes API key directly.
+edges:
+  translates_for:
+    - target: agent:codex
+---
+nodeKind: ProviderTranslation
+id: provider-translation:codex:default
+attributes:
+  harness: codex
+  provider: _default
+  proxyRequired: true
+  proxyExposedTransport: openai-responses
+  staticEnv:
+    ANTHROPIC_API_KEY: ""
+  envMapping: []
+  args: []
+  notes: >
+    Default fallback for unsupported providers on Codex.
+    Routes through transport-mux proxy exposing OpenAI Responses transport.
+edges:
+  translates_for:
+    - target: agent:codex

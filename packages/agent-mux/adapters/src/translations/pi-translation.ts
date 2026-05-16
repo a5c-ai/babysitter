@@ -1,44 +1,50 @@
-import type { ProviderConfig } from '@a5c-ai/agent-mux-core';
+import type { ProviderConfig, TransportId } from '@a5c-ai/agent-mux-core';
+import { getProviderTranslation } from '@a5c-ai/agent-catalog';
+import type { ProviderTranslationRecord, ProviderTranslationEnvMapping } from '@a5c-ai/agent-catalog';
 import type { HarnessProviderTranslation } from '../provider-translation.js';
 
-export function translateForPi(config: ProviderConfig): HarnessProviderTranslation {
-  const env: Record<string, string> = {};
-  const args: string[] = [];
-
-  switch (config.provider) {
-    case 'openai':
-      if (config.auth.apiKey) env['OPENAI_API_KEY'] = config.auth.apiKey;
-      return { env, args, proxyRequired: false };
-    case 'foundry':
-    case 'azure': {
-      // Pi's Azure provider uses the Responses API path which isn't supported
-      // by all Azure AI Services deployments. Route through the transport-mux
-      // proxy which exposes standard Chat Completions. Pass --base-url so Pi
-      // connects to the local proxy instead of api.openai.com.
-      env['ANTHROPIC_API_KEY'] = '';
-      env['OPENAI_API_KEY'] = '';
-      return { env, args, proxyRequired: true, proxyExposedTransport: 'openai-chat' };
-    }
-    case 'anthropic':
-      if (config.auth.apiKey) env['ANTHROPIC_API_KEY'] = config.auth.apiKey;
-      args.push('--provider', 'anthropic');
-      return { env, args, proxyRequired: false };
-    case 'custom':
-    case 'ollama':
-    case 'local':
-    case 'lmstudio':
-    case 'vllm': {
-      if (config.params['apiBase']) {
-        env['OPENAI_BASE_URL'] = String(config.params['apiBase']);
-        env['OPENAI_API_BASE'] = String(config.params['apiBase']);
-      }
-      if (config.auth.apiKey) env['OPENAI_API_KEY'] = config.auth.apiKey;
-      env['ANTHROPIC_API_KEY'] = '';
-      return { env, args, proxyRequired: false };
-    }
+function resolveEnvSource(mapping: ProviderTranslationEnvMapping, config: ProviderConfig): string | undefined {
+  switch (mapping.source) {
+    case 'auth.apiKey':
+      return config.auth.apiKey;
+    case 'params.apiBase':
+      return config.params['apiBase'] != null ? String(config.params['apiBase']) : undefined;
     default:
-      env['ANTHROPIC_API_KEY'] = '';
-      env['OPENAI_API_KEY'] = '';
-      return { env, args, proxyRequired: true, proxyExposedTransport: 'openai-chat' };
+      return undefined;
   }
+}
+
+function applyRecord(record: ProviderTranslationRecord, config: ProviderConfig): HarnessProviderTranslation {
+  const env: Record<string, string> = {};
+  const args: string[] = [...record.args];
+
+  if (record.staticEnv) {
+    Object.assign(env, record.staticEnv);
+  }
+
+  for (const mapping of record.envMapping) {
+    if (mapping.condition === 'present') {
+      const value = resolveEnvSource(mapping, config);
+      if (value != null) {
+        env[mapping.envVar] = value;
+      } else if (mapping.fallback != null) {
+        env[mapping.envVar] = mapping.fallback;
+      }
+    }
+  }
+
+  return {
+    env,
+    args,
+    proxyRequired: record.proxyRequired,
+    proxyExposedTransport: record.proxyExposedTransport as TransportId | undefined,
+  };
+}
+
+export function translateForPi(config: ProviderConfig): HarnessProviderTranslation {
+  const record = getProviderTranslation('pi', config.provider);
+  if (record) {
+    return applyRecord(record, config);
+  }
+  return { env: { ANTHROPIC_API_KEY: '', OPENAI_API_KEY: '' }, args: [], proxyRequired: true, proxyExposedTransport: 'openai-chat' };
 }

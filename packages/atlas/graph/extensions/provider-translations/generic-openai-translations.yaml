@@ -1,0 +1,76 @@
+nodeKind: ProviderTranslation
+id: provider-translation:generic-openai:direct-providers
+attributes:
+  harness: generic-openai
+  provider: _group
+  providerGroup:
+    - openai
+    - foundry
+    - groq
+    - fireworks
+    - together
+    - deepseek
+    - mistral
+    - cerebras
+    - sambanova
+    - openrouter
+    - ollama
+    - local
+    - lmstudio
+    - vllm
+    - custom
+  proxyRequired: false
+  envMapping:
+    - envVar: OPENAI_BASE_URL
+      source: params.apiBase
+      condition: present
+    - envVar: OPENAI_API_BASE
+      source: params.apiBase
+      condition: present
+    - envVar: OPENAI_API_KEY
+      source: auth.apiKey
+      condition: present
+  suppressNonAnthropicKey: true
+  args: []
+  harnessUsers:
+    - cursor
+    - omp
+    - openclaw
+    - hermes
+    - droid
+    - amp
+  notes: >
+    Generic OpenAI-compatible translation used by agents that speak the
+    OpenAI protocol natively (Cursor, OMP, OpenClaw, Hermes, Droid, Amp).
+    Sets both OPENAI_BASE_URL and OPENAI_API_BASE (legacy). Suppresses
+    ANTHROPIC_API_KEY for non-anthropic providers.
+---
+nodeKind: ProviderTranslation
+id: provider-translation:generic-openai:default
+attributes:
+  harness: generic-openai
+  provider: _default
+  proxyRequired: true
+  proxyExposedTransport: openai-chat
+  envMapping:
+    - envVar: OPENAI_BASE_URL
+      source: params.apiBase
+      condition: present
+    - envVar: OPENAI_API_BASE
+      source: params.apiBase
+      condition: present
+    - envVar: OPENAI_API_KEY
+      source: auth.apiKey
+      condition: present
+  suppressNonAnthropicKey: true
+  args: []
+  harnessUsers:
+    - cursor
+    - omp
+    - openclaw
+    - hermes
+    - droid
+    - amp
+  notes: >
+    Default fallback for the generic OpenAI translation.
+    Routes through transport-mux proxy exposing OpenAI Chat transport.

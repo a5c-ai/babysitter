@@ -1,0 +1,113 @@
+nodeKind: ProviderTranslation
+id: provider-translation:pi:openai
+attributes:
+  harness: pi
+  provider: openai
+  proxyRequired: false
+  envMapping:
+    - envVar: OPENAI_API_KEY
+      source: auth.apiKey
+      condition: present
+  args: []
+  notes: Native OpenAI provider for Pi - direct API key pass-through.
+edges:
+  translates_for:
+    - target: agent:pi
+  uses_provider:
+    - target: provider:openai
+---
+nodeKind: ProviderTranslation
+id: provider-translation:pi:foundry
+attributes:
+  harness: pi
+  provider: _group
+  providerGroup:
+    - foundry
+    - azure
+  proxyRequired: true
+  proxyExposedTransport: openai-chat
+  staticEnv:
+    ANTHROPIC_API_KEY: ""
+    OPENAI_API_KEY: ""
+  envMapping: []
+  args: []
+  notes: >
+    Pi's Azure/Foundry provider uses the Responses API path which isn't
+    supported by all Azure AI Services deployments. Route through the
+    transport-mux proxy which exposes standard Chat Completions.
+edges:
+  translates_for:
+    - target: agent:pi
+  uses_provider:
+    - target: provider:foundry
+---
+nodeKind: ProviderTranslation
+id: provider-translation:pi:anthropic
+attributes:
+  harness: pi
+  provider: anthropic
+  proxyRequired: false
+  envMapping:
+    - envVar: ANTHROPIC_API_KEY
+      source: auth.apiKey
+      condition: present
+  args:
+    - "--provider"
+    - "anthropic"
+  notes: Pi with Anthropic provider - passes --provider anthropic arg.
+edges:
+  translates_for:
+    - target: agent:pi
+  uses_provider:
+    - target: provider:anthropic
+---
+nodeKind: ProviderTranslation
+id: provider-translation:pi:local-compatible
+attributes:
+  harness: pi
+  provider: _group
+  providerGroup:
+    - custom
+    - ollama
+    - local
+    - lmstudio
+    - vllm
+  proxyRequired: false
+  staticEnv:
+    ANTHROPIC_API_KEY: ""
+  envMapping:
+    - envVar: OPENAI_BASE_URL
+      source: params.apiBase
+      condition: present
+    - envVar: OPENAI_API_BASE
+      source: params.apiBase
+      condition: present
+    - envVar: OPENAI_API_KEY
+      source: auth.apiKey
+      condition: present
+  args: []
+  notes: >
+    Local/custom OpenAI-compatible providers for Pi. Sets both
+    OPENAI_BASE_URL and OPENAI_API_BASE (legacy) for compatibility.
+edges:
+  translates_for:
+    - target: agent:pi
+---
+nodeKind: ProviderTranslation
+id: provider-translation:pi:default
+attributes:
+  harness: pi
+  provider: _default
+  proxyRequired: true
+  proxyExposedTransport: openai-chat
+  staticEnv:
+    ANTHROPIC_API_KEY: ""
+    OPENAI_API_KEY: ""
+  envMapping: []
+  args: []
+  notes: >
+    Default fallback for unsupported providers on Pi.
+    Routes through transport-mux proxy exposing OpenAI Chat transport.
+edges:
+  translates_for:
+    - target: agent:pi

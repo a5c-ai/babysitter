@@ -1,0 +1,138 @@
+nodeKind: ProviderTranslation
+id: provider-translation:claude:anthropic
+attributes:
+  harness: claude
+  provider: anthropic
+  proxyRequired: false
+  envMapping:
+    - envVar: ANTHROPIC_API_KEY
+      source: auth.apiKey
+      condition: present
+    - envVar: ANTHROPIC_MODEL
+      source: config.model
+      condition: present
+  args: []
+  notes: Native Anthropic provider for Claude Code - direct API key pass-through.
+edges:
+  translates_for:
+    - target: agent:claude-code
+  uses_provider:
+    - target: provider:anthropic
+---
+nodeKind: ProviderTranslation
+id: provider-translation:claude:bedrock
+attributes:
+  harness: claude
+  provider: bedrock
+  proxyRequired: false
+  staticEnv:
+    CLAUDE_CODE_USE_BEDROCK: "1"
+  envMapping:
+    - envVar: AWS_REGION
+      source: params.region
+      condition: present
+    - envVar: AWS_PROFILE
+      source: auth.awsProfile
+      condition: present
+  args: []
+  notes: AWS Bedrock support for Claude Code via native integration.
+edges:
+  translates_for:
+    - target: agent:claude-code
+  uses_provider:
+    - target: provider:bedrock
+---
+nodeKind: ProviderTranslation
+id: provider-translation:claude:vertex
+attributes:
+  harness: claude
+  provider: vertex
+  proxyRequired: false
+  staticEnv:
+    CLAUDE_CODE_USE_VERTEX: "1"
+  envMapping:
+    - envVar: GOOGLE_CLOUD_PROJECT
+      source: params.project
+      condition: present
+    - envVar: GOOGLE_CLOUD_LOCATION
+      source: params.region
+      condition: present
+  args: []
+  conditionalLogic: vertex-gemini-reroute
+  notes: >
+    Vertex AI native support. Has conditional logic: if model matches
+    gemini pattern, routes through proxy instead (proxyRequired=true,
+    proxyExposedTransport=anthropic).
+edges:
+  translates_for:
+    - target: agent:claude-code
+  uses_provider:
+    - target: provider:vertex
+---
+nodeKind: ProviderTranslation
+id: provider-translation:claude:foundry
+attributes:
+  harness: claude
+  provider: foundry
+  proxyRequired: true
+  proxyExposedTransport: anthropic
+  staticEnv:
+    ANTHROPIC_API_KEY: ""
+  envMapping: []
+  args: []
+  notes: Azure AI Foundry routed through transport-mux proxy exposing Anthropic transport.
+edges:
+  translates_for:
+    - target: agent:claude-code
+  uses_provider:
+    - target: provider:foundry
+---
+nodeKind: ProviderTranslation
+id: provider-translation:claude:ollama
+attributes:
+  harness: claude
+  provider: ollama
+  proxyRequired: false
+  staticEnv:
+    ANTHROPIC_API_KEY: ""
+    ANTHROPIC_AUTH_TOKEN: ollama
+    CLAUDE_CODE_ATTRIBUTION_HEADER: "0"
+    CLAUDE_CODE_AUTO_COMPACT_WINDOW: "8192"
+  envMapping:
+    - envVar: ANTHROPIC_BASE_URL
+      source: params.apiBase
+      condition: present
+      fallback: "http://localhost:11434"
+  args: []
+  conditionalLogic: ollama-model-tier-override
+  modelTierEnvVars:
+    - ANTHROPIC_DEFAULT_SONNET_MODEL
+    - ANTHROPIC_DEFAULT_OPUS_MODEL
+    - ANTHROPIC_DEFAULT_HAIKU_MODEL
+  notes: >
+    Ollama local models via Claude Code's native Anthropic-compatible endpoint.
+    Overrides all model tier env vars to the Ollama model name to prevent
+    Claude from requesting a real Anthropic model.
+edges:
+  translates_for:
+    - target: agent:claude-code
+  uses_provider:
+    - target: provider:ollama
+---
+nodeKind: ProviderTranslation
+id: provider-translation:claude:default
+attributes:
+  harness: claude
+  provider: _default
+  proxyRequired: true
+  proxyExposedTransport: anthropic
+  staticEnv:
+    ANTHROPIC_API_KEY: ""
+  envMapping: []
+  args: []
+  notes: >
+    Default fallback for unsupported providers on Claude Code.
+    Routes through transport-mux proxy exposing Anthropic transport.
+edges:
+  translates_for:
+    - target: agent:claude-code

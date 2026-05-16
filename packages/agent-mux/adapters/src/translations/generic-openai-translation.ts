@@ -1,33 +1,55 @@
-import type { ProviderConfig } from '@a5c-ai/agent-mux-core';
+import type { ProviderConfig, TransportId } from '@a5c-ai/agent-mux-core';
+import { getProviderTranslation } from '@a5c-ai/agent-catalog';
+import type { ProviderTranslationRecord, ProviderTranslationEnvMapping } from '@a5c-ai/agent-catalog';
 import type { HarnessProviderTranslation } from '../provider-translation.js';
 
-export function translateForGenericOpenAI(config: ProviderConfig): HarnessProviderTranslation {
+function resolveEnvSource(mapping: ProviderTranslationEnvMapping, config: ProviderConfig): string | undefined {
+  switch (mapping.source) {
+    case 'auth.apiKey':
+      return config.auth.apiKey;
+    case 'params.apiBase':
+      return config.params['apiBase'] != null ? String(config.params['apiBase']) : undefined;
+    default:
+      return undefined;
+  }
+}
+
+function applyRecord(record: ProviderTranslationRecord, config: ProviderConfig): HarnessProviderTranslation {
   const env: Record<string, string> = {};
-  const args: string[] = [];
+  const args: string[] = [...record.args];
 
-  // OpenAI-compatible providers can be reached directly
-  if (config.params['apiBase']) {
-    const base = String(config.params['apiBase']);
-    env['OPENAI_BASE_URL'] = base;
-    env['OPENAI_API_BASE'] = base; // legacy env var used by some CLIs
-  }
-  if (config.auth.apiKey) {
-    env['OPENAI_API_KEY'] = config.auth.apiKey;
+  if (record.staticEnv) {
+    Object.assign(env, record.staticEnv);
   }
 
-  // When routing through a non-Anthropic provider, suppress ANTHROPIC_API_KEY
-  // to prevent the harness from falling back to direct Anthropic calls.
-  if (config.provider !== 'anthropic') {
+  // Suppress ANTHROPIC_API_KEY for non-Anthropic providers if flagged
+  if (record.suppressNonAnthropicKey && config.provider !== 'anthropic') {
     env['ANTHROPIC_API_KEY'] = '';
   }
 
-  const directProviders = ['openai', 'foundry', 'groq', 'fireworks', 'together', 'deepseek',
-    'mistral', 'cerebras', 'sambanova', 'openrouter', 'ollama', 'local',
-    'lmstudio', 'vllm', 'custom'];
-
-  if (directProviders.includes(config.provider)) {
-    return { env, args, proxyRequired: false };
+  for (const mapping of record.envMapping) {
+    if (mapping.condition === 'present') {
+      const value = resolveEnvSource(mapping, config);
+      if (value != null) {
+        env[mapping.envVar] = value;
+      } else if (mapping.fallback != null) {
+        env[mapping.envVar] = mapping.fallback;
+      }
+    }
   }
 
-  return { env, args, proxyRequired: true, proxyExposedTransport: 'openai-chat' };
+  return {
+    env,
+    args,
+    proxyRequired: record.proxyRequired,
+    proxyExposedTransport: record.proxyExposedTransport as TransportId | undefined,
+  };
+}
+
+export function translateForGenericOpenAI(config: ProviderConfig): HarnessProviderTranslation {
+  const record = getProviderTranslation('generic-openai', config.provider);
+  if (record) {
+    return applyRecord(record, config);
+  }
+  return { env: {}, args: [], proxyRequired: true, proxyExposedTransport: 'openai-chat' };
 }

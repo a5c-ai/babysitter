@@ -27,7 +27,7 @@ const AGENT_CATALOG_KINDS = new Set([
   "HookMapping", "HookSurface", "LifecycleSemantics", "Modality",
   "ModelFamily", "ModelProviderProduct", "ModelProviderVersion", "ModelVersion",
   "PackageSurface", "PathDescriptor", "PluginArtifact", "PluginTarget",
-  "ProcessDescriptor", "SessionSemantics", "TransportProtocol", "TransportRuntime",
+  "ProcessDescriptor", "ProviderTranslation", "SessionSemantics", "TransportProtocol", "TransportRuntime",
 ]);
 
 function isAgentCatalogRecord(record: AtlasRecord): boolean {

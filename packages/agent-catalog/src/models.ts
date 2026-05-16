@@ -20,6 +20,7 @@ export type NodeKind =
   | "PluginArtifact"
   | "PluginTarget"
   | "ProcessDescriptor"
+  | "ProviderTranslation"
   | "SessionSemantics"
   | "TransportProtocol"
   | "TransportRuntime";
