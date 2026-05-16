@@ -709,6 +709,9 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         completionEngine,
       });
       proxyRuntime.applyHarnessEnv(plan.env);
+      if (plan.env['ANTHROPIC_API_KEY']) {
+        plan.env['ANTHROPIC_AUTH_TOKEN'] = '';
+      }
 
       // Pi ignores OPENAI_BASE_URL — write a models.json config that registers
       // a custom provider pointing to the local proxy.

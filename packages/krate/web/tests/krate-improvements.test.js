@@ -57,18 +57,23 @@ test('degraded Krate UI renders recovery loader only for controller fetch failur
   assert.match(loader, /fetch\(target, \{ cache: 'no-store' \}\)/);
   assert.match(loader, /controllerModelIsReachable/);
   assert.match(loader, /content-type/);
-  assert.match(loader, /window\.location\.reload\(\)/);
+  assert.match(loader, /setRecovered\(true\)/);
+  assert.match(loader, /router\.refresh\(\)/);
+  assert.match(loader, /sessionStorage/);
+  assert.doesNotMatch(loader, /window\.location\.reload\(\)/);
   assert.doesNotMatch(loader, /body\?\.status === 'ready'/);
 });
 
 test('loading page uses changing phases and progressing bar', () => {
   const loading = readWebFile('app', 'loading.jsx');
+  const css = readWebFile('app', 'globals.css');
   const loader = readWebFile('app', 'components', 'krate-loading.jsx');
+  assert.match(loading, /krateRecoveryOverlay/);
+  assert.match(css, /\.krateRecoveryOverlay\s*\{[\s\S]*position:\s*fixed[\s\S]*inset:\s*0/);
   assert.match(loading, /KrateLoadingView/);
   assert.match(loader, /KRATE_LOADING_MESSAGES/);
   assert.match(loader, /setInterval\(\(\) => setTick/);
   assert.match(loader, /setInterval\(\(\) => setProgress/);
   assert.match(loader, /shownProgress/);
 });
-
 

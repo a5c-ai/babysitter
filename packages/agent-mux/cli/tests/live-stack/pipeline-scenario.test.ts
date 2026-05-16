@@ -67,6 +67,6 @@ describe('pipeline-owned live stack scenario execution', () => {
     });
 
     expect(result.status).toBe('skipped');
-    expect(result.commands.length).toBe(5);
+    expect(result.commands.length).toBe(6);
   });
 });

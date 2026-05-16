@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 
 export const KRATE_LOADING_MESSAGES = [
   'Connecting to the Krate workspace',
@@ -66,16 +67,21 @@ function controllerModelIsReachable(body) {
 }
 
 export function KrateControllerRecovery({ org = 'default', pollMs = 2500 }) {
-  const redirectingRef = useRef(false);
+  const router = useRouter();
+  const pathname = usePathname();
   const [detail, setDetail] = useState('Polling the controller until the workspace responds.');
+  const [recovered, setRecovered] = useState(false);
 
   useEffect(() => {
     let disposed = false;
 
-    function leaveRecovery() {
-      if (!redirectingRef.current) {
-        redirectingRef.current = true;
-        window.location.reload();
+    function refreshPageOnce() {
+      const refreshKey = `krate-recovery-refresh:${org}:${pathname || '/'}`;
+      const now = Date.now();
+      const lastRefresh = Number(window.sessionStorage.getItem(refreshKey) || 0);
+      if (now - lastRefresh > 60000) {
+        window.sessionStorage.setItem(refreshKey, String(now));
+        router.refresh();
       }
     }
 
@@ -92,7 +98,10 @@ export function KrateControllerRecovery({ org = 'default', pollMs = 2500 }) {
         if (!response.headers.get('content-type')?.includes('application/json')) throw new Error('controller did not return JSON');
         const body = await response.json();
         if (controllerModelIsReachable(body)) {
-          leaveRecovery();
+          if (!disposed) {
+            setRecovered(true);
+            refreshPageOnce();
+          }
           return;
         }
         if (!disposed) setDetail('The controller answered; waiting for reachable workspace data.');
@@ -107,7 +116,9 @@ export function KrateControllerRecovery({ org = 'default', pollMs = 2500 }) {
       disposed = true;
       clearInterval(pollInterval);
     };
-  }, [org, pollMs]);
+  }, [org, pathname, pollMs, router]);
+
+  if (recovered) return null;
 
   return (
     <div className="krateRecoveryOverlay">
@@ -117,7 +128,7 @@ export function KrateControllerRecovery({ org = 'default', pollMs = 2500 }) {
         detail={detail}
         fullPage={false}
       />
-      <p className="krateRecoveryHint">This page will refresh back to the requested view as soon as the controller responds with workspace data.</p>
+      <p className="krateRecoveryHint">This overlay will close as soon as the controller responds with workspace data.</p>
     </div>
   );
 }

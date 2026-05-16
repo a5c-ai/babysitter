@@ -167,6 +167,7 @@ export function buildPrimaryLiveStackCommands(
     commandExecution(commandEnv, 'LIVE_STACK_AMUX_BIN', 'amux', ['install', installTarget, '--json'], options.cwd, SETUP_TIMEOUT_MS),
     commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['install', '--global', './packages/sdk'], options.cwd, SETUP_TIMEOUT_MS),
     generatedPluginInstallCommand(commandEnv, scenario, options.cwd, SETUP_TIMEOUT_MS),
+    { command: 'bash', args: ['-c', `mkdir -p ${path.join(options.cwd, '.a5c', 'processes')} && cp ${path.join(options.cwd, 'packages', 'agent-mux', 'cli', 'tests', 'live-stack', 'fixtures', 'summarize-translate-test.mjs')} ${path.join(options.cwd, '.a5c', 'processes', 'summarize-translate-test.mjs')}`], env: commandEnv, cwd: options.cwd, timeoutMs: SETUP_TIMEOUT_MS },
     executionCommand,
   ];
 }
@@ -430,7 +431,7 @@ function buildPrompt(scenario: LiveStackScenario, traceId: string): string {
   }
 
   if (scenario.agent.installMode === 'babysitter-plugin') {
-    return `Use the babysitter skill to: ${coreTask}`;
+    return `Use the babysitter skill to: ${coreTask}. A process definition is available at .a5c/processes/summarize-translate-test.mjs`;
   }
 
   return coreTask;
