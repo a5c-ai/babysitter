@@ -338,10 +338,9 @@ describe('bridge-interactive spawn', () => {
       await waitFor(() => ptyKilled.includes('SIGTERM'));
 
       await waitFor(() => ptyKilled.includes('SIGTERM'));
-      await fs.access(path.join(cwd, '.a5c-live-test', 'fallback-trace-odyssey.md'));
-      await waitFor(() => ptyKilled.includes('SIGTERM') && ptyKilled.length > 0);
       await waitFor(async () => {
         try {
+          await fs.access(path.join(cwd, '.a5c-live-test', 'fallback-trace-odyssey.md'));
           await fs.access(path.join(cwd, '.a5c', 'runs', 'run-fallback-trace', 'journal', '001.json'));
           await fs.access(path.join(cwd, '.a5c', 'logs', 'hooks', 'hooks-mux-fallback-trace.json'));
           return true;
