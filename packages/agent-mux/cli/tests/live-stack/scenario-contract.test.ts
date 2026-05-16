@@ -203,9 +203,11 @@ describe('live stack scenario contract primitives', () => {
     const publish = fs.readFileSync('.github/workflows/publish.yml', 'utf8');
 
     expect(publish).not.toContain('Run selected live stack E2E');
-    expect(publish).not.toContain('live_stack_babysitter_plugin');
+    expect(publish).not.toContain('live_stack_bp_interactive');
+    expect(publish).not.toContain('live_stack_bp_bridged');
     expect(publish).not.toContain('live_stack_babysitter_agent');
-    expect(publish).not.toContain('live_stack_vanilla');
+    expect(publish).not.toContain('live_stack_vanilla_ni');
+    expect(publish).not.toContain('live_stack_vanilla_interactive');
     expect(publish).not.toContain('live-stack.yml');
   });
 
@@ -241,7 +243,7 @@ describe('live stack scenario contract primitives', () => {
   it('keeps live-stack matrix concurrency below publish runner saturation', () => {
     const workflow = fs.readFileSync('.github/workflows/live-stack.yml', 'utf8');
 
-    for (const jobName of ['live_stack_babysitter_plugin', 'live_stack_vanilla']) {
+    for (const jobName of ['live_stack_bp_interactive', 'live_stack_bp_bridged', 'live_stack_vanilla_ni', 'live_stack_vanilla_interactive']) {
       const pattern = new RegExp(`${jobName}:[\\s\\S]*?strategy:\\n\\s+fail-fast: (true|false)`);
       expect(workflow).toMatch(pattern);
     }
