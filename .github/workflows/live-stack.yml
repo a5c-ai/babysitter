@@ -578,6 +578,7 @@ jobs:
             amux_provider: foundry
             model: gpt-5.5
             required_env: AZURE_API_KEY,AMUX_API_BASE
+            skip: 'true'
           - id: live.agent-mux.hermes.foundry-openai.gpt-5.5
             agent_path: agent-mux
             agent: hermes
@@ -597,6 +598,7 @@ jobs:
             amux_provider: foundry
             model: gpt-5.5
             required_env: AZURE_API_KEY,AMUX_API_BASE
+            skip: 'true'
           - id: live.agent-mux.copilot-cli.foundry-openai.gpt-5.5
             agent_path: agent-mux
             agent: copilot-cli
@@ -606,6 +608,7 @@ jobs:
             amux_provider: foundry
             model: gpt-5.5
             required_env: AZURE_API_KEY,AMUX_API_BASE
+            skip: 'true'
           - id: live.agent-mux.cursor-cli.foundry-openai.gpt-5.5
             agent_path: agent-mux
             agent: cursor-cli

@@ -1569,6 +1569,10 @@ export interface ResolvedInstallMethod {
 }
 
 export function getInstallMethods(harness: string): ResolvedInstallMethod[] {
+  const metadata = getAdapterMetadata(harness);
+  if (metadata?.installCommands?.length) {
+    return metadata.installCommands.map(c => ({ type: c.type, command: c.command }));
+  }
   const agent = getAgentVersion(harness);
   const node = resolveVersionNode(agentVersionNodes(harness));
   const installRefs = node ? stringArray(node.installMethods) : [];

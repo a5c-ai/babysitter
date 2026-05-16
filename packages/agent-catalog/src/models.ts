@@ -439,7 +439,13 @@ export interface AdapterConfigSchema {
   projectConfigFilePaths?: string[];
 }
 
+export interface AdapterInstallCommand {
+  type: string;
+  command: string;
+}
+
 export interface AdapterMetadata {
+  installCommands?: AdapterInstallCommand[];
   authMethods?: AdapterAuthMethod[];
   authFiles?: string[];
   hostEnvSignals?: string[];

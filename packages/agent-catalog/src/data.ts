@@ -455,6 +455,10 @@ function parseAdapterMetadata(value: unknown): import('./models.js').AdapterMeta
   if (!value || typeof value !== 'object') return undefined;
   const obj = value as Record<string, unknown>;
   return {
+    installCommands: Array.isArray(obj.installCommands) ? obj.installCommands.map((c: unknown) => {
+      const cmd = c as Record<string, unknown>;
+      return { type: valueAsString(cmd.type), command: valueAsString(cmd.command) };
+    }) : undefined,
     authMethods: Array.isArray(obj.authMethods) ? obj.authMethods.map((m: unknown) => {
       const method = m as Record<string, unknown>;
       return {
