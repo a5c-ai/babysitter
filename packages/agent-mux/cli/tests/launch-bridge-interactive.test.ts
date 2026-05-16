@@ -370,6 +370,27 @@ describe('bridge-interactive spawn', () => {
     }
   });
 
+  it('continues Claude babysitter slash commands after skill load', async () => {
+    const { launchCommand, LAUNCH_FLAGS, parseArgs } = await importModules();
+
+    const launchPromise = launchCommand(
+      makeClient(),
+      parseArgs(
+        ['launch', 'claude', '--bridge-interactive', '--no-interactive', '--prompt', '/babysitter:yolo write .a5c-live-test/plugin.md'],
+        LAUNCH_FLAGS,
+      ),
+    );
+
+    await new Promise(r => setTimeout(r, 600));
+    for (const cb of ptyDataCallbacks) cb('\u001b[1mSkill\u001b[22m(babysitter:babysit)\n');
+    await new Promise(r => setTimeout(r, 1200));
+
+    expect(ptyWritten).toContain('Continue executing the babysitter skill instructions for the previous request until completion proof is produced.\r');
+
+    for (const cb of ptyExitCallbacks) cb({ exitCode: 0 });
+    await launchPromise;
+  });
+
   it('does not pass Claude bare mode for bridge-interactive sessions', async () => {
     const { launchCommand, LAUNCH_FLAGS, parseArgs } = await importModules();
 

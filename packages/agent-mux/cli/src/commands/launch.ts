@@ -356,6 +356,14 @@ function promptRequiresBabysitterCompletion(prompt: string | undefined): boolean
   return typeof prompt === 'string' && /(babysitter|\.a5c\/processes)/i.test(prompt);
 }
 
+function promptInvokesBabysitterSlashCommand(prompt: string | undefined): boolean {
+  return typeof prompt === 'string' && /(?:^|\s)\/babysitter:[\w-]+/.test(prompt);
+}
+
+function stripTerminalControl(input: string): string {
+  return input.replace(/\x1b\[[0-9;?]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*(?:\x07|\x1b\\)/g, '');
+}
+
 async function hasCompletedBabysitterRun(cwd: string): Promise<boolean> {
   const fs = await import('node:fs/promises');
   const { join } = await import('node:path');
@@ -882,6 +890,15 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       let interactiveOutputBuf = '';
       let interactiveApiKeyHandled = false;
       let interactiveBypassHandled = false;
+      let babysitterSkillFollowupInjected = false;
+      const maybeInjectBabysitterSkillFollowup = (output: string) => {
+        if (babysitterSkillFollowupInjected || !promptInvokesBabysitterSlashCommand(prompt)) return;
+        if (!stripTerminalControl(output).includes('Skill(babysitter:babysit)')) return;
+        babysitterSkillFollowupInjected = true;
+        setTimeout(() => {
+          if (!ptyTerminationExpected) ptyProcess.write('Continue executing the babysitter skill instructions for the previous request until completion proof is produced.\r');
+        }, 1000);
+      };
       ptyProcess.onData((data: string) => {
         process.stdout.write(data);
         interactiveOutputBuf += data;
@@ -896,6 +913,8 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
           interactiveBypassHandled = true;
           setTimeout(() => ptyProcess.write('\x1b[B\r'), 200);
         }
+
+        maybeInjectBabysitterSkillFollowup(interactiveOutputBuf);
 
         if (!assembler || !adapter || turnDetected) return;
 
@@ -1062,6 +1081,15 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     let eventCount = 0;
     let apiKeyPromptHandled = false;
     let bypassPromptHandled = false;
+    let babysitterSkillFollowupInjected = false;
+    const maybeInjectBabysitterSkillFollowup = (output: string) => {
+      if (babysitterSkillFollowupInjected || !promptInvokesBabysitterSlashCommand(prompt)) return;
+      if (!stripTerminalControl(output).includes('Skill(babysitter:babysit)')) return;
+      babysitterSkillFollowupInjected = true;
+      setTimeout(() => {
+        if (!ptyTerminationExpected) ptyProcess.write('Continue executing the babysitter skill instructions for the previous request until completion proof is produced.\r');
+      }, 1000);
+    };
     let idleTimer: ReturnType<typeof setTimeout> | null = null;
     const IDLE_TIMEOUT_MS = 30_000;
     const harnessesWithEndEvents = new Set(['claude', 'codex', 'gemini', 'opencode']);
@@ -1098,6 +1126,8 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         // Default is "No, exit". Send Down arrow + Enter to select "Yes, I accept".
         setTimeout(() => ptyProcess.write('\x1b[B\r'), 200);
       }
+
+      maybeInjectBabysitterSkillFollowup(outputBuf);
 
       if (!assembler || !adapter || turnComplete) return;
 
