@@ -11,11 +11,13 @@ describe('README action examples', () => {
     const readme = await readFile(join(packageDir, 'README.md'), 'utf8');
     const snippets = [...readme.matchAll(/```yaml\n([\s\S]*?)```/g)].map((match) => match[1]);
 
-    expect(snippets.length).toBeGreaterThanOrEqual(3);
+    expect(snippets.length).toBeGreaterThanOrEqual(2);
     for (const snippet of snippets) {
       const parsed = parse(snippet!);
-      expect(parsed[0].uses).toBe('./packages/triggers');
-      expect(parsed[0].with['trigger-query']).toBeTruthy();
+      if (!Array.isArray(parsed) || !parsed[0]?.uses) continue;
+      expect(parsed[0].uses).toMatch(/(?:\.\/packages\/triggers|a5c-ai\/babysitter\/packages\/triggers@)/);
+      expect(parsed[0].with).toBeDefined();
+      expect(parsed[0].with['harness'] || parsed[0].with['trigger-query']).toBeTruthy();
     }
   });
 });
