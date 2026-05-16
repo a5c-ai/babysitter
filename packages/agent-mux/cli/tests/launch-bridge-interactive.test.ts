@@ -385,7 +385,7 @@ describe('bridge-interactive spawn', () => {
     for (const cb of ptyDataCallbacks) cb('\u001b[1mSkill\u001b[22m(babysitter:babysit)\n');
     await new Promise(r => setTimeout(r, 1200));
 
-    expect(ptyWritten).toContain('Continue executing the babysitter skill instructions for the previous request until completion proof is produced.\r');
+    expect(ptyWritten).toContain('Do not invoke the Skill tool again. Use Bash to run: babysitter instructions:babysit-skill --harness claude-code --no-interactive. Then follow the returned CLI instructions for the previous request until completion proof is produced.');
 
     for (const cb of ptyExitCallbacks) cb({ exitCode: 0 });
     await launchPromise;

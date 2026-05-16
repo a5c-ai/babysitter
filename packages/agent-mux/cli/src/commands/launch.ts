@@ -857,6 +857,9 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     if (!ptyProcess || ptyTerminationExpected) return;
     ptyTerminationExpected = true;
     try { ptyProcess.kill('SIGTERM'); } catch { /* */ }
+    setTimeout(() => {
+      try { ptyProcess?.kill('SIGKILL'); } catch { /* */ }
+    }, 2000);
   };
 
   if (isInteractive) {
@@ -896,7 +899,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         if (!stripTerminalControl(output).includes('Skill(babysitter:babysit)')) return;
         babysitterSkillFollowupInjected = true;
         setTimeout(() => {
-          if (!ptyTerminationExpected) ptyProcess.write('Continue executing the babysitter skill instructions for the previous request until completion proof is produced.\r');
+          if (!ptyTerminationExpected) {
+            ptyProcess.write('Do not invoke the Skill tool again. Use Bash to run: babysitter instructions:babysit-skill --harness claude-code --no-interactive. Then follow the returned CLI instructions for the previous request until completion proof is produced.');
+            setTimeout(() => ptyProcess.write('\r'), 500);
+          }
         }, 1000);
       };
       ptyProcess.onData((data: string) => {
@@ -1087,7 +1093,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       if (!stripTerminalControl(output).includes('Skill(babysitter:babysit)')) return;
       babysitterSkillFollowupInjected = true;
       setTimeout(() => {
-        if (!ptyTerminationExpected) ptyProcess.write('Continue executing the babysitter skill instructions for the previous request until completion proof is produced.\r');
+        if (!ptyTerminationExpected) {
+          ptyProcess.write('Do not invoke the Skill tool again. Use Bash to run: babysitter instructions:babysit-skill --harness claude-code --no-interactive. Then follow the returned CLI instructions for the previous request until completion proof is produced.');
+          setTimeout(() => ptyProcess.write('\r'), 500);
+        }
       }, 1000);
     };
     let idleTimer: ReturnType<typeof setTimeout> | null = null;
