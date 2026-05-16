@@ -7,7 +7,7 @@
  * hook handling and run-status queries.
  */
 
-import type { HookSupportLevel } from '@a5c-ai/agent-catalog';
+import { getHookSupport, type HookSupportLevel } from '@a5c-ai/agent-catalog';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -76,14 +76,8 @@ async function getHookSupportLevel(
   harness: string,
   hookName: string,
 ): Promise<HookSupportLevel | undefined> {
-  try {
-    const { getHookSupport } = await import('@a5c-ai/agent-catalog');
-    const support = getHookSupport(harness, 'nonInteractive');
-    return support?.[hookName as keyof typeof support];
-  } catch {
-    // agent-catalog not available
-    return undefined;
-  }
+  const support = getHookSupport(harness, 'nonInteractive');
+  return support?.[hookName as keyof typeof support];
 }
 
 /**

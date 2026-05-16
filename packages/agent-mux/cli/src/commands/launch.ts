@@ -14,6 +14,11 @@ import {
 } from '@a5c-ai/agent-mux-core';
 import type { ProviderId, TransportId } from '@a5c-ai/agent-mux-core';
 import { translateForHarness } from '@a5c-ai/agent-mux-adapters';
+import {
+  getAutomationEnv,
+  getBridgeCapabilities,
+  getYoloLaunchArgs,
+} from '@a5c-ai/agent-catalog';
 import { startTransportMuxRuntime } from '@a5c-ai/transport-mux';
 import type { TransportMuxRuntime } from '@a5c-ai/transport-mux';
 import type { ParsedArgs, FlagDef } from '../parse-args.js';
@@ -237,13 +242,10 @@ async function prepareHarnessAutomationState(harness: string, cwd: string, env: 
   if (!isAutomationPreseedEnabled(env)) return;
   if (harness === 'claude') await prepareClaudeAutomationState(cwd, env);
   if (harness === 'codex') await prepareCodexAutomationState(cwd);
-  try {
-    const { getAutomationEnv } = await import('@a5c-ai/agent-catalog');
-    const automationEnv = getAutomationEnv(harness);
-    for (const [key, value] of Object.entries(automationEnv)) {
-      env[key] = value;
-    }
-  } catch { /* agent-catalog not available */ }
+  const automationEnv = getAutomationEnv(harness);
+  for (const [key, value] of Object.entries(automationEnv)) {
+    env[key] = value;
+  }
 }
 
 function isAutomationPreseedEnabled(env: Record<string, string>): boolean {
@@ -783,17 +785,12 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
   }
 
   if (bridgeInteractive) {
-    try {
-      const { getBridgeCapabilities } = await import('@a5c-ai/agent-catalog');
-      const caps = getBridgeCapabilities(plan.harness);
-      if (!caps?.interactiveBridge) {
-        const msg = `${plan.harness} does not support interactive bridging`;
-        if (jsonMode) printJsonError('CAPABILITY_ERROR', msg);
-        else printError(msg);
-        return ExitCode.USAGE_ERROR;
-      }
-    } catch {
-      // agent-catalog not available — skip capability check
+    const caps = getBridgeCapabilities(plan.harness);
+    if (!caps?.interactiveBridge) {
+      const msg = `${plan.harness} does not support interactive bridging`;
+      if (jsonMode) printJsonError('CAPABILITY_ERROR', msg);
+      else printError(msg);
+      return ExitCode.USAGE_ERROR;
     }
   }
 
@@ -817,14 +814,9 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
   // --yolo: add harness-specific auto-approve flags resolved through
   // agent-catalog → atlas graph (LaunchConfig records with commArgs)
   if (flagBool(args.flags, 'yolo')) {
-    try {
-      const { getYoloLaunchArgs } = await import('@a5c-ai/agent-catalog');
-      const yoloArgs = getYoloLaunchArgs(plan.harness);
-      if (yoloArgs.length > 0) {
-        plan.args.push(...yoloArgs);
-      }
-    } catch {
-      // agent-catalog not available
+    const yoloArgs = getYoloLaunchArgs(plan.harness);
+    if (yoloArgs.length > 0) {
+      plan.args.push(...yoloArgs);
     }
   }
 
