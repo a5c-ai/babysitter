@@ -108,10 +108,18 @@ export function verifyAgentMuxTuiRelease({ packageRoot, manifest, packEntries })
 
 function main() {
   const manifest = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
-  const packOutput = execFileSync('npm', ['pack', '--json', '--dry-run'], {
-    cwd: packageRoot,
-    encoding: 'utf8',
-  });
+  const packArgs = ['pack', '--json', '--dry-run'];
+  const npmExecPath = process.env.npm_execpath;
+  const packOutput = npmExecPath
+    ? execFileSync(process.execPath, [npmExecPath, ...packArgs], {
+        cwd: packageRoot,
+        encoding: 'utf8',
+      })
+    : execFileSync('npm', packArgs, {
+        cwd: packageRoot,
+        encoding: 'utf8',
+        shell: process.platform === 'win32',
+      });
   const [packResult] = JSON.parse(packOutput);
   const packEntries = Array.isArray(packResult?.files) ? packResult.files : [];
 
