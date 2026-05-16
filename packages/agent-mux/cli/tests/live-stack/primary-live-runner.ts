@@ -770,19 +770,21 @@ async function validateAgentBehavior(
       if (runEntries.length === 0) {
         runCompletionDetail = 'no runs created in .a5c/runs/';
       } else {
-        // Any run with a journal directory proves the babysitter infrastructure works
+        const MIN_JOURNAL_EVENTS = 15;
         for (const entry of runEntries.slice(-5)) {
           const journalDir = path.join(runsDir, entry, 'journal');
           try {
             const journalEntries = await fs.readdir(journalDir);
-            if (journalEntries.length > 0) {
+            if (journalEntries.length >= MIN_JOURNAL_EVENTS) {
               runCompleted = true;
-              runCompletionDetail = `run ${entry} exists with ${journalEntries.length} journal events`;
+              runCompletionDetail = `run ${entry} exists with ${journalEntries.length} journal events (>=${MIN_JOURNAL_EVENTS} required)`;
               break;
+            } else if (journalEntries.length > 0) {
+              runCompletionDetail = `run ${entry} has only ${journalEntries.length} journal events (need >=${MIN_JOURNAL_EVENTS} — process did not fully execute)`;
             }
           } catch { continue; }
         }
-        if (!runCompleted) {
+        if (!runCompleted && !runCompletionDetail.includes('journal events')) {
           runCompletionDetail = `runs exist (${runEntries.length}) but no journal events found`;
         }
       }
