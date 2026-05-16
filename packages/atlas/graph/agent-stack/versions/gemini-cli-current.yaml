@@ -8,7 +8,7 @@ attributes:
   releaseChannel: "stable"
   displayName: "Gemini CLI"
   summary: "Google's CLI agent for coding tasks"
-  sourcePackage: "@anthropic-ai/gemini-cli"
+  sourcePackage: "@google/gemini-cli"
   osSupport:
     - "linux"
     - "macos"
@@ -20,6 +20,25 @@ attributes:
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "API Key"
+        envVars: [GOOGLE_API_KEY, GEMINI_API_KEY]
+      - type: browser_login
+        name: "Browser Login"
+    authFiles:
+      - "~/.config/gemini/settings.json"
+    hostEnvSignals:
+      - GEMINI_CLI
+      - GEMINI_SESSION_ID
+    sessionDir: "~/.gemini/sessions"
+    sessionPersistence: file
+    automationEnv:
+      GEMINI_CLI_TRUST_WORKSPACE: "true"
+    approvalModes:
+      - yolo
+      - prompt
   hookSupport:
     interactive:
       sessionStart: native

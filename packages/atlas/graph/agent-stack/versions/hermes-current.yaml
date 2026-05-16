@@ -6,8 +6,38 @@ attributes:
   releasedAt: "2025-01-01"
   cliCommand: "hermes"
   installMethods:
-    - install:pip
+    - install:npm
   minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "OpenRouter API Key"
+        envVars: [OPENROUTER_API_KEY]
+      - type: api_key
+        name: "Anthropic API Key"
+        envVars: [ANTHROPIC_API_KEY]
+      - type: api_key
+        name: "OpenAI API Key"
+        envVars: [OPENAI_API_KEY]
+      - type: api_key
+        name: "Nous API Key"
+        envVars: [NOUS_API_KEY]
+      - type: github_token
+        name: "GitHub Token"
+        envVars: [GITHUB_TOKEN]
+      - type: api_key
+        name: "Google API Key"
+        envVars: [GOOGLE_API_KEY]
+    authFiles:
+      - "~/.hermes/cli-config.yaml"
+    hostEnvSignals:
+      - HERMES_SESSION
+      - HERMES_RUN_ID
+    sessionDir: "~/.hermes/sessions"
+    sessionPersistence: sqlite
+    approvalModes:
+      - yolo
+      - prompt
   hookSupport:
     interactive:
       sessionStart: unsupported

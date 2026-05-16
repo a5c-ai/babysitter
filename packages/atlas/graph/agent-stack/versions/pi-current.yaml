@@ -19,6 +19,21 @@ attributes:
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "Provider API Key"
+        envVars: [ANTHROPIC_API_KEY, OPENAI_API_KEY]
+    authFiles:
+      - "~/.pi/agent/settings.json"
+    hostEnvSignals:
+      - PI_RUN_ID
+      - PI_SESSION_ID
+    sessionDir: "~/.pi/agent/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
   interactiveSignals:
     turnCompletePattern: "^>"
     exitOnNonInteractive: false

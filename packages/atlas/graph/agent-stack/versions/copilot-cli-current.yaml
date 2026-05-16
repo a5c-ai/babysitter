@@ -20,7 +20,36 @@ attributes:
   cliCommand: "gh copilot"
   installMethods:
     - install:gh-extension
+    - install:npm
   minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: github_token
+        name: "GitHub Token"
+        envVars: [GITHUB_TOKEN]
+      - type: oauth_device
+        name: "OAuth Device Flow"
+    authFiles:
+      - "~/.config/github-copilot/settings.json"
+    hostEnvSignals:
+      - COPILOT_CLI_SESSION
+      - GH_COPILOT_SESSION
+    sessionDir: "~/.config/github-copilot/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - prompt
+  hookSupport:
+    interactive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+    nonInteractive: {}
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: false
+    positionalPrompt: false
 edges:
   version_of:
     - agent:copilot-cli

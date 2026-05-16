@@ -19,6 +19,21 @@ attributes:
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "Provider API Key"
+        envVars: [ANTHROPIC_API_KEY, OPENAI_API_KEY]
+    authFiles:
+      - "~/.openclaw/config.json"
+    hostEnvSignals:
+      - OPENCLAW_SESSION
+      - OPENCLAW_RUN_ID
+    sessionDir: "~/.openclaw/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
   hookSupport:
     interactive:
       sessionStart: unsupported

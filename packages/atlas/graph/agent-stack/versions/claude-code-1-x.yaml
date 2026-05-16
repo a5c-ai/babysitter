@@ -26,6 +26,27 @@ attributes:
     exitOnNonInteractive: true
     nonInteractiveMode: "-p"
     interactiveMode: ""
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "API Key"
+        envVars: [ANTHROPIC_API_KEY]
+      - type: browser_login
+        name: "Browser Login"
+    authFiles:
+      - "~/.claude.json"
+      - "~/.claude/settings.json"
+    hostEnvSignals:
+      - CLAUDECODE
+      - CLAUDE_CODE_SESSION_ID
+      - CLAUDE_CODE
+      - CLAUDE_PROJECT_DIR
+    sessionDir: "~/.claude/projects"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
+      - deny
   hookSupport:
     interactive:
       sessionStart: native

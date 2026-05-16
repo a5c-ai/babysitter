@@ -20,6 +20,21 @@ attributes:
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "Provider API Key"
+        envVars: [ANTHROPIC_API_KEY, OPENAI_API_KEY]
+    authFiles:
+      - "~/.omp/agent/settings.json"
+    hostEnvSignals:
+      - OMP_RUN_ID
+      - OMP_SESSION_ID
+    sessionDir: "~/.omp/agent/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
   hookSupport:
     interactive:
       sessionStart: unsupported

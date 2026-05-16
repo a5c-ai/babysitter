@@ -24,6 +24,23 @@ attributes:
     exitOnNonInteractive: true
     nonInteractiveMode: "exec"
     interactiveMode: ""
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "API Key"
+        envVars: [OPENAI_API_KEY]
+    authFiles:
+      - "~/.codex/config.json"
+    hostEnvSignals:
+      - CODEX_SESSION_ID
+      - CODEX_RUN_ID
+      - CODEX_CLI
+    sessionDir: "~/.codex/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
+      - deny
   hookSupport:
     interactive:
       sessionStart: native
@@ -99,6 +116,23 @@ attributes:
     exitOnNonInteractive: true
     nonInteractiveMode: "exec"
     interactiveMode: ""
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "API Key"
+        envVars: [OPENAI_API_KEY]
+    authFiles:
+      - "~/.codex/config.json"
+    hostEnvSignals:
+      - CODEX_SESSION_ID
+      - CODEX_RUN_ID
+      - CODEX_CLI
+    sessionDir: "~/.codex/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
+      - deny
   hookSupport:
     interactive:
       sessionStart: native

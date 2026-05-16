@@ -19,6 +19,23 @@ attributes:
   installMethods:
     - install:manual
   minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "API Key"
+        envVars: [CURSOR_API_KEY]
+      - type: browser_login
+        name: "Browser Login"
+    authFiles:
+      - "~/.cursor/settings.json"
+    hostEnvSignals:
+      - CURSOR_SESSION
+      - CURSOR_AGENT_SESSION
+    sessionDir: "~/.cursor/sessions"
+    sessionPersistence: sqlite
+    approvalModes:
+      - yolo
+      - prompt
   hookSupport:
     interactive:
       sessionStart: native
