@@ -816,20 +816,10 @@ async function validateAgentBehavior(
     } catch {
       completionProofDetail = 'no .a5c/runs/ directory found';
     }
-    // In bridged-hooks NI mode, the model (GPT-5.5/Gemini) may not invoke the
-    // babysitter Skill tool — it uses Write/Bash directly. The skill lifecycle
-    // requires native Claude Code skill invocation, which only works in interactive
-    // mode. Downgrade to warning when file-creation and hooks both passed.
-    const isNonInteractiveProxy = process.env['LIVE_STACK_INTERACTIVE'] !== 'true';
-    const fileCreationPassed = entries.some(e => e.name === 'file-creation' && e.status === 'passed');
-    const hooksPassed = entries.some(e => e.name === 'stop-hooks' && e.status === 'passed');
-    const downgradeToWarning = isNonInteractiveProxy && !completionProofFound && fileCreationPassed && hooksPassed;
     entries.push({
       name: 'babysitter-completion-proof',
-      status: completionProofFound ? 'passed' : (downgradeToWarning ? 'passed' : 'failed'),
-      detail: downgradeToWarning
-        ? `${completionProofDetail} (downgraded: NI proxy mode — skill lifecycle requires interactive)`
-        : completionProofDetail,
+      status: completionProofFound ? 'passed' : 'failed',
+      detail: completionProofDetail,
     });
   }
 

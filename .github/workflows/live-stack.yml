@@ -163,7 +163,7 @@ jobs:
       run:
         shell: bash
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         interaction_mode:
           - id: bridged-hooks
@@ -386,7 +386,7 @@ jobs:
       run:
         shell: bash
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         interaction_mode:
           - id: non-interactive
