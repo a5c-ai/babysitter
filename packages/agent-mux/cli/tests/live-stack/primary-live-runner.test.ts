@@ -67,6 +67,28 @@ describe('primary live stack runner contract', () => {
     expect(codexPrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
   });
 
+  it('runs plugin bridged-hooks through the interactive bridge so slash commands resolve', () => {
+    const scenario = primaryLiveStackScenario();
+    const commands = buildPrimaryLiveStackCommands(scenario, {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AMUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: 'trace-1',
+        LIVE_STACK_INTERACTIVE: 'false',
+        LIVE_STACK_BRIDGE_INTERACTIVE: 'true',
+        LIVE_STACK_BRIDGE_HOOKS: 'true',
+      },
+    });
+
+    const launch = commands.at(-1);
+    expect(launch?.args).toContain('--no-interactive');
+    expect(launch?.args).toContain('--bridge-interactive');
+    expect(launch?.args).toContain('--bridge-hooks');
+    expect(launch?.args).not.toContain('-p');
+  });
+
   it('pins babysitter-plugin runs to the workspace runs directory', () => {
     const scenario = primaryLiveStackScenario();
     const commands = buildPrimaryLiveStackCommands(scenario, {

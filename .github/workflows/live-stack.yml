@@ -168,7 +168,7 @@ jobs:
         interaction_mode:
           - id: bridged-hooks
             interactive: 'false'
-            bridge_interactive: 'false'
+            bridge_interactive: 'true'
             bridge_hooks: 'true'
           - id: interactive
             interactive: 'true'
