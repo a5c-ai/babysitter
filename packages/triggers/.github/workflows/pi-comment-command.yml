@@ -1,0 +1,38 @@
+# Pi Comment Command — trigger on issue/PR comments
+#
+# Responds to `/agent <task>` commands in issue and PR comments
+# using Pi in plain NI mode through Foundry.
+
+name: Pi Comment Command
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  respond:
+    if: startsWith(github.event.comment.body, '/agent ')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: a5c-ai/babysitter/packages/triggers@main
+        with:
+          harness: pi
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: non-interactive
+          prompt: ${{ github.event.comment.body }}
+          max-turns: '10'
+          trigger-query: |
+            event: issue_comment
+            action: created
+            text: '/agent'
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AMUX_API_BASE: ${{ vars.AZURE_OPENAI_ENDPOINT }}

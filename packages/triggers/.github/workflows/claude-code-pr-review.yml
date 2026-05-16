@@ -1,0 +1,45 @@
+# Claude Code PR Review — babysitter-plugin with bridged-hooks
+#
+# Reviews pull request changes using Claude Code through Azure Foundry.
+# Babysitter plugin drives the orchestration lifecycle via hook emulation.
+
+name: Claude Code PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: a5c-ai/babysitter/packages/triggers@main
+        with:
+          harness: claude
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          babysitter-prompt-prefix: '/babysitter:yolo'
+          prompt: |
+            Review this pull request. Check for:
+            1. Code correctness and potential bugs
+            2. Test coverage gaps
+            3. Security issues
+            4. Style and naming consistency
+            Post a review comment summarizing findings.
+          max-turns: '30'
+          trigger-query: |
+            event: pull_request
+            action: [opened, synchronize]
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AMUX_API_BASE: ${{ vars.AZURE_OPENAI_ENDPOINT }}

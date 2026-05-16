@@ -1,0 +1,62 @@
+# Multi-Harness Quality Gates — babysitter-plugin matrix
+#
+# Runs quality gates on push to main using multiple harnesses in parallel.
+# Each harness uses bridged-hooks mode with the babysitter plugin for
+# orchestrated process execution.
+
+name: Quality Gates
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - harness: claude
+            provider: foundry
+            model: gpt-5.5
+            prefix: '/babysitter:yolo'
+            env_key: AZURE_API_KEY
+          - harness: codex
+            provider: foundry
+            model: gpt-5.5
+            prefix: '$babysitter:yolo'
+            env_key: AZURE_API_KEY
+          - harness: pi
+            provider: foundry
+            model: gpt-5.5
+            prefix: 'Invoke the babysitter:yolo command to:'
+            env_key: AZURE_API_KEY
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: a5c-ai/babysitter/packages/triggers@main
+        with:
+          harness: ${{ matrix.harness }}
+          provider: ${{ matrix.provider }}
+          model: ${{ matrix.model }}
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          babysitter-prompt-prefix: ${{ matrix.prefix }}
+          prompt: |
+            Run quality gates on the latest changes:
+            1. Check for type errors (tsc --noEmit)
+            2. Run the test suite
+            3. Verify no security vulnerabilities in dependencies
+            4. Report results
+          max-turns: '30'
+          trigger-query: |
+            event: push
+            branch: main
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AMUX_API_BASE: ${{ vars.AZURE_OPENAI_ENDPOINT }}
