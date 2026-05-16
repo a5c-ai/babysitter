@@ -360,6 +360,16 @@ function promptInvokesBabysitterSlashCommand(prompt: string | undefined): boolea
   return typeof prompt === 'string' && /(?:^|\s)\/babysitter:[\w-]+/.test(prompt);
 }
 
+function buildBabysitterSkillFollowupPrompt(prompt: string | undefined): string {
+  const originalRequest = (prompt ?? '').replace(/\s+/g, ' ').trim();
+  return [
+    'Continue the Babysitter command now; do not answer in prose and do not call the Skill tool again.',
+    'Use the Bash tool now with this exact command: babysitter instructions:babysit-skill --harness claude-code --no-interactive',
+    'Then follow the returned CLI instructions for the original /babysitter request until completion proof is produced.',
+    originalRequest ? `Original /babysitter request: ${originalRequest}` : '',
+  ].filter(Boolean).join(' ');
+}
+
 function stripTerminalControl(input: string): string {
   return input.replace(/\x1b\[[0-9;?]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*(?:\x07|\x1b\\)/g, '');
 }
@@ -900,7 +910,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         babysitterSkillFollowupInjected = true;
         setTimeout(() => {
           if (!ptyTerminationExpected) {
-            ptyProcess.write('Do not invoke the Skill tool again. Use Bash to run: babysitter instructions:babysit-skill --harness claude-code --no-interactive. Then follow the returned CLI instructions for the previous request until completion proof is produced.');
+            ptyProcess.write(buildBabysitterSkillFollowupPrompt(prompt));
             setTimeout(() => ptyProcess.write('\r'), 500);
           }
         }, 1000);
@@ -1094,7 +1104,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       babysitterSkillFollowupInjected = true;
       setTimeout(() => {
         if (!ptyTerminationExpected) {
-          ptyProcess.write('Do not invoke the Skill tool again. Use Bash to run: babysitter instructions:babysit-skill --harness claude-code --no-interactive. Then follow the returned CLI instructions for the previous request until completion proof is produced.');
+          ptyProcess.write(buildBabysitterSkillFollowupPrompt(prompt));
           setTimeout(() => ptyProcess.write('\r'), 500);
         }
       }, 1000);

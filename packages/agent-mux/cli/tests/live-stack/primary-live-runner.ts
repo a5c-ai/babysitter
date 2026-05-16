@@ -283,7 +283,7 @@ export async function runPrimaryLiveStackScenario(options: PrimaryLiveRunOptions
 
   // Behavioral validation: verify the agent actually used tools (created the requested file)
   const traceId = commands[0]?.env['LIVE_STACK_TRACE_ID'];
-  const verifications = await validateAgentBehavior(scenario, options.cwd, commandOutput, traceId);
+  const verifications = await validateAgentBehavior(scenario, options.cwd, commandOutput, traceId, options.env);
   const behaviorFailures = verifications.filter((v) => v.status === 'failed').map((v) => v.detail ?? v.name);
 
   const captured = mergeTraceIds(
@@ -646,6 +646,7 @@ async function validateAgentBehavior(
   cwd: string,
   output: string,
   traceId: string | undefined,
+  env: Record<string, string | undefined>,
 ): Promise<VerificationEntry[]> {
   const entries: VerificationEntry[] = [];
   const isBabysitterAgent = scenario.agent.agent === 'babysitter-agent';
@@ -686,11 +687,10 @@ async function validateAgentBehavior(
   }
 
   // --- babysitter-plugin: stop hooks, hooks-mux session, run completion, completion proof ---
-  // All checks run in both interactive and non-interactive modes.
-  // stop-hooks is a warning (not failure) in non-interactive mode since hooks
-  // don't fire without a TTY session.
-  const isInteractiveMode = process.env['LIVE_STACK_INTERACTIVE'] === 'true';
-  const isBridgeHooksMode = process.env['LIVE_STACK_BRIDGE_HOOKS'] === 'true';
+  // All checks run in both TTY-backed and non-TTY modes.
+  // stop-hooks is a warning (not failure) only when no TTY-backed invocation is used.
+  const isInteractiveInvocation = env['LIVE_STACK_INTERACTIVE'] === 'true' || env['LIVE_STACK_BRIDGE_INTERACTIVE'] === 'true';
+  const isBridgeHooksMode = env['LIVE_STACK_BRIDGE_HOOKS'] === 'true';
   if (isBabysitterPlugin) {
     // stop-hooks: check for hooks-mux log files
     const hooksLogDir = path.join(cwd, '.a5c', 'logs', 'hooks');
@@ -741,7 +741,7 @@ async function validateAgentBehavior(
       entries.push({ name: 'stop-hooks', status: 'passed', detail: 'hooks-mux log files found' });
     } else if (hasStopHookInJournal) {
       entries.push({ name: 'stop-hooks', status: 'passed', detail: 'stop hook event found in run journal (no log files on disk)' });
-    } else if (!isInteractiveMode) {
+    } else if (!isInteractiveInvocation) {
       entries.push({ name: 'stop-hooks', status: 'passed', detail: 'no hooks-mux logs (expected in non-interactive mode — hooks require TTY session)' });
     } else if (!isBridgeHooksMode) {
       entries.push({ name: 'stop-hooks', status: 'passed', detail: 'no hooks-mux logs (command-surface interactive lane; hook evidence is covered by bridged-hooks)' });
@@ -754,7 +754,7 @@ async function validateAgentBehavior(
       if (hasSessionLogs) parts.push('hooks-mux log files found');
       if (hasStopHookInJournal) parts.push('stop hook event in run journal');
       entries.push({ name: 'hooks-mux-session', status: 'passed', detail: parts.join('; ') });
-    } else if (!isInteractiveMode) {
+    } else if (!isInteractiveInvocation) {
       entries.push({ name: 'hooks-mux-session', status: 'passed', detail: 'no hooks-mux evidence (expected in non-interactive — hooks require TTY)' });
     } else if (!isBridgeHooksMode) {
       entries.push({ name: 'hooks-mux-session', status: 'passed', detail: 'no hooks-mux evidence (command-surface interactive lane; hook evidence is covered by bridged-hooks)' });

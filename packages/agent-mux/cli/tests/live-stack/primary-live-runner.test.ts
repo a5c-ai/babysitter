@@ -340,6 +340,102 @@ describe('primary live stack runner contract', () => {
     expect(result.status).toBe('passed');
     expect(result.failure).toBeUndefined();
   });
+  it('does not require hook logs from command-surface bridged-interactive plugin lanes', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-plugin-bridged-interactive-run-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-plugin-bridged-interactive-run';
+    const runId = '01KRNFFW81BT433PT8HSTA32Q0';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AMUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_INTERACTIVE: 'false',
+        LIVE_STACK_BRIDGE_INTERACTIVE: 'true',
+        LIVE_STACK_BRIDGE_HOOKS: 'false',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), '# Odyssey\n\n' + 'Greek text ΑΒΓ '.repeat(80));
+        const runDir = path.join(cwd, '.a5c', 'runs', runId);
+        await fs.mkdir(path.join(runDir, 'journal'), { recursive: true });
+        await fs.writeFile(path.join(runDir, 'run.json'), JSON.stringify({ processId: 'processes/live-stack/summarize-translate-test', metadata: { completionProof: `${runId}-proof` } }));
+        await fs.writeFile(path.join(runDir, 'journal', '001.json'), 'RUN_COMPLETED');
+
+        return {
+          status: 0,
+          stdout: [
+            'agentMuxRunId: amux-run-1',
+            'agentMuxSessionId: amux-session-1',
+            `babysitterRunId: ${runId}`,
+            'babysitterEffectId: effect-1',
+            'hookEventId: hook-1',
+            'hookMuxEventId: hookmux-1',
+            `transportTraceId: ${traceId}`,
+          ].join('\n'),
+          stderr: '',
+        };
+      },
+    });
+
+    expect(result.status).toBe('passed');
+    expect(result.failure).toBeUndefined();
+  });
+
+  it('requires hook evidence from bridged interactive hook plugin lanes', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-plugin-bridged-hooks-run-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-plugin-bridged-hooks-run';
+    const runId = '01KRNFFW81BT433PT8HSTA32Q1';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AMUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_INTERACTIVE: 'false',
+        LIVE_STACK_BRIDGE_INTERACTIVE: 'true',
+        LIVE_STACK_BRIDGE_HOOKS: 'true',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), '# Odyssey\n\n' + 'Greek text ΑΒΓ '.repeat(80));
+        const runDir = path.join(cwd, '.a5c', 'runs', runId);
+        await fs.mkdir(path.join(runDir, 'journal'), { recursive: true });
+        await fs.writeFile(path.join(runDir, 'run.json'), JSON.stringify({ processId: 'processes/live-stack/summarize-translate-test', metadata: { completionProof: `${runId}-proof` } }));
+        await fs.writeFile(path.join(runDir, 'journal', '001.json'), 'RUN_COMPLETED');
+
+        return {
+          status: 0,
+          stdout: [
+            'agentMuxRunId: amux-run-1',
+            'agentMuxSessionId: amux-session-1',
+            `babysitterRunId: ${runId}`,
+            'babysitterEffectId: effect-1',
+            'hookEventId: hook-1',
+            'hookMuxEventId: hookmux-1',
+            `transportTraceId: ${traceId}`,
+          ].join('\n'),
+          stderr: '',
+        };
+      },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('no hooks-mux log files found');
+  });
+
   it('writes a redacted failed artifact when live output lacks required joined trace IDs', async () => {
     const artifactsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-artifacts-'));
     const result = await runPrimaryLiveStackScenario({

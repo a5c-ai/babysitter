@@ -138,6 +138,14 @@ describe('bridge-interactive spawn', () => {
     return { launchCommand, LAUNCH_FLAGS, parseArgs };
   }
 
+  async function waitFor(condition: () => boolean, timeoutMs = 3000): Promise<void> {
+    const startedAt = Date.now();
+    while (!condition()) {
+      if (Date.now() - startedAt > timeoutMs) throw new Error('timed out waiting for condition');
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
+  }
+
   function makeClient(harness = 'claude') {
     return {
       adapters: {
@@ -168,8 +176,8 @@ describe('bridge-interactive spawn', () => {
         makeClient('claude'),
         parseArgs(['launch', 'claude', '--bridge-interactive', '--no-interactive', '--prompt', 'hello'], LAUNCH_FLAGS),
       );
-      await new Promise(r => setTimeout(r, 20));
-      for (const cb of ptyExitCallbacks) cb({ exitCode: 0 });
+      await waitFor(() => ptySpawnMock.mock.calls.length >= 1 && ptyExitCallbacks.length > 0);
+      for (const cb of [...ptyExitCallbacks]) cb({ exitCode: 0 });
       await claudeLaunch;
 
       const claudeConfig = JSON.parse(await fs.readFile(path.join(home, '.claude.json'), 'utf8'));
@@ -191,8 +199,8 @@ describe('bridge-interactive spawn', () => {
         makeClient('codex'),
         parseArgs(['launch', 'codex', '--bridge-interactive', '--no-interactive', '--prompt', 'hello'], LAUNCH_FLAGS),
       );
-      await new Promise(r => setTimeout(r, 20));
-      for (const cb of ptyExitCallbacks) cb({ exitCode: 0 });
+      await waitFor(() => ptySpawnMock.mock.calls.length >= 2 && ptyExitCallbacks.length > 0);
+      for (const cb of [...ptyExitCallbacks]) cb({ exitCode: 0 });
       await codexLaunch;
 
       const codexConfig = await fs.readFile(path.join(home, '.codex', 'config.toml'), 'utf8');
@@ -385,7 +393,10 @@ describe('bridge-interactive spawn', () => {
     for (const cb of ptyDataCallbacks) cb('\u001b[1mSkill\u001b[22m(babysitter:babysit)\n');
     await new Promise(r => setTimeout(r, 1200));
 
-    expect(ptyWritten).toContain('Do not invoke the Skill tool again. Use Bash to run: babysitter instructions:babysit-skill --harness claude-code --no-interactive. Then follow the returned CLI instructions for the previous request until completion proof is produced.');
+    const writtenText = ptyWritten.join('');
+    expect(writtenText).toContain('Continue the Babysitter command now; do not answer in prose');
+    expect(writtenText).toContain('Use the Bash tool now with this exact command: babysitter instructions:babysit-skill --harness claude-code --no-interactive');
+    expect(writtenText).toContain('Original /babysitter request: /babysitter:yolo write .a5c-live-test/plugin.md');
 
     for (const cb of ptyExitCallbacks) cb({ exitCode: 0 });
     await launchPromise;
