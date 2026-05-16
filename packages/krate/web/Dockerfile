@@ -9,7 +9,6 @@ RUN npm install --workspace=packages/krate/web --legacy-peer-deps --ignore-scrip
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/krate/web/node_modules ./packages/krate/web/node_modules
 COPY packages/krate/web ./packages/krate/web
 COPY packages/krate/sdk ./packages/krate/sdk
 COPY packages/krate/core/src ./packages/krate/core/src
