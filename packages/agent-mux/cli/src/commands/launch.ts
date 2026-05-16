@@ -237,6 +237,7 @@ async function prepareHarnessAutomationState(harness: string, cwd: string, env: 
   if (!isAutomationPreseedEnabled(env)) return;
   if (harness === 'claude') await prepareClaudeAutomationState(cwd, env);
   if (harness === 'codex') await prepareCodexAutomationState(cwd);
+  if (harness === 'gemini') env['GEMINI_CLI_TRUST_WORKSPACE'] = 'true';
 }
 
 function isAutomationPreseedEnabled(env: Record<string, string>): boolean {

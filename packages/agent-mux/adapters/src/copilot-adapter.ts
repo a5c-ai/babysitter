@@ -83,8 +83,8 @@ export class CopilotAdapter extends BaseAgentAdapter {
     ],
     authFiles: ['.config/github-copilot/settings.json'],
     installMethods: [
-      { platform: 'all', type: 'npm', command: 'npm install -g @github/copilot-cli' },
       { platform: 'all', type: 'gh-extension', command: 'gh extension install github/gh-copilot' },
+      { platform: 'all', type: 'npm', command: 'npm install -g @github/copilot-cli' },
     ],
   };
 
