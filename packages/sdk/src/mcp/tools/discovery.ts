@@ -9,7 +9,6 @@ import { toolResult, toolError } from "../util/errors";
 
 export function registerDiscoveryTools(server: McpServer): void {
   // ── skill_discover ──────────────────────────────────────────────────
-  // @ts-ignore -- MCP SDK type depth limit
   server.tool(
     "skill_discover",
     "Discover available skills, agents, and process definitions",
@@ -61,7 +60,6 @@ export function registerDiscoveryTools(server: McpServer): void {
   );
 
   // ── health ──────────────────────────────────────────────────────────
-  // @ts-ignore -- MCP SDK type depth limit
   server.tool(
     "health",
     "Check the health and configuration status of the babysitter installation",
@@ -83,7 +81,6 @@ export function registerDiscoveryTools(server: McpServer): void {
   );
 
   // ── configure_show ──────────────────────────────────────────────────
-  // @ts-ignore -- MCP SDK type depth limit
   server.tool(
     "configure_show",
     "Show current babysitter configuration and environment",

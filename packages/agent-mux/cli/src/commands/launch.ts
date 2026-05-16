@@ -1044,28 +1044,36 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       }
     });
 
-    // Inject prompt after any observed onboarding prompts are dismissed.
-    // Do not require startup output: some harnesses wait silently for input.
+    // Inject prompt after observed onboarding prompts are dismissed.
+    // If the PTY stays silent, inject after a short startup grace period because
+    // some harnesses wait for input without rendering an initial prompt.
     if (prompt) {
+      const startedAt = Date.now();
+      let promptInjected = false;
       const injectPrompt = () => {
+        if (promptInjected) return;
+        promptInjected = true;
         ptyProcess.write(prompt);
         setTimeout(() => ptyProcess.write('\r'), 500);
       };
-      const waitForOutputThenInject = () => {
-        if (outputBuf.length === 0) { setTimeout(waitForOutputThenInject, 500); return; }
-        const checkAndInject = () => {
-          const stripped = outputBuf.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
-          if (apiKeyPromptHandled || bypassPromptHandled) {
-            setTimeout(injectPrompt, 2000);
-          } else if (stripped.includes('APIkey') || stripped.includes('Bypass')) {
-            setTimeout(checkAndInject, 500);
-          } else {
-            setTimeout(injectPrompt, 3000);
-          }
-        };
-        checkAndInject();
+      const checkAndInject = () => {
+        if (promptInjected) return;
+        if (outputBuf.length === 0) {
+          if (Date.now() - startedAt >= 1000) injectPrompt();
+          else setTimeout(checkAndInject, 100);
+          return;
+        }
+
+        const stripped = outputBuf.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
+        if (apiKeyPromptHandled || bypassPromptHandled) {
+          setTimeout(injectPrompt, 2000);
+        } else if (stripped.includes('APIkey') || stripped.includes('Bypass')) {
+          setTimeout(checkAndInject, 500);
+        } else {
+          setTimeout(injectPrompt, 3000);
+        }
       };
-      waitForOutputThenInject();
+      checkAndInject();
     }
 
     // Create a fake ChildProcess-like for signal handling

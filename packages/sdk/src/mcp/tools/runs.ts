@@ -80,7 +80,6 @@ function derivePendingEffects(events: JournalEvent[]): Array<{ effectId: string;
 
 export function registerRunTools(server: McpServer): void {
   // ── run_create ──────────────────────────────────────────────────────
-  // @ts-ignore -- MCP SDK type depth limit
   server.tool(
     "run_create",
     "Create a new babysitter run for a given process definition",
@@ -130,7 +129,6 @@ export function registerRunTools(server: McpServer): void {
   );
 
   // ── run_status ──────────────────────────────────────────────────────
-  // @ts-ignore -- MCP SDK type depth limit
   server.tool(
     "run_status",
     "Get the current status and metadata of a run",
@@ -168,7 +166,6 @@ export function registerRunTools(server: McpServer): void {
   );
 
   // ── run_iterate ─────────────────────────────────────────────────────
-  // @ts-ignore -- MCP SDK type depth limit
   server.tool(
     "run_iterate",
     "Execute one orchestration iteration for a run",
@@ -232,7 +229,6 @@ export function registerRunTools(server: McpServer): void {
   );
 
   // ── run_events ──────────────────────────────────────────────────────
-  // @ts-ignore -- MCP SDK type depth limit
   server.tool(
     "run_events",
     "List journal events for a run",
@@ -273,7 +269,6 @@ export function registerRunTools(server: McpServer): void {
   );
 
   // ── run_rebuild_state ───────────────────────────────────────────────
-  // @ts-ignore -- MCP SDK type depth limit
   server.tool(
     "run_rebuild_state",
     "Rebuild the state cache for a run from its journal",

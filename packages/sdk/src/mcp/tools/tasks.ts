@@ -86,7 +86,6 @@ function buildTaskList(events: JournalEvent[]): Array<{
 
 export function registerTaskTools(server: McpServer): void {
   // ── task_post ───────────────────────────────────────────────────────
-  // @ts-ignore -- MCP SDK type depth limit
   server.tool(
     "task_post",
     "Post a result for a pending task effect",
@@ -167,7 +166,6 @@ export function registerTaskTools(server: McpServer): void {
   );
 
   // ── task_list ───────────────────────────────────────────────────────
-  // @ts-ignore -- MCP SDK type depth limit
   server.tool(
     "task_list",
     "List all tasks for a run, optionally showing only pending tasks",
@@ -204,7 +202,6 @@ export function registerTaskTools(server: McpServer): void {
   );
 
   // ── task_show ───────────────────────────────────────────────────────
-  // @ts-ignore -- MCP SDK type depth limit
   server.tool(
     "task_show",
     "Show details of a specific task including its definition and result",
