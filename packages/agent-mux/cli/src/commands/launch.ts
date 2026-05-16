@@ -1425,8 +1425,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     let niIdleTimer: ReturnType<typeof setTimeout> | null = null;
     let niHasOutput = false;
     const NI_IDLE_TIMEOUT_MS = 30_000;
+    const niStdoutChunks: Buffer[] = [];
     child.stdout?.on('data', (chunk: Buffer) => {
       process.stdout.write(chunk);
+      niStdoutChunks.push(chunk);
       niHasOutput = true;
       if (niUseIdleKill) {
         if (niIdleTimer) clearTimeout(niIdleTimer);
@@ -1436,6 +1438,26 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
           }
         }, NI_IDLE_TIMEOUT_MS);
       }
+    });
+
+    // After NI process exits, write captured stdout to expected artifact path
+    // if the agent didn't create it (for agents without file-writing tools).
+    child.on('exit', () => {
+      if (niStdoutChunks.length === 0) return;
+      const artifactPaths = extractPromptArtifactPaths(prompt, launchCwd);
+      if (artifactPaths.length === 0) return;
+      const stdout = Buffer.concat(niStdoutChunks).toString('utf8');
+      if (stdout.length < 200) return;
+      void (async () => {
+        const fsNi = await import('node:fs/promises');
+        const { dirname: dirnameNi } = await import('node:path');
+        for (const artifactPath of artifactPaths) {
+          try { await fsNi.access(artifactPath); continue; } catch { /* doesn't exist */ }
+          await fsNi.mkdir(dirnameNi(artifactPath), { recursive: true });
+          await fsNi.writeFile(artifactPath, stdout);
+          console.error(`[amux launch] NI stdout bridged to ${artifactPath} (${stdout.length} bytes)`);
+        }
+      })().catch(() => { /* best-effort */ });
     });
   }
 
