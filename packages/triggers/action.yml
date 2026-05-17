@@ -197,8 +197,17 @@ runs:
         set -euo pipefail
         cd "$INPUT_WORKING_DIRECTORY"
 
+        # Map to SDK harness names
+        SDK_HARNESS="$INPUT_HARNESS"
+        case "$INPUT_HARNESS" in
+          claude-code) SDK_HARNESS="claude" ;;
+          gemini-cli) SDK_HARNESS="gemini" ;;
+          copilot-cli) SDK_HARNESS="copilot" ;;
+          cursor-cli) SDK_HARNESS="cursor" ;;
+        esac
+
         # Install babysitter plugin into harness
-        babysitter harness:install-plugin "$INPUT_HARNESS" --workspace "$INPUT_WORKING_DIRECTORY"
+        babysitter harness:install-plugin "$SDK_HARNESS" --workspace "$INPUT_WORKING_DIRECTORY"
 
         # Copy process file if provided
         if [ -n "$INPUT_PROCESS_FILE" ]; then
