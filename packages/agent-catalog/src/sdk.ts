@@ -19,7 +19,6 @@ import { atlas } from "@a5c-ai/atlas";
 import { getCatalogGraph, listGraphNodes, listRelationshipsByRelation } from "./atlas-bridge";
 import { effectiveTransportMuxClaimStatus, shouldSurfaceTransportProtocol } from "./transport-mux-cutover";
 import type {
-  AdapterModelRecord,
   AgentCapabilitySupportMatrix,
   AgentCatalog,
   AgentOntologyDetail,
@@ -28,7 +27,6 @@ import type {
   AgentVersionReference,
   AgentProductDescriptor,
   AgentVersion,
-  BridgeCapabilities,
   CapabilityAssertion,
   AgentVersionTopology,
   CapabilityDescriptor,
@@ -36,7 +34,6 @@ import type {
   CatalogGraph,
   ClaimRecord,
   CiSurfaceDescriptor,
-  CodecCapabilities,
   DiscoverySignalDescriptor,
   EvidenceRecord,
   GraphNode,
@@ -45,8 +42,6 @@ import type {
   HarnessImageEntry,
   HookDescriptor,
   HookMappingDescriptor,
-  HookSupportMap,
-  InteractiveSignals,
   HooksMuxDetectionRule,
   HostDetectionRule,
   HostMetadataField,
@@ -68,7 +63,6 @@ import type {
   ProviderModelTopology,
   SessionNuance,
   SubjectProvenance,
-  ToolSchemaFormat,
   TransportDescriptor,
   TransportProtocolDescriptor,
   UiAgentCard,
@@ -337,24 +331,6 @@ function toModelFamily(node: GraphNode): ModelFamilyDescriptor {
   };
 }
 
-function parseToolSchemaFormat(value: unknown): ToolSchemaFormat {
-  const normalized = valueAsString(value);
-  if (normalized === "openai" || normalized === "anthropic" || normalized === "google") return normalized;
-  return "none";
-}
-
-function parseCodecCapabilities(value: unknown): CodecCapabilities | undefined {
-  if (!value || typeof value !== 'object') return undefined;
-  const obj = value as Record<string, unknown>;
-  return {
-    supportsTools: obj.supportsTools === true || obj.supportsTools === "true",
-    supportsStreaming: obj.supportsStreaming === true || obj.supportsStreaming === "true",
-    supportsTokenCounting: obj.supportsTokenCounting === true || obj.supportsTokenCounting === "true",
-    costTracking: obj.costTracking === true || obj.costTracking === "true",
-    toolSchemaFormat: parseToolSchemaFormat(obj.toolSchemaFormat),
-  };
-}
-
 function toTransportProtocol(node: GraphNode): TransportProtocolDescriptor {
   return {
     transportId: valueAsString(node.transportId),
@@ -365,7 +341,6 @@ function toTransportProtocol(node: GraphNode): TransportProtocolDescriptor {
     streaming: Boolean(node.streaming),
     requestShape: valueAsString(node.requestShape),
     responseShape: valueAsString(node.responseShape),
-    codecCapabilities: parseCodecCapabilities(node.codecCapabilities),
     evidenceIds: nodeEvidenceIds(node),
   };
 }
@@ -1486,339 +1461,4 @@ export function searchOntologyEvidence(query: string): OntologyEvidenceSearchRes
   );
 
   return clone({ query, evidence, claims });
-}
-
-export interface LaunchConfigDescriptor {
-  id: string;
-  harness: string;
-  mode: string;
-  displayName: string;
-  commArgs: string[];
-  env: Record<string, string>;
-  description: string;
-}
-
-export function getLaunchConfig(harness: string, mode: string): LaunchConfigDescriptor | undefined {
-  try {
-    const atlas = require('@a5c-ai/atlas') as { AtlasGraph: new (index: unknown) => { getAllRecords(): Array<Record<string, unknown>> }; getIndex(): unknown };
-    const graph = new atlas.AtlasGraph(atlas.getIndex());
-    const configId = `launch-config:${harness}.${mode}`;
-    const record = graph.getAllRecords().find((r) => r.id === configId);
-    if (!record) return undefined;
-    return {
-      id: String(record.id),
-      harness,
-      mode,
-      displayName: String(record.displayName ?? ''),
-      commArgs: Array.isArray(record.commArgs) ? record.commArgs as string[] : [],
-      env: (record.env && typeof record.env === 'object') ? record.env as Record<string, string> : {},
-      description: String(record.description ?? ''),
-    };
-  } catch {
-    return undefined;
-  }
-}
-
-export function getYoloLaunchArgs(harness: string): string[] {
-  const config = getLaunchConfig(harness, 'dangerously-bypass-approvals-and-sandbox');
-  return config?.commArgs ?? [];
-}
-
-export function getInteractiveSignals(harness: string): InteractiveSignals | undefined {
-  const agent = getAgentVersion(harness);
-  return agent?.interactiveSignals;
-}
-
-export function getHookSupport(harness: string, mode: 'interactive' | 'nonInteractive'): Partial<HookSupportMap> | undefined {
-  const agent = getAgentVersion(harness);
-  return agent?.hookSupport?.[mode];
-}
-
-export function getBridgeCapabilities(harness: string): BridgeCapabilities | undefined {
-  const agent = getAgentVersion(harness);
-  return agent?.bridgeCapabilities;
-}
-
-export function getTransportCodecCapabilities(transportId: string): CodecCapabilities | undefined {
-  // First check TransportRuntime descriptors (TransportDescriptor)
-  const transportDescriptor = getSdkState().transportById.get(transportId);
-  if (transportDescriptor?.codecCapabilities) {
-    return clone(transportDescriptor.codecCapabilities);
-  }
-
-  // Then check TransportProtocol nodes
-  const protocolNode = getNode(`transportProtocol:${transportId}`) ??
-    getSdkState().graph.nodes.find(
-      (node) => node.kind === "TransportProtocol" && valueAsString(node.transportId) === transportId,
-    );
-  if (protocolNode) {
-    const capabilities = parseCodecCapabilities(protocolNode.codecCapabilities);
-    return capabilities ? clone(capabilities) : undefined;
-  }
-
-  return undefined;
-}
-
-export function getAdapterMetadata(harness: string): import('./models.js').AdapterMetadata | undefined {
-  const agent = getAgentVersion(harness);
-  return agent?.adapterMetadata;
-}
-
-export interface ResolvedInstallMethod {
-  type: string;
-  command: string;
-}
-
-export function getInstallMethods(harness: string): ResolvedInstallMethod[] {
-  const metadata = getAdapterMetadata(harness);
-  if (metadata?.installCommands?.length) {
-    return metadata.installCommands.map(c => ({ type: c.type, command: c.command }));
-  }
-  const agent = getAgentVersion(harness);
-  const node = resolveVersionNode(agentVersionNodes(harness));
-  const installRefs = node ? stringArray(node.installMethods) : [];
-  const sourcePackage = agent?.sourcePackage ?? harness;
-  return installRefs.map((ref: string) => {
-    const type = ref.replace(/^install:/, '');
-    let command: string;
-    switch (type) {
-      case 'npm': command = `npm install -g ${sourcePackage}`; break;
-      case 'gh-extension': command = `gh extension install ${sourcePackage.replace(/^@/, '')}`; break;
-      case 'pip': command = `pip install ${sourcePackage}`; break;
-      case 'brew': command = `brew install ${sourcePackage}`; break;
-      case 'manual': command = `Download from ${sourcePackage}`; break;
-      default: command = `${type} install ${sourcePackage}`; break;
-    }
-    return { type, command };
-  });
-}
-
-export function getAutomationEnv(harness: string): Record<string, string> {
-  const metadata = getAdapterMetadata(harness);
-  return metadata?.automationEnv ?? {};
-}
-
-export function getHostEnvSignals(harness: string): string[] {
-  const metadata = getAdapterMetadata(harness);
-  return metadata?.hostEnvSignals ?? [];
-}
-
-function expandHome(p: string | undefined): string | undefined {
-  if (!p) return p;
-  const home = (typeof process !== 'undefined' && process.env) ? (process.env['HOME'] || process.env['USERPROFILE'] || '') : '';
-  return path.normalize(p.replace(/^~(?=[/\\]|$)/, home));
-}
-
-export function getSessionConfig(harness: string): { sessionDir?: string; sessionPersistence?: string } {
-  const metadata = getAdapterMetadata(harness);
-  return { sessionDir: expandHome(metadata?.sessionDir), sessionPersistence: metadata?.sessionPersistence };
-}
-
-export function getCapabilityFlags(harness: string): Record<string, unknown> {
-  const metadata = getAdapterMetadata(harness);
-  return metadata?.capabilityFlags ?? {};
-}
-
-export function getRuntimeHooks(harness: string): import('./models.js').AdapterRuntimeHooks {
-  const metadata = getAdapterMetadata(harness);
-  return metadata?.runtimeHooks ?? {};
-}
-
-export function getConfigSchema(harness: string): import('./models.js').AdapterConfigSchema {
-  const metadata = getAdapterMetadata(harness);
-  const schema = metadata?.configSchema ?? {};
-  return {
-    ...schema,
-    configFilePaths: schema.configFilePaths?.map(expandHome).filter((p): p is string => !!p),
-    projectConfigFilePaths: schema.projectConfigFilePaths?.map(expandHome).filter((p): p is string => !!p),
-  };
-}
-
-export function getDisplayName(harness: string): string {
-  const metadata = getAdapterMetadata(harness);
-  return metadata?.displayName ?? harness;
-}
-
-export function getDefaultModelId(harness: string): string | undefined {
-  const metadata = getAdapterMetadata(harness);
-  return metadata?.defaultModelId;
-}
-
-// ---------------------------------------------------------------------------
-// Provider translation graph queries
-// ---------------------------------------------------------------------------
-
-export interface ProviderTranslationEnvMapping {
-  envVar: string;
-  source: string;
-  condition: string;
-  fallback?: string;
-}
-
-export interface ProviderTranslationRecord {
-  id: string;
-  harness: string;
-  provider: string;
-  proxyRequired: boolean;
-  proxyExposedTransport?: string;
-  staticEnv?: Record<string, string>;
-  envMapping: ProviderTranslationEnvMapping[];
-  args: string[];
-  providerGroup?: string[];
-  harnessUsers?: string[];
-  conditionalLogic?: string;
-  nativeSdk?: string;
-  modelTierEnvVars?: string[];
-  suppressNonAnthropicKey?: boolean;
-  notes?: string;
-}
-
-function parseEnvMapping(raw: unknown): ProviderTranslationEnvMapping[] {
-  if (!Array.isArray(raw)) return [];
-  const result: ProviderTranslationEnvMapping[] = [];
-  for (const entry of raw) {
-    if (!entry || typeof entry !== "object") continue;
-    const obj = entry as Record<string, unknown>;
-    const envVar = String(obj.envVar ?? "");
-    if (!envVar) continue;
-    result.push({
-      envVar,
-      source: String(obj.source ?? ""),
-      condition: String(obj.condition ?? ""),
-      fallback: obj.fallback != null ? String(obj.fallback) : undefined,
-    });
-  }
-  return result;
-}
-
-function parseStaticEnv(raw: unknown): Record<string, string> | undefined {
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
-  const result: Record<string, string> = {};
-  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
-    result[key] = String(value ?? "");
-  }
-  return Object.keys(result).length > 0 ? result : undefined;
-}
-
-function toProviderTranslationRecord(node: GraphNode): ProviderTranslationRecord {
-  return {
-    id: node.id,
-    harness: valueAsString(node.harness),
-    provider: valueAsString(node.provider),
-    proxyRequired: Boolean(node.proxyRequired),
-    proxyExposedTransport: node.proxyExposedTransport ? valueAsString(node.proxyExposedTransport) : undefined,
-    staticEnv: parseStaticEnv(node.staticEnv),
-    envMapping: parseEnvMapping(node.envMapping),
-    args: stringArray(node.args),
-    providerGroup: node.providerGroup ? stringArray(node.providerGroup) : undefined,
-    harnessUsers: node.harnessUsers ? stringArray(node.harnessUsers) : undefined,
-    conditionalLogic: node.conditionalLogic ? valueAsString(node.conditionalLogic) : undefined,
-    nativeSdk: node.nativeSdk ? valueAsString(node.nativeSdk) : undefined,
-    modelTierEnvVars: node.modelTierEnvVars ? stringArray(node.modelTierEnvVars) : undefined,
-    suppressNonAnthropicKey: node.suppressNonAnthropicKey === true || node.suppressNonAnthropicKey === "true" ? true : undefined,
-    notes: node.notes ? valueAsString(node.notes) : undefined,
-  };
-}
-
-/**
- * Returns all ProviderTranslation records from the atlas graph.
- */
-export function listProviderTranslations(): ProviderTranslationRecord[] {
-  return getSdkState().graph.nodes
-    .filter((node) => node.kind === "ProviderTranslation")
-    .map(toProviderTranslationRecord)
-    .map(clone);
-}
-
-/**
- * Returns all ProviderTranslation records for a given harness.
- */
-export function listProviderTranslationsForHarness(harness: string): ProviderTranslationRecord[] {
-  const normalized = normalizeLookup(harness);
-  return getSdkState().graph.nodes
-    .filter((node) => {
-      if (node.kind !== "ProviderTranslation") return false;
-      if (normalizeLookup(valueAsString(node.harness)) === normalized) return true;
-      // Check if this harness is listed in harnessUsers (for generic-openai shared translations)
-      const users = node.harnessUsers;
-      if (Array.isArray(users) && users.some((u) => normalizeLookup(String(u)) === normalized)) return true;
-      return false;
-    })
-    .map(toProviderTranslationRecord)
-    .map(clone);
-}
-
-/**
- * Resolves the specific ProviderTranslation record for a harness + provider combination.
- *
- * Resolution order:
- * 1. Exact provider match (node.provider === provider)
- * 2. Provider group match (provider in node.providerGroup)
- * 3. Default fallback (node.provider === '_default')
- *
- * Returns undefined if no translation is found.
- */
-export function getProviderTranslation(harness: string, provider: string): ProviderTranslationRecord | undefined {
-  const translations = listProviderTranslationsForHarness(harness);
-  const normalizedProvider = normalizeLookup(provider);
-
-  // 1. Exact match on provider field
-  const exact = translations.find((t) => normalizeLookup(t.provider) === normalizedProvider);
-  if (exact) return exact;
-
-  // 2. Match within a provider group
-  const group = translations.find(
-    (t) => t.providerGroup && t.providerGroup.some((p) => normalizeLookup(p) === normalizedProvider),
-  );
-  if (group) return group;
-
-  // 3. Default fallback
-  const fallback = translations.find((t) => t.provider === "_default");
-  return fallback;
-}
-
-// ---------------------------------------------------------------------------
-// Adapter model queries
-// ---------------------------------------------------------------------------
-
-function toAdapterModelRecord(node: GraphNode): AdapterModelRecord {
-  return {
-    harness: valueAsString(node.harness),
-    modelId: valueAsString(node.modelId),
-    modelAlias: valueAsString(node.modelAlias) || undefined,
-    displayName: valueAsString(node.displayName),
-    deprecated: Boolean(node.deprecated),
-    contextWindow: Number(node.contextWindow) || 0,
-    maxOutputTokens: Number(node.maxOutputTokens) || 0,
-    maxThinkingTokens: node.maxThinkingTokens != null ? Number(node.maxThinkingTokens) : undefined,
-    inputPricePerMillion: node.inputPricePerMillion != null ? Number(node.inputPricePerMillion) : undefined,
-    outputPricePerMillion: node.outputPricePerMillion != null ? Number(node.outputPricePerMillion) : undefined,
-    supportsThinking: Boolean(node.supportsThinking),
-    thinkingEffortLevels: stringArray(node.thinkingEffortLevels),
-    supportsToolCalling: Boolean(node.supportsToolCalling),
-    supportsParallelToolCalls: Boolean(node.supportsParallelToolCalls),
-    supportsToolCallStreaming: Boolean(node.supportsToolCallStreaming),
-    supportsJsonMode: Boolean(node.supportsJsonMode),
-    supportsStructuredOutput: Boolean(node.supportsStructuredOutput),
-    supportsTextStreaming: Boolean(node.supportsTextStreaming),
-    supportsThinkingStreaming: Boolean(node.supportsThinkingStreaming),
-    supportsImageInput: Boolean(node.supportsImageInput),
-    supportsImageOutput: Boolean(node.supportsImageOutput),
-    supportsFileInput: Boolean(node.supportsFileInput),
-    cliArgKey: valueAsString(node.cliArgKey),
-    cliArgValue: valueAsString(node.cliArgValue),
-    lastUpdated: valueAsString(node.lastUpdated),
-    source: (valueAsString(node.source) as 'bundled' | 'remote') || 'bundled',
-  };
-}
-
-/**
- * Returns all AdapterModel records for a given harness from the atlas graph.
- */
-export function getAdapterModels(harness: string): AdapterModelRecord[] {
-  const normalized = normalizeLookup(harness);
-  return getSdkState().graph.nodes
-    .filter((node) => node.kind === "AdapterModel" && normalizeLookup(valueAsString(node.harness)) === normalized)
-    .map(toAdapterModelRecord)
-    .map(clone);
 }

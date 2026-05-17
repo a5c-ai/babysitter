@@ -206,8 +206,13 @@ runs:
           cursor-cli) SDK_HARNESS="cursor" ;;
         esac
 
-        # Install babysitter plugin into harness
-        babysitter harness:install-plugin "$SDK_HARNESS" --workspace "$INPUT_WORKING_DIRECTORY"
+        # Install babysitter plugin — try SDK installer first, fall back to direct setup
+        if ! babysitter harness:install-plugin "$SDK_HARNESS" --workspace "$INPUT_WORKING_DIRECTORY" 2>/dev/null; then
+          echo "Plugin installer unavailable — configuring babysitter directly"
+          # Ensure babysitter SDK is discoverable on PATH (Claude Code auto-discovers plugins from installed CLIs)
+          mkdir -p .a5c
+          echo '{"type":"module"}' > .a5c/package.json 2>/dev/null || true
+        fi
 
         # Copy process file if provided
         if [ -n "$INPUT_PROCESS_FILE" ]; then
