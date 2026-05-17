@@ -95,10 +95,9 @@ jobs:
             - After completing, post a summary as a comment on #${{ inputs.issue_number || github.event.issue.number }}.
 
             User request: ${{ inputs.instructions || github.event.comment.body }}
-          trigger-query: |
-            event: issue_comment
+          trigger-query: ${{ github.event_name == 'issue_comment' && 'event: issue_comment
             action: created
-            body: /^\/agent /
+            body: /^\/agent /' || '' }}
         env:
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
