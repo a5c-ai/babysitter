@@ -42,10 +42,6 @@ describe('pipeline-owned live stack scenario execution', () => {
       console.log('└─────────────────────────────────────────────────\n');
     }
 
-    if (result.status === 'skipped' && result.skipReason?.includes('not install')) {
-      console.log(`⊘ Skipped: ${result.skipReason}`);
-      return;
-    }
     expect(result.status, result.failure ?? result.skipReason).toBe('passed');
     expect(result.missingTraceIds).toEqual([]);
     expect(result.missingArtifacts ?? []).toEqual([]);

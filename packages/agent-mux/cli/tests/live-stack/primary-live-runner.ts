@@ -870,12 +870,6 @@ function classifySkippableLiveProviderFailure(result: CommandResult): string | u
   ) {
     return 'live provider unavailable: configured credentials were rejected';
   }
-  if (/is not installed\. Install with:/i.test(combined) || /"installed"\s*:\s*false/i.test(combined)) {
-    return 'harness not installed: CLI binary not available on this runner';
-  }
-  if (/E404.*Not found|npm error code E404/i.test(combined)) {
-    return 'harness not installable: package not found in registry';
-  }
   return undefined;
 }
 

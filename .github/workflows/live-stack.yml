@@ -354,6 +354,17 @@ jobs:
             printf '#!/bin/sh\nexec node "%s/%s" "$@"\n' "${{ github.workspace }}" "$script" > "$HOME/.local/bin/$name"
             chmod +x "$HOME/.local/bin/$name"
           done
+
+          # Create mock-harness shims for CLIs without public packages.
+          # The shim delegates to mock-harness which replays realistic scenarios
+          # through the real adapter/proxy pipeline.
+          MOCK="${{ github.workspace }}/packages/agent-mux/harness-mock/dist/bin/mock-harness.js"
+          for agent in hermes cursor omp openclaw droid amp; do
+            if ! command -v "$agent" >/dev/null 2>&1; then
+              printf '#!/bin/sh\nexec node "%s" --agent %s "$@"\n' "$MOCK" "$agent" > "$HOME/.local/bin/$agent"
+              chmod +x "$HOME/.local/bin/$agent"
+            fi
+          done
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Run selected live stack E2E
