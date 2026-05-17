@@ -1,238 +1,187 @@
 # Krate Requirements Specification v2
 
-> Derived from implementation. Every requirement below corresponds to implemented functionality.
-
-## 1. Functional Requirements
-
-### FR-IDENTITY: Identity and Access Management
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| FR-IDENTITY-01 | System SHALL support multi-tenant organizations with display name and namespace binding | `resource-model.js:Organization` |
-| FR-IDENTITY-02 | System SHALL support user accounts with email, display name, admin flag, and linked identities | `resource-model.js:User` |
-| FR-IDENTITY-03 | System SHALL support teams with membership, maintainers, and permission grants | `resource-model.js:Team` |
-| FR-IDENTITY-04 | System SHALL support pending invitations with email, role, and team assignment | `resource-model.js:Invite` |
-| FR-IDENTITY-05 | System SHALL map between Krate users, sign-in subjects, and external accounts | `resource-model.js:IdentityMapping` |
-| FR-IDENTITY-06 | System SHALL support configurable auth providers (GitHub, OIDC/SSO) per org | `resource-model.js:AuthProvider` |
-| FR-IDENTITY-07 | System SHALL support agent service accounts for K8s identity binding | `resource-model.js:AgentServiceAccount` |
-| FR-IDENTITY-08 | System SHALL project managed RBAC bindings for agent identity | `resource-model.js:AgentRoleBinding` |
-| FR-IDENTITY-09 | System SHALL gate secret access through explicit grants with purpose scope | `resource-model.js:AgentSecretGrant` |
-| FR-IDENTITY-10 | System SHALL gate ConfigMap access through explicit grants with purpose scope | `resource-model.js:AgentConfigGrant` |
-
-### FR-REPOSITORY: Repository Management
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| FR-REPO-01 | System SHALL support repository CRUD with visibility settings | `resource-model.js:Repository` |
-| FR-REPO-02 | System SHALL manage user, deploy, and automation SSH keys | `resource-model.js:SSHKey` |
-| FR-REPO-03 | System SHALL manage repository collaborator and team permissions | `resource-model.js:RepositoryPermission` |
-| FR-REPO-04 | System SHALL enforce branch protection rules | `resource-model.js:BranchProtection` |
-| FR-REPO-05 | System SHALL enforce reference deny rules and force-push policies | `resource-model.js:RefPolicy` |
-| FR-REPO-06 | System SHALL provide git object recording for repository content | `http-server.js:objects` |
-| FR-REPO-07 | System SHALL support search indexing per repository | `http-server.js:search-index` |
-
-### FR-POLICY: Policy Management
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| FR-POLICY-01 | System SHALL support organization policy profiles with posture and rollout mode | `resource-model.js:PolicyProfile` |
-| FR-POLICY-02 | System SHALL provide curated Kyverno policy templates with parameters | `resource-model.js:PolicyTemplate` |
-| FR-POLICY-03 | System SHALL bind templates to orgs/repos with audit/enforce state | `resource-model.js:PolicyBinding` |
-| FR-POLICY-04 | System SHALL support auditable exception request workflows with expiry | `resource-model.js:PolicyExceptionRequest` |
-
-### FR-AGENT: Agent Orchestration
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| FR-AGENT-01 | System SHALL define reusable agent stacks with model, prompt, tools, MCP, skills | `resource-model.js:AgentStack` |
-| FR-AGENT-02 | System SHALL support named child-agent definitions with role/task scoping | `resource-model.js:AgentSubagent` |
-| FR-AGENT-03 | System SHALL define tool profiles with filesystem/network/shell policies | `resource-model.js:AgentToolProfile` |
-| FR-AGENT-04 | System SHALL manage MCP server endpoints with transport and health checks | `resource-model.js:AgentMcpServer` |
-| FR-AGENT-05 | System SHALL support reusable skill bundles with prompt fragments | `resource-model.js:AgentSkill` |
-| FR-AGENT-06 | System SHALL route events to agent stacks via trigger rules | `resource-model.js:AgentTriggerRule` |
-| FR-AGENT-07 | System SHALL provide reviewed prompt fragments with provenance | `resource-model.js:AgentContextLabel` |
-| FR-AGENT-08 | System SHALL create dispatch runs with queue, status, workspace, cost tracking | `resource-model.js:AgentDispatchRun` |
-| FR-AGENT-09 | System SHALL track execution attempts with reason and stack snapshot | `resource-model.js:AgentDispatchAttempt` |
-| FR-AGENT-10 | System SHALL project Agent Mux sessions with lifecycle state | `resource-model.js:AgentSession` |
-| FR-AGENT-11 | System SHALL create immutable context bundles with digest and provenance | `resource-model.js:AgentContextBundle` |
-| FR-AGENT-12 | System SHALL store durable agent outputs with kind and retention | `resource-model.js:KrateArtifact` |
-| FR-AGENT-13 | System SHALL gate agent actions through human approval workflows | `resource-model.js:AgentApproval` |
-| FR-AGENT-14 | System SHALL support adapter definitions with transport/capabilities | `resource-model.js:AgentAdapter` |
-| FR-AGENT-15 | System SHALL configure transport bindings with endpoint/protocol/auth | `resource-model.js:AgentTransportBinding` |
-| FR-AGENT-16 | System SHALL configure model providers with API base and rate limits | `resource-model.js:AgentProviderConfig` |
-| FR-AGENT-17 | System SHALL group issues and repositories into projects with kanban | `resource-model.js:KrateProject` |
-| FR-AGENT-18 | System SHALL configure gateway connections with URL and feature flags | `resource-model.js:AgentGatewayConfig` |
-| FR-AGENT-19 | System SHALL record session transcripts with message nodes and cost | `resource-model.js:AgentSessionTranscript` |
-| FR-AGENT-20 | System SHALL perform permission review before dispatch | `agent-dispatch-controller.js` |
-| FR-AGENT-21 | System SHALL provision workspaces during dispatch | `agent-dispatch-controller.js` |
-| FR-AGENT-22 | System SHALL perform MCP health checks with 3s timeout | `agent-stack-controller.js` |
-
-### FR-MEMORY: Agent Memory
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| FR-MEM-01 | System SHALL point to Git repositories for shared agent memory | `resource-model.js:AgentMemoryRepository` |
-| FR-MEM-02 | System SHALL define read policies per repository/team/stack/trigger | `resource-model.js:AgentMemorySource` |
-| FR-MEM-03 | System SHALL enforce ontology with required fields and vocabulary | `resource-model.js:AgentMemoryOntology` |
-| FR-MEM-04 | System SHALL create immutable memory snapshots at dispatch time | `resource-model.js:AgentMemorySnapshot` |
-| FR-MEM-05 | System SHALL execute graph traversal queries with depth/kind filtering | `agent-memory-query.js:queryGraph` |
-| FR-MEM-06 | System SHALL execute full-text grep queries with context extraction | `agent-memory-query.js:queryGrep` |
-| FR-MEM-07 | System SHALL support combined graph+grep queries | `agent-memory-query.js:queryMemory` |
-| FR-MEM-08 | System SHALL track proposed memory mutations with validation | `resource-model.js:AgentMemoryUpdate` |
-| FR-MEM-09 | System SHALL import run metadata into memory with redaction | `resource-model.js:AgentRunMemoryImport` |
-| FR-MEM-10 | System SHALL bridge memory content to Krate resources | `resource-model.js:AgentMemoryAssociation` |
-
-### FR-EXTERNAL: External Backend Integration
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| FR-EXT-01 | System SHALL register external providers with type/endpoint/auth | `resource-model.js:ExternalBackendProvider` |
-| FR-EXT-02 | System SHALL bind providers to orgs with credentials | `resource-model.js:ExternalBackendBinding` |
-| FR-EXT-03 | System SHALL configure sync intervals and conflict resolution | `resource-model.js:ExternalBackendSyncPolicy` |
-| FR-EXT-04 | System SHALL discover provider capabilities automatically | `resource-model.js:ExternalProviderCapabilityManifest` |
-| FR-EXT-05 | System SHALL verify inbound webhooks with HMAC-SHA256 | `external/webhook-controller.js` |
-| FR-EXT-06 | System SHALL deduplicate webhook deliveries by ID | `external/webhook-controller.js` |
-| FR-EXT-07 | System SHALL track sync events with ordering metadata | `resource-model.js:ExternalSyncEvent` |
-| FR-EXT-08 | System SHALL maintain current sync phase and error state | `resource-model.js:ExternalSyncState` |
-| FR-EXT-09 | System SHALL queue write-back intents with approval state | `resource-model.js:ExternalWriteIntent` |
-| FR-EXT-10 | System SHALL detect conflicts with diff and resolution outcome | `resource-model.js:ExternalSyncConflict` |
-| FR-EXT-11 | System SHALL maintain stable local-to-external object mappings | `resource-model.js:ExternalObjectLink` |
-| FR-EXT-12 | System SHALL provide GitHub adapter (auth, git-forge, issues, CI) | `external/github/` |
-
-### FR-CI: Continuous Integration
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| FR-CI-01 | System SHALL track pipeline runs with state and resume point | `resource-model.js:Pipeline` |
-| FR-CI-02 | System SHALL define executable job steps with isolation | `resource-model.js:Job` |
-| FR-CI-03 | System SHALL manage runner pools with warm/max replicas | `resource-model.js:RunnerPool` |
-
-### FR-HOOKS: Webhook Management
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| FR-HOOKS-01 | System SHALL support webhook subscriptions with URL, events, signing | `resource-model.js:WebhookSubscription` |
-| FR-HOOKS-02 | System SHALL record durable outbound delivery attempts | `resource-model.js:WebhookDelivery` |
-
-### FR-WEB: Web UI
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| FR-WEB-01 | System SHALL support saved triage and dashboard views | `resource-model.js:View` |
-| FR-WEB-02 | System SHALL support reusable label/query selectors | `resource-model.js:Selector` |
+> Exhaustive requirements derived from implemented functionality.
+> Every requirement corresponds to verified source code behavior.
 
 ---
 
-## 2. Non-Functional Requirements
+## 1. Functional Requirements — Identity and Access
 
-### NFR-PERF: Performance
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| NFR-PERF-01 | System SHALL cache snapshots with stale-while-revalidate (30s TTL) | `snapshot-cache.js` |
-| NFR-PERF-02 | System SHALL support per-org cache entries for independent revalidation | `snapshot-cache.js` |
-| NFR-PERF-03 | System SHALL execute kubectl operations asynchronously | `kubernetes-controller-async.js` |
-| NFR-PERF-04 | System SHALL batch events with configurable size (50) and interval (1000ms) | `async-controller.js:createEventBatcher` |
-| NFR-PERF-05 | System SHALL retry operations with exponential backoff | `async-controller.js:createRetryPolicy` |
-| NFR-PERF-06 | System SHALL deliver events via ordered async queue | `async-controller.js:createDeliveryQueue` |
-| NFR-PERF-07 | System SHALL checkpoint long-running operations for resumption | `async-controller.js:createCheckpointer` |
-| NFR-PERF-08 | System SHALL stream events via SSE with 30s heartbeat keepalive | `http-server.js:sseMatch` |
-
-### NFR-SEC: Security
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| NFR-SEC-01 | System SHALL sign session cookies with HMAC-SHA256 | `auth.js:createSessionCookie` |
-| NFR-SEC-02 | System SHALL use timing-safe comparison for signatures | `auth.js:timingSafeEqual` |
-| NFR-SEC-03 | System SHALL require auth on all mutating API routes | `http-server.js` |
-| NFR-SEC-04 | System SHALL reject unsigned cookies when secret is configured | `auth.js:parseSessionCookie` |
-| NFR-SEC-05 | System SHALL verify webhook signatures with HMAC-SHA256 | `external/webhook-controller.js` |
-| NFR-SEC-06 | System SHALL set HttpOnly and SameSite=Lax on session cookies | `auth.js:createSessionCookie` |
-| NFR-SEC-07 | System SHALL enforce org namespace isolation for all resources | `http-server.js:scopeResource` |
-| NFR-SEC-08 | System SHALL use RBAC ClusterRole for CRD access | `kubernetes-controller.js` |
-
-### NFR-A11Y: Accessibility
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| NFR-A11Y-01 | Web console SHALL provide aria-label attributes on interactive elements | `packages/krate/web/` |
-| NFR-A11Y-02 | Web console SHALL support keyboard navigation | `keyboard-shortcuts.jsx` |
-| NFR-A11Y-03 | Web console SHALL provide command palette (Cmd+K) for quick access | `command-palette.jsx` |
-
-### NFR-RESPONSIVE: Responsiveness
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| NFR-RESP-01 | Web console SHALL adapt layout for mobile viewports | `packages/krate/web/` CSS |
-| NFR-RESP-02 | Web console SHALL provide dark/light theme with system preference | `theme-runtime.jsx` |
+| ID | Priority | Description | Acceptance Criteria | Implementation | Test Coverage | Status |
+|----|----------|-------------|--------------------:|----------------|---------------|--------|
+| REQ-FUNC-IAM-001 | MUST | Multi-tenant organizations with display name and namespace binding | Organization resource created with displayName and namespaceName; OrgNamespaceBinding created; tenant namespace created in K8s | `kubernetes-controller.js:createOrganization()` | `tests/kubernetes-controller.test.js` | Implemented |
+| REQ-FUNC-IAM-002 | MUST | User accounts with email, display name, admin flag | User resource created with required spec fields; admin derived from group membership | `auth.js:mapLoginProfileToKrateIdentity()` | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-IAM-003 | MUST | Teams with membership, maintainers, and permission grants | Team resource with members[], maintainers[], repositoryGrants[]; memberCount in status | `auth.js:createTeamResource()` | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-IAM-004 | MUST | Pending invitations with email, role, team, and expiry | Invite resource with expiresAt computed from expiresInDays; phase=Pending | `auth.js:createInviteResource()` | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-IAM-005 | MUST | Identity mapping between Krate users and external subjects | IdentityMapping with workspaceIdentity and repositoryIdentity sub-objects | `auth.js:mapLoginProfileToKrateIdentity()` | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-IAM-006 | MUST | Configurable auth providers (GitHub OAuth, OIDC/SSO, Delegated) | AuthProvider resource per provider; environment-driven configuration | `auth.js:createAuthProviderConfig()` | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-IAM-007 | MUST | Agent service accounts for K8s identity binding | AgentServiceAccount with namespace and serviceAccountName fields | `resource-model.js` | `tests/resource-model.test.js` | Implemented |
+| REQ-FUNC-IAM-008 | MUST | Managed RBAC projection for agent identity | AgentRoleBinding with subject, roleRef, scope fields | `agent-permission-review.js` | `tests/agent-permission-review.test.js` | Implemented |
+| REQ-FUNC-IAM-009 | MUST | Explicit secret access grants with purpose scope | AgentSecretGrant with subject, secretRef, purpose; validated by permission reviewer | `agent-secret-config-grant-controller.js` | `tests/agent-secret-config-grant.test.js` | Implemented |
+| REQ-FUNC-IAM-010 | MUST | Explicit ConfigMap access grants with purpose scope | AgentConfigGrant with subject, configMapRef, purpose; validated by permission reviewer | `agent-secret-config-grant-controller.js` | `tests/agent-secret-config-grant.test.js` | Implemented |
+| REQ-FUNC-IAM-011 | MUST | Admin detection from group membership | Groups `krate:platform-engineers` or `krate:repo-admins` set admin=true | `auth.js:normalizeProviderProfile()` line 124 | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-IAM-012 | MUST | Bootstrap admin via KRATE_ADMIN_USERNAME | Username match against profile sets isBootstrapAdmin | `auth.js:registerLoginProfile()` line 143 | `tests/auth.test.js` | Implemented |
 
 ---
 
-## 3. Integration Requirements
+## 2. Functional Requirements — Authentication
 
-### INT-K8S: Kubernetes
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| INT-K8S-01 | System SHALL store CONFIG resources as Kubernetes CRDs | `kubernetes-controller.js` |
-| INT-K8S-02 | System SHALL use kubectl for resource operations | `kubernetes-controller.js:spawn` |
-| INT-K8S-03 | System SHALL define 75 CRDs under `krate.a5c.ai/v1alpha1` | `kubernetes-controller.js:KRATE_RESOURCES` |
-| INT-K8S-04 | System SHALL scope resources to org namespaces (`krate-org-{org}`) | `org-scoping.js:orgNamespaceName` |
-| INT-K8S-05 | System SHALL manage PersistentVolumeClaims for workspaces | `agent-workspace-controller.js` |
-| INT-K8S-06 | System SHALL use `x-kubernetes-preserve-unknown-fields` for extensibility | CRD definitions |
-
-### INT-GITEA: Gitea Integration
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| INT-GITEA-01 | System SHALL use Gitea for repository hosting | `gitea-service.js` |
-| INT-GITEA-02 | System SHALL access Gitea tree/blob/branch APIs | `gitea-backend.js` |
-| INT-GITEA-03 | System SHALL sync SSH keys with Gitea repositories | `gitea-service.js` |
-
-### INT-ATLAS: Atlas Graph
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| INT-ATLAS-01 | SDK SHALL provide Atlas graph search client | `sdk/src/atlas-graph-client.js` |
-| INT-ATLAS-02 | SDK SHALL expose stack layers and composition facets | `sdk/src/atlas-graph-client.js:STACK_LAYERS, COMPOSITION_FACETS` |
-| INT-ATLAS-03 | Web console SHALL provide Atlas search API route | `web/app/api/atlas/search/route.js` |
-
-### INT-GITHUB: GitHub Integration
-
-| ID | Requirement | Source |
-|----|-------------|--------|
-| INT-GH-01 | System SHALL support GitHub as OAuth sign-in provider | `auth.js:github` |
-| INT-GH-02 | System SHALL ingest GitHub webhooks with signature verification | `external/webhook-controller.js` |
-| INT-GH-03 | System SHALL provide GitHub adapter for git-forge operations | `external/github/git-forge.js` |
-| INT-GH-04 | System SHALL provide GitHub adapter for issue tracking | `external/github/issue-tracking.js` |
-| INT-GH-05 | System SHALL provide GitHub adapter for CI/CD operations | `external/github/cicd.js` |
-| INT-GH-06 | System SHALL handle GitHub App authentication | `external/github/auth.js` |
+| ID | Priority | Description | Acceptance Criteria | Implementation | Test Coverage | Status |
+|----|----------|-------------|--------------------:|----------------|---------------|--------|
+| REQ-FUNC-AUTH-001 | MUST | GitHub OAuth sign-in flow | Authorization URL built with client_id, redirect_uri, scope, state; code exchanged for access_token; profile fetched from /user | `auth.js:buildAuthorizationRedirect(), exchangeOAuthCodeForProfile()` | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-AUTH-002 | MUST | OIDC/SSO sign-in flow | Same OAuth flow with configurable issuer/token/userinfo endpoints; scopes include groups | `auth.js:exchangeOAuthCodeForProfile()` | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-AUTH-003 | MUST | Delegated identity via proxy headers | x-forwarded-user, x-forwarded-groups, x-forwarded-email parsed; local dev fallback | `auth.js:profileFromDelegatedHeaders()` | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-AUTH-004 | MUST | HMAC-SHA256 signed session cookies | Payload base64url encoded; signature = HMAC-SHA256(payload, secret).base64url | `auth.js:createSessionCookie()` | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-AUTH-005 | MUST | Timing-safe signature verification | `timingSafeEqual(expected, received)` from node:crypto | `auth.js:parseSessionCookie()` line 189 | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-AUTH-006 | MUST | Reject unsigned cookies when secret configured | If dotIndex === -1 and secret is set: return null | `auth.js:parseSessionCookie()` line 178 | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-AUTH-007 | MUST | Reject signed cookies when no secret | If dotIndex !== -1 and no secret: return null | `auth.js:parseSessionCookie()` line 172 | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-AUTH-008 | MUST | HttpOnly and SameSite=Lax cookie attributes | Cookie string ends with `; Path=/; HttpOnly; SameSite=Lax` | `auth.js:createSessionCookie()` line 162 | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-AUTH-009 | SHOULD | Local development auto-login | Active when NODE_ENV !== 'production'; configurable user/groups | `auth.js:localDelegatedDevelopmentProfile()` | `tests/auth.test.js` | Implemented |
+| REQ-FUNC-AUTH-010 | MUST | User+IdentityMapping registration on first login | registerLoginProfile creates/updates User and IdentityMapping resources via applyResource | `auth.js:registerLoginProfile()` | `tests/auth.test.js` | Implemented |
 
 ---
 
-## 4. Deployment Requirements
+## 3. Functional Requirements — Repository Management
 
-| ID | Requirement | Source |
-|----|-------------|--------|
-| DEP-HELM-01 | System SHALL deploy via Helm chart | Helm chart directory |
-| DEP-HELM-02 | Helm chart SHALL manage CRD lifecycle | Chart templates |
-| DEP-HELM-03 | Helm chart SHALL create org namespace on install | Chart templates |
-| DEP-DOCKER-01 | System SHALL use multi-stage Docker builds | Dockerfile |
-| DEP-DOCKER-02 | Deployment SHALL run multi-container pods (api, controllers, web, webhook-worker) | Helm values |
-| DEP-AKS-01 | System SHALL deploy to Azure Kubernetes Service | Deployment docs |
-| DEP-AKS-02 | System SHALL use Azure Container Registry for images | Deployment docs |
-| DEP-CERT-01 | System SHALL use cert-manager for TLS certificates | Ingress annotations |
-| DEP-INGRESS-01 | System SHALL use nginx ingress controller for HTTP routing | Ingress resource |
+| ID | Priority | Description | Acceptance Criteria | Implementation | Test Coverage | Status |
+|----|----------|-------------|--------------------:|----------------|---------------|--------|
+| REQ-FUNC-REPO-001 | MUST | Repository CRUD with visibility | Repository created with organizationRef, visibility (private/internal/public); delete removes CRD | `api-controller.js:createRepository()` | `tests/api-controller.test.js` | Implemented |
+| REQ-FUNC-REPO-002 | MUST | SSH key management (user, deploy, automation scopes) | SSHKey with scope field; fingerprint computed via sha256 hash | `kubernetes-controller.js:identityAccessReconciliationPlan()` | `tests/kubernetes-controller.test.js` | Implemented |
+| REQ-FUNC-REPO-003 | MUST | Repository permission management | RepositoryPermission with subject, permission (read/write/admin), revoked flag | `kubernetes-controller.js:identityAccessReconciliationPlan()` | `tests/kubernetes-controller.test.js` | Implemented |
+| REQ-FUNC-REPO-004 | MUST | Branch protection rules | BranchProtection with refs pattern; PR requirement enforcement | `resource-model.js` | `tests/resource-model.test.js` | Implemented |
+| REQ-FUNC-REPO-005 | MUST | Reference deny rules and force-push policy | RefPolicy resource with organizationRef | `resource-model.js` | `tests/resource-model.test.js` | Implemented |
+| REQ-FUNC-REPO-006 | MUST | Git object recording | POST /api/orgs/:org/repositories/:repo/objects stores object reference | `http-server.js` line 60-63 | `tests/http-server.test.js` | Implemented |
+| REQ-FUNC-REPO-007 | MUST | Search index enqueuing | POST returns 202 Accepted; search indexing queued asynchronously | `http-server.js` line 66-70 | `tests/http-server.test.js` | Implemented |
 
 ---
 
-## 5. Testing Requirements
+## 4. Functional Requirements — Agent Orchestration
 
-| ID | Requirement | Coverage | Source |
-|----|-------------|----------|--------|
-| TEST-CORE-01 | Core package SHALL have 1259 unit+integration tests | `node:test` | `packages/krate/core/package.json` |
-| TEST-SDK-01 | SDK package SHALL have 73 export and integration tests | `node:test` | `packages/krate/sdk/tests/` |
-| TEST-CLI-01 | CLI package SHALL have 51 command and MCP protocol tests | `node:test` | `packages/krate/cli/tests/` |
-| TEST-E2E-01 | Core SHALL have 3 end-to-end validation tests | `npm run e2e` | `packages/krate/core/package.json` |
-| TEST-SMOKE-01 | Core SHALL have 21 MVP smoke assertions | `npm run smoke` | `packages/krate/core/package.json` |
-| TEST-WEB-01 | Web console SHALL have build validation tests | `npm run build` | `packages/krate/web/package.json` |
+| ID | Priority | Description | Acceptance Criteria | Implementation | Test Coverage | Status |
+|----|----------|-------------|--------------------:|----------------|---------------|--------|
+| REQ-FUNC-AGENT-001 | MUST | Reusable agent stacks with full config | AgentStack with baseAgent, adapter, runtimeIdentity, toolPolicy, mcpServerRefs, skillRefs, subagentRefs, contextLabelRefs, approvalMode | `agent-stack-controller.js` | `tests/agent-stack-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-002 | MUST | Stack readiness reconciliation with 10 conditions | reconcileStack() resolves all refs, runs permission review, computes Ready condition | `agent-stack-controller.js:reconcileStack()` | `tests/agent-stack-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-003 | MUST | MCP health check with 3s timeout | HTTP GET to endpoint with AbortController timeout; returns healthy/unhealthy + latencyMs | `agent-stack-controller.js:checkMcpHealth()` | `tests/agent-stack-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-004 | MUST | Manual dispatch with permission gating | createManualDispatch: find stack → permission review → memory snapshot → workspace → context → launch | `agent-dispatch-controller.js` | `tests/agent-dispatch-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-005 | MUST | Permission review with cross-org denial | Cross-org check: agent org vs repository org; denied if mismatch | `agent-permission-review.js` line 44-52 | `tests/agent-permission-review.test.js` | Implemented |
+| REQ-FUNC-AGENT-006 | MUST | Untrusted fork detection | Refs matching `/^refs\/pull\/\d+\//` flagged as fork; privileged grants restricted | `agent-permission-review.js` line 64 | `tests/agent-permission-review.test.js` | Implemented |
+| REQ-FUNC-AGENT-007 | MUST | Approval mode enforcement (yolo/prompt/deny) | deny: immediate block; prompt: requires-approval; yolo: allowed | `agent-permission-review.js` lines 34-40 | `tests/agent-permission-review.test.js` | Implemented |
+| REQ-FUNC-AGENT-008 | MUST | Workspace provisioning with PVC | createWorkspace generates KrateWorkspace + PVC manifest with storage class, capacity, access modes | `agent-workspace-controller.js:createWorkspace()` | `tests/agent-workspace-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-009 | MUST | Workspace reuse by repo+branch+phase | findReusableWorkspace matches org+repo+branch+Ready phase | `agent-workspace-controller.js:findReusableWorkspace()` | `tests/agent-workspace-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-010 | MUST | Codespace lifecycle (launch/stop/status) | Pod spec with code-server image, PVC mount, Service with ClusterIP | `agent-workspace-controller.js:launchCodespace()` | `tests/agent-workspace-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-011 | MUST | Event-to-stack routing via trigger rules | evaluateEvent matches event type against rule sources; dedup check; dispatch creation | `agent-trigger-controller.js:processEvent()` | `tests/agent-trigger-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-012 | MUST | Cron expression validation (5-field) | validateCronExpression checks 5 fields, valid chars [0-9*/,-] | `agent-trigger-controller.js:validateCronExpression()` | `tests/agent-trigger-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-013 | MUST | Next cron run calculation | calculateNextRun iterates minute-by-minute up to 527,040 iterations (1 year) | `agent-trigger-controller.js:calculateNextRun()` | `tests/agent-trigger-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-014 | MUST | Human approval gates for agent actions | createApprovalRequest with 5 valid actions; recordDecision approve/deny; dedup check | `agent-approval-controller.js` | `tests/agent-approval-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-015 | MUST | Approval enforcement gate | enforceApproval returns allowed/denied/pending based on phase | `agent-approval-controller.js:enforceApproval()` | `tests/agent-approval-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-016 | MUST | Work item linking (issues/PRs to sessions/workspaces) | WorkItemSessionLink and WorkItemWorkspaceLink resources created | `agent-workspace-controller.js:linkWorkItem(), linkWorkItemToSession()` | `tests/agent-workspace-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-017 | MUST | Workspace associations | addAssociation/removeAssociation with valid kinds: AgentDispatchRun, User, AgentSession | `agent-workspace-controller.js:addAssociation()` | `tests/agent-workspace-controller.test.js` | Implemented |
+| REQ-FUNC-AGENT-018 | MUST | Workspace run history | getWorkspaceRuns partitions into active (Running/Queued/Pending/Dispatched) and history | `agent-workspace-controller.js:getWorkspaceRuns()` | `tests/agent-workspace-controller.test.js` | Implemented |
+
+---
+
+## 5. Functional Requirements — Memory System
+
+| ID | Priority | Description | Acceptance Criteria | Implementation | Test Coverage | Status |
+|----|----------|-------------|--------------------:|----------------|---------------|--------|
+| REQ-FUNC-MEM-001 | MUST | Graph query with nodeKind filtering and depth | queryGraph: records filtered by kinds[], scored by id/attribute match, edges followed to depth | `agent-memory-query.js:queryGraph()` | `tests/agent-memory-query.test.js` | Implemented |
+| REQ-FUNC-MEM-002 | MUST | Full-text grep with context extraction | queryGrep: line-by-line case-insensitive search; context lines above/below; highlighted output | `agent-memory-query.js:queryGrep()` | `tests/agent-memory-query.test.js` | Implemented |
+| REQ-FUNC-MEM-003 | MUST | Combined graph+grep query | queryMemory: mode selects graph-only, grep-only, or both; merged stats | `agent-memory-query.js:queryMemory()` | `tests/agent-memory-query.test.js` | Implemented |
+| REQ-FUNC-MEM-004 | MUST | Query validation (non-empty string required) | Throws Error if query is null, undefined, or empty string | `agent-memory-query.js` lines 42-45 | `tests/agent-memory-query.test.js` | Implemented |
+| REQ-FUNC-MEM-005 | MUST | Mode validation | Throws Error if mode not in ['graph-only', 'grep-only', 'graph-and-grep'] | `agent-memory-query.js` line 168 | `tests/agent-memory-query.test.js` | Implemented |
+| REQ-FUNC-MEM-006 | MUST | Grep path filtering with glob patterns | Glob match: * matches any sequence; documents filtered before search | `agent-memory-query.js:globMatch()` | `tests/agent-memory-query.test.js` | Implemented |
+| REQ-FUNC-MEM-007 | MUST | Grep max matches limit | Default 25; stops searching once limit reached | `agent-memory-query.js:queryGrep()` line 106 | `tests/agent-memory-query.test.js` | Implemented |
+| REQ-FUNC-MEM-008 | MUST | Graph adjacency from both record edges and flat edges | buildAdjacency merges per-record edges[] with flat edges parameter | `agent-memory-query.js:buildAdjacency()` | `tests/agent-memory-query.test.js` | Implemented |
+| REQ-FUNC-MEM-009 | MUST | BFS edge traversal with cycle prevention | visited Set prevents infinite loops; frontier-based BFS up to maxDepth | `agent-memory-query.js:followEdges()` | `tests/agent-memory-query.test.js` | Implemented |
+| REQ-FUNC-MEM-010 | MUST | Memory import from babysitter runs | parseJournalForImport extracts importable data; validateMemoryImport checks structure | `agent-memory-import.js` | `tests/agent-memory-import.test.js` | Implemented |
+
+---
+
+## 6. Functional Requirements — External Backend Integration
+
+| ID | Priority | Description | Acceptance Criteria | Implementation | Test Coverage | Status |
+|----|----------|-------------|--------------------:|----------------|---------------|--------|
+| REQ-FUNC-EXT-001 | MUST | HMAC-SHA256 webhook signature verification | sha256= prefix; createHmac + timingSafeEqual; reject on mismatch | `external/webhook-controller.js:verifyHmacSignature()` | `tests/external/webhook-controller.test.js` | Implemented |
+| REQ-FUNC-EXT-002 | MUST | Delivery deduplication by ID | isDuplicate(deliveryId) checks Map; processDelivery returns duplicate=true if exists | `external/webhook-controller.js:isDuplicate()` | `tests/external/webhook-controller.test.js` | Implemented |
+| REQ-FUNC-EXT-003 | MUST | Event normalization from raw provider format | normalizeEvent produces canonical { eventType, action, nativeId, providerRef, resourceKind, data, timestamps } | `external/sync-controller.js:normalizeEvent()` | `tests/external/sync-controller.test.js` | Implemented |
+| REQ-FUNC-EXT-004 | MUST | Resource upsert with external envelope | upsertResource stores nativeId, url, etag, providerRef, firstSyncedAt, lastSyncedAt | `external/sync-controller.js:upsertResource()` | `tests/external/sync-controller.test.js` | Implemented |
+| REQ-FUNC-EXT-005 | MUST | High-watermark tracking per binding | updateWatermark only advances forward; getWatermark returns current | `external/sync-controller.js:updateWatermark()` | `tests/external/sync-controller.test.js` | Implemented |
+| REQ-FUNC-EXT-006 | MUST | Ownership mode enforcement | bidirectional=allow all; external-owned=block krate writes; krate-owned=block external writes | `external/sync-controller.js:applyOwnershipMode()` | `tests/external/sync-controller.test.js` | Implemented |
+| REQ-FUNC-EXT-007 | MUST | Tombstone creation for deleted externals | createTombstone stores nativeId, providerRef, localRef, deletedAt, tombstoned=true | `external/sync-controller.js:createTombstone()` | `tests/external/sync-controller.test.js` | Implemented |
+| REQ-FUNC-EXT-008 | MUST | Field-level conflict detection | detectConflict compares localValue vs externalValue; creates ExternalSyncConflict if different | `external/conflict-controller.js:detectConflict()` | `tests/external/conflict-controller.test.js` | Implemented |
+| REQ-FUNC-EXT-009 | MUST | Conflict resolution with 4 strategies | prefer-external, prefer-krate, manual, ignore; resolveConflict sets phase=Resolved | `external/conflict-controller.js:resolveConflict()` | `tests/external/conflict-controller.test.js` | Implemented |
+| REQ-FUNC-EXT-010 | MUST | Write intent lifecycle with approval | createWriteIntent → PendingApproval → ReadyToSend → Sending → Succeeded/Failed | `external/write-controller.js` | `tests/external/write-controller.test.js` | Implemented |
+| REQ-FUNC-EXT-011 | MUST | Write intent idempotency key | Deterministic djb2 hash of (interfaceKey, operation, resourceRef, payload) | `external/write-controller.js:getIdempotencyKey()` | `tests/external/write-controller.test.js` | Implemented |
+| REQ-FUNC-EXT-012 | MUST | GitHub adapter (auth, git-forge, issues, CI) | Separate modules: auth.js, git-forge.js, issue-tracking.js, cicd.js, index.js | `external/github/` | `tests/external/github/` | Implemented |
+
+---
+
+## 7. Non-Functional Requirements — Performance
+
+| ID | Priority | Description | Acceptance Criteria | Implementation | Status |
+|----|----------|-------------|--------------------:|----------------|--------|
+| NFR-PERF-001 | MUST | Stale-while-revalidate cache with 30s TTL | Return stale data immediately; background refresh; configurable via KRATE_SNAPSHOT_CACHE_TTL_MS | `snapshot-cache.js:staleWhileRevalidate()` | Implemented |
+| NFR-PERF-002 | MUST | Per-org independent cache entries | Map-based; each org revalidates independently | `snapshot-cache.js:orgCacheMap` | Implemented |
+| NFR-PERF-003 | MUST | Event batching with configurable flush | maxBatchSize=50, flushIntervalMs=1000; fire-and-forget on size limit | `async-controller.js:createEventBatcher()` | Implemented |
+| NFR-PERF-004 | MUST | Exponential backoff retry with jitter | baseDelay * 2^attempt, capped at maxDelay; full-jitter option | `async-controller.js:createRetryPolicy()` | Implemented |
+| NFR-PERF-005 | MUST | Concurrent delivery queue | configurable concurrency (default 5); ordered processing | `async-controller.js:createDeliveryQueue()` | Implemented |
+| NFR-PERF-006 | MUST | SSE heartbeat every 30 seconds | setInterval(30000) writes heartbeat JSON | `http-server.js` line 302 | Implemented |
+| NFR-PERF-007 | MUST | kubectl timeout protection | spawnSync with configurable timeout (default 3s) | `kubernetes-controller.js:runKubectl()` | Implemented |
+| NFR-PERF-008 | MUST | 32MB kubectl output buffer | maxBuffer: KRATE_KUBECTL_MAX_BUFFER_BYTES | `kubernetes-controller.js:runKubectl()` | Implemented |
+
+---
+
+## 8. Non-Functional Requirements — Security
+
+| ID | Priority | Description | Acceptance Criteria | Implementation | Status |
+|----|----------|-------------|--------------------:|----------------|--------|
+| NFR-SEC-001 | MUST | HMAC-SHA256 session cookie signing | createHmac('sha256', secret).update(payload).digest('base64url') | `auth.js:createSessionCookie()` | Implemented |
+| NFR-SEC-002 | MUST | Timing-safe signature comparison | `timingSafeEqual` from node:crypto; length check before compare | `auth.js:parseSessionCookie()` line 189 | Implemented |
+| NFR-SEC-003 | MUST | Auth on all mutating API routes | POST/DELETE routes check session; read routes generally unprotected | `http-server.js` | Implemented |
+| NFR-SEC-004 | MUST | Cross-org namespace isolation | applyResource/deleteResourceForOrg verify namespace matches org | `api-controller.js` lines 85-100 | Implemented |
+| NFR-SEC-005 | MUST | HMAC-SHA256 webhook signature verification | External webhook controller uses timing-safe comparison | `external/webhook-controller.js` | Implemented |
+| NFR-SEC-006 | MUST | Delivery deduplication prevents replay | Map-based check before processing; duplicate returns early | `external/webhook-controller.js:isDuplicate()` | Implemented |
+| NFR-SEC-007 | MUST | No secrets in permission review output | permissionReviewer mustNotOwn: 'secret values' | `agent-permission-review.js` boundary | Implemented |
+| NFR-SEC-008 | MUST | Fork-restricted privileged grants | Untrusted fork detection blocks AgentServiceAccount/AgentSecretGrant auto-approval | `agent-permission-review.js` line 66-73 | Implemented |
+
+---
+
+## 9. Non-Functional Requirements — Reliability
+
+| ID | Priority | Description | Acceptance Criteria | Implementation | Status |
+|----|----------|-------------|--------------------:|----------------|--------|
+| NFR-REL-001 | MUST | Audit failures must not crash operations | try/catch around emitAuditEvent; swallowed silently | `api-controller.js:emitAuditEvent()` | Implemented |
+| NFR-REL-002 | MUST | Background revalidation errors reset flag | catch block clears revalidating=false for retry | `snapshot-cache.js:staleWhileRevalidate()` | Implemented |
+| NFR-REL-003 | MUST | Fire-and-forget persistence in external controllers | `Promise.resolve(persistFn(resource)).catch(() => {})` | All external controllers | Implemented |
+| NFR-REL-004 | MUST | Delivery queue error isolation | processItem catches; retries per policy; swallows after max | `async-controller.js:createDeliveryQueue()` | Implemented |
+| NFR-REL-005 | MUST | Graceful degraded snapshot on kubectl failure | Returns partial snapshot with errors[] array; resources empty | `kubernetes-controller.js:getControllerSnapshot()` | Implemented |
+
+---
+
+## 10. Integration Requirements
+
+| ID | Priority | Description | Acceptance Criteria | Implementation | Status |
+|----|----------|-------------|--------------------:|----------------|--------|
+| INT-K8S-001 | MUST | Store CONFIG resources as CRDs | kubectl apply/get/delete with krate.a5c.ai group | `kubernetes-controller.js` | Implemented |
+| INT-K8S-002 | MUST | Use kubectl for all K8s operations | spawnSync/spawn with configurable binary path | `kubernetes-controller.js:runKubectl()` | Implemented |
+| INT-K8S-003 | MUST | In-cluster authentication support | Auto-detect SA token + CA cert; inject --server/--token/--certificate-authority | `kubernetes-controller.js:inClusterKubectlConfig()` | Implemented |
+| INT-K8S-004 | MUST | Namespace auto-creation | ensureNamespace before apply; kubectl create namespace if not exists | `kubernetes-controller.js:ensureNamespace()` | Implemented |
+| INT-K8S-005 | MUST | SubjectAccessReview for permission discovery | `kubectl auth can-i <verb> <resource>` for each CRD | `kubernetes-controller.js:canI()` | Implemented |
+| INT-GITEA-001 | MUST | Repository hosting via Gitea | createGiteaService with baseUrl and token | `gitea-service.js` | Implemented |
+| INT-ATLAS-001 | SHOULD | Atlas graph search for stack builder | fetchAtlasRecordsByKinds queries /api/v1/kinds/{kind}; searchAtlasGraph queries /api/v1/search | `sdk/src/atlas-graph-client.js` | Implemented |
+| INT-GH-001 | MUST | GitHub webhook normalization | normalizeWebhookEvent handles workflow_run, PR, comment, label, push | `http-server.js:normalizeWebhookEvent()` | Implemented |
+| INT-KYVERNO-001 | SHOULD | Kyverno policy engine integration | CRD discovery; controller health check; policy report aggregation | `kubernetes-controller.js:discoverKyverno()` | Implemented |
+| INT-KUBEVELA-001 | SHOULD | KubeVela application delivery | Application, Revision, Component, Trait, Scope discovery | `kubernetes-controller.js:KRATE_RESOURCES` | Implemented |
+
+---
+
+## 11. Testing Requirements
+
+| ID | Description | Framework | Count | Source |
+|----|-------------|-----------|-------|--------|
+| TEST-CORE-001 | Core package unit+integration tests | node:test | 1259 | `packages/krate/core/package.json` |
+| TEST-SDK-001 | SDK export and integration tests | node:test | 73 | `packages/krate/sdk/tests/` |
+| TEST-CLI-001 | CLI command and MCP protocol tests | node:test | 51 | `packages/krate/cli/tests/` |
+| TEST-E2E-001 | End-to-end package validation | npm run e2e | 3 | `packages/krate/core/package.json` |
+| TEST-SMOKE-001 | MVP smoke assertions | npm run smoke | 21 | `packages/krate/core/package.json` |
+| TEST-WEB-001 | Web console build validation | npm run build | 1 | `packages/krate/web/package.json` |

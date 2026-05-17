@@ -1,433 +1,397 @@
 # Krate Web Console Specification
 
-> Derived from implementation. Source: `packages/krate/web/`
-
-## 1. Page Inventory
-
-Framework: Next.js 16 + React 19 (App Router)
-Base path: `packages/krate/web/app/`
-
-### Top-Level Pages
-
-| Route | File | Purpose |
-|-------|------|---------|
-| `/` | `page.jsx` | Landing/home page |
-| `/login` | `login/page.jsx` | Authentication login |
-| `/logout` | `logout/page.jsx` | Session logout |
-| `/orgs` | `orgs/page.jsx` | Organization list |
-| `/people` | `people/page.jsx` | People directory |
-
-### Organization Dashboard
-
-| Route | File | Purpose |
-|-------|------|---------|
-| `/orgs/[org]` | `orgs/[org]/page.jsx` | Org dashboard overview |
-| `/orgs/[org]/profile` | `orgs/[org]/profile/page.jsx` | User profile |
-| `/orgs/[org]/people` | `orgs/[org]/people/page.jsx` | Org members |
-| `/orgs/[org]/inbox` | `orgs/[org]/inbox/page.jsx` | Notification inbox |
-| `/orgs/[org]/insights` | `orgs/[org]/insights/page.jsx` | Analytics and insights |
-
-### Ship (Repositories & Code)
-
-| Route | File | Purpose |
-|-------|------|---------|
-| `/orgs/[org]/repositories` | `orgs/[org]/repositories/page.jsx` | Repository list |
-| `/orgs/[org]/repositories/[repo]/code` | `repositories/[repo]/code/page.jsx` | Code browser |
-| `/orgs/[org]/repositories/[repo]/pull-requests` | `repositories/[repo]/pull-requests/page.jsx` | PR list |
-| `/orgs/[org]/repositories/[repo]/issues` | `repositories/[repo]/issues/page.jsx` | Issue list |
-| `/orgs/[org]/repositories/[repo]/issues/[issue]` | `repositories/[repo]/issues/[issue]/page.jsx` | Issue detail |
-| `/orgs/[org]/repositories/[repo]/hooks` | `repositories/[repo]/hooks/page.jsx` | Webhook config |
-| `/orgs/[org]/repositories/[repo]/runs` | `repositories/[repo]/runs/page.jsx` | Repo agent runs |
-| `/orgs/[org]/repositories/[repo]/settings` | `repositories/[repo]/settings/page.jsx` | Repo settings |
-| `/orgs/[org]/runs` | `orgs/[org]/runs/page.jsx` | All runs overview |
-
-### Manage (Access & Policy)
-
-| Route | File | Purpose |
-|-------|------|---------|
-| `/orgs/[org]/access/permissions` | `access/permissions/page.jsx` | Permission management |
-| `/orgs/[org]/access/ssh-keys` | `access/ssh-keys/page.jsx` | SSH key management |
-| `/orgs/[org]/access/branch-protection` | `access/branch-protection/page.jsx` | Branch rules |
-| `/orgs/[org]/settings` | `orgs/[org]/settings/page.jsx` | Org settings |
-| `/orgs/[org]/settings/secrets` | `settings/secrets/page.jsx` | Secret management |
-| `/orgs/[org]/hooks-events` | `orgs/[org]/hooks-events/page.jsx` | Webhook events |
-| `/orgs/[org]/deployments` | `orgs/[org]/deployments/page.jsx` | Deployments |
-| `/orgs/[org]/runners-ci` | `orgs/[org]/runners-ci/page.jsx` | Runner pools & CI |
-
-### Agents
-
-| Route | File | Purpose |
-|-------|------|---------|
-| `/orgs/[org]/agents` | `agents/page.jsx` | Agent overview |
-| `/orgs/[org]/agents/stacks` | `agents/stacks/page.jsx` | Stack list |
-| `/orgs/[org]/agents/stacks/new` | `agents/stacks/new/page.jsx` | Create stack |
-| `/orgs/[org]/agents/stacks/[name]` | `agents/stacks/[name]/page.jsx` | Stack detail |
-| `/orgs/[org]/agents/runs` | `agents/runs/page.jsx` | Dispatch run list |
-| `/orgs/[org]/agents/runs/[runId]` | `agents/runs/[runId]/page.jsx` | Run detail |
-| `/orgs/[org]/agents/sessions` | `agents/sessions/page.jsx` | Session list |
-| `/orgs/[org]/agents/sessions/[sessionId]` | `agents/sessions/[sessionId]/page.jsx` | Session detail |
-| `/orgs/[org]/agents/rules` | `agents/rules/page.jsx` | Trigger rule list |
-| `/orgs/[org]/agents/rules/new` | `agents/rules/new/page.jsx` | Create trigger rule |
-| `/orgs/[org]/agents/rules/[ruleName]` | `agents/rules/[ruleName]/page.jsx` | Rule detail |
-| `/orgs/[org]/agents/approvals` | `agents/approvals/page.jsx` | Approval queue |
-| `/orgs/[org]/agents/workspaces` | `agents/workspaces/page.jsx` | Workspace list |
-| `/orgs/[org]/agents/workspaces/[workspaceId]` | `agents/workspaces/[workspaceId]/page.jsx` | Workspace detail |
-| `/orgs/[org]/agents/settings` | `agents/settings/page.jsx` | Agent settings |
-| `/orgs/[org]/agents/projects` | `agents/projects/page.jsx` | Project list |
-| `/orgs/[org]/agents/projects/[projectId]` | `agents/projects/[projectId]/page.jsx` | Project detail |
-| `/orgs/[org]/agents/projects/[projectId]/issues` | `projects/[projectId]/issues/page.jsx` | Project issues |
-| `/orgs/[org]/agents/projects/[projectId]/issues/[issue]` | `projects/[projectId]/issues/[issue]/page.jsx` | Project issue detail |
-| `/orgs/[org]/agents/memory` | `agents/memory/page.jsx` | Memory overview |
-| `/orgs/[org]/agents/memory/search` | `agents/memory/search/page.jsx` | Memory search |
-| `/orgs/[org]/agents/memory/ontology` | `agents/memory/ontology/page.jsx` | Ontology editor |
-| `/orgs/[org]/agents/memory/imports` | `agents/memory/imports/page.jsx` | Import list |
-| `/orgs/[org]/agents/memory/imports/[importId]` | `agents/memory/imports/[importId]/page.jsx` | Import detail |
-
-### External
-
-| Route | File | Purpose |
-|-------|------|---------|
-| `/orgs/[org]/external` | `orgs/[org]/external/page.jsx` | External overview |
-| `/orgs/[org]/external/providers/new` | `external/providers/new/page.jsx` | Add provider |
-| `/orgs/[org]/external/sync` | `external/sync/page.jsx` | Sync dashboard |
-| `/orgs/[org]/external/conflicts` | `external/conflicts/page.jsx` | Conflict list |
-
-### Observe & Tools
-
-| Route | File | Purpose |
-|-------|------|---------|
-| `/orgs/[org]/api-docs` | `orgs/[org]/api-docs/page.jsx` | API documentation |
-| `/orgs/[org]/controller-api` | `orgs/[org]/controller-api/page.jsx` | Controller API explorer |
-| `/orgs/[org]/advanced-plans` | `orgs/[org]/advanced-plans/page.jsx` | Advanced plans |
-| `/orgs/[org]/operations-install` | `orgs/[org]/operations-install/page.jsx` | Operations install guide |
-
-**Total: 57 pages**
+> Exhaustive reference for the Krate web console.
+> Source: `packages/krate/web/`
+> Framework: Next.js 16 + React 19 (App Router)
 
 ---
 
-## 2. Component Library
+## 1. Page Inventory (57 pages)
 
-Source: `packages/krate/web/app/components/`
+### 1.1 Top-Level Pages
 
-| Component | File | Purpose |
-|-----------|------|---------|
-| ActivityFeed | `activity-feed.jsx` | Real-time activity stream with time-grouped entries |
-| AgentSettingsForm | `agent-settings-form.jsx` | Agent configuration form (adapters, providers, gateway) |
-| ApiExplorer | `api-explorer.jsx` | Interactive API testing interface |
-| AppSettings | `app-settings.jsx` | Application-level settings panel |
-| ApprovalActions | `approval-actions.jsx` | Approve/deny action buttons for agent gates |
-| ApprovalModeToggle | `approval-mode-toggle.jsx` | Toggle between approval modes |
-| CodeEditor | `code-editor.jsx` | Syntax-highlighted code editor |
-| CommandPalette | `command-palette.jsx` | Global command palette (Cmd+K) with search |
-| DeploymentPipeline | `deployment-pipeline.jsx` | Visual pipeline progress display |
-| DispatchButton | `dispatch-button.jsx` | One-click agent dispatch trigger |
-| ExternalConflictResolver | `external-conflict-resolver.jsx` | Side-by-side conflict resolution UI |
-| ExternalProviderList | `external-provider-list.jsx` | Provider listing with status indicators |
-| ExternalProviderWizard | `external-provider-wizard.jsx` | Multi-step provider setup wizard |
-| ExternalSyncDashboard | `external-sync-dashboard.jsx` | Sync status overview with metrics |
-| GlobalSearch | `global-search.jsx` | Full-text search across all resources |
-| HealthMonitor | `health-monitor.jsx` | System health indicators and status |
-| IssueEditor | `issue-editor.jsx` | Rich issue create/edit form |
-| IssueList | `issue-list.jsx` | Filterable issue list view |
-| KanbanCard | `kanban-card.jsx` | Draggable card for kanban board |
-| KanbanColumn | `kanban-column.jsx` | Drop target column for kanban |
-| KanbanEnhanced | `kanban-enhanced.jsx` | Full kanban board with drag-drop |
-| KanbanFilters | `kanban-filters.jsx` | Filter bar for kanban views |
-| KanbanInteractive | `kanban-interactive.jsx` | Interactive kanban with real-time updates |
-| KeyboardShortcuts | `keyboard-shortcuts.jsx` | Keyboard shortcut overlay/help |
-| KrateLoading | `krate-loading.jsx` | Branded loading spinner |
-| LiveUpdates | `live-updates.jsx` | SSE-powered live data refresh |
-| MemoryImportReview | `memory-import-review.jsx` | Review and approve memory imports |
-| MemoryOntologyEditor | `memory-ontology-editor.jsx` | Visual ontology editor |
-| MemorySearchForm | `memory-search-form.jsx` | Graph/grep query builder |
-| NotificationBell | `notification-bell.jsx` | Bell icon with unread count badge |
-| PullRequestList | `pull-request-list.jsx` | PR list with status indicators |
-| RepoCodeBrowser | `repo-code-browser.jsx` | File tree + content viewer |
-| RepoRuns | `repo-runs.jsx` | Repository-scoped run list |
-| ResourceActions | `resource-actions.jsx` | Edit/delete/view action menu |
-| ResourceCrudActions | `resource-crud-actions.jsx` | Full CRUD operation buttons |
-| RuleActions | `rule-actions.jsx` | Trigger rule action buttons |
-| RunActions | `run-actions.jsx` | Dispatch run action buttons |
-| RunnerPoolManager | `runner-pool-manager.jsx` | Pool sizing and configuration |
-| SecretManager | `secret-manager.jsx` | Secret CRUD with masked values |
-| SessionCost | `session-cost.jsx` | Token/cost display for sessions |
-| SessionShell | `session-shell.jsx` | Terminal-style session viewer |
-| SessionTabs | `session-tabs.jsx` | Tabbed session detail view |
-| SettingsAdapters | `settings-adapters.jsx` | Adapter configuration panel |
-| SettingsGateway | `settings-gateway.jsx` | Gateway configuration panel |
-| SettingsProviders | `settings-providers.jsx` | Provider configuration panel |
-| StackActions | `stack-actions.jsx` | Stack management action buttons |
-| StackBuilder | `stack-builder.jsx` | Visual agent stack builder |
-| StackBuilderGraph | `stack-builder-graph.jsx` | Graph visualization for stack composition |
-| ThemeRuntime | `theme-runtime.jsx` | Dark/light theme toggle and persistence |
-| ToolInspector | `tool-inspector.jsx` | MCP tool inspection panel |
-| TriggerRuleForm | `trigger-rule-form.jsx` | Trigger rule creation/edit form |
-| UserProfile | `user-profile.jsx` | User profile display and edit |
-| WebhookManager | `webhook-manager.jsx` | Webhook subscription management |
-| WorkspaceAssociations | `workspace-associations.jsx` | Work item link management |
-| WorkspaceCodespace | `workspace-codespace.jsx` | Live codespace interface |
-| WorkspacePanel | `workspace-panel.jsx` | Workspace overview panel |
-| WorkspaceRunHistory | `workspace-run-history.jsx` | Historical runs for workspace |
+| # | Route | File | Data Source | Purpose | Interactive Elements |
+|---|-------|------|-------------|---------|---------------------|
+| 1 | `/` | `page.jsx` | None | Landing/home page | Login CTA, org selector |
+| 2 | `/login` | `login/page.jsx` | `listEnabledAuthProviders()` | Authentication login | Provider buttons (GitHub, SSO) |
+| 3 | `/logout` | `logout/page.jsx` | None | Session logout | Auto-redirect to /login |
+| 4 | `/orgs` | `orgs/page.jsx` | `fetchControllerUiModel()` | Organization list | Org cards, create org button |
+| 5 | `/people` | `people/page.jsx` | `fetchControllerUiModel()` | People directory | User search, team filter |
 
-**Total: 56 components**
+### 1.2 Organization Dashboard (5 pages)
 
----
+| # | Route | File | Data Source | Purpose | Interactive Elements |
+|---|-------|------|-------------|---------|---------------------|
+| 6 | `/orgs/[org]` | `orgs/[org]/page.jsx` | `uiModel.views.dashboard` | Org dashboard overview | Cards (repos, PRs, issues, runs), activity feed, quick actions |
+| 7 | `/orgs/[org]/profile` | `orgs/[org]/profile/page.jsx` | `uiModel.identity` | User profile | Edit display name, email; linked identities |
+| 8 | `/orgs/[org]/people` | `orgs/[org]/people/page.jsx` | `uiModel.identity.users` | Org members | Invite button, team assignment, role toggle |
+| 9 | `/orgs/[org]/inbox` | `orgs/[org]/inbox/page.jsx` | `notifications.listNotifications()` | Notification inbox | Mark as read, filter by type, clear all |
+| 10 | `/orgs/[org]/insights` | `orgs/[org]/insights/page.jsx` | `uiModel.metrics` | Analytics and insights | Time range selector, metric cards |
 
-## 3. Navigation Architecture
+### 1.3 Ship (Repositories & Code) — 9 pages
 
-### Navigation Groups
+| # | Route | File | Data Source | Purpose | Interactive Elements |
+|---|-------|------|-------------|---------|---------------------|
+| 11 | `/orgs/[org]/repositories` | `orgs/[org]/repositories/page.jsx` | `uiModel.views.dashboard.repositories` | Repository list | Create repo form, visibility filter, search |
+| 12 | `/orgs/[org]/repositories/[repo]/code` | `repositories/[repo]/code/page.jsx` | `git-proxy` API | Code browser | File tree, branch selector, breadcrumb |
+| 13 | `/orgs/[org]/repositories/[repo]/pull-requests` | `repositories/[repo]/pull-requests/page.jsx` | `uiModel resources PullRequest` | PR list | Status filter, create PR button |
+| 14 | `/orgs/[org]/repositories/[repo]/issues` | `repositories/[repo]/issues/page.jsx` | `uiModel resources Issue` | Issue list | Label filter, assignee, new issue |
+| 15 | `/orgs/[org]/repositories/[repo]/issues/[issue]` | `issues/[issue]/page.jsx` | Issue resource | Issue detail | Comment form, label editor, close/reopen |
+| 16 | `/orgs/[org]/repositories/[repo]/hooks` | `repositories/[repo]/hooks/page.jsx` | `WebhookSubscription` | Webhook config | Add webhook form, delivery list, replay |
+| 17 | `/orgs/[org]/repositories/[repo]/runs` | `repositories/[repo]/runs/page.jsx` | `AgentDispatchRun` filtered by repo | Repo agent runs | Run list, dispatch button, status filter |
+| 18 | `/orgs/[org]/repositories/[repo]/settings` | `repositories/[repo]/settings/page.jsx` | Repository resource | Repo settings | Rename, visibility toggle, danger zone (delete) |
+| 19 | `/orgs/[org]/runs` | `orgs/[org]/runs/page.jsx` | `uiModel.agents.runs` | All runs overview | Filter by stack, status, repository |
 
-| Group | Icon | Pages |
-|-------|------|-------|
-| **Ship** | Code | Repositories, Pull Requests, Issues, Code |
-| **Manage** | Settings | Permissions, SSH Keys, Branch Protection, Settings, Deployments, Runners |
-| **Agents** | Bot | Stacks, Runs, Sessions, Rules, Approvals, Workspaces, Projects, Memory |
-| **Observe** | Eye | Hooks & Events, Insights, Inbox, Health |
-| **External** | Link | Providers, Sync, Conflicts |
+### 1.4 Manage (Access & Policy) — 8 pages
 
-### Command Palette (Cmd+K)
+| # | Route | File | Data Source | Purpose | Interactive Elements |
+|---|-------|------|-------------|---------|---------------------|
+| 20 | `/orgs/[org]/access/permissions` | `access/permissions/page.jsx` | `uiModel.identity.permissions` | Permission management | Grant/revoke, subject selector, permission level |
+| 21 | `/orgs/[org]/access/ssh-keys` | `access/ssh-keys/page.jsx` | `uiModel.identity.sshKeys` | SSH key management | Add key form, revoke button, scope filter |
+| 22 | `/orgs/[org]/access/branch-protection` | `access/branch-protection/page.jsx` | `BranchProtection` resources | Branch rules | Ref pattern input, toggle required reviews |
+| 23 | `/orgs/[org]/settings` | `orgs/[org]/settings/page.jsx` | Organization resource | Org settings | Display name, slug, namespace info, danger zone |
+| 24 | `/orgs/[org]/settings/secrets` | `settings/secrets/page.jsx` | `/api/orgs/:org/secrets` | Secret management | Add secret form, delete, grant management |
+| 25 | `/orgs/[org]/hooks-events` | `orgs/[org]/hooks-events/page.jsx` | `WebhookSubscription + Delivery` | Webhook events | Subscription list, delivery inspector, replay |
+| 26 | `/orgs/[org]/deployments` | `orgs/[org]/deployments/page.jsx` | `uiModel.delivery` | Deployments | Application list, release history, health |
+| 27 | `/orgs/[org]/runners-ci` | `orgs/[org]/runners-ci/page.jsx` | `RunnerPool + Pipeline + Job` | Runner pools & CI | Pool editor, pipeline list, job detail |
 
-Source: `command-palette.jsx`
+### 1.5 Agents — 24 pages
 
-- Global keyboard shortcut: `Cmd+K` (macOS) / `Ctrl+K` (Windows/Linux)
-- Full-text search across all resources
-- Quick navigation to any page
-- Recent items history
+| # | Route | File | Data Source | Purpose | Interactive Elements |
+|---|-------|------|-------------|---------|---------------------|
+| 28 | `/orgs/[org]/agents` | `agents/page.jsx` | `uiModel.agents` | Agent overview | Stack count cards, active runs, pending approvals |
+| 29 | `/orgs/[org]/agents/stacks` | `agents/stacks/page.jsx` | `uiModel.agents.stacks` | Stack list | Readiness indicators, create button |
+| 30 | `/orgs/[org]/agents/stacks/new` | `agents/stacks/new/page.jsx` | `STACK_LAYERS, COMPOSITION_FACETS` | Create stack | Multi-step StackBuilder form |
+| 31 | `/orgs/[org]/agents/stacks/[name]` | `agents/stacks/[name]/page.jsx` | AgentStack resource | Stack detail | Conditions list, capabilities graph, edit |
+| 32 | `/orgs/[org]/agents/runs` | `agents/runs/page.jsx` | `uiModel.agents.runs` | Dispatch run list | Phase filter, repository filter, cost summary |
+| 33 | `/orgs/[org]/agents/runs/[runId]` | `agents/runs/[runId]/page.jsx` | AgentDispatchRun + Attempt | Run detail | Attempt timeline, transcript, workspace link |
+| 34 | `/orgs/[org]/agents/sessions` | `agents/sessions/page.jsx` | `uiModel.agents.sessions` | Session list | Active/completed filter, cost column |
+| 35 | `/orgs/[org]/agents/sessions/[sessionId]` | `agents/sessions/[sessionId]/page.jsx` | AgentSession + Transcript | Session detail | SessionTabs: transcript, tools, cost, shell |
+| 36 | `/orgs/[org]/agents/rules` | `agents/rules/page.jsx` | `uiModel.agents.rules` | Trigger rule list | Source type badges, enable/disable toggle |
+| 37 | `/orgs/[org]/agents/rules/new` | `agents/rules/new/page.jsx` | Stack list for dropdown | Create trigger rule | TriggerRuleForm with source type selector |
+| 38 | `/orgs/[org]/agents/rules/[ruleName]` | `agents/rules/[ruleName]/page.jsx` | AgentTriggerRule resource | Rule detail | Edit form, execution history |
+| 39 | `/orgs/[org]/agents/approvals` | `agents/approvals/page.jsx` | `uiModel.agents.approvals` | Approval queue | Approve/Deny buttons, filter by action type |
+| 40 | `/orgs/[org]/agents/workspaces` | `agents/workspaces/page.jsx` | `uiModel.agents.workspaces` | Workspace list | Phase badges, repository links |
+| 41 | `/orgs/[org]/agents/workspaces/[workspaceId]` | `agents/workspaces/[workspaceId]/page.jsx` | KrateWorkspace resource | Workspace detail | Codespace launch, associations, run history |
+| 42 | `/orgs/[org]/agents/settings` | `agents/settings/page.jsx` | Adapter + Provider + Gateway | Agent settings | Adapter config, provider forms, gateway URL |
+| 43 | `/orgs/[org]/agents/projects` | `agents/projects/page.jsx` | `uiModel.agents.projects` | Project list | Create project, kanban toggle |
+| 44 | `/orgs/[org]/agents/projects/[projectId]` | `agents/projects/[projectId]/page.jsx` | KrateProject resource | Project detail | Kanban board, issue list, settings |
+| 45 | `/orgs/[org]/agents/projects/[projectId]/issues` | `projects/[projectId]/issues/page.jsx` | Issues filtered by project | Project issues | Filter, create issue |
+| 46 | `/orgs/[org]/agents/projects/[projectId]/issues/[issue]` | `issues/[issue]/page.jsx` | Issue resource | Project issue detail | Comment, labels, assign |
+| 47 | `/orgs/[org]/agents/memory` | `agents/memory/page.jsx` | `uiModel.agents.memoryRepositories` | Memory overview | Repository list, snapshot count |
+| 48 | `/orgs/[org]/agents/memory/search` | `agents/memory/search/page.jsx` | Memory query API | Memory search | MemorySearchForm, results display |
+| 49 | `/orgs/[org]/agents/memory/ontology` | `agents/memory/ontology/page.jsx` | AgentMemoryOntology | Ontology editor | MemoryOntologyEditor, node/edge kind editors |
+| 50 | `/orgs/[org]/agents/memory/imports` | `agents/memory/imports/page.jsx` | `uiModel.agents.memoryImports` | Import list | Status badges, review button |
+| 51 | `/orgs/[org]/agents/memory/imports/[importId]` | `agents/memory/imports/[importId]/page.jsx` | AgentRunMemoryImport | Import detail | MemoryImportReview, approve/reject |
 
-### Keyboard Shortcuts
+### 1.6 External — 4 pages
 
-Source: `keyboard-shortcuts.jsx`
+| # | Route | File | Data Source | Purpose | Interactive Elements |
+|---|-------|------|-------------|---------|---------------------|
+| 52 | `/orgs/[org]/external` | `orgs/[org]/external/page.jsx` | ExternalBackendProvider list | External overview | Provider cards, add button |
+| 53 | `/orgs/[org]/external/providers/new` | `external/providers/new/page.jsx` | Provider type list | Add provider | ExternalProviderWizard (multi-step) |
+| 54 | `/orgs/[org]/external/sync` | `external/sync/page.jsx` | ExternalSyncState | Sync dashboard | ExternalSyncDashboard, trigger sync |
+| 55 | `/orgs/[org]/external/conflicts` | `external/conflicts/page.jsx` | ExternalSyncConflict list | Conflict list | ExternalConflictResolver, strategy selector |
 
-- Navigation shortcuts for major sections
-- Action shortcuts (new, edit, delete)
-- Modal shortcuts (close, confirm)
-- `?` to show shortcut overlay
+### 1.7 Observe & Tools — 4 pages
+
+| # | Route | File | Data Source | Purpose | Interactive Elements |
+|---|-------|------|-------------|---------|---------------------|
+| 56 | `/orgs/[org]/api-docs` | `orgs/[org]/api-docs/page.jsx` | controllerEndpoints | API documentation | Endpoint list, try-it panel |
+| 57 | `/orgs/[org]/controller-api` | `orgs/[org]/controller-api/page.jsx` | Full snapshot | Controller API explorer | ApiExplorer with request/response |
+| 58 | `/orgs/[org]/advanced-plans` | `orgs/[org]/advanced-plans/page.jsx` | Resource YAML | Advanced plans | YAML editor, apply button |
+| 59 | `/orgs/[org]/operations-install` | `orgs/[org]/operations-install/page.jsx` | uiModel.operations | Operations install guide | Copy commands, step indicators |
 
 ---
 
-## 4. UI Patterns
+## 2. Component Library (56 components)
 
-### PageFrame Layout
+### 2.1 Agent Components
 
-Standard page layout with:
-- Sidebar navigation (collapsible)
-- Header with org selector, search, notification bell
-- Main content area
-- Breadcrumb navigation
+| # | Component | File | Props | State | API Calls | Key Behavior |
+|---|-----------|------|-------|-------|-----------|--------------|
+| 1 | ApprovalActions | `approval-actions.jsx` | `{ approval, org, onDecide }` | — | POST approvals/:name/decide | Approve/Deny buttons with reason modal |
+| 2 | ApprovalModeToggle | `approval-mode-toggle.jsx` | `{ stack, onToggle }` | `useState(mode)` | — | Toggle between yolo/prompt/deny |
+| 3 | DispatchButton | `dispatch-button.jsx` | `{ stack, repo, org, onDispatch }` | `useState(loading)` | POST agents/dispatch | One-click dispatch with loading state |
+| 4 | RunActions | `run-actions.jsx` | `{ run, org }` | — | — | Retry, cancel, view workspace links |
+| 5 | RuleActions | `rule-actions.jsx` | `{ rule, org }` | — | — | Edit, disable, delete trigger rule |
+| 6 | StackActions | `stack-actions.jsx` | `{ stack, org }` | — | — | Edit, dispatch, delete stack |
+| 7 | StackBuilder | `stack-builder.jsx` | `{ org, layers, onSave }` | Multi-step form state | POST resources | Multi-step agent stack creation wizard |
+| 8 | StackBuilderGraph | `stack-builder-graph.jsx` | `{ stack, capabilities }` | — | — | Visual capability graph |
+| 9 | SessionCost | `session-cost.jsx` | `{ session, transcript }` | — | — | Token count and cost display |
+| 10 | SessionShell | `session-shell.jsx` | `{ sessionId, org }` | SSE subscription | SSE stream | Terminal-style live session viewer |
+| 11 | SessionTabs | `session-tabs.jsx` | `{ session, transcript }` | `useState(activeTab)` | — | Tabbed: Transcript, Tools, Cost, Shell |
+| 12 | ToolInspector | `tool-inspector.jsx` | `{ mcpServers, toolProfiles }` | — | — | MCP tool listing with status |
+| 13 | TriggerRuleForm | `trigger-rule-form.jsx` | `{ org, stacks, onSave }` | Form state | POST resources | Source type selector, cron/webhook/comment/label fields |
 
-### EmptyState
+### 2.2 Memory Components
 
-Used when a resource list has no items:
-- Illustration/icon
-- Title and description
-- Primary CTA button (e.g., "Create Stack")
-- Secondary action link
+| # | Component | File | Props | Key Behavior |
+|---|-----------|------|-------|--------------|
+| 14 | MemorySearchForm | `memory-search-form.jsx` | `{ org, onSearch }` | Mode selector (graph/grep/both), query input, kind filter, depth |
+| 15 | MemoryOntologyEditor | `memory-ontology-editor.jsx` | `{ ontology, org }` | Node kind editor, edge kind editor, vocabulary |
+| 16 | MemoryImportReview | `memory-import-review.jsx` | `{ importResource, org }` | Diff view, approve/reject buttons |
 
-### StatusPill
+### 2.3 External Components
 
-Tone-based status indicators:
+| # | Component | File | Props | Key Behavior |
+|---|-----------|------|-------|--------------|
+| 17 | ExternalConflictResolver | `external-conflict-resolver.jsx` | `{ conflict, org }` | Side-by-side diff, strategy buttons |
+| 18 | ExternalProviderList | `external-provider-list.jsx` | `{ providers }` | Cards with status indicators |
+| 19 | ExternalProviderWizard | `external-provider-wizard.jsx` | `{ org, onComplete }` | Multi-step: type → credentials → scope → confirm |
+| 20 | ExternalSyncDashboard | `external-sync-dashboard.jsx` | `{ syncStates, org }` | Status overview with metrics |
 
-| Tone | Color | Used For |
-|------|-------|----------|
-| success | Green | Running, Healthy, Approved |
-| warning | Amber | Pending, Degraded |
-| error | Red | Failed, Denied, Conflict |
-| info | Blue | In Progress, Syncing |
-| neutral | Gray | Unknown, Inactive |
+### 2.4 Kanban Components
 
-### InlineCreateForm
+| # | Component | File | Props | Key Behavior |
+|---|-----------|------|-------|--------------|
+| 21 | KanbanCard | `kanban-card.jsx` | `{ item, onDragStart }` | Draggable card with issue/PR preview |
+| 22 | KanbanColumn | `kanban-column.jsx` | `{ status, items, onDrop }` | Drop target column |
+| 23 | KanbanEnhanced | `kanban-enhanced.jsx` | `{ project, issues }` | Full board with columns |
+| 24 | KanbanFilters | `kanban-filters.jsx` | `{ onFilter }` | Label, assignee, repository filters |
+| 25 | KanbanInteractive | `kanban-interactive.jsx` | `{ project, org }` | SSE-powered live kanban with drag-drop |
 
-Quick resource creation without navigating away:
-- Collapsible form below list header
-- Minimal required fields
-- Auto-focus on first field
-- Cancel/Create buttons
+### 2.5 Workspace Components
 
-### ResourceActions
+| # | Component | File | Props | Key Behavior |
+|---|-----------|------|-------|--------------|
+| 26 | WorkspacePanel | `workspace-panel.jsx` | `{ workspace }` | Overview: phase, repo, branch, PVC |
+| 27 | WorkspaceCodespace | `workspace-codespace.jsx` | `{ workspace, org }` | Launch/stop codespace, URL display |
+| 28 | WorkspaceAssociations | `workspace-associations.jsx` | `{ workspace }` | Add/remove run, user, session links |
+| 29 | WorkspaceRunHistory | `workspace-run-history.jsx` | `{ workspace, runs }` | Active runs, historical runs table |
 
-Contextual action menu per resource:
-- View (navigate to detail)
-- Edit (inline or modal)
-- Delete (with confirmation dialog)
-- Custom actions per resource kind
+### 2.6 Repository Components
+
+| # | Component | File | Props | Key Behavior |
+|---|-----------|------|-------|--------------|
+| 30 | RepoCodeBrowser | `repo-code-browser.jsx` | `{ org, repo, branch }` | File tree + content viewer via git-proxy |
+| 31 | RepoRuns | `repo-runs.jsx` | `{ runs, org }` | Filtered run list for a repository |
+| 32 | PullRequestList | `pull-request-list.jsx` | `{ pullRequests, org }` | PR list with status indicators |
+| 33 | IssueList | `issue-list.jsx` | `{ issues, org }` | Filterable issue list |
+| 34 | IssueEditor | `issue-editor.jsx` | `{ issue, org }` | Rich issue create/edit form |
+| 35 | WebhookManager | `webhook-manager.jsx` | `{ subscriptions, deliveries }` | CRUD webhooks, delivery inspector |
+
+### 2.7 Global Components
+
+| # | Component | File | Props | Key Behavior |
+|---|-----------|------|-------|--------------|
+| 36 | CommandPalette | `command-palette.jsx` | `{ org }` | Cmd+K / Ctrl+K; full-text search, quick nav |
+| 37 | KeyboardShortcuts | `keyboard-shortcuts.jsx` | — | ? overlay; nav shortcuts, action shortcuts |
+| 38 | GlobalSearch | `global-search.jsx` | `{ org }` | Full-text search across all resources |
+| 39 | NotificationBell | `notification-bell.jsx` | `{ org }` | Badge with unread count, dropdown panel |
+| 40 | ActivityFeed | `activity-feed.jsx` | `{ org, events }` | Time-grouped activity entries |
+| 41 | HealthMonitor | `health-monitor.jsx` | `{ connection }` | System component status indicators |
+| 42 | LiveUpdates | `live-updates.jsx` | `{ org, onEvent }` | SSE connection, auto-reconnect |
+| 43 | ThemeRuntime | `theme-runtime.jsx` | — | Dark/light toggle, system preference detection |
+| 44 | KrateLoading | `krate-loading.jsx` | `{ label? }` | Branded loading spinner |
+
+### 2.8 Settings Components
+
+| # | Component | File | Props | Key Behavior |
+|---|-----------|------|-------|--------------|
+| 45 | AgentSettingsForm | `agent-settings-form.jsx` | `{ org }` | Combined adapters + providers + gateway form |
+| 46 | SettingsAdapters | `settings-adapters.jsx` | `{ adapters, org }` | Adapter CRUD |
+| 47 | SettingsProviders | `settings-providers.jsx` | `{ providers, org }` | Provider CRUD |
+| 48 | SettingsGateway | `settings-gateway.jsx` | `{ gateway, org }` | Gateway URL + feature flags |
+| 49 | AppSettings | `app-settings.jsx` | `{ org }` | App-level settings |
+| 50 | SecretManager | `secret-manager.jsx` | `{ org }` | Secret CRUD with masked values |
+| 51 | RunnerPoolManager | `runner-pool-manager.jsx` | `{ pools, org }` | Pool sizing with warm/max sliders |
+| 52 | UserProfile | `user-profile.jsx` | `{ user, org }` | Profile display and edit |
+
+### 2.9 Utility Components
+
+| # | Component | File | Props | Key Behavior |
+|---|-----------|------|-------|--------------|
+| 53 | ResourceActions | `resource-actions.jsx` | `{ resource, org }` | View/Edit/Delete menu |
+| 54 | ResourceCrudActions | `resource-crud-actions.jsx` | `{ kind, org }` | Full CRUD buttons |
+| 55 | CodeEditor | `code-editor.jsx` | `{ value, language, onChange }` | Syntax-highlighted editor |
+| 56 | ApiExplorer | `api-explorer.jsx` | `{ endpoints }` | Interactive API testing |
+| 57 | DeploymentPipeline | `deployment-pipeline.jsx` | `{ applications }` | Visual pipeline progress |
 
 ---
 
-## 5. Data Flow
+## 3. Data Flow Architecture
 
-### Fetch Pipeline
+### 3.1 Fetch Pipeline
 
 ```
-Page Component
-    → loadKrateUi() / fetchControllerUiModel()
+Page Component (Server Component)
+    → loadKrateUi() / fetchControllerUiModel({ baseUrl, org })
         → HTTP GET /api/controller?org=<org>
-            → createControllerUiModel(snapshot, { organization })
-                → Stale-while-revalidate cache (30s)
-    → Render with data
+            → createKrateHttpHandler matches route
+                → createControllerUiModel(snapshot, { organization })
+                    → Stale-while-revalidate cache (30s TTL)
+    → Pass data as props to Client Components
 ```
 
-Source: `packages/krate/core/src/controller-client.js`, `controller-ui.js`
+### 3.2 Controller UI Model Shape
 
-### Controller UI Model
-
-`createControllerUiModel(snapshot, options)` produces:
-- `orgs` — Organization list
-- `repositories` — Repository list with stats
-- `pullRequests` — Open PRs with review status
-- `pipelines` — Recent pipeline runs
-- `agents` — Stacks, runs, sessions
-- `memory` — Memory repositories and queries
-
-### API Proxy Routes
-
-Source: `packages/krate/web/app/api/`
-
-| Route | Target |
-|-------|--------|
-| `/api/orgs` | Krate API `/api/orgs` |
-| `/api/orgs/[org]/repositories` | Resource CRUD |
-| `/api/auth/[provider]` | OAuth redirect |
-| `/api/auth/callback/[provider]` | OAuth callback |
-| `/api/auth/logout` | Session destruction |
-| `/api/auth/delegated` | Delegated identity |
-| `/api/atlas/search` | Atlas graph search |
-| `/api/git-proxy` | Gitea tree/blob proxy |
-| `/api/watch/[...resource]` | SSE watch endpoint |
-
----
-
-## 6. Dark Mode
-
-Source: `theme-runtime.jsx`
-
-### Implementation
-
-- CSS custom properties (variables) for all colors
-- Two theme sets: `light` and `dark`
-- Applied via `data-theme` attribute on `<html>`
-
-### Persistence
-
-- User preference stored in `localStorage` key `krate-theme`
-- Initial value: system preference via `prefers-color-scheme` media query
-- Toggle available in header/settings
-
-### System Preference Detection
+`createControllerUiModel()` produces:
 
 ```javascript
-window.matchMedia('(prefers-color-scheme: dark)').matches
+{
+  product: 'Krate',
+  status: 'ready' | 'degraded',
+  namespace: 'krate-org-acme',
+  platformNamespace: 'krate-system',
+  org: { name, slug, displayName, namespace },
+  orgs: [...],
+  generatedAt: ISO timestamp,
+  controller: { mode, endpoints, architecture, storage, connection, apiService, commands },
+  metrics: { components, resources, events, users, teams, repositories, pullRequests, issues, projects, pipelines, ... },
+  components: [...runtimeComponents],
+  resources: [...KRATE_RESOURCES mapped with items],
+  events: [...last 8 K8s events],
+  delivery: { applications, runtime, capabilityCatalog },
+  policyEngine: { mode, health, profiles, templates, bindings, violations },
+  agents: { stacks, runs, rules, sessions, workspaces, approvals, adapters, providers, projects, gateway, transcripts, memoryRepositories, memorySnapshots, memoryImports },
+  identity: { counts, providers, users, teams, invites, mappings, permissions, sshKeys, reconciliation },
+  validation: [...healthChecks],
+  views: { dashboard, pullRequestReview, failingRun, runnerPoolEditor, webhookInspector, triageView }
+}
 ```
 
-Listens for changes and auto-updates when no explicit preference set.
+### 3.3 API Proxy Routes (Web)
+
+| Route | Target | Method |
+|-------|--------|--------|
+| `/api/orgs` | Krate API | GET |
+| `/api/orgs/[org]/repositories` | Resource CRUD | GET/POST |
+| `/api/auth/[provider]` | OAuth redirect | GET |
+| `/api/auth/callback/[provider]` | OAuth callback | GET |
+| `/api/auth/logout` | Session destruction | POST |
+| `/api/auth/delegated` | Delegated identity | GET |
+| `/api/atlas/search` | Atlas graph search | POST |
+| `/api/git-proxy` | Gitea tree/blob proxy | POST |
+| `/api/watch/[...resource]` | SSE watch endpoint | GET |
 
 ---
 
-## 7. Authentication Flow
+## 4. Navigation Architecture
 
-### Login Flow
+### 4.1 Navigation Groups
 
+| Group | Icon | Pages | Section |
+|-------|------|-------|---------|
+| **Ship** | Code | Repositories, PRs, Issues, Code, Runs | Primary development |
+| **Manage** | Settings | Permissions, SSH Keys, Branch Protection, Settings, Secrets, Deployments, Runners | Administration |
+| **Agents** | Bot | Stacks, Runs, Sessions, Rules, Approvals, Workspaces, Projects, Memory | AI orchestration |
+| **Observe** | Eye | Hooks & Events, Insights, Inbox, Health, API Docs | Monitoring |
+| **External** | Link | Providers, Sync, Conflicts | Integration |
+
+### 4.2 Command Palette
+
+- Trigger: `Cmd+K` (macOS) / `Ctrl+K` (Windows/Linux)
+- Features: full-text search across resources, quick page navigation, recent items
+- Implementation: `command-palette.jsx`
+
+### 4.3 Keyboard Shortcuts
+
+- `?` — Show shortcut overlay
+- `j/k` — Navigate items in lists
+- `n` — New (context-dependent)
+- `Escape` — Close modal/palette
+
+---
+
+## 5. Real-Time Updates
+
+### 5.1 LiveUpdates Component
+
+```jsx
+// Connection lifecycle:
+// 1. Connect to /api/orgs/:org/agents/events/stream
+// 2. Receive {"type":"connected"} — mark as connected
+// 3. Process {"type":"resource-change", kind, name, operation}
+// 4. On disconnect: auto-reconnect with backoff
+// 5. Receive {"type":"heartbeat"} every 30s — keepalive
 ```
-User → /login page
-    → Select provider (GitHub / SSO)
-    → Redirect to /api/auth/[provider]
-    → OAuth authorization URL
-    → Provider callback → /api/auth/callback/[provider]
-    → Exchange code for profile
-    → Create session cookie (HMAC-signed)
-    → Redirect to /orgs/[org]
-```
 
-### Session Validation
+### 5.2 SSE-Powered Components
 
-- Cookie `krate_session` parsed on each request
-- HMAC signature verified with `KRATE_SESSION_SECRET`
-- Invalid/expired sessions redirect to `/login`
+| Component | SSE Usage |
+|-----------|-----------|
+| KanbanInteractive | Live card movement on issue/PR status changes |
+| NotificationBell | Real-time unread count updates |
+| ActivityFeed | New events prepended |
+| SessionShell | Live transcript streaming |
+| HealthMonitor | Connection status indicator |
 
-### Protected Routes
+---
 
-All mutating operations check session validity. Read operations are generally unprotected for API simplicity (auth enforced at Krate API level).
+## 6. Theme System
 
-### Logout
+### 6.1 Implementation
 
-```
-User → /logout
-    → /api/auth/logout
-    → Clear cookie (Max-Age=0)
-    → Redirect to /login
+- CSS custom properties for all colors
+- Two theme sets: `light` and `dark`
+- Applied via `data-theme` attribute on `<html>`
+- ThemeRuntime component manages state
+
+### 6.2 Persistence
+
+```javascript
+// Read: localStorage.getItem('krate-theme')
+// Write: localStorage.setItem('krate-theme', theme)
+// Default: window.matchMedia('(prefers-color-scheme: dark)').matches
+// Auto-update: mediaQuery.addEventListener('change', handler)
 ```
 
 ---
 
-## 8. Real-time Updates
+## 7. Form Patterns
 
-### SSE LiveUpdates Component
+### 7.1 Multi-Step Forms
 
-Source: `live-updates.jsx`
+| Form | Steps | Source |
+|------|-------|--------|
+| StackBuilder | Model → Provider → Transport → Tools → Skills → Review | `stack-builder.jsx` |
+| ExternalProviderWizard | Type → Credentials → Scope → Confirm | `external-provider-wizard.jsx` |
+| TriggerRuleForm | Source Type → Config → Stack Selection → Review | `trigger-rule-form.jsx` |
 
-- Connects to `/api/orgs/:org/agents/events/stream`
-- Receives JSON events via Server-Sent Events
-- Auto-reconnects on disconnection
-- Processes event types: `connected`, `heartbeat`, `resource-change`
-
-### Notification Bell
-
-Source: `notification-bell.jsx`
-
-- Badge showing unread notification count
-- Dropdown panel with recent notifications
-- Mark as read on click
-- Links to relevant resource pages
-
-### Activity Feed
-
-Source: `activity-feed.jsx`
-
-- Time-grouped activity entries
-- Resource change events (create, update, delete)
-- Agent dispatch and completion events
-- Filterable by resource kind
-
-### Health Monitor
-
-Source: `health-monitor.jsx`
-
-- System component status indicators
-- MCP server health checks
-- Kubernetes connection status
-- SSE connection health
-
----
-
-## 9. Form Patterns
-
-### Validation
-
-- Required field indicators (asterisk)
-- Format validation (email, URL, name patterns)
-- Custom validators per resource kind
-- Cross-field validation (e.g., date ranges)
-
-### Error Display
+### 7.2 Error Handling
 
 - Inline field errors below inputs
-- Toast notifications for operation failures
-- Error boundary component for unhandled errors (`error.jsx`)
+- Toast notifications for operation failures (auto-dismiss)
+- Error boundary component (`error.jsx`) for unhandled errors
+- Form-level validation before submission
 
-### Success Feedback
+### 7.3 Loading States
 
-- Auto-dismiss success toast (3-5 seconds)
-- Optimistic updates on create/edit
-- Resource list auto-refresh after mutation
+- `KrateLoading` spinner for full-page loads
+- Disabled buttons with spinner during submission
+- Skeleton loading for list views
+- Optimistic updates on create/edit (revert on failure)
 
-### Loading States
+---
 
-- `KrateLoading` spinner component
-- Skeleton loading for lists
-- Disabled buttons during submission
-- Progress indicators for long operations
+## 8. Authentication Flow (Web)
 
-### Multi-Step Forms
+### 8.1 Login Flow
 
-- Stack builder (`stack-builder.jsx`) — multi-step agent configuration
-- Provider wizard (`external-provider-wizard.jsx`) — guided provider setup
-- Trigger rule form (`trigger-rule-form.jsx`) — conditional rule builder
+```
+/login → Click provider → /api/auth/[provider]
+    → 302 to OAuth provider
+    → User authorizes
+    → /api/auth/callback/[provider]?code=...
+    → Exchange code → Create session cookie
+    → 302 to /orgs/[org]
+```
+
+### 8.2 Session Validation
+
+- Cookie `krate_session` sent on every request
+- Web API routes verify via `parseSessionCookie()`
+- Invalid sessions: redirect to `/login`
+- Logout: clear cookie with `Max-Age=0`, redirect to `/login`
+
+---
+
+## 9. Error Page
+
+Source: `packages/krate/web/app/error.jsx`
+
+- React Error Boundary component
+- Displays error message and stack trace (dev mode)
+- "Try Again" button to reset error state
+- Falls back to minimal UI on catastrophic failure

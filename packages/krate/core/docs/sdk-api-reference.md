@@ -1,10 +1,8 @@
 # Krate SDK API Reference
 
-> Derived from implementation. Source: `packages/krate/sdk/src/index.js`
-
-Package: `@a5c-ai/krate-sdk`
-
-The SDK re-exports core helpers for web and CLI consumers. All functions are pure ESM exports with zero external dependencies.
+> Exhaustive API reference for `@a5c-ai/krate-sdk`.
+> Source: `packages/krate/sdk/src/index.js` — 65+ re-exports from core.
+> All functions are pure ESM exports with zero external dependencies.
 
 ---
 
@@ -12,60 +10,101 @@ The SDK re-exports core helpers for web and CLI consumers. All functions are pur
 
 Source: `packages/krate/core/src/resource-model.js`
 
-### Constants
+### CONFIG_KINDS
 
 ```javascript
-import { CONFIG_KINDS, AGGREGATED_KINDS, ALL_KINDS, RESOURCE_DEFINITIONS } from '@a5c-ai/krate-sdk';
+import { CONFIG_KINDS } from '@a5c-ai/krate-sdk';
+// Type: Set<string>
+// Size: 44 kind names stored in etcd via Kubernetes CRDs
+// Includes: Organization, User, Team, Repository, AgentStack, KrateWorkspace, etc.
 ```
 
-| Export | Type | Description |
-|--------|------|-------------|
-| `CONFIG_KINDS` | `Set<string>` | Set of 44 kind names stored in etcd |
-| `AGGREGATED_KINDS` | `Set<string>` | Set of 32 kind names stored in postgres |
-| `ALL_KINDS` | `Set<string>` | Union of CONFIG_KINDS and AGGREGATED_KINDS (76 total) |
-| `RESOURCE_DEFINITIONS` | `Object` | Frozen map of kind → `{ storage, context, plural, purpose, requiredSpec }` |
+### AGGREGATED_KINDS
 
-### createResource(kind, metadata, spec)
+```javascript
+import { AGGREGATED_KINDS } from '@a5c-ai/krate-sdk';
+// Type: Set<string>
+// Size: 32 kind names stored in PostgreSQL
+// Includes: PullRequest, Issue, AgentDispatchRun, AgentSession, etc.
+```
 
-Creates a well-formed Krate resource object.
+### createResource(kind, metadata, spec, status)
+
+Creates a well-formed Krate resource object with validation.
 
 ```javascript
 import { createResource } from '@a5c-ai/krate-sdk';
 
-const repo = createResource('Repository', { name: 'my-repo', namespace: 'krate-org-acme' }, {
-  organizationRef: 'acme',
-  visibility: 'private'
-});
-// Returns: { apiVersion: 'krate.a5c.ai/v1alpha1', kind: 'Repository', metadata: {...}, spec: {...} }
+const repo = createResource('Repository',
+  { name: 'my-repo', namespace: 'krate-org-acme' },
+  { organizationRef: 'acme', visibility: 'private' },
+  { phase: 'Ready' }
+);
 ```
 
-### clone(obj)
+**Parameters:**
+| Parameter | Type | Required | Default | Constraints |
+|-----------|------|----------|---------|-------------|
+| `kind` | `string` | Yes | — | Must be a key in ALL_KINDS (76 valid values) |
+| `metadata` | `object` | Yes | — | Must contain `name` (non-empty string) |
+| `spec` | `object` | No | `{}` | Deep-cloned via JSON.parse(JSON.stringify) |
+| `status` | `object` | No | `{}` | Deep-cloned |
 
-Deep clone utility for resource objects.
+**Returns:** `{ apiVersion: 'krate.a5c.ai/v1alpha1', kind, metadata: { namespace, labels: {}, annotations: {}, ...metadata }, spec, status }`
+
+**Throws:**
+- `Error('Unknown Krate resource kind: X')` if kind not in ALL_KINDS
+- `Error('X requires metadata.name')` if metadata.name is falsy
+
+**Side Effects:** None (pure function)
+
+### clone(value)
+
+Deep clone via `JSON.parse(JSON.stringify(value))`. Returns `undefined` for `undefined` input.
 
 ```javascript
 import { clone } from '@a5c-ai/krate-sdk';
-const copy = clone(resource);
+const copy = clone(resource);  // Independent deep copy
+clone(undefined);              // Returns undefined
 ```
 
 ### resourceToYaml(resource)
 
-Serialize a resource object to YAML string format.
+Serialize a resource object to YAML string format. Custom implementation (no dependencies).
 
 ```javascript
 import { resourceToYaml } from '@a5c-ai/krate-sdk';
 const yaml = resourceToYaml(repo);
+// apiVersion: krate.a5c.ai/v1alpha1
+// kind: Repository
+// metadata:
+//   name: my-repo
+//   namespace: krate-org-acme
+// spec:
+//   organizationRef: acme
+//   visibility: private
 ```
+
+**Behavior:**
+- Scalars: direct value (quotes added for `: ` or `{`/`[` prefixed strings)
+- Objects: nested with 2-space indent
+- Arrays: `- item` format; first key of object items on same line as `-`
+- Returns string with trailing newline
 
 ### findResourceDefinition(kind)
 
-Look up the resource definition (plural, storage, namespace) for a given kind.
+Look up the full resource definition from `KRATE_RESOURCES` array.
 
 ```javascript
 import { findResourceDefinition } from '@a5c-ai/krate-sdk';
 const def = findResourceDefinition('Repository');
 // { kind: 'Repository', plural: 'repositories', namespaced: true, storage: 'etcd' }
+findResourceDefinition('repositories');  // Also works (matches on plural)
 ```
+
+**Throws:** `Error('Unsupported Krate resource X')` if not found.
+
+**Note:** This function searches the 75+ KRATE_RESOURCES array (which includes KubeVela, Kyverno, and core K8s resources beyond the 76 Krate-native kinds).
 
 ---
 
@@ -75,45 +114,62 @@ Source: `packages/krate/core/src/api-controller.js`
 
 ### createKrateApiController(options?)
 
-Creates the main API controller for resource operations.
+Creates the main API controller facade for resource operations.
 
 ```javascript
 import { createKrateApiController } from '@a5c-ai/krate-sdk';
 
 const controller = createKrateApiController({
   namespace: 'krate-org-acme',
-  resourceGateway: createKubernetesResourceGateway()  // optional
+  resourceGateway: customGateway,  // optional
+  onAuditEvent: (event) => {}     // optional callback
 });
 ```
 
 **Options:**
-| Option | Type | Description |
-|--------|------|-------------|
-| `namespace` | `string` | Target K8s namespace |
-| `resourceGateway` | `object` | Custom resource gateway (default: kubectl) |
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `namespace` | `string` | `process.env.KRATE_NAMESPACE` or `'krate-system'` | Target K8s namespace |
+| `resourceGateway` | `object` | `createKubernetesResourceGateway(options)` | Custom gateway |
+| `onAuditEvent` | `function` | `null` | Callback for audit events |
 
 **Methods:**
 
-| Method | Signature | Returns |
-|--------|-----------|---------|
-| `snapshot()` | `() => Promise<object>` | Full namespace resource snapshot |
-| `listResource(kind)` | `(kind: string) => Promise<{ items: object[] }>` | List resources by kind |
-| `getResource(kind, name)` | `(kind: string, name: string) => Promise<object>` | Get single resource |
-| `applyResource(resource)` | `(resource: object) => Promise<object>` | Create or update resource |
-| `deleteResource(kind, name)` | `(kind: string, name: string) => Promise<object>` | Delete resource |
-| `createOrganization(spec)` | `(spec: object) => Promise<object>` | Create org with namespace |
-| `createRepository(spec)` | `(spec: object) => Promise<object>` | Create repository |
-| `listResourceForOrg(org, kind)` | `(org: string, kind: string) => Promise<object>` | List resources scoped to org |
-| `applyResourceForOrg(org, resource)` | `(org: string, resource: object) => Promise<object>` | Apply resource scoped to org |
-| `deleteResourceForOrg(org, kind, name)` | `(org: string, kind: string, name: string) => Promise<object>` | Delete scoped resource |
-| `syncExternalBinding(name, data)` | `(name: string, data: object) => Promise<object>` | Trigger external sync |
-| `resolveExternalConflict(options)` | `(options: object) => Promise<object>` | Resolve sync conflict |
-| `approveExternalWriteIntent(options)` | `(options: object) => Promise<object>` | Approve write intent |
-| `cancelExternalWriteIntent(options)` | `(options: object) => Promise<object>` | Cancel write intent |
-| `processWebhookEvent(event)` | `(event: object) => Promise<object>` | Process webhook/trigger event |
-| `queryAgentMemory(options)` | `(options: object) => Promise<object>` | Query agent memory |
-| `approveAgentAction(input)` | `(input: object) => Promise<object>` | Approve agent action |
-| `denyAgentAction(input)` | `(input: object) => Promise<object>` | Deny agent action |
+| Method | Signature | Returns | Side Effects |
+|--------|-----------|---------|--------------|
+| `snapshot()` | `() → Promise<object>` | Full snapshot with architecture | kubectl calls |
+| `listResource(kind)` | `(string) → Promise<{items}>` | Resource list | kubectl get |
+| `listResourceForOrg(org, kind)` | `(string, string) → Promise<{items}>` | Org-filtered list | kubectl get + filter |
+| `getResource(kind, name)` | `(string, string) → Promise<object>` | Single resource | kubectl get |
+| `applyResource(resource)` | `(object) → Promise<{operation, resource}>` | Apply result | kubectl apply, cache clear, event emit |
+| `applyResourceForOrg(org, resource)` | `(string, object) → Promise<object>` | Scoped apply | kubectl apply, cross-org validation |
+| `deleteResource(kind, name)` | `(string, string) → Promise<object>` | Delete result | kubectl delete, cache clear, event emit |
+| `deleteResourceForOrg(org, kind, name)` | `(string, string, string) → Promise<object>` | Scoped delete | Cross-org validation, kubectl delete |
+| `getResourceForOrg(org, kind, name)` | `(string, string, string) → Promise<object>` | Scoped get | Cross-org validation |
+| `createRepository(input)` | `(object) → Promise<{repository, resource}>` | Repository summary | kubectl apply |
+| `createOrganization(input)` | `(object) → Promise<{organization, namespace, binding}>` | Org + namespace + binding | kubectl apply x3 |
+| `watchResource(path, handlers)` | `(string, object) → {child, command}` | Watch handle | kubectl spawn |
+| `reviewAgentPermissions(input)` | `(object) → Promise<review>` | Permission review | snapshot + review |
+| `dispatchAgent(input)` | `(object) → Promise<dispatch result>` | Dispatch run | Full dispatch flow |
+| `approveAgentAction(input)` | `(object) → Promise<result>` | Approval decision | Snapshot + approve |
+| `denyAgentAction(input)` | `(object) → Promise<result>` | Deny decision | Snapshot + deny |
+| `processWebhookEvent(input)` | `(object) → Promise<{processed, dispatched}>` | Trigger results | Snapshot + trigger eval |
+| `provisionAgentWorkspace(input)` | `(object) → Promise<workspace>` | Workspace | Workspace creation |
+| `archiveAgentWorkspace(input)` | `(object) → Promise<result>` | Archived workspace | Snapshot + archive |
+| `linkWorkItem(input)` | `(object) → Promise<link>` | Link resource | Link creation |
+| `queryAgentMemory(input)` | `(object) → Promise<results>` | Query results | Memory query |
+| `syncExternalBinding(name, opts)` | `(string, object) → Promise<{resource, bindingName}>` | Sync result | Upsert + watermark |
+| `resolveExternalConflict(opts)` | `(object) → Promise<result>` | Resolution | Conflict resolve |
+| `approveExternalWriteIntent(opts)` | `(object) → Promise<result>` | Approval | Intent approve |
+| `cancelExternalWriteIntent(opts)` | `(object) → Promise<result>` | Cancellation | Intent reject |
+| `processExternalWebhook(params)` | `(object) → Promise<result>` | Delivery result | HMAC verify + process |
+
+**Cross-org admission (in `applyResource`):**
+```javascript
+// If resource.spec.organizationRef is set and metadata.namespace doesn't match
+// orgNamespaceName(organizationRef), throws:
+// Error('Cross-org namespace mismatch: resource organizationRef "X" expects namespace "Y" but got "Z"')
+```
 
 ---
 
@@ -123,32 +179,38 @@ Source: `packages/krate/core/src/controller-ui.js`
 
 ### createControllerUiModel(snapshot, options?)
 
-Transforms a raw controller snapshot into a structured UI model.
+Transforms a raw snapshot into the structured UI model consumed by all web pages.
 
 ```javascript
 import { createControllerUiModel } from '@a5c-ai/krate-sdk';
-
-const uiModel = createControllerUiModel(await controller.snapshot(), {
-  organization: 'acme'
-});
+const uiModel = createControllerUiModel(snapshot, { organization: 'acme' });
 ```
 
-**Returns:** Object with:
-- `orgs` — Organization list with display names
-- `repositories` — Repository list with metadata
-- `pullRequests` — Open pull requests
-- `pipelines` — Recent pipeline runs
-- `issues` — Issue list
-- `agents` — Agent stacks, runs, sessions
-- `memory` — Memory repositories
+**Parameters:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `snapshot` | `object` | Raw snapshot from `controller.snapshot()` or runtime |
+| `options.organization` | `string` | Org slug to filter by (optional) |
+
+**Returns:** Full UI model object (see web-console-spec.md Section 3.2 for full shape)
 
 ### issueProjectRefs(issue)
 
-Extract project references from an issue resource.
+Extract all project references from an issue resource (checks spec, labels, annotations, status).
+
+```javascript
+import { issueProjectRefs } from '@a5c-ai/krate-sdk';
+const refs = issueProjectRefs(issue); // ['project-alpha', 'project-beta']
+```
 
 ### issueRepositoryRefs(issue)
 
-Extract repository references from an issue resource.
+Extract all repository references from an issue resource.
+
+```javascript
+import { issueRepositoryRefs } from '@a5c-ai/krate-sdk';
+const refs = issueRepositoryRefs(issue); // ['my-repo', 'other-repo']
+```
 
 ---
 
@@ -158,28 +220,21 @@ Source: `packages/krate/core/src/auth.js`
 
 ### createAuthProviderConfig(env?)
 
-Build auth configuration from environment variables.
-
 ```javascript
 import { createAuthProviderConfig } from '@a5c-ai/krate-sdk';
 const config = createAuthProviderConfig(process.env);
+// Returns: { session: { cookieName }, delegatedIdentity: {...}, providers: { github: {...}, sso: {...} } }
 ```
 
-**Returns:** `{ session, delegatedIdentity, providers: { github, sso } }`
-
 ### listEnabledAuthProviders(config?)
-
-Get array of enabled and configured providers.
 
 ```javascript
 import { listEnabledAuthProviders } from '@a5c-ai/krate-sdk';
 const providers = listEnabledAuthProviders(config);
-// [{ id: 'github', label: 'GitHub', type: 'github', ... }]
+// Returns: Array of providers where enabled=true, clientId set, authorizationUrl set
 ```
 
 ### buildAuthorizationRedirect({ provider, requestUrl, state? })
-
-Build OAuth authorization redirect URL.
 
 ```javascript
 import { buildAuthorizationRedirect } from '@a5c-ai/krate-sdk';
@@ -187,11 +242,12 @@ const { url, state, redirectUri } = buildAuthorizationRedirect({
   provider: config.providers.github,
   requestUrl: 'https://krate.example.com/login'
 });
+// url: 'https://github.com/login/oauth/authorize?response_type=code&client_id=...&redirect_uri=...&scope=...&state=...'
 ```
 
-### exchangeOAuthCodeForProfile({ provider, code, requestUrl, fetchImpl? })
+**Throws:** Error if provider disabled, clientId missing, or authorizationUrl missing.
 
-Exchange OAuth authorization code for user profile.
+### exchangeOAuthCodeForProfile({ provider, code, requestUrl, fetchImpl? })
 
 ```javascript
 import { exchangeOAuthCodeForProfile } from '@a5c-ai/krate-sdk';
@@ -200,583 +256,524 @@ const profile = await exchangeOAuthCodeForProfile({
   code: 'abc123',
   requestUrl: 'https://krate.example.com/login'
 });
-// { provider, subject, email, displayName, username, groups, teams, admin }
+// Returns: { provider, subject, email, displayName, username, groups, teams, admin }
 ```
+
+**Side Effects:** Two HTTP requests (token exchange + profile fetch)
 
 ### createSessionCookie(config, profile, options?)
 
-Create an HMAC-signed session cookie.
-
 ```javascript
 import { createSessionCookie } from '@a5c-ai/krate-sdk';
-const cookie = createSessionCookie(config, profile, { secret: process.env.KRATE_SESSION_SECRET });
-// "krate_session=base64url.signature; Path=/; HttpOnly; SameSite=Lax"
+const cookie = createSessionCookie(config, profile, { secret: 'my-secret' });
+// "krate_session=eyJ...base64url.hmac_signature; Path=/; HttpOnly; SameSite=Lax"
 ```
 
 ### parseSessionCookie(config, cookieValue, options?)
 
-Parse and verify a session cookie. Returns `null` if invalid.
-
 ```javascript
 import { parseSessionCookie } from '@a5c-ai/krate-sdk';
-const session = parseSessionCookie(config, cookieValue, { secret });
-// { provider, subject, user } or null
+const session = parseSessionCookie(config, cookieValue, { secret: 'my-secret' });
+// Returns: { cookieName, provider, subject, user } or null
+```
+
+### profileFromDelegatedHeaders(headers, config?, options?)
+
+```javascript
+import { profileFromDelegatedHeaders } from '@a5c-ai/krate-sdk';
+const profile = profileFromDelegatedHeaders(request.headers, config, { requestUrl });
 ```
 
 ### registerLoginProfile({ controller, namespace, profile })
 
-Register a login profile as a User and IdentityMapping.
+Applies User + IdentityMapping resources via `controller.applyResource()`.
 
 ### mapLoginProfileToKrateIdentity(profile)
 
-Map an OAuth profile to Krate User + IdentityMapping resources.
+Pure function: maps OAuth profile to User + IdentityMapping resources.
 
-### profileFromDelegatedHeaders(headers, config?, options?)
+### createInviteResource(spec) / createTeamResource(spec)
 
-Extract user profile from proxy delegation headers.
-
-### createInviteResource(spec)
-
-Create an Invite resource for user onboarding.
-
-### createTeamResource(spec)
-
-Create a Team resource.
+Factory functions for Invite and Team resources.
 
 ---
 
-## 5. Agent Controllers
+## 5. Org Scoping
 
-### createAgentStackController()
+Source: `packages/krate/core/src/org-scoping.js`
 
-Source: `packages/krate/core/src/agent-stack-controller.js`
+### orgNamespaceName(org)
 
-Stack readiness reconciliation with capability resolution and MCP health checks.
+```javascript
+import { orgNamespaceName } from '@a5c-ai/krate-sdk';
+orgNamespaceName('acme');      // 'krate-org-acme'
+orgNamespaceName('Acme Inc');  // 'krate-org-acme-inc'
+```
+
+**Throws:** `Error('organization is required')` if empty after normalization.
+
+### normalizeOrgSlug(value)
+
+```javascript
+import { normalizeOrgSlug } from '@a5c-ai/krate-sdk';
+normalizeOrgSlug('Acme Inc');   // 'acme-inc'
+normalizeOrgSlug('  HELLO  ');  // 'hello'
+```
+
+---
+
+## 6. Agent Controllers
+
+### createAgentStackController(options?)
 
 ```javascript
 import { createAgentStackController } from '@a5c-ai/krate-sdk';
-const stackCtrl = createAgentStackController();
+const ctrl = createAgentStackController({ fetch: customFetch });
 ```
 
 **Methods:**
-- `reconcileStack(stack, resources)` — Resolve capabilities, compute readiness
-- `performMcpHealthCheck(url)` — HTTP health check (3s timeout)
+- `reconcileStack(stack, resources)` — Returns `{ conditions, capabilities, validation, permissionDecision }`
+- `listStackCapabilities(stack, resources)` — Returns array of `{ kind, name, status, ref }`
+- `checkMcpHealth(mcpServer)` — Returns `{ serverName, status, latencyMs, error? }`
 
 ### createAgentDispatchController(options?)
 
-Source: `packages/krate/core/src/agent-dispatch-controller.js`
-
-Manual dispatch orchestration with permission gating.
-
 ```javascript
 import { createAgentDispatchController } from '@a5c-ai/krate-sdk';
-const dispatchCtrl = createAgentDispatchController();
+const ctrl = createAgentDispatchController({ permissionReviewer, stackController, ... });
 ```
 
 **Methods:**
-- `createManualDispatch({ repository, ref, agentStack, taskKind, actor, namespace, organizationRef, resources })` — Create dispatch run
+- `createManualDispatch({ repository, ref, agentStack, taskKind, actor, namespace, organizationRef, resources })` — Full dispatch orchestration
 
 ### createAgentWorkspaceController()
 
-Source: `packages/krate/core/src/agent-workspace-controller.js`
+```javascript
+import { createAgentWorkspaceController } from '@a5c-ai/krate-sdk';
+const ctrl = createAgentWorkspaceController();
+```
 
-Volume-backed git workspace provisioning.
+**Methods (25):**
+- `createWorkspace(opts)` — Returns `{ workspace, pvcManifest }`
+- `deleteWorkspace(opts)` — Returns `{ workspace, pvcDeleteManifest }`
+- `getWorkspaceStatus(opts)` — Returns status object
+- `initializeWorkspace(opts)` — Returns git clone commandSpec
+- `checkoutBranch(opts)` — Returns git checkout commandSpec
+- `syncWorkspace(opts)` — Returns fetch+reset commandSpecs
+- `getMountSpec(opts)` — Returns `{ volume, volumeMount }`
+- `findReusableWorkspace(opts)` — Returns matching workspace or null
+- `claimWorkspace(opts)` — Marks workspace InUse
+- `releaseWorkspace(opts)` — Returns workspace to Ready
+- `provisionWorkspace(opts)` — Legacy: create + mark InUse + runtime
+- `archiveWorkspace(opts)` — Sets phase=Archived
+- `recoverWorkspace(opts)` — Recovers from Archived
+- `bindSession(opts)` — Adds session to boundSessions[]
+- `linkWorkItem(opts)` — Creates WorkItemWorkspaceLink
+- `linkWorkItemToSession(opts)` — Creates WorkItemSessionLink
+- `listWorkspacesForRepo(opts)` — Filter by repository
+- `listWorkspacesForRun(opts)` — Filter by runRef
+- `launchCodespace(workspace, opts)` — Returns podSpec, serviceSpec, codespaceUrl
+- `stopCodespace(workspace)` — Returns delete manifests
+- `getCodespaceStatus(workspace, podStatus)` — Returns running/url/uptime
+- `addAssociation(workspace, ref)` — Adds to spec.associations[]
+- `removeAssociation(workspace, ref)` — Removes from spec.associations[]
+- `listAssociations(workspace)` — Returns associations array
+- `getWorkspaceRuns(workspace, allRuns)` — Returns `{ active, history }`
 
-**Methods:**
-- `createWorkspace({ name, organizationRef, repository, volumeSpec, branch, namespace })` — Create workspace with PVC
-- `generateCloneSpec(workspace)` — Git clone commands
-- `generateCheckoutSpec(workspace, ref)` — Checkout commands
-- `generateMountSpec(workspace)` — Volume mount configuration
-- `findReusableWorkspace(repository, branch, workspaces)` — Find existing workspace
-- `recordRunInHistory(workspace, runId)` — Track run association
-
-### createAgentApprovalController()
-
-Source: `packages/krate/core/src/agent-approval-controller.js`
-
-Approval workflow management.
-
-**Methods:**
-- `createApproval(options)` — Create pending approval
-- `approveAction(approval, decidedBy, reason)` — Approve
-- `denyAction(approval, decidedBy, reason)` — Deny
-
-### createAgentTriggerController()
-
-Source: `packages/krate/core/src/agent-trigger-controller.js`
-
-Event-to-stack routing.
+### createAgentTriggerController(options?)
 
 ```javascript
 import { createAgentTriggerController, validateTriggerRule } from '@a5c-ai/krate-sdk';
 ```
 
 **Methods:**
-- `evaluateTrigger(event, rules, resources)` — Match event to rules
-- `createExecutionRecord(rule, event, decision)` — Record evaluation
+- `matchRule(rule, event)` — Returns `{ matches, reason }`
+- `evaluateEvent({ event, resources })` — Returns array of `{ rule, matches, reason, isDuplicate }`
+- `createTriggerExecution({ rule, event, decision, reason, namespace, organizationRef })` — Creates resource
+- `evaluateWebhookEvent(event, rules)` — Returns `{ matchingRules, dispatchIntents }`
+- `processEvent({ event, resources, namespace, organizationRef })` — Full evaluation + dispatch
 
-**Exported utilities:**
-- `validateCronExpression(expr)` — Validate cron syntax
-- `calculateNextRun(expr, now)` — Next cron execution time
-- `validateWebhookTrigger(source)` — Validate webhook source config
-- `validateCommentTrigger(source)` — Validate comment trigger
-- `validateLabelTrigger(source)` — Validate label trigger
-- `getTriggerSourceType(source)` — Determine source type
-- `validateTriggerRule(rule)` — Full rule validation
+**Utility exports:**
+- `validateCronExpression(expr)` → `{ valid, error? }`
+- `calculateNextRun(cronExpr, fromDate?)` → `Date | null`
+- `validateWebhookTrigger(config)` → `{ valid, error? }`
+- `validateCommentTrigger(config)` → `{ valid, error? }`
+- `validateLabelTrigger(config)` → `{ valid, error? }`
+- `getTriggerSourceType(rule)` → `'cron'|'webhook'|'comment'|'label'|'event'|'unknown'`
+- `validateTriggerRule(rule)` → `{ valid, errors[] }`
 
-### createAgentMemoryController()
-
-Source: `packages/krate/core/src/agent-memory-controller.js`
-
-Memory CRUD and time travel.
+### createAgentApprovalController()
 
 **Methods:**
-- `createMemorySnapshot(options)` — Create dispatch-time memory pin
-- `resolveTimeTravel(options)` — Resolve commit reference
+- `createApprovalRequest({ dispatchRun, action, requestedBy, context, namespace, organizationRef, resources })` — Creates AgentApproval (dedup check)
+- `recordDecision({ approvalName, decision, decidedBy, reason, namespace, organizationRef, resources })` — Approve or deny
+- `isActionApproved({ dispatchRun, action, resources })` — Check approval status
+- `listPendingApprovals({ organizationRef, resources })` — Filter pending
+- `listApprovalsForRun({ dispatchRun, resources })` — Filter by run
+- `persistApproval({ approval, applyResource })` — Persist to K8s
+- `enforceApproval({ dispatchRun, action, resources })` — Gate check
 
-### createAgentAdapterController()
-
-Source: `packages/krate/core/src/agent-adapter-controller.js`
-
-```javascript
-import { createAgentAdapterController, validateAgentAdapter } from '@a5c-ai/krate-sdk';
-```
-
-### createAgentTransportBindingController()
-
-Source: `packages/krate/core/src/agent-transport-binding-controller.js`
+### createPermissionReviewer()
 
 ```javascript
-import { createAgentTransportBindingController, validateAgentTransportBinding } from '@a5c-ai/krate-sdk';
-```
-
-### createAgentProviderConfigController()
-
-Source: `packages/krate/core/src/agent-provider-config-controller.js`
-
-```javascript
-import { createAgentProviderConfigController, validateAgentProviderConfig } from '@a5c-ai/krate-sdk';
-```
-
-### createAgentProjectController()
-
-Source: `packages/krate/core/src/agent-project-controller.js`
-
-```javascript
-import { createAgentProjectController, validateAgentProject } from '@a5c-ai/krate-sdk';
-```
-
-### createAgentGatewayConfigController()
-
-Source: `packages/krate/core/src/agent-gateway-config-controller.js`
-
-```javascript
-import { createAgentGatewayConfigController, validateAgentGatewayConfig } from '@a5c-ai/krate-sdk';
-```
-
-### createAgentSessionTranscriptController()
-
-Source: `packages/krate/core/src/agent-session-transcript-controller.js`
-
-```javascript
-import { createAgentSessionTranscriptController, validateAgentSessionTranscript } from '@a5c-ai/krate-sdk';
-```
-
-### createAgentSubagentController()
-
-Source: `packages/krate/core/src/agent-subagent-controller.js`
-
-```javascript
-import { createAgentSubagentController } from '@a5c-ai/krate-sdk';
-```
-
-### createAgentWritebackController()
-
-Source: `packages/krate/core/src/agent-writeback-controller.js`
-
-```javascript
-import { createAgentWritebackController } from '@a5c-ai/krate-sdk';
+import { createPermissionReviewer } from '@a5c-ai/krate-sdk';
+const reviewer = createPermissionReviewer();
+const result = reviewer.reviewPermissions({
+  repository, ref, actor, agentStack, triggerSource, taskKind,
+  runnerPool, toolRefs, skillRefs, mcpServerRefs, contextLabelRefs,
+  workspacePolicyRef, isFork, resources
+});
+// Returns: { decision: 'allowed'|'requires-approval'|'denied', reasons[], grants[], capabilities, ... }
 ```
 
 ---
 
-## 6. Memory System
-
-Source: `packages/krate/core/src/agent-memory-query.js`
+## 7. Memory System
 
 ### queryGraph({ records, edges, query, kinds?, depth? })
 
-Execute a graph query over memory records.
-
 ```javascript
 import { queryGraph } from '@a5c-ai/krate-sdk';
-
 const result = queryGraph({
-  records: [{ id: 'n1', nodeKind: 'concept', attributes: { title: 'Agent Design' }, edges: [] }],
+  records: [{ id: 'n1', nodeKind: 'concept', attributes: { title: 'Design' }, edges: [] }],
   edges: [{ source: 'n1', target: 'n2', kind: 'related-to' }],
-  query: 'agent',
+  query: 'design',
   kinds: ['concept'],
   depth: 2
 });
-// { matches: [...], totalMatches: number }
+// Returns: { matches: [{ record, score, edges }], totalMatches: number }
 ```
 
-**Parameters:**
-| Param | Type | Required | Description |
-|-------|------|----------|-------------|
-| `records` | `Array<{ id, nodeKind, attributes, edges }>` | Yes | Graph records |
-| `edges` | `Array<{ source, target, kind }>` | No | Flat edges (supplements per-record edges) |
-| `query` | `string` | Yes | Search text (non-empty) |
-| `kinds` | `string[]` | No | nodeKind filter (empty = no filter) |
-| `depth` | `number` | No | Edge-follow depth (default: 1) |
+**Scoring:** id match = 2, attribute match = 1, no match = 0
+**Throws:** Error if query is null, undefined, or empty string
 
-### queryGrep({ documents, query, contextLines? })
-
-Execute full-text grep over documents.
+### queryGrep({ documents, query, paths?, context?, maxMatches? })
 
 ```javascript
 import { queryGrep } from '@a5c-ai/krate-sdk';
-
 const result = queryGrep({
-  documents: [{ id: 'doc1', content: 'Agent memory stores knowledge...' }],
-  query: 'knowledge',
-  contextLines: 2
+  documents: [{ path: 'docs/arch.md', content: '...' }],
+  query: 'controller',
+  paths: ['docs/*'],
+  context: 2,
+  maxMatches: 25
 });
-// { matches: [...], totalMatches: number }
+// Returns: { excerpts: [{ path, lineNumber, line, highlighted, context, contextStart, contextEnd }], totalMatches }
 ```
 
-### queryMemory({ records, documents, edges, query, mode, kinds?, depth?, contextLines? })
+### queryMemory({ query, mode, records, documents, edges, graphOptions, grepOptions })
 
-Combined graph + grep query.
+Combined query supporting three modes: `'graph-only'`, `'grep-only'`, `'graph-and-grep'`.
 
 ```javascript
 import { queryMemory } from '@a5c-ai/krate-sdk';
-
 const result = queryMemory({
-  records,
-  documents,
-  edges,
   query: 'agent design',
-  mode: 'graph-and-grep',  // 'graph-only' | 'grep-only' | 'graph-and-grep'
-  kinds: [],
-  depth: 1,
-  contextLines: 3
+  mode: 'graph-and-grep',
+  records, documents, edges,
+  graphOptions: { kinds: ['concept'], depth: 2 },
+  grepOptions: { paths: ['docs/*'], context: 3, maxMatches: 25 }
 });
+// Returns: { graph: { matches, totalMatches }, grep: { excerpts, totalMatches }, stats: { mode, totalMatches, graphCount, grepCount } }
 ```
 
 ### Memory Import Utilities
 
-Source: `packages/krate/core/src/agent-memory-import.js`
-
 ```javascript
 import {
-  parseJournalForImport,
-  createMemorySnapshot,
-  validateMemoryImport,
-  validateMemorySnapshot,
-  validateOntology,
-  getOntologyNodeKinds,
-  getOntologyEdgeKinds
+  parseJournalForImport,    // Parse babysitter run journal → importable data
+  createMemorySnapshot,     // Create AgentMemorySnapshot resource
+  validateMemoryImport,     // Validate AgentRunMemoryImport structure
+  validateMemorySnapshot,   // Validate AgentMemorySnapshot structure
+  validateOntology,         // Validate AgentMemoryOntology structure
+  getOntologyNodeKinds,     // Extract valid node kinds
+  getOntologyEdgeKinds      // Extract valid edge kinds
 } from '@a5c-ai/krate-sdk';
 ```
 
-| Function | Description |
-|----------|-------------|
-| `parseJournalForImport(journal)` | Parse babysitter run journal for importable data |
-| `createMemorySnapshot(options)` | Create an AgentMemorySnapshot resource |
-| `validateMemoryImport(importResource)` | Validate an AgentRunMemoryImport |
-| `validateMemorySnapshot(snapshot)` | Validate an AgentMemorySnapshot |
-| `validateOntology(ontology)` | Validate an AgentMemoryOntology |
-| `getOntologyNodeKinds(ontology)` | Extract valid node kinds from ontology |
-| `getOntologyEdgeKinds(ontology)` | Extract valid edge kinds from ontology |
-
 ---
 
-## 7. External Backend Controllers
+## 8. External Backend Controllers
 
 ### createWebhookController(options?)
 
-Source: `packages/krate/core/src/external/webhook-controller.js`
-
 ```javascript
 import { createWebhookController } from '@a5c-ai/krate-sdk';
-const webhookCtrl = createWebhookController({ secret: 'webhook-secret' });
+const ctrl = createWebhookController({ secret: 'webhook-signing-secret' });
 ```
 
-**Methods:**
-- `verifySignature(body, signature)` — HMAC-SHA256 verification → `{ valid, reason }`
-- `createDelivery(event)` — Create delivery record with dedup
-- `subscribe(handler)` — Subscribe to delivery events
-- `getDelivery(id)` — Get delivery by ID
-- `listDeliveries()` — List all deliveries
+- `verifyHmacSignature(body, signature)` → `{ valid, reason }`
+- `createDeliveryRecord({ deliveryId, eventType, payload, rawBody })` → record
+- `recordDelivery(record)` — Store in dedup Map
+- `isDuplicate(deliveryId)` → boolean
+- `onEvent(handler)` — Subscribe to events
+- `processDelivery(params)` → `{ queued, duplicate, deliveryId }`
 
-### createSyncController()
-
-Source: `packages/krate/core/src/external/sync-controller.js`
+### createSyncController(opts?)
 
 ```javascript
 import { createSyncController } from '@a5c-ai/krate-sdk';
-const syncCtrl = createSyncController();
+const ctrl = createSyncController({ persistFn: async (resource) => {} });
 ```
 
-**Methods:**
-- `processSync(event)` — Process sync event, update state
-- `getSyncState(provider, resource)` — Get current sync state
-- `listSyncEvents(options)` — List events with filtering
+- `normalizeEvent(rawEvent)` → canonical event
+- `upsertResource({ kind, localName, namespace, spec, externalEnvelope })` → resource
+- `updateWatermark(bindingRef, timestamp)` — Advance watermark
+- `getWatermark(bindingRef)` → string | null
+- `applyOwnershipMode({ ownershipMode, operation, origin })` → `{ allowed, reason }`
+- `createTombstone(params)` → tombstone record
+- `getTombstone(nativeId)` → record | null
 
-### createWriteController()
-
-Source: `packages/krate/core/src/external/write-controller.js`
-
-```javascript
-import { createWriteController } from '@a5c-ai/krate-sdk';
-const writeCtrl = createWriteController();
-```
-
-**Methods:**
-- `createWriteIntent(options)` — Queue write-back intent
-- `approveIntent(name, approvedBy)` — Approve for execution
-- `cancelIntent(name, cancelledBy)` — Cancel intent
-- `listIntents(options)` — List pending intents
-
-### createConflictController()
-
-Source: `packages/krate/core/src/external/conflict-controller.js`
+### createConflictController(opts?)
 
 ```javascript
 import { createConflictController } from '@a5c-ai/krate-sdk';
-const conflictCtrl = createConflictController();
+const ctrl = createConflictController({ persistFn });
 ```
 
-**Methods:**
-- `detectConflict(local, external)` — Compare and detect conflicts
-- `resolveConflict(name, strategy, resolvedValue)` — Resolve with strategy
-- `listConflicts(options)` — List unresolved conflicts
+- `detectConflict({ resourceRef, fieldPath, localValue, externalValue, namespace?, organizationRef? })` → `{ conflict: resource | null }`
+- `resolveConflict({ conflictName, strategy, resolvedValue?, resources? })` → resolved conflict
+- `listOpenConflicts(options)` → conflict array
+- `supersede(conflictName, resources)` → superseded conflict
 
-### createDefaultProviderRegistry()
-
-Source: `packages/krate/core/src/external/provider-resource-factory.js`
+### createWriteController(opts?)
 
 ```javascript
-import { createDefaultProviderRegistry, createExternalBackendProvider } from '@a5c-ai/krate-sdk';
-const registry = createDefaultProviderRegistry();
+import { createWriteController } from '@a5c-ai/krate-sdk';
+const ctrl = createWriteController({ persistFn });
 ```
+
+- `createWriteIntent({ interfaceKey, operation, payload?, resourceRef, requiresApproval?, maxRetries?, namespace?, organizationRef? })` → intent
+- `approveWriteIntent({ intentName, approvedBy, resources? })` → approved intent
+- `rejectWriteIntent({ intentName, rejectedBy, reason?, resources? })` → rejected intent
+- `markSending(intentName, resources)` → sending intent
+- `confirmSuccess(intentName, response, resources)` → succeeded intent
+- `confirmFailure(intentName, error, resources)` → failed/retrying intent
+- `listIntents(options)` → intent array
 
 ---
 
-## 8. Event System
-
-Source: `packages/krate/core/src/event-bus.js`
+## 9. Event System
 
 ### globalEventBus
 
-Singleton event bus instance.
+Singleton event bus shared across the process.
 
 ```javascript
 import { globalEventBus } from '@a5c-ai/krate-sdk';
-
-globalEventBus.subscribe((event) => {
-  console.log('Event:', event.type, event.kind, event.name);
-});
-
-globalEventBus.emit({ type: 'resource-change', kind: 'Repository', name: 'my-repo', operation: 'apply' });
+globalEventBus.subscribe((event) => console.log(event));
+globalEventBus.emit({ type: 'custom', data: {} });
+globalEventBus.emitResourceChange('Repository', 'my-repo', 'apply');
 ```
 
 ### createEventBus()
 
-Create a new isolated event bus.
+Create an isolated event bus instance.
 
 ```javascript
 import { createEventBus } from '@a5c-ai/krate-sdk';
 const bus = createEventBus();
+bus.subscribe(fn);
+bus.unsubscribe(fn);
+bus.emit(event);
+bus.emitResourceChange(kind, name, operation);
 ```
-
-**Methods:**
-| Method | Signature | Description |
-|--------|-----------|-------------|
-| `subscribe(fn)` | `(fn: (event) => void) => void` | Add listener |
-| `unsubscribe(fn)` | `(fn: Function) => void` | Remove listener |
-| `emit(event)` | `(event: object) => void` | Broadcast to all |
-| `emitResourceChange(kind, name, operation)` | `(kind, name, op) => void` | Emit resource-change event |
 
 ---
 
-## 9. Audit
+## 10. Async Utilities
 
-Source: `packages/krate/core/src/audit-controller.js`
+### createEventBatcher(handler, options?)
+
+```javascript
+import { createEventBatcher } from '@a5c-ai/krate-sdk';
+const batcher = createEventBatcher(async (events) => { await saveAll(events); }, { maxBatchSize: 50, flushIntervalMs: 1000 });
+batcher.push(event);     // Add event to batch
+await batcher.flush();   // Force immediate flush
+batcher.stop();          // Clear timer and buffer
+```
+
+### createRetryPolicy(options?)
+
+```javascript
+import { createRetryPolicy } from '@a5c-ai/krate-sdk';
+const policy = createRetryPolicy({ maxRetries: 3, baseDelayMs: 1000, maxDelayMs: 30000, jitter: true });
+policy.shouldRetry(attempt, error);  // boolean
+policy.getDelay(attempt);            // milliseconds
+```
+
+### createDeliveryQueue(processor, options?)
+
+```javascript
+import { createDeliveryQueue } from '@a5c-ai/krate-sdk';
+const queue = createDeliveryQueue(async (item) => { await deliver(item); }, { concurrency: 5, retryPolicy });
+queue.enqueue(item);     // Add to queue
+await queue.drain();     // Wait for empty
+queue.size();            // Current queue + active
+queue.stop();            // Clear and resolve waiters
+```
+
+### createCheckpointer(storage?)
+
+```javascript
+import { createCheckpointer } from '@a5c-ai/krate-sdk';
+const cp = createCheckpointer(new Map());
+cp.save('progress', { page: 5 });
+cp.load('progress');    // { page: 5 }
+cp.clear('progress');
+cp.listKeys();          // []
+```
+
+---
+
+## 11. Audit
 
 ### createAuditController()
 
 ```javascript
 import { createAuditController } from '@a5c-ai/krate-sdk';
 const audit = createAuditController();
+audit.log({ org: 'acme', actor: 'user1', action: 'apply', resource: { kind: 'Repository', name: 'x' } });
+const { events, total } = audit.query({ org: 'acme', action: 'apply', limit: 10, offset: 0 });
 ```
-
-**Methods:**
-- `record(event)` — Record an audit event
-- `query(options)` — Query events by org, action, time range, pagination
 
 ### createEventPoller(options)
 
-Polling mechanism for audit event consumption.
+Polling mechanism for audit event consumption with exponential backoff.
 
 ---
 
-## 10. Async Utilities
+## 12. Other Utilities
 
-Source: `packages/krate/core/src/async-controller.js`
-
-### createEventBatcher(handler, options?)
-
-Batch events with size and time-based flushing.
-
-```javascript
-import { createEventBatcher } from '@a5c-ai/krate-sdk';
-
-const batcher = createEventBatcher(async (events) => {
-  await saveAll(events);
-}, { maxBatchSize: 50, flushIntervalMs: 1000 });
-
-batcher.push(event);
-await batcher.flush();
-batcher.stop();
-```
-
-**Options:** `{ maxBatchSize: 50, flushIntervalMs: 1000 }`
-**Returns:** `{ push(event), flush(), stop() }`
-
-### createRetryPolicy(options?)
-
-Retry operations with exponential backoff and jitter.
-
-```javascript
-import { createRetryPolicy } from '@a5c-ai/krate-sdk';
-const retry = createRetryPolicy({ maxRetries: 3, baseDelayMs: 100 });
-```
-
-### createDeliveryQueue(options?)
-
-Ordered async delivery queue with error isolation.
-
-```javascript
-import { createDeliveryQueue } from '@a5c-ai/krate-sdk';
-const queue = createDeliveryQueue({ concurrency: 5 });
-```
-
-### createCheckpointer(options?)
-
-Checkpoint and resume for long-running operations.
-
-```javascript
-import { createCheckpointer } from '@a5c-ai/krate-sdk';
-const cp = createCheckpointer({ storageKey: 'sync-progress' });
-```
-
----
-
-## 11. Other Utilities
-
-### Runner Controller
-
-Source: `packages/krate/core/src/runner-controller.js`
+### createRunnerController()
 
 ```javascript
 import { createRunnerController } from '@a5c-ai/krate-sdk';
 const runners = createRunnerController();
+runners.validateRunnerPool(resource);  // { valid, reason?, name?, ... }
+runners.getPoolStatus(pool);           // { idle, active, total, phase, scaling }
+runners.getCapacity(pool);             // { maxReplicas, used, available, utilizationPct }
+runners.createRunner(pool, runRef);    // Runner record
+runners.assignJob(runnerId, jobRef);   // Assignment
+runners.releaseRunner(runnerId);       // Release
 ```
 
-### Notification Controller
-
-Source: `packages/krate/core/src/notification-controller.js`
+### createNotificationController()
 
 ```javascript
 import { createNotificationController } from '@a5c-ai/krate-sdk';
-const notifications = createNotificationController();
+const notif = createNotificationController();
+notif.createNotification(event);                    // Create from event
+notif.listNotifications(org, { unreadOnly, limit, since });
+notif.markAsRead(id);                               // Mark single
+notif.markAllAsRead(org);                           // Mark all for org
+notif.getUnreadCount(org);                          // Count
+notif.getPreferences(userId);                       // Get prefs
+notif.updatePreferences(userId, { sound: true });   // Update
 ```
 
-### Org Scoping
-
-Source: `packages/krate/core/src/org-scoping.js`
-
-```javascript
-import { orgNamespaceName, normalizeOrgSlug } from '@a5c-ai/krate-sdk';
-
-orgNamespaceName('acme');      // 'krate-org-acme'
-normalizeOrgSlug('Acme Inc');  // 'acme-inc'
-```
-
-### Permission Review
-
-Source: `packages/krate/core/src/agent-permission-review.js`
-
-```javascript
-import { createPermissionReviewer } from '@a5c-ai/krate-sdk';
-const reviewer = createPermissionReviewer();
-const result = reviewer.reviewPermissions({ repository, ref, actor, agentStack, resources });
-```
-
-### Secret/Config Grant Management
-
-Source: `packages/krate/core/src/agent-secret-config-grant-controller.js`
-
-```javascript
-import {
-  createAgentSecretGrantController,
-  createAgentConfigGrantController,
-  validateAgentSecretGrant,
-  validateAgentConfigGrant,
-  listGrantsForAgent,
-  revokeGrant
-} from '@a5c-ai/krate-sdk';
-```
-
-### Gitea Service
-
-Source: `packages/krate/core/src/gitea-service.js`
+### createGiteaService(options)
 
 ```javascript
 import { createGiteaService } from '@a5c-ai/krate-sdk';
-const gitea = createGiteaService({ baseUrl: 'http://gitea:3000', token: '...' });
+const gitea = createGiteaService({ baseUrl: 'http://gitea:3000', token: 'admin-token' });
 ```
 
-### Atlas Graph Client
-
-Source: `packages/krate/sdk/src/atlas-graph-client.js`
-
-```javascript
-import { fetchAtlasRecordsByKinds, searchAtlasGraph, STACK_LAYERS, COMPOSITION_FACETS, ALL_LAYER_DEFS } from '@a5c-ai/krate-sdk';
-```
-
-| Export | Description |
-|--------|-------------|
-| `fetchAtlasRecordsByKinds(kinds, options)` | Fetch graph records by node kinds |
-| `searchAtlasGraph(query, options)` | Full-text search across Atlas graph |
-| `STACK_LAYERS` | Stack layer definitions |
-| `COMPOSITION_FACETS` | Composition facet catalog |
-| `ALL_LAYER_DEFS` | All layer definition objects |
-
-### Controller Client
-
-Source: `packages/krate/core/src/controller-client.js`
+### fetchControllerUiModel({ baseUrl, org })
 
 ```javascript
 import { fetchControllerUiModel } from '@a5c-ai/krate-sdk';
 const uiModel = await fetchControllerUiModel({ baseUrl: 'http://localhost:3080', org: 'acme' });
 ```
 
-### Snapshot Cache
-
-Source: `packages/krate/core/src/snapshot-cache.js`
+### clearSnapshotCache()
 
 ```javascript
 import { clearSnapshotCache } from '@a5c-ai/krate-sdk';
-clearSnapshotCache();  // Invalidate all cached data
+clearSnapshotCache();  // Invalidates all per-org cache entries + legacy cache
 ```
 
-### Identity Policy
-
-Source: `packages/krate/core/src/identity-policy.js`
+### mapOidcIdentity(profile)
 
 ```javascript
 import { mapOidcIdentity } from '@a5c-ai/krate-sdk';
+const identity = mapOidcIdentity({ subject, email, groups });
 ```
+
+---
+
+## 13. Atlas Graph Client
+
+Source: `packages/krate/sdk/src/atlas-graph-client.js`
+
+### STACK_LAYERS
+
+Array of 11 stack layer definitions for the agent stack builder. Each has:
+```javascript
+{ key: 'layer:N-name', label: string, kind: 'stack-layer', position: number, atlasKinds: string[] }
+```
+
+Layers: Model, Provider, Transport, Agent Core, Agent Runtime, Agent Platform, Workspace, Execution, Sandbox, Interaction, Presentation.
+
+### COMPOSITION_FACETS
+
+Array of 4 composition facet definitions:
+- Roles and Teams
+- Skills and Capabilities
+- Evaluation and Governance
+- Environment and Data
+
+### ALL_LAYER_DEFS
+
+Combined `[...STACK_LAYERS, ...COMPOSITION_FACETS]` — 15 definitions.
+
+### fetchAtlasRecordsByKinds(atlasBaseUrl, kinds, options?)
+
+```javascript
+import { fetchAtlasRecordsByKinds } from '@a5c-ai/krate-sdk';
+const records = await fetchAtlasRecordsByKinds('https://atlas.example.com', ['ModelFamily', 'ModelVersion'], { limit: 100 });
+// Returns: Array<{ id, nodeKind, displayName, description, cluster }>
+```
+
+### searchAtlasGraph(atlasBaseUrl, query, options?)
+
+```javascript
+import { searchAtlasGraph } from '@a5c-ai/krate-sdk';
+const result = await searchAtlasGraph('https://atlas.example.com', 'claude', { kinds: ['ModelFamily'], limit: 25 });
+// Returns: { total, hits: Array<{ id, nodeKind, displayName, cluster, score, snippet }> }
+```
+
+---
+
+## 14. Boundary Constants
+
+All boundary declarations are also exported for runtime introspection:
+
+```javascript
+import {
+  KRATE_API_CONTROLLER_BOUNDARY,
+  AGENT_STACK_CONTROLLER_BOUNDARY,
+  AGENT_DISPATCH_CONTROLLER_BOUNDARY,
+  AGENT_WORKSPACE_CONTROLLER_BOUNDARY,
+  AGENT_TRIGGER_CONTROLLER_BOUNDARY,
+  AGENT_APPROVAL_CONTROLLER_BOUNDARY,
+  AGENT_MEMORY_QUERY_BOUNDARY,
+  AGENT_PERMISSION_REVIEW_BOUNDARY,
+  AGENT_SECRET_GRANT_CONTROLLER_BOUNDARY,
+  AGENT_CONFIG_GRANT_CONTROLLER_BOUNDARY,
+  AGENT_ADAPTER_CONTROLLER_BOUNDARY,
+  AGENT_TRANSPORT_BINDING_CONTROLLER_BOUNDARY,
+  AGENT_PROVIDER_CONFIG_CONTROLLER_BOUNDARY,
+  AGENT_PROJECT_CONTROLLER_BOUNDARY,
+  AGENT_GATEWAY_CONFIG_CONTROLLER_BOUNDARY,
+  AGENT_SESSION_TRANSCRIPT_CONTROLLER_BOUNDARY,
+  AGENT_SUBAGENT_CONTROLLER_BOUNDARY,
+  AGENT_WRITEBACK_CONTROLLER_BOUNDARY,
+  AUDIT_CONTROLLER_BOUNDARY,
+  RUNNER_CONTROLLER_BOUNDARY,
+  NOTIFICATION_CONTROLLER_BOUNDARY,
+  AGENT_MEMORY_CONTROLLER_BOUNDARY
+} from '@a5c-ai/krate-sdk';
+```
+
+Each exports `{ role, scope, owns, delegatesTo, mustNotOwn }`.
