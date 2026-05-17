@@ -7,6 +7,9 @@
 name: QA Dispatch
 
 on:
+  push:
+    branches: [main, staging, develop]
+    paths: ['.github/workflows/qa-dispatch.yml']
   issue_comment:
     types: [created]
   workflow_dispatch:
