@@ -268,7 +268,7 @@ runs:
         INPUT_PLUGINS: ${{ inputs.plugins }}
       run: |
         set -euo pipefail
-        REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+        REPO_ROOT="${GITHUB_WORKSPACE:-$(pwd)}"
         while IFS= read -r plugin; do
           [ -z "$plugin" ] && continue
           node "$REPO_ROOT/packages/agent-mux/cli/dist/index.js" plugin install "$INPUT_ADAPTER" "$plugin"
@@ -285,7 +285,7 @@ runs:
         EFFECTIVE_GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || inputs.github-token }}
       run: |
         set -euo pipefail
-        REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+        REPO_ROOT="${GITHUB_WORKSPACE:-$(pwd)}"
         EVENT_FILE="$RUNNER_TEMP/agent-mux-event.json"
         RESULT_FILE="$RUNNER_TEMP/agent-mux-trigger.json"
         INCLUDE_DIFF_ARGS=()
@@ -351,7 +351,7 @@ runs:
         AMUX_TRIGGER_EVENT_PATH: ${{ steps.trigger.outputs.event }}
       run: |
         set -euo pipefail
-        REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+        REPO_ROOT="${GITHUB_WORKSPACE:-$(pwd)}"
         AMUX="node $REPO_ROOT/packages/agent-mux/cli/dist/index.js"
 
         # Build command args
