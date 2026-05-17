@@ -991,10 +991,19 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         console.error(`[amux launch] ${plan.harness} proxy: OPENAI_BASE_URL=${proxyRuntime.url}/v1`);
       }
 
-      // Cursor: set CURSOR_API_KEY to skip browser login — the proxy handles
-      // upstream auth, so cursor-agent just needs a non-empty key to proceed.
+      // Cursor: pre-create ~/.cursor/auth.json with a proxy token so
+      // cursor-agent skips browser OAuth. Also set CURSOR_API_KEY env var.
       if (plan.harness === 'cursor') {
-        plan.env['CURSOR_API_KEY'] = plan.env['CURSOR_API_KEY'] || proxyRuntime.authToken || 'proxy-token';
+        const token = proxyRuntime.authToken || 'proxy-token';
+        plan.env['CURSOR_API_KEY'] = plan.env['CURSOR_API_KEY'] || token;
+        const { writeFileSync, mkdirSync } = await import('node:fs');
+        const { join } = await import('node:path');
+        const cursorDir = join(process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp', '.cursor');
+        mkdirSync(cursorDir, { recursive: true });
+        const authPayload = JSON.stringify({ accessToken: token, refreshToken: token, userId: 'ci-proxy', email: 'ci@proxy.local' });
+        writeFileSync(join(cursorDir, 'auth.json'), authPayload);
+        writeFileSync(join(cursorDir, 'credentials.json'), authPayload);
+        console.error(`[amux launch] Cursor auth pre-seeded at ${cursorDir}/auth.json`);
       }
 
       // Pi ignores OPENAI_BASE_URL — write a models.json config that registers
