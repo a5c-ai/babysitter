@@ -15,12 +15,14 @@ const required = [
   'apps/web/app/pages/settings-pages.jsx',
   'apps/web/app/pages/external-pages.jsx',
   'apps/web/proxy.js',
+  'apps/web/app/components/app-settings.jsx',
   'apps/web/app/components/code-editor.jsx',
   'apps/web/app/components/resource-actions.jsx',
   'apps/web/app/components/issue-editor.jsx',
   'apps/web/app/components/repo-code-browser.jsx',
   'apps/web/app/components/repo-runs.jsx',
   'apps/web/app/components/krate-loading.jsx',
+  'apps/web/app/components/theme-runtime.jsx',
   'apps/web/app/loading.jsx',
   'apps/web/app/api/controller/route.js',
   'apps/web/app/api/orgs/[org]/resources/route.js',
@@ -141,6 +143,13 @@ if (!files['apps/web/app/loading.jsx'].includes('routeLoading') || !files['apps/
 if (files['apps/web/app/loading.jsx'].includes('KrateDelayedRouteLoading') || files['apps/web/app/loading.jsx'].includes('return null')) failures.push('route loading UI must not delay or render a blank fallback');
 if (!files['apps/web/app/globals.css'].includes('krateRouteLoadingProgress') || !files['apps/web/app/globals.css'].includes('krateRouteLoadingPhase')) failures.push('route loading UI must animate progress and phase text without client hydration');
 if (!files['apps/web/app/lib/krate-ui.jsx'].includes('useCache: true') || files['apps/web/app/lib/krate-ui.jsx'].includes('useCache: false')) failures.push('Krate page loader must use cached controller snapshots');
+for (const token of ['ThemeRuntime', 'themeInitScript', 'krate-theme', 'suppressHydrationWarning']) {
+  if (!files['apps/web/app/layout.jsx'].includes(token)) failures.push(`root layout missing persistent theme token ${token}`);
+}
+for (const token of ['THEME_STORAGE_KEY', 'krate-theme', 'applyTheme', 'storeTheme', "window.addEventListener('storage'", 'prefers-color-scheme: dark']) {
+  if (!files['apps/web/app/components/theme-runtime.jsx'].includes(token)) failures.push(`theme runtime missing ${token}`);
+}
+if (!files['apps/web/app/components/app-settings.jsx'].includes('storeTheme(newTheme)') || files['apps/web/app/components/app-settings.jsx'].includes("localStorage.setItem('krate-theme'")) failures.push('settings theme changes must go through the shared theme runtime');
 if ((webUiSource() + files['apps/web/app/components/krate-loading.jsx']).includes('Krate workspace degraded or empty')) failures.push('degraded workspace copy should be replaced by recovery loading UI');
 if ((webUiSource() + files['apps/web/app/components/krate-loading.jsx']).includes('window.location.reload')) failures.push('recovery loading UI must not reload the page');
 for (const token of ['text/event-stream', 'globalEventBus', 'KRATE_CONTROLLER_URL', "type: 'connected'"]) {

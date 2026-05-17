@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { applyTheme, readStoredTheme, storeTheme } from './theme-runtime.jsx';
 
 const THEMES = ['light', 'dark', 'system'];
 const DENSITIES = ['compact', 'default', 'spacious'];
@@ -26,16 +27,6 @@ function getStoredValue(key, fallback) {
   try { return localStorage.getItem(key) || fallback; } catch { return fallback; }
 }
 
-function applyTheme(theme) {
-  if (typeof document === 'undefined') return;
-  if (theme === 'system') {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-  } else {
-    document.documentElement.setAttribute('data-theme', theme);
-  }
-}
-
 export function AppSettingsForm() {
   const [theme, setTheme] = useState('light');
   const [locale, setLocale] = useState('en');
@@ -53,7 +44,7 @@ export function AppSettingsForm() {
   const [desktopPermission, setDesktopPermission] = useState('default');
 
   useEffect(() => {
-    setTheme(getStoredValue('krate-theme', 'light'));
+    setTheme(readStoredTheme('light'));
     setLocale(getStoredValue('krate-locale', 'en'));
     setSseEnabled(getStoredValue('krate-sse-enabled', 'true') === 'true');
     setCacheTtl(getStoredValue('krate-cache-ttl', '300'));
@@ -67,14 +58,12 @@ export function AppSettingsForm() {
       setDesktopPermission(Notification.permission);
     }
 
-    const storedTheme = getStoredValue('krate-theme', 'light');
-    applyTheme(storedTheme);
+    applyTheme(readStoredTheme('light'));
   }, []);
 
   function handleThemeChange(newTheme) {
     setTheme(newTheme);
-    localStorage.setItem('krate-theme', newTheme);
-    applyTheme(newTheme);
+    storeTheme(newTheme);
     flashSaved();
   }
 

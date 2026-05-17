@@ -96,6 +96,22 @@ test('recovery overlay progresses without covering normal route navigation', () 
   assert.match(loader, /shownProgress/);
 });
 
+test('theme setting applies across full page loads', () => {
+  const layout = readWebFile('app', 'layout.jsx');
+  const settings = readWebFile('app', 'components', 'app-settings.jsx');
+  const runtime = readWebFile('app', 'components', 'theme-runtime.jsx');
+  assert.match(layout, /ThemeRuntime/);
+  assert.match(layout, /themeInitScript/);
+  assert.match(layout, /krate-theme/);
+  assert.match(layout, /suppressHydrationWarning/);
+  assert.match(runtime, /THEME_STORAGE_KEY = 'krate-theme'/);
+  assert.ok(runtime.includes("document.documentElement.setAttribute('data-theme'"));
+  assert.ok(runtime.includes("window.addEventListener('storage'"));
+  assert.match(runtime, /prefers-color-scheme: dark/);
+  assert.ok(settings.includes('storeTheme(newTheme)'));
+  assert.ok(!settings.includes("localStorage.setItem('krate-theme'"));
+});
+
 
 
 
