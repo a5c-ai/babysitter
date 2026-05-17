@@ -150,10 +150,11 @@ runs:
         ACTION_ROOT: ${{ github.action_path }}
       run: |
         set -euo pipefail
-        REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
-        if [ -d "$REPO_ROOT/packages/agent-mux/cli" ] && [ -f "$REPO_ROOT/packages/triggers/action.yml" ]; then
+        # Check if the WORKSPACE (not the action checkout) is the monorepo
+        WORKSPACE="${GITHUB_WORKSPACE:-$(pwd)}"
+        if [ -d "$WORKSPACE/packages/agent-mux/cli" ] && [ -f "$WORKSPACE/packages/triggers/action.yml" ]; then
           echo "mode=monorepo" >> "$GITHUB_OUTPUT"
-          echo "repo_root=$REPO_ROOT" >> "$GITHUB_OUTPUT"
+          echo "repo_root=$WORKSPACE" >> "$GITHUB_OUTPUT"
         else
           echo "mode=npx" >> "$GITHUB_OUTPUT"
           echo "repo_root=" >> "$GITHUB_OUTPUT"
@@ -204,10 +205,18 @@ runs:
       run: |
         set -euo pipefail
         cd "$INPUT_WORKING_DIRECTORY"
+        # Map adapter names to amux agent aliases
+        AMUX_AGENT="$INPUT_HARNESS"
+        case "$INPUT_HARNESS" in
+          claude-code) AMUX_AGENT="claude" ;;
+          gemini-cli) AMUX_AGENT="gemini" ;;
+          copilot-cli) AMUX_AGENT="copilot" ;;
+          cursor-cli) AMUX_AGENT="cursor" ;;
+        esac
         if [ "$RUNTIME_MODE" = "monorepo" ]; then
-          node "$REPO_ROOT/packages/agent-mux/cli/dist/index.js" install "$INPUT_HARNESS" || true
+          node "$REPO_ROOT/packages/agent-mux/cli/dist/index.js" install "$AMUX_AGENT" || true
         else
-          npx -y @a5c-ai/agent-mux-cli install "$INPUT_HARNESS" || true
+          npx -y @a5c-ai/agent-mux-cli install "$AMUX_AGENT" || true
         fi
 
     - name: Install babysitter plugin
