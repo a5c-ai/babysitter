@@ -2,6 +2,8 @@ import { cookies } from 'next/headers';
 import { createAuthProviderConfig, listEnabledAuthProviders, parseSessionCookie, fetchControllerUiModel, createKrateApiController, orgNamespaceName, resourceToYaml } from '@a5c-ai/krate-sdk';
 import { KrateControllerRecovery } from '../components/krate-loading.jsx';
 
+const ORG_HYDRATED_RESOURCE_KINDS = ['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject'];
+
 export const orgNavigationGroups = [
   {
     title: 'Ship',
@@ -140,7 +142,8 @@ export async function loadKrateUi(org = null) {
   const model = await fetchControllerUiModel({ organization: org, useCache: true, swrOptions: { staleMs: 5 * 60_000 } });
   const activeOrg = org || model.org?.slug || 'default';
   const resourceByKind = new Map(model.resources.map((resource) => [resource.kind, resource]));
-  await hydrateEmptyOrgResources(resourceByKind, activeOrg, ['Repository', 'RunnerPool', 'Pipeline', 'Job']);
+  await hydrateEmptyOrgResources(resourceByKind, activeOrg, ORG_HYDRATED_RESOURCE_KINDS);
+  syncHydratedModel(model, resourceByKind);
   const repositoryResource = resourceByKind.get('Repository');
   const repositories = repositoryResource?.items?.length ? repositoryResource.items : model.views.dashboard.repositories || [];
   return {
@@ -162,6 +165,29 @@ export async function loadKrateUi(org = null) {
     policyBindings: resourceByKind.get('PolicyBinding'),
     policyExceptionRequests: resourceByKind.get('PolicyExceptionRequest')
   };
+}
+
+function syncHydratedModel(model, resourceByKind) {
+  if (!model || !resourceByKind) return;
+  const resources = Array.isArray(model.resources) ? [...model.resources] : [];
+  for (const [kind, summary] of resourceByKind.entries()) {
+    const index = resources.findIndex((resource) => resource.kind === kind);
+    if (index >= 0) resources[index] = summary;
+    else resources.push(summary);
+  }
+  model.resources = resources;
+  const projects = resourceByKind.get('KrateProject')?.items || [];
+  if (projects.length) {
+    model.agents = {
+      ...(model.agents || {}),
+      projects: { ...((model.agents || {}).projects || {}), count: projects.length, items: projects }
+    };
+    model.metrics = {
+      ...(model.metrics || {}),
+      projects: projects.length,
+      resources: resources.reduce((count, resource) => count + Number(resource?.count || resource?.items?.length || 0), 0)
+    };
+  }
 }
 
 async function hydrateEmptyOrgResources(resourceByKind, org, kinds) {

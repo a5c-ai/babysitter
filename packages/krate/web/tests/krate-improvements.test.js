@@ -47,11 +47,17 @@ test('repository code browser uses CodeMirror syntax highlighting', () => {
 test('degraded Krate UI renders recovery loader only for controller fetch failures', () => {
   const ui = readWebFile('app', 'lib', 'krate-ui.jsx');
   const loader = readWebFile('app', 'components', 'krate-loading.jsx');
+  const controllerRoute = readWebFile('app', 'api', 'controller', 'route.js');
   assert.match(ui, /shouldShowControllerRecovery/);
   assert.doesNotMatch(ui, /localFallback: false/);
   assert.match(ui, /useCache: true/);
   assert.doesNotMatch(ui, /useCache: false/);
   assert.match(ui, /KrateControllerRecovery/);
+  assert.match(ui, /ORG_HYDRATED_RESOURCE_KINDS = \['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject'\]/);
+  assert.match(ui, /syncHydratedModel/);
+  assert.match(ui, /model\.agents/);
+  assert.match(controllerRoute, /'KrateProject'/);
+  assert.match(controllerRoute, /model\.agents/);
   assert.match(ui, /hasLiveControllerData/);
   assert.doesNotMatch(ui, /Number\.isFinite\(model\.metrics\?\.resources\)/);
   assert.doesNotMatch(ui, /orgs\?\.length/);

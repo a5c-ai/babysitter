@@ -143,6 +143,10 @@ if (!files['apps/web/app/loading.jsx'].includes('routeLoading') || !files['apps/
 if (files['apps/web/app/loading.jsx'].includes('KrateDelayedRouteLoading') || files['apps/web/app/loading.jsx'].includes('return null')) failures.push('route loading UI must not delay or render a blank fallback');
 if (!files['apps/web/app/globals.css'].includes('krateRouteLoadingProgress') || !files['apps/web/app/globals.css'].includes('krateRouteLoadingPhase')) failures.push('route loading UI must animate progress and phase text without client hydration');
 if (!files['apps/web/app/lib/krate-ui.jsx'].includes('useCache: true') || files['apps/web/app/lib/krate-ui.jsx'].includes('useCache: false')) failures.push('Krate page loader must use cached controller snapshots');
+for (const token of ['KrateProject', 'syncHydratedModel', 'model.agents']) {
+  if (!files['apps/web/app/lib/krate-ui.jsx'].includes(token)) failures.push(`Krate page model hydration missing ${token}`);
+  if (!files['apps/web/app/api/controller/route.js'].includes(token === 'syncHydratedModel' ? 'KrateProject' : token)) failures.push(`controller API hydration missing ${token}`);
+}
 for (const token of ['ThemeRuntime', 'themeInitScript', 'krate-theme', 'suppressHydrationWarning']) {
   if (!files['apps/web/app/layout.jsx'].includes(token)) failures.push(`root layout missing persistent theme token ${token}`);
 }
