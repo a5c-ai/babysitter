@@ -179,7 +179,7 @@ jobs:
               const models = {
                 'foundry-gpt55': {provider:'foundry-openai', amux_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AMUX_API_BASE'},
                 'google-gemini31': {provider:'google', amux_provider:'google', model:'gemini-3.1-pro-preview', required_env:'GOOGLE_API_KEY'},
-                'anthropic-sonnet46': {provider:'anthropic', amux_provider:'anthropic', model:'claude-sonnet-4-6-20250514', required_env:'ANTHROPIC_API_KEY'},
+                'anthropic-sonnet46': {provider:'anthropic', amux_provider:'anthropic', model:'claude-sonnet-4-6', required_env:'ANTHROPIC_API_KEY'},
                 'foundry-kimi': {provider:'foundry-openai', amux_provider:'foundry', model:'Kimi-K2.6', required_env:'AZURE_API_KEY,AMUX_API_BASE'},
               };
               const modes = {
