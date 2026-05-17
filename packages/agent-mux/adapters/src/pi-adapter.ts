@@ -5,7 +5,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { getAdapterMetadata, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/agent-catalog';
+import { getAdapterMetadata, getAdapterModels, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/agent-catalog';
 
 import type {
   AgentCapabilities,
@@ -98,31 +98,13 @@ export class PiAdapter extends BaseAgentAdapter {
     };
   }
 
-  readonly models: ModelCapabilities[] = [
-    {
+  get models(): ModelCapabilities[] {
+    return getAdapterModels(this.agent).map((m) => ({
+      ...m,
       agent: this.agent,
-      modelId: 'default',
-      displayName: 'Default Model',
-      deprecated: false,
-      contextWindow: 128000,
-      maxOutputTokens: 8192,
-      supportsThinking: false,
-      supportsToolCalling: true,
-      supportsParallelToolCalls: false,
-      supportsToolCallStreaming: true,
-      supportsJsonMode: false,
-      supportsStructuredOutput: false,
-      supportsTextStreaming: true,
-      supportsThinkingStreaming: false,
-      supportsImageInput: false,
-      supportsImageOutput: false,
-      supportsFileInput: false,
-      cliArgKey: '--model',
-      cliArgValue: 'default',
-      lastUpdated: '2025-01-01',
-      source: 'bundled',
-    },
-  ];
+      thinkingEffortLevels: m.thinkingEffortLevels as ModelCapabilities['thinkingEffortLevels'],
+    }));
+  }
 
   get defaultModelId() { return getDefaultModelId(this.agent) ?? 'default'; }
 

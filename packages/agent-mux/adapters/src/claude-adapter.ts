@@ -5,7 +5,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { getAdapterMetadata, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/agent-catalog';
+import { getAdapterMetadata, getAdapterModels, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/agent-catalog';
 
 import type {
   AgentCapabilities,
@@ -103,64 +103,13 @@ export class ClaudeAdapter extends BaseAgentAdapter {
     };
   }
 
-  readonly models: ModelCapabilities[] = [
-    {
+  get models(): ModelCapabilities[] {
+    return getAdapterModels(this.agent).map((m) => ({
+      ...m,
       agent: this.agent,
-      modelId: 'claude-sonnet-4-20250514',
-      modelAlias: 'sonnet',
-      displayName: 'Claude Sonnet 4',
-      deprecated: false,
-      contextWindow: 200000,
-      maxOutputTokens: 16384,
-      maxThinkingTokens: 128000,
-      inputPricePerMillion: 3,
-      outputPricePerMillion: 15,
-      supportsThinking: true,
-      thinkingEffortLevels: ['low', 'medium', 'high', 'max'],
-      supportsToolCalling: true,
-      supportsParallelToolCalls: true,
-      supportsToolCallStreaming: true,
-      supportsJsonMode: true,
-      supportsStructuredOutput: true,
-      supportsTextStreaming: true,
-      supportsThinkingStreaming: true,
-      supportsImageInput: true,
-      supportsImageOutput: false,
-      supportsFileInput: true,
-      cliArgKey: '--model',
-      cliArgValue: 'claude-sonnet-4-20250514',
-      lastUpdated: '2025-05-14',
-      source: 'bundled',
-    },
-    {
-      agent: this.agent,
-      modelId: 'claude-opus-4-20250514',
-      modelAlias: 'opus',
-      displayName: 'Claude Opus 4',
-      deprecated: false,
-      contextWindow: 200000,
-      maxOutputTokens: 16384,
-      maxThinkingTokens: 128000,
-      inputPricePerMillion: 15,
-      outputPricePerMillion: 75,
-      supportsThinking: true,
-      thinkingEffortLevels: ['low', 'medium', 'high', 'max'],
-      supportsToolCalling: true,
-      supportsParallelToolCalls: true,
-      supportsToolCallStreaming: true,
-      supportsJsonMode: true,
-      supportsStructuredOutput: true,
-      supportsTextStreaming: true,
-      supportsThinkingStreaming: true,
-      supportsImageInput: true,
-      supportsImageOutput: false,
-      supportsFileInput: true,
-      cliArgKey: '--model',
-      cliArgValue: 'claude-opus-4-20250514',
-      lastUpdated: '2025-05-14',
-      source: 'bundled',
-    },
-  ];
+      thinkingEffortLevels: m.thinkingEffortLevels as ModelCapabilities['thinkingEffortLevels'],
+    }));
+  }
 
   get defaultModelId() { return getDefaultModelId(this.agent) ?? 'claude-sonnet-4-20250514'; }
 

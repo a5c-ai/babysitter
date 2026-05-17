@@ -22,7 +22,7 @@ import type {
 // ---------------------------------------------------------------------------
 
 const AGENT_CATALOG_KINDS = new Set([
-  "AgentProduct", "AgentVersion", "Capability", "CapabilitySupport",
+  "AdapterModel", "AgentProduct", "AgentVersion", "Capability", "CapabilitySupport",
   "CiSurface", "Claim", "DiscoverySignal", "EvidenceSource",
   "HookMapping", "HookSurface", "LifecycleSemantics", "Modality",
   "ModelFamily", "ModelProviderProduct", "ModelProviderVersion", "ModelVersion",

@@ -5,7 +5,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { getAdapterMetadata, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/agent-catalog';
+import { getAdapterMetadata, getAdapterModels, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/agent-catalog';
 
 import type {
   AgentCapabilities,
@@ -99,55 +99,13 @@ export class CodexAdapter extends BaseAgentAdapter {
     };
   }
 
-  readonly models: ModelCapabilities[] = [
-    {
+  get models(): ModelCapabilities[] {
+    return getAdapterModels(this.agent).map((m) => ({
+      ...m,
       agent: this.agent,
-      modelId: 'o4-mini',
-      displayName: 'o4-mini',
-      deprecated: false,
-      contextWindow: 200000,
-      maxOutputTokens: 100000,
-      supportsThinking: true,
-      thinkingEffortLevels: ['low', 'medium', 'high'],
-      supportsToolCalling: true,
-      supportsParallelToolCalls: true,
-      supportsToolCallStreaming: true,
-      supportsJsonMode: true,
-      supportsStructuredOutput: true,
-      supportsTextStreaming: true,
-      supportsThinkingStreaming: false,
-      supportsImageInput: false,
-      supportsImageOutput: false,
-      supportsFileInput: false,
-      cliArgKey: '--model',
-      cliArgValue: 'o4-mini',
-      lastUpdated: '2025-04-01',
-      source: 'bundled',
-    },
-    {
-      agent: this.agent,
-      modelId: 'codex-mini-latest',
-      displayName: 'Codex Mini',
-      deprecated: false,
-      contextWindow: 200000,
-      maxOutputTokens: 100000,
-      supportsThinking: false,
-      supportsToolCalling: true,
-      supportsParallelToolCalls: true,
-      supportsToolCallStreaming: true,
-      supportsJsonMode: true,
-      supportsStructuredOutput: true,
-      supportsTextStreaming: true,
-      supportsThinkingStreaming: false,
-      supportsImageInput: false,
-      supportsImageOutput: false,
-      supportsFileInput: false,
-      cliArgKey: '--model',
-      cliArgValue: 'codex-mini-latest',
-      lastUpdated: '2025-04-01',
-      source: 'bundled',
-    },
-  ];
+      thinkingEffortLevels: m.thinkingEffortLevels as ModelCapabilities['thinkingEffortLevels'],
+    }));
+  }
 
   get defaultModelId() { return getDefaultModelId(this.agent) ?? 'o4-mini'; }
 

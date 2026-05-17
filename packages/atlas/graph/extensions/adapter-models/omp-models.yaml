@@ -1,0 +1,27 @@
+nodeKind: AdapterModel
+id: adapter-model:omp:default
+attributes:
+  harness: omp
+  modelId: default
+  displayName: Default Model
+  deprecated: false
+  contextWindow: 128000
+  maxOutputTokens: 8192
+  supportsThinking: false
+  supportsToolCalling: true
+  supportsParallelToolCalls: false
+  supportsToolCallStreaming: true
+  supportsJsonMode: false
+  supportsStructuredOutput: false
+  supportsTextStreaming: true
+  supportsThinkingStreaming: false
+  supportsImageInput: false
+  supportsImageOutput: false
+  supportsFileInput: false
+  cliArgKey: "--model"
+  cliArgValue: default
+  lastUpdated: "2025-01-01"
+  source: bundled
+edges:
+  model_for:
+    - target: agent:omp

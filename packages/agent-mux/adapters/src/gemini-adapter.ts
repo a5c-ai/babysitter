@@ -5,7 +5,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { getAdapterMetadata, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/agent-catalog';
+import { getAdapterMetadata, getAdapterModels, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/agent-catalog';
 
 import type {
   AgentCapabilities,
@@ -103,57 +103,13 @@ export class GeminiAdapter extends BaseAgentAdapter {
     };
   }
 
-  readonly models: ModelCapabilities[] = [
-    {
+  get models(): ModelCapabilities[] {
+    return getAdapterModels(this.agent).map((m) => ({
+      ...m,
       agent: this.agent,
-      modelId: 'gemini-2.5-pro',
-      displayName: 'Gemini 2.5 Pro',
-      deprecated: false,
-      contextWindow: 1000000,
-      maxOutputTokens: 65536,
-      maxThinkingTokens: 65536,
-      supportsThinking: true,
-      thinkingEffortLevels: ['low', 'medium', 'high'],
-      supportsToolCalling: true,
-      supportsParallelToolCalls: true,
-      supportsToolCallStreaming: true,
-      supportsJsonMode: true,
-      supportsStructuredOutput: true,
-      supportsTextStreaming: true,
-      supportsThinkingStreaming: true,
-      supportsImageInput: true,
-      supportsImageOutput: false,
-      supportsFileInput: true,
-      cliArgKey: '--model',
-      cliArgValue: 'gemini-2.5-pro',
-      lastUpdated: '2025-03-01',
-      source: 'bundled',
-    },
-    {
-      agent: this.agent,
-      modelId: 'gemini-2.5-flash',
-      displayName: 'Gemini 2.5 Flash',
-      deprecated: false,
-      contextWindow: 1000000,
-      maxOutputTokens: 65536,
-      supportsThinking: true,
-      thinkingEffortLevels: ['low', 'medium', 'high'],
-      supportsToolCalling: true,
-      supportsParallelToolCalls: true,
-      supportsToolCallStreaming: true,
-      supportsJsonMode: true,
-      supportsStructuredOutput: true,
-      supportsTextStreaming: true,
-      supportsThinkingStreaming: true,
-      supportsImageInput: true,
-      supportsImageOutput: false,
-      supportsFileInput: true,
-      cliArgKey: '--model',
-      cliArgValue: 'gemini-2.5-flash',
-      lastUpdated: '2025-03-01',
-      source: 'bundled',
-    },
-  ];
+      thinkingEffortLevels: m.thinkingEffortLevels as ModelCapabilities['thinkingEffortLevels'],
+    }));
+  }
 
   get defaultModelId() { return getDefaultModelId(this.agent) ?? 'gemini-2.5-pro'; }
 

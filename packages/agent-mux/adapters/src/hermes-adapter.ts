@@ -5,7 +5,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { getAdapterMetadata, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/agent-catalog';
+import { getAdapterMetadata, getAdapterModels, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/agent-catalog';
 
 import type {
   AgentCapabilities,
@@ -103,31 +103,13 @@ export class HermesAdapter extends BaseAgentAdapter {
     };
   }
 
-  readonly models: ModelCapabilities[] = [
-    {
-      agent: 'hermes',
-      modelId: 'hermes-3-llama-3.1-405b',
-      displayName: 'Hermes 3 Llama 3.1 405B',
-      deprecated: false,
-      contextWindow: 128000,
-      maxOutputTokens: 8192,
-      supportsThinking: false,
-      supportsToolCalling: true,
-      supportsParallelToolCalls: true,
-      supportsToolCallStreaming: true,
-      supportsJsonMode: false,
-      supportsStructuredOutput: false,
-      supportsTextStreaming: true,
-      supportsThinkingStreaming: false,
-      supportsImageInput: false,
-      supportsImageOutput: false,
-      supportsFileInput: false,
-      cliArgKey: '--model',
-      cliArgValue: 'hermes-3-llama-3.1-405b',
-      lastUpdated: '2025-01-01',
-      source: 'bundled',
-    },
-  ];
+  get models(): ModelCapabilities[] {
+    return getAdapterModels(this.agent).map((m) => ({
+      ...m,
+      agent: this.agent,
+      thinkingEffortLevels: m.thinkingEffortLevels as ModelCapabilities['thinkingEffortLevels'],
+    }));
+  }
 
   get defaultModelId() { return getDefaultModelId(this.agent) ?? 'hermes-3-llama-3.1-405b'; }
 

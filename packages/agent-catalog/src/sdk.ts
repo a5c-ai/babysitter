@@ -19,6 +19,7 @@ import { atlas } from "@a5c-ai/atlas";
 import { getCatalogGraph, listGraphNodes, listRelationshipsByRelation } from "./atlas-bridge";
 import { effectiveTransportMuxClaimStatus, shouldSurfaceTransportProtocol } from "./transport-mux-cutover";
 import type {
+  AdapterModelRecord,
   AgentCapabilitySupportMatrix,
   AgentCatalog,
   AgentOntologyDetail,
@@ -1774,4 +1775,50 @@ export function getProviderTranslation(harness: string, provider: string): Provi
   // 3. Default fallback
   const fallback = translations.find((t) => t.provider === "_default");
   return fallback;
+}
+
+// ---------------------------------------------------------------------------
+// Adapter model queries
+// ---------------------------------------------------------------------------
+
+function toAdapterModelRecord(node: GraphNode): AdapterModelRecord {
+  return {
+    harness: valueAsString(node.harness),
+    modelId: valueAsString(node.modelId),
+    modelAlias: valueAsString(node.modelAlias) || undefined,
+    displayName: valueAsString(node.displayName),
+    deprecated: Boolean(node.deprecated),
+    contextWindow: Number(node.contextWindow) || 0,
+    maxOutputTokens: Number(node.maxOutputTokens) || 0,
+    maxThinkingTokens: node.maxThinkingTokens != null ? Number(node.maxThinkingTokens) : undefined,
+    inputPricePerMillion: node.inputPricePerMillion != null ? Number(node.inputPricePerMillion) : undefined,
+    outputPricePerMillion: node.outputPricePerMillion != null ? Number(node.outputPricePerMillion) : undefined,
+    supportsThinking: Boolean(node.supportsThinking),
+    thinkingEffortLevels: stringArray(node.thinkingEffortLevels),
+    supportsToolCalling: Boolean(node.supportsToolCalling),
+    supportsParallelToolCalls: Boolean(node.supportsParallelToolCalls),
+    supportsToolCallStreaming: Boolean(node.supportsToolCallStreaming),
+    supportsJsonMode: Boolean(node.supportsJsonMode),
+    supportsStructuredOutput: Boolean(node.supportsStructuredOutput),
+    supportsTextStreaming: Boolean(node.supportsTextStreaming),
+    supportsThinkingStreaming: Boolean(node.supportsThinkingStreaming),
+    supportsImageInput: Boolean(node.supportsImageInput),
+    supportsImageOutput: Boolean(node.supportsImageOutput),
+    supportsFileInput: Boolean(node.supportsFileInput),
+    cliArgKey: valueAsString(node.cliArgKey),
+    cliArgValue: valueAsString(node.cliArgValue),
+    lastUpdated: valueAsString(node.lastUpdated),
+    source: (valueAsString(node.source) as 'bundled' | 'remote') || 'bundled',
+  };
+}
+
+/**
+ * Returns all AdapterModel records for a given harness from the atlas graph.
+ */
+export function getAdapterModels(harness: string): AdapterModelRecord[] {
+  const normalized = normalizeLookup(harness);
+  return getSdkState().graph.nodes
+    .filter((node) => node.kind === "AdapterModel" && normalizeLookup(valueAsString(node.harness)) === normalized)
+    .map(toAdapterModelRecord)
+    .map(clone);
 }

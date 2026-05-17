@@ -1,4 +1,5 @@
 export type NodeKind =
+  | "AdapterModel"
   | "AgentProduct"
   | "AgentVersion"
   | "Capability"
@@ -768,4 +769,63 @@ export interface OntologyEvidenceSearchResult {
   query: string;
   evidence: EvidenceRecord[];
   claims: ClaimRecord[];
+}
+
+// ---------------------------------------------------------------------------
+// AdapterModelRecord — model capabilities stored in atlas graph
+// ---------------------------------------------------------------------------
+
+export interface AdapterModelRecord {
+  /** The harness (adapter) this model belongs to. */
+  harness: string;
+  /** The canonical model identifier. */
+  modelId: string;
+  /** An optional short alias. */
+  modelAlias?: string;
+  /** Human-readable display name. */
+  displayName: string;
+  /** Whether this model is deprecated. */
+  deprecated: boolean;
+  /** Maximum context window size in tokens. */
+  contextWindow: number;
+  /** Maximum output tokens. */
+  maxOutputTokens: number;
+  /** Maximum thinking/reasoning tokens. */
+  maxThinkingTokens?: number;
+  /** Cost per million input tokens in USD. */
+  inputPricePerMillion?: number;
+  /** Cost per million output tokens in USD. */
+  outputPricePerMillion?: number;
+  /** Whether this model supports extended thinking. */
+  supportsThinking: boolean;
+  /** Discrete thinking effort levels. */
+  thinkingEffortLevels: string[];
+  /** Whether this model supports tool/function calling. */
+  supportsToolCalling: boolean;
+  /** Whether this model supports parallel tool calls. */
+  supportsParallelToolCalls: boolean;
+  /** Whether tool call arguments stream incrementally. */
+  supportsToolCallStreaming: boolean;
+  /** Whether this model supports JSON-only output mode. */
+  supportsJsonMode: boolean;
+  /** Whether this model supports structured output with a schema. */
+  supportsStructuredOutput: boolean;
+  /** Whether this model supports real-time text token streaming. */
+  supportsTextStreaming: boolean;
+  /** Whether thinking/reasoning tokens stream. */
+  supportsThinkingStreaming: boolean;
+  /** Whether this model accepts image inputs. */
+  supportsImageInput: boolean;
+  /** Whether this model can produce image outputs. */
+  supportsImageOutput: boolean;
+  /** Whether this model accepts file inputs beyond images. */
+  supportsFileInput: boolean;
+  /** The CLI argument key used to select this model. */
+  cliArgKey: string;
+  /** The CLI argument value passed with cliArgKey. */
+  cliArgValue: string;
+  /** ISO 8601 timestamp of the last update. */
+  lastUpdated: string;
+  /** Whether this data comes from a bundled snapshot or a remote refresh. */
+  source: 'bundled' | 'remote';
 }
