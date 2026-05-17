@@ -120,6 +120,11 @@ test('theme setting applies across full page loads', () => {
   assert.match(css, /\[style\*=\"#374151\"\]/);
   assert.match(css, /\[style\*=\"#fafafa\"\]/);
   assert.match(css, /outline: 3px solid #79c0ff/);
+  assert.match(css, /\.appSidebar a\[aria-current="page"\]/);
+  assert.match(css, /background: #4d1512/);
+  assert.match(css, /\.pill\.good \{ color: #7ee787/);
+  assert.match(css, /\.skipLink \{/);
+  assert.match(css, /background: #ffb4ab/);
   assert.ok(settings.includes('storeTheme(newTheme)'));
   assert.ok(!settings.includes("localStorage.setItem('krate-theme'"));
 });

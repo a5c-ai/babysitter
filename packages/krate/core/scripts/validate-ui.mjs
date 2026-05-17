@@ -153,7 +153,7 @@ for (const token of ['ThemeRuntime', 'themeInitScript', 'krate-theme', 'suppress
 for (const token of ['THEME_STORAGE_KEY', 'krate-theme', 'applyTheme', 'storeTheme', "window.addEventListener('storage'", 'prefers-color-scheme: dark']) {
   if (!files['apps/web/app/components/theme-runtime.jsx'].includes(token)) failures.push(`theme runtime missing ${token}`);
 }
-for (const token of ['[style*="#374151"]', '[style*="#fafafa"]', 'outline: 3px solid #79c0ff', '::placeholder']) {
+for (const token of ['[style*="#374151"]', '[style*="#fafafa"]', 'outline: 3px solid #79c0ff', '::placeholder', 'background: #4d1512', '.pill.good { color: #7ee787', 'background: #ffb4ab']) {
   if (!files['apps/web/app/globals.css'].includes(token)) failures.push(`dark mode accessibility override missing ${token}`);
 }
 if (!files['apps/web/app/components/app-settings.jsx'].includes('storeTheme(newTheme)') || files['apps/web/app/components/app-settings.jsx'].includes("localStorage.setItem('krate-theme'")) failures.push('settings theme changes must go through the shared theme runtime');
