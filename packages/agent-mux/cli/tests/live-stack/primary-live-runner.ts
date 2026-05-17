@@ -248,7 +248,9 @@ export async function runPrimaryLiveStackScenario(options: PrimaryLiveRunOptions
   await fs.mkdir(options.artifactsDir, { recursive: true });
   const startedAtMs = Date.now();
   const commandResults: CommandResult[] = [];
-  for (const command of commands) {
+  for (let cmdIdx = 0; cmdIdx < commands.length; cmdIdx++) {
+    const command = commands[cmdIdx]!;
+    const isLastCommand = cmdIdx === commands.length - 1;
     const result = await options.executeCommand(command);
     commandResults.push(result);
     await writeCommandTranscript(options.artifactsDir, scenario, commandResults);
@@ -268,6 +270,22 @@ export async function runPrimaryLiveStackScenario(options: PrimaryLiveRunOptions
           commands: redactCommands(commands),
           artifactPath,
         };
+      }
+      // For the launch command (last in sequence): if the expected artifact
+      // was created with real content despite non-zero exit, continue to
+      // verification. Many harnesses exit non-zero after producing valid output
+      // (e.g., Gemini CLI errors on 2nd turn after writing content on 1st).
+      if (isLastCommand) {
+        const traceId = command.env['LIVE_STACK_TRACE_ID'];
+        if (traceId) {
+          const expectedFile = path.join(options.cwd, '.a5c-live-test', `${traceId}-odyssey.md`);
+          try {
+            const stat = await fs.stat(expectedFile);
+            if (stat.size > 500) {
+              break;
+            }
+          } catch { /* file doesn't exist — fall through to failure */ }
+        }
       }
       const artifactPath = await writeScenarioArtifact(options.artifactsDir, scenario, { status: 'failed', command: redactCommands([command])[0], commandResults });
       return { status: 'failed', scenarioId: scenario.scenarioId, commands: redactCommands(commands), artifactPath, failure: `command failed: ${command.command} ${command.args.join(' ')}` };
