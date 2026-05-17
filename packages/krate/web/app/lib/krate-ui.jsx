@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { createAuthProviderConfig, listEnabledAuthProviders, parseSessionCookie, fetchControllerUiModel, createKrateApiController, orgNamespaceName, resourceToYaml } from '@a5c-ai/krate-sdk';
 import { KrateControllerRecovery } from '../components/krate-loading.jsx';
 
-const ORG_HYDRATED_RESOURCE_KINDS = ['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject'];
+const ORG_HYDRATED_RESOURCE_KINDS = ['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject', 'Issue'];
 
 export const orgNavigationGroups = [
   {
@@ -177,6 +177,7 @@ function syncHydratedModel(model, resourceByKind) {
   }
   model.resources = resources;
   const projects = resourceByKind.get('KrateProject')?.items || [];
+  const issues = resourceByKind.get('Issue')?.items || [];
   if (projects.length) {
     model.agents = {
       ...(model.agents || {}),
@@ -185,6 +186,13 @@ function syncHydratedModel(model, resourceByKind) {
     model.metrics = {
       ...(model.metrics || {}),
       projects: projects.length,
+      resources: resources.reduce((count, resource) => count + Number(resource?.count || resource?.items?.length || 0), 0)
+    };
+  }
+  if (issues.length) {
+    model.metrics = {
+      ...(model.metrics || {}),
+      issues: issues.length,
       resources: resources.reduce((count, resource) => count + Number(resource?.count || resource?.items?.length || 0), 0)
     };
   }

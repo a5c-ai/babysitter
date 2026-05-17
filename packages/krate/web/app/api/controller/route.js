@@ -21,7 +21,7 @@ export async function GET(request) {
 
 async function hydrateOrgResourceSummaries(model, org) {
   if (!org || !Array.isArray(model?.resources)) return;
-  const kinds = ['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject'];
+  const kinds = ['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject', 'Issue'];
   const summaries = new Map(model.resources.map((resource) => [resource.kind, resource]));
   const missingKinds = kinds.filter((kind) => !Number(summaries.get(kind)?.count || summaries.get(kind)?.items?.length || 0));
   if (!missingKinds.length) return;
@@ -49,7 +49,8 @@ async function hydrateOrgResourceSummaries(model, org) {
       pipelines: Number(summaries.get('Pipeline')?.count || metrics.pipelines || 0),
       jobs: Number(summaries.get('Job')?.count || metrics.jobs || 0),
       runnerPools: Number(summaries.get('RunnerPool')?.count || metrics.runnerPools || 0),
-      projects: Number(summaries.get('KrateProject')?.count || metrics.projects || 0)
+      projects: Number(summaries.get('KrateProject')?.count || metrics.projects || 0),
+      issues: Number(summaries.get('Issue')?.count || metrics.issues || 0)
     };
     const repositories = summaries.get('Repository')?.items;
     if (repositories?.length) model.views.dashboard.repositories = repositories;

@@ -53,10 +53,12 @@ test('degraded Krate UI renders recovery loader only for controller fetch failur
   assert.match(ui, /useCache: true/);
   assert.doesNotMatch(ui, /useCache: false/);
   assert.match(ui, /KrateControllerRecovery/);
-  assert.match(ui, /ORG_HYDRATED_RESOURCE_KINDS = \['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject'\]/);
+  assert.match(ui, /ORG_HYDRATED_RESOURCE_KINDS = \['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject', 'Issue'\]/);
   assert.match(ui, /syncHydratedModel/);
   assert.match(ui, /model\.agents/);
   assert.match(controllerRoute, /'KrateProject'/);
+  assert.match(controllerRoute, /'Issue'/);
+  assert.match(controllerRoute, /issues: Number/);
   assert.match(controllerRoute, /model\.agents/);
   assert.match(ui, /hasLiveControllerData/);
   assert.doesNotMatch(ui, /Number\.isFinite\(model\.metrics\?\.resources\)/);
@@ -106,6 +108,7 @@ test('theme setting applies across full page loads', () => {
   const layout = readWebFile('app', 'layout.jsx');
   const settings = readWebFile('app', 'components', 'app-settings.jsx');
   const runtime = readWebFile('app', 'components', 'theme-runtime.jsx');
+  const css = readWebFile('app', 'globals.css');
   assert.match(layout, /ThemeRuntime/);
   assert.match(layout, /themeInitScript/);
   assert.match(layout, /krate-theme/);
@@ -114,6 +117,9 @@ test('theme setting applies across full page loads', () => {
   assert.ok(runtime.includes("document.documentElement.setAttribute('data-theme'"));
   assert.ok(runtime.includes("window.addEventListener('storage'"));
   assert.match(runtime, /prefers-color-scheme: dark/);
+  assert.match(css, /\[style\*=\"#374151\"\]/);
+  assert.match(css, /\[style\*=\"#fafafa\"\]/);
+  assert.match(css, /outline: 3px solid #79c0ff/);
   assert.ok(settings.includes('storeTheme(newTheme)'));
   assert.ok(!settings.includes("localStorage.setItem('krate-theme'"));
 });

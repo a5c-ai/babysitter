@@ -143,7 +143,7 @@ if (!files['apps/web/app/loading.jsx'].includes('routeLoading') || !files['apps/
 if (files['apps/web/app/loading.jsx'].includes('KrateDelayedRouteLoading') || files['apps/web/app/loading.jsx'].includes('return null')) failures.push('route loading UI must not delay or render a blank fallback');
 if (!files['apps/web/app/globals.css'].includes('krateRouteLoadingProgress') || !files['apps/web/app/globals.css'].includes('krateRouteLoadingPhase')) failures.push('route loading UI must animate progress and phase text without client hydration');
 if (!files['apps/web/app/lib/krate-ui.jsx'].includes('useCache: true') || files['apps/web/app/lib/krate-ui.jsx'].includes('useCache: false')) failures.push('Krate page loader must use cached controller snapshots');
-for (const token of ['KrateProject', 'syncHydratedModel', 'model.agents']) {
+for (const token of ['KrateProject', 'Issue', 'syncHydratedModel', 'model.agents']) {
   if (!files['apps/web/app/lib/krate-ui.jsx'].includes(token)) failures.push(`Krate page model hydration missing ${token}`);
   if (!files['apps/web/app/api/controller/route.js'].includes(token === 'syncHydratedModel' ? 'KrateProject' : token)) failures.push(`controller API hydration missing ${token}`);
 }
@@ -152,6 +152,9 @@ for (const token of ['ThemeRuntime', 'themeInitScript', 'krate-theme', 'suppress
 }
 for (const token of ['THEME_STORAGE_KEY', 'krate-theme', 'applyTheme', 'storeTheme', "window.addEventListener('storage'", 'prefers-color-scheme: dark']) {
   if (!files['apps/web/app/components/theme-runtime.jsx'].includes(token)) failures.push(`theme runtime missing ${token}`);
+}
+for (const token of ['[style*="#374151"]', '[style*="#fafafa"]', 'outline: 3px solid #79c0ff', '::placeholder']) {
+  if (!files['apps/web/app/globals.css'].includes(token)) failures.push(`dark mode accessibility override missing ${token}`);
 }
 if (!files['apps/web/app/components/app-settings.jsx'].includes('storeTheme(newTheme)') || files['apps/web/app/components/app-settings.jsx'].includes("localStorage.setItem('krate-theme'")) failures.push('settings theme changes must go through the shared theme runtime');
 if ((webUiSource() + files['apps/web/app/components/krate-loading.jsx']).includes('Krate workspace degraded or empty')) failures.push('degraded workspace copy should be replaced by recovery loading UI');
