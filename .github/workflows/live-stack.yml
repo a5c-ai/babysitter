@@ -252,13 +252,15 @@ jobs:
               const vanillaNi = [
                 {scenario: claude, interaction_mode: ni, install_mode: vanillaInstall},
                 {scenario: codex, interaction_mode: ni, install_mode: vanillaInstall},
-                {scenario: claude, interaction_mode: bridgedInt, install_mode: vanillaInstall},
-                {scenario: codex, interaction_mode: bridgedInt, install_mode: vanillaInstall},
-                {scenario: pi, interaction_mode: bridgedInt, install_mode: vanillaInstall},
+                {scenario: pi, interaction_mode: ni, install_mode: vanillaInstall},
               ];
 
               // Vanilla Interactive: empty — defaults use NI + bridged-interactive only
-              const vanillaInt = [];
+              const vanillaInt = [
+                  {scenario: claude, interaction_mode: bridgedInt, install_mode: vanillaInstall},
+                  {scenario: codex, interaction_mode: bridgedInt, install_mode: vanillaInstall},
+                  {scenario: pi, interaction_mode: bridgedInt, install_mode: vanillaInstall},
+              ];
 
               // BP Interactive: claude+codex
               const bpInt = [
