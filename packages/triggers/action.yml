@@ -164,7 +164,7 @@ runs:
       run: |
         set -euo pipefail
         echo "Installing @a5c-ai packages with tag: $NPM_TAG"
-        npm install -g @a5c-ai/agent-mux-cli@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/triggers@$NPM_TAG
+        npm install -g --legacy-peer-deps @a5c-ai/agent-mux-cli@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/triggers@$NPM_TAG
         which amux && amux --version || { echo "ERROR: amux not found after install"; exit 1; }
 
     - name: Install harness
