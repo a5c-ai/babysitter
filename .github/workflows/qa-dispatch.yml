@@ -1,0 +1,83 @@
+# QA Dispatch — trigger live-stack validation from PR comments
+#
+# Usage: Comment `/qa` or `/qa <specific instructions>` on a PR.
+# The agent reads the QA guide, analyzes the PR changes, determines
+# the right live-stack dispatch matrix, runs it, and reports results.
+
+name: QA Dispatch
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: write
+  issues: write
+
+jobs:
+  qa:
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/qa')
+    runs-on: ubuntu-latest-l
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: a5c-ai/babysitter/packages/triggers@main
+        with:
+          harness: claude
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          babysitter-prompt-prefix: '/babysitter:call'
+          max-turns: '50'
+          prompt: |
+            You are a QA automation agent triggered by `/qa` on PR #${{ github.event.issue.number }}.
+            Comment author: ${{ github.event.comment.user.login }}
+            Comment: ${{ github.event.comment.body }}
+
+            STEP 1 — READ THE QA GUIDE:
+            Read docs/development/07-live-stack-qa-guide.md thoroughly. It describes:
+            - Available test axes (agents, models, modes, install types)
+            - How to dispatch the live-stack workflow with a JSON matrix
+            - When to test which scenarios
+
+            STEP 2 — ANALYZE THE PR:
+            Run `gh pr view ${{ github.event.issue.number }} --json files,title,body` to understand what changed.
+            Determine which components are affected:
+            - transport-mux changes → test multiple providers/models
+            - adapter changes → test the specific harness that changed
+            - launch.ts changes → test multiple harnesses across modes
+            - atlas/agent-catalog changes → test adapters that read from the graph
+            - babysitter SDK/plugin changes → test BP mode (predefined + create)
+            - hooks-mux changes → test bridged-hooks mode
+            If the `/qa` comment includes specific instructions, follow those instead.
+
+            STEP 3 — DISPATCH THE LIVE-STACK WORKFLOW:
+            Use `gh workflow run live-stack.yml --ref ${{ github.event.issue.pull_request.head.ref || github.head_ref }} -f matrix='<JSON>'` with the appropriate test matrix.
+            The JSON format is: [{"agent":"...","model":"...","mode":"...","install":"...","live":true}]
+            Choose a focused set — not the full cross-product, but enough to cover the affected paths.
+
+            STEP 4 — WAIT FOR RESULTS:
+            After dispatching, poll with `gh run list --workflow=live-stack.yml --limit=1 --json databaseId,status,conclusion` until the run completes.
+            Check every 60 seconds. Timeout after 20 minutes.
+
+            STEP 5 — REPORT RESULTS:
+            Get the results: `gh run view <id> --json jobs --jq '.jobs[] | {name, conclusion}'`
+            Post a comment on PR #${{ github.event.issue.number }} with:
+            - Which scenarios were tested and why
+            - Pass/fail table
+            - Link to the run
+            Use: `gh pr comment ${{ github.event.issue.number }} --body "<markdown>"`
+          trigger-query: |
+            event: issue_comment
+            action: created
+            body: /^\/qa/
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
