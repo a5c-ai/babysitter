@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 import { execSync } from "child_process";
 import * as path from "path";
+import { initI18n, t } from "./extensions-i18n.js";
 
 const PLUGIN_ROOT = path.resolve(__dirname, "..");
 
@@ -53,6 +54,8 @@ function runProxiedHook(
 }
 
 export default function activate(pi: ExtensionAPI): void {
+  initI18n(pi);
+
   // ---------------------------------------------------------------------------
   // Trigger session-start hook on activation
   // ---------------------------------------------------------------------------
@@ -84,12 +87,16 @@ export default function activate(pi: ExtensionAPI): void {
     };
 
     pi.registerCommand(name, {
-      description: `Open the Babysitter ${name} skill`,
+      description: name === "doctor"
+        ? t("command.doctor.description", "Open the Babysitter doctor skill")
+        : `Open the Babysitter ${name} skill`,
       handler: forward,
     });
 
     pi.registerCommand(`babysitter:${name}`, {
-      description: `Alias for /${name}`,
+      description: name === "doctor"
+        ? t("command.doctor.aliasDescription", "Alias for /doctor")
+        : `Alias for /${name}`,
       handler: forward,
     });
   }

@@ -65,7 +65,8 @@
       "AGENTS.md": "file:per-harness/{{targetDir}}/AGENTS.md"
     },
     "pi-extension": {
-      "extensions/index.ts": "file:per-harness/{{targetDir}}/extensions-index.ts"
+      "extensions/index.ts": "file:per-harness/{{targetDir}}/extensions-index.ts",
+      "extensions/i18n.ts": "file:per-harness/{{targetDir}}/extensions-i18n.ts"
     },
     "codex-branding": {
       "assets/icon.svg": "file:per-harness/{{targetDir}}/assets/icon.svg",
