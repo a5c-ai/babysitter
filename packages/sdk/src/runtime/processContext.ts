@@ -64,7 +64,20 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
     map: (items, fn) => runParallelMap(items, fn),
   };
 
+  // Per-run artifacts directory — created up-front so processes can write to
+  // ctx.artifactsDir from the first iteration without ENOENT. mkdir is
+  // idempotent (recursive); fire-and-forget so context construction stays
+  // synchronous in surface, and any race with parallel processes resolves to
+  // the same directory.
+  const artifactsDir = path.join(internal.runDir, "artifacts");
+  void fs.mkdir(artifactsDir, { recursive: true }).catch(() => {
+    // Never let bootstrap break orchestration.
+  });
+
   const processContext: ProcessContext = {
+    runId: internal.runId,
+    runDir: internal.runDir,
+    artifactsDir,
     now: () => internal.now(),
     task: (task, args, options) =>
       runTaskIntrinsic({

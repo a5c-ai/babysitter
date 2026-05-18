@@ -61,6 +61,42 @@ function makeAction(id: string): EffectAction {
 
 const delay = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms));
 
+describe("ProcessContext runtime identity surface", () => {
+  test("public context exposes runId, runDir, and a derived artifactsDir", () => {
+    const { context } = createProcessContext({
+      runId: "01TESTRUNID",
+      runDir: "/tmp/01TESTRUNID",
+      processId: "proc-id-surface",
+      effectIndex: effectIndexStub(),
+      replayCursor: new ReplayCursor(),
+    });
+
+    expect(context.runId).toBe("01TESTRUNID");
+    expect(context.runDir).toBe("/tmp/01TESTRUNID");
+    expect(context.artifactsDir).toBe("/tmp/01TESTRUNID/artifacts");
+  });
+
+  test("artifactsDir is always <runDir>/artifacts regardless of runDir shape", () => {
+    const { context: a } = createProcessContext({
+      runId: "run-a",
+      runDir: "/var/runs/run-a",
+      processId: "p",
+      effectIndex: effectIndexStub(),
+      replayCursor: new ReplayCursor(),
+    });
+    const { context: b } = createProcessContext({
+      runId: "run-b",
+      runDir: "/var/runs/run-b/",
+      processId: "p",
+      effectIndex: effectIndexStub(),
+      replayCursor: new ReplayCursor(),
+    });
+
+    expect(a.artifactsDir).toBe("/var/runs/run-a/artifacts");
+    expect(b.artifactsDir).toBe("/var/runs/run-b/artifacts");
+  });
+});
+
 describe("ProcessContext ambient helpers", () => {
   test("withProcessContext isolates ALS scopes across concurrent runs", async () => {
     const { internalContext: ctxA } = createProcessContext({

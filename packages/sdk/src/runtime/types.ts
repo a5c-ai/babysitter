@@ -173,6 +173,17 @@ export interface ParallelHelpers {
 }
 
 export interface ProcessContext {
+  /** ULID of the current run — same as the run directory name. */
+  runId: string;
+  /** Absolute path to the run directory (e.g. `.a5c/runs/<runId>`). */
+  runDir: string;
+  /**
+   * Absolute path to the per-run artifacts directory (`<runDir>/artifacts`),
+   * created on first context construction. Processes can write reports,
+   * logs, and other generated files here without computing the path
+   * themselves.
+   */
+  artifactsDir: string;
   now(): Date;
   task<TArgs, TResult>(
     task: DefinedTask<TArgs, TResult>,
