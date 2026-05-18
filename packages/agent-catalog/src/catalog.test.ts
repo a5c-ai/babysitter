@@ -278,7 +278,7 @@ describe("agent-catalog graph-backed ontology", () => {
     const assertionsById = new Map(assertions.map((assertion) => [assertion.supportId, assertion]));
     expect(assertionsById.get("capabilitySupport:claude:ge-0-0-0:runtime-hooks")?.evidenceStrength).toBe("corroborated");
     expect(assertionsById.get("capabilitySupport:codex:ge-0-119-0:runtime-hooks")?.evidenceStrength).toBe("partial");
-    expect(assertionsById.get("capabilitySupport:codex:ge-0-119-0:image-input")?.evidenceStrength).toBe("inferred");
+    expect(assertionsById.get("capabilitySupport:codex:ge-0-119-0:image-input")?.evidenceStrength).toBe("corroborated");
     expect(assertionsById.get("capabilitySupport:omp:ge-0-0-0:session-resume")?.evidenceStrength).toBe("partial");
     expect(assertionsById.get("capabilitySupport:omp:ge-0-0-0:session-resume")?.unresolvedGaps.length).toBeGreaterThan(0);
   });

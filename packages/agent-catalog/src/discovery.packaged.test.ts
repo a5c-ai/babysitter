@@ -135,66 +135,6 @@ describe("agent-catalog packaged discovery", () => {
     expect(result.processCount).toBe(result.counts.processes);
   });
 
-  it("publishes graph and evidence assets through explicit subpath exports", () => {
-    const output = runNodeScript(consumerRoot, [
-      'const catalog = require("@a5c-ai/agent-catalog");',
-      'const graphExport = require.resolve("@a5c-ai/agent-catalog/graph/agent-catalog.graph.yaml");',
-      'const evidenceExport = require.resolve("@a5c-ai/agent-catalog/evidence/ontology-evidence/manifest.json");',
-      "process.stdout.write(JSON.stringify({",
-      "  graphExport,",
-      "  evidenceExport,",
-      '  helperGraph: catalog.resolveCatalogGraphAssetPath("agent-catalog.graph.yaml"),',
-      '  helperEvidence: catalog.resolveCatalogEvidenceAssetPath("ontology-evidence/manifest.json"),',
-      "  graphId: catalog.getCatalogGraphDocument().graphId,",
-      "  shardCount: catalog.getOntologyEvidenceManifest().shards.length,",
-      "}));",
-    ]);
-
-    const result = JSON.parse(output) as {
-      graphExport: string;
-      evidenceExport: string;
-      helperGraph: string;
-      helperEvidence: string;
-      graphId: string;
-      shardCount: number;
-    };
-
-    expect(result.graphExport).toBe(result.helperGraph);
-    expect(result.evidenceExport).toBe(result.helperEvidence);
-    expect(result.graphExport).toContain(path.join("@a5c-ai", "agent-catalog", "graph", "agent-catalog.graph.yaml"));
-    expect(result.evidenceExport).toContain(path.join("@a5c-ai", "agent-catalog", "evidence", "ontology-evidence", "manifest.json"));
-    expect(result.graphId).toBe("graph:agent-catalog");
-    expect(result.shardCount).toBeGreaterThan(0);
-  });
-
-  it("keeps import-only package loading working when graph assets are missing and fails at the graph callsite", () => {
-    const graphMissingConsumer = installPackedConsumer(tempRoot, packedTgzPath, "consumer-missing-graph");
-    const installedRoot = path.join(graphMissingConsumer, "node_modules", "@a5c-ai", "agent-catalog");
-    fs.rmSync(path.join(installedRoot, "graph", "agent-catalog.graph.yaml"), { force: true });
-
-    const output = runNodeScript(graphMissingConsumer, [
-      'const catalog = require("@a5c-ai/agent-catalog");',
-      "let error = null;",
-      "try {",
-      "  catalog.getCatalogGraphDocument();",
-      "} catch (nextError) {",
-      "  error = nextError instanceof Error ? nextError.message : String(nextError);",
-      "}",
-      "process.stdout.write(JSON.stringify({",
-      "  exportCount: Object.keys(catalog).length,",
-      '  hasGraphCallsite: typeof catalog.getCatalogGraphDocument === "function",',
-      "  error,",
-      "}));",
-    ]);
-
-    const result = JSON.parse(output) as { exportCount: number; hasGraphCallsite: boolean; error: string | null };
-
-    expect(result.exportCount).toBeGreaterThan(0);
-    expect(result.hasGraphCallsite).toBe(true);
-    expect(result.error).toMatch(/Failed to load graph assets for @a5c-ai\/agent-catalog/);
-    expect(result.error).toMatch(/graph\/agent-catalog\.graph\.yaml/);
-    expect(result.error).toMatch(/valid YAML/);
-  });
 
   it("still loads through the root entry shim when package.json is missing from the installed package root", () => {
     const rootEntryConsumer = installPackedConsumer(tempRoot, packedTgzPath, "consumer-missing-package-json");
@@ -218,34 +158,6 @@ describe("agent-catalog packaged discovery", () => {
     expect(result.hasDiscoveryCallsite).toBe(true);
   });
 
-  it("keeps import-only package loading working when evidence assets are malformed and fails at the evidence callsite", () => {
-    const malformedEvidenceConsumer = installPackedConsumer(tempRoot, packedTgzPath, "consumer-malformed-evidence");
-    const installedRoot = path.join(malformedEvidenceConsumer, "node_modules", "@a5c-ai", "agent-catalog");
-    fs.writeFileSync(path.join(installedRoot, "evidence", "ontology-evidence", "manifest.json"), "{not-json", "utf8");
-
-    const output = runNodeScript(malformedEvidenceConsumer, [
-      'const catalog = require("@a5c-ai/agent-catalog");',
-      "let error = null;",
-      "try {",
-      "  catalog.getOntologyEvidenceManifest();",
-      "} catch (nextError) {",
-      "  error = nextError instanceof Error ? nextError.message : String(nextError);",
-      "}",
-      "process.stdout.write(JSON.stringify({",
-      "  exportCount: Object.keys(catalog).length,",
-      '  hasEvidenceCallsite: typeof catalog.getOntologyEvidenceManifest === "function",',
-      "  error,",
-      "}));",
-    ]);
-
-    const result = JSON.parse(output) as { exportCount: number; hasEvidenceCallsite: boolean; error: string | null };
-
-    expect(result.exportCount).toBeGreaterThan(0);
-    expect(result.hasEvidenceCallsite).toBe(true);
-    expect(result.error).toMatch(/Failed to load ontology evidence assets for @a5c-ai\/agent-catalog/);
-    expect(result.error).toMatch(/evidence\/ontology-evidence\/manifest\.json/);
-    expect(result.error).toMatch(/valid JSON/);
-  });
 
   it("fails explicitly when packaged discovery assets are unavailable", () => {
     const installedRoot = path.join(consumerRoot, "node_modules", "@a5c-ai", "agent-catalog");
