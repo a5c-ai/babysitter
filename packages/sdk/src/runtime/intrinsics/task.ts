@@ -1,3 +1,5 @@
+import { promises as fs } from "fs";
+import path from "path";
 import { appendEvent } from "../../storage/journal";
 import { readTaskDefinition } from "../../storage/tasks";
 import type { JournalEvent } from "../../storage/types";
@@ -7,6 +9,7 @@ import {
   EffectRequestedError,
   InvalidTaskDefinitionError,
   InvocationCollisionError,
+  ProcessCodeDriftError,
   RunFailedError,
 } from "../exceptions";
 import { hashInvocationKey } from "../invocation";
@@ -69,7 +72,8 @@ export async function runTaskIntrinsic<TArgs, TResult>(
     throw new InvalidTaskDefinitionError("ctx.task requires a DefinedTask created via defineTask()");
   }
 
-  const stepId = options.invokeOptions?.stableKey ?? options.context.replayCursor.nextStepId();
+  const hasStableKey = options.invokeOptions?.stableKey !== undefined;
+  const stepId = hasStableKey ? options.invokeOptions!.stableKey! : options.context.replayCursor.nextStepId();
   const invocation = hashInvocationKey({
     processId: options.context.processId,
     stepId,
@@ -78,10 +82,45 @@ export async function runTaskIntrinsic<TArgs, TResult>(
 
   const existing = options.context.effectIndex.getByInvocation(invocation.key);
   if (existing) {
+    await assertReplayCompatible(existing, options);
     return handleExistingInvocation(existing, options);
   }
 
+  if (!hasStableKey) {
+    const stepRecord = options.context.effectIndex.getByStepId(stepId);
+    if (stepRecord) {
+      throw new ProcessCodeDriftError({
+        processId: options.context.processId,
+        stepId,
+        expectedInvocationKey: stepRecord.invocationKey,
+        actualInvocationKey: invocation.key,
+        previousTaskId: stepRecord.taskId,
+        currentTaskId: task.id,
+        reason: "step-task-mismatch",
+      });
+    }
+  }
+
   return requestNewEffect(stepId, invocation.key, invocation.digest, options);
+}
+
+async function assertReplayCompatible<TArgs, TResult>(
+  record: EffectRecord,
+  options: TaskIntrinsicInvokeOptions<TArgs, TResult>
+): Promise<void> {
+  if (options.invokeOptions?.stableKey !== undefined) return;
+  const storedInputs = await readStoredInputs(options.context.runDir, record);
+  if (storedInputs.available && !stableJsonEqual(storedInputs.value, options.args)) {
+    throw new ProcessCodeDriftError({
+      processId: options.context.processId,
+      stepId: record.stepId,
+      expectedInvocationKey: record.invocationKey,
+      actualInvocationKey: record.invocationKey,
+      previousTaskId: record.taskId,
+      currentTaskId: options.task.id,
+      reason: "arguments-mismatch",
+    });
+  }
 }
 
 async function handleExistingInvocation<TArgs, TResult>(
@@ -186,4 +225,44 @@ async function ensureTaskDefinition(runDir: string, record: EffectRecord): Promi
   const stored = await readTaskDefinition(runDir, record.effectId);
   if (!stored) throw new RunFailedError(`Task definition missing for effect ${record.effectId}`, { effectId: record.effectId });
   return stored as TaskDef;
+}
+
+async function readStoredInputs(runDir: string, record: EffectRecord): Promise<{ available: boolean; value?: unknown }> {
+  const taskDef = await readTaskDefinition(runDir, record.effectId);
+  if (!taskDef) return { available: false };
+  if (taskDef.inputsRef) {
+    if (typeof taskDef.inputsRef !== "string") return { available: false };
+    const raw = await fs.readFile(resolveRunRef(runDir, taskDef.inputsRef), "utf8");
+    return { available: true, value: JSON.parse(raw) };
+  }
+  if (Object.prototype.hasOwnProperty.call(taskDef, "inputs")) {
+    return { available: true, value: taskDef.inputs };
+  }
+  return { available: false };
+}
+
+function resolveRunRef(runDir: string, ref: string): string {
+  return path.isAbsolute(ref) ? ref : path.join(runDir, ref);
+}
+
+function stableJsonEqual(left: unknown, right: unknown): boolean {
+  return stableStringify(left) === stableStringify(right);
+}
+
+function stableStringify(value: unknown): string {
+  return JSON.stringify(stableNormalize(value));
+}
+
+function stableNormalize(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => stableNormalize(entry));
+  }
+  if (value && typeof value === "object") {
+    const normalized: Record<string, unknown> = {};
+    for (const key of Object.keys(value as Record<string, unknown>).sort((a, b) => a.localeCompare(b))) {
+      normalized[key] = stableNormalize((value as Record<string, unknown>)[key]);
+    }
+    return normalized;
+  }
+  return value;
 }

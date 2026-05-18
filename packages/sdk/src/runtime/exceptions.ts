@@ -155,6 +155,36 @@ export class InvocationCollisionError extends BabysitterRuntimeError {
   }
 }
 
+export interface ProcessCodeDriftDetails extends BabysitterErrorDetails {
+  processId: string;
+  stepId: string;
+  expectedInvocationKey?: string;
+  actualInvocationKey: string;
+  previousTaskId?: string;
+  currentTaskId: string;
+  reason: "step-task-mismatch" | "arguments-mismatch";
+}
+
+export class ProcessCodeDriftError extends BabysitterRuntimeError {
+  constructor(details: ProcessCodeDriftDetails) {
+    const reason = details.reason === "arguments-mismatch"
+      ? "task arguments changed for an existing replay step"
+      : "replay step now points at a different task invocation";
+    super("ProcessCodeDriftError", `Process code drift detected at ${details.processId}:${details.stepId}: ${reason}`, {
+      category: ErrorCategory.Runtime,
+      details,
+      suggestions: [
+        "Avoid inserting, removing, or reordering positional ctx.task() calls while resuming an in-flight run.",
+        "Use ctx.task(..., { stableKey: 'namespace.step-name' }) for task calls that must survive process edits.",
+      ],
+      nextSteps: [
+        "Restore the process task order used when this run started, or start a new run from the edited process.",
+        "For future editable processes, add stableKey values to ctx.task() calls before starting the run.",
+      ],
+    });
+  }
+}
+
 export class RunFailedError extends BabysitterRuntimeError {
   constructor(message: string, options?: BabysitterErrorOptions | BabysitterErrorDetails) {
     super("RunFailedError", message, options);

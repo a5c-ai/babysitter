@@ -125,6 +125,10 @@ export class EffectIndex {
     return this.byEffectId.get(effectId);
   }
 
+  getByStepId(stepId: string): EffectRecord | undefined {
+    return this.listEffects().find((record) => record.stepId === stepId);
+  }
+
   listEffects(): EffectRecord[] {
     return Array.from(this.byEffectId.values());
   }

@@ -10,6 +10,7 @@ import { runTaskIntrinsic } from "../intrinsics/task";
 import {
   EffectPendingError,
   EffectRequestedError,
+  ProcessCodeDriftError,
   RunFailedError,
 } from "../exceptions";
 import { commitEffectResult } from "../commitEffectResult";
@@ -338,6 +339,107 @@ describe("runTaskIntrinsic", () => {
       stderr: "tsc failed",
       error: "Shell command exited with code 2",
     });
+  });
+
+  test("detects positional replay drift when a step now maps to a different task", async () => {
+    const { runDir, runId } = await createRun("run-step-drift");
+    const context = await buildContext(runDir, runId);
+
+    let firstError: unknown;
+    try {
+      await runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 1 },
+        context,
+      });
+    } catch (error) {
+      firstError = error;
+    }
+    expect(firstError).toBeInstanceOf(EffectRequestedError);
+
+    const replayCtx = await buildContext(runDir, runId);
+    await expect(
+      runTaskIntrinsic({
+        task: shellTask,
+        args: { command: "npm test" },
+        context: replayCtx,
+      })
+    ).rejects.toSatisfy((error) => {
+      expect(error).toBeInstanceOf(ProcessCodeDriftError);
+      expect((error as ProcessCodeDriftError).details).toMatchObject({
+        stepId: "S000001",
+        previousTaskId: "sample-task",
+        currentTaskId: "shell-task",
+        reason: "step-task-mismatch",
+      });
+      return true;
+    });
+  });
+
+  test("detects positional replay drift when existing invocation args change", async () => {
+    const { runDir, runId } = await createRun("run-args-drift");
+    const context = await buildContext(runDir, runId);
+
+    try {
+      await runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 1 },
+        context,
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(EffectRequestedError);
+    }
+
+    const replayCtx = await buildContext(runDir, runId);
+    await expect(
+      runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 2 },
+        context: replayCtx,
+      })
+    ).rejects.toSatisfy((error) => {
+      expect(error).toBeInstanceOf(ProcessCodeDriftError);
+      expect((error as ProcessCodeDriftError).details).toMatchObject({
+        stepId: "S000001",
+        currentTaskId: "sample-task",
+        reason: "arguments-mismatch",
+      });
+      return true;
+    });
+  });
+
+  test("allows stableKey calls to replay even when arguments differ", async () => {
+    const { runDir, runId } = await createRun("run-stablekey-args-change");
+    const context = await buildContext(runDir, runId);
+
+    let requestedEffectId = "";
+    try {
+      await runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 1 },
+        invokeOptions: { stableKey: "editable.sample" },
+        context,
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(EffectRequestedError);
+      requestedEffectId = (error as EffectRequestedError).action.effectId;
+    }
+
+    await commitEffectResult({
+      runDir,
+      effectId: requestedEffectId,
+      result: { status: "ok", value: 4 },
+    });
+
+    const replayCtx = await buildContext(runDir, runId);
+    await expect(
+      runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 999 },
+        invokeOptions: { stableKey: "editable.sample" },
+        context: replayCtx,
+      })
+    ).resolves.toBe(4);
   });
 
   test("provides TaskBuildContext metadata and records registry entries", async () => {
