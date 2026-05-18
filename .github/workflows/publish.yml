@@ -549,6 +549,9 @@ jobs:
           set -euo pipefail
           mkdir -p artifacts/krate-logs
 
+      - name: Build krate Helm dependencies
+        run: helm dependency build packages/krate/charts 2>&1 | tee artifacts/krate-logs/helm-dep-build.log || true
+
       - name: Test krate core
         run: |
           set -euo pipefail
