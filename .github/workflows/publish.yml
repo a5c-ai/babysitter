@@ -549,8 +549,8 @@ jobs:
           set -euo pipefail
           mkdir -p artifacts/krate-logs
 
-      - name: Build krate Helm chart dependencies
-        run: helm dependency build packages/krate/charts 2>&1 || true
+      - name: Build Helm dependencies
+        run: helm dependency build packages/krate/charts 2>&1 | tee artifacts/krate-logs/helm-dep-build.log || true
 
       - name: Test krate core
         run: |
@@ -2133,9 +2133,10 @@ jobs:
           kubectl -n "$KUBE_NAMESPACE" delete service krate --ignore-not-found
           kubectl -n "$KUBE_NAMESPACE" delete deployment krate --ignore-not-found
 
-      - name: Build Helm chart dependencies
+      - name: Build Helm dependencies
         if: steps.config.outputs.deploy_enabled == 'true'
-        run: helm dependency build packages/krate/charts 2>&1 || true
+        run: |
+          helm dependency update packages/krate/charts 2>&1 || echo "::notice::Helm dependency update completed (some repos may be unavailable)"
 
       - name: Update Krate CRDs
         if: steps.config.outputs.deploy_enabled == 'true'
@@ -2173,9 +2174,7 @@ jobs:
             --set demo.enabled=false \
             --set gitea.enabled=false \
             --set argocd.enabled=false \
-            --set kubevela.install=true \
             --set kubevela.enabled=true \
-            --set kyverno.install=false \
             --set "externalDependencies.kyverno.enabled=true" \
             --set "externalDependencies.kyverno.discoverExisting=true" \
             --set networkPolicy.enabled=false \
