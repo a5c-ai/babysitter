@@ -1,0 +1,41 @@
+{
+  "issueNumber": 184,
+  "baseBranch": "staging",
+  "targetBranch": "fix/issue-184-macos-arm64-node-pty-fallback",
+  "component": "packages/agent-mux/cli live-stack tests",
+  "ciWorkflowFile": ".github/workflows/live-stack.yml",
+  "targetFiles": [
+    "packages/agent-mux/cli/tests/live-stack/pipeline-scenario.test.ts",
+    "packages/agent-mux/cli/tests/live-stack/primary-live-runner.ts",
+    "packages/agent-mux/cli/tests/live-stack/primary-live-runner.test.ts",
+    "packages/agent-mux/cli/tests/live-stack/scenario-contract.ts",
+    ".github/workflows/live-stack.yml"
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/agent-mux/cli/tests/live-stack/primary-live-runner.test.ts packages/agent-mux/cli/tests/live-stack/pipeline-scenario.test.ts",
+    "npm run test:e2e:live-stack:primary",
+    "npm run test:e2e:live-stack:framework",
+    "npm run build:agent-mux:non-realtime",
+    "npm run verify:metadata"
+  ],
+  "acceptanceCriteria": [
+    "A synchronous node-pty require/spawn failure such as \"posix_spawnp failed\" must not crash Vitest before live-stack artifacts are written.",
+    "The non-TTY interactive live-stack path must fall back to a controlled execution mode, preferably bridged interactive, while keeping command transcripts and scenario artifacts intact.",
+    "The fix must preserve the existing node-pty path when PTY startup succeeds.",
+    "The fix must cover Codex and Claude live-stack interactive BP/predefined lanes without requiring real macOS ARM64 hardware in unit tests.",
+    "Verification must include targeted regression tests and broader live-stack/agent-mux checks."
+  ],
+  "nonGoals": [
+    "Do not remove interactive live-stack coverage.",
+    "Do not make CI native addon rebuilds the only fix.",
+    "Do not require live provider credentials for regression coverage.",
+    "Do not refactor unrelated agent-mux CLI behavior."
+  ],
+  "processLibraryReferences": [
+    "cradle/bugfix.js",
+    "tdd-quality-convergence.md",
+    "specializations/sdk-platform-development/sdk-testing-strategy.js",
+    "specializations/sdk-platform-development/error-handling-debugging-support.js",
+    "specializations/devops-sre-platform/agents/cicd-specialist/AGENT.md"
+  ]
+}
