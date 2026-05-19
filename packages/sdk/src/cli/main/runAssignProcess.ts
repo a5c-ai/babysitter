@@ -11,6 +11,7 @@ import {
   validateProcessEntrypoint,
 } from "./runSupport";
 import { USAGE } from "./usage";
+import { hashProcessCodeFile } from "../../runtime/processCodeHash";
 
 export async function handleRunAssignProcess(parsed: ParsedArgs): Promise<number> {
   if (!parsed.runDirArg) {
@@ -112,6 +113,7 @@ export async function handleRunAssignProcess(parsed: ParsedArgs): Promise<number
     };
     current.processPath = absoluteImportPath;
     current.processId = processId;
+    current.processCodeHash = await hashProcessCodeFile(absoluteImportPath);
     if (parsed.processRevision) {
       current.processRevision = parsed.processRevision;
     }
@@ -126,6 +128,7 @@ export async function handleRunAssignProcess(parsed: ParsedArgs): Promise<number
         entrypoint: current.entrypoint,
         previousEntrypoint,
         force: parsed.sessionForce ?? false,
+        ...(current.processCodeHash ? { processCodeHash: current.processCodeHash } : {}),
       },
     });
   });

@@ -16,6 +16,8 @@ import { commitEffectResult } from "../commitEffectResult";
 import { DefinedTask } from "../types";
 import { TaskIntrinsicContext } from "../intrinsics/task";
 import { globalTaskRegistry } from "../../tasks/registry";
+import { serializeAndWriteTaskDefinition } from "../../tasks/serializer";
+import { hashInvocationKey } from "../invocation/hashInvocationKey";
 
 const sampleTask: DefinedTask<{ value: number }, number> = {
   id: "sample-task",
@@ -338,6 +340,162 @@ describe("runTaskIntrinsic", () => {
       stderr: "tsc failed",
       error: "Shell command exited with code 2",
     });
+  });
+
+  test("replays a task after a new task is inserted before it", async () => {
+    const { runDir, runId } = await createRun("run-stable-derived-insert");
+    const context = await buildContext(runDir, runId);
+
+    let requestedEffectId = "";
+    let firstError: unknown;
+    try {
+      await runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 1 },
+        context,
+      });
+    } catch (error) {
+      firstError = error;
+      requestedEffectId = (error as EffectRequestedError).action.effectId;
+    }
+    expect(firstError).toBeInstanceOf(EffectRequestedError);
+
+    await commitEffectResult({
+      runDir,
+      effectId: requestedEffectId,
+      result: { status: "ok", value: 10 },
+    });
+
+    const insertedCtx = await buildContext(runDir, runId);
+    await expect(
+      runTaskIntrinsic({
+        task: shellTask,
+        args: { command: "npm test" },
+        context: insertedCtx,
+      })
+    ).rejects.toThrow(EffectRequestedError);
+
+    await expect(
+      runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 2 },
+        context: insertedCtx,
+      })
+    ).resolves.toBe(10);
+  });
+
+  test("uses args shape rather than args values in derived keys", async () => {
+    const { runDir, runId } = await createRun("run-args-shape-stable");
+    const context = await buildContext(runDir, runId);
+
+    let requestedEffectId = "";
+    try {
+      await runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 1 },
+        context,
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(EffectRequestedError);
+      requestedEffectId = (error as EffectRequestedError).action.effectId;
+    }
+
+    await commitEffectResult({
+      runDir,
+      effectId: requestedEffectId,
+      result: { status: "ok", value: 4 },
+    });
+
+    const replayCtx = await buildContext(runDir, runId);
+    await expect(
+      runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 2 },
+        context: replayCtx,
+      })
+    ).resolves.toBe(4);
+  });
+
+  test("replays legacy stepId-only invocation keys", async () => {
+    const { runDir, runId } = await createRun("run-legacy-stepid");
+    const invocation = hashInvocationKey({
+      processId: "demo-process",
+      stepId: "S000001",
+      taskId: sampleTask.id,
+    });
+    const effectId = "legacy-effect";
+    const { taskRef, inputsRef } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId,
+      taskId: sampleTask.id,
+      invocationKey: invocation.key,
+      stepId: "S000001",
+      task: { kind: "node", title: "legacy" },
+      inputs: { value: 1 },
+    });
+    await appendEvent({
+      runDir,
+      eventType: "EFFECT_REQUESTED",
+      event: {
+        effectId,
+        invocationKey: invocation.key,
+        invocationHash: invocation.digest,
+        stepId: "S000001",
+        taskId: sampleTask.id,
+        kind: "node",
+        label: sampleTask.id,
+        taskDefRef: taskRef,
+        inputsRef,
+      },
+    });
+    await commitEffectResult({
+      runDir,
+      effectId,
+      result: { status: "ok", value: 8 },
+    });
+
+    const replayCtx = await buildContext(runDir, runId);
+    await expect(
+      runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 999 },
+        context: replayCtx,
+      })
+    ).resolves.toBe(8);
+  });
+
+  test("allows explicit key calls to replay even when arguments differ", async () => {
+    const { runDir, runId } = await createRun("run-key-args-change");
+    const context = await buildContext(runDir, runId);
+
+    let requestedEffectId = "";
+    try {
+      await runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 1 },
+        invokeOptions: { key: "editable.sample" },
+        context,
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(EffectRequestedError);
+      requestedEffectId = (error as EffectRequestedError).action.effectId;
+    }
+
+    await commitEffectResult({
+      runDir,
+      effectId: requestedEffectId,
+      result: { status: "ok", value: 4 },
+    });
+
+    const replayCtx = await buildContext(runDir, runId);
+    await expect(
+      runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 999 },
+        invokeOptions: { key: "editable.sample" },
+        context: replayCtx,
+      })
+    ).resolves.toBe(4);
   });
 
   test("provides TaskBuildContext metadata and records registry entries", async () => {

@@ -66,8 +66,8 @@ async function buildContext(runDir: string, runId: string): Promise<TaskIntrinsi
   };
 }
 
-describe("stableKey option on ctx.task()", () => {
-  test("stableKey prevents cursor advancement", async () => {
+describe("key option on ctx.task()", () => {
+  test("key prevents cursor advancement", async () => {
     const { runDir, runId } = await createRun("run-sk-no-advance");
     const context = await buildContext(runDir, runId);
 
@@ -77,18 +77,18 @@ describe("stableKey option on ctx.task()", () => {
       await runTaskIntrinsic({
         task: sampleTask,
         args: { value: 1 },
-        invokeOptions: { stableKey: "my-key" },
+        invokeOptions: { key: "my-key" },
         context,
       });
     } catch (error) {
       expect(error).toBeInstanceOf(EffectRequestedError);
     }
 
-    // Cursor must NOT have advanced because stableKey was provided
+    // Cursor must NOT have advanced because key was provided
     expect(context.replayCursor.value).toBe(0);
   });
 
-  test("stableKey produces same invocationKey across calls", async () => {
+  test("key produces same invocationKey across calls", async () => {
     const { runDir, runId } = await createRun("run-sk-same-key");
     const context = await buildContext(runDir, runId);
 
@@ -99,7 +99,7 @@ describe("stableKey option on ctx.task()", () => {
       await runTaskIntrinsic({
         task: sampleTask,
         args: { value: 2 },
-        invokeOptions: { stableKey: "my-key" },
+        invokeOptions: { key: "my-key" },
         context,
       });
     } catch (error) {
@@ -108,13 +108,13 @@ describe("stableKey option on ctx.task()", () => {
     }
     expect(firstInvocationKey).toBeDefined();
 
-    // Second call with same stableKey: should hit the index (EffectPendingError)
+    // Second call with same key: should hit the index (EffectPendingError)
     let secondInvocationKey: string | undefined;
     try {
       await runTaskIntrinsic({
         task: sampleTask,
         args: { value: 2 },
-        invokeOptions: { stableKey: "my-key" },
+        invokeOptions: { key: "my-key" },
         context,
       });
     } catch (error) {
@@ -126,11 +126,11 @@ describe("stableKey option on ctx.task()", () => {
     // Both calls must produce the same invocationKey
     expect(firstInvocationKey).toBe(secondInvocationKey);
 
-    // Cursor should still be at 0 — neither call advanced it
+    // Cursor should still be at 0 - neither call advanced it.
     expect(context.replayCursor.value).toBe(0);
   });
 
-  test("without stableKey, cursor advances normally (regression guard)", async () => {
+  test("without explicit key, cursor advances for legacy stepId compatibility", async () => {
     const { runDir, runId } = await createRun("run-sk-regression");
     const context = await buildContext(runDir, runId);
 
@@ -146,23 +146,23 @@ describe("stableKey option on ctx.task()", () => {
       expect(error).toBeInstanceOf(EffectRequestedError);
     }
 
-    // Without stableKey the cursor MUST advance
+    // Without key the cursor advances so old stepId-only runs can still replay.
     expect(context.replayCursor.value).toBe(1);
   });
 
-  test("stableKey and normal calls can coexist", async () => {
+  test("key and derived-key calls can coexist", async () => {
     const { runDir, runId } = await createRun("run-sk-coexist");
     const context = await buildContext(runDir, runId);
 
     let stableInvocationKey: string | undefined;
     let normalInvocationKey: string | undefined;
 
-    // First call: stableKey (should NOT advance cursor)
+    // First call: explicit key (should NOT advance cursor)
     try {
       await runTaskIntrinsic({
         task: sampleTask,
         args: { value: 10 },
-        invokeOptions: { stableKey: "key-a" },
+        invokeOptions: { key: "key-a" },
         context,
       });
     } catch (error) {
@@ -171,7 +171,7 @@ describe("stableKey option on ctx.task()", () => {
     }
     expect(context.replayCursor.value).toBe(0);
 
-    // Second call: no stableKey, different task (WILL advance cursor)
+    // Second call: no explicit key, different task (WILL advance cursor).
     try {
       await runTaskIntrinsic({
         task: otherTask,
@@ -182,7 +182,7 @@ describe("stableKey option on ctx.task()", () => {
       expect(error).toBeInstanceOf(EffectRequestedError);
       normalInvocationKey = (error as EffectRequestedError).action.invocationKey;
     }
-    // Only the non-stableKey call advanced the cursor
+    // Only the non-keyed call advanced the cursor.
     expect(context.replayCursor.value).toBe(1);
 
     // Both effects should have different invocationKeys
@@ -191,19 +191,19 @@ describe("stableKey option on ctx.task()", () => {
     expect(stableInvocationKey).not.toBe(normalInvocationKey);
   });
 
-  test("two different stableKeys produce different effects", async () => {
+  test("two different keys produce different effects", async () => {
     const { runDir, runId } = await createRun("run-sk-diff-keys");
     const context = await buildContext(runDir, runId);
 
     let effectIdA: string | undefined;
     let effectIdB: string | undefined;
 
-    // First call with stableKey='key-a'
+    // First call with key='key-a'
     try {
       await runTaskIntrinsic({
         task: sampleTask,
         args: { value: 20 },
-        invokeOptions: { stableKey: "key-a" },
+        invokeOptions: { key: "key-a" },
         context,
       });
     } catch (error) {
@@ -211,12 +211,12 @@ describe("stableKey option on ctx.task()", () => {
       effectIdA = (error as EffectRequestedError).action.effectId;
     }
 
-    // Second call with stableKey='key-b'
+    // Second call with key='key-b'
     try {
       await runTaskIntrinsic({
         task: sampleTask,
         args: { value: 21 },
-        invokeOptions: { stableKey: "key-b" },
+        invokeOptions: { key: "key-b" },
         context,
       });
     } catch (error) {
@@ -229,7 +229,61 @@ describe("stableKey option on ctx.task()", () => {
     expect(effectIdB).toBeDefined();
     expect(effectIdA).not.toBe(effectIdB);
 
-    // Cursor should still be at 0 — neither stableKey call advances it
+    // Cursor should still be at 0 - neither explicit-key call advances it.
     expect(context.replayCursor.value).toBe(0);
+  });
+
+  test("derived key idx distinguishes repeated same-task calls in loops", async () => {
+    const { runDir, runId } = await createRun("run-derived-loop-idx");
+    const context = await buildContext(runDir, runId);
+
+    const invocationKeys: string[] = [];
+    for (const value of [1, 2]) {
+      try {
+        await runTaskIntrinsic({
+          task: sampleTask,
+          args: { value },
+          invokeOptions: { label: "loop" },
+          context,
+        });
+      } catch (error) {
+        expect(error).toBeInstanceOf(EffectRequestedError);
+        invocationKeys.push((error as EffectRequestedError).action.invocationKey);
+      }
+    }
+
+    expect(invocationKeys).toHaveLength(2);
+    expect(invocationKeys[0]).not.toBe(invocationKeys[1]);
+  });
+
+  test("legacy stableKey alias still works", async () => {
+    const { runDir, runId } = await createRun("run-sk-alias");
+    const context = await buildContext(runDir, runId);
+
+    let firstInvocationKey: string | undefined;
+    try {
+      await runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 30 },
+        invokeOptions: { stableKey: "legacy-key" },
+        context,
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(EffectRequestedError);
+      firstInvocationKey = (error as EffectRequestedError).action.invocationKey;
+    }
+
+    await expect(
+      runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 31 },
+        invokeOptions: { stableKey: "legacy-key" },
+        context,
+      })
+    ).rejects.toMatchObject({
+      action: {
+        invocationKey: firstInvocationKey,
+      },
+    });
   });
 });

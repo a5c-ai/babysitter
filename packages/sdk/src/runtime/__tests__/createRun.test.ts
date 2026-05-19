@@ -2,7 +2,9 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import path from "path";
 import os from "os";
 import { promises as fs, realpathSync } from "fs";
+import crypto from "crypto";
 import { createRun } from "../createRun";
+import { runIterate } from "../../cli/commands/runIterate";
 import { loadJournal } from "../../storage/journal";
 import { readRunMetadata, readRunInputs } from "../../storage/runFiles";
 import { DEFAULT_LAYOUT_VERSION } from "../../storage/paths";
@@ -50,6 +52,9 @@ describe("createRun", () => {
       importPath: "../processes/pipeline.mjs",
       exportName: "handler",
     });
+    expect(metadata.processCodeHash).toBe(
+      crypto.createHash("sha256").update("export async function handler() { return 'ok'; }").digest("hex"),
+    );
     expect(typeof metadata.createdAt).toBe("string");
 
     const journal = await loadJournal(result.runDir);
@@ -63,6 +68,7 @@ describe("createRun", () => {
         importPath: "../processes/pipeline.mjs",
         exportName: "handler",
       },
+      processCodeHash: metadata.processCodeHash,
     });
     expect(journal[0].data.inputsRef).toBeUndefined();
   });
@@ -145,6 +151,35 @@ describe("createRun", () => {
 
     const journal = await loadJournal(result.runDir);
     expect(journal[0].data.harness).toBe("codex");
+  });
+
+  test("run:iterate warns when process code hash changes", async () => {
+    const entryFile = path.join(tmpRoot, "processes", "mutable.mjs");
+    await fs.mkdir(path.dirname(entryFile), { recursive: true });
+    await fs.writeFile(entryFile, "export async function process() { return 'first'; }");
+
+    const result = await createRun({
+      runsDir: tmpRoot,
+      request: "mutable-request",
+      process: {
+        processId: "ci/mutable",
+        importPath: entryFile,
+        exportName: "process",
+      },
+    });
+
+    await fs.writeFile(entryFile, "export async function process() { return 'second'; }");
+
+    const iteration = await runIterate({ runDir: result.runDir, json: true });
+    expect(iteration.warnings).toContain(
+      "Process code changed since last recorded process hash; replay may need journal reconstruction.",
+    );
+    const updatedMetadata = await readRunMetadata(result.runDir);
+    expect(updatedMetadata.processCodeHash).toBe(
+      crypto.createHash("sha256").update("export async function process() { return 'second'; }").digest("hex"),
+    );
+    const journal = await loadJournal(result.runDir);
+    expect(journal.some((event) => event.type === "PROCESS_CODE_HASH_CHANGED")).toBe(true);
   });
 
   test("persists nested run metadata, stamps it on RUN_CREATED, and can skip run-start hooks", async () => {

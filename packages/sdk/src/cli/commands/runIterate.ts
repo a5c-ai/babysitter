@@ -10,7 +10,8 @@
  * The command does NOT loop - it handles exactly one iteration.
  */
 
-import { readRunMetadata } from "../../storage/runFiles";
+import { readRunMetadata, writeRunMetadata } from "../../storage/runFiles";
+import { appendEvent } from "../../storage/journal";
 import { callRuntimeHook } from "../../runtime/hooks/runtime";
 import { orchestrateIteration } from "../../runtime/orchestrateIteration";
 import type { EffectAction } from "../../runtime/types";
@@ -19,6 +20,7 @@ import { resolveCompletionProof } from "../completionProof";
 import { groupActionsByParallelGroup } from "../../tasks/grouping";
 import { classifyWaitingActions } from "../../runtime/asyncEffects";
 import { resolveProjectRootForRun } from "../../config";
+import { hashProcessCodeFile } from "../../runtime/processCodeHash";
 import {
   detectIterationCount,
   deriveIterationReason,
@@ -56,6 +58,7 @@ export interface RunIterateResult {
     blocking: EffectAction[];
     background: EffectAction[];
   };
+  warnings?: string[];
   metadata?: {
     runId: string;
     processId: string;
@@ -75,9 +78,28 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
   const iteration = options.iteration ?? (iterationCount + 1);
 
   const projectRoot = resolveProjectRootForRun(runDir, metadata.entrypoint?.importPath);
+  const warnings: string[] = [];
+  const currentProcessCodeHash = await hashProcessCodeFile(metadata.entrypoint?.importPath, runDir);
+  if (metadata.processCodeHash && currentProcessCodeHash && metadata.processCodeHash !== currentProcessCodeHash) {
+    warnings.push("Process code changed since last recorded process hash; replay may need journal reconstruction.");
+    const previousProcessCodeHash = metadata.processCodeHash;
+    metadata.processCodeHash = currentProcessCodeHash;
+    await writeRunMetadata(runDir, metadata);
+    await appendEvent({
+      runDir,
+      eventType: "PROCESS_CODE_HASH_CHANGED",
+      event: {
+        runId,
+        processId: metadata.processId,
+        previousProcessCodeHash,
+        processCodeHash: currentProcessCodeHash,
+      },
+    });
+  }
 
   if (verbose) {
     console.error(`[run:iterate] Starting iteration ${iteration} for run ${runId}`);
+    for (const warning of warnings) console.error(`[run:iterate] Warning: ${warning}`);
   }
 
   const iterationResult = await orchestrateIteration({ runDir });
@@ -103,6 +125,7 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
       action: "none",
       reason: "completed",
       completionProof,
+      warnings: warnings.length ? warnings : undefined,
       metadata: { runId, processId: metadata.processId, hookStatus: "executed" },
     };
   }
@@ -126,6 +149,7 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
       status: "failed",
       action: "none",
       reason: "failed",
+      warnings: warnings.length ? warnings : undefined,
       metadata: { runId, processId: metadata.processId, hookStatus: "executed" },
     };
   }
@@ -195,6 +219,7 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
     count,
     until,
     nextActions: iterationResult.status === "waiting" ? iterationResult.nextActions : undefined,
+    warnings: warnings.length ? warnings : undefined,
     metadata: {
       runId,
       processId: metadata.processId,

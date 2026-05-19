@@ -23,6 +23,7 @@ export interface RunMetadata extends JsonRecord {
   entrypoint: RunEntrypointMetadata;
   processPath?: string;
   processRevision?: string;
+  processCodeHash?: string;
   layoutVersion: string;
   createdAt: string;
   completionProof?: string;

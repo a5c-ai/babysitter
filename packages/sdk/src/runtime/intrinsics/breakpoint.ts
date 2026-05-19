@@ -83,7 +83,7 @@ export async function runBreakpointIntrinsic<T = unknown>(
     return { approved: true, response: "Auto-approved (non-interactive mode)" };
   }
 
-  const invokeOptions = { ...options, label, stableKey: `__sdk.breakpoint.${breakpointId}` };
+  const invokeOptions = { ...options, label, key: `__sdk.breakpoint.${breakpointId}` };
   return runTaskIntrinsic({
     task: breakpointTask,
     args: {

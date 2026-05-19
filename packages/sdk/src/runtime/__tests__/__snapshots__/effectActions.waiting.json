@@ -12,7 +12,7 @@
       "sleepUntilEpochMs": undefined,
     },
     "slot": 0,
-    "stepId": "S000001",
+    "stepId": "alpha-task.default.079a626c6aa0.0",
     "taskDef": {
       "kind": "node",
       "metadataKeys": [
@@ -35,7 +35,7 @@
       "sleepUntilEpochMs": undefined,
     },
     "slot": 1,
-    "stepId": "S000002",
+    "stepId": "beta-task.default.079a626c6aa0.0",
     "taskDef": {
       "kind": "node",
       "metadataKeys": [
@@ -58,7 +58,7 @@
       "sleepUntilEpochMs": 4070908800000,
     },
     "slot": 2,
-    "stepId": "S000003",
+    "stepId": "__sdk-sleep.sleep-thunk.04008deeff20.0",
     "taskDef": {
       "kind": "sleep",
       "metadataKeys": [

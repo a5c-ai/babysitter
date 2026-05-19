@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { appendEvent } from "../../storage/journal";
 import { readTaskDefinition } from "../../storage/tasks";
 import type { JournalEvent } from "../../storage/types";
@@ -52,6 +53,7 @@ export interface TaskIntrinsicContext {
   subprocessSupport?: "disabled" | "babysitter-agent";
   policyEngine?: PolicyEngine;
   reportPolicyDecision?: PolicyDecisionReporter;
+  invocationKeyCounts?: Map<string, number>;
 }
 
 export interface TaskIntrinsicInvokeOptions<TArgs, TResult> {
@@ -69,14 +71,20 @@ export async function runTaskIntrinsic<TArgs, TResult>(
     throw new InvalidTaskDefinitionError("ctx.task requires a DefinedTask created via defineTask()");
   }
 
-  const stepId = options.invokeOptions?.stableKey ?? options.context.replayCursor.nextStepId();
+  const explicitKey = options.invokeOptions?.key ?? options.invokeOptions?.stableKey;
+  const legacyStepId = explicitKey === undefined ? options.context.replayCursor.nextStepId() : undefined;
+  const stepId = explicitKey ?? deriveStableTaskKey(options);
   const invocation = hashInvocationKey({
     processId: options.context.processId,
-    stepId,
+    key: stepId,
     taskId: task.id,
   });
 
-  const existing = options.context.effectIndex.getByInvocation(invocation.key);
+  const legacyInvocation = legacyStepId
+    ? hashInvocationKey({ processId: options.context.processId, stepId: legacyStepId, taskId: task.id })
+    : undefined;
+  const existing = options.context.effectIndex.getByInvocation(invocation.key)
+    ?? (legacyInvocation ? options.context.effectIndex.getByInvocation(legacyInvocation.key) : undefined);
   if (existing) {
     return handleExistingInvocation(existing, options);
   }
@@ -186,4 +194,37 @@ async function ensureTaskDefinition(runDir: string, record: EffectRecord): Promi
   const stored = await readTaskDefinition(runDir, record.effectId);
   if (!stored) throw new RunFailedError(`Task definition missing for effect ${record.effectId}`, { effectId: record.effectId });
   return stored as TaskDef;
+}
+
+function deriveStableTaskKey<TArgs, TResult>(options: TaskIntrinsicInvokeOptions<TArgs, TResult>): string {
+  const label = normalizeKeyPart(options.invokeOptions?.label ?? "default");
+  const shapeHash = hashArgsShape(options.args);
+  const baseKey = `${normalizeKeyPart(options.task.id)}.${label}.${shapeHash}`;
+  const counts = options.context.invocationKeyCounts ??= new Map<string, number>();
+  const idx = counts.get(baseKey) ?? 0;
+  counts.set(baseKey, idx + 1);
+  return `${baseKey}.${idx}`;
+}
+
+function hashArgsShape(value: unknown): string {
+  const shape = stableNormalizeShape(value);
+  return crypto.createHash("sha256").update(JSON.stringify(shape)).digest("hex").slice(0, 12);
+}
+
+function normalizeKeyPart(value: string): string {
+  return value.trim().replace(/[^A-Za-z0-9_-]+/g, "-") || "default";
+}
+
+function stableNormalizeShape(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => stableNormalizeShape(entry));
+  }
+  if (value && typeof value === "object") {
+    const normalized: Record<string, unknown> = {};
+    for (const key of Object.keys(value as Record<string, unknown>).sort((a, b) => a.localeCompare(b))) {
+      normalized[key] = stableNormalizeShape((value as Record<string, unknown>)[key]);
+    }
+    return normalized;
+  }
+  return value === null ? "null" : typeof value;
 }

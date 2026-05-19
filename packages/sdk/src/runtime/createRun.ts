@@ -11,6 +11,7 @@ import { callRuntimeHook } from "./hooks/runtime";
 import { validateAgainstSchema } from "./schemaValidator";
 import { BabysitterRuntimeError } from "./exceptions";
 import { resolveProjectRootForRun, resolveRunsDir } from "../config";
+import { hashProcessCodeFile } from "./processCodeHash";
 
 export async function createRun(options: CreateRunOptions): Promise<CreateRunResult> {
   const runId = options.runId ?? nextUlid();
@@ -47,6 +48,7 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
   const extraMetadata = {
     ...options.metadata,
     ...(options.governance ? { governance: options.governance } : {}),
+    ...(options.process ? { processCodeHash: await hashProcessCodeFile(options.process.importPath) } : {}),
     completionProof,
   };
   const { metadata } = await createRunDir({
@@ -84,6 +86,9 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     }
     if (metadata.processRevision) {
       eventPayload.processRevision = metadata.processRevision;
+    }
+    if (metadata.processCodeHash) {
+      eventPayload.processCodeHash = metadata.processCodeHash;
     }
     if (options.inputs !== undefined) {
       eventPayload.inputsRef = INPUTS_FILE;
