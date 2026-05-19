@@ -66,6 +66,96 @@ describe("handleSessionResume", () => {
     expect(content).toContain(`run_id: "${runId}"`);
   });
 
+  it("normalizes an explicit global state root to the canonical state subdirectory", async () => {
+    const runId = "existing-run-explicit-root";
+    const runDir = path.join(runsDir, runId);
+    const previousGlobalStateDir = process.env.BABYSITTER_GLOBAL_STATE_DIR;
+    await fs.mkdir(path.join(runDir, "journal"), { recursive: true });
+    await fs.writeFile(
+      path.join(runDir, "run.json"),
+      JSON.stringify({ processId: "test-process" }),
+      "utf8",
+    );
+
+    try {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = stateDir;
+
+      const result = await handleSessionResume({
+        sessionId,
+        runId,
+        stateDir,
+        runsDir,
+        json: true,
+      });
+
+      expect(result).toBe(0);
+
+      const output = JSON.parse(String(vi.mocked(console.log).mock.calls.at(-1)?.[0] ?? "{}"));
+      const canonicalStateFile = path.join(stateDir, "state", `${sessionId}.md`);
+      const misplacedStateFile = path.join(stateDir, `${sessionId}.md`);
+      expect(output.stateFile).toBe(canonicalStateFile);
+
+      const content = await fs.readFile(canonicalStateFile, "utf8");
+      expect(content).toContain("active: true");
+      expect(content).toContain(`run_id: "${runId}"`);
+      await expect(fs.access(misplacedStateFile)).rejects.toThrow();
+    } finally {
+      if (previousGlobalStateDir === undefined) {
+        delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
+      } else {
+        process.env.BABYSITTER_GLOBAL_STATE_DIR = previousGlobalStateDir;
+      }
+    }
+  });
+
+  it("normalizes documented relative .a5c state root to the canonical state subdirectory", async () => {
+    const runId = "existing-run-relative-root";
+    const runDir = path.join(runsDir, runId);
+    const relativeRoot = ".a5c";
+    const globalRoot = path.join(testDir, relativeRoot);
+    const previousGlobalStateDir = process.env.BABYSITTER_GLOBAL_STATE_DIR;
+    const previousCwd = process.cwd();
+    await fs.mkdir(path.join(runDir, "journal"), { recursive: true });
+    await fs.mkdir(globalRoot, { recursive: true });
+    await fs.writeFile(
+      path.join(runDir, "run.json"),
+      JSON.stringify({ processId: "test-process" }),
+      "utf8",
+    );
+
+    try {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = globalRoot;
+      process.chdir(testDir);
+
+      const result = await handleSessionResume({
+        sessionId,
+        runId,
+        stateDir: relativeRoot,
+        runsDir,
+        json: true,
+      });
+
+      expect(result).toBe(0);
+
+      const output = JSON.parse(String(vi.mocked(console.log).mock.calls.at(-1)?.[0] ?? "{}"));
+      const canonicalStateFile = path.join(globalRoot, "state", `${sessionId}.md`);
+      const misplacedStateFile = path.join(globalRoot, `${sessionId}.md`);
+      expect(output.stateFile).toBe(canonicalStateFile);
+
+      const content = await fs.readFile(canonicalStateFile, "utf8");
+      expect(content).toContain("active: true");
+      expect(content).toContain(`run_id: "${runId}"`);
+      await expect(fs.access(misplacedStateFile)).rejects.toThrow();
+    } finally {
+      process.chdir(previousCwd);
+      if (previousGlobalStateDir === undefined) {
+        delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
+      } else {
+        process.env.BABYSITTER_GLOBAL_STATE_DIR = previousGlobalStateDir;
+      }
+    }
+  });
+
   it("does not treat a run as completed when pending work exists after RUN_COMPLETED", async () => {
     const runId = "existing-run-with-pending";
     const runDir = path.join(runsDir, runId);
