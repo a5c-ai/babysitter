@@ -12,6 +12,11 @@ on:
         required: false
         type: string
         default: ''
+      os:
+        description: 'Runner OS (ubuntu-latest-l, macos-latest, windows-latest).'
+        required: false
+        type: string
+        default: 'ubuntu-latest-l'
       matrix:
         description: 'JSON array of test combinations. Each entry: {agent, model, mode, install, live}. Empty = use push defaults.'
         required: false
@@ -35,7 +40,7 @@ jobs:
   build_all:
     if: ${{ !contains(github.event.head_commit.message || '', '[skip publish]') }}
     name: Build All
-    runs-on: ubuntu-latest-l
+    runs-on: ${{ inputs.os || 'ubuntu-latest-l' }}
     permissions:
       contents: read
     steps:
@@ -284,7 +289,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message || '', '[skip publish]') }}
     needs: [build_all, setup]
     name: "Live Stack (vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
-    runs-on: ubuntu-latest-m
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
     permissions:
       contents: read
       actions: read
@@ -411,7 +416,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message || '', '[skip publish]') }}
     needs: [build_all, setup]
     name: "Live Stack (vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
-    runs-on: ubuntu-latest-m
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
     permissions:
       contents: read
       actions: read
@@ -427,7 +432,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message || '', '[skip publish]') }}
     needs: [build_all, setup]
     name: "Live Stack (bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
-    runs-on: ubuntu-latest-m
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
     permissions:
       contents: read
       actions: read
@@ -443,7 +448,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message || '', '[skip publish]') }}
     needs: [build_all, setup]
     name: "Live Stack (bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
-    runs-on: ubuntu-latest-m
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
     permissions:
       contents: read
       actions: read
