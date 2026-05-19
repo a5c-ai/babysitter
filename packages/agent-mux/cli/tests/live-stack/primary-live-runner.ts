@@ -414,36 +414,83 @@ export async function executeChildProcessCommand(execution: CommandExecution): P
 }
 
 export async function executePtyCommand(execution: CommandExecution): Promise<CommandResult> {
-  const nodePty = require('node-pty') as {
-    spawn(file: string, args: string[], options: Record<string, unknown>): {
-      onData(cb: (data: string) => void): void;
-      onExit(cb: (e: { exitCode: number }) => void): void;
-      kill(signal?: string): void;
-      pid: number;
+  try {
+    const nodePty = require('node-pty') as {
+      spawn(file: string, args: string[], options: Record<string, unknown>): {
+        onData(cb: (data: string) => void): void;
+        onExit(cb: (e: { exitCode: number }) => void): void;
+        kill(signal?: string): void;
+        pid: number;
+      };
     };
+
+    return await new Promise<CommandResult>((resolve) => {
+      let output = '';
+      const pty = nodePty.spawn(execution.command, execution.args, {
+        name: 'xterm-256color',
+        cols: 120,
+        rows: 40,
+        cwd: execution.cwd,
+        env: { ...process.env, ...execution.env },
+      });
+
+      const timer = setTimeout(() => {
+        pty.kill('SIGTERM');
+        output += '\nTimed out after ' + execution.timeoutMs + 'ms';
+      }, execution.timeoutMs);
+
+      pty.onData((data) => { output += data; });
+      pty.onExit(({ exitCode }) => {
+        clearTimeout(timer);
+        resolve({ status: exitCode, stdout: output, stderr: '' });
+      });
+    });
+  } catch (error) {
+    return executePtyStartupFallback(execution, error);
+  }
+}
+
+async function executePtyStartupFallback(execution: CommandExecution, error: unknown): Promise<CommandResult> {
+  const message = error instanceof Error ? error.message : String(error);
+  const result = await executeChildProcessCommand(toBridgedInteractiveExecution(execution));
+  const fallbackNote = `node-pty startup failed; fell back to bridged child-process execution: ${message}`;
+  return {
+    status: result.status,
+    stdout: result.stdout,
+    stderr: [fallbackNote, result.stderr].filter(Boolean).join('\n'),
   };
+}
 
-  return await new Promise<CommandResult>((resolve) => {
-    let output = '';
-    const pty = nodePty.spawn(execution.command, execution.args, {
-      name: 'xterm-256color',
-      cols: 120,
-      rows: 40,
-      cwd: execution.cwd,
-      env: { ...process.env, ...execution.env },
-    });
+function toBridgedInteractiveExecution(execution: CommandExecution): CommandExecution {
+  return {
+    ...execution,
+    args: withBridgedInteractiveArgs(execution.args),
+    env: {
+      ...execution.env,
+      LIVE_STACK_INTERACTIVE: 'false',
+      LIVE_STACK_BRIDGE_INTERACTIVE: 'true',
+    },
+  };
+}
 
-    const timer = setTimeout(() => {
-      pty.kill('SIGTERM');
-      output += '\nTimed out after ' + execution.timeoutMs + 'ms';
-    }, execution.timeoutMs);
+function withBridgedInteractiveArgs(args: readonly string[]): readonly string[] {
+  const launchIndex = args.indexOf('launch');
+  if (launchIndex === -1) return args;
 
-    pty.onData((data) => { output += data; });
-    pty.onExit(({ exitCode }) => {
-      clearTimeout(timer);
-      resolve({ status: exitCode, stdout: output, stderr: '' });
-    });
-  });
+  const nextArgs = [...args];
+  const insertAt = firstPassthroughFlagIndex(nextArgs, launchIndex + 1);
+  const flagsToInsert = [
+    nextArgs.includes('--no-interactive') ? undefined : '--no-interactive',
+    nextArgs.includes('--bridge-interactive') ? undefined : '--bridge-interactive',
+  ].filter((flag): flag is string => Boolean(flag));
+  nextArgs.splice(insertAt, 0, ...flagsToInsert);
+  return nextArgs;
+}
+
+function firstPassthroughFlagIndex(args: readonly string[], start: number): number {
+  const passthroughFlags = new Set(['--yolo']);
+  const index = args.findIndex((arg, argIndex) => argIndex >= start && passthroughFlags.has(arg));
+  return index === -1 ? args.length : index;
 }
 
 function commandExecution(env: Record<string, string>, overrideKey: string, fallbackCommand: string, args: readonly string[], cwd: string, timeoutMs: number): CommandExecution {
