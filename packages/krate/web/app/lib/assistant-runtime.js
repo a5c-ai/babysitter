@@ -2,17 +2,38 @@
  * In-memory assistant runtime for krate chat sessions.
  *
  * Each session holds a message history and an optional stack reference.
- * The runtime delegates actual generation to the krate API controller's
- * agent dispatch pipeline when a controller is supplied, or falls back
- * to a simple echo / stub response for development.
+ * The runtime calls the Anthropic API directly via the SDK's callModel()
+ * — no K8s Job dispatch, no controller.dispatchAgent(). This prevents
+ * pod crashes from missing Job infrastructure.
+ *
+ * Stack config is resolved from AgentStack CRDs when a controller is
+ * available, falling back to sensible defaults.
  *
  * Sessions persist across Next.js hot reloads via globalThis.
  */
+
+import { callModel, defaultSystemPrompt as coreDefaultSystemPrompt } from '@a5c-ai/krate-sdk';
 
 let idCounter = 1;
 
 function generateId() {
   return `asst_${Date.now().toString(36)}_${(idCounter++).toString(36)}`;
+}
+
+function defaultSystemPrompt() {
+  return coreDefaultSystemPrompt();
+}
+
+async function resolveStackConfig(controller, stackRef) {
+  const defaults = { provider: 'anthropic', model: 'claude-sonnet-4-20250514', systemPrompt: defaultSystemPrompt() };
+  if (!controller) return defaults;
+  try {
+    const result = await controller.getResource('AgentStack', stackRef || 'assistant');
+    if (result?.resource?.spec) {
+      return { ...defaults, ...result.resource.spec };
+    }
+  } catch { /* use defaults */ }
+  return defaults;
 }
 
 export function createAssistantRuntime() {
@@ -55,40 +76,33 @@ export function createAssistantRuntime() {
       const session = sessions.get(sessionId);
       if (!session) throw new Error(`Session ${sessionId} not found`);
 
-      const userEntry = {
+      session.messages.push({
         id: generateId(),
         role: 'user',
         content: userMessage,
         timestamp: new Date().toISOString(),
-      };
-      session.messages.push(userEntry);
+      });
 
-      let assistantContent;
+      let assistantContent = '';
       let tokenUsage = null;
+
       try {
-        if (controller && typeof controller.chatAssistant === 'function') {
-          const result = await controller.chatAssistant({
-            stackRef: session.stackRef,
-            messages: session.messages.map((m) => ({ role: m.role, content: m.content })),
-          });
-          assistantContent = result.content || result.message || result.text || String(result);
-          tokenUsage = result.usage || null;
-        } else if (controller && typeof controller.dispatchAgent === 'function') {
-          // Fallback: use dispatch with a chat-oriented task
-          const result = await controller.dispatchAgent({
-            agentStack: session.stackRef,
-            taskKind: 'chat',
-            actor: 'assistant',
-            prompt: userMessage,
-          });
-          assistantContent = result.response || result.output || result.content || JSON.stringify(result, null, 2);
-          tokenUsage = result.usage || null;
-        } else {
-          // Dev-mode echo
-          assistantContent = `I received your message: "${userMessage}"\n\nThe assistant runtime is running without a connected agent backend. Configure an agent stack to enable AI-powered responses.`;
-        }
+        const config = await resolveStackConfig(controller, session.stackRef);
+
+        const result = await callModel({
+          provider: config.provider || 'anthropic',
+          model: config.model || 'claude-sonnet-4-20250514',
+          messages: [
+            ...(config.systemPrompt ? [{ role: 'system', content: config.systemPrompt }] : []),
+            ...session.messages.map((m) => ({ role: m.role, content: m.content })),
+          ],
+          maxTokens: 4096,
+        });
+
+        assistantContent = result.content || 'No response from model.';
+        tokenUsage = result.usage || null;
       } catch (err) {
-        assistantContent = `Error processing request: ${err.message}`;
+        assistantContent = `Error: ${err.message}. Check that ANTHROPIC_API_KEY is configured.`;
       }
 
       const assistantEntry = {
@@ -108,17 +122,21 @@ export function createAssistantRuntime() {
       let content;
       let tokenUsage = null;
       try {
-        if (controller && typeof controller.chatAssistant === 'function') {
-          const systemPrompt = buildGeneratePrompt(task, context, outputType);
-          const result = await controller.chatAssistant({
-            stackRef: stackRef || 'assistant',
-            messages: [{ role: 'user', content: systemPrompt }],
-          });
-          content = result.content || result.message || result.text || String(result);
-          tokenUsage = result.usage || null;
-        } else {
-          content = generateStubContent(task, context, outputType);
-        }
+        const config = await resolveStackConfig(controller, stackRef);
+        const systemPrompt = buildGeneratePrompt(task, context, outputType);
+
+        const result = await callModel({
+          provider: config.provider || 'anthropic',
+          model: config.model || 'claude-sonnet-4-20250514',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: task },
+          ],
+          maxTokens: 4096,
+        });
+
+        content = result.content || generateStubContent(task, context, outputType);
+        tokenUsage = result.usage || null;
       } catch (err) {
         content = `Generation error: ${err.message}`;
       }
