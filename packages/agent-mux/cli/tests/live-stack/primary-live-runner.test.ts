@@ -1,16 +1,12 @@
 import * as fs from 'node:fs/promises';
-import { createRequire } from 'node:module';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { buildPrimaryLiveStackCommands, executeChildProcessCommand, executePtyCommand, runPrimaryLiveStackScenario } from './primary-live-runner';
+import { buildMacosScriptPtyInvocation, buildPrimaryLiveStackCommands, executeChildProcessCommand, runPrimaryLiveStackScenario } from './primary-live-runner';
 import type { LiveStackScenario } from './scenario-contract';
 import { liveStackScenarioFromEnv, primaryLiveStackScenario } from './scenario-contract';
-
-const requireForTest = createRequire(import.meta.url);
-let restoreNodePtySpawn: (() => void) | undefined;
 
 async function writeMinimalJournal(journalDir: string, completed: boolean): Promise<void> {
   const events = [
@@ -67,23 +63,7 @@ function promptFor(scenario: LiveStackScenario, env: Record<string, string | und
   return launch?.args[(launch?.args.indexOf('--prompt') ?? -2) + 1];
 }
 
-function mockNodePtySpawnFailure(message = 'posix_spawnp failed'): void {
-  const nodePty = requireForTest('node-pty') as { spawn: unknown };
-  const originalSpawn = nodePty.spawn;
-  nodePty.spawn = () => {
-    throw new Error(message);
-  };
-  restoreNodePtySpawn = () => {
-    nodePty.spawn = originalSpawn;
-  };
-}
-
 describe('primary live stack runner contract', () => {
-  afterEach(() => {
-    restoreNodePtySpawn?.();
-    restoreNodePtySpawn = undefined;
-  });
-
   it('keeps Claude Code babysitter-plugin live lanes on Foundry GPT-5.5', () => {
     const scenario = primaryLiveStackScenario();
     const commands = buildPrimaryLiveStackCommands(scenario, {
@@ -214,57 +194,47 @@ describe('primary live stack runner contract', () => {
     expect(launch?.args).not.toContain('-p');
   });
 
-  it('falls back to bridged child-process execution when node-pty spawn fails synchronously', async () => {
-    mockNodePtySpawnFailure();
-
-    const result = await executePtyCommand({
-      command: process.execPath,
+  it('wraps macOS live-stack commands in the native script PTY without bridge fallback flags', () => {
+    const invocation = buildMacosScriptPtyInvocation({
+      command: 'amux',
       args: [
-        '-e',
-        [
-          'const fs = require("node:fs");',
-          'fs.writeFileSync(process.env.FALLBACK_CAPTURE, JSON.stringify({',
-          '  args: process.argv.slice(1),',
-          '  interactive: process.env.LIVE_STACK_INTERACTIVE,',
-          '  bridgeInteractive: process.env.LIVE_STACK_BRIDGE_INTERACTIVE',
-          '}));',
-          'console.log(process.env.FALLBACK_CAPTURE);',
-        ].join(''),
         'launch',
         'codex',
         'foundry',
         '--model',
         'gpt-5.5',
+        '--prompt',
+        'write the artifact',
         '--yolo',
       ],
       cwd: process.cwd(),
       env: {
-        FALLBACK_CAPTURE: path.join(os.tmpdir(), `live-stack-pty-fallback-${Date.now()}.json`),
         LIVE_STACK_INTERACTIVE: 'true',
         LIVE_STACK_BRIDGE_INTERACTIVE: 'false',
       },
       timeoutMs: 1000,
     });
 
-    const captured = JSON.parse(await fs.readFile(result.stdout.trim(), 'utf8')) as {
-      args: string[];
-      interactive: string;
-      bridgeInteractive: string;
-    };
-
-    expect(result.status).toBe(0);
-    expect(captured.interactive).toBe('false');
-    expect(captured.bridgeInteractive).toBe('true');
-    expect(captured.args).toContain('--no-interactive');
-    expect(captured.args).toContain('--bridge-interactive');
-    expect(captured.args.filter((arg) => arg === '--no-interactive')).toHaveLength(1);
-    expect(captured.args.filter((arg) => arg === '--bridge-interactive')).toHaveLength(1);
+    expect(invocation.command).toBe('/usr/bin/script');
+    expect(invocation.args).toEqual([
+      '-q',
+      '/dev/null',
+      'amux',
+      'launch',
+      'codex',
+      'foundry',
+      '--model',
+      'gpt-5.5',
+      '--prompt',
+      'write the artifact',
+      '--yolo',
+    ]);
+    expect(invocation.args).not.toContain('--no-interactive');
+    expect(invocation.args).not.toContain('--bridge-interactive');
   });
 
-  it('writes a failed scenario artifact instead of throwing when PTY startup fails', async () => {
-    mockNodePtySpawnFailure();
-
-    const artifactsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-pty-fallback-artifacts-'));
+  it('records PTY command failures without rewriting live-stack interactive mode', async () => {
+    const artifactsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-native-pty-artifacts-'));
     const result = await runPrimaryLiveStackScenario({
       cwd: process.cwd(),
       artifactsDir,
@@ -272,22 +242,39 @@ describe('primary live stack runner contract', () => {
       env: {
         AZURE_API_KEY: 'sk-live-secret',
         AMUX_API_BASE: 'https://foundry.example.test',
-        LIVE_STACK_TRACE_ID: 'pty-fallback-trace',
+        LIVE_STACK_TRACE_ID: 'native-pty-trace',
         LIVE_STACK_INTERACTIVE: 'true',
       },
       executeCommand: async (command) => command.args.includes('launch')
-        ? executePtyCommand(command)
+        ? {
+            status: 1,
+            stdout: '',
+            stderr: JSON.stringify({
+              args: command.args,
+              interactive: command.env['LIVE_STACK_INTERACTIVE'],
+              bridgeInteractive: command.env['LIVE_STACK_BRIDGE_INTERACTIVE'],
+            }),
+          }
         : { status: 0, stdout: '{}', stderr: '' },
       timeoutMs: 1000,
     });
 
     expect(result.status).toBe('failed');
-    expect(result.failure).toContain('command failed:');
     expect(result.artifactPath).toBeDefined();
-    const artifact = await fs.readFile(result.artifactPath!, 'utf8');
-    expect(artifact).toContain('commandResults');
-    expect(artifact).toContain('posix_spawnp failed');
-    expect(await fs.readFile(path.join(artifactsDir, 'plugin-command-transcript.json'), 'utf8')).toContain('posix_spawnp failed');
+    const transcript = JSON.parse(await fs.readFile(path.join(artifactsDir, 'plugin-command-transcript.json'), 'utf8')) as {
+      commandResults: Array<{ stderr: string }>;
+    };
+    const launchResult = transcript.commandResults.at(-1);
+    expect(launchResult).toBeDefined();
+    const launchCapture = JSON.parse(launchResult!.stderr) as {
+      args: string[];
+      interactive: string;
+      bridgeInteractive?: string;
+    };
+    expect(launchCapture.interactive).toBe('true');
+    expect(launchCapture.bridgeInteractive).toBeUndefined();
+    expect(launchCapture.args).not.toContain('--bridge-interactive');
+    expect(launchCapture.args).not.toContain('--no-interactive');
   });
 
   it('pins babysitter-plugin runs to the workspace runs directory', () => {

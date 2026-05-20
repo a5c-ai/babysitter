@@ -1,0 +1,47 @@
+{
+  "issueNumber": 185,
+  "linkedIssueNumber": 184,
+  "baseBranch": "staging",
+  "targetBranch": "plan/issue-184",
+  "component": "packages/agent-mux/cli live-stack PTY support",
+  "ciWorkflowFile": ".github/workflows/live-stack.yml",
+  "targetFiles": [
+    "packages/agent-mux/cli/tests/live-stack/pipeline-scenario.test.ts",
+    "packages/agent-mux/cli/tests/live-stack/primary-live-runner.ts",
+    "packages/agent-mux/cli/tests/live-stack/primary-live-runner.test.ts",
+    "packages/agent-mux/cli/src/commands/launch.ts",
+    "packages/agent-mux/core/src/spawn-runner.ts",
+    "package.json",
+    "package-lock.json",
+    ".github/workflows/live-stack.yml"
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/agent-mux/cli/tests/live-stack/primary-live-runner.test.ts packages/agent-mux/cli/tests/live-stack/pipeline-scenario.test.ts packages/agent-mux/cli/tests/launch-bridge-interactive.test.ts",
+    "npm run build:agent-mux:non-realtime",
+    "npm run verify:metadata"
+  ],
+  "guardrailCommands": [
+    "node -e \"const fs=require('fs'); const s=fs.readFileSync('packages/agent-mux/cli/tests/live-stack/primary-live-runner.ts','utf8'); if (/executePtyStartupFallback|toBridgedInteractiveExecution|withBridgedInteractiveArgs|fell back|node-pty startup failed/.test(s)) { console.error('live-stack PTY runner still contains rejected fallback behavior'); process.exit(1); }\"",
+    "npm ls node-pty"
+  ],
+  "acceptanceCriteria": [
+    "The live-stack interactive path must use real PTY-based execution on macOS ARM64 CI runners.",
+    "Do not use bridge-interactive, child-process bridged mode, or non-interactive execution as a fallback for node-pty startup failure.",
+    "If node-pty itself is kept, fix its installation/build/runtime availability for darwin-arm64; otherwise replace it with another native PTY implementation that preserves TTY semantics.",
+    "Existing bridge-interactive feature tests may remain for the bridge feature, but live-stack interactive macOS support must not depend on bridge-interactive fallback.",
+    "The fix must preserve command transcript/artifact behavior and targeted live-stack verification."
+  ],
+  "nonGoals": [
+    "Do not remove interactive live-stack coverage.",
+    "Do not silently skip macOS ARM64 interactive lanes.",
+    "Do not add a bridge-interactive fallback in primary live-stack execution.",
+    "Do not refactor unrelated agent-mux CLI behavior."
+  ],
+  "processLibraryReferences": [
+    "tdd-quality-convergence.md",
+    "methodologies/spec-kit-brownfield.js",
+    "specializations/sdk-platform-development/sdk-testing-strategy.js",
+    "specializations/sdk-platform-development/error-handling-debugging-support.js",
+    "specializations/devops-sre-platform/agents/cicd-specialist/AGENT.md"
+  ]
+}

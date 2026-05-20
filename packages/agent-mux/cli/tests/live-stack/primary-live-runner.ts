@@ -414,90 +414,101 @@ export async function executeChildProcessCommand(execution: CommandExecution): P
 }
 
 export async function executePtyCommand(execution: CommandExecution): Promise<CommandResult> {
-  try {
-    const nodePty = require('node-pty') as {
-      spawn(file: string, args: string[], options: Record<string, unknown>): {
-        onData(cb: (data: string) => void): void;
-        onExit(cb: (e: { exitCode: number }) => void): void;
-        kill(signal?: string): void;
-        pid: number;
-      };
+  if (process.platform === 'darwin') {
+    return executeMacosScriptPtyCommand(execution);
+  }
+
+  const nodePty = require('node-pty') as {
+    spawn(file: string, args: string[], options: Record<string, unknown>): {
+      onData(cb: (data: string) => void): void;
+      onExit(cb: (e: { exitCode: number }) => void): void;
+      kill(signal?: string): void;
+      pid: number;
+    };
+  };
+
+  return await new Promise<CommandResult>((resolve) => {
+    let output = '';
+    const pty = nodePty.spawn(execution.command, execution.args, {
+      name: 'xterm-256color',
+      cols: 120,
+      rows: 40,
+      cwd: execution.cwd,
+      env: { ...process.env, ...execution.env },
+    });
+
+    const timer = setTimeout(() => {
+      pty.kill('SIGTERM');
+      output += '\nTimed out after ' + execution.timeoutMs + 'ms';
+    }, execution.timeoutMs);
+
+    pty.onData((data) => { output += data; });
+    pty.onExit(({ exitCode }) => {
+      clearTimeout(timer);
+      resolve({ status: exitCode, stdout: output, stderr: '' });
+    });
+  });
+}
+
+export function buildMacosScriptPtyInvocation(execution: CommandExecution): Pick<CommandExecution, 'command' | 'args'> {
+  return {
+    command: '/usr/bin/script',
+    args: ['-q', '/dev/null', execution.command, ...execution.args],
+  };
+}
+
+async function executeMacosScriptPtyCommand(execution: CommandExecution): Promise<CommandResult> {
+  const { spawn } = await import('node:child_process');
+  const invocation = buildMacosScriptPtyInvocation(execution);
+  return await new Promise<CommandResult>((resolve) => {
+    const child = spawn(invocation.command, invocation.args, {
+      cwd: execution.cwd,
+      env: { ...process.env, ...execution.env },
+      detached: true,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    child.stdin?.end();
+    let stdout = '';
+    let stderr = '';
+    let timedOut = false;
+    let forceKillTimer: NodeJS.Timeout | undefined;
+
+    const killProcessTree = (signal: NodeJS.Signals) => {
+      if (!child.pid) return;
+      try {
+        process.kill(-child.pid, signal);
+      } catch {
+        child.kill(signal);
+      }
     };
 
-    return await new Promise<CommandResult>((resolve) => {
-      let output = '';
-      const pty = nodePty.spawn(execution.command, execution.args, {
-        name: 'xterm-256color',
-        cols: 120,
-        rows: 40,
-        cwd: execution.cwd,
-        env: { ...process.env, ...execution.env },
-      });
-
-      const timer = setTimeout(() => {
-        pty.kill('SIGTERM');
-        output += '\nTimed out after ' + execution.timeoutMs + 'ms';
-      }, execution.timeoutMs);
-
-      pty.onData((data) => { output += data; });
-      pty.onExit(({ exitCode }) => {
-        clearTimeout(timer);
-        resolve({ status: exitCode, stdout: output, stderr: '' });
-      });
+    const timer = setTimeout(() => {
+      timedOut = true;
+      stderr += `\nTimed out after ${execution.timeoutMs}ms`;
+      killProcessTree('SIGTERM');
+      forceKillTimer = setTimeout(() => killProcessTree('SIGKILL'), 1000);
+      forceKillTimer.unref?.();
+    }, execution.timeoutMs);
+    child.stdout?.on('data', (chunk) => { stdout += String(chunk); });
+    child.stderr?.on('data', (chunk) => { stderr += String(chunk); });
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      if (forceKillTimer) clearTimeout(forceKillTimer);
+      resolve({ status: timedOut ? (code ?? 124) : (code ?? 1), stdout, stderr });
     });
-  } catch (error) {
-    return executePtyStartupFallback(execution, error);
-  }
+    child.on('error', (error) => {
+      clearTimeout(timer);
+      if (forceKillTimer) clearTimeout(forceKillTimer);
+      resolve({ status: 1, stdout, stderr: `${stderr}\n${error.message}` });
+    });
+  });
 }
 
-async function executePtyStartupFallback(execution: CommandExecution, error: unknown): Promise<CommandResult> {
-  const message = error instanceof Error ? error.message : String(error);
-  const result = await executeChildProcessCommand(toBridgedInteractiveExecution(execution));
-  const fallbackNote = `node-pty startup failed; fell back to bridged child-process execution: ${message}`;
-  return {
-    status: result.status,
-    stdout: result.stdout,
-    stderr: [fallbackNote, result.stderr].filter(Boolean).join('\n'),
-  };
-}
-
-function toBridgedInteractiveExecution(execution: CommandExecution): CommandExecution {
-  return {
-    ...execution,
-    args: withBridgedInteractiveArgs(execution.args),
-    env: {
-      ...execution.env,
-      LIVE_STACK_INTERACTIVE: 'false',
-      LIVE_STACK_BRIDGE_INTERACTIVE: 'true',
-    },
-  };
-}
-
-function withBridgedInteractiveArgs(args: readonly string[]): readonly string[] {
-  const launchIndex = args.indexOf('launch');
-  if (launchIndex === -1) return args;
-
-  const nextArgs = [...args];
-  const insertAt = firstPassthroughFlagIndex(nextArgs, launchIndex + 1);
-  const flagsToInsert = [
-    nextArgs.includes('--no-interactive') ? undefined : '--no-interactive',
-    nextArgs.includes('--bridge-interactive') ? undefined : '--bridge-interactive',
-  ].filter((flag): flag is string => Boolean(flag));
-  nextArgs.splice(insertAt, 0, ...flagsToInsert);
-  return nextArgs;
-}
-
-function firstPassthroughFlagIndex(args: readonly string[], start: number): number {
-  const passthroughFlags = new Set(['--yolo']);
-  const index = args.findIndex((arg, argIndex) => argIndex >= start && passthroughFlags.has(arg));
-  return index === -1 ? args.length : index;
-}
-
-function commandExecution(env: Record<string, string>, overrideKey: string, fallbackCommand: string, args: readonly string[], cwd: string, timeoutMs: number): CommandExecution {
+function commandExecution(env: Record<string, string>, overrideKey: string, defaultCommand: string, args: readonly string[], cwd: string, timeoutMs: number): CommandExecution {
   const overrideBin = env[overrideKey];
   return overrideBin
     ? { command: process.execPath, args: [overrideBin, ...args], env, cwd, timeoutMs }
-    : { command: fallbackCommand, args, env, cwd, timeoutMs };
+    : { command: defaultCommand, args, env, cwd, timeoutMs };
 }
 
 function buildCommandEnv(env: Record<string, string | undefined>, cwd: string): Record<string, string> {
