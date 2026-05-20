@@ -1,0 +1,94 @@
+{
+  "issueNumber": 170,
+  "baseBranch": "staging",
+  "targetBranch": "fix/issue-170-claude-code-run-create-first-iteration",
+  "title": "[Hooks] Stop hook never fires after `run:create --harness claude-code` — first iteration is never triggered, run parked at `state=created`",
+  "labels": [
+    "bug",
+    "sdk",
+    "hooks-mux",
+    "priority:high",
+    "effort:medium",
+    "ready-for-dev",
+    "plugins"
+  ],
+  "summary": "A Claude Code harness-bound run can be created and have its session state written successfully, but the host Stop hook is not invoked after the run:create assistant turn. The run remains at state=created with only RUN_CREATED and no pending effects until a manual run:iterate generates the first EFFECT_REQUESTED.",
+  "rootCauseHypothesis": "The first iteration is a chicken-and-egg gap: stop-hook continuation relies on the host invoking the Stop hook, but immediately after run:create there are no pending effects and no first run:iterate has occurred. Existing stop-hook code can block a created run if invoked, but the reported failure is that the host never invokes it after run:create.",
+  "targetFiles": [
+    "packages/sdk/src/cli/main/runCreate.ts",
+    "packages/sdk/src/runtime/createRun.ts",
+    "packages/sdk/src/cli/commands/runIterate.ts",
+    "packages/sdk/src/runtime/orchestrateIteration.ts",
+    "packages/sdk/src/harness/types.ts",
+    "packages/sdk/src/harness/BaseAdapter.ts",
+    "packages/sdk/src/harness/adapters/claude-code.ts",
+    "packages/sdk/src/harness/hooks/sessionBinding.ts",
+    "packages/sdk/src/harness/hooks/stopHookHandler.ts",
+    "packages/sdk/src/harness/hooks/stopHookContinuation.ts",
+    "packages/sdk/src/harness/hooks/runState.ts",
+    "packages/sdk/src/cli/__tests__/cliRuns.test.ts",
+    "packages/sdk/src/cli/commands/__tests__/hookRun.test.ts",
+    "packages/sdk/src/runtime/__tests__/createRun.test.ts",
+    "packages/sdk/src/harness/__tests__/harness.test.ts"
+  ],
+  "relatedIssues": [
+    158,
+    166,
+    139,
+    136,
+    164,
+    133,
+    130
+  ],
+  "processLibraryReferences": [
+    "cradle/bugfix.js",
+    "babysitter/tdd-quality-convergence.js",
+    "methodologies/atdd-tdd/atdd-tdd.js",
+    "methodologies/process-hardening/process-hardening-patterns.js",
+    "specializations/sdk-platform-development/sdk-testing-strategy.js",
+    "specializations/sdk-platform-development/error-handling-debugging-support.js",
+    "specializations/sdk-platform-development/compatibility-testing.js",
+    "specializations/collaboration/github/issue-linking.js",
+    "specializations/collaboration/github/pr-policies.js",
+    "processes/shared/ci/idempotency-and-safe-abort.js"
+  ],
+  "preferredFixDirection": "Favor making run:create --harness claude-code seed the first iteration for eligible hook-driven, session-bound, non-bare runs before returning, so the run is delivered at waiting/completed/failed rather than unreachable created. The design task must still compare this against a stop-hook created-state special case and document the tradeoff.",
+  "acceptanceFocus": [
+    "`babysitter run:create --harness claude-code` with a valid process and successful session binding must not leave the run with only RUN_CREATED and zero pending effects.",
+    "The newly created hook-driven run should reach the first orchestration result without requiring a manual `run:iterate` or user nudge.",
+    "The fix must not double-iterate when a harness or caller already performed the first iteration.",
+    "Bare runs must remain created and uniterated until a process is assigned.",
+    "Failed or unresolved session binding must not hide errors by auto-iterating.",
+    "Existing stop-hook continuation, #158/#159 waiting behavior, and #166 missing-session recovery semantics must remain intact.",
+    "CLI JSON and human output should expose any initial iteration result clearly enough for callers and tests to reason about it."
+  ],
+  "nonGoals": [
+    "Do not rewrite the Claude Code hook installation flow unless runtime tracing proves it is required.",
+    "Do not broaden the change to unrelated harnesses without an explicit compatibility reason.",
+    "Do not change bare-run assignment semantics.",
+    "Do not weaken stop-hook backoff, breakpoint waiting, completion-proof handling, or missing-session recovery behavior.",
+    "Do not introduce shell-oriented process subtasks in this repository process."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/cli/__tests__/cliRuns.test.ts packages/sdk/src/cli/commands/__tests__/hookRun.test.ts packages/sdk/src/runtime/__tests__/createRun.test.ts packages/sdk/src/harness/__tests__/harness.test.ts",
+    "npm run build:sdk",
+    "npm run test:sdk"
+  ],
+  "qualityGates": [
+    "Regression tests fail before implementation and pass after implementation.",
+    "Targeted CLI/harness tests prove run:create --harness claude-code reaches the first EFFECT_REQUESTED for a process with a first task.",
+    "Negative tests prove bare runs and session binding errors do not auto-iterate.",
+    "SDK build passes.",
+    "SDK test suite passes or any pre-existing unrelated failures are documented with command output.",
+    "Compatibility review approves interactions with #158, #159, and #166 hook behavior."
+  ],
+  "plannedPhases": [
+    "Read issue #170, comments, labels, and related issue boundaries.",
+    "Trace run:create, createRun, bindSession, stop-hook run-state resolution, and run:iterate paths.",
+    "Design first-iteration wakeup semantics and use a sparse breakpoint only if a maintainer decision is genuinely required.",
+    "Author failing regression tests before implementation.",
+    "Implement a focused fix with up to three verification/review attempts.",
+    "Run targeted and full SDK verification gates.",
+    "Perform compatibility review and final acceptance."
+  ]
+}

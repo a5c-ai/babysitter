@@ -72,6 +72,7 @@ describe("babysitter run:create CLI", () => {
     }
     __resetCacheForTests();
     __setAncestorResolverForTests(undefined);
+    vi.restoreAllMocks();
     await fs.rm(runsRoot, { recursive: true, force: true });
   });
 
@@ -239,6 +240,156 @@ describe("babysitter run:create CLI", () => {
     ).resolves.toBeUndefined();
 
     await fs.rm(globalStateRoot, { recursive: true, force: true });
+  });
+
+  it("seeds the first iteration for claude-code run:create when session binding succeeds", async () => {
+    const entryFile = await writeEntrypoint(
+      "processes/claude-first-iteration.mjs",
+      `export async function process() { return true; }\n`,
+    );
+    const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-run-create-claude-first-"));
+    const currentSessionId = "current-claude-first-iteration";
+    const firstEffectId = "ef-issue-170-first";
+
+    const orchestrateSpy = vi.spyOn(orchestrateIterationModule, "orchestrateIteration").mockImplementation(
+      async (options) => {
+        await appendEvent({
+          runDir: options.runDir,
+          eventType: "EFFECT_REQUESTED",
+          event: {
+            effectId: firstEffectId,
+            invocationKey: "issue-170:first-effect",
+            stepId: "first-effect",
+            taskId: "issue-170-first-effect",
+            kind: "agent",
+            label: "agent",
+          },
+        });
+        return {
+          status: "waiting",
+          nextActions: [
+            {
+              effectId: firstEffectId,
+              invocationKey: "issue-170:first-effect",
+              kind: "agent",
+              label: "agent",
+              taskDef: { kind: "agent", title: "first effect" },
+            },
+          ],
+        };
+      },
+    );
+
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "1";
+    __resetCacheForTests();
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+
+    const markerPath = getSessionMarkerPath("claude-code", process.pid);
+    await fs.mkdir(path.dirname(markerPath), { recursive: true });
+    await fs.writeFile(markerPath, `${currentSessionId}\n`);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/claude-first-iteration",
+      "--entry",
+      `${entryFile}#process`,
+      "--harness",
+      "claude-code",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    const payload = readLastJsonLine(logSpy);
+    expect(payload.session).toMatchObject({
+      harness: "claude-code",
+      sessionId: currentSessionId,
+    });
+    expect(payload.initialIteration).toMatchObject({
+      iteration: 1,
+      status: "waiting",
+      reason: "agent-pending",
+    });
+    expect(orchestrateSpy).toHaveBeenCalledTimes(1);
+
+    const runDir = await expectSingleRunDir();
+    const journal = await loadJournal(runDir);
+    expect(journal.map((event) => event.type)).toContain("EFFECT_REQUESTED");
+    expect(journal.filter((event) => event.type === "EFFECT_REQUESTED")).toHaveLength(1);
+
+    await fs.rm(globalStateRoot, { recursive: true, force: true });
+    orchestrateSpy.mockRestore();
+  });
+
+  it("does not seed the first iteration for claude-code bare runs", async () => {
+    const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-run-create-claude-bare-"));
+    const currentSessionId = "current-claude-bare-run";
+
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "1";
+    __resetCacheForTests();
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+
+    const markerPath = getSessionMarkerPath("claude-code", process.pid);
+    await fs.mkdir(path.dirname(markerPath), { recursive: true });
+    await fs.writeFile(markerPath, `${currentSessionId}\n`);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--harness",
+      "claude-code",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    const payload = readLastJsonLine(logSpy);
+    expect(payload.initialIteration).toBeUndefined();
+
+    const runDir = await expectSingleRunDir();
+    const journal = await loadJournal(runDir);
+    expect(journal).toHaveLength(1);
+    expect(journal[0].type).toBe("RUN_CREATED");
+
+    await fs.rm(globalStateRoot, { recursive: true, force: true });
+  });
+
+  it("does not seed the first iteration when claude-code session binding is unresolved", async () => {
+    const entryFile = await writeEntrypoint("processes/claude-no-session.mjs", `export async function process() { return true; }\n`);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/claude-no-session",
+      "--entry",
+      `${entryFile}#process`,
+      "--harness",
+      "claude-code",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    const payload = readLastJsonLine(logSpy);
+    expect(payload.initialIteration).toBeUndefined();
+    expect(payload.session).toMatchObject({
+      harness: "claude-code",
+      sessionId: "",
+    });
+    expect(payload.session.error).toContain("session");
+
+    const runDir = await expectSingleRunDir();
+    const journal = await loadJournal(runDir);
+    expect(journal).toHaveLength(1);
+    expect(journal[0].type).toBe("RUN_CREATED");
   });
 
   it("describes dry-run plans without creating run directories", async () => {

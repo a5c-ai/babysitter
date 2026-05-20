@@ -2,6 +2,7 @@ import * as crypto from "node:crypto";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { createRun } from "../../runtime/createRun";
+import { loadJournal } from "../../storage/journal";
 import { rebuildStateCache } from "../../runtime/replay/stateCache";
 import type { IterationMetadata } from "../../runtime/types";
 import type { JsonRecord } from "../../storage/types";
@@ -10,8 +11,11 @@ import {
   getAdapter,
   getAdapterByName,
   getSessionResolutionDetails,
+  HarnessCapability,
+  type HarnessAdapter,
 } from "../../harness";
 import { discoverFromProcessFile, discoverSkillsInternal } from "../commands/skill";
+import { runIterate, type RunIterateResult } from "../commands/runIterate";
 import { getActiveProcessLibraryPath } from "../../processLibrary/active";
 import { collapseDoubledA5cRuns, resolveRunDir } from "./args";
 import {
@@ -162,6 +166,22 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     sessionBound = { harness: parsed.harness, sessionId: "", error: `Unsupported harness: ${parsed.harness}` };
   }
 
+  let initialIteration: RunIterateResult | undefined;
+  if (await shouldSeedInitialIterationAfterRunCreate({
+    isBareRun,
+    adapter,
+    sessionBound,
+    runDir: result.runDir,
+  })) {
+    initialIteration = await runIterate({
+      runDir: result.runDir,
+      iteration: 1,
+      verbose: parsed.verbose,
+      json: parsed.json,
+      harnessCapabilities: adapter?.getCapabilities?.(),
+    });
+  }
+
   let discoveredSkills: Array<{ name: string; file?: string }> | undefined;
   let discoveredAgents: Array<{ name: string; file?: string }> | undefined;
   const discoverPluginRoot = parsed.pluginRoot ?? adapter?.resolvePluginRoot(parsed);
@@ -209,6 +229,7 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
           runDir: result.runDir,
           entry: entrySpec,
           session: sessionOut,
+          ...(initialIteration ? { initialIteration } : {}),
           discoveredSkills: summarizeDiscovery(discoveredSkills, parsed.verbose),
           discoveredAgents: summarizeDiscovery(discoveredAgents, parsed.verbose),
         },
@@ -223,8 +244,26 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     } else if (sessionBound) {
       console.log(`[run:create] session=${sessionBound.sessionId} bound via ${sessionBound.harness} stateFile=${sessionBound.stateFile}`);
     }
+    if (initialIteration) {
+      console.log(`[run:create] initialIteration status=${initialIteration.status} reason=${initialIteration.reason ?? ""}`);
+    }
   }
   return sessionBound?.fatal ? 1 : 0;
+}
+
+async function shouldSeedInitialIterationAfterRunCreate(args: {
+  isBareRun: boolean;
+  adapter?: HarnessAdapter | null;
+  sessionBound?: { sessionId?: string; error?: string; fatal?: boolean };
+  runDir: string;
+}): Promise<boolean> {
+  if (args.isBareRun) return false;
+  if (args.adapter?.name !== "claude-code") return false;
+  if (!args.adapter.getCapabilities?.().includes(HarnessCapability.StopHook)) return false;
+  if (!args.sessionBound?.sessionId || args.sessionBound.error || args.sessionBound.fatal) return false;
+
+  const journal = await loadJournal(args.runDir);
+  return journal.length === 1 && journal[0]?.type === "RUN_CREATED";
 }
 
 function summarizeDiscovery(
