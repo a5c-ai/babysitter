@@ -8,6 +8,10 @@ import { appendFileSync } from "node:fs";
 import { BaseHarnessAdapter, type AdapterConfig } from "../BaseAdapter";
 import { getAmuxAdapterMetadata } from "../amuxMetadata";
 import { deriveAdapterConfig } from "../derivePromptContext";
+import {
+  resolveSessionIdWithMarkerDetailed,
+  type SessionResolutionDetails as SharedSessionResolutionDetails,
+} from "../../utils/sessionMarker";
 
 // ---------------------------------------------------------------------------
 // Backward-compatible exported utilities
@@ -17,24 +21,13 @@ export function resolveCurrentSessionIdFromEnv(): string | undefined {
   return process.env.AGENT_SESSION_ID;
 }
 
-export interface SessionResolutionDetails {
-  sessionId?: string;
-  resolvedFrom: "env-var" | "explicit" | "none";
-  /** @deprecated PID-marker logic removed. Always null. */
-  ancestorPid: number | null;
-  /** @deprecated PID-marker logic removed. Always null. */
-  ancestorAlive: boolean | null;
-}
+export type SessionResolutionDetails = SharedSessionResolutionDetails;
 
 export function resolveSessionIdDetailed(explicit?: string): SessionResolutionDetails {
-  if (explicit) {
-    return { sessionId: explicit, resolvedFrom: "explicit", ancestorPid: null, ancestorAlive: null };
-  }
-  const agentSessionId = process.env.AGENT_SESSION_ID;
-  if (agentSessionId) {
-    return { sessionId: agentSessionId, resolvedFrom: "env-var", ancestorPid: null, ancestorAlive: null };
-  }
-  return { sessionId: undefined, resolvedFrom: "none", ancestorPid: null, ancestorAlive: null };
+  return resolveSessionIdWithMarkerDetailed(
+    "claude-code",
+    explicit ? { sessionId: explicit } : {},
+  );
 }
 
 export const __resolveCurrentSessionIdFromEnvForTests = resolveCurrentSessionIdFromEnv;

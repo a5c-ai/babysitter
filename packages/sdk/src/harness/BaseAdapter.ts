@@ -24,7 +24,10 @@ import { bindSession } from "./hooks/sessionBinding";
 import { handleStopHookCommon } from "./hooks/stopHookHandler";
 import { buildStopHookContinuation } from "./hooks/stopHookContinuation";
 import { initializeSessionState, readStdin, parseHookInput, safeStr } from "./hooks/utils";
-import { resolveSessionIdWithMarker } from "../utils/sessionMarker";
+import {
+  resolveSessionIdWithMarker,
+  writeSessionMarker,
+} from "../utils/sessionMarker";
 
 // ---------------------------------------------------------------------------
 // Adapter configuration interface
@@ -273,6 +276,7 @@ export abstract class BaseHarnessAdapter implements HarnessAdapter {
         verbose: args.verbose,
       });
     }
+    writeSessionMarker(this.config.name, sessionId);
 
     process.stdout.write("{}\n");
     return 0;

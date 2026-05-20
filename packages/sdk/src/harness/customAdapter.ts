@@ -18,7 +18,7 @@ import type {
   SessionBindResult,
   HookHandlerArgs,
 } from "./types";
-import { readSessionMarker } from "../utils/sessionMarker";
+import { resolveSessionIdWithMarker } from "../utils/sessionMarker";
 
 export function createCustomAdapter(): HarnessAdapter {
   return {
@@ -35,22 +35,7 @@ export function createCustomAdapter(): HarnessAdapter {
     },
 
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
-      if (parsed.sessionId) return parsed.sessionId;
-      const trustEnv =
-        process.env.AGENT_TRUST_ENV_SESSION === "1" ||
-        process.env.BABYSITTER_TRUST_ENV_SESSION === "1";
-      const agentSessionId =
-        process.env.AGENT_SESSION_ID;
-      if (trustEnv) {
-        if (agentSessionId) return agentSessionId;
-        return undefined;
-      }
-      // 1. Cross-harness standard env var
-      if (agentSessionId) return agentSessionId;
-      // 2. PID-scoped marker fallback (if any harness ancestor happens to exist)
-      const fromMarker = readSessionMarker("custom");
-      if (fromMarker) return fromMarker;
-      return undefined;
+      return resolveSessionIdWithMarker("custom", parsed);
     },
 
     resolveStateDir(args: { stateDir?: string; pluginRoot?: string }): string | undefined {

@@ -2,11 +2,11 @@
  * Verifies session-resolution precedence across all harness adapters.
  *
  * Each adapter (codex, gemini-cli, github-copilot, pi, oh-my-pi, custom,
- * cursor) must prefer direct per-session env bindings first and use the
- * PID-scoped marker only as a fallback when those ambient bindings are
- * unavailable. Harness-native per-session env vars (CODEX_THREAD_ID,
- * GEMINI_SESSION_ID, COPILOT_SESSION_ID, PI_SESSION_ID, OMP_SESSION_ID)
- * should win over the cross-harness AGENT_SESSION_ID.
+ * cursor) must prefer the live PID-scoped marker first and use inherited
+ * env bindings only as fallbacks. Harness-native per-session env vars
+ * (CODEX_THREAD_ID, GEMINI_SESSION_ID, COPILOT_SESSION_ID, PI_SESSION_ID,
+ * OMP_SESSION_ID) should win over the cross-harness AGENT_SESSION_ID when
+ * no marker is available.
  *
  * Legacy escape hatch BABYSITTER_TRUST_ENV_SESSION=1 restores env-var-first
  * precedence.
@@ -102,7 +102,7 @@ function seedMarker(harness: string, pid: number, sessionId: string): void {
 describe("adapter session-id resolution precedence", () => {
   for (const c of CASES) {
     describe(c.harness, () => {
-      it("Case A: ambient env beats pid marker", () => {
+      it("Case A: pid marker beats ambient env", () => {
         __setAncestorResolverForTests(() => ({ pid: process.pid }));
         seedMarker(c.harness, process.pid, "MARKER-A");
         if (c.envVarName) {
@@ -111,16 +111,16 @@ describe("adapter session-id resolution precedence", () => {
           process.env.AGENT_SESSION_ID = "ENV-A";
         }
         const adapter = c.adapter();
-        expect(adapter.resolveSessionId?.({})).toBe(c.envVarName ? "NATIVE-A" : "ENV-A");
+        expect(adapter.resolveSessionId?.({})).toBe("MARKER-A");
       });
 
       if (c.envVarName) {
-        it("Case B: no native env, AGENT_SESSION_ID wins over pid marker", () => {
+        it("Case B: pid marker beats AGENT_SESSION_ID when no native env is present", () => {
           __setAncestorResolverForTests(() => ({ pid: process.pid }));
           seedMarker(c.harness, process.pid, "MARKER-B");
           process.env.AGENT_SESSION_ID = "FALLBACK-B";
           const adapter = c.adapter();
-          expect(adapter.resolveSessionId?.({})).toBe("FALLBACK-B");
+          expect(adapter.resolveSessionId?.({})).toBe("MARKER-B");
         });
 
         it("Case C: no marker, harness-native env var wins over stale AGENT_SESSION_ID", () => {
@@ -131,7 +131,7 @@ describe("adapter session-id resolution precedence", () => {
           expect(adapter.resolveSessionId?.({})).toBe("NATIVE-B");
         });
 
-        it("Case D: marker is used only when env-based sources are absent", () => {
+        it("Case D: marker is used when env-based sources are absent", () => {
           __setAncestorResolverForTests(() => ({ pid: process.pid }));
           seedMarker(c.harness, process.pid, "MARKER-D");
           const adapter = c.adapter();
@@ -150,15 +150,15 @@ describe("adapter session-id resolution precedence", () => {
           expect(adapter.resolveSessionId?.({})).toBe("TRUSTED-ENV");
         });
       } else {
-        it("Case B (no native env var): AGENT_SESSION_ID beats pid marker", () => {
+        it("Case B (no native env var): pid marker beats AGENT_SESSION_ID", () => {
           __setAncestorResolverForTests(() => ({ pid: process.pid }));
           seedMarker(c.harness, process.pid, "MARKER-B");
           process.env.AGENT_SESSION_ID = "FALLBACK-B";
           const adapter = c.adapter();
-          expect(adapter.resolveSessionId?.({})).toBe("FALLBACK-B");
+          expect(adapter.resolveSessionId?.({})).toBe("MARKER-B");
         });
 
-        it("Case C (no native env var): marker is used only when env is absent", () => {
+        it("Case C (no native env var): marker is used when env is absent", () => {
           __setAncestorResolverForTests(() => ({ pid: process.pid }));
           seedMarker(c.harness, process.pid, "MARKER-C");
           const adapter = c.adapter();

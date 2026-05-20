@@ -46,6 +46,7 @@ describe("babysitter run:create CLI", () => {
     errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     savedSessionEnv = {
       AGENT_SESSION_ID: process.env.AGENT_SESSION_ID,
+      AGENT_TRUST_ENV_SESSION: process.env.AGENT_TRUST_ENV_SESSION,
       BABYSITTER_ENABLE_SESSION_PID_MARKERS: process.env.BABYSITTER_ENABLE_SESSION_PID_MARKERS,
       BABYSITTER_GLOBAL_STATE_DIR: process.env.BABYSITTER_GLOBAL_STATE_DIR,
       BABYSITTER_TRUST_ENV_SESSION: process.env.BABYSITTER_TRUST_ENV_SESSION,
@@ -147,13 +148,14 @@ describe("babysitter run:create CLI", () => {
     });
   });
 
-  it("binds claude-code runs to AGENT_SESSION_ID when pid markers are disabled", async () => {
+  it("binds claude-code runs to the current marker-backed session instead of leaked AGENT_SESSION_ID", async () => {
     const entryFile = await writeEntrypoint("processes/claude-session.mjs", `export async function process() { return true; }\n`);
     const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-run-create-claude-state-"));
     const currentSessionId = "current-claude-session";
     const leakedSessionId = "leaked-background-shell-session";
 
     process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "1";
     process.env.AGENT_SESSION_ID = leakedSessionId;
     __resetCacheForTests();
     __setAncestorResolverForTests(() => ({ pid: process.pid }));
@@ -180,12 +182,60 @@ describe("babysitter run:create CLI", () => {
     const payload = readLastJsonLine(logSpy);
     expect(payload.session).toMatchObject({
       harness: "claude-code",
-      sessionId: leakedSessionId,
+      sessionId: currentSessionId,
+      resolvedFrom: "pid-marker",
+      ancestorPid: process.pid,
+      ancestorAlive: true,
+    });
+    expect(String(payload.session.stateFile).replace(/\\/g, "/")).toContain(`/state/${currentSessionId}.md`);
+    await expect(
+      fs.access(path.join(globalStateRoot, "state", `${currentSessionId}.md`)),
+    ).resolves.toBeUndefined();
+
+    await fs.rm(globalStateRoot, { recursive: true, force: true });
+  });
+
+  it("keeps claude-code env-first binding when trust-env is explicitly set", async () => {
+    const entryFile = await writeEntrypoint("processes/claude-trust-env.mjs", `export async function process() { return true; }\n`);
+    const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-run-create-claude-trust-"));
+    const currentSessionId = "current-claude-session";
+    const trustedSessionId = "trusted-ci-session";
+
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "1";
+    process.env.AGENT_SESSION_ID = trustedSessionId;
+    process.env.AGENT_TRUST_ENV_SESSION = "1";
+    __resetCacheForTests();
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+
+    const markerPath = getSessionMarkerPath("claude-code", process.pid);
+    await fs.mkdir(path.dirname(markerPath), { recursive: true });
+    await fs.writeFile(markerPath, `${currentSessionId}\n`);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/claude-trust-env",
+      "--entry",
+      `${entryFile}#process`,
+      "--harness",
+      "claude-code",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    const payload = readLastJsonLine(logSpy);
+    expect(payload.session).toMatchObject({
+      harness: "claude-code",
+      sessionId: trustedSessionId,
       resolvedFrom: "env-var",
     });
-    expect(String(payload.session.stateFile).replace(/\\/g, "/")).toContain(`/state/${leakedSessionId}.md`);
+    expect(String(payload.session.stateFile).replace(/\\/g, "/")).toContain(`/state/${trustedSessionId}.md`);
     await expect(
-      fs.access(path.join(globalStateRoot, "state", `${leakedSessionId}.md`)),
+      fs.access(path.join(globalStateRoot, "state", `${trustedSessionId}.md`)),
     ).resolves.toBeUndefined();
 
     await fs.rm(globalStateRoot, { recursive: true, force: true });

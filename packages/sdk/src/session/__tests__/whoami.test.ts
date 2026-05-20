@@ -68,21 +68,35 @@ afterEach(async () => {
 });
 
 describe("runSessionWhoami", () => {
-  // PID-marker tests removed -- PID markers were removed during harness
-  // unification.  AGENT_SESSION_ID is now the sole session source for
-  // claude-code.
-
-  it("returns AGENT_SESSION_ID as the session source for claude-code", () => {
+  it("returns the PID marker as the session source for claude-code before stale AGENT_SESSION_ID", () => {
+    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "1";
     process.env.AGENT_SESSION_ID = "SESS-FROM-ENV";
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+    writeSessionMarker("claude-code", "SESS-FROM-MARKER");
+
+    const result = runSessionWhoami({ harness: "claude-code" });
+    expect(result.harness).toBe("claude-code");
+    expect(result.sessionId).toBe("SESS-FROM-MARKER");
+    expect(result.resolvedFrom).toBe("pid-marker");
+    expect(result.envVarPresent).toBe(true);
+    expect(result.envVarMatches).toBe(false);
+    expect(result.ancestorPid).toBe(process.pid);
+    expect(result.ancestorAlive).toBe(true);
+    expect(result.markerPath).toBe(path.join(tmpDir, "state", `current-session-claude-code-pid-${process.pid}`));
+  });
+
+  it("returns AGENT_SESSION_ID first for claude-code when trust-env is set", () => {
+    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "1";
+    process.env.AGENT_SESSION_ID = "SESS-FROM-ENV";
+    process.env.AGENT_TRUST_ENV_SESSION = "1";
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+    writeSessionMarker("claude-code", "SESS-FROM-MARKER");
 
     const result = runSessionWhoami({ harness: "claude-code" });
     expect(result.harness).toBe("claude-code");
     expect(result.sessionId).toBe("SESS-FROM-ENV");
     expect(result.resolvedFrom).toBe("env-var");
-    expect(result.envVarPresent).toBe(true);
     expect(result.envVarMatches).toBe(true);
-    expect(result.ancestorPid).toBeNull();
-    expect(result.ancestorAlive).toBeNull();
   });
 
   it("ignores pid markers when the feature flag is disabled", () => {

@@ -104,17 +104,39 @@ export function cleanupDeadSessionMarkers(): number {
 }
 
 export function readSessionMarker(harness: string): string | undefined {
+  return readSessionMarkerDetails(harness)?.sessionId;
+}
+
+export type SessionResolutionSource = "pid-marker" | "env-var" | "explicit" | "none";
+
+export interface SessionMarkerDetails {
+  sessionId: string;
+  ancestorPid: number;
+  ancestorAlive: boolean;
+}
+
+export interface SessionResolutionDetails {
+  sessionId?: string;
+  resolvedFrom: SessionResolutionSource;
+  ancestorPid: number | null;
+  ancestorAlive: boolean | null;
+}
+
+export function readSessionMarkerDetails(harness: string): SessionMarkerDetails | undefined {
   if (!isSessionPidMarkerEnabled()) return undefined;
-  const { __setAncestorResolverForTests: _unused, ..._ } = { __setAncestorResolverForTests: setAncestorResolver };
-  void _unused;
   if (!hasSessionMarkerCandidate(harness)) return undefined;
   const info = findHarnessAncestorPid(deriveProcessNames(harness));
   if (!info) return undefined;
-  if (!isProcessAlive(info.pid)) return undefined;
+  const ancestorAlive = isProcessAlive(info.pid);
+  if (!ancestorAlive) return undefined;
   const target = getSessionMarkerPath(harness, info.pid);
   if (!existsSync(target)) return undefined;
-  try { const content = readFileSync(target, "utf8").trim(); return content || undefined; }
-  catch { return undefined; }
+  try {
+    const content = readFileSync(target, "utf8").trim();
+    return content ? { sessionId: content, ancestorPid: info.pid, ancestorAlive } : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export function resolveSessionIdWithMarker(
@@ -122,19 +144,69 @@ export function resolveSessionIdWithMarker(
   parsed: { sessionId?: string },
   harnessEnvVars: readonly string[] = [],
 ): string | undefined {
-  if (parsed.sessionId) return parsed.sessionId;
+  return resolveSessionIdWithMarkerDetailed(harness, parsed, harnessEnvVars).sessionId;
+}
+
+export function resolveSessionIdWithMarkerDetailed(
+  harness: string,
+  parsed: { sessionId?: string },
+  harnessEnvVars: readonly string[] = [],
+): SessionResolutionDetails {
+  if (parsed.sessionId) {
+    return {
+      sessionId: parsed.sessionId,
+      resolvedFrom: "explicit",
+      ancestorPid: null,
+      ancestorAlive: null,
+    };
+  }
   const trustEnv = process.env.AGENT_TRUST_ENV_SESSION === "1" || process.env.BABYSITTER_TRUST_ENV_SESSION === "1";
   const agentSessionId = process.env.AGENT_SESSION_ID;
-  if (trustEnv) {
-    if (agentSessionId) return agentSessionId;
-    for (const key of harnessEnvVars) { const v = process.env[key]; if (v) return v; }
+  const fromMarker = readSessionMarkerDetails(harness);
+
+  const fromHarnessEnv = () => {
+    for (const key of harnessEnvVars) {
+      const v = process.env[key];
+      if (v) return v;
+    }
     return undefined;
+  };
+
+  if (trustEnv) {
+    if (agentSessionId) {
+      return { sessionId: agentSessionId, resolvedFrom: "env-var", ancestorPid: null, ancestorAlive: null };
+    }
+    const harnessEnvSessionId = fromHarnessEnv();
+    if (harnessEnvSessionId) {
+      return { sessionId: harnessEnvSessionId, resolvedFrom: "env-var", ancestorPid: null, ancestorAlive: null };
+    }
+    if (fromMarker) {
+      return {
+        sessionId: fromMarker.sessionId,
+        resolvedFrom: "pid-marker",
+        ancestorPid: fromMarker.ancestorPid,
+        ancestorAlive: fromMarker.ancestorAlive,
+      };
+    }
+    return { sessionId: undefined, resolvedFrom: "none", ancestorPid: null, ancestorAlive: null };
   }
-  for (const key of harnessEnvVars) { const v = process.env[key]; if (v) return v; }
-  if (agentSessionId) return agentSessionId;
-  const fromMarker = readSessionMarker(harness);
-  if (fromMarker) return fromMarker;
-  return undefined;
+
+  if (fromMarker) {
+    return {
+      sessionId: fromMarker.sessionId,
+      resolvedFrom: "pid-marker",
+      ancestorPid: fromMarker.ancestorPid,
+      ancestorAlive: fromMarker.ancestorAlive,
+    };
+  }
+  const harnessEnvSessionId = fromHarnessEnv();
+  if (harnessEnvSessionId) {
+    return { sessionId: harnessEnvSessionId, resolvedFrom: "env-var", ancestorPid: null, ancestorAlive: null };
+  }
+  if (agentSessionId) {
+    return { sessionId: agentSessionId, resolvedFrom: "env-var", ancestorPid: null, ancestorAlive: null };
+  }
+  return { sessionId: undefined, resolvedFrom: "none", ancestorPid: null, ancestorAlive: null };
 }
 
 export function deriveProcessNames(harness: string): string[] {
