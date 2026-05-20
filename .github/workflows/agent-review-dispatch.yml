@@ -1,0 +1,119 @@
+# Agent Review Dispatch — adversarial PR review, QA dispatch, and conditional merge
+#
+# Usage:
+#   - Comment `/review` on any PR
+#   - Or dispatch manually with a PR number
+#
+# The review agent performs adversarial code review, dispatches QA live-stack
+# tests, examines results, and if everything passes — approves and merges.
+# Deferred/minor issues are opened as new issues with the 'debt' label
+# rather than blocking approval.
+
+name: Agent Review Dispatch
+
+on:
+  push:
+    branches: [main, staging, develop]
+    paths: ['.github/workflows/agent-review-dispatch.yml']
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: string
+      instructions:
+        description: 'Additional review instructions (optional)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+
+jobs:
+  review:
+    if: >-
+      (github.event_name == 'workflow_dispatch') ||
+      (github.event.issue.pull_request && startsWith(github.event.comment.body, '/review'))
+    runs-on: ubuntu-latest-l
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+          fetch-depth: 0
+
+      - uses: a5c-ai/babysitter/packages/triggers@staging
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          max-turns: '9999'
+          babysitter-prompt-prefix: '$babysitter:yolo '
+          prompt: |
+            You are an adversarial PR review agent. Your job is to thoroughly review,
+            test, and either approve+merge or request changes on a pull request.
+
+            PR: #${{ inputs.pr_number || github.event.issue.number }}
+            ${{ inputs.instructions || '' }}
+
+            PHASE 1 — ADVERSARIAL CODE REVIEW:
+            1. Read the PR: `gh pr view ${{ inputs.pr_number || github.event.issue.number }} --json title,body,files,comments,labels,headRefName,baseRefName`
+            2. Read every changed file: `gh pr diff ${{ inputs.pr_number || github.event.issue.number }}`
+            3. Check the linked issue (if any) for requirements.
+            4. Review the code adversarially. Look for:
+               - Security vulnerabilities (injection, XSS, secrets, OWASP top 10)
+               - Logic errors, off-by-one, race conditions, unhandled edge cases
+               - Breaking changes to public APIs without migration
+               - Missing or incorrect tests
+               - Performance issues (N+1 queries, unbounded allocations, blocking I/O)
+               - Error handling gaps (swallowed errors, missing cleanup)
+               - Type safety (any escapes, unsafe casts, missing null checks)
+               - Consistency with existing codebase patterns
+            5. Classify each finding:
+               - **blocker**: must fix before merge (security, correctness, data loss)
+               - **major**: should fix before merge (breaking changes, missing tests for new paths)
+               - **minor**: nice-to-have, can be deferred (style, naming, small refactors)
+               - **debt**: track as a follow-up issue (cleanup, optimization, documentation gaps)
+
+            PHASE 2 — DISPATCH QA:
+            1. Determine which live-stack scenarios to test based on the changed files.
+            2. Get the PR head branch: extract headRefName from the PR data.
+            3. Dispatch the QA workflow:
+               `gh workflow run qa-dispatch.yml --ref staging -f branch=<headRefName> -f pr_number=${{ inputs.pr_number || github.event.issue.number }} -f instructions="QA for review agent"`
+            4. Wait for the QA run to complete:
+               Poll with `gh run list --workflow=qa-dispatch.yml --limit=1 --json databaseId,status,conclusion` every 60s, timeout after 25 minutes.
+            5. Read the QA results and any comments it posted on the PR.
+
+            PHASE 3 — DECISION:
+            Based on review findings and QA results, decide:
+
+            IF there are **blockers** or **major** issues:
+            - Post a review requesting changes: `gh pr review ${{ inputs.pr_number || github.event.issue.number }} --request-changes --body "<review>"`
+            - List all blockers and majors with file:line references.
+            - Do NOT merge. Do NOT approve.
+
+            IF there are only **minor** or **debt** issues (or none):
+            - For each **debt** item, create a tracking issue:
+              `gh issue create --label "debt" --title "<brief description>" --body "<details and file references>"`
+              Create the 'debt' label if it doesn't exist: `gh label create "debt" --description "Technical debt for follow-up" --color "FBCA04" 2>/dev/null || true`
+            - Post an approving review: `gh pr review ${{ inputs.pr_number || github.event.issue.number }} --approve --body "<review summary>"`
+            - Merge the PR: `gh pr merge ${{ inputs.pr_number || github.event.issue.number }} --squash --auto`
+            - Post a summary comment listing: what was reviewed, QA results, any debt issues created.
+
+            IF QA failed:
+            - Do NOT approve or merge.
+            - Post a comment explaining the QA failure and link to the failed run.
+            - Request changes with the QA failure details.
+          trigger-query: ''
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
