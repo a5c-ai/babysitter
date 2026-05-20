@@ -468,6 +468,7 @@ function buildCommandEnv(env: Record<string, string | undefined>, cwd: string): 
     Object.entries({
       ...env,
       PATH: withWorkspaceBinOnPath(env, cwd),
+      NODE_PATH: path.join(cwd, 'node_modules'),
       LIVE_STACK_TRACE_ID: traceId,
       LIVE_STACK_GENERATED_PLUGINS_DIR: env['LIVE_STACK_GENERATED_PLUGINS_DIR'] ?? path.join(cwd, 'artifacts', 'generated-plugins'),
       AGENT_SESSION_ID: env['AGENT_SESSION_ID'] ?? traceId,
