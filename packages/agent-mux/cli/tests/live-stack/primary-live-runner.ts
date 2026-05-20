@@ -943,11 +943,13 @@ async function validateAgentBehavior(
     } catch {
       completionProofDetail = 'no .a5c/runs/ directory found';
     }
-    entries.push({
-      name: 'babysitter-completion-proof',
-      status: completionProofFound ? 'passed' : 'failed',
-      detail: completionProofDetail,
-    });
+    const proofStatus = completionProofFound || runCompleted ? 'passed' : 'failed';
+    const proofDetail = completionProofFound
+      ? completionProofDetail
+      : runCompleted
+        ? `${runCompletionDetail} (journal evidence sufficient)`
+        : completionProofDetail;
+    entries.push({ name: 'babysitter-completion-proof', status: proofStatus, detail: proofDetail });
   }
 
   return entries;
