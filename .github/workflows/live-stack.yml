@@ -128,7 +128,9 @@ jobs:
           wait_all
 
       - name: Package dist directories
-        run: find packages -path '*/dist' -type d | tar czf ${RUNNER_TEMP}/build-all-dist.tar.gz -T -
+        run: |
+          TEMP_DIR=$(echo "${RUNNER_TEMP}" | sed 's|\\|/|g')
+          find packages -path '*/dist' -type d | tar czf "${TEMP_DIR}/build-all-dist.tar.gz" -T -
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
@@ -342,7 +344,9 @@ jobs:
 
       - name: Extract build artifacts
         if: ${{ matrix.scenario.skip != 'true' }}
-        run: tar xzf ${RUNNER_TEMP}/build-all-dist.tar.gz
+        run: |
+          TEMP_DIR=$(echo "${RUNNER_TEMP}" | sed 's|\\|/|g')
+          tar xzf "${TEMP_DIR}/build-all-dist.tar.gz"
 
       - name: Install node-pty for TTY-based tool use
         if: ${{ matrix.scenario.skip != 'true' }}
