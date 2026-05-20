@@ -3,7 +3,7 @@ import os from "os";
 import path from "path";
 import { promises as fs } from "fs";
 import { createRunDir } from "../../storage/createRunDir";
-import { appendEvent } from "../../storage/journal";
+import { appendEvent, loadJournal } from "../../storage/journal";
 import { orchestrateIteration } from "../orchestrateIteration";
 import { commitEffectResult } from "../commitEffectResult";
 
@@ -74,6 +74,52 @@ describe("orchestrateIteration integration", () => {
     if (secondIteration.status === "completed") {
       expect(secondIteration.output).toEqual({ doubled: 10 });
     }
+  });
+
+  test("does not append duplicate RUN_COMPLETED when iterating an already completed run", async () => {
+    const processDir = path.join(tmpRoot, "processes-completed-replay");
+    await fs.mkdir(processDir, { recursive: true });
+    const processPath = await writeProcessFile(processDir, "completed-replay.mjs");
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-completed-replay",
+      request: "integration",
+      processPath,
+      inputs: { value: 5 },
+    });
+
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-completed-replay" } });
+
+    const firstIteration = await orchestrateIteration({ runDir });
+    expect(firstIteration.status).toBe("waiting");
+    if (firstIteration.status !== "waiting") {
+      throw new Error("Expected waiting status");
+    }
+
+    await commitEffectResult({
+      runDir,
+      effectId: firstIteration.nextActions[0].effectId,
+      result: {
+        status: "ok",
+        value: { value: 5 },
+      },
+    });
+
+    const completion = await orchestrateIteration({ runDir });
+    expect(completion.status).toBe("completed");
+    if (completion.status === "completed") {
+      expect(completion.output).toEqual({ doubled: 10 });
+    }
+
+    const replay = await orchestrateIteration({ runDir });
+    expect(replay.status).toBe("completed");
+    if (replay.status === "completed") {
+      expect(replay.output).toEqual({ doubled: 10 });
+    }
+
+    const journal = await loadJournal(runDir);
+    expect(journal.filter((event) => event.type === "RUN_COMPLETED")).toHaveLength(1);
   });
 
   test("emits replay iteration metrics with logger instrumentation", async () => {

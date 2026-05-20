@@ -1,4 +1,5 @@
 import path from "path";
+import { promises as fs } from "fs";
 import { pathToFileURL } from "url";
 import { appendEvent, loadJournal } from "../storage/journal";
 import { readTaskDefinition } from "../storage/tasks";
@@ -16,6 +17,7 @@ import type {
   EffectAction,
   ProcessContext,
 } from "./types";
+import type { JournalEvent } from "../storage/types";
 import { serializeUnknownError } from "./errorUtils";
 import { emitRuntimeMetric } from "./instrumentation";
 import { callRuntimeHook } from "./hooks/runtime";
@@ -52,13 +54,30 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
     if (defaultEntrypoint.importPath === "bare-run") {
       throw new RunFailedError("Run has no process assigned. Use run:assign-process to attach a process before iterating.");
     }
-    const processFn = await loadProcessFunction(options, defaultEntrypoint, options.runDir);
     const inputs = options.inputs ?? engine.inputs;
     let finalStatus: IterationResult["status"] = "failed";
     const logger = engine.internalContext.logger ?? options.logger;
     const projectRoot = resolveProjectRootForRun(options.runDir, engine.metadata.entrypoint?.importPath);
 
     await callRuntimeHook("on-iteration-start", { runId: engine.runId, iteration: engine.replayCursor.value }, { cwd: projectRoot, logger });
+    const terminalResult = await getTerminalReplayResult(options.runDir, engine);
+    if (terminalResult) {
+      finalStatus = terminalResult.status;
+      emitRuntimeMetric(logger, "replay.iteration", {
+        duration_ms: Date.now() - iterationStartedAt,
+        status: finalStatus,
+        runId: engine.runId,
+        stepCount: engine.replayCursor.value,
+      });
+      await callRuntimeHook(
+        "on-iteration-end",
+        { runId: engine.runId, iteration: engine.replayCursor.value, status: finalStatus },
+        { cwd: projectRoot, logger },
+      );
+      return terminalResult;
+    }
+
+    const processFn = await loadProcessFunction(options, defaultEntrypoint, options.runDir);
 
     let capturedStrayEffect: unknown = null;
     const strayEffectHandler = (reason: unknown) => { if (asWaitingResult(reason)) capturedStrayEffect = reason; };
@@ -166,6 +185,51 @@ async function loadProcessFunction(options: OrchestrateOptions, defaults: Entryp
   const candidate = (exportName && mod[exportName]) ?? (!exportName && mod.default) ?? mod.process ?? mod.default;
   if (typeof candidate !== "function") throw new RunFailedError(`Export '${exportName}' was not a function in ${resolvedPath}`);
   return candidate as ProcessFunction;
+}
+
+async function getTerminalReplayResult(runDir: string, engine: ReplayEngine): Promise<IterationResult | null> {
+  if (engine.effectIndex.listPendingEffects().length > 0) return null;
+
+  const journal = await loadJournal(runDir);
+  const terminalEvent = findLastTerminalEvent(journal);
+  if (!terminalEvent) return null;
+
+  const metadata = createIterationMetadata(engine);
+  if (terminalEvent.type === "RUN_COMPLETED") {
+    const outputRef = readStringField(terminalEvent.data, "outputRef");
+    if (!outputRef) {
+      throw new RunFailedError("Completed run is missing outputRef", { runDir });
+    }
+    const outputPath = path.resolve(runDir, outputRef);
+    const output = JSON.parse(await fs.readFile(outputPath, "utf8")) as unknown;
+    return { status: "completed", output, metadata };
+  }
+
+  return {
+    status: "failed",
+    error: readObjectField(terminalEvent.data, "error") ?? { message: "Run failed" },
+    metadata,
+  };
+}
+
+function findLastTerminalEvent(events: JournalEvent[]): JournalEvent | undefined {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    if (event.type === "RUN_COMPLETED" || event.type === "RUN_FAILED") return event;
+  }
+  return undefined;
+}
+
+function readStringField(value: unknown, key: string): string | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const field = (value as Record<string, unknown>)[key];
+  return typeof field === "string" && field ? field : undefined;
+}
+
+function readObjectField(value: unknown, key: string): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const field = (value as Record<string, unknown>)[key];
+  return field && typeof field === "object" && !Array.isArray(field) ? field as Record<string, unknown> : undefined;
 }
 
 async function initializeReplayEngine(options: OrchestrateOptions, nowFn: () => Date, iterationStartedAt: number): Promise<ReplayEngine> {
