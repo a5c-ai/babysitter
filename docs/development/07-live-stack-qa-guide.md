@@ -237,4 +237,3 @@ This means you can safely dispatch a manual run while a push-triggered run is in
 - **Pi NI requires `--mode json` flag** — the Pi harness adapter must pass `--mode json` for non-interactive runs. This is handled automatically by the adapter, but be aware of it when debugging Pi NI failures.
 - **Some harnesses install via pip/curl, not npm** — `hermes` and `cursor` (among others) are installed through pip or curl rather than npm. Their installation steps take longer and depend on external package registries outside the npm ecosystem.
 - **macOS CI runners lack TTY devices** — neither `node-pty` nor the macOS `script` command can allocate a PTY on GitHub Actions macOS runners. Interactive mode tests auto-fall back to `--bridge-interactive` on macOS.
-- **Create mode is flaky** — depends on the agent authoring a correct process file. May fail if the agent doesn't follow the process creation instructions precisely.
