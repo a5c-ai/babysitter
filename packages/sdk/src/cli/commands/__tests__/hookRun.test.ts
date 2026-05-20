@@ -690,6 +690,16 @@ describe("handleHookRun stop", () => {
     });
   }
 
+  async function finishRun(runDir: string, eventType: "RUN_COMPLETED" | "RUN_FAILED") {
+    await appendEvent({
+      runDir,
+      eventType,
+      event: eventType === "RUN_COMPLETED"
+        ? { result: { ok: true }, completionProof: "proof" }
+        : { error: "failed" },
+    });
+  }
+
   async function createActiveSession(sessionId: string, runId: string, runDir: string) {
     const filePath = getSessionFilePath(stateDir, sessionId);
     const now = getCurrentTimestamp();
@@ -817,6 +827,39 @@ describe("handleHookRun stop", () => {
     expect(stopEvents.at(-1)?.data.effectId).toBeUndefined();
     expect(stopEvents.at(-1)?.data.hookBackoffDelaySeconds).toBeUndefined();
   });
+
+  it.each(["RUN_COMPLETED", "RUN_FAILED"] as const)(
+    "does not apply stale backoff metadata after %s",
+    async (eventType) => {
+      process.env.BABYSITTER_HOOK_BACKOFF_BASE = "0.001";
+      process.env.BABYSITTER_HOOK_BACKOFF_CAP = "0.06";
+      const runId = `backoff-terminal-${eventType.toLowerCase()}`;
+      const sessionId = `backoff-terminal-session-${eventType.toLowerCase()}`;
+      const runsDir = path.join(tmpDir, "runs");
+      const runDir = path.join(runsDir, runId);
+      await createRunMetadata(runDir, runId);
+      await requestAgentEffect(runDir, "effect-terminal");
+      await createActiveSession(sessionId, runId, runDir);
+
+      await callWithStdin(JSON.stringify({ session_id: sessionId }), { ...baseArgs, stateDir, runsDir });
+      stdoutChunks = [];
+      await finishRun(runDir, eventType);
+      const code = await callWithStdin(
+        JSON.stringify({ session_id: sessionId }),
+        { ...baseArgs, stateDir, runsDir },
+      );
+
+      expect(code).toBe(0);
+      const events = await loadJournal(runDir);
+      const terminalIndex = events.findIndex((event) => event.type === eventType);
+      expect(terminalIndex).toBeGreaterThanOrEqual(0);
+      const terminalStopEvents = events
+        .slice(terminalIndex + 1)
+        .filter((event) => event.type === "STOP_HOOK_INVOKED");
+      expect(terminalStopEvents.every((event) => event.data.effectId === undefined)).toBe(true);
+      expect(terminalStopEvents.every((event) => event.data.hookBackoffDelaySeconds === undefined)).toBe(true);
+    },
+  );
 
   it("interrupts backoff promptly when the effect resolves during the wait", async () => {
     process.env.BABYSITTER_HOOK_BACKOFF_BASE = "0.05";

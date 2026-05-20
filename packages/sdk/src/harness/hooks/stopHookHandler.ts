@@ -21,6 +21,7 @@ import {
 import {
   countPendingEffectsFromJournal,
   deriveObservedRunState,
+  findLastLifecycleEventType,
   isTerminalRunState,
 } from "../../runtime/runLifecycleState";
 import { loadJournal } from "../../storage/journal";
@@ -186,6 +187,11 @@ async function applyStopHookBackoff(args: {
     events = await loadJournal(args.runDir);
   } catch {
     return { effectId: args.effectId };
+  }
+
+  const lastLifecycleEventType = findLastLifecycleEventType(events);
+  if (lastLifecycleEventType === "RUN_COMPLETED" || lastLifecycleEventType === "RUN_FAILED") {
+    return {};
   }
 
   const fireCount = countPriorStopHookFires(events, args.effectId);
