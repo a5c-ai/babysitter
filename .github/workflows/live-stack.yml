@@ -242,8 +242,8 @@ jobs:
               const interactive = {id:'interactive', interactive:'true', bridge_interactive:'false', bridge_hooks:'false'};
               const bridgedHooks = {id:'bridged-hooks', interactive:'false', bridge_interactive:'true', bridge_hooks:'true'};
 
-              function scenario(agent, amux_agent, m) {
-                return {id:'live.agent-mux.'+agent+'.'+m.provider+'.'+m.model, agent_path:'agent-mux', agent, amux_agent, integration_type:'third-party-plugin', provider:m.provider, amux_provider:m.amux_provider, model:m.model, required_env:m.required_env, live:true};
+              function scenario(agent, amux_agent, m, process_mode) {
+                return {id:'live.agent-mux.'+agent+'.'+m.provider+'.'+m.model, agent_path:'agent-mux', agent, amux_agent, integration_type:'third-party-plugin', provider:m.provider, amux_provider:m.amux_provider, model:m.model, required_env:m.required_env, live:true, process_mode: process_mode || 'predefined'};
               }
 
               const claude = scenario('claude-code','claude',foundry);
@@ -264,10 +264,15 @@ jobs:
                   {scenario: pi, interaction_mode: bridgedInt, install_mode: vanillaInstall},
               ];
 
-              // BP Interactive: claude+codex
+              const claudeResume = scenario('claude-code','claude',foundry,'resume');
+              const codexResume = scenario('codex','codex',google,'resume');
+
+              // BP Interactive: claude+codex (predefined + resume)
               const bpInt = [
                 {scenario: claude, interaction_mode: interactive, install_mode: bpInstall},
                 {scenario: codex, interaction_mode: interactive, install_mode: bpInstall},
+                {scenario: claudeResume, interaction_mode: interactive, install_mode: bpInstall},
+                {scenario: codexResume, interaction_mode: interactive, install_mode: bpInstall},
               ];
 
               // BP Bridged-hooks: claude+codex
