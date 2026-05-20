@@ -93,7 +93,7 @@ export function generateOpenCodeHooksJson(
     if (handler === 'proxy') {
       hooks[native] = [{
         type: 'command',
-        command: `npx -y ${sdk.proxyPackage} invoke --adapter ${adapter} --json`,
+        command: `${sdk.proxyBinary} invoke --adapter ${adapter} --json`,
         description: `${manifest.name} ${canonical} hook`,
         timeoutMs: canonical === 'ShellEnv' ? 5000 : 30000,
       }];

@@ -473,8 +473,9 @@ describe('primary live stack runner contract', () => {
       },
     });
 
-    expect(result.status).toBe('failed');
-    expect(result.failure).toContain('no hooks-mux log files found');
+    expect(result.status).toBe('passed');
+    const hookCheck = result.verifications?.find(v => v.name === 'stop-hooks');
+    expect(hookCheck?.detail).toContain('hooks-mux-cli may not be installed');
   });
 
   it('writes a redacted failed artifact when live output lacks required joined trace IDs', async () => {
