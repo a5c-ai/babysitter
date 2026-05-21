@@ -187,7 +187,7 @@ export function buildPrimaryLiveStackCommands(
     );
   } else if (processMode === 'create') {
     setupCommands.push(
-      { command: 'bash', args: ['-c', `mkdir -p ${path.join(options.cwd, '.a5c', 'processes')} && cp ${path.join(fixturesDir, 'create-process-skeleton.mjs')} ${path.join(options.cwd, '.a5c', 'processes', 'odyssey-live-test.skeleton.mjs')}`], env: commandEnv, cwd: options.cwd, timeoutMs: SETUP_TIMEOUT_MS },
+      { command: 'bash', args: ['-c', `mkdir -p ${path.join(options.cwd, '.a5c', 'processes')} && cp ${path.join(fixturesDir, 'create-process-skeleton.mjs')} ${path.join(options.cwd, '.a5c', 'processes', 'odyssey-live-test.skeleton.mjs')} && rm -f ${path.join(options.cwd, '.a5c', 'processes', 'summarize-translate-test.mjs')}`], env: commandEnv, cwd: options.cwd, timeoutMs: SETUP_TIMEOUT_MS },
     );
   } else if (processMode === 'resume') {
     const resumeRunId = `resume-${traceId}`;
