@@ -213,6 +213,13 @@ interface SessionArgs {
   bridgeInteractive?: boolean;
 }
 
+function insertCodexOptionArgs(plan: LaunchPlan, optionArgs: string[]): void {
+  if (plan.args[0] === 'exec') {
+    plan.args.splice(1, 0, ...optionArgs);
+    return;
+  }
+  plan.args.push(...optionArgs);
+}
 function appendHarnessSessionArgs(plan: LaunchPlan, session: SessionArgs): void {
   const interactive = session.interactive !== false;
 
@@ -894,7 +901,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
 
   // Add --model for harnesses that accept it as a CLI arg
   const modelFlag = flagStr(args.flags, 'model');
-  if (modelFlag && ['pi', 'gemini', 'opencode'].includes(plan.harness)) {
+  const codexModelFlag = modelFlag ?? (plan.harness === 'codex' ? plan.model : undefined);
+  if (codexModelFlag && plan.harness === 'codex') {
+    insertCodexOptionArgs(plan, ['-m', codexModelFlag]);
+  } else if (modelFlag && ['pi', 'gemini', 'opencode'].includes(plan.harness)) {
     plan.args.push('--model', modelFlag);
   }
 
@@ -999,7 +1009,13 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         plan.env['OPENAI_BASE_URL'] = `${proxyRuntime.url}/v1`;
         plan.env['OPENAI_API_BASE'] = `${proxyRuntime.url}/v1`;
         if (plan.harness === 'codex') {
-          plan.args.push('-c', `openai_base_url=${proxyRuntime.url}/v1`);
+          insertCodexOptionArgs(plan, [
+            '-c', 'model_provider="amux-proxy"',
+            '-c', 'model_providers.amux-proxy.name="amux-proxy"',
+            '-c', `model_providers.amux-proxy.base_url="${proxyRuntime.url}/v1"`,
+            '-c', 'model_providers.amux-proxy.env_key="OPENAI_API_KEY"',
+            '-c', 'model_providers.amux-proxy.wire_api="responses"',
+          ]);
         }
         console.error(`[amux launch] ${plan.harness} proxy: OPENAI_BASE_URL=${proxyRuntime.url}/v1`);
       }

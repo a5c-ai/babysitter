@@ -140,8 +140,13 @@ describe('launchCommand transport-mux integration', () => {
     expect(spawnMock).toHaveBeenCalledTimes(1);
     expect(spawnMock.mock.calls[0]?.[2]?.env['OPENAI_BASE_URL']).toBe('http://127.0.0.1:4010/v1');
     expect(spawnMock.mock.calls[0]?.[2]?.env['OPENAI_API_KEY']).toBe('runtime-token');
+    expect(spawnMock.mock.calls[0]?.[1]).toContain('-m');
+    expect(spawnMock.mock.calls[0]?.[1]).toContain('claude-sonnet-4-20250514');
     expect(spawnMock.mock.calls[0]?.[1]).toContain('-c');
-    expect(spawnMock.mock.calls[0]?.[1]).toContain('openai_base_url=http://127.0.0.1:4010/v1');
+    expect(spawnMock.mock.calls[0]?.[1]).toContain('model_provider="amux-proxy"');
+    expect(spawnMock.mock.calls[0]?.[1]).toContain('model_providers.amux-proxy.base_url="http://127.0.0.1:4010/v1"');
+    expect(spawnMock.mock.calls[0]?.[1]).toContain('model_providers.amux-proxy.env_key="OPENAI_API_KEY"');
+    expect(spawnMock.mock.calls[0]?.[1]).toContain('model_providers.amux-proxy.wire_api="responses"');
     expect(runtimeStop).toHaveBeenCalledTimes(1);
     expect(child.stdin.write).toHaveBeenCalledWith('hello\n');
     expect(child.stdin.end).toHaveBeenCalledTimes(1);
