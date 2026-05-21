@@ -53,16 +53,16 @@ The graph layer is "Transport" but the package is `transport-mux`. The "mux" suf
 
 **Recommendation:** Accept. The `-mux` suffix is a codebase convention for packages that bridge multiple implementations.
 
-### 5. "breakpoints-mux" vs Layer 9 (Sandbox)
+### 5. "tasks-mux" vs Layer 9 (Sandbox)
 
-The graph layer is "Sandbox" with `HumanCheckpoint`, `BreakpointStrategy`, `BreakpointAnswer` node kinds. The package is named `breakpoints-mux`.
+The graph layer is "Sandbox" with `HumanCheckpoint`, `BreakpointStrategy`, `BreakpointAnswer` node kinds. The package is named `tasks-mux`.
 
 | Graph Concept | Package | Alignment |
 |---------------|---------|-----------|
-| HumanCheckpoint | breakpoints-mux | Good — breakpoints ARE checkpoints |
-| Sandbox (layer) | breakpoints-mux | Partial — breakpoints are one aspect of sandbox |
+| HumanCheckpoint | tasks-mux | Good — breakpoints ARE checkpoints |
+| Sandbox (layer) | tasks-mux | Partial — breakpoints are one aspect of sandbox |
 
-**Recommendation:** `breakpoints-mux` correctly names what it does (breakpoint multiplexing). It's a subset of the Sandbox layer, not the full layer implementation. Future sandbox packages (filesystem policy, network policy) should not be under `breakpoints-mux`.
+**Recommendation:** `tasks-mux` correctly names what it does (breakpoint multiplexing). It's a subset of the Sandbox layer, not the full layer implementation. Future sandbox packages (filesystem policy, network policy) should not be under `tasks-mux`.
 
 ### 6. Graph Node Kinds Without Package Representation
 
@@ -78,7 +78,7 @@ These graph node kinds in the agent-stack cluster have no corresponding package:
 ## Naming Convention Guidelines for v6.1
 
 1. **New packages** should use the graph layer name when the package implements exactly one layer
-2. **Cross-layer packages** may use domain-specific names (e.g., `breakpoints-mux` spans L9 + L14)
+2. **Cross-layer packages** may use domain-specific names (e.g., `tasks-mux` spans L9 + L14)
 3. **The `-mux` suffix** means "multiplexes across implementations" (multiple harnesses, multiple transports, etc.)
 4. **Graph node kinds** are the canonical vocabulary — package READMEs should reference their node kinds
 5. **"babysitter"** is the product name; **layer names** are the architecture vocabulary

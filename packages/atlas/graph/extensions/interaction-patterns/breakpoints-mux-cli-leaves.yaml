@@ -1,124 +1,124 @@
-# leaf-level CLI subcommand records for `breakpoints-mux` bin.
+# leaf-level CLI subcommand records for `tasks-mux` bin.
 # Promotes the current catalog group-level records to leaf-level primitives so codegen
 # can emit each commander.Command leaf from the v6 graph alone.
-# Source root: packages/breakpoints-mux/src/cli/commands/*.ts.
-# Wired via @a5c-ai/breakpoints-mux PackageSurface `exposes_subcommand` edge.
+# Source root: packages/tasks-mux/src/cli/commands/*.ts.
+# Wired via @a5c-ai/tasks-mux PackageSurface `exposes_subcommand` edge.
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-auth-login
+id: interaction-primitive:tasks-mux-cli-auth-login
 attributes:
-  displayName: "breakpoints-mux auth login"
+  displayName: "tasks-mux auth login"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "auth login"
   flags: []
   description: |
     Authenticate with GitHub OAuth via a one-shot localhost callback server;
-    saves access token + user profile to ~/.breakpoints-mux/auth.json.
-    Source: packages/breakpoints-mux/src/cli/commands/auth.ts:61-130.
+    saves access token + user profile to ~/.tasks-mux/auth.json.
+    Source: packages/tasks-mux/src/cli/commands/auth.ts:61-130.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-auth-server-set
+id: interaction-primitive:tasks-mux-cli-auth-server-set
 attributes:
-  displayName: "breakpoints-mux auth server set <url>"
+  displayName: "tasks-mux auth server set <url>"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "auth server set"
   flags: []
   description: |
-    Persist a default breakpoints-mux server URL in
-    ~/.breakpoints-mux/config.json.
-    Source: packages/breakpoints-mux/src/cli/commands/auth.ts:135-160.
+    Persist a default tasks-mux server URL in
+    ~/.tasks-mux/config.json.
+    Source: packages/tasks-mux/src/cli/commands/auth.ts:135-160.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-auth-server-clear
+id: interaction-primitive:tasks-mux-cli-auth-server-clear
 attributes:
-  displayName: "breakpoints-mux auth server clear"
+  displayName: "tasks-mux auth server clear"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "auth server clear"
   flags: []
   description: |
     Remove the saved default server URL from
-    ~/.breakpoints-mux/config.json.
-    Source: packages/breakpoints-mux/src/cli/commands/auth.ts:163-181.
+    ~/.tasks-mux/config.json.
+    Source: packages/tasks-mux/src/cli/commands/auth.ts:163-181.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-auth-token-set
+id: interaction-primitive:tasks-mux-cli-auth-token-set
 attributes:
-  displayName: "breakpoints-mux auth token set <token>"
+  displayName: "tasks-mux auth token set <token>"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "auth token set"
   flags: []
   description: |
-    Persist a bearer token in ~/.breakpoints-mux/config.json for CLI/MCP use.
-    Source: packages/breakpoints-mux/src/cli/commands/auth.ts:189-212.
+    Persist a bearer token in ~/.tasks-mux/config.json for CLI/MCP use.
+    Source: packages/tasks-mux/src/cli/commands/auth.ts:189-212.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-auth-token-clear
+id: interaction-primitive:tasks-mux-cli-auth-token-clear
 attributes:
-  displayName: "breakpoints-mux auth token clear"
+  displayName: "tasks-mux auth token clear"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "auth token clear"
   flags: []
   description: |
-    Remove the saved bearer token from ~/.breakpoints-mux/config.json.
-    Source: packages/breakpoints-mux/src/cli/commands/auth.ts:214-233.
+    Remove the saved bearer token from ~/.tasks-mux/config.json.
+    Source: packages/tasks-mux/src/cli/commands/auth.ts:214-233.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-auth-logout
+id: interaction-primitive:tasks-mux-cli-auth-logout
 attributes:
-  displayName: "breakpoints-mux auth logout"
+  displayName: "tasks-mux auth logout"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "auth logout"
   flags: []
   description: |
     Clear stored OAuth + bearer-token state from disk.
-    Source: packages/breakpoints-mux/src/cli/commands/auth.ts:240-261.
+    Source: packages/tasks-mux/src/cli/commands/auth.ts:240-261.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-auth-status
+id: interaction-primitive:tasks-mux-cli-auth-status
 attributes:
-  displayName: "breakpoints-mux auth status"
+  displayName: "tasks-mux auth status"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "auth status"
   flags: []
   description: |
     Print current authentication state (user, server URL, token source,
     expiration). Calls /auth/me on the configured server.
-    Source: packages/breakpoints-mux/src/cli/commands/auth.ts:265-335.
+    Source: packages/tasks-mux/src/cli/commands/auth.ts:265-335.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-auth-keygen
+id: interaction-primitive:tasks-mux-cli-auth-keygen
 attributes:
-  displayName: "breakpoints-mux auth keygen"
+  displayName: "tasks-mux auth keygen"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "auth keygen"
   flags: []
   description: |
     Generate a new Ed25519 SSH key pair, saved as
-    ~/.breakpoints-mux/keys/<fingerprint>.pem with mode 0600.
-    Source: packages/breakpoints-mux/src/cli/commands/auth.ts:339-383.
+    ~/.tasks-mux/keys/<fingerprint>.pem with mode 0600.
+    Source: packages/tasks-mux/src/cli/commands/auth.ts:339-383.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-auth-key-push
+id: interaction-primitive:tasks-mux-cli-auth-key-push
 attributes:
-  displayName: "breakpoints-mux auth key-push"
+  displayName: "tasks-mux auth key-push"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "auth key-push"
   flags:
     - "--pr:0:create a pull request with the key"
@@ -126,43 +126,43 @@ attributes:
   description: |
     Push the local public SSH key into the configured repository (optionally
     via PR), enabling signed-answer flows.
-    Source: packages/breakpoints-mux/src/cli/commands/auth.ts:387-470.
+    Source: packages/tasks-mux/src/cli/commands/auth.ts:387-470.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-auth-keys
+id: interaction-primitive:tasks-mux-cli-auth-keys
 attributes:
-  displayName: "breakpoints-mux auth keys"
+  displayName: "tasks-mux auth keys"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "auth keys"
   flags: []
   description: |
-    List local SSH keys stored under ~/.breakpoints-mux/keys/.
-    Source: packages/breakpoints-mux/src/cli/commands/auth.ts:53,470-583.
+    List local SSH keys stored under ~/.tasks-mux/keys/.
+    Source: packages/tasks-mux/src/cli/commands/auth.ts:53,470-583.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-breakpoints-pending
+id: interaction-primitive:tasks-mux-cli-breakpoints-pending
 attributes:
-  displayName: "breakpoints-mux breakpoints pending"
+  displayName: "tasks-mux breakpoints pending"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "breakpoints pending"
   flags:
     - "-e,--responder:1:responder ID (required)"
   description: |
     List pending breakpoints assigned to a responder via the configured
     backend.
-    Source: packages/breakpoints-mux/src/cli/commands/breakpoints.ts:34-68.
+    Source: packages/tasks-mux/src/cli/commands/breakpoints.ts:34-68.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-breakpoints-answer
+id: interaction-primitive:tasks-mux-cli-breakpoints-answer
 attributes:
-  displayName: "breakpoints-mux breakpoints answer <breakpointId>"
+  displayName: "tasks-mux breakpoints answer <breakpointId>"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "breakpoints answer"
   flags:
     - "-a,--answer:1:answer text (required)"
@@ -170,73 +170,73 @@ attributes:
     - "--confidence:1:confidence level 0-100 (default 80)"
   description: |
     Submit an answer to an open breakpoint as a given responder.
-    Source: packages/breakpoints-mux/src/cli/commands/breakpoints.ts:70-105.
+    Source: packages/tasks-mux/src/cli/commands/breakpoints.ts:70-105.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-breakpoints-status
+id: interaction-primitive:tasks-mux-cli-breakpoints-status
 attributes:
-  displayName: "breakpoints-mux breakpoints status <breakpointId>"
+  displayName: "tasks-mux breakpoints status <breakpointId>"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "breakpoints status"
   flags: []
   description: |
     Fetch a single breakpoint and any associated answers.
-    Source: packages/breakpoints-mux/src/cli/commands/breakpoints.ts:107-139.
+    Source: packages/tasks-mux/src/cli/commands/breakpoints.ts:107-139.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-breakpoints-poll
+id: interaction-primitive:tasks-mux-cli-breakpoints-poll
 attributes:
-  displayName: "breakpoints-mux breakpoints poll <breakpointId>"
+  displayName: "tasks-mux breakpoints poll <breakpointId>"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "breakpoints poll"
   flags:
     - "-t,--timeout:1:timeout in seconds (default 300)"
     - "-i,--interval:1:polling interval in seconds (default 5)"
   description: |
     Poll (or open SSE stream) for an answer to a specific breakpoint.
-    Source: packages/breakpoints-mux/src/cli/commands/breakpoints.ts:141-187.
+    Source: packages/tasks-mux/src/cli/commands/breakpoints.ts:141-187.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-responders-list
+id: interaction-primitive:tasks-mux-cli-responders-list
 attributes:
-  displayName: "breakpoints-mux responders list"
+  displayName: "tasks-mux responders list"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "responders list"
   flags:
     - "-d,--domain:1:filter by domain"
   description: |
     List available responder profiles; optionally filter by domain.
-    Source: packages/breakpoints-mux/src/cli/commands/responders.ts:20-64.
+    Source: packages/tasks-mux/src/cli/commands/responders.ts:20-64.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-responders-show
+id: interaction-primitive:tasks-mux-cli-responders-show
 attributes:
-  displayName: "breakpoints-mux responders show <responderId>"
+  displayName: "tasks-mux responders show <responderId>"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "responders show"
   flags: []
   description: |
     Show full responder profile by ID.
-    Source: packages/breakpoints-mux/src/cli/commands/responders.ts:66-92.
+    Source: packages/tasks-mux/src/cli/commands/responders.ts:66-92.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-server-start
+id: interaction-primitive:tasks-mux-cli-server-start
 attributes:
-  displayName: "breakpoints-mux server start"
+  displayName: "tasks-mux server start"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "server start"
   flags: []
   description: |
-    Start the breakpoints-mux MCP server on stdio, exposing the breakpoint
+    Start the tasks-mux MCP server on stdio, exposing the breakpoint
     tool catalog (ask, list, answer, claim, status, ...) to MCP clients.
-    Source: packages/breakpoints-mux/src/cli/commands/server.ts:15-46.
+    Source: packages/tasks-mux/src/cli/commands/server.ts:15-46.

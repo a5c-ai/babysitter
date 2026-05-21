@@ -13,7 +13,7 @@ The current stack has one strong center and several supporting seams:
 - `@a5c-ai/babysitter-sdk` remains the orchestration core.
 - `@a5c-ai/babysitter` and `@a5c-ai/babysitter-agent` provide the operational CLI and runtime surfaces.
 - `packages/agent-mux/*` provide the dispatch layer for harness-facing agent execution.
-- `@a5c-ai/hooks-mux`, `@a5c-ai/extension-mux`, and `@a5c-ai/breakpoints-mux` are focused support subsystems that normalize hooks, compile plugins, and route human approvals.
+- `@a5c-ai/hooks-mux`, `@a5c-ai/extension-mux`, and `@a5c-ai/tasks-mux` are focused support subsystems that normalize hooks, compile plugins, and route human approvals.
 - `plugins/babysitter-unified/` is the canonical plugin source, while per-harness plugin bundles remain the user-installable outputs.
 
 This is a unified executable stack with explicit package families, not a promise that every family must become its own larger platform.
@@ -29,7 +29,7 @@ flowchart TD
   CLI[babysitter CLI and runtime<br/>@a5c-ai/babysitter<br/>@a5c-ai/babysitter-agent]
   SDK[babysitter-sdk<br/>runs, replay, storage, tasks]
   LIB[Process library and project processes<br/>library/, .a5c/processes, ~/.a5c]
-  BP[breakpoints-mux<br/>human approval routing]
+  BP[tasks-mux<br/>human approval routing]
   APM[extension-mux<br/>plugin compilation]
   AMUX[agent-mux packages<br/>core, adapters, cli, sdk, gateway]
   UI[User surfaces<br/>TUI, web UI, mobile, docs]
@@ -81,13 +81,13 @@ Owned primarily by:
 
 - `packages/hooks-mux/*`
 - `packages/extension-mux`
-- `packages/breakpoints-mux`
+- `packages/tasks-mux`
 
 These packages solve cross-cutting problems:
 
 - `hooks-mux` normalizes hook events and adapter wiring.
 - `extension-mux` compiles one canonical plugin description into harness-specific outputs.
-- `breakpoints-mux` routes human approvals and structured breakpoint responses.
+- `tasks-mux` routes human approvals and structured breakpoint responses.
 
 This support layer is part of the delivery path for metaplugins on legacy non-Babysitter agents, but it is not the metaplugin abstraction itself. Metaplugins sit one level higher: they package reusable capability concerns across plugin and hook surfaces. `extension-mux` emits the concrete bundles those concerns need, while unified plugin sources such as `plugins/babysitter-unified/` provide one first-party authoring surface for that delivery.
 
@@ -123,7 +123,7 @@ These packages are consumers of the orchestration and dispatch layers. They are 
 |---|---|---|---|
 | Orchestration core | `packages/sdk`, `packages/babysitter`, `packages/babysitter-agent` | Run lifecycle, replay, storage, task dispatch, CLI/runtime surfaces | A future forced split into many more top-level runtime packages |
 | Dispatch family | `packages/agent-mux/*` | Harness invocation, adapter normalization, gateway, shared interaction contracts | Replacement of Babysitter orchestration |
-| Support mux family | `packages/hooks-mux/*`, `packages/extension-mux`, `packages/breakpoints-mux` | Hook normalization, bundle compilation, human approval routing | A formal "platform layer" that already has independent product boundaries |
+| Support mux family | `packages/hooks-mux/*`, `packages/extension-mux`, `packages/tasks-mux` | Hook normalization, bundle compilation, human approval routing | A formal "platform layer" that already has independent product boundaries |
 | Distribution surfaces | `plugins/babysitter-unified`, `plugins/babysitter-*` | Canonical plugin authoring plus harness-specific installable outputs | One single bundle format with no compatibility constraints |
 | User surfaces | `packages/agent-mux/ui`, `packages/agent-mux/webui`, `packages/agent-mux/tui`, `docs-site/` | Human-facing interaction, visualization, docs, and operator surfaces | Ownership of orchestration semantics |
 
@@ -136,7 +136,7 @@ The end-to-end diagram above is the shape. The live execution narrative is:
 3. The installed bundle reaches the operational runtime in `packages/babysitter` and `packages/babysitter-agent`.
 4. That runtime delegates the core orchestration work to `packages/sdk`, which owns run directories, journal/state replay, effect requests, process-library binding, and workflow execution.
 5. When a workflow requires a reusable process, the runtime reaches into `library/` or project-local `.a5c/processes/`.
-6. When a workflow requires human approval routing, `packages/breakpoints-mux` handles that concern as a distinct subsystem instead of burying it inside generic hook language.
+6. When a workflow requires human approval routing, `packages/tasks-mux` handles that concern as a distinct subsystem instead of burying it inside generic hook language.
 7. When the system needs adapter-level dispatch or richer interaction surfaces, `packages/agent-mux/*` carries that responsibility without changing the orchestration center of gravity.
 
 ## Integration Contracts That Matter
@@ -158,7 +158,7 @@ The unified plugin is the authoring source. Per-harness bundles are the compatib
 
 ### Orchestration ↔ Human Approval
 
-Breakpoint routing is a distinct concern. `breakpoints-mux` should be discussed as a supporting subsystem for approvals rather than folded into generic hook or session language.
+Breakpoint routing is a distinct concern. `tasks-mux` should be discussed as a supporting subsystem for approvals rather than folded into generic hook or session language.
 
 ### V6 ↔ Validation
 
@@ -170,7 +170,7 @@ That command matters because V6 is supposed to promote real seams with active ch
 
 ## What Is Normative Now
 
-- The monorepo already contains Babysitter, agent-mux, hooks-mux, extension-mux, and breakpoints-mux.
+- The monorepo already contains Babysitter, agent-mux, hooks-mux, extension-mux, and tasks-mux.
 - `packages/sdk` is still the main center of gravity.
 - agent-mux is already integrated as repo content, workspace packages, and documentation.
 - Unified plugin authoring coexists with per-harness plugin bundles.

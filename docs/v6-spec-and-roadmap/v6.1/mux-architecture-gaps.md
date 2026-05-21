@@ -13,7 +13,7 @@ The Atlas graph defines **9 canonical muxes** as the bridging abstractions of th
 | `transport-mux` | inference | Wire protocols → canonical request/response | `transport-mux` |
 | `extension-mux` | plugin | Portable Extension → per-agent native formats | `extension-mux` |
 | `session-storage-mux` | storage | Session files at rest | `babysitter-sdk` (session module) |
-| `tasks-mux` | approval | Trust chain for breakpoint answers | `breakpoints-mux` |
+| `tasks-mux` | approval | Trust chain for breakpoint answers | `tasks-mux` |
 | `tool-mux` | tool-dispatch | Tool calls across MCP, CLI, hooks | No dedicated package |
 
 ---
@@ -162,19 +162,19 @@ The Atlas graph defines **9 canonical muxes** as the bridging abstractions of th
 
 ---
 
-### 8. tasks-mux → `breakpoints-mux`
+### 8. tasks-mux → `tasks-mux`
 
 **Graph description:** The lone live Trust Chain primitive — ProvenBreakpointAnswer signs decision answers with the named Authority of the responder. Bridges every backend (Linear, GitHub, Slack, etc.)
 
 **Implementation reality:**
-- breakpoints-mux: pluggable backends, cryptographic signing
+- tasks-mux: pluggable backends, cryptographic signing
 - Server-backed breakpoint routing
 - MCP integration for remote approval
 
 **Gaps:**
 | ID | Severity | Gap |
 |----|----------|-----|
-| M-TASKS-01 | S3 | Graph name "tasks-mux" ≠ package name "breakpoints-mux" |
+| M-TASKS-01 | S3 | Graph name "tasks-mux" ≠ package name "tasks-mux" |
 | M-TASKS-02 | S4 | Linear, Slack backends mentioned in graph — not implemented |
 
 ---
@@ -240,4 +240,4 @@ But `agent-mux-core` also implements L4-L5 concerns (event dispatch, session man
 | P1 | agent-comm-mux event schema not formalized (M-COMM-02) | Each adapter emits different shapes |
 | P2 | agent-mux-core not represented in graph (decomposition gap) | Graph doesn't reflect reality |
 | P2 | extension-mux ≠ extension-mux naming (M-EXTENSION-01) | Confusing for contributors |
-| P2 | tasks-mux ≠ breakpoints-mux naming (M-TASKS-01) | Confusing for contributors |
+| P2 | tasks-mux ≠ tasks-mux naming (M-TASKS-01) | Confusing for contributors |

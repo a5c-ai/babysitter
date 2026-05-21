@@ -189,7 +189,7 @@ const updateLockVersion = (path, version) => {
         "@a5c-ai/babysitter-sdk": version
       }
     },
-    "packages/breakpoints-mux": {
+    "packages/tasks-mux": {
       version
     },
     "packages/babysitter-tui-plugins": {
@@ -233,7 +233,7 @@ const workspaceManifestPaths = [
   "packages/babysitter/package.json",
   "packages/babysitter-agent/package.json",
   "packages/extension-mux/package.json",
-  "packages/breakpoints-mux/package.json",
+  "packages/tasks-mux/package.json",
   "packages/babysitter-tui-plugins/package.json",
   "packages/cloud/package.json",
   "packages/observer-dashboard/package.json",

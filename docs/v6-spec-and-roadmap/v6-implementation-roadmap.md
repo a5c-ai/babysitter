@@ -193,9 +193,9 @@ Current V6-facing commands that can be cited today are:
 - `npm run test:hooks-mux`
 - `npm run build:agent-mux`
 - `npm run test:agent-mux`
-- `npm run build --workspace=@a5c-ai/breakpoints-mux`
-- `npm run typecheck --workspace=@a5c-ai/breakpoints-mux`
-- `npm run test --workspace=@a5c-ai/breakpoints-mux`
+- `npm run build --workspace=@a5c-ai/tasks-mux`
+- `npm run typecheck --workspace=@a5c-ai/tasks-mux`
+- `npm run test --workspace=@a5c-ai/tasks-mux`
 - `npm run build --workspace=@a5c-ai/extension-mux`
 - `npm run test --workspace=@a5c-ai/extension-mux`
 - `npm run verify:metadata`

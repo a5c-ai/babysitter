@@ -22,7 +22,7 @@ The current repository provides these concrete validation commands and workflow 
 | Hooks mux | `npm run build:hooks-mux`, `npm run test:hooks-mux` | Build and test coverage for the current hooks-mux packages |
 | Agent mux | `npm run build:agent-mux`, `npm run test:agent-mux` | Build and test coverage for the current agent-mux packages |
 | Agent plugins mux | `npm run build --workspace=@a5c-ai/extension-mux`, `npm run test --workspace=@a5c-ai/extension-mux` | Build and test coverage for the current compiler package |
-| Breakpoints mux | `npm run build --workspace=@a5c-ai/breakpoints-mux`, `npm run typecheck --workspace=@a5c-ai/breakpoints-mux`, `npm run test --workspace=@a5c-ai/breakpoints-mux` | Build, typecheck, and test coverage for the current breakpoints workspace |
+| Breakpoints mux | `npm run build --workspace=@a5c-ai/tasks-mux`, `npm run typecheck --workspace=@a5c-ai/tasks-mux`, `npm run test --workspace=@a5c-ai/tasks-mux` | Build, typecheck, and test coverage for the current breakpoints workspace |
 | Architecture boundaries | `npm run test:architecture` | Enforces the `@a5c-ai/babysitter-agent` seam contract and repo package-family dependency rules for the current orchestration, dispatch, support, consumer, and distribution surfaces |
 | Plugin packaging checks | `npm run validate:ci --prefix plugins/<plugin>` for first-class plugins | Packaged-install and integration validation for the listed plugin packages |
 | Metadata checks | `npm run verify:metadata` | Repository/package metadata consistency checks only |

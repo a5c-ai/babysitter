@@ -66,7 +66,7 @@ Complete inventory of gaps between the Atlas graph (source of truth) and the cur
 
 | ID | Severity | Gap | Description |
 |----|----------|-----|-------------|
-| G-L9-01 | S4 | No filesystem policy enforcement | Graph defines Sandbox and FilesystemSafetyInvariant; only human approval gates (breakpoints-mux) are implemented. |
+| G-L9-01 | S4 | No filesystem policy enforcement | Graph defines Sandbox and FilesystemSafetyInvariant; only human approval gates (tasks-mux) are implemented. |
 | G-L9-02 | S4 | No network policy enforcement | No network-level sandboxing for agent-driven HTTP requests. |
 | G-L9-03 | S4 | No resource limit enforcement | No CPU/memory/time budgets for effect execution beyond timeouts. |
 
@@ -95,7 +95,7 @@ Complete inventory of gaps between the Atlas graph (source of truth) and the cur
 
 | ID | Severity | Gap | Description |
 |----|----------|-----|-------------|
-| G-L14-01 | S2 | No unified governance API | Governance concerns are in babysitter-agent (module), breakpoints-mux (approval), atlas (evidence/claims). No unified governance interface. |
+| G-L14-01 | S2 | No unified governance API | Governance concerns are in babysitter-agent (module), tasks-mux (approval), atlas (evidence/claims). No unified governance interface. |
 | G-L14-02 | S4 | NIST/OWASP frameworks aspirational | Graph references compliance frameworks; no implementation maps controls to these frameworks. |
 | G-L14-03 | S3 | TrustLevel has 5 records, no runtime | Graph defines 5 trust levels; no runtime mechanism to evaluate or enforce trust decisions. |
 

@@ -95,7 +95,7 @@ A `Mux` is treated as `ExtensionInterface` (a5c-flavored contract) plus implemen
 | hooks-mux (#6) | a5c/02-muxes.md §6 | `ExtensionInterface` `iface:hooks-mux`; `ProcessDescriptor` `pkg:@a5c-ai/hooks-mux` | ✅ | |
 | extension-mux (#7) | a5c/02-muxes.md §7 | `ExtensionInterface` `iface:extension-mux`; `ProcessDescriptor` `pkg:@a5c-ai/extension-mux` | ✅ | |
 | tool-mux (#8) | a5c/02-muxes.md §8 | `ExtensionInterface` `iface:tool-mux` | ✅ | |
-| tasks-mux (#9) | a5c/02-muxes.md §9 | `ExtensionInterface` `iface:tasks-mux`; `ProcessDescriptor` `pkg:@a5c-ai/breakpoints-mux` | ✅ | |
+| tasks-mux (#9) | a5c/02-muxes.md §9 | `ExtensionInterface` `iface:tasks-mux`; `ProcessDescriptor` `pkg:@a5c-ai/tasks-mux` | ✅ | |
 | Mux native side / canonical side framing | a5c/02-muxes.md preamble | attributes `nativeProtocols` and `canonicalProtocol` on `ExtensionInterface` (kind=mux) | ✅ | |
 | "What is not a mux" rejected list (identity, secrets, memory, trust, policy, blueprints, install, events, observability) | a5c/02-muxes.md §What is not a mux | each captured as `Term` with note + `replaces` to corresponding `ExtensionInterface` (or `OutOfScopeReason`) | ✅ | |
 | Mux bridging concerns (per-mux: spawn args, env-vars, signal propagation, etc.) | a5c/02-muxes.md (each section) | attributes on `ExtensionInterface` (kind=mux) `bridgingConcerns[]` | ✅ | |
@@ -469,7 +469,7 @@ A `Mux` is treated as `ExtensionInterface` (a5c-flavored contract) plus implemen
 | `@a5c-ai/transport-mux` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/hooks-mux` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/extension-mux` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
-| `@a5c-ai/breakpoints-mux` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
+| `@a5c-ai/tasks-mux` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/babysitter-sdk` | a5c/01-component-map.md, 05-sdk.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/babysitter` (top-level npm) | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/babysitter-tui-plugins` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |

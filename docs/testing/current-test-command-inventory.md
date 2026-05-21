@@ -77,9 +77,9 @@ Status: Current. This inventory implements roadmap slice 0, "Inventory and namin
 | `@a5c-ai/babysitter-sdk` | `test` | No-model | unit-or-integration | SDK maintainers | `test-logs/babysitter-sdk-test.log` | ci.yml packages-sdk/test; publish.yml validate_core |
 | `@a5c-ai/babysitter-tui-plugins` | `lint` | No-model | static-check | Owning package maintainer | `test-logs/babysitter-tui-plugins-lint.log` | ci.yml test or package-local validation when package is touched |
 | `@a5c-ai/babysitter-tui-plugins` | `test` | No-model | unit-or-integration | Owning package maintainer | `test-logs/babysitter-tui-plugins-test.log` | ci.yml test or package-local validation when package is touched |
-| `@a5c-ai/breakpoints-mux` | `lint` | No-model | static-check | Mux maintainers | `test-logs/breakpoints-mux-lint.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
-| `@a5c-ai/breakpoints-mux` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/breakpoints-mux-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
-| `@a5c-ai/breakpoints-mux` | `test:packaged-surface-parity` | No-model | unit-or-integration | Mux maintainers | `test-logs/breakpoints-mux-test-packaged-surface-parity.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
+| `@a5c-ai/tasks-mux` | `lint` | No-model | static-check | Mux maintainers | `test-logs/tasks-mux-lint.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
+| `@a5c-ai/tasks-mux` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/tasks-mux-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
+| `@a5c-ai/tasks-mux` | `test:packaged-surface-parity` | No-model | unit-or-integration | Mux maintainers | `test-logs/tasks-mux-test-packaged-surface-parity.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/cloud` | `prepublishOnly` | No-model release gate | release-gate | Cloud maintainers | `release-logs/cloud-prepublishonly.log` | publish.yml validate and publish gates |
 | `@a5c-ai/cloud` | `test` | No-model | unit-or-integration | Cloud maintainers | `test-logs/cloud-test.log` | ci.yml test; publish.yml validate_cloud; publish.yml validate/deploy |
 | `@a5c-ai/cloud` | `test:coverage` | No-model | coverage | Cloud maintainers | `coverage/cloud-test-coverage` | ci.yml test; publish.yml validate_cloud; publish.yml validate/deploy |

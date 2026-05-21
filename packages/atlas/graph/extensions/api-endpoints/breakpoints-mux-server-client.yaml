@@ -1,5 +1,5 @@
 nodeKind: APIEndpoint
-id: api-endpoint:breakpoints-mux-server-client-questions-create
+id: api-endpoint:tasks-mux-server-client-questions-create
 attributes:
   displayName: "POST /api/v1/questions"
   method: POST
@@ -8,13 +8,13 @@ attributes:
   description: |
     [direction: outbound-client] Submit a new breakpoint (question) to the
     upstream breakpoints-pro server. Body: { text, context, routing,
-    projectId, repoId }. Source: packages/breakpoints-mux/src/backends/server.ts:287-294.
+    projectId, repoId }. Source: packages/tasks-mux/src/backends/server.ts:287-294.
 edges:
   exposed_by:
-    - target: package:a5c-ai-breakpoints-mux
+    - target: package:a5c-ai-tasks-mux
 ---
 nodeKind: APIEndpoint
-id: api-endpoint:breakpoints-mux-server-client-questions-get
+id: api-endpoint:tasks-mux-server-client-questions-get
 attributes:
   displayName: "GET /api/v1/questions/{id}"
   method: GET
@@ -23,13 +23,13 @@ attributes:
   description: |
     [direction: outbound-client] Fetch a single breakpoint by ID, including
     its answers and selectedAnswer.
-    Source: packages/breakpoints-mux/src/backends/server.ts:296-303.
+    Source: packages/tasks-mux/src/backends/server.ts:296-303.
 edges:
   exposed_by:
-    - target: package:a5c-ai-breakpoints-mux
+    - target: package:a5c-ai-tasks-mux
 ---
 nodeKind: APIEndpoint
-id: api-endpoint:breakpoints-mux-server-client-questions-cancel
+id: api-endpoint:tasks-mux-server-client-questions-cancel
 attributes:
   displayName: "DELETE /api/v1/questions/{id}"
   method: DELETE
@@ -37,13 +37,13 @@ attributes:
   authRequired: true
   description: |
     [direction: outbound-client] Cancel a breakpoint.
-    Source: packages/breakpoints-mux/src/backends/server.ts:452-457.
+    Source: packages/tasks-mux/src/backends/server.ts:452-457.
 edges:
   exposed_by:
-    - target: package:a5c-ai-breakpoints-mux
+    - target: package:a5c-ai-tasks-mux
 ---
 nodeKind: APIEndpoint
-id: api-endpoint:breakpoints-mux-server-client-questions-list
+id: api-endpoint:tasks-mux-server-client-questions-list
 attributes:
   displayName: "GET /api/v1/questions?status=&projectId=&repoId="
   method: GET
@@ -52,13 +52,13 @@ attributes:
   description: |
     [direction: outbound-client] List pending breakpoints for a project/repo
     pair (status=pending).
-    Source: packages/breakpoints-mux/src/backends/server.ts:410-421.
+    Source: packages/tasks-mux/src/backends/server.ts:410-421.
 edges:
   exposed_by:
-    - target: package:a5c-ai-breakpoints-mux
+    - target: package:a5c-ai-tasks-mux
 ---
 nodeKind: APIEndpoint
-id: api-endpoint:breakpoints-mux-server-client-experts-questions
+id: api-endpoint:tasks-mux-server-client-experts-questions
 attributes:
   displayName: "GET /api/v1/experts/{responderId}/questions"
   method: GET
@@ -67,13 +67,13 @@ attributes:
   description: |
     [direction: outbound-client] List breakpoints currently routed to a
     responder (status=routed).
-    Source: packages/breakpoints-mux/src/backends/server.ts:395-407.
+    Source: packages/tasks-mux/src/backends/server.ts:395-407.
 edges:
   exposed_by:
-    - target: package:a5c-ai-breakpoints-mux
+    - target: package:a5c-ai-tasks-mux
 ---
 nodeKind: APIEndpoint
-id: api-endpoint:breakpoints-mux-server-client-questions-answers
+id: api-endpoint:tasks-mux-server-client-questions-answers
 attributes:
   displayName: "POST /api/v1/questions/{id}/answers"
   method: POST
@@ -84,13 +84,13 @@ attributes:
     { expertId, expertName, text, approved, confidence, references,
     followUpQuestions, decisionMemory }. Note: signing fields rejected
     server-side (ServerBackendError 400).
-    Source: packages/breakpoints-mux/src/backends/server.ts:424-450.
+    Source: packages/tasks-mux/src/backends/server.ts:424-450.
 edges:
   exposed_by:
-    - target: package:a5c-ai-breakpoints-mux
+    - target: package:a5c-ai-tasks-mux
 ---
 nodeKind: APIEndpoint
-id: api-endpoint:breakpoints-mux-server-client-experts-list
+id: api-endpoint:tasks-mux-server-client-experts-list
 attributes:
   displayName: "GET /api/v1/experts?projectId=&repoId="
   method: GET
@@ -99,13 +99,13 @@ attributes:
   description: |
     [direction: outbound-client] List responder (expert) profiles scoped to
     a project/repo pair.
-    Source: packages/breakpoints-mux/src/backends/server.ts:459-475.
+    Source: packages/tasks-mux/src/backends/server.ts:459-475.
 edges:
   exposed_by:
-    - target: package:a5c-ai-breakpoints-mux
+    - target: package:a5c-ai-tasks-mux
 ---
 nodeKind: APIEndpoint
-id: api-endpoint:breakpoints-mux-server-client-questions-claim
+id: api-endpoint:tasks-mux-server-client-questions-claim
 attributes:
   displayName: "POST /api/v1/questions/{id}/claim"
   method: POST
@@ -113,7 +113,7 @@ attributes:
   authRequired: true
   description: |
     [direction: outbound-client] Claim a breakpoint as a specific responder.
-    Source: packages/breakpoints-mux/src/backends/server.ts:477-490.
+    Source: packages/tasks-mux/src/backends/server.ts:477-490.
 edges:
   exposed_by:
-    - target: package:a5c-ai-breakpoints-mux
+    - target: package:a5c-ai-tasks-mux

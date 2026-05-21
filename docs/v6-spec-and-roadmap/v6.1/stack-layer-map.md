@@ -127,10 +127,10 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/breakpoints-mux` (approval gates) |
+| Packages | `@a5c-ai/tasks-mux` (approval gates) |
 | Node Kinds | Sandbox, PermissionMode (lifecycle + security) |
 | Graph Cluster | lifecycle, security |
-| Maturity | Partial — breakpoints-mux handles human approval; filesystem/network policy enforcement deferred |
+| Maturity | Partial — tasks-mux handles human approval; filesystem/network policy enforcement deferred |
 | Spec Coverage | v6.0 security-architecture.md |
 
 **Gap:** Sandbox as a policy enforcement layer (filesystem restrictions, network controls, resource limits) is aspirational. Only human approval gates are implemented.
@@ -198,7 +198,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/babysitter-agent` (governance module), `@a5c-ai/breakpoints-mux` (approval routing), `@a5c-ai/atlas` (evidence/claims) |
+| Packages | `@a5c-ai/babysitter-agent` (governance module), `@a5c-ai/tasks-mux` (approval routing), `@a5c-ai/atlas` (evidence/claims) |
 | Node Kinds | AgentGovernanceImpl, EvidencePolicy, Claim, TrustLevel (agent-stack + catalog-meta + trust) |
 | Graph Cluster | agent-stack, catalog-meta, trust |
 | Maturity | Partial — approval gates, evidence claims, trust levels defined; broader policy framework (NIST AI RMF, OWASP) aspirational |

@@ -183,15 +183,15 @@ edges:
     - evidence:agent-mux-gateway-endpoint-source
 ---
 nodeKind: Claim
-id: claim:breakpoints-mux-package-surface
+id: claim:tasks-mux-package-surface
 attributes:
-  subjectId: package:a5c-ai-breakpoints-mux
+  subjectId: package:a5c-ai-tasks-mux
   subjectKind: PackageSurface
   attribute: surfaceKinds
-  value: '@a5c-ai/breakpoints-mux is modeled as a breakpoint-runtime package surface.'
-  statement: The breakpoints-mux package surface is grounded in package metadata and runtime source files.
+  value: '@a5c-ai/tasks-mux is modeled as a breakpoint-runtime package surface.'
+  statement: The tasks-mux package surface is grounded in package metadata and runtime source files.
   evidenceSourceIds:
-    - evidence:breakpoints-mux-package-source
+    - evidence:tasks-mux-package-source
   confidence: high
   provenanceKind: repo-inspection
   evidenceStrength: strong
@@ -201,20 +201,20 @@ attributes:
   claimKind: provenance
 edges:
   about_subject:
-    - package:a5c-ai-breakpoints-mux
+    - package:a5c-ai-tasks-mux
   backed_by_evidence:
-    - evidence:breakpoints-mux-package-source
+    - evidence:tasks-mux-package-source
 ---
 nodeKind: Claim
-id: claim:breakpoints-mux-server-client-endpoints
+id: claim:tasks-mux-server-client-endpoints
 attributes:
-  subjectId: package:a5c-ai-breakpoints-mux
+  subjectId: package:a5c-ai-tasks-mux
   subjectKind: PackageSurface
   attribute: exposes_endpoint
-  value: breakpoints-mux server backend client methods are modeled as authenticated outbound-client APIEndpoint records for question create/get/cancel/list/answer/claim and expert listing.
-  statement: The breakpoints-mux server-client endpoint records are grounded in ServerBreakpointBackend source methods.
+  value: tasks-mux server backend client methods are modeled as authenticated outbound-client APIEndpoint records for question create/get/cancel/list/answer/claim and expert listing.
+  statement: The tasks-mux server-client endpoint records are grounded in ServerBreakpointBackend source methods.
   evidenceSourceIds:
-    - evidence:breakpoints-mux-server-client-source
+    - evidence:tasks-mux-server-client-source
   confidence: high
   provenanceKind: repo-inspection
   evidenceStrength: strong
@@ -224,6 +224,6 @@ attributes:
   claimKind: provenance
 edges:
   about_subject:
-    - package:a5c-ai-breakpoints-mux
+    - package:a5c-ai-tasks-mux
   backed_by_evidence:
-    - evidence:breakpoints-mux-server-client-source
+    - evidence:tasks-mux-server-client-source

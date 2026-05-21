@@ -1,11 +1,11 @@
 nodeKind: Issue
 id: issue:linear-aca-390
 attributes:
-  displayName: "ACA-390 — breakpoints-mux runtime packaging"
+  displayName: "ACA-390 — tasks-mux runtime packaging"
   identifier: "ACA-390"
   trackerKind: issue-tracker:linear
   state: "in-progress"
-  title: "breakpoints-mux: fix auth/browser-session runtime packaging"
+  title: "tasks-mux: fix auth/browser-session runtime packaging"
   url: "https://linear.app/a5c/issue/ACA-390"
 edges:
   from_tracker:

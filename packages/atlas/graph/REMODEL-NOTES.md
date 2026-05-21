@@ -5013,7 +5013,7 @@ Top-level mux + catalog packages:
 3. `extension-mux` — single package (already PackageSurface).
 4. `hooks-mux` — single core package (already PackageSurface) + 9 adapter
    subdirs (claude/codex/copilot/cursor/gemini/oh-my-pi/openclaw/opencode/pi).
-5. `breakpoints-mux` — single package (already PackageSurface).
+5. `tasks-mux` — single package (already PackageSurface).
 6. `transport-mux` — single package (already PackageSurface).
 
 ### Per-package gap count + codegen-readiness verdict
@@ -5033,7 +5033,7 @@ Top-level mux + catalog packages:
 | agent-mux/adapters | 1 (PackageSurface missing) | YES post-catalog pass 96 |
 | extension-mux | 0 | YES — PluginTargetDescriptor×17, schema/transform/emit modeled |
 | hooks-mux core | 0 | YES — HookMapping/HookSurface/MergePolicy/DecisionVerb covered |
-| breakpoints-mux | 0 | YES — BreakpointStrategy/ResponderProfile/HumanCheckpoint/DecisionMemory covered |
+| tasks-mux | 0 | YES — BreakpointStrategy/ResponderProfile/HumanCheckpoint/DecisionMemory covered |
 | transport-mux | 0 | YES — all 8 SUPPORTED_TRANSPORTS covered as ModelTransportProtocol |
 
 ### Schema delta
@@ -5086,7 +5086,7 @@ the package and path nodes report non-orphan after the catalog pass.
   `model-transport:*` records (anthropic-messages, openai-chat-completions,
   openai-responses, gemini-generate-content, bedrock-converse,
   azure-foundry, vertex-anthropic-messages, passthrough). No new records.
-- **breakpoints-mux Zod schemas**: BreakpointStrategy, ResponderProfile,
+- **tasks-mux Zod schemas**: BreakpointStrategy, ResponderProfile,
   BreakpointAnswer, DecisionMemory, HumanCheckpoint, BreakpointStatus are
   fully modeled as atlas NodeKinds. Internal-only types (BreakpointContext,
   BreakpointRouting) are payload shapes — out of scope.
@@ -5172,7 +5172,7 @@ citation in the catalog pass 95 style.
 
 Decomposed the 6 mux PackageSurfaces from catalog pass 96 (agent-mux/tui,
 agent-mux/observability, agent-mux/harness-mock, transport-mux,
-breakpoints-mux, hooks-mux/core) into 40 graph records.
+tasks-mux, hooks-mux/core) into 40 graph records.
 
 - 3 InteractionPrimitive[kind=tui-command] (agent-mux/tui:
   command-palette, prompt-input, model-picker)
@@ -5185,7 +5185,7 @@ breakpoints-mux, hooks-mux/core) into 40 graph records.
 - 1 InteractionPrimitive[kind=cli-subcommand] for the `amux-proxy` bin
   (transport-mux ModelTransportProtocol records left untouched per spec)
 - 6 InteractionPrimitive[kind=cli-subcommand] for the
-  `breakpoints-mux` top-level CLI groups + 2 APIEndpoint for the MCP
+  `tasks-mux` top-level CLI groups + 2 APIEndpoint for the MCP
   HTTP transport (`/mcp`, `/healthz`) + 6 SharedContextSpec for the
   zod-validated wire schemas / BreakpointBackend interface
 - 8 SharedContextSpec for @a5c-ai/hooks-mux-core (UnifiedHookEvent,
@@ -5228,8 +5228,8 @@ itself with n=0).
 
 | Item (source catalog pass) | Outcome | Records / deferred work item |
 | --- | --- | --- |
-| breakpoints-mux deep leaf-subcommand enumeration (catalog pass 97c) | authored | 17 InteractionPrimitive[cli-subcommand] under graph/extensions/interaction-patterns/breakpoints-mux-cli-leaves.yaml |
-| breakpoints-mux backends/server.ts client model (catalog pass 97c) | authored | 8 APIEndpoint with [direction: outbound-client] flag in description |
+| tasks-mux deep leaf-subcommand enumeration (catalog pass 97c) | authored | 17 InteractionPrimitive[cli-subcommand] under graph/extensions/interaction-patterns/tasks-mux-cli-leaves.yaml |
+| tasks-mux backends/server.ts client model (catalog pass 97c) | authored | 8 APIEndpoint with [direction: outbound-client] flag in description |
 | harness-mock error + runtime-hook scenarios (catalog pass 97c) | authored | 8 InteractionPrimitive[mock-scenario]: 5 error:* + 3 runtimeHook* |
 | transport-mux runtime.ts programmatic API (catalog pass 97c) | structured-deferral | deferred-work:transport-mux-runtime-programmatic-api (status: abandoned, wrapper-over-graph evidence) |
 | hooks-mux internals helpers (catalog pass 97c) | structured-deferral | deferred-work:hooks-mux-internals-helpers (status: abandoned, private-helpers evidence) |
@@ -5247,18 +5247,18 @@ itself with n=0).
 
 ### Records authored
 
-- 17 InteractionPrimitive[cli-subcommand] (breakpoints-mux leaves)
+- 17 InteractionPrimitive[cli-subcommand] (tasks-mux leaves)
 - 13 InteractionPrimitive[cli-subcommand] (babysitter-sdk + agent CLI groups)
 - 8 InteractionPrimitive[mock-scenario] (harness-mock error + runtime-hook)
-- 8 APIEndpoint (breakpoints-mux outbound-client)
+- 8 APIEndpoint (tasks-mux outbound-client)
 - 14 deferred work item (5 status open + 9 status abandoned with not-applicable / wrapper-over-graph evidence)
 
 **Total: 60 new graph records.**
 
 ### Edges wired
 
-- exposes_subcommand: 17 (breakpoints-mux leaves) + 8 (harness-mock) + 12 (babysitter-sdk) + 1 (babysitter-agent) = 38 new
-- exposes_endpoint: 8 (breakpoints-mux outbound-client)
+- exposes_subcommand: 17 (tasks-mux leaves) + 8 (harness-mock) + 12 (babysitter-sdk) + 1 (babysitter-agent) = 38 new
+- exposes_endpoint: 8 (tasks-mux outbound-client)
 - exposed_by: 8 (APIEndpoint to PackageSurface)
 
 ### Schema delta
@@ -5346,12 +5346,12 @@ catalog pass but cheap to unblock individually.
 
 ### Files touched (catalog pass 98)
 
-- graph/extensions/interaction-patterns/breakpoints-mux-cli-leaves.yaml (new)
+- graph/extensions/interaction-patterns/tasks-mux-cli-leaves.yaml (new)
 - graph/extensions/interaction-patterns/agent-mux-harness-mock-errors-hooks.yaml (new)
 - graph/extensions/interaction-patterns/babysitter-sdk-cli.yaml (new)
-- graph/extensions/api-endpoints/breakpoints-mux-server-client.yaml (new)
+- graph/extensions/api-endpoints/tasks-mux-server-client.yaml (new)
 - concrete graph records replacing deferred work (new - 14 deferred work records)
-- graph/catalog-meta/package-surfaces/breakpoints-mux.yaml (extended exposes_subcommand + exposes_endpoint)
+- graph/catalog-meta/package-surfaces/tasks-mux.yaml (extended exposes_subcommand + exposes_endpoint)
 - graph/catalog-meta/package-surfaces/agent-mux-harness-mock.yaml (extended exposes_subcommand)
 - graph/catalog-meta/package-surfaces/babysitter-sdk.yaml (rewritten with bins + 12 subcommand groups)
 - graph/catalog-meta/package-surfaces/babysitter-agent.yaml (rewritten with babysitter-harness bin)

@@ -1,17 +1,17 @@
 # Top-level CLI subcommand groups exposed by the
-# `breakpoints-mux` bin (packages/breakpoints-mux/src/cli/program.ts).
+# `tasks-mux` bin (packages/tasks-mux/src/cli/program.ts).
 # Each group sub-tree (e.g. `auth login|set-token|status|...`) is summarized
 # at the group level; deep enumeration is deferred — leaf subcommand
 # expansion would not change the grammar shape and is callable through the
 # parent group records here.
-# Wired via @a5c-ai/breakpoints-mux PackageSurface `exposes_subcommand` edge.
+# Wired via @a5c-ai/tasks-mux PackageSurface `exposes_subcommand` edge.
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-ask
+id: interaction-primitive:tasks-mux-cli-ask
 attributes:
-  displayName: "breakpoints-mux ask"
+  displayName: "tasks-mux ask"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "ask"
   flags:
     - "-q,--question:1:breakpoint text (required)"
@@ -36,15 +36,15 @@ attributes:
     Submit a breakpoint to responders via the configured backend (server
     or git-native). Optionally waits for an answer and opens a browser
     session for human responders.
-    Source: packages/breakpoints-mux/src/cli/commands/ask.ts:98-200.
+    Source: packages/tasks-mux/src/cli/commands/ask.ts:98-200.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-responders
+id: interaction-primitive:tasks-mux-cli-responders
 attributes:
-  displayName: "breakpoints-mux responders {list|show}"
+  displayName: "tasks-mux responders {list|show}"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "responders"
   flags:
     - "list:0:list available responder profiles"
@@ -52,15 +52,15 @@ attributes:
   description: |
     Manage and view responder profiles registered with the configured
     backend.
-    Source: packages/breakpoints-mux/src/cli/commands/responders.ts:17-110.
+    Source: packages/tasks-mux/src/cli/commands/responders.ts:17-110.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-breakpoints
+id: interaction-primitive:tasks-mux-cli-breakpoints
 attributes:
-  displayName: "breakpoints-mux breakpoints {pending|answer|status|poll}"
+  displayName: "tasks-mux breakpoints {pending|answer|status|poll}"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "breakpoints"
   flags:
     - "pending:0:list pending breakpoints for a responder"
@@ -70,48 +70,48 @@ attributes:
   description: |
     Manage breakpoints and answers — list pending, answer, check status,
     and poll for completion.
-    Source: packages/breakpoints-mux/src/cli/commands/breakpoints.ts:31-200.
+    Source: packages/tasks-mux/src/cli/commands/breakpoints.ts:31-200.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-server
+id: interaction-primitive:tasks-mux-cli-server
 attributes:
-  displayName: "breakpoints-mux server {start}"
+  displayName: "tasks-mux server {start}"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "server"
   flags:
-    - "start:0:start the breakpoints-mux MCP server (stdio transport)"
+    - "start:0:start the tasks-mux MCP server (stdio transport)"
   description: |
-    Launch the breakpoints-mux MCP stdio server, exposing the breakpoint
+    Launch the tasks-mux MCP stdio server, exposing the breakpoint
     tool catalog (ask, list, answer, claim, ...) to MCP clients.
-    Source: packages/breakpoints-mux/src/cli/commands/server.ts:12-50.
+    Source: packages/tasks-mux/src/cli/commands/server.ts:12-50.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-responder-loop
+id: interaction-primitive:tasks-mux-cli-responder-loop
 attributes:
-  displayName: "breakpoints-mux responder-loop"
+  displayName: "tasks-mux responder-loop"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "responder-loop"
   flags: []
   description: |
     Long-running polling loop that watches the configured backend for new
     breakpoints assigned to a responder and dispatches them.
-    Source: packages/breakpoints-mux/src/cli/commands/responder-loop.ts:22-50.
+    Source: packages/tasks-mux/src/cli/commands/responder-loop.ts:22-50.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:breakpoints-mux-cli-auth
+id: interaction-primitive:tasks-mux-cli-auth
 attributes:
-  displayName: "breakpoints-mux auth {login|server set|server clear|token set|token clear|clear|status|key generate|key push|key list}"
+  displayName: "tasks-mux auth {login|server set|server clear|token set|token clear|clear|status|key generate|key push|key list}"
   kind: cli-subcommand
   surface: cli
-  parentBin: "breakpoints-mux"
+  parentBin: "tasks-mux"
   subcommandVerb: "auth"
   flags:
     - "login:0:authenticate with GitHub OAuth"
-    - "server set <url>:0:save default server url in ~/.breakpoints-mux/config.json"
+    - "server set <url>:0:save default server url in ~/.tasks-mux/config.json"
     - "server clear:0:remove saved default server url"
     - "token set <token>:0:save bearer token"
     - "token clear:0:remove saved bearer token"
@@ -121,6 +121,6 @@ attributes:
     - "key push:0:push public key to repository"
     - "key list:0:list local SSH keys"
   description: |
-    Authentication and key management for breakpoints-mux server / git
+    Authentication and key management for tasks-mux server / git
     backends.
-    Source: packages/breakpoints-mux/src/cli/commands/auth.ts:44-470.
+    Source: packages/tasks-mux/src/cli/commands/auth.ts:44-470.

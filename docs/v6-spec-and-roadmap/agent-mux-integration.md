@@ -47,7 +47,7 @@ Agent-mux is the dispatch layer, not the orchestration core.
 - agent-mux owns harness-facing adapter behavior, normalized event streams, invocation modes, and agent-running APIs.
 - `hooks-mux` normalizes hook payloads across harnesses.
 - `extension-mux` compiles the unified plugin authoring surface into harness-specific bundles.
-- `breakpoints-mux` handles routed human approval and response flows when those are needed.
+- `tasks-mux` handles routed human approval and response flows when those are needed.
 
 This means the integration is already a package-and-boundary question inside one repository, not a cross-repo migration plan.
 

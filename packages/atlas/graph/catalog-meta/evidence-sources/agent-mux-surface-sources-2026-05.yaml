@@ -159,14 +159,14 @@ edges:
     - trust-level:repo
 ---
 nodeKind: EvidenceSource
-id: evidence:breakpoints-mux-package-source
+id: evidence:tasks-mux-package-source
 attributes:
-  displayName: breakpoints-mux package source
+  displayName: tasks-mux package source
   kindLabel: file
   trustLevel: trust-level:repo
-  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/breakpoints-mux/package.json
-  filePath: packages/breakpoints-mux/package.json
-  sourcePathOrUrl: packages/breakpoints-mux/package.json
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/tasks-mux/package.json
+  filePath: packages/tasks-mux/package.json
+  sourcePathOrUrl: packages/tasks-mux/package.json
   locator: package metadata and breakpoints runtime package surface
   capturedAt: '2026-05-05T00:00:00Z'
   observedAt: '2026-05-05T00:00:00Z'
@@ -179,14 +179,14 @@ edges:
     - trust-level:repo
 ---
 nodeKind: EvidenceSource
-id: evidence:breakpoints-mux-server-client-source
+id: evidence:tasks-mux-server-client-source
 attributes:
-  displayName: breakpoints-mux server backend client source
+  displayName: tasks-mux server backend client source
   kindLabel: file
   trustLevel: trust-level:repo
-  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/breakpoints-mux/src/backends/server.ts
-  filePath: packages/breakpoints-mux/src/backends/server.ts
-  sourcePathOrUrl: packages/breakpoints-mux/src/backends/server.ts
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/tasks-mux/src/backends/server.ts
+  filePath: packages/tasks-mux/src/backends/server.ts
+  sourcePathOrUrl: packages/tasks-mux/src/backends/server.ts
   locator: ServerBreakpointBackend outbound-client endpoint methods
   capturedAt: '2026-05-05T00:00:00Z'
   observedAt: '2026-05-05T00:00:00Z'

@@ -94,20 +94,20 @@ describe("verifyBreakpointResult", () => {
     expect(result.reason).toBe("verification disabled");
   });
 
-  it("returns verified:false when breakpoints-mux verifyAnswer is missing", async () => {
+  it("returns verified:false when tasks-mux verifyAnswer is missing", async () => {
     vi.resetModules();
-    vi.doMock("@a5c-ai/breakpoints-mux/proven", () => ({
+    vi.doMock("@a5c-ai/tasks-mux/proven", () => ({
       verifyAnswer: undefined,
     }));
     const { verifyBreakpointResult: verify } = await import("../proven-verification");
     const result = await verify(makeSignedResult());
     expect(result.verified).toBe(false);
-    expect(result.reason).toBe("breakpoints-mux/proven does not export verifyAnswer");
+    expect(result.reason).toBe("tasks-mux/proven does not export verifyAnswer");
   });
 
   it("never throws even when verifyAnswer rejects", async () => {
     vi.resetModules();
-    vi.doMock("@a5c-ai/breakpoints-mux/proven", () => ({
+    vi.doMock("@a5c-ai/tasks-mux/proven", () => ({
       verifyAnswer: async () => { throw new Error("Unexpected verification crash"); },
     }));
     const { verifyBreakpointResult: verify } = await import("../proven-verification");
@@ -121,13 +121,13 @@ describe("verifyBreakpointResult", () => {
 
   it("defaults to enabled:true when config is omitted", async () => {
     vi.resetModules();
-    vi.doMock("@a5c-ai/breakpoints-mux/proven", () => ({
+    vi.doMock("@a5c-ai/tasks-mux/proven", () => ({
       verifyAnswer: undefined,
     }));
     const { verifyBreakpointResult: verify } = await import("../proven-verification");
     const result = await verify(makeSignedResult());
     expect(result.verified).toBe(false);
-    expect(result.reason).toBe("breakpoints-mux/proven does not export verifyAnswer");
+    expect(result.reason).toBe("tasks-mux/proven does not export verifyAnswer");
   });
 
   it("skips verification entirely for unsigned result even when enabled", async () => {
@@ -149,7 +149,7 @@ describe("verifyBreakpointResult", () => {
       verifiedAt: "2026-04-21T10:05:00.000Z",
     });
 
-    vi.doMock("@a5c-ai/breakpoints-mux/proven", () => ({
+    vi.doMock("@a5c-ai/tasks-mux/proven", () => ({
       verifyAnswer: mockVerifyAnswer,
     }));
 
@@ -171,11 +171,11 @@ describe("verifyBreakpointResult", () => {
       "/custom/keys/dir",
     );
 
-    vi.doUnmock("@a5c-ai/breakpoints-mux/proven");
+    vi.doUnmock("@a5c-ai/tasks-mux/proven");
   });
 
   it("returns verified:false when verifyAnswer returns valid:false", async () => {
-    vi.doMock("@a5c-ai/breakpoints-mux/proven", () => ({
+    vi.doMock("@a5c-ai/tasks-mux/proven", () => ({
       verifyAnswer: vi.fn().mockResolvedValue({
         valid: false,
         publicKeyFingerprint: "abc123fingerprint",
@@ -192,11 +192,11 @@ describe("verifyBreakpointResult", () => {
     expect(result.verificationResult?.valid).toBe(false);
     expect(result.verificationResult?.reason).toBe("Signature verification failed");
 
-    vi.doUnmock("@a5c-ai/breakpoints-mux/proven");
+    vi.doUnmock("@a5c-ai/tasks-mux/proven");
   });
 
   it("handles verifyAnswer that throws an error", async () => {
-    vi.doMock("@a5c-ai/breakpoints-mux/proven", () => ({
+    vi.doMock("@a5c-ai/tasks-mux/proven", () => ({
       verifyAnswer: vi.fn().mockRejectedValue(new Error("corrupted key file")),
     }));
 
@@ -206,11 +206,11 @@ describe("verifyBreakpointResult", () => {
     expect(result.verified).toBe(false);
     expect(result.reason).toContain("corrupted key file");
 
-    vi.doUnmock("@a5c-ai/breakpoints-mux/proven");
+    vi.doUnmock("@a5c-ai/tasks-mux/proven");
   });
 
   it("handles module that exports verifyAnswer as undefined", async () => {
-    vi.doMock("@a5c-ai/breakpoints-mux/proven", () => ({
+    vi.doMock("@a5c-ai/tasks-mux/proven", () => ({
       verifyAnswer: undefined,
     }));
 
@@ -218,8 +218,8 @@ describe("verifyBreakpointResult", () => {
 
     const result = await freshVerify(makeSignedResult());
     expect(result.verified).toBe(false);
-    expect(result.reason).toBe("breakpoints-mux/proven does not export verifyAnswer");
+    expect(result.reason).toBe("tasks-mux/proven does not export verifyAnswer");
 
-    vi.doUnmock("@a5c-ai/breakpoints-mux/proven");
+    vi.doUnmock("@a5c-ai/tasks-mux/proven");
   });
 });

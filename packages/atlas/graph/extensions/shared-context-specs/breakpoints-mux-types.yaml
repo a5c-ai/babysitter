@@ -1,19 +1,19 @@
 # Public zod-validated wire schemas exposed by
-# @a5c-ai/breakpoints-mux/src/types.ts. Modeled types are the ones that
+# @a5c-ai/tasks-mux/src/types.ts. Modeled types are the ones that
 # cross the package boundary (CLI ↔ backend ↔ MCP tool boundary). Internal
 # helpers (Code Snippet helpers, lock-file shapes) are not modeled.
-# Wired via @a5c-ai/breakpoints-mux PackageSurface `has_payload_schema` edge.
+# Wired via @a5c-ai/tasks-mux PackageSurface `has_payload_schema` edge.
 nodeKind: SharedContextSpec
-id: shared-context-spec:breakpoints-mux-breakpoint-context
+id: shared-context-spec:tasks-mux-breakpoint-context
 attributes:
   displayName: "BreakpointContext (zod)"
   contextKind: "wire-payload"
   typescriptInterface: "BreakpointContext"
-  producerIface: "@a5c-ai/breakpoints-mux CLI / SDK callers (createBreakpoint)"
+  producerIface: "@a5c-ai/tasks-mux CLI / SDK callers (createBreakpoint)"
   consumerIfaces:
-    - "@a5c-ai/breakpoints-mux backends/server.ts ServerBreakpointBackend"
-    - "@a5c-ai/breakpoints-mux backends/git-native.ts"
-    - "@a5c-ai/breakpoints-mux mcp/tools/ask-breakpoint.ts"
+    - "@a5c-ai/tasks-mux backends/server.ts ServerBreakpointBackend"
+    - "@a5c-ai/tasks-mux backends/git-native.ts"
+    - "@a5c-ai/tasks-mux mcp/tools/ask-breakpoint.ts"
   fieldSchema:
     - "description:string:required:Plain-text breakpoint context"
     - "codeSnippets:list<string|{filename,code,language?}>:required:Code snippets bundle"
@@ -25,18 +25,18 @@ attributes:
     - "links:list<{label,url,kind?}>:optional:Rich reference links"
     - "sections|artifacts:list<...>:optional:Structured context blocks"
     - "metadata:map<string,unknown>:optional:Open-ended bag (catchall unknowns)"
-  sourceCitation: "packages/breakpoints-mux/src/types.ts:76-92"
+  sourceCitation: "packages/tasks-mux/src/types.ts:76-92"
 edges: {}
 ---
 nodeKind: SharedContextSpec
-id: shared-context-spec:breakpoints-mux-breakpoint-routing
+id: shared-context-spec:tasks-mux-breakpoint-routing
 attributes:
   displayName: "BreakpointRouting (zod)"
   contextKind: "wire-payload"
   typescriptInterface: "BreakpointRouting"
-  producerIface: "@a5c-ai/breakpoints-mux CLI ask command"
+  producerIface: "@a5c-ai/tasks-mux CLI ask command"
   consumerIfaces:
-    - "@a5c-ai/breakpoints-mux backends/* SubmitBreakpointParams.routing"
+    - "@a5c-ai/tasks-mux backends/* SubmitBreakpointParams.routing"
   fieldSchema:
     - "strategy:enum<single|first-response-wins|collect-all|quorum>:required"
     - "targetResponders:list<string>:required:Responder ids"
@@ -44,18 +44,18 @@ attributes:
     - "presentToUser:bool:required:Whether the answer is shown back to the original user"
     - "breakpointId:string:optional:Caller-supplied id"
     - "autoApproveAfterN:int:optional:Quorum auto-approve threshold"
-  sourceCitation: "packages/breakpoints-mux/src/types.ts:96-104"
+  sourceCitation: "packages/tasks-mux/src/types.ts:96-104"
 edges: {}
 ---
 nodeKind: SharedContextSpec
-id: shared-context-spec:breakpoints-mux-breakpoint-answer
+id: shared-context-spec:tasks-mux-breakpoint-answer
 attributes:
   displayName: "BreakpointAnswer (zod)"
   contextKind: "wire-payload"
   typescriptInterface: "BreakpointAnswer"
   producerIface: "responders (CLI answer / MCP answer-breakpoint tool)"
   consumerIfaces:
-    - "@a5c-ai/breakpoints-mux backends/server.ts (POST /questions/:id/answers body)"
+    - "@a5c-ai/tasks-mux backends/server.ts (POST /questions/:id/answers body)"
     - "callers awaiting BreakpointWaitResult.answer"
   fieldSchema:
     - "id|breakpointId|responderId|responderName:string:required"
@@ -67,57 +67,57 @@ attributes:
     - "answeredAt:datetime:required:ISO-8601 timestamp"
     - "rating:{helpful,comment?,ratedAt}:optional:Post-hoc rating"
     - "decisionMemory:{applicabilityContext,reasoning,enrichedContext?,savedAt}:optional"
-  sourceCitation: "packages/breakpoints-mux/src/types.ts:137-151"
+  sourceCitation: "packages/tasks-mux/src/types.ts:137-151"
 edges: {}
 ---
 nodeKind: SharedContextSpec
-id: shared-context-spec:breakpoints-mux-proven-breakpoint-answer
+id: shared-context-spec:tasks-mux-proven-breakpoint-answer
 attributes:
   displayName: "ProvenBreakpointAnswer (zod)"
   contextKind: "wire-payload"
   typescriptInterface: "ProvenBreakpointAnswer"
   producerIface: "responders signing answers via Ed25519 key (auth key generate / push)"
   consumerIfaces:
-    - "@a5c-ai/breakpoints-mux proven verifier"
-    - "@a5c-ai/breakpoints-mux mcp/tools/verify-answer.ts"
+    - "@a5c-ai/tasks-mux proven verifier"
+    - "@a5c-ai/tasks-mux mcp/tools/verify-answer.ts"
   fieldSchema:
     - "<extends BreakpointAnswer>:embed:required"
     - "signature:string:required:Detached Ed25519 signature over signedFields"
     - "publicKeyFingerprint:string:required"
     - "signedAt:datetime:required"
     - "signedFields:list<string>:required:Canonical field list signed"
-  sourceCitation: "packages/breakpoints-mux/src/types.ts:155-161"
+  sourceCitation: "packages/tasks-mux/src/types.ts:155-161"
 edges: {}
 ---
 nodeKind: SharedContextSpec
-id: shared-context-spec:breakpoints-mux-responder-profile
+id: shared-context-spec:tasks-mux-responder-profile
 attributes:
   displayName: "ResponderProfile (zod)"
   contextKind: "wire-payload"
   typescriptInterface: "ResponderProfile"
-  producerIface: "@a5c-ai/breakpoints-mux backends/* listResponders"
+  producerIface: "@a5c-ai/tasks-mux backends/* listResponders"
   consumerIfaces:
-    - "@a5c-ai/breakpoints-mux CLI responders {list,show}"
-    - "@a5c-ai/breakpoints-mux mcp/tools/list-responders.ts"
+    - "@a5c-ai/tasks-mux CLI responders {list,show}"
+    - "@a5c-ai/tasks-mux mcp/tools/list-responders.ts"
   fieldSchema:
     - "id|name|title:string:required"
     - "domains|tags:list<string>:required"
     - "availability:bool:required"
     - "responseTimeSla:positive-number:required:Target response SLA (ms)"
     - "publicKeyFingerprint:string:optional:Set when responder uses signed answers"
-  sourceCitation: "packages/breakpoints-mux/src/types.ts:108-118"
+  sourceCitation: "packages/tasks-mux/src/types.ts:108-118"
 edges: {}
 ---
 nodeKind: SharedContextSpec
-id: shared-context-spec:breakpoints-mux-backend-iface
+id: shared-context-spec:tasks-mux-backend-iface
 attributes:
   displayName: "BreakpointBackend (interface)"
   contextKind: "interface-contract"
   typescriptInterface: "BreakpointBackend"
-  producerIface: "@a5c-ai/breakpoints-mux backends/server.ts ServerBreakpointBackend / backends/git-native.ts"
+  producerIface: "@a5c-ai/tasks-mux backends/server.ts ServerBreakpointBackend / backends/git-native.ts"
   consumerIfaces:
-    - "@a5c-ai/breakpoints-mux CLI commands (ask, breakpoints, responders, responder-loop)"
-    - "@a5c-ai/breakpoints-mux mcp/backend-resolver.ts"
+    - "@a5c-ai/tasks-mux CLI commands (ask, breakpoints, responders, responder-loop)"
+    - "@a5c-ai/tasks-mux mcp/backend-resolver.ts"
   fieldSchema:
     - "submitBreakpoint:fn(SubmitBreakpointParams)->Promise<Breakpoint>:required"
     - "waitForAnswer:fn(id,WaitForAnswerOptions)->Promise<BreakpointWaitResult>:required"
@@ -126,5 +126,5 @@ attributes:
     - "claimBreakpoint:fn(id,responderId)->Promise<void>:optional:Single-claim grammar"
     - "listPendingBreakpoints:fn(responderId)->Promise<list<Breakpoint>>:required"
     - "getBreakpointStatus:fn(id)->Promise<{ status, ... }>:required"
-  sourceCitation: "packages/breakpoints-mux/src/backend.ts (full module)"
+  sourceCitation: "packages/tasks-mux/src/backend.ts (full module)"
 edges: {}

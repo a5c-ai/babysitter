@@ -38,7 +38,7 @@ const packageFamilies = {
     "@a5c-ai/agent-catalog",
     "@a5c-ai/extension-mux",
     "@a5c-ai/atlas",
-    "@a5c-ai/breakpoints-mux",
+    "@a5c-ai/tasks-mux",
     "@a5c-ai/hooks-mux-core",
     "@a5c-ai/hooks-mux-cli",
     "@a5c-ai/hooks-mux-adapter-claude",

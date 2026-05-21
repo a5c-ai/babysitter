@@ -32,23 +32,23 @@ Make npm package names and directory names match graph mux names.
 - [ ] Publish `@a5c-ai/extension-mux` and deprecate `@a5c-ai/extension-mux` on npm
 - [ ] Update graph YAML to reference new package name in SourceRef nodes
 
-### 1.2 breakpoints-mux → tasks-mux
+### 1.2 tasks-mux → tasks-mux
 
 | Aspect | Current | Target |
 |--------|---------|--------|
 | Graph mux | `mux:tasks-mux` | — |
-| npm name | `@a5c-ai/breakpoints-mux` | `@a5c-ai/tasks-mux` |
-| Directory | `packages/breakpoints-mux/` | `packages/tasks-mux/` |
-| Binary | `breakpoints-mux` | `tasks-mux` |
+| npm name | `@a5c-ai/tasks-mux` | `@a5c-ai/tasks-mux` |
+| Directory | `packages/tasks-mux/` | `packages/tasks-mux/` |
+| Binary | `tasks-mux` | `tasks-mux` |
 
 **Tasks:**
-- [ ] Rename directory `packages/breakpoints-mux/` → `packages/tasks-mux/`
+- [ ] Rename directory `packages/tasks-mux/` → `packages/tasks-mux/`
 - [ ] Update `package.json` name to `@a5c-ai/tasks-mux`
 - [ ] Update binary name in package.json bin field
 - [ ] Update all workspace references
 - [ ] Update all import paths across the monorepo
 - [ ] Update CI workflows
-- [ ] Publish `@a5c-ai/tasks-mux` and deprecate `@a5c-ai/breakpoints-mux`
+- [ ] Publish `@a5c-ai/tasks-mux` and deprecate `@a5c-ai/tasks-mux`
 - [ ] Update graph YAML SourceRef nodes
 
 ### 1.3 agent-mux decomposition — align sub-packages to graph muxes

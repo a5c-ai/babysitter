@@ -14,7 +14,7 @@ attributes:
 
     Source: packages/sdk/src/cli/main/usage.ts shows `--interactive` /
     `--no-interactive` / `--non-interactive` flags on `create-run` and
-    `run:create`. packages/breakpoints-mux mediates the operator-prompt
+    `run:create`. packages/tasks-mux mediates the operator-prompt
     surface. Defaults are interactive when stdin is a TTY.
 ---
 nodeKind: PermissionMode

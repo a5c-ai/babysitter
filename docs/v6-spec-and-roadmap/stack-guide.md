@@ -87,12 +87,12 @@ Work mainly in:
 
 Read:
 
-- `packages/breakpoints-mux/specs/architecture.md`
+- `packages/tasks-mux/specs/architecture.md`
 - [Testing Framework](testing-framework.md)
 
 Work mainly in:
 
-- `packages/breakpoints-mux`
+- `packages/tasks-mux`
 - `packages/sdk` breakpoint integration
 - related hook and plugin surfaces if the transport changes
 
@@ -124,7 +124,7 @@ Use this rule of thumb:
 | Harness dispatch behavior | `packages/agent-mux/*` and `docs/agent-mux/` | V6 integration docs |
 | Hook normalization | `packages/hooks-mux/*` | per-harness plugin docs |
 | Unified plugin packaging | `packages/extension-mux`, `plugins/babysitter-unified/` | install READMEs for concrete bundles |
-| Breakpoint routing | `packages/breakpoints-mux` | SDK integration docs |
+| Breakpoint routing | `packages/tasks-mux` | SDK integration docs |
 
 ## Practical Rules
 

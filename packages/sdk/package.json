@@ -53,10 +53,10 @@
     "puppeteer": "^24.0.0"
   },
   "peerDependencies": {
-    "@a5c-ai/breakpoints-mux": "^5.0.0"
+    "@a5c-ai/tasks-mux": "^5.0.0"
   },
   "peerDependenciesMeta": {
-    "@a5c-ai/breakpoints-mux": {
+    "@a5c-ai/tasks-mux": {
       "optional": true
     }
   },

@@ -131,7 +131,7 @@ catalog-faithful (codegen-ready).
 | `agent-mux/adapters` | per-harness adapters bundle | PackageSurface + PathDescriptor (catalog pass 96-new); adapter behavior on AgentRuntimeImpl | GREEN |
 | `extension-mux` | PluginTarget×17, schema/transform/emit | PluginTargetDescriptor + PackageSurface | GREEN |
 | `hooks-mux/core` | HookMapping records, MergePolicy, DecisionVerb | HookMapping, HookSurface, MergePolicy, DecisionVerb | GREEN |
-| `breakpoints-mux` | Zod-defined breakpoint types | BreakpointStrategy, ResponderProfile, BreakpointAnswer, DecisionMemory, HumanCheckpoint | GREEN |
+| `tasks-mux` | Zod-defined breakpoint types | BreakpointStrategy, ResponderProfile, BreakpointAnswer, DecisionMemory, HumanCheckpoint | GREEN |
 | `transport-mux` | 8 SUPPORTED_TRANSPORTS | ModelTransportProtocol×8 (existing) | GREEN |
 
 Out-of-scope dirs (no `package.json`): `agent-mux/amux-proxy`,
@@ -144,7 +144,7 @@ project from existing NodeKinds.
 
 ## catalog pass 98 deep-decomposition update (2026-05-04)
 
-catalog pass 98 promoted the catalog pass 97c group-level breakpoints-mux records to leaf-level,
+catalog pass 98 promoted the catalog pass 97c group-level tasks-mux records to leaf-level,
 authored outbound-client APIEndpoints, promoted harness-mock error +
 runtime-hook fixtures to InteractionPrimitive[mock-scenario], and added
 PackageSurface command-group enrichment for babysitter-sdk and
@@ -152,7 +152,7 @@ babysitter-agent.
 
 | Package | catalog pass 98 delta |
 | --- | --- |
-| `breakpoints-mux` | 17 leaf CLI subcommand records authored (auth login/logout/status/keygen/key-push/keys/server set/server clear/token set/token clear; breakpoints pending/answer/status/poll; responders list/show; server start) + 8 outbound-client APIEndpoint records (POST/GET/DELETE under /api/v1/{questions,experts,...}). |
+| `tasks-mux` | 17 leaf CLI subcommand records authored (auth login/logout/status/keygen/key-push/keys/server set/server clear/token set/token clear; breakpoints pending/answer/status/poll; responders list/show; server start) + 8 outbound-client APIEndpoint records (POST/GET/DELETE under /api/v1/{questions,experts,...}). |
 | `agent-mux/harness-mock` | 5 `error:*` + 3 `runtimeHook*` scenarios promoted from data fixtures to InteractionPrimitive[mock-scenario]. |
 | `babysitter-sdk` | PackageSurface enriched with bins (babysitter, babysitter-sdk, babysitter-mcp-server) + 12 top-level CLI command-group records spanning run:/task:/session:/plugin:/skill:/process-library:/profile:/instructions:/compression:/breakpoint:/hook:/mcp-server. |
 | `babysitter-agent` | PackageSurface enriched with bin (babysitter-harness) + harness-runtime command-set primitive (HARNESS_RUNTIME_COMMANDS literal). |
