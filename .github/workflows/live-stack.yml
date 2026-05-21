@@ -299,7 +299,7 @@ jobs:
   live_stack_vanilla_ni:
     if: ${{ !contains(github.event.head_commit.message || '', '[skip publish]') }}
     needs: [build_all, setup]
-    name: "Live Stack (vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
+    name: "Live Stack (${{ inputs.os || 'ubuntu' }}, vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
     runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
     permissions:
       contents: read
@@ -430,7 +430,7 @@ jobs:
   live_stack_vanilla_interactive:
     if: ${{ !contains(github.event.head_commit.message || '', '[skip publish]') }}
     needs: [build_all, setup]
-    name: "Live Stack (vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
+    name: "Live Stack (${{ inputs.os || 'ubuntu' }}, vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
     runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
     permissions:
       contents: read
@@ -446,7 +446,7 @@ jobs:
   live_stack_bp_interactive:
     if: ${{ !contains(github.event.head_commit.message || '', '[skip publish]') }}
     needs: [build_all, setup]
-    name: "Live Stack (bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
+    name: "Live Stack (${{ inputs.os || 'ubuntu' }}, bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
     runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
     permissions:
       contents: read
@@ -462,7 +462,7 @@ jobs:
   live_stack_bp_bridged:
     if: ${{ !contains(github.event.head_commit.message || '', '[skip publish]') }}
     needs: [build_all, setup]
-    name: "Live Stack (bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
+    name: "Live Stack (${{ inputs.os || 'ubuntu' }}, bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
     runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
     permissions:
       contents: read
@@ -500,6 +500,7 @@ jobs:
           echo "# Live Stack Report" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Commit:** \`${{ github.sha }}\` on \`${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**OS:** \`${{ inputs.os || 'ubuntu-latest-l' }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "**Run:** [#${RUN_ID}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${RUN_ID})" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
@@ -508,8 +509,9 @@ jobs:
 
           echo "## Babysitter-Plugin Matrix" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Agent | Provider | Model | Mode | Process | Runtime | Status | Detail |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|-------|----------|-------|------|---------|---------|--------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          OS_LABEL="${{ inputs.os || 'ubuntu' }}"
+          echo "| OS | Agent | Provider | Model | Mode | Process | Runtime | Status | Detail |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|----|-------|----------|-------|------|---------|---------|--------|--------|" >> "$GITHUB_STEP_SUMMARY"
 
           for dir in all-artifacts/live-stack-*-babysitter-plugin-*/ ; do
             [ -d "$dir" ] || continue
@@ -553,7 +555,7 @@ jobs:
               agent="?"; provider="—"; model="—"
               status="⊘"; bp_skip=$((bp_skip + 1)); detail="no report"
             fi
-            echo "| ${agent} | ${provider} | ${model} | ${mode} | ${proc_mode} | ${runtime} | ${status} | ${detail} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| ${OS_LABEL} | ${agent} | ${provider} | ${model} | ${mode} | ${proc_mode} | ${runtime} | ${status} | ${detail} |" >> "$GITHUB_STEP_SUMMARY"
             else
               mode=$(echo "$dir" | grep -oP '(bridged-hooks|bridged-interactive|interactive|non-interactive)' | head -1 || echo "?")
               echo "| ? | — | — | ${mode} | — | — | ⊘ | skipped |" >> "$GITHUB_STEP_SUMMARY"
@@ -564,8 +566,8 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "## Agent-Mux Matrix" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Agent | Provider | Model | Mode | Runtime | Status | Detail |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|-------|----------|-------|------|---------|--------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| OS | Agent | Provider | Model | Mode | Runtime | Status | Detail |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|----|-------|----------|-------|------|---------|--------|--------|" >> "$GITHUB_STEP_SUMMARY"
 
           for dir in all-artifacts/live-stack-*-vanilla-*/ ; do
             [ -d "$dir" ] || continue
@@ -590,10 +592,10 @@ jobs:
                 status="✅"; van_pass=$((van_pass + 1))
                 detail="${passes:-0} checks"
               fi
-              echo "| ${agent} | ${provider} | ${model} | ${mode} | ${runtime} | ${status} | ${detail} |" >> "$GITHUB_STEP_SUMMARY"
+              echo "| ${OS_LABEL} | ${agent} | ${provider} | ${model} | ${mode} | ${runtime} | ${status} | ${detail} |" >> "$GITHUB_STEP_SUMMARY"
             else
               mode=$(echo "$dir" | grep -oP '(bridged-hooks|bridged-interactive|interactive|non-interactive)' | head -1 || echo "?")
-              echo "| ? | — | — | ${mode} | — | ⊘ | skipped |" >> "$GITHUB_STEP_SUMMARY"
+              echo "| ${OS_LABEL} | ? | — | — | ${mode} | — | ⊘ | skipped |" >> "$GITHUB_STEP_SUMMARY"
               van_skip=$((van_skip + 1))
             fi
           done
