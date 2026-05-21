@@ -6,6 +6,9 @@
 name: QA Daily
 
 on:
+  push:
+    branches: [main, staging, develop]
+    paths: ['.github/workflows/qa-daily.yml']
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
