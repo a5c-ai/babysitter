@@ -30,7 +30,7 @@ describe('pipeline-owned live stack scenario execution', () => {
       return;
     }
 
-    // Print verification report for vitest output
+    // Print verification report for enforced pass/fail output.
     if (result.verifications?.length) {
       console.log('\n┌─────────────────────────────────────────────────');
       console.log(`│ Verification Report: ${scenario.scenarioId}`);
@@ -41,18 +41,6 @@ describe('pipeline-owned live stack scenario execution', () => {
       }
       console.log('└─────────────────────────────────────────────────\n');
     }
-
-    if (result.status === 'skipped') {
-      expect(result.skipReason).toMatch(/^live (provider|agent) unavailable:/);
-      expect(result.artifactPath).toBeDefined();
-      const fs = await import('node:fs/promises');
-      const artifactContent = await fs.readFile(result.artifactPath!, 'utf8');
-      const artifact = JSON.parse(artifactContent);
-      expect(artifact.status).toBe('skipped');
-      expect(artifact.skipReason).toBe(result.skipReason);
-      return;
-    }
-
     expect(result.status, result.failure ?? result.skipReason).toBe('passed');
     expect(result.missingTraceIds).toEqual([]);
     expect(result.missingArtifacts ?? []).toEqual([]);

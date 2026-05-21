@@ -588,11 +588,11 @@ describe('primary live stack runner contract', () => {
       },
     });
 
-    expect(result.status).toBe('skipped');
-    expect(result.skipReason).toContain('configured credentials were rejected');
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('command failed:');
   });
 
-  it('skips live agents that emit login UI instead of task output', async () => {
+  it('fails live agents that emit login UI instead of task output', async () => {
     const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-login-ui-'));
     const artifactsDir = path.join(cwd, 'artifacts');
     const traceId = 'trace-login-ui';
@@ -629,11 +629,11 @@ describe('primary live stack runner contract', () => {
       },
     });
 
-    expect(result.status).toBe('skipped');
-    expect(result.skipReason).toContain('interactive login is required');
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('does not contain a valid Odyssey markdown artifact');
   });
 
-  it('skips live agents that request tools without executable tool results', async () => {
+  it('fails live agents that request tools without executable tool results', async () => {
     const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-empty-tool-use-'));
     const artifactsDir = path.join(cwd, 'artifacts');
     const traceId = 'trace-empty-tool-use';
@@ -672,11 +672,11 @@ describe('primary live stack runner contract', () => {
       },
     });
 
-    expect(result.status).toBe('skipped');
-    expect(result.skipReason).toContain('tool-use response produced no executable tool results');
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('does not contain a valid Odyssey markdown artifact');
   });
 
-  it('skips terminated bridged launches that only bridge transcripts', async () => {
+  it('fails terminated bridged launches that only bridge transcripts', async () => {
     const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-terminated-bridge-'));
     const artifactsDir = path.join(cwd, 'artifacts');
     const traceId = 'trace-terminated-bridge';
@@ -719,11 +719,11 @@ describe('primary live stack runner contract', () => {
       },
     });
 
-    expect(result.status).toBe('skipped');
-    expect(result.skipReason).toContain('terminated before producing task evidence');
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('command failed:');
   });
 
-  it('skips successful bridged launches that only bridge non-task transcripts', async () => {
+  it('fails successful bridged launches that only bridge non-task transcripts', async () => {
     const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-invalid-bridge-'));
     const artifactsDir = path.join(cwd, 'artifacts');
     const traceId = 'trace-invalid-bridge';
@@ -760,8 +760,8 @@ describe('primary live stack runner contract', () => {
       },
     });
 
-    expect(result.status).toBe('skipped');
-    expect(result.skipReason).toContain('bridged output did not contain a valid task artifact');
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('does not contain a valid Odyssey markdown artifact');
   });
 
   it('writes a redacted failed artifact when live output lacks required joined trace IDs', async () => {
@@ -786,7 +786,7 @@ describe('primary live stack runner contract', () => {
     expect(artifact).toContain('[REDACTED]');
   });
 
-  it('skips provider-backed live runs when the upstream service reports exhausted credits', async () => {
+  it('fails provider-backed live runs when the upstream service reports exhausted credits', async () => {
     const artifactsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-provider-skip-'));
     const result = await runPrimaryLiveStackScenario({
       cwd: process.cwd(),
@@ -798,12 +798,12 @@ describe('primary live stack runner contract', () => {
         : { status: 1, stdout: 'Credit balance is too low', stderr: '' },
     });
 
-    expect(result.status).toBe('skipped');
-    expect(result.skipReason).toContain('credit balance is too low');
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('command failed:');
     expect(result.artifactPath).toBeDefined();
   });
 
-  it('skips provider-backed live runs when configured credentials are rejected upstream', async () => {
+  it('fails provider-backed live runs when configured credentials are rejected upstream', async () => {
     const artifactsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-provider-auth-skip-'));
     const result = await runPrimaryLiveStackScenario({
       cwd: process.cwd(),
@@ -815,12 +815,12 @@ describe('primary live stack runner contract', () => {
         : { status: 1, stdout: '', stderr: '401 Incorrect API key provided: sk-incorrect' },
     });
 
-    expect(result.status).toBe('skipped');
-    expect(result.skipReason).toContain('configured credentials were rejected');
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('command failed:');
     expect(result.artifactPath).toBeDefined();
   });
 
-  it('skips Codex live runs when upstream OpenAI auth is missing', async () => {
+  it('fails Codex live runs when upstream OpenAI auth is missing', async () => {
     const artifactsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-provider-codex-auth-skip-'));
     const result = await runPrimaryLiveStackScenario({
       cwd: process.cwd(),
@@ -850,8 +850,8 @@ describe('primary live stack runner contract', () => {
         : { status: 1, stdout: '', stderr: 'ERROR: unexpected status 401 Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses' },
     });
 
-    expect(result.status).toBe('skipped');
-    expect(result.skipReason).toContain('configured credentials were rejected');
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('command failed:');
     expect(result.artifactPath).toBeDefined();
   });
 

@@ -11,11 +11,11 @@ const repoRoot = resolve(__dirname, '..', '..', '..', '..', '..');
 const scriptPath = resolve(repoRoot, 'scripts', 'live-stack-coverage-report.cjs');
 
 describe('scripts/live-stack-coverage-report.cjs', () => {
-  it('allows provider-unavailable skips when live evidence is required', () => {
+  it('fails skipped scenarios when live evidence is required', () => {
     const { result, cleanup } = runCoverageReport({
       execution: {
         status: 'skipped',
-        skipReason: 'live provider unavailable: credit balance is too low',
+        skipReason: 'upstream command failed before evidence was produced',
         evidence: {
           artifacts: {},
         },
@@ -23,7 +23,7 @@ describe('scripts/live-stack-coverage-report.cjs', () => {
     });
 
     try {
-      expect(result.status).toBe(0);
+      expect(result.status).toBe(1);
       expect(JSON.parse(result.stdout)).toMatchObject({
         status: 'skipped',
         missingArtifacts: [
@@ -32,16 +32,17 @@ describe('scripts/live-stack-coverage-report.cjs', () => {
           'provider-trace-redacted',
         ],
       });
+      expect(result.stderr).toContain('live scenario did not pass:');
     } finally {
       cleanup();
     }
   });
 
-  it('allows agent-unavailable skips when live evidence is required', () => {
+  it('fails additional skipped scenarios when live evidence is required', () => {
     const { result, cleanup } = runCoverageReport({
       execution: {
         status: 'skipped',
-        skipReason: 'live agent unavailable: tool-use response produced no executable tool results',
+        skipReason: 'agent output did not produce required evidence',
         evidence: {
           artifacts: {},
         },
@@ -49,7 +50,7 @@ describe('scripts/live-stack-coverage-report.cjs', () => {
     });
 
     try {
-      expect(result.status).toBe(0);
+      expect(result.status).toBe(1);
       expect(JSON.parse(result.stdout)).toMatchObject({
         status: 'skipped',
         missingArtifacts: [
@@ -58,6 +59,7 @@ describe('scripts/live-stack-coverage-report.cjs', () => {
           'provider-trace-redacted',
         ],
       });
+      expect(result.stderr).toContain('live scenario did not pass:');
     } finally {
       cleanup();
     }

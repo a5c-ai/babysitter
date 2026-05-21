@@ -529,18 +529,11 @@ jobs:
             json_artifact=$(find "$dir" -name "live.agent-mux.*.json" | head -1)
 
             result_status=""
-            result_detail=""
             if [ -n "$json_artifact" ] && [ -f "$json_artifact" ]; then
               result_status=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.status || '')" 2>/dev/null || echo "")
-              result_detail=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.skipReason || d.failure || '')" 2>/dev/null || echo "")
             fi
 
-            if [ "$result_status" = "skipped" ]; then
-              agent=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.scenarioId?.split('.')[2] || '?')" 2>/dev/null || echo "?")
-              provider=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.provider || '?')" 2>/dev/null || echo "?")
-              model=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.model || '?')" 2>/dev/null || echo "?")
-              status="⊘"; bp_skip=$((bp_skip + 1)); detail="${result_detail:-skipped}"
-            elif [ -n "$report" ] && [ -f "$report" ]; then
+            if [ -n "$report" ] && [ -f "$report" ]; then
               agent=$(grep -oP '(?<=\*\*Agent:\*\* ).*' "$report" | head -1 || echo "?")
               provider=$(grep -oP '(?<=\*\*Provider:\*\* ).*' "$report" | head -1 || echo "?")
               model=$(grep -oP '(?<=\*\*Model:\*\* ).*' "$report" | head -1 || echo "?")
@@ -564,7 +557,7 @@ jobs:
               fi
             else
               agent="?"; provider="—"; model="—"
-              status="⊘"; bp_skip=$((bp_skip + 1)); detail="no report"
+              status="❌"; bp_fail=$((bp_fail + 1)); detail="no report"
             fi
             echo "| ${OS_LABEL} | ${agent} | ${provider} | ${model} | ${mode} | ${proc_mode} | ${runtime} | ${status} | ${detail} |" >> "$GITHUB_STEP_SUMMARY"
           done
@@ -580,10 +573,8 @@ jobs:
             report=$(find "$dir" -name "verification-report.md" | head -1)
             json_artifact=$(find "$dir" -name "live.agent-mux.*.json" | head -1)
             result_status=""
-            result_detail=""
             if [ -n "$json_artifact" ] && [ -f "$json_artifact" ]; then
               result_status=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.status || '')" 2>/dev/null || echo "")
-              result_detail=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.skipReason || d.failure || '')" 2>/dev/null || echo "")
             fi
             mode=$(echo "$dir" | grep -oP '(bridged-hooks|bridged-interactive|interactive|non-interactive)' | head -1 || echo "?")
             dur_file=$(find "$dir" -name "duration-seconds.txt" | head -1)
@@ -592,12 +583,7 @@ jobs:
             else
               runtime="—"
             fi
-            if [ "$result_status" = "skipped" ]; then
-              agent=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.scenarioId?.split('.')[2] || '?')" 2>/dev/null || echo "?")
-              provider=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.provider || '?')" 2>/dev/null || echo "?")
-              model=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.model || '?')" 2>/dev/null || echo "?")
-              status="⊘"; van_skip=$((van_skip + 1)); detail="${result_detail:-skipped}"
-            elif [ -n "$report" ] && [ -f "$report" ]; then
+            if [ -n "$report" ] && [ -f "$report" ]; then
               agent=$(grep -oP '(?<=\*\*Agent:\*\* ).*' "$report" | head -1 || echo "?")
               provider=$(grep -oP '(?<=\*\*Provider:\*\* ).*' "$report" | head -1 || echo "?")
               model=$(grep -oP '(?<=\*\*Model:\*\* ).*' "$report" | head -1 || echo "?")
@@ -621,7 +607,7 @@ jobs:
               fi
             else
               agent="?"; provider="—"; model="—"
-              status="⊘"; van_skip=$((van_skip + 1)); detail="no report"
+              status="❌"; van_fail=$((van_fail + 1)); detail="no report"
             fi
             echo "| ${OS_LABEL} | ${agent} | ${provider} | ${model} | ${mode} | ${runtime} | ${status} | ${detail} |" >> "$GITHUB_STEP_SUMMARY"
           done
