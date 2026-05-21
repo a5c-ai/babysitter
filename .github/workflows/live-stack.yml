@@ -269,15 +269,15 @@ jobs:
                   {scenario: pi, interaction_mode: bridgedInt, install_mode: vanillaInstall},
               ];
 
-              const claudeResume = scenario('claude-code','claude',foundry,'resume');
-              const codexResume = scenario('codex','codex',google,'resume');
+              const claudeCreate = scenario('claude-code','claude',foundry,'create');
+              const codexCreate = scenario('codex','codex',google,'create');
 
-              // BP Interactive: claude+codex (predefined + resume)
+              // BP Interactive: claude+codex (predefined + create)
               const bpInt = [
                 {scenario: claude, interaction_mode: interactive, install_mode: bpInstall},
                 {scenario: codex, interaction_mode: interactive, install_mode: bpInstall},
-                {scenario: claudeResume, interaction_mode: interactive, install_mode: bpInstall},
-                {scenario: codexResume, interaction_mode: interactive, install_mode: bpInstall},
+                {scenario: claudeCreate, interaction_mode: interactive, install_mode: bpInstall},
+                {scenario: codexCreate, interaction_mode: interactive, install_mode: bpInstall},
               ];
 
               // BP Bridged-hooks: claude+codex
