@@ -37,6 +37,32 @@ describe('scripts/live-stack-coverage-report.cjs', () => {
     }
   });
 
+  it('allows agent-unavailable skips when live evidence is required', () => {
+    const { result, cleanup } = runCoverageReport({
+      execution: {
+        status: 'skipped',
+        skipReason: 'live agent unavailable: tool-use response produced no executable tool results',
+        evidence: {
+          artifacts: {},
+        },
+      },
+    });
+
+    try {
+      expect(result.status).toBe(0);
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        status: 'skipped',
+        missingArtifacts: [
+          'agent-mux-events',
+          'transport-mux-trace',
+          'provider-trace-redacted',
+        ],
+      });
+    } finally {
+      cleanup();
+    }
+  });
+
   it('still fails unexpected skipped scenarios when live evidence is required', () => {
     const { result, cleanup } = runCoverageReport({
       execution: {
