@@ -746,21 +746,33 @@ function openAiResponsesStreamResponse(
           ),
         );
 
-        for await (const event of stream) {
-          if (event.type === 'text-delta' && event.text) {
-            outputText += event.text;
-            controller.enqueue(
-              encoder.encode(
-                encodeSseChunk('event: response.output_text.delta\ndata: ', {
-                  type: 'response.output_text.delta',
-                  item_id: itemId,
-                  output_index: 0,
-                  content_index: 0,
-                  delta: event.text,
-                }),
-              ),
-            );
+        try {
+          for await (const event of stream) {
+            if (event.type === 'text-delta' && event.text) {
+              outputText += event.text;
+              controller.enqueue(
+                encoder.encode(
+                  encodeSseChunk('event: response.output_text.delta\ndata: ', {
+                    type: 'response.output_text.delta',
+                    item_id: itemId,
+                    output_index: 0,
+                    content_index: 0,
+                    delta: event.text,
+                  }),
+                ),
+              );
+            }
           }
+        } catch (streamError: unknown) {
+          const errorMsg = streamError instanceof Error ? streamError.message : String(streamError);
+          controller.enqueue(
+            encoder.encode(
+              encodeSseChunk('event: error\ndata: ', {
+                type: 'error',
+                error: { type: 'server_error', message: `Upstream stream error: ${errorMsg}` },
+              }),
+            ),
+          );
         }
 
         const messageItem = openAiResponsesMessageItem(itemId, outputText, 'completed');

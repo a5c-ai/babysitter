@@ -939,7 +939,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
           providers: {
             'amux-proxy': {
               baseUrl: `${proxyRuntime.url}/v1`,
-              api: 'openai-completions',
+              api: 'openai-chat',
               apiKey: proxyRuntime.authToken ?? 'proxy-token',
               models: [{
                 id: plan.model,
