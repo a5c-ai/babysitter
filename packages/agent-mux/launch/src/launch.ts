@@ -1427,6 +1427,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     // internally (claude -p, codex exec, gemini --prompt, pi -p).
     const { spawn } = await import('node:child_process');
     const resolvedSpawn = await resolveSpawnCommand(plan.command, plan.args);
+    console.error(`[amux launch] spawn: ${resolvedSpawn.command} shell=${resolvedSpawn.shell} args[0..2]=${resolvedSpawn.args.slice(0, 3).join(' ')} totalArgs=${resolvedSpawn.args.length}`);
     child = spawn(resolvedSpawn.command, resolvedSpawn.args, {
       stdio: ['pipe', 'pipe', 'pipe'],
       env: { ...process.env, ...plan.env },

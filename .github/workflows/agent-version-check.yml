@@ -55,15 +55,8 @@ jobs:
           babysitter-prompt-prefix: '$babysitter:yolo '
           prompt: |
             You are an agent version tracker. Check for new releases of the ORIGINAL
-            agent CLI products (Claude Code, Codex, Pi, Gemini CLI, Cursor, etc.) —
-            NOT the babysitter plugin packages (@a5c-ai/babysitter-*).
+            upstream agent CLI products — NOT our babysitter plugin packages.
             ${{ inputs.dry_run == 'true' && 'DRY RUN MODE: report findings but do NOT create PRs or issues.' || '' }}
-
-            WHAT TO CHECK: the upstream agent CLIs that users install independently.
-            Examples: @anthropic-ai/claude-code, @openai/codex, the Pi coding agent,
-            @google/gemini-cli, cursor, opencode, aider, goose, roo-code, etc.
-            These are the HOST AGENTS — the tools babysitter plugs into.
-            Do NOT check @a5c-ai/* packages — those are ours.
 
             STEP 1: Build atlas and agent-catalog.
             ```
@@ -71,16 +64,35 @@ jobs:
             npm run build --workspace=@a5c-ai/agent-catalog
             ```
 
-            STEP 2: Discover the original agent CLI packages.
-            Look at the adapter source code to find install commands:
+            STEP 2: Get the target list using the SAME logic as
+            `scripts/sync-external-plugin-repos.mjs` uses in `buildTargetsFromCatalog()`.
+            Read that file to understand the pattern, then run:
+            ```
+            node -e "
+              import(new URL('file://' + process.cwd() + '/packages/agent-catalog/dist/sdk.js').href)
+                .then(m => {
+                  const targets = m.listPluginTargetDescriptors()
+                    .filter(t => t.externalRepo)
+                    .map(t => ({
+                      id: t.adapterName || t.targetId,
+                      displayName: t.displayName,
+                      cliCommand: t.cliCommand,
+                      externalPackageName: t.externalPackageName,
+                      externalRepo: t.externalRepo,
+                    }));
+                  console.log(JSON.stringify(targets, null, 2));
+                });
+            "
+            ```
+            This gives you every agent that has an external repo — these are the
+            upstream host agents. The `externalPackageName` is the npm package to
+            check (if set). For agents without an npm package, search the web.
+
+            Also check adapter source for additional install commands:
             ```
             grep -r 'npm install -g' packages/agent-mux/adapters/src/ | grep -v node_modules | grep -v test
             ```
-            Also check the PluginTarget records in the graph — each has a `hostAgent`
-            field pointing to the original agent product, and the adapters reference
-            the upstream npm package in their `installMethods`.
-            Build a table: agent name, upstream npm/pip package, current install command.
-            EXCLUDE all @a5c-ai/* packages from this list.
+            Merge both lists. EXCLUDE all @a5c-ai/* packages.
 
             STEP 3: For EACH upstream agent, check the latest published version.
             `npm view <package>@latest version` for npm packages.
