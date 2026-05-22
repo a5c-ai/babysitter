@@ -1,26 +1,9 @@
-import { BackgroundProcessRegistry } from "../../backgroundProcessRegistry";
-import type { AgenticToolOptions } from "../types";
-
-const scopedRegistries = new WeakMap<AgenticToolOptions, BackgroundProcessRegistry>();
-
-export function getBackgroundRegistry(options: AgenticToolOptions): BackgroundProcessRegistry {
-  if (options.backgroundRegistry) {
-    return options.backgroundRegistry;
-  }
-
-  let registry = scopedRegistries.get(options);
-  if (!registry) {
-    registry = new BackgroundProcessRegistry({ maxConcurrent: options.maxBackgroundProcesses });
-    scopedRegistries.set(options, registry);
-  }
-  return registry;
-}
-
-export function disposeBackgroundRegistry(options: AgenticToolOptions): void {
-  const registry = scopedRegistries.get(options);
-  if (!registry) {
-    return;
-  }
-  registry.dispose();
-  scopedRegistries.delete(options);
-}
+/**
+ * Backwards-compatibility shim -- the canonical implementation now lives in
+ * `@a5c-ai/agent-runtime`.  This re-export keeps internal agent-core consumers
+ * working without changes.
+ */
+export {
+  getBackgroundRegistry,
+  disposeBackgroundRegistry,
+} from "@a5c-ai/agent-runtime";

@@ -17,7 +17,6 @@
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "src/**/__tests__"],
   "references": [
-    { "path": "../sdk" },
-    { "path": "../agent-runtime" }
+    { "path": "../sdk" }
   ]
 }
