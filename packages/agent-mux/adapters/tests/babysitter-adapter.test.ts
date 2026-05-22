@@ -425,7 +425,7 @@ describe('BabysitterAdapter', () => {
     it('includes install command in steps', () => {
       const guidance = adapter.getAuthGuidance();
       const hasInstallStep = guidance.steps.some(
-        (s) => typeof s.command === 'string' && s.command.includes('@a5c-ai/babysitter'),
+        (s) => typeof s.command === 'string' && s.command.includes('@a5c-ai/agent-platform'),
       );
       expect(hasInstallStep).toBe(true);
     });
