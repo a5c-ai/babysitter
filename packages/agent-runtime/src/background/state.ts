@@ -26,7 +26,7 @@ export function getBackgroundRegistry(options: BackgroundRegistryOwner): Backgro
 }
 
 export function disposeBackgroundRegistry(options: BackgroundRegistryOwner): void {
-  const registry = scopedRegistries.get(options);
+  const registry = scopedRegistries.get(options) ?? options.backgroundRegistry;
   if (!registry) {
     return;
   }

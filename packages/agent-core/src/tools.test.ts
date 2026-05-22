@@ -66,6 +66,7 @@ import {
   createAgentCoreToolDefinitions as createAgentCoreToolDefinitionsFromIndex,
   DeferredToolRegistry,
 } from "./index";
+import { BackgroundProcessRegistry } from "./backgroundProcessRegistry";
 
 function getText(result: Awaited<ReturnType<ReturnType<typeof getTool>["execute"]>>) {
   return result.content[0]?.text ?? "";
@@ -524,7 +525,7 @@ describe("agent-core tools", () => {
       stderr: PassThrough;
     }> = [];
 
-    vi.mocked(childProcess.spawn).mockImplementation(() => {
+    const mockSpawn = vi.fn((() => {
       const processHandle = new PassThrough() as unknown as childProcess.ChildProcessWithoutNullStreams & {
         kill: ReturnType<typeof vi.fn>;
       };
@@ -538,14 +539,14 @@ describe("agent-core tools", () => {
       });
       spawned.push({ processHandle, stdout, stderr });
       return processHandle;
-    });
+    }) as unknown as typeof childProcess.spawn);
 
     const sessionOneTools = getToolDefinitions(workspace, {
-      maxBackgroundProcesses: 1,
+      backgroundRegistry: new BackgroundProcessRegistry({ maxConcurrent: 1, spawnFn: mockSpawn }),
       onBackgroundComplete: sessionOneComplete,
     });
     const sessionTwoTools = getToolDefinitions(workspace, {
-      maxBackgroundProcesses: 2,
+      backgroundRegistry: new BackgroundProcessRegistry({ maxConcurrent: 2, spawnFn: mockSpawn }),
       onBackgroundComplete: sessionTwoComplete,
     });
     const sessionOneBash = sessionOneTools.find((tool) => tool.name === "bash");
@@ -623,7 +624,7 @@ describe("agent-core tools", () => {
       stderr: PassThrough;
     }> = [];
 
-    vi.mocked(childProcess.spawn).mockImplementation(() => {
+    const mockSpawn = vi.fn((() => {
       const processHandle = new PassThrough() as unknown as childProcess.ChildProcessWithoutNullStreams & {
         kill: ReturnType<typeof vi.fn>;
       };
@@ -637,9 +638,11 @@ describe("agent-core tools", () => {
       });
       spawned.push({ processHandle, stdout, stderr });
       return processHandle;
-    });
+    }) as unknown as typeof childProcess.spawn);
 
-    const definitions = getToolDefinitions(workspace, { maxBackgroundProcesses: 1 });
+    const definitions = getToolDefinitions(workspace, {
+      backgroundRegistry: new BackgroundProcessRegistry({ maxConcurrent: 1, spawnFn: mockSpawn }),
+    });
     const bashTool = definitions.find((tool) => tool.name === "bash");
     const listTool = definitions.find((tool) => tool.name === "background_list");
 

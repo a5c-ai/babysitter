@@ -77,9 +77,11 @@ const DEFAULT_MAX_CONCURRENT = 16;
 export class BackgroundProcessRegistry {
   private readonly processes = new Map<string, TrackedProcess>();
   private readonly maxConcurrent: number;
+  private readonly spawnFn: typeof childProcess.spawn;
 
-  constructor(options?: { maxConcurrent?: number }) {
+  constructor(options?: { maxConcurrent?: number; spawnFn?: typeof childProcess.spawn }) {
     this.maxConcurrent = options?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT;
+    this.spawnFn = options?.spawnFn ?? childProcess.spawn;
   }
 
   /**
@@ -105,7 +107,7 @@ export class BackgroundProcessRegistry {
         ? ["/c", opts.command]
         : ["-c", opts.command];
 
-    const child = childProcess.spawn(shell, shellArgs, {
+    const child = this.spawnFn(shell, shellArgs, {
       cwd: opts.cwd,
       env: { ...process.env, ...opts.env },
       shell: false,
