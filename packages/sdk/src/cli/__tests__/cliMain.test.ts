@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MockInstance } from "vitest";
 import path from "path";
+import os from "os";
+import { promises as fs } from "fs";
 import { createBabysitterCli } from "../main";
-import { handleHarnessCreateRun } from "../commands/harnessCreateRun";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { readRunMetadata } from "../../storage/runFiles";
 import { commitEffectResult } from "../../runtime/commitEffectResult";
-import { invokeHarness } from "../../harness/invoker";
 import type { EffectRecord } from "../../runtime/types";
 
 vi.mock("../../runtime/replay/effectIndex", () => ({
@@ -21,19 +21,9 @@ vi.mock("../../runtime/commitEffectResult", () => ({
   commitEffectResult: vi.fn(),
 }));
 
-vi.mock("../commands/harnessCreateRun", () => ({
-  handleHarnessCreateRun: vi.fn().mockResolvedValue(0),
-}));
-
-vi.mock("../../harness/invoker", () => ({
-  invokeHarness: vi.fn(),
-}));
-
 const buildEffectIndexMock = buildEffectIndex as unknown as ReturnType<typeof vi.fn>;
 const readRunMetadataMock = readRunMetadata as unknown as ReturnType<typeof vi.fn>;
 const commitEffectResultMock = commitEffectResult as unknown as ReturnType<typeof vi.fn>;
-const handleSessionCreateMock = handleHarnessCreateRun as unknown as ReturnType<typeof vi.fn>;
-const invokeHarnessMock = invokeHarness as unknown as ReturnType<typeof vi.fn>;
 
 describe("CLI main entry", () => {
   let logSpy: MockInstance<[message?: any, ...optionalParams: any[]], void>;
@@ -54,16 +44,6 @@ describe("CLI main entry", () => {
       startedAt: "2026-01-20T00:00:00.000Z",
       finishedAt: "2026-01-20T00:00:01.000Z",
     });
-    handleSessionCreateMock.mockReset();
-    handleSessionCreateMock.mockResolvedValue(0);
-    invokeHarnessMock.mockReset();
-    invokeHarnessMock.mockResolvedValue({
-      success: true,
-      output: "ok",
-      exitCode: 0,
-      duration: 1,
-      harness: "internal",
-    });
   });
 
   afterEach(() => {
@@ -77,6 +57,160 @@ describe("CLI main entry", () => {
 
     expect(helpText).toContain("Usage:");
     expect(helpText).toContain("babysitter run:create");
+    expect(helpText).toContain("babysitter session:init");
+    expect(helpText).toContain("--help-human");
+  });
+
+  it("exposes the human usage block separately", () => {
+    const cli = createBabysitterCli();
+    const helpText = cli.formatHumanHelp();
+
+    expect(helpText).toContain("Usage:");
+    expect(helpText).toContain("babysitter session:resume");
+    expect(helpText).toContain("babysitter harness:install");
+    expect(helpText).toContain("babysitter session:whoami");
+    expect(helpText).toContain("babysitter session:cleanup");
+    expect(helpText).toContain("@a5c-ai/babysitter-agent");
+    expect(helpText).not.toContain("babysitter-harness session:init");
+    expect(helpText).not.toContain("babysitter run:create");
+  });
+
+  it("supports session:init from the core babysitter CLI", async () => {
+    const cli = createBabysitterCli();
+    const tmpStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "cli-session-init-state-"));
+
+    try {
+      const exitCode = await cli.run([
+        "session:init",
+        "--session-id",
+        "sess-init-1",
+        "--state-dir",
+        tmpStateDir,
+        "--run-id",
+        "run-init-1",
+        "--prompt",
+        "Initialize this session",
+        "--json",
+      ]);
+
+      expect(exitCode).toBe(0);
+      const output = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0] ?? "{}"));
+      expect(output.runId).toBe("run-init-1");
+      expect(output.stateFile).toContain("sess-init-1");
+    } finally {
+      await fs.rm(tmpStateDir, { recursive: true, force: true });
+    }
+  });
+
+  it("supports session:associate from the core babysitter CLI", async () => {
+    const cli = createBabysitterCli();
+    const tmpStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "cli-session-associate-state-"));
+
+    try {
+      await cli.run([
+        "session:init",
+        "--session-id",
+        "sess-assoc-1",
+        "--state-dir",
+        tmpStateDir,
+        "--json",
+      ]);
+      logSpy.mockClear();
+
+      const exitCode = await cli.run([
+        "session:associate",
+        "--session-id",
+        "sess-assoc-1",
+        "--state-dir",
+        tmpStateDir,
+        "--run-id",
+        "run-assoc-1",
+        "--json",
+      ]);
+
+      expect(exitCode).toBe(0);
+      const output = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0] ?? "{}"));
+      expect(output.runId).toBe("run-assoc-1");
+    } finally {
+      await fs.rm(tmpStateDir, { recursive: true, force: true });
+    }
+  });
+
+  it("supports session:whoami from the core babysitter CLI", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["session:whoami", "--json"]);
+
+    expect(exitCode).toBe(0);
+    const output = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0] ?? "{}"));
+    expect(output).toHaveProperty("resolvedFrom");
+    expect(output).toHaveProperty("harness");
+  });
+
+  it("supports session:cleanup from the core babysitter CLI", async () => {
+    const cli = createBabysitterCli();
+    const tmpStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "cli-session-cleanup-"));
+    const previousGlobalStateDir = process.env.BABYSITTER_GLOBAL_STATE_DIR;
+
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = tmpStateDir;
+    try {
+      const exitCode = await cli.run(["session:cleanup", "--dry-run", "--json"]);
+
+      expect(exitCode).toBe(0);
+      const output = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0] ?? "{}"));
+      expect(output.markersRemoved).toEqual([]);
+      expect(output.statesDeactivated).toEqual([]);
+      expect(output.dryRun).toBe(true);
+    } finally {
+      if (previousGlobalStateDir === undefined) {
+        delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
+      } else {
+        process.env.BABYSITTER_GLOBAL_STATE_DIR = previousGlobalStateDir;
+      }
+      await fs.rm(tmpStateDir, { recursive: true, force: true });
+    }
+  });
+
+  it("supports session:resume from the core babysitter CLI", async () => {
+    const cli = createBabysitterCli();
+    const tmpStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "cli-session-resume-state-"));
+    const tmpRunsDir = await fs.mkdtemp(path.join(os.tmpdir(), "cli-session-resume-runs-"));
+    const runId = "resume-run-1";
+    const runDir = path.join(tmpRunsDir, runId);
+    await fs.mkdir(path.join(runDir, "journal"), { recursive: true });
+    await fs.writeFile(
+      path.join(runDir, "run.json"),
+      JSON.stringify({ processId: "process/demo" }, null, 2),
+      "utf8",
+    );
+    await fs.writeFile(
+      path.join(runDir, "journal", "000001.test.json"),
+      JSON.stringify({ type: "RUN_CREATED" }, null, 2),
+      "utf8",
+    );
+
+    try {
+      const exitCode = await cli.run([
+        "session:resume",
+        "--session-id",
+        "sess-1",
+        "--state-dir",
+        tmpStateDir,
+        "--run-id",
+        runId,
+        "--runs-dir",
+        tmpRunsDir,
+        "--json",
+      ]);
+
+      expect(exitCode).toBe(0);
+      const output = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0] ?? "{}"));
+      expect(output.runId).toBe(runId);
+      expect(output.processId).toBe("process/demo");
+      expect(output.stateFile).toContain("sess-1");
+    } finally {
+      await fs.rm(tmpStateDir, { recursive: true, force: true });
+      await fs.rm(tmpRunsDir, { recursive: true, force: true });
+    }
   });
 
   it("prints help and exits zero when invoked without args", async () => {
@@ -94,6 +228,15 @@ describe("CLI main entry", () => {
 
     expect(exitCode).toBe(0);
     expect(logSpy).toHaveBeenCalledWith(cli.formatHelp());
+    expect(readRunMetadataMock).not.toHaveBeenCalled();
+  });
+
+  it("prints human help when --help-human is requested", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["--help-human"]);
+
+    expect(exitCode).toBe(0);
+    expect(logSpy).toHaveBeenCalledWith(cli.formatHumanHelp());
     expect(readRunMetadataMock).not.toHaveBeenCalled();
   });
 
@@ -272,6 +415,62 @@ describe("CLI main entry", () => {
     );
   });
 
+  it("normalizes shell task error posts into success:false shell results", async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "cli-task-post-shell-error-"));
+    const errorPath = path.join(tmpDir, "error.json");
+    await fs.writeFile(
+      errorPath,
+      JSON.stringify({
+        exitCode: 2,
+        stderr: "tsc failed",
+      }),
+      "utf8",
+    );
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([shellEffectRecord("ef-shell-err")]));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-shell-err",
+      "--status",
+      "error",
+      "--error",
+      errorPath,
+      "--runs-dir",
+      ".",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(commitEffectResultMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        effectId: "ef-shell-err",
+        result: {
+          status: "ok",
+          value: {
+            success: false,
+            exitCode: 2,
+            stdout: "",
+            stderr: "tsc failed",
+            error: "Shell command exited with code 2",
+          },
+          stdout: undefined,
+          stderr: undefined,
+          stdoutRef: undefined,
+          stderrRef: undefined,
+          startedAt: expect.any(String),
+          finishedAt: expect.any(String),
+          metadata: undefined,
+        },
+      }),
+    );
+    expect(logSpy).toHaveBeenCalledWith(
+      "[task:post] status=ok normalizedShellFailure=true stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/mock/result.json"
+    );
+
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
   it("rejects task:post ok results without a value payload", async () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-no-value")]));
 
@@ -283,146 +482,18 @@ describe("CLI main entry", () => {
     expect(errorSpy).toHaveBeenCalledWith("[task:post] ok results require --value or --value-inline");
   });
 
-  it("accepts harness:create-run --non-interactive as an alias for --no-interactive", async () => {
+  it("reports create-run as moved when called from the core babysitter CLI", async () => {
     const cli = createBabysitterCli();
     const exitCode = await cli.run([
-      "harness:create-run",
+      "create-run",
       "--process",
       "/tmp/generated-process.mjs",
-      "--non-interactive",
     ]);
 
-    expect(exitCode).toBe(0);
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        processPath: "/tmp/generated-process.mjs",
-        interactive: false,
-      }),
-    );
+    expect(exitCode).toBe(1);
+    expect(errorSpy).toHaveBeenCalled();
+    expect(String(errorSpy.mock.calls[0]?.[0] ?? "")).toContain("@a5c-ai/babysitter-agent");
   });
-
-  it("routes harness:invoke internal through the invoker", async () => {
-    const cli = createBabysitterCli();
-    const exitCode = await cli.run([
-      "harness:invoke",
-      "internal",
-      "--prompt",
-      "hello",
-      "--model",
-      "gpt-5.4",
-    ]);
-
-    expect(exitCode).toBe(0);
-    expect(invokeHarnessMock).toHaveBeenCalledWith("internal", {
-      prompt: "hello",
-      workspace: undefined,
-      model: "gpt-5.4",
-      timeout: undefined,
-    });
-    expect(logSpy).toHaveBeenCalledWith("ok");
-  });
-
-  it("passes the assimilate target through without asking the agent to restate it", async () => {
-    const cli = createBabysitterCli();
-    const exitCode = await cli.run([
-      "harness:assimilate",
-      "--prompt",
-      "oh-my-pi",
-      "--interactive",
-      "--model",
-      "gpt-5.4",
-    ]);
-
-    expect(exitCode).toBe(0);
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        interactive: true,
-        model: "gpt-5.4",
-        prompt: expect.stringContaining("Target to assimilate: oh-my-pi"),
-      }),
-    );
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prompt: expect.stringContaining("do not ask the user to restate the initial prompt"),
-      }),
-    );
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prompt: expect.stringContaining("Read `binding.dir`"),
-      }),
-    );
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prompt: expect.stringContaining("specializations/meta/assimilation/workflows/methodology-assimilation"),
-      }),
-    );
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prompt: expect.stringContaining("specializations/meta/assimilation/harness/<name>"),
-      }),
-    );
-  });
-
-  it("renders cleanup prompt details from the synced command template", async () => {
-    const cli = createBabysitterCli();
-    const exitCode = await cli.run([
-      "harness:cleanup",
-      "--keep-days",
-      "14",
-      "--dry-run",
-      "--prompt",
-      "be conservative",
-    ]);
-
-    expect(exitCode).toBe(0);
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prompt: expect.stringContaining("older than 14 days"),
-      }),
-    );
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prompt: expect.stringContaining("DRY RUN"),
-      }),
-    );
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prompt: expect.stringContaining("Additional instructions: be conservative"),
-      }),
-    );
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prompt: expect.stringContaining("docs/run-history-insights.md"),
-      }),
-    );
-  });
-
-  it("renders doctor diagnostics from the synced command template", async () => {
-    const cli = createBabysitterCli();
-    const exitCode = await cli.run([
-      "harness:doctor",
-      "--run-id",
-      "run-123",
-    ]);
-
-    expect(exitCode).toBe(0);
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prompt: expect.stringContaining("Target run ID: run-123"),
-      }),
-    );
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prompt: expect.stringContaining("Run Discovery"),
-      }),
-    );
-    expect(handleSessionCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prompt: expect.stringContaining("BABYSITTER DIAGNOSTIC REPORT"),
-      }),
-    );
-  });
-
 });
 
 function mockRunMetadata() {
@@ -455,6 +526,14 @@ function nodeEffectRecord(effectId: string, overrides: Partial<EffectRecord> = {
     requestedAt: new Date(0).toISOString(),
     ...overrides,
   };
+}
+
+function shellEffectRecord(effectId: string, overrides: Partial<EffectRecord> = {}): EffectRecord {
+  return nodeEffectRecord(effectId, {
+    kind: "shell",
+    taskId: "task/shell",
+    ...overrides,
+  });
 }
 
 function mockEffectIndex(records: EffectRecord[]) {

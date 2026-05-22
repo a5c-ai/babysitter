@@ -1,0 +1,12 @@
+{
+  "repoRoot": "C:/work/agent-mux",
+  "todoFile": "C:/work/agent-mux/todos.md",
+  "todoLine": 40,
+  "targetHarnesses": [
+    "codex",
+    "claude",
+    "claude-code",
+    "opencode"
+  ],
+  "maxReviewLoops": 3
+}

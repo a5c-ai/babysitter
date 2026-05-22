@@ -15,6 +15,13 @@
  * @references
  * - Python requests: https://requests.readthedocs.io/
  * - Go net/http: https://pkg.go.dev/net/http
+ * @graph
+ *   domains: [domain:networking]
+ *   specializations: [specialization:network-programming]
+ *   skillAreas: [skill-area:protocol-design, skill-area:socket-programming]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:circuit-breakers]
+ *   workflows: [workflow:protocol-implementation-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

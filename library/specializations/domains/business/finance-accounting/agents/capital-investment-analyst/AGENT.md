@@ -9,6 +9,12 @@ expertise:
   - Project ranking
   - Post-implementation review
   - Capital allocation support
+graph:
+  domains: [domain:finance]
+  specializations: [specialization:corporate-finance]
+  skillAreas: [skill-area:financial-modeling, skill-area:budgeting-forecasting, skill-area:investment-analysis, skill-area:valuation-analysis]
+  workflows: [workflow:financial-planning, workflow:budget-planning]
+  roles: [role:financial-analyst]
 ---
 
 # Capital Investment Analyst

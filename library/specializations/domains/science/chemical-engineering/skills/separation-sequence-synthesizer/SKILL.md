@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Separation Processes
   skill-id: CE-SK-013
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:np-hard-heuristics, skill-area:mathematical-reasoning, skill-area:physics-simulation]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Separation Sequence Synthesizer Skill

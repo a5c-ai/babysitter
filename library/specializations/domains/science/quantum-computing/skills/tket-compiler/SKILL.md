@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: circuit-design
   phase: 6
+graph:
+  domains: [domain:quantum-computing]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:compiler-implementation, skill-area:graph-algorithms, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # TKET Compiler

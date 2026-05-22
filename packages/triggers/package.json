@@ -1,0 +1,69 @@
+{
+  "name": "@a5c-ai/triggers",
+  "version": "5.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Event trigger normalization, enrichment, and filtering helpers for automation actions",
+  "author": "a5c-ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/triggers#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/triggers"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "agent-mux",
+    "github-actions",
+    "gitlab",
+    "bitbucket",
+    "webhooks",
+    "triggers"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "bin": {
+    "triggers": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./action": {
+      "import": {
+        "types": "./dist/action.d.ts",
+        "default": "./dist/action.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "action.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "test": "npm run test:unit && npm run test:e2e",
+    "prepublishOnly": "npm run verify:release",
+    "verify:release": "npm run build && npm run test:unit && npm run test:e2e && npm run test:coverage",
+    "test:unit": "vitest run --root ../.. --config vitest.config.ts packages/triggers/tests/action-helpers.test.ts packages/triggers/tests/action-metadata.test.ts packages/triggers/tests/backend-modules.test.ts packages/triggers/tests/backends.test.ts packages/triggers/tests/cli.test.ts packages/triggers/tests/enrich.test.ts packages/triggers/tests/query.test.ts packages/triggers/tests/readme-examples.test.ts packages/triggers/src",
+    "test:e2e": "npm run build && vitest run --root ../.. --config vitest.config.ts packages/triggers/tests/action.test.ts packages/triggers/tests/dist-cli.smoke.test.ts",
+    "test:coverage": "vitest run --root ../.. --config vitest.config.ts --coverage --coverage.include=packages/triggers/src/**/*.ts packages/triggers/tests/action-helpers.test.ts packages/triggers/tests/action-metadata.test.ts packages/triggers/tests/action.test.ts packages/triggers/tests/backend-modules.test.ts packages/triggers/tests/backends.test.ts packages/triggers/tests/cli.test.ts packages/triggers/tests/enrich.test.ts packages/triggers/tests/query.test.ts packages/triggers/tests/readme-examples.test.ts packages/triggers/src"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.4"
+  }
+}

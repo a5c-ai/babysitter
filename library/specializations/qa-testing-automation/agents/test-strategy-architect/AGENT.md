@@ -10,6 +10,13 @@ expertise:
   - Quality gate strategy
   - Shift-left testing implementation
   - Test coverage optimization
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer, role:tech-lead]
+  skillAreas: [skill-area:regression-testing, skill-area:acceptance-testing]
+  workflows: [workflow:feature-development, workflow:code-review]
+  topics: [topic:test-driven-development, topic:code-review-best-practices]
 ---
 
 # Test Strategy Architect Agent

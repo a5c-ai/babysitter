@@ -1,0 +1,9 @@
+nodeKind: InstallMethod
+id: install:gh-extension
+attributes:
+  displayName: "gh CLI extension"
+  kind: gh-extension
+  platforms: [darwin, linux, win32]
+  command: "gh extension install {{package}}"
+  prerequisiteCheck: "gh --version"
+edges: {}

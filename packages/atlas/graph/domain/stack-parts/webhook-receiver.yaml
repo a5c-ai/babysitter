@@ -1,0 +1,13 @@
+nodeKind: StackPart
+id: stack-part:webhook-receiver
+attributes:
+  displayName: "Webhook Receiver"
+  category: api
+  description: |
+    HTTP endpoint that accepts inbound webhook deliveries with signature verification, retry tolerance, and dedup.
+edges:
+  implemented_by:
+    - target: platform-service:vercel-functions
+    - target: platform-service:netlify-functions
+    - target: platform-service:aws-lambda
+    - target: platform-service:gcp-cloud-functions

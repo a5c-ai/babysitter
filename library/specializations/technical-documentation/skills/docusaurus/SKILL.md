@@ -6,6 +6,11 @@ backlog-id: SK-002
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:technical-documentation]
+  skillAreas: [skill-area:docs-as-code, skill-area:tutorial-design]
+  roles: [role:technical-writer, role:documentation-engineer]
 ---
 
 # Docusaurus Skill

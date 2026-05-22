@@ -1,0 +1,633 @@
+nodeKind: ToolServer
+id: tool-server:krate-mcp-server
+attributes:
+  displayName: Krate MCP Server
+  description: MCP stdio server exported by @a5c-ai/krate-cli. It exposes Krate resource CRUD, snapshots, search, agent
+    stack/dispatch, secret grants, external sync/conflict, and audit query tools for agent clients.
+  protocol: mcp-stdio
+  provenance: built-in
+  category: devtools
+  maintainer: a5c.ai
+  repoUrl: https://github.com/a5c-ai/babysitter/tree/staging/packages/krate/cli
+  installCommand: npm install && npm test --workspace=@a5c-ai/krate-cli
+  npmPackage: "@a5c-ai/krate-cli"
+  tools:
+    - tool-descriptor:krate.krate-list-resources
+    - tool-descriptor:krate.krate-get-resource
+    - tool-descriptor:krate.krate-apply-resource
+    - tool-descriptor:krate.krate-delete-resource
+    - tool-descriptor:krate.krate-snapshot
+    - tool-descriptor:krate.krate-search
+    - tool-descriptor:krate.krate-list-stacks
+    - tool-descriptor:krate.krate-dispatch-agent
+    - tool-descriptor:krate.krate-list-secrets
+    - tool-descriptor:krate.krate-create-secret
+    - tool-descriptor:krate.krate-create-stack
+    - tool-descriptor:krate.krate-sync-external
+    - tool-descriptor:krate.krate-resolve-conflict
+    - tool-descriptor:krate.krate-audit-query
+edges:
+  integrates_with:
+    - target: platform-service:krate-agent-dispatch
+    - target: platform-service:krate-external-backends
+    - target: platform-service:krate-company-brain
+    - target: platform-service:krate-policy
+  lib_applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:devops
+  contains_tool_descriptor:
+    - target: tool-descriptor:krate.krate-list-resources
+    - target: tool-descriptor:krate.krate-get-resource
+    - target: tool-descriptor:krate.krate-apply-resource
+    - target: tool-descriptor:krate.krate-delete-resource
+    - target: tool-descriptor:krate.krate-snapshot
+    - target: tool-descriptor:krate.krate-search
+    - target: tool-descriptor:krate.krate-list-stacks
+    - target: tool-descriptor:krate.krate-dispatch-agent
+    - target: tool-descriptor:krate.krate-list-secrets
+    - target: tool-descriptor:krate.krate-create-secret
+    - target: tool-descriptor:krate.krate-create-stack
+    - target: tool-descriptor:krate.krate-sync-external
+    - target: tool-descriptor:krate.krate-resolve-conflict
+    - target: tool-descriptor:krate.krate-audit-query
+  exposes_prompt:
+    - target: mcp-prompt:krate.krate-workspace-setup
+    - target: mcp-prompt:krate.krate-stack-config
+    - target: mcp-prompt:krate.krate-troubleshoot
+  exposes_resource:
+    - target: mcp-resource:krate.snapshot
+    - target: mcp-resource:krate.stacks
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-list-resources
+attributes:
+  displayName: "Krate: krate_list_resources"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: List resources of a given kind
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      kind:
+        type: string
+    required:
+      - kind
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-get-resource
+attributes:
+  displayName: "Krate: krate_get_resource"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Get a single resource by kind and name
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      kind:
+        type: string
+      name:
+        type: string
+    required:
+      - kind
+      - name
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-apply-resource
+attributes:
+  displayName: "Krate: krate_apply_resource"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Create or update a resource
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "resource"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      resource:
+        type: object
+    required:
+      - resource
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-delete-resource
+attributes:
+  displayName: "Krate: krate_delete_resource"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Delete a resource
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      kind:
+        type: string
+      name:
+        type: string
+    required:
+      - kind
+      - name
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-snapshot
+attributes:
+  displayName: "Krate: krate_snapshot"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Get full organization snapshot
+  schema: |-
+    {
+      "type": "object",
+      "properties": {}
+    }
+  inputSchema:
+    type: object
+    properties: {}
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-search
+attributes:
+  displayName: "Krate: krate_search"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Search resources by query
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      query:
+        type: string
+    required:
+      - query
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-list-stacks
+attributes:
+  displayName: "Krate: krate_list_stacks"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: List agent stacks
+  schema: |-
+    {
+      "type": "object",
+      "properties": {}
+    }
+  inputSchema:
+    type: object
+    properties: {}
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-dispatch-agent
+attributes:
+  displayName: "Krate: krate_dispatch_agent"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Dispatch an agent run
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "stackRef": {
+          "type": "string"
+        },
+        "input": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "stackRef"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      stackRef:
+        type: string
+      input:
+        type: object
+    required:
+      - stackRef
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-list-secrets
+attributes:
+  displayName: "Krate: krate_list_secrets"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: List AgentSecretGrant resources in an org namespace
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "org": {
+          "type": "string"
+        }
+      }
+    }
+  inputSchema:
+    type: object
+    properties:
+      org:
+        type: string
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-create-secret
+attributes:
+  displayName: "Krate: krate_create_secret"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Create an AgentSecretGrant resource
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "org": {
+          "type": "string"
+        },
+        "agentRef": {
+          "type": "string"
+        },
+        "secretRef": {
+          "type": "string"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "org",
+        "agentRef",
+        "secretRef"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      name:
+        type: string
+      org:
+        type: string
+      agentRef:
+        type: string
+      secretRef:
+        type: string
+      permissions:
+        type: array
+        items:
+          type: string
+    required:
+      - name
+      - org
+      - agentRef
+      - secretRef
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-create-stack
+attributes:
+  displayName: "Krate: krate_create_stack"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Create an AgentStack resource
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "org": {
+          "type": "string"
+        },
+        "spec": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "org"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      name:
+        type: string
+      org:
+        type: string
+      spec:
+        type: object
+    required:
+      - name
+      - org
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-sync-external
+attributes:
+  displayName: "Krate: krate_sync_external"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Trigger an external sync for a binding
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "bindingName": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "localName": {
+          "type": "string"
+        },
+        "spec": {
+          "type": "object"
+        },
+        "externalEnvelope": {
+          "type": "object"
+        },
+        "watermark": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "bindingName",
+        "kind",
+        "localName"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      bindingName:
+        type: string
+      kind:
+        type: string
+      localName:
+        type: string
+      spec:
+        type: object
+      externalEnvelope:
+        type: object
+      watermark:
+        type: string
+    required:
+      - bindingName
+      - kind
+      - localName
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-resolve-conflict
+attributes:
+  displayName: "Krate: krate_resolve_conflict"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Resolve an external sync conflict
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "conflictName": {
+          "type": "string"
+        },
+        "strategy": {
+          "type": "string"
+        },
+        "resolvedValue": {}
+      },
+      "required": [
+        "conflictName",
+        "strategy"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      conflictName:
+        type: string
+      strategy:
+        type: string
+      resolvedValue: {}
+    required:
+      - conflictName
+      - strategy
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:krate.krate-audit-query
+attributes:
+  displayName: "Krate: krate_audit_query"
+  category: krate-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Query audit events with optional org/action/time filters
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "org": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "since": {
+          "type": "string"
+        },
+        "until": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "number"
+        },
+        "offset": {
+          "type": "number"
+        }
+      }
+    }
+  inputSchema:
+    type: object
+    properties:
+      org:
+        type: string
+      action:
+        type: string
+      since:
+        type: string
+      until:
+        type: string
+      limit:
+        type: number
+      offset:
+        type: number
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: MCPPrompt
+id: mcp-prompt:krate.krate-workspace-setup
+attributes:
+  displayName: krate_workspace_setup
+  name: krate_workspace_setup
+  arguments: []
+  description: Guide for setting up a new krate workspace
+edges: {}
+---
+nodeKind: MCPPrompt
+id: mcp-prompt:krate.krate-stack-config
+attributes:
+  displayName: krate_stack_config
+  name: krate_stack_config
+  arguments: []
+  description: Help configuring an agent stack
+edges: {}
+---
+nodeKind: MCPPrompt
+id: mcp-prompt:krate.krate-troubleshoot
+attributes:
+  displayName: krate_troubleshoot
+  name: krate_troubleshoot
+  arguments: []
+  description: Diagnose common krate issues
+edges: {}
+---
+nodeKind: MCPResource
+id: mcp-resource:krate.snapshot
+attributes:
+  displayName: Krate Workspace Snapshot
+  uri: krate://snapshot
+  mimeType: application/json
+  subscribable: false
+  description: Current org runtime snapshot
+edges: {}
+---
+nodeKind: MCPResource
+id: mcp-resource:krate.stacks
+attributes:
+  displayName: Krate Agent Stacks Resource
+  uri: krate://stacks
+  mimeType: application/json
+  subscribable: false
+  description: List of configured agent stacks
+edges: {}

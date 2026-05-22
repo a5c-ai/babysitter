@@ -5,6 +5,13 @@ version: 1.0.0
 category: Cross-Platform Development
 slug: react-native-dev
 status: active
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:react-native-development, skill-area:mobile-state-management]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # React Native Development Skill

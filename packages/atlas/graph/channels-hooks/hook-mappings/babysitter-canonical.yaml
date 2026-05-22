@@ -1,0 +1,114 @@
+---
+nodeKind: HookMapping
+id: hook-mapping:start-babysitter
+attributes:
+  mappingId: hook-mapping:start-babysitter
+  hookId: hook-surface:start
+  targetId: agent-version:babysitter@current
+  nativeName: Start
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: a5c
+  delivery: in-process
+  blocking: false
+  supportLevel: supported
+edges:
+  maps_hook:
+    - target: hook-surface:start
+  emits_hook:
+    - target: agent-version:babysitter@current
+---
+nodeKind: HookMapping
+id: hook-mapping:done-babysitter
+attributes:
+  mappingId: hook-mapping:done-babysitter
+  hookId: hook-surface:done
+  targetId: agent-version:babysitter@current
+  nativeName: Done
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: a5c
+  delivery: in-process
+  blocking: false
+  supportLevel: supported
+edges:
+  maps_hook:
+    - target: hook-surface:done
+  emits_hook:
+    - target: agent-version:babysitter@current
+---
+nodeKind: HookMapping
+id: hook-mapping:wake-babysitter
+attributes:
+  mappingId: hook-mapping:wake-babysitter
+  hookId: hook-surface:wake
+  targetId: agent-version:babysitter@current
+  nativeName: Wake
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: a5c
+  delivery: in-process
+  blocking: false
+  supportLevel: supported
+edges:
+  maps_hook:
+    - target: hook-surface:wake
+  emits_hook:
+    - target: agent-version:babysitter@current
+---
+nodeKind: HookMapping
+id: hook-mapping:phase-change-babysitter
+attributes:
+  mappingId: hook-mapping:phase-change-babysitter
+  hookId: hook-surface:phase-change
+  targetId: agent-version:babysitter@current
+  nativeName: PhaseChange
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: a5c
+  delivery: in-process
+  blocking: false
+  supportLevel: supported
+edges:
+  maps_hook:
+    - target: hook-surface:phase-change
+  emits_hook:
+    - target: agent-version:babysitter@current
+---
+nodeKind: HookMapping
+id: hook-mapping:phase-change-check-babysitter
+attributes:
+  mappingId: hook-mapping:phase-change-check-babysitter
+  hookId: hook-surface:phase-change-check
+  targetId: agent-version:babysitter@current
+  nativeName: PhaseChangeCheck
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: a5c
+  delivery: in-process
+  blocking: true
+  supportLevel: supported
+edges:
+  maps_hook:
+    - target: hook-surface:phase-change-check
+  emits_hook:
+    - target: agent-version:babysitter@current
+---
+nodeKind: HookMapping
+id: hook-mapping:decision-point-babysitter
+attributes:
+  mappingId: hook-mapping:decision-point-babysitter
+  hookId: hook-surface:decision-point
+  targetId: agent-version:babysitter@current
+  nativeName: DecisionPoint
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: a5c
+  delivery: in-process
+  blocking: true
+  supportLevel: supported
+edges:
+  maps_hook:
+    - target: hook-surface:decision-point
+  emits_hook:
+    - target: agent-version:babysitter@current

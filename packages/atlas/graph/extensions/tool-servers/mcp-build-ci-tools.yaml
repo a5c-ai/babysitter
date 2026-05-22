@@ -1,0 +1,155 @@
+---
+# MCP servers for build, CI, and developer tools already in the graph
+
+nodeKind: ToolServer
+id: tool-server:mcp-helm
+attributes:
+  displayName: Helm MCP Server
+  description: |
+    MCP server providing access to Helm Kubernetes package management.
+    Enables AI agents to list, install, upgrade, and rollback Helm releases,
+    inspect chart values and manifests, and manage repositories.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/helm/helm-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:helm
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:cloud-infra
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-circleci
+attributes:
+  displayName: CircleCI MCP Server
+  description: |
+    MCP server providing access to the CircleCI CI/CD platform.
+    Enables AI agents to retrieve pipeline and workflow status, inspect
+    job logs, trigger pipelines, and manage project configurations.
+  protocol: mcp
+  category: ci
+  repoUrl: https://github.com/CircleCI-Public/mcp-server-circleci
+  maintainer: CircleCI
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:circleci
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-jenkins
+attributes:
+  displayName: Jenkins MCP Server
+  description: |
+    MCP server providing access to Jenkins CI automation server.
+    Enables AI agents to list and trigger builds, retrieve build logs,
+    manage job configurations, and inspect pipeline stages.
+  protocol: mcp
+  category: ci
+  repoUrl: https://github.com/jenkinsci/jenkins-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:jenkins
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-honeycomb
+attributes:
+  displayName: Honeycomb MCP Server
+  description: |
+    MCP server providing access to the Honeycomb observability platform.
+    Enables AI agents to query traces and spans, create and run queries,
+    manage boards, and explore datasets for distributed system insights.
+  protocol: mcp
+  category: monitoring
+  repoUrl: https://github.com/honeycombio/honeycomb-mcp
+  maintainer: Honeycomb
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:honeycomb
+  lib_applies_to_domain:
+  - target: domain:observability
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-temporal
+attributes:
+  displayName: Temporal MCP Server
+  description: |
+    MCP server providing access to the Temporal durable workflow platform.
+    Enables AI agents to list and describe workflows, signal running workflows,
+    retrieve workflow history, and query workflow state.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/temporalio/temporal-mcp-server
+  maintainer: Temporal Technologies
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:temporal
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-kong
+attributes:
+  displayName: Kong MCP Server
+  description: |
+    MCP server providing access to the Kong API Gateway.
+    Enables AI agents to manage routes, services, plugins, consumers,
+    and upstreams through the Kong Admin API.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/Kong/kong-mcp-server
+  maintainer: Kong
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:kong
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-jupyter
+attributes:
+  displayName: Jupyter MCP Server
+  description: |
+    MCP server providing access to Jupyter notebook environments.
+    Enables AI agents to create, read, and execute notebook cells,
+    list kernels, manage files, and retrieve cell outputs.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/datalayer/jupyter-mcp-server
+  maintainer: Datalayer
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:jupyter
+  lib_applies_to_domain:
+  - target: domain:data-science
+  - target: domain:software-engineering

@@ -44,7 +44,7 @@ export interface PromptContext {
 
   /**
    * Additional CLI flags appended to run:create for session binding.
-   * e.g., '--state-dir .a5c --plugin-root "${CODEX_PLUGIN_ROOT}"'
+   * e.g., '--state-dir ~/.a5c/state'
    */
   sessionBindingFlags: string;
 
@@ -60,8 +60,8 @@ export interface PromptContext {
 
   /**
    * Environment variables the harness auto-resolves for session binding.
-   * e.g., 'BABYSITTER_SESSION_ID (via CLAUDE_ENV_FILE)' or
-   *       'BABYSITTER_SESSION_ID, CODEX_THREAD_ID (auto-injected)'
+   * e.g., 'AGENT_SESSION_ID (via CLAUDE_ENV_FILE)' or
+   *       'AGENT_SESSION_ID, CODEX_THREAD_ID (auto-injected)'
    */
   sessionEnvVars: string;
 
@@ -114,6 +114,43 @@ export interface PromptContext {
    * Typically `defaultSpec.referenceRoot` from the resolved library.
    */
   processLibraryReferenceRoot?: string;
+
+  /**
+   * GAP-PROMPT-005: Continuity context for resume overlays.
+   * When set, renderContinuityOverlay produces a structured resume context section.
+   * Undefined by default — only populated when resuming an existing run.
+   */
+  continuityContext?: ContinuityContext;
+
+  // ── Context-gated part flags (auto-derived from detectExecutionContext) ──
+
+  /** Always-on additions (enabled by default). */
+  hasPriorityLadder?: boolean;
+  hasRootCauseGuardrail?: boolean;
+}
+
+/**
+ * GAP-PROMPT-005: Summary of a single effect for continuity overlays.
+ */
+export interface ContinuityEffectSummary {
+  effectId: string;
+  kind: string;
+  title: string;
+  status: 'resolved' | 'pending';
+}
+
+/**
+ * GAP-PROMPT-005: Rich context extracted from run journal, tasks, and session
+ * for structured resume overlays.
+ */
+export interface ContinuityContext {
+  resolvedEffects: ContinuityEffectSummary[];
+  pendingEffects: ContinuityEffectSummary[];
+  stateTransitions: Array<{ event: string; recordedAt: string }>;
+  modifiedFiles: string[];
+  decisions: Array<{ description: string; timestamp: string }>;
+  iteration: number;
+  progressText: string;
 }
 
 /**
@@ -121,3 +158,58 @@ export interface PromptContext {
  * a markdown string for that section. Returns empty string when not applicable.
  */
 export type PromptPart = (ctx: PromptContext) => string;
+
+/**
+ * GAP-PROMPT-001: Prompt strata for cache optimization and deterministic composition.
+ *
+ * - stable:    System identity, core rules, tool definitions (rarely changes, highly cacheable)
+ * - runtime:   Available capabilities, feature flags, workspace context (changes per session)
+ * - turnLocal: Recent messages, current task, turn-specific instructions (changes every turn)
+ */
+export type PromptStratum = 'stable' | 'runtime' | 'turnLocal';
+
+/**
+ * A prompt part tagged with its stratum classification and a human-readable name.
+ */
+export interface StratumTaggedPart {
+  /** Human-readable part name (e.g. 'renderCriticalRules') */
+  name: string;
+  /** Which stratum this part belongs to */
+  stratum: PromptStratum;
+  /** The render function */
+  render: PromptPart;
+  /**
+   * GAP-PERF-005: Volatility score for cache-aware ordering within a stratum.
+   * 0 = most stable (rendered first, most cacheable), 100 = most volatile.
+   * Default: 50.
+   */
+  volatilityScore?: number;
+}
+
+/**
+ * GAP-PERF-005: Stratum checksums for cache-break detection.
+ * Only populated strata have checksums.
+ */
+export type StratumChecksums = Partial<Record<PromptStratum, string>>;
+
+/**
+ * GAP-PERF-005: Result of strata-aware composition with metadata.
+ */
+export interface ComposeByStrataWithMetaResult {
+  /** The composed prompt output */
+  output: string;
+  /** SHA256 checksum per stratum for cache-break detection */
+  stratumChecksums: StratumChecksums;
+}
+
+/**
+ * Options for strata-aware prompt composition.
+ */
+export interface ComposeByStrataOptions {
+  /** When true, add stratum header labels to the output for debugging */
+  showStrata?: boolean;
+  /** Custom separator between stratum groups (default: '\n\n---\n\n') */
+  separator?: string;
+  /** GAP-PERF-005: Sort parts within each stratum by volatilityScore ascending. Default: true */
+  sortByVolatility?: boolean;
+}

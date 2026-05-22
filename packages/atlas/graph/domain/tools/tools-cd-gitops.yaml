@@ -1,0 +1,63 @@
+---
+nodeKind: Tool
+id: tool:argocd
+attributes:
+  displayName: "Argo CD"
+  homepageUrl: "https://argoproj.github.io/cd/"
+  kind: ci
+  description: |
+    Declarative GitOps continuous-delivery controller for Kubernetes;
+    syncs cluster state from Git repositories.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:gitops
+  used_for:
+    - target: skill-area:gitops
+    - target: skill-area:ci-cd
+    - target: skill-area:deployment-automation
+  alternative_to:
+    - target: tool:flux
+      comparison: "GitOps controllers — Argo CD has a built-in UI; Flux is CLI/API-first"
+---
+nodeKind: Tool
+id: tool:flux
+attributes:
+  displayName: "Flux"
+  homepageUrl: "https://fluxcd.io"
+  kind: ci
+  description: |
+    CNCF GitOps toolkit for Kubernetes — Source/Kustomize/Helm/Image
+    controllers and progressive delivery via Flagger.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:gitops
+  used_for:
+    - target: skill-area:gitops
+    - target: skill-area:ci-cd
+    - target: skill-area:deployment-automation
+  alternative_to:
+    - target: tool:argocd
+      comparison: "GitOps controllers — Flux is CLI/API-first; Argo CD has a built-in UI"
+---
+nodeKind: Tool
+id: tool:tekton
+attributes:
+  displayName: "Tekton"
+  homepageUrl: "https://tekton.dev"
+  kind: ci
+  description: |
+    Kubernetes-native CI/CD framework with Tasks, Pipelines, and
+    Triggers as custom resources.
+edges:
+  belongs_to_language:
+    - target: language:yaml
+  used_for:
+    - target: skill-area:ci-cd
+    - target: skill-area:deployment-automation
+  alternative_to:
+    - target: tool:act
+      comparison: "CI tools — Tekton is Kubernetes-native CI/CD; act runs GitHub Actions locally"

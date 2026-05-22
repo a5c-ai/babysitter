@@ -1,0 +1,18 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-8dd20922e0ff
+attributes:
+  displayName: 'Catalog source reference: https://docs.anthropic.com/en/docs/claude-code/hooks'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/hooks
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/hooks
+  locator: Source reference for catalog entities in graph/channels-hooks/hook-surfaces/native/hook-surfaces-claude-code.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web

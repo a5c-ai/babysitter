@@ -16,6 +16,11 @@
  * @references
  * - McKinsey Market Sizing: https://www.mckinsey.com/business-functions/mckinsey-analytics/our-insights
  * - TAM SAM SOM Framework: Business Strategy Fundamentals
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+ *   roles: [role:data-analyst, role:business-analyst]
+ *   workflows: [workflow:brand-campaign-launch]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

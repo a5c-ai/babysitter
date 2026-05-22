@@ -17,6 +17,9 @@
  * @references
  * - OWASP API Security: https://owasp.org/www-project-api-security/
  * - API Security Best Practices: https://swagger.io/blog/api-security/
+ * @graph
+ *   domains: [domain:cybersecurity]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

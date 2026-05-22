@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:multipl-e.scope
+attributes:
+  subjectId: benchmark:multipl-e
+  inScope: |
+    Multi-language code-generation benchmark — translates HumanEval/MBPP problems into 18+ programming languages and scores by per-language pass-rate.
+  outOfScope: |
+    Repository-scale tasks, agentic tool-use, and contamination-resistant rolling collection (use LiveCodeBench).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:multipl-e

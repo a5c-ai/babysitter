@@ -1,0 +1,14 @@
+name: "Archived: amux-proxy CI"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  archived_notice:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Historical archive only
+        run: |
+          echo "Historical archive only."
+          echo "Active transport/proxy runtime owner: @a5c-ai/transport-mux."
+          echo "Use the repo root ci.yml, release.yml, and staging-publish.yml workflows instead."

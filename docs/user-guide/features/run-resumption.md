@@ -250,7 +250,7 @@ For automated scenarios, use the CLI in a loop:
 set -euo pipefail
 
 RUN_ID="01KFFTSF8TK8C9GT3YM9QYQ6WG"
-CLI="npx -y @a5c-ai/babysitter-sdk@latest"
+CLI="npx -y @a5c-ai/babysitter@latest"
 
 # Check current status
 STATUS=$($CLI run:status "$RUN_ID" --json | jq -r '.state')

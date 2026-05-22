@@ -2,6 +2,12 @@
 name: ui-automation-specialist
 description: Expert in desktop UI automation, page object patterns, and visual testing
 expertise: [ui-automation, playwright, page-objects, visual-testing]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-automation, skill-area:e2e-testing]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # ui-automation-specialist

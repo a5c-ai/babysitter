@@ -8,6 +8,14 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:acceptance-testing, skill-area:e2e-testing]
+  roles: [role:qa-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
+
 ---
 
 # Cucumber BDD Testing Skill

@@ -6,6 +6,11 @@ backlog-id: AG-001
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:technical-documentation]
+  skillAreas: [skill-area:tutorial-design, skill-area:reference-docs]
+  roles: [role:technical-writer, role:documentation-engineer]
 ---
 
 # tech-writer-expert

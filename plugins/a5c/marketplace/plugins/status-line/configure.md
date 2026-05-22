@@ -42,7 +42,9 @@ state_dirs+=("/path/to/custom/state")
 
 ## 4. Disable Without Uninstalling
 
-To temporarily disable the status line, edit `~/.claude/settings.json` and remove or comment out the `statusLine` key. The script remains on disk and can be re-enabled by restoring the configuration from the install instructions.
+To temporarily disable the status line, edit `~/.claude/settings.json` and remove the `statusLine` key. The script remains on disk and can be re-enabled by restoring the configuration from the install instructions.
+
+Note: if `disableAllHooks` is set to `true` in your settings, the status line is also disabled.
 
 ## 5. Verify Current Configuration
 
@@ -57,3 +59,10 @@ Test the script manually:
 ```bash
 echo '{"session_id":"your-session-id","workspace":{"current_dir":"'$(pwd)'"}}' | bash ~/.claude/statusline-command.sh
 ```
+
+## 6. Troubleshooting
+
+- **Nothing appears at all**: Ensure the `statusLine` command uses `~/.claude/statusline-command.sh` (tilde format). Do NOT use resolved MSYS paths like `/c/Users/...` on Windows.
+- **`statusline skipped` notification**: Accept the workspace trust dialog and restart Claude Code.
+- **Script exits silently**: The script only produces output when a babysitter run is active for the current session. No output = no run associated = correct behavior.
+- **Debug mode**: Run `claude --debug` to see exit codes and stderr from the status line command.

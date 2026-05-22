@@ -13,6 +13,13 @@ metadata:
   author: giladw
   version: "1.0.0"
   category: backend-development
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:backend-development]
+  skillAreas: [skill-area:backend-api-design, skill-area:backend-data-persistence, skill-area:integration-testing, skill-area:unit-testing]
+  topics: [topic:test-driven-development, topic:domain-driven-design, topic:clean-architecture]
+  workflows: [workflow:feature-development]
+  roles: [role:backend-engineer, role:tech-lead]
   backlog-id: SK-GOIS-001
 ---
 

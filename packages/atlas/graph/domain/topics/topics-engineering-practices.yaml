@@ -1,0 +1,187 @@
+---
+nodeKind: Topic
+id: topic:continuous-integration
+attributes:
+  displayName: "Continuous Integration"
+  description: |
+    Continuous Integration as a cross-cutting topic - the practice of
+    automatically building and testing code on every commit to a shared
+    branch. Provides rapid feedback on integration errors, enforces quality
+    gates through automated test suites and static analysis, and enables
+    trunk-based development by keeping the mainline always releasable.
+    Covers CI server configuration, build caching, parallelization, and
+    flaky-test management.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:continuous-deployment
+attributes:
+  displayName: "Continuous Deployment"
+  description: |
+    Continuous Deployment as a cross-cutting topic - automatically releasing
+    every change that passes the full automated pipeline to production without
+    manual approval gates. Requires high confidence in test coverage,
+    observability, and rollback mechanisms. Covers deployment pipelines,
+    progressive delivery strategies, and the organizational trust required
+    to sustain fully automated releases.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:refactoring
+attributes:
+  displayName: "Refactoring"
+  description: |
+    Refactoring as a cross-cutting topic - systematically improving code
+    structure without changing external behavior. Covers refactoring catalogs
+    (Fowler), identifying code smells, safe transformation sequences backed
+    by tests, IDE-assisted refactorings, and strategies for refactoring under
+    time pressure. Addresses the balance between continuous improvement and
+    delivery velocity across engineering teams.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:design-patterns
+attributes:
+  displayName: "Design Patterns"
+  description: |
+    Design Patterns as a cross-cutting topic - reusable solutions to common
+    software design problems documented as named patterns with context,
+    forces, and consequences. Covers Gang of Four patterns, enterprise
+    integration patterns, domain-driven design patterns, and anti-patterns.
+    Provides shared vocabulary for architectural discussions and design
+    reviews across engineering teams.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:test-driven-development
+attributes:
+  displayName: "Test-Driven Development"
+  description: |
+    Test-Driven Development as a cross-cutting topic - the red-green-refactor
+    cycle of writing a failing test before implementation code, making it pass
+    with minimal code, then refactoring to improve structure. Covers TDD at
+    unit and acceptance levels, outside-in vs inside-out approaches, and the
+    design feedback that emerges from writing tests first. Addresses when TDD
+    provides the highest return and where alternative testing strategies may
+    be more appropriate.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:qa-testing
+---
+nodeKind: Topic
+id: topic:pair-programming
+attributes:
+  displayName: "Pair Programming"
+  description: |
+    Pair Programming as a cross-cutting topic - two developers working
+    together at one workstation with defined driver/navigator roles. Covers
+    strong-style pairing, ping-pong pairing with TDD, remote pairing tooling,
+    and mob/ensemble programming as an extension. Addresses knowledge transfer,
+    code quality improvement, and the productivity tradeoffs of synchronous
+    collaboration versus solo work.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:domain-driven-design
+attributes:
+  displayName: "Domain-Driven Design"
+  description: |
+    Domain-Driven Design as a cross-cutting topic - modeling software around
+    the core business domain through ubiquitous language, bounded contexts,
+    aggregates, and strategic design patterns. Covers context mapping, event
+    storming, anti-corruption layers, and the collaboration between domain
+    experts and developers that produces rich domain models aligned with
+    business reality.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:twelve-factor-app
+attributes:
+  displayName: "Twelve-Factor App"
+  description: |
+    The Twelve-Factor App as a cross-cutting topic - methodology for building
+    software-as-a-service applications that are portable, scalable, and
+    maintainable. Covers the twelve factors (codebase, dependencies, config,
+    backing services, build-release-run, processes, port binding, concurrency,
+    disposability, dev-prod parity, logs, admin processes) and their modern
+    reinterpretations for containerized and serverless environments.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:cloud-infra
+---
+nodeKind: Topic
+id: topic:infrastructure-as-code
+attributes:
+  displayName: "Infrastructure as Code"
+  description: |
+    Infrastructure as Code as a cross-cutting topic - managing and provisioning
+    infrastructure through machine-readable configuration files rather than
+    manual processes. Covers declarative (Terraform, Pulumi, CloudFormation)
+    and imperative approaches, state management, drift detection, and module
+    composition patterns. Enables version-controlled, peer-reviewed, and
+    reproducible infrastructure changes.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:cloud-infra
+---
+nodeKind: Topic
+id: topic:api-gateway
+attributes:
+  displayName: "API Gateway Pattern"
+  description: |
+    API Gateway as a cross-cutting topic - a single entry point that handles
+    cross-cutting concerns for backend services including routing, rate
+    limiting, authentication, request transformation, and response aggregation.
+    Covers managed gateways (AWS API Gateway, Kong, Envoy) and the tradeoff
+    between centralized control and gateway-as-bottleneck risk.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:cloud-infra
+---
+nodeKind: Topic
+id: topic:service-mesh
+attributes:
+  displayName: "Service Mesh"
+  description: |
+    Service Mesh as a cross-cutting topic - a dedicated infrastructure layer
+    for handling service-to-service communication through sidecar proxies.
+    Covers Istio, Linkerd, and Consul Connect; mTLS, traffic management,
+    observability injection, and the operational overhead tradeoffs of mesh
+    adoption versus simpler alternatives.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:networking
+---
+nodeKind: Topic
+id: topic:immutable-infrastructure
+attributes:
+  displayName: "Immutable Infrastructure"
+  description: |
+    Immutable Infrastructure as a cross-cutting topic - the practice of
+    replacing infrastructure components rather than mutating them in place.
+    Covers golden image pipelines (AMIs, container images), ephemeral
+    environments, and the reliability benefits of eliminating configuration
+    drift at the cost of slower iteration cycles for infrastructure changes.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:cloud-infra

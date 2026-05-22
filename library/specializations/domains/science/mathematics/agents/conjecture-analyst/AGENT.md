@@ -14,6 +14,12 @@ metadata:
   domain: science
   category: pure-mathematics
   phase: 6
+graph:
+  domains: [domain:mathematics]
+  specializations: [specialization:computational-mathematics]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:np-hard-heuristics, skill-area:graph-algorithms]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:computational-scientist]
 ---
 
 # Conjecture Analyst

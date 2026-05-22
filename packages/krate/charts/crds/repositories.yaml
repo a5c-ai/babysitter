@@ -1,0 +1,534 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: repositories.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: repositories
+    singular: repository
+    kind: Repository
+    shortNames:
+    - repo
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            properties:
+              organizationRef:
+                type: string
+              visibility:
+                type: string
+                enum:
+                - private
+                - internal
+                - public
+              defaultBranch:
+                type: string
+            required:
+            - organizationRef
+            - visibility
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: branchprotections.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: branchprotections
+    singular: branchprotection
+    kind: BranchProtection
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            properties:
+              organizationRef:
+                type: string
+              refs:
+                type: array
+                items:
+                  type: string
+              requirePullRequest:
+                type: boolean
+            required:
+            - organizationRef
+            - refs
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: organizations.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: organizations
+    singular: organization
+    kind: Organization
+    shortNames:
+    - org
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - displayName
+            - namespaceName
+            properties:
+              displayName:
+                type: string
+              slug:
+                type: string
+              namespaceName:
+                type: string
+              defaultVisibility:
+                type: string
+                enum:
+                - private
+                - internal
+                - public
+              memoryRepositoryRef:
+                type: string
+              policyProfileRef:
+                type: string
+              description:
+                type: string
+              owners:
+                type: array
+                items:
+                  type: string
+              teams:
+                type: array
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: orgnamespacebindings.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: orgnamespacebindings
+    singular: orgnamespacebinding
+    kind: OrgNamespaceBinding
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - namespace
+            properties:
+              organizationRef:
+                type: string
+              namespace:
+                type: string
+              createNamespace:
+                type: boolean
+              labels:
+                type: object
+                additionalProperties:
+                  type: string
+              serviceAccountPolicy:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: sshkeys.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: sshkeys
+    singular: sshkey
+    kind: SSHKey
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - scope
+            - key
+            properties:
+              organizationRef:
+                type: string
+              scope:
+                type: string
+                enum:
+                - user
+                - deploy
+                - automation
+                - argocd
+              owner:
+                type: string
+              repository:
+                type: string
+              title:
+                type: string
+              key:
+                type: string
+              readOnly:
+                type: boolean
+              revoked:
+                type: boolean
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: repositorypermissions.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: repositorypermissions
+    singular: repositorypermission
+    kind: RepositoryPermission
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - repository
+            - subject
+            - permission
+            properties:
+              organizationRef:
+                type: string
+              repository:
+                type: string
+              subject:
+                type: string
+              subjectKind:
+                type: string
+                enum:
+                - user
+                - team
+              permission:
+                type: string
+                enum:
+                - read
+                - write
+                - admin
+              revoked:
+                type: boolean
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: users.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: users
+    singular: user
+    kind: User
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - displayName
+            - email
+            properties:
+              organizationRef:
+                type: string
+              displayName:
+                type: string
+              email:
+                type: string
+              username:
+                type: string
+              teams:
+                type: array
+                items:
+                  type: string
+              admin:
+                type: boolean
+              disabled:
+                type: boolean
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: teams.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: teams
+    singular: team
+    kind: Team
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - displayName
+            properties:
+              organizationRef:
+                type: string
+              displayName:
+                type: string
+              members:
+                type: array
+                items:
+                  type: string
+              maintainers:
+                type: array
+                items:
+                  type: string
+              repositoryGrants:
+                type: array
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: invites.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: invites
+    singular: invite
+    kind: Invite
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - email
+            - role
+            properties:
+              organizationRef:
+                type: string
+              email:
+                type: string
+              role:
+                type: string
+                enum:
+                - member
+                - admin
+              teams:
+                type: array
+                items:
+                  type: string
+              invitedBy:
+                type: string
+              expiresAt:
+                type: string
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: identitymappings.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: identitymappings
+    singular: identitymapping
+    kind: IdentityMapping
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - user
+            - provider
+            - subject
+            properties:
+              organizationRef:
+                type: string
+              user:
+                type: string
+              provider:
+                type: string
+              subject:
+                type: string
+              email:
+                type: string
+              workspaceIdentity:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              repositoryIdentity:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: authproviders.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: authproviders
+    singular: authprovider
+    kind: AuthProvider
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - type
+            properties:
+              organizationRef:
+                type: string
+              type:
+                type: string
+              label:
+                type: string
+              enabled:
+                type: boolean
+              scopes:
+                type: string
+              delegatedIdentity:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}

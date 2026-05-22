@@ -1,0 +1,73 @@
+---
+nodeKind: Workflow
+id: workflow:guest-experience-feedback-analysis
+attributes:
+  displayName: "Guest Experience Feedback Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Analyzes guest experience feedback across hospitality properties --
+    aggregating survey responses, online review sentiment, social-media
+    mentions, and in-stay complaint tickets, running NLP-based topic
+    extraction to identify recurring pain points, benchmarking Net Promoter
+    Scores across properties and segments, correlating satisfaction drivers
+    with operational metrics (check-in time, room-readiness rate, F&B
+    service speed), and generating property-level action plans. Produces
+    sentiment trend dashboards, competitive benchmarking reports, and
+    prioritized service-improvement recommendations. Excludes service
+    delivery changes.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:product-designer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:retrieval-augmented-generation
+  applies_to_domain:
+    - target: domain:hospitality
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:customer-success
+---
+nodeKind: Workflow
+id: workflow:property-portfolio-analysis
+attributes:
+  displayName: "Property Portfolio Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Evaluates the performance and risk profile of a real-estate portfolio --
+    aggregating occupancy rates, rental yield, cap-rate trends, and
+    operating-expense ratios across properties, running discounted-cash-flow
+    models for hold/sell scenario analysis, benchmarking against comparable
+    market indices, assessing geographic and tenant-sector concentration
+    risk, and incorporating macroeconomic indicators (interest rates,
+    construction starts) into forward-looking valuations. Produces portfolio
+    performance scorecards, risk-concentration heatmaps, and
+    investment-committee recommendation memos. Excludes property acquisition
+    due diligence.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:real-estate
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:analytics-team

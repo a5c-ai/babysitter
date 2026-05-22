@@ -8,6 +8,10 @@ required-skills:
   - SK-FTV-008 (world-building)
   - SK-FTV-009 (shot-composition)
   - SK-FTV-012 (genre-analysis-film)
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:visual-design, skill-area:interaction-design, skill-area:content-strategy]
+  roles: [role:creative-director, role:product-designer]
 ---
 
 # World Builder Agent

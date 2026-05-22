@@ -1,0 +1,168 @@
+---
+nodeKind: Workflow
+id: workflow:ai-pair-programming-governance
+attributes:
+  displayName: "AI Pair-Programming Governance"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Evaluates the organisational posture around AI-assisted coding — reviewing
+    which copilot tools are approved, auditing suggestion-acceptance rates vs
+    defect introduction, verifying prompt-injection guardrails, checking that
+    generated code passes the same review gates as human code, and ensuring
+    intellectual-property attribution policies are followed. Produces a
+    governance compliance scorecard and policy-gap remediation list. Excludes
+    tool procurement negotiation.
+edges:
+  involves_role:
+    - target: role:ai-champion
+    - target: role:engineering-manager
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:ml-ops
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:ai-agent-usage-review
+    - target: responsibility:ai-safety-guardrails
+  performed_by_org_unit:
+    - target: org-unit:ai-enablement
+    - target: org-unit:engineering-productivity
+---
+nodeKind: Workflow
+id: workflow:copilot-usage-review
+attributes:
+  displayName: "Copilot Usage Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Analyses seat-level and team-level usage metrics for AI coding assistants —
+    measuring active-user ratios, lines-accepted vs lines-suggested, language
+    and repository breakdown, identifying under-utilised seats, correlating
+    copilot adoption with velocity and defect-rate changes, and benchmarking
+    against industry baselines. Produces a usage report with license
+    optimisation and enablement recommendations. Excludes tool-selection
+    decisions.
+edges:
+  involves_role:
+    - target: role:ai-champion
+    - target: role:engineering-manager
+    - target: role:cost-tracker
+  requires_skill_area:
+    - target: skill-area:prompt-engineering
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:ml-ops
+  triggers_responsibility:
+    - target: responsibility:ai-agent-usage-review
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:ai-enablement
+    - target: org-unit:engineering-productivity
+---
+nodeKind: Workflow
+id: workflow:llm-cost-optimization
+attributes:
+  displayName: "LLM Cost Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Reviews and optimises spend across LLM API providers — analysing per-model
+    token consumption, identifying prompt-length bloat, evaluating cache-hit
+    rates, testing cheaper model substitutions for low-criticality tasks,
+    auditing retry and fallback policies that inflate costs, and projecting
+    budget burn-rate against forecasts. Produces a cost breakdown dashboard
+    and actionable savings plan. Excludes model fine-tuning work.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:cost-tracker
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:context-management
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:ml-platform-team
+    - target: org-unit:infra-engineering
+---
+nodeKind: Workflow
+id: workflow:synthetic-data-generation-pipeline
+attributes:
+  displayName: "Synthetic Data Generation Pipeline"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Designs and executes pipelines that produce synthetic training, evaluation,
+    or test datasets — defining schema constraints and statistical
+    distributions, configuring generative models or rule-based generators,
+    validating that synthetic outputs match real-data characteristics without
+    leaking PII, running bias and fairness audits, and versioning artifacts in
+    a data registry. Produces validated synthetic datasets and a data-card.
+    Excludes model training itself.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:ml-engineer
+    - target: role:data-engineer
+  requires_skill_area:
+    - target: skill-area:python-implementation
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:ml-ops
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:ai-safety-guardrails
+  performed_by_org_unit:
+    - target: org-unit:ml-platform-team
+    - target: org-unit:data-platform-team
+---
+nodeKind: Workflow
+id: workflow:ai-model-license-compliance
+attributes:
+  displayName: "AI Model License Compliance"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Audits the licensing posture of all AI/ML models consumed or distributed by
+    the organisation — cataloguing model provenance, verifying that open-weight
+    license terms (e.g., Llama Community License, Apache-2.0, RAIL) permit the
+    intended commercial use, checking for attribution and redistribution
+    obligations, flagging models with unclear or viral clauses, and ensuring
+    training-data provenance claims are documented. Produces a license
+    compliance matrix and risk register. Excludes license negotiation.
+edges:
+  involves_role:
+    - target: role:license-auditor
+    - target: role:ai-champion
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:dependency-audit
+    - target: responsibility:ai-agent-adoption-strategy
+  performed_by_org_unit:
+    - target: org-unit:ai-enablement
+    - target: org-unit:legal-team

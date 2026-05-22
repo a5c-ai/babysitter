@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:agent-product
+attributes:
+  canonicalDefinitionId: definition:agent-product.canonical
+  displayName: "AgentProduct"
+  kind: concept
+  references:
+    - "NodeKind:AgentProduct"
+  description: |
+    Productized agent (Claude Code, Codex, ...) — the umbrella
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

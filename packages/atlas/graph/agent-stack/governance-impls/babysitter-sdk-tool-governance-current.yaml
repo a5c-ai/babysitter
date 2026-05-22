@@ -1,0 +1,46 @@
+nodeKind: AgentGovernanceImpl
+id: agent-governance-impl:babysitter-sdk-tool.governance@current
+attributes:
+  displayName: "Babysitter SDK Tool Governance (current)"
+  agentVersionId: agent-version:babysitter-sdk@current
+  packageRef: source-ref:babysitter-sdk
+  componentKind: tool-governance
+  governedSurfaces:
+    - ctx.task effects
+    - ctx.breakpoint approval gates
+    - task output schemas
+    - run journals
+    - completion proof
+    - subprocess and shell effects
+    - harness tool dispatch
+  riskControls:
+    - tool misuse and privilege escalation
+    - effect replay integrity
+    - unapproved shell/subprocess execution
+    - stale or poisoned memory entering task context
+    - schema-invalid task output
+    - hidden delegation without audit evidence
+  evidenceProduced:
+    - EFFECT_REQUESTED and EFFECT_RESOLVED journal events
+    - invocationKey hashes
+    - task output JSON artifacts
+    - breakpoint approval records
+    - completionProof objects
+  notes: |
+    The Babysitter SDK acts as a governed process/tool surface: user-authored
+    process functions call `ctx.task`, `ctx.breakpoint`, and related effects;
+    the SDK records those effects, replays state, enforces task schemas and
+    approval gates, and emits evidence. Modeling it as tool governance makes
+    the SDK part of the governance layer rather than only an agent runtime.
+edges:
+  realizes:
+    - target: layer:14-governance
+  composes:
+    - target: agent:babysitter-sdk
+      role: governance
+  bundles:
+    - target: tool-descriptor:babysitter-sdk-process-api
+  implements:
+    - target: extension-interface:governance
+  depends_on:
+    - target: source-ref:babysitter-sdk

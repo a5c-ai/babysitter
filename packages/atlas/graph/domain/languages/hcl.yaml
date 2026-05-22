@@ -1,0 +1,23 @@
+nodeKind: Language
+id: language:hcl
+attributes:
+  displayName: "HCL"
+  paradigms:
+    - declarative
+    - configuration
+  description: |
+    HCL (HashiCorp Configuration Language) is a structured configuration
+    language designed to be both human-readable and machine-parseable. It
+    is the primary language for Terraform infrastructure definitions,
+    Packer build templates, Vault policies, and Nomad job specs.
+
+    HCL supports expressions, loops (for_each, count, dynamic blocks),
+    functions, locals, and module composition. Its type system supports
+    strings, numbers, booleans, lists, maps, and objects. The HCL2 version
+    introduced more powerful expression semantics. Terraform-specific HCL
+    adds provider, resource, data, and output blocks that drive
+    infrastructure-as-code workflows across AWS, GCP, Azure, and hundreds
+    of other providers via the Terraform Registry.
+edges:
+  used_by_skill_area:
+    - target: skill-area:terraform-infrastructure

@@ -1,0 +1,13 @@
+nodeKind: Capability
+id: capability:mcp-protocol-version-header
+attributes:
+  displayName: "MCP-Protocol-Version header"
+  description: |
+    The entity sends/honors the mandatory `MCP-Protocol-Version` HTTP
+    header on Streamable HTTP transports, recording the negotiated
+    protocol version on every subsequent request. Required by MCP spec
+    revision 2025-06-18.
+    See https://modelcontextprotocol.io/specification/2025-06-18/basic/transports
+  appliesToNodeKinds: ["AgentRuntimeImpl", "ToolServer"]
+  category: agent
+edges: {}

@@ -1,0 +1,23 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:glob
+attributes:
+  schema: '{}'
+  displayName: "Glob"
+  description: |
+    Filename pattern matching tool — returns paths matching a glob
+    expression. Standard across coding agents.
+  inputSchema:
+    type: object
+    required: [pattern]
+    properties:
+      pattern: { type: string, description: "Glob pattern (e.g. '**/*.ts')" }
+      path: { type: string, description: "Root directory (default cwd)" }
+  outputSchema:
+    type: object
+    properties:
+      paths:
+        type: array
+        items: { type: string }
+  mode: normal
+  streamable: false
+edges: {}

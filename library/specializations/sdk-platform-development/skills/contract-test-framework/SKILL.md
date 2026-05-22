@@ -7,6 +7,12 @@ metadata:
   version: "1.0.0"
   category: sdk-testing
   backlog-id: SK-SDK-003
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:api-contract-testing, skill-area:integration-testing]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # contract-test-framework

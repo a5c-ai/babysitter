@@ -1,0 +1,9 @@
+nodeKind: InstallMethod
+id: install:nix
+attributes:
+  displayName: "nix"
+  kind: nix
+  platforms: [darwin, linux]
+  command: "nix profile install {{flake-ref}}"
+  prerequisiteCheck: "nix --version"
+edges: {}

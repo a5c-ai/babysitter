@@ -6,6 +6,14 @@ backlog-id: AG-008
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer]
+  skillAreas: [skill-area:accessibility-testing, skill-area:web-accessibility]
+  workflows: [workflow:feature-development]
+  topics: [topic:accessibility, topic:test-driven-development]
+
 ---
 
 # accessibility-testing-expert

@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:swe-bench-multimodal.scope
+attributes:
+  subjectId: benchmark:swe-bench-multimodal
+  inScope: |
+    Multimodal extension of SWE-bench — JavaScript repositories with issues that include screenshots / images as part of the problem context.
+  outOfScope: |
+    Python-only repositories (use SWE-bench / SWE-bench-Verified), and pure-text issue contexts.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:swe-bench-multimodal

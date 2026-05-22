@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:command-line-interface.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:command-line-interface
+  text: |
+    Command-Line Interface (CLI): a text-based interface for invoking programs from a terminal, parameterized via argv flags and stdin/stdout.
+  status: canonical
+edges:
+  defines:
+    - term:command-line-interface

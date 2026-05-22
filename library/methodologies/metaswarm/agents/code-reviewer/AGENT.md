@@ -8,17 +8,15 @@ expertise:
   - Binary verdict assessment
   - Evidence-based review
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Code Reviewer Agent
-
-## Role
-
-Performs fresh adversarial code reviews. Unlike collaborative review, adversarial review is an independent audit checking spec compliance with binary PASS/FAIL verdicts and required evidence citations.
-
-## Expertise
-
-- Adversarial (not collaborative) code review
 - Spec compliance verification against DoD items
 - Binary PASS/FAIL verdict with evidence
 - File:line reference citations for all findings

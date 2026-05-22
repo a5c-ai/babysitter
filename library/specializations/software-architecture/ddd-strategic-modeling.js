@@ -19,6 +19,13 @@
  * - Domain-Driven Design Distilled by Vaughn Vernon: https://www.informit.com/store/domain-driven-design-distilled-9780134434421
  * - Patterns, Principles, and Practices of Domain-Driven Design by Scott Millett: https://www.wiley.com/en-us/Patterns%2C+Principles%2C+and+Practices+of+Domain+Driven+Design-p-9781118714706
  * - Strategic DDD Context Mapping: https://github.com/ddd-crew/context-mapping
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:principal-engineer]
+ *   skillAreas: [skill-area:domain-driven-design]
+ *   topics: [topic:domain-driven-design, topic:event-sourcing]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -63,12 +70,13 @@ export async function process(inputs, ctx) {
       domainKnowledge
     };
   }
+
   // ============================================================================
   // PHASE 2: SUBDOMAIN CLASSIFICATION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Classifying subdomains into Core, Supporting, and Generic');
-  let subdomainClassification = await ctx.task(subdomainClassificationTask, {
+  const subdomainClassification = await ctx.task(subdomainClassificationTask, {
     projectName,
     domainKnowledge,
     businessCapabilities: domainKnowledge.businessCapabilities,
@@ -88,17 +96,9 @@ export async function process(inputs, ctx) {
       subdomainClassification
     };
   }
-  let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      subdomainClassification = await ctx.task(subdomainClassificationTask, { ...{
-    projectName,
-    domainKnowledge,
-    businessCapabilities: domainKnowledge.businessCapabilities,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+
+  // Breakpoint: Review subdomain classification
+  await ctx.breakpoint({
     question: `Subdomain classification complete. Identified ${coreSubdomains.length} core domain(s), ${subdomainClassification.subdomains.filter(s => s.type === 'supporting').length} supporting domain(s), and ${subdomainClassification.subdomains.filter(s => s.type === 'generic').length} generic domain(s). Core domains receive highest investment. Approve classification?`,
     title: 'Subdomain Classification Review',
     context: {
@@ -112,15 +112,9 @@ export async function process(inputs, ctx) {
         format: a.format || 'markdown',
         label: a.label
       }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: BOUNDED CONTEXT IDENTIFICATION
   // ============================================================================
@@ -155,7 +149,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Mapping context relationships and integration patterns');
-  let contextMapping = await ctx.task(contextMappingTask, {
+  const contextMapping = await ctx.task(contextMappingTask, {
     projectName,
     boundedContexts: boundedContexts.contexts,
     subdomainClassification,
@@ -165,18 +159,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...contextMapping.artifacts);
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      contextMapping = await ctx.task(contextMappingTask, { ...{
-    projectName,
-    boundedContexts: boundedContexts.contexts,
-    subdomainClassification,
-    domainKnowledge,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Breakpoint: Review bounded contexts and context map
+  await ctx.breakpoint({
     question: `Bounded contexts and context map complete. Identified ${boundedContexts.contexts.length} bounded context(s) with ${contextMapping.relationships.length} relationship(s). Context mapping patterns include: ${contextMapping.strategicPatterns.join(', ')}. Review strategic model?`,
     title: 'Strategic Model Review',
     context: {
@@ -191,15 +175,9 @@ export async function process(inputs, ctx) {
         language: a.language || undefined,
         label: a.label
       }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: AGGREGATE IDENTIFICATION
   // ============================================================================
@@ -306,7 +284,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Validating strategic model consistency and completeness');
-  let modelValidation = await ctx.task(strategicModelValidationTask, {
+  const modelValidation = await ctx.task(strategicModelValidationTask, {
     projectName,
     domainKnowledge,
     subdomainClassification,
@@ -325,25 +303,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Model must pass validation
   const validationIssues = modelValidation.issues.filter(issue => issue.severity === 'critical');
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        modelValidation = await ctx.task(strategicModelValidationTask, { ...{
-    projectName,
-    domainKnowledge,
-    subdomainClassification,
-    boundedContexts: boundedContexts.contexts,
-    contextMapping,
-    ubiquitousLanguage,
-    aggregateAnalysis,
-    domainEvents,
-    teamAlignment,
-    aclDesign,
-    integrationStrategy,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (validationIssues.length > 0) {
+    await ctx.breakpoint({
       question: `Strategic model validation found ${validationIssues.length} critical issue(s). These must be resolved before proceeding. Review validation results?`,
       title: 'Critical Validation Issues',
       context: {
@@ -351,15 +312,9 @@ export async function process(inputs, ctx) {
         projectName,
         criticalIssues: validationIssues,
         recommendation: 'Address critical issues before finalizing strategic model'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 13: STRATEGIC DESIGN QUALITY SCORING
@@ -406,7 +361,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 15: Generating comprehensive strategic DDD documentation');
-  let strategyDocument = await ctx.task(strategyDocumentationTask, {
+  const strategyDocument = await ctx.task(strategyDocumentationTask, {
     projectName,
     domainKnowledge,
     subdomainClassification,
@@ -427,29 +382,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategyDocument.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      strategyDocument = await ctx.task(strategyDocumentationTask, { ...{
-    projectName,
-    domainKnowledge,
-    subdomainClassification,
-    boundedContexts: boundedContexts.contexts,
-    ubiquitousLanguage,
-    contextMapping,
-    aggregateAnalysis,
-    domainEvents,
-    teamAlignment,
-    aclDesign,
-    sharedKernelAnalysis,
-    integrationStrategy,
-    modelValidation,
-    qualityScore,
-    adrGeneration,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Review complete strategic model
+  await ctx.breakpoint({
     question: `DDD Strategic Modeling complete for ${projectName}. Overall quality score: ${overallScore}/100. ${qualityMet ? 'Strategic model meets quality standards!' : 'Strategic model may need refinement.'} Total bounded contexts: ${boundedContexts.contexts.length}. Core subdomains: ${coreSubdomains.length}. Strategic patterns identified: ${contextMapping.strategicPatterns.length}. Approve strategic model for tactical design?`,
     title: 'Strategic Model Approval',
     context: {
@@ -477,15 +411,9 @@ export async function process(inputs, ctx) {
         teams: teamAlignment.teams.length,
         qualityScore: overallScore
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -569,7 +497,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

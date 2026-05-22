@@ -3,6 +3,12 @@
  * @description RPIKit Brainstorming Phase - Clarifies vague requirements through exploratory questioning before research begins. Used when "what to build" is unclear.
  * @inputs { topic: string, constraints?: object, priorDiscussions?: array }
  * @outputs { success: boolean, clarifiedRequirements: array, exploredOptions: array, recommendation: string, readyForResearch: boolean }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning, skill-area:prioritization-frameworks]
+ *   workflows: [workflow:feature-development, workflow:release-management]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:engineering-manager, role:tech-lead, role:scrum-master]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:claude-code-commands-dir
+attributes:
+  artifactId: plugin-artifact:claude-code-commands-dir
+  displayName: "Claude Code commands directory"
+  targetId: plugin-target:claude-code
+  artifactKind: command
+  pathPattern: "commands/*.md"
+  installerSurface: "fs"
+  scriptVariants:
+    - markdown-commands
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code

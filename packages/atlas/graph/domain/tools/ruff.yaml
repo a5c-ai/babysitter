@@ -1,0 +1,21 @@
+nodeKind: Tool
+id: tool:ruff
+attributes:
+  displayName: "Ruff"
+  homepageUrl: "https://github.com/astral-sh/ruff"
+  kind: linter
+  language: language:python
+  description: |
+    Extremely fast Python linter and formatter, written in Rust.
+edges:
+  belongs_to_language:
+    - language:python
+  used_for:
+    - target: skill-area:code-quality
+  alternative_to:
+    - target: tool:black
+      comparison: "Python formatters — Ruff is Rust-based and includes linting; Black is pure Python"
+    - target: tool:flake8
+      comparison: "Python linters — Ruff replaces Flake8 with faster Rust implementation"
+    - target: tool:mypy
+      comparison: "Python code quality — Ruff is a linter/formatter; mypy is a type checker"

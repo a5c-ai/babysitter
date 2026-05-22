@@ -4,6 +4,13 @@
  * @inputs { projectName: string, measurementId?: string }
  * @outputs { success: boolean, analyticsConfig: object, events: array, artifacts: array }
  * @references - Google Analytics: https://developers.google.com/analytics
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer]
+ *   skillAreas: [skill-area:analytics-tracking]
+ *   topics: [topic:developer-experience]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -7,6 +7,13 @@ model: opus
 skills:
   - authentication-migrator
   - compliance-validator
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:oauth-flows, skill-area:authentication-authorization]
+  roles: [role:security-engineer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Authentication Migration Agent

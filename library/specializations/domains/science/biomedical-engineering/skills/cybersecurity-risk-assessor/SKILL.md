@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Risk Management
   skill-id: BME-SK-010
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:threat-modeling, skill-area:data-analysis, skill-area:compliance-automation]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:security-engineer]
 ---
 
 # Cybersecurity Risk Assessor Skill

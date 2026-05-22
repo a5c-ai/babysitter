@@ -13,6 +13,10 @@ required-skills:
   - cycle-count-scheduler
   - fifo-lifo-controller
   - abc-xyz-classifier
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:data-analytics, skill-area:statistical-analysis]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:procurement-manager]
 ---
 
 # Inventory Control Specialist

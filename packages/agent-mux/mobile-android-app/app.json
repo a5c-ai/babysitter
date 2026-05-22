@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "AgentMux Android",
+    "slug": "agent-mux-android",
+    "scheme": "agentmux",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#08111f"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "package": "ai.a5c.amux",
+      "permissions": [
+        "CAMERA",
+        "POST_NOTIFICATIONS",
+        "REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+        "RECEIVE_BOOT_COMPLETED",
+        "WAKE_LOCK"
+      ]
+    },
+    "plugins": [
+      "expo-notifications",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "AgentMux uses the camera to scan pairing QR codes."
+        }
+      ]
+    ]
+  }
+}

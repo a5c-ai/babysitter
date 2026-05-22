@@ -15,13 +15,13 @@ import * as os from "node:os";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { writeFileSync } from "node:fs";
 import { Readable } from "node:stream";
-import { createClaudeCodeAdapter } from "../claudeCode";
+import { createClaudeCodeAdapter } from "../adapters/claude-code";
 import { writeSessionFile } from "../../session/write";
 import { getSessionFilePath, readSessionFile, sessionFileExists } from "../../session/parse";
 import { appendEvent } from "../../storage/journal";
-import { createCodexAdapter } from "../codex";
-import { createPiAdapter, installPiPlugin } from "../pi";
-import { createOhMyPiAdapter } from "../ohMyPi";
+import { createCodexAdapter } from "../adapters/codex";
+import { createPiAdapter } from "../adapters/pi";
+import { createOhMyPiAdapter } from "../adapters/oh-my-pi";
 import { createNullAdapter } from "../nullAdapter";
 import {
   detectAdapter,
@@ -37,7 +37,8 @@ import {
 // ---------------------------------------------------------------------------
 
 const ENV_KEYS = [
-  "BABYSITTER_SESSION_ID",
+  "AGENT_SESSION_ID",
+  "AGENT_SESSION_ID",
   "CLAUDE_ENV_FILE",
   "CLAUDE_PLUGIN_ROOT",
   "CODEX_THREAD_ID",
@@ -88,8 +89,8 @@ describe("ClaudeCodeAdapter", () => {
       expect(adapter.isActive()).toBe(false);
     });
 
-    it("returns true when BABYSITTER_SESSION_ID is set", () => {
-      process.env.BABYSITTER_SESSION_ID = "test-session";
+    it("returns true when AGENT_SESSION_ID is set", () => {
+      process.env.AGENT_SESSION_ID = "test-session";
       const adapter = createClaudeCodeAdapter();
       expect(adapter.isActive()).toBe(true);
     });
@@ -103,13 +104,13 @@ describe("ClaudeCodeAdapter", () => {
 
   describe("resolveSessionId", () => {
     it("returns parsed.sessionId first", () => {
-      process.env.BABYSITTER_SESSION_ID = "env-session";
+      process.env.AGENT_SESSION_ID = "env-session";
       const adapter = createClaudeCodeAdapter();
       expect(adapter.resolveSessionId({ sessionId: "explicit" })).toBe("explicit");
     });
 
-    it("falls back to BABYSITTER_SESSION_ID env", () => {
-      process.env.BABYSITTER_SESSION_ID = "env-session";
+    it("falls back to AGENT_SESSION_ID env", () => {
+      process.env.AGENT_SESSION_ID = "env-session";
       const adapter = createClaudeCodeAdapter();
       expect(adapter.resolveSessionId({})).toBe("env-session");
     });
@@ -137,6 +138,14 @@ describe("ClaudeCodeAdapter", () => {
       const adapter = createClaudeCodeAdapter();
       const result = adapter.resolveStateDir({});
       expect(result).toBe(path.resolve("/custom/global/state"));
+    });
+
+    it("normalizes legacy global-root BABYSITTER_STATE_DIR env var to the session state dir", () => {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = "/custom/global-root";
+      process.env.BABYSITTER_STATE_DIR = "/custom/global-root";
+      const adapter = createClaudeCodeAdapter();
+      const result = adapter.resolveStateDir({});
+      expect(result).toBe(path.resolve("/custom/global-root/state"));
     });
   });
 
@@ -220,6 +229,14 @@ describe("CodexAdapter", () => {
       const adapter = createCodexAdapter();
       expect(adapter.resolveStateDir({})).toBe(path.join(os.homedir(), ".a5c", "state"));
     });
+
+    it("normalizes a legacy explicit global-root stateDir to the session state dir", () => {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = "/custom/global-root";
+      const adapter = createCodexAdapter();
+      expect(adapter.resolveStateDir({ stateDir: "/custom/global-root" })).toBe(
+        path.resolve("/custom/global-root/state"),
+      );
+    });
   });
 
   it("reports codex-specific missing session ID guidance", () => {
@@ -290,18 +307,7 @@ describe("OhMyPiAdapter", () => {
   });
 });
 
-describe("Pi install helpers", () => {
-  it("returns an npx-based dry-run install command", async () => {
-    const result = await installPiPlugin({
-      workspace: "/tmp/project",
-      dryRun: true,
-      json: true,
-      verbose: false,
-    });
-    expect(result.dryRun).toBe(true);
-    expect(result.command).toContain("@a5c-ai/babysitter-pi");
-  });
-});
+// Pi install helpers removed -- installPiPlugin moved to agent-mux.
 
 // ---------------------------------------------------------------------------
 // NullAdapter
@@ -449,6 +455,8 @@ describe("bindSession stale session handling", () => {
   });
 
   afterEach(async () => {
+    delete process.env.BABYSITTER_HOOK_BACKOFF_BASE;
+    delete process.env.BABYSITTER_HOOK_BACKOFF_CAP;
     await fs.rm(tmpDir, { recursive: true, force: true });
   });
 
@@ -456,8 +464,9 @@ describe("bindSession stale session handling", () => {
     return {
       active: true,
       iteration: 1,
-      maxIterations: 256,
+      maxIterations: 65_000,
       runId,
+      runIds: [],
       startedAt: "2026-01-01T00:00:00Z",
       lastIterationAt: "2026-01-01T00:00:00Z",
       iterationTimes: [],
@@ -471,6 +480,27 @@ describe("bindSession stale session handling", () => {
       runDir,
       event: { reason: "test" },
       eventType,
+    });
+  }
+
+  async function createRunWithPrematureCompletion(runId: string) {
+    const runDir = path.join(runsDir, runId);
+    await fs.mkdir(runDir, { recursive: true });
+    await appendEvent({
+      runDir,
+      event: { reason: "test" },
+      eventType: "RUN_COMPLETED",
+    });
+    await appendEvent({
+      runDir,
+      event: {
+        effectId: "effect-1",
+        invocationKey: "effect-1:inv",
+        stepId: "step-1",
+        taskId: "task/agent",
+        kind: "agent",
+      },
+      eventType: "EFFECT_REQUESTED",
     });
   }
 
@@ -570,6 +600,34 @@ describe("bindSession stale session handling", () => {
     expect(session.state.runId).toBe(oldRunId);
   });
 
+  it("does not auto-release a session when completion is followed by pending work", async () => {
+    const sessionId = "test-session";
+    const oldRunId = "old-run-premature-complete";
+    const newRunId = "new-run";
+
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(oldRunId), "old prompt");
+    await createRunWithPrematureCompletion(oldRunId);
+
+    const adapter = createClaudeCodeAdapter();
+    const result = await adapter.bindSession({
+      sessionId,
+      runId: newRunId,
+      runDir: path.join(runsDir, newRunId),
+      stateDir,
+      runsDir,
+      prompt: "new prompt",
+      verbose: false,
+      json: false,
+    });
+
+    expect(result.error).toContain(`Session bound to active run: ${oldRunId}`);
+    expect(result.fatal).toBe(true);
+
+    const session = await readSessionFile(filePath);
+    expect(session.state.runId).toBe(oldRunId);
+  });
+
   it("idempotent: succeeds when session is already bound to the same runId", async () => {
     const sessionId = "test-session";
     const runId = "same-run";
@@ -592,6 +650,29 @@ describe("bindSession stale session handling", () => {
     expect(result.error).toBeUndefined();
     expect(result.sessionId).toBe(sessionId);
     expect(result.stateFile).toBe(filePath);
+  });
+
+  it("stores the absolute runDir in session state when binding a run", async () => {
+    const sessionId = "test-session";
+    const runId = "run-with-absolute-dir";
+    const runDir = path.join(runsDir, runId);
+
+    const adapter = createClaudeCodeAdapter();
+    const result = await adapter.bindSession({
+      sessionId,
+      runId,
+      runDir,
+      stateDir,
+      runsDir,
+      prompt: "prompt",
+      verbose: false,
+      json: false,
+    });
+
+    expect(result.error).toBeUndefined();
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    const session = await readSessionFile(filePath);
+    expect(session.state.runDir).toBe(path.resolve(runDir));
   });
 
   it("works for no-runId case (session init without run)", async () => {
@@ -707,8 +788,9 @@ describe("stop hook stale session fallback (Issue #69)", () => {
     return {
       active: true,
       iteration: 1,
-      maxIterations: 256,
+      maxIterations: 65_000,
       runId,
+      runIds: [],
       startedAt: "2026-01-01T00:00:00Z",
       lastIterationAt: "2026-01-01T00:00:00Z",
       iterationTimes: [],
@@ -750,8 +832,8 @@ describe("stop hook stale session fallback (Issue #69)", () => {
     // Verify the current session file exists
     expect(await sessionFileExists(filePath)).toBe(true);
 
-    // Set BABYSITTER_SESSION_ID to the current session (simulating env after /clear)
-    process.env.BABYSITTER_SESSION_ID = currentSessionId;
+    // Set AGENT_SESSION_ID to the current session (simulating env after /clear)
+    process.env.AGENT_SESSION_ID = currentSessionId;
 
     // Create a proper run so the hook can determine run state
     await createMinimalRun(runId);
@@ -785,7 +867,7 @@ describe("stop hook stale session fallback (Issue #69)", () => {
     const envSessionId = "env-session-also-unknown";
 
     // No session files exist for either ID
-    process.env.BABYSITTER_SESSION_ID = envSessionId;
+    process.env.AGENT_SESSION_ID = envSessionId;
 
     const adapter = createClaudeCodeAdapter();
     const hookPayload = JSON.stringify({ session_id: staleSessionId });
@@ -805,37 +887,34 @@ describe("stop hook stale session fallback (Issue #69)", () => {
     expect(stdout.trim()).toBe("{}");
   });
 
-  it("uses CLAUDE_ENV_FILE fallback when BABYSITTER_SESSION_ID is not set", async () => {
-    const staleSessionId = "stale-from-payload";
-    const currentSessionId = "session-from-env-file";
-    const runId = "test-run-002";
+  // "uses CLAUDE_ENV_FILE fallback" test removed -- env-file fallback
+  // was removed during harness unification. Session resolution is now
+  // solely via AGENT_SESSION_ID.
 
-    // Write session file for the current session
-    const filePath = getSessionFilePath(stateDir, currentSessionId);
-    await writeSessionFile(filePath, makeSessionState(runId), "test prompt");
+  it("codex stop hook normalizes a legacy root-style stateDir and finds the session under /state", async () => {
+    const rootStateDir = path.join(tmpDir, "global-root");
+    const nestedStateDir = path.join(rootStateDir, "state");
+    const sessionId = "codex-root-state-session";
+    const runId = "codex-root-state-run";
 
-    // Create a proper run
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = rootStateDir;
+    await fs.mkdir(nestedStateDir, { recursive: true });
     await createMinimalRun(runId);
 
-    // Set CLAUDE_ENV_FILE instead of BABYSITTER_SESSION_ID
-    delete process.env.BABYSITTER_SESSION_ID;
-    writeFileSync(envFilePath, `export BABYSITTER_SESSION_ID="${currentSessionId}"\n`, "utf-8");
-    process.env.CLAUDE_ENV_FILE = envFilePath;
+    const filePath = getSessionFilePath(nestedStateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(runId), "test prompt");
 
-    const adapter = createClaudeCodeAdapter();
-    const hookPayload = JSON.stringify({ session_id: staleSessionId });
-
-    const { exitCode, stdout } = await withSyntheticStdinAndCapturedStdout(
-      hookPayload,
+    const adapter = createCodexAdapter();
+    const { stdout } = await withSyntheticStdinAndCapturedStdout(
+      JSON.stringify({ session_id: sessionId }),
       () => adapter.handleStopHook({
-        stateDir,
+        stateDir: rootStateDir,
         runsDir,
         json: true,
         verbose: false,
       }),
     );
 
-    // Should find the session via env file fallback and block exit
     const parsed = stdout.trim() ? JSON.parse(stdout.trim()) : {};
     expect(parsed).not.toEqual({});
     expect(parsed.decision).toBe("block");
@@ -867,8 +946,9 @@ describe("stop hook allows exit when only breakpoints are pending", () => {
     return {
       active: true,
       iteration: 1,
-      maxIterations: 256,
+      maxIterations: 65_000,
       runId,
+      runIds: [],
       startedAt: "2026-01-01T00:00:00Z",
       lastIterationAt: "2026-01-01T00:00:00Z",
       iterationTimes: [],
@@ -978,6 +1058,8 @@ describe("stop hook allows exit when only breakpoints are pending", () => {
   });
 
   it("blocks exit when breakpoints AND other effects are pending", async () => {
+    process.env.BABYSITTER_HOOK_BACKOFF_BASE = "0.001";
+    process.env.BABYSITTER_HOOK_BACKOFF_CAP = "0.001";
     const sessionId = "bp-session-002";
     const runId = "bp-run-002";
 
@@ -1000,3 +1082,4 @@ describe("stop hook allows exit when only breakpoints are pending", () => {
     expect(parsed.decision).toBe("block");
   });
 });
+

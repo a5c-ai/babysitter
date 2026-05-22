@@ -18,10 +18,11 @@ import { beforeEach, afterEach, vi } from "vitest";
 
 // Save/restore env to prevent leaking
 const ENV_KEYS = [
-  "BABYSITTER_SESSION_ID", "CLAUDE_ENV_FILE",
+  "AGENT_SESSION_ID", "AGENT_SESSION_ID", "CLAUDE_ENV_FILE",
   "CODEX_THREAD_ID", "CODEX_SESSION_ID", "CODEX_PLUGIN_ROOT",
   "OMP_SESSION_ID", "PI_SESSION_ID", "OMP_PLUGIN_ROOT", "PI_PLUGIN_ROOT",
   "GEMINI_SESSION_ID", "GEMINI_PROJECT_DIR", "GEMINI_CWD",
+  "AGENT_TRUST_ENV_SESSION", "BABYSITTER_TRUST_ENV_SESSION",
 ];
 let savedEnv: Record<string, string | undefined>;
 
@@ -71,8 +72,8 @@ describe("createCustomAdapter", () => {
     expect(adapter.resolveSessionId({})).toBeUndefined();
   });
 
-  it("resolveSessionId() falls back to BABYSITTER_SESSION_ID env var", () => {
-    process.env.BABYSITTER_SESSION_ID = "cross-harness-session";
+  it("resolveSessionId() falls back to AGENT_SESSION_ID env var", () => {
+    process.env.AGENT_SESSION_ID = "cross-harness-session";
     const adapter = createCustomAdapter();
     expect(adapter.resolveSessionId({})).toBe("cross-harness-session");
   });

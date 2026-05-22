@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:lifecycle-semantics.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:lifecycle-semantics
+  text: |
+    per-agent runtime lifecycle — hook mode, stop-hook mode, background tasks, checkpoints, plugin context
+  status: canonical
+edges:
+  defines:
+    - term:lifecycle-semantics

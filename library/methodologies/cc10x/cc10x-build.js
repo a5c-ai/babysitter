@@ -3,6 +3,12 @@
  * @description CC10X BUILD Workflow - TDD-enforced feature development with parallel code review, silent failure hunting, and integration verification
  * @inputs { request: string, projectRoot?: string, planFile?: string, memory?: object, confidenceThreshold?: number }
  * @outputs { success: boolean, tddEvidence: object, reviewResults: object, verificationResult: object, filesChanged: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:unit-testing, skill-area:integration-testing, skill-area:acceptance-testing]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:test-driven-development]
+ *   roles: [role:backend-engineer, role:qa-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

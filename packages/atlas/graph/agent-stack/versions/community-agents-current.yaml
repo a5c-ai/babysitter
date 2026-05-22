@@ -1,0 +1,118 @@
+nodeKind: AgentVersion
+id: agent-version:claude-sh@current
+attributes:
+  agentProductId: agent:claude-sh
+  versionRange: '>=1.0.0'
+  releasedAt: '2025-01-01'
+  cliCommand: claude-sh
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: knowledge-fabric-impl:claude-sh.knowledge@current
+    role: knowledge-fabric
+  version_of:
+  - agent:claude-sh
+  sourced_from: []
+  supports:
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0'
+    level: full
+    notes: claude-sh implements the full agent loop in bash with multi-turn support.
+  uses_memory_system:
+    - target: memory-system:memories-sh
+    - target: memory-system:agentmemory-service
+    - target: memory-system:file-based-markdown-pattern
+---
+nodeKind: AgentVersion
+id: agent-version:psclaudecode@current
+attributes:
+  agentProductId: agent:psclaudecode
+  versionRange: '>=1.0.0'
+  releasedAt: '2025-01-01'
+  cliCommand: psclaudecode
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: agent-core-impl:psclaudecode.core@current
+    role: core
+  version_of:
+  - agent:psclaudecode
+  sourced_from: []
+  supports:
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0'
+    level: full
+    notes: PSClaudeCode implements the agent loop in PowerShell with multi-turn support.
+---
+nodeKind: AgentVersion
+id: agent-version:cyclop-one@current
+attributes:
+  agentProductId: agent:cyclop-one
+  versionRange: '>=1.0.0'
+  releasedAt: '2025-01-01'
+  cliCommand: cyclop
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: agent-core-impl:cyclop-one.core@current
+    role: core
+  version_of:
+  - agent:cyclop-one
+  sourced_from: []
+  supports:
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0'
+    level: full
+    notes: Cyclop One runs autonomous desktop sessions with vision-based multi-turn interaction.
+---
+nodeKind: AgentVersion
+id: agent-version:cli-anything@current
+attributes:
+  agentProductId: agent:cli-anything
+  versionRange: '>=1.0.0'
+  releasedAt: '2025-01-01'
+  cliCommand: cli-anything
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: agent-core-impl:cli-anything.core@current
+    role: core
+  version_of:
+  - agent:cli-anything
+  sourced_from: []
+  supports:
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0'
+    level: full
+    notes: CLI Anything wraps software into agent-callable CLI interfaces.
+---
+nodeKind: AgentVersion
+id: agent-version:nanny@current
+attributes:
+  agentProductId: agent:nanny
+  versionRange: '>=1.0.0'
+  releasedAt: '2025-01-01'
+  cliCommand: nanny
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: agent-core-impl:nanny.core@current
+    role: core
+  version_of:
+  - agent:nanny
+  sourced_from: []
+  supports:
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0'
+    level: full
+    notes: Nanny provides a task loop with retry and status tracking for smart agents.

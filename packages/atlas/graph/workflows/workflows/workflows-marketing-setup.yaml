@@ -1,0 +1,102 @@
+---
+nodeKind: Workflow
+id: workflow:marketing-automation-platform-setup
+attributes:
+  displayName: "Marketing Automation Platform Setup"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Configures and operationalizes a marketing automation platform —
+    defining lead scoring models based on demographic and behavioral
+    signals, building nurture flow templates, establishing list hygiene
+    and suppression rules, integrating CRM bi-directional sync, setting
+    up email authentication (SPF/DKIM/DMARC), and creating reporting
+    dashboards. Produces a configured MAP with documented scoring rules
+    and flow logic. Excludes ongoing campaign execution.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:marketing-analytics-stack-setup
+attributes:
+  displayName: "Marketing Analytics Stack Setup"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Establishes the marketing measurement infrastructure — designing UTM
+    taxonomy and naming conventions, configuring analytics dashboards for
+    channel and campaign performance, building attribution models
+    (first-touch, multi-touch, data-driven), setting up data pipelines
+    from ad platforms and CRM into a unified reporting layer, and defining
+    KPI thresholds and alerting rules. Produces documented analytics
+    architecture with validated data flows. Excludes ongoing reporting
+    and optimization.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:staff-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:business-intelligence-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:brand-identity-refresh
+attributes:
+  displayName: "Brand Identity Refresh"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "annual"
+  complexity: cross-team
+  description: |
+    Executes a brand identity update — revising visual identity elements
+    (logo, color palette, typography), updating brand guidelines and voice
+    documentation, refreshing digital and print asset templates,
+    coordinating rollout across web properties, marketing materials, and
+    product UI, and training teams on new guidelines. Produces updated
+    brand book and asset library. Excludes strategic brand repositioning
+    decisions.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:planner
+    - target: role:technical-writer
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:public-relations
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:design-team
+    - target: org-unit:content-team

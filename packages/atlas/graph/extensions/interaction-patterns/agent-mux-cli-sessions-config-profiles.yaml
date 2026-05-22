@@ -1,0 +1,277 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-sessions-list
+attributes:
+  displayName: "amux sessions list"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "sessions list"
+  flags:
+    - "--since:1:filter sessions after date"
+    - "--until:1:filter sessions before date"
+    - "--model:1:filter by model"
+    - "--tag:N:filter by tag (repeatable)"
+    - "--limit:1:maximum results"
+    - "--sort:1:sort by date|cost|turns"
+  subcommandExitCodes:
+    - "0:success:listed sessions"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent>"
+  description: |
+    List recorded sessions for an agent. Source:
+    packages/agent-mux/cli/src/commands/sessions.ts:86-129.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-sessions-show
+attributes:
+  displayName: "amux sessions show"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "sessions show"
+  flags:
+    - "--format:1:json|jsonl|markdown (default markdown)"
+  subcommandExitCodes:
+    - "0:success:session rendered"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent> or <session-id>"
+    - "8:session-not-found:SESSION_NOT_FOUND"
+  description: |
+    Render one session via client.sessions.export() (default markdown).
+    Source: packages/agent-mux/cli/src/commands/sessions.ts:131-147.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-sessions-search
+attributes:
+  displayName: "amux sessions search"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "sessions search"
+  flags:
+    - "--agent:1:restrict search to one agent"
+    - "--since:1:filter sessions after date"
+    - "--until:1:filter sessions before date"
+  subcommandExitCodes:
+    - "0:success:search results emitted"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <query>"
+  description: |
+    Full-text search across session histories. Source:
+    packages/agent-mux/cli/src/commands/sessions.ts:149-185.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-sessions-export
+attributes:
+  displayName: "amux sessions export"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "sessions export"
+  flags:
+    - "--format:1:json|jsonl|markdown (default json)"
+  subcommandExitCodes:
+    - "0:success:session exported"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent> or <session-id>"
+    - "8:session-not-found:SESSION_NOT_FOUND"
+  description: |
+    Export one session to stdout in chosen format. Source:
+    packages/agent-mux/cli/src/commands/sessions.ts:187-203.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-sessions-cost
+attributes:
+  displayName: "amux sessions cost"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "sessions cost"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:total cost printed"
+    - "1:general-error:internal error"
+  description: |
+    Print accumulated session cost across agents. Source:
+    packages/agent-mux/cli/src/commands/sessions.ts:205-227.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-config-get
+attributes:
+  displayName: "amux config get"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "config get"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:value or full config printed"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent>"
+    - "7:config-error:CONFIG_ERROR / CONFIG_LOCK_ERROR"
+  description: |
+    Read a config field (or the whole agent config if no field). Source:
+    packages/agent-mux/cli/src/commands/config.ts:97-121.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-config-set
+attributes:
+  displayName: "amux config set"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "config set"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:value written"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent>/<field>/<value>"
+    - "7:config-error:CONFIG_ERROR / CONFIG_LOCK_ERROR"
+  description: |
+    Write one config field for an agent (parses JSON-shaped values).
+    Source: packages/agent-mux/cli/src/commands/config.ts:123-152.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-config-schema
+attributes:
+  displayName: "amux config schema"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "config schema"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:schema printed"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent>"
+  description: |
+    Print the JSON schema describing an agent's config fields. Source:
+    packages/agent-mux/cli/src/commands/config.ts:154-167.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-config-validate
+attributes:
+  displayName: "amux config validate"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "config validate"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:validation report emitted"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent>"
+  description: |
+    Validate the on-disk config for an agent against its schema. Source:
+    packages/agent-mux/cli/src/commands/config.ts:169-191.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-config-reload
+attributes:
+  displayName: "amux config reload"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "config reload"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:reloaded"
+    - "1:general-error:internal error"
+    - "7:config-error:CONFIG_ERROR / CONFIG_LOCK_ERROR"
+  description: |
+    Reload config files for an agent (or all if no <agent>). Source:
+    packages/agent-mux/cli/src/commands/config.ts:193-212.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-profiles-list
+attributes:
+  displayName: "amux profiles list"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "profiles list"
+  flags:
+    - "--scope:1:global|project"
+  subcommandExitCodes:
+    - "0:success:profiles printed"
+    - "1:general-error:internal error"
+  description: |
+    List saved RunOptions profiles. Default subcommand. Source:
+    packages/agent-mux/cli/src/commands/profiles.ts:90-118.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-profiles-show
+attributes:
+  displayName: "amux profiles show"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "profiles show"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:profile printed"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <name>"
+    - "9:profile-not-found:PROFILE_NOT_FOUND"
+  description: |
+    Print one profile by name. Source:
+    packages/agent-mux/cli/src/commands/profiles.ts:120-133.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-profiles-set
+attributes:
+  displayName: "amux profiles set"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "profiles set"
+  flags:
+    - "--scope:1:global|project"
+    - "--agent:1:profile agent"
+    - "--model:1:profile model"
+  subcommandExitCodes:
+    - "0:success:profile saved"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <name>"
+  description: |
+    Save a profile from passthrough run flags (everything not in the
+    reserved global flag set is captured). Source:
+    packages/agent-mux/cli/src/commands/profiles.ts:135-168.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-profiles-delete
+attributes:
+  displayName: "amux profiles delete"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "profiles delete"
+  flags:
+    - "--scope:1:global|project"
+  subcommandExitCodes:
+    - "0:success:profile deleted"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <name>"
+    - "9:profile-not-found:PROFILE_NOT_FOUND"
+  description: |
+    Delete a profile by name. Source:
+    packages/agent-mux/cli/src/commands/profiles.ts:170-187.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-profiles-apply
+attributes:
+  displayName: "amux profiles apply"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "profiles apply"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:resolved profile printed"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <name>"
+    - "9:profile-not-found:PROFILE_NOT_FOUND"
+  description: |
+    Resolve a profile to its effective RunOptions and print as JSON.
+    Source: packages/agent-mux/cli/src/commands/profiles.ts:189-202.

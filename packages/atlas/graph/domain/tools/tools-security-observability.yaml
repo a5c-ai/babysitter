@@ -1,0 +1,304 @@
+---
+nodeKind: Tool
+id: tool:trivy
+attributes:
+  displayName: "Trivy"
+  homepageUrl: "https://github.com/aquasecurity/trivy"
+  kind: security
+  description: |
+    Comprehensive open-source vulnerability scanner for containers, filesystems, Git repos,
+    Kubernetes clusters, and IaC files. Detects OS packages, language dependencies, misconfigurations,
+    and exposed secrets with zero-configuration operation.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:container-security
+    - target: skill-area:vulnerability-scanning
+  used_for:
+    - skill-area:vulnerability-scanning
+    - skill-area:runtime-security
+  alternative_to:
+    - target: tool:snyk
+      comparison: "Security scanning — Trivy is open-source CLI; Snyk is a commercial platform"
+    - target: tool:checkov
+      comparison: "Security scanning — Trivy covers containers+IaC; Checkov focuses on IaC"
+    - target: tool:tfsec
+      comparison: "Security scanning — Trivy is multi-target; tfsec is Terraform-specific"
+    - target: tool:sonarqube
+      comparison: "Code security — Trivy scans dependencies and containers; SonarQube scans source code"
+---
+nodeKind: Tool
+id: tool:falco
+attributes:
+  displayName: "Falco"
+  homepageUrl: "https://falco.org"
+  kind: security
+  description: |
+    CNCF cloud-native runtime security tool that detects anomalous activity in containers,
+    hosts, and Kubernetes workloads using eBPF and kernel system call inspection.
+    Provides real-time threat detection with a flexible rules engine for custom policies.
+edges:
+  belongs_to_language:
+    - language:cpp
+  tool_used_by:
+    - target: skill-area:runtime-security
+    - target: skill-area:threat-detection
+  used_for:
+    - skill-area:vulnerability-scanning
+    - skill-area:runtime-security
+  alternative_to:
+    - target: tool:opa
+      comparison: "Runtime security — Falco detects threats via eBPF; OPA enforces policies via Rego"
+---
+nodeKind: Tool
+id: tool:opa
+attributes:
+  displayName: "Open Policy Agent"
+  homepageUrl: "https://www.openpolicyagent.org"
+  kind: security
+  description: |
+    General-purpose policy engine that decouples policy decisions from application code using the
+    Rego language. Enforces fine-grained authorization policies across microservices, Kubernetes
+    admission control, API gateways, and CI/CD pipelines.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:policy-enforcement
+    - target: skill-area:access-control
+  alternative_to:
+    - target: tool:falco
+      comparison: "Runtime security — OPA enforces policies via Rego; Falco detects threats via eBPF"
+---
+nodeKind: Tool
+id: tool:checkov
+attributes:
+  displayName: "Checkov"
+  homepageUrl: "https://www.checkov.io"
+  kind: security
+  description: |
+    Static analysis tool for infrastructure-as-code that scans Terraform, CloudFormation, Kubernetes,
+    Dockerfiles, and ARM templates for security misconfigurations and compliance violations.
+    Supports hundreds of built-in policies and custom Rego or Python rules.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:iac-security
+    - target: skill-area:compliance-scanning
+  used_for:
+    - skill-area:vulnerability-scanning
+    - skill-area:runtime-security
+  alternative_to:
+    - target: tool:tfsec
+      comparison: "IaC security — Checkov covers multi-IaC; tfsec is Terraform-specific"
+    - target: tool:trivy
+      comparison: "Security scanning — Checkov focuses on IaC; Trivy covers containers+IaC"
+    - target: tool:snyk
+      comparison: "Security scanning — Checkov is open-source IaC-focused; Snyk is a commercial platform"
+---
+nodeKind: Tool
+id: tool:tfsec
+attributes:
+  displayName: "tfsec"
+  homepageUrl: "https://github.com/aquasecurity/tfsec"
+  kind: security
+  description: |
+    Security scanner for Terraform code that identifies misconfigurations and potential vulnerabilities
+    in cloud infrastructure definitions before deployment. Covers AWS, Azure, GCP, and general
+    Terraform resources with configurable severity levels and custom checks.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:iac-security
+    - target: skill-area:vulnerability-scanning
+  used_for:
+    - skill-area:vulnerability-scanning
+    - skill-area:runtime-security
+  alternative_to:
+    - target: tool:checkov
+      comparison: "IaC security — tfsec is Terraform-specific; Checkov covers multi-IaC"
+    - target: tool:trivy
+      comparison: "Security scanning — tfsec is Terraform-specific; Trivy is multi-target"
+    - target: tool:snyk
+      comparison: "Security scanning tools"
+---
+nodeKind: Tool
+id: tool:owasp-zap
+attributes:
+  displayName: "OWASP ZAP"
+  homepageUrl: "https://www.zaproxy.org"
+  kind: security
+  description: |
+    Open-source dynamic application security testing (DAST) tool maintained by OWASP for finding
+    vulnerabilities in web applications. Provides automated scanning, active and passive attack modes,
+    and a REST API for CI/CD pipeline integration.
+edges:
+  belongs_to_language:
+    - language:java
+  tool_used_by:
+    - target: skill-area:dast-scanning
+    - target: skill-area:web-security-testing
+  alternative_to:
+    - target: tool:snyk
+      comparison: "Security scanning — OWASP ZAP is DAST for web apps; Snyk is SCA and code scanning"
+    - target: tool:sonarqube
+      comparison: "Security testing — OWASP ZAP is DAST (runtime); SonarQube is SAST (static)"
+---
+nodeKind: Tool
+id: tool:jaeger
+attributes:
+  displayName: "Jaeger"
+  homepageUrl: "https://www.jaegertracing.io"
+  kind: observability
+  description: |
+    CNCF open-source distributed tracing platform for monitoring microservices-based architectures.
+    Provides end-to-end request tracing, latency analysis, dependency graph visualization, and
+    root cause analysis of performance bottlenecks across services.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:distributed-tracing
+    - target: skill-area:observability-pipeline
+  alternative_to:
+    - target: tool:zipkin
+      comparison: "Distributed tracing platforms"
+    - target: tool:honeycomb
+      comparison: "Distributed tracing platforms"
+---
+nodeKind: Tool
+id: tool:zipkin
+attributes:
+  displayName: "Zipkin"
+  homepageUrl: "https://zipkin.io"
+  kind: observability
+  description: |
+    Distributed tracing system originally developed at Twitter that helps gather timing data
+    needed to troubleshoot latency problems in service architectures. Provides a UI to visualize
+    trace waterfalls and service dependency graphs.
+edges:
+  belongs_to_language:
+    - language:java
+  tool_used_by:
+    - target: skill-area:distributed-tracing
+    - target: skill-area:observability-pipeline
+  alternative_to:
+    - target: tool:jaeger
+      comparison: "Distributed tracing platforms"
+    - target: tool:honeycomb
+      comparison: "Distributed tracing platforms"
+---
+nodeKind: Tool
+id: tool:opentelemetry
+attributes:
+  displayName: "OpenTelemetry"
+  homepageUrl: "https://opentelemetry.io"
+  kind: observability
+  description: |
+    CNCF vendor-neutral observability framework providing APIs, SDKs, and instrumentation libraries
+    for generating, collecting, and exporting traces, metrics, and logs. Acts as the unified
+    standard for instrumenting cloud-native applications across languages and platforms.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:distributed-tracing
+  alternative_to:
+    - target: tool:opentelemetry-collector
+      comparison: "OpenTelemetry ecosystem — OTel is the instrumentation SDK; the Collector is the data pipeline"
+---
+nodeKind: Tool
+id: tool:loki
+attributes:
+  displayName: "Loki"
+  homepageUrl: "https://grafana.com/oss/loki/"
+  kind: observability
+  description: |
+    Horizontally scalable, highly available log aggregation system by Grafana Labs inspired by
+    Prometheus. Stores only log metadata labels rather than full-text indexing for cost-efficient
+    log storage, queried via LogQL and integrated natively into Grafana dashboards.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:log-aggregation
+  alternative_to:
+    - target: tool:fluentd
+      comparison: "Log infrastructure — Loki is a log storage backend; Fluentd is a log collector/router"
+    - target: tool:fluent-bit
+      comparison: "Log infrastructure — Loki is a log storage backend; Fluent Bit is a log shipper"
+    - target: tool:vector
+      comparison: "Log infrastructure — Loki is a log storage backend; Vector is a log pipeline"
+---
+nodeKind: Tool
+id: tool:tempo
+attributes:
+  displayName: "Grafana Tempo"
+  homepageUrl: "https://grafana.com/oss/tempo/"
+  kind: observability
+  description: |
+    Cost-effective distributed tracing backend by Grafana Labs that stores traces in object storage
+    (S3, GCS, Azure Blob) without indexing, supporting Jaeger, Zipkin, and OTLP ingest formats.
+    Integrates with Grafana for trace-to-log and trace-to-metrics correlation.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:distributed-tracing
+    - target: skill-area:observability-pipeline
+  alternative_to:
+    - target: tool:jaeger
+      comparison: "Distributed tracing backends — Tempo uses object storage; Jaeger uses Elasticsearch/Cassandra"
+---
+nodeKind: Tool
+id: tool:vector
+attributes:
+  displayName: "Vector"
+  homepageUrl: "https://vector.dev"
+  kind: observability
+  description: |
+    High-performance observability data pipeline by Datadog for collecting, transforming, and
+    routing logs, metrics, and traces. Written in Rust for minimal resource footprint with
+    a composable topology of sources, transforms, and sinks.
+edges:
+  belongs_to_language:
+    - language:rust
+  tool_used_by:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:log-aggregation
+  alternative_to:
+    - target: tool:fluentd
+      comparison: "Log shipping — Vector is Rust-based and high-performance; Fluentd has 500+ plugins"
+    - target: tool:fluent-bit
+      comparison: "Log shipping — Vector handles logs+metrics+traces; Fluent Bit is lightweight log shipper"
+    - target: tool:loki
+      comparison: "Log infrastructure — Vector is a log pipeline; Loki is a log storage backend"
+---
+nodeKind: Tool
+id: tool:fluentd
+attributes:
+  displayName: "Fluentd"
+  homepageUrl: "https://www.fluentd.org"
+  kind: observability
+  description: |
+    CNCF open-source data collector for unified logging infrastructure that supports 500+ plugins
+    for connecting data sources and destinations. Provides a structured JSON logging layer that
+    decouples data collection from backend storage and analytics systems.
+edges:
+  belongs_to_language:
+    - language:ruby
+  tool_used_by:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:log-aggregation
+  alternative_to:
+    - target: tool:fluent-bit
+      comparison: "Log shipping — Fluentd has 500+ plugins; Fluent Bit is a lightweight alternative"
+    - target: tool:vector
+      comparison: "Log shipping — Fluentd has 500+ plugins; Vector is Rust-based and high-performance"
+    - target: tool:loki
+      comparison: "Log infrastructure — Fluentd is a log collector/router; Loki is a log storage backend"

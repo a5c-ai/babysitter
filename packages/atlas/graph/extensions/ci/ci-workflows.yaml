@@ -1,0 +1,98 @@
+---
+nodeKind: CIWorkflow
+id: ci-workflow:gh-actions-test
+attributes:
+  displayName: "GitHub Actions — test.yml"
+  workflowKind: github-actions
+  filePath: ".github/workflows/test.yml"
+  triggers: [push, pull_request]
+  vcsHostId: vcs-host:github
+  notes: |
+    Standard test matrix on Linux + macOS for Node 18 and 20.
+edges:
+  hosted_on_vcs:
+    - target: vcs-host:github
+  validates_pull_request:
+    - target: pull-request:acme-app-1234
+    - target: pull-request:globex-platform-87
+---
+nodeKind: CIWorkflow
+id: ci-workflow:claim-tests-daily
+attributes:
+  displayName: "Catalog claim tests (daily)"
+  workflowKind: github-actions
+  filePath: ".github/workflows/claim-tests-daily.yml"
+  triggers: [schedule, workflow_dispatch]
+  vcsHostId: vcs-host:github
+  notes: |
+    Daily 06:00 UTC run of every ClaimTest with cadence=daily. Failures
+    open / update one rolling Issue per failing claim; recoveries close
+    them. Drives early-warning detection of external integration drift.
+edges:
+  hosted_on_vcs:
+    - target: vcs-host:github
+  schedules_claim_test:
+    - target: claim-test:claude-code-session-path-convention
+---
+nodeKind: CIWorkflow
+id: ci-workflow:claim-tests-weekly
+attributes:
+  displayName: "Catalog claim tests (weekly)"
+  workflowKind: github-actions
+  filePath: ".github/workflows/claim-tests-weekly.yml"
+  triggers: [schedule, workflow_dispatch]
+  vcsHostId: vcs-host:github
+  notes: |
+    Weekly Monday 06:00 UTC run of every ClaimTest with cadence=weekly.
+    Same reporter pipeline as the daily workflow.
+edges:
+  hosted_on_vcs:
+    - target: vcs-host:github
+  schedules_claim_test:
+    - target: claim-test:claude-code-cli-command
+    - target: claim-test:claude-opus-4-7-context-window
+    - target: claim-test:mcp-stdio-init-handshake
+    - target: claim-test:filesystem-mcp-tool-list
+---
+nodeKind: CIWorkflow
+id: ci-workflow:gh-actions-release
+attributes:
+  displayName: "GitHub Actions — release.yml"
+  workflowKind: github-actions
+  filePath: ".github/workflows/release.yml"
+  triggers: [release]
+  vcsHostId: vcs-host:github
+  notes: |
+    Builds and publishes packages to npm + GH Releases on tag push.
+edges:
+  hosted_on_vcs:
+    - target: vcs-host:github
+---
+nodeKind: CIWorkflow
+id: ci-workflow:gitlab-ci-pipeline
+attributes:
+  displayName: "GitLab CI — .gitlab-ci.yml"
+  workflowKind: gitlab-ci
+  filePath: ".gitlab-ci.yml"
+  triggers: [push, merge_request, schedule]
+  vcsHostId: vcs-host:gitlab
+  notes: |
+    Multi-stage build/test/deploy pipeline using GitLab-hosted runners.
+edges:
+  hosted_on_vcs:
+    - target: vcs-host:gitlab
+---
+nodeKind: CIWorkflow
+id: ci-workflow:circleci-config
+attributes:
+  displayName: "CircleCI — .circleci/config.yml"
+  workflowKind: circleci
+  filePath: ".circleci/config.yml"
+  triggers: [push]
+  vcsHostId: vcs-host:github
+  notes: |
+    CircleCI workflow with parallel test splits and a deploy job gated on
+    main.
+edges:
+  hosted_on_vcs:
+    - target: vcs-host:github

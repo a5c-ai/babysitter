@@ -8,6 +8,13 @@
  * // Input: { researchQuestion: "Does treatment X improve outcome Y?", hypotheses: [...], variables: {...} }
  * // Output: { experimentalDesign: { type: "RCT", factors: [...] }, protocols: [...], statisticalPlan: {...} }
  * @references Fisher's experimental design principles, Campbell & Stanley validity framework, CONSORT guidelines
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -27,6 +34,7 @@ export async function process(inputs, ctx) {
       suggestions: questionAnalysis.reformulationSuggestions
     };
   }
+
   // Phase 2: Variable Identification and Operationalization
   const variableAnalysis = await ctx.task(analyzeVariablesTask, {
     independentVariables: inputs.variables?.independent || [],
@@ -77,7 +85,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Validity Assessment
-  let validityAnalysis = await ctx.task(assessValidityTask, {
+  const validityAnalysis = await ctx.task(assessValidityTask, {
     design: designSelection,
     controls: controlStrategy,
     randomization: randomizationPlan,
@@ -85,28 +93,13 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Design Validity
-      let lastFeedback = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback) {
-        validityAnalysis = await ctx.task(assessValidityTask, { ...{
-    design: designSelection,
-    controls: controlStrategy,
-    randomization: randomizationPlan,
-    confounds: confoundAnalysis.identifiedConfounds
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint('design-revision-required', {
+  if (validityAnalysis.overallValidity < 0.6) {
+    await ctx.breakpoint('design-revision-required', {
       message: 'Experimental design has significant validity concerns',
       concerns: validityAnalysis.majorThreats,
-      suggestedRevisions: validityAnalysis.mitigationStrategies,
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      suggestedRevisions: validityAnalysis.mitigationStrategies
+    });
+  }
 
   // Phase 9: Protocol Development
   const protocols = await ctx.task(developProtocolsTask, {

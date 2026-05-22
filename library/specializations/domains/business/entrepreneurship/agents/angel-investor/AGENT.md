@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: Fundraising
   agent-id: AG-014
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:investment-analysis, skill-area:financial-planning, skill-area:business-model-design]
+  workflows: [workflow:product-discovery]
+  roles: [role:financial-analyst, role:strategic-planner, role:partnerships-manager]
 ---
 
 # Angel Investor Agent

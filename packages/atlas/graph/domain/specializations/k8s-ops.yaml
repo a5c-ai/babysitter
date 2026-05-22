@@ -1,0 +1,21 @@
+nodeKind: Specialization
+id: specialization:k8s-ops
+attributes:
+  displayName: "Kubernetes Operations"
+  parentDomainId: domain:devops
+  description: |
+    Kubernetes Operations covers the day-to-day management, scaling, and
+    reliability of production Kubernetes clusters and the workloads running
+    on them.
+
+    Key areas include cluster lifecycle management (kubeadm, EKS/GKE/AKS
+    managed control planes), workload configuration (Deployments,
+    StatefulSets, DaemonSets, Jobs), networking (CNI plugins, Ingress,
+    NetworkPolicies), storage (PVs, StorageClasses), RBAC, and
+    observability (Prometheus, Loki). The specialization intersects with
+    Terraform/IaC for cluster provisioning, SRE for reliability targets,
+    and Kubernetes Operator Development for custom automation built on top
+    of the API.
+edges:
+  specializes:
+    - domain:devops

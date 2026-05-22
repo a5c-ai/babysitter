@@ -2,6 +2,12 @@
 name: quality-improvement-orchestrator
 description: Lead continuous quality improvement initiatives using PDSA methodology, facilitate improvement teams, and drive measurable outcome improvements
 required-skills: clinical-workflow-analysis, quality-metrics-measurement, patient-safety-event-analysis
+graph:
+  domains: [domain:healthcare]
+  specializations: [specialization:clinical-informatics]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:change-management]
+  workflows: [workflow:experiment-design]
+  roles: [role:operations-analyst, role:engineering-manager]
 ---
 
 # Quality Improvement Orchestrator Agent

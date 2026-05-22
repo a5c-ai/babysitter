@@ -17,6 +17,12 @@
  * - Vivado Power Analysis: https://docs.amd.com/r/en-US/ug907-vivado-power-analysis-optimization
  * - PowerPlay Analysis: https://www.intel.com/content/www/us/en/programmable/documentation/mwh1410384175702.html
  * - Low Power Design: https://docs.amd.com/r/en-US/ug949-vivado-design-methodology
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:hardware-software-integration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

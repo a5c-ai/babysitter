@@ -3,6 +3,13 @@
  * @description Maestro Bootstrap - New project minimum infrastructure setup: scaffold, configure, initial architecture
  * @inputs { projectName: string, projectType: string, techStack?: object, projectRoot?: string, qualityThreshold?: number }
  * @outputs { success: boolean, scaffold: object, config: object, initialArchitecture: object, knowledgeGraph: object, readyForDevelopment: boolean }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   skillAreas: [skill-area:domain-driven-design, skill-area:c4-modeling, skill-area:adr-writing]
+ *   workflows: [workflow:architecture-decision-record]
+ *   topics: [topic:domain-driven-design, topic:clean-architecture]
+ *   roles: [role:architect, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

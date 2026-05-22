@@ -20,6 +20,13 @@
  * - React Testing Library: https://testing-library.com/react
  * - Redux Toolkit: https://redux-toolkit.js.org/
  * - TypeScript: https://www.typescriptlang.org/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer]
+ *   skillAreas: [skill-area:react-state-management, skill-area:react-testing]
+ *   topics: [topic:component-based-architecture, topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -152,6 +159,9 @@ export async function process(inputs, ctx) {
   });
 
   artifacts.push(...testingInfra.artifacts);
+
+  // TypeScript hard gate (issue #65)
+  const tsCheck = await ctx.task(tsCheckTask, { projectName });
 
     let lastFeedback = null;
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -692,6 +702,8 @@ export const errorHandlingTask = defineTask('error-handling', (args, taskCtx) =>
   },
   labels: ['web', 'react', 'error-handling', 'error-boundaries']
 }));
+
+export const tsCheckTask = defineTask('typescript-check', (args, taskCtx) => ({ kind: 'shell', title: 'TypeScript compilation check', shell: { command: 'npx tsc --noEmit 2>&1', expectedExitCode: 0, timeout: 120000 }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['typescript', 'compilation', 'hard-gate'] }));
 
 export const cacheBustVerificationTask = defineTask('cache-bust-verification', (args, taskCtx) => ({ kind: 'shell', title: `Cache Bust Verification - ${args.projectName}`, shell: { command: 'rm -rf .next node_modules/.vite node_modules/.cache build dist 2>/dev/null; echo "React build cache cleared at $(date +%s)"' }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'react', 'cache-bust'] }));
 

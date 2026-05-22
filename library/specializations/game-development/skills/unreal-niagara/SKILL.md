@@ -2,6 +2,11 @@
 name: unreal-niagara
 description: Unreal Engine Niagara VFX skill for particle simulations, GPU sprites, and procedural visual effects.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:graphics-rendering, skill-area:shader-programming]
+  roles: [role:game-developer]
 ---
 
 # Unreal Niagara Skill

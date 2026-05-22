@@ -14,6 +14,11 @@ metadata:
   domain: science
   category: Design Control
   agent-id: BME-AG-004
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:data-analysis, skill-area:compliance-automation, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # Design Control Manager Agent

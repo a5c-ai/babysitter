@@ -1,0 +1,64 @@
+---
+nodeKind: SkillArea
+id: skill-area:code-review-practice
+attributes:
+  displayName: "Code Review Practice"
+  description: |
+    Reviewing pull requests and diffs for correctness, security,
+    performance, style, and tests — producing structured, actionable
+    review comments.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: specialization:collaboration
+      confidence: secondary
+    - target: specialization:extreme-programming
+      confidence: secondary
+    - target: specialization:cleanroom
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:code-quality
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:api-contract-testing
+attributes:
+  displayName: "API Contract Testing"
+  description: |
+    Probing HTTP/REST APIs with curl/httpie/Postman, generating request
+    fixtures, asserting JSON Schemas, and running consumer-driven
+    contract checks.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:orchestration-loop
+attributes:
+  displayName: "Orchestration Loop Engineering"
+  description: |
+    Designing the outer loop of agentic systems — process definitions,
+    task decomposition, journals, breakpoints, resume/replay, and
+    eval-driven iteration. Sibling to agentic-loops with focus on
+    operator-facing orchestration scaffolding.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: specialization:maestro
+      confidence: secondary
+    - target: specialization:metaswarm
+      confidence: secondary
+    - target: specialization:bmad-method
+      confidence: secondary

@@ -1,0 +1,101 @@
+---
+nodeKind: Workflow
+id: workflow:release-readiness-checklist
+attributes:
+  displayName: "Release Readiness Checklist"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Executes a structured go/no-go checklist before every production release —
+    verifying feature-flag states, confirming test-suite green status,
+    validating migration scripts, checking rollback plan existence, reviewing
+    on-call coverage, auditing changelog completeness, confirming monitoring
+    dashboards are updated, and collecting sign-offs from QA, security, and
+    product owners. Produces a signed release-readiness certificate. Excludes
+    the deployment itself.
+edges:
+  involves_role:
+    - target: role:release-manager-bot
+    - target: role:qa-lead
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:gitops
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:approve-deploys
+  performed_by_org_unit:
+    - target: org-unit:release-engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:artifact-signing-and-provenance
+attributes:
+  displayName: "Artifact Signing and Provenance"
+  workflowKind: security
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Ensures every release artifact (container image, binary, SBOM) is
+    cryptographically signed and accompanied by verifiable provenance
+    metadata — configuring Sigstore/cosign or GPG signing in CI, generating
+    SLSA provenance attestations, verifying signatures in deployment admission
+    controllers, auditing key-rotation schedules, and validating that
+    downstream consumers can verify provenance end-to-end. Produces a
+    signing-compliance report. Excludes key-ceremony procedures.
+edges:
+  involves_role:
+    - target: role:security-engineer
+    - target: role:devops-engineer
+    - target: role:release-manager-bot
+  requires_skill_area:
+    - target: skill-area:gitops
+    - target: skill-area:signature-schemes
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:release-engineering
+    - target: org-unit:application-security-team
+---
+nodeKind: Workflow
+id: workflow:rollback-runbook-validation
+attributes:
+  displayName: "Rollback Runbook Validation"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Validates that rollback runbooks are accurate, executable, and up-to-date
+    before each release — dry-running rollback steps in a staging environment,
+    verifying database migration reversibility, checking that feature-flag kill
+    switches function correctly, confirming monitoring alerts fire during
+    simulated rollback, and timing the end-to-end rollback duration against the
+    SLA target. Produces a validated runbook and rollback-time estimate.
+    Excludes runbook authoring from scratch.
+edges:
+  involves_role:
+    - target: role:sre-runbook-author
+    - target: role:sre-lead
+    - target: role:devops-engineer
+  requires_skill_area:
+    - target: skill-area:runbook-writing
+    - target: skill-area:blue-green-deployment
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:runbook-authoring
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:release-engineering
+    - target: org-unit:infra-engineering

@@ -3,6 +3,12 @@
  * @description Structured approach to designing, documenting, and iterating on business models using the nine building blocks framework
  * @inputs { businessConcept: string, organizationContext: object, targetSegments: array, outputDir: string }
  * @outputs { success: boolean, businessModelCanvas: object, valueProposition: object, revenueModel: object, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:business-model-design, skill-area:growth-strategy]
+ *   workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

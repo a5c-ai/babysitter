@@ -1,0 +1,85 @@
+nodeKind: Provider
+id: provider:azure-openai
+attributes:
+  displayName: "Azure OpenAI Service"
+  vendor: "Microsoft"
+  versionRange: ">=2023-05-15"
+  authMethods:
+    - api-key
+    - oauth
+  authMethodNotes: |
+    Azure OpenAI deployments authenticate with an `api-key` header or a
+    Microsoft Entra ID (Azure AD) bearer token in `Authorization: Bearer
+    <token>`. Each deployment has its own per-resource endpoint:
+    `https://<resource>.openai.azure.com/openai/deployments/<deployment>`.
+    Distinct from Azure AI Foundry which uses the newer unified endpoint.
+  endpoints:
+    chat_completions: "https://<resource>.openai.azure.com/openai/deployments/<deployment>/chat/completions?api-version=<version>"
+    responses: "https://<resource>.openai.azure.com/openai/deployments/<deployment>/responses?api-version=<version>"
+    completions: "https://<resource>.openai.azure.com/openai/deployments/<deployment>/completions?api-version=<version>"
+    embeddings: "https://<resource>.openai.azure.com/openai/deployments/<deployment>/embeddings?api-version=<version>"
+    models: "https://<resource>.openai.azure.com/openai/models?api-version=<version>"
+  pricing: |
+    Per-model pay-as-you-go rates published at
+    https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/.
+    Provisioned throughput (PTU) pricing also available.
+  pricingTiers:
+    - name: pay-as-you-go
+      rateLimit: "Per-deployment TPM/RPM quotas configurable in Azure portal"
+      priceMultiplier: 1.0
+      description: "Default per-token billing."
+    - name: provisioned-throughput
+      rateLimit: "Reserved PTUs (provisioned throughput units) per region"
+      priceMultiplier: 1.0
+      description: "Reserved capacity at fixed monthly cost."
+    - name: batch
+      rateLimit: "Global batch jobs processed within 24h"
+      priceMultiplier: 0.5
+      description: "Azure OpenAI Global Batch — 50% discount."
+  rateLimitSignalingProtocol: |
+    Azure returns `x-ratelimit-remaining-requests`,
+    `x-ratelimit-remaining-tokens`, and HTTP 429 with `retry-after`
+    (seconds). Error envelope follows the OpenAI format:
+    `{ "error": { "code": "...", "message": "..." } }`.
+  dataResidencyOptions:
+    - us
+    - eu
+    - asia
+  vendorFeatures:
+    - capability:supports-tool-use
+    - capability:supports-prompt-caching
+    - capability:supports-batch-api
+    - capability:supports-structured-output
+  slaTier: "azure-99.9"
+  regions:
+    - eastus
+    - eastus2
+    - westus
+    - westus3
+    - southcentralus
+    - northcentralus
+    - swedencentral
+    - westeurope
+    - uksouth
+    - japaneast
+    - australiaeast
+    - canadaeast
+edges:
+  realizes:
+    - target: layer:2-provider
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: ">=2023-12-01"
+      level: full
+    - target: capability:supports-prompt-caching
+      versionRange: ">=2024-08-01"
+    - target: capability:supports-batch-api
+      versionRange: ">=2024-06-01"
+    - target: capability:supports-structured-output
+      versionRange: ">=2024-08-01"
+      level: full
+      notes: Structured output via json_schema response_format with strict=true.
+    - target: capability:supports-json-mode
+      versionRange: ">=2023-12-01"
+      level: full
+  serves: []

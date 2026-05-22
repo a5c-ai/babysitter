@@ -1,0 +1,23 @@
+nodeKind: HookSurface
+id: hook-surface:post-tool-use
+attributes:
+  eventName: "PostToolUse (canonical)"
+  displayName: "PostToolUse (canonical)"
+  kind: canonical
+  direction: post
+  blocking: false
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [tool_name, tool_input, tool_response, session_id, transcript_path]
+    properties:
+      tool_name: { type: string }
+      tool_input: { type: object }
+      tool_response: { type: object, description: "Result returned by the tool (success or error)." }
+      session_id: { type: string }
+      transcript_path: { type: string }
+      cwd: { type: string }
+  description: |
+    Canonical post-tool-use hook. Fires after every tool invocation
+    completes, providing input and output for telemetry / governance.
+edges:

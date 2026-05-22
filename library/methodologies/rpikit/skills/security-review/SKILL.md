@@ -2,17 +2,14 @@
 name: security-review
 description: Security vulnerability assessment identifying OWASP risks, injection vectors, authentication issues, and data exposure with severity classification.
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Security Review
-
-## Overview
-
-Identify security vulnerabilities in code changes. Covers OWASP categories, injection vectors, authentication/authorization issues, data exposure, and dependency risks.
-
-## When to Use
-
-- After code review passes (or in parallel)
 - Before any code merge involving user-facing changes
 - As part of the /review-security command
 - Mandatory for high-stakes implementations

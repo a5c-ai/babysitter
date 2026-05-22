@@ -15,6 +15,13 @@
  * @references
  * - PostgreSQL Performance Tips: https://www.postgresql.org/docs/current/performance-tips.html
  * - MySQL Optimization: https://dev.mysql.com/doc/refman/8.0/en/optimization.html
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:performance-optimization]
+ *   skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:observability-driven-development]
+ *   workflows: [workflow:data-pipeline-deployment]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

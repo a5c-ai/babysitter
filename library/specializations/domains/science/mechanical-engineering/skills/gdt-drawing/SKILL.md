@@ -19,6 +19,10 @@ metadata:
     - NX Drafting
     - CETOL 6 Sigma
     - 3DCS
+graph:
+  domains: [domain:mechanical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # GD&T and Drawing Creation Skill

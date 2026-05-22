@@ -1,0 +1,162 @@
+---
+nodeKind: Presentation
+id: presentation:agent-mux-tui
+attributes:
+  displayName: "agent-mux TUI"
+  kind: tui
+  description: |
+    Terminal UI for agent-mux sessions. Renders agent runs, slash commands,
+    and breakpoint approvals in an ink-based full-screen terminal shell;
+    bridges to remote agents (claude-code, codex, etc.) via the agent-mux
+    transport.
+  renderingTechnology: terminal-emulator
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: partial
+  platforms: [darwin, linux, win32]
+  bundleSize: "~50 MB"
+  updateChannel: auto
+edges: {}
+---
+nodeKind: Presentation
+id: presentation:agent-mux-cli
+attributes:
+  displayName: "agent-mux CLI"
+  kind: cli
+  description: |
+    Non-interactive CLI surface of agent-mux. Scriptable `amux run --json`
+    invocation that proxies events from the bridged remote agent and exits
+    on session end. Used in CI and headless automation.
+  themeSupport: none
+  accessibilitySupport: basic
+  offlineMode: partial
+  platforms: [darwin, linux, win32]
+  bundleSize: "~50 MB"
+  updateChannel: auto
+edges: {}
+---
+nodeKind: Presentation
+id: presentation:agent-mux-webui
+attributes:
+  displayName: "agent-mux Web UI"
+  kind: web
+  description: |
+    Browser-based control surface for agent-mux sessions. Next.js / React
+    web app rendering a session list, run detail panel, kanban board, and
+    real-time hook/breakpoint inbox driven by the agent-mux gateway.
+  renderingTechnology: next-js
+  themeSupport: full-customizable
+  accessibilitySupport: wcag-aa
+  offlineMode: partial
+  platforms: [web]
+  bundleSize: "~5 MB"
+  updateChannel: auto
+edges: {}
+---
+nodeKind: Presentation
+id: presentation:agent-mux-mobile-ios
+attributes:
+  displayName: "agent-mux iOS app"
+  kind: mobile
+  description: |
+    iOS mobile app for agent-mux. React Native client that connects to the
+    agent-mux gateway, surfaces session activity, accepts breakpoints, and
+    streams agent output on the go.
+  renderingTechnology: react-native
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: partial
+  platforms: [ios]
+  bundleSize: "~30 MB"
+  updateChannel: extension-store
+edges: {}
+---
+nodeKind: Presentation
+id: presentation:agent-mux-mobile-android
+attributes:
+  displayName: "agent-mux Android app"
+  kind: mobile
+  description: |
+    Android mobile app for agent-mux. React Native client that connects to
+    the agent-mux gateway, surfaces session activity, accepts breakpoints,
+    and streams agent output on the go.
+  renderingTechnology: react-native
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: partial
+  platforms: [android]
+  bundleSize: "~30 MB"
+  updateChannel: extension-store
+edges: {}
+---
+nodeKind: Presentation
+id: presentation:agent-mux-tv-androidtv
+attributes:
+  displayName: "agent-mux Android TV app"
+  kind: tv
+  description: |
+    Android TV / Google TV app for agent-mux. Lean-back, remote-control
+    optimized view of session activity and run progress, suitable for
+    monitoring long-running agent runs from a couch.
+  renderingTechnology: react-native
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: partial
+  platforms: [android]
+  bundleSize: "~30 MB"
+  updateChannel: extension-store
+edges: {}
+---
+nodeKind: Presentation
+id: presentation:agent-mux-tv-appletv
+attributes:
+  displayName: "agent-mux Apple TV app"
+  kind: tv
+  description: |
+    Apple TV (tvOS) app for agent-mux. Lean-back, remote-control optimized
+    view of session activity and run progress for monitoring long-running
+    agent runs from a couch.
+  renderingTechnology: react-native
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: partial
+  platforms: [ios]
+  bundleSize: "~30 MB"
+  updateChannel: extension-store
+edges: {}
+---
+nodeKind: Presentation
+id: presentation:agent-mux-watch-watchos
+attributes:
+  displayName: "agent-mux watchOS app"
+  kind: watch
+  description: |
+    Apple Watch (watchOS) companion app for agent-mux. Glanceable run
+    status, breakpoint approval taps, and complications surfacing the
+    state of in-flight agent sessions.
+  renderingTechnology: react-native
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: partial
+  platforms: [ios]
+  bundleSize: "~5 MB"
+  updateChannel: extension-store
+edges: {}
+---
+nodeKind: Presentation
+id: presentation:agent-mux-watch-wearos
+attributes:
+  displayName: "agent-mux Wear OS app"
+  kind: watch
+  description: |
+    Wear OS companion app for agent-mux. Glanceable run status, breakpoint
+    approval taps, and tiles surfacing the state of in-flight agent
+    sessions.
+  renderingTechnology: react-native
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: partial
+  platforms: [android]
+  bundleSize: "~5 MB"
+  updateChannel: extension-store
+edges: {}

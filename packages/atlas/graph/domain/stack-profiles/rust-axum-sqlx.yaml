@@ -1,0 +1,23 @@
+nodeKind: StackProfile
+id: stack-profile:rust-axum-sqlx
+attributes:
+  displayName: "Rust + Axum + SQLx + Postgres"
+  description: |
+    Rust web service stack: Axum (a tokio-based, modular HTTP framework from
+    the Tower ecosystem), SQLx for compile-time verified SQL queries with
+    async support, and PostgreSQL as the primary data store.
+
+    This stack targets extremely high-throughput, low-latency API services
+    where memory safety, predictable performance, and small binary size
+    matter. Tower middleware (auth, rate limiting, tracing) layers cleanly
+    onto Axum. sqlx macros catch schema mismatches at compile time. The
+    tracing + tracing-subscriber crates handle structured observability.
+    Deployment commonly targets Fly.io, bare VMs, or Kubernetes with
+    distroless container images.
+  composes:
+    - language:rust
+    - framework:axum
+edges:
+  composed_of:
+    - language:rust
+    - framework:axum

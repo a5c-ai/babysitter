@@ -1,0 +1,137 @@
+nodeKind: Benchmark
+id: benchmark:re-bench
+attributes:
+  displayName: "RE-Bench"
+  homepageUrl: https://metr.org/AI_R_D_Evaluation_Report.pdf
+  kind: research-engineering
+  targetsKind: AgentVersion
+  description: |
+    METR's autonomous-research-engineering benchmark: time-bounded ML
+    R&D tasks scored against expert human baselines to measure
+    frontier-agent ability to do self-directed research engineering.
+edges:
+  covers:
+    - target: skill-area:autonomous-research-engineering
+      attributes:
+        coverage: full
+        weight: 0.8
+    - target: skill-area:ml-fine-tuning
+      attributes:
+        coverage: tangential
+        weight: 0.2
+  applies_to:
+    - target: domain:machine-learning
+    - target: domain:scientific-discovery
+---
+nodeKind: Benchmark
+id: benchmark:appworld
+attributes:
+  displayName: "AppWorld"
+  homepageUrl: https://appworld.dev/
+  kind: tool-use
+  targetsKind: AgentVersion
+  description: |
+    Tool-use benchmark with a controllable ecosystem of 9 simulated
+    apps (email, calendar, shopping, etc.) and 750 cross-app tasks.
+    Tests long-horizon multi-app orchestration.
+edges:
+  covers:
+    - target: skill-area:multi-app-orchestration
+      attributes:
+        coverage: full
+        weight: 0.7
+    - target: skill-area:multi-turn-tool-use
+      attributes:
+        coverage: partial
+        weight: 0.3
+  applies_to:
+    - target: domain:software-engineering
+---
+nodeKind: Benchmark
+id: benchmark:assistant-bench
+attributes:
+  displayName: "AssistantBench"
+  homepageUrl: https://assistantbench.github.io/
+  kind: web-agent
+  targetsKind: AgentVersion
+  description: |
+    Real-world web-research tasks (price comparison, scheduling,
+    finding multi-attribute info) constructed to stress-test agentic
+    assistants beyond simple QA.
+edges:
+  covers:
+    - target: skill-area:deep-web-research
+      attributes:
+        coverage: partial
+        weight: 0.4
+    - target: skill-area:agentic-loops
+      attributes:
+        coverage: partial
+        weight: 0.2
+  applies_to:
+    - target: domain:web-development
+---
+nodeKind: Benchmark
+id: benchmark:the-agent-company
+attributes:
+  displayName: "TheAgentCompany"
+  homepageUrl: https://the-agent-company.com/
+  kind: full-stack
+  targetsKind: AgentVersion
+  description: |
+    CMU benchmark simulating a real software-company environment
+    (Gitea, RocketChat, Plane, OwnCloud, etc.) where agents complete
+    consequential workplace tasks across tools.
+edges:
+  covers:
+    - target: skill-area:multi-app-orchestration
+      attributes:
+        coverage: full
+        weight: 0.6
+    - target: skill-area:bug-fixing-from-issues
+      attributes:
+        coverage: partial
+        weight: 0.2
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:operations
+---
+nodeKind: Benchmark
+id: benchmark:agentclinic
+attributes:
+  displayName: "AgentClinic"
+  homepageUrl: https://agentclinic.github.io/
+  kind: domain-specific
+  targetsKind: AgentVersion
+  description: |
+    Multimodal medical-agent benchmark simulating a clinical encounter
+    (patient, exam, lab tools, instruments) to evaluate diagnostic
+    reasoning end-to-end.
+edges:
+  covers:
+    - target: skill-area:medical-agent
+      attributes:
+        coverage: full
+        weight: 0.7
+  applies_to:
+    - target: domain:healthcare
+---
+nodeKind: Benchmark
+id: benchmark:travelplanner
+attributes:
+  displayName: "TravelPlanner"
+  homepageUrl: https://osu-nlp-group.github.io/TravelPlanner/
+  kind: planning
+  targetsKind: AgentVersion
+  description: |
+    Tool-augmented planning benchmark requiring agents to compose
+    multi-day travel itineraries with explicit constraint satisfaction
+    (budget, dates, preferences).
+edges:
+  covers:
+    - target: skill-area:travel-itinerary-planning
+      attributes:
+        coverage: full
+        weight: 0.8
+  applies_to:
+    - target: domain:travel

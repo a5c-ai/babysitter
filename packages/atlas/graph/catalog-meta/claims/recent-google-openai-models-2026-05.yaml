@@ -1,0 +1,175 @@
+nodeKind: Claim
+id: claim:recent-model-gpt-5.4-exists
+attributes:
+  subjectKind: "ModelVersion"
+  statement: "OpenAI lists GPT-5.4 as an API model with published token pricing."
+  confidence: "medium"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "adequate"
+  status: "open"
+  subjectId: model:gpt-5.4@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  evidenceSourceIds:
+    - evidence:openai-api-pricing-2026-05
+  claimedAt: "2026-05-04T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+edges:
+  about_subject:
+    - model:gpt-5.4@current
+  backed_by_evidence:
+    - evidence:openai-api-pricing-2026-05
+---
+nodeKind: Claim
+id: claim:recent-model-gpt-5.4-mini-exists
+attributes:
+  subjectKind: "ModelVersion"
+  statement: "OpenAI lists GPT-5.4 mini as an API model with published token pricing."
+  confidence: "medium"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "adequate"
+  status: "open"
+  subjectId: model:gpt-5.4-mini@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  evidenceSourceIds:
+    - evidence:openai-api-pricing-2026-05
+  claimedAt: "2026-05-04T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+edges:
+  about_subject:
+    - model:gpt-5.4-mini@current
+  backed_by_evidence:
+    - evidence:openai-api-pricing-2026-05
+---
+nodeKind: Claim
+id: claim:recent-model-gpt-5.5-exists
+attributes:
+  subjectKind: "ModelVersion"
+  statement: "OpenAI lists GPT-5.5 as an API model with published token pricing."
+  confidence: "medium"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "adequate"
+  status: "open"
+  subjectId: model:gpt-5.5@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  evidenceSourceIds:
+    - evidence:openai-api-pricing-2026-05
+  claimedAt: "2026-05-04T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+edges:
+  about_subject:
+    - model:gpt-5.5@current
+  backed_by_evidence:
+    - evidence:openai-api-pricing-2026-05
+---
+nodeKind: Claim
+id: claim:recent-model-gemini-3-pro-exists
+attributes:
+  subjectKind: "ModelVersion"
+  statement: "Google lists Gemini 3 Pro as a Gemini 3 model."
+  confidence: "medium"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "adequate"
+  status: "open"
+  subjectId: model:gemini-3-pro@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  evidenceSourceIds:
+    - evidence:google-gemini-3-model-cards-2026
+  claimedAt: "2026-05-04T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+edges:
+  about_subject:
+    - model:gemini-3-pro@current
+  backed_by_evidence:
+    - evidence:google-gemini-3-model-cards-2026
+---
+nodeKind: Claim
+id: claim:recent-model-gemini-3-flash-exists
+attributes:
+  subjectKind: "ModelVersion"
+  statement: "Google DeepMind lists Gemini 3 Flash as a Gemini 3 model for agentic workflows."
+  confidence: "medium"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "adequate"
+  status: "open"
+  subjectId: model:gemini-3-flash@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  evidenceSourceIds:
+    - evidence:google-gemini-3-model-cards-2026
+  claimedAt: "2026-05-04T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+edges:
+  about_subject:
+    - model:gemini-3-flash@current
+  backed_by_evidence:
+    - evidence:google-gemini-3-model-cards-2026
+---
+nodeKind: Claim
+id: claim:recent-model-gemini-3-1-pro-exists
+attributes:
+  subjectKind: "ModelVersion"
+  statement: "Google DeepMind publishes a Gemini 3.1 Pro model card."
+  confidence: "medium"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "adequate"
+  status: "open"
+  subjectId: model:gemini-3-1-pro@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  evidenceSourceIds:
+    - evidence:google-gemini-3-model-cards-2026
+  claimedAt: "2026-05-04T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+edges:
+  about_subject:
+    - model:gemini-3-1-pro@current
+  backed_by_evidence:
+    - evidence:google-gemini-3-model-cards-2026
+---
+nodeKind: Claim
+id: claim:recent-model-gemini-3-1-deep-think-exists
+attributes:
+  subjectKind: "ModelVersion"
+  statement: "Google DeepMind describes Gemini 3.1 Deep Think as a specialized reasoning mode built on Gemini 3.1 Pro."
+  confidence: "medium"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "adequate"
+  status: "open"
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  evidenceSourceIds:
+    - evidence:google-gemini-3-model-cards-2026
+  claimedAt: "2026-05-04T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+edges:
+  about_subject:
+    - model:gemini-3-1-deep-think@current
+  backed_by_evidence:
+    - evidence:google-gemini-3-model-cards-2026
+---
+nodeKind: Claim
+id: claim:recent-model-gemini-3-1-flash-lite-exists
+attributes:
+  subjectKind: "ModelVersion"
+  statement: "Google publishes Gemini 3.1 Flash-Lite documentation for a low-cost Gemini 3 series model."
+  confidence: "medium"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "adequate"
+  status: "open"
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  evidenceSourceIds:
+    - evidence:google-gemini-3-model-cards-2026
+  claimedAt: "2026-05-04T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+edges:
+  about_subject:
+    - model:gemini-3-1-flash-lite@current
+  backed_by_evidence:
+    - evidence:google-gemini-3-model-cards-2026

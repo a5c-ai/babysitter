@@ -1,0 +1,21 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:pi-host-env
+attributes:
+  signalId: discovery-signal:pi-host-env
+  signalKind: env-any
+  key: pi
+  matchMode: any
+  confidence: medium
+  scope: host-detection
+  signals:
+    - PI_RUN_ID
+    - PI_SESSION_ID
+  argvMatches:
+    - pi
+  consumer: agent-mux-core
+  metadataFields:
+    - { key: session_id, envVars: [PI_SESSION_ID] }
+    - { key: run_id,     envVars: [PI_RUN_ID] }
+edges:
+  applies_to:
+    - target: agent:pi

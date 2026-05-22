@@ -1,0 +1,84 @@
+nodeKind: ModelVersion
+id: model:llama-4-405b-instruct@current
+attributes:
+  displayName: "Llama 4 405B Instruct"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:llama-4
+  versionRange: '>=4.0.0 <5.0.0'
+  kind: chat
+  contextWindowTokens: 256000
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-04-05'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-04-05'
+  modelCardUrl: https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:llama-4
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:llama-4
+  served_by:
+  - provider:aws-bedrock
+  - provider:together-ai
+  - provider:fireworks-ai
+  - provider:groq
+  speaks:
+  - model-transport:openai-compat
+  supports:
+  - target: capability:streaming
+    versionRange: '>=4.0.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-4-405b-instruct
+  - target: capability:supports-text-streaming
+    versionRange: '>=4.0.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-4-405b-instruct
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=4.0.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-4-405b-instruct
+  - target: capability:can-multi-turn
+    versionRange: '>=4.0.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-4-405b-instruct
+  - target: capability:supports-native-tools
+    versionRange: '>=4.0.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-4-405b-instruct
+  - target: capability:parallel-tool-calls
+    versionRange: '>=4.0.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-4-405b-instruct
+  - target: capability:requires-tool-approval
+    versionRange: '>=4.0.0 <5.0.0'
+    level: full
+    notes: 'Open-weights model deployed via third-party providers; tool execution
+      by convention requires approval at the agent/runtime layer.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-4-405b-instruct

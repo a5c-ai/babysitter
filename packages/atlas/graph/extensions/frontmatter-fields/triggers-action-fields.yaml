@@ -1,0 +1,323 @@
+# packages/triggers/action.yml inputs (25) + outputs (3) decomposed into
+# per-field FrontmatterField records.
+# Source: packages/triggers/action.yml (lines 9-120 inputs, 121-131 outputs).
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-command
+attributes:
+  displayName: "amux-triggers action input: command"
+  name: command
+  valueType: string
+  required: "no"
+  defaultValue: "launch"
+  appliesTo: github-action-input
+  description: "agent-mux command to execute after trigger evaluation."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-args
+attributes:
+  displayName: "amux-triggers action input: args"
+  name: args
+  valueType: string
+  required: "no"
+  appliesTo: github-action-input
+  description: "Space-delimited fallback arguments passed to amux after the command."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-args-json
+attributes:
+  displayName: "amux-triggers action input: args-json"
+  name: args-json
+  valueType: string
+  required: "no"
+  appliesTo: github-action-input
+  description: "JSON string array of additional arguments passed to amux after the command. Prefer this for values containing spaces or shell-sensitive characters."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-adapter
+attributes:
+  displayName: "amux-triggers action input: adapter"
+  name: adapter
+  valueType: string
+  required: "no"
+  appliesTo: github-action-input
+  description: "Alias for harness (backward compatibility)."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-prompt
+attributes:
+  displayName: "amux-triggers action input: prompt"
+  name: prompt
+  valueType: string
+  required: "no"
+  appliesTo: github-action-input
+  description: "Prompt or task to send to the agent."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-harness
+attributes:
+  displayName: "amux-triggers action input: harness"
+  name: harness
+  valueType: enum
+  required: "yes"
+  allowedValues:
+    - claude
+    - codex
+    - pi
+    - gemini
+    - copilot
+    - cursor
+    - opencode
+    - hermes
+  appliesTo: github-action-input
+  description: "Coding agent harness to use (claude, codex, pi, gemini, copilot, cursor, opencode, hermes)."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-provider
+attributes:
+  displayName: "amux-triggers action input: provider"
+  name: provider
+  valueType: enum
+  required: "no"
+  allowedValues:
+    - foundry
+    - google
+    - anthropic
+    - bedrock
+    - openai
+  appliesTo: github-action-input
+  description: "Model provider (foundry, google, anthropic, bedrock, openai)."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-model
+attributes:
+  displayName: "amux-triggers action input: model"
+  name: model
+  valueType: string
+  required: "no"
+  appliesTo: github-action-input
+  description: "Model name to use (e.g. gpt-5.5, gemini-3.1-pro-preview, claude-sonnet-4)."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-interaction-mode
+attributes:
+  displayName: "amux-triggers action input: interaction-mode"
+  name: interaction-mode
+  valueType: enum
+  required: "no"
+  defaultValue: "non-interactive"
+  allowedValues:
+    - non-interactive
+    - bridged-hooks
+    - bridged-interactive
+  appliesTo: github-action-input
+  description: "How to launch the harness in CI: non-interactive (plain NI mode), bridged-hooks (NI + emulated babysitter lifecycle hooks), bridged-interactive (NI externally, interactive internally via PTY)."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-max-turns
+attributes:
+  displayName: "amux-triggers action input: max-turns"
+  name: max-turns
+  valueType: string
+  required: "no"
+  defaultValue: "15"
+  appliesTo: github-action-input
+  description: "Maximum model turns before the agent exits."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-with-proxy
+attributes:
+  displayName: "amux-triggers action input: with-proxy"
+  name: with-proxy
+  valueType: bool
+  required: "no"
+  defaultValue: "true"
+  appliesTo: github-action-input
+  description: "Start transport-mux proxy if the harness doesn't support the provider natively."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-proxy-log-level
+attributes:
+  displayName: "amux-triggers action input: proxy-log-level"
+  name: proxy-log-level
+  valueType: enum
+  required: "no"
+  defaultValue: "error"
+  allowedValues:
+    - error
+    - warn
+    - info
+    - debug
+  appliesTo: github-action-input
+  description: "Proxy log level (error, warn, info, debug)."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-babysitter-plugin
+attributes:
+  displayName: "amux-triggers action input: babysitter-plugin"
+  name: babysitter-plugin
+  valueType: bool
+  required: "no"
+  defaultValue: "false"
+  appliesTo: github-action-input
+  description: "Install the babysitter plugin into the harness before running."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-process-file
+attributes:
+  displayName: "amux-triggers action input: process-file"
+  name: process-file
+  valueType: string
+  required: "no"
+  appliesTo: github-action-input
+  description: "Path to a babysitter process definition (.mjs) to copy into .a5c/processes/."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-babysitter-prompt-prefix
+attributes:
+  displayName: "amux-triggers action input: babysitter-prompt-prefix"
+  name: babysitter-prompt-prefix
+  valueType: string
+  required: "no"
+  appliesTo: github-action-input
+  description: "Slash command prefix for babysitter invocation. Harness-specific: claude → /babysitter:yolo, codex → $babysitter:yolo, other → Invoke the babysitter:yolo command to:"
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-plugins
+attributes:
+  displayName: "amux-triggers action input: plugins"
+  name: plugins
+  valueType: string
+  required: "no"
+  appliesTo: github-action-input
+  description: "Newline-delimited plugin specs installed after harness setup. Each line is passed to amux plugin install <adapter> <plugin>."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-trigger-backend
+attributes:
+  displayName: "amux-triggers action input: trigger-backend"
+  name: trigger-backend
+  valueType: enum
+  required: "no"
+  defaultValue: "github"
+  appliesTo: github-action-input
+  description: "Trigger backend to normalize. Supports github, gitlab, bitbucket, generic-webhook."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-trigger-query
+attributes:
+  displayName: "amux-triggers action input: trigger-query"
+  name: trigger-query
+  valueType: string
+  required: "no"
+  appliesTo: github-action-input
+  description: "Query used to decide whether agent-mux should run."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-include-diff
+attributes:
+  displayName: "amux-triggers action input: include-diff"
+  name: include-diff
+  valueType: bool
+  required: "no"
+  defaultValue: "true"
+  appliesTo: github-action-input
+  description: "Include local git diff patches in trigger enrichment."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-use-a5c-token-exchange
+attributes:
+  displayName: "amux-triggers action input: use-a5c-token-exchange"
+  name: use-a5c-token-exchange
+  valueType: bool
+  required: "no"
+  defaultValue: "false"
+  appliesTo: github-action-input
+  description: "Use a5c-ai/generate-token-action@main before running trigger enrichment and agent-mux."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-github-token
+attributes:
+  displayName: "amux-triggers action input: github-token"
+  name: github-token
+  valueType: string
+  required: "no"
+  defaultValue: "${{ github.token }}"
+  appliesTo: github-action-input
+  description: "GitHub token fallback for API enrichment."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-node-version
+attributes:
+  displayName: "amux-triggers action input: node-version"
+  name: node-version
+  valueType: string
+  required: "no"
+  defaultValue: "22"
+  appliesTo: github-action-input
+  description: "Node.js version."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-working-directory
+attributes:
+  displayName: "amux-triggers action input: working-directory"
+  name: working-directory
+  valueType: string
+  required: "no"
+  defaultValue: "${{ github.workspace }}"
+  appliesTo: github-action-input
+  description: "Working directory for amux execution."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-pre-run
+attributes:
+  displayName: "amux-triggers action input: pre-run"
+  name: pre-run
+  valueType: string
+  required: "no"
+  appliesTo: github-action-input
+  description: "Optional shell commands to run after trigger match and before amux."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-input-post-run
+attributes:
+  displayName: "amux-triggers action input: post-run"
+  name: post-run
+  valueType: string
+  required: "no"
+  appliesTo: github-action-input
+  description: "Optional shell commands to run after amux when trigger matched."
+---
+# Outputs (action.yml:66-75)
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-output-matched
+attributes:
+  displayName: "amux-triggers action output: matched"
+  name: matched
+  valueType: bool
+  required: "yes"
+  defaultValue: "${{ steps.trigger.outputs.matched }}"
+  appliesTo: github-action-output
+  description: "Whether trigger-query matched the enriched event."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-output-event
+attributes:
+  displayName: "amux-triggers action output: event"
+  name: event
+  valueType: string
+  required: "yes"
+  defaultValue: "${{ steps.trigger.outputs.event }}"
+  appliesTo: github-action-output
+  description: "Path to enriched event JSON."
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:triggers-action-output-exit-code
+attributes:
+  displayName: "amux-triggers action output: exit-code"
+  name: exit-code
+  valueType: string
+  required: "no"
+  defaultValue: "${{ steps.amux.outputs.exit-code }}"
+  appliesTo: github-action-output
+  description: "agent-mux exit code. Empty when trigger did not match."
+

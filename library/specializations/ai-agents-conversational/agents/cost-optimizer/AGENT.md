@@ -8,6 +8,13 @@ expertise:
   - Model selection
   - Caching strategies
   - Budget management
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:context-management, skill-area:model-monitoring-drift-detection]
+  roles: [role:ml-engineer, role:backend-engineer, role:cost-tracker]
+  workflows: [workflow:ml-model-lifecycle, workflow:feature-development]
+
 ---
 
 # Cost Optimizer

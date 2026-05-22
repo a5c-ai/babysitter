@@ -1,0 +1,275 @@
+---
+nodeKind: StackProfile
+id: stack-profile:mern-stack
+attributes:
+  displayName: "MERN Stack (MongoDB, Express, React, Node.js)"
+  description: |
+    The MERN stack pairs MongoDB as a document database, Express as a
+    Node.js HTTP server framework, React for the frontend UI, and Node.js
+    as the JavaScript runtime. The all-JavaScript/TypeScript lineage means
+    a single language spans client and server, making it popular for
+    full-stack JavaScript teams.
+
+    MongoDB's flexible schema suits rapid iteration and hierarchical data.
+    Express provides lightweight routing and middleware. React handles
+    interactive UIs. Mongoose is a common ODM for schema enforcement on the
+    Node side. Deployment targets include Heroku, Railway, Render, and
+    MongoDB Atlas for managed database hosting.
+  composes:
+    - language:javascript
+    - language:typescript
+    - framework:react
+    - library:express
+    - library:mongoose
+edges:
+  composed_of:
+    - language:javascript
+    - language:typescript
+    - framework:react
+    - library:express
+    - library:mongoose
+---
+nodeKind: StackProfile
+id: stack-profile:mean-stack
+attributes:
+  displayName: "MEAN Stack (MongoDB, Express, Angular, Node.js)"
+  description: |
+    The MEAN stack combines MongoDB for document storage, Express as the
+    Node.js web framework, Angular for the single-page application frontend,
+    and Node.js as the runtime. Like MERN, it is an all-JavaScript stack,
+    but Angular's opinionated structure—modules, services, dependency
+    injection, RxJS—makes it a stronger fit for large enterprise teams.
+
+    TypeScript is the first-class language across all layers. Angular CLI
+    scaffolds and builds the frontend; NestJS or plain Express handles the
+    API. MongoDB Atlas provides cloud hosting for the database. The stack
+    is common in enterprise line-of-business applications where Angular's
+    conventions reduce the decision surface.
+  composes:
+    - language:typescript
+    - language:javascript
+    - framework:angular
+    - library:express
+    - library:mongoose
+edges:
+  composed_of:
+    - language:typescript
+    - language:javascript
+    - framework:angular
+    - library:express
+    - library:mongoose
+---
+nodeKind: StackProfile
+id: stack-profile:python-ml-stack
+attributes:
+  displayName: "Python ML Stack (NumPy, Pandas, scikit-learn)"
+  description: |
+    The classical Python machine learning stack anchored by NumPy for
+    numerical array operations, Pandas for tabular data manipulation and
+    exploration, and scikit-learn for preprocessing, model selection, and
+    a broad catalogue of supervised and unsupervised algorithms.
+
+    This combination is the default starting point for data science and
+    applied ML work. Matplotlib and Seaborn are typically added for
+    visualisation. Jupyter notebooks serve as the interactive development
+    environment. When models need to graduate to production APIs, FastAPI
+    or Flask are layered on top. scikit-learn's consistent estimator API
+    and Pipeline abstraction make feature engineering and model evaluation
+    straightforward to compose and cross-validate.
+  composes:
+    - language:python
+    - library:numpy
+    - library:pandas
+    - library:scikit-learn
+edges:
+  composed_of:
+    - language:python
+    - library:numpy
+    - library:pandas
+    - library:scikit-learn
+    - library:matplotlib
+    - library:seaborn
+---
+nodeKind: StackProfile
+id: stack-profile:go-grpc-postgres
+attributes:
+  displayName: "Go + gRPC + PostgreSQL"
+  description: |
+    A Go microservice stack using gRPC for strongly-typed inter-service
+    communication and PostgreSQL as the primary relational data store.
+    Service contracts are defined in Protocol Buffers and code-generated
+    into Go stubs via protoc-gen-go-grpc.
+
+    This combination targets high-throughput internal APIs and platform
+    services where strict schema contracts between teams matter. pgx or
+    sqlc are common PostgreSQL drivers; sqlc generates type-safe Go from
+    SQL queries. grpc-gateway can expose an HTTP/JSON transcoding layer
+    alongside the gRPC server. Deployment typically targets Kubernetes
+    with Envoy or a service mesh handling mTLS between services.
+  composes:
+    - language:go
+    - language:protobuf
+edges:
+  composed_of:
+    - language:go
+    - language:protobuf
+---
+nodeKind: StackProfile
+id: stack-profile:rust-cli-stack
+attributes:
+  displayName: "Rust CLI Stack (clap + tokio)"
+  description: |
+    A Rust stack for building production-quality command-line tools:
+    clap for declarative argument parsing with subcommands, shell
+    completions, and validation, and tokio as the async runtime for
+    I/O-bound operations such as concurrent HTTP calls or file processing.
+
+    This combination is popular for developer tooling, build systems, and
+    infrastructure CLIs where startup latency, binary size, and memory
+    footprint matter. reqwest (built on hyper) integrates naturally for
+    async HTTP. serde and serde_json handle serialisation. indicatif
+    provides progress bars and spinners. The resulting binary is typically
+    distributed as a single static executable via cargo-dist or GitHub
+    Releases.
+  composes:
+    - language:rust
+    - library:clap
+    - library:tokio
+edges:
+  composed_of:
+    - language:rust
+    - library:clap
+    - library:tokio
+---
+nodeKind: StackProfile
+id: stack-profile:fastapi-postgres
+attributes:
+  displayName: "FastAPI + SQLAlchemy + PostgreSQL"
+  description: |
+    Python API stack: FastAPI as the ASGI web framework, SQLAlchemy as the
+    ORM with its declarative mapping and async engine (via asyncpg), and
+    PostgreSQL as the primary data store. Pydantic models serve double
+    duty as both request/response schemas and validation layer.
+
+    Alembic handles database migrations. The stack is popular for
+    data-intensive REST and async APIs where Python's ecosystem (pandas,
+    scikit-learn, Celery) needs to plug in alongside a web layer. Uvicorn
+    or Gunicorn+Uvicorn workers serve the ASGI app. Deployment targets
+    include Docker on Railway, Fly.io, or GCP Cloud Run. pytest with
+    httpx and pytest-asyncio is the idiomatic testing setup.
+  composes:
+    - language:python
+    - framework:fastapi
+    - library:sqlalchemy
+    - library:pydantic
+edges:
+  composed_of:
+    - language:python
+    - framework:fastapi
+    - library:sqlalchemy
+    - library:pydantic
+---
+nodeKind: StackProfile
+id: stack-profile:sveltekit-stack
+attributes:
+  displayName: "SvelteKit + Tailwind + TypeScript"
+  description: |
+    A modern full-stack web stack: SvelteKit as the meta-framework with
+    file-based routing, server-side rendering, and form actions, Tailwind
+    CSS for utility-first styling, and TypeScript throughout.
+
+    SvelteKit's load functions run on the server or client depending on
+    the route configuration, enabling hybrid SSR/CSR patterns without the
+    complexity of separate client and server repos. Prisma or Drizzle ORM
+    are common data-access choices. Vite powers the dev server and build.
+    The stack emphasises small bundle sizes and minimal runtime overhead,
+    making it well-suited for content sites, dashboards, and SaaS
+    applications that care about Core Web Vitals. Deployment targets
+    include Vercel, Netlify, and Cloudflare Pages via adapters.
+  composes:
+    - language:typescript
+    - framework:sveltekit
+edges:
+  composed_of:
+    - language:typescript
+    - framework:sveltekit
+    - framework:svelte
+---
+nodeKind: StackProfile
+id: stack-profile:spring-boot-stack
+attributes:
+  displayName: "Spring Boot + Java + Hibernate"
+  description: |
+    The dominant Java web application stack: Spring Boot for opinionated
+    auto-configuration, embedded Tomcat, and starter dependency management;
+    Hibernate as the JPA provider for ORM; and Java as the primary language
+    (Kotlin is a common drop-in alternative on the same runtime).
+
+    Spring Boot's actuator provides production-ready health checks and
+    metrics out of the box. Spring Security handles authentication and
+    authorisation. Spring Data JPA repositories reduce boilerplate data
+    access code. Flyway or Liquibase manage schema migrations. The stack
+    is ubiquitous in enterprise Java, financial services, and large
+    organisations with existing JVM investments. Deployment targets
+    include traditional application servers, Docker, and Kubernetes.
+  composes:
+    - language:java
+    - library:spring-boot
+    - library:hibernate
+edges:
+  composed_of:
+    - language:java
+    - library:spring-boot
+    - library:hibernate
+---
+nodeKind: StackProfile
+id: stack-profile:laravel-vue-stack
+attributes:
+  displayName: "Laravel + Vue.js + PHP"
+  description: |
+    A full-stack PHP web application stack: Laravel as the batteries-
+    included MVC framework with Eloquent ORM, queues, and a rich CLI;
+    Vue.js as the progressive frontend framework for interactive UIs;
+    and PHP as the server-side language.
+
+    Inertia.js is a popular glue layer that lets Vue components act as
+    Laravel Blade view replacements without building a separate API.
+    Laravel Sail provides a Docker-based local development environment.
+    Laravel Horizon monitors Redis queue workers. This stack is popular
+    for agencies and SaaS businesses that value PHP's widespread hosting
+    availability alongside a modern reactive UI. Deployment targets
+    include Laravel Forge, Ploi, and Heroku.
+  composes:
+    - language:php
+    - framework:laravel
+    - framework:vue
+edges:
+  composed_of:
+    - language:php
+    - framework:laravel
+    - framework:vue
+---
+nodeKind: StackProfile
+id: stack-profile:flutter-firebase-stack
+attributes:
+  displayName: "Flutter + Firebase + Dart"
+  description: |
+    A cross-platform mobile application stack: Flutter as Google's UI
+    toolkit for building natively compiled apps from a single Dart codebase,
+    and Firebase as the managed backend providing Firestore (real-time
+    NoSQL), Authentication, Cloud Storage, Cloud Functions, and Analytics.
+
+    Flutter's widget tree and hot-reload cycle enable rapid UI iteration
+    across iOS, Android, and web from a single codebase. FlutterFire
+    packages provide idiomatic Dart bindings to all Firebase services.
+    Riverpod or Bloc are popular state management libraries. This stack
+    is the dominant choice for indie developers and small teams shipping
+    mobile apps quickly without maintaining a separate backend service.
+    Firebase's free Spark tier enables low-cost prototyping.
+  composes:
+    - language:dart
+    - framework:flutter
+edges:
+  composed_of:
+    - language:dart
+    - framework:flutter

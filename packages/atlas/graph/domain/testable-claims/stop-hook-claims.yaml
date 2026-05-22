@@ -1,0 +1,223 @@
+---
+nodeKind: TestableClaim
+id: claim:stop-hook-claude-interactive-fires
+attributes:
+  displayName: "Claude Code stop hook fires in interactive mode"
+  description: |
+    When Claude Code reaches end-of-turn in interactive mode, the hooks-mux
+    adapter normalizes the native "Stop" event to canonical phase turn.stop
+    and invokes registered handlers with the stop payload.
+  testStatus: pending
+  testType: integration
+  testCommand: "npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts -t \"claude adapter.*fires turn.stop via interactive\""
+  category: hooks
+  priority: high
+edges:
+  asserts_about:
+    - agent:claude-code
+    - hook-surface:stop
+  tests_hook_surface:
+    - hook-surface:claude.stop
+---
+nodeKind: TestableClaim
+id: claim:stop-hook-claude-interactive-blocks
+attributes:
+  displayName: "Claude Code stop hook can block (deny) at end-of-turn"
+  description: |
+    A hooks-mux handler returning decision: deny at turn.stop propagates the
+    deny decision in the output for Claude Code, since the Claude adapter
+    supports the blockCapability. This allows hooks to prevent the agent
+    from stopping (e.g., to enforce a review step before turn completion).
+  testStatus: pending
+  testType: integration
+  testCommand: "npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts -t \"claude adapter.*deny decision propagates\""
+  category: hooks
+  priority: high
+edges:
+  asserts_about:
+    - agent:claude-code
+    - hook-surface:stop
+  tests_hook_surface:
+    - hook-surface:claude.stop
+---
+nodeKind: TestableClaim
+id: claim:stop-hook-codex-interactive-fires
+attributes:
+  displayName: "Codex stop hook fires in interactive mode"
+  description: |
+    When Codex reaches end-of-turn, the hooks-mux codex adapter normalizes
+    the native "on-stop" event to turn.stop and invokes handlers.
+  testStatus: pending
+  testType: integration
+  testCommand: "npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts -t \"codex adapter.*fires turn.stop via interactive\""
+  category: hooks
+  priority: high
+edges:
+  asserts_about:
+    - agent:codex
+    - hook-surface:stop
+  tests_hook_surface:
+    - hook-surface:codex.on-stop
+---
+nodeKind: TestableClaim
+id: claim:stop-hook-codex-interactive-blocks
+attributes:
+  displayName: "Codex stop hook can block (deny) at end-of-turn"
+  description: |
+    A handler returning deny at turn.stop propagates the deny decision
+    for Codex, since the codex adapter supports blockCapability.
+  testStatus: pending
+  testType: integration
+  testCommand: "npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts -t \"codex adapter.*deny decision propagates\""
+  category: hooks
+  priority: high
+edges:
+  asserts_about:
+    - agent:codex
+    - hook-surface:stop
+  tests_hook_surface:
+    - hook-surface:codex.on-stop
+---
+nodeKind: TestableClaim
+id: claim:stop-hook-gemini-interactive-fires
+attributes:
+  displayName: "Gemini CLI stop hook fires in interactive mode"
+  description: |
+    When Gemini CLI reaches end-of-turn, the hooks-mux gemini adapter
+    normalizes the native "post-response" event to turn.stop and invokes
+    handlers.
+  testStatus: pending
+  testType: integration
+  testCommand: "npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts -t \"gemini adapter.*fires turn.stop via interactive\""
+  category: hooks
+  priority: high
+edges:
+  asserts_about:
+    - agent:gemini-cli
+    - hook-surface:stop
+---
+nodeKind: TestableClaim
+id: claim:stop-hook-gemini-interactive-degrades
+attributes:
+  displayName: "Gemini CLI stop hook degrades deny (no block support)"
+  description: |
+    Gemini CLI's adapter does not support blockCapability, so a handler
+    returning deny at turn.stop is degraded — the deny decision is stripped
+    from the output. The hook fires but cannot prevent the agent from stopping.
+  testStatus: pending
+  testType: integration
+  testCommand: "npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts -t \"gemini adapter.*deny decision is degraded\""
+  category: hooks
+  priority: high
+edges:
+  asserts_about:
+    - agent:gemini-cli
+    - hook-surface:stop
+---
+nodeKind: TestableClaim
+id: claim:stop-hook-cursor-interactive-fires
+attributes:
+  displayName: "Cursor stop hook fires in interactive mode"
+  description: |
+    When Cursor reaches end-of-turn, the hooks-mux cursor adapter normalizes
+    the native "stop" event to turn.stop and invokes handlers.
+  testStatus: pending
+  testType: integration
+  testCommand: "npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts -t \"cursor adapter.*fires turn.stop via interactive\""
+  category: hooks
+  priority: high
+edges:
+  asserts_about:
+    - agent:cursor
+    - hook-surface:stop
+  tests_hook_surface:
+    - hook-surface:cursor.stop
+---
+nodeKind: TestableClaim
+id: claim:stop-hook-cursor-interactive-blocks
+attributes:
+  displayName: "Cursor stop hook can block (deny) at end-of-turn"
+  description: |
+    A handler returning deny at turn.stop propagates the deny decision
+    for Cursor, since the cursor adapter supports blockCapability.
+  testStatus: pending
+  testType: integration
+  testCommand: "npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts -t \"cursor adapter.*deny decision propagates\""
+  category: hooks
+  priority: high
+edges:
+  asserts_about:
+    - agent:cursor
+    - hook-surface:stop
+  tests_hook_surface:
+    - hook-surface:cursor.stop
+---
+nodeKind: TestableClaim
+id: claim:stop-hook-copilot-interactive-fires
+attributes:
+  displayName: "GitHub Copilot CLI stop hook fires in interactive mode"
+  description: |
+    When GitHub Copilot CLI reaches end-of-turn, the hooks-mux copilot
+    adapter normalizes the native "stop" event to turn.stop and invokes
+    handlers.
+  testStatus: pending
+  testType: integration
+  testCommand: "npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts -t \"copilot adapter.*fires turn.stop via interactive\""
+  category: hooks
+  priority: high
+edges:
+  asserts_about:
+    - agent:copilot-cli
+    - hook-surface:stop
+---
+nodeKind: TestableClaim
+id: claim:stop-hook-copilot-interactive-degrades
+attributes:
+  displayName: "Copilot CLI stop hook degrades deny (no block support)"
+  description: |
+    Copilot CLI's adapter does not support blockCapability, so a handler
+    returning deny at turn.stop is degraded. The hook fires but cannot
+    prevent the agent from stopping.
+  testStatus: pending
+  testType: integration
+  testCommand: "npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts -t \"copilot adapter.*deny decision is degraded\""
+  category: hooks
+  priority: high
+edges:
+  asserts_about:
+    - agent:copilot-cli
+    - hook-surface:stop
+---
+nodeKind: TestableClaim
+id: claim:stop-hook-codex-noninteractive-fires
+attributes:
+  displayName: "Codex stop hook fires in non-interactive mode"
+  description: |
+    The hooks-mux codex adapter can receive stop events via --event-json
+    (non-interactive/CI mode) and still normalizes to turn.stop.
+  testStatus: pending
+  testType: integration
+  testCommand: "npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts -t \"codex adapter.*fires turn.stop via non-interactive\""
+  category: hooks
+  priority: medium
+edges:
+  asserts_about:
+    - agent:codex
+    - hook-surface:stop
+---
+nodeKind: TestableClaim
+id: claim:stop-hook-claude-noninteractive-fires
+attributes:
+  displayName: "Claude Code stop hook fires in non-interactive mode"
+  description: |
+    The hooks-mux claude adapter can receive stop events via --event-json
+    (non-interactive/CI mode) and still normalizes to turn.stop.
+  testStatus: pending
+  testType: integration
+  testCommand: "npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts -t \"claude adapter.*fires turn.stop via non-interactive\""
+  category: hooks
+  priority: medium
+edges:
+  asserts_about:
+    - agent:claude-code
+    - hook-surface:stop

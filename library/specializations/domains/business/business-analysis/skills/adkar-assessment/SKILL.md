@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-009
   category: Change Management
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:change-management, skill-area:stakeholder-management, skill-area:organizational-design]
+  workflows: [workflow:market-analysis]
+  roles: [role:organizational-development-specialist, role:business-analyst]
 ---
 
 # ADKAR Assessment

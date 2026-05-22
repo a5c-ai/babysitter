@@ -1,0 +1,24 @@
+nodeKind: Language
+id: language:haskell
+attributes:
+  displayName: "Haskell"
+  paradigms:
+    - functional
+    - pure
+    - lazy
+  description: |
+    Haskell is a purely functional, lazy-evaluated, statically-typed language
+    with an expressive Hindley-Milner type system and type classes. It treats
+    all I/O and side effects through monads, making the boundary between pure
+    and effectful code explicit.
+
+    Haskell excels in compiler and language tooling, formal verification
+    adjacent work, and domains where algebraic abstractions (functors,
+    monoids, traversables) provide architectural clarity. The GHC compiler
+    includes advanced features such as type families, GADTs, linear types,
+    and Template Haskell. Libraries like servant (type-safe APIs), conduit
+    (streaming), and optics are widely used in production code.
+edges:
+  applies_to:
+    - target: domain:computer-science
+    - target: domain:software-engineering

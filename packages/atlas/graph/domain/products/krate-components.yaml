@@ -1,0 +1,1093 @@
+# ============================================================================
+# Krate Components — Three-Plane Architecture
+# Models Krate's internal components as StackPart nodes, Presentation
+# surfaces, domain-specific Responsibilities, and testable graph claims.
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# 1. Control Plane Components
+# ---------------------------------------------------------------------------
+---
+nodeKind: StackPart
+id: stack-part:krate-control-plane
+attributes:
+  displayName: "Krate Control Plane"
+  category: infrastructure
+  description: |
+    The Kubernetes API extension that makes Krate a K8s-native forge.
+    Stores low-cardinality configuration as etcd-backed CRDs (Repository,
+    WebhookSubscription, RefPolicy, BranchProtection, View, Selector)
+    and enforces all mutations through Kubernetes RBAC and admission
+    webhooks. Exposes watch/event streams so controllers and the UI
+    can reconcile state changes in real time.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+      notes: "Core control plane for the Krate forge runtime"
+  part_of:
+    - target: platform:krate
+      notes: "Krate control plane component"
+---
+nodeKind: StackPart
+id: stack-part:krate-aggregated-api
+attributes:
+  displayName: "Krate Aggregated API Server"
+  category: api
+  description: |
+    Postgres-backed Kubernetes API extension that serves high-cardinality
+    social and execution data — PullRequest, Issue, Review, Pipeline, Job,
+    WebhookDelivery, and all agent runtime resources. Registers with
+    kube-apiserver via APIService so kubectl, client-go, watch, RBAC, and
+    admission work transparently while avoiding etcd storage for records
+    that grow with usage.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+      notes: "Aggregated API server for data-plane resources"
+  part_of:
+    - target: platform:krate
+      notes: "Krate aggregated API component"
+  implemented_by:
+    - target: stack-part:managed-postgres
+      notes: "PostgreSQL backs the aggregated API storage"
+---
+nodeKind: StackPart
+id: stack-part:krate-identity-engine
+attributes:
+  displayName: "Krate Identity Engine"
+  category: security
+  description: |
+    Handles OIDC/OAuth sign-in, maps external identities to Kubernetes
+    users and groups via IdentityMapping CRDs, and evaluates Kubernetes
+    RBAC policy for every API call. Issues scoped ServiceAccount tokens
+    for CI jobs and agent dispatch attempts. Manages User, Team, Invite,
+    AuthProvider, AgentServiceAccount, and AgentRoleBinding resources
+    to ensure the forge never creates a parallel permission system.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+      notes: "Identity and RBAC enforcement layer"
+  part_of:
+    - target: platform:krate
+      notes: "Krate identity engine component"
+
+# ---------------------------------------------------------------------------
+# 2. Data Plane Components
+# ---------------------------------------------------------------------------
+---
+nodeKind: StackPart
+id: stack-part:krate-git-backend
+attributes:
+  displayName: "Krate Git Backend (Gitea)"
+  category: data-store
+  description: |
+    Gitea-backed Git server hosted on Kubernetes that terminates
+    smart-HTTP and SSH Git traffic. Provides repository storage on
+    RWX persistent volumes, SSH deploy keys, collaborator/team
+    permissions, protected branches, and webhook firing. The control
+    plane reconciles Repository CRDs into Gitea hosting state while
+    keeping the Git protocol path outside the API controller boundary.
+edges:
+  realizes:
+    - target: layer:8-execution
+      notes: "Git data plane execution layer"
+  part_of:
+    - target: platform:krate
+      notes: "Krate Git backend component"
+  implemented_by:
+    - target: tool:gitea
+      notes: "Gitea is the backing Git server"
+---
+nodeKind: StackPart
+id: stack-part:krate-object-store
+attributes:
+  displayName: "Krate Object Store"
+  category: data-store
+  description: |
+    Storage layer for LFS blobs, release archives, CI artifacts, and
+    other large immutable objects. Backed by S3-compatible object storage
+    and separated from the Git ref/pack storage so that binary-heavy
+    repositories do not saturate the Gitea persistent volume. Object
+    placement is tracked per-repository in Repository status and resolved
+    independently from Git backend routing.
+edges:
+  realizes:
+    - target: layer:8-execution
+      notes: "Object/artifact storage execution"
+  part_of:
+    - target: platform:krate
+      notes: "Krate object store component"
+---
+nodeKind: StackPart
+id: stack-part:krate-code-search
+attributes:
+  displayName: "Krate Code Search (Zoekt)"
+  category: tooling
+  description: |
+    Zoekt-based trigram code search service that indexes all org-scoped
+    repositories into per-cohort shards. Provides sub-second regex and
+    literal search across the entire forge. Currently in the post-MVP
+    roadmap — the indexer scales independently from Gitea backends and
+    API servers so search traffic never starves Git read/write operations.
+edges:
+  realizes:
+    - target: layer:8-execution
+      notes: "Code search execution layer (post-MVP)"
+  part_of:
+    - target: platform:krate
+      notes: "Krate code search component"
+  implemented_by:
+    - target: tool:zoekt
+      notes: "Zoekt powers per-repo cohort indexing"
+---
+nodeKind: StackPart
+id: stack-part:krate-ci-engine
+attributes:
+  displayName: "Krate CI Engine"
+  category: compute
+  description: |
+    Pipeline and Job scheduling engine backed by ARC (Actions Runner
+    Controller). Defines RunnerPool CRDs with warm/max replica scaling,
+    trust-tier admission, per-pool cache backends, and queue-depth KEDA
+    autoscaling. Pipelines execute as Kubernetes Jobs with projected
+    ServiceAccount tokens scoped to repo/ref/pipeline. Collects artifacts,
+    streams logs via SSE, and supports rerun-from-step semantics.
+edges:
+  realizes:
+    - target: layer:8-execution
+      notes: "CI pipeline execution engine"
+  part_of:
+    - target: platform:krate
+      notes: "Krate CI engine component"
+
+# ---------------------------------------------------------------------------
+# 3. Agent Plane Components
+# ---------------------------------------------------------------------------
+---
+nodeKind: StackPart
+id: stack-part:krate-agent-dispatch
+attributes:
+  displayName: "Krate Agent Dispatch"
+  category: compute
+  description: |
+    Handles manual and automated dispatch of AI coding agents. Creates
+    AgentDispatchRun resources, performs permission review against org
+    policies, assembles context bundles, and launches agent sessions as
+    Kubernetes Jobs via the Agent Mux client. Tracks attempt lifecycle
+    (Pending, PermissionReview, ContextBundle, Running, Completed/Failed)
+    and streams session output back through SSE.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+      notes: "Agent dispatch runtime component"
+  part_of:
+    - target: platform:krate
+      notes: "Krate agent dispatch component"
+---
+nodeKind: StackPart
+id: stack-part:krate-agent-triggers
+attributes:
+  displayName: "Krate Agent Triggers"
+  category: compute
+  description: |
+    Event routing engine that connects CI failures, incoming webhooks,
+    PR comments, issue label changes, cron schedules, and manual actions
+    to agent stacks via AgentTriggerRule CRDs. Evaluates matched events
+    against capability requirements, performs deduplication and rate
+    limiting, and initiates dispatch runs. Each trigger firing is recorded
+    as an AgentTriggerExecution for audit trail purposes.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+      notes: "Event-driven agent trigger routing"
+  part_of:
+    - target: platform:krate
+      notes: "Krate agent triggers component"
+---
+nodeKind: StackPart
+id: stack-part:krate-agent-approvals
+attributes:
+  displayName: "Krate Agent Approvals"
+  category: security
+  description: |
+    Human gate controller for agent actions that exceed autonomy policy.
+    When an agent requests destructive operations, secret access, production
+    writes, or large refactors, the approval controller routes the request
+    to designated reviewers via configurable channels (Slack, email, in-
+    platform UI). Supports timeout policies, escalation chains, and
+    auto-approve rules for trusted agent stacks.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+      notes: "Human-in-the-loop approval gates"
+  part_of:
+    - target: platform:krate
+      notes: "Krate agent approvals component"
+---
+nodeKind: StackPart
+id: stack-part:krate-agent-workspaces
+attributes:
+  displayName: "Krate Agent Workspaces"
+  category: compute
+  description: |
+    Git worktree provisioning and lifecycle management for agent dispatch
+    runs. Creates isolated workspaces with their own branches, working
+    directories, and environment variables according to AgentWorkspacePolicy
+    CRDs. Tracks workspace state (active, idle, stale, dirty, archived,
+    missing) and provides lifecycle actions: pin, archive, cleanup,
+    recover, rebase, and open-in-editor.
+edges:
+  realizes:
+    - target: layer:7-workspace
+      notes: "Agent workspace provisioning and lifecycle"
+  part_of:
+    - target: platform:krate
+      notes: "Krate agent workspaces component"
+---
+nodeKind: StackPart
+id: stack-part:krate-agent-context
+attributes:
+  displayName: "Krate Agent Context Assembly"
+  category: tooling
+  description: |
+    Prompt assembly engine that constructs AgentContextBundle resources
+    with full source provenance. Gathers repository files, CI logs,
+    issue descriptions, memory snapshots, and context labels into an
+    immutable bundle with content-addressed digest. Redacts secret values
+    before snapshotting and supports retry with original context unless
+    explicitly refreshed. Every prompt fragment has traceable provenance.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+      notes: "Context assembly and prompt safety"
+  part_of:
+    - target: platform:krate
+      notes: "Krate agent context assembly component"
+---
+nodeKind: StackPart
+id: stack-part:krate-company-brain
+attributes:
+  displayName: "Krate Company Brain"
+  category: data-store
+  description: |
+    Cross-run knowledge persistence layer implementing organizational
+    memory. Manages AgentMemoryRepository, AgentMemorySnapshot,
+    AgentMemoryQuery, AgentMemoryUpdate, AgentMemoryOntology, and
+    AgentMemoryAssociation resources. Supports vector similarity search,
+    temporal filtering, and org-scoped access control so agents accumulate
+    knowledge across independent dispatch runs — coding patterns,
+    architecture decisions, error resolutions, and team conventions.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+      notes: "Company brain memory and knowledge layer"
+  part_of:
+    - target: platform:krate
+      notes: "Krate company brain component"
+
+# ---------------------------------------------------------------------------
+# 4. Integration Components
+# ---------------------------------------------------------------------------
+---
+nodeKind: StackPart
+id: stack-part:krate-gitops-sync
+attributes:
+  displayName: "Krate GitOps Sync (ArgoCD)"
+  category: tooling
+  description: |
+    ArgoCD Application reconciliation that manages GitOps-driven
+    deployment of Krate itself and tenant workloads. Watches Git
+    repositories for manifest changes, performs declarative sync/prune/
+    self-heal, and reports drift. Krate's own deployment is managed
+    through its own forge — the platform eats its own dog food with
+    ArgoCD as the continuous deployment engine.
+edges:
+  realizes:
+    - target: layer:8-execution
+      notes: "GitOps continuous deployment"
+  part_of:
+    - target: platform:krate
+      notes: "Krate GitOps sync component"
+  implemented_by:
+    - target: tool:argocd
+      notes: "ArgoCD powers GitOps reconciliation"
+---
+nodeKind: StackPart
+id: stack-part:krate-webhook-bus
+attributes:
+  displayName: "Krate Webhook Bus"
+  category: messaging
+  description: |
+    Durable webhook delivery queue serving outbound integrations.
+    WebhookSubscription CRDs define endpoints, event filters, signing
+    secrets, and retry policies. Each delivery is tracked as a
+    WebhookDelivery aggregated resource with signature, phase, response
+    code, and replay metadata. Supports coalescing, deduplication, and
+    dead-letter queuing for failed deliveries.
+edges:
+  realizes:
+    - target: layer:8-execution
+      notes: "Webhook event delivery execution"
+  part_of:
+    - target: platform:krate
+      notes: "Krate webhook bus component"
+---
+nodeKind: StackPart
+id: stack-part:krate-agent-mux-client
+attributes:
+  displayName: "Krate Agent Mux Client"
+  category: api
+  description: |
+    Zero-dependency HTTP/SSE adapter connecting Krate's dispatch
+    controller to the Agent Mux gateway. Handles session creation,
+    transcript streaming, tool approval relay, and session lifecycle
+    management without requiring external npm dependencies. Translates
+    between Krate's Kubernetes-native resource model and Agent Mux's
+    transport protocol.
+edges:
+  realizes:
+    - target: layer:3-transport
+      notes: "Agent Mux transport client"
+  part_of:
+    - target: platform:krate
+      notes: "Krate Agent Mux client component"
+  implemented_by:
+    - target: agent:agent-mux
+      notes: "Communicates with Agent Mux gateway"
+
+# ---------------------------------------------------------------------------
+# 5. Krate Presentation Surfaces
+# ---------------------------------------------------------------------------
+---
+nodeKind: Presentation
+id: presentation:krate-web-ui
+attributes:
+  displayName: "Krate Web UI"
+  kind: web
+  description: |
+    Next.js 16 App Router web interface for Krate. Server Components
+    fetch directly from the Kubernetes and aggregated API. Watch streams
+    are converted to SSE through route handlers for real-time updates.
+    Org-scoped navigation provides Code, Issues, Pull Requests, Runs,
+    Hooks, Settings, Agents, and Memory surfaces. Monaco or CodeMirror
+    powers diff and code views.
+  renderingTechnology: nextjs-app-router
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [web]
+edges:
+  bundled_with:
+    - target: platform:krate
+      notes: "Primary web interface for the Krate forge"
+  surfaces_resource:
+    - target: kubernetes-crd-kind:krate-agent-stack
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-subagent
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-tool-profile
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-mcp-server
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-skill
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-trigger-rule
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-context-label
+      surface: web
+    - target: kubernetes-crd-kind:krate-krate-workspace-policy
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-service-account
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-role-binding
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-secret-grant
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-config-grant
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-adapter
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-transport-binding
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-provider-config
+      surface: web
+    - target: kubernetes-crd-kind:krate-krate-project
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-gateway-config
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-memory-repository
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-memory-source
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-memory-ontology
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-memory-association
+      surface: web
+    - target: kubernetes-crd-kind:krate-krate-workspace
+      surface: web
+    - target: kubernetes-crd-kind:krate-ref-policy
+      surface: web
+    - target: kubernetes-crd-kind:krate-runner-pool
+      surface: web
+    - target: kubernetes-crd-kind:krate-webhook-subscription
+      surface: web
+    - target: kubernetes-crd-kind:krate-view
+      surface: web
+    - target: kubernetes-crd-kind:krate-selector
+      surface: web
+    - target: kubernetes-crd-kind:krate-pull-request
+      surface: web
+    - target: kubernetes-crd-kind:krate-issue
+      surface: web
+    - target: kubernetes-crd-kind:krate-review
+      surface: web
+    - target: kubernetes-crd-kind:krate-pipeline
+      surface: web
+    - target: kubernetes-crd-kind:krate-job
+      surface: web
+    - target: kubernetes-crd-kind:krate-webhook-delivery
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-dispatch-run
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-dispatch-attempt
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-session
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-context-bundle
+      surface: web
+    - target: kubernetes-crd-kind:krate-krate-artifact
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-approval
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-trigger-execution
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-capability-requirement
+      surface: web
+    - target: kubernetes-crd-kind:krate-work-item-session-link
+      surface: web
+    - target: kubernetes-crd-kind:krate-work-item-workspace-link
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-session-transcript
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-session-attachment
+      surface: web
+    - target: kubernetes-crd-kind:krate-krate-workspace-runtime
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-memory-snapshot
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-memory-query
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-memory-update
+      surface: web
+    - target: kubernetes-crd-kind:krate-agent-run-memory-import
+      surface: web
+    - target: kubernetes-crd-kind:krate-external-backend-provider
+      surface: web
+    - target: kubernetes-crd-kind:krate-external-backend-binding
+      surface: web
+    - target: kubernetes-crd-kind:krate-external-backend-sync-policy
+      surface: web
+    - target: kubernetes-crd-kind:krate-external-provider-capability-manifest
+      surface: web
+    - target: kubernetes-crd-kind:krate-external-webhook-delivery
+      surface: web
+    - target: kubernetes-crd-kind:krate-external-sync-event
+      surface: web
+    - target: kubernetes-crd-kind:krate-external-sync-state
+      surface: web
+    - target: kubernetes-crd-kind:krate-external-write-intent
+      surface: web
+    - target: kubernetes-crd-kind:krate-external-sync-conflict
+      surface: web
+    - target: kubernetes-crd-kind:krate-external-object-link
+      surface: web
+    - target: kubernetes-crd-kind:krate-policy-profile
+      surface: web
+    - target: kubernetes-crd-kind:krate-policy-template
+      surface: web
+    - target: kubernetes-crd-kind:krate-policy-binding
+      surface: web
+    - target: kubernetes-crd-kind:krate-policy-exception-request
+      surface: web
+    - target: kubernetes-crd-kind:krate-repository
+      surface: web
+    - target: kubernetes-crd-kind:krate-branch-protection
+      surface: web
+    - target: kubernetes-crd-kind:krate-organization
+      surface: web
+    - target: kubernetes-crd-kind:krate-org-namespace-binding
+      surface: web
+    - target: kubernetes-crd-kind:krate-sshkey
+      surface: web
+    - target: kubernetes-crd-kind:krate-repository-permission
+      surface: web
+    - target: kubernetes-crd-kind:krate-user
+      surface: web
+    - target: kubernetes-crd-kind:krate-team
+      surface: web
+    - target: kubernetes-crd-kind:krate-invite
+      surface: web
+    - target: kubernetes-crd-kind:krate-identity-mapping
+      surface: web
+    - target: kubernetes-crd-kind:krate-auth-provider
+      surface: web
+---
+nodeKind: Presentation
+id: presentation:krate-cli
+attributes:
+  displayName: "Krate CLI (kubectl)"
+  kind: cli
+  description: |
+    kubectl-native CLI access to all Krate resources. Since every forge
+    concept is a Kubernetes custom resource or aggregated API object,
+    standard kubectl commands (get, apply, delete, watch, describe)
+    work directly. No custom CLI binary is needed — kubectl IS the
+    Krate CLI, with custom short names and printer columns for
+    ergonomic output.
+  renderingTechnology: kubectl
+  themeSupport: none
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+edges:
+  bundled_with:
+    - target: platform:krate
+      notes: "kubectl-native CLI for Krate resources"
+  surfaces_resource:
+    - target: kubernetes-crd-kind:krate-agent-stack
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-subagent
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-tool-profile
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-mcp-server
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-skill
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-trigger-rule
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-context-label
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-krate-workspace-policy
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-service-account
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-role-binding
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-secret-grant
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-config-grant
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-adapter
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-transport-binding
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-provider-config
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-krate-project
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-gateway-config
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-memory-repository
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-memory-source
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-memory-ontology
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-memory-association
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-krate-workspace
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-ref-policy
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-runner-pool
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-webhook-subscription
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-view
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-selector
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-pull-request
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-issue
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-review
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-pipeline
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-job
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-webhook-delivery
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-dispatch-run
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-dispatch-attempt
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-session
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-context-bundle
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-krate-artifact
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-approval
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-trigger-execution
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-capability-requirement
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-work-item-session-link
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-work-item-workspace-link
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-session-transcript
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-session-attachment
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-krate-workspace-runtime
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-memory-snapshot
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-memory-query
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-memory-update
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-agent-run-memory-import
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-external-backend-provider
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-external-backend-binding
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-external-backend-sync-policy
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-external-provider-capability-manifest
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-external-webhook-delivery
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-external-sync-event
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-external-sync-state
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-external-write-intent
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-external-sync-conflict
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-external-object-link
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-policy-profile
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-policy-template
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-policy-binding
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-policy-exception-request
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-repository
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-branch-protection
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-organization
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-org-namespace-binding
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-sshkey
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-repository-permission
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-user
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-team
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-invite
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-identity-mapping
+      surface: kubectl
+    - target: kubernetes-crd-kind:krate-auth-provider
+      surface: kubectl
+---
+nodeKind: Presentation
+id: presentation:krate-api
+attributes:
+  displayName: "Krate REST API"
+  kind: api
+  description: |
+    REST API served on port 3080 by the Krate API controller. Provides
+    workflow-shaped endpoints for the web UI, SSE streaming for watch
+    updates, Git smart-HTTP proxy to the Gitea backend, and convenience
+    endpoints for operations that span multiple Kubernetes resources.
+    Authentication via Kubernetes bearer tokens and service accounts.
+  renderingTechnology: http-rest
+  themeSupport: none
+  accessibilitySupport: none
+  offlineMode: 'no'
+  platforms: [web]
+edges:
+  bundled_with:
+    - target: platform:krate
+      notes: "REST API surface for the Krate forge"
+  surfaces_resource:
+    - target: kubernetes-crd-kind:krate-agent-stack
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-subagent
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-tool-profile
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-mcp-server
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-skill
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-trigger-rule
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-context-label
+      surface: api
+    - target: kubernetes-crd-kind:krate-krate-workspace-policy
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-service-account
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-role-binding
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-secret-grant
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-config-grant
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-adapter
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-transport-binding
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-provider-config
+      surface: api
+    - target: kubernetes-crd-kind:krate-krate-project
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-gateway-config
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-memory-repository
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-memory-source
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-memory-ontology
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-memory-association
+      surface: api
+    - target: kubernetes-crd-kind:krate-krate-workspace
+      surface: api
+    - target: kubernetes-crd-kind:krate-ref-policy
+      surface: api
+    - target: kubernetes-crd-kind:krate-runner-pool
+      surface: api
+    - target: kubernetes-crd-kind:krate-webhook-subscription
+      surface: api
+    - target: kubernetes-crd-kind:krate-view
+      surface: api
+    - target: kubernetes-crd-kind:krate-selector
+      surface: api
+    - target: kubernetes-crd-kind:krate-pull-request
+      surface: api
+    - target: kubernetes-crd-kind:krate-issue
+      surface: api
+    - target: kubernetes-crd-kind:krate-review
+      surface: api
+    - target: kubernetes-crd-kind:krate-pipeline
+      surface: api
+    - target: kubernetes-crd-kind:krate-job
+      surface: api
+    - target: kubernetes-crd-kind:krate-webhook-delivery
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-dispatch-run
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-dispatch-attempt
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-session
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-context-bundle
+      surface: api
+    - target: kubernetes-crd-kind:krate-krate-artifact
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-approval
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-trigger-execution
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-capability-requirement
+      surface: api
+    - target: kubernetes-crd-kind:krate-work-item-session-link
+      surface: api
+    - target: kubernetes-crd-kind:krate-work-item-workspace-link
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-session-transcript
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-session-attachment
+      surface: api
+    - target: kubernetes-crd-kind:krate-krate-workspace-runtime
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-memory-snapshot
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-memory-query
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-memory-update
+      surface: api
+    - target: kubernetes-crd-kind:krate-agent-run-memory-import
+      surface: api
+    - target: kubernetes-crd-kind:krate-external-backend-provider
+      surface: api
+    - target: kubernetes-crd-kind:krate-external-backend-binding
+      surface: api
+    - target: kubernetes-crd-kind:krate-external-backend-sync-policy
+      surface: api
+    - target: kubernetes-crd-kind:krate-external-provider-capability-manifest
+      surface: api
+    - target: kubernetes-crd-kind:krate-external-webhook-delivery
+      surface: api
+    - target: kubernetes-crd-kind:krate-external-sync-event
+      surface: api
+    - target: kubernetes-crd-kind:krate-external-sync-state
+      surface: api
+    - target: kubernetes-crd-kind:krate-external-write-intent
+      surface: api
+    - target: kubernetes-crd-kind:krate-external-sync-conflict
+      surface: api
+    - target: kubernetes-crd-kind:krate-external-object-link
+      surface: api
+    - target: kubernetes-crd-kind:krate-policy-profile
+      surface: api
+    - target: kubernetes-crd-kind:krate-policy-template
+      surface: api
+    - target: kubernetes-crd-kind:krate-policy-binding
+      surface: api
+    - target: kubernetes-crd-kind:krate-policy-exception-request
+      surface: api
+    - target: kubernetes-crd-kind:krate-repository
+      surface: api
+    - target: kubernetes-crd-kind:krate-branch-protection
+      surface: api
+    - target: kubernetes-crd-kind:krate-organization
+      surface: api
+    - target: kubernetes-crd-kind:krate-org-namespace-binding
+      surface: api
+    - target: kubernetes-crd-kind:krate-sshkey
+      surface: api
+    - target: kubernetes-crd-kind:krate-repository-permission
+      surface: api
+    - target: kubernetes-crd-kind:krate-user
+      surface: api
+    - target: kubernetes-crd-kind:krate-team
+      surface: api
+    - target: kubernetes-crd-kind:krate-invite
+      surface: api
+    - target: kubernetes-crd-kind:krate-identity-mapping
+      surface: api
+    - target: kubernetes-crd-kind:krate-auth-provider
+      surface: api
+
+# ---------------------------------------------------------------------------
+# 6. Krate-Specific Responsibilities
+# ---------------------------------------------------------------------------
+---
+nodeKind: Responsibility
+id: responsibility:repository-governance
+attributes:
+  displayName: "Repository Governance"
+  description: |
+    Establishing and enforcing branch protection rules, merge policies
+    (squash, rebase, merge commit), required reviewers, status checks,
+    RefPolicy enforcement on receive-pack, and CI gating requirements.
+    Ensures code flowing into protected branches meets quality,
+    security, and review standards defined at the org and repo level.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:devops
+    - domain:platform-engineering
+---
+nodeKind: Responsibility
+id: responsibility:agent-dispatch-safety
+attributes:
+  displayName: "Agent Dispatch Safety"
+  description: |
+    Reviewing agent permission requests before dispatch, auditing secret
+    grants (AgentSecretGrant), enforcing tool profile restrictions
+    (AgentToolProfile), managing approval gates for destructive or
+    privileged operations, and ensuring untrusted agent runs cannot
+    escalate to trusted runner pools or access production secrets.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:security
+    - domain:software-engineering
+---
+nodeKind: Responsibility
+id: responsibility:company-brain-curation
+attributes:
+  displayName: "Company Brain Curation"
+  description: |
+    Maintaining the quality and accuracy of organizational memory stored
+    in AgentMemoryRepository. Includes reviewing agent-proposed memory
+    updates, maintaining the memory ontology schema, managing snapshot
+    retention and archival, resolving conflicting or stale knowledge
+    entries, and ensuring memory retrieval quality supports productive
+    agent sessions.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+---
+nodeKind: Responsibility
+id: responsibility:forge-availability
+attributes:
+  displayName: "Forge Availability"
+  description: |
+    Ensuring Git service uptime for clone/push/fetch operations, API
+    availability for the aggregated and CRD-backed resources, storage
+    health for Gitea persistent volumes and object storage, and graceful
+    degradation when Postgres or individual components are unavailable.
+    Includes monitoring request latency, error rates, watch counts,
+    and reconciliation lag.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:platform-engineering
+
+# ---------------------------------------------------------------------------
+# 7. Testable Claims for Krate Graph Integrity
+# ---------------------------------------------------------------------------
+---
+nodeKind: TestableClaim
+id: claim:krate-has-75-crd-kinds
+attributes:
+  displayName: "Krate defines 75 CRD kinds"
+  description: |
+    Verifies that the Krate product (platform:krate) description
+    references 75 total Krate CRD kinds across etcd CRDs and aggregated
+    API resources, confirming the resource model is fully represented.
+  testStatus: untested
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['platform:krate'];process.exit(r&&String(r.description||'').includes('75')?0:1)\""
+  category: graph-integrity
+  priority: high
+edges:
+  asserts_about:
+    - platform:krate
+---
+nodeKind: TestableClaim
+id: claim:krate-integrates-with-agent-mux
+attributes:
+  displayName: "Krate integrates with Agent Mux"
+  description: |
+    Verifies that platform:krate has an integrates_with edge pointing
+    to agent:agent-mux, confirming the agent dispatch integration
+    path is modeled in the graph.
+  testStatus: untested
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.from==='platform:krate'&&e.kind==='integrates_with'&&e.to==='agent:agent-mux')?0:1)\""
+  category: graph-integrity
+  priority: high
+edges:
+  asserts_about:
+    - platform:krate
+---
+nodeKind: TestableClaim
+id: claim:krate-has-stack-impls
+attributes:
+  displayName: "Krate version has composed_of edges"
+  description: |
+    Verifies that platform:krate has composed_of edges
+    in the graph through the StackProfile, confirming the technology
+    stack is properly wired.
+  testStatus: untested
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.records['stack-profile:krate-platform']&&i.edges.some(e=>e.from==='stack-profile:krate-platform'&&e.kind==='composed_of')?0:1)\""
+  category: graph-integrity
+  priority: high
+edges:
+  asserts_about:
+    - platform:krate
+    - stack-profile:krate-platform
+---
+nodeKind: TestableClaim
+id: claim:krate-company-brain-modeled
+attributes:
+  displayName: "Krate company brain memory topics exist"
+  description: |
+    Verifies that the company brain memory-related topics are present
+    in the graph — AgentMemoryRepository, AgentMemorySnapshot,
+    AgentMemoryQuery, and AgentMemoryOntology topics all exist.
+  testStatus: untested
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const ids=['topic:krate-agent-memory-repository','topic:krate-agent-memory-snapshot','topic:krate-agent-memory-query','topic:krate-agent-memory-ontology'];process.exit(ids.every(id=>i.records[id])?0:1)\""
+  category: graph-integrity
+  priority: high
+edges:
+  asserts_about:
+    - topic:krate-agent-memory-repository
+    - topic:krate-agent-memory-snapshot
+    - topic:krate-agent-memory-query
+    - topic:krate-agent-memory-ontology
+---
+nodeKind: TestableClaim
+id: claim:krate-ci-engine-modeled
+attributes:
+  displayName: "Krate CI engine entities exist"
+  description: |
+    Verifies that the CI-related definitions and tool server are
+    present in the graph — definition:krate-forge-model contains
+    Pipeline references and tool-server:krate-api exists.
+  testStatus: untested
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const d=i.records['definition:krate-forge-model'];const t=i.records['tool-server:krate-api'];process.exit(d&&t?0:1)\""
+  category: graph-integrity
+  priority: high
+edges:
+  asserts_about:
+    - definition:krate-forge-model
+    - tool-server:krate-api
+---
+nodeKind: TestableClaim
+id: claim:krate-control-plane-component
+attributes:
+  displayName: "Krate control plane StackPart exists"
+  description: |
+    Verifies that stack-part:krate-control-plane is present in the
+    graph with proper displayName and description attributes.
+  testStatus: untested
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['stack-part:krate-control-plane'];process.exit(r&&r.displayName?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - stack-part:krate-control-plane
+---
+nodeKind: TestableClaim
+id: claim:krate-git-backend-uses-gitea
+attributes:
+  displayName: "Krate Git backend implemented by Gitea"
+  description: |
+    Verifies that stack-part:krate-git-backend has an implemented_by
+    edge pointing to tool:gitea, confirming the Git data plane's
+    backing implementation is modeled.
+  testStatus: untested
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.from==='stack-part:krate-git-backend'&&e.kind==='implemented_by'&&e.to==='tool:gitea')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - stack-part:krate-git-backend
+    - tool:gitea
+---
+nodeKind: TestableClaim
+id: claim:krate-presentations-exist
+attributes:
+  displayName: "Krate has web UI, CLI, and API presentations"
+  description: |
+    Verifies that all three Krate presentation surfaces are modeled
+    in the graph: the Next.js web UI, the kubectl-native CLI, and
+    the REST API on port 3080.
+  testStatus: untested
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const ids=['presentation:krate-web-ui','presentation:krate-cli','presentation:krate-api'];process.exit(ids.every(id=>i.records[id])?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - presentation:krate-web-ui
+    - presentation:krate-cli
+    - presentation:krate-api

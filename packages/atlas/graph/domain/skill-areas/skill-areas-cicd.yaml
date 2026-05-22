@@ -1,0 +1,96 @@
+---
+nodeKind: SkillArea
+id: skill-area:github-actions-authoring
+attributes:
+  displayName: "GitHub Actions Authoring"
+  description: |
+    Writing and maintaining GitHub Actions workflows — job matrices, reusable
+    workflows, composite actions, environment protection rules, OIDC secret
+    federation, and workflow_dispatch/repository_dispatch event design.
+  domains:
+    - domain:devops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:ci-pipeline-optimization
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:ci-pipeline-optimization
+attributes:
+  displayName: "CI Pipeline Optimization"
+  description: |
+    Optimizing CI build times through dependency caching, build-graph
+    parallelism, incremental (affected-only) execution, layer-cache
+    tuning for containers, and flaky-test quarantine strategies.
+  domains:
+    - domain:devops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:deployment-automation
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:deployment-automation
+attributes:
+  displayName: "Deployment Automation"
+  description: |
+    Designing and operating fully automated deployment pipelines — rolling
+    updates, blue/green and canary release automation, environment promotion
+    gates, rollback triggers on SLO breach, and GitOps-style reconciliation.
+  domains:
+    - domain:devops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:cloud-infra
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:platform-engineering
+      strength: recommended
+    - target: skill-area:serverless-compute
+      strength: helpful
+    - target: skill-area:blue-green-deployment
+      strength: recommended
+    - target: skill-area:canary-rollouts
+      strength: recommended
+    - target: skill-area:gitops
+      strength: recommended
+    - target: skill-area:deployment
+      strength: recommended
+    - target: skill-area:feature-management
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:ci-security
+attributes:
+  displayName: "CI/CD Security"
+  description: |
+    Securing CI/CD pipelines against supply-chain attacks and credential
+    leakage — OIDC token federation, secret scanning, SLSA artifact
+    provenance, dependency review gates, and pipeline permission hardening.
+  domains:
+    - domain:devops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:cybersecurity
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:secrets-rotation
+      strength: recommended

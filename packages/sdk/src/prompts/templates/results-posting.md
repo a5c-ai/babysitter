@@ -15,12 +15,12 @@
 
 2. Post the result, either by passing the value file or inline JSON:
 ```bash
-$CLI task:post .a5c/runs/<runId> <effectId> \
+$CLI task:post <runDir> <effectId> \
   --status ok \
   --value tasks/<effectId>/output.json \
   --json
 
-$CLI task:post .a5c/runs/<runId> <effectId> \
+$CLI task:post <runDir> <effectId> \
   --status ok \
   --value-inline '{"score": 85}' \
   --json

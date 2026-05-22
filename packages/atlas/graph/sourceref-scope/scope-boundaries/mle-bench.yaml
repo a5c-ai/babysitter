@@ -1,0 +1,20 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:mle-bench.scope
+attributes:
+  subjectId: benchmark:mle-bench
+  inScope: |
+    End-to-end machine-learning engineering tasks drawn from 75 Kaggle
+    competitions — agents must produce a submission CSV scored against
+    held-out leaderboards. Tasks use Python, common ML libraries
+    (PyTorch, scikit-learn, pandas), and run inside a Docker sandbox.
+  outOfScope: |
+    Pure code-generation tasks (use HumanEval/SWE-bench), data-engineering
+    (ETL) tasks without an ML objective, foundation-model pre-training,
+    interactive/UI-driven ML workflows, and tasks requiring proprietary
+    GPU clusters beyond a single accelerator.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:mle-bench

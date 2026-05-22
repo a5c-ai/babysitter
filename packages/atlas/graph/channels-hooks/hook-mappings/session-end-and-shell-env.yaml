@@ -1,0 +1,40 @@
+nodeKind: HookMapping
+id: hook-mapping:before-provider-request-pi
+attributes:
+  mappingId: hook-mapping:before-provider-request-pi
+  hookId: hook-surface:pi.on-event
+  targetId: agentVersion:pi:ge-0-0-0
+  nativeName: beforeProviderRequest
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: pi
+  notes: "Pi pre-provider-request hook surface (proxy-shaped event)."
+  canonicalPhase: model.before_request
+  blockCapability: false
+  mutationCapability: false
+  scope: model
+edges:
+  maps_hook:
+    - target: hook-surface:pi.on-event
+  emits_hook:
+    - target: agentVersion:pi:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:after-agent-gemini
+attributes:
+  mappingId: hook-mapping:after-agent-gemini
+  hookId: hook-surface:gemini.post-response
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: afterAgent
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: gemini
+  canonicalPhase: turn.after_agent
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:gemini.post-response
+  emits_hook:
+    - target: agentVersion:gemini:ge-0-0-0

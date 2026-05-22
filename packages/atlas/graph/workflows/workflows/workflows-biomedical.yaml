@@ -1,0 +1,67 @@
+---
+nodeKind: Workflow
+id: workflow:medical-device-validation
+attributes:
+  displayName: "Medical Device Validation"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Validates medical device software per IEC 62304 and FDA 21 CFR Part
+    820 -- verifying requirements traceability matrices, executing
+    protocol-driven IQ/OQ/PQ test suites, confirming cybersecurity
+    controls per FDA premarket guidance, validating SOUP (Software of
+    Unknown Provenance) risk assessments, and assembling the Design
+    History File (DHF) for regulatory submission. Excludes clinical
+    trial execution.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:test-writer
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:integration-testing
+    - target: skill-area:firmware-development
+  applies_to_domain:
+    - target: domain:biomedical-engineering
+    - target: domain:embedded-systems
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:clinical-data-pipeline-review
+attributes:
+  displayName: "Clinical Data Pipeline Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-study"
+  complexity: single-team
+  description: |
+    Reviews clinical data pipelines for CDISC/SDTM compliance --
+    validating data transformations from EDC systems, checking derivation
+    logic against analysis datasets, ensuring audit trail integrity for
+    21 CFR Part 11 compliance, verifying de-identification procedures for
+    PHI, and confirming data lock readiness for statistical analysis.
+    Excludes statistical analysis itself.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:staff-engineer
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:biomedical-engineering
+    - target: domain:scientific-computing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:research-engineering

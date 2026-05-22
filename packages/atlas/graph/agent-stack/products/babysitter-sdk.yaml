@@ -1,0 +1,18 @@
+nodeKind: AgentProduct
+id: agent:babysitter-sdk
+attributes:
+  displayName: "babysitter SDK"
+  vendor: "a5c-ai"
+  homepageUrl: "https://www.npmjs.com/package/@a5c-ai/babysitter-sdk"
+  primarySurface: sdk
+  supportTier: catalog-backed
+  productKind: sdk
+  stackScope: core-runtime
+  description: |
+    @a5c-ai/babysitter-sdk — programmatic SDK for catalog-driven agentic
+    workflows. Provides the run/iterate/task primitives, MCP server
+    bindings, and process orchestration intrinsics. Imported by host
+    harnesses and the babysitter-agent CLI.
+edges:
+  has_version:
+    - agent-version:babysitter-sdk@current

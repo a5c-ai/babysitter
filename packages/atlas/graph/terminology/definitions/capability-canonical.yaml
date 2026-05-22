@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:capability.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:capability
+  text: |
+    a named capability
+  status: canonical
+edges:
+  defines:
+    - term:capability

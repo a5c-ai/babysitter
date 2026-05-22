@@ -29,6 +29,9 @@
  * - NIST HIPAA Security Rule Toolkit: https://csrc.nist.gov/projects/hipaa-security-rule-toolkit
  * - OCR Audit Protocol: https://www.hhs.gov/hipaa/for-professionals/compliance-enforcement/audit/protocol/index.html
  * - HHS Breach Notification Rule: https://www.hhs.gov/hipaa/for-professionals/breach-notification/index.html
+ * @graph
+ *   domains: [domain:security, role:security-engineer]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

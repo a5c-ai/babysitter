@@ -1,0 +1,71 @@
+---
+nodeKind: Workflow
+id: workflow:esg-reporting-cycle
+attributes:
+  displayName: "ESG Reporting Cycle"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Orchestrates Environmental, Social, and Governance reporting --
+    collecting emissions data from facility energy management systems,
+    aggregating workforce diversity and safety metrics from HR platforms,
+    gathering governance indicators from board and committee records,
+    mapping disclosures to GRI, SASB, and TCFD frameworks, validating data
+    against third-party assurance standards, and generating reports for
+    investor and regulatory audiences. Produces ESG disclosure reports,
+    materiality matrices, and data lineage documentation. Excludes
+    sustainability strategy formulation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:sustainability-esg
+    - target: domain:compliance
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:regulatory-filing
+  performed_by_org_unit:
+    - target: org-unit:esg-sustainability-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:carbon-footprint-audit
+attributes:
+  displayName: "Carbon Footprint Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annually"
+  complexity: cross-team
+  description: |
+    Audits organizational carbon emissions across all scopes -- inventorying
+    Scope 1 direct emissions from owned facilities and fleet, calculating
+    Scope 2 emissions from purchased electricity using location-based and
+    market-based methods, estimating Scope 3 value-chain emissions from
+    supply chain surveys and spend-based modeling, verifying calculations
+    against the GHG Protocol, and identifying reduction opportunities ranked
+    by abatement cost. Produces verified emissions inventory, variance
+    analysis against prior periods, and reduction roadmap. Excludes carbon
+    offset procurement.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:security-reviewer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:sustainability-esg
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:esg-sustainability-team
+    - target: org-unit:operations-team

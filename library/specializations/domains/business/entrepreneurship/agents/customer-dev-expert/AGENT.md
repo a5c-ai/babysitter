@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: Research
   agent-id: AG-013
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:market-research, skill-area:customer-success, skill-area:growth-strategy]
+  workflows: [workflow:product-discovery]
+  roles: [role:product-manager, role:business-analyst, role:strategic-planner]
 ---
 
 # Customer Development Expert Agent

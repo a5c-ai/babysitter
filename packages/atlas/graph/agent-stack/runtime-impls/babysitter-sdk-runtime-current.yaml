@@ -1,0 +1,54 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:babysitter-sdk.runtime@current
+attributes:
+  displayName: "babysitter SDK Runtime (current) — task-effect dispatcher"
+  agentVersionId: agent-version:babysitter-sdk@current
+  packageRef: source-ref:babysitter-github
+  subagentDispatchMechanism: agent-as-tool
+  builtInTools:
+    - tool-descriptor:bash
+    - tool-descriptor:read
+    - tool-descriptor:write
+    - tool-descriptor:edit
+    - tool-descriptor:grep
+    - tool-descriptor:glob
+  toolRegistryDiscovery: dynamic-extension-loaded
+  hookSockets: []
+  internalSessionStateLocation: ".a5c/runs/<runId>/"
+  sessionFileFormat: event-sourced-jsonl
+  sessionFilePathConvention: ".a5c/runs/<runId>/journal/<seq>.<ulid>.json"
+  approvalGatingPrimitive: policy-engine
+  subprocessSandboxStrategy: wrapped-shell
+  runtimeIdentity: none
+  supportedMCPTransports:
+    - mcp-transport:stdio
+    - mcp-transport:streamable-http
+    - mcp-transport:http-sse
+  supportsStreaming: true
+  notes: |
+    The SDK runtime records effects (task / breakpoint / sleep /
+    orchestratorTask / subprocess / hook intrinsics) into the journal
+    and replays them deterministically across iterations. Harness
+    adapters spawn subprocesses for kind: 'agent' tasks. This runtime
+    is reused by the babysitter-agent CLI binary.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:babysitter-sdk
+      role: runtime
+  bundles:
+    - target: tool-descriptor:bash
+    - target: tool-descriptor:read
+    - target: tool-descriptor:write
+    - target: tool-descriptor:edit
+    - target: tool-descriptor:grep
+    - target: tool-descriptor:glob
+  connects:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http
+    - target: mcp-transport:http-sse
+  speaks:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http
+    - target: mcp-transport:http-sse

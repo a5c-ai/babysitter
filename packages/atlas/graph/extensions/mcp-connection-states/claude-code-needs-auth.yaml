@@ -1,0 +1,11 @@
+nodeKind: MCPConnectionState
+id: mcp-connection-state:claude-code-needs-auth-github
+attributes:
+  displayName: "Needs auth: github MCP"
+  serverName: "github"
+  state: needs-auth
+  configScopeId: mcp-config-scope:claude-code-project
+  oauthCallbackPort: 33417
+  description: |
+    OAuth flow pending — listening on callbackPort for the user-visible
+    redirect. Until the flow completes the server isn't usable.

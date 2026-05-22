@@ -1,0 +1,12 @@
+nodeKind: Definition
+id: definition:install-method.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:install-method
+  text: |
+    a canonical install method (npm, brew, gh-extension, …) referenced by
+    AgentVersion.installMethods, Plugin install records, and Blueprint setup
+  status: canonical
+edges:
+  defines:
+    - term:install-method

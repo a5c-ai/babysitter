@@ -87,14 +87,14 @@ ls -la $(npm config get prefix)/lib/node_modules/
 
 2. **Reinstall packages:**
    ```bash
-   npm install -g @a5c-ai/babysitter-sdk@latest
+   npm install -g @a5c-ai/babysitter@latest
    ```
 
 **Prevention:** Never use `sudo npm install -g`. Configure npm for user installs.
 
 ---
 
-### SDK Module Not Found
+### Core CLI or SDK Module Not Found
 
 **Symptoms:**
 ```
@@ -110,17 +110,22 @@ echo $PATH
 
 **Solutions:**
 
-1. **Install globally:**
+1. **Install the main CLI globally:**
    ```bash
-   npm install -g @a5c-ai/babysitter-sdk@latest
+   npm install -g @a5c-ai/babysitter@latest
    ```
 
-2. **Use npx (always works):**
+2. **Use npx (always works for the main CLI):**
    ```bash
-   npx -y @a5c-ai/babysitter-sdk@latest --version
+   npx -y @a5c-ai/babysitter@latest --version
    ```
 
-3. **Check PATH includes npm global bin:**
+3. **If your code imports the SDK, install it in the project too:**
+   ```bash
+   npm install @a5c-ai/babysitter-sdk
+   ```
+
+4. **Check PATH includes npm global bin:**
    ```bash
    npm bin -g
    # Add this to your PATH if not included
@@ -134,7 +139,7 @@ echo $PATH
 
 **Symptoms:**
 ```
-Error: Incompatible version: sdk@0.0.120 requires babysitter@^0.0.120
+Error: Incompatible version: sdk@4.x requires babysitter@^4.x
 ```
 
 **Diagnosis:**
@@ -146,7 +151,7 @@ npm list -g @a5c-ai/babysitter-sdk
 
 Update all packages to the latest versions:
 ```bash
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-agent@latest
 ```
 
 **Prevention:** Update all packages together, not individually.
@@ -224,7 +229,7 @@ claude plugin list | grep babysitter
 
 1. **Add marketplace (if not added):**
    ```bash
-   claude plugin marketplace add a5c-ai/babysitter
+   claude plugin marketplace add a5c-ai/babysitter-claude
    ```
 
 2. **Install plugin:**
@@ -266,7 +271,7 @@ claude plugin marketplace list
 
 1. **Add marketplace first:**
    ```bash
-   claude plugin marketplace add a5c-ai/babysitter
+   claude plugin marketplace add a5c-ai/babysitter-claude
    ```
 
 2. **Check network connectivity:**
@@ -825,11 +830,11 @@ cat .a5c/runs/<runId>/tasks/<effectId>/result.json | jq .
 ### System Checks
 
 ```bash
-# Check SDK version
-npx -y @a5c-ai/babysitter-sdk@latest --version
+# Check core CLI version
+babysitter --version
 
 # Check installed packages
-npm list -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk
+npm list -g @a5c-ai/babysitter @a5c-ai/babysitter-agent
 
 # Check plugin status
 claude plugin list | grep babysitter
@@ -868,7 +873,7 @@ Contact support if you experience:
    - OS and version
    - Node.js version: `node --version`
    - Claude Code version: `claude --version`
-   - Babysitter SDK version: `npx @a5c-ai/babysitter-sdk --version`
+   - Babysitter CLI version: `babysitter --version`
    - Full error message and stack trace
    - Steps to reproduce
 

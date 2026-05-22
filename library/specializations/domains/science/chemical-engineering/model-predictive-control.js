@@ -3,6 +3,12 @@
  * @description Design and implement MPC systems for advanced process control and optimization
  * @inputs { processName: string, mpcScope: object, processModels: object, constraints: object, outputDir: string }
  * @outputs { success: boolean, mpcConfiguration: object, commissioningReport: object, trainingMaterials: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:chemical-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -9,6 +9,13 @@ expertise:
   - Ensemble strategy selection
   - Model comparison
   - Human-in-loop validation
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:hyperparameter-tuning-experiment-management, skill-area:machine-learning-frameworks]
+  roles: [role:ml-engineer, role:data-scientist]
+  workflows: [workflow:ml-model-lifecycle, workflow:experiment-design]
+
 ---
 
 # automl-orchestrator

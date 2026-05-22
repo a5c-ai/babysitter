@@ -5,7 +5,10 @@
 
 export {
   callHook,
+  discoverHooks,
 } from "./dispatcher";
+
+export type { DiscoveredHook } from "./dispatcher";
 
 export type {
   HookType,
@@ -22,6 +25,7 @@ export type {
   OnIterationStartPayload,
   OnIterationEndPayload,
   OnBreakpointPayload,
+  OnPermissionDeniedPayload,
   PreCommitPayload,
   PreBranchPayload,
   PostPlanningPayload,

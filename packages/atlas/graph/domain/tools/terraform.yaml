@@ -1,0 +1,25 @@
+nodeKind: Tool
+id: tool:terraform
+attributes:
+  displayName: "Terraform"
+  homepageUrl: "https://www.terraform.io"
+  kind: iac
+  releasedAt: "2014"
+  description: |
+    Infrastructure-as-code tool for declarative cloud provisioning.
+edges:
+  belongs_to_language:
+    - target: language:hcl
+  used_for:
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:deployment-automation
+    - target: skill-area:ci-security
+  alternative_to:
+    - target: tool:pulumi
+      comparison: "IaC — Terraform uses HCL; Pulumi uses general-purpose languages"
+    - target: tool:opentofu
+      comparison: "IaC — OpenTofu is an open-source fork of Terraform"
+    - target: tool:crossplane
+      comparison: "IaC — Terraform uses HCL files; Crossplane uses Kubernetes CRDs"
+  tool_used_by:
+    - target: skill-area:terraform-infrastructure

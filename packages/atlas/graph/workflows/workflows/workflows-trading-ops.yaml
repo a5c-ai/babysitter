@@ -1,0 +1,144 @@
+---
+nodeKind: Workflow
+id: workflow:trade-reconciliation-cycle
+attributes:
+  displayName: "Trade Reconciliation Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Matches trade records across order management system, broker
+    confirmations, clearing house statements, and custodian records —
+    performing automated three-way reconciliation of trade date,
+    settlement date, quantity, and price fields, identifying and
+    categorizing breaks (price, quantity, commission, counterparty
+    mismatches), escalating unresolved breaks by aging bucket and
+    materiality threshold, and tracking break resolution rates against SLA
+    targets. Produces daily reconciliation dashboards, open break aging
+    reports, and resolution audit trails. Excludes trade booking and
+    settlement instruction generation.
+edges:
+  involves_role:
+    - target: role:trading-systems-engineer
+    - target: role:operational-risk-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:trading-operations
+    - target: domain:capital-markets
+  triggers_responsibility:
+    - target: responsibility:trading-system-reliability
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:trading-desk
+---
+nodeKind: Workflow
+id: workflow:settlement-exception-management
+attributes:
+  displayName: "Settlement Exception Management"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Handles failed trade settlements, reconciliation breaks, and corporate
+    action processing — identifying settlement failures by fail reason
+    (insufficient securities, SSI mismatches, counterparty issues),
+    coordinating with brokers and custodians for resolution, processing
+    mandatory and voluntary corporate actions (dividends, splits, mergers,
+    tender offers) with proper ex-date and record-date handling, managing
+    partial settlements and buy-in/sell-out procedures, and tracking fail
+    charges and regulatory penalties. Produces exception dashboards,
+    fail-rate KPIs, and corporate action processing confirmations.
+    Excludes trade initiation and position management.
+edges:
+  involves_role:
+    - target: role:operational-risk-analyst
+    - target: role:trading-systems-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:trading-operations
+    - target: domain:capital-markets
+  triggers_responsibility:
+    - target: responsibility:trading-system-reliability
+    - target: responsibility:risk-reporting
+  performed_by_org_unit:
+    - target: org-unit:trading-desk
+---
+nodeKind: Workflow
+id: workflow:trading-system-failover-drill
+attributes:
+  displayName: "Trading System Failover Drill"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Tests disaster recovery and business continuity for trading
+    infrastructure — executing planned failover of order management
+    systems and execution management systems to secondary data centers,
+    validating market data feed reconnection and gap-fill procedures,
+    testing FIX session re-establishment with broker and exchange
+    gateways, verifying position and order state recovery from persistent
+    stores, measuring recovery time objectives against regulatory and
+    business requirements, and conducting tabletop exercises for extended
+    outage scenarios. Produces DR test reports with RTO/RPO measurements,
+    gap findings, and remediation action items. Excludes production
+    trading activity and strategy deployment.
+edges:
+  involves_role:
+    - target: role:trading-systems-engineer
+    - target: role:platform-engineer
+    - target: role:risk-analyst
+  requires_skill_area:
+    - target: skill-area:chaos-engineering
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:trading-operations
+    - target: domain:capital-markets
+  triggers_responsibility:
+    - target: responsibility:trading-system-reliability
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:trading-desk
+    - target: org-unit:market-risk-team
+---
+nodeKind: Workflow
+id: workflow:market-data-feed-validation
+attributes:
+  displayName: "Market Data Feed Validation"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: moderate
+  description: |
+    Validates market data feed integrity across all consumed data
+    sources — detecting data gaps and sequence number discontinuities in
+    real-time tick feeds, identifying stale prices through last-update
+    timestamp monitoring, performing cross-vendor price comparison to
+    detect outliers and erroneous prints, validating reference data
+    (symbol mapping, lot sizes, tick sizes) against exchange master files,
+    and monitoring feed latency distributions against SLA thresholds.
+    Produces data quality dashboards, vendor comparison scorecards, and
+    stale-price alert reports. Excludes data vendor selection and contract
+    management.
+edges:
+  involves_role:
+    - target: role:trading-systems-engineer
+    - target: role:data-engineer
+  requires_skill_area:
+    - target: skill-area:kafka-stream-processing
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:market-data
+    - target: domain:trading-operations
+    - target: domain:data-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:trading-system-reliability
+  performed_by_org_unit:
+    - target: org-unit:trading-desk
+    - target: org-unit:quant-research

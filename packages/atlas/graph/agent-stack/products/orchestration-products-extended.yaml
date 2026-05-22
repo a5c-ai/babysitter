@@ -1,0 +1,79 @@
+nodeKind: AgentProduct
+id: agent:sweep-ai
+attributes:
+  displayName: "Sweep AI"
+  vendor: "Sweep AI, Inc."
+  homepageUrl: "https://sweep.dev/"
+  primarySurface: web
+  supportTier: none
+  productKind: web-agent
+  stackScope: full
+  description: |
+    Sweep AI is an AI junior developer that takes GitHub issues and
+    autonomously creates pull requests. It polls for new issues, plans
+    code changes, creates isolated branches, implements the fix or
+    feature, and opens a PR with generated description linking back
+    to the originating issue. Designed for low-complexity tickets
+    that benefit from automated triage-to-PR workflows.
+edges:
+  has_version:
+    - agent-version:sweep-ai@current
+  integrates_with:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:ci-cd
+    - target: topic:agent-orchestration-products
+    - target: topic:agent-dispatch
+---
+nodeKind: AgentVersion
+id: agent-version:sweep-ai@current
+attributes:
+  agentProductId: agent:sweep-ai
+  versionRange: '>=1.0.0'
+  releasedAt: '2023-07-01'
+  cliCommand: sweep
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  version_of:
+  - agent:sweep-ai
+  sourced_from: []
+  supports:
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0'
+    level: full
+  composed_of:
+  - target: agent-core-impl:sweep-ai.core@current
+    role: core
+---
+nodeKind: AgentCoreImpl
+id: agent-core-impl:sweep-ai.core@current
+attributes:
+  displayName: "Sweep AI Core (current)"
+  agentVersionId: agent-version:sweep-ai@current
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    Sweep polls GitHub issues, generates a plan, implements code changes
+    in an isolated branch, and opens a PR. The loop is issue-driven.
+  contextManagementStrategy: user-managed
+  subagentInvokerPolicy: none
+  resultSynthesisPolicy: model-direct
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: none
+  supportedTransportProtocols: []
+  parallelToolCallHandling: none
+  streamingFidelity: none
+  thinkingChannelHandling: none
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:sweep-ai
+      role: core
+  speaks: []
+  supports_orchestration_primitive:
+    - target: orch-primitive:poll-tick
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:workspace-create
+    - target: orch-primitive:pr-creation
+    - target: orch-primitive:task-complete

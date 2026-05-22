@@ -3,6 +3,10 @@ name: music-producer-agent
 description: Music production specialist agent for creating detailed style specifications, genre classification, instrumentation design, vocal direction, and AI platform prompt optimization
 required-skills: style-specification, genre-analysis, vocal-direction, production-guidance, music-prompt-engineering
 id: AG-MAC-002
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:audio-processing, skill-area:prompt-engineering, skill-area:content-strategy]
+  roles: [role:creative-director, role:media-engineer]
 ---
 
 # Music Producer Agent

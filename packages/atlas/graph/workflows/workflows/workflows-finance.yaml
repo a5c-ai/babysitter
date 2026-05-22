@@ -1,0 +1,93 @@
+---
+nodeKind: Workflow
+id: workflow:budget-planning-cycle
+attributes:
+  displayName: "Budget Planning Cycle"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Coordinates the organizational budget planning process — collecting
+    departmental budget requests, analyzing spend trends against revenue
+    forecasts, modeling scenarios for headcount and infrastructure investment,
+    facilitating cross-functional prioritization, and producing consolidated
+    budget proposals for executive approval. Produces approved budget
+    allocations and variance thresholds. Excludes day-to-day expense tracking.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:expense-audit
+attributes:
+  displayName: "Expense Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Audits organizational spending for policy compliance and anomalies —
+    reviewing expense reports against approval thresholds, validating vendor
+    invoices against contract terms, identifying duplicate payments, flagging
+    unusual spending patterns, and verifying budget utilization rates by cost
+    center. Produces audit findings report and remediation actions. Excludes
+    policy definition changes.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:security-reviewer
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:revenue-recognition-review
+attributes:
+  displayName: "Revenue Recognition Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews revenue recognition practices for accounting standards
+    compliance — validating contract milestone completions against recognition
+    triggers, reconciling deferred revenue balances, auditing multi-element
+    arrangement allocations, and ensuring ASC 606 compliance across
+    subscription and professional services revenue streams. Produces
+    compliance attestation and adjustment journal entries. Excludes contract
+    negotiation.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:license-auditor
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:legal-team

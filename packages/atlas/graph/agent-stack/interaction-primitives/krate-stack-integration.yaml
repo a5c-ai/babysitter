@@ -1,0 +1,111 @@
+# How Krate fits into the agentic stack alongside agent-mux and babysitter.
+# Krate owns the repository/policy/dispatch plane; agent-mux owns the session
+# plane; babysitter owns the process orchestration plane.
+
+# ═══════════════════════════════════════════
+# Cross-product orchestration flow
+# ═══════════════════════════════════════════
+
+# Krate's orchestration primitives connect to agent-mux and babysitter
+# primitives to form the full dispatch→execute→merge flow.
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:krate-to-mux-handoff
+attributes:
+  displayName: "Krate→Agent Mux Handoff"
+  description: |
+    After Krate assembles context and provisions a workspace, it hands
+    off to agent-mux for the actual agent session. Krate creates the
+    dispatch run, agent-mux manages the chat/tool loop, and Krate
+    receives the artifacts back when the session completes. This is
+    the boundary between the forge plane and the agent execution plane.
+  kind: session-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+  orch_triggers:
+    - target: orch-primitive:agent-dispatch
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:krate-to-babysitter-handoff
+attributes:
+  displayName: "Krate→Babysitter Handoff"
+  description: |
+    For multi-step workflows (e.g., fix→test→review→merge), Krate
+    delegates to babysitter's process orchestration. Babysitter manages
+    the step-by-step iteration while Krate provides the repository
+    context, workspace isolation, and merge governance.
+  kind: multi-agent-coordination
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+
+# ═══════════════════════════════════════════
+# Krate interaction patterns
+# These describe HOW Krate participates in common agentic workflows.
+# ═══════════════════════════════════════════
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:krate-issue-to-pr
+attributes:
+  displayName: "Krate Issue→Agent→PR"
+  description: |
+    End-to-end automation: a Krate issue triggers agent dispatch, the
+    agent works in an isolated worktree, and the result surfaces as a
+    pull request with CI and review gates. The full cycle from problem
+    statement to deployable code change, governed by org policy.
+edges:
+  realizes:
+    - target: layer:10-interaction
+  integrates_with:
+    - target: platform:krate
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:krate-ci-failure-fix
+attributes:
+  displayName: "Krate CI Failure→Agent Fix"
+  description: |
+    Auto-remediation pattern: when a CI pipeline fails, a trigger rule
+    dispatches a coding agent to analyze the failure and propose a fix.
+    The agent receives the pipeline logs, test output, and repo context
+    as its prompt, then creates a fix PR targeting the failing branch.
+edges:
+  realizes:
+    - target: layer:10-interaction
+  integrates_with:
+    - target: platform:krate
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:krate-memory-assisted-dispatch
+attributes:
+  displayName: "Krate Memory-Assisted Dispatch"
+  description: |
+    Context-enriched dispatch: before launching an agent, Krate queries
+    the company brain for relevant memories from prior sessions, similar
+    issues, and organizational patterns. The memory context is injected
+    into the prompt alongside the repo state, giving the agent access
+    to institutional knowledge that spans sessions and team members.
+edges:
+  realizes:
+    - target: layer:10-interaction
+  integrates_with:
+    - target: platform:krate
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:krate-governed-agent-work
+attributes:
+  displayName: "Krate Governed Agent Work"
+  description: |
+    Policy-governed agent execution: Krate enforces org-level policies
+    on every agent dispatch — tool allowlists, secret access grants,
+    file scope boundaries, and mandatory review gates. Agents operate
+    within the same RBAC model as human developers, using K8s
+    ServiceAccounts and RoleBindings rather than separate permission
+    systems.
+edges:
+  realizes:
+    - target: layer:10-interaction
+  integrates_with:
+    - target: platform:krate

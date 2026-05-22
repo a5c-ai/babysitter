@@ -1,0 +1,552 @@
+---
+nodeKind: Specialization
+id: specialization:scientific-discovery
+attributes:
+  displayName: "Scientific Discovery"
+  description: |
+    Cross-disciplinary research methodology focused on scientific discovery workflows,
+    hypothesis generation, and experimental design. Covers AI-assisted discovery,
+    open science practices, and systematic innovation frameworks.
+edges:
+  specializes:
+    - domain:scientific-discovery
+---
+nodeKind: Specialization
+id: specialization:physics
+attributes:
+  displayName: "Physics"
+  description: |
+    Computational physics, simulation, and experimental data analysis workflows.
+    Covers numerical methods, particle physics, condensed matter, and astrophysics
+    research tooling and scientific computing practices.
+edges:
+  specializes:
+    - domain:physics
+---
+nodeKind: Specialization
+id: specialization:venture-capital
+attributes:
+  displayName: "Venture Capital"
+  description: |
+    Venture capital investment processes including deal sourcing, due diligence,
+    term sheet negotiation, portfolio management, and exit strategy. Covers
+    fund operations, LP relations, and startup ecosystem engagement.
+edges:
+  specializes:
+    - domain:venture-capital
+---
+nodeKind: Specialization
+id: specialization:industrial-engineering
+attributes:
+  displayName: "Industrial Engineering"
+  description: |
+    Manufacturing systems optimization, quality control, lean operations, and
+    process engineering. Covers simulation modeling, ergonomics, supply chain
+    engineering, and production systems design.
+edges:
+  specializes:
+    - domain:industrial-engineering
+---
+nodeKind: Specialization
+id: specialization:arts-culture
+attributes:
+  displayName: "Arts & Culture"
+  description: |
+    Arts administration, cultural heritage management, curation, and creative
+    production workflows. Covers digital preservation, arts programming,
+    community engagement, and cultural institution operations.
+edges:
+  specializes:
+    - domain:arts-culture
+---
+nodeKind: Specialization
+id: specialization:nanotechnology
+attributes:
+  displayName: "Nanotechnology"
+  description: |
+    Nanofabrication, nano-characterization, and nanomaterials design workflows.
+    Covers cleanroom processes, atomic force microscopy, self-assembly,
+    and nano-device integration techniques.
+edges:
+  specializes:
+    - domain:nanotechnology
+---
+nodeKind: Specialization
+id: specialization:decision-intelligence
+attributes:
+  displayName: "Decision Intelligence"
+  description: |
+    Decision analytics, forecasting, simulation, and optimization for business
+    choices. Covers causal inference, scenario planning, decision trees,
+    and AI-augmented decision support systems.
+edges:
+  specializes:
+    - domain:business-intelligence
+---
+nodeKind: Specialization
+id: specialization:civil-engineering
+attributes:
+  displayName: "Civil Engineering"
+  description: |
+    Structural analysis, construction management, and infrastructure design.
+    Covers geotechnical engineering, transportation systems, hydraulics,
+    and BIM-driven project delivery workflows.
+edges:
+  specializes:
+    - domain:civil-engineering
+---
+nodeKind: Specialization
+id: specialization:bioinformatics
+attributes:
+  displayName: "Bioinformatics"
+  description: |
+    Computational biology workflows for genomic data analysis, sequence alignment,
+    protein structure prediction, and biological pathway modeling. Covers
+    pipeline orchestration for NGS, proteomics, and systems biology.
+edges:
+  specializes:
+    - domain:bioinformatics
+---
+nodeKind: Specialization
+id: specialization:operations
+attributes:
+  displayName: "Operations"
+  description: |
+    Business operations management covering process optimization, resource planning,
+    and operational excellence frameworks. Includes supply chain coordination,
+    workforce management, and operational KPI tracking.
+edges:
+  specializes:
+    - domain:operations
+---
+nodeKind: Specialization
+id: specialization:sales
+attributes:
+  displayName: "Sales"
+  description: |
+    Sales processes, pipeline management, CRM workflows, and revenue operations.
+    Covers prospecting, qualification, negotiation, and closing techniques
+    alongside territory planning and sales enablement.
+edges:
+  specializes:
+    - domain:sales
+---
+nodeKind: Specialization
+id: specialization:logistics
+attributes:
+  displayName: "Logistics"
+  description: |
+    Supply chain logistics, warehousing, fulfillment, and last-mile delivery
+    optimization. Covers route planning, inventory control, freight management,
+    and logistics technology integration.
+edges:
+  specializes:
+    - domain:logistics
+---
+nodeKind: Specialization
+id: specialization:mathematics
+attributes:
+  displayName: "Mathematics"
+  description: |
+    Pure and applied mathematics spanning algebra, analysis, topology, number
+    theory, combinatorics, probability, and numerical methods. Includes formal
+    proof workflows, mathematical modeling, and computational mathematics.
+edges:
+  specializes:
+    - domain:mathematics
+---
+nodeKind: Specialization
+id: specialization:biomedical-engineering
+attributes:
+  displayName: "Biomedical Engineering"
+  description: |
+    Medical device design, health informatics systems, and clinical engineering.
+    Covers regulatory compliance for medical devices, biocompatibility testing,
+    and integration of engineering principles with biomedical sciences.
+edges:
+  specializes:
+    - domain:biomedical-engineering
+---
+nodeKind: Specialization
+id: specialization:chemical-engineering
+attributes:
+  displayName: "Chemical Engineering"
+  description: |
+    Process design, reaction engineering, and materials processing workflows.
+    Covers unit operations, process simulation, safety analysis, and scale-up
+    from lab to industrial production systems.
+edges:
+  specializes:
+    - domain:chemical-engineering
+---
+nodeKind: Specialization
+id: specialization:computer-science
+attributes:
+  displayName: "Computer Science"
+  description: |
+    Theoretical and applied computer science including algorithms, complexity
+    theory, programming language theory, and formal methods. Covers foundations
+    that underpin cryptography, AI, databases, and distributed systems research.
+edges:
+  specializes:
+    - domain:computer-science
+---
+nodeKind: Specialization
+id: specialization:finance-accounting
+attributes:
+  displayName: "Finance & Accounting"
+  description: |
+    Financial planning, accounting workflows, budgeting, and audit processes.
+    Covers financial reporting, cost accounting, treasury management, and
+    compliance with accounting standards and regulatory requirements.
+edges:
+  specializes:
+    - domain:finance
+---
+nodeKind: Specialization
+id: specialization:mechanical-engineering
+attributes:
+  displayName: "Mechanical Engineering"
+  description: |
+    Mechanical design, thermodynamics, and manufacturing engineering workflows.
+    Covers CAD/CAM, FEA simulation, HVAC systems, and product lifecycle
+    management from concept through production.
+edges:
+  specializes:
+    - domain:mechanical-engineering
+---
+nodeKind: Specialization
+id: specialization:automotive-engineering
+attributes:
+  displayName: "Automotive Engineering"
+  description: |
+    Vehicle systems engineering covering ADAS, powertrain, chassis, and
+    automotive software development. Includes functional safety (ISO 26262),
+    embedded systems integration, and EV/hybrid powertrain engineering.
+edges:
+  specializes:
+    - domain:automotive-engineering
+---
+nodeKind: Specialization
+id: specialization:human-resources
+attributes:
+  displayName: "Human Resources"
+  description: |
+    Recruiting, onboarding, performance management, and culture development.
+    Covers HRIS systems, compensation and benefits design, learning and
+    development programs, and workforce analytics.
+edges:
+  specializes:
+    - domain:human-resources
+---
+nodeKind: Specialization
+id: specialization:marketing
+attributes:
+  displayName: "Marketing"
+  description: |
+    Marketing strategy, campaigns, analytics, and brand management workflows.
+    Covers content marketing, demand generation, marketing operations,
+    and cross-channel attribution modeling.
+edges:
+  specializes:
+    - domain:marketing
+---
+nodeKind: Specialization
+id: specialization:project-management
+attributes:
+  displayName: "Project Management"
+  description: |
+    Project planning, execution, and delivery using agile and waterfall
+    methodologies. Covers scope management, risk mitigation, stakeholder
+    communication, and project governance frameworks.
+edges:
+  specializes:
+    - domain:project-management
+---
+nodeKind: Specialization
+id: specialization:business-analysis
+attributes:
+  displayName: "Business Analysis"
+  description: |
+    Requirements elicitation, process modeling, and stakeholder alignment for
+    business transformation initiatives. Covers gap analysis, use-case development,
+    and translating business needs into actionable specifications.
+edges:
+  specializes:
+    - domain:business-intelligence
+---
+nodeKind: Specialization
+id: specialization:public-relations
+attributes:
+  displayName: "Public Relations"
+  description: |
+    PR strategy, media relations, crisis communications, and brand reputation
+    management. Covers press release writing, journalist outreach, social
+    media positioning, and executive communications.
+edges:
+  specializes:
+    - domain:public-relations
+---
+nodeKind: Specialization
+id: specialization:education
+attributes:
+  displayName: "Education"
+  description: |
+    Educational technology, curriculum design, learning management, and assessment
+    workflows. Covers instructional design, adaptive learning systems, student
+    engagement, and outcomes-based education frameworks.
+edges:
+  specializes:
+    - domain:education
+---
+nodeKind: Specialization
+id: specialization:humanities
+attributes:
+  displayName: "Humanities"
+  description: |
+    Humanities research methods including literary analysis, historical research,
+    digital humanities, NLP for text corpora, and cultural studies. Covers
+    archival research, corpus linguistics, and interdisciplinary inquiry.
+edges:
+  specializes:
+    - domain:humanities
+---
+nodeKind: Specialization
+id: specialization:social-sciences
+attributes:
+  displayName: "Social Sciences"
+  description: |
+    Social research methods, behavioral analytics, and policy analysis workflows.
+    Covers survey design, qualitative research, behavioral economics,
+    and evidence-based policy development.
+edges:
+  specializes:
+    - domain:social-sciences
+---
+nodeKind: Specialization
+id: specialization:philosophy
+attributes:
+  displayName: "Philosophy"
+  description: |
+    Philosophical inquiry covering ethics, logic, epistemology, and philosophy
+    of mind. Covers formal argumentation, analytic and continental traditions,
+    and applied ethics for technology and AI systems.
+edges:
+  specializes:
+    - domain:philosophy
+---
+nodeKind: Specialization
+id: specialization:entrepreneurship
+attributes:
+  displayName: "Entrepreneurship"
+  description: |
+    Startup founding workflows covering idea validation, business model design,
+    fundraising, and early-stage growth. Includes lean startup methodology,
+    pitch development, and founder-to-CEO scaling patterns.
+edges:
+  specializes:
+    - domain:entrepreneurship
+---
+nodeKind: Specialization
+id: specialization:healthcare
+attributes:
+  displayName: "Healthcare"
+  description: |
+    Healthcare operations, clinical systems, patient safety, and health informatics
+    workflows. Covers EHR integration, clinical workflow optimization, healthcare
+    compliance (HIPAA), and value-based care delivery models.
+edges:
+  specializes:
+    - domain:healthcare
+---
+nodeKind: Specialization
+id: specialization:meta
+attributes:
+  displayName: "Meta / Process Engineering"
+  description: |
+    Meta-level process engineering and workflow design for software development
+    teams. Covers developer experience, tooling strategy, process improvement,
+    and engineering effectiveness measurement.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:environmental-engineering
+attributes:
+  displayName: "Environmental Engineering"
+  description: |
+    Environmental monitoring, sustainability engineering, and remediation workflows.
+    Covers environmental impact assessment, waste management, air and water
+    quality systems, and sustainability reporting.
+edges:
+  specializes:
+    - domain:environmental-engineering
+---
+nodeKind: Specialization
+id: specialization:knowledge-management
+attributes:
+  displayName: "Knowledge Management"
+  description: |
+    Organizational knowledge capture, structuring, and retrieval systems. Covers
+    wiki design, documentation culture, institutional memory preservation,
+    and knowledge graph construction for enterprise contexts.
+edges:
+  specializes:
+    - domain:knowledge-management
+---
+nodeKind: Specialization
+id: specialization:business-strategy
+attributes:
+  displayName: "Business Strategy"
+  description: |
+    Corporate and product strategy, competitive analysis, and market research.
+    Covers strategic planning frameworks (OKRs, Balanced Scorecard), market
+    positioning, and strategy-to-execution alignment.
+edges:
+  specializes:
+    - domain:strategy
+---
+nodeKind: Specialization
+id: specialization:materials-science
+attributes:
+  displayName: "Materials Science"
+  description: |
+    Material characterization, composites design, and advanced materials research.
+    Covers structure-property relationships, materials processing, failure
+    analysis, and computational materials modeling.
+edges:
+  specializes:
+    - domain:materials-science
+---
+nodeKind: Specialization
+id: specialization:business-strategy-advanced
+attributes:
+  displayName: "Advanced Business Strategy"
+  description: |
+    Advanced strategic frameworks for complex market environments including
+    platform strategy, ecosystem orchestration, and competitive dynamics modeling.
+    Covers M&A strategy, corporate venturing, and transformational change.
+edges:
+  specializes:
+    - domain:strategy
+---
+nodeKind: Specialization
+id: specialization:customer-experience
+attributes:
+  displayName: "Customer Experience"
+  description: |
+    Customer journey design, satisfaction measurement, and loyalty program
+    management. Covers NPS/CSAT analytics, voice of customer programs,
+    and cross-functional CX improvement initiatives.
+edges:
+  specializes:
+    - domain:customer-experience
+---
+nodeKind: Specialization
+id: specialization:electrical-engineering
+attributes:
+  displayName: "Electrical Engineering"
+  description: |
+    Circuit design, signal processing, and power systems engineering workflows.
+    Covers PCB design, EMC compliance, power electronics, and electronic
+    systems integration from component to system level.
+edges:
+  specializes:
+    - domain:electrical-engineering
+---
+nodeKind: Specialization
+id: specialization:travel
+attributes:
+  displayName: "Travel"
+  description: |
+    Travel technology and operations covering booking systems, dynamic packaging,
+    loyalty programs, and traveler personalization. Includes GDS integration,
+    content aggregation, and travel experience optimization.
+edges:
+  specializes:
+    - domain:travel
+---
+nodeKind: Specialization
+id: specialization:common-utilities
+attributes:
+  displayName: "Common Utilities"
+  description: |
+    Cross-cutting utility libraries and shared tooling for software projects.
+    Covers logging, configuration management, date/time handling, validation,
+    and other foundational utilities reused across applications.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:authoring
+attributes:
+  displayName: "Authoring"
+  description: |
+    Technical authoring and developer content creation workflows. Covers
+    API documentation, tutorial writing, developer guides, changelogs,
+    and docs-as-code pipeline integration.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:business
+attributes:
+  displayName: "Business Software"
+  description: |
+    Business application software development covering ERP, CRM, workflow
+    automation, and enterprise integration. Bridges domain business logic
+    with software engineering practices for line-of-business systems.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:sourcing
+attributes:
+  displayName: "Sourcing"
+  description: |
+    Software sourcing strategies including open source dependency management,
+    vendor evaluation, build-vs-buy decisions, and third-party integration.
+    Covers license compliance, supply chain security, and vendor risk assessment.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:digital-marketing
+attributes:
+  displayName: "Digital Marketing"
+  description: |
+    Digital marketing execution covering SEO, SEM, social media, content marketing,
+    email campaigns, and performance marketing. Includes marketing analytics,
+    attribution modeling, CRO, and full-funnel growth strategy.
+edges:
+  specializes:
+    - domain:digital-marketing
+---
+nodeKind: Specialization
+id: specialization:legal
+attributes:
+  displayName: "Legal"
+  description: |
+    Legal practice workflows covering contract drafting, compliance program design,
+    corporate governance, data privacy (GDPR, CCPA), and litigation support.
+    Includes regulatory compliance, entity management, and legal operations.
+edges:
+  specializes:
+    - domain:legal
+---
+nodeKind: Specialization
+id: specialization:supply-chain
+attributes:
+  displayName: "Supply Chain"
+  description: |
+    End-to-end supply chain management including procurement, demand planning,
+    inventory optimization, supplier relationship management, and logistics.
+    Covers supply chain risk, sustainability sourcing, and digital transformation.
+edges:
+  specializes:
+    - domain:supply-chain

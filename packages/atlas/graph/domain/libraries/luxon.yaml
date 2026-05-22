@@ -1,0 +1,13 @@
+nodeKind: Library
+id: library:luxon
+attributes:
+  displayName: "Luxon"
+  belongsToLanguageId: language:javascript
+  category: datetime
+  description: |
+    DateTime library by a Moment.js maintainer with immutable types and good time-zone / Intl support.
+edges:
+  belongs_to_language:
+    - language:javascript
+  library_used_by:
+    - target: skill-area:date-time-manipulation

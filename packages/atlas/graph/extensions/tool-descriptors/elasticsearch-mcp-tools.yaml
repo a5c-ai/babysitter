@@ -1,0 +1,90 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:elasticsearch.list-indices
+attributes:
+  schema: '{}'
+  displayName: "Elasticsearch: List Indices"
+  description: List all indices on the cluster, including health and document counts.
+  inputSchema:
+    type: object
+    properties:
+      pattern: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      indices: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-elasticsearch
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:elasticsearch.get-mappings
+attributes:
+  schema: '{}'
+  displayName: "Elasticsearch: Get Index Mappings"
+  description: Retrieve field mappings for an index.
+  inputSchema:
+    type: object
+    required: [index]
+    properties:
+      index: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      mappings: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-elasticsearch
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:elasticsearch.search
+attributes:
+  schema: '{}'
+  displayName: "Elasticsearch: Search"
+  description: Run a search query against one or more indices using the Elasticsearch DSL.
+  inputSchema:
+    type: object
+    required: [index, query]
+    properties:
+      index: { type: string }
+      query: { type: object }
+      size: { type: integer }
+      from: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      hits: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-elasticsearch
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:elasticsearch.esql
+attributes:
+  schema: '{}'
+  displayName: "Elasticsearch: ES|QL Query"
+  description: Run an ES|QL (Elasticsearch query language) query against indices.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      columns: { type: array }
+      values: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-elasticsearch

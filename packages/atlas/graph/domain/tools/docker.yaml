@@ -1,0 +1,24 @@
+nodeKind: Tool
+id: tool:docker
+attributes:
+  displayName: "Docker"
+  homepageUrl: "https://www.docker.com"
+  kind: container
+  releasedAt: "2013"
+  description: |
+    Platform for developing, shipping, and running applications in containers.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:container-security
+    - target: skill-area:containerization
+  used_for:
+    - target: skill-area:containerization
+    - target: skill-area:deployment
+    - target: skill-area:configuration-management
+  implements_stack_part:
+    - target: stack-part:container-runtime
+  alternative_to:
+    - target: tool:podman
+      comparison: "container runtimes — Docker uses a daemon; Podman is daemonless"

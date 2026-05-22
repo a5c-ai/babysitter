@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:gemini-cli-container-image
+attributes:
+  artifactId: plugin-artifact:gemini-cli-container-image
+  displayName: "Gemini CLI container image"
+  targetId: plugin-target:gemini-cli
+  artifactKind: container-image
+  pathPattern: "ghcr.io/google/gemini-cli"
+  installerSurface: "latest"
+  scriptVariants:
+    - preinstalled
+edges:
+  emits_artifact:
+    - target: plugin-target:gemini-cli

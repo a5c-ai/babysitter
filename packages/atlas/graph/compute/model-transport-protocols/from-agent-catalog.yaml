@@ -1,0 +1,56 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:azure-foundry
+attributes:
+  displayName: "Azure AI Foundry Chat Completions"
+  vendor: "Microsoft"
+  specUrl: "https://learn.microsoft.com/azure/ai-foundry/model-inference/api/reference"
+  streamingFraming: sse
+  toolUseSchema: |
+    OpenAI-compatible: tool calls appear in the assistant message's
+    `tool_calls` array with `id`, `type: "function"`, and
+    `function: { name, arguments }`.
+  thinkingChannel: none
+  cacheControl: implicit
+  status: standard
+  requestBodyShape: |
+    POST /models/chat/completions
+    OpenAI-compatible JSON body. Authentication via `api-key` header
+    or `Authorization: Bearer <Entra-token>`.
+  responseBodyShape: |
+    OpenAI-compatible chat-completion response (`choices[].message`).
+  authHeaderFormat: |
+    `api-key: <azure-key>`
+    or `Authorization: Bearer <entra-token>`
+edges:
+  realizes:
+    - target: layer:3-transport
+  served_by:
+    - provider:azure-foundry
+---
+nodeKind: ModelTransportProtocol
+id: model-transport:passthrough
+attributes:
+  displayName: "Passthrough upstream protocol"
+  vendor: "(varies)"
+  specUrl: "https://github.com/a5c-ai/babysitter"
+  streamingFraming: sse
+  toolUseSchema: |
+    Wire format is whatever the upstream provider speaks; the proxy
+    forwards bytes verbatim. Used by amux-proxy when the harness and
+    upstream already share a compatible contract.
+  thinkingChannel: none
+  cacheControl: passthrough
+  status: standard
+  requestBodyShape: |
+    Provider-native request path and body forwarded as-is.
+  responseBodyShape: |
+    Provider-native response forwarded as-is (status, headers, and
+    body bytes preserved).
+  authHeaderFormat: |
+    Whatever the upstream requires; the proxy substitutes credentials
+    based on the configured route.
+edges:
+  realizes:
+    - target: layer:3-transport
+  bridged_by:
+    - transport-proxy:agent-mux-proxy

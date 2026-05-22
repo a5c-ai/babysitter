@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:session
+attributes:
+  canonicalDefinitionId: definition:session.canonical
+  displayName: "Session"
+  kind: concept
+  references:
+    - "NodeKind:Session"
+  description: |
+    Persisted conversational state
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:cybersecurity

@@ -1,0 +1,17 @@
+nodeKind: PathDescriptor
+id: path:codex-config-toml
+attributes:
+  pathId: path:codex-config-toml
+  displayName: "Codex config (TOML)"
+  path: "~/.codex/config.toml"
+  pathKind: settings-file
+  ownerKind: AgentRuntimeImpl
+  ownerId: agent-runtime-impl:codex.runtime@1.x
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+
+edges:
+  owned_by:
+    - target: agent-runtime-impl:codex.runtime@1.x

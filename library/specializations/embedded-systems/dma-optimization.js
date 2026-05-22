@@ -17,6 +17,12 @@
  * - DMA Basics: https://interrupt.memfault.com/blog/introduction-to-dma
  * - DMA Performance: https://www.embedded.com/dma-fundamentals-on-various-platforms/
  * - Circular DMA: https://www.st.com/resource/en/application_note/dm00046011-using-the-stm32f2-stm32f4-and-stm32f7-series-dma-controller-stmicroelectronics.pdf
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:firmware-release-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

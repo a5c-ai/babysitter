@@ -1,0 +1,57 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:amp-oracle-dispatch
+attributes:
+  displayName: "Amp Oracle subagent dispatch"
+  description: |
+    Dispatch a query to Amp's Oracle subagent — Sourcegraph Amp's
+    specialized deep-reasoning persona that runs longer for complex
+    multi-step problems. Triggered via tool-call from the parent
+    session; emits structured findings back to the parent on completion.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:human-in-loop
+  availableInModes: [chat, plan]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:human-in-loop
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:amp-librarian-dispatch
+attributes:
+  displayName: "Amp Librarian subagent dispatch"
+  description: |
+    Dispatch to Amp's Librarian subagent — specialized for codebase
+    search, indexing, and documentation lookup. Triggered via tool-call
+    from the parent session.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:navigation
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:navigation
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:droid-parallel-subagent-dispatch
+attributes:
+  displayName: "Factory Droid parallel-subagent dispatch"
+  description: |
+    Dispatch up to 10 parallel subagents from Factory Droid. Each
+    subagent runs in its own ChildSession; results aggregated and
+    returned to the parent session. Triggered via tool-call.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat, plan]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:lifecycle

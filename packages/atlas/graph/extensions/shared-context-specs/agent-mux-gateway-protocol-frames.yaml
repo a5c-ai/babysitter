@@ -1,0 +1,307 @@
+# Protocol v1 wire frames for @a5c-ai/agent-mux-gateway.
+# Source of truth: packages/agent-mux/gateway/src/protocol/v1.ts (TypeScript
+# interfaces) + packages/agent-mux/gateway/src/protocol/frames.ts (zod
+# discriminated-union runtime validators in `gatewayFrameSchema`).
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-auth
+attributes:
+  displayName: "AuthFrame (client→server)"
+  contextKind: "websocket-frame-client"
+  typescriptInterface: "AuthFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway client (encodeFrame)"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-gateway server.ts websocket message handler (server.ts:586-630)"
+  fieldSchema:
+    - "type:literal<auth>:required:Frame discriminator"
+    - "token:string:required:Bearer token to authenticate the websocket connection (zod min(1))"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:5-8; frames.ts:6-9"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-hello
+attributes:
+  displayName: "HelloFrame (server→client)"
+  contextKind: "websocket-frame-server"
+  typescriptInterface: "HelloFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway server.ts createHelloFrame (server.ts:66-73)"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-gateway client (decodeFrame)"
+  fieldSchema:
+    - "type:literal<hello>:required:Frame discriminator"
+    - "protocolVersions:list<literal<1>>:required:Server-supported protocol versions (currently only '1')"
+    - "serverVersion:string:required:Gateway server semver"
+    - "serverTime:string:required:ISO-8601 timestamp at hello emission"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:10-15; frames.ts:11-16"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-error
+attributes:
+  displayName: "ErrorFrame (server→client)"
+  contextKind: "websocket-frame-server"
+  typescriptInterface: "ErrorFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway server.ts (RunManager / ClientConn error paths)"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-gateway client"
+  fieldSchema:
+    - "type:literal<error>:required:Frame discriminator"
+    - "code:string:required:Machine-readable error code (zod min(1))"
+    - "message:string:required:Human-readable error message"
+    - "runId:string:optional:Run id the error pertains to (when applicable)"
+    - "tailSeq:int:optional:Last delivered seq for the run subscription, for resume"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:17-23; frames.ts:18-24"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-subscribe
+attributes:
+  displayName: "SubscribeFrame (client→server)"
+  contextKind: "websocket-frame-client"
+  typescriptInterface: "SubscribeFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway client"
+  consumerIfaces:
+    - "RunManager.subscribe (server.ts:637-639)"
+  fieldSchema:
+    - "type:literal<subscribe>:required:Frame discriminator"
+    - "runId:string:required:Run id to subscribe the connection to"
+    - "sinceSeq:int:optional:Resume cursor (server replays events with seq > sinceSeq)"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:25-29; frames.ts:26-30"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-unsubscribe
+attributes:
+  displayName: "UnsubscribeFrame (client→server)"
+  contextKind: "websocket-frame-client"
+  typescriptInterface: "UnsubscribeFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway client"
+  consumerIfaces:
+    - "RunManager.unsubscribe (server.ts:642-644)"
+  fieldSchema:
+    - "type:literal<unsubscribe>:required:Frame discriminator"
+    - "runId:string:required:Run id to remove from this connection's subscriptions"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:31-34; frames.ts:32-35"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-session-subscribe
+attributes:
+  displayName: "SessionSubscribeFrame (client→server)"
+  contextKind: "websocket-frame-client"
+  typescriptInterface: "SessionSubscribeFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway client"
+  consumerIfaces:
+    - "RunManager.subscribeSession (server.ts:647-649)"
+  fieldSchema:
+    - "type:literal<session.subscribe>:required:Frame discriminator"
+    - "sessionId:string:required:Session id to subscribe to"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:36-39; frames.ts:37-40"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-session-unsubscribe
+attributes:
+  displayName: "SessionUnsubscribeFrame (client→server)"
+  contextKind: "websocket-frame-client"
+  typescriptInterface: "SessionUnsubscribeFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway client"
+  consumerIfaces:
+    - "RunManager.unsubscribeSession (server.ts:652-654)"
+  fieldSchema:
+    - "type:literal<session.unsubscribe>:required:Frame discriminator"
+    - "sessionId:string:required:Session id to remove from subscriptions"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:41-44; frames.ts:42-45"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-session-start
+attributes:
+  displayName: "SessionStartFrame (client→server, request/response)"
+  contextKind: "websocket-frame-client"
+  typescriptInterface: "SessionStartFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway client"
+  consumerIfaces:
+    - "handleRequestFrame 'session.start' (server.ts:742-774)"
+  fieldSchema:
+    - "type:literal<session.start>:required:Frame discriminator"
+    - "agent:string:required:Adapter agent name (must be runnable / available)"
+    - "prompt:string:required:Initial prompt text"
+    - "model:string:optional:Override model id"
+    - "attachments:list<Attachment>:optional:Attachments lifted via sanitizeAttachments (filePath | url | base64 + mimeType + name)"
+    - "approvalMode:enum<yolo|prompt|deny>:optional:Tool-approval policy for the session"
+    - "sessionId:string:optional:Reuse an existing session id"
+    - "runId:string:optional:Caller-supplied Crockford-base32 26-char run id (else generated)"
+    - "cwd:string:optional:Working directory override"
+    - "workspaceId:string:optional:Workspace context id"
+    - "forkSessionId:string:optional:Source session id when forking"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:46-58; frames.ts:47-59"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-session-message
+attributes:
+  displayName: "SessionMessageFrame (client→server, request/response)"
+  contextKind: "websocket-frame-client"
+  typescriptInterface: "SessionMessageFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway client"
+  consumerIfaces:
+    - "handleRequestFrame 'session.message' (server.ts:779-805)"
+  fieldSchema:
+    - "type:literal<session.message>:required:Frame discriminator"
+    - "sessionId:string:required:Target session id"
+    - "prompt:string:required:User prompt body"
+    - "agent:string:optional:Override adapter agent name"
+    - "model:string:optional:Override model id"
+    - "attachments:list<Attachment>:optional:Attachment list"
+    - "approvalMode:enum<yolo|prompt|deny>:optional:Tool-approval policy override"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:60-68; frames.ts:61-69"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-ping
+attributes:
+  displayName: "PingFrame (client→server)"
+  contextKind: "websocket-frame-client"
+  typescriptInterface: "PingFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway client"
+  consumerIfaces:
+    - "server.ts websocket message handler (server.ts:632-634)"
+  fieldSchema:
+    - "type:literal<ping>:required:Frame discriminator (server replies with PongFrame)"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:70-72; frames.ts:71-73"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-pong
+attributes:
+  displayName: "PongFrame (server→client)"
+  contextKind: "websocket-frame-server"
+  typescriptInterface: "PongFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway server.ts (server.ts:633)"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-gateway client"
+  fieldSchema:
+    - "type:literal<pong>:required:Frame discriminator (heartbeat reply)"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:74-76; frames.ts:75-77"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-run-event
+attributes:
+  displayName: "RunEventFrame (server→client)"
+  contextKind: "websocket-frame-server"
+  typescriptInterface: "RunEventFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway RunManager fanout"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-gateway client"
+  fieldSchema:
+    - "type:literal<run.event>:required:Frame discriminator"
+    - "runId:string:required:Run id the event belongs to"
+    - "seq:int:required:Monotonic per-run sequence (zod nonnegative int)"
+    - "source:string:required:Origin label (e.g. journal source)"
+    - "event:record<string,unknown>:required:Verbatim event payload (JournalEvent or adapter event)"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:78-84; frames.ts:79-85"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-hook-request
+attributes:
+  displayName: "HookRequestFrame (server→client)"
+  contextKind: "websocket-frame-server"
+  typescriptInterface: "HookRequestFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway RunManager (hook elevation path)"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-gateway client (responds with HookDecisionFrame)"
+  fieldSchema:
+    - "type:literal<hook.request>:required:Frame discriminator"
+    - "hookRequestId:string:required:Correlation id for the decision"
+    - "runId:string:required:Run that issued the hook elevation"
+    - "hookKind:string:required:Hook category (e.g. tool-approval, breakpoint)"
+    - "payload:record<string,unknown>:required:Hook-specific payload"
+    - "deadlineTs:int:required:Absolute deadline in ms (epoch); after this the gateway resolves with default policy"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:86-93; frames.ts:87-94"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-hook-decision
+attributes:
+  displayName: "HookDecisionFrame (client→server)"
+  contextKind: "websocket-frame-client"
+  typescriptInterface: "HookDecisionFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway client"
+  consumerIfaces:
+    - "RunManager.submitHookDecision (server.ts:657-663)"
+  fieldSchema:
+    - "type:literal<hook.decision>:required:Frame discriminator"
+    - "hookRequestId:string:required:Correlation id from the matching HookRequestFrame"
+    - "decision:enum<allow|deny>:required:Operator decision"
+    - "reason:string:optional:Human-readable rationale"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:95-100; frames.ts:96-101"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-hook-resolved
+attributes:
+  displayName: "HookResolvedFrame (server→client)"
+  contextKind: "websocket-frame-server"
+  typescriptInterface: "HookResolvedFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway RunManager (hook resolution broadcast)"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-gateway client"
+  fieldSchema:
+    - "type:literal<hook.resolved>:required:Frame discriminator"
+    - "hookRequestId:string:required:Correlation id"
+    - "resolvedBy:string:required:Identity of the resolver (token name or system)"
+    - "decision:enum<allow|deny>:required:Final decision applied"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:102-107; frames.ts:103-108"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-pairing-register
+attributes:
+  displayName: "PairingRegisterFrame (client→server, request/response)"
+  contextKind: "websocket-frame-client"
+  typescriptInterface: "PairingRegisterFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway client"
+  consumerIfaces:
+    - "handleRequestFrame 'pairing.register' (server.ts:806-813)"
+  fieldSchema:
+    - "type:literal<pairing.register>:required:Frame discriminator"
+    - "code:string:required:Short pairing code"
+    - "url:string:required:Gateway URL the consuming device should connect to"
+    - "token:string:required:Bearer token the code unlocks"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:109-114; frames.ts:110-115"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-pairing-consume
+attributes:
+  displayName: "PairingConsumeFrame (client→server, request/response)"
+  contextKind: "websocket-frame-client"
+  typescriptInterface: "PairingConsumeFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway client"
+  consumerIfaces:
+    - "handleRequestFrame 'pairing.consume' (server.ts:814-817)"
+  fieldSchema:
+    - "type:literal<pairing.consume>:required:Frame discriminator"
+    - "code:string:required:Short pairing code to consume"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:116-119; frames.ts:117-120"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-gateway-frame-pairing-consumed
+attributes:
+  displayName: "PairingConsumedFrame (server→client)"
+  contextKind: "websocket-frame-server"
+  typescriptInterface: "PairingConsumedFrame"
+  producerIface: "@a5c-ai/agent-mux-gateway ShortCodeStore (server.ts:807-816)"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-gateway client"
+  fieldSchema:
+    - "type:literal<pairing.consumed>:required:Frame discriminator"
+    - "code:string:required:Pairing code that was consumed"
+    - "url:string:required:Gateway URL associated with the code"
+    - "token:string:required:Bearer token released by the consume action"
+    - "expiresAt:int:required:Epoch-ms expiration of the released token (zod positive int)"
+  sourceCitation: "packages/agent-mux/gateway/src/protocol/v1.ts:121-127; frames.ts:122-128"
+edges: {}

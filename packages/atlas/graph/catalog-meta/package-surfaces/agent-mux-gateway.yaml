@@ -1,0 +1,93 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-mux-gateway
+attributes:
+  packageId: "@a5c-ai/agent-mux-gateway"
+  packageName: "@a5c-ai/agent-mux-gateway"
+  workspacePath: packages/agent-mux/gateway
+  moduleType: typescript
+  surfaceKinds:
+    - http-gateway
+    - fanout-server
+  sourceOfTruthRole: application
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:agent-mux-gateway
+  exposes_endpoint:
+    - target: api-endpoint:agent-mux-gateway-get-healthz
+    - target: api-endpoint:agent-mux-gateway-get-tokens
+    - target: api-endpoint:agent-mux-gateway-post-tokens
+    - target: api-endpoint:agent-mux-gateway-post-tokens-revoke
+    - target: api-endpoint:agent-mux-gateway-post-bootstrap-login
+    - target: api-endpoint:agent-mux-gateway-get-dispatches
+    - target: api-endpoint:agent-mux-gateway-get-runs-v1
+    - target: api-endpoint:agent-mux-gateway-get-sessions
+    - target: api-endpoint:agent-mux-gateway-get-workspaces-v1
+    - target: api-endpoint:agent-mux-gateway-post-workspaces-v1
+    - target: api-endpoint:agent-mux-gateway-get-session
+    - target: api-endpoint:agent-mux-gateway-get-session-full
+    - target: api-endpoint:agent-mux-gateway-post-sessions
+    - target: api-endpoint:agent-mux-gateway-get-session-messages
+    - target: api-endpoint:agent-mux-gateway-post-session-messages
+    - target: api-endpoint:agent-mux-gateway-get-agents
+    - target: api-endpoint:agent-mux-gateway-post-dispatches
+    - target: api-endpoint:agent-mux-gateway-post-runs-v1
+    - target: api-endpoint:agent-mux-gateway-get-dispatch
+    - target: api-endpoint:agent-mux-gateway-get-run-v1
+    - target: api-endpoint:agent-mux-gateway-post-dispatch-stop
+    - target: api-endpoint:agent-mux-gateway-post-run-v1-stop
+    - target: api-endpoint:agent-mux-gateway-post-pairing-register
+    - target: api-endpoint:agent-mux-gateway-post-pairing-consume
+    - target: api-endpoint:agent-mux-gateway-ws-upgrade
+    - target: api-endpoint:agent-mux-gateway-get-backlog
+    - target: api-endpoint:agent-mux-gateway-post-backlog
+    - target: api-endpoint:agent-mux-gateway-get-task-tags
+    - target: api-endpoint:agent-mux-gateway-post-task-tags
+    - target: api-endpoint:agent-mux-gateway-patch-task-tag
+    - target: api-endpoint:agent-mux-gateway-delete-task-tag
+    - target: api-endpoint:agent-mux-gateway-get-dispatch-context-labels
+    - target: api-endpoint:agent-mux-gateway-post-dispatch-context-labels
+    - target: api-endpoint:agent-mux-gateway-patch-dispatch-context-label
+    - target: api-endpoint:agent-mux-gateway-delete-dispatch-context-label
+    - target: api-endpoint:agent-mux-gateway-get-reviews
+    - target: api-endpoint:agent-mux-gateway-post-reviews
+    - target: api-endpoint:agent-mux-gateway-get-automations
+    - target: api-endpoint:agent-mux-gateway-post-automations
+    - target: api-endpoint:agent-mux-gateway-get-automation
+    - target: api-endpoint:agent-mux-gateway-patch-automation
+    - target: api-endpoint:agent-mux-gateway-delete-automation
+    - target: api-endpoint:agent-mux-gateway-post-automation-lifecycle
+    - target: api-endpoint:agent-mux-gateway-post-automation-webhook
+    - target: api-endpoint:agent-mux-gateway-get-settings-agent-configuration
+    - target: api-endpoint:agent-mux-gateway-post-settings-agent-configuration
+    - target: api-endpoint:agent-mux-gateway-get-settings-mcp-servers
+    - target: api-endpoint:agent-mux-gateway-post-settings-mcp-servers
+    - target: api-endpoint:agent-mux-gateway-get-workspaces-kanban
+    - target: api-endpoint:agent-mux-gateway-post-workspaces-kanban
+    - target: api-endpoint:agent-mux-gateway-get-digest
+    - target: api-endpoint:agent-mux-gateway-get-runs-kanban
+    - target: api-endpoint:agent-mux-gateway-get-run-kanban
+    - target: api-endpoint:agent-mux-gateway-get-run-events
+    - target: api-endpoint:agent-mux-gateway-get-run-task
+    - target: api-endpoint:agent-mux-gateway-post-run-task-approve
+    - target: api-endpoint:agent-mux-gateway-get-stream
+  has_payload_schema:
+    - target: shared-context-spec:agent-mux-gateway-frame-auth
+    - target: shared-context-spec:agent-mux-gateway-frame-hello
+    - target: shared-context-spec:agent-mux-gateway-frame-error
+    - target: shared-context-spec:agent-mux-gateway-frame-subscribe
+    - target: shared-context-spec:agent-mux-gateway-frame-unsubscribe
+    - target: shared-context-spec:agent-mux-gateway-frame-session-subscribe
+    - target: shared-context-spec:agent-mux-gateway-frame-session-unsubscribe
+    - target: shared-context-spec:agent-mux-gateway-frame-session-start
+    - target: shared-context-spec:agent-mux-gateway-frame-session-message
+    - target: shared-context-spec:agent-mux-gateway-frame-ping
+    - target: shared-context-spec:agent-mux-gateway-frame-pong
+    - target: shared-context-spec:agent-mux-gateway-frame-run-event
+    - target: shared-context-spec:agent-mux-gateway-frame-hook-request
+    - target: shared-context-spec:agent-mux-gateway-frame-hook-decision
+    - target: shared-context-spec:agent-mux-gateway-frame-hook-resolved
+    - target: shared-context-spec:agent-mux-gateway-frame-pairing-register
+    - target: shared-context-spec:agent-mux-gateway-frame-pairing-consume
+    - target: shared-context-spec:agent-mux-gateway-frame-pairing-consumed

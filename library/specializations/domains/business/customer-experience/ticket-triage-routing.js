@@ -3,6 +3,11 @@
  * @description Intelligent process for categorizing, prioritizing, and routing support tickets based on severity, customer tier, and agent expertise
  * @inputs { ticket: object, customerProfile: object, agentPool: array, routingRules: object }
  * @outputs { success: boolean, triageResult: object, routing: object, prioritization: object, artifacts: array }
+  * @graph
+ *   domains: [domain:customer-experience]
+ *   skillAreas: [skill-area:customer-success, skill-area:user-research, skill-area:product-discovery]
+ *   workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+ *   roles: [role:product-designer, role:customer-success-manager, role:ux-researcher]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

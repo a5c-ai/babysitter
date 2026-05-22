@@ -1,0 +1,23 @@
+nodeKind: HookSurface
+id: hook-surface:pre-tool-use
+attributes:
+  eventName: "PreToolUse (canonical)"
+  displayName: "PreToolUse (canonical)"
+  kind: canonical
+  direction: pre
+  blocking: true
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [tool_name, tool_input, session_id, transcript_path]
+    properties:
+      tool_name: { type: string, description: "Name of the tool about to be invoked." }
+      tool_input: { type: object, description: "Tool-specific input arguments." }
+      session_id: { type: string }
+      transcript_path: { type: string }
+      cwd: { type: string }
+  description: |
+    The v6 canonical pre-tool-use hook. Native vendor surfaces
+    canonicalize to this surface so cross-product policies and
+    plugins can target a single name.
+edges:

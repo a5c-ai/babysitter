@@ -14,6 +14,11 @@ metadata:
   domain: science
   category: Biomechanics
   agent-id: BME-AG-011
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:data-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # Orthopedic Test Engineer Agent

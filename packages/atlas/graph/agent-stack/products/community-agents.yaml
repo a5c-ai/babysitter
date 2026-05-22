@@ -1,0 +1,134 @@
+nodeKind: AgentProduct
+id: agent:claude-sh
+attributes:
+  displayName: "claude-sh"
+  vendor: "Community (open-source)"
+  homepageUrl: "https://github.com/anthropics/claude-code"
+  primarySurface: cli
+  supportTier: none
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Claude Code rewritten as a ~1500-line bash script. Zero npm
+    dependencies — uses only curl and jq. Implements the full agent
+    loop including tool use, file editing, and command execution in
+    pure shell. Demonstrates that the core Claude Code interaction
+    pattern can be replicated with minimal tooling, making it useful
+    for constrained environments where Node.js is unavailable.
+edges:
+  has_version:
+    - agent-version:claude-sh@current
+---
+nodeKind: AgentProduct
+id: agent:psclaudecode
+attributes:
+  displayName: "PSClaudeCode"
+  vendor: "Community (open-source)"
+  homepageUrl: "https://github.com/dfinke/PSClaudeCode"
+  primarySurface: cli
+  supportTier: none
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    PowerShell implementation of the Claude Code agent loop with tools
+    and permissions. Brings the agentic coding assistant experience to
+    Windows-native PowerShell environments. Implements file editing,
+    command execution, and tool-use patterns using PowerShell cmdlets
+    and the Anthropic API. Designed for developers whose primary
+    environment is PowerShell on Windows.
+edges:
+  has_version:
+    - agent-version:psclaudecode@current
+---
+nodeKind: AgentProduct
+id: agent:cyclop-one
+attributes:
+  displayName: "Cyclop One"
+  vendor: "Community (open-source)"
+  homepageUrl: "https://github.com/cyclopone/cyclopone"
+  primarySurface: desktop
+  supportTier: none
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Autonomous macOS desktop agent powered by Claude vision. Captures
+    the screen, reasons about what it sees, and takes actions via mouse
+    and keyboard. Operates at the OS level rather than within a terminal
+    or IDE — can interact with any application visible on screen. Uses
+    Claude's vision capabilities to understand UI elements, read text,
+    and navigate graphical interfaces autonomously.
+edges:
+  has_version:
+    - agent-version:cyclop-one@current
+  integrates_with:
+    - target: skill-area:ai-agent-development
+---
+nodeKind: AgentProduct
+id: agent:cli-anything
+attributes:
+  displayName: "CLI Anything"
+  vendor: "Community (open-source)"
+  homepageUrl: "https://github.com/ATheoLogical/cli-anything"
+  primarySurface: cli
+  supportTier: none
+  productKind: agent-framework
+  stackScope: full
+  description: |
+    Makes all software agent-native via CLI wrappers. Generates thin
+    CLI interfaces around existing tools and applications, enabling AI
+    agents to interact with any software through a consistent command-line
+    protocol. Bridges the gap between non-agent-aware software and AI
+    coding assistants by providing structured input/output wrappers
+    that agents can discover and invoke.
+edges:
+  has_version:
+    - agent-version:cli-anything@current
+  integrates_with:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:tool-use
+---
+nodeKind: AgentProduct
+id: agent:nanny
+attributes:
+  displayName: "Nanny"
+  vendor: "Community (open-source)"
+  homepageUrl: "https://github.com/nannycodes/nanny"
+  primarySurface: cli
+  supportTier: none
+  productKind: agent-orchestrator
+  stackScope: full
+  description: |
+    Dumb task loop for smart agents. Provides minimal orchestration
+    structure — task queuing, retry logic, and status tracking — while
+    giving maximum autonomy to the agent executing each task. Designed
+    for workflows where the agent is intelligent enough to handle task
+    execution but needs a simple harness for sequencing, retrying, and
+    reporting. Favors simplicity over control.
+edges:
+  has_version:
+    - agent-version:nanny@current
+  integrates_with:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:multi-agent-coordination
+    - target: topic:agent-orchestration-products
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:retry-with-backoff
+---
+nodeKind: AgentProduct
+id: agent:nanoclaw
+attributes:
+  displayName: "NanoClaw"
+  vendor: "qwibitai"
+  homepageUrl: "https://github.com/qwibitai/nanoclaw"
+  primarySurface: cli
+  supportTier: none
+  productKind: agent-framework
+  stackScope: full
+  description: |
+    Containerized AI agent framework providing sandboxed execution
+    environments. Agents run in isolated containers with controlled
+    file system and network access, enabling safe autonomous operation.
+edges:
+  integrates_with:
+    - target: skill-area:ai-agent-development
+    - target: topic:agent-orchestration-products

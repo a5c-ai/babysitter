@@ -1,0 +1,111 @@
+---
+nodeKind: Workflow
+id: workflow:workplace-space-planning
+attributes:
+  displayName: "Workplace Space Planning"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Plans workspace allocation and configuration to optimize utilization and
+    employee experience -- analyzing badge-swipe and desk-booking data to
+    determine actual occupancy patterns, surveying teams on collaboration and
+    focus-space needs, modeling seating arrangements for hybrid-work
+    scenarios at varying return-to-office ratios, evaluating
+    neighborhood-based versus free-address layouts, planning meeting-room and
+    phone-booth ratios against peak-demand analytics, coordinating with IT
+    for power, AV, and network infrastructure requirements, and projecting
+    space needs against 12-month headcount forecasts. Produces space plan
+    with floor layouts and move schedules. Excludes construction management.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:real-estate
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:facilities-team
+    - target: org-unit:operations-team
+    - target: org-unit:hr-team
+---
+nodeKind: Workflow
+id: workflow:office-relocation-management
+attributes:
+  displayName: "Office Relocation Management"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Manages end-to-end office relocation from site selection through move-in
+    -- conducting site-evaluation scoring against criteria for commute
+    access, cost, expansion capacity, and infrastructure readiness,
+    negotiating lease terms with landlord coordination, planning IT
+    infrastructure migration including network cutover and server relocation
+    schedules, coordinating physical move logistics with phased team
+    migration to minimize business disruption, managing employee
+    communication campaigns with FAQ updates, overseeing furniture
+    procurement and space buildout, and conducting post-move satisfaction
+    surveys. Produces relocation project plan and budget tracker. Excludes
+    lease financial modeling.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:network-security
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:real-estate
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:facilities-team
+    - target: org-unit:operations-team
+    - target: org-unit:it-service-management
+---
+nodeKind: Workflow
+id: workflow:workplace-safety-audit
+attributes:
+  displayName: "Workplace Safety Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits workplace safety compliance across all facilities -- inspecting
+    fire-suppression systems, emergency exits, and evacuation route signage,
+    reviewing electrical and ergonomic hazard reports, validating first-aid
+    supply inventories and AED maintenance records, assessing compliance with
+    OSHA or local occupational health regulations, reviewing incident and
+    near-miss logs for trend analysis, evaluating employee safety training
+    completion rates, and testing emergency notification system
+    functionality. Produces safety audit report with findings and corrective
+    action plan. Excludes building code certification.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:threat-modeling
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:incident-command
+  performed_by_org_unit:
+    - target: org-unit:facilities-team
+    - target: org-unit:hr-team
+    - target: org-unit:compliance-team

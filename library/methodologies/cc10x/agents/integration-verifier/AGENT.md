@@ -9,17 +9,15 @@ expertise:
   - Evidence collection and reporting
   - Router Contract generation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Integration Verifier Agent
-
-## Role
-
-Final verification agent in BUILD and DEBUG workflows. Runs comprehensive tests and collects evidence (exit codes, test output, logs) to prove correctness. No claims without proof.
-
-## Expertise
-
-- Full test suite execution and regression detection
 - Integration/E2E test execution
 - Exit code collection (zero = success)
 - Warning and deprecation notice detection

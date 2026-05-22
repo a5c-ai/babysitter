@@ -1,0 +1,38 @@
+nodeKind: Tool
+id: tool:ora-agent-readiness
+attributes:
+  displayName: Ora Agent Readiness
+  homepageUrl: https://ora.run/docs
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Agent-readiness ranking and discovery surface used to evaluate products by agent accessibility,
+    score domains, retrieve badges, discover products by intent, and gather agent feedback.
+  ora:
+    docsUrl: https://ora.run/docs
+    openapiUrl: https://ora.run/api/openapi.json
+    mcpMetadataUrl: https://ora.run/.well-known/mcp.json
+    discoverUrl: https://ora.run/api/discover
+    scoreLayers:
+      - discovery
+      - identity
+      - access
+      - integration
+      - in-agent-experience
+edges:
+  sourced_from:
+    - source-ref:ora-docs
+    - source-ref:ora-openapi
+    - source-ref:ora-mcp
+  used_for:
+    - target: skill-area:tool-use
+  supports_work:
+    - target: role:engineering-manager
+      confidence: high
+      evidence: "Ora discovery ranks products by intent, useful for tool evaluation and agent-readiness governance."
+    - target: responsibility:ai-tooling-evaluation
+      confidence: high
+      evidence: "Ora score, scan, badge, and discovery APIs provide a comparable readiness signal across products."
+    - target: workflow:ai-agent-adoption-rollout
+      confidence: high
+      evidence: "Ora score records and discovery results help pick tool/server candidates for agent rollout gaps."

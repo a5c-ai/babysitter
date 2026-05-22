@@ -1,0 +1,216 @@
+---
+nodeKind: Workflow
+id: workflow:sla-breach-response
+attributes:
+  displayName: "SLA Breach Response"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Responds to SLA threshold breaches in real time — detecting when ticket
+    response or resolution times approach or exceed contractual SLA commitments,
+    automatically escalating to service owners and on-call engineers, notifying
+    account managers for customer-facing impact assessment, triggering war-room
+    assembly for critical-tier breaches, tracking remediation steps until SLA
+    compliance is restored, and generating breach post-analysis reports with
+    root-cause attribution. Produces SLA breach alerts, escalation audit trails,
+    and monthly SLA compliance dashboards. Excludes SLA contract negotiation.
+edges:
+  involves_role:
+    - target: role:bug-triager
+    - target: role:incident-commander
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:incident-response
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:incident-command
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:incident-response-team
+---
+nodeKind: Workflow
+id: workflow:customer-feedback-triage
+attributes:
+  displayName: "Customer Feedback Triage"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Systematically routes inbound customer feedback to appropriate product and
+    engineering teams — ingesting feedback from support tickets, NPS surveys,
+    in-app widgets, and social channels, classifying submissions by theme (bug,
+    feature request, UX friction, praise), scoring severity by customer tier and
+    frequency of mention, deduplicating against existing backlog items, assigning
+    ownership to the relevant product area, and closing the loop with customers
+    when their feedback drives a shipped change. Produces feedback digest reports,
+    theme trend analyses, and customer-closed-loop metrics. Excludes product
+    roadmap prioritization.
+edges:
+  involves_role:
+    - target: role:bug-triager
+    - target: role:product-designer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:tier2-escalation-management
+attributes:
+  displayName: "Tier-2 Escalation Management"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Manages the escalation of support cases from L1 generalist agents to L2/L3
+    specialist engineers — defining escalation criteria based on issue complexity,
+    customer tier, and time-in-queue thresholds, packaging diagnostic context
+    (logs, reproduction steps, environment details) into structured escalation
+    handoff documents, routing to the appropriate specialist queue by technology
+    domain, tracking escalation-to-resolution time, and feeding resolution
+    patterns back to L1 as knowledge base updates. Produces escalation handoff
+    packets, specialist utilization reports, and deflection-opportunity analyses.
+    Excludes L1 ticket handling.
+edges:
+  involves_role:
+    - target: role:bug-triager
+    - target: role:debugger
+    - target: role:fullstack-engineer
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:incident-customer-communication
+attributes:
+  displayName: "Incident Customer Communication"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Coordinates customer-facing communications during production incidents —
+    drafting initial impact acknowledgement within SLA-defined response windows,
+    maintaining a status page with real-time updates at each incident phase
+    (investigating, identified, monitoring, resolved), tailoring messaging by
+    customer segment and affected product surface, coordinating between incident
+    command and customer success for proactive outreach to high-value accounts,
+    and publishing post-incident customer summaries distinct from internal
+    postmortems. Produces status page update logs, customer communication
+    templates, and incident communication retrospective notes. Excludes internal
+    incident resolution activities.
+edges:
+  involves_role:
+    - target: role:incident-commander
+    - target: role:technical-writer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:runbook-writing
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:incident-command
+    - target: responsibility:postmortem-writeup
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:customer-success
+---
+nodeKind: Workflow
+id: workflow:support-knowledge-article-creation
+attributes:
+  displayName: "Support Knowledge Article Creation"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Creates and maintains knowledge base articles derived from resolved support
+    tickets — identifying frequently-asked or high-effort ticket categories that
+    lack KB coverage, extracting resolution steps from ticket threads into
+    structured article drafts, validating technical accuracy with engineering
+    subject-matter experts, tagging articles with product version and feature
+    taxonomy for searchability, measuring article deflection rates against future
+    ticket volumes, and scheduling periodic reviews to retire stale content.
+    Produces draft KB articles, article effectiveness scorecards, and coverage
+    gap reports. Excludes product documentation authoring.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:bug-triager
+    - target: role:doc-generator
+  requires_skill_area:
+    - target: skill-area:tutorial-design
+    - target: skill-area:reference-docs
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:content-team
+---
+nodeKind: Workflow
+id: workflow:support-tooling-review
+attributes:
+  displayName: "Support Tooling Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Periodically reviews the support technology stack and identifies automation
+    opportunities — auditing ticket routing accuracy and auto-classification
+    performance, benchmarking chatbot deflection rates against industry baselines,
+    evaluating new AI-assisted support tools for triage and response suggestion,
+    analyzing agent productivity metrics across tooling surfaces, assessing
+    integration gaps between ticketing, CRM, and engineering systems, and
+    producing a prioritized investment roadmap for support tooling improvements.
+    Produces tooling audit reports, automation opportunity scorecards, and vendor
+    comparison matrices. Excludes tool procurement execution.
+edges:
+  involves_role:
+    - target: role:vp-engineering
+    - target: role:platform-engineer
+    - target: role:ai-champion
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:prompt-engineering
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:ai-tooling-evaluation
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:engineering-productivity

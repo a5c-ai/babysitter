@@ -1,0 +1,27 @@
+nodeKind: Framework
+id: framework:astro
+attributes:
+  displayName: "Astro"
+  homepageUrl: "https://astro.build"
+  belongsToLanguageId: language:typescript
+  category: web-fullstack
+  description: |
+    Astro — a content-focused web framework with islands architecture.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:hydration
+    - target: skill-area:frontend-development
+    - target: skill-area:frontend-performance
+  alternative_to:
+    - target: framework:nextjs
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:nuxt
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:sveltekit
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:remix
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:gatsby
+      comparison: "JavaScript meta-frameworks"

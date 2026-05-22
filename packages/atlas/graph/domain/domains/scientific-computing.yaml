@@ -1,0 +1,10 @@
+nodeKind: Domain
+id: domain:scientific-computing
+attributes:
+  displayName: "Scientific Computing"
+  description: |
+    Scientific Computing domain — numerical methods, HPC, simulation,
+    linear algebra at scale, and research-grade computational workflows.
+edges:
+  contains:
+    - specialization:gpu-programming

@@ -1,0 +1,12 @@
+nodeKind: ModelFamily
+id: model-family:gpt-4o
+attributes:
+  displayName: "GPT-4o"
+  vendor: "OpenAI"
+  homepageUrl: "https://platform.openai.com/docs/models"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:gpt-4o@current
+    - model:gpt-4o-mini@current

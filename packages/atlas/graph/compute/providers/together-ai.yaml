@@ -1,0 +1,50 @@
+nodeKind: Provider
+id: provider:together-ai
+attributes:
+  versionRange: ">=2024-01-01"
+  displayName: "Together AI"
+  vendor: "Together AI"
+  authMethods:
+    - api-key
+  authMethodNotes: |
+    Standard `Authorization: Bearer <api-key>`. OpenAI-compatible surface
+    plus a native fine-tuning API.
+  endpoints:
+    base: "https://api.together.xyz/v1"
+    chat_completions: "https://api.together.xyz/v1/chat/completions"
+    completions: "https://api.together.xyz/v1/completions"
+    embeddings: "https://api.together.xyz/v1/embeddings"
+    models: "https://api.together.xyz/v1/models"
+  pricing: |
+    See https://www.together.ai/pricing — pricing varies per open-weights
+    model and tier.
+  pricingTiers:
+    - name: serverless
+      rateLimit: "Tiered per-account RPM caps"
+      priceMultiplier: 1.0
+      description: "Pay-per-token serverless inference (default)."
+    - name: dedicated
+      rateLimit: "GPU-hour billed; per-deployment throughput"
+      priceMultiplier: 1.0
+      description: "Dedicated endpoints — reserved GPU capacity."
+    - name: batch
+      rateLimit: "Async; processed within 24h SLA"
+      priceMultiplier: 0.5
+      description: "Together Batch Inference — discounted async."
+  rateLimitSignalingProtocol: |
+    OpenAI-compatible. 429 with `retry-after`; `x-ratelimit-*` headers
+    surfaced where applicable.
+  dataResidencyOptions:
+    - us
+    - us-east-1
+  vendorFeatures:
+    - capability:supports-batch-api
+  slaTier: "together-no-public-sla"
+  regions:
+    - global
+    - us-east-1
+edges:
+  realizes:
+    - target: layer:2-provider
+  serves:
+    - model:llama-4-405b-instruct@current

@@ -1,0 +1,185 @@
+---
+nodeKind: Workflow
+id: workflow:data-mesh-domain-ownership-review
+attributes:
+  displayName: "Data Mesh Domain Ownership Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews and refines domain ownership boundaries in a data mesh architecture —
+    auditing each domain's data product catalog for completeness and
+    discoverability, verifying that domain teams have clear ownership of their
+    analytical and operational data products, evaluating cross-domain data
+    contract adherence and SLA compliance, identifying orphaned datasets without
+    an accountable domain owner, assessing the federated governance layer for
+    policy consistency across domains, and recommending boundary adjustments when
+    organizational or product changes shift data ownership. Produces domain
+    ownership maps, data product maturity scorecards, and governance policy
+    compliance reports. Excludes data platform infrastructure changes.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:principal-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-governance
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:data-engineering
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:run-architecture-review
+  performed_by_org_unit:
+    - target: org-unit:data-governance-team
+    - target: org-unit:data-platform-team
+---
+nodeKind: Workflow
+id: workflow:real-time-streaming-health-check
+attributes:
+  displayName: "Real-Time Streaming Health Check"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: single-team
+  description: |
+    Monitors the health of real-time streaming pipelines across Kafka, Flink,
+    and Spark Streaming deployments — checking consumer lag against acceptable
+    thresholds per topic, verifying checkpoint and offset commit freshness,
+    detecting schema registry compatibility violations before they cause
+    deserialization failures, alerting on partition skew and rebalance storms,
+    validating exactly-once semantics integrity through watermark tracking, and
+    triggering automated remediation for common failure modes (stuck consumers,
+    memory pressure, backpressure cascades). Produces streaming health
+    dashboards, lag trend reports, and incident trigger logs. Excludes pipeline
+    development.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:data-scientist
+    - target: role:debugger
+  requires_skill_area:
+    - target: skill-area:kafka-stream-processing
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:data-engineering
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:on-call-handoff
+  performed_by_org_unit:
+    - target: org-unit:data-platform-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:data-warehouse-schema-governance
+attributes:
+  displayName: "Data Warehouse Schema Governance"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Governs schema changes to the shared data warehouse — requiring schema change
+    proposals with impact analysis before DDL execution, validating naming
+    conventions and type standards against the warehouse style guide, running
+    backward-compatibility checks to ensure existing dashboards and downstream
+    consumers remain functional, coordinating migration windows with dependent
+    teams, maintaining a schema changelog with version tags, and enforcing
+    column-level documentation requirements for discoverability. Produces schema
+    change review records, compatibility test results, and warehouse schema
+    documentation updates. Excludes ETL pipeline modifications.
+edges:
+  involves_role:
+    - target: role:database-administrator
+    - target: role:data-scientist
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:data-warehouse-modeling
+    - target: skill-area:database-migrations-zero-downtime
+  applies_to_domain:
+    - target: domain:data-engineering
+    - target: domain:databases
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:data-governance-team
+    - target: org-unit:database-team
+---
+nodeKind: Workflow
+id: workflow:etl-pipeline-cost-optimization
+attributes:
+  displayName: "ETL Pipeline Cost Optimization"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Optimizes compute costs and scheduling efficiency across ETL/ELT pipelines —
+    profiling per-pipeline resource consumption (CPU, memory, shuffle I/O)
+    against actual data volumes, identifying over-provisioned Spark/Flink
+    clusters and right-sizing executor configurations, consolidating overlapping
+    extraction windows to reduce source-system load, migrating infrequently-run
+    batch jobs to spot/preemptible instances, evaluating incremental versus
+    full-refresh strategies per table based on change-data-capture feasibility,
+    and tracking month-over-month cost trends with attribution to pipeline
+    owners. Produces cost attribution dashboards, optimization recommendation
+    reports, and scheduling conflict analyses. Excludes pipeline logic changes.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:data-scientist
+    - target: role:cloud-architect
+  requires_skill_area:
+    - target: skill-area:etl-pipelines
+    - target: skill-area:spark-jobs
+  applies_to_domain:
+    - target: domain:data-engineering
+    - target: domain:cloud-infra
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:data-platform-team
+    - target: org-unit:infra-engineering
+---
+nodeKind: Workflow
+id: workflow:data-access-request-workflow
+attributes:
+  displayName: "Data Access Request Workflow"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Manages and audits data access grants across the organization — processing
+    access requests through a structured intake form capturing business
+    justification, data classification level, and intended use, routing approvals
+    to data stewards and security reviewers based on sensitivity tier,
+    provisioning access through role-based grants with automatic expiration
+    dates, logging all grant and revoke events for compliance audit trails,
+    conducting periodic access recertification campaigns to remove stale
+    permissions, and generating compliance reports for SOC 2 and GDPR data
+    access controls. Produces access request audit logs, recertification campaign
+    results, and compliance posture reports. Excludes data classification
+    tagging.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:database-administrator
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-governance
+    - target: skill-area:k8s-rbac
+  applies_to_domain:
+    - target: domain:data-engineering
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:data-governance-team
+    - target: org-unit:security-team

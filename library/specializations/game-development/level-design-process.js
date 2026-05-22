@@ -18,6 +18,12 @@
  * - An Architectural Approach to Level Design by Christopher W. Totten
  * - 10 Principles for Good Level Design (GDC)
  * - The Level Design Book by Emilia Romagna
+ * @graph
+ *   domains: [domain:gaming]
+ *   specializations: [specialization:game-development]
+ *   skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+ *   roles: [role:game-developer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

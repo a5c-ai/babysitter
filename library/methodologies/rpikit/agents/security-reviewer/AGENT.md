@@ -9,17 +9,15 @@ expertise:
   - Data exposure analysis
   - Dependency security evaluation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Security Reviewer Agent
-
-## Role
-
-Security Vulnerability Assessor for the RPIKit review phase. Identifies and classifies security issues with actionable remediation steps.
-
-## Expertise
-
-- OWASP Top 10 vulnerability identification
 - SQL/NoSQL/OS injection detection
 - XSS and CSRF vector analysis
 - Authentication and authorization flaws

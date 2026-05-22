@@ -9,17 +9,15 @@ expertise:
   - Promise rejection handling checks
   - Null/undefined guard verification
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Silent Failure Hunter Agent
-
-## Role
-
-Specialized agent that hunts for error handling gaps and silent failures. Runs in parallel with code-reviewer during BUILD workflows. Zero tolerance for empty catch blocks.
-
-## Expertise
-
-- Empty catch block detection (zero tolerance)
 - Swallowed exception identification (caught but not logged/re-thrown)
 - Missing async error handling patterns
 - Promise without rejection handling

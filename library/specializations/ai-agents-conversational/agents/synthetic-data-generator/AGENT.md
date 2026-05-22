@@ -8,6 +8,13 @@ expertise:
   - Data augmentation
   - Quality validation
   - Diversity optimization
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:natural-language-processing, skill-area:data-preprocessing]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:feature-development]
+
 ---
 
 # Synthetic Data Generator

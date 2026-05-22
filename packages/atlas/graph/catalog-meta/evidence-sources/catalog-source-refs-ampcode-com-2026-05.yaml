@@ -1,0 +1,18 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-82221d76b917
+attributes:
+  displayName: 'Catalog source reference: https://ampcode.com/manual'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://ampcode.com/manual
+  sourcePathOrUrl: https://ampcode.com/manual
+  locator: Source reference for catalog entities in graph/extensions/plugin-artifacts/plugin-target-amp.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web

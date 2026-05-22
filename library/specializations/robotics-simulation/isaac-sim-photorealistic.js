@@ -18,6 +18,12 @@
  * - NVIDIA Isaac Sim: https://developer.nvidia.com/isaac-sim
  * - Isaac Sim Documentation: https://docs.omniverse.nvidia.com/isaacsim/latest/
  * - NVIDIA Isaac ROS: https://developer.nvidia.com/isaac-ros
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:simulation-validation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

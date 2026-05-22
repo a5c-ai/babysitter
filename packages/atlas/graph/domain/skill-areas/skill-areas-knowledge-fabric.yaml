@@ -1,0 +1,216 @@
+---
+nodeKind: SkillArea
+id: skill-area:knowledge-fabric-design
+attributes:
+  displayName: "Knowledge Fabric Design"
+  description: |
+    Designing organizational knowledge systems — architecting the
+    knowledge layer that connects vector stores, knowledge graphs,
+    document indexes, and retrieval pipelines into a unified fabric.
+    Covers source integration, domain partitioning, trust models,
+    and cross-agent knowledge sharing.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  uses_tool:
+    - tool:chromadb
+    - tool:weaviate
+    - tool:pinecone
+    - tool:qdrant
+    - tool:milvus
+    - tool:glean
+    - tool:danswer
+    - tool:haystack
+  prerequisite_for_learning:
+    - target: skill-area:rag-pipeline-engineering
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:rag-pipeline-engineering
+attributes:
+  displayName: "RAG Pipeline Engineering"
+  description: |
+    Building retrieval-augmented generation pipelines end-to-end —
+    document ingestion, chunking, embedding, vector indexing, retrieval,
+    re-ranking, context assembly, and evaluation. Covers both
+    prototyping with lightweight tools and production-grade pipelines
+    with monitoring and quality metrics.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  uses_framework:
+    - framework:langchain
+    - framework:langgraph
+  uses_library:
+    - library:llama-index
+  uses_tool:
+    - tool:chromadb
+    - tool:pinecone
+    - tool:weaviate
+    - tool:haystack
+    - tool:cognita
+    - tool:verba
+  prerequisite_for_learning:
+    - target: skill-area:knowledge-graph-management
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:knowledge-graph-management
+attributes:
+  displayName: "Knowledge Graph Management"
+  description: |
+    Building, querying, and maintaining knowledge graphs — entity
+    extraction, relation linking, graph schema design, traversal
+    queries, and incremental updates. Covers graph databases,
+    ontology alignment, and using knowledge graphs for multi-hop
+    reasoning in AI applications.
+  domains:
+    - specialization:ai-agents-conversational
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:knowledge-curation
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:document-indexing
+attributes:
+  displayName: "Document Indexing"
+  description: |
+    Document processing, chunking, and embedding for search and
+    retrieval — parsing PDFs/HTML/markdown, semantic boundary
+    detection, embedding model selection, index construction,
+    and metadata extraction. The foundation layer that feeds
+    all retrieval pipelines in the knowledge fabric.
+  domains:
+    - specialization:ai-agents-conversational
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+  uses_library:
+    - library:llama-index
+  prerequisite_for_learning:
+    - target: skill-area:embedding-optimization
+      strength: required
+    - target: skill-area:knowledge-graph-management
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:organizational-intelligence
+attributes:
+  displayName: "Organizational Intelligence"
+  description: |
+    Extracting actionable insights from organizational data —
+    pattern recognition across conversations, decisions, incidents,
+    and metrics. Covers trend detection, knowledge gap identification,
+    decision support, and proactive surfacing of relevant organizational
+    context to agents and humans.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  uses_tool:
+    - tool:mem0
+    - tool:zep
+  prerequisite_for_learning:
+    - target: skill-area:knowledge-curation
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:embedding-optimization
+attributes:
+  displayName: "Embedding Optimization"
+  description: |
+    Choosing, tuning, and evaluating embedding models for knowledge
+    retrieval — model selection (OpenAI, Cohere, open-source E5/BGE/GTE),
+    dimensionality trade-offs (higher dimensions = better quality but
+    more storage/compute), fine-tuning embeddings on domain-specific
+    data for improved retrieval relevance, quantization for memory
+    efficiency, and benchmarking with MTEB (Massive Text Embedding
+    Benchmark) and domain-specific evaluation sets.
+  domains:
+    - specialization:ai-agents-conversational
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: domain:data-science
+      confidence: secondary
+  uses_tool:
+    - tool:pinecone
+    - tool:weaviate
+    - tool:chromadb
+  prerequisite_for_learning:
+    - target: skill-area:retrieval-evaluation
+      strength: required
+---
+nodeKind: SkillArea
+id: skill-area:retrieval-evaluation
+attributes:
+  displayName: "Retrieval Evaluation"
+  description: |
+    Measuring and improving RAG pipeline quality — evaluation metrics
+    (faithfulness, answer relevance, context precision, context recall),
+    evaluation frameworks (Ragas, DeepEval, TruLens), building golden
+    evaluation datasets, A/B testing retrieval configurations, monitoring
+    retrieval quality in production, and the distinction between
+    component-level evaluation (retriever quality) and end-to-end
+    evaluation (final answer quality).
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  uses_tool:
+    - tool:haystack
+---
+nodeKind: SkillArea
+id: skill-area:knowledge-curation
+attributes:
+  displayName: "Knowledge Curation"
+  description: |
+    Maintaining, pruning, and updating organizational knowledge bases —
+    knowledge lifecycle management (creation, verification, deprecation,
+    archival), duplicate detection and merging, contradiction resolution
+    across sources, freshness policies and automated staleness detection,
+    knowledge ownership assignment, expert verification workflows, and
+    quality metrics for knowledge bases (coverage, accuracy, currency).
+  domains:
+    - specialization:ai-agents-conversational
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+  uses_tool:
+    - tool:guru
+    - tool:glean

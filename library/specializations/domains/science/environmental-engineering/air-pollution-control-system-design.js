@@ -18,6 +18,12 @@
  * - AWMA Air Pollution Control Manual
  * - EPA Cost Manual for Air Pollution Control
  * - Industrial Ventilation: A Manual of Recommended Practice
+ *
+ * @graph
+ *   domains: [domain:environmental-engineering]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:geospatial-data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

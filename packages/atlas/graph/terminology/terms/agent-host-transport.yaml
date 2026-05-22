@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:agent-host-transport
+attributes:
+  canonicalDefinitionId: definition:agent-host-transport.canonical
+  displayName: "AgentHostTransport"
+  kind: protocol
+  references:
+    - "NodeKind:AgentHostTransport"
+  description: |
+    How a host talks to an agent process (stdio, http, ws, ...)
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

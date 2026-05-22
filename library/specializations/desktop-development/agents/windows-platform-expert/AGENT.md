@@ -2,6 +2,12 @@
 name: windows-platform-expert
 description: Deep expertise in Windows APIs, Win32, WinRT, registry, UAC, and Windows Store submission
 expertise: [windows, win32, winrt, registry, msix, windows-store]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:desktop-system-integration]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # windows-platform-expert

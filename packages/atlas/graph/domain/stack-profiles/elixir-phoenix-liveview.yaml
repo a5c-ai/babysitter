@@ -1,0 +1,22 @@
+nodeKind: StackProfile
+id: stack-profile:elixir-phoenix-liveview
+attributes:
+  displayName: "Elixir + Phoenix + LiveView"
+  description: |
+    Elixir web stack: Phoenix framework with LiveView for real-time,
+    server-rendered interactive UIs over a persistent WebSocket. LiveView
+    eliminates the need for a separate JavaScript SPA framework by rendering
+    HTML server-side and pushing minimal diffs to the client.
+
+    This stack is characterized by extremely low latency, massive concurrency
+    via BEAM lightweight processes, and a single-language full-stack experience.
+    Ecto is the canonical database library (typically with PostgreSQL). OTP
+    supervision trees provide fault isolation. Tailwind CSS and esbuild are
+    the standard frontend tooling alongside LiveView.
+  composes:
+    - language:elixir
+    - framework:phoenix
+edges:
+  composed_of:
+    - language:elixir
+    - framework:phoenix

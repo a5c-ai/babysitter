@@ -1,0 +1,172 @@
+import { randomUUID } from 'node:crypto';
+
+import type {
+  CompletionRequest,
+  CompletionResult,
+  CompletionStreamEvent,
+} from '../types.js';
+import type {
+  CodecCapabilities,
+  NormalizedCostRecord,
+  NormalizedToolDefinition,
+  TransportCodec,
+} from '../codec.js';
+
+function textFromInput(input: unknown): string {
+  if (typeof input === 'string') {
+    return input;
+  }
+  if (!Array.isArray(input)) {
+    return '';
+  }
+
+  return input
+    .map((entry) => {
+      if (typeof entry === 'string') {
+        return entry;
+      }
+      if (!entry || typeof entry !== 'object') {
+        return '';
+      }
+      const record = entry as Record<string, unknown>;
+      if (typeof record.text === 'string') {
+        return record.text;
+      }
+      if (Array.isArray(record.content)) {
+        return textFromInput(record.content);
+      }
+      return '';
+    })
+    .filter(Boolean)
+    .join(' ');
+}
+
+export class OpenAiResponsesCodec implements TransportCodec {
+  readonly transportId = 'openai-responses';
+
+  readonly capabilities: CodecCapabilities = {
+    supportsTools: true,
+    supportsStreaming: true,
+    supportsTokenCounting: false,
+    costTracking: true,
+    toolSchemaFormat: 'openai',
+  };
+
+  decodeRequest(body: Record<string, unknown>): CompletionRequest {
+    const input = textFromInput(body.input);
+
+    return {
+      model: typeof body.model === 'string' ? body.model : 'mock-model',
+      transport: this.transportId,
+      messages: input ? [{ role: 'user', content: input }] : [],
+      tools: Array.isArray(body.tools) ? body.tools : undefined,
+      toolChoice: body.tool_choice ?? body.toolChoice ?? undefined,
+      stream: body.stream === true,
+      input,
+      raw: body,
+    };
+  }
+
+  encodeResult(result: CompletionResult): unknown {
+    return {
+      id: result.id,
+      object: 'response',
+      status: 'completed',
+      model: result.model,
+      output: [
+        {
+          type: 'message',
+          role: 'assistant',
+          content: [{ type: 'output_text', text: result.text }],
+        },
+      ],
+      usage: {
+        input_tokens: result.usage.promptTokens,
+        output_tokens: result.usage.completionTokens,
+        total_tokens: result.usage.totalTokens,
+      },
+    };
+  }
+
+  encodeStreamChunk(event: CompletionStreamEvent): string {
+    const responseId = `resp_${randomUUID()}`;
+
+    if (event.type === 'text-delta' && event.text) {
+      return `event: response.output_text.delta\ndata: ${JSON.stringify({
+        type: 'response.output_text.delta',
+        output_index: 0,
+        content_index: 0,
+        delta: event.text,
+      })}\n\n`;
+    }
+
+    if (event.type === 'tool-call') {
+      return `event: response.output_item.added\ndata: ${JSON.stringify({
+        type: 'response.output_item.added',
+        output_index: 1,
+        item: {
+          type: 'function_call',
+          id: event.id,
+          call_id: event.id,
+          name: event.name,
+          arguments: event.arguments,
+          ...event.metadata,
+        },
+      })}\n\n`;
+    }
+
+    if (event.type === 'done') {
+      return `event: response.completed\ndata: ${JSON.stringify({
+        type: 'response.completed',
+        response: { id: responseId, status: 'completed' },
+      })}\n\n`;
+    }
+
+    return '';
+  }
+
+  normalizeTools(tools: unknown[]): NormalizedToolDefinition[] {
+    const result: NormalizedToolDefinition[] = [];
+    for (const tool of tools) {
+      if (!tool || typeof tool !== 'object') {
+        continue;
+      }
+      const record = tool as Record<string, unknown>;
+      const nested = record.function && typeof record.function === 'object'
+        ? record.function as Record<string, unknown>
+        : record;
+      if (typeof nested.name !== 'string') {
+        continue;
+      }
+      result.push({
+        name: nested.name,
+        description: typeof nested.description === 'string' ? nested.description : undefined,
+        parameters: nested.parameters && typeof nested.parameters === 'object'
+          ? nested.parameters as Record<string, unknown>
+          : undefined,
+      });
+    }
+    return result;
+  }
+
+  denormalizeTools(tools: NormalizedToolDefinition[]): unknown[] {
+    return tools.map((tool) => ({
+      type: 'function',
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parameters ?? { type: 'object', properties: {} },
+    }));
+  }
+
+  extractCostRecord(result: CompletionResult): NormalizedCostRecord | undefined {
+    if (!result.usage) {
+      return undefined;
+    }
+    return {
+      inputTokens: result.usage.promptTokens,
+      outputTokens: result.usage.completionTokens,
+      model: result.model,
+      provider: 'openai',
+    };
+  }
+}

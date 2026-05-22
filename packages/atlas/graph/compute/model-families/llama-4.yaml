@@ -1,0 +1,11 @@
+nodeKind: ModelFamily
+id: model-family:llama-4
+attributes:
+  displayName: "Llama 4"
+  vendor: "Meta"
+  homepageUrl: "https://www.llama.com/"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:llama-4-405b-instruct@current

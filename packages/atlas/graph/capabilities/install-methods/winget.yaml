@@ -1,0 +1,9 @@
+nodeKind: InstallMethod
+id: install:winget
+attributes:
+  displayName: "winget"
+  kind: winget
+  platforms: [win32]
+  command: "winget install {{package}}"
+  prerequisiteCheck: "winget --version"
+edges: {}

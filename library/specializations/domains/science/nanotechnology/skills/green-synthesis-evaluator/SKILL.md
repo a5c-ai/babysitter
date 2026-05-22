@@ -17,6 +17,11 @@ metadata:
     - LCA tools
     - Green chemistry databases
     - Sustainability metrics calculators
+graph:
+  domains: [domain:nanotechnology]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # Green Synthesis Evaluator

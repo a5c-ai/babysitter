@@ -1,0 +1,60 @@
+---
+nodeKind: Responsibility
+id: responsibility:secret-rotation-cadence
+attributes:
+  displayName: "Secret rotation cadence"
+  cadence: scheduled
+  description: |
+    Define and enforce rotation schedules for secrets, keys, and tokens.
+edges:
+  held_by:
+    - target: role:security-engineer
+    - target: role:devops-engineer
+  requires_expertise:
+    - target: skill-area:secrets-rotation
+---
+nodeKind: Responsibility
+id: responsibility:security-review
+attributes:
+  displayName: "Security review"
+  cadence: on-demand
+  description: |
+    Perform security review of high-risk PRs and design proposals; produce
+    structured findings.
+edges:
+  held_by:
+    - target: role:security-reviewer
+    - target: role:security-engineer
+  requires_expertise:
+    - target: skill-area:threat-modeling
+---
+nodeKind: Responsibility
+id: responsibility:dependency-audit
+attributes:
+  displayName: "Dependency audit"
+  cadence: scheduled
+  description: |
+    Periodic audit of third-party dependencies for vuln status, licensing,
+    and supply-chain risk.
+edges:
+  held_by:
+    - target: role:dependency-updater
+    - target: role:license-auditor
+    - target: role:security-scanner-bot
+  requires_expertise:
+    - target: skill-area:dependency-vulnerability-mgmt
+---
+nodeKind: Responsibility
+id: responsibility:threat-modeling
+attributes:
+  displayName: "Threat modeling"
+  cadence: on-demand
+  description: |
+    Lead structured threat-modeling sessions for new services and risky
+    changes.
+edges:
+  held_by:
+    - target: role:security-engineer
+    - target: role:security-reviewer
+  requires_expertise:
+    - target: skill-area:threat-modeling

@@ -1,0 +1,72 @@
+---
+nodeKind: Workflow
+id: workflow:flight-operations-review
+attributes:
+  displayName: "Flight Operations Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Reviews flight operations performance and safety -- analyzing flight
+    data monitoring (FDM/FOQA) exceedance events, reviewing crew fatigue
+    risk management system outputs, evaluating on-time performance against
+    network schedule integrity, assessing fuel efficiency trends by fleet
+    type and route, and tracking open safety reports through the aviation
+    safety management system (SMS). Produces operational performance
+    dashboards, exceedance investigation summaries, and safety trend reports
+    for the airline safety review board. Excludes flight scheduling and crew
+    rostering.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:incident-commander
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:aviation
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:risk-management-team
+---
+nodeKind: Workflow
+id: workflow:mro-scheduling-optimization
+attributes:
+  displayName: "MRO Scheduling Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Optimizes maintenance, repair, and overhaul scheduling for aircraft
+    fleet -- integrating airworthiness directive compliance deadlines with
+    component time-between-overhaul limits, balancing hangar slot capacity
+    against aircraft utilization targets, scheduling heavy checks to
+    minimize revenue flight disruption, coordinating rotable parts
+    availability with MRO facility capabilities, and tracking deferred
+    maintenance items against MEL (Minimum Equipment List) dispatch limits.
+    Produces optimized maintenance plans, slot allocation schedules, and
+    fleet availability forecasts. Excludes spare parts procurement.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:aviation
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:engineering

@@ -2,6 +2,14 @@
 name: mcp-tool-schema-generator
 description: Generate JSON Schema definitions for MCP tool input parameters. Creates well-documented, AI-consumable schemas with proper types, descriptions, and validation rules.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation, skill-area:mcp-tool-design]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # MCP Tool Schema Generator

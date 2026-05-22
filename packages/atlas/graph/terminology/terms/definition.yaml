@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:definition
+attributes:
+  canonicalDefinitionId: definition:definition.canonical
+  displayName: "Definition"
+  kind: concept
+  references:
+    - "NodeKind:Definition"
+  description: |
+    A definition of a term
+edges:
+  applies_to:
+    - target: domain:computer-science

@@ -1,0 +1,99 @@
+---
+nodeKind: Workflow
+id: workflow:cdc-pipeline-validation
+attributes:
+  displayName: "CDC Pipeline Validation"
+  workflowKind: data
+  triggerType: event-driven
+  typicalCadence: "per-change"
+  complexity: cross-team
+  description: |
+    Validates change data capture pipelines after source schema changes or
+    connector upgrades — verifying Debezium/CDC connector configuration
+    correctness, testing schema evolution compatibility, measuring consumer lag
+    against SLA thresholds, checking exactly-once delivery guarantees,
+    validating dead-letter queue handling, and confirming end-to-end data
+    consistency between source and sink. Excludes CDC architecture design.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:database-administrator
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:kafka-stream-processing
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:databases
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:data-platform-team
+    - target: org-unit:database-team
+---
+nodeKind: Workflow
+id: workflow:data-catalog-maintenance
+attributes:
+  displayName: "Data Catalog Maintenance"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Curates and maintains the organizational data catalog — verifying dataset
+    descriptions and ownership tags, identifying undocumented tables and
+    columns, validating data lineage graphs, pruning stale entries, enforcing
+    classification labels for PII and sensitivity tiers, and ensuring
+    discoverability metadata stays current as schemas evolve. Excludes data
+    pipeline development and ETL authoring.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:technical-writer
+    - target: role:database-administrator
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:postgres-tuning
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:databases
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:data-platform-team
+---
+nodeKind: Workflow
+id: workflow:dbt-model-review
+attributes:
+  displayName: "dbt Model Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: single-team
+  description: |
+    Reviews dbt model changes before merge — validating naming conventions,
+    checking materialization strategy appropriateness, verifying test coverage
+    on primary keys and not-null constraints, auditing ref() lineage for
+    circular dependencies, profiling query cost against warehouse budgets, and
+    ensuring documentation blocks and schema YAML are updated. Excludes data
+    pipeline orchestration and scheduling.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:code-reviewer
+    - target: role:ml-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:postgres-tuning
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:databases
+  triggers_responsibility:
+    - target: responsibility:review-prs-merge-decisions
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:data-platform-team

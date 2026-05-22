@@ -1,3 +1,12 @@
+---
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
+---
+
 # Session Recovery
 
 Detect and recover previous planning sessions, reconstructing lost context from persistent planning files.

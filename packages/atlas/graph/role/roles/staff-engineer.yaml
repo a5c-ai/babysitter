@@ -1,0 +1,25 @@
+nodeKind: Role
+id: role:staff-engineer
+attributes:
+  displayName: "Staff Engineer"
+  isAgentic: false
+  seniority: staff
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:software-engineering
+  description: |
+    Cross-team senior IC — drives multi-team technical strategy and large initiatives.
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:code-review
+    - responsibility:mentoring
+    - responsibility:knowledge-sharing
+  requires_expertise:
+    - target: skill-area:c4-modeling
+    - target: skill-area:adr-writing
+    - target: skill-area:monorepo-extraction
+    - target: skill-area:strangler-fig-pattern
+    - target: skill-area:domain-driven-design
+  applies_to:
+    - target: domain:software-engineering

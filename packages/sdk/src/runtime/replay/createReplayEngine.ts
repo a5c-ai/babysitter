@@ -10,12 +10,19 @@ import { createProcessContext, InternalProcessContext } from "../processContext"
 import { replaySchemaVersion } from "../constants";
 import { RunFailedError } from "../exceptions";
 import { journalHeadsEqual, readStateCache, rebuildStateCache, StateCacheSnapshot } from "./stateCache";
+import {
+  createPolicyDecisionReporter,
+  createPolicyEngine,
+  type PolicyRule,
+  type RuntimeGovernanceConfig,
+} from "../policy";
 
 export interface CreateReplayEngineOptions {
   runDir: string;
   now?: () => Date;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logger?: (...args: any[]) => void;
+  subprocessSupport?: "disabled" | "babysitter-agent";
 }
 
 export interface ReplayEngine {
@@ -66,6 +73,11 @@ export async function createReplayEngine(options: CreateReplayEngineOptions): Pr
 
   const replayCursor = new ReplayCursor();
   const processId = metadata.processId ?? metadata.request ?? metadata.runId;
+  const governance = readRuntimeGovernanceConfig(metadata);
+  const policyEngine = governance ? createPolicyEngine(governance.policyRules ?? []) : undefined;
+  const reportPolicyDecision = governance
+    ? createPolicyDecisionReporter(metadata.runId, governance)
+    : undefined;
   const { context, internalContext } = createProcessContext({
     runId: metadata.runId,
     runDir: options.runDir,
@@ -76,6 +88,9 @@ export async function createReplayEngine(options: CreateReplayEngineOptions): Pr
     logger: options.logger,
     recordedLogSeqs,
     nonInteractive: Boolean(metadata.nonInteractive),
+    subprocessSupport: options.subprocessSupport,
+    policyEngine,
+    reportPolicyDecision,
   });
 
   return {
@@ -161,4 +176,26 @@ function ensureCompatibleLayout(layoutVersion: string | undefined, runDir: strin
       runDir,
     });
   }
+}
+
+function readRuntimeGovernanceConfig(metadata: RunMetadata): RuntimeGovernanceConfig | undefined {
+  const candidate = (metadata as RunMetadata & { governance?: unknown }).governance;
+  if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) {
+    return undefined;
+  }
+
+  const record = candidate as Record<string, unknown>;
+  const policyRules = Array.isArray(record.policyRules)
+    ? record.policyRules.filter((rule): rule is PolicyRule => (
+      Boolean(rule) && typeof rule === "object" && !Array.isArray(rule)
+    ))
+    : undefined;
+  const auditLogDir = typeof record.auditLogDir === "string" && record.auditLogDir.trim()
+    ? record.auditLogDir
+    : undefined;
+
+  return {
+    ...(policyRules ? { policyRules } : {}),
+    ...(auditLogDir ? { auditLogDir } : {}),
+  };
 }

@@ -1,0 +1,10 @@
+nodeKind: StackPart
+id: stack-part:service-mesh
+attributes:
+  displayName: "Service Mesh"
+  category: infrastructure
+  description: |
+    Dedicated infrastructure layer for service-to-service communication - mTLS, traffic shaping, retries, observability via sidecar or ambient proxies. Examples: Istio, Linkerd, Consul Connect.
+edges:
+  stack_part_used_by:
+    - target: skill-area:service-mesh-config

@@ -8,6 +8,13 @@ expertise:
   - Example diversity
   - Quality optimization
   - Example formatting
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:prompt-engineering, skill-area:prompt-instruction-tuning-agents]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:feature-development]
+
 ---
 
 # Few-Shot Curator

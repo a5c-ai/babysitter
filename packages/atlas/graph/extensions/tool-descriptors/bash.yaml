@@ -1,0 +1,32 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:bash
+attributes:
+  schema: '{}'
+  displayName: "Bash"
+  description: |
+    Execute a shell command in a persistent (or per-call) shell. The
+    canonical "run a shell command" tool — present under this name in
+    Claude Code; equivalent under aliases (e.g. `shell`, `exec`) on
+    other runtimes.
+  inputSchema:
+    type: object
+    required: [command]
+    properties:
+      command: { type: string, description: "Shell command to run" }
+      description: { type: string, description: "Short human-readable description of the command" }
+      timeout: { type: integer, description: "Timeout in milliseconds (max ~600000)" }
+      run_in_background: { type: boolean, description: "Run as a background process" }
+  outputSchema:
+    type: object
+    properties:
+      stdout: { type: string }
+      stderr: { type: string }
+      exitCode: { type: integer }
+  mode: normal
+  streamable: false
+  timeoutMs: 120000
+edges:
+  denied_by_reason:
+    - target: permission-denial-reason:claude-code-background-no-ui
+  assesses_policy:
+    - target: content-policy:default-acceptable-use

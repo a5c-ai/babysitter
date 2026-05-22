@@ -1,0 +1,12 @@
+nodeKind: Capability
+id: capability:streaming
+attributes:
+  displayName: "Streaming"
+  description: |
+    Generic streaming capability — the entity can emit incremental
+    output rather than only a single completed response. Specific
+    streaming variants (text, tool-call, thinking) are separate
+    capabilities.
+  appliesToNodeKinds: ["AgentVersion", "ModelVersion"]
+  category: model
+edges: {}

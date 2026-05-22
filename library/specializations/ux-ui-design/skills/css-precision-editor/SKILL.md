@@ -6,6 +6,12 @@ metadata:
   author: babysitter-sdk
   version: "1.0.0"
   category: implementation
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:ui-styling, skill-area:css-architecture]
+  roles: [role:frontend-engineer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # css-precision-editor

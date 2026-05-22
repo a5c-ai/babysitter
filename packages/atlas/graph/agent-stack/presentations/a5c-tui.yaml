@@ -1,0 +1,47 @@
+---
+nodeKind: Presentation
+id: presentation:a5c-tui
+attributes:
+  displayName: "a5c TUI"
+  kind: tui
+  description: |
+    Terminal UI bundled with the a5c agent. Renders streaming output from the
+    bridged backend (via agent-mux), tool-use blocks, marketplace skill
+    invocations, and a5c plugin slash commands in a full-screen ink-based
+    shell.
+  renderingTechnology: vte
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+  bundleSize: "~50 MB"
+  updateChannel: auto
+  accessibilityShortcuts:
+    - "Esc Esc: jump to most recent user message"
+    - "Ctrl+C: cancel current turn"
+    - "Ctrl+D: exit"
+edges:
+  bundled_with:
+    - agent-platform-impl:a5c.platform@current
+---
+nodeKind: Presentation
+id: presentation:a5c-cli
+attributes:
+  displayName: "a5c CLI"
+  kind: tui
+  description: |
+    Non-interactive / scripted entry point to the a5c agent. Same binary as the
+    TUI but driven via flags / stdin for headless and CI use; emits a
+    normalized JSON event stream when invoked with `--json`.
+  renderingTechnology: vte
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+  bundleSize: "~50 MB"
+  updateChannel: auto
+  accessibilityShortcuts:
+    - "Ctrl+C: interrupt current task"
+edges:
+  bundled_with:
+    - agent-platform-impl:a5c.platform@current

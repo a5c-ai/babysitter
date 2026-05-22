@@ -1,0 +1,22 @@
+nodeKind: Tool
+id: tool:circleci
+attributes:
+  displayName: "CircleCI"
+  homepageUrl: "https://circleci.com"
+  kind: ci
+  description: |
+    CI/CD platform with parallelism, caching, and orb ecosystem.
+edges:
+  belongs_to_language:
+    - target: language:yaml
+  used_for:
+    - target: skill-area:ci-cd
+  alternative_to:
+    - target: tool:github-actions
+      comparison: "CI/CD platforms"
+    - target: tool:gitlab-ci
+      comparison: "CI/CD platforms"
+    - target: tool:buildkite
+      comparison: "CI/CD — CircleCI is fully hosted; Buildkite is hybrid"
+    - target: tool:jenkins
+      comparison: "CI/CD — CircleCI is SaaS; Jenkins is self-hosted"

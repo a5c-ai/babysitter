@@ -1,0 +1,16 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:github-copilot
+attributes:
+  displayName: "GitHub Copilot"
+  vendor: "GitHub"
+  specUrl: "https://docs.github.com/en/copilot"
+  streamingFraming: sse
+  status: vendor-internal
+  notes: |
+    The Copilot backend is OAuth-authenticated via a GitHub PAT or
+    Copilot subscription token. Wire format on `copilot/chat` is a
+    near-superset of OpenAI chat-completions with vendor extensions
+    (e.g. `intent`, contextual file blocks).
+edges:
+  realizes:
+    - target: layer:3-transport

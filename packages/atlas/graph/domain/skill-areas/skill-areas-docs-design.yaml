@@ -1,0 +1,170 @@
+---
+nodeKind: SkillArea
+id: skill-area:runbook-writing
+attributes:
+  displayName: "Runbook Writing"
+  description: |
+    Operational runbooks for incidents and routine procedures —
+    preconditions, steps, verification, and rollback.
+  domains:
+    - specialization:technical-documentation
+    - specialization:devops-sre-platform
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:technical-documentation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:tutorial-design
+attributes:
+  displayName: "Tutorial Design"
+  description: |
+    Designing learner-first tutorials — concrete tasks, scaffolding,
+    and the Diátaxis tutorial pattern.
+  domains:
+    - specialization:technical-documentation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:technical-documentation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:reference-docs
+attributes:
+  displayName: "Reference Documentation"
+  description: |
+    Authoring exhaustive reference docs — completeness, examples,
+    versioning, and Diátaxis reference style.
+  domains:
+    - specialization:technical-documentation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:technical-documentation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:api-doc-generation
+attributes:
+  displayName: "API Doc Generation"
+  description: |
+    Generating API docs from source/specs — OpenAPI/Redoc, javadoc/
+    rustdoc/typedoc, and doc CI pipelines.
+  domains:
+    - specialization:technical-documentation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:technical-documentation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:docs-as-code
+attributes:
+  displayName: "Docs-as-Code"
+  description: |
+    Treating docs as source artifacts — versioning, review, lint,
+    test, and continuous publishing.
+  domains:
+    - specialization:technical-documentation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:technical-documentation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:figma-prototyping
+attributes:
+  displayName: "Figma Prototyping"
+  description: |
+    Designing in Figma — auto-layout, components/variants, prototypes,
+    and design-to-dev handoff.
+  domains:
+    - specialization:ux-ui-design
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ux-ui-design
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:design-systems
+attributes:
+  displayName: "Design Systems"
+  description: |
+    Building and maintaining design systems — tokens, components,
+    documentation, and contribution governance.
+  domains:
+    - specialization:ux-ui-design
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ux-ui-design
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:color-theory
+attributes:
+  displayName: "Color Theory for UI"
+  description: |
+    Applied color theory for product UI — palettes, contrast,
+    perceptual color spaces, and accessible color systems.
+  domains:
+    - specialization:ux-ui-design
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ux-ui-design
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:typography
+attributes:
+  displayName: "UI Typography"
+  description: |
+    Typography for product UI — type scales, line-height, vertical
+    rhythm, web-font loading, and variable fonts.
+  domains:
+    - specialization:ux-ui-design
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ux-ui-design
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:motion-design
+attributes:
+  displayName: "Motion Design"
+  description: |
+    Motion principles for UI — easing, durations, choreography,
+    reduced-motion preferences, and Lottie/Framer Motion implementations.
+  domains:
+    - specialization:ux-ui-design
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ux-ui-design
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:accessibility-first-design
+attributes:
+  displayName: "Accessibility-First Design"
+  description: |
+    Designing for accessibility from the start — color contrast,
+    focus order, target sizes, and inclusive content patterns.
+  domains:
+    - specialization:ux-ui-design
+    - topic:accessibility
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ux-ui-design
+      confidence: primary
+  requires_skill_area:
+    - skill-area:web-accessibility

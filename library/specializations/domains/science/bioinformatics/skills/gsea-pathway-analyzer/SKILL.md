@@ -18,6 +18,12 @@ metadata:
     - pathway-analysis
     - gsea
     - functional
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:graph-algorithms, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:biomedical-engineer]
 ---
 
 # GSEA Pathway Analyzer Skill

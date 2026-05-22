@@ -1,0 +1,19 @@
+nodeKind: Tool
+id: tool:flake8
+attributes:
+  displayName: "flake8"
+  homepageUrl: "https://github.com/PyCQA/flake8"
+  kind: linter
+  language: language:python
+  description: |
+    Python tool that glues pyflakes, pycodestyle, and McCabe complexity checks.
+edges:
+  belongs_to_language:
+    - language:python
+  used_for:
+    - target: skill-area:code-quality
+  alternative_to:
+    - target: tool:ruff
+      comparison: "Python linters — Flake8 is pure Python; Ruff is a faster Rust-based replacement"
+    - target: tool:mypy
+      comparison: "Python code quality — Flake8 is style/error linting; mypy is type checking"

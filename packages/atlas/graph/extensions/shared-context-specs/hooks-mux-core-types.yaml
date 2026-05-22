@@ -1,0 +1,169 @@
+nodeKind: SharedContextSpec
+id: shared-context-spec:hooks-mux-unified-hook-event
+attributes:
+  displayName: "UnifiedHookEvent (a5c.hooks.v1)"
+  contextKind: "wire-payload"
+  typescriptInterface: "UnifiedHookEvent"
+  producerIface: "@a5c-ai/hooks-mux-core adapters (claude, codex, gemini, ...) normalize raw events"
+  consumerIfaces:
+    - "@a5c-ai/hooks-mux-core merge-engine (handler dispatch)"
+    - "@a5c-ai/hooks-mux-core SDK consumers"
+  fieldSchema:
+    - "version:literal<a5c.hooks.v1>:required"
+    - "adapter:string:required:Source adapter id"
+    - "phase:ref<CanonicalPhase>:required:Canonical lifecycle phase"
+    - "rawEventName:string:required:Adapter-native event name"
+    - "supportLevel:enum<native|emulated|lossy|unsupported>:required"
+    - "execution:ref<UnifiedExecutionContext>:required"
+    - "payload:map<string,unknown>:required:Phase-specific structured payload"
+    - "env:{ input: map<string,string>, persisted: map<string,string> }:required"
+    - "raw:unknown:required:Original adapter event for debugging"
+  sourceCitation: "packages/hooks-mux/core/src/types/event.ts:34-47"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:hooks-mux-unified-execution-context
+attributes:
+  displayName: "UnifiedExecutionContext"
+  contextKind: "wire-payload"
+  typescriptInterface: "UnifiedExecutionContext"
+  producerIface: "@a5c-ai/hooks-mux-core adapter normalizers"
+  consumerIfaces:
+    - "@a5c-ai/hooks-mux-core handlers / merge-engine"
+  fieldSchema:
+    - "sessionId:string|null:required"
+    - "turnId|conversationId|toolName|toolCallId:string|null:optional"
+    - "adapter:string:required"
+    - "cwd|worktree|transcriptPath|source|model|agentType|permissionMode:string|null:optional"
+    - "nativeEventName:string:required"
+    - "rawEventScope:string|null:optional"
+    - "persistedEnv:map<string,string>:required"
+    - "contextVars:map<string,string>:required"
+    - "metadata:map<string,unknown>:required"
+  sourceCitation: "packages/hooks-mux/core/src/types/event.ts:7-26"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:hooks-mux-unified-hook-result
+attributes:
+  displayName: "UnifiedHookResult"
+  contextKind: "wire-payload"
+  typescriptInterface: "UnifiedHookResult"
+  producerIface: "user-supplied hook handlers"
+  consumerIfaces:
+    - "@a5c-ai/hooks-mux-core merge-engine (mergeResults)"
+  fieldSchema:
+    - "decision:enum<allow|deny|ask|continue|noop>:optional:Decision verb"
+    - "reason:string:optional"
+    - "systemMessage|additionalContext|followUpMessage:string:optional"
+    - "continueSession:bool:optional"
+    - "stopReason:string:optional"
+    - "suppressOutput:bool:optional"
+    - "toolMutation:{mode:enum<replace|patch>,value:unknown}:optional"
+    - "persistEnv:map<string,string>:optional"
+    - "unsetEnv:list<string>:optional"
+    - "contextVars:map<string,string>:optional"
+    - "metadata:map<string,unknown>:optional"
+  sourceCitation: "packages/hooks-mux/core/src/types/result.ts:8-28"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:hooks-mux-merged-execution-result
+attributes:
+  displayName: "MergedExecutionResult"
+  contextKind: "interface-contract"
+  typescriptInterface: "MergedExecutionResult"
+  producerIface: "@a5c-ai/hooks-mux-core merge-engine (mergeResults)"
+  consumerIfaces:
+    - "@a5c-ai/hooks-mux-core propagation/adapt-output (per-adapter rendering)"
+  fieldSchema:
+    - "decision:enum<deny|ask|allow|continue|noop>:required:Most-restrictive aggregate"
+    - "reason:string:required"
+    - "persistEnv:map<string,string>:required"
+    - "unsetEnv:list<string>:required"
+    - "contextVars:map<string,string>:required"
+    - "additionalContext|systemMessage|followUpMessage|stopReason:string:required"
+    - "toolMutation:{mode,value}:optional"
+    - "continueSession|suppressOutput:bool:required"
+    - "metadata:map<string,unknown>:required"
+    - "diagnostics:ref<MergeDiagnostics>:required:Per-result conflict trace"
+  sourceCitation: "packages/hooks-mux/core/src/merge-engine/merge.ts:20-43"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:hooks-mux-phase-mapping
+attributes:
+  displayName: "PhaseMapping (canonical↔native)"
+  contextKind: "interface-contract"
+  typescriptInterface: "PhaseMapping"
+  producerIface: "@a5c-ai/agent-catalog adapter capability tables"
+  consumerIfaces:
+    - "@a5c-ai/hooks-mux-core merge-engine (capability gating)"
+    - "@a5c-ai/hooks-mux-core propagation/adapt-output (degradation tracking)"
+  fieldSchema:
+    - "canonicalPhase:ref<CanonicalPhase>:required"
+    - "nativeHook:string:required"
+    - "supportLevel:enum<native|emulated|lossy|unsupported>:required"
+    - "blockCapability:bool:required"
+    - "mutationCapability:bool:required"
+    - "scope:enum<session|turn|model|planner|tool|subagent|notification|mcp|gateway>:required"
+    - "notes:string:optional"
+  sourceCitation: "packages/hooks-mux/core/src/types/lifecycle.ts:66-81"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:hooks-mux-session-state
+attributes:
+  displayName: "SessionState (a5c.hooks.session.v1)"
+  contextKind: "session-store-record"
+  typescriptInterface: "SessionState"
+  producerIface: "@a5c-ai/hooks-mux-core session-store (saveSession)"
+  consumerIfaces:
+    - "@a5c-ai/hooks-mux-core propagation/materialize (persistedEnv rehydration)"
+    - "@a5c-ai/hooks-mux-core handlers (cross-hook context fragments)"
+  fieldSchema:
+    - "version:literal<a5c.hooks.session.v1>:required"
+    - "sessionId|adapter:string:required"
+    - "createdAt|updatedAt:datetime:required"
+    - "cwd|transcriptPath:string:optional"
+    - "persistedEnv|contextVars:map<string,string>:required"
+    - "contextFragments:list<{fragmentId,source,createdAt,data,ttlSeconds?}>:required"
+    - "metadata:map<string,unknown>:required"
+  sourceCitation: "packages/hooks-mux/core/src/types/session.ts:5-35"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:hooks-mux-detected-harness
+attributes:
+  displayName: "DetectedHarness (discovery output)"
+  contextKind: "discovery-result"
+  typescriptInterface: "DetectedHarness"
+  producerIface: "@a5c-ai/hooks-mux-core discovery/detector.ts detectHarness"
+  consumerIfaces:
+    - "@a5c-ai/hooks-mux-core CLI `--adapter auto` resolver"
+    - "@a5c-ai/hooks-mux-core SDK consumers"
+  fieldSchema:
+    - "adapter:string:required:Resolved adapter id (e.g. claude, codex, gemini)"
+    - "confidence:enum<high|medium|low>:required"
+    - "evidence:list<string>:required:Env var / signal keys that fired"
+  sourceCitation: "packages/hooks-mux/core/src/discovery/detector.ts:13-20"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:hooks-mux-propagation-options
+attributes:
+  displayName: "PropagationOptions / PropagationBackend"
+  contextKind: "interface-contract"
+  typescriptInterface: "PropagationOptions"
+  producerIface: "@a5c-ai/hooks-mux-core CLI / SDK callers (propagateEnv)"
+  consumerIfaces:
+    - "@a5c-ai/hooks-mux-core propagation/propagation-backends.ts"
+    - "@a5c-ai/hooks-mux-core propagation/env-file.ts / materialize.ts"
+  fieldSchema:
+    - "backend:enum<native_env_file|runtime_hook|wrapper_only|none>:required(elsewhere):PropagationBackend tag"
+    - "nativeEnvFilePath:string:optional:Required for native_env_file backend"
+    - "tempDir:string:optional:Wrapper-only temp dir"
+    - "sessionId:string:optional:Required for `none` backend"
+    - "sessionStore:ref<SessionStore>:optional:Required for `none` backend"
+  sourceCitation: "packages/hooks-mux/core/src/propagation/types.ts:63-77"
+edges: {}

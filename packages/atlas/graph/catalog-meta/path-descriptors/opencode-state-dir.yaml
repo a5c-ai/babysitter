@@ -1,0 +1,22 @@
+nodeKind: PathDescriptor
+id: path:opencode-state-dir
+attributes:
+  pathId: path:opencode-state-dir
+  displayName: "OpenCode state directory"
+  path: "~/.local/share/opencode/"
+  pathKind: session-state-dir
+  ownerKind: AgentPlatformImpl
+  ownerId: agent-platform-impl:opencode.platform@1.x
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+  notes: |
+    Linux/macOS XDG-style state location. On Windows the equivalent is
+    %LOCALAPPDATA%\opencode\. TODO: confirm via vendor doc.
+
+
+
+edges:
+  owned_by:
+    - target: agent-platform-impl:opencode.platform@1.x

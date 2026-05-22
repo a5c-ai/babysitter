@@ -1,0 +1,23 @@
+nodeKind: EnvVar
+id: env-var:claude-code-max-context-tokens
+attributes:
+  displayName: CLAUDE_CODE_MAX_CONTEXT_TOKENS
+  description: Override the context window size Claude Code assumes for the active model.
+  name: CLAUDE_CODE_MAX_CONTEXT_TOKENS
+  category: output
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-enable-fine-grained-tool-streaming
+attributes:
+  displayName: CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING
+  description: Set to 1 to force-enable fine-grained tool input streaming.
+  name: CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING
+  category: output
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

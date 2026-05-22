@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:claude-code-skills-dir
+attributes:
+  artifactId: plugin-artifact:claude-code-skills-dir
+  displayName: "Claude Code skills directory"
+  targetId: plugin-target:claude-code
+  artifactKind: skill-md
+  pathPattern: "skills/*/SKILL.md"
+  installerSurface: "fs"
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code

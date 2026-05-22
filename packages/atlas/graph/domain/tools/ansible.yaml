@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:ansible
+attributes:
+  displayName: "Ansible"
+  homepageUrl: "https://github.com/ansible/ansible"
+  kind: config-mgmt
+  description: |
+    Agentless IT automation - configuration management, application deployment, and orchestration.
+edges:
+  belongs_to_language:
+    - target: language:yaml
+  used_for:
+    - target: skill-area:operations-automation
+    - target: skill-area:deployment-automation
+    - target: skill-area:configuration-management
+  alternative_to:
+    - target: tool:terraform-cloud
+      comparison: "IaC/config — Ansible is agentless config management; Terraform Cloud is declarative provisioning"
+    - target: tool:pulumi-cloud
+      comparison: "IaC/config — Ansible is imperative playbooks; Pulumi Cloud is code-based provisioning"

@@ -7,6 +7,11 @@ metadata:
   version: "1.0.0"
   category: integration
   backlog-id: SK-META-016
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:ai-agent-development, skill-area:orchestration-loop]
+  topics: [topic:developer-experience]
+  roles: [role:platform-engineer]
 ---
 
 # process-integrator

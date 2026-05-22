@@ -1,0 +1,42 @@
+nodeKind: AgentVersion
+id: agent-version:opencode-http@current
+attributes:
+  agentProductId: agent:opencode
+  versionRange: ">=0.1.0"
+  releasedAt: "2025-01-01"
+  cliCommand: "opencode serve"
+  installMethods:
+    - install:npm
+    - install:brew
+    - install:curl
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:opencode
+  composed_of:
+    - target: agent-core-impl:opencode-http.core@current
+      role: core
+    - target: agent-runtime-impl:opencode.runtime@1.x
+      role: runtime
+    - target: agent-platform-impl:opencode.platform@1.x
+      role: platform
+  sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+      notes: OpenCode HTTP server hosts multi-turn sessions.
+    - target: capability:supports-text-streaming
+      versionRange: '>=0.1.0'
+      level: full
+      notes: OpenCode streams model output via HTTP.
+    - target: capability:supports-tool-use
+      versionRange: '>=0.1.0'
+      level: full
+      notes: OpenCode dispatches tool calls in sandboxed sessions.
+    - target: capability:supports-mcp
+      versionRange: '>=0.1.0'
+      level: full
+      notes: OpenCode supports MCP server integration.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern

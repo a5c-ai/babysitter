@@ -2,6 +2,11 @@
 name: embedded-docs
 description: Embedded firmware documentation generation and maintenance using Doxygen and related tools. Expert skill for API documentation, hardware interface documentation, memory maps, and integration with documentation systems.
 allowed-tools: Read, Grep, Write, Edit, Bash, Glob, WebFetch
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+  roles: [role:embedded-engineer]
 ---
 
 # Embedded Documentation Skill

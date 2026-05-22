@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:pi-hooks-mux
+attributes:
+  signalId: discovery-signal:pi-hooks-mux
+  signalKind: env-any
+  key: pi
+  matchMode: all
+  confidence: high
+  scope: hooks-mux
+  signals:
+    - PI_PLUGIN_ROOT
+    - PI_SESSION_ID
+  absentSignals: []
+  argvMatches: []
+  metadataFields: []
+  consumer: hooks-mux-core
+  notes: 'Ordered adapter auto-detection rule used by hooks-mux. Verbatim from legacy discovery:pi:hooks-mux:7.'
+edges:
+  applies_to:
+    - target: agent:pi

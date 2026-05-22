@@ -421,6 +421,660 @@ Within a process, read `relatedProcessIds` from `inputs` and pass them through t
 
 ---
 
+### `playwright-visual-smoke`
+
+Performs visual regression smoke tests using Playwright to catch CSS/layout regressions. Designed for injection into CI, quality-gate, and convergence processes that need to verify UI integrity before completing or merging.
+
+The module exposes three surfaces:
+- **`createVisualSmokeTest(config)`** — factory that builds two `defineTask` descriptors for fine-grained manual control.
+- **`executeVisualSmokeTest(ctx, config, args?)`** — convenience wrapper that drives the full sequence and returns a unified result.
+- **`playwrightVisualSmokeTask`** — standalone `defineTask` for direct `ctx.task()` usage without a factory.
+
+**Import**
+
+```js
+import {
+  createVisualSmokeTest,
+  executeVisualSmokeTest,
+  playwrightVisualSmokeTask
+} from './index.js';
+// or directly:
+import {
+  createVisualSmokeTest,
+  executeVisualSmokeTest,
+  playwrightVisualSmokeTask
+} from './playwright-visual-smoke.js';
+```
+
+**`createVisualSmokeTest(config)` — factory**
+
+Creates two babysitter task definitions that can be dispatched individually via `ctx.task()`. The returned descriptors carry no shared mutable state and are safe to reuse across multiple convergence loop iterations.
+
+```js
+function createVisualSmokeTest(config: VisualSmokeTestConfig): {
+  smokeTestTask:    TaskDef,  // shell task — runs Playwright checks, outputs raw JSON
+  generateReportTask: TaskDef,  // agent task — analyses results, produces human-readable report
+}
+```
+
+**`VisualSmokeTestConfig` options**
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `name` | `string` | yes | — | Human-readable identifier, e.g. `'dashboard-visual-smoke'`. Used in task IDs and titles. |
+| `baseUrl` | `string` | yes | — | Base URL of the application under test, e.g. `'http://localhost:3000'`. |
+| `pages` | `string[]` | no | `['/']` | URL paths to visit relative to `baseUrl`. |
+| `criticalButtons` | `string[]` | no | `['Save','Submit','Cancel']` | Button labels (role=button) to verify are visible and clickable. |
+| `containerSelectors` | `string[]` | no | `['main','[role="main"]','.container']` | CSS selectors whose bounding boxes must have non-zero dimensions. |
+| `viewportWidth` | `number` | no | `1280` | Browser viewport width in pixels. |
+| `viewportHeight` | `number` | no | `720` | Browser viewport height in pixels. |
+| `timeout` | `number` | no | `30000` | Navigation timeout in milliseconds per page. |
+
+**The 4 checks performed per page**
+
+1. **Build error detection** — scans `document.body.innerText` for patterns: `'Build Error'`, `'Compilation Error'`, `'Module not found'`, `'SyntaxError'`. A match is a hard failure.
+2. **Container dimension verification** — checks each `containerSelectors` element has a non-zero bounding box (`width > 0 && height > 0`). The page fails only if *all* containers are missing or zero-area (individual misses are warnings).
+3. **Fixed element bounds validation** — enumerates all `position: fixed` elements via `getComputedStyle` and verifies each lies within the configured viewport bounds. Out-of-bounds fixed elements indicate CSS layout regressions.
+4. **Critical button visibility and clickability** — for each label in `criticalButtons`, locates the first `role=button` match and asserts both `isVisible()` and `isEnabled()`.
+
+**`generateReportTask` output schema**
+
+```js
+{
+  passed:          boolean,
+  summary:         string,
+  pages:           Array<{ url: string, status: 'pass'|'fail'|'error', issues: string[] }>,
+  recommendations: string[]
+}
+```
+
+**`executeVisualSmokeTest(ctx, config, args?)` — convenience wrapper**
+
+Orchestrates the full smoke test sequence in two phases: run Playwright checks (shell task), then analyse results (agent task). Returns a unified `VisualSmokeTestResult`. The final `passed` flag is `true` only when both the raw shell task and the analysis agent independently report success.
+
+```js
+async function executeVisualSmokeTest(
+  ctx:    ProcessContext,
+  config: VisualSmokeTestConfig,
+  args?:  { attempt?: number }  // attempt number for retry tracking, default 1
+): Promise<{
+  passed:  boolean,      // true when all checks across all pages and the agent report pass
+  pages:   PageResult[], // raw per-page results from the Playwright shell task
+  summary: string        // human-readable summary from the report agent
+}>
+```
+
+**`playwrightVisualSmokeTask` — standalone `defineTask`**
+
+A single `defineTask` descriptor that combines script execution and result analysis into one agent task invocation. Use when you want the smoke test as a single orchestrated harness task without the factory split. All config is passed via `args` at call time.
+
+Task inputs (via `args`):
+
+| Field | Type | Default |
+|-------|------|---------|
+| `name` | `string` | `'visual-smoke'` |
+| `baseUrl` | `string` | `'http://localhost:3000'` |
+| `pages` | `string[]` | `['/']` |
+| `criticalButtons` | `string[]` | `['Save','Submit','Cancel']` |
+| `containerSelectors` | `string[]` | `['main','[role="main"]','.container']` |
+| `viewportWidth` | `number` | `1280` |
+| `viewportHeight` | `number` | `720` |
+| `timeout` | `number` | `30000` |
+
+Task output: `{ passed, pages, summary, recommendations }`.
+
+**Usage — convenience approach**
+
+```js
+import { executeVisualSmokeTest } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const result = await executeVisualSmokeTest(ctx, {
+    name: 'dashboard-visual-smoke',
+    baseUrl: inputs.baseUrl ?? 'http://localhost:3000',
+    pages: ['/', '/settings', '/dashboard'],
+    criticalButtons: ['Save', 'Submit', 'Cancel', 'Delete'],
+    containerSelectors: ['main', '.dashboard-grid', '.sidebar'],
+  });
+
+  if (!result.passed) {
+    // Feed result.summary back into a convergence loop breakpoint
+    const response = await ctx.breakpoint({
+      message: `Visual smoke checks failed.\n${result.summary}`,
+      options: ['fix and retry', 'defer', 'abort']
+    });
+  }
+
+  return result;
+}
+```
+
+**Usage — factory approach (manual control)**
+
+```js
+import { createVisualSmokeTest } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const { smokeTestTask, generateReportTask } = createVisualSmokeTest({
+    name: 'catalog-visual-smoke',
+    baseUrl: 'http://localhost:3000',
+    pages: ['/', '/browse', '/search'],
+    criticalButtons: ['Search', 'Clear'],
+    containerSelectors: ['main', '.catalog-grid'],
+  });
+
+  const rawResults = await ctx.task(smokeTestTask, { attempt: 1 });
+  const report     = await ctx.task(generateReportTask, { smokeResults: rawResults });
+
+  return { passed: report.passed, summary: report.summary };
+}
+```
+
+**Usage — standalone task**
+
+```js
+import { playwrightVisualSmokeTask } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const result = await ctx.task(playwrightVisualSmokeTask, {
+    name: 'app-smoke',
+    baseUrl: 'http://localhost:3000',
+    pages: ['/', '/about'],
+  });
+
+  return result;
+}
+```
+
+**Example output**
+
+```json
+{
+  "passed": false,
+  "summary": "Visual regression detected on /dashboard: the .dashboard-grid container has zero area, indicating a rendering failure. All other pages passed.",
+  "pages": [
+    {
+      "url": "/",
+      "status": "pass",
+      "issues": []
+    },
+    {
+      "url": "/dashboard",
+      "status": "fail",
+      "issues": [
+        "Container '.dashboard-grid' has zero area (width=0, height=0)",
+        "Button 'Save' not visible"
+      ]
+    }
+  ],
+  "recommendations": [
+    "Inspect .dashboard-grid CSS — possible display:none or missing layout styles",
+    "Verify the Save button renders within the dashboard view before making it visible"
+  ]
+}
+```
+
+---
+
+### `ts-check`
+
+Provides a hard shell gate for TypeScript compilation correctness via `tsc --noEmit`. Unlike soft agent-prompt-based checks — where an agent can reason its way around a failing typecheck or simply note the errors and continue — this module enforces compilation via a shell task with `expectedExitCode: 0`. The harness cannot satisfy the task with anything other than a zero exit code from the compiler. It is a non-negotiable quality gate.
+
+The module exposes three surfaces:
+- **`tsCheckTask`** — standalone `defineTask` descriptor (kind: `'shell'`) for direct use with `ctx.task()`.
+- **`createTsCheck(config)`** — factory that builds a shell check task and an agent report task, parameterized by project directory, tsconfig path, and compiler flags.
+- **`executeTsCheck(ctx, config)`** — convenience wrapper that runs the check, parses tsc output into structured error records, and returns a comprehensive result object.
+
+**Import**
+
+```js
+import { tsCheckTask, createTsCheck, executeTsCheck } from './index.js';
+// or directly:
+import { tsCheckTask, createTsCheck, executeTsCheck } from './ts-check.js';
+```
+
+**`tsCheckTask` — standalone task**
+
+A single `defineTask` descriptor that runs `tsc --noEmit` as a hard compilation gate. Use when you want a one-off typecheck without factory configuration.
+
+Expected args:
+
+```js
+{
+  projectDir?:    string,    // Working directory for the compiler (default: current directory)
+  tsconfigPath?:  string,    // Path to tsconfig.json (default: 'tsconfig.json')
+  strict?:        boolean,   // Pass --strict flag (default: false)
+  incremental?:   boolean,   // Pass --incremental flag (default: false)
+  extraFlags?:    string[],  // Additional tsc flags (default: [])
+}
+```
+
+```js
+const result = await ctx.task(tsCheckTask, {
+  projectDir: 'packages/sdk',
+  tsconfigPath: 'tsconfig.json',
+});
+```
+
+**`createTsCheck(config)` — factory**
+
+Creates two babysitter task definitions that can be dispatched individually via `ctx.task()`:
+
+- **`checkTask`** (kind: `'shell'`) — runs `tsc --noEmit` with the specified configuration. Uses `expectedExitCode: 0` to enforce a hard compilation gate.
+- **`reportTask`** (kind: `'agent'`) — analyzes raw tsc output and produces a structured diagnostic report with error categorization and remediation suggestions.
+
+Both descriptors carry no shared mutable state and are safe to reuse across convergence loop iterations.
+
+```js
+function createTsCheck(config: TsCheckConfig): {
+  checkTask:  TaskDef,  // shell task — runs tsc --noEmit as a hard gate
+  reportTask: TaskDef,  // agent task — categorizes errors and suggests remediations
+}
+```
+
+**`TsCheckConfig` options**
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `projectDir` | `string` | no | current directory | Working directory for the compiler. |
+| `tsconfigPath` | `string` | no | `'tsconfig.json'` | Path to the tsconfig file, relative to `projectDir`. |
+| `strict` | `boolean` | no | `false` | Whether to pass `--strict` to tsc. |
+| `incremental` | `boolean` | no | `false` | Whether to pass `--incremental` to tsc. |
+| `extraFlags` | `string[]` | no | `[]` | Additional flags to pass to tsc verbatim. |
+| `timeout` | `number` | no | `120000` | Maximum execution time in milliseconds. |
+
+**`reportTask` output schema**
+
+```js
+{
+  totalErrors:  number,
+  categories:   Record<string, number>,  // e.g. { "type mismatch": 4, "import resolution": 2 }
+  topErrors:    Array<{ file: string, line: number, code: string, message: string }>,
+  suggestions:  string[],
+  summary:      string
+}
+```
+
+**`executeTsCheck(ctx, config)` — convenience wrapper**
+
+Runs the compilation check, catches failures, parses tsc output into structured error records, and returns a unified result. Does **not** throw on compilation failure — it captures the failure and returns `{ passed: false, ... }` so the caller can decide how to proceed (fix-and-retry loop, breakpoint, abort).
+
+```js
+async function executeTsCheck(
+  ctx:    ProcessContext,
+  config: TsCheckConfig
+): Promise<{
+  passed:     boolean,    // true when tsc exits with code 0
+  exitCode:   number,     // actual compiler exit code
+  errorCount: number,     // number of parsed diagnostic errors
+  errors:     TscError[], // structured error records
+  output:     string,     // raw combined stdout+stderr
+  summary:    string      // human-readable one-line result
+}>
+```
+
+`TscError` shape:
+
+```js
+{
+  file:    string,  // source file path relative to projectDir
+  line:    number,  // 1-based line number
+  column:  number,  // 1-based column number
+  code:    string,  // TypeScript error code, e.g. 'TS2322'
+  message: string   // human-readable error description
+}
+```
+
+**Usage — standalone task**
+
+```js
+import { tsCheckTask } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const result = await ctx.task(tsCheckTask, {
+    projectDir: 'packages/sdk',
+  });
+}
+```
+
+**Usage — factory approach (manual control)**
+
+```js
+import { createTsCheck } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const { checkTask, reportTask } = createTsCheck({
+    projectDir: 'packages/sdk',
+    strict: true,
+    timeout: 180000,
+  });
+
+  const checkResult = await ctx.task(checkTask, {});
+
+  if (checkResult.exitCode !== 0) {
+    const report = await ctx.task(reportTask, { tscOutput: checkResult });
+    // report.suggestions contains actionable remediation steps
+  }
+}
+```
+
+**Usage — convenience approach**
+
+```js
+import { executeTsCheck } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const result = await executeTsCheck(ctx, {
+    projectDir: 'packages/sdk',
+    strict: true,
+  });
+
+  if (!result.passed) {
+    // Feed structured errors into a fix-and-retry convergence loop
+    const response = await ctx.breakpoint({
+      message: `TypeScript compilation failed.\n${result.summary}\n\nErrors:\n${result.errors.map(e => `  ${e.file}:${e.line} ${e.code}: ${e.message}`).join('\n')}`,
+      options: ['fix errors and retry', 'defer', 'abort'],
+      previousFeedback: inputs.previousFeedback,
+    });
+  }
+
+  return result;
+}
+```
+
+**Why this matters: hard gates vs. soft checks**
+
+Agent-prompt-based TypeScript checks are inherently soft: an agent can acknowledge errors, note them as "minor", decide they are pre-existing, or simply continue. There is no enforcement mechanism. A shell task with `expectedExitCode: 0` cannot be reasoned around — the harness must execute `tsc --noEmit` and the task only resolves successfully when the compiler exits cleanly. This makes `ts-check` appropriate for:
+
+- Quality gates in convergence loops that must not complete with type errors.
+- CI-equivalent checks within orchestrated processes.
+- Pre-merge or pre-deploy verification phases where compilation correctness is non-negotiable.
+
+For exploratory or diagnostic contexts where you want to *know* about errors without blocking progress, use `executeTsCheck` (which captures failures without throwing) and feed the structured errors into a breakpoint or retry loop.
+
+---
+
+### `runtime-call-tracer`
+
+Traces runtime execution paths across a codebase by grepping for route/handler registrations and following import chains. Produces a structured map of feature areas to their traced files, dead code candidates, and dominant hot path. Designed for injection into architecture-analysis, refactoring-planning, and quality-audit processes.
+
+The module exposes two surfaces:
+- **`traceRuntimeCallPathsTask`** — standalone `defineTask` descriptor (kind: `'agent'`) for direct `ctx.task()` usage.
+- **`createCallPathTracer(options)`** — convenience factory that bakes in default `projectDir`, `maxDepth`, and `timeout` values and returns a reusable task definition.
+
+**Import**
+
+```js
+import { traceRuntimeCallPathsTask, createCallPathTracer } from './index.js';
+// or directly:
+import { traceRuntimeCallPathsTask, createCallPathTracer } from './runtime-call-tracer.js';
+```
+
+**`traceRuntimeCallPathsTask` — standalone task**
+
+Expected args:
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `featureAreas` | `Array<{ name: string, entryPoint: string }>` | yes | — | Feature areas to trace. Each `entryPoint` is a path relative to `projectDir`. |
+| `projectDir` | `string` | no | `'.'` | Root directory for resolving relative import paths. |
+| `maxDepth` | `number` | no | `8` | Maximum import-follow depth per feature area. |
+| `timeout` | `number` | no | `120000` | Task timeout in milliseconds. |
+
+Output schema:
+
+```js
+{
+  runtimeCallPaths: {
+    [featureName: string]: {
+      entryPoint:         string,    // the provided entry point path
+      tracedFiles:        string[],  // all visited source files, relative to projectDir
+      deadCodeCandidates: string[],  // "<file>:<symbol>" entries with no external callers
+      hotPath:            string,    // dominant call chain from entry to terminal effect
+    }
+  },
+  summary: string  // concise architectural overview of observed patterns
+}
+```
+
+**`createCallPathTracer(options)` — factory**
+
+```js
+function createCallPathTracer(options?: {
+  projectDir?:  string,  // default '.'
+  maxDepth?:    number,  // default 8, clamped to [1, 20]
+  timeout?:     number,  // default 120000
+  tracerName?:  string,  // default 'default'; used to differentiate task IDs in multi-tracer processes
+}): TaskDef
+```
+
+The returned task definition accepts the same `featureAreas` (and optional per-call `projectDir`, `maxDepth`, `timeout`) arguments as the standalone task. Per-call values override factory defaults.
+
+**Usage — standalone task**
+
+```js
+import { traceRuntimeCallPathsTask } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const result = await ctx.task(traceRuntimeCallPathsTask, {
+    featureAreas: [
+      { name: 'run-create', entryPoint: 'packages/sdk/src/cli/commands/runCreate.ts' },
+      { name: 'task-post',  entryPoint: 'packages/sdk/src/cli/commands/taskPost.ts' },
+    ],
+    projectDir: '.',
+    maxDepth: 6,
+  });
+
+  for (const [feature, paths] of Object.entries(result.runtimeCallPaths)) {
+    console.log(`${feature}: ${paths.tracedFiles.length} files, hot path: ${paths.hotPath}`);
+  }
+
+  return result;
+}
+```
+
+**Usage — factory approach**
+
+```js
+import { createCallPathTracer } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const tracerTask = createCallPathTracer({
+    projectDir: inputs.projectDir ?? '.',
+    maxDepth: 5,
+    tracerName: 'sdk-tracer',
+  });
+
+  // Dispatch in two batches to keep individual agent contexts focused
+  const runtimePaths = await ctx.task(tracerTask, {
+    featureAreas: [
+      { name: 'replay-engine',  entryPoint: 'src/runtime/replay/index.ts' },
+      { name: 'storage-layer',  entryPoint: 'src/storage/index.ts' },
+    ],
+  });
+
+  const taskPaths = await ctx.task(tracerTask, {
+    featureAreas: [
+      { name: 'task-dispatch', entryPoint: 'src/tasks/index.ts' },
+    ],
+  });
+
+  return {
+    callPaths: {
+      ...runtimePaths.runtimeCallPaths,
+      ...taskPaths.runtimeCallPaths,
+    },
+    summaries: [runtimePaths.summary, taskPaths.summary],
+  };
+}
+```
+
+**Example output**
+
+```json
+{
+  "runtimeCallPaths": {
+    "run-create": {
+      "entryPoint": "packages/sdk/src/cli/commands/runCreate.ts",
+      "tracedFiles": [
+        "packages/sdk/src/cli/commands/runCreate.ts",
+        "packages/sdk/src/runtime/createRun.ts",
+        "packages/sdk/src/storage/createRunDir.ts",
+        "packages/sdk/src/storage/appendEvent.ts",
+        "packages/sdk/src/storage/lock.ts"
+      ],
+      "deadCodeCandidates": [
+        "packages/sdk/src/storage/createRunDir.ts:ensureParentDir"
+      ],
+      "hotPath": "cli#runCreate → createRun() → createRunDir() → acquireRunLock() → appendEvent(RUN_CREATED)"
+    }
+  },
+  "summary": "The run-create path follows a strict layered architecture: CLI → runtime orchestration → storage primitives. The storage layer is consistently accessed through thin wrapper functions with no cross-cutting concerns. One unexported utility (ensureParentDir) appears to have no callers outside its declaration file."
+}
+```
+
+---
+
+### `cycle-aware-verification`
+
+Validates that fixes survive system execution cycles (cron jobs, watch-mode rebuilds, scheduled tasks, server restarts). Many bugs only manifest after the system completes its next cycle — a server that passes an immediate health check may crash on the next hot-reload. This module adds a temporal dimension to verification: baseline check, wait for cycle, re-check.
+
+The module also provides pre-flight analysis to scan files for dangerous patterns (e.g., `rm -rf`, `kill -9`) before changes are applied.
+
+The module exposes four surfaces:
+- **`createPreflightAnalysis(config)`** — factory that builds a shell task to grep for dangerous patterns in a target file.
+- **`cycleAwareVerificationTask`** — standalone `defineTask` descriptor (kind: `'shell'`) that performs baseline + cycle wait + post-cycle check in a single shell invocation.
+- **`createCycleAwareVerification(config)`** — factory that returns separate `baselineTask` and `postCycleTask` definitions for fine-grained manual control.
+- **`createPostCycleSurvivalCheck(config)`** — factory that builds a single post-cycle survival check task with baked-in URL, cycle interval, and expected status.
+
+**Import**
+
+```js
+import {
+  cycleAwareVerificationTask,
+  createCycleAwareVerification,
+  createPreflightAnalysis,
+  createPostCycleSurvivalCheck,
+} from './index.js';
+// or directly:
+import {
+  cycleAwareVerificationTask,
+  createCycleAwareVerification,
+  createPreflightAnalysis,
+  createPostCycleSurvivalCheck,
+} from './cycle-aware-verification.js';
+```
+
+**`cycleAwareVerificationTask` — standalone task**
+
+Expected args:
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `url` | `string` | yes | — | Health check endpoint URL. |
+| `cycleIntervalMs` | `number` | no | `300000` | Cycle wait duration in milliseconds. |
+| `expectedStatus` | `number` | no | `200` | Expected HTTP status code. |
+| `timeout` | `number` | no | `10000` | Per-request timeout in milliseconds. |
+
+Output (JSON on stdout):
+
+```js
+{
+  passed:         boolean,  // true only when both baseline and post-cycle checks pass
+  baselineOk:     boolean,  // true when baseline HTTP status matches expected
+  postCycleOk:    boolean,  // true when post-cycle HTTP status matches expected
+  cycleIntervalMs?: number, // echoed back on success
+  error?:         string    // human-readable error message on failure
+}
+```
+
+**`createCycleAwareVerification(config)` — factory**
+
+```js
+function createCycleAwareVerification(config: {
+  healthCheck: { url: string, expectedStatus?: number, timeout?: number },
+  cycleIntervalMs?: number,
+  name?: string,
+}): { baselineTask: TaskDef, postCycleTask: TaskDef }
+```
+
+**`createPreflightAnalysis(config)` — factory**
+
+```js
+function createPreflightAnalysis(config?: {
+  patterns?: string[],  // default: ['rm -rf', 'rm -r ', 'rmdir', 'kill -9', 'pkill', 'killall']
+  name?: string,        // default: 'preflight-analysis'
+  timeout?: number,     // default: 10000
+}): TaskDef
+```
+
+Expected args: `{ filePath: string }` — the file to scan for dangerous patterns.
+
+**`createPostCycleSurvivalCheck(config)` — factory**
+
+```js
+function createPostCycleSurvivalCheck(config: {
+  url: string,
+  cycleIntervalMs?: number,  // default: 300000
+  name?: string,             // default: 'post-cycle-survival'
+  expectedStatus?: number,   // default: 200
+  timeout?: number,          // default: 10000
+}): TaskDef
+```
+
+**Usage — standalone task**
+
+```js
+import { cycleAwareVerificationTask } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const result = await ctx.task(cycleAwareVerificationTask, {
+    url: inputs.healthCheckUrl ?? 'http://localhost:3000/api/health',
+    cycleIntervalMs: 60000,
+    expectedStatus: 200,
+  });
+}
+```
+
+**Usage — factory approach (manual control)**
+
+```js
+import { createCycleAwareVerification } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const { baselineTask, postCycleTask } = createCycleAwareVerification({
+    healthCheck: { url: 'http://localhost:3000/api/health', timeout: 5000 },
+    cycleIntervalMs: 120000,
+    name: 'api-cycle-check',
+  });
+
+  const baseline = await ctx.task(baselineTask, {});
+  // ... apply fix or perform other work between checks ...
+  const postCycle = await ctx.task(postCycleTask, {});
+}
+```
+
+**Usage — pre-flight scan + post-cycle survival**
+
+```js
+import { createPreflightAnalysis, createPostCycleSurvivalCheck } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  // Scan script for dangerous patterns before applying
+  const preflight = createPreflightAnalysis({ patterns: ['rm -rf', 'DROP TABLE'] });
+  const scan = await ctx.task(preflight, { filePath: inputs.scriptPath });
+
+  // After applying the fix, verify the server survives its next cycle
+  const survivalTask = createPostCycleSurvivalCheck({
+    url: 'http://localhost:8080/health',
+    cycleIntervalMs: 60000,
+  });
+  const survived = await ctx.task(survivalTask, {});
+}
+```
+
+---
+
 ## API Reference
 
 | Export | Module | Type | Description |
@@ -434,5 +1088,127 @@ Within a process, read `relatedProcessIds` from `inputs` and pass them through t
 | `costAggregationTask` | `cost-aggregation` | `TaskDef` | `defineTask` wrapper for harness-driven execution |
 | `createTddTriplet` | `tdd-triplet` | `function` | Factory that returns three `defineTask` descriptors for the write-tests, run-tests, and validate phases |
 | `executeTddTriplet` | `tdd-triplet` | `async function` | Convenience wrapper that drives the full TDD triplet sequence with built-in retry logic |
+| `createVisualSmokeTest` | `playwright-visual-smoke` | `function` | Factory that returns two `defineTask` descriptors for the Playwright shell task and report agent task |
+| `executeVisualSmokeTest` | `playwright-visual-smoke` | `async function` | Convenience wrapper that drives the full visual smoke test sequence and returns a unified result |
+| `playwrightVisualSmokeTask` | `playwright-visual-smoke` | `TaskDef` | Standalone `defineTask` for direct `ctx.task()` usage without factory instantiation |
+| `tsCheckTask` | `ts-check` | `TaskDef` | Standalone shell `defineTask` that runs `tsc --noEmit` as a hard compilation gate |
+| `createTsCheck` | `ts-check` | `function` | Factory that returns a shell `checkTask` and an agent `reportTask` for TypeScript compilation checking |
+| `executeTsCheck` | `ts-check` | `async function` | Convenience wrapper that runs the compilation check and returns a structured result with parsed errors |
+| `traceRuntimeCallPathsTask` | `runtime-call-tracer` | `TaskDef` | Standalone agent `defineTask` that greps for handlers, follows imports, and maps call paths for a list of feature areas |
+| `createCallPathTracer` | `runtime-call-tracer` | `function` | Factory that returns a pre-configured `defineTask` descriptor with baked-in `projectDir`, `maxDepth`, and `timeout` defaults |
+| `cycleAwareVerificationTask` | `cycle-aware-verification` | `TaskDef` | Standalone shell `defineTask` that performs baseline check, cycle wait, and post-cycle check in a single invocation |
+| `createCycleAwareVerification` | `cycle-aware-verification` | `function` | Factory that returns separate `baselineTask` and `postCycleTask` definitions for fine-grained cycle-aware verification |
+| `createPreflightAnalysis` | `cycle-aware-verification` | `function` | Factory that returns a shell `defineTask` to grep for dangerous patterns in a target file |
+| `createPostCycleSurvivalCheck` | `cycle-aware-verification` | `function` | Factory that returns a shell `defineTask` for post-cycle survival checking with baked-in URL and cycle interval |
 
 All exports are available from `./index.js` (the preferred import path) or from the individual module files.
+
+---
+
+## Curated-Dataset + SQL-Tool Pattern
+
+Three composable processes that together implement the "do the curation once, then let an LLM compose SQL against a local SQLite database through Python stdlib scripts at query time" pattern. Generalized from `specializations/domains/business/travel/` -- works for any domain (science, finance, sports, civic data, ...).
+
+Hard constraints inherited from the source pattern (applies to all three):
+
+- Only `kind: 'agent'` tasks. No shell tasks, no MCP.
+- All DB creation/loading/indexing/querying happens via Python 3 scripts using ONLY the stdlib `sqlite3` module. No ORM, no sqlite3 CLI, no pandas, no requests.
+- DB is opened read-only (`file:{db}?mode=ro` URI) during exploration so the analyst cannot mutate the dataset.
+- Every finding carries the verbatim SQL that produced it as audit evidence.
+
+### `source-discovery`
+
+Discovers authoritative, licence-clean open data sources for a domain + scope and writes a reusable `sources.json` + `SOURCES.md` manifest.
+
+**Import**
+
+```js
+import { process as discoverSources, sourceDiscoveryTask } from './index.js';
+// or:
+import { process as discoverSources } from './source-discovery.js';
+```
+
+**Inputs** (see file header for full schema): `{ domain, scope, workDir, entityHints?, licencePolicy?, maxSources?, priorManifestPath? }`
+
+**Outputs**: `{ manifestPath, sources, coverageGaps, artifacts, duration, metadata }`
+
+**Phases**: scope-refinement → source-discovery → source-validation (reachability + licence re-check + sample persistence) → manifest-export.
+
+### `local-db-build`
+
+Turns a `sources.json` manifest into a populated, indexed, documented SQLite database.
+
+**Import**
+
+```js
+import { process as buildLocalDb } from './local-db-build.js';
+```
+
+**Inputs**: `{ manifestPath, workDir, dbFileName?, rebuild?, domain?, scopeNotes?, expectedRowCounts? }`
+
+**Outputs**: `{ dbPath, schemaDocPath, ingestReport, queryReadiness, artifacts, duration, metadata }`
+
+**Phases**: schema-design → python-etl-authoring (stdlib-only scripts) → ingest-execution (idempotent) → index-build (indexes + denormalized views + ANALYZE) → data-validation (foreign_key_check, integrity_check, row-count gates, representative queries) → schema-documentation (writes `SCHEMA.md` with tables, views, indexes, worked example queries).
+
+### `db-agent-explore`
+
+Points an analyst agent at a populated SQLite DB (typically from `local-db-build`) with a natural-language research question. The agent reads `SCHEMA.md`, decomposes the question into sub-questions, composes + executes Python `sqlite3` scripts in iterative rounds until the findings are sufficient, then emits a markdown report with verbatim SQL as evidence.
+
+**Import**
+
+```js
+import { process as exploreDb } from './db-agent-explore.js';
+```
+
+**Inputs**: `{ dbPath, schemaDocPath, workDir, question, hypotheses?, maxQueryRounds?, outputFormat?, persona? }`
+
+**Outputs**: `{ reportPath, findings, queryLog, artifacts, duration, metadata }`
+
+**Phases**: question-planning → sql-exploration (looped up to `maxQueryRounds`, with refinementNotes threading between rounds) → findings-synthesis (dedup + rank, no DB access) → report-export.
+
+### End-to-end usage
+
+```js
+import {
+  sourceDiscoveryProcess,
+  localDbBuildProcess,
+  dbAgentExploreProcess,
+} from '@a5c-ai/babysitter-library/processes/shared';
+
+export async function process(inputs, ctx) {
+  const workDir = inputs.workDir;
+
+  const sources = await sourceDiscoveryProcess({
+    domain: 'science/astronomy',
+    scope: { objects: ['exoplanets'], window: { from: '1995-01-01' } },
+    workDir,
+  }, ctx);
+
+  const db = await localDbBuildProcess({
+    manifestPath: sources.manifestPath,
+    workDir,
+    domain: 'science/astronomy',
+    scopeNotes: 'confirmed exoplanets discovered 1995-present',
+  }, ctx);
+
+  const report = await dbAgentExploreProcess({
+    dbPath: db.dbPath,
+    schemaDocPath: db.schemaDocPath,
+    workDir: `${workDir}/exploration`,
+    question: 'What is the mass/radius distribution of exoplanets discovered by transit vs radial velocity?',
+  }, ctx);
+
+  return { sources, db, report };
+}
+```
+
+### When to use which
+
+- Only need a source manifest (e.g. to hand to a non-Babysitter pipeline)? Run `source-discovery` alone.
+- Have sources already and want a queryable DB? Skip to `local-db-build` with a hand-written manifest.
+- Have a DB already and want an analyst pass? Run `db-agent-explore` standalone.
+- Want the full curated-dataset + SQL-tool experience? Chain all three, as shown above.
+
+### Inspired by
+
+Michael Lugassy's curated-dataset + direct-SQL-tool travel-agent pattern ([github.com/mluggy](https://github.com/mluggy)).

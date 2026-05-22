@@ -2,6 +2,12 @@
 name: typescript
 description: TypeScript configuration, strict mode, generics, and type utilities.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:typescript-generic-programming, skill-area:code-analysis-linting]
+  roles: [role:frontend-engineer, role:fullstack-engineer]
+  topics: [topic:design-patterns]
 ---
 
 # TypeScript Skill

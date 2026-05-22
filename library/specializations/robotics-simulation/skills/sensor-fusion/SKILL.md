@@ -7,6 +7,11 @@ metadata:
   version: "1.0.0"
   category: state-estimation
   backlog-id: SK-009
+graph:
+  domains: [domain:robotics]
+  specializations: [specialization:robotics-simulation]
+  skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+  roles: [role:research-engineer]
 ---
 
 # sensor-fusion

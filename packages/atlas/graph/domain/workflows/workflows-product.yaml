@@ -1,0 +1,149 @@
+---
+nodeKind: Workflow
+id: workflow:product-discovery
+attributes:
+  displayName: "Product Discovery"
+  description: |
+    On-demand cross-team development workflow that validates whether a proposed product
+    initiative is worth building before significant engineering investment is committed.
+    Product managers and UX researchers conduct customer interviews, review usage data,
+    and map the problem space to uncover genuine user needs and business opportunities.
+    Product designers rapidly prototype solution concepts and run usability tests to
+    surface critical design assumptions. Findings are synthesized into an opportunity
+    brief that includes a problem statement, target personas, solution hypotheses, and
+    a risk assessment. The brief is reviewed by product and engineering leadership, and
+    a go/no-go decision determines whether the initiative proceeds to roadmap planning
+    and detailed specification, or is parked pending further evidence.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-initiative"
+  complexity: complex
+edges:
+  involves_role:
+    - role:product-manager
+    - role:ux-researcher
+    - role:product-designer
+    - role:engineering-manager
+    - role:business-analyst
+    - role:growth-pm
+  applies_to_domain:
+    - domain:software-engineering
+    - domain:customer-experience
+    - domain:business-intelligence
+  triggers_responsibility:
+    - responsibility:user-research
+    - responsibility:market-research
+    - responsibility:strategic-planning
+    - responsibility:backlog-grooming
+    - responsibility:stakeholder-communication
+---
+nodeKind: Workflow
+id: workflow:user-feedback-loop
+attributes:
+  displayName: "User Feedback Loop"
+  description: |
+    Continuous single-team operational workflow that systematically collects, triages,
+    and routes user feedback from in-product surveys, support tickets, app store reviews,
+    social listening, and customer interviews into actionable product insights. Product
+    analysts tag and categorize incoming feedback against a structured taxonomy each week.
+    Recurring themes are surfaced to product managers in a weekly digest, with verbatim
+    highlights attached to relevant backlog items. High-signal feedback triggers rapid
+    follow-up interviews coordinated by UX researchers to deepen understanding. The
+    workflow closes the loop with customers by communicating when reported issues are
+    resolved or requested features are shipped, driving higher response rates and
+    reinforcing a customer-centric product culture.
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "weekly"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:product-manager
+    - role:product-analyst
+    - role:ux-researcher
+    - role:customer-success-manager
+  applies_to_domain:
+    - domain:customer-experience
+    - domain:customer-relations
+    - domain:software-engineering
+  triggers_responsibility:
+    - responsibility:user-research
+    - responsibility:metric-definition
+    - responsibility:customer-journey-mapping
+    - responsibility:stakeholder-communication
+    - responsibility:backlog-grooming
+---
+nodeKind: Workflow
+id: workflow:competitive-analysis
+attributes:
+  displayName: "Competitive Analysis"
+  description: |
+    Quarterly cross-team governance workflow that maintains a structured, current view
+    of the competitive landscape to inform product strategy, positioning, and sales
+    enablement. Marketing strategists and product managers identify relevant competitors
+    and track changes in their feature sets, pricing, messaging, and market traction.
+    Customer-facing teams contribute win/loss insights collected from deals and support
+    interactions. Findings are synthesized into a competitive intelligence brief covering
+    key battlecards, strategic gaps, and opportunities for differentiation. The brief is
+    shared with product, sales, and leadership, and directly influences roadmap priorities,
+    positioning updates, and go-to-market adjustments for the coming quarter.
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:marketing-strategist
+    - role:product-manager
+    - role:business-analyst
+    - role:strategic-planner
+    - role:account-executive
+  applies_to_domain:
+    - domain:strategy
+    - domain:marketing
+    - domain:business-intelligence
+  triggers_responsibility:
+    - responsibility:market-research
+    - responsibility:strategic-planning
+    - responsibility:metric-definition
+    - responsibility:documentation
+    - responsibility:stakeholder-communication
+---
+nodeKind: Workflow
+id: workflow:pricing-strategy-review
+attributes:
+  displayName: "Pricing Strategy Review"
+  description: |
+    Semi-annual cross-team governance workflow that evaluates and updates the
+    organization's pricing model, packaging tiers, and discount policies to ensure
+    alignment with market conditions, competitive positioning, cost structures, and
+    revenue objectives. Financial analysts model the revenue and margin implications of
+    candidate pricing changes across customer segments. Product managers assess fit with
+    product value delivery and roadmap direction. Marketing strategists evaluate
+    competitive price perception and buyer sensitivity through research. Legal reviews
+    contractual and regulatory implications of any changes. Approved pricing changes are
+    communicated to sales and customer success with updated collateral, and their impact
+    on pipeline conversion and net revenue retention is tracked in the quarter following
+    implementation.
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annual"
+  complexity: complex
+edges:
+  involves_role:
+    - role:product-manager
+    - role:financial-analyst
+    - role:marketing-strategist
+    - role:strategic-planner
+    - role:legal-advisor
+    - role:account-executive
+  applies_to_domain:
+    - domain:strategy
+    - domain:finance
+    - domain:revenue-operations
+  triggers_responsibility:
+    - responsibility:financial-analysis
+    - responsibility:market-research
+    - responsibility:strategic-planning
+    - responsibility:stakeholder-communication
+    - responsibility:metric-definition

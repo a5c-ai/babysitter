@@ -19,6 +19,13 @@
  * @references
  * - Huh: https://github.com/charmbracelet/huh
  * - Enquirer: https://github.com/enquirer/enquirer
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:cli-mcp-development]
+ *   skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation]
+ *   roles: [role:backend-engineer, role:platform-engineer]
+ *   workflows: [workflow:sdk-api-design]
+ *   topics: [topic:developer-experience]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

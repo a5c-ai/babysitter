@@ -1,0 +1,52 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:droid.ui@current
+attributes:
+  displayName: "Droid UI (current) — tui-and-cli"
+  agentVersionId: agent-version:droid@current
+  packageRef: source-ref:droid-github
+  uiKind: tui-and-cli
+  presentationsBundled: []
+  themeSupport: none
+  accessibilitySupport: basic
+  notes: |
+    Factory Droid ships an interactive TUI plus a scripted CLI; tool-approval
+    prompts surface at the UI layer. Awaiting a dedicated Presentation node.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:droid-parallel-subagent-dispatch
+      attributes:
+        mechanism: tool-call
+        toolCallName: "droid_parallel_subagent"
+    - target: interaction-primitive:prompt-input
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:slash-help
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/help"
+    - target: interaction-primitive:model-picker
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:command-palette
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:file-attachment
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:paste-image
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:tool-approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:resume-session
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:fork-session
+      attributes:
+        mechanism: ui-control

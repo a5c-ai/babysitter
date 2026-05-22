@@ -1,0 +1,13 @@
+nodeKind: Role
+id: role:end-user
+attributes:
+  displayName: "End User"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    A non-employee end user of an agent product or API. Used as a target of
+    per-user quotas and rate limits applied at the public-API edge.
+edges:
+  holds_responsibility:
+    - responsibility:stakeholder-communication

@@ -1,0 +1,235 @@
+nodeKind: ToolServer
+id: tool-server:mcp-terraform
+attributes:
+  displayName: Terraform MCP Server
+  description: |
+    MCP server providing access to HashiCorp Terraform and Terraform Cloud.
+    Enables AI agents to manage workspaces, trigger plan and apply runs,
+    inspect state, estimate costs, and browse the Terraform registry.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/hashicorp/terraform-mcp-server
+  maintainer: HashiCorp
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:platform-engineer
+      confidence: high
+      evidence: "Terraform state and plan access supports infrastructure operations."
+    - target: role:cloud-architect
+      confidence: high
+      evidence: "IaC review projects architecture decisions into concrete resources."
+    - target: responsibility:architecture-governance
+      confidence: medium
+      evidence: "IaC plans and state help enforce cloud architecture policy."
+  integrates_with:
+  - target: tool:terraform
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:cloud-infra
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-vercel
+attributes:
+  displayName: Vercel MCP Server
+  description: |
+    MCP server providing access to the Vercel deployment platform.
+    Enables AI agents to manage projects, deployments, domains,
+    environment variables, and inspect build logs on Vercel.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/vercel/vercel-mcp
+  maintainer: Vercel
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform:vercel
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-netlify
+attributes:
+  displayName: Netlify MCP Server
+  description: |
+    MCP server providing access to the Netlify platform.
+    Enables AI agents to manage sites, deployments, build hooks,
+    environment variables, and serverless functions on Netlify.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/netlify/netlify-mcp-server
+  maintainer: Netlify
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform:netlify
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-aws-cdk
+attributes:
+  displayName: AWS CDK MCP Server
+  description: |
+    MCP server for AWS Cloud Development Kit best practices.
+    Enables AI agents to generate CDK constructs, validate
+    infrastructure patterns, and check security compliance with CDK Nag.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/awslabs/mcp
+  maintainer: AWS
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform:aws
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-pulumi
+attributes:
+  displayName: Pulumi MCP Server
+  description: |
+    MCP server providing access to the Pulumi infrastructure-as-code platform.
+    Enables AI agents to create and list stacks, preview deployments,
+    query stack outputs, and manage cloud resources through Pulumi.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/pulumi/mcp-server
+  maintainer: Pulumi
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "Pulumi MCP/IaC access supports infrastructure and FinOps workflow projections."
+    - target: workflow:cloud-cost-anomaly-detection
+      confidence: medium
+      evidence: "IaC inventory and stack metadata can support cost anomaly analysis."
+  integrates_with:
+  - target: tool:pulumi
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-heroku
+attributes:
+  displayName: Heroku MCP Server
+  description: |
+    MCP server providing access to the Heroku platform.
+    Enables AI agents to manage apps, dynos, add-ons, config vars,
+    and deploy code to Heroku with Salesforce Agentforce integration.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/heroku/heroku-mcp-server
+  maintainer: Heroku
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform:heroku
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:platform-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-fly-io
+attributes:
+  displayName: Fly.io MCP Server
+  description: |
+    MCP server providing access to the Fly.io platform.
+    Enables AI agents to manage apps, machines, volumes, secrets,
+    and deployments on Fly.io with near-zero idle cost.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/superfly/fly-mcp
+  maintainer: Fly.io
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform:fly-io
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:platform-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-render
+attributes:
+  displayName: Render MCP Server
+  description: |
+    MCP server providing access to the Render cloud platform.
+    Enables AI agents to manage services, deployments, environment
+    groups, and databases hosted on Render.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/render-oss/render-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:render
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:platform-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-railway
+attributes:
+  displayName: Railway MCP Server
+  description: |
+    MCP server providing access to the Railway platform.
+    Enables AI agents to manage projects, services, deployments,
+    variables, and databases on Railway with persistent process support.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/railway-mcp/railway-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform:railway
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:platform-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-ansible
+attributes:
+  displayName: Ansible MCP Server
+  description: |
+    MCP server providing access to Ansible Automation Platform.
+    Enables AI agents to run playbooks, manage inventories, query
+    job histories, and orchestrate infrastructure automation tasks.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/ansible/ansible-mcp
+  maintainer: Red Hat
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:ansible
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:infrastructure

@@ -1,0 +1,95 @@
+nodeKind: AgentProduct
+id: agent:pikiclaw
+attributes:
+  displayName: "PikiClaw"
+  vendor: "PikiClaw"
+  homepageUrl: "https://pikiclaw.com/"
+  primarySurface: mobile
+  supportTier: none
+  productKind: mobile-agent
+  stackScope: full
+  description: |
+    Mobile-first AI agent platform with a plugin system. Provides a
+    native mobile interface for interacting with coding and productivity
+    agents on the go, with plugin extensibility for custom tools,
+    workflows, and integrations. Targets developers who need agent
+    access from mobile devices with touch-optimized UI.
+  aliases:
+    - "pikiclaw"
+edges:
+  has_version:
+    - agent-version:pikiclaw@current
+  integrates_with:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:tool-use
+---
+nodeKind: AgentVersion
+id: agent-version:pikiclaw@current
+attributes:
+  agentProductId: agent:pikiclaw
+  versionRange: '>=1.0.0'
+  releasedAt: '2025-01-01'
+  installMethods:
+    - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  version_of:
+    - agent:pikiclaw
+  composed_of:
+    - target: agent-core-impl:pikiclaw.core@current
+      role: core
+    - target: agent-runtime-impl:pikiclaw.runtime@current
+      role: runtime
+    - target: agent-platform-impl:pikiclaw.platform@current
+      role: platform
+    - target: agent-ui-impl:pikiclaw.ui@current
+      role: ui
+  sourced_from: []
+  supports:
+    - target: capability:supports-mcp
+      versionRange: '>=1.0.0'
+      level: full
+      notes: MCP tool server support via backend proxy.
+    - target: capability:supports-plugins
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Plugin marketplace with installable extensions.
+    - target: capability:vision-input
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Mobile camera and photo library as vision input sources.
+    - target: capability:streaming
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Streams model output to mobile UI.
+    - target: capability:can-multi-turn
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Multi-turn conversations with persistent session state.
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Tool calling via registered plugins and MCP servers.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern
+---
+nodeKind: Presentation
+id: presentation:pikiclaw-mobile
+attributes:
+  displayName: "PikiClaw Mobile"
+  kind: mobile
+  description: |
+    Native mobile presentation layer for the PikiClaw agent platform.
+    Touch-optimized interface for agent interaction, plugin management,
+    and workflow execution on iOS and Android devices. Supports voice
+    input, camera-based vision input, and a built-in plugin marketplace.
+  renderingTechnology: native
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: partial
+  platforms: [ios, android]
+  bundleSize: "~40 MB"
+  updateChannel: extension-store
+edges:
+  bundled_with:
+    - agent-version:pikiclaw@current

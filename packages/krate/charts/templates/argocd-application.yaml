@@ -1,0 +1,29 @@
+{{- if .Values.argocd.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.argocd.applicationName | quote }}
+  namespace: {{ .Values.argocd.namespace | quote }}
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+    krate.a5c.ai/gitops-engine: argocd
+spec:
+  project: {{ .Values.argocd.project | quote }}
+  source:
+    repoURL: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/krate/platform-config.git" (include "krate.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.argocd.repoURL | quote }}
+    targetRevision: {{ .Values.argocd.targetRevision | quote }}
+    path: {{ .Values.argocd.path | quote }}
+  destination:
+    server: {{ .Values.argocd.destination.server | quote }}
+    namespace: {{ .Values.argocd.destination.namespace | quote }}
+  syncPolicy:
+    {{- if .Values.argocd.syncPolicy.automated }}
+    automated:
+      prune: {{ .Values.argocd.syncPolicy.prune }}
+      selfHeal: {{ .Values.argocd.syncPolicy.selfHeal }}
+    {{- end }}
+    syncOptions:
+      {{- range .Values.argocd.syncPolicy.syncOptions }}
+      - {{ . | quote }}
+      {{- end }}
+{{- end -}}

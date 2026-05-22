@@ -3,6 +3,12 @@ name: qt-qml-component-generator
 description: Generate QML components with proper property bindings, signal/slot connections, and Qt Quick Controls integration
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [qt, qml, quick, ui, components]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:ui-component-libraries]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # qt-qml-component-generator

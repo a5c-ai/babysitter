@@ -12,6 +12,12 @@ metadata:
   domain: business
   category: cross-functional
   priority: future
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:quantitative-modeling, skill-area:data-analytics]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:data-scientist]
 ---
 
 # Supply Chain Digital Twin

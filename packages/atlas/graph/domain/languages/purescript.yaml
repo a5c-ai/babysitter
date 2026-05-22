@@ -1,0 +1,14 @@
+nodeKind: Language
+id: language:purescript
+attributes:
+  displayName: "PureScript"
+  paradigms:
+    - functional
+    - pure
+  description: |
+    PureScript — a strongly-typed pure-functional language compiling to
+    JavaScript, in the Haskell tradition.
+edges:
+  applies_to:
+    - target: domain:frontend
+    - target: domain:web-development

@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:cursor-host-env
+attributes:
+  signalId: discovery-signal:cursor-host-env
+  signalKind: env-any
+  key: cursor
+  matchMode: any
+  confidence: medium
+  scope: host-detection
+  signals:
+    - CURSOR_SESSION
+    - CURSOR_AGENT_SESSION
+  argvMatches:
+    - cursor-cli
+  consumer: agent-mux-core
+  metadataFields:
+    - { key: session_id, envVars: [CURSOR_SESSION, CURSOR_AGENT_SESSION] }
+edges:
+  applies_to:
+    - target: agent:cursor

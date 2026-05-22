@@ -8,6 +8,14 @@ expertise:
   - Tool selection strategies
   - Error handling
   - API integration
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:tool-use, skill-area:tool-service-integration-agents]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development, workflow:ml-model-lifecycle]
+  topics: [topic:api-design, topic:design-patterns]
+
 ---
 
 # Tool Use Specialist

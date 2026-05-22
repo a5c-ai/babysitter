@@ -11,6 +11,11 @@ metadata:
   specialization: operations
   domain: business
   category: capacity-planning
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:change-management, skill-area:stakeholder-management, skill-area:capacity-planning-ops]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:procurement-manager, role:business-analyst]
 ---
 
 # S&OP Facilitator

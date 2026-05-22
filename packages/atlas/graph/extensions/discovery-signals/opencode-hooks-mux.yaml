@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:opencode-hooks-mux
+attributes:
+  signalId: discovery-signal:opencode-hooks-mux
+  signalKind: env-any
+  key: opencode
+  matchMode: all
+  confidence: high
+  scope: hooks-mux
+  signals:
+    - OPENCODE_CONFIG
+    - ACCOMPLISH_TASK_ID
+  absentSignals: []
+  argvMatches: []
+  metadataFields: []
+  consumer: hooks-mux-core
+  notes: 'Ordered adapter auto-detection rule used by hooks-mux. Verbatim from legacy discovery:opencode:hooks-mux:9.'
+edges:
+  applies_to:
+    - target: agent:opencode

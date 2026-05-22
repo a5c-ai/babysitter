@@ -1,0 +1,60 @@
+nodeKind: EnvVar
+id: env-var:claude-code-cert-store
+attributes:
+  displayName: CLAUDE_CODE_CERT_STORE
+  description: Comma-separated list of CA certificate sources (bundled, system, or both).
+  name: CLAUDE_CODE_CERT_STORE
+  category: tls
+  valueType: enum
+  defaultValue: bundled,system
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-client-cert
+attributes:
+  displayName: CLAUDE_CODE_CLIENT_CERT
+  description: Path to the client certificate file for mTLS authentication.
+  name: CLAUDE_CODE_CLIENT_CERT
+  category: tls
+  valueType: path
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-client-key
+attributes:
+  displayName: CLAUDE_CODE_CLIENT_KEY
+  description: Path to the client private key file for mTLS authentication.
+  name: CLAUDE_CODE_CLIENT_KEY
+  category: tls
+  valueType: path
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-client-key-passphrase
+attributes:
+  displayName: CLAUDE_CODE_CLIENT_KEY_PASSPHRASE
+  description: Passphrase for the encrypted CLAUDE_CODE_CLIENT_KEY.
+  name: CLAUDE_CODE_CLIENT_KEY_PASSPHRASE
+  category: tls
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-proxy-resolves-hosts
+attributes:
+  displayName: CLAUDE_CODE_PROXY_RESOLVES_HOSTS
+  description: Set to 1 to allow the proxy to perform DNS resolution.
+  name: CLAUDE_CODE_PROXY_RESOLVES_HOSTS
+  category: tls
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

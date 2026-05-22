@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": ["@changesets/cli/changelog", null],
+  "commit": false,
+  "fixed": [["@a5c-ai/agent-mux-core", "@a5c-ai/agent-mux-adapters", "@a5c-ai/agent-mux-cli", "@a5c-ai/agent-mux", "@a5c-ai/agent-mux-harness-mock"]],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": []
+}

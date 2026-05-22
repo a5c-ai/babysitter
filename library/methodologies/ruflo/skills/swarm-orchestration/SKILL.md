@@ -2,17 +2,14 @@
 name: swarm-orchestration
 description: Multi-agent swarm formation and coordinated execution with topology-aware agent deployment, consensus protocols, and anti-drift enforcement.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Swarm Orchestration
-
-## Overview
-
-Form and coordinate multi-agent swarms with topology-aware deployment. Supports Mesh, Hierarchical, Ring, and Star topologies with automatic selection based on task complexity and agent count.
-
-## When to Use
-
-- Complex tasks requiring multiple specialized agents
 - Tasks needing coordinated parallel execution
 - When consensus among agents is required for quality
 - Projects requiring anti-drift enforcement during execution

@@ -19,6 +19,9 @@
  * - Tecton Feature Platform: https://www.tecton.ai/
  * - AWS SageMaker Feature Store: https://aws.amazon.com/sagemaker/feature-store/
  * - Hopsworks Feature Store: https://www.hopsworks.ai/
+ * @graph
+ *   domains: [domain:data-science, role:data-scientist]
+ *   workflows: [workflow:data-pipeline-deployment]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -256,25 +259,30 @@ export async function process(inputs, ctx) {
       ctx.log('warn', `Quality below target: ${currentQuality}/${targetQuality}`);
 
       // Breakpoint: Review iteration results before continuing
-          let lastFeedback_iterationApproval = null;
-        for (let attempt = 0; attempt < 3; attempt++) {
-          if (lastFeedback_iterationApproval) {
-            qualityScore = await ctx.task(storageQualityScoringTask, { ...{
-      projectName,
-      architectureDesign,
-      storageImplementation,
-      validationChecks: {
-        performance: performanceValidation,
-        consistency: consistencyValidation,
-        scalability: scalabilityValidation,
-        reliability: reliabilityValidation
-      },
-      iteration,
-      targetQuality,
-      outputDir
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-          }
-  const iterationApproval = await ctx.breakpoint({
+      let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          qualityScore = await ctx.task(storageQualityScoringTask, {
+            ...{
+              projectName,
+              architectureDesign,
+              storageImplementation,
+              validationChecks: {
+                performance: performanceValidation,
+                consistency: consistencyValidation,
+                scalability: scalabilityValidation,
+                reliability: reliabilityValidation
+              },
+              iteration,
+              targetQuality,
+              outputDir
+            },
+            feedback: lastFeedback_iterationApproval,
+            attempt: attempt + 1
+          });
+        }
+
+        const iterationApproval = await ctx.breakpoint({
           question: `Storage layer iteration ${iteration} complete. Quality: ${currentQuality}/${targetQuality}. Continue to iteration ${iteration + 1} for refinement?`,
           title: `Storage Layer Iteration ${iteration} Review`,
           context: {
@@ -295,10 +303,11 @@ export async function process(inputs, ctx) {
           tags: ['approval-gate'],
           previousFeedback: lastFeedback_iterationApproval || undefined,
           attempt: attempt > 0 ? attempt + 1 : undefined
-          });
-          if (iterationApproval.approved) break;
-          lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-        }     }
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval =
+          iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }
     }
   }
   const finalStorageIteration = iterationResults[iteration - 1];
@@ -608,51 +617,59 @@ export async function process(inputs, ctx) {
     failoverTesting.passed === false
   ].filter(Boolean).length;
 
-      let lastFeedback_qualityGateApproval2 = null;
+  if (criticalTestsFailed > 0) {
+    let lastFeedback_qualityGateApproval2 = null;
     for (let attempt = 0; attempt < 3; attempt++) {
       if (lastFeedback_qualityGateApproval2) {
-        finalReview = await ctx.task(featureStoreFinalReviewTask, { ...{
-    projectName,
-    architectureDesign,
-    featureRegistryDesign,
-    storageQuality: currentQuality,
-    targetQuality,
-    converged,
-    storageIterations: iteration,
-    servingLayerImplementation,
-    ingestionPipelineDesign,
-    monitoringDesign,
-    versioningDesign,
-    operationalProcedures,
-    testingResults: {
-      integration: integrationTesting,
-      performance: performanceTesting,
-      failover: failoverTesting
-    },
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+        finalReview = await ctx.task(featureStoreFinalReviewTask, {
+          ...{
+            projectName,
+            architectureDesign,
+            featureRegistryDesign,
+            storageQuality: currentQuality,
+            targetQuality,
+            converged,
+            storageIterations: iteration,
+            servingLayerImplementation,
+            ingestionPipelineDesign,
+            monitoringDesign,
+            versioningDesign,
+            operationalProcedures,
+            testingResults: {
+              integration: integrationTesting,
+              performance: performanceTesting,
+              failover: failoverTesting
+            },
+            outputDir
+          },
+          feedback: lastFeedback_qualityGateApproval2,
+          attempt: attempt + 1
+        });
       }
-  const qualityGateApproval2 = await ctx.breakpoint({
-      question: `${criticalTestsFailed} critical test suite(s) failed. Should we address failures before production deployment?`,
-      title: 'Critical Test Failures',
-      context: {
-        runId: ctx.runId,
-        projectName,
-        testFailures: {
-          integration: !integrationTesting.passed,
-          performance: !performanceTesting.passed,
-          failover: !failoverTesting.passed
+
+      const qualityGateApproval2 = await ctx.breakpoint({
+        question: `${criticalTestsFailed} critical test suite(s) failed. Should we address failures before production deployment?`,
+        title: 'Critical Test Failures',
+        context: {
+          runId: ctx.runId,
+          projectName,
+          testFailures: {
+            integration: !integrationTesting.passed,
+            performance: !performanceTesting.passed,
+            failover: !failoverTesting.passed
+          },
+          recommendation: 'Address all critical test failures before production deployment'
         },
-        recommendation: 'Address all critical test failures before production deployment'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
       });
       if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      lastFeedback_qualityGateApproval2 =
+        qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    }
+  }
 
     let lastFeedback_finalApproval2 = null;
   for (let attempt = 0; attempt < 3; attempt++) {

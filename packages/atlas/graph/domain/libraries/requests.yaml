@@ -1,0 +1,16 @@
+nodeKind: Library
+id: library:requests
+attributes:
+  displayName: "Requests"
+  belongsToLanguageId: language:python
+  category: http-client
+  description: |
+    HTTP for Humans — a simple HTTP library for Python.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:httpx
+    - library:aiohttp

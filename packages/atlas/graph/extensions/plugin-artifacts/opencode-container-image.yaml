@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:opencode-container-image
+attributes:
+  artifactId: plugin-artifact:opencode-container-image
+  displayName: "OpenCode container image"
+  targetId: plugin-target:opencode
+  artifactKind: container-image
+  pathPattern: "ghcr.io/anomalyco/opencode"
+  installerSurface: "latest"
+  scriptVariants:
+    - preinstalled
+edges:
+  emits_artifact:
+    - target: plugin-target:opencode

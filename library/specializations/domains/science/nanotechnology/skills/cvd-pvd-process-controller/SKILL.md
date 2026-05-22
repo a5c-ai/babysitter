@@ -16,6 +16,11 @@ metadata:
   tools-libraries:
     - Deposition rate calculators
     - Film thickness monitors
+graph:
+  domains: [domain:nanotechnology]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # CVD-PVD Process Controller

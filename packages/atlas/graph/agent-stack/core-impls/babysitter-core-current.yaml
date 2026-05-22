@@ -1,0 +1,58 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:babysitter.core@current
+attributes:
+  displayName: "babysitter Core (current) — process orchestrator + journal"
+  agentVersionId: agent-version:babysitter@current
+  packageRef: source-ref:babysitter-github
+  loopIteratorPolicy: process-function-driven
+  loopIteratorNotes: |
+    Babysitter doesn't have a chat-loop. Each run executes a user-authored
+    async `process(inputs, ctx)` function (defined via `defineTask` /
+    `process` exports) that issues `ctx.task(...)` /
+    `ctx.parallel.all(...)` / `ctx.breakpoint(...)` effects. The runtime
+    replays the journal each iterate.
+  contextManagementStrategy: user-managed
+  compactionTriggerNotes: |
+    Context lives in the user-authored process function; babysitter has no
+    global context window or compaction primitive of its own. Subordinate
+    harness subprocesses (claude-code, codex, …) handle their own
+    compaction.
+  subagentInvokerPolicy: platform-mediated
+  subagentInvokerNotes: |
+    Subagents (kind: 'agent' subtasks) are dispatched by
+    `ctx.task(definedTask, args)` — the process body decides what counts as
+    a subagent. Dispatch is platform-mediated: the babysitter runtime spawns
+    a harness subprocess (claude-code, codex, cursor, opencode, gemini-cli)
+    in its own working directory.
+  resultSynthesisPolicy: process-function-defined
+  resultSynthesisNotes: |
+    Final result is whatever the process function returns. Babysitter has
+    no model-direct response synthesis; it journal-replays the user-authored
+    process and surfaces its return value.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: none
+  supportedTransportProtocols: []
+  parallelToolCallHandling: delegated-to-remote
+  streamingFidelity: full
+  thinkingChannelHandling: delegated-to-remote
+  notes: |
+    Babysitter is a process-orchestration SDK + CLI, not a chat agent.
+    All Layer-3 (model transport) concerns are delegated to whichever
+    harness subprocess is spawned for kind: 'agent' tasks. The "core" here
+    is the journal-replay engine + state machine; there is no embedded
+    model client.
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:babysitter
+      role: core
+  depends_on:
+    - target: source-ref:babysitter-github
+  speaks: []
+  supports_orchestration_primitive:
+    - target: orch-primitive:approval-gate
+    - target: orch-primitive:progress-stream
+    - target: orch-primitive:workflow-policy-load
+    - target: orch-primitive:retry-with-backoff
+    - target: orch-primitive:task-complete

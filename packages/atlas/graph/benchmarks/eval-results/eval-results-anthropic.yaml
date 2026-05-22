@@ -1,0 +1,165 @@
+---
+nodeKind: EvalResult
+id: eval-result:swe-bench-verified.claude-haiku-4-5.001
+attributes:
+  evalRunId: eval-run:swe-bench-verified.claude-haiku-4-5.2025-10
+  metricName: pass_rate
+  score: 0.73
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-10-15T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench-verified.claude-haiku-4-5.2025-10
+  scored_against:
+    - target: benchmark:swe-bench-verified
+---
+nodeKind: EvalResult
+id: eval-result:gpqa.claude-haiku-4-5.001
+attributes:
+  evalRunId: eval-run:gpqa.claude-haiku-4-5.2025-10
+  metricName: accuracy
+  score: 0.755
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-10-15T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gpqa.claude-haiku-4-5.2025-10
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:human-eval.claude-sonnet-4-6.001
+attributes:
+  evalRunId: eval-run:human-eval.claude-sonnet-4-6.2025-11
+  metricName: pass_rate
+  score: 0.95
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-11-15T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:human-eval.claude-sonnet-4-6.2025-11
+  scored_against:
+    - target: benchmark:human-eval
+---
+nodeKind: EvalResult
+id: eval-result:mmlu.claude-sonnet-4-6.001
+attributes:
+  evalRunId: eval-run:mmlu.claude-sonnet-4-6.2025-11
+  metricName: accuracy
+  score: 0.89
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-11-15T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mmlu.claude-sonnet-4-6.2025-11
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:bfcl.claude-sonnet-4-5.001
+attributes:
+  evalRunId: eval-run:bfcl.claude-sonnet-4-5.2025-09
+  metricName: accuracy
+  score: 0.72
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:bfcl.claude-sonnet-4-5.2025-09
+  scored_against:
+    - target: benchmark:berkeley-function-calling
+---
+nodeKind: EvalResult
+id: eval-result:gpqa-diamond.claude-opus-4-5.001
+attributes:
+  evalRunId: eval-run:gpqa-diamond.claude-opus-4-5.2025-09
+  metricName: accuracy
+  score: 0.838
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gpqa-diamond.claude-opus-4-5.2025-09
+  scored_against:
+    - target: benchmark:gpqa
+---
+nodeKind: EvalResult
+id: eval-result:os-world.claude-sonnet-4-5.001
+attributes:
+  evalRunId: eval-run:os-world.claude-sonnet-4-5.2025-09
+  metricName: success_rate
+  score: 0.617
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:os-world.claude-sonnet-4-5.2025-09
+  scored_against:
+    - target: benchmark:os-world
+---
+nodeKind: EvalResult
+id: eval-result:truthful-qa.claude-opus-4-5.001
+attributes:
+  evalRunId: eval-run:truthful-qa.claude-opus-4-5.2025-09
+  metricName: mc2
+  score: 0.78
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:truthful-qa.claude-opus-4-5.2025-09
+  scored_against:
+    - target: benchmark:truthful-qa
+---
+nodeKind: EvalResult
+id: eval-result:human-eval-plus.claude-sonnet-4-5.001
+attributes:
+  evalRunId: eval-run:human-eval-plus.claude-sonnet-4-5.2025-09
+  metricName: pass@1
+  score: 0.91
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:human-eval-plus.claude-sonnet-4-5.2025-09
+  scored_against:
+    - target: benchmark:bigcode-evalplus
+---
+nodeKind: EvalResult
+id: eval-result:harmbench.claude-opus-4-5.001
+attributes:
+  evalRunId: eval-run:harmbench.claude-opus-4-5.2025-09
+  metricName: attack_success_rate
+  score: 0.04
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:harmbench.claude-opus-4-5.2025-09
+  scored_against:
+    - target: benchmark:harmbench
+---
+nodeKind: EvalResult
+id: eval-result:arc-challenge.claude-sonnet-4-5.001
+attributes:
+  evalRunId: eval-run:arc-challenge.claude-sonnet-4-5.2025-09
+  metricName: accuracy
+  score: 0.96
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:arc-challenge.claude-sonnet-4-5.2025-09
+  scored_against:
+    - target: benchmark:arc-challenge

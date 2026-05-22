@@ -18,6 +18,11 @@ metadata:
     - environmental
     - qualification
     - validation
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:sensor-fusion, skill-area:statistical-analysis, skill-area:physics-simulation]
+  roles: [role:research-engineer, role:lab-technician]
 ---
 
 # Environmental Testing Skill

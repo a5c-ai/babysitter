@@ -1,0 +1,50 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:copilot-cli.runtime@current
+attributes:
+  displayName: GitHub Copilot CLI Runtime (current)
+  agentVersionId: agentVersion:copilot:ge-0-0-0
+  subagentDispatchMechanism: none
+  subagentChildSessionPolicy: inline-no-child-session
+  subagentToolScopePolicy: inherit-parent
+  packageRef: source-ref:gh-copilot-github
+  builtInTools: []
+  toolRegistryDiscovery: not-applicable
+  hookSockets:
+  - hook-surface:copilot.pre-tool
+  - hook-surface:copilot.post-tool
+  internalSessionStateLocation: ~/.config/github-copilot/sessions/
+  sessionFileFormat: json
+  sessionFilePathConvention: ~/.config/github-copilot/sessions/<session-id>.json
+  approvalGatingPrimitive: server-managed
+  subprocessSandboxStrategy: platform-deferred
+  runtimeIdentity: github-token
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  supportsStreaming: true
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:copilot-cli
+    role: runtime
+  exposes:
+  - target: hook-surface:copilot.pre-tool
+  - target: hook-surface:copilot.post-tool
+  - target: hook-surface:error
+  bundles: []
+  connects:
+  - target: mcp-transport:stdio
+  supports:
+  - target: capability:mcp-stdio
+    versionRange: '*'
+    level: full
+  - target: capability:supports-mcp
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'MCP server install/list supported.
+      '
+  has_env_var:
+  - target: env-var:gh-token
+  - target: env-var:github-copilot-cli-debug
+  speaks:
+    - target: mcp-transport:stdio

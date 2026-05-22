@@ -17,6 +17,13 @@
  * - Docker Best Practices: https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
  * - Kubernetes Patterns: https://k8spatterns.io/
  * - 12-Factor App: https://12factor.net/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:code-migration-modernization]
+ *   skillAreas: [skill-area:strangler-fig-pattern, skill-area:parallel-run-migration]
+ *   roles: [role:architect, role:tech-lead]
+ *   workflows: [workflow:technical-debt-reduction]
+ *   topics: [topic:refactoring]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

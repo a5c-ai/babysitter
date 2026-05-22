@@ -57,7 +57,7 @@ Quick check that everything is working:
 
 ```bash
 # In your terminal
-npx -y @a5c-ai/babysitter-sdk@latest --version
+babysitter --version
 
 # Or run diagnostics
 /babysitter:doctor

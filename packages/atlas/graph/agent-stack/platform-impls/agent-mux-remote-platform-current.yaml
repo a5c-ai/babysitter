@@ -1,0 +1,73 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:agent-mux-remote.platform@current
+attributes:
+  displayName: agent-mux-remote Platform (current) — MCP broker only
+  agentVersionId: agent-version:agent-mux-remote@current
+  subagentDefinitionFormat: none
+  packageRef: source-ref:agent-mux-github
+  nativeExtensionFormat: none
+  nativeExtensionManifestPath: ''
+  nativeExtensionsDirectoryPath: []
+  skillFormat: none
+  skillsDirectoryPath: []
+  customSlashCommandsPath: []
+  subagentsDirectoryPath: []
+  hooksDirectoryOrConfigPath: []
+  settingsFiles: []
+  pluginRegistryPath: ''
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: delegated-to-invocation-mode
+  updateChannelMechanism: npm
+  supportedChannelKinds:
+  - mcp-channel
+  notes: 'Special case: agent-mux-remote is a *transport-only* meta-adapter. It brokers
+
+    MCP and proxies events but does not host plugins, skills, slash commands, or
+
+    a TUI of its own. The "remote" target (Claude.ai, Claude desktop app, or any
+
+    catalog agent over ssh/docker/k8s) supplies all platform features.
+
+    '
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+  - target: agent:agent-mux-remote
+    role: platform
+  bundles: []
+  supports:
+  - target: capability:can-multi-turn
+    versionRange: '*'
+    level: full
+    evidenceSourceIds:
+    - evidence:repo-agent-mux-host
+  - target: capability:can-resume
+    versionRange: '>=1.0.0'
+    level: partial
+    notes: 'Resume works only if the remote agent supports it and the session is reachable.
+
+      '
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+    notes: 'agent-mux-remote forwards streaming events from the underlying
+
+      upstream agent through the remote channel.
+
+      '
+    evidenceSourceIds:
+    - evidence:repo-agent-mux-host
+  - target: capability:supports-mcp
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'Brokers MCP through to the remote target (Claude.ai / Claude app).
+
+      '
+  - target: capability:supports-plugins
+    versionRange: '>=1.0.0'
+    level: none
+    notes: 'No plugins of its own; plugins live with the remote agent.
+
+      '

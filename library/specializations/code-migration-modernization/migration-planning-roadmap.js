@@ -19,6 +19,13 @@
  * - AWS Migration Hub: https://aws.amazon.com/migration-hub/
  * - Cloud Migration Strategies (6 Rs): https://docs.aws.amazon.com/prescriptive-guidance/latest/migration-strategies/
  * - Strangler Fig Pattern: https://martinfowler.com/bliki/StranglerFigApplication.html
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:code-migration-modernization]
+ *   skillAreas: [skill-area:strangler-fig-pattern, skill-area:parallel-run-migration, skill-area:roadmap-management]
+ *   roles: [role:architect, role:tech-lead]
+ *   workflows: [workflow:technical-debt-reduction, workflow:legacy-migration-sprint]
+ *   topics: [topic:refactoring]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

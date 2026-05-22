@@ -2,6 +2,12 @@
 name: lms-configuration-administration
 description: Configure learning management system settings, user roles, course templates, gradebooks, and third-party integrations
 allowed-tools: Read, Grep, Write, Edit, Glob, Bash, WebFetch
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:configuration-management, skill-area:deployment-infrastructure-management]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:it-ops-engineer, role:platform-engineer]
 ---
 
 # LMS Configuration and Administration

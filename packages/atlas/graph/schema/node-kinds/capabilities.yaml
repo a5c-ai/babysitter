@@ -1,0 +1,183 @@
+# NodeKinds for cluster 8-capabilities.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:capability
+  name: Capability
+  origin: universal
+  prefix: capability
+  cluster: 8-capabilities
+  purpose: a named capability
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: appliesToNodeKinds
+    type: list<string>
+    required: true
+  - name: category
+    type: enum<model
+    agent: null
+    runtime: null
+    platform: null
+    tool: null
+    session: null
+    hook: null
+    extension: null
+    reasoning: null
+    provider-feature>: null
+    required: true
+  incomingEdges:
+  - supports
+  - requires_capability
+  - supported_by
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:install-method
+  name: InstallMethod
+  origin: universal
+  prefix: install
+  cluster: 8-capabilities
+  purpose: 'a canonical install method (npm, brew, gh-extension, …) referenced by
+
+    AgentVersion.installMethods, Plugin install records, and Blueprint setup
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<npm,brew,gh-extension,curl,winget,scoop,manual,pip,nix,cargo,go-install>
+    required: true
+  - name: platforms
+    type: list<enum<darwin,linux,win32,all>>
+    required: true
+    notes: Supported OS platforms. `all` is allowed as shorthand for [darwin,linux,win32].
+  - name: command
+    type: string
+    required: true
+    notes: Install-command template, e.g. `npm install -g {{package}}`.
+  - name: prerequisiteCheck
+    type: string
+    required: false
+    notes: Verification command, e.g. `node --version`.
+  incomingEdges:
+  - install_method_for
+  outgoingEdges:
+  - installs
+  - requires_capability
+  invariants:
+  - id starts with install: null
+  - command MUST be a non-empty templated string (V-11.x)
+  - platforms list MUST be non-empty
+  - kind values MUST be unique across the catalog (one canonical InstallMethod per kind)
+  examples:
+  - graph/capabilities/install-methods/npm.yaml
+  - graph/capabilities/install-methods/brew.yaml
+  - graph/capabilities/install-methods/gh-extension.yaml
+  - graph/capabilities/install-methods/curl.yaml
+  - graph/capabilities/install-methods/manual.yaml
+  - graph/capabilities/install-methods/winget.yaml
+  - graph/capabilities/install-methods/pip.yaml
+  - graph/capabilities/install-methods/scoop.yaml
+  - graph/capabilities/install-methods/nix.yaml
+  - graph/capabilities/install-methods/cargo.yaml
+  - graph/capabilities/install-methods/go-install.yaml
+# --- Legacy NodeKinds (catalog pass 9c remodel 2026-04-29) ---
+# These NodeKinds were collapsed into edges/enums but legacy data files
+# still emit instances. Schema entries here prevent validator warnings
+# and document the migration path.
+- id: node:capability-support
+  name: CapabilitySupport
+  origin: universal
+  prefix: capabilitySupport
+  cluster: 8-capabilities
+  purpose: |
+    (LEGACY — catalog pass 9c remodel 2026-04-29) binding of (entity, capability,
+    version-range, support-level). Collapsed into the direct `supports` edge;
+    retained here as schema so legacy data files validate. New data MUST use
+    the `supports` edge instead.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: supportId
+    type: string
+    required: false
+  - name: capabilityId
+    type: string
+    required: true
+  - name: supportLevel
+    type: enum<native,partial,via-extension,none>
+    required: false
+  - name: subjectKind
+    type: string
+    required: false
+  - name: subjectId
+    type: id
+    required: false
+  - name: versionRange
+    type: string
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  - name: evidenceRefs
+    type: list<string>
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - references_capability
+  - references_entity
+  invariants: []
+  examples: []
+- id: node:modality
+  name: Modality
+  origin: universal
+  prefix: modality
+  cluster: 8-capabilities
+  purpose: |
+    (LEGACY — remodel 2026-04-29) an input/output modality (text, image, audio, etc.).
+    Collapsed into list<enum<text,image,audio,...>> attribute on ModelVersion.
+    Retained here as schema so legacy data files validate. New data MUST use
+    the ModelVersion.modalities enum attribute instead.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: modalityId
+    type: string
+    required: true
+  - name: direction
+    type: enum<input,output,bidirectional>
+    required: false
+  - name: label
+    type: string
+    required: false
+  - name: mediaType
+    type: string
+    required: false
+  - name: semanticCategory
+    type: string
+    required: false
+  - name: evidenceRefs
+    type: list<string>
+    required: false
+  incomingEdges:
+  - supports_modality
+  outgoingEdges: []
+  invariants: []
+  examples: []
+

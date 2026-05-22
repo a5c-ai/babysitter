@@ -1,0 +1,22 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:omp-host-env
+attributes:
+  signalId: discovery-signal:omp-host-env
+  signalKind: env-any
+  key: omp
+  matchMode: any
+  confidence: medium
+  scope: host-detection
+  signals:
+    - OMP_RUN_ID
+    - OMP_SESSION_ID
+  argvMatches:
+    - oh-my-pi
+    - omp
+  consumer: agent-mux-core
+  metadataFields:
+    - { key: session_id, envVars: [OMP_SESSION_ID] }
+    - { key: run_id,     envVars: [OMP_RUN_ID] }
+edges:
+  applies_to:
+    - target: agent:omp

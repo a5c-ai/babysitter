@@ -1,0 +1,102 @@
+---
+nodeKind: Workflow
+id: workflow:content-release-pipeline
+attributes:
+  displayName: "Content Release Pipeline"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Orchestrates the publication pipeline for media content -- ingesting
+    finalized assets from post-production, running automated quality checks
+    (resolution, codec compliance, loudness normalization), generating
+    derivative formats for multi-platform distribution, tagging metadata for
+    content discovery, coordinating embargo-aware release scheduling, and
+    triggering CDN cache priming for launch. Produces distribution
+    manifests, quality-gate pass reports, and platform-specific delivery
+    confirmations. Excludes content creation and editorial decisions.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:kafka-stream-processing
+  applies_to_domain:
+    - target: domain:media-entertainment
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:release-engineering
+---
+nodeKind: Workflow
+id: workflow:streaming-quality-review
+attributes:
+  displayName: "Streaming Quality Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Reviews streaming delivery quality across platforms and regions --
+    analyzing adaptive bitrate ladder efficiency, monitoring rebuffering
+    rates and start-up latency percentiles, auditing CDN cache-hit ratios
+    by edge PoP, evaluating video-quality metrics (VMAF/SSIM) for
+    transcoded profiles, and correlating quality-of-experience scores with
+    subscriber churn indicators. Produces regional quality scorecards,
+    degradation root-cause analyses, and encoding-profile optimization
+    recommendations. Excludes content encoding parameter changes.
+edges:
+  involves_role:
+    - target: role:performance-profiler
+    - target: role:platform-engineer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:media-entertainment
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:rights-clearance-workflow
+attributes:
+  displayName: "Rights Clearance Workflow"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-content-item"
+  complexity: cross-team
+  description: |
+    Manages the intellectual-property clearance process for media assets
+    before distribution -- verifying license terms against planned
+    distribution territories and windows, checking music and footage rights
+    databases for expiration or exclusivity conflicts, coordinating legal
+    review of derivative-work permissions, tracking residual and royalty
+    obligations, and generating territory-specific availability matrices.
+    Produces clearance certificates, rights-gap reports, and holdback
+    schedules. Excludes license negotiation and contract drafting.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  applies_to_domain:
+    - target: domain:media-entertainment
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:regulatory-filing
+  performed_by_org_unit:
+    - target: org-unit:legal-team
+    - target: org-unit:content-team

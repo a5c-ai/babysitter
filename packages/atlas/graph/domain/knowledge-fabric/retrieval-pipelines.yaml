@@ -1,0 +1,195 @@
+---
+nodeKind: RetrievalPipeline
+id: retrieval-pipeline:rag-code-search
+attributes:
+  displayName: "RAG Code Search"
+  description: |
+    Retrieval-augmented generation pipeline specialized for code search.
+    Embeds code snippets, docstrings, and commit messages into a vector
+    store and retrieves relevant code context to augment LLM prompts
+    for code generation, review, and debugging tasks.
+  pipelineKind: rag
+  vectorStore: chromadb
+  chunkingStrategy: semantic
+edges:
+  retrieves_from:
+    - knowledge-source:code-repository
+    - knowledge-source:api-documentation
+  uses_vector_store:
+    - vector-store:chroma
+  uses_framework:
+    - framework:langchain
+---
+nodeKind: RetrievalPipeline
+id: retrieval-pipeline:semantic-doc-search
+attributes:
+  displayName: "Semantic Document Search"
+  description: |
+    Semantic search pipeline over organizational documentation. Embeds
+    documents, wiki pages, and knowledge base articles into a managed
+    vector database for meaning-based retrieval. Supports natural
+    language queries across documentation silos.
+  pipelineKind: semantic-search
+  vectorStore: pinecone
+  chunkingStrategy: hierarchical
+edges:
+  retrieves_from:
+    - knowledge-source:documentation-wiki
+    - knowledge-source:api-documentation
+    - knowledge-source:decision-log
+  uses_vector_store:
+    - vector-store:pinecone
+  uses_tool:
+    - tool:pinecone
+---
+nodeKind: RetrievalPipeline
+id: retrieval-pipeline:decision-graph-query
+attributes:
+  displayName: "Decision Graph Query"
+  description: |
+    Graph traversal pipeline for navigating chains of architectural
+    decisions, their rationale, and supersession relationships. Uses
+    a knowledge graph backend to answer questions like "why was X
+    chosen over Y?" and "what decisions depend on this one?"
+  pipelineKind: graph-traversal
+  chunkingStrategy: document-level
+edges:
+  retrieves_from:
+    - knowledge-source:decision-log
+    - knowledge-source:code-repository
+  relates_to_topic:
+    - topic:graph-rag
+---
+nodeKind: RetrievalPipeline
+id: retrieval-pipeline:hybrid-knowledge-search
+attributes:
+  displayName: "Hybrid Knowledge Search"
+  description: |
+    Combined vector and keyword search pipeline for broad organizational
+    knowledge retrieval. Merges semantic similarity with BM25 keyword
+    matching for high-recall, high-precision results across heterogeneous
+    knowledge sources. The default entry point for general knowledge queries.
+  pipelineKind: hybrid
+  vectorStore: weaviate
+  chunkingStrategy: hierarchical
+edges:
+  retrieves_from:
+    - knowledge-source:documentation-wiki
+    - knowledge-source:conversation-history
+    - knowledge-source:slack-threads
+    - knowledge-source:meeting-transcripts
+  uses_vector_store:
+    - vector-store:weaviate
+---
+nodeKind: RetrievalPipeline
+id: retrieval-pipeline:multi-hop-reasoning
+attributes:
+  displayName: "Multi-Hop Reasoning"
+  description: |
+    Multi-step retrieval pipeline that chains multiple queries to answer
+    complex questions requiring information from several sources. Decomposes
+    a query into sub-questions, retrieves evidence for each, and synthesizes
+    a coherent answer. Used for cross-domain questions like "how does our
+    pricing model relate to customer churn in segment X?"
+  pipelineKind: multi-hop
+  chunkingStrategy: semantic
+edges:
+  relates_to_topic:
+    - topic:graph-rag
+    - topic:agentic-rag
+  retrieves_from:
+    - knowledge-source:documentation-wiki
+    - knowledge-source:crm-data
+    - knowledge-source:conversation-history
+    - knowledge-source:incident-history
+---
+nodeKind: RetrievalPipeline
+id: retrieval-pipeline:graph-rag
+attributes:
+  displayName: "Graph RAG"
+  description: |
+    Microsoft-style graph+vector hybrid retrieval pipeline. Extracts
+    entities and relationships from documents into a knowledge graph,
+    applies community detection (Leiden algorithm) to identify topic
+    clusters, generates hierarchical summaries at multiple granularities,
+    and combines graph traversal with vector similarity for retrieval.
+    Supports both local search (entity-focused) and global search
+    (theme-focused) query modes. Excels at answering holistic questions
+    that require synthesizing information across many documents.
+  pipelineKind: graph-hybrid
+  chunkingStrategy: hierarchical
+edges:
+  retrieves_from:
+    - knowledge-source:documentation-wiki
+    - knowledge-source:code-repository
+    - knowledge-source:decision-log
+  relates_to_topic:
+    - topic:graph-rag
+    - topic:knowledge-graph-construction
+---
+nodeKind: RetrievalPipeline
+id: retrieval-pipeline:parent-child-retrieval
+attributes:
+  displayName: "Parent-Child Retrieval"
+  description: |
+    Hierarchical chunk retrieval pipeline that embeds small child chunks
+    for precise similarity matching but returns the larger parent chunk
+    as context. Child chunks (e.g., individual paragraphs) are embedded
+    and searched; when a child matches, the parent chunk (e.g., the full
+    section or page) is returned to provide surrounding context. This
+    pattern improves both retrieval precision (small chunks match better)
+    and generation quality (large context prevents information loss).
+  pipelineKind: hierarchical
+  chunkingStrategy: parent-child
+edges:
+  retrieves_from:
+    - knowledge-source:documentation-wiki
+    - knowledge-source:api-documentation
+  relates_to_topic:
+    - topic:chunking-strategies
+---
+nodeKind: RetrievalPipeline
+id: retrieval-pipeline:agentic-retrieval
+attributes:
+  displayName: "Agentic Retrieval"
+  description: |
+    Agent-driven iterative retrieval pipeline where an LLM agent decides
+    what to search, evaluates results, and re-queries until sufficient
+    context is gathered. The agent decomposes complex questions into
+    sub-queries, selects which retrieval backends to query (vector store,
+    knowledge graph, API, code search), evaluates if retrieved context
+    answers the question, and iterates if not. Supports self-reflective
+    retrieval (is this enough?), corrective retrieval (this answer seems
+    wrong, let me re-search), and multi-source orchestration.
+  pipelineKind: agentic
+  chunkingStrategy: semantic
+edges:
+  retrieves_from:
+    - knowledge-source:documentation-wiki
+    - knowledge-source:code-repository
+    - knowledge-source:conversation-history
+    - knowledge-source:api-documentation
+  relates_to_topic:
+    - topic:agentic-rag
+---
+nodeKind: RetrievalPipeline
+id: retrieval-pipeline:conversational-retrieval
+attributes:
+  displayName: "Conversational Retrieval"
+  description: |
+    Chat-history-aware retrieval pipeline that rewrites user queries
+    in the context of the conversation before searching. Handles
+    coreference resolution (user says "it" referring to a previous
+    topic), query expansion from conversation context, and follow-up
+    question handling. The pipeline: take user query + chat history,
+    rewrite query to be self-contained, retrieve using rewritten query,
+    generate answer grounded in retrieved context and chat history.
+  pipelineKind: conversational
+  chunkingStrategy: semantic
+edges:
+  retrieves_from:
+    - knowledge-source:documentation-wiki
+    - knowledge-source:conversation-history
+    - knowledge-source:slack-threads
+  relates_to_topic:
+    - topic:memory-to-knowledge-bridge

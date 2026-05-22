@@ -3,6 +3,12 @@ name: nsis-installer-generator
 description: Generate NSIS installer scripts for Windows with custom UI and features
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [windows, nsis, installer, distribution, packaging]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:cross-platform-desktop, skill-area:deployment-infrastructure-management]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # nsis-installer-generator

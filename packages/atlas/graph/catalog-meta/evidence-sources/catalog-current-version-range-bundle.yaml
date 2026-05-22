@@ -1,0 +1,14 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-current-version-range-bundle
+attributes:
+  displayName: "Current vendor changelog bundle for version ranges"
+  kindLabel: vendor-doc
+  sourceUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages/atlas/graph"
+  trustLevel: trust-level:official-web
+  observedAt: "2026-05-05T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  locator: catalog-current-version-range-bundle
+edges:
+  has_trust_level:
+    - trust-level:official-web
+

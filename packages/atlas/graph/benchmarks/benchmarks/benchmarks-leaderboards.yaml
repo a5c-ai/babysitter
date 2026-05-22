@@ -1,0 +1,33 @@
+---
+nodeKind: Benchmark
+id: benchmark:agentboard
+attributes:
+  displayName: "AgentBoard"
+  homepageUrl: https://hkust-nlp.github.io/agentboard/
+  kind: agent-leaderboard
+  targetsKind: AgentVersion
+  description: |
+    AgentBoard is an analytical benchmark and leaderboard for LLM agents
+    covering embodied tasks, web, tool use, and games. Reports
+    fine-grained progress and sub-goal metrics rather than only success
+    rate.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+---
+nodeKind: Benchmark
+id: benchmark:lmsys-arena
+attributes:
+  displayName: "Chatbot Arena (LMSYS)"
+  homepageUrl: https://lmarena.ai/
+  kind: agent-leaderboard
+  targetsKind: ModelVersion
+  description: |
+    Chatbot Arena (LMSYS / LMArena) is a crowdsourced LLM evaluation
+    platform that ranks models via blinded pairwise human votes,
+    producing an Elo-style leaderboard.
+edges:
+  covers:
+    - target: skill-area:general-knowledge-reasoning
+  applies_to:
+    - target: domain:ml-ai

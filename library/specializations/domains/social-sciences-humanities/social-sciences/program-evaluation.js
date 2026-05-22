@@ -5,6 +5,12 @@
  * @outputs { success: boolean, evaluationFindings: object, recommendations: array, qualityScore: number, artifacts: array }
  * @recommendedSkills SK-SS-006 (program-evaluation), SK-SS-010 (mixed-methods-integration)
  * @recommendedAgents AG-SS-004 (program-evaluation-specialist), AG-SS-008 (mixed-methods-research-coordinator)
+ *
+ * @graph
+ *   domains: [domain:social-sciences]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:user-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:data-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

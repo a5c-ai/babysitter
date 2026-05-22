@@ -3,6 +3,12 @@
  * @description Comprehensive competitive analysis and market positioning framework with competitor identification, feature comparison, SWOT analysis, positioning strategy, differentiation mapping, and market positioning visualization
  * @inputs { productName: string, targetMarket: object, competitorList: array, features: array, outputDir: string, analysisDepth: string }
  * @outputs { success: boolean, competitors: object, featureComparison: object, swotAnalysis: object, positioningStrategy: object, differentiation: object, marketPositioningMap: object, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:product-management]
+ *   skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:competitive-intelligence]
+ *   roles: [role:product-manager, role:product-analyst]
+ *   workflows: [workflow:product-discovery, workflow:competitive-analysis]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -11,6 +11,10 @@ expertise:
   - Marginal rate of substitution
   - Sensitivity to values
   - Trade-off communication
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:strategic-analysis, skill-area:quantitative-modeling, skill-area:business-analysis]
+  roles: [role:strategic-planner, role:data-analyst, role:business-analyst]
 ---
 
 # Trade-off Analyst

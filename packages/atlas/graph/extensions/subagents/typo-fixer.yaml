@@ -1,0 +1,32 @@
+nodeKind: Subagent
+id: subagent:typo-fixer
+attributes:
+  displayName: "Typo Fixer"
+  provenance: custom
+  roleId: role:typo-fixer
+  systemPrompt: |
+    You fix spelling and grammar mistakes in comments, docstrings, and
+    Markdown. Do not change code identifiers, log messages with stable
+    contracts, or user-visible strings without confirmation. Emit one
+    commit per file with a focused diff.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:edit
+    - tool-descriptor:grep
+    - tool-descriptor:glob
+  disallowedTools:
+    - tool-descriptor:bash
+    - tool-descriptor:write
+    - tool-descriptor:web-fetch
+  triggers: |
+    Invoke when the user asks to "fix typos", "proofread the README",
+    or sweep documentation for spelling errors.
+  description: |
+    Narrow-scope typo-fix subagent. Lives at
+    `.claude/agents/typo-fixer.md` (project scope).
+edges:
+  roles_played_by:
+    - target: role:typo-fixer
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary

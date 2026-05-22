@@ -1,0 +1,40 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:hermes.ui@current
+attributes:
+  displayName: "Hermes UI (current) — tui-only"
+  agentVersionId: agent-version:hermes@current
+  packageRef: source-ref:hermes-agent-pypi
+  uiKind: tui-only
+  presentationsBundled:
+    - presentation:hermes-cli
+  themeSupport: none
+  accessibilitySupport: basic
+  notes: |
+    Hermes is a TUI surface; auto-approve toggle and slash-help are the
+    user-facing primitives at the UI layer.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:prompt-input
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:slash-help
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/help"
+    - target: interaction-primitive:model-picker
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:hermes-auto-approve
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:tool-approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:resume-session
+      attributes:
+        mechanism: ui-control

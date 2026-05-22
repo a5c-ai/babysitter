@@ -1,0 +1,45 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:qwen.core@current
+attributes:
+  displayName: Qwen Code Core (current)
+  agentVersionId: agent-version:qwen@current
+  packageRef: source-ref:qwen-code-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    Qwen Code is a fork of Google's Gemini CLI. The tool-use loop runs
+    over an OpenAI-compatible chat-completions API (DashScope or
+    self-hosted), executing model-emitted tool calls and posting
+    responses back until the model finishes.
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: |
+    Inherits Gemini CLI's context strategy — relies on the model's
+    1M-token context window directly; no in-CLI compaction.
+  subagentInvokerPolicy: not-applicable
+  subagentInvokerNotes: |
+    Qwen Code does not advertise subagent dispatch (supportsSubagentDispatch
+    is false in the adapter's capabilities).
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Final text is streamed via the OpenAI-compatible streaming protocol.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: qwen-internal
+  supportedTransportProtocols:
+  - model-transport:openai-chat-completions
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:qwen
+    role: core
+  speaks:
+  - target: model-transport:openai-chat-completions
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full

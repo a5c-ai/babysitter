@@ -1,0 +1,232 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-hooks-discover
+attributes:
+  displayName: "amux hooks <agent> discover"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "hooks discover"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:hook catalog printed"
+  description: |
+    List native hook types supported by the harness. Source:
+    packages/agent-mux/cli/src/commands/hooks.ts:89-104.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-hooks-list
+attributes:
+  displayName: "amux hooks <agent> list"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "hooks list"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:registered hooks printed"
+  description: |
+    List registered hooks (project + global) for an agent (or `*`).
+    Source: packages/agent-mux/cli/src/commands/hooks.ts:106-129.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-hooks-add
+attributes:
+  displayName: "amux hooks <agent> add"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "hooks add"
+  flags:
+    - "--handler:1:builtin|command|script (default builtin)"
+    - "--target:1:hook target (default log)"
+    - "--id:1:explicit hook id"
+    - "--priority:1:sort order (lower = earlier; default 100)"
+    - "--global:0:write to global scope (default project)"
+  subcommandExitCodes:
+    - "0:success:hook added"
+    - "2:usage-error:missing hookType"
+  description: |
+    Register a hook entry (project or global) for an agent. Source:
+    packages/agent-mux/cli/src/commands/hooks.ts:131-162.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-hooks-remove
+attributes:
+  displayName: "amux hooks <agent> remove"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "hooks remove"
+  flags:
+    - "--global:0:scope global"
+    - "--project:0:scope project"
+  subcommandExitCodes:
+    - "0:success:hook removed"
+    - "1:general-error:no hook with that id"
+    - "2:usage-error:missing id"
+  description: |
+    Remove a registered hook by id. Source:
+    packages/agent-mux/cli/src/commands/hooks.ts:164-182.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-hooks-set
+attributes:
+  displayName: "amux hooks <agent> set"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "hooks set"
+  flags:
+    - "--priority:1:override priority"
+    - "--enabled:1:enable/disable without removal"
+    - "--target:1:override hook target"
+  subcommandExitCodes:
+    - "0:success:hook updated"
+    - "1:general-error:no hook with that id"
+    - "2:usage-error:missing id"
+  description: |
+    Mutate a hook entry's priority/enabled/target. Source:
+    packages/agent-mux/cli/src/commands/hooks.ts:184-212.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-hooks-handle
+attributes:
+  displayName: "amux hooks <agent> handle"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "hooks handle"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:dispatcher exit-code (formatHookResult)"
+    - "2:usage-error:missing hookType"
+  description: |
+    Read a JSON payload on stdin, dispatch through HookDispatcher, emit
+    formatHookResult stdout + exit-code. Source:
+    packages/agent-mux/cli/src/commands/hooks.ts:214-239.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-gateway-serve
+attributes:
+  displayName: "amux gateway serve"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "gateway serve"
+  flags:
+    - "--config:1:gateway config path (default ~/.amux/gateway/config.yml)"
+    - "--host:1:override listen host"
+    - "--port:1:override listen port"
+    - "--webui:1:webui static root"
+    - "--no-webui:0:disable web UI"
+  subcommandExitCodes:
+    - "0:success:gateway shut down cleanly on SIGINT/SIGTERM"
+  description: |
+    Start the agent-mux gateway HTTP/WebSocket service. Source:
+    packages/agent-mux/cli/src/commands/gateway/serve.ts:30-80.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-gateway-status
+attributes:
+  displayName: "amux gateway status"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "gateway status"
+  flags:
+    - "--url:1:gateway URL (default http://127.0.0.1:7878)"
+  subcommandExitCodes:
+    - "0:success:health check returned ok"
+    - "1:general-error:health check non-2xx"
+  description: |
+    Probe a running gateway's `/healthz` endpoint. Source:
+    packages/agent-mux/cli/src/commands/gateway/status.ts:6-27.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-gateway-tokens-list
+attributes:
+  displayName: "amux gateway tokens list"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "gateway tokens list"
+  flags:
+    - "--config:1:gateway config path"
+  subcommandExitCodes:
+    - "0:success:tokens printed"
+  description: |
+    List gateway access tokens. Source:
+    packages/agent-mux/cli/src/commands/gateway/tokens.ts:44-61.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-gateway-tokens-create
+attributes:
+  displayName: "amux gateway tokens create"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "gateway tokens create"
+  flags:
+    - "--config:1:gateway config path"
+    - "--name:1:friendly token name (default token@<hostname>)"
+    - "--ttl-ms:1:expiry in ms (null = never)"
+    - "--qr:0:render QR code with token + url"
+    - "--url:1:URL embedded in QR (default http://127.0.0.1:7878)"
+  subcommandExitCodes:
+    - "0:success:token minted"
+  description: |
+    Create a new gateway access token (optionally render QR for mobile
+    onboarding). Source:
+    packages/agent-mux/cli/src/commands/gateway/tokens.ts:63-79.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-gateway-tokens-revoke
+attributes:
+  displayName: "amux gateway tokens revoke"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "gateway tokens revoke"
+  flags:
+    - "--config:1:gateway config path"
+    - "--id:1:token id (else first positional)"
+  subcommandExitCodes:
+    - "0:success:token revoked"
+    - "1:general-error:token not found"
+    - "2:usage-error:missing token id"
+  description: |
+    Revoke a gateway access token by id. Source:
+    packages/agent-mux/cli/src/commands/gateway/tokens.ts:81-94.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-help
+attributes:
+  displayName: "amux help"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "help"
+  flags:
+    - "-h / --help:0:show usage (alias)"
+  subcommandExitCodes:
+    - "0:success:help text printed"
+  description: |
+    Print top-level help (or per-command help if a command name follows).
+    Source: packages/agent-mux/cli/src/commands/help.ts:21-498.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-version
+attributes:
+  displayName: "amux version"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "version"
+  flags:
+    - "-V / --version:0:print version (alias)"
+  subcommandExitCodes:
+    - "0:success:version printed"
+  description: |
+    Print the CLI version (read from package.json at runtime). Source:
+    packages/agent-mux/cli/src/commands/help.ts:500-505.

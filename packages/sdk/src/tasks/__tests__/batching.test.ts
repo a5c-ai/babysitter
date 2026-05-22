@@ -84,7 +84,97 @@ describe("batching helpers", () => {
         inputsRef: summary.inputsRef,
         requestedAt: summary.requestedAt,
         metadata: summary.metadata,
+        ...(summary.parallelGroupId ? { parallelGroupId: summary.parallelGroupId } : {}),
       })),
     });
+  });
+});
+
+describe("batching – GAP-PAR-001 concurrent execution extensions", () => {
+  test("parallelGroupId preserved on BatchedEffectSummary", () => {
+    const actions = [
+      makeAction("01G", {
+        schedulerHints: { parallelGroupId: "test-group-42" },
+      }),
+      makeAction("01H", {
+        schedulerHints: { parallelGroupId: "test-group-42" },
+      }),
+    ];
+
+    const batch = buildParallelBatch(actions);
+
+    // The parallelGroupId should be accessible on the summaries
+    // so orchestrators can group effects for concurrent execution
+    for (const summary of batch.summaries) {
+      expect(summary.parallelGroupId).toBe("test-group-42");
+    }
+  });
+
+  test("maxConcurrency propagated through buildParallelBatch", () => {
+    const actions = [makeAction("01I"), makeAction("01J"), makeAction("01K")];
+
+    const batch = buildParallelBatch(actions, { maxConcurrency: 2 });
+
+    // All actions in the batch should carry the maxConcurrency hint
+    for (const action of batch.actions) {
+      expect(action.schedulerHints?.maxConcurrency).toBe(2);
+    }
+  });
+
+  test("assignParallelGroupHints does not overwrite existing parallelGroupId", () => {
+    const existingGroupId = "pre-existing-group";
+    const actions = [
+      makeAction("01L", {
+        schedulerHints: { parallelGroupId: existingGroupId },
+      }),
+      makeAction("01M", {
+        schedulerHints: { parallelGroupId: existingGroupId },
+      }),
+    ];
+
+    const batch = buildParallelBatch(actions);
+
+    // The pre-existing parallelGroupId should be preserved, not overwritten
+    for (const action of batch.actions) {
+      expect(action.schedulerHints?.parallelGroupId).toBe(existingGroupId);
+    }
+  });
+
+  test("executionStrategy hint propagated through batch", () => {
+    const actions = [makeAction("01N"), makeAction("01O")];
+
+    const batch = buildParallelBatch(actions, {
+      executionStrategy: "concurrent",
+    });
+
+    for (const action of batch.actions) {
+      expect(action.schedulerHints?.executionStrategy).toBe("concurrent");
+    }
+  });
+
+  test("batch without options uses default parallelGroupId assignment", () => {
+    const actions = [makeAction("01P"), makeAction("01Q")];
+
+    const batch = buildParallelBatch(actions);
+
+    // Default behavior: a parallelGroupId is auto-generated for multi-action batches
+    const groupIds = new Set(
+      batch.actions.map((a) => a.schedulerHints?.parallelGroupId)
+    );
+    expect(groupIds.size).toBe(1);
+    const groupId = Array.from(groupIds)[0];
+    expect(groupId).toBeDefined();
+    expect(typeof groupId).toBe("string");
+  });
+
+  test("single action batch does not get parallelGroupId", () => {
+    const actions = [makeAction("01R")];
+
+    const batch = buildParallelBatch(actions);
+
+    // Single actions should not be assigned a parallelGroupId
+    expect(
+      batch.actions[0].schedulerHints?.parallelGroupId
+    ).toBeUndefined();
   });
 });

@@ -1,0 +1,16 @@
+nodeKind: Library
+id: library:hibernate
+attributes:
+  displayName: "Hibernate ORM"
+  belongsToLanguageId: language:java
+  category: orm
+  description: |
+    Object-relational mapping framework for Java — JPA implementation.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:spring-data
+    - library:exposed

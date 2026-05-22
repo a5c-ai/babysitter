@@ -3,6 +3,12 @@
  * @description Develop comprehensive procedures for safe and efficient process startup including PSSR and commissioning
  * @inputs { processName: string, processDescription: object, equipmentList: array, safetyRequirements: object, outputDir: string }
  * @outputs { success: boolean, startupProcedure: object, pssrChecklist: object, trainingPlan: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:chemical-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -6,15 +6,14 @@ allowed-tools:
   - file-write
   - file-search
   - git-commit
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# COG Knowledge Consolidation Skill
-
-Build structured knowledge frameworks from scattered notes across the vault, preserving source attribution and maintaining cross-references.
-
-## Capabilities
-
-- Scan vault sections for unconsolidated notes
 - Cluster related notes into coherent themes
 - Build structured frameworks: concept maps, key principles, examples, applications
 - Cross-reference with existing frameworks in 05-knowledge

@@ -6,6 +6,14 @@ allowed-tools:
   - Read
   - Write
   - Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:chaos-engineering]
+  roles: [role:sre, role:architect]
+  workflows: [workflow:incident-response]
+  topics: [topic:chaos-engineering, topic:circuit-breakers]
+
 ---
 
 # Chaos Engineering Runner Skill

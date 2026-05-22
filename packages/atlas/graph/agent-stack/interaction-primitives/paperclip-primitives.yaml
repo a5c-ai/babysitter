@@ -1,0 +1,116 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:paperclip-company-board
+attributes:
+  displayName: "Paperclip Company Board"
+  description: |
+    Company-scoped task board for managing AI agent work items. Each
+    company gets an isolated board with its own task queue, agent
+    assignments, and activity history. The board provides a visual
+    overview of all in-flight agent tasks, their status, assigned
+    agents, and budget consumption. Multi-tenant isolation ensures
+    companies cannot see each other's data.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:paperclip-agent-adapter
+attributes:
+  displayName: "Paperclip Agent Adapter"
+  description: |
+    Adapter pattern for integrating multiple coding agents behind a
+    unified dispatch interface. Each adapter (claude-local, codex-local,
+    cursor-local, gemini-local, openclaw-gateway, opencode-local,
+    pi-local, acpx-local) translates Paperclip's task format into the
+    target agent's native invocation protocol. New agents are added
+    by implementing the adapter interface without modifying core logic.
+  kind: automation
+  surface: headless
+  category: interaction-primitive-category:configuration
+  availableInModes: [headless]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:paperclip-approval-gate
+attributes:
+  displayName: "Paperclip Approval Gate"
+  description: |
+    Governed action approval gate for controlling agent autonomy.
+    Certain actions (deployments, external API calls, destructive
+    operations) require explicit human approval before the agent
+    can proceed. The gate surfaces the pending action with context
+    and provides approve/reject controls in the board UI.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:review
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:paperclip-budget-control
+attributes:
+  displayName: "Paperclip Budget Control"
+  description: |
+    Budget hard-stop auto-pause primitive. Tracks token and cost
+    consumption per task and per company. When a configurable budget
+    threshold is reached, the running agent is automatically paused
+    and the operator is notified. Prevents runaway agent costs with
+    configurable soft warnings and hard limits.
+  kind: automation
+  surface: headless
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [headless]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:paperclip-issue-checkout
+attributes:
+  displayName: "Paperclip Issue Checkout"
+  description: |
+    Atomic single-assignee task checkout primitive. When an agent
+    claims a task from the board, an atomic lock ensures no other
+    agent can pick up the same task simultaneously. The checkout
+    is transactional — if the agent fails to start, the task is
+    released back to the queue for another agent to claim.
+  kind: automation
+  surface: headless
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [headless]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:paperclip-activity-log
+attributes:
+  displayName: "Paperclip Activity Log"
+  description: |
+    Mutation activity logging primitive. Every state-changing action
+    (task creation, agent assignment, approval decision, budget
+    adjustment, task completion) is recorded in an append-only
+    activity log. Provides a complete audit trail for compliance,
+    debugging, and operational review of agent actions.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:observability
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction

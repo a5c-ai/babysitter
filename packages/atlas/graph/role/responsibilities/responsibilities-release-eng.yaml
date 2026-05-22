@@ -1,0 +1,55 @@
+---
+nodeKind: Responsibility
+id: responsibility:performance-budget-tracking
+attributes:
+  displayName: "Performance budget tracking"
+  cadence: continuous
+  description: |
+    Track frontend and backend performance budgets; block regressions in CI.
+edges:
+  held_by:
+    - target: role:perf-regression-detector
+    - target: role:performance-profiler
+  requires_expertise:
+    - target: skill-area:web-vitals
+    - target: skill-area:performance-testing
+---
+nodeKind: Responsibility
+id: responsibility:release-coordination
+attributes:
+  displayName: "Release coordination"
+  cadence: scheduled
+  description: |
+    Coordinate releases across teams: cut, validate, deploy, and post-release
+    watch.
+edges:
+  held_by:
+    - target: role:release-manager-bot
+    - target: role:engineering-manager
+---
+nodeKind: Responsibility
+id: responsibility:flaky-test-quarantine
+attributes:
+  displayName: "Flaky test quarantine"
+  cadence: continuous
+  description: |
+    Detect, quarantine, and drive fixes for flaky tests in shared CI.
+edges:
+  held_by:
+    - target: role:flaky-test-detector
+    - target: role:qa-lead
+  requires_expertise:
+    - target: skill-area:integration-testing
+---
+nodeKind: Responsibility
+id: responsibility:changelog-maintenance
+attributes:
+  displayName: "Changelog maintenance"
+  cadence: scheduled
+  description: |
+    Keep the changelog accurate per release; align with semver decisions.
+edges:
+  held_by:
+    - target: role:changelog-writer
+  requires_expertise:
+    - target: skill-area:semver-discipline

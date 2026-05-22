@@ -1,0 +1,11 @@
+nodeKind: ModelFamily
+id: model-family:cohere-command
+attributes:
+  displayName: "Cohere Command"
+  vendor: "Cohere"
+  homepageUrl: "https://cohere.com/command"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:command-r-plus@current

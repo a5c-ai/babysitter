@@ -1,0 +1,22 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:web-fetch
+attributes:
+  schema: '{}'
+  displayName: "Web Fetch"
+  description: |
+    Fetch a URL and return its content (typically markdown-rendered
+    HTML). Available in Claude Code WebFetch and equivalents.
+  inputSchema:
+    type: object
+    required: [url]
+    properties:
+      url: { type: string, description: "Absolute URL to fetch" }
+      prompt: { type: string, description: "Optional extraction prompt applied to the fetched content" }
+  outputSchema:
+    type: object
+    properties:
+      content: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges: {}

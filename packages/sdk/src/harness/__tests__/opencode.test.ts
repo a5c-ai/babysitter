@@ -4,7 +4,7 @@
  * Covers:
  *   - createOpenCodeAdapter() returns valid adapter with correct name
  *   - isActive() detection via env vars (OPENCODE_SESSION_ID, OPENCODE_PROJECT_DIR)
- *   - resolveSessionId() from parsed args and env (BABYSITTER_SESSION_ID, OPENCODE_SESSION_ID)
+ *   - resolveSessionId() from parsed args and env (AGENT_SESSION_ID, OPENCODE_SESSION_ID)
  *   - getCapabilities() returns [HeadlessPrompt]
  *   - autoResolvesSessionId() returns false
  *   - supportsHookType() returns correct values for supported/unsupported hook types
@@ -15,7 +15,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { createOpenCodeAdapter } from "../opencode";
+import { createOpenCodeAdapter } from "../adapters/opencode";
 import { HarnessCapability } from "../types";
 
 // ---------------------------------------------------------------------------
@@ -26,7 +26,8 @@ const ENV_KEYS = [
   "OPENCODE_SESSION_ID",
   "OPENCODE_CONFIG",
   "OPENCODE_PLUGIN_ROOT",
-  "BABYSITTER_SESSION_ID",
+  "AGENT_SESSION_ID",
+  "AGENT_SESSION_ID",
   "BABYSITTER_STATE_DIR",
   "BABYSITTER_GLOBAL_STATE_DIR",
   "BABYSITTER_LOG_DIR",
@@ -67,8 +68,8 @@ describe("createOpenCodeAdapter", () => {
 // ---------------------------------------------------------------------------
 
 describe("OpenCode isActive()", () => {
-  it("returns true when BABYSITTER_SESSION_ID is set", () => {
-    process.env.BABYSITTER_SESSION_ID = "test-session-123";
+  it("returns true when AGENT_SESSION_ID is set", () => {
+    process.env.AGENT_SESSION_ID = "test-session-123";
     const adapter = createOpenCodeAdapter();
     expect(adapter.isActive()).toBe(true);
   });
@@ -79,15 +80,15 @@ describe("OpenCode isActive()", () => {
     expect(adapter.isActive()).toBe(true);
   });
 
-  it("returns true when both BABYSITTER_SESSION_ID and OPENCODE_CONFIG are set", () => {
-    process.env.BABYSITTER_SESSION_ID = "sess-1";
+  it("returns true when both AGENT_SESSION_ID and OPENCODE_CONFIG are set", () => {
+    process.env.AGENT_SESSION_ID = "sess-1";
     process.env.OPENCODE_CONFIG = "/tmp/opencode.json";
     const adapter = createOpenCodeAdapter();
     expect(adapter.isActive()).toBe(true);
   });
 
   it("returns false when no OpenCode env vars are set", () => {
-    delete process.env.BABYSITTER_SESSION_ID;
+    delete process.env.AGENT_SESSION_ID;
     delete process.env.OPENCODE_CONFIG;
     const adapter = createOpenCodeAdapter();
     expect(adapter.isActive()).toBe(false);
@@ -99,13 +100,13 @@ describe("OpenCode isActive()", () => {
 // ---------------------------------------------------------------------------
 
 describe("OpenCode resolveSessionId()", () => {
-  it("returns BABYSITTER_SESSION_ID when set", () => {
-    process.env.BABYSITTER_SESSION_ID = "babysitter-session-abc";
+  it("returns AGENT_SESSION_ID when set", () => {
+    process.env.AGENT_SESSION_ID = "babysitter-session-abc";
     const adapter = createOpenCodeAdapter();
     expect(adapter.resolveSessionId({})).toBe("babysitter-session-abc");
   });
 
-  it("returns OPENCODE_SESSION_ID as fallback when BABYSITTER_SESSION_ID is not set", () => {
+  it("returns OPENCODE_SESSION_ID as fallback when AGENT_SESSION_ID is not set", () => {
     process.env.OPENCODE_SESSION_ID = "opencode-session-xyz";
     const adapter = createOpenCodeAdapter();
     expect(adapter.resolveSessionId({})).toBe("opencode-session-xyz");
@@ -113,7 +114,7 @@ describe("OpenCode resolveSessionId()", () => {
 
   it("returns explicit sessionId when passed", () => {
     // Even with env vars set, explicit arg takes priority
-    process.env.BABYSITTER_SESSION_ID = "env-session";
+    process.env.AGENT_SESSION_ID = "env-session";
     process.env.OPENCODE_SESSION_ID = "opencode-env-session";
     const adapter = createOpenCodeAdapter();
     expect(adapter.resolveSessionId({ sessionId: "explicit-id" })).toBe(
@@ -122,14 +123,14 @@ describe("OpenCode resolveSessionId()", () => {
   });
 
   it("returns undefined when no session vars available", () => {
-    delete process.env.BABYSITTER_SESSION_ID;
+    delete process.env.AGENT_SESSION_ID;
     delete process.env.OPENCODE_SESSION_ID;
     const adapter = createOpenCodeAdapter();
     expect(adapter.resolveSessionId({})).toBeUndefined();
   });
 
-  it("prefers BABYSITTER_SESSION_ID over OPENCODE_SESSION_ID", () => {
-    process.env.BABYSITTER_SESSION_ID = "babysitter-wins";
+  it("prefers AGENT_SESSION_ID over OPENCODE_SESSION_ID", () => {
+    process.env.AGENT_SESSION_ID = "babysitter-wins";
     process.env.OPENCODE_SESSION_ID = "opencode-loses";
     const adapter = createOpenCodeAdapter();
     expect(adapter.resolveSessionId({})).toBe("babysitter-wins");
@@ -222,7 +223,7 @@ describe("OpenCode getMissingSessionIdHint()", () => {
     const adapter = createOpenCodeAdapter();
     const hint = adapter.getMissingSessionIdHint!();
     expect(hint).toContain("shell.env");
-    expect(hint).toContain("BABYSITTER_SESSION_ID");
+    expect(hint).toContain("AGENT_SESSION_ID");
   });
 });
 

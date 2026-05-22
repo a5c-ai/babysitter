@@ -1,0 +1,112 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:babysitter.platform@current
+attributes:
+  displayName: "babysitter Platform (current) — defineTask + skill/plugin registry"
+  agentVersionId: agent-version:babysitter@current
+  packageRef: source-ref:babysitter-github
+  subagentDefinitionFormat: js-module-export
+  nativeExtensionFormat: babysitter-plugin
+  nativeExtensionManifestPath: plugin.json
+  nativeExtensionsDirectoryPath:
+    - ~/.claude/plugins/
+    - .claude/plugins/
+    - plugins/
+  skillFormat: anthropic-skill-md
+  skillsDirectoryPath:
+    - ~/.claude/skills/
+    - .claude/skills/
+    - skills/
+  customSlashCommandsPath:
+    - commands/
+    - .claude/commands/
+  subagentsDirectoryPath:
+    - agents/
+    - .claude/agents/
+  hooksDirectoryOrConfigPath:
+    - hooks/
+    - .claude/hooks.json
+  settingsFiles:
+    - .claude/settings.json
+    - .claude/settings.local.json
+  marketplaceUrl: https://github.com/a5c-ai/babysitter
+  pluginRegistryPath: ~/.claude/plugins/registry.json
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: delegated-to-harness
+  updateChannelMechanism: npm
+  supportedChannelKinds:
+    - mcp-channel
+  notes: |
+    Babysitter is a headless process-orchestration SDK + CLI. It owns the
+    `defineTask` registry, the plugin/skill/agent loader, and the
+    breakpoint policy engine. It bundles no Presentation of its own —
+    operators interact with babysitter through whichever harness they
+    spawn (claude-code, codex, cursor, opencode, gemini-cli) plus the
+    babysitter slash-command surface. The marketplace lives at
+    plugins/a5c/marketplace/ inside the babysitter monorepo.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+    - target: agent:babysitter
+      role: platform
+  bundles: []
+  supports:
+    - target: capability:supports-github-trigger
+      versionRange: '>=0.4.0'
+      level: full
+      notes: 'normalizeGithub + REST changed-files enrichment (packages/triggers/src/backends/github.ts, src/enrich.ts:61).'
+    - target: capability:supports-gitlab-trigger
+      versionRange: '>=0.4.0'
+      level: full
+      notes: 'normalizeGitlab via object_kind/object_attributes (packages/triggers/src/backends/gitlab.ts).'
+    - target: capability:supports-bitbucket-trigger
+      versionRange: '>=0.4.0'
+      level: full
+      notes: 'normalizeBitbucket; action derived from event-name suffix after `:` (packages/triggers/src/backends/bitbucket.ts).'
+    - target: capability:supports-generic-webhook-trigger
+      versionRange: '>=0.4.0'
+      level: full
+      notes: 'normalizeGeneric fallback (packages/triggers/src/backends/generic-webhook.ts).'
+    - target: capability:supports-trigger-query-dsl
+      versionRange: '>=0.4.0'
+      level: full
+      notes: 'parseQuery: key:value, JSON object, expression clause (packages/triggers/src/query.ts:75).'
+    - target: capability:supports-trigger-glob-paths
+      versionRange: '>=0.4.0'
+      level: full
+      notes: 'globToRegExp + matchesGlob; ** any-depth, * single-segment, ? single-char (packages/triggers/src/query.ts:20).'
+    - target: capability:supports-trigger-diff-enrichment
+      versionRange: '>=0.4.0'
+      level: full
+      notes: 'enrichDiffsWithLocalGit via `git show --unified=80` (packages/triggers/src/enrich.ts:45).'
+    - target: capability:supports-trigger-expression-clause
+      versionRange: '>=0.4.0'
+      level: full
+      notes: 'evaluateExpression with `~` (contains) and `==` (equals), &&-joined (packages/triggers/src/query.ts:55).'
+  defines_frontmatter_field:
+    - target: frontmatter-field:task-schema-id
+    - target: frontmatter-field:task-schema-name
+    - target: frontmatter-field:task-schema-kind
+    - target: frontmatter-field:task-schema-title
+    - target: frontmatter-field:task-schema-description
+    - target: frontmatter-field:task-schema-labels
+    - target: frontmatter-field:task-schema-source
+    - target: frontmatter-field:task-schema-inputs
+    - target: frontmatter-field:task-schema-outputs
+    - target: frontmatter-field:task-schema-io
+    - target: frontmatter-field:task-schema-metadata
+    - target: frontmatter-field:task-schema-execution
+    - target: frontmatter-field:task-schema-node
+    - target: frontmatter-field:task-schema-breakpoint
+    - target: frontmatter-field:task-schema-sleep
+    - target: frontmatter-field:task-schema-subprocess
+
+  supports_orchestration_primitive:
+    - target: orch-primitive:babysitter-run-create
+    - target: orch-primitive:babysitter-run-iterate
+    - target: orch-primitive:babysitter-effect-request
+    - target: orch-primitive:babysitter-effect-resolution
+    - target: orch-primitive:babysitter-breakpoint-gate
+    - target: orch-primitive:babysitter-completion-proof
+    - target: orch-primitive:babysitter-harness-dispatch

@@ -1,0 +1,12 @@
+nodeKind: Capability
+id: capability:mcp-elicitation
+attributes:
+  displayName: "MCP elicitation"
+  description: |
+    The entity supports MCP elicitation requests (introduced in MCP spec
+    revision 2025-06-18): a server can ask the client for additional
+    structured input from the user mid-tool-call.
+    See https://modelcontextprotocol.io/specification/2025-06-18/client/elicitation
+  appliesToNodeKinds: ["AgentRuntimeImpl", "ToolServer"]
+  category: agent
+edges: {}

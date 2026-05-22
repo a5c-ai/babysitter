@@ -1,0 +1,58 @@
+{
+  "name": "@a5c-ai/agent-catalog",
+  "version": "5.0.0",
+  "description": "Public package for the shared agent ontology, discovery catalog, and packaged evidence graph consumed across the Babysitter toolchain.",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/agent-catalog"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-catalog#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./docs": "./docs/ontology-evidence.md",
+    "./docs/*": "./docs/*"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md",
+    "dist",
+    "docs"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "check:src-artifacts": "node ./scripts/check-src-artifacts.cjs",
+    "generate:discovery-snapshot": "node ./scripts/generate-discovery-snapshot.cjs",
+    "build": "npm run clean && npm run check:src-artifacts && tsc -p tsconfig.json && npm run generate:discovery-snapshot",
+    "clean": "rimraf dist",
+    "test": "npm run check:src-artifacts && cd ../.. && npm run test:agent-catalog-contracts",
+    "policy:check": "node ./scripts/check-lifecycle-policy.cjs",
+    "ci:test": "npm run clean && npm run build && npm run test && npm run policy:check",
+    "version:check": "node ./scripts/check-version.cjs"
+  },
+  "dependencies": {
+    "@a5c-ai/atlas": "*",
+    "yaml": "^2.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "rimraf": "^6.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

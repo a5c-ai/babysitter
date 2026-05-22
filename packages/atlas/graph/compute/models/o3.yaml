@@ -1,0 +1,105 @@
+nodeKind: ModelVersion
+id: model:o3@current
+attributes:
+  displayName: "o3"
+  supportsExtendedThinking: false
+  modelFamilyId: model-family:o-reasoning-series
+  versionRange: '>=3.0.0 <4.0.0'
+  kind: reasoning
+  contextWindowTokens: 200000
+  costPerMTokInput: 2.0
+  costPerMTokOutput: 8.0
+  supportsThinking: true
+  thinkingEffortLevels:
+  - low
+  - medium
+  - high
+  supportsThinkingBudgetTokens: false
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-04-16'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-04-16'
+  knowledgeCutoffDate: '2024-06-01'
+  safetyTier: openai-preparedness-high
+  modelCardUrl: https://openai.com/index/o3-o4-mini-system-card/
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:o-reasoning-series
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:o-reasoning-series
+  served_by:
+  - provider:openai
+  speaks:
+  - model-transport:openai-responses
+  - model-transport:openai-chat-completions
+  supports:
+  - target: capability:supports-batch-api
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:parallel-tool-calls
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-prompt-caching
+    versionRange: '>=3.0.0 <4.0.0'
+    level: partial
+    notes: 'OpenAI implicit prompt caching: server-side, automatic; no explicit cache_control
+      surface.
+
+      '
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:streaming
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-text-streaming
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-thinking-streaming
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-thinking
+    versionRange: '*'
+    level: full
+    notes: 'OpenAI o3 is a reasoning-class model with internal chain-of-thought.
+
+      '
+    evidenceSourceIds:
+    - evidence:openai-responses-api
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-responses-api
+  supports_effort_level:
+  - target: effort-level:low
+  - target: effort-level:medium
+  - target: effort-level:high

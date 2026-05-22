@@ -1,0 +1,93 @@
+---
+nodeKind: Library
+id: library:tanstack-query
+attributes:
+  displayName: "TanStack Query"
+  belongsToLanguageId: language:typescript
+  description: |
+    Async state manager for fetching, caching, and synchronizing
+    server data in React, Vue, Solid, and Svelte (formerly React Query).
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:application-state-management
+  alternative_to:
+    - library:swr
+---
+nodeKind: Library
+id: library:swr
+attributes:
+  displayName: "SWR"
+  belongsToLanguageId: language:typescript
+  description: |
+    React Hooks library for data fetching using stale-while-revalidate
+    semantics, by Vercel.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:application-state-management
+---
+nodeKind: Library
+id: library:trpc
+attributes:
+  displayName: "tRPC"
+  belongsToLanguageId: language:typescript
+  description: |
+    End-to-end typesafe APIs for TypeScript — share procedure types
+    across server and client without a schema layer.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:backend-api-design
+  alternative_to:
+    - library:trpc-server
+    - library:trpc-client
+---
+nodeKind: Library
+id: library:drizzle-orm
+attributes:
+  displayName: "Drizzle ORM"
+  belongsToLanguageId: language:typescript
+  description: |
+    TypeScript-first SQL ORM with a type-safe query builder, schema
+    declaration in code, and Postgres / MySQL / SQLite drivers.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:backend-data-persistence
+  alternative_to:
+    - target: library:prisma
+      comparison: "TypeScript ORMs — Drizzle is SQL-centric; Prisma uses a schema DSL"
+    - target: library:typeorm
+      comparison: "TypeScript ORMs"
+    - target: library:knex
+      comparison: "TypeScript SQL query builders / ORMs"
+---
+nodeKind: Library
+id: library:prisma
+attributes:
+  displayName: "Prisma"
+  belongsToLanguageId: language:typescript
+  description: |
+    Node.js / TypeScript ORM with declarative schema, generated
+    client, and migration tooling for Postgres, MySQL, SQLite, etc.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:backend-data-persistence
+  alternative_to:
+    - target: library:typeorm
+      comparison: "TypeScript ORMs"
+    - target: library:sequelize
+      comparison: "TypeScript ORMs"
+    - target: library:knex
+      comparison: "TypeScript ORMs / query builders"
+    - target: library:drizzle-orm
+      comparison: "TypeScript ORMs — Prisma uses a schema DSL; Drizzle is SQL-centric"
+    - target: library:mongoose
+      comparison: "JS/TS ORMs — Prisma is multi-database; Mongoose is MongoDB-specific"

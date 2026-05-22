@@ -2,6 +2,11 @@
 name: slither-analysis
 description: Expert integration with Slither static analyzer for smart contract vulnerability detection, code quality analysis, and security reporting. Supports all Slither detectors and custom analysis configurations.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:smart-contract-security, skill-area:application-security-testing, skill-area:vulnerability-scanning-remediation]
+  roles: [role:security-engineer]
 ---
 
 # Slither Static Analysis Skill

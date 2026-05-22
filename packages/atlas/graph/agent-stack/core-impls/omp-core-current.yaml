@@ -1,0 +1,61 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:omp.core@current
+attributes:
+  displayName: OMP Core (current)
+  agentVersionId: agentVersion:omp:ge-0-0-0
+  packageRef: source-ref:omp-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: 'OMP inherits Pi''s serial tool-use loop. Loop advances on provider
+    end-of-turn;
+
+    thinking content is always preserved (passthrough) for downstream display.
+
+    '
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: 'Provider-managed; OMP exposes no compaction threshold.
+
+    '
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: 'Same as Pi: no first-class subagent primitive; sub-tasks
+    are tool-call handlers
+
+    that may spawn a nested OMP session.
+
+    '
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: 'Final assistant text is streamed; thinking blocks are interleaved
+    verbatim.
+
+    Session ends on provider end-of-turn.
+
+    '
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: omp-internal
+  supportedTransportProtocols:
+  - model-transport:anthropic-messages
+  - model-transport:openai-responses
+  parallelToolCallHandling: sequentialized
+  streamingFidelity: full
+  thinkingChannelHandling: passthrough
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:omp
+    role: core
+  speaks:
+  - target: model-transport:anthropic-messages
+  - target: model-transport:openai-responses
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-thinking
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'OMP always supports thinking per task brief.
+
+      '
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full

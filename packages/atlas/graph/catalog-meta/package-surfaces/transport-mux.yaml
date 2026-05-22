@@ -1,0 +1,22 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-transport-mux
+attributes:
+  packageId: "@a5c-ai/transport-mux"
+  packageName: "@a5c-ai/transport-mux"
+  workspacePath: packages/transport-mux
+  moduleType: typescript
+  surfaceKinds:
+    - transport-runtime
+    - provider-ontology-source
+  sourceOfTruthRole: ontology-input
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:agent-catalog-graph
+  # `amux-proxy` runtime CLI bin modeled as
+  # InteractionPrimitive[kind=cli-subcommand]. The package's transport-
+  # protocol handlers are already modeled as ModelTransportProtocol records
+  # and are NOT duplicated here.
+  exposes_subcommand:
+    - target: interaction-primitive:transport-mux-amux-proxy

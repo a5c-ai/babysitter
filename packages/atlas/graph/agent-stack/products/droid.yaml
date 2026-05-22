@@ -1,0 +1,17 @@
+nodeKind: AgentProduct
+id: agent:droid
+attributes:
+  displayName: "Factory Droid"
+  vendor: "Factory AI"
+  homepageUrl: "https://factory.ai/"
+  primarySurface: cli
+  supportTier: catalog-backed
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Factory AI's Droid CLI — an agentic coding companion supporting parallel
+    subagent execution, MCP plugin integration, and multi-model routing.
+    Configuration lives under `~/.config/droid/` and `~/.droid/`.
+edges:
+  has_version:
+    - agent-version:droid@current

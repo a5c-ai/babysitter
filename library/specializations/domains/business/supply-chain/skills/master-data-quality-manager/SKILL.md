@@ -12,6 +12,12 @@ metadata:
   domain: business
   category: cross-functional
   priority: future
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:data-quality, skill-area:data-governance]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:procurement-manager, role:information-architect]
 ---
 
 # Master Data Quality Manager

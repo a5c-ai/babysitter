@@ -2,6 +2,13 @@
 name: framework-compatibility-checker
 description: Check codebase compatibility with target framework versions and generate migration paths
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:dependency-upgrade-strategies, skill-area:breaking-change-management]
+  roles: [role:backend-engineer, role:tech-lead]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Framework Compatibility Checker Skill

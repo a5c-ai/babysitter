@@ -16,6 +16,13 @@
  * @references
  * - Semantic Versioning: https://semver.org/
  * - API Evolution: https://www.mnot.net/blog/2012/12/04/api-evolution
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:sdk-platform-development]
+ *   skillAreas: [skill-area:sdk-codegen, skill-area:api-clients-sdks]
+ *   roles: [role:platform-engineer]
+ *   topics: [topic:api-design, topic:developer-experience]
+ *   workflows: [workflow:sdk-release-lifecycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

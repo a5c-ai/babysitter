@@ -16,6 +16,10 @@ metadata:
     - LLM APIs
     - jinja2
     - markdown
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:strategic-analysis, skill-area:competitive-intelligence, skill-area:business-analysis]
+  roles: [role:strategic-planner, role:business-analyst, role:data-analyst]
 ---
 
 # Scenario Narrative Generator

@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:openclaw-container-image
+attributes:
+  artifactId: plugin-artifact:openclaw-container-image
+  displayName: "OpenClaw container image"
+  targetId: plugin-target:openclaw
+  artifactKind: container-image
+  pathPattern: "ghcr.io/openclaw/openclaw"
+  installerSurface: "latest"
+  scriptVariants:
+    - preinstalled
+edges:
+  emits_artifact:
+    - target: plugin-target:openclaw

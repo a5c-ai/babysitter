@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:mcp
+attributes:
+  acronym: "MCP"
+  expandsToTermId: term:model-context-protocol
+  description: |
+    Acronym for "Model Context Protocol".
+edges:
+  expands_to:
+    - term:model-context-protocol

@@ -1,0 +1,124 @@
+nodeKind: ProtocolMessage
+id: protocol-message:cohere-message-start
+attributes:
+  displayName: "Cohere chat-stream / message-start"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["type=message-start", "id", "delta(role)"]
+  description: |
+    First event in a Cohere v2 chat-stream. Carries the assistant message
+    id and a delta with `role: assistant`.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:cohere-content-start
+attributes:
+  displayName: "Cohere chat-stream / content-start"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["type=content-start", "index", "delta(message(content(type=text,text)))"]
+  description: |
+    Marks the start of a content block (text). Subsequent content-delta
+    events stream tokens into this block until content-end.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:cohere-content-delta
+attributes:
+  displayName: "Cohere chat-stream / content-delta"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["type=content-delta", "index", "delta(message(content(text)))"]
+  description: |
+    Incremental text token appended to the in-progress assistant content
+    block.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:cohere-content-end
+attributes:
+  displayName: "Cohere chat-stream / content-end"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["type=content-end", "index"]
+  description: |
+    Closes the current text content block.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:cohere-tool-call-start
+attributes:
+  displayName: "Cohere chat-stream / tool-call-start"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["type=tool-call-start", "index", "delta(message(tool_calls(id, type, function(name))))"]
+  description: |
+    Begins a tool-call content block — emits id, function name, and an
+    empty arguments string ready to receive deltas.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:cohere-tool-call-delta
+attributes:
+  displayName: "Cohere chat-stream / tool-call-delta"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["type=tool-call-delta", "index", "delta(message(tool_calls(function(arguments))))"]
+  description: |
+    Streams tokens into the tool-call's `arguments` JSON string.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:cohere-tool-call-end
+attributes:
+  displayName: "Cohere chat-stream / tool-call-end"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["type=tool-call-end", "index"]
+  description: |
+    Closes a tool-call content block.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:cohere-message-end
+attributes:
+  displayName: "Cohere chat-stream / message-end"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["type=message-end", "delta(finish_reason, usage(billed_units, tokens))"]
+  description: |
+    Terminal stream event carrying finish_reason (COMPLETE / MAX_TOKENS /
+    STOP_SEQUENCE / TOOL_CALL / ERROR) plus usage accounting.

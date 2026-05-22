@@ -1,0 +1,108 @@
+---
+nodeKind: Workflow
+id: workflow:sdk-adoption-tracking
+attributes:
+  displayName: "SDK Adoption Tracking"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Tracks adoption metrics for published SDKs and developer tools --
+    analyzing download counts, active-install telemetry, and version
+    distribution across the developer base, monitoring breaking-change
+    migration completion rates, reviewing SDK-related support ticket
+    volume and resolution times, evaluating developer satisfaction survey
+    responses, benchmarking adoption against competitor SDKs, and
+    identifying language or platform gaps in SDK coverage. Produces SDK
+    adoption dashboard and prioritized investment recommendations.
+    Excludes SDK feature development.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:data-scientist
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:sdk-codegen
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:changelog-maintenance
+  performed_by_org_unit:
+    - target: org-unit:developer-relations-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:developer-event-planning
+attributes:
+  displayName: "Developer Event Planning"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Plans and coordinates developer-facing events including hackathons,
+    meetups, conference talks, and workshops -- defining event objectives
+    and success metrics, curating session content and speaker lineup,
+    managing registration and venue logistics, preparing demo environments
+    and sample code repositories, coordinating live-streaming and
+    recording, planning swag and follow-up engagement sequences, and
+    producing post-event analytics on attendance, engagement, and lead
+    conversion. Produces event run-of-show document and post-event impact
+    report. Excludes ongoing community management.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:technical-writer
+    - target: role:product-designer
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:ai-knowledge-sharing
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:developer-relations-team
+    - target: org-unit:marketing-team
+    - target: org-unit:community-team
+---
+nodeKind: Workflow
+id: workflow:changelog-communication-cycle
+attributes:
+  displayName: "Changelog Communication Cycle"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Coordinates multi-channel changelog communication for product
+    releases -- aggregating merged PRs and commit messages into
+    human-readable changelog entries, categorizing changes by impact level
+    (breaking, feature, fix, deprecation), drafting release blog posts and
+    developer newsletter content, updating API reference documentation,
+    preparing migration guides for breaking changes, coordinating
+    announcement timing across social media, community forums, and
+    in-product notifications, and tracking developer acknowledgment of
+    breaking changes. Produces changelog, release announcement assets, and
+    communication audit trail. Excludes release engineering.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:technical-writer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:semver-discipline
+    - target: skill-area:breaking-change-management
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:public-relations
+  triggers_responsibility:
+    - target: responsibility:changelog-maintenance
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:developer-relations-team
+    - target: org-unit:release-engineering
+    - target: org-unit:marketing-team

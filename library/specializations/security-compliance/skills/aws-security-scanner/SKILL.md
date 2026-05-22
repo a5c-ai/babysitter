@@ -8,6 +8,14 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:vulnerability-scanning-remediation, skill-area:application-security-testing]
+  roles: [role:security-engineer, role:devops-engineer]
+  workflows: [workflow:security-audit, workflow:vulnerability-management]
+  topics: [topic:zero-trust-architecture]
+
 ---
 
 # AWS Security Scanner Skill

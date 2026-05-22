@@ -14,6 +14,12 @@ expertise:
   - SLA configuration
   - Cross-DAG coordination
   - Backfill management
+graph:
+  domains: [domain:data-engineering]
+  specializations: [specialization:data-engineering-analytics]
+  skillAreas: [skill-area:etl-pipelines, skill-area:streaming-realtime-processing]
+  roles: [role:data-engineer, role:analytics-engineer]
+  workflows: [workflow:data-pipeline-deployment]
 ---
 
 # Data Orchestration Engineer Agent

@@ -12,6 +12,11 @@ metadata:
   domain: business
   category: Earned Value Management
   id: SK-004
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:financial-planning, skill-area:roadmap-planning, skill-area:data-analytics]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:financial-analyst, role:business-analyst]
 ---
 
 # EVM Calculator

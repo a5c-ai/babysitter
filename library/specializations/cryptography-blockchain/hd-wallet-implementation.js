@@ -17,6 +17,13 @@
  * - BIP-32: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
  * - BIP-39: https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
  * - BIP-44: https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
+ * @graph
+ *   domains: [domain:security]
+ *   specializations: [specialization:cryptography-blockchain]
+ *   skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption, skill-area:wallet-integration-key-management]
+ *   roles: [role:security-engineer]
+ *   topics: [topic:hmac-signing, topic:ssl-certs]
+ *   workflows: [workflow:crypto-protocol-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

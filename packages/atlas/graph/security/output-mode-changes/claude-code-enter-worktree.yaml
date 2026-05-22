@@ -1,0 +1,19 @@
+nodeKind: OutputModeChange
+id: output-mode-change:claude-code-enter-worktree-example
+attributes:
+  changeKind: worktree-enter
+  fromMode: main-checkout
+  toMode: worktree
+  scope: session
+  requiresUserApproval: true
+  invalidatesCaches:
+    - system-prompt-sections
+    - memory-file-caches
+    - plans-directory
+  description: |
+    EnterWorktree flips CWD to the worktree path; system-prompt env_info
+    block, memory file caches, and plans-directory cache must recompute
+    against the new CWD.
+edges:
+  mode_change_triggered_by_tool:
+    - target: tool-descriptor:claude-code-enter-worktree

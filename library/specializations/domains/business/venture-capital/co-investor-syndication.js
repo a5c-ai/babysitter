@@ -3,6 +3,11 @@
  * @description Building and maintaining relationships with co-investment partners, coordinating syndicated investments, and managing lead/follow dynamics in deals
  * @inputs { fundName: string, dealInfo: object, syndicationStrategy: string, targetCoInvestors: array }
  * @outputs { success: boolean, syndicationPlan: object, coInvestorOutreach: array, termAlignment: object, artifacts: array }
+  * @graph
+ *   domains: [domain:venture-capital]
+ *   skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+ *   roles: [role:financial-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

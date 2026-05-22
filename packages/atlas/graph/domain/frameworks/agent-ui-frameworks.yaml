@@ -1,0 +1,178 @@
+---
+nodeKind: Framework
+id: framework:ink
+attributes:
+  displayName: "Ink"
+  homepageUrl: "https://github.com/vadimdemedes/ink"
+  belongsToLanguageId: language:typescript
+  category: agent-ui
+  description: |
+    React-based CLI rendering framework for Node.js that lets you build
+    interactive terminal UIs using React components and Flexbox layout.
+    Ink powers the terminal interface of tools like Claude Code, Gatsby,
+    and Prisma, replacing raw readline/ncurses with a declarative
+    component model. Supports hooks, context, and the full React
+    reconciler lifecycle in the terminal.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:cli-design
+    - target: skill-area:cli-tooling
+  alternative_to:
+    - target: framework:bubbletea
+      comparison: "Terminal UI frameworks"
+    - target: framework:textual
+      comparison: "Terminal UI frameworks"
+    - target: framework:rich
+      comparison: "Terminal UI frameworks"
+---
+nodeKind: Framework
+id: framework:bubbletea
+attributes:
+  displayName: "Bubble Tea"
+  homepageUrl: "https://github.com/charmbracelet/bubbletea"
+  belongsToLanguageId: language:go
+  category: agent-ui
+  description: |
+    Go TUI framework based on the Elm architecture (Model-Update-View)
+    for building rich, interactive terminal applications. Part of the
+    Charm ecosystem alongside Lip Gloss (styling), Bubbles (components),
+    and Wish (SSH apps). Bubble Tea's functional architecture and
+    composable commands make it straightforward to build complex terminal
+    UIs with clean state management.
+edges:
+  belongs_to_language:
+    - language:go
+  used_by_skill_area:
+    - target: skill-area:cli-design
+    - target: skill-area:cli-tooling
+  alternative_to:
+    - target: framework:ink
+      comparison: "Terminal UI frameworks"
+    - target: framework:textual
+      comparison: "Terminal UI frameworks"
+    - target: framework:rich
+      comparison: "Terminal UI frameworks"
+---
+nodeKind: Framework
+id: framework:textual
+attributes:
+  displayName: "Textual"
+  homepageUrl: "https://textual.textualize.io"
+  belongsToLanguageId: language:python
+  category: agent-ui
+  description: |
+    Python TUI framework built on Rich that enables rapid development of
+    sophisticated terminal applications with CSS-like styling, widgets,
+    reactive attributes, and async event handling. Textual applications
+    can also be served in a web browser via Textual Web. Commonly used
+    for developer tools, data dashboards, and AI chat interfaces that
+    need to run in a terminal.
+edges:
+  belongs_to_language:
+    - language:python
+  used_by_skill_area:
+    - target: skill-area:cli-design
+    - target: skill-area:cli-tooling
+  alternative_to:
+    - target: framework:ink
+      comparison: "Terminal UI frameworks"
+    - target: framework:bubbletea
+      comparison: "Terminal UI frameworks"
+    - target: framework:rich
+      comparison: "Terminal UI frameworks"
+---
+nodeKind: Framework
+id: framework:rich
+attributes:
+  displayName: "Rich"
+  homepageUrl: "https://rich.readthedocs.io"
+  belongsToLanguageId: language:python
+  category: agent-ui
+  description: |
+    Python library for rich text and beautiful formatting in the terminal.
+    Provides tables, syntax highlighting, progress bars, markdown
+    rendering, tracebacks, and a logging handler out of the box. Rich is
+    the rendering layer beneath Textual and is widely adopted in CLI tools
+    like pip, pytest, and httpie for producing human-friendly terminal
+    output.
+edges:
+  belongs_to_language:
+    - language:python
+  used_by_skill_area:
+    - target: skill-area:cli-design
+  alternative_to:
+    - target: framework:ink
+      comparison: "Terminal UI frameworks"
+    - target: framework:bubbletea
+      comparison: "Terminal UI frameworks"
+    - target: framework:textual
+      comparison: "Terminal UI frameworks"
+---
+nodeKind: Framework
+id: framework:open-webui
+attributes:
+  displayName: "Open WebUI"
+  homepageUrl: "https://openwebui.com"
+  belongsToLanguageId: language:typescript
+  category: agent-ui
+  description: |
+    Self-hosted web UI for interacting with local and remote LLMs.
+    Supports OpenAI-compatible APIs, Ollama, and multiple model providers
+    with features like conversation history, RAG document upload, model
+    management, and user authentication. Designed as a drop-in replacement
+    for ChatGPT's interface that runs on your own infrastructure.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+  alternative_to:
+    - framework:chatbot-ui
+    - framework:librechat
+---
+nodeKind: Framework
+id: framework:chatbot-ui
+attributes:
+  displayName: "Chatbot UI"
+  homepageUrl: "https://github.com/mckaywrigley/chatbot-ui"
+  belongsToLanguageId: language:typescript
+  category: agent-ui
+  description: |
+    Open-source ChatGPT-style chat interface built with Next.js and
+    Tailwind CSS. Supports multiple AI providers, conversation branching,
+    prompt templates, and plugin integration. Designed for developers who
+    want a polished chat frontend that connects to their own LLM backends
+    or API keys without vendor lock-in.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+  alternative_to:
+    - framework:open-webui
+    - framework:librechat
+---
+nodeKind: Framework
+id: framework:librechat
+attributes:
+  displayName: "LibreChat"
+  homepageUrl: "https://www.librechat.ai"
+  belongsToLanguageId: language:typescript
+  category: agent-ui
+  description: |
+    Multi-provider AI chat platform that aggregates OpenAI, Anthropic,
+    Google, and local model endpoints into a single unified interface.
+    Features include multi-user support, conversation search, plugins,
+    file uploads, code execution, and model comparison. Deployable via
+    Docker with MongoDB for persistence and supports custom endpoints
+    for enterprise LLM gateways.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+  alternative_to:
+    - framework:open-webui
+    - framework:chatbot-ui

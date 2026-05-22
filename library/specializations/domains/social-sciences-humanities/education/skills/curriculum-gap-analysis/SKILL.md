@@ -2,6 +2,12 @@
 name: curriculum-gap-analysis
 description: Identify gaps, overlaps, and misalignments in curriculum coverage through systematic comparison with standards and learning progressions
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:data-analysis, skill-area:strategic-analysis]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:business-analyst, role:technical-writer]
 ---
 
 # Curriculum Gap Analysis

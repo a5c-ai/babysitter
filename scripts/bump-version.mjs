@@ -20,320 +20,390 @@ const bumpVersion = (version, level) => {
   return `${major}.${minor}.${patch + 1}`;
 };
 
-const packageManifests = [
-  { path: "package.json" },
-  { path: "packages/sdk/package.json" },
-  { path: "packages/babysitter/package.json" },
+const isValidSemver = (version) => /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version);
+
+const getBumpLevel = (currentVersion, nextVersion) => {
+  const [currentMajor, currentMinor, currentPatch] = currentVersion.split(".").map((n) => parseInt(n, 10));
+  const [nextMajor, nextMinor, nextPatch] = nextVersion.split(".").map((n) => parseInt(n, 10));
+  if ([currentMajor, currentMinor, currentPatch, nextMajor, nextMinor, nextPatch].some((n) => Number.isNaN(n))) {
+    throw new Error(`Unable to compare versions: ${currentVersion} -> ${nextVersion}`);
+  }
+  if (nextMajor > currentMajor) return "major";
+  if (nextMinor > currentMinor) return "minor";
+  return "patch";
+};
+
+const parseExplicitVersion = (argv) => {
+  for (let index = 0; index < argv.length; index += 1) {
+    const value = argv[index];
+    if (value === "--version") {
+      return argv[index + 1] ?? null;
+    }
+    if (value.startsWith("--version=")) {
+      return value.slice("--version=".length);
+    }
+    if (!value.startsWith("--")) {
+      return value;
+    }
+  }
+  return null;
+};
+
+const writeJson = (path, data) => {
+  writeFileSync(path, `${JSON.stringify(data, null, 2)}\n`);
+};
+
+const updateVersionField = (path, version) => {
+  if (!existsSync(path)) {
+    return;
+  }
+  const data = JSON.parse(readFileSync(path, "utf8"));
+  data.version = version;
+  writeJson(path, data);
+};
+
+const syncDependencyVersion = (path, packageName, version) => {
+  if (!existsSync(path)) {
+    return;
+  }
+  const data = JSON.parse(readFileSync(path, "utf8"));
+  let changed = false;
+  for (const field of ["dependencies", "peerDependencies", "optionalDependencies", "devDependencies"]) {
+    if (data[field]?.[packageName]) {
+      const currentValue = data[field][packageName];
+      if (typeof currentValue === "string" && currentValue.startsWith("^")) {
+        data[field][packageName] = `^${version}`;
+      } else if (typeof currentValue === "string" && currentValue.startsWith("~")) {
+        data[field][packageName] = `~${version}`;
+      } else {
+        data[field][packageName] = version;
+      }
+      changed = true;
+    }
+  }
+  if (changed) {
+    writeJson(path, data);
+  }
+};
+
+const updateLockVersion = (path, version) => {
+  if (!existsSync(path)) {
+    return;
+  }
+  const data = JSON.parse(readFileSync(path, "utf8"));
+  if (data.version) {
+    data.version = version;
+  }
+  if (data.packages && data.packages[""]) {
+    data.packages[""].version = version;
+    if (data.packages[""].dependencies?.["@a5c-ai/agent-mux"]) {
+      data.packages[""].dependencies["@a5c-ai/agent-mux"] = `^${version}`;
+    }
+  }
+  const lockUpdates = {
+    "packages/agent-mux/adapters": {
+      version,
+      dependencies: { "@a5c-ai/agent-mux-core": version }
+    },
+    "packages/agent-mux/cli": {
+      version,
+      dependencies: {
+        "@a5c-ai/agent-mux-adapters": version,
+        "@a5c-ai/agent-mux-core": version,
+        "@a5c-ai/agent-mux-gateway": version,
+        "@a5c-ai/agent-mux-observability": version
+      }
+    },
+    "packages/agent-mux/core": {
+      version,
+      dependencies: { "@a5c-ai/agent-mux-observability": version }
+    },
+    "packages/agent-mux/gateway": {
+      version,
+      dependencies: {
+        "@a5c-ai/agent-mux-adapters": version,
+        "@a5c-ai/agent-mux-core": version
+      }
+    },
+    "packages/agent-mux/harness-mock": {
+      version,
+      dependencies: { "@a5c-ai/agent-mux-core": version }
+    },
+    "packages/agent-mux/mobile-android-app": {
+      version,
+      dependencies: { "@a5c-ai/agent-mux-ui": version }
+    },
+    "packages/agent-mux/mobile-ios-app": {
+      version,
+      dependencies: { "@a5c-ai/agent-mux-ui": version }
+    },
+    "packages/agent-mux/observability": {
+      version
+    },
+    "packages/agent-mux/sdk": {
+      version,
+      dependencies: {
+        "@a5c-ai/agent-mux-adapters": version,
+        "@a5c-ai/agent-mux-cli": version,
+        "@a5c-ai/agent-mux-core": version
+      }
+    },
+    "packages/agent-mux/tui": {
+      version,
+      dependencies: {
+        "@a5c-ai/agent-mux": version,
+        "@a5c-ai/agent-mux-observability": version
+      }
+    },
+    "packages/agent-mux/tv-androidtv-app": {
+      version
+    },
+    "packages/agent-mux/tv-appletv-app": {
+      version
+    },
+    "packages/agent-mux/ui": {
+      version,
+      dependencies: { "@a5c-ai/agent-mux-core": version }
+    },
+    "packages/agent-mux/watch-watchos-app": {
+      version
+    },
+    "packages/agent-mux/watch-wearos-app": {
+      version
+    },
+    "packages/agent-mux/webui": {
+      version,
+      dependencies: { "@a5c-ai/agent-mux-ui": version }
+    },
+    "packages/transport-mux": {
+      version,
+      dependencies: { "@a5c-ai/agent-mux-core": version }
+    },
+    "packages/triggers": {
+      version
+    },
+    "packages/agent-core": {
+      version,
+      dependencies: {
+        "@a5c-ai/agent-mux": version,
+        "@a5c-ai/babysitter-sdk": version
+      }
+    },
+    "packages/tasks-mux": {
+      version
+    },
+    "packages/babysitter-tui-plugins": {
+      version,
+      dependencies: {
+        "@a5c-ai/babysitter-sdk": version,
+        "@a5c-ai/agent-mux-tui": version,
+        "@a5c-ai/agent-mux": version
+      }
+    },
+    "packages/cloud": {
+      version
+    },
+    "packages/observer-dashboard": {
+      version
+    }
+  };
+  for (const [workspacePath, update] of Object.entries(lockUpdates)) {
+    const entry = data.packages?.[workspacePath];
+    if (!entry) {
+      continue;
+    }
+    entry.version = update.version;
+    if (update.dependencies && entry.dependencies) {
+      for (const [dependencyName, dependencyVersion] of Object.entries(update.dependencies)) {
+        if (entry.dependencies[dependencyName]) {
+          entry.dependencies[dependencyName] = dependencyVersion;
+        }
+      }
+    }
+  }
+  writeJson(path, data);
+};
+
+const workspaceManifestPaths = [
+  "package.json",
+  "packages/agent-catalog/package.json",
+  "packages/atlas/package.json",
+  "packages/agent-core/package.json",
+  "packages/sdk/package.json",
+  "packages/babysitter/package.json",
+  "packages/babysitter-agent/package.json",
+  "packages/extension-mux/package.json",
+  "packages/tasks-mux/package.json",
+  "packages/babysitter-tui-plugins/package.json",
+  "packages/cloud/package.json",
+  "packages/observer-dashboard/package.json",
+  "packages/hooks-mux/core/package.json",
+  "packages/hooks-mux/cli/package.json",
+  "packages/hooks-mux/adapter-claude/package.json",
+  "packages/hooks-mux/adapter-codex/package.json",
+  "packages/hooks-mux/adapter-gemini/package.json",
+  "packages/hooks-mux/adapter-copilot/package.json",
+  "packages/hooks-mux/adapter-cursor/package.json",
+  "packages/hooks-mux/adapter-pi/package.json",
+  "packages/hooks-mux/adapter-oh-my-pi/package.json",
+  "packages/hooks-mux/adapter-opencode/package.json",
+  "packages/hooks-mux/adapter-openclaw/package.json",
 ];
 
-const pluginManifests = [
-  { path: "plugins/babysitter/.claude-plugin/plugin.json" },
-  { path: "plugins/babysitter/plugin.json" },
+const agentMuxManifestPaths = [
+  "packages/agent-mux/adapters/package.json",
+  "packages/agent-mux/cli/package.json",
+  "packages/agent-mux/core/package.json",
+  "packages/agent-mux/gateway/package.json",
+  "packages/agent-mux/harness-mock/package.json",
+  "packages/agent-mux/mobile-android-app/package.json",
+  "packages/agent-mux/mobile-ios-app/package.json",
+  "packages/agent-mux/observability/package.json",
+  "packages/agent-mux/sdk/package.json",
+  "packages/agent-mux/tui/package.json",
+  "packages/agent-mux/tv-androidtv-app/package.json",
+  "packages/agent-mux/tv-appletv-app/package.json",
+  "packages/agent-mux/ui/package.json",
+  "packages/agent-mux/watch-watchos-app/package.json",
+  "packages/agent-mux/watch-wearos-app/package.json",
+  "packages/agent-mux/webui/package.json",
+  "packages/transport-mux/package.json",
+  "packages/triggers/package.json",
 ];
-const codexPackageManifestPath = "plugins/babysitter-codex/package.json";
-const codexPackageLockPath = "plugins/babysitter-codex/package-lock.json";
-const geminiPackageManifestPath = "plugins/babysitter-gemini/package.json";
-const geminiPluginManifestPath = "plugins/babysitter-gemini/plugin.json";
-const geminiExtensionManifestPath = "plugins/babysitter-gemini/gemini-extension.json";
-const geminiVersionsPath = "plugins/babysitter-gemini/versions.json";
-const githubPackageManifestPath = "plugins/babysitter-github/package.json";
-const cursorPackageManifestPath = "plugins/babysitter-cursor/package.json";
-const piPackageManifestPath = "plugins/babysitter-pi/package.json";
-const piPackageLockPath = "plugins/babysitter-pi/package-lock.json";
-const ompPackageManifestPath = "plugins/babysitter-omp/package.json";
-const ompPackageLockPath = "plugins/babysitter-omp/package-lock.json";
-const opencodePackageManifestPath = "plugins/babysitter-opencode/package.json";
 
-const manifests = packageManifests.map(({ path }) => ({
-  path,
-  data: JSON.parse(readFileSync(path, "utf8")),
-}));
+const pluginPackageManifestPaths = [
+];
 
-const pluginManifestData = pluginManifests.map(({ path }) => ({
-  path,
-  data: JSON.parse(readFileSync(path, "utf8")),
-}));
-const codexPackageManifest = existsSync(codexPackageManifestPath)
-  ? {
-      path: codexPackageManifestPath,
-      data: JSON.parse(readFileSync(codexPackageManifestPath, "utf8")),
-    }
-  : null;
-const geminiPackageManifest = existsSync(geminiPackageManifestPath)
-  ? {
-      path: geminiPackageManifestPath,
-      data: JSON.parse(readFileSync(geminiPackageManifestPath, "utf8")),
-    }
-  : null;
-const geminiPluginManifest = existsSync(geminiPluginManifestPath)
-  ? {
-      path: geminiPluginManifestPath,
-      data: JSON.parse(readFileSync(geminiPluginManifestPath, "utf8")),
-    }
-  : null;
-const geminiExtensionManifest = existsSync(geminiExtensionManifestPath)
-  ? {
-      path: geminiExtensionManifestPath,
-      data: JSON.parse(readFileSync(geminiExtensionManifestPath, "utf8")),
-    }
-  : null;
-const githubPackageManifest = existsSync(githubPackageManifestPath)
-  ? {
-      path: githubPackageManifestPath,
-      data: JSON.parse(readFileSync(githubPackageManifestPath, "utf8")),
-    }
-  : null;
-const cursorPackageManifest = existsSync(cursorPackageManifestPath)
-  ? {
-      path: cursorPackageManifestPath,
-      data: JSON.parse(readFileSync(cursorPackageManifestPath, "utf8")),
-    }
-  : null;
-const piPackageManifest = existsSync(piPackageManifestPath)
-  ? {
-      path: piPackageManifestPath,
-      data: JSON.parse(readFileSync(piPackageManifestPath, "utf8")),
-    }
-  : null;
-const ompPackageManifest = existsSync(ompPackageManifestPath)
-  ? {
-      path: ompPackageManifestPath,
-      data: JSON.parse(readFileSync(ompPackageManifestPath, "utf8")),
-    }
-  : null;
-const opencodePackageManifest = existsSync(opencodePackageManifestPath)
-  ? {
-      path: opencodePackageManifestPath,
-      data: JSON.parse(readFileSync(opencodePackageManifestPath, "utf8")),
-    }
-  : null;
+const pluginManifestPaths = [
+  "plugins/babysitter-unified/plugin.json",
+];
 
-const rootManifest = manifests[0].data;
+const versionsJsonPaths = [
+  "plugins/babysitter-unified/versions.json",
+];
+
+const lockPaths = ["package-lock.json"];
+
+const rootManifest = JSON.parse(readFileSync("package.json", "utf8"));
 const currentVersion = rootManifest.version;
+const explicitVersion = parseExplicitVersion(process.argv.slice(2));
 
-const lastTag = run("git describe --tags --abbrev=0");
-const logRange = lastTag ? `${lastTag}..HEAD` : "";
-const logCmd = lastTag
-  ? `git log ${logRange} --pretty=%s`
-  : "git log -n 50 --pretty=%s";
-const commits = run(logCmd, "");
+if (explicitVersion && !isValidSemver(explicitVersion)) {
+  throw new Error(`Invalid version argument: ${explicitVersion}`);
+}
 
+let newVersion = explicitVersion;
 let bumpTarget = "patch";
-if (/#major\b/i.test(commits)) {
-  bumpTarget = "major";
-} else if (/#minor\b/i.test(commits)) {
-  bumpTarget = "minor";
-}
+if (!newVersion) {
+  const lastTag = run("git describe --tags --abbrev=0");
+  const logRange = lastTag ? `${lastTag}..HEAD` : "";
+  const logCmd = lastTag
+    ? `git log ${logRange} --pretty=%s`
+    : "git log -n 50 --pretty=%s";
+  const commits = run(logCmd, "");
 
-const newVersion = bumpVersion(currentVersion, bumpTarget);
-
-for (const manifest of manifests) {
-  manifest.data.version = newVersion;
-  writeFileSync(manifest.path, `${JSON.stringify(manifest.data, null, 2)}\n`);
-}
-
-// Update plugin manifests - bump from their current version
-for (const pluginManifest of pluginManifestData) {
-  const currentPluginVersion = pluginManifest.data.version;
-  const newPluginVersion = bumpVersion(currentPluginVersion, bumpTarget);
-  pluginManifest.data.version = newPluginVersion;
-  writeFileSync(pluginManifest.path, `${JSON.stringify(pluginManifest.data, null, 2)}\n`);
-}
-
-// Update Codex package manifest - keep its own version stream, bumped by policy.
-if (codexPackageManifest) {
-  const currentCodexVersion = codexPackageManifest.data.version;
-  const newCodexVersion = bumpVersion(currentCodexVersion, bumpTarget);
-  codexPackageManifest.data.version = newCodexVersion;
-  writeFileSync(
-    codexPackageManifest.path,
-    `${JSON.stringify(codexPackageManifest.data, null, 2)}\n`,
-  );
-
-  if (existsSync(codexPackageLockPath)) {
-    const codexLock = JSON.parse(readFileSync(codexPackageLockPath, "utf8"));
-    codexLock.version = newCodexVersion;
-    if (codexLock.packages && codexLock.packages[""]) {
-      codexLock.packages[""].version = newCodexVersion;
-    }
-    writeFileSync(codexPackageLockPath, `${JSON.stringify(codexLock, null, 2)}\n`);
-  }
-}
-
-if (geminiPackageManifest) {
-  const currentGeminiVersion = geminiPackageManifest.data.version;
-  const newGeminiVersion = bumpVersion(currentGeminiVersion, bumpTarget);
-  geminiPackageManifest.data.version = newGeminiVersion;
-  writeFileSync(
-    geminiPackageManifest.path,
-    `${JSON.stringify(geminiPackageManifest.data, null, 2)}\n`,
-  );
-
-  if (geminiPluginManifest) {
-    geminiPluginManifest.data.version = newGeminiVersion;
-    writeFileSync(
-      geminiPluginManifest.path,
-      `${JSON.stringify(geminiPluginManifest.data, null, 2)}\n`,
-    );
+  if (/#major\b/i.test(commits)) {
+    bumpTarget = "major";
+  } else if (/#minor\b/i.test(commits)) {
+    bumpTarget = "minor";
   }
 
-  if (geminiExtensionManifest) {
-    geminiExtensionManifest.data.version = newGeminiVersion;
-    writeFileSync(
-      geminiExtensionManifest.path,
-      `${JSON.stringify(geminiExtensionManifest.data, null, 2)}\n`,
-    );
-  }
-
-  if (existsSync(geminiVersionsPath)) {
-    const geminiVersions = JSON.parse(readFileSync(geminiVersionsPath, "utf8"));
-    geminiVersions.extensionVersion = newGeminiVersion;
-    writeFileSync(geminiVersionsPath, `${JSON.stringify(geminiVersions, null, 2)}\n`);
-  }
+  newVersion = bumpVersion(currentVersion, bumpTarget);
+} else {
+  bumpTarget = getBumpLevel(currentVersion, newVersion);
 }
 
-// Update GitHub package manifest - keep its own version stream, bumped by policy.
-if (githubPackageManifest) {
-  const currentGithubVersion = githubPackageManifest.data.version;
-  const newGithubVersion = bumpVersion(currentGithubVersion, bumpTarget);
-  githubPackageManifest.data.version = newGithubVersion;
-  writeFileSync(
-    githubPackageManifest.path,
-    `${JSON.stringify(githubPackageManifest.data, null, 2)}\n`,
-  );
+const newAgentMuxVersion = newVersion;
+
+for (const path of [...workspaceManifestPaths, ...pluginPackageManifestPaths, ...pluginManifestPaths]) {
+  updateVersionField(path, newVersion);
 }
 
-// Update Cursor package manifest - keep its own version stream, bumped by policy.
-if (cursorPackageManifest) {
-  const currentCursorVersion = cursorPackageManifest.data.version;
-  const newCursorVersion = bumpVersion(currentCursorVersion, bumpTarget);
-  cursorPackageManifest.data.version = newCursorVersion;
-  writeFileSync(
-    cursorPackageManifest.path,
-    `${JSON.stringify(cursorPackageManifest.data, null, 2)}\n`,
-  );
+for (const path of agentMuxManifestPaths) {
+  updateVersionField(path, newAgentMuxVersion);
 }
 
-if (piPackageManifest) {
-  const currentPiVersion = piPackageManifest.data.version;
-  const newPiVersion = bumpVersion(currentPiVersion, bumpTarget);
-  piPackageManifest.data.version = newPiVersion;
-  writeFileSync(
-    piPackageManifest.path,
-    `${JSON.stringify(piPackageManifest.data, null, 2)}\n`,
-  );
-
-  if (existsSync(piPackageLockPath)) {
-    const piLock = JSON.parse(readFileSync(piPackageLockPath, "utf8"));
-    piLock.version = newPiVersion;
-    if (piLock.packages && piLock.packages[""]) {
-      piLock.packages[""].version = newPiVersion;
-    }
-    writeFileSync(piPackageLockPath, `${JSON.stringify(piLock, null, 2)}\n`);
-  }
-}
-
-if (ompPackageManifest) {
-  const currentOmpVersion = ompPackageManifest.data.version;
-  const newOmpVersion = bumpVersion(currentOmpVersion, bumpTarget);
-  ompPackageManifest.data.version = newOmpVersion;
-  writeFileSync(
-    ompPackageManifest.path,
-    `${JSON.stringify(ompPackageManifest.data, null, 2)}\n`,
-  );
-
-  if (existsSync(ompPackageLockPath)) {
-    const ompLock = JSON.parse(readFileSync(ompPackageLockPath, "utf8"));
-    ompLock.version = newOmpVersion;
-    if (ompLock.packages && ompLock.packages[""]) {
-      ompLock.packages[""].version = newOmpVersion;
-    }
-    writeFileSync(ompPackageLockPath, `${JSON.stringify(ompLock, null, 2)}\n`);
-  }
-}
-
-if (opencodePackageManifest) {
-  const currentOpencodeVersion = opencodePackageManifest.data.version;
-  const newOpencodeVersion = bumpVersion(currentOpencodeVersion, bumpTarget);
-  opencodePackageManifest.data.version = newOpencodeVersion;
-  writeFileSync(
-    opencodePackageManifest.path,
-    `${JSON.stringify(opencodePackageManifest.data, null, 2)}\n`,
-  );
-}
-
-// Write sdkVersion to versions.json (separate from plugin.json to avoid
-// Claude Code's plugin validator rejecting unrecognized keys)
-for (const versionsPath of [
-  "plugins/babysitter/versions.json",
-  "plugins/babysitter-codex/versions.json",
-  "plugins/babysitter-gemini/versions.json",
-  "plugins/babysitter-omp/versions.json",
-  "plugins/babysitter-opencode/versions.json",
-  "plugins/babysitter-pi/versions.json",
-  "plugins/babysitter-github/versions.json",
-  "plugins/babysitter-cursor/versions.json",
+for (const path of [
+  "package.json",
+  "packages/babysitter/package.json",
+  "packages/babysitter-agent/package.json",
+  "packages/babysitter-tui-plugins/package.json",
 ]) {
-  const versionsData = existsSync(versionsPath)
-    ? JSON.parse(readFileSync(versionsPath, "utf8"))
-    : {};
-  versionsData.sdkVersion = newVersion;
-  writeFileSync(versionsPath, `${JSON.stringify(versionsData, null, 2)}\n`);
+  syncDependencyVersion(path, "@a5c-ai/babysitter-sdk", newVersion);
 }
 
-// Update marketplace.json plugin entry - bump from its current version
+for (const path of [
+  "package.json",
+  "packages/agent-core/package.json",
+  "packages/sdk/package.json",
+  "packages/babysitter-agent/package.json",
+  "packages/agent-mux/adapters/package.json",
+  "packages/agent-mux/cli/package.json",
+  "packages/agent-mux/core/package.json",
+  "packages/agent-mux/gateway/package.json",
+  "packages/agent-mux/harness-mock/package.json",
+  "packages/agent-mux/mobile-android-app/package.json",
+  "packages/agent-mux/mobile-ios-app/package.json",
+  "packages/agent-mux/sdk/package.json",
+  "packages/agent-mux/tui/package.json",
+  "packages/agent-mux/webui/package.json",
+  "packages/agent-mux/ui/package.json",
+  "packages/agent-mux/webui/package.json",
+  "packages/transport-mux/package.json",
+  "packages/babysitter-tui-plugins/package.json",
+]) {
+  syncDependencyVersion(path, "@a5c-ai/agent-core", newVersion);
+  syncDependencyVersion(path, "@a5c-ai/babysitter-agent", newVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-mux", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-mux-adapters", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-mux-cli", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-mux-core", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-mux-gateway", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-mux-observability", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-mux-tui", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-mux-ui", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-mux-webui", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/transport-mux", newAgentMuxVersion);
+}
+
+for (const path of [
+  "packages/hooks-mux/cli/package.json",
+  "packages/hooks-mux/adapter-claude/package.json",
+  "packages/hooks-mux/adapter-codex/package.json",
+  "packages/hooks-mux/adapter-gemini/package.json",
+  "packages/hooks-mux/adapter-copilot/package.json",
+  "packages/hooks-mux/adapter-cursor/package.json",
+  "packages/hooks-mux/adapter-pi/package.json",
+  "packages/hooks-mux/adapter-oh-my-pi/package.json",
+  "packages/hooks-mux/adapter-opencode/package.json",
+  "packages/hooks-mux/adapter-openclaw/package.json",
+]) {
+  syncDependencyVersion(path, "@a5c-ai/hooks-mux-core", newVersion);
+}
+
+for (const path of versionsJsonPaths) {
+  const data = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : {};
+  data.sdkVersion = newVersion;
+  if ("extensionVersion" in data) {
+    data.extensionVersion = newVersion;
+  }
+  writeJson(path, data);
+}
+
 const marketplacePath = ".claude-plugin/marketplace.json";
 if (existsSync(marketplacePath)) {
   const marketplaceData = JSON.parse(readFileSync(marketplacePath, "utf8"));
-  if (marketplaceData.plugins) {
-    const babysitterPlugin = marketplaceData.plugins.find(
-      (plugin) => plugin.name === "babysitter"
-    );
+  if (Array.isArray(marketplaceData.plugins)) {
+    const babysitterPlugin = marketplaceData.plugins.find((plugin) => plugin.name === "babysitter");
     if (babysitterPlugin) {
-      const currentMarketplaceVersion = babysitterPlugin.version;
-      const newMarketplaceVersion = bumpVersion(currentMarketplaceVersion, bumpTarget);
-      babysitterPlugin.version = newMarketplaceVersion;
-      writeFileSync(marketplacePath, `${JSON.stringify(marketplaceData, null, 2)}\n`);
+      babysitterPlugin.version = newVersion;
     }
   }
+  writeJson(marketplacePath, marketplaceData);
 }
 
-const lockPath = "package-lock.json";
-if (existsSync(lockPath)) {
-  const lock = JSON.parse(readFileSync(lockPath, "utf8"));
-  if (lock.version) lock.version = newVersion;
-  if (lock.packages && lock.packages[""]) {
-    lock.packages[""].version = newVersion;
-  }
-  const sdkWorkspaceKey = "packages/sdk";
-  if (lock.packages && lock.packages[sdkWorkspaceKey]) {
-    lock.packages[sdkWorkspaceKey].version = newVersion;
-  }
-  const babysitterWorkspaceKey = "packages/babysitter";
-  if (lock.packages && lock.packages[babysitterWorkspaceKey]) {
-    lock.packages[babysitterWorkspaceKey].version = newVersion;
-  }
-  const sdkManifest = manifests.find(
-    (manifest) => manifest.path === "packages/sdk/package.json",
-  );
-  const sdkName = sdkManifest?.data?.name;
-  if (sdkName) {
-    const sdkNodeModulesKey = `node_modules/${sdkName}`;
-    if (lock.packages && lock.packages[sdkNodeModulesKey]) {
-      lock.packages[sdkNodeModulesKey].version = newVersion;
-    }
-  }
-  const babysitterManifest = manifests.find(
-    (manifest) => manifest.path === "packages/babysitter/package.json",
-  );
-  const babysitterName = babysitterManifest?.data?.name;
-  if (babysitterName) {
-    const babysitterNodeModulesKey = `node_modules/${babysitterName}`;
-    if (lock.packages && lock.packages[babysitterNodeModulesKey]) {
-      lock.packages[babysitterNodeModulesKey].version = newVersion;
-    }
-  }
-  writeFileSync(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
+for (const path of lockPaths) {
+  updateLockVersion(path, newVersion);
 }
 
 const changelogPath = "CHANGELOG.md";

@@ -1,0 +1,46 @@
+nodeKind: ToolServer
+id: tool-server:slack-mcp
+attributes:
+  displayName: "Slack MCP"
+  description: "MCP server providing programmatic access to Slack workspaces. Enables AI agents to list channels, post messages, reply to threads, add reactions, and retrieve user profiles. Supports stdio transport."
+  protocol: mcp
+  category: communication
+  repoUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/slack
+  npmPackage: "@modelcontextprotocol/server-slack"
+  maintainer: Anthropic
+  mcpTransports:
+    - mcp-transport:stdio
+  tools:
+    - tool-descriptor:slack.list-channels
+    - tool-descriptor:slack.post-message
+    - tool-descriptor:slack.reply-to-thread
+    - tool-descriptor:slack.add-reaction
+    - tool-descriptor:slack.get-channel-history
+    - tool-descriptor:slack.get-thread-replies
+    - tool-descriptor:slack.get-users
+    - tool-descriptor:slack.get-user-profile
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:slack.list-channels
+  - target: tool-descriptor:slack.post-message
+  - target: tool-descriptor:slack.reply-to-thread
+  - target: tool-descriptor:slack.add-reaction
+  - target: tool-descriptor:slack.get-channel-history
+  - target: tool-descriptor:slack.get-thread-replies
+  - target: tool-descriptor:slack.get-users
+  - target: tool-descriptor:slack.get-user-profile
+  integrates_with:
+  - target: tool:slack
+  - target: channel:slack-via-mcp
+  implements:
+    - target: extension-interface:orchestration
+  requires_capability:
+    - target: capability:supports-mcp
+      level: required
+  sourced_from:
+    - target: source-ref:mcp-servers-registry
+  exposes_resource:
+    - target: mcp-resource:slack-channel-history
+  lib_applies_to_domain:
+    - target: domain:software-engineering

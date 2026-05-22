@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:model-family.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:model-family
+  text: |
+    a family of models
+  status: canonical
+edges:
+  defines:
+    - term:model-family

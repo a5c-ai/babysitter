@@ -1,0 +1,45 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:pi-sdk.core@current
+attributes:
+  displayName: Pi SDK Core (current)
+  agentVersionId: agent-version:pi-sdk@current
+  packageRef: source-ref:pi-github
+  loopIteratorPolicy: process-function-driven
+  loopIteratorNotes: |
+    Host program drives the Pi SDK chunk protocol — message_start /
+    content_delta / tool_call_start / tool_call_delta / tool_call_ready
+    / tool_result / message_stop. The tool-use loop is owned by the
+    host; the SDK provides a streaming chunk iterator.
+  contextManagementStrategy: user-managed
+  compactionTriggerNotes: |
+    No in-SDK compaction primitive; host program manages context.
+  subagentInvokerPolicy: platform-mediated
+  subagentInvokerNotes: |
+    Pi SDK supports parallel execution; subagent dispatch is host-mediated.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Streaming chunks deliver the final response; host program emits
+    on `message_stop`.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: pi-internal
+  supportedTransportProtocols: []
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:pi
+    role: core
+  speaks: []
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:progress-stream

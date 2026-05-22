@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:hook-merge-diagnostic
+attributes:
+  canonicalDefinitionId: definition:hook-merge-diagnostic.canonical
+  displayName: "HookMergeDiagnostic"
+  kind: hook
+  references:
+    - "NodeKind:HookMergeDiagnostic"
+  description: |
+    A record produced by hooks-mux when merging hook surfaces from multiple sources (plugins, settings, profiles)
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

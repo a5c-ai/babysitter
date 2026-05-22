@@ -1,0 +1,12 @@
+nodeKind: Responsibility
+id: responsibility:approve-architecture
+attributes:
+  displayName: "Approve architecture proposals"
+  cadence: as-needed
+  requiredSkills:
+    - skill:system-design
+  description: |
+    Approve architecture proposals.
+edges:
+  requires_skill:
+    - skill:system-design

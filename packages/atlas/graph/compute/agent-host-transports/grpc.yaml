@@ -1,0 +1,28 @@
+nodeKind: AgentHostTransport
+id: agent-host-transport:grpc
+attributes:
+  displayName: "grpc"
+  kind: grpc
+  description: |
+    gRPC bidirectional streaming between agent host and agent process —
+    HTTP/2 framed, protobuf-encoded. Used by hosted-agent backends and
+    mux gateways that need fan-in/fan-out across many concurrent
+    invocations with backpressure. Distinct from `http` (REST/SSE) and
+    `ws` (WebSocket framing).
+  inboundMessageFormat: |
+    Protobuf-encoded request messages over a bidirectional streaming RPC.
+    Method definition is per-host — most a5c gateways use a single
+    `RunAgent(stream Request) returns (stream Event)` shape.
+  outboundMessageFormat: |
+    Protobuf-encoded event messages — turn deltas, tool calls, lifecycle
+    events. Stream-end carries the terminal status.
+  signalForwarding: |
+    gRPC cancellation propagates through context cancellation; client-side
+    `Context.cancel()` triggers server-side `Context.Done()`. There is no
+    direct POSIX-signal mapping — hosts that need stronger guarantees
+    layer a separate control-plane RPC (e.g. `Cancel(invocationId)`).
+  ptySemantics: |
+    None — gRPC is a structured RPC transport, not a terminal substrate.
+edges:
+  used_by:
+    - agent-version:agent-mux-remote@current

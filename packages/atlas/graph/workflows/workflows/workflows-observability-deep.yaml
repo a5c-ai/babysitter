@@ -1,0 +1,123 @@
+---
+nodeKind: Workflow
+id: workflow:alert-tuning
+attributes:
+  displayName: "Alert Tuning"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Reviews and optimizes alerting rules to reduce noise — analyzing
+    alert-to-incident conversion rates, suppressing flapping alerts, tuning
+    thresholds based on historical data, consolidating duplicate alerts, and
+    adjusting routing policies. Excludes initial alert creation.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:observability
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:on-call-rotation
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:incident-response-team
+---
+nodeKind: Workflow
+id: workflow:dashboard-governance
+attributes:
+  displayName: "Dashboard Governance"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Governs observability dashboards — enforcing naming conventions, archiving
+    unused dashboards, standardizing panel layouts, validating data source
+    queries for performance, and ensuring critical dashboards have owners and
+    are tested against dashboard-as-code definitions. Excludes dashboard
+    creation.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:observability
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:slo-burn-rate-review
+attributes:
+  displayName: "SLO Burn Rate Review"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Reviews SLO error budget consumption rates across services — identifying
+    services burning budget too fast, correlating burn-rate spikes with
+    deployments or incidents, and triggering reliability-focused work when
+    budgets approach exhaustion. Excludes SLO definition changes.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:observability
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:log-retention-policy
+attributes:
+  displayName: "Log Retention Policy"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews and enforces log retention configurations — auditing log volume
+    growth, validating retention periods against compliance requirements,
+    optimizing storage tiers, implementing log sampling strategies, and
+    ensuring audit logs meet minimum retention mandates. Excludes log pipeline
+    architecture.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:security-reviewer
+    - target: role:cloud-architect
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:observability
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:security-team

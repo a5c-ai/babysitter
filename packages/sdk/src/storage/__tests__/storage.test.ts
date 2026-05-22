@@ -1,14 +1,14 @@
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import os from "os";
 import path from "path";
 import { promises as fs } from "fs";
 import { createRunDir } from "../../storage/createRunDir";
 import { appendEvent, loadJournal } from "../../storage/journal";
-import { snapshotState } from "../../storage/snapshotState";
-import { storeTaskArtifacts } from "../../storage/storeTaskArtifacts";
 import { getDiskUsage, findOrphanedBlobs } from "../../storage/cleanup";
 import { acquireRunLock, releaseRunLock } from "../../storage/lock";
-import { readRunMetadata } from "../../storage/runFiles";
+import { readRunMetadata, writeRunMetadata } from "../../storage/runFiles";
+import { __resetICloudDriveWarningCacheForTests } from "../../storage/icloudWarning";
+import { BABYSITTER_SDK_VERSION } from "../../sdkVersion";
 
 let tmpRoot: string;
 
@@ -17,6 +17,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+  __resetICloudDriveWarningCacheForTests();
   await fs.rm(tmpRoot, { recursive: true, force: true });
 });
 
@@ -32,6 +33,7 @@ describe("storage primitives", () => {
     });
     const runJson = JSON.parse(await fs.readFile(path.join(runDir, "run.json"), "utf8"));
     expect(runJson.layoutVersion).toBe("test-layout");
+    expect(runJson.sdkVersion).toBe(BABYSITTER_SDK_VERSION);
     expect(await fs.stat(path.join(runDir, "journal"))).toBeDefined();
   });
 
@@ -51,47 +53,37 @@ describe("storage primitives", () => {
     expect(files[0].startsWith("000001")).toBe(true);
     const events = await loadJournal(runDir);
     expect(events[0].type).toBe("RUN_CREATED");
+    expect(events[0].sdkVersion).toBe(BABYSITTER_SDK_VERSION);
     expect(events[0].data.harness).toBe("pi");
     expect(events[1].type).toBe("EFFECT_REQUESTED");
+    expect(events[1].sdkVersion).toBe(BABYSITTER_SDK_VERSION);
     expect(events[1].data.harness).toBe("pi");
   });
 
-  test("snapshotState writes rebuildable cache", async () => {
+  test("appendEvent serializes concurrent writes for the same run directory", async () => {
     const { runDir } = await createRunDir({
       runsRoot: tmpRoot,
-      runId: "run-3",
-      request: "state",
+      runId: "run-concurrent-append",
+      request: "append-concurrently",
       processPath: ".a5c/processes/foo.js",
     });
-    await snapshotState({ runDir, state: { cursor: 123 }, journalHead: { seq: 1, ulid: "X" } });
-    const contents = JSON.parse(await fs.readFile(path.join(runDir, "state", "state.json"), "utf8"));
-    expect(contents.state.cursor).toBe(123);
-    expect(contents.journalHead.seq).toBe(1);
-  });
 
-  test("storeTaskArtifacts writes metadata and blobs", async () => {
-    const { runDir } = await createRunDir({
-      runsRoot: tmpRoot,
-      runId: "run-4",
-      request: "tasks",
-      processPath: ".a5c/processes/foo.js",
-    });
-    await storeTaskArtifacts({
-      runDir,
-      effectId: "effect-1",
-      task: { kind: "act" },
-      result: { ok: true },
-      artifacts: [
-        { name: "stdout.txt", data: "hello" },
-        { name: "large.bin", data: Buffer.alloc(600 * 1024, 1) },
-      ],
-    });
-    const artifactsManifest = JSON.parse(
-      await fs.readFile(path.join(runDir, "tasks/effect-1/artifacts.json"), "utf8")
+    const results = await Promise.all(
+      Array.from({ length: 25 }, (_, index) =>
+        appendEvent({
+          runDir,
+          eventType: "PROCESS_LOG",
+          event: { logSeq: index + 1, message: `log-${index + 1}` },
+        })
+      )
     );
-    expect(artifactsManifest).toHaveLength(2);
-    const blobEntry = artifactsManifest.find((a: any) => a.storedAt.startsWith("blobs/"));
-    expect(blobEntry).toBeDefined();
+
+    const resultSeqs = results.map((result) => result.seq).sort((a, b) => a - b);
+    expect(resultSeqs).toEqual(Array.from({ length: 25 }, (_, index) => index + 1));
+
+    const journal = await loadJournal(runDir);
+    expect(journal.map((event) => event.seq)).toEqual(resultSeqs);
+    expect(new Set(journal.map((event) => event.filename)).size).toBe(journal.length);
   });
 
   test("disk usage + orphan detection", async () => {
@@ -102,11 +94,8 @@ describe("storage primitives", () => {
       processPath: ".a5c/processes/foo.js",
     });
     await appendEvent({ runDir, eventType: "RUN_CREATED", event: {} });
-    await storeTaskArtifacts({
-      runDir,
-      effectId: "effect-usage",
-      artifacts: [{ name: "stdout.txt", data: "log" }],
-    });
+    await fs.mkdir(path.join(runDir, "tasks", "effect-usage", "artifacts"), { recursive: true });
+    await fs.writeFile(path.join(runDir, "tasks", "effect-usage", "artifacts", "stdout.txt"), "log");
     const usage = await getDiskUsage(tmpRoot, "run-5");
     expect(usage.totalBytes).toBeGreaterThan(0);
     const orphaned = await findOrphanedBlobs(tmpRoot, "run-5");
@@ -245,5 +234,92 @@ describe("storage primitives", () => {
     expect(lock2.pid).toBe(process.pid);
     expect(lock2.owner).toBe("owner-b");
     await releaseRunLock(runDir);
+  });
+
+  test("warns once when run state is placed inside iCloud Drive", async () => {
+    const stderrChunks: string[] = [];
+    const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(((chunk: string | Uint8Array) => {
+      stderrChunks.push(typeof chunk === "string" ? chunk : Buffer.from(chunk).toString());
+      return true;
+    }) as typeof process.stderr.write);
+
+    try {
+      const runsRoot = path.join(
+        tmpRoot,
+        "Library",
+        "Mobile Documents",
+        "com~apple~CloudDocs",
+        "project",
+        ".a5c",
+        "runs",
+      );
+      const { runDir } = await createRunDir({
+        runsRoot,
+        runId: "run-icloud",
+        request: "icloud-warning",
+        processPath: ".a5c/processes/foo.js",
+      });
+
+      await appendEvent({ runDir, eventType: "RUN_CREATED", event: { ok: true } });
+
+      const stderr = stderrChunks.join("");
+      expect(stderr).toContain("Babysitter state is inside iCloud Drive");
+      expect(stderr).toContain("issues/77");
+      expect(stderr.match(/Babysitter state is inside iCloud Drive/g)).toHaveLength(1);
+    } finally {
+      stderrSpy.mockRestore();
+    }
+  });
+
+  test("createRunDir auto-creates parent package.json with type:module", async () => {
+    const runsRoot = path.join(tmpRoot, "dot-a5c", "runs");
+    await createRunDir({
+      runsRoot,
+      runId: "run-pkg",
+      request: "pkg-test",
+    });
+    const pkgPath = path.join(tmpRoot, "dot-a5c", "package.json");
+    const content = JSON.parse(await fs.readFile(pkgPath, "utf8"));
+    expect(content).toEqual({ type: "module" });
+  });
+
+  test("createRunDir does not overwrite existing parent package.json", async () => {
+    const parentDir = path.join(tmpRoot, "existing-parent");
+    const runsRoot = path.join(parentDir, "runs");
+    await fs.mkdir(parentDir, { recursive: true });
+    await fs.writeFile(
+      path.join(parentDir, "package.json"),
+      JSON.stringify({ name: "my-project", type: "commonjs" }),
+    );
+    await createRunDir({
+      runsRoot,
+      runId: "run-existing-pkg",
+      request: "existing-pkg-test",
+    });
+    const content = JSON.parse(
+      await fs.readFile(path.join(parentDir, "package.json"), "utf8"),
+    );
+    expect(content.name).toBe("my-project");
+    expect(content.type).toBe("commonjs");
+  });
+
+  test("writeRunMetadata atomically updates run.json", async () => {
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-write-meta",
+      request: "write-meta-test",
+      processPath: ".a5c/processes/foo.js",
+    });
+    const original = await readRunMetadata(runDir);
+    expect(original.entrypoint.importPath).toContain("foo.js");
+
+    const updated = { ...original, entrypoint: { importPath: "/new/path.js", exportName: "handler" }, processId: "new-process" };
+    await writeRunMetadata(runDir, updated);
+
+    const reread = await readRunMetadata(runDir);
+    expect(reread.entrypoint.importPath).toBe("/new/path.js");
+    expect(reread.entrypoint.exportName).toBe("handler");
+    expect(reread.processId).toBe("new-process");
+    expect(reread.runId).toBe("run-write-meta");
   });
 });

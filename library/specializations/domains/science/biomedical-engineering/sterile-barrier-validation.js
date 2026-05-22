@@ -17,6 +17,12 @@
  * - ISO 11607-1:2019 Packaging for terminally sterilized medical devices - Requirements
  * - ISO 11607-2:2019 Packaging - Validation requirements for forming, sealing and assembly processes
  * - ASTM F2095 Standard Test Methods for Seal Strength of Flexible Barrier Materials
+ *
+ * @graph
+ *   domains: [domain:biomedical-engineering]
+ *   skillAreas: [skill-area:data-analysis, skill-area:sensor-fusion, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:biomedical-engineer, role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -5,6 +5,13 @@
  * @category Operational Architecture
  * @inputs { system: string, architecture: object, securityRequirements?: object, complianceStandards?: string[] }
  * @outputs { success: boolean, threatModel: object, securityRisks: object[], remediationPlan: object[], complianceStatus: object }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:security-audit, workflow:architecture-decision-record]
+ *   roles: [role:architect, role:security-engineer]
+ *   skillAreas: [skill-area:threat-modeling, skill-area:application-security-testing]
+ *   topics: [topic:zero-trust-architecture, topic:defense-in-depth]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

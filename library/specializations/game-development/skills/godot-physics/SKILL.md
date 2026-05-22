@@ -2,6 +2,11 @@
 name: godot-physics
 description: Godot physics skill for rigid bodies, areas, collision layers, and raycasting.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:physics-simulation, skill-area:game-engines]
+  roles: [role:game-developer]
 ---
 
 # Godot Physics Skill

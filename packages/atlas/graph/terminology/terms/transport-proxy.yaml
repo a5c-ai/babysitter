@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:transport-proxy
+attributes:
+  canonicalDefinitionId: definition:transport-proxy.canonical
+  displayName: "TransportProxy"
+  kind: protocol
+  references:
+    - "NodeKind:TransportProxy"
+  description: |
+    Optional interposer (recording, integrity, multiplexing)
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:backend

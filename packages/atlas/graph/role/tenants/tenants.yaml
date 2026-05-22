@@ -1,0 +1,46 @@
+---
+nodeKind: Tenant
+id: tenant:acme
+attributes:
+  displayName: "Acme Corp"
+  tenantKind: workspace
+  isolationLevel: logical
+  regions: ["us-east-1", "us-west-2"]
+  description: |
+    Enterprise tenant; primary anchor for all Acme-affiliated runs, quotas,
+    and budgets.
+edges:
+  owned_by:
+    - target: org-unit:platform-team
+  owns_workspace:
+    - target: workspace:local-developer-default
+  scopes_runs:
+    - target: run:01kqex-example-run-001
+    - target: session:01kqex-session-001
+  complies_with:
+    - target: compliance:soc-2
+---
+nodeKind: Tenant
+id: tenant:globex
+attributes:
+  displayName: "Globex Industries"
+  tenantKind: account
+  isolationLevel: logical
+  regions: ["eu-central-1"]
+  description: |
+    Mid-market tenant on a shared multi-tenant cluster pinned to Frankfurt.
+edges:
+  owned_by:
+    - target: org-unit:platform-team
+---
+nodeKind: Tenant
+id: tenant:initech
+attributes:
+  displayName: "Initech LLC"
+  tenantKind: project
+  isolationLevel: logical
+  description: |
+    14-day trial tenant evaluating the platform on the starter plan.
+edges:
+  owned_by:
+    - target: org-unit:platform-team

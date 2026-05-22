@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:hook-mapping.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:hook-mapping
+  text: |
+    per-(agent, canonical-hook) mapping recording the agent's native event name, version range, payload shape, and delivery
+  status: canonical
+edges:
+  defines:
+    - term:hook-mapping

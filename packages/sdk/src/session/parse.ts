@@ -13,8 +13,9 @@ import { SessionError, SessionErrorCode } from './types';
 export const DEFAULT_SESSION_STATE: SessionState = {
   active: false,
   iteration: 1,
-  maxIterations: 256,
+  maxIterations: 65_000,
   runId: '',
+  runIds: [],
   startedAt: '',
   lastIterationAt: '',
   iterationTimes: [],
@@ -75,6 +76,11 @@ export function parseYamlFrontmatter(content: string): { frontmatter: Record<str
  * Parse session state from YAML frontmatter values.
  */
 export function parseSessionState(frontmatter: Record<string, string>): SessionState {
+  const parseString = (value: string | undefined, defaultValue: string): string => {
+    if (!value || value === 'undefined') return defaultValue;
+    return value;
+  };
+
   const parseNumber = (value: string | undefined, defaultValue: number): number => {
     if (!value) return defaultValue;
     const parsed = parseInt(value, 10);
@@ -94,14 +100,28 @@ export function parseSessionState(frontmatter: Record<string, string>): SessionS
       .filter(n => Number.isFinite(n) && n > 0);
   };
 
+  const parseStringArray = (value: string | undefined): string[] => {
+    if (!value || value.trim() === '') return [];
+    return value.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  };
+
+  const metadata = Object.fromEntries(
+    Object.entries(frontmatter)
+      .filter(([key]) => key.startsWith('metadata_'))
+      .map(([key, value]) => [key.slice('metadata_'.length), value]),
+  );
+
   return {
     active: parseBoolean(frontmatter.active, DEFAULT_SESSION_STATE.active),
     iteration: parseNumber(frontmatter.iteration, DEFAULT_SESSION_STATE.iteration),
     maxIterations: parseNumber(frontmatter.max_iterations, DEFAULT_SESSION_STATE.maxIterations),
-    runId: frontmatter.run_id ?? DEFAULT_SESSION_STATE.runId,
+    runId: parseString(frontmatter.run_id, DEFAULT_SESSION_STATE.runId),
+    runDir: parseString(frontmatter.run_dir, '').trim() || undefined,
+    runIds: parseStringArray(frontmatter.run_ids),
     startedAt: frontmatter.started_at ?? DEFAULT_SESSION_STATE.startedAt,
     lastIterationAt: frontmatter.last_iteration_at ?? DEFAULT_SESSION_STATE.lastIterationAt,
     iterationTimes: parseNumberArray(frontmatter.iteration_times),
+    metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
   };
 }
 
@@ -178,3 +198,4 @@ export function validateSessionState(state: SessionState): void {
 export function getSessionFilePath(stateDir: string, sessionId: string): string {
   return `${stateDir}/${sessionId}.md`;
 }
+

@@ -1,0 +1,20 @@
+nodeKind: StackPart
+id: stack-part:event-bus
+attributes:
+  displayName: "Event Bus"
+  category: infrastructure
+  description: |
+    Publish-subscribe backbone that decouples event producers from consumers,
+    enabling event-driven architectures across microservices. Producers
+    publish events to named topics/channels; consumers subscribe and react
+    asynchronously, providing temporal decoupling and fan-out.
+
+    Apache Kafka is the dominant high-throughput option with strong ordering
+    guarantees per partition and durable log retention. AWS EventBridge
+    provides serverless routing with content-based filtering and schema
+    registry. NATS offers extremely low-latency pub/sub for service meshes.
+    Key concerns include at-least-once vs exactly-once delivery semantics,
+    consumer group lag monitoring, topic partitioning, and schema evolution.
+edges:
+  stack_part_used_by:
+    - target: skill-area:kafka-stream-processing

@@ -17,6 +17,12 @@
  * - FTIR: https://www.thermofisher.com/us/en/home/industrial/spectroscopy-elemental-isotope-analysis/spectroscopy-elemental-isotope-analysis-learning-center/molecular-spectroscopy-information/ftir-information.html
  * - Raman: https://www.horiba.com/int/scientific/technologies/raman-imaging-and-spectroscopy/
  * - NMR: https://www.bruker.com/en/products-and-solutions/mr/nmr.html
+ *
+ * @graph
+ *   domains: [domain:materials-science]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

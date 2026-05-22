@@ -17,6 +17,10 @@ metadata:
     - beautifulsoup4
     - pandas
     - custom scrapers
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:competitive-intelligence, skill-area:market-research, skill-area:strategic-analysis]
+  roles: [role:data-analyst, role:strategic-planner, role:marketing-strategist]
 ---
 
 # Competitive Intelligence Tracker

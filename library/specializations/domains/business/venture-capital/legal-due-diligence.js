@@ -3,6 +3,11 @@
  * @description Review of corporate structure, cap table accuracy, material contracts, intellectual property ownership, litigation history, and regulatory compliance status
  * @inputs { companyName: string, corporateDocuments: object, contracts: array, ipDocuments: object }
  * @outputs { success: boolean, corporateReview: object, capTableAnalysis: object, contractsReview: object, complianceStatus: object, artifacts: array }
+  * @graph
+ *   domains: [domain:venture-capital]
+ *   skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+ *   roles: [role:financial-analyst]
+ *   workflows: [workflow:contract-lifecycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

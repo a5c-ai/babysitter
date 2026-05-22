@@ -1,0 +1,13 @@
+nodeKind: Benchmark
+id: benchmark:apps
+attributes:
+  displayName: "APPS"
+  homepageUrl: https://github.com/hendrycks/apps
+  kind: code-generation
+  targetsKind: ModelVersion
+  description: |
+    APPS — competitive-programming-style benchmark spanning introductory, interview, and competition difficulty tiers.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science

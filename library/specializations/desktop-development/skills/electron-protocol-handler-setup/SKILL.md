@@ -3,6 +3,12 @@ name: electron-protocol-handler-setup
 description: Register and handle custom URL protocols (deep linking) across platforms for Electron applications
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [electron, deep-linking, protocol-handler, url-scheme, desktop]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop, skill-area:protocol-design]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # electron-protocol-handler-setup

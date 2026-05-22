@@ -3,6 +3,12 @@
  * @description Conduct systematic analysis comparing current-state processes to desired future-state or industry benchmarks. Identify gaps, root causes, and prioritize improvement opportunities.
  * @inputs { projectName: string, currentState: object, futureState: object, benchmarks: array, stakeholders: array }
  * @outputs { success: boolean, gapAnalysisMatrix: object, rootCauseAnalysis: object, prioritizedImprovements: array, artifacts: array }
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:competitive-intelligence]
+ *   workflows: [workflow:market-analysis]
+ *   roles: [role:business-analyst, role:strategic-planner]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

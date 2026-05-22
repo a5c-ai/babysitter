@@ -12,6 +12,11 @@ metadata:
   domain: business
   category: Resource Management
   id: SK-003
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:capacity-planning-ops, skill-area:roadmap-planning, skill-area:quantitative-modeling]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:technical-program-manager, role:operations-analyst]
 ---
 
 # Resource Leveling Optimizer

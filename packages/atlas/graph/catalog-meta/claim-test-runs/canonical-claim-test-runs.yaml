@@ -1,0 +1,79 @@
+---
+nodeKind: ClaimTestRun
+id: claim-test-run:claude-code-cli-command-2026-05-04
+attributes:
+  claimTestId: claim-test:claude-code-cli-command
+  runAt: "2026-05-04T00:00:00Z"
+  result: pass
+  durationMs: 218
+  output: |
+    tests: 2
+    pass: 1
+    skipped: 1
+    fail: 0
+    Source-of-truth subtest passed (catalog records cliCommand="claude").
+    Fixture subtest skipped (no claude --help fixture present).
+edges:
+  test_run_of:
+    - target: claim-test:claude-code-cli-command
+---
+nodeKind: ClaimTestRun
+id: claim-test-run:claude-code-session-path-convention-2026-05-04
+attributes:
+  claimTestId: claim-test:claude-code-session-path-convention
+  runAt: "2026-05-04T00:00:00Z"
+  result: pass
+  durationMs: 207
+  output: |
+    tests: 2
+    pass: 2
+    fail: 0
+edges:
+  test_run_of:
+    - target: claim-test:claude-code-session-path-convention
+---
+nodeKind: ClaimTestRun
+id: claim-test-run:claude-opus-4-7-context-window-2026-05-04
+attributes:
+  claimTestId: claim-test:claude-opus-4-7-context-window
+  runAt: "2026-05-04T00:00:00Z"
+  result: pass
+  durationMs: 206
+  output: |
+    tests: 2
+    pass: 2
+    fail: 0
+edges:
+  test_run_of:
+    - target: claim-test:claude-opus-4-7-context-window
+---
+nodeKind: ClaimTestRun
+id: claim-test-run:filesystem-mcp-tool-list-2026-05-04
+attributes:
+  claimTestId: claim-test:filesystem-mcp-tool-list
+  runAt: "2026-05-04T00:00:00Z"
+  result: pass
+  durationMs: 202
+  output: |
+    tests: 2
+    pass: 2
+    fail: 0
+edges:
+  test_run_of:
+    - target: claim-test:filesystem-mcp-tool-list
+---
+nodeKind: ClaimTestRun
+id: claim-test-run:mcp-stdio-init-handshake-2026-05-04
+attributes:
+  claimTestId: claim-test:mcp-stdio-init-handshake
+  runAt: "2026-05-04T00:00:00Z"
+  result: pass
+  durationMs: 420
+  output: |
+    tests: 4
+    pass: 4
+    fail: 0
+edges:
+  test_run_of:
+    - target: claim-test:mcp-stdio-init-handshake
+

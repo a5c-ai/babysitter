@@ -6,6 +6,13 @@ allowed-tools:
   - Read
   - Write
   - Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:observability-instrumentation, skill-area:log-aggregation]
+  roles: [role:sre, role:architect]
+  topics: [topic:observability-driven-development]
+
 ---
 
 # Log Schema Generator Skill

@@ -1,0 +1,21 @@
+nodeKind: Presentation
+id: presentation:gemini-cli-tui
+attributes:
+  displayName: "Gemini CLI TUI"
+  kind: tui
+  description: |
+    Terminal UI bundled with Google's Gemini CLI. Renders streaming
+    output, tool-use turns, YOLO-mode prompts, and a thinking toggle.
+  renderingTechnology: vte
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+  bundleSize: "~50 MB"
+  updateChannel: auto
+  accessibilityShortcuts:
+    - "Ctrl+C: cancel"
+    - "Ctrl+D: exit"
+edges:
+  bundled_with:
+    - agent-platform-impl:gemini-cli.platform@current

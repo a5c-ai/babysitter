@@ -26,10 +26,10 @@ interface MetricTileProps {
 }
 
 const colorMap: Record<MetricTileProps["color"], { text: string; bg: string; glow: string; borderL: string; ring: string }> = {
-  primary: { text: "text-primary", bg: "bg-primary/10", glow: "", borderL: "", ring: "ring-primary/50" },
-  success: { text: "text-success", bg: "bg-success/10", glow: "", borderL: "border-l-success/60", ring: "ring-success/50" },
-  warning: { text: "text-warning", bg: "bg-warning/10", glow: "shadow-[0_0_8px_var(--warning)]", borderL: "border-l-warning/60", ring: "ring-warning/50" },
-  error: { text: "text-error", bg: "bg-error/10", glow: "", borderL: "border-l-error/60", ring: "ring-error/50" },
+  primary: { text: "text-primary", bg: "bg-primary/10", glow: "shadow-neon-glow-primary-xs", borderL: "", ring: "ring-primary/50" },
+  success: { text: "text-success", bg: "bg-success/10", glow: "shadow-neon-glow-success-sm", borderL: "border-l-success/60", ring: "ring-success/50" },
+  warning: { text: "text-warning", bg: "bg-warning/10", glow: "shadow-neon-glow-warning-sm", borderL: "border-l-warning/60", ring: "ring-warning/50" },
+  error: { text: "text-error", bg: "bg-error/10", glow: "shadow-neon-glow-error-sm", borderL: "border-l-error/60", ring: "ring-error/50" },
   muted: { text: "text-zinc-500", bg: "bg-zinc-500/10", glow: "", borderL: "border-l-zinc-500/60", ring: "ring-zinc-500/50" },
 };
 
@@ -47,10 +47,11 @@ function MetricTile({ label, value, icon, color, pulse, testId, active, onClick 
       onClick={onClick}
       onKeyDown={isClickable ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick?.(); } } : undefined}
       className={cn(
-        "rounded-lg border border-border bg-card/80 backdrop-blur-sm p-3 flex items-center gap-3 transition-all",
+        "rounded-xl border border-border bg-card/90 p-3 flex items-center gap-3 transition-all shadow-sm",
         value > 0 && color !== "primary" && "border-l-2",
         value > 0 && color !== "primary" && c.borderL,
-        isClickable && "cursor-pointer hover:bg-background-secondary/50",
+        c.glow,
+        isClickable && "cursor-pointer hover:bg-background-secondary/65 hover:shadow-md",
         active && "ring-2",
         active && c.ring,
       )}
@@ -62,7 +63,7 @@ function MetricTile({ label, value, icon, color, pulse, testId, active, onClick 
         <p className={cn("text-lg font-bold tabular-nums leading-none mb-0.5", c.text)}>
           {displayValue}
         </p>
-        <p className="text-xs leading-tight text-foreground-muted uppercase tracking-wider font-medium">
+        <p className="text-[11px] leading-tight text-foreground-muted uppercase tracking-[0.12em] font-medium">
           {label}
         </p>
       </div>

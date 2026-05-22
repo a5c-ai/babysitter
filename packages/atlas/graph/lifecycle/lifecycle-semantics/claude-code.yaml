@@ -1,0 +1,15 @@
+nodeKind: LifecycleSemantics
+id: lifecycle-semantics:claude-code
+attributes:
+  lifecycleSemanticsId: lifecycle-semantics:claude-code
+  agentId: agent:claude-code
+  versionRange: ">=0.0.0"
+  runtimeHookMode: native-shell-hooks
+  stopHookMode: blocking-stop-hook
+  backgroundTaskMode: supported
+  checkpointMode: documented
+  pluginContextMode: "plugin.json + marketplace hooks"
+  platformNuances: []
+edges:
+  applies_to_version:
+    - target: agentVersion:claude:ge-0-0-0

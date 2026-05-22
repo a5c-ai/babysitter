@@ -1,0 +1,52 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:langgraph.runtime@current
+attributes:
+  displayName: "LangGraph Runtime (current)"
+  agentVersionId: agent-version:langgraph@current
+  packageRef: source-ref:langgraph-github
+  builtInTools: []
+  toolRegistryDiscovery: dynamic-config
+  hookSockets: []
+  internalSessionStateLocation: "user-configured checkpointer / store / thread state"
+  sessionFileFormat: json
+  sessionFilePathConvention: "checkpointer/store defined by host application or deployment"
+  approvalGatingPrimitive: none
+  subprocessSandboxStrategy: none
+  runtimeIdentity: host-process
+  supportedMCPTransports: []
+  supportsStreaming: true
+  supportedAgentControlVerbs:
+    - interrupt
+    - resume
+    - checkpoint
+  ioSurfaceKinds: []
+  notes: |
+    LangGraph itself is a framework runtime: tools, checkpoint storage, durable
+    execution, human review gates, and IO surfaces are configured by the host
+    application or LangSmith/LangGraph Platform deployment rather than bundled as
+    a fixed CLI runtime.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:langgraph
+      role: runtime
+  sourced_from:
+    - source-ref:langgraph-docs
+    - source-ref:langchain-agents-docs
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: ">=0.0.0"
+      level: full
+      notes: |
+        Tools are host-defined and registered into LangChain/LangGraph agent or
+        graph execution rather than statically bundled.
+    - target: capability:can-resume
+      versionRange: ">=0.0.0"
+      level: full
+      notes: |
+        Runtime persistence is modeled through checkpointers/stores and deployed
+        thread-level persistence.
+    - target: capability:streaming
+      versionRange: ">=0.0.0"
+      level: full

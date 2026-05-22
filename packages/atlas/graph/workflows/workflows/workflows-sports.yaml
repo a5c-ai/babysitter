@@ -1,0 +1,72 @@
+---
+nodeKind: Workflow
+id: workflow:athlete-performance-analytics-review
+attributes:
+  displayName: "Athlete Performance Analytics Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Reviews athlete performance data and training load metrics --
+    aggregating GPS tracking, heart rate variability, and biomechanical
+    sensor data from training sessions and competitions, computing
+    acute-to-chronic workload ratios to assess injury risk, analyzing game
+    film with computer vision for tactical pattern recognition, benchmarking
+    individual metrics against positional norms, and correlating recovery
+    protocol adherence with performance outcomes. Produces athlete readiness
+    dashboards, injury risk flags, and periodization adjustment
+    recommendations. Excludes medical diagnosis and treatment.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:ml-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  applies_to_domain:
+    - target: domain:sports-fitness
+    - target: domain:data-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:data-team
+---
+nodeKind: Workflow
+id: workflow:event-operations-planning
+attributes:
+  displayName: "Event Operations Planning"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Plans and coordinates sports event operations -- developing venue setup
+    timelines with load-in/load-out schedules, coordinating security
+    staffing plans against crowd capacity models, planning broadcast
+    infrastructure and camera placement, managing ticketing system capacity
+    testing, orchestrating vendor and sponsor activation logistics, and
+    building contingency plans for weather, crowd, and medical emergency
+    scenarios. Produces event operations runbooks, resource allocation
+    matrices, and post-event debrief reports. Excludes athlete competition
+    management.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:incident-commander
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:sports-fitness
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:facilities-team

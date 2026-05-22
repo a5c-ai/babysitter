@@ -2,6 +2,12 @@
 name: primary-source-evaluation
 description: Authenticate, date, and critically assess historical documents for provenance, reliability, and bias with systematic source criticism methodology
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
+graph:
+  domains: [domain:humanities]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:deep-web-research, skill-area:data-analysis, skill-area:document-processing]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-analyst, role:research-scientist]
 ---
 
 # Primary Source Evaluation

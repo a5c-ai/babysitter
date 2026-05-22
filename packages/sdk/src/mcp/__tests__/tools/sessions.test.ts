@@ -75,14 +75,14 @@ describe("session_init", () => {
     const data = parseResult(result) as { stateFile: string; iteration: number; maxIterations: number };
     expect(data.stateFile).toBe(filePath);
     expect(data.iteration).toBe(1);
-    expect(data.maxIterations).toBe(256);
+    expect(data.maxIterations).toBe(65_000);
 
     expect(mockedWriteSessionFile).toHaveBeenCalledWith(
       filePath,
       expect.objectContaining({
         active: true,
         iteration: 1,
-        maxIterations: 256,
+        maxIterations: 65_000,
         runId: "",
       }),
       ""
@@ -111,7 +111,7 @@ describe("session_init", () => {
     mockedGetSessionFilePath.mockReturnValue("/tmp/s/sess-3.md");
     mockedSessionFileExists.mockResolvedValue(true);
     mockedReadSessionFile.mockResolvedValue({
-      state: { active: true, iteration: 5, maxIterations: 256, runId: "existing-run", startedAt: "", lastIterationAt: "", iterationTimes: [] },
+      state: { active: true, iteration: 5, maxIterations: 65_000, runId: "existing-run", startedAt: "", lastIterationAt: "", iterationTimes: [] },
       prompt: "",
     });
 
@@ -130,7 +130,7 @@ describe("session_init", () => {
     mockedGetSessionFilePath.mockReturnValue("/tmp/s/sess-4.md");
     mockedSessionFileExists.mockResolvedValue(true);
     mockedReadSessionFile.mockResolvedValue({
-      state: { active: true, iteration: 1, maxIterations: 256, runId: "", startedAt: "", lastIterationAt: "", iterationTimes: [] },
+      state: { active: true, iteration: 1, maxIterations: 65_000, runId: "", startedAt: "", lastIterationAt: "", iterationTimes: [] },
       prompt: "",
     });
 
@@ -151,7 +151,7 @@ describe("session_associate", () => {
     const filePath = "/tmp/s/sess-5.md";
     mockedGetSessionFilePath.mockReturnValue(filePath);
     mockedReadSessionFile.mockResolvedValue({
-      state: { active: true, iteration: 1, maxIterations: 256, runId: "", startedAt: "", lastIterationAt: "", iterationTimes: [] },
+      state: { active: true, iteration: 1, maxIterations: 65_000, runId: "", startedAt: "", lastIterationAt: "", iterationTimes: [] },
       prompt: "test prompt",
     });
     mockedWriteSessionFile.mockResolvedValue(undefined);
@@ -177,7 +177,7 @@ describe("session_associate", () => {
   it("rejects when session already has a run", async () => {
     mockedGetSessionFilePath.mockReturnValue("/tmp/s/sess-6.md");
     mockedReadSessionFile.mockResolvedValue({
-      state: { active: true, iteration: 1, maxIterations: 256, runId: "old-run", startedAt: "", lastIterationAt: "", iterationTimes: [] },
+      state: { active: true, iteration: 1, maxIterations: 65_000, runId: "old-run", startedAt: "", lastIterationAt: "", iterationTimes: [] },
       prompt: "",
     });
 
@@ -290,6 +290,28 @@ describe("session_resume", () => {
     expect(data.error).toContain("already completed");
   });
 
+  it("treats a run with pending work after RUN_COMPLETED as waiting", async () => {
+    mockedGetSessionFilePath.mockReturnValue("/tmp/s/sess-11b.md");
+    mockedWriteSessionFile.mockResolvedValue(undefined);
+    mockedLoadJournal.mockResolvedValue([
+      { seq: 1, type: "RUN_CREATED", recordedAt: "t1", data: {}, checksum: "a" },
+      { seq: 2, type: "RUN_COMPLETED", recordedAt: "t2", data: {}, checksum: "b" },
+      { seq: 3, type: "EFFECT_REQUESTED", recordedAt: "t3", data: { effectId: "e1" }, checksum: "c" },
+    ] as Awaited<ReturnType<typeof loadJournal>>);
+
+    const handler = getToolHandler(server, "session_resume");
+    const result = await handler({
+      sessionId: "sess-11b",
+      stateDir: "/tmp/s",
+      runId: "run-not-done",
+      runsDir: "/tmp/runs",
+    });
+
+    expect(result.isError).toBeUndefined();
+    const data = parseResult(result) as { runState: string };
+    expect(data.runState).toBe("waiting");
+  });
+
   it("returns error when run not found", async () => {
     mockedGetSessionFilePath.mockReturnValue("/tmp/s/sess-12.md");
     mockedLoadJournal.mockRejectedValue(new Error("ENOENT"));
@@ -307,3 +329,4 @@ describe("session_resume", () => {
     expect(data.error).toContain("Run not found");
   });
 });
+

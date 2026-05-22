@@ -1,0 +1,539 @@
+---
+nodeKind: Workflow
+id: workflow:model-training-pipeline
+attributes:
+  displayName: "Model Training Pipeline"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-experiment"
+  complexity: cross-team
+  description: |
+    End-to-end ML model training workflow — data preparation, feature
+    engineering, hyperparameter search, distributed training, evaluation
+    against baselines, and model registry promotion. Includes
+    reproducibility checks and experiment tracking. Distinct from
+    model-training-cycle in focusing on pipeline infrastructure rather
+    than individual training runs.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:applied-scientist
+    - target: role:data-engineer
+  requires_skill_area:
+    - target: skill-area:machine-learning-frameworks
+    - target: skill-area:feature-engineering-pipelines
+    - target: skill-area:ci-cd-ml-pipelines
+  applies_to_domain:
+    - target: domain:ml-ai
+    - target: domain:ml-ops
+  triggers_responsibility:
+    - target: responsibility:model-training-quality
+    - target: responsibility:model-quality-assurance
+---
+nodeKind: Workflow
+id: workflow:data-quality-check
+attributes:
+  displayName: "Data Quality Check"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: moderate
+  description: |
+    Automated data quality validation workflow — schema conformance,
+    completeness checks, statistical anomaly detection, freshness
+    monitoring, and cross-source consistency validation. Generates
+    data quality scorecards and alerts on threshold violations.
+edges:
+  involves_role:
+    - target: role:data-quality-engineer
+    - target: role:data-steward
+    - target: role:data-engineer
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:etl-pipelines
+    - target: skill-area:data-lineage
+  applies_to_domain:
+    - target: domain:data-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality
+    - target: responsibility:data-pipeline-reliability
+---
+nodeKind: Workflow
+id: workflow:schema-migration-workflow
+attributes:
+  displayName: "Schema Migration Workflow"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Coordinated database schema migration — backward-compatible schema
+    design, migration script review, staged rollout (expand-contract
+    pattern), data backfill, and rollback planning. Includes zero-downtime
+    validation and downstream consumer notification. Distinct from
+    schema-migration in covering the full organizational coordination.
+edges:
+  involves_role:
+    - target: role:database-engineer
+    - target: role:backend-engineer
+    - target: role:database-administrator
+  requires_skill_area:
+    - target: skill-area:database-migration
+    - target: skill-area:schema-evolution
+    - target: skill-area:zero-downtime-deployment
+  applies_to_domain:
+    - target: domain:databases
+    - target: domain:backend
+  triggers_responsibility:
+    - target: responsibility:deployment-management
+---
+nodeKind: Workflow
+id: workflow:api-versioning-workflow
+attributes:
+  displayName: "API Versioning Workflow"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-breaking-change"
+  complexity: cross-team
+  description: |
+    Managing API version lifecycle — evaluating breaking changes, creating
+    new API versions, maintaining parallel versions, migration tooling
+    for consumers, sunset timelines, and deprecation communication.
+    Produces migration guides and updated SDK artifacts.
+edges:
+  involves_role:
+    - target: role:api-engineer
+    - target: role:sdk-engineer
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:api-design
+    - target: skill-area:breaking-change-management
+    - target: skill-area:deprecation-policy
+  applies_to_domain:
+    - target: domain:api-development
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:api-design-governance
+    - target: responsibility:sdk-quality
+---
+nodeKind: Workflow
+id: workflow:dependency-upgrade-cycle
+attributes:
+  displayName: "Dependency Upgrade Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: moderate
+  description: |
+    Systematic dependency update workflow — automated upgrade PRs,
+    security vulnerability prioritization, breaking change assessment,
+    test suite validation, and staged rollout. Tracks upgrade freshness
+    and security debt across the dependency graph.
+edges:
+  involves_role:
+    - target: role:appsec-engineer
+    - target: role:backend-engineer
+    - target: role:frontend-engineer
+  requires_skill_area:
+    - target: skill-area:dependency-vulnerability-mgmt
+    - target: skill-area:dependency-management
+    - target: skill-area:dependency-upgrade-strategies
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:dependency-security
+    - target: responsibility:dependency-audit
+---
+nodeKind: Workflow
+id: workflow:security-incident-response
+attributes:
+  displayName: "Security Incident Response"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "on-demand"
+  complexity: cross-team
+  description: |
+    Structured response to security incidents — detection confirmation,
+    severity classification, containment actions, evidence preservation,
+    eradication, recovery, and post-incident review. Follows NIST
+    incident response framework with defined communication protocols.
+edges:
+  involves_role:
+    - target: role:soc-analyst
+    - target: role:blue-team-lead
+    - target: role:incident-commander
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:incident-response-forensics
+    - target: skill-area:security-monitoring-siem
+  applies_to_domain:
+    - target: domain:cybersecurity
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:security-incident-triage
+    - target: responsibility:incident-response
+---
+nodeKind: Workflow
+id: workflow:cve-triage
+attributes:
+  displayName: "CVE Triage"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "on-demand"
+  complexity: moderate
+  description: |
+    Triaging new Common Vulnerabilities and Exposures — impact assessment
+    against deployed systems, exploitability analysis, patch availability
+    check, remediation prioritization, and SLA-driven fix scheduling.
+    Distinct from cve-response-coordination in focusing on initial
+    triage rather than full response.
+edges:
+  involves_role:
+    - target: role:appsec-engineer
+    - target: role:security-engineer
+    - target: role:threat-analyst
+  requires_skill_area:
+    - target: skill-area:vulnerability-management
+    - target: skill-area:dependency-vulnerability-mgmt
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:cybersecurity
+  triggers_responsibility:
+    - target: responsibility:dependency-security
+    - target: responsibility:zero-day-response
+---
+nodeKind: Workflow
+id: workflow:chaos-experiment
+attributes:
+  displayName: "Chaos Experiment"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Controlled failure injection experiment — hypothesis formation,
+    blast radius definition, steady-state identification, fault injection
+    execution, observation, and findings documentation. Validates
+    system resilience assumptions. Distinct from chaos-game-day in
+    being a single focused experiment rather than a full gameday event.
+edges:
+  involves_role:
+    - target: role:chaos-engineer
+    - target: role:sre
+    - target: role:backend-engineer
+  requires_skill_area:
+    - target: skill-area:chaos-engineering
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:site-reliability
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:platform-reliability
+---
+nodeKind: Workflow
+id: workflow:database-failover-drill
+attributes:
+  displayName: "Database Failover Drill"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Planned database failover exercise — replica promotion testing,
+    connection failover validation, data consistency verification,
+    application reconnection behavior, and recovery time measurement.
+    Validates disaster recovery procedures for database infrastructure.
+edges:
+  involves_role:
+    - target: role:database-administrator
+    - target: role:database-engineer
+    - target: role:sre
+  requires_skill_area:
+    - target: skill-area:postgres-tuning
+    - target: skill-area:connection-pool-tuning
+    - target: skill-area:database-migration
+  applies_to_domain:
+    - target: domain:databases
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:disaster-recovery
+    - target: responsibility:platform-reliability
+---
+nodeKind: Workflow
+id: workflow:on-call-handoff
+attributes:
+  displayName: "On-Call Handoff"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: simple
+  description: |
+    Structured handoff between on-call rotations — outgoing engineer
+    briefs incoming on open incidents, degraded services, pending
+    changes, and known risks. Includes runbook updates and alert
+    state review.
+edges:
+  involves_role:
+    - target: role:sre
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:alerting-oncall
+    - target: skill-area:incident-management
+    - target: skill-area:runbook-authoring
+  applies_to_domain:
+    - target: domain:site-reliability
+  triggers_responsibility:
+    - target: responsibility:on-call-rotation-fairness
+    - target: responsibility:on-call
+---
+nodeKind: Workflow
+id: workflow:sprint-retrospective
+attributes:
+  displayName: "Sprint Retrospective"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "per-sprint"
+  complexity: simple
+  description: |
+    Structured team reflection at sprint end — collecting what went well,
+    what did not, and actionable improvements. Facilitator guides
+    discussion, team votes on action items, and items are tracked to
+    completion. Distinct from general retrospective in being sprint-scoped.
+edges:
+  involves_role:
+    - target: role:scrum-master
+    - target: role:engineering-manager
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:agile-delivery
+    - target: skill-area:team-management
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:project-management
+  triggers_responsibility:
+    - target: responsibility:retro-facilitation
+---
+nodeKind: Workflow
+id: workflow:user-research-cycle
+attributes:
+  displayName: "User Research Cycle"
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: moderate
+  description: |
+    Full user research cycle — research question formulation, methodology
+    selection (interviews, surveys, usability tests), participant
+    recruitment, data collection, analysis, and insight synthesis.
+    Produces research reports and design recommendations. Distinct from
+    user-research-session in being a complete research initiative.
+edges:
+  involves_role:
+    - target: role:design-researcher
+    - target: role:ux-researcher
+    - target: role:product-manager
+  requires_skill_area:
+    - target: skill-area:user-research
+    - target: skill-area:product-analytics
+    - target: skill-area:product-discovery
+  applies_to_domain:
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:user-research
+---
+nodeKind: Workflow
+id: workflow:a-b-test-lifecycle
+attributes:
+  displayName: "A/B Test Lifecycle"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-experiment"
+  complexity: moderate
+  description: |
+    Full A/B experiment lifecycle — hypothesis documentation, sample size
+    calculation, experiment configuration, traffic allocation, monitoring,
+    statistical analysis, decision making, and cleanup. Includes
+    guardrail metric monitoring throughout. Distinct from
+    ab-experiment-lifecycle in covering organizational governance.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:conversion-rate-optimizer
+    - target: role:growth-engineer
+  requires_skill_area:
+    - target: skill-area:experiment-design-AB-testing
+    - target: skill-area:a-b-testing
+    - target: skill-area:statistical-analysis
+  applies_to_domain:
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:a-b-test-integrity
+    - target: responsibility:experimentation-governance
+---
+nodeKind: Workflow
+id: workflow:feature-flag-lifecycle-governance
+attributes:
+  displayName: "Feature Flag Lifecycle Governance"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: moderate
+  description: |
+    Governing the complete feature flag lifecycle — creation standards,
+    progressive rollout procedures, stale flag identification, cleanup
+    scheduling, and audit trail maintenance. Ensures flags do not
+    accumulate as technical debt.
+edges:
+  involves_role:
+    - target: role:release-manager
+    - target: role:tech-lead
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:feature-management
+    - target: skill-area:deployment-automation
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:feature-flag-governance
+    - target: responsibility:tech-debt-management
+---
+nodeKind: Workflow
+id: workflow:bug-triage-process
+attributes:
+  displayName: "Bug Triage Process"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: simple
+  description: |
+    Systematic bug triage — severity classification, reproduction
+    verification, assignment to owning team, priority ranking against
+    backlog, and SLA tracking for resolution. Includes customer-reported
+    and internally-detected bugs.
+edges:
+  involves_role:
+    - target: role:qa-engineer
+    - target: role:engineering-manager
+    - target: role:support-engineer
+  requires_skill_area:
+    - target: skill-area:code-quality
+    - target: skill-area:error-tracking
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:qa-testing
+  triggers_responsibility:
+    - target: responsibility:test-strategy
+---
+nodeKind: Workflow
+id: workflow:hotfix-deployment-procedure
+attributes:
+  displayName: "Hotfix Deployment Procedure"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "on-demand"
+  complexity: moderate
+  description: |
+    Emergency fix deployment — branch from production, minimal change
+    scope, expedited review, canary validation, progressive rollout,
+    and post-deployment verification. Includes rollback criteria and
+    communication to stakeholders.
+edges:
+  involves_role:
+    - target: role:release-engineer
+    - target: role:sre
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:deployment-automation
+    - target: skill-area:canary-rollouts
+    - target: skill-area:ci-cd
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:deployment-management
+    - target: responsibility:release-coordination
+---
+nodeKind: Workflow
+id: workflow:rollback-execution
+attributes:
+  displayName: "Rollback Execution"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "on-demand"
+  complexity: moderate
+  description: |
+    Production rollback procedure — trigger criteria evaluation, rollback
+    method selection (redeploy previous, feature flag off, database
+    revert), execution, verification of rollback success, and impact
+    assessment. Produces incident timeline entry and lessons learned.
+edges:
+  involves_role:
+    - target: role:sre
+    - target: role:release-engineer
+    - target: role:incident-commander
+  requires_skill_area:
+    - target: skill-area:deployment-automation
+    - target: skill-area:blue-green-deployment
+    - target: skill-area:incident-response
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:site-reliability
+  triggers_responsibility:
+    - target: responsibility:deployment-management
+    - target: responsibility:incident-response
+---
+nodeKind: Workflow
+id: workflow:load-testing-pipeline
+attributes:
+  displayName: "Load Testing Pipeline"
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "pre-release"
+  complexity: moderate
+  description: |
+    Automated load testing workflow — test scenario design, traffic
+    pattern generation, progressive load ramp, performance metric
+    collection, bottleneck identification, and baseline comparison.
+    Integrated into CI/CD for pre-release performance gates.
+edges:
+  involves_role:
+    - target: role:performance-engineer
+    - target: role:sre
+    - target: role:backend-engineer
+  requires_skill_area:
+    - target: skill-area:load-testing
+    - target: skill-area:performance-testing
+    - target: skill-area:profiling-cpu
+  applies_to_domain:
+    - target: domain:performance-engineering
+    - target: domain:site-reliability
+  triggers_responsibility:
+    - target: responsibility:performance-optimization
+---
+nodeKind: Workflow
+id: workflow:design-sprint-process
+attributes:
+  displayName: "Design Sprint Process"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Five-day design sprint — problem mapping, solution sketching,
+    decision making, prototyping, and user testing. Rapidly validates
+    product ideas with real users before committing engineering resources.
+    Follows the Google Ventures design sprint methodology.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:product-manager
+    - target: role:design-researcher
+  requires_skill_area:
+    - target: skill-area:prototyping
+    - target: skill-area:user-research
+    - target: skill-area:interaction-design
+  applies_to_domain:
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:user-research

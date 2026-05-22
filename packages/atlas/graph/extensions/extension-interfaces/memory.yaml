@@ -1,0 +1,15 @@
+nodeKind: ExtensionInterface
+id: extension-interface:memory
+attributes:
+  interfaceVersion: "1.0.0"
+  description: Memory
+  displayName: "Memory"
+  concern: "Long-lived knowledge an agent reads and writes across sessions."
+  surface: |
+    `read(query)`, `write(fact, ttl)`, `forget(id)`. Backed by an
+    embedding store or a structured graph; the interface is agnostic.
+  builtInDefault: |
+    A flat markdown file at `~/.claude/MEMORY.md` with append-only
+    semantics. No retrieval — full file is loaded each turn.
+  notableImpls: []
+edges: {}

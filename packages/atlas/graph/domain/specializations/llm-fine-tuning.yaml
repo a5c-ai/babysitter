@@ -1,0 +1,11 @@
+nodeKind: Specialization
+id: specialization:llm-fine-tuning
+attributes:
+  displayName: "LLM Fine-tuning"
+  parentDomainId: domain:ml-ops
+  description: |
+    Fine-tuning of large language models — supervised fine-tuning,
+    LoRA / QLoRA adapters, RLHF / DPO, dataset curation, and eval.
+edges:
+  specializes:
+    - domain:ml-ops

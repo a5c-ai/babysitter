@@ -1,0 +1,46 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:time.get-current-time
+attributes:
+  schema: '{}'
+  displayName: "Time: Get Current Time"
+  description: Return the current time in a specified IANA timezone.
+  inputSchema:
+    type: object
+    required: [timezone]
+    properties:
+      timezone: { type: string, description: "IANA timezone, e.g. America/New_York" }
+  outputSchema:
+    type: object
+    properties:
+      time: { type: string }
+      timezone: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-time
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:time.convert-time
+attributes:
+  schema: '{}'
+  displayName: "Time: Convert Time"
+  description: Convert a time between two IANA timezones.
+  inputSchema:
+    type: object
+    required: [source_timezone, time, target_timezone]
+    properties:
+      source_timezone: { type: string }
+      time: { type: string }
+      target_timezone: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      time: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-time

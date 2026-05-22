@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: documentation
   phase: 6
+graph:
+  domains: [domain:quantum-computing]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:language-design]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:technical-writer]
 ---
 
 # Quantum Documentation Specialist

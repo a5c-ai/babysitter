@@ -1,0 +1,11 @@
+nodeKind: Topic
+id: topic:graphql-schema-design
+attributes:
+  displayName: "GraphQL Schema Design"
+  description: |
+    GraphQL schema design — type modeling, pagination conventions,
+    federation, persisted queries, and schema evolution.
+edges:
+  applies_to:
+    - domain:web-development
+    - domain:software-engineering

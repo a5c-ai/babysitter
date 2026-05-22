@@ -2,6 +2,13 @@
 name: nextjs-app-router
 description: Deep expertise in Next.js App Router patterns including route groups, parallel routes, intercepting routes, layouts, and loading states.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:server-side-rendering, skill-area:frontend-routing]
+  roles: [role:frontend-engineer, role:fullstack-engineer]
+  topics: [topic:streaming-ssr]
+
 ---
 
 # Next.js App Router Skill

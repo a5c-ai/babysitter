@@ -1,0 +1,21 @@
+nodeKind: Tool
+id: tool:uv
+attributes:
+  displayName: "uv"
+  homepageUrl: "https://github.com/astral-sh/uv"
+  kind: package-manager
+  language: language:python
+  description: |
+    Extremely fast Python package and project manager, written in Rust by Astral.
+edges:
+  belongs_to_language:
+    - language:python
+  used_for:
+    - target: skill-area:developer-environment
+  alternative_to:
+    - target: tool:pip
+      comparison: "Python package managers — uv is a fast Rust-based drop-in; pip is the standard"
+    - target: tool:poetry
+      comparison: "Python project managers — uv is Rust-based and faster; Poetry uses pyproject.toml"
+    - target: tool:rye
+      comparison: "Python project managers — uv is Rye's successor"

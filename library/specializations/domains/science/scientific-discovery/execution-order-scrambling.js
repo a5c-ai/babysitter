@@ -12,6 +12,13 @@
  *   orderingConstraints: object,
  *   insights: array
  * }
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -54,7 +61,7 @@ export async function process(inputs, ctx) {
   // Phase 4: Evaluate Each Ordering
   ctx.log('info', 'Evaluating alternative orderings');
   for (const ordering of generatedOrderings.orderings) {
-    let evaluation = await ctx.task(evaluateOrderingTask, {
+    const evaluation = await ctx.task(evaluateOrderingTask, {
       processDescription,
       ordering,
       stepAnalysis,
@@ -67,18 +74,9 @@ export async function process(inputs, ctx) {
       evaluation,
       timestamp: ctx.now()
     });
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      evaluation = await ctx.task(evaluateOrderingTask, { ...{
-      processDescription,
-      ordering,
-      stepAnalysis,
-      constraints,
-      domain
-    }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Generated and evaluated ${alternativeOrderings.length} orderings. Review findings?`,
     title: 'Execution Order Scrambling - Orderings Evaluated',
     context: {
@@ -87,15 +85,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/alternative-orderings.json', format: 'json' },
         { path: 'artifacts/constraints.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 5: Identify Order-Sensitive vs Order-Invariant Aspects
   ctx.log('info', 'Identifying order sensitivity');
   const orderSensitivity = await ctx.task(analyzeOrderSensitivityTask, {

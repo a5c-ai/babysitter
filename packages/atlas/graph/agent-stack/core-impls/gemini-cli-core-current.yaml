@@ -1,0 +1,79 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:gemini-cli.core@current
+attributes:
+  displayName: Gemini CLI Core (current)
+  agentVersionId: agentVersion:gemini:ge-0-0-0
+  packageRef: source-ref:gemini-cli-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: 'Tool-use loop over Gemini''s `generateContent` (streaming) API.
+    Each turn, the
+    model emits `functionCall` parts; the CLI executes them and feeds back
+    `functionResponse` parts. The loop advances until a chunk arrives with
+    `finishReason: STOP` (or `MAX_TOKENS` / `SAFETY`).
+    '
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: 'Gemini CLI relies on the model''s 1M-token context window
+    directly; no in-CLI
+    compaction is performed for the @current pin.
+    '
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: 'Gemini CLI follows the ADK `sub_agents` pattern: subagent
+    invocation is a
+    structured tool-call whose target name resolves to another agent definition;
+    the CLI dispatches a child `generateContent` loop for the sub-task.
+    '
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: 'Final text parts are streamed as they arrive; the CLI emits
+    a post_response hook
+    after the last chunk with `finishReason: STOP` is observed.
+    '
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: '@google/genai'
+  supportedTransportProtocols:
+  - model-transport:gemini-generate-content
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: passthrough
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:gemini-cli
+    role: core
+  speaks:
+  - target: model-transport:gemini-generate-content
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-thinking
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'Thinking effort low/medium/high streamed.
+      '
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+  supports_effort_level:
+  - target: effort-level:low
+  - target: effort-level:medium
+  - target: effort-level:high
+  fires_hook:
+  - target: hook-surface:gemini.pre-prompt
+  - target: hook-surface:gemini.post-response
+  - target: hook-surface:gemini.tool-call-pre
+  - target: hook-surface:gemini.tool-call-post
+  output_guard_applied_by:
+  - target: output-guard:gemini-response-mime-type-json
+  emits_message_type:
+  - target: protocol-message:gemini-content
+  - target: protocol-message:gemini-part-text
+  - target: protocol-message:gemini-part-inline-data
+  - target: protocol-message:gemini-part-function-call
+  - target: protocol-message:gemini-part-function-response
+  - target: protocol-message:gemini-candidate
+  - target: protocol-message:gemini-generate-content-response
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:multi-agent-dispatch
+    - target: orch-primitive:session-handoff

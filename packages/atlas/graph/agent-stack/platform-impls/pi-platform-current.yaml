@@ -1,0 +1,64 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:pi.platform@current
+attributes:
+  displayName: Pi Platform (current)
+  agentVersionId: agentVersion:pi:ge-0-0-0
+  subagentDefinitionFormat: none
+  packageRef: source-ref:pi-github
+  nativeExtensionFormat: pi-plugin
+  nativeExtensionManifestPath: ~/.pi/agent/plugins/<name>/plugin.json
+  nativeExtensionsDirectoryPath:
+  - ~/.pi/agent/plugins/
+  skillFormat: harness-native
+  skillsDirectoryPath:
+  - skills/
+  customSlashCommandsPath: []
+  subagentsDirectoryPath: []
+  hooksDirectoryOrConfigPath: []
+  settingsFiles:
+  - ~/.pi/agent/settings.json
+  pluginRegistryPath: ''
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: api-key
+  updateChannelMechanism: npm
+  supportedChannelKinds:
+  - mcp-channel
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+  - target: agent:pi
+    role: platform
+  bundles:
+  - target: presentation:pi-tui
+  supports:
+  - target: capability:can-resume
+    versionRange: '>=1.0.0'
+    level: full
+    notes: |
+      Multi-turn JSONL-tree sessions; resume + fork.
+  - target: capability:supports-plugins
+    versionRange: '>=1.0.0'
+    level: none
+    notes: |
+      Pi exposes only MCP servers for extensibility (per agent-mux ref). Task
+      brief mentions a marketplace; reconcile TODO.
+  - target: capability:skills
+    versionRange: '>=0.0.0'
+    level: full
+    notes: |
+      Pi harness supports skill invocation via formatSkillInvocation.
+      Skills are dispatched as structured interactions within the agent loop.
+  - target: capability:supports-prompt-templates
+    versionRange: '>=0.0.0'
+    level: full
+    notes: |
+      Harness includes parameterized prompt-template system for system
+      prompts, tool descriptions, and context injection.
+  - target: capability:supports-compaction
+    versionRange: '>=0.0.0'
+    level: full
+    notes: |
+      Client-side branch-summarization compaction with configurable
+      threshold and strategy settings.

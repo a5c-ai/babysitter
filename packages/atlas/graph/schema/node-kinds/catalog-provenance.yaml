@@ -1,0 +1,284 @@
+# NodeKinds for cluster 15-catalog-provenance.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+
+nodeKinds:
+- id: node:ontology-schema
+  name: OntologySchema
+  origin: universal
+  prefix: ontology
+  cluster: 15-catalog-provenance
+  purpose: 'The current catalog ontology modeled as a first-class entity so it
+
+    can be claimed about and linked from `Term term:ontology`.
+
+    It references MetaClusters: the meta-shape of the catalog (the
+
+    MetaCluster / MetaNodeKind / MetaEdgeKind / MetaAttribute / MetaEnum
+
+    registry) makes the ontology self-describing so readers can enumerate the
+
+    schema without re-parsing this file.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: metaClusters
+    type: list<ref<MetaCluster>>
+    required: false
+    notes: The set of MetaClusters that partition the meta-shape of this ontology snapshot.
+  - name: metaNodeKindCount
+    type: int
+    required: false
+    notes: Synthesized count of MetaNodeKind records in the registry; informational.
+  - name: metaEdgeKindCount
+    type: int
+    required: false
+    notes: Synthesized count of MetaEdgeKind records in the registry; informational.
+  incomingEdges: []
+  outgoingEdges:
+  - defines_meta_cluster
+  invariants:
+  - The meta-shape registry (MetaCluster + MetaNodeKind + MetaEdgeKind + MetaAttribute + MetaEnum) is referenced via `metaClusters` and the `defines_meta_cluster` edge.
+  examples: []
+- id: node:meta-node-kind
+  name: MetaNodeKind
+  origin: universal
+  prefix: meta-node-kind
+  cluster: 15-catalog-provenance
+  purpose: 'A first-class record describing one NodeKind in the catalog ontology.
+
+    Lets the catalog enumerate, query, and version its own meta-shape
+
+    without re-parsing `schema/ontology-schema.yaml`. Mirrors the
+
+    NodeKind declaration fields from `../schema/meta-schema.md`.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: name
+    type: string
+    required: true
+    notes: Canonical PascalCase NodeKind class name (e.g. `AgentProduct`, `Role`).
+  - name: cluster
+    type: string
+    required: false
+    notes: Editorial cluster slug (e.g. `10-roles`).
+  - name: prefix
+    type: string
+    required: false
+    notes: Declared id-prefix for nodes of this kind.
+  - name: origin
+    type: enum<standard,universal,a5c,derived>
+    required: false
+  - name: purpose
+    type: markdown
+    required: false
+  - name: exampleCount
+    type: int
+    required: false
+    notes: Synthesized count of seed example files referenced by the underlying NodeKind.
+  - name: invariants
+    type: list<string>
+    required: false
+  incomingEdges:
+  - contains_meta_node_kind
+  - source_of_meta_edge
+  - target_of_meta_edge
+  outgoingEdges:
+  - contains_meta_attribute
+  - has_outgoing_edge
+  - has_incoming_edge
+  - in_cluster
+  - has_example
+  invariants:
+  - id starts with meta-node-kind: null
+  - name MUST match a NodeKind defined in this ontology snapshot.
+  examples:
+  - graph/catalog-meta/meta-shape/meta-shape-seed.yaml
+- id: node:meta-edge-kind
+  name: MetaEdgeKind
+  origin: universal
+  prefix: meta-edge-kind
+  cluster: 15-catalog-provenance
+  purpose: 'A first-class record describing one EdgeKind in the catalog ontology.
+
+    Mirrors the EdgeKind declaration fields from `../schema/meta-schema.md`
+
+    (source, target, cardinality, inverse).
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: name
+    type: string
+    required: true
+    notes: Canonical snake_case EdgeKind name (e.g. `has_version`).
+  - name: source
+    type: list<ref<MetaNodeKind>>
+    required: false
+  - name: target
+    type: list<ref<MetaNodeKind>>
+    required: false
+  - name: cardinality
+    type: enum<1:1,1:N,N:1,N:N>
+    required: false
+  - name: origin
+    type: enum<standard,universal,a5c,derived>
+    required: false
+  - name: inverse
+    type: ref<MetaEdgeKind>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - contains_meta_edge_kind
+  - has_outgoing_edge
+  - has_incoming_edge
+  - inverse_of
+  outgoingEdges:
+  - source_of_meta_edge
+  - target_of_meta_edge
+  - inverse_of
+  invariants:
+  - id starts with meta-edge-kind: null
+  - name MUST match an EdgeKind defined in this ontology snapshot.
+- id: node:meta-cluster
+  name: MetaCluster
+  origin: universal
+  prefix: meta-cluster
+  cluster: 15-catalog-provenance
+  purpose: 'A first-class record describing one editorial cluster of the catalog
+
+    ontology (e.g. `10-roles`, `15-catalog-provenance`). Groups the
+
+    MetaNodeKinds and MetaEdgeKinds that live inside that cluster.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: clusterNumber
+    type: int
+    required: true
+  - name: scope
+    type: markdown
+    required: false
+  - name: parentClusterId
+    type: ref<MetaCluster>
+    required: false
+  incomingEdges:
+  - in_cluster
+  - defines_meta_cluster
+  outgoingEdges:
+  - contains_meta_node_kind
+  - contains_meta_edge_kind
+  invariants:
+  - id starts with meta-cluster: null
+- id: node:meta-attribute
+  name: MetaAttribute
+  origin: universal
+  prefix: meta-attribute
+  cluster: 15-catalog-provenance
+  purpose: 'A first-class record describing one attribute on a NodeKind. Lets the
+
+    catalog enumerate every declared attribute (with type, required, and
+
+    evidence-tier hints) without re-parsing the YAML.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: name
+    type: string
+    required: true
+  - name: parentNodeKindId
+    type: ref<MetaNodeKind>
+    required: true
+  - name: type
+    type: string
+    required: true
+    notes: AttributeType expression (e.g. `enum<...>`, `list<id>`, `markdown`, `iso-date`).
+  - name: required
+    type: bool
+    required: true
+  - name: evidenceTier
+    type: string
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - contains_meta_attribute
+  - used_on_attribute
+  outgoingEdges:
+  - defined_on
+  - enum_value_for
+  invariants:
+  - id starts with meta-attribute: null
+- id: node:meta-enum
+  name: MetaEnum
+  origin: universal
+  prefix: meta-enum
+  cluster: 15-catalog-provenance
+  purpose: 'A first-class record describing one named enum used in attribute
+
+    types across the ontology (e.g. the `origin` enum
+
+    `universal|standardized|convergent|a5c`). Lets the wiki enumerate
+
+    enum values cleanly with per-value descriptions.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: name
+    type: string
+    required: true
+  - name: values
+    type: list<map<string
+    string>>: null
+    required: true
+    notes: Each map carries `value` + `description`.
+  - name: usedOnAttributes
+    type: list<ref<MetaAttribute>>
+    required: false
+  incomingEdges:
+  - enum_value_for
+  outgoingEdges:
+  - used_on_attribute
+  invariants:
+  - id starts with meta-enum: null

@@ -16,6 +16,10 @@ metadata:
   domain: business
   category: Stakeholder Communications
   agent-id: AG-009
+graph:
+  domains: [domain:public-relations]
+  skillAreas: [skill-area:competitive-intelligence, skill-area:brand-strategy, skill-area:market-research]
+  roles: [role:marketing-strategist, role:content-strategist, role:legal-advisor]
 ---
 
 # Government Affairs Communications Expert Agent

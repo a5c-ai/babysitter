@@ -1,0 +1,60 @@
+---
+nodeKind: Workflow
+id: workflow:language-version-upgrade
+attributes:
+  displayName: "Language Version Upgrade"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-major-release"
+  complexity: cross-team
+  description: |
+    Coordinates the upgrade of a programming language runtime or version
+    across the codebase — assessing breaking changes, updating CI toolchains,
+    migrating deprecated syntax, running comprehensive test suites, and
+    validating production parity. Excludes general dependency upgrades.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:implementer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:typescript-generic-programming
+    - target: skill-area:rust-async-runtime
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:upgrade-dependencies-weekly
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity
+---
+nodeKind: Workflow
+id: workflow:compiler-toolchain-validation
+attributes:
+  displayName: "Compiler Toolchain Validation"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-toolchain-release"
+  complexity: single-team
+  description: |
+    Validates a new compiler or toolchain release against the project
+    codebase — running build and test suites, checking for new warnings,
+    verifying binary output equivalence, profiling compile times, and
+    producing an upgrade readiness report. Excludes the actual toolchain
+    migration.
+edges:
+  involves_role:
+    - target: role:implementer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:rust-async-runtime
+    - target: skill-area:editor-fluency
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:engineering-productivity
+    - target: org-unit:engineering

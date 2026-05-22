@@ -8,6 +8,13 @@ skills:
   - codemod-executor
   - refactoring-assistant
   - dead-code-eliminator
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:dead-code-elimination, skill-area:dependency-upgrade-strategies]
+  roles: [role:backend-engineer, role:refactor-bot]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Code Transformation Executor Agent

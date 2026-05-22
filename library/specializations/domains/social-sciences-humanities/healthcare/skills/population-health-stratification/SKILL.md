@@ -2,6 +2,12 @@
 name: population-health-stratification
 description: Stratify patient populations by risk level using claims data, clinical data, and social determinants to prioritize care management interventions
 allowed-tools: Read, Grep, Write, Edit, Glob, Bash, WebFetch
+graph:
+  domains: [domain:healthcare]
+  specializations: [specialization:clinical-informatics]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:geospatial-data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:data-scientist, role:research-scientist]
 ---
 
 # Population Health Stratification

@@ -1,0 +1,169 @@
+# Babysitter Plugin for Claude Code
+
+Babysitter is the Claude Code plugin for SDK-backed orchestration with
+event-sourced runs, stop-hook continuation, native hook dispatch, and human
+approval gates.
+
+<!-- docs-status:start -->
+> Status: Public harness plugin surface for Claude Code.
+> Canonical docs home: [Package and Plugin Docs Map](../../docs/package-and-plugin-map.md).
+> This README is the canonical Claude Code plugin contract; use [Plugins Overview](../../docs/plugins.md) for repo-level plugin discovery.
+<!-- docs-status:end -->
+
+## Active Orchestration Contract
+
+Claude Code is the canonical hook-driven harness:
+
+- `SessionStart` prepares baseline session state
+- the babysit skill or plugin command surface starts and resumes runs
+- Claude performs one orchestration phase per turn
+- after each posted effect, the assistant stops and the stop hook decides
+  whether to block or approve exit
+- the run finishes only when `completionProof` is emitted and returned as
+  `<promise>...</promise>`
+
+Do not document multi-iteration loops inside a single turn.
+
+## Active Process-Library Model
+
+Process discovery should prefer:
+
+1. `.a5c/processes` in the current workspace
+2. The SDK-managed active process-library binding returned by `babysitter process-library:active --json`
+3. Other installed skill/plugin roots only as compatibility fallback
+4. Reference/bundled content only as last resort
+
+The process library is active-use and layered. Docs should not frame it as a
+single bundled snapshot or as a team/project-scoped library only.
+
+## Task Kinds
+
+Current generated-process guidance:
+
+- prefer `agent`
+- prefer `skill` when a matching installed skill exists
+- allow `shell` for existing tooling/tests/builds
+- use `breakpoint` for approval gates
+- use `sleep` for time gates
+
+Do not document `node` as an allowed generated effect kind for current
+Babysitter processes.
+
+## Runtime Ownership
+
+The Claude-facing README should stay on the Claude skill and hook experience.
+Low-level Babysitter runtime mechanics such as run creation, result posting,
+binding, and compatibility fallbacks belong in the babysit skill and hook
+implementation docs, not in this top-level README.
+
+## Breakpoints
+
+Interactive breakpoint rules:
+
+- require explicit approve/reject choices
+- empty or ambiguous answers are not approval
+- rejection is still posted with `--status ok` and `approved: false`
+- the assistant must not auto-approve breakpoints in interactive mode
+
+## Native Hooks
+
+The plugin dispatches native Babysitter hooks from these priority tiers:
+
+1. `.a5c/hooks/<hook-type>/`
+2. `~/.config/babysitter/hooks/<hook-type>/`
+3. `plugins/babysitter-unified/hooks/<hook-type>/`
+
+Common hook points:
+
+- `on-run-start`
+- `on-iteration-start`
+- `on-iteration-end`
+- `on-task-start`
+- `on-task-complete`
+- `on-breakpoint`
+- `on-run-complete`
+- `on-run-fail`
+
+## Key Files
+
+- `plugins/babysitter-unified/plugin.json`
+- `plugins/babysitter-unified/hooks/`
+- `plugins/babysitter-unified/skills/babysit/SKILL.md`
+- `library/`
+
+## Installation
+
+Install the Claude Code plugin through the Claude plugin installer or the SDK
+CLI helper:
+
+```bash
+claude plugin marketplace add a5c-ai/babysitter-claude
+claude plugin install --scope user babysitter@a5c.ai
+```
+
+The SDK helper runs the same published Claude plugin flow. Install the Babysitter CLI once, then choose user or project scope:
+
+```bash
+npm install -g @a5c-ai/babysitter
+
+# User-scope install
+babysitter harness:install-plugin claude-code
+
+# Project-scope install
+babysitter harness:install-plugin claude-code --workspace /path/to/repo
+```
+
+Then restart Claude Code. The installer does not materialize a repo-local
+plugin copy.
+
+## Claude Cowork Installation
+
+Claude Cowork can install this same plugin package without any plugin-structure
+changes. This repository includes a Claude marketplace manifest at
+`.claude-plugin/marketplace.json` that points to the generated external
+`a5c-ai/babysitter-claude` marketplace repo, while the maintained source in
+this repo lives under `plugins/babysitter-unified/`.
+
+### Personal install from this repository
+
+1. Open Claude Desktop and switch to the `Cowork` tab.
+2. Click `Customize` in the left sidebar.
+3. Click `Browse plugins`.
+4. Select `Personal`.
+5. Click `+`, then choose `Add marketplace from GitHub`.
+6. Enter `https://github.com/a5c-ai/babysitter`.
+7. Install `Babysitter` from the marketplace that Cowork imports from this repo.
+
+After installation, the plugin's skills appear in Cowork when you type `/` or
+click `+`.
+
+### Team / Enterprise org-managed install
+
+Organization owners can also distribute Cowork plugins from
+`Organization settings > Plugins`.
+
+- Manual marketplace: upload plugin ZIP files in the admin UI.
+- GitHub-synced marketplace: connect a private or internal GitHub repo in
+  `owner/repo` format.
+
+Anthropic's current Cowork docs require organization GitHub-synced
+marketplaces to use private or internal repositories on `github.com`, not
+public repos. If you want to distribute Babysitter org-wide through a
+GitHub-synced marketplace, use a private/internal fork of this repo or upload
+the plugin ZIP manually.
+
+If the workspace does not already have an active process-library binding, this command bootstraps the shared global SDK process library automatically:
+
+```bash
+babysitter process-library:active --json
+```
+
+## Quick Start
+
+In Claude Code, invoke the skill or the plugin commands and let the harness own
+the loop. The assistant should iterate once, post results, stop, and resume via
+the stop hook until completion.
+
+## License
+
+See the repository license.

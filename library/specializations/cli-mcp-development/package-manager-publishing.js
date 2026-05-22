@@ -17,6 +17,13 @@
  * - npm publishing: https://docs.npmjs.com/cli/v8/commands/npm-publish
  * - PyPI publishing: https://packaging.python.org/tutorials/packaging-projects/
  * - crates.io publishing: https://doc.rust-lang.org/cargo/reference/publishing.html
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:cli-mcp-development]
+ *   skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation]
+ *   roles: [role:backend-engineer, role:platform-engineer]
+ *   workflows: [workflow:sdk-api-design, workflow:release-management]
+ *   topics: [topic:developer-experience]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

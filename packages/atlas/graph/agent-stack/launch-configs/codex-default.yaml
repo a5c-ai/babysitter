@@ -1,0 +1,161 @@
+nodeKind: LaunchConfig
+id: launch-config:codex.default
+attributes:
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  displayName: Codex CLI default
+  env: {}
+  commArgs: []
+  description: |-
+    Default Codex CLI launch recipe. Spawns the `codex` CLI with no extra argv and uses the user's configured approval policy, sandbox mode, model, and project configuration.
+edges:
+  requires_capability:
+    - target: capability:streaming
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+    - target: capability:supports-mcp
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+  runs_via:
+    - target: execution:local-host
+---
+nodeKind: LaunchConfig
+id: launch-config:codex.approval-untrusted
+attributes:
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  displayName: Codex CLI untrusted approval-policy launch
+  env: {}
+  commArgs:
+    - --ask-for-approval
+    - untrusted
+  description: |-
+    Codex CLI launch recipe that sets `--ask-for-approval untrusted`, allowing trusted commands without asking while escalating untrusted commands to the user.
+edges:
+  requires_capability:
+    - target: capability:requires-tool-approval
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+  runs_via:
+    - target: execution:local-host
+---
+nodeKind: LaunchConfig
+id: launch-config:codex.approval-on-failure
+attributes:
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  displayName: Codex CLI deprecated on-failure approval-policy launch
+  env: {}
+  commArgs:
+    - --ask-for-approval
+    - on-failure
+  description: |-
+    Deprecated Codex CLI launch recipe that sets `--ask-for-approval on-failure`, running commands without asking first and escalating after command failure. Codex CLI help recommends `on-request` for interactive runs or `never` for non-interactive runs instead.
+edges:
+  requires_capability:
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+  runs_via:
+    - target: execution:local-host
+---
+nodeKind: LaunchConfig
+id: launch-config:codex.ask-for-approval
+attributes:
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  displayName: Codex CLI on-request approval-policy launch
+  env: {}
+  commArgs:
+    - --ask-for-approval
+    - on-request
+  description: |-
+    Codex CLI launch recipe that sets `--ask-for-approval on-request`, where the model decides when to ask the user for approval before running commands.
+edges:
+  requires_capability:
+    - target: capability:requires-tool-approval
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+  runs_via:
+    - target: execution:local-host
+---
+nodeKind: LaunchConfig
+id: launch-config:codex.approval-never
+attributes:
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  displayName: Codex CLI never approval-policy launch
+  env: {}
+  commArgs:
+    - --ask-for-approval
+    - never
+  description: |-
+    Codex CLI launch recipe that sets `--ask-for-approval never`, never prompting for user approval and returning execution failures directly to the model.
+edges:
+  requires_capability:
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+  runs_via:
+    - target: execution:local-host
+---
+nodeKind: LaunchConfig
+id: launch-config:codex.full-auto
+attributes:
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  displayName: Codex CLI full-auto launch
+  env: {}
+  commArgs:
+    - --full-auto
+  description: |-
+    Codex CLI launch recipe for the `--full-auto` convenience flag, equivalent to `--ask-for-approval on-request --sandbox workspace-write` for low-friction sandboxed automatic execution.
+edges:
+  requires_capability:
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+  runs_via:
+    - target: execution:local-host
+---
+nodeKind: LaunchConfig
+id: launch-config:codex.dangerously-bypass-approvals-and-sandbox
+attributes:
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  displayName: Codex CLI dangerous bypass launch
+  env: {}
+  commArgs:
+    - --dangerously-bypass-approvals-and-sandbox
+  description: |-
+    Codex CLI launch recipe for `--dangerously-bypass-approvals-and-sandbox`, which skips confirmation prompts and executes commands without sandboxing. The CLI help marks this as extremely dangerous and intended only for externally sandboxed environments.
+edges:
+  requires_capability:
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+  runs_via:
+    - target: execution:local-host
+---
+nodeKind: LaunchConfig
+id: launch-config:codex.mcp-server
+attributes:
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  displayName: Codex MCP server launch
+  env: {}
+  commArgs:
+    - mcp-server
+  description: |-
+    Codex CLI launch recipe for running Codex as an MCP server. The server exposes Codex conversation tools for multi-agent workflows.
+edges:
+  requires_capability:
+    - target: capability:supports-mcp
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+    - target: capability:mcp-stdio
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+  runs_via:
+    - target: execution:local-host

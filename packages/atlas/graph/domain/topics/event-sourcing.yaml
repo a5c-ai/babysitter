@@ -1,0 +1,11 @@
+nodeKind: Topic
+id: topic:event-sourcing
+attributes:
+  displayName: "Event Sourcing"
+  description: |
+    Event Sourcing as a cross-cutting topic — append-only event logs as
+    source of truth, projections, snapshots, and replay.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:databases

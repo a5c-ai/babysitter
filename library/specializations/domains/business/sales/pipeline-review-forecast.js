@@ -15,6 +15,11 @@
  * @references
  * - Clari Revenue Operations: https://www.clari.com/
  * - Gartner Sales Forecasting: https://www.gartner.com/en/sales/topics/sales-forecasting
+  * @graph
+ *   domains: [domain:sales]
+ *   skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+ *   workflows: [workflow:customer-journey-optimization]
+ *   roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

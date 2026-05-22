@@ -1,0 +1,327 @@
+---
+nodeKind: Responsibility
+id: responsibility:clinical-data-integrity
+attributes:
+  displayName: "Clinical data integrity"
+  cadence: continuous
+  description: |
+    Ensure clinical data accuracy, completeness, and consistency across
+    electronic health records, clinical trial databases, and patient
+    registries. Enforce data validation rules, audit trails, and
+    regulatory standards (GCP, 21 CFR Part 11).
+edges:
+  held_by:
+    - target: role:clinical-data-scientist
+    - target: role:epidemiologist
+    - target: role:bioinformatician
+---
+nodeKind: Responsibility
+id: responsibility:patient-safety-compliance
+attributes:
+  displayName: "Patient safety compliance"
+  cadence: continuous
+  description: |
+    Monitor and enforce patient safety protocols — adverse event reporting,
+    safety signal detection, and compliance with pharmacovigilance
+    regulations. Ensure clinical systems flag potential safety issues
+    in real time.
+edges:
+  held_by:
+    - target: role:clinical-data-scientist
+    - target: role:epidemiologist
+---
+nodeKind: Responsibility
+id: responsibility:drug-safety-monitoring
+attributes:
+  displayName: "Drug safety monitoring"
+  cadence: continuous
+  description: |
+    Track post-market drug safety data — adverse event collection,
+    signal detection and evaluation, periodic safety update reports,
+    and risk-benefit assessment. Ensure compliance with global
+    pharmacovigilance requirements.
+edges:
+  held_by:
+    - target: role:clinical-data-scientist
+---
+nodeKind: Responsibility
+id: responsibility:financial-model-accuracy
+attributes:
+  displayName: "Financial model accuracy"
+  cadence: continuous
+  description: |
+    Validate and maintain the accuracy of financial models — pricing
+    models, valuation models, and forecasting models. Perform back-testing,
+    sensitivity analysis, and model benchmarking against market data.
+edges:
+  held_by:
+    - target: role:quant-developer
+    - target: role:quantitative-analyst
+    - target: role:actuary
+---
+nodeKind: Responsibility
+id: responsibility:risk-model-validation
+attributes:
+  displayName: "Risk model validation"
+  cadence: quarterly
+  description: |
+    Independently validate risk models — test model assumptions, evaluate
+    calibration, assess model limitations, and ensure models meet
+    regulatory requirements. Produce validation reports and track
+    remediation of identified deficiencies.
+edges:
+  held_by:
+    - target: role:risk-analyst
+    - target: role:quant-developer
+    - target: role:actuary
+---
+nodeKind: Responsibility
+id: responsibility:trade-compliance
+attributes:
+  displayName: "Trade compliance"
+  cadence: continuous
+  description: |
+    Ensure adherence to international trade regulations — export controls,
+    customs compliance, trade embargoes, and dual-use goods restrictions.
+    Screen transactions and maintain compliance documentation.
+edges:
+  held_by:
+    - target: role:compliance-officer
+    - target: role:legal-counsel
+---
+nodeKind: Responsibility
+id: responsibility:sanctions-screening
+attributes:
+  displayName: "Sanctions screening"
+  cadence: continuous
+  description: |
+    Screen customers, transactions, and counterparties against sanctions
+    lists — OFAC, EU, UN, and other regulatory sanctions databases.
+    Manage screening rules, investigate alerts, and document
+    disposition decisions.
+edges:
+  held_by:
+    - target: role:compliance-officer
+    - target: role:fraud-analyst
+---
+nodeKind: Responsibility
+id: responsibility:content-policy-enforcement
+attributes:
+  displayName: "Content policy enforcement"
+  cadence: continuous
+  description: |
+    Enforce platform content policies at scale — configure and tune
+    automated moderation systems, manage human review queues, handle
+    escalations, and measure enforcement consistency across content
+    types and regions.
+edges:
+  held_by:
+    - target: role:trust-safety-engineer
+    - target: role:content-moderator
+---
+nodeKind: Responsibility
+id: responsibility:community-guidelines-enforcement
+attributes:
+  displayName: "Community guidelines enforcement"
+  cadence: continuous
+  description: |
+    Maintain healthy community interactions — apply community guidelines
+    consistently, manage user reports, issue warnings and sanctions,
+    and document enforcement decisions. Balance community safety with
+    open participation.
+edges:
+  held_by:
+    - target: role:community-manager
+    - target: role:content-moderator
+---
+nodeKind: Responsibility
+id: responsibility:trust-score-maintenance
+attributes:
+  displayName: "Trust score maintenance"
+  cadence: continuous
+  description: |
+    Maintain and calibrate trust and reputation scoring systems —
+    user trustworthiness signals, seller ratings, content quality
+    scores, and platform safety metrics. Ensure scoring models remain
+    fair, accurate, and resistant to manipulation.
+edges:
+  held_by:
+    - target: role:trust-safety-engineer
+---
+nodeKind: Responsibility
+id: responsibility:fraud-rule-tuning
+attributes:
+  displayName: "Fraud rule tuning"
+  cadence: weekly
+  description: |
+    Optimize fraud detection rules and models — adjust thresholds,
+    add new rules for emerging fraud patterns, reduce false positive
+    rates, and maintain detection effectiveness as fraud tactics
+    evolve.
+edges:
+  held_by:
+    - target: role:fraud-analyst
+---
+nodeKind: Responsibility
+id: responsibility:transaction-monitoring
+attributes:
+  displayName: "Transaction monitoring"
+  cadence: continuous
+  description: |
+    Monitor financial transactions for suspicious activity — configure
+    monitoring rules, investigate alerts, file suspicious activity
+    reports, and maintain audit trails. Ensure compliance with
+    anti-money-laundering regulations.
+edges:
+  held_by:
+    - target: role:fraud-analyst
+    - target: role:compliance-officer
+---
+nodeKind: Responsibility
+id: responsibility:environmental-impact-assessment
+attributes:
+  displayName: "Environmental impact assessment"
+  cadence: per-project
+  description: |
+    Evaluate the environmental consequences of proposed projects or
+    policies — ecological surveys, air and water quality modeling,
+    cumulative impact analysis, and mitigation planning. Produce
+    reports that satisfy regulatory requirements.
+edges:
+  held_by:
+    - target: role:environmental-scientist
+    - target: role:urban-planner
+---
+nodeKind: Responsibility
+id: responsibility:carbon-footprint-tracking
+attributes:
+  displayName: "Carbon footprint tracking"
+  cadence: quarterly
+  description: |
+    Measure and report organizational carbon emissions — Scope 1, 2,
+    and 3 accounting, emissions factor management, reduction target
+    tracking, and carbon offset verification. Support ESG reporting
+    and climate disclosure requirements.
+edges:
+  held_by:
+    - target: role:environmental-scientist
+---
+nodeKind: Responsibility
+id: responsibility:workplace-safety
+attributes:
+  displayName: "Workplace safety"
+  cadence: continuous
+  description: |
+    Ensure safe working conditions in physical environments — hazard
+    identification, safety training, incident investigation, and
+    OSHA compliance. Maintain safety management systems and drive
+    continuous improvement in safety metrics.
+edges:
+  held_by:
+    - target: role:manufacturing-engineer
+    - target: role:quality-assurance-engineer-industrial
+---
+nodeKind: Responsibility
+id: responsibility:diversity-metrics-reporting
+attributes:
+  displayName: "Diversity metrics reporting"
+  cadence: quarterly
+  description: |
+    Collect, analyze, and report workforce diversity metrics —
+    representation data, pay equity analysis, promotion rate parity,
+    and inclusion survey results. Support organizational accountability
+    and regulatory disclosure requirements.
+edges:
+  held_by:
+    - target: role:hr-manager
+    - target: role:people-analytics-specialist
+---
+nodeKind: Responsibility
+id: responsibility:employee-retention
+attributes:
+  displayName: "Employee retention"
+  cadence: continuous
+  description: |
+    Monitor and improve employee retention — attrition analysis, flight
+    risk identification, stay interview programs, and retention strategy
+    development. Track retention metrics by team, tenure, and demographic
+    to address systemic issues.
+edges:
+  held_by:
+    - target: role:hr-manager
+    - target: role:people-analytics-specialist
+---
+nodeKind: Responsibility
+id: responsibility:customer-satisfaction-metrics
+attributes:
+  displayName: "Customer satisfaction metrics"
+  cadence: continuous
+  description: |
+    Measure and track customer satisfaction across touchpoints — CSAT
+    surveys, service quality scores, complaint resolution rates, and
+    sentiment analysis. Drive improvements based on customer feedback
+    patterns.
+edges:
+  held_by:
+    - target: role:customer-experience-manager
+    - target: role:customer-success-manager
+---
+nodeKind: Responsibility
+id: responsibility:NPS-tracking
+attributes:
+  displayName: "NPS tracking"
+  cadence: quarterly
+  description: |
+    Administer and analyze Net Promoter Score programs — survey design,
+    response collection, segment analysis, and closed-loop follow-up.
+    Track NPS trends, identify promoter and detractor drivers, and
+    correlate with business outcomes.
+edges:
+  held_by:
+    - target: role:customer-experience-manager
+    - target: role:product-manager
+---
+nodeKind: Responsibility
+id: responsibility:churn-reduction
+attributes:
+  displayName: "Churn reduction"
+  cadence: continuous
+  description: |
+    Identify and reduce customer churn — build churn prediction models,
+    design intervention programs, monitor at-risk accounts, and measure
+    the effectiveness of retention initiatives. Analyze churn drivers
+    by segment and product area.
+edges:
+  held_by:
+    - target: role:customer-success-manager
+    - target: role:growth-pm
+---
+nodeKind: Responsibility
+id: responsibility:user-activation-rate
+attributes:
+  displayName: "User activation rate"
+  cadence: continuous
+  description: |
+    Measure and improve the rate at which new users reach their "aha
+    moment" — define activation milestones, instrument onboarding funnels,
+    run activation experiments, and optimize time-to-value for new
+    signups.
+edges:
+  held_by:
+    - target: role:growth-pm
+    - target: role:growth-engineer
+---
+nodeKind: Responsibility
+id: responsibility:feature-adoption-tracking
+attributes:
+  displayName: "Feature adoption tracking"
+  cadence: continuous
+  description: |
+    Track and improve adoption of product features — instrument feature
+    usage, measure adoption curves, identify friction points, and
+    evaluate the impact of feature launches. Inform product decisions
+    with usage data.
+edges:
+  held_by:
+    - target: role:product-analyst
+    - target: role:product-manager

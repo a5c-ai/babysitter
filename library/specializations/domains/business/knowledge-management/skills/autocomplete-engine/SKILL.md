@@ -13,6 +13,10 @@ metadata:
   domain: business
   category: Search Optimization
   skill-id: SK-016
+graph:
+  domains: [domain:knowledge-management]
+  skillAreas: [skill-area:search-indexing, skill-area:retrieval-augmented-generation, skill-area:natural-language-processing]
+  roles: [role:information-architect, role:data-engineer, role:analytics-engineer]
 ---
 
 # Autocomplete Engine Skill

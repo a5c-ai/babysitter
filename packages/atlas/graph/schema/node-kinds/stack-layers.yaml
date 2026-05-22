@@ -1,0 +1,51 @@
+# NodeKinds for cluster 1-stack-layers.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:layer
+  name: Layer
+  origin: universal
+  prefix: layer
+  cluster: 1-stack-layers
+  purpose: one of the top-level universal agentic stack layers
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: position
+    type: int
+    required: true
+    constraint: between 1 and 14
+    notes: Required for top-level layers; there are no modeled nested layer nodes.
+  - name: summary
+    type: string
+    required: true
+  - name: path
+    type: enum<compute,surfacing,knowledge,control,governance>
+    required: true
+  - name: scope
+    type: markdown
+    required: false
+    notes: Human-readable boundary for what belongs in this layer.
+  - name: responsibilities
+    type: list<string>
+    required: false
+    notes: Internal boxes shown in the landscape map; responsibilities are not nested layers.
+  - name: examples
+    type: list<string>
+    required: false
+    notes: Human examples of tools, products, or concepts that fit this layer.
+  - name: fitNotes
+    type: markdown
+    required: false
+    notes: Guidance for fitting products that collapse, omit, or span layers.
+  incomingEdges:
+  - realizes
+  outgoingEdges: []
+  invariants:
+  - position 1..14 unique across all Layer nodes
+  examples: []

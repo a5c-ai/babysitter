@@ -1,0 +1,19 @@
+nodeKind: LSPServer
+id: lsp-server:example-typescript
+attributes:
+  displayName: "TypeScript LSP (example)"
+  manifestPath: ".lsp.json"
+  command: "typescript-language-server"
+  args: ["--stdio"]
+  languages: [language:typescript, language:javascript]
+  frameworks: []
+  transport: stdio
+  description: "Standard TypeScript language server bundled inside a Claude Code plugin."
+edges:
+  contained_in_plugin:
+    - target: plugin:example-portable-extension
+  serves_language:
+    - target: language:typescript
+    - target: language:javascript
+  sourced_from:
+    - target: source-ref:example-skill-source

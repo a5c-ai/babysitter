@@ -1,0 +1,45 @@
+nodeKind: IssueDispatchState
+id: issue-dispatch-state:aca-390
+attributes:
+  displayName: "ACA-390 dispatch state"
+  readiness: completed
+  blockedReasons: []
+  lastDispatchedAt: "2026-05-02T08:18:42Z"
+edges:
+  dispatch_state_of_issue:
+    - target: issue:linear-aca-390
+---
+nodeKind: IssueDispatchState
+id: issue-dispatch-state:gh-1234
+attributes:
+  displayName: "GH#1234 dispatch state"
+  readiness: needs-decomposition
+  blockedReasons:
+    - "no-decomposition: agent has not yet proposed a decomposition"
+edges:
+  dispatch_state_of_issue:
+    - target: issue:github-1234
+---
+nodeKind: IssueDispatchState
+id: issue-dispatch-state:gh-1234-blocked
+attributes:
+  displayName: "GH#1234 blocked dispatch state (alternate)"
+  readiness: blocked
+  blockedReasons:
+    - "missing-acceptance-criteria"
+    - "depends-on:issue:linear-aca-390"
+edges:
+  dispatch_state_of_issue:
+    - target: issue:github-1234
+---
+nodeKind: IssueDispatchState
+id: issue-dispatch-state:gh-1234-ready
+attributes:
+  displayName: "GH#1234 ready-for-dispatch state (alternate)"
+  readiness: ready
+  blockedReasons: []
+  renderedContext: |
+    Implement the reconciliation timer per ACA-390 acceptance criteria.
+edges:
+  dispatch_state_of_issue:
+    - target: issue:github-1234

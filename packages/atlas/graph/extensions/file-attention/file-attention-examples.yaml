@@ -1,0 +1,35 @@
+nodeKind: FileAttention
+id: file-attention:example-readme
+attributes:
+  displayName: "README.md attended in example session"
+  path: "README.md"
+  kind: read
+  firstTouchedAt: "2026-05-02T00:00:00Z"
+  lastTouchedAt: "2026-05-02T00:01:00Z"
+  touchCount: 2
+  toolNames:
+    - Read
+---
+nodeKind: FileAttention
+id: file-attention:example-package-json-write
+attributes:
+  displayName: "package.json edited in example session"
+  path: "package.json"
+  kind: both
+  firstTouchedAt: "2026-05-02T00:00:30Z"
+  lastTouchedAt: "2026-05-02T00:02:00Z"
+  touchCount: 4
+  toolNames:
+    - Read
+    - Edit
+---
+nodeKind: FileAttention
+id: file-attention:example-bash-grep
+attributes:
+  displayName: "src/index.ts touched via Grep + Read"
+  path: "src/index.ts"
+  kind: read
+  touchCount: 1
+  toolNames:
+    - Grep
+    - Read

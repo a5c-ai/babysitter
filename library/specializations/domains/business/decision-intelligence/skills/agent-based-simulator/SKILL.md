@@ -16,6 +16,10 @@ metadata:
     - mesa
     - agentpy
     - pyNetLogo
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:quantitative-modeling, skill-area:statistical-analysis, skill-area:data-analysis]
+  roles: [role:data-scientist, role:research-scientist, role:quantitative-analyst]
 ---
 
 # Agent-Based Simulator

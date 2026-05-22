@@ -1,0 +1,7 @@
+.a5c
+node_modules
+**/.next
+dist
+.git
+*.md
+tests

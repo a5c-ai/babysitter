@@ -10,7 +10,7 @@ export interface BuildEffectIndexOptions {
   events?: JournalEvent[];
 }
 
-type SupportedEventType = "RUN_CREATED" | "RUN_COMPLETED" | "RUN_FAILED" | "EFFECT_REQUESTED" | "EFFECT_RESOLVED";
+type SupportedEventType = "RUN_CREATED" | "RUN_COMPLETED" | "RUN_FAILED" | "EFFECT_REQUESTED" | "EFFECT_RESOLVED" | "EFFECT_CANCELLED" | "EFFECT_PROGRESS" | "COST_TRACKED" | "PROCESS_ASSIGNED";
 
 interface EffectRequestedPayload {
   effectId: string;
@@ -32,6 +32,30 @@ interface EffectResolvedPayload {
   error?: SerializedEffectError;
   stdoutRef?: string;
   stderrRef?: string;
+}
+
+interface EffectCancelledPayload {
+  effectId: string;
+  reason?: string;
+}
+
+interface CostTrackedPayload {
+  effectId?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  cacheCreationInputTokens?: number;
+  cacheReadInputTokens?: number;
+  costUsd?: number;
+  model?: string;
+  taskKind?: string;
+}
+
+interface EffectProgressPayload {
+  effectId?: string;
+  progressPercent?: number;
+  progressLabel?: string;
+  currentStep?: string;
+  progressEta?: string;
 }
 
 export class EffectIndex {
@@ -76,6 +100,15 @@ export class EffectIndex {
         return;
       case "EFFECT_RESOLVED":
         this.handleEffectResolved(event);
+        return;
+      case "EFFECT_CANCELLED":
+        this.handleEffectCancelled(event);
+        return;
+      case "EFFECT_PROGRESS":
+        this.handleEffectProgress(event);
+        return;
+      case "COST_TRACKED":
+        this.handleCostTracked(event);
         return;
       default:
         // Informational events (e.g. STOP_HOOK_INVOKED) don't affect the
@@ -216,6 +249,70 @@ export class EffectIndex {
     record.stdoutRef = payload.stdoutRef ? collapseDoubledA5cRuns(payload.stdoutRef) : payload.stdoutRef;
     record.stderrRef = payload.stderrRef ? collapseDoubledA5cRuns(payload.stderrRef) : payload.stderrRef;
     record.resolvedAt = event.recordedAt;
+  }
+
+  private handleEffectCancelled(event: JournalEvent) {
+    const payload = this.expectObject<EffectCancelledPayload>(event, "EFFECT_CANCELLED");
+    const effectId = this.expectString(payload.effectId, "effectId", event);
+    const record = this.byEffectId.get(effectId);
+    if (!record) {
+      throw new RunFailedError(`EFFECT_CANCELLED references unknown effectId ${effectId}`, {
+        path: event.path,
+      });
+    }
+    if (record.status !== "requested") {
+      throw new RunFailedError(`Effect ${effectId} is not requested (status=${record.status})`, {
+        path: event.path,
+      });
+    }
+    record.status = "cancelled";
+    record.resolvedAt = event.recordedAt;
+  }
+
+  private handleEffectProgress(event: JournalEvent) {
+    const payload = this.expectObject<EffectProgressPayload>(event, "EFFECT_PROGRESS");
+    const effectId = typeof payload.effectId === "string" ? payload.effectId : undefined;
+    if (!effectId) return; // Ignore malformed progress events silently
+    const record = this.byEffectId.get(effectId);
+    if (!record) return; // Ignore progress for unknown effects silently
+    if (typeof payload.progressPercent === "number") {
+      record.progressPercent = payload.progressPercent;
+    }
+    if (typeof payload.progressLabel === "string") {
+      record.progressLabel = payload.progressLabel;
+    }
+    if (typeof payload.currentStep === "string") {
+      record.currentStep = payload.currentStep;
+    }
+    if (typeof payload.progressEta === "string") {
+      record.progressEta = payload.progressEta;
+    }
+  }
+
+  private handleCostTracked(event: JournalEvent) {
+    const payload = this.expectObject<CostTrackedPayload>(event, "COST_TRACKED");
+    const effectId = typeof payload.effectId === "string" ? payload.effectId : undefined;
+    if (!effectId) return; // Run-level cost event — no effect association
+    const record = this.byEffectId.get(effectId);
+    if (!record) return; // Unknown effect — silently ignore
+    if (typeof payload.inputTokens === "number") {
+      record.inputTokens = (record.inputTokens ?? 0) + payload.inputTokens;
+    }
+    if (typeof payload.outputTokens === "number") {
+      record.outputTokens = (record.outputTokens ?? 0) + payload.outputTokens;
+    }
+    if (typeof payload.cacheCreationInputTokens === "number") {
+      record.cacheCreationInputTokens = (record.cacheCreationInputTokens ?? 0) + payload.cacheCreationInputTokens;
+    }
+    if (typeof payload.cacheReadInputTokens === "number") {
+      record.cacheReadInputTokens = (record.cacheReadInputTokens ?? 0) + payload.cacheReadInputTokens;
+    }
+    if (typeof payload.costUsd === "number") {
+      record.costUsd = (record.costUsd ?? 0) + payload.costUsd;
+    }
+    if (typeof payload.model === "string") {
+      record.costModel = payload.model;
+    }
   }
 
   private expectObject<T>(event: JournalEvent, type: string): T {

@@ -1,0 +1,103 @@
+---
+nodeKind: Workflow
+id: workflow:post-incident-review
+attributes:
+  displayName: "Post-Incident Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-incident"
+  complexity: cross-team
+  description: |
+    Conducts blameless post-incident reviews spanning all involved teams —
+    timeline reconstruction, root-cause analysis, action item assignment,
+    systemic pattern identification, and remediation tracking. Excludes real-time incident response.
+edges:
+  involves_role:
+    - target: role:incident-commander
+    - target: role:engineering-manager
+    - target: role:staff-engineer
+    - target: role:principal-engineer
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:observability
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:postmortem-writeup
+    - target: responsibility:retro-facilitation
+    - target: responsibility:run-architecture-review
+  performed_by_org_unit:
+    - target: org-unit:incident-response-team
+    - target: org-unit:engineering
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:quarterly-planning
+attributes:
+  displayName: "Quarterly Planning"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Coordinates the quarterly planning cycle across all engineering teams —
+    goal setting, capacity allocation, cross-team dependency mapping,
+    roadmap alignment, and commitment finalization. Excludes daily sprint planning.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:principal-engineer
+    - target: role:tech-lead
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:run-architecture-review
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:product-team
+    - target: org-unit:platform-team
+    - target: org-unit:ml-team
+    - target: org-unit:data-team
+---
+nodeKind: Workflow
+id: workflow:production-readiness-review
+attributes:
+  displayName: "Production Readiness Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-launch"
+  complexity: cross-team
+  description: |
+    Evaluates new services or major features against a production readiness
+    checklist spanning observability, security, scalability, disaster recovery,
+    and operational runbooks before launch approval. Excludes post-launch monitoring.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:platform-engineer
+    - target: role:security-reviewer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+    - target: skill-area:chaos-engineering
+    - target: skill-area:incident-response
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:observability
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:approve-architecture
+    - target: responsibility:runbook-authoring
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:security-team
+    - target: org-unit:architecture-guild
+    - target: org-unit:engineering

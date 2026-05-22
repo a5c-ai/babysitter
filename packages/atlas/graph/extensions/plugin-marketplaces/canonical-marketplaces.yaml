@@ -1,0 +1,62 @@
+nodeKind: PluginMarketplace
+id: plugin-marketplace:claude-plugins-official
+attributes:
+  displayName: "Anthropic Official Plugins"
+  description: |
+    Auto-added registry on Claude Code install. Hosts vendor-curated
+    plugins across categories: code-intelligence (per-language LSP plugins),
+    external-integrations (github, gitlab, atlassian, asana, linear, notion,
+    figma, vercel, firebase, supabase, slack, sentry), development-workflows
+    (commit-commands, pr-review-toolkit, agent-sdk-dev, plugin-dev), and
+    output-styles (explanatory-output-style, learning-output-style).
+    Auto-update governed by FORCE_AUTOUPDATE_PLUGINS=1; opt-out via
+    DISABLE_AUTOUPDATER.
+  marketplaceId: claude-plugins-official
+  source: github
+  sourceUri: anthropics/claude-plugins
+  categories:
+  - code-intelligence
+  - external-integrations
+  - development-workflows
+  - output-styles
+  autoUpdate: true
+  official: true
+edges:
+  catalogs:
+  - target: plugin:example-native-claude
+---
+nodeKind: PluginMarketplace
+id: plugin-marketplace:claude-code-plugins-demo
+attributes:
+  displayName: "Claude Code Plugins (Demo)"
+  description: |
+    Opt-in demonstration registry of community example plugins. Users
+    add via `/plugin marketplace add anthropics/claude-code-plugins`.
+  marketplaceId: claude-code-plugins
+  source: github
+  sourceUri: anthropics/claude-code-plugins
+  categories:
+  - development-workflows
+  autoUpdate: false
+  official: false
+edges:
+  catalogs:
+  - target: plugin:example-portable-extension
+---
+nodeKind: PluginMarketplace
+id: plugin-marketplace:team-internal-example
+attributes:
+  displayName: "Team Internal Marketplace (example)"
+  description: |
+    Hypothetical team-private marketplace served from a local
+    marketplace.json or a remote URL — registered via
+    `extraKnownMarketplaces` in `.claude/settings.json` so all team
+    members trust the same source.
+  marketplaceId: team-internal
+  source: local
+  sourceUri: ./.claude-plugin/marketplace.json
+  categories:
+  - development-workflows
+  autoUpdate: false
+  official: false
+edges: {}

@@ -1,0 +1,17 @@
+nodeKind: AgentProduct
+id: agent:amp
+attributes:
+  displayName: "Sourcegraph Amp"
+  vendor: "Sourcegraph"
+  homepageUrl: "https://ampcode.com/"
+  primarySurface: cli
+  supportTier: catalog-backed
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Sourcegraph's Amp CLI — an agentic coding assistant with multi-model
+    support, specialized subagents (Oracle, Librarian), advanced code
+    understanding, and MCP integration. Authenticates via SOURCEGRAPH_ACCESS_TOKEN.
+edges:
+  has_version:
+    - agent-version:amp@current

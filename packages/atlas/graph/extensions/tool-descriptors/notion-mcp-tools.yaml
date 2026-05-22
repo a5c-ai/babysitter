@@ -1,0 +1,140 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:notion.search
+attributes:
+  schema: '{}'
+  displayName: "Notion: Search"
+  description: Search across pages and databases the integration can access.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+      filter: { type: object }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-notion
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:notion.get-page
+attributes:
+  schema: '{}'
+  displayName: "Notion: Get Page"
+  description: Retrieve a Notion page by ID with its block contents.
+  inputSchema:
+    type: object
+    required: [page_id]
+    properties:
+      page_id: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      page: { type: object }
+      blocks: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-notion
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:notion.create-page
+attributes:
+  schema: '{}'
+  displayName: "Notion: Create Page"
+  description: Create a new page in a database or under a parent page.
+  inputSchema:
+    type: object
+    required: [parent, properties]
+    properties:
+      parent: { type: object }
+      properties: { type: object }
+      children: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      id: { type: string }
+      url: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-notion
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:notion.update-page
+attributes:
+  schema: '{}'
+  displayName: "Notion: Update Page"
+  description: Update properties on an existing page.
+  inputSchema:
+    type: object
+    required: [page_id, properties]
+    properties:
+      page_id: { type: string }
+      properties: { type: object }
+  outputSchema:
+    type: object
+    properties:
+      page: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-notion
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:notion.append-block-children
+attributes:
+  schema: '{}'
+  displayName: "Notion: Append Block Children"
+  description: Append new block children under a parent page or block.
+  inputSchema:
+    type: object
+    required: [block_id, children]
+    properties:
+      block_id: { type: string }
+      children: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-notion
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:notion.query-database
+attributes:
+  schema: '{}'
+  displayName: "Notion: Query Database"
+  description: Run a filter+sort query against a Notion database.
+  inputSchema:
+    type: object
+    required: [database_id]
+    properties:
+      database_id: { type: string }
+      filter: { type: object }
+      sorts: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-notion

@@ -1,0 +1,70 @@
+---
+nodeKind: Workflow
+id: workflow:forecasting-model-calibration
+attributes:
+  displayName: "Forecasting Model Calibration"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Calibrates organizational forecasting models against realized
+    outcomes -- comparing prior predictions to actuals across revenue,
+    headcount, infrastructure spend, and capacity projections, computing
+    Brier scores and calibration curves for probability estimates,
+    identifying systematic over- or under-confidence bands, adjusting
+    model parameters and ensemble weights, and documenting calibration
+    methodology changes. Produces model accuracy report and updated
+    calibration parameters. Excludes model architecture redesign.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:staff-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:decision-intelligence
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:business-intelligence-team
+---
+nodeKind: Workflow
+id: workflow:decision-retrospective
+attributes:
+  displayName: "Decision Retrospective"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Conducts structured retrospectives on significant organizational
+    decisions after outcomes are observable -- reconstructing the decision
+    context and alternatives considered, evaluating information quality
+    available at decision time, assessing whether the decision process
+    surfaced the right considerations, distinguishing outcome quality from
+    decision quality, identifying repeatable decision patterns and
+    cognitive biases, and extracting process improvements for future
+    decisions. Produces decision retrospective document and
+    decision-framework updates. Excludes ongoing decision tracking.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:adr-writing
+  applies_to_domain:
+    - target: domain:decision-intelligence
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:retro-facilitation
+    - target: responsibility:adr-curation
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:engineering

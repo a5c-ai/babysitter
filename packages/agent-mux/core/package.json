@@ -1,0 +1,97 @@
+{
+  "name": "@a5c-ai/agent-mux-core",
+  "version": "5.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Core runtime, types, and utilities for agent-mux",
+  "author": "a5c-ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux/core#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/agent-mux/core"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "agent-mux",
+    "claude",
+    "codex",
+    "coding-agent",
+    "llm",
+    "cli",
+    "harness",
+    "ai"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "default": "./dist/index.js"
+    },
+    "./browser": {
+      "import": {
+        "types": "./dist/browser.d.ts",
+        "default": "./dist/browser.js"
+      },
+      "require": {
+        "types": "./dist/browser.d.ts",
+        "default": "./dist/browser.js"
+      },
+      "default": "./dist/browser.js"
+    },
+    "./kanban": {
+      "import": {
+        "types": "./dist/kanban.d.ts",
+        "default": "./dist/kanban.js"
+      },
+      "require": {
+        "types": "./dist/kanban.d.ts",
+        "default": "./dist/kanban.js"
+      },
+      "default": "./dist/kanban.js"
+    },
+    "./automation": {
+      "import": {
+        "types": "./dist/automation.d.ts",
+        "default": "./dist/automation.js"
+      },
+      "require": {
+        "types": "./dist/automation.d.ts",
+        "default": "./dist/automation.js"
+      },
+      "default": "./dist/automation.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "test": "vitest run --root ../../.. --config vitest.config.ts packages/agent-mux/core",
+    "verify:release": "node ./scripts/verify-release.mjs",
+    "prepublishOnly": "npm run build && npm run test && npm run verify:release"
+  },
+  "dependencies": {
+    "@a5c-ai/agent-catalog": "5.0.0",
+    "@a5c-ai/agent-mux-observability": "5.0.0"
+  }
+}

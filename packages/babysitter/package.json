@@ -1,8 +1,8 @@
 {
   "name": "@a5c-ai/babysitter",
-  "version": "0.0.187",
+  "version": "5.0.0",
   "description": "Metapackage for installing all babysitter npm packages",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "commonjs",
   "bin": {
     "babysitter": "bin/babysitter.js"
@@ -11,10 +11,24 @@
     "bin/",
     "README.md"
   ],
-  "dependencies": {},
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "lint": "eslint \"bin/**/*.js\" --max-warnings=0"
+  },
+  "dependencies": {
+    "@a5c-ai/babysitter-sdk": "5.0.0",
+    "@a5c-ai/babysitter-agent": "5.0.0"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/a5c-ai/babysitter.git"
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/babysitter"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/babysitter#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
   },
   "keywords": [
     "babysitter",

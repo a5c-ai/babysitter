@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:rag
+attributes:
+  acronym: "RAG"
+  expandsToTermId: term:retrieval-augmented-generation
+  description: |
+    Acronym for RAG.
+edges:
+  expands_to:
+    - term:retrieval-augmented-generation

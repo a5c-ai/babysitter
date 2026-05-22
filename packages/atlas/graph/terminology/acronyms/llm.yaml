@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:llm
+attributes:
+  acronym: "LLM"
+  expandsToTermId: term:large-language-model
+  description: |
+    Acronym for LLM.
+edges:
+  expands_to:
+    - term:large-language-model

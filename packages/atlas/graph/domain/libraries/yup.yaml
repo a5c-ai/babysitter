@@ -1,0 +1,13 @@
+nodeKind: Library
+id: library:yup
+attributes:
+  displayName: "Yup"
+  belongsToLanguageId: language:javascript
+  category: validation
+  description: |
+    Schema builder for runtime value parsing and validation in JavaScript/TypeScript.
+edges:
+  belongs_to_language:
+    - language:javascript
+  library_used_by:
+    - target: skill-area:data-validation-sanitization

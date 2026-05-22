@@ -11,6 +11,11 @@ metadata:
   specialization: operations
   domain: business
   category: operational-analytics
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:data-analytics, skill-area:data-visualization, skill-area:business-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:bi-developer, role:business-analyst]
 ---
 
 # Operational Dashboard Generator

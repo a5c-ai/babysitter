@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: program-synthesis
   phase: 6
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:theoretical-computer-science]
+  skillAreas: [skill-area:compiler-implementation, skill-area:language-design, skill-area:mathematical-reasoning]
+  workflows: [workflow:research-grant-lifecycle]
+  roles: [role:computational-scientist, role:research-scientist]
 ---
 
 # Synthesis Specialist

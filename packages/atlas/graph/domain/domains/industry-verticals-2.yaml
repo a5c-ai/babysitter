@@ -1,0 +1,207 @@
+---
+nodeKind: Domain
+id: domain:construction
+attributes:
+  displayName: "Construction"
+  description: |
+    Construction management, BIM, site logistics, and building compliance.
+edges:
+  contains:
+    - specialization:civil-engineering
+---
+nodeKind: Domain
+id: domain:field-services
+attributes:
+  displayName: "Field Services"
+  description: |
+    Field service management, dispatching, work orders, and mobile workforce.
+edges:
+  contains:
+    - specialization:operations
+    - specialization:logistics
+---
+nodeKind: Domain
+id: domain:sustainability-esg
+attributes:
+  displayName: "Sustainability & ESG"
+  description: |
+    Environmental sustainability, ESG reporting, carbon accounting, and climate risk.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:dei-inclusion
+attributes:
+  displayName: "DEI & Inclusion"
+  description: |
+    Diversity, equity, and inclusion programs, metrics, and bias auditing.
+edges:
+  contains:
+    - specialization:applied-ethics
+---
+nodeKind: Domain
+id: domain:fashion-apparel
+attributes:
+  displayName: "Fashion & Apparel"
+  description: |
+    Fashion tech, design-to-shelf pipeline, sizing, and trend analytics.
+edges:
+  contains:
+    - specialization:supply-chain-optimization
+---
+nodeKind: Domain
+id: domain:food-beverage
+attributes:
+  displayName: "Food & Beverage"
+  description: |
+    Food safety, recipe management, supply chain traceability, and F&B tech.
+edges:
+  contains:
+    - specialization:supply-chain-optimization
+---
+nodeKind: Domain
+id: domain:pharmaceuticals
+attributes:
+  displayName: "Pharmaceuticals"
+  description: |
+    Drug development, clinical trials, regulatory submissions, and pharmacovigilance.
+edges:
+  contains:
+    - specialization:biomedical-informatics
+    - specialization:legal-compliance
+---
+nodeKind: Domain
+id: domain:mining
+attributes:
+  displayName: "Mining"
+  description: |
+    Mining operations, resource estimation, extraction optimization, and safety.
+edges:
+  contains:
+    - specialization:environmental-engineering
+    - specialization:industrial-engineering
+---
+nodeKind: Domain
+id: domain:aviation
+attributes:
+  displayName: "Aviation"
+  description: |
+    Aviation operations, flight planning, MRO, and airspace management.
+edges:
+  contains:
+    - specialization:aerospace-engineering
+---
+nodeKind: Domain
+id: domain:maritime
+attributes:
+  displayName: "Maritime"
+  description: |
+    Maritime logistics, vessel tracking, port operations, and maritime compliance.
+edges:
+  contains:
+    - specialization:logistics
+---
+nodeKind: Domain
+id: domain:sports-fitness
+attributes:
+  displayName: "Sports & Fitness"
+  description: |
+    Sports analytics, athlete performance, fitness tech, and event management.
+edges:
+  contains:
+    - specialization:data-science-ml
+---
+nodeKind: Domain
+id: domain:nonprofit
+attributes:
+  displayName: "Nonprofit"
+  description: |
+    Nonprofit operations, fundraising, grant management, and impact measurement.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:media-publishing
+attributes:
+  displayName: "Media & Publishing"
+  description: |
+    Publishing workflows, editorial management, and digital content distribution.
+edges:
+  contains:
+    - specialization:media
+---
+nodeKind: Domain
+id: domain:fintech
+attributes:
+  displayName: "Fintech"
+  description: |
+    Financial technology, payments, neobanking, and regulatory sandbox.
+edges:
+  contains:
+    - specialization:corporate-finance
+    - specialization:security-compliance
+---
+nodeKind: Domain
+id: domain:edtech
+attributes:
+  displayName: "EdTech"
+  description: |
+    Educational technology, adaptive learning, and student engagement platforms.
+edges:
+  contains:
+    - specialization:instructional-design
+---
+nodeKind: Domain
+id: domain:proptech
+attributes:
+  displayName: "PropTech"
+  description: |
+    Property technology, smart buildings, and real estate marketplace tech.
+edges:
+  contains:
+    - specialization:embedded-systems
+---
+nodeKind: Domain
+id: domain:legaltech
+attributes:
+  displayName: "LegalTech"
+  description: |
+    Legal technology, contract automation, e-discovery, and case management.
+edges:
+  contains:
+    - specialization:legal-compliance
+    - specialization:legal
+---
+nodeKind: Domain
+id: domain:healthtech
+attributes:
+  displayName: "HealthTech"
+  description: |
+    Health technology, telemedicine, remote monitoring, and digital therapeutics.
+edges:
+  contains:
+    - specialization:clinical-informatics
+    - specialization:healthcare
+---
+nodeKind: Domain
+id: domain:cleantech
+attributes:
+  displayName: "CleanTech"
+  description: |
+    Clean energy technology, carbon capture, and circular economy.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:cybersecurity-grc
+attributes:
+  displayName: "Cybersecurity GRC"
+  description: |
+    Governance, risk, and compliance for cybersecurity frameworks.
+edges:
+  contains:
+    - specialization:security-compliance
+    - specialization:legal-compliance

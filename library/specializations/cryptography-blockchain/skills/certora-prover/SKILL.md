@@ -2,6 +2,11 @@
 name: certora-prover
 description: Formal verification using Certora Prover with CVL specification language. Supports invariant rules, parametric verification, ghost variables, and counterexample analysis for mathematical proof of contract correctness.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:smart-contract-security, skill-area:smart-contract-development-testing, skill-area:application-security-testing]
+  roles: [role:security-engineer]
 ---
 
 # Certora Formal Verification Skill

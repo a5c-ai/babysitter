@@ -1,0 +1,38 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:droid.runtime@current
+attributes:
+  displayName: Factory Droid Runtime (current)
+  agentVersionId: agent-version:droid@current
+  subagentDispatchMechanism: handoff
+  packageRef: source-ref:droid-github
+  builtInTools: []
+  toolRegistryDiscovery: static-bundled
+  hookSockets: []
+  internalSessionStateLocation: ~/.droid/sessions/
+  sessionFileFormat: jsonl
+  sessionFilePathConvention: ~/.droid/sessions/<session-id>.jsonl
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: platform-deferred
+  runtimeIdentity: api-key
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  supportsStreaming: true
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:droid
+    role: runtime
+  exposes: []
+  bundles: []
+  connects:
+  - target: mcp-transport:stdio
+  supports:
+  - target: capability:mcp-stdio
+    versionRange: '*'
+    level: full
+  - target: capability:supports-mcp
+    versionRange: '*'
+    level: full
+  speaks:
+    - target: mcp-transport:stdio

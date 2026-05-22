@@ -7,7 +7,6 @@
  * so the SDK core remains harness-agnostic.
  */
 
-import type { AskUserQuestionUiContext } from "../interaction";
 import type { PromptContext } from "../prompts/types";
 
 // ---------------------------------------------------------------------------
@@ -26,6 +25,12 @@ export enum HarnessCapability {
   Mcp = "mcp",
   /** Harness can accept a prompt without a TTY (headless mode). */
   HeadlessPrompt = "headless-prompt",
+  /** Harness supports concurrent effect execution (GAP-PAR-001). */
+  ConcurrentEffects = "concurrent-effects",
+  /** Harness supports async/background effects (GAP-PAR-002). */
+  BackgroundEffects = "background-effects",
+  /** Harness supports multi-harness parallel dispatch (GAP-PAR-003). */
+  MultiHarnessDispatch = "multi-harness-dispatch",
 }
 
 // ---------------------------------------------------------------------------
@@ -69,95 +74,21 @@ export interface CallerHarnessResult {
   capabilities: HarnessCapability[];
 }
 
-// ---------------------------------------------------------------------------
-// Invocation types
-// ---------------------------------------------------------------------------
-
-/** Options for programmatically invoking a harness CLI. */
-export interface HarnessInvokeOptions {
-  /** The prompt to send to the harness. */
-  prompt: string;
-  /** Working directory for the invocation. */
-  workspace?: string;
-  /** Model override (harness-specific). */
-  model?: string;
-  /** Maximum execution time in milliseconds. */
-  timeout?: number;
-  /** Whether to use RPC/structured-output mode. */
-  rpc?: boolean;
-  /** Additional environment variables passed to the child process. */
-  env?: Record<string, string>;
-}
-
-/** Result returned after a harness CLI invocation completes. */
-export interface HarnessInvokeResult {
-  /** Whether the invocation completed without error. */
-  success: boolean;
-  /** Combined stdout/stderr output from the CLI. */
-  output: string;
-  /** Process exit code. */
-  exitCode: number;
-  /** Wall-clock duration of the invocation in milliseconds. */
-  duration: number;
-  /** Name of the harness that was invoked. */
-  harness: string;
-}
-
-// ---------------------------------------------------------------------------
-// Pi-specific session types
-// ---------------------------------------------------------------------------
-
-/** Options for creating a Pi harness session (programmatic API). */
-export interface PiSessionOptions {
-  /** Working directory for the session. */
-  workspace?: string;
-  /** Model identifier string (e.g. "claude-opus-4-5"). */
-  model?: string;
-  /** Maximum time in ms to wait for a single prompt to complete. */
-  timeout?: number;
-  /** Thinking level for the model. */
-  thinkingLevel?: "minimal" | "low" | "medium" | "high" | "xhigh";
-  /** Built-in tool mode to expose to the model. */
-  toolsMode?: "default" | "coding" | "readonly";
-  /** Custom tool definitions to register with the session. */
-  customTools?: unknown[];
-  /** Optional extension-style UI context exposed to custom tools inside the PI loop. */
-  uiContext?: AskUserQuestionUiContext;
-  /** Replace the discovered system prompt with a custom one. */
-  systemPrompt?: string;
-  /** Append custom system prompt instructions. */
-  appendSystemPrompt?: string[];
-  /** Isolate the session from discovered extensions, skills, and AGENTS files. */
-  isolated?: boolean;
-  /** Use an in-memory session manager instead of persistent session files. */
-  ephemeral?: boolean;
-  /** Bash tool execution backend. Defaults to native/local PI execution; "secure" opts into the sandbox backend and "auto" falls back to local. */
-  bashSandbox?: "auto" | "secure" | "local";
-  /** Whether PI session compaction should be enabled for this session. */
-  enableCompaction?: boolean;
-  /** Global pi agent config directory (default: ~/.pi/agent). */
-  agentDir?: string;
-}
-
-/**
- * Event emitted by a Pi session during prompt execution.
- * Mirrors the AgentSessionEvent union from `@mariozechner/pi-coding-agent`.
- */
-export interface PiSessionEvent {
-  type: string;
-  [key: string]: unknown;
-}
-
-/** Result of sending a prompt through a Pi session. */
-export interface PiPromptResult {
-  /** Collected text output from the agent response. */
-  output: string;
-  /** Wall-clock duration in milliseconds. */
-  duration: number;
-  /** Whether the prompt completed without error. */
-  success: boolean;
-  /** Exit code (0 = success, 1 = failure). */
-  exitCode: number;
+/** Detection specification for a single known harness. */
+export interface HarnessSpec {
+  /** Harness identifier (matches HarnessAdapter.name). */
+  name: string;
+  /** CLI command name used to invoke the harness. */
+  cli: string;
+  /**
+   * Environment variables that indicate we are running inside an active
+   * session of this harness.
+   */
+  callerEnvVars: string[];
+  /** Capabilities advertised by this harness. */
+  capabilities: HarnessCapability[];
+  /** Config directory names to probe in cwd/home during installed discovery. */
+  configPaths: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -191,11 +122,14 @@ export interface SessionBindResult {
 // ---------------------------------------------------------------------------
 
 export interface HookHandlerArgs {
+  /** @deprecated Resolved from environment automatically (CLAUDE_PLUGIN_ROOT, CODEX_PLUGIN_ROOT, etc.). Accepted for backward compatibility. */
   pluginRoot?: string;
   stateDir?: string;
   runsDir?: string;
   json: boolean;
   verbose?: boolean;
+  /** Pre-read stdin payload. When set, hook handlers should use this instead of reading process.stdin. */
+  stdinPayload?: string;
 }
 
 export interface HarnessInstallOptions {
@@ -205,14 +139,27 @@ export interface HarnessInstallOptions {
   verbose: boolean;
 }
 
+export type HarnessInstallStatus =
+  | "planned"
+  | "installed"
+  | "skipped"
+  | "unsupported"
+  | "failed";
+
 export interface HarnessInstallResult {
   harness: string;
   dryRun?: boolean;
+  success?: boolean;
+  status?: HarnessInstallStatus;
+  installer?: string;
+  scope?: "global" | "workspace";
   warning?: string;
   summary?: string;
   command?: string;
   output?: string;
   location?: string;
+  exitCode?: number;
+  error?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -272,10 +219,18 @@ export interface HarnessAdapter {
   /** List capabilities supported by this harness adapter. */
   getCapabilities?(): HarnessCapability[];
 
-  /** Install the harness CLI itself. */
+  /**
+   * Install the harness CLI itself.
+   * @deprecated Harness installation is now delegated to agent-mux. Use
+   *   `installHarnessViaAmux()` from `./install.ts` instead.
+   */
   installHarness?(options: HarnessInstallOptions): Promise<HarnessInstallResult>;
 
-  /** Install or materialize the Babysitter plugin/extension integration for this harness. */
+  /**
+   * Install or materialize the Babysitter plugin/extension integration for this harness.
+   * @deprecated Plugin installation is being migrated. This method will be
+   *   removed in a future release.
+   */
   installPlugin?(options: HarnessInstallOptions): Promise<HarnessInstallResult>;
 
   /**

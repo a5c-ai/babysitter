@@ -1,0 +1,136 @@
+---
+nodeKind: Workflow
+id: workflow:gitops-config-drift-audit
+attributes:
+  displayName: "GitOps Config Drift Audit"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Audits the convergence state of GitOps-managed clusters and services --
+    comparing desired state in Git repositories against live cluster state,
+    identifying resources modified out-of-band (kubectl edits, manual console
+    changes), categorizing drift by severity and blast radius, auto-reconciling
+    safe drifts, escalating risky drifts for manual review, and tracking drift
+    trends to identify systemic process gaps. Excludes Terraform drift (covered
+    separately) and initial GitOps adoption.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:devops-engineer
+  requires_skill_area:
+    - target: skill-area:gitops
+    - target: skill-area:k8s-rbac
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:cloud-infra
+  triggers_responsibility:
+    - target: responsibility:terraform-state-mgmt
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:infra-engineering
+---
+nodeKind: Workflow
+id: workflow:helm-chart-promotion
+attributes:
+  displayName: "Helm Chart Promotion"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Governs the lifecycle of Helm chart promotion across environments --
+    validating chart templating against values overrides per environment, running
+    helm lint and kubeval/kubeconform validation, executing integration tests in
+    staging, verifying resource quotas and limit compliance, promoting to
+    production chart repository with semantic versioning, and coordinating
+    rollout with ArgoCD or Flux sync. Excludes chart authoring and cluster
+    upgrades.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:devops-engineer
+  requires_skill_area:
+    - target: skill-area:k8s-operator-development
+    - target: skill-area:gitops
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:runbook-review-cycle
+attributes:
+  displayName: "Runbook Review Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews and validates operational runbooks for accuracy, completeness, and
+    executability -- testing runbook steps against current production topology,
+    identifying outdated commands or deprecated service names, verifying
+    escalation contact accuracy, validating automation scripts referenced by
+    runbooks, measuring mean-time-to-execute for critical procedures, and
+    archiving obsolete runbooks. Excludes initial runbook authoring.
+edges:
+  involves_role:
+    - target: role:sre-runbook-author
+    - target: role:platform-engineer
+    - target: role:incident-commander
+  requires_skill_area:
+    - target: skill-area:runbook-writing
+    - target: skill-area:incident-response
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:runbook-authoring
+    - target: responsibility:on-call-rotation
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:incident-response-team
+---
+nodeKind: Workflow
+id: workflow:disaster-recovery-failover-drill
+attributes:
+  displayName: "Disaster Recovery Failover Drill"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "semi-annual"
+  complexity: cross-team
+  description: |
+    Executes end-to-end disaster recovery failover tests -- triggering regional
+    failover for critical services, validating data replication lag and
+    consistency, measuring RTO and RPO against defined targets, testing DNS
+    failover propagation, verifying backup restoration procedures, evaluating
+    communication plan execution, documenting deviations from expected behavior,
+    and tracking remediation items for gap closure. Excludes DR architecture
+    design and backup strategy definition.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:cloud-architect
+    - target: role:incident-commander
+    - target: role:database-administrator
+  requires_skill_area:
+    - target: skill-area:chaos-engineering
+    - target: skill-area:incident-response
+  applies_to_domain:
+    - target: domain:infrastructure
+    - target: domain:cloud-infra
+  triggers_responsibility:
+    - target: responsibility:respond-incidents
+    - target: responsibility:runbook-authoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:infra-engineering
+    - target: org-unit:incident-response-team

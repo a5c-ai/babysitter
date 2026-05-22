@@ -16,6 +16,10 @@
  * @references
  * - Fuld & Company: https://www.fuld.com/
  * - Win/Loss Analysis Best Practices: Clozd, Primary Intelligence
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+ *   roles: [role:data-analyst, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

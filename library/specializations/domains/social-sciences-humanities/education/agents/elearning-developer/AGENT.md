@@ -2,6 +2,12 @@
 name: elearning-developer
 description: Create interactive digital learning content using authoring tools with SCORM/xAPI compliance and accessibility standards
 required-skills: elearning-storyboarding, multimedia-learning-design, lms-configuration-administration, accessibility-compliance-auditing, instructional-video-production
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:animation-transitions, skill-area:accessibility-first-design]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:frontend-engineer, role:technical-writer]
 ---
 
 # E-Learning Developer Agent

@@ -1,0 +1,26 @@
+nodeKind: MemoryHierarchy
+id: memory-hierarchy:claude-code-default
+attributes:
+  displayName: "Claude Code default memory hierarchy"
+  scopes:
+    - project-claude-md
+    - nested-memory
+    - user-memory
+    - auto-memory
+  defaultBaseDir: "~/.claude"
+  entrypointFilename: "MEMORY.md"
+  autoMemDirname: "memory"
+  enableGate: settings-with-env-override
+  disableEnvVars:
+    - CLAUDE_CODE_DISABLE_AUTO_MEMORY
+    - CLAUDE_CODE_SIMPLE
+  securityValidation:
+    - absolute-required
+    - min-length-3
+    - reject-windows-drive-root
+    - reject-unc
+    - reject-null-byte
+    - tilde-expansion-settings-only
+edges:
+  uses_memory_system:
+    - target: memory-system:claude-code-auto-memory

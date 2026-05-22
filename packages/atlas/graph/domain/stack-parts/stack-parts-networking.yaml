@@ -1,0 +1,38 @@
+---
+nodeKind: StackPart
+id: stack-part:virtual-private-network
+attributes:
+  displayName: "Virtual Private Network (VPC)"
+  category: infrastructure
+  description: |
+    Tenant-isolated software-defined network (VPC, VNet).
+edges:
+  implemented_by:
+    - target: platform-service:aws-vpc
+---
+nodeKind: StackPart
+id: stack-part:dns-service
+attributes:
+  displayName: "Managed DNS"
+  category: infrastructure
+  description: |
+    Authoritative managed DNS (Route53, Cloud DNS, Azure DNS).
+edges:
+  implemented_by:
+    - target: platform-service:dokploy-domain
+---
+nodeKind: StackPart
+id: stack-part:pubsub-service
+attributes:
+  displayName: "Pub/Sub Service"
+  category: messaging
+  description: |
+    Topic/subscription pub-sub messaging (GCP Pub/Sub, SNS). Distinct from
+    message-queue (work distribution) and event-bus (filtered routing).
+  relatedStackParts:
+    - stack-part:message-queue
+    - stack-part:event-bus
+edges:
+  implemented_by:
+    - target: platform-service:gcp-pubsub
+    - target: platform-service:aws-sqs

@@ -1,0 +1,31 @@
+nodeKind: MergePolicy
+id: merge-policy:protected-prefixes
+attributes:
+  displayName: "Protected-prefixes env merge"
+  decisionRule: most-restrictive-wins
+  envMergeRule: protected-prefixes
+  protectedPrefixes:
+    - A5C_
+    - BABYSITTER_
+    - CLAUDE_
+  systemMessageStrategy: concatenate
+  arraysMergeRule: replace
+  description: |
+    Merge policy used when settings layers ship sensitive env keys that
+    plugins SHOULD NOT be able to overwrite. Any persistEnv / contextVars
+    key whose name starts with one of `protectedPrefixes` is locked in by
+    the first handler that sets it; later handlers attempting to override
+    such a key produce a HookMergeDiagnostic with outcome=conflict and
+    severity=warning.
+edges:
+  merge_policy_orders_decision_verb:
+    - target: decision-verb:deny
+      rank: 1
+    - target: decision-verb:ask
+      rank: 2
+    - target: decision-verb:allow
+      rank: 3
+    - target: decision-verb:continue
+      rank: 4
+    - target: decision-verb:noop
+      rank: 5

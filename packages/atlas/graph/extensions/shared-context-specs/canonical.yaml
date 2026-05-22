@@ -1,0 +1,17 @@
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:default
+attributes:
+  contextKind: "default-fabric"
+  producerIface: "iface:shared-context-producer"
+  consumerIfaces:
+    - "iface:shared-context-consumer"
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:run-scoped
+attributes:
+  contextKind: "run-scoped-fabric"
+  producerIface: "iface:run-scoped-producer"
+  consumerIfaces:
+    - "iface:shared-context-consumer"
+    - "iface:run-journal-consumer"

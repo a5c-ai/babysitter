@@ -1,0 +1,17 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-mux-adapters
+attributes:
+  packageId: "@a5c-ai/agent-mux-adapters"
+  packageName: "@a5c-ai/agent-mux-adapters"
+  workspacePath: packages/agent-mux/adapters
+  moduleType: typescript
+  surfaceKinds:
+    - adapter-registry
+    - harness-adapter-bundle
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+  # Source: packages/agent-mux/adapters/package.json (name, version 0.4.9)
+edges:
+  references_path:
+    - target: path:agent-mux-adapters

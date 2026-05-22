@@ -1,0 +1,128 @@
+nodeKind: Capability
+id: capability:supports-github-trigger
+attributes:
+  displayName: "Supports GitHub trigger backend"
+  description: |
+    Normalizes GitHub webhook / Actions payloads (issues, pull_request,
+    issue_comment, push) into NormalizedTriggerEvent and enriches
+    changed files via REST + local git fallback.
+    Source: packages/triggers/src/backends/github.ts:4
+    (normalizeGithub); packages/triggers/src/enrich.ts:61
+    (enrichGithubFromApi).
+  appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
+  category: extension
+edges:
+  supported_by:
+    - package:a5c-ai-triggers
+---
+nodeKind: Capability
+id: capability:supports-gitlab-trigger
+attributes:
+  displayName: "Supports GitLab trigger backend"
+  description: |
+    Normalizes GitLab webhook payloads via object_kind /
+    object_attributes shape; merge_request, push, note, issue.
+    Source: packages/triggers/src/backends/gitlab.ts:4
+    (normalizeGitlab).
+  appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
+  category: extension
+edges:
+  supported_by:
+    - package:a5c-ai-triggers
+---
+nodeKind: Capability
+id: capability:supports-bitbucket-trigger
+attributes:
+  displayName: "Supports Bitbucket trigger backend"
+  description: |
+    Normalizes Bitbucket Cloud webhook payloads (pullrequest:*,
+    repo:push). Action is derived from the event name suffix after the
+    colon. Source: packages/triggers/src/backends/bitbucket.ts:4
+    (normalizeBitbucket).
+  appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
+  category: extension
+edges:
+  supported_by:
+    - package:a5c-ai-triggers
+---
+nodeKind: Capability
+id: capability:supports-generic-webhook-trigger
+attributes:
+  displayName: "Supports generic webhook trigger backend"
+  description: |
+    Fallback JSON-webhook normalizer with flexible top-level field
+    discovery (event/action/actor/repository/ref/sha/title/body/
+    labels/changes). Source:
+    packages/triggers/src/backends/generic-webhook.ts:4
+    (normalizeGeneric).
+  appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
+  category: extension
+edges:
+  supported_by:
+    - package:a5c-ai-triggers
+---
+nodeKind: Capability
+id: capability:supports-trigger-query-dsl
+attributes:
+  displayName: "Supports compact trigger query DSL"
+  description: |
+    Compact `key:value` filter language with `event`/`action`/`text`/
+    `contains`/`diff`/`path`/`file`/`branch`/`label` keys plus an
+    optional JSON object form (`{...}`) and an `expression` clause
+    using `~` (contains) and `==` (equals) operators joined by `&&`.
+    Source: packages/triggers/src/query.ts:75 (parseQuery),
+    packages/triggers/src/query.ts:55 (evaluateExpression).
+  appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
+  category: extension
+edges:
+  supported_by:
+    - package:a5c-ai-triggers
+---
+nodeKind: Capability
+id: capability:supports-trigger-glob-paths
+attributes:
+  displayName: "Supports glob path filters in trigger queries"
+  description: |
+    Trigger queries accept glob patterns over changed-file paths
+    (`path:packages/agent-mux/**`). `**` matches any depth, `*` matches
+    a single segment, `?` matches a single character; backslashes are
+    normalized to forward slashes before matching.
+    Source: packages/triggers/src/query.ts:20 (globToRegExp),
+    packages/triggers/src/query.ts:39 (matchesGlob).
+  appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
+  category: extension
+edges:
+  supported_by:
+    - package:a5c-ai-triggers
+---
+nodeKind: Capability
+id: capability:supports-trigger-diff-enrichment
+attributes:
+  displayName: "Supports unified-diff enrichment in triggers"
+  description: |
+    With `--include-diff`, the enricher runs `git show --unified=80
+    <ref>` (10 MiB maxBuffer) and attaches per-file patches onto each
+    NormalizedTriggerEvent change record so `diff:<text>` query terms
+    can match. Source: packages/triggers/src/enrich.ts:45
+    (enrichDiffsWithLocalGit).
+  appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
+  category: extension
+edges:
+  supported_by:
+    - package:a5c-ai-triggers
+---
+nodeKind: Capability
+id: capability:supports-trigger-expression-clause
+attributes:
+  displayName: "Supports expression clauses in trigger queries"
+  description: |
+    Trigger queries accept an `expression` field combining clauses with
+    `&&`. Each clause uses `field ~ 'value'` (contains, case-insensitive)
+    or `field == 'value'` (equals). Fields: event/eventName, action,
+    backend, text, diff, path/paths/files, branch/ref, label/labels.
+    Source: packages/triggers/src/query.ts:55 (evaluateExpression).
+  appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
+  category: extension
+edges:
+  supported_by:
+    - package:a5c-ai-triggers

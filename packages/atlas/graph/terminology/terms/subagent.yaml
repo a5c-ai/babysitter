@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:subagent
+attributes:
+  canonicalDefinitionId: definition:subagent.canonical
+  displayName: "Subagent"
+  kind: tool
+  references:
+    - "NodeKind:Subagent"
+  description: |
+    A specialized worker / persona that an agent runtime can dispatch alongside
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

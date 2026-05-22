@@ -1,0 +1,13 @@
+nodeKind: Synonym
+id: synonym:host-transport-comm-mode
+attributes:
+  termAId: term:agent-host-transport
+  termBId: term:model-transport-protocol
+  direction: bidirectional
+  note: |
+    "Comm mode" was the legacy term for what is now AgentHostTransport.
+edges:
+  synonym_a:
+    - term:agent-host-transport
+  synonym_b:
+    - term:model-transport-protocol

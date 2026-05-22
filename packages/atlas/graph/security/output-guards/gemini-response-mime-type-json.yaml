@@ -1,0 +1,16 @@
+nodeKind: OutputGuard
+id: output-guard:gemini-response-mime-type-json
+attributes:
+  displayName: "Gemini responseMimeType=application/json guard"
+  appliesTo: tool-result
+  phase: post-call
+  detectorKinds: [format-violation]
+  onTrigger: block
+  severity: block-call
+  description: |
+    Google Gemini API generationConfig accepts
+    `responseMimeType: "application/json"` and an optional `responseSchema`.
+    The server constrains output to valid JSON matching the schema and
+    rejects malformed candidates, returning structural error metadata.
+    Doc: ai.google.dev/gemini-api/docs/structured-output.
+edges: {}

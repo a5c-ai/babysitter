@@ -1,0 +1,92 @@
+---
+nodeKind: Workflow
+id: workflow:soc2-audit-preparation
+attributes:
+  displayName: "SOC 2 Audit Preparation"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annually"
+  complexity: cross-team
+  description: |
+    Prepares evidence and controls documentation for SOC 2 Type II audit —
+    collecting access logs, change management records, incident response
+    evidence, and security policy attestations. Excludes the audit itself.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:k8s-rbac
+    - target: skill-area:secrets-rotation
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:engineering
+    - target: org-unit:application-security-team
+---
+nodeKind: Workflow
+id: workflow:access-control-audit
+attributes:
+  displayName: "Access Control Audit"
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews and validates access permissions across systems — IAM policies,
+    RBAC roles, service account privileges, and data access grants — removing
+    stale access and enforcing least-privilege principles. Excludes initial access provisioning.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:platform-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:k8s-rbac
+    - target: skill-area:oauth-flows
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:cybersecurity
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:threat-modeling
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:application-security-team
+---
+nodeKind: Workflow
+id: workflow:privacy-impact-assessment
+attributes:
+  displayName: "Privacy Impact Assessment"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-feature"
+  complexity: cross-team
+  description: |
+    Evaluates new features and data processing changes for privacy implications —
+    data flow mapping, consent mechanism review, retention policy validation,
+    and regulatory compliance verification. Excludes ongoing data governance.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:staff-engineer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:oauth-flows
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:data-team
+    - target: org-unit:product-team

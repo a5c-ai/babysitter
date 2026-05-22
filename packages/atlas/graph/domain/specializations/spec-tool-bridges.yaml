@@ -1,0 +1,649 @@
+# Bridges connecting specializations to tools, frameworks, and libraries.
+# Fixes F12: Many specializations had zero edges to Tool/Framework/Library.
+# The indexer merges edges from duplicate node IDs, so we re-declare
+# each specialization here solely to attach new uses_tool / uses_framework
+# / uses_library edges. The record attributes are ignored (original wins).
+
+# ── web-development ──────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:web-development
+edges:
+  uses_framework:
+    - framework:react
+    - framework:nextjs
+    - framework:vue
+    - framework:angular
+    - framework:svelte
+  uses_tool:
+    - tool:vite
+    - tool:webpack
+  uses_library:
+    - library:tailwindcss
+
+# ── devops-sre-platform ──────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:devops-sre-platform
+edges:
+  uses_tool:
+    - tool:kubernetes
+    - tool:docker
+    - tool:terraform
+    - tool:helm
+    - tool:github-actions
+    - tool:prometheus
+    - tool:grafana
+    - tool:argocd
+
+# ── ai-agents-conversational ─────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:ai-agents-conversational
+edges:
+  uses_framework:
+    - framework:langchain
+    - framework:langgraph
+    - framework:crewai
+    - framework:autogen
+    - framework:pydantic-ai
+    - framework:semantic-kernel
+  uses_tool:
+    - tool:langsmith
+
+# ── backend-development ──────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:backend-development
+edges:
+  uses_framework:
+    - framework:django
+    - framework:fastapi
+    - framework:nestjs
+    - framework:rails
+    - framework:flask
+  uses_tool:
+    - tool:docker
+
+# ── data-science-ml ──────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:data-science-ml
+edges:
+  uses_library:
+    - library:pytorch
+    - library:tensorflow
+    - library:scikit-learn
+    - library:pandas
+    - library:numpy
+  uses_tool:
+    - tool:jupyter
+    - tool:mlflow
+
+# ── mobile-development ───────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:mobile-development
+edges:
+  uses_framework:
+    - framework:flutter
+    - framework:react
+    - framework:swiftui
+    - framework:jetpack-compose
+  uses_tool:
+    - tool:android-studio
+    - tool:xcodebuild
+
+# ── frontend-react ───────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:frontend-react
+edges:
+  uses_framework:
+    - framework:react
+    - framework:nextjs
+  uses_library:
+    - library:zustand
+    - library:tanstack-query
+  uses_tool:
+    - tool:vite
+    - tool:storybook
+
+# ── game-development ─────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:game-development
+edges:
+  uses_tool:
+    - tool:unity
+    - tool:unreal-engine
+    - tool:godot
+    - tool:blender
+    - tool:aseprite
+
+# ── security-compliance ──────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:security-compliance
+edges:
+  uses_tool:
+    - tool:snyk
+    - tool:sonarqube
+    - tool:trivy
+    - tool:vault
+    - tool:owasp-zap
+
+# ── qa-testing-automation ────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:qa-testing-automation
+edges:
+  uses_framework:
+    - framework:jest
+  uses_tool:
+    - tool:playwright
+    - tool:cypress
+    - tool:vitest
+    - tool:testcontainers
+  uses_library:
+    - library:pytest
+
+# ── observability ────────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:observability
+edges:
+  uses_tool:
+    - tool:datadog
+    - tool:grafana
+    - tool:prometheus
+    - tool:opentelemetry
+    - tool:honeycomb
+    - tool:loki
+
+# ── software-architecture ────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:software-architecture
+edges:
+  uses_tool:
+    - tool:docker
+    - tool:kubernetes
+    - tool:terraform
+  uses_framework:
+    - framework:nestjs
+
+# ── sre ──────────────────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:sre
+edges:
+  uses_tool:
+    - tool:kubernetes
+    - tool:prometheus
+    - tool:grafana
+    - tool:pagerduty
+    - tool:datadog
+
+# ── terraform-iac ────────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:terraform-iac
+edges:
+  uses_tool:
+    - tool:terraform
+    - tool:opentofu
+    - tool:pulumi
+    - tool:terraform-cloud
+
+# ── performance-optimization ─────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:performance-optimization
+edges:
+  uses_tool:
+    - tool:perf
+    - tool:flamegraph
+    - tool:py-spy
+    - tool:k6
+    - tool:locust
+
+# ── backend-python-django ────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:backend-python-django
+edges:
+  uses_framework:
+    - framework:django
+  uses_library:
+    - library:celery
+    - library:pytest
+    - library:sqlalchemy
+  uses_tool:
+    - tool:ruff
+
+# ── data-engineering-analytics ───────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:data-engineering-analytics
+edges:
+  uses_tool:
+    - tool:airflow
+    - tool:dagster
+    - tool:databricks
+    - tool:snowflake
+  uses_library:
+    - library:polars
+    - library:pandas
+
+# ── webapp-fullstack-typescript ──────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:webapp-fullstack-typescript
+edges:
+  uses_framework:
+    - framework:nextjs
+    - framework:react
+  uses_library:
+    - library:prisma
+    - library:trpc
+    - library:zod
+  uses_tool:
+    - tool:tsc
+
+# ── webapp-fullstack-python ──────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:webapp-fullstack-python
+edges:
+  uses_framework:
+    - framework:fastapi
+    - framework:django
+  uses_library:
+    - library:sqlalchemy
+    - library:pydantic
+  uses_tool:
+    - tool:uv
+
+# ── embedded-systems ─────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:embedded-systems
+edges:
+  uses_library:
+    - library:freertos
+    - library:zephyr-rtos
+  uses_tool:
+    - tool:make
+
+# ── security-research ────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:security-research
+edges:
+  uses_tool:
+    - tool:owasp-zap
+    - tool:snyk
+    - tool:trivy
+    - tool:checkov
+
+# ── technical-documentation ──────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:technical-documentation
+edges:
+  uses_tool:
+    - tool:gitbook
+  uses_framework:
+    - framework:docusaurus
+    - framework:vitepress
+
+# ── cli-mcp-development ─────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:cli-mcp-development
+edges:
+  uses_tool:
+    - tool:npm
+    - tool:tsc
+  uses_library:
+    - library:commander
+
+# ── ux-ui-design ─────────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:ux-ui-design
+edges:
+  uses_tool:
+    - tool:figma
+    - tool:storybook
+  uses_library:
+    - library:shadcn
+    - library:radix-ui
+    - library:tailwindcss
+
+# ── game-engine-dev ──────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:game-engine-dev
+edges:
+  uses_tool:
+    - tool:unity
+    - tool:unreal-engine
+    - tool:godot
+
+# ── computer-graphics ────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:computer-graphics
+edges:
+  uses_tool:
+    - tool:blender
+    - tool:unreal-engine
+
+# ── flutter-mobile ───────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:flutter-mobile
+edges:
+  uses_framework:
+    - framework:flutter
+  uses_library:
+    - library:riverpod
+    - library:bloc
+    - library:dio
+
+# ── go-microservices ─────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:go-microservices
+edges:
+  uses_framework:
+    - framework:gin
+  uses_library:
+    - library:chi
+    - library:gorm
+    - library:cobra
+  uses_tool:
+    - tool:docker
+
+# ── rust-systems ─────────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:rust-systems
+edges:
+  uses_library:
+    - library:tokio
+    - library:serde
+    - library:clap
+  uses_tool:
+    - tool:cargo
+    - tool:clippy
+
+# ── k8s-ops ─────────────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:k8s-ops
+edges:
+  uses_tool:
+    - tool:kubernetes
+    - tool:helm
+    - tool:kustomize
+    - tool:argocd
+
+# ── k8s-operator ────────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:k8s-operator
+edges:
+  uses_tool:
+    - tool:kubernetes
+  uses_library:
+    - library:cobra
+
+# ── llm-fine-tuning ─────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:llm-fine-tuning
+edges:
+  uses_library:
+    - library:pytorch
+    - library:hf-transformers
+  uses_tool:
+    - tool:huggingface
+    - tool:mlflow
+
+# ── ml-inference-serving ─────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:ml-inference-serving
+edges:
+  uses_tool:
+    - tool:vllm
+    - tool:triton-inference
+    - tool:onnx-runtime
+    - tool:bentoml
+
+# ── postgres-tuning ──────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:postgres-tuning
+edges:
+  uses_tool:
+    - tool:psql
+    - tool:datadog
+
+# ── redis-ops ────────────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:redis-ops
+edges:
+  uses_tool:
+    - tool:redis-cli
+  uses_library:
+    - library:ioredis
+    - library:redis-py
+
+# ── mobile-ios ───────────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:mobile-ios
+edges:
+  uses_framework:
+    - framework:swiftui
+  uses_library:
+    - library:alamofire
+    - library:combine
+  uses_tool:
+    - tool:xcodebuild
+
+# ── react-native-mobile ─────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:react-native-mobile
+edges:
+  uses_framework:
+    - framework:react
+  uses_tool:
+    - tool:android-studio
+    - tool:xcodebuild
+
+# ── desktop-development ─────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:desktop-development
+edges:
+  uses_framework:
+    - framework:electron
+    - framework:tauri
+  uses_library:
+    - library:zustand
+
+# ── distributed-systems ─────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:distributed-systems
+edges:
+  uses_tool:
+    - tool:kubernetes
+    - tool:docker
+    - tool:rabbitmq
+    - tool:nats
+
+# ── database-internals ──────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:database-internals
+edges:
+  uses_tool:
+    - tool:psql
+    - tool:elasticsearch
+
+# ── network-programming ─────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:network-programming
+edges:
+  uses_library:
+    - library:tokio
+    - library:grpc-js
+  uses_tool:
+    - tool:ngrok
+
+# ── embedded-firmware ────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:embedded-firmware
+edges:
+  uses_library:
+    - library:freertos
+    - library:zephyr-rtos
+  uses_tool:
+    - tool:make
+
+# ── sdk-platform-development ────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:sdk-platform-development
+edges:
+  uses_tool:
+    - tool:npm
+    - tool:tsc
+  uses_library:
+    - library:zod
+
+# ── gpu-programming ──────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:gpu-programming
+edges:
+  uses_tool:
+    - tool:vllm
+    - tool:tensorrt
+  uses_library:
+    - library:pytorch
+
+# ── code-migration-modernization ─────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:code-migration-modernization
+edges:
+  uses_tool:
+    - tool:eslint
+    - tool:tsc
+    - tool:ruff
+
+# ── cryptography-blockchain ──────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:cryptography-blockchain
+edges:
+  uses_tool:
+    - tool:vault
+
+# ── robotics-simulation ─────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:robotics-simulation
+edges:
+  uses_tool:
+    - tool:blender
+  uses_library:
+    - library:pytorch
+
+# ── algorithms-optimization ──────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:algorithms-optimization
+edges:
+  uses_library:
+    - library:numpy
+    - library:pytorch
+
+# ── fpga-programming ────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:fpga-programming
+edges:
+  uses_tool:
+    - tool:make
+
+# ── search-infrastructure ───────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:search-infrastructure
+edges:
+  uses_tool:
+    - tool:elasticsearch
+    - tool:algolia
+    - tool:meilisearch
+    - tool:typesense
+
+# ── identity-management ─────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:identity-management
+edges:
+  uses_tool:
+    - tool:auth0
+    - tool:clerk
+    - tool:keycloak
+    - tool:okta
+
+# ── fraud-prevention ────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:fraud-prevention
+edges:
+  uses_library:
+    - library:scikit-learn
+  uses_tool:
+    - tool:datadog
+
+# ── ad-serving ──────────────────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:ad-serving
+edges:
+  uses_tool:
+    - tool:segment
+    - tool:google-analytics
+
+# ── recommendation-infrastructure ───────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:recommendation-infrastructure
+edges:
+  uses_library:
+    - library:pytorch
+    - library:scikit-learn
+  uses_tool:
+    - tool:mlflow
+
+# ── payment-processing-spec ─────────────────────────────────────────
+---
+nodeKind: Specialization
+id: specialization:payment-processing-spec
+edges:
+  uses_tool:
+    - tool:stripe

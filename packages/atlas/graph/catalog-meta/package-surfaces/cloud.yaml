@@ -1,0 +1,16 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-cloud
+attributes:
+  packageId: "@a5c-ai/cloud"
+  packageName: "@a5c-ai/cloud"
+  workspacePath: packages/cloud
+  moduleType: nextjs
+  surfaceKinds:
+    - ui-consumer
+    - api-surface
+  sourceOfTruthRole: application
+  publishedTo: none
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:catalog-api

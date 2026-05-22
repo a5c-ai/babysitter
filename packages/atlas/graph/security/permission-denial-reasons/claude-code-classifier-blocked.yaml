@@ -1,0 +1,11 @@
+nodeKind: PermissionDenialReason
+id: permission-denial-reason:claude-code-classifier-blocked
+attributes:
+  displayName: "Classifier: tool call blocked"
+  kind: classifier-blocked
+  ruleSource: policy-settings
+  behavior: deny
+  triggeredBy: classifier
+  interpretedMessage: |
+    Auto-classifier blocked this tool call as potentially unsafe (e.g.
+    rm -rf, network exfiltration pattern).

@@ -18,6 +18,12 @@ metadata:
     - mass-spectrometry
     - quantification
     - identification
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:python-data-pipelines, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:lab-technician]
 ---
 
 # MaxQuant Processor Skill

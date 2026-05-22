@@ -1,0 +1,13 @@
+nodeKind: Library
+id: library:ramda
+attributes:
+  displayName: "Ramda"
+  belongsToLanguageId: language:javascript
+  category: data-structures
+  description: |
+    A practical functional library for JavaScript programmers.
+edges:
+  belongs_to_language:
+    - language:javascript
+  library_used_by:
+    - target: skill-area:frontend-development

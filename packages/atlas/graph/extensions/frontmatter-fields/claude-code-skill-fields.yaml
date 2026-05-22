@@ -1,0 +1,201 @@
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-name
+attributes:
+  displayName: "Skill frontmatter: name"
+  name: name
+  valueType: string
+  required: "yes"
+  appliesTo: skill
+  description: Skill identifier (kebab-case). Required.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-description
+attributes:
+  displayName: "Skill frontmatter: description"
+  name: description
+  valueType: string
+  required: "yes"
+  appliesTo: skill
+  description: Short prose triggering description used by the model to decide invocation.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-when-to-use
+attributes:
+  displayName: "Skill frontmatter: when_to_use"
+  name: when_to_use
+  valueType: string
+  required: "recommended"
+  appliesTo: skill
+  description: Auxiliary trigger guidance (richer than `description`).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-argument-hint
+attributes:
+  displayName: "Skill frontmatter: argument-hint"
+  name: argument-hint
+  valueType: string
+  required: "no"
+  appliesTo: skill
+  description: User-facing arguments hint shown in the slash-command palette.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-arguments
+attributes:
+  displayName: "Skill frontmatter: arguments"
+  name: arguments
+  valueType: list
+  required: "no"
+  appliesTo: skill
+  description: Named positional argument schema for substitution.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-disable-model-invocation
+attributes:
+  displayName: "Skill frontmatter: disable-model-invocation"
+  name: disable-model-invocation
+  valueType: bool
+  required: "no"
+  defaultValue: "false"
+  appliesTo: skill
+  description: When true, skill is user-invokable only — the model cannot auto-trigger.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-user-invocable
+attributes:
+  displayName: "Skill frontmatter: user-invocable"
+  name: user-invocable
+  valueType: bool
+  required: "no"
+  defaultValue: "true"
+  appliesTo: skill
+  description: When false, skill is hidden from the user palette.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-allowed-tools
+attributes:
+  displayName: "Skill frontmatter: allowed-tools"
+  name: allowed-tools
+  valueType: list
+  required: "no"
+  appliesTo: skill
+  description: Tool allowlist scoped to this skill's invocation.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-model
+attributes:
+  displayName: "Skill frontmatter: model"
+  name: model
+  valueType: enum
+  required: "no"
+  appliesTo: skill
+  description: Pin a specific model version for this skill.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-effort
+attributes:
+  displayName: "Skill frontmatter: effort"
+  name: effort
+  valueType: enum
+  required: "no"
+  appliesTo: skill
+  description: Pin reasoning-effort level (low/medium/high/xhigh/max).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-context
+attributes:
+  displayName: "Skill frontmatter: context"
+  name: context
+  valueType: object
+  required: "no"
+  appliesTo: skill
+  description: Dynamic context injection block (shell commands, file globs).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-agent
+attributes:
+  displayName: "Skill frontmatter: agent"
+  name: agent
+  valueType: string
+  required: "no"
+  appliesTo: skill
+  description: Subagent reference to dispatch when this skill is invoked.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-hooks
+attributes:
+  displayName: "Skill frontmatter: hooks"
+  name: hooks
+  valueType: object
+  required: "no"
+  appliesTo: skill
+  description: Skill-scoped hook overrides.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-paths
+attributes:
+  displayName: "Skill frontmatter: paths"
+  name: paths
+  valueType: glob
+  required: "no"
+  appliesTo: skill
+  description: Glob restricting which file paths trigger model auto-invocation.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:skill-shell
+attributes:
+  displayName: "Skill frontmatter: shell"
+  name: shell
+  valueType: list
+  required: "no"
+  appliesTo: skill
+  description: Shell commands to execute and inject as dynamic context.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:subagent-name
+attributes:
+  displayName: "Subagent frontmatter: name"
+  name: name
+  valueType: string
+  required: "yes"
+  appliesTo: subagent
+  description: Subagent identifier.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:subagent-description
+attributes:
+  displayName: "Subagent frontmatter: description"
+  name: description
+  valueType: string
+  required: "yes"
+  appliesTo: subagent
+  description: Triggering description used by the model to decide dispatch.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:subagent-tools
+attributes:
+  displayName: "Subagent frontmatter: tools"
+  name: tools
+  valueType: list
+  required: "no"
+  appliesTo: subagent
+  description: Tool allowlist for this subagent.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:subagent-model
+attributes:
+  displayName: "Subagent frontmatter: model"
+  name: model
+  valueType: enum
+  required: "no"
+  appliesTo: subagent
+  description: Pin a specific model version for this subagent.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:subagent-color
+attributes:
+  displayName: "Subagent frontmatter: color"
+  name: color
+  valueType: string
+  required: "no"
+  appliesTo: subagent
+  description: TUI display color for this subagent.

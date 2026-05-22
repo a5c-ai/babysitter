@@ -19,6 +19,13 @@
  * - nf-core: https://nf-co.re/
  * - BioContainers: https://biocontainers.pro/
  * - Conda/Bioconda: https://bioconda.github.io/
+ *
+ * @graph
+ *   domains: [domain:bioinformatics]
+ *   specializations: [specialization:biomedical-informatics]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:python-data-pipelines]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer, role:biomedical-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

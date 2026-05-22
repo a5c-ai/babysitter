@@ -1,0 +1,30 @@
+---
+nodeKind: Library
+id: library:freertos
+attributes:
+  displayName: "FreeRTOS"
+  belongsToLanguageId: language:c
+  description: |
+    Real-time operating system kernel for microcontrollers — tasks,
+    queues, semaphores, and tickless idle.
+edges:
+  belongs_to_language:
+    - language:c
+  library_used_by:
+    - target: skill-area:real-time-os
+  alternative_to:
+    - library:zephyr-rtos
+---
+nodeKind: Library
+id: library:zephyr-rtos
+attributes:
+  displayName: "Zephyr RTOS"
+  belongsToLanguageId: language:c
+  description: |
+    Linux Foundation RTOS for resource-constrained devices with a
+    broad driver model, networking stack, and Bluetooth support.
+edges:
+  belongs_to_language:
+    - language:c
+  library_used_by:
+    - target: skill-area:real-time-os

@@ -1,0 +1,19 @@
+nodeKind: Channel
+id: channel:a2a-example
+attributes:
+  displayName: "A2A example channel"
+  kind: a2a-channel
+  endpoint: "a2a://peers.example.com"
+  brokeringPrimitive: |
+    Peer agents connect to a shared A2A broker. The broker routes
+    typed messages between named agent endpoints with at-least-once
+    delivery; mailboxing is the peer's responsibility.
+  persistent: false
+  description: |
+    Demonstration A2A channel for agent-to-agent peer messaging.
+    Implements Google's A2A (Agent-to-Agent) protocol for cross-agent
+    communication via JSON-RPC 2.0 transport with task lifecycle
+    management and SSE-based streaming.
+edges:
+  integrates_with:
+    - target: topic:a2a-protocol

@@ -1,0 +1,37 @@
+nodeKind: EnvVar
+id: env-var:api-timeout-ms
+attributes:
+  displayName: API_TIMEOUT_MS
+  description: Timeout for API requests in milliseconds; maximum is 2147483647.
+  name: API_TIMEOUT_MS
+  category: network-timeout
+  valueType: int
+  defaultValue: "600000"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-max-retries
+attributes:
+  displayName: CLAUDE_CODE_MAX_RETRIES
+  description: Number of times to retry failed API requests.
+  name: CLAUDE_CODE_MAX_RETRIES
+  category: network-timeout
+  valueType: int
+  defaultValue: "10"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-nonstreaming-fallback
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK
+  description: Set to 1 to disable the non-streaming fallback when a streaming request fails mid-stream.
+  name: CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK
+  category: network-timeout
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

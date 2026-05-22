@@ -1,0 +1,439 @@
+---
+nodeKind: Skill
+id: skill:babysitter-babysit
+attributes:
+  displayName: "babysitter:babysit"
+  description: |
+    Orchestrate via @babysitter. Drives `.a5c/runs/<runId>/` through
+    iterative execution against an SDK-defined process. Invoked when the
+    user asks to "babysit", "orchestrate a run", or run a workflow.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-plugin
+  addresses:
+    - target: skill-area:agentic-loops
+    - target: skill-area:orchestration-loop
+---
+nodeKind: Skill
+id: skill:babysitter-call
+attributes:
+  displayName: "babysitter:call"
+  description: |
+    Orchestrate a babysitter run. Entry-point skill for starting a new
+    complex workflow. Wraps the babysit skill with call-style framing.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:orchestration-loop
+    - target: skill-area:agentic-loops
+---
+nodeKind: Skill
+id: skill:babysitter-plan
+attributes:
+  displayName: "babysitter:plan"
+  description: |
+    Plan a babysitter run without executing. Produces the best possible
+    process for a complex workflow but stops short of creating/running
+    the run.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:orchestration-loop
+    - target: skill-area:adr-writing
+---
+nodeKind: Skill
+id: skill:babysitter-resume
+attributes:
+  displayName: "babysitter:resume"
+  description: |
+    Resume orchestration of an existing babysitter run. If no run is
+    given, discovers incomplete runs and suggests which to resume by
+    status/inputs/process.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:orchestration-loop
+---
+nodeKind: Skill
+id: skill:babysitter-yolo
+attributes:
+  displayName: "babysitter:yolo"
+  description: |
+    Orchestrate a babysitter run in non-interactive mode — no user
+    interaction, no breakpoints; the run proceeds to terminal state.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:orchestration-loop
+    - target: skill-area:agentic-loops
+---
+nodeKind: Skill
+id: skill:babysitter-forever
+attributes:
+  displayName: "babysitter:forever"
+  description: |
+    Start a never-ending babysitter run. Builds a process that uses an
+    infinite loop with ctx.sleep — typical use is a daily process that
+    pulls support tickets, resolves them, sleeps 4h, and repeats.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:orchestration-loop
+    - target: skill-area:agentic-loops
+---
+nodeKind: Skill
+id: skill:babysitter-doctor
+attributes:
+  displayName: "babysitter:doctor"
+  description: |
+    Diagnose babysitter run health: journal integrity, state cache,
+    effects, locks, sessions, logs, and disk usage. Performs a 14-area
+    health check and emits a structured diagnostic report.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+    - domain:devops
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+---
+nodeKind: Skill
+id: skill:babysitter-cleanup
+attributes:
+  displayName: "babysitter:cleanup"
+  description: |
+    Clean up `.a5c/runs/` and `.a5c/processes/` directories. Aggregates
+    insights from completed/failed runs into
+    docs/run-history-insights.md before pruning old run data and
+    orphaned process files.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:orchestration-loop
+---
+nodeKind: Skill
+id: skill:babysitter-retrospect
+attributes:
+  displayName: "babysitter:retrospect"
+  description: |
+    Run a retrospective on a completed run: results, process quality,
+    suggestions for process improvements, optimizations, and fixes for
+    future runs.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:eval-driven-development
+    - target: skill-area:orchestration-loop
+---
+nodeKind: Skill
+id: skill:babysitter-observe
+attributes:
+  displayName: "babysitter:observe"
+  description: |
+    Launch the babysitter observer dashboard — installs and runs the
+    real-time observer UI that watches babysitter runs in the browser
+    (task progress, journal events, orchestration state).
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+    - domain:devops
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:orchestration-loop
+---
+nodeKind: Skill
+id: skill:babysitter-help
+attributes:
+  displayName: "babysitter:help"
+  description: |
+    Help and documentation for babysitter command usage, processes,
+    skills, agents, and methodologies.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:reference-docs
+    - target: skill-area:tutorial-design
+---
+nodeKind: Skill
+id: skill:babysitter-plugins
+attributes:
+  displayName: "babysitter:plugins"
+  description: |
+    Manage babysitter plugins — list installed plugins, install/update/
+    uninstall, manage marketplaces, and create new plugins. A plugin is
+    a version-managed package of contextual install/uninstall/configure/
+    update instructions.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:plugin-systems
+---
+nodeKind: Skill
+id: skill:babysitter-project-install
+attributes:
+  displayName: "babysitter:project-install"
+  description: |
+    Onboard a project to babysitter — research codebase, interview the
+    user about goals/workflows, build a project profile, install best
+    tools, and optionally configure CI/CD integration.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:plugin-systems
+    - target: skill-area:runbook-writing
+---
+nodeKind: Skill
+id: skill:babysitter-user-install
+attributes:
+  displayName: "babysitter:user-install"
+  description: |
+    Onboard a user to babysitter — install dependencies, interview the
+    user about specialties/preferences, build a user profile, and
+    configure best tools for their workflow.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:plugin-systems
+    - target: skill-area:tutorial-design
+---
+nodeKind: Skill
+id: skill:babysitter-assimilate
+attributes:
+  displayName: "babysitter:assimilate"
+  description: |
+    Assimilate an external methodology, harness, or specification into
+    babysitter process definitions with accompanying skills/ and agents/
+    directories.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:orchestration-loop
+    - target: skill-area:plugin-systems
+---
+nodeKind: Skill
+id: skill:babysitter-contrib
+attributes:
+  displayName: "babysitter:contrib"
+  description: |
+    Submit feedback or contribute to the babysitter project — guides
+    the user through producing a structured contribution against the
+    babysitter monorepo.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-codex-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+  addresses:
+    - target: skill-area:orchestration-loop
+---
+nodeKind: Skill
+id: skill:babysitter-accomplish-status
+attributes:
+  displayName: "babysitter:accomplish-status"
+  description: |
+    OpenCode-only adapter skill — reports accomplishment status from a
+    babysitter run for the OpenCode harness. Ships exclusively in
+    plugins/babysitter-opencode/skills/accomplish-status.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:babysitter-plugin
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:babysitter-plugin
+  addresses:
+    - target: skill-area:orchestration-loop
+    - target: skill-area:eval-driven-development

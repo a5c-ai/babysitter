@@ -1,0 +1,76 @@
+nodeKind: Provider
+id: provider:google
+attributes:
+  displayName: Google AI (Gemini API)
+  versionRange: '>=v1'
+  authMethods:
+  - api-key
+  - oauth
+  - service-account
+  authMethodNotes: 'The Google AI (`generativelanguage.googleapis.com`) surface accepts
+
+    either `?key=<api-key>` query auth or `Authorization: Bearer <oauth>`
+
+    for OAuth/service-account flows. Distinct from Vertex (which is
+
+    GCP IAM via `gcloud` ADC).
+
+    '
+  endpoints:
+    generate_content: https://generativelanguage.googleapis.com/v1/models/{model}:generateContent
+    stream_generate_content: https://generativelanguage.googleapis.com/v1/models/{model}:streamGenerateContent
+    batch: https://generativelanguage.googleapis.com/v1/batches
+    files: https://generativelanguage.googleapis.com/v1/files
+  pricing: 'See https://ai.google.dev/pricing for Gemini API pricing.
+
+    '
+  pricingTiers:
+  - name: free
+    rateLimit: Low RPM/RPD per model; usage data may be used to improve products
+    priceMultiplier: 0.0
+    description: Free tier — limited rate, usage-for-training opt-out unavailable.
+  - name: paid
+    rateLimit: Higher per-project quotas; usage NOT used for training
+    priceMultiplier: 1.0
+    description: Paid tier — standard per-token billing.
+  - name: batch
+    rateLimit: Async batch jobs; processed within 24h
+    priceMultiplier: 0.5
+    description: Gemini Batch API — discounted async.
+  rateLimitSignalingProtocol: 'Quota errors return HTTP 429 with `code: 8 (RESOURCE_EXHAUSTED)`
+
+    in the gRPC-mapped JSON error envelope `{ "error": { "code": 429,
+
+    "status": "RESOURCE_EXHAUSTED", "message": ... } }`. `Retry-After`
+
+    is sometimes set; callers SHOULD use exponential backoff.
+
+    '
+  dataResidencyOptions:
+  - global
+  vendorFeatures:
+  - capability:supports-prompt-caching
+  - capability:supports-batch-api
+  - capability:supports-files-api
+  slaTier: google-ai-no-public-sla
+  regions:
+  - global
+edges:
+  realizes:
+  - target: layer:2-provider
+  supports:
+  - target: capability:supports-prompt-caching
+    versionRange: '>=2024-01-01'
+  - target: capability:model-discovery
+    versionRange: '>=2024-01-01'
+  serves:
+  - model:gemini-3-1-pro@current
+  - model:gemini-2-5-pro@current
+  emits_message_type:
+  - protocol-message:gemini-content
+  - protocol-message:gemini-part-text
+  - protocol-message:gemini-part-inline-data
+  - protocol-message:gemini-part-function-call
+  - protocol-message:gemini-part-function-response
+  - protocol-message:gemini-candidate
+  - protocol-message:gemini-generate-content-response

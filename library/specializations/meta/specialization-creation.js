@@ -3,6 +3,12 @@
  * @description Create a new specialization with all 7 phases in sequence - from research to integration
  * @inputs { name: string, domain: string|null, description: string, scope: string, outputDir: string }
  * @outputs { success: boolean, specialization: object, phases: object, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   skillAreas: [skill-area:orchestration-loop, skill-area:prompt-engineering, skill-area:agentic-loops]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:tech-lead, role:platform-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -525,6 +531,7 @@ export const phase3CreateProcessesTask = defineTask('phase3-create-processes', (
         'Read processes-backlog.md',
         'For each process, create a JS file following SDK patterns:',
         '  - JSDoc with @process, @description, @inputs, @outputs',
+        '  - Include a @graph JSDoc block referencing relevant atlas graph node IDs (domains, skillAreas, topics, roles, workflows). Read packages/atlas/graph/domain/ to find valid IDs. At minimum include one domain: node.',
         '  - Import defineTask from SDK',
         '  - Export async process function',
         '  - Define tasks with defineTask',
@@ -654,12 +661,13 @@ export const phase6CreateSkillsAgentsTask = defineTask('phase6-create-skills-age
         'Read skills-agents-backlog.md',
         'For each skill:',
         '  - Create directory: skills/<skill-name>/',
-        '  - Create SKILL.md with frontmatter (name, description, allowed-tools)',
+        '  - Create SKILL.md with frontmatter (name, description, allowed-tools, and graph: block with relevant atlas node IDs from packages/atlas/graph/domain/)',
         '  - Create README.md with usage documentation',
         'For each agent:',
         '  - Create directory: agents/<agent-name>/',
-        '  - Create AGENT.md with frontmatter (name, description, role, expertise)',
+        '  - Create AGENT.md with frontmatter (name, description, role, expertise, and graph: block with relevant atlas node IDs from packages/atlas/graph/domain/)',
         '  - Create README.md with prompt templates',
+        'At minimum, every skill and agent graph: block must include one domain: node.',
         'Mark completed items in backlog',
         `Save to: ${args.basePath}/skills/ and ${args.basePath}/agents/`
       ],

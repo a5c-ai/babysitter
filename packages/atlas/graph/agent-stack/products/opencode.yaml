@@ -1,0 +1,17 @@
+nodeKind: AgentProduct
+id: agent:opencode
+attributes:
+  displayName: "OpenCode"
+  vendor: "SST (sst.dev)"
+  homepageUrl: "https://opencode.ai"
+  primarySurface: cli
+  supportTier: catalog-backed
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Open-source terminal-native coding agent. Provider-agnostic — drives
+    Anthropic, OpenAI, Google, and other models through a unified loop.
+    Ships a TUI, an HTTP+SSE server mode, and an `AGENTS.md` skill format.
+edges:
+  has_version:
+    - agentVersion:opencode:ge-0-0-0

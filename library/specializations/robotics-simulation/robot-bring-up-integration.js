@@ -16,6 +16,12 @@
  * - Robot Bring-Up: https://docs.ros.org/en/rolling/Tutorials/Intermediate/Tf2/Tf2-Main.html
  * - Integration Testing: https://www.ros.org/reps/rep-0107.html
  * - ROS2 Launch: https://docs.ros.org/en/rolling/Tutorials/Intermediate/Launch/Launch-Main.html
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:simulation-validation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

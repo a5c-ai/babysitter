@@ -9,6 +9,12 @@ expertise:
   - MITRE ATT&CK coverage
   - Detection engineering
   - Metrics and reporting
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:penetration-testing-ethical-hacking, skill-area:threat-intelligence-hunting]
+  roles: [role:security-engineer]
+  workflows: [workflow:penetration-testing-cycle, workflow:vulnerability-management]
 ---
 
 # Purple Team Coordinator Agent

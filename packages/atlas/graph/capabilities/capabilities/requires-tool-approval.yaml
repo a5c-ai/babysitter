@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:requires-tool-approval
+attributes:
+  displayName: "Requires tool approval"
+  description: |
+    The entity requires explicit user approval (interactive or via
+    settings) before each tool call, unless an allowlist is active.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: tool
+edges: {}

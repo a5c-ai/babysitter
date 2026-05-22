@@ -1,0 +1,36 @@
+# Gitleaks configuration for a5c-ai/a5c
+# Curated to reduce noise from test fixtures and schema files.
+
+title = "a5c-ai/a5c gitleaks config"
+
+[allowlist]
+# Paths that commonly contain test data, schemas, or generated artifacts.
+paths = [
+  # Documentation + schemas
+  "^docs/specs/",
+  "^docs/examples/",
+  # Test directories
+  "^tests/",
+  "^test/",
+  # Samples and examples at repo root
+  "^samples/",
+  "^example/",
+  # Changelog and project docs
+  "^CHANGELOG\\.md$",
+]
+
+# Filename-based allow patterns
+files = [
+  # Schema files anywhere in the repo
+  "\\.schema\\.json$",
+]
+
+# Regex-based allow patterns for common non-secret tokens in docs/tests
+regexes = [
+  # Placeholder tokens often used in examples
+  "(?i)(dummy|placeholder|example|sample)[-_]?(token|key|secret)",
+]
+
+# You can customize rules here if needed in the future
+# [rules]
+# ...

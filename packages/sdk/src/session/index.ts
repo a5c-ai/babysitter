@@ -38,9 +38,38 @@ export {
   createSessionFileContent,
   writeSessionFile,
   updateSessionState,
-  deleteSessionFile,
   getCurrentTimestamp,
   isoToEpochSeconds,
   updateIterationTimes,
-  isIterationTooFast,
+  addRunToSession,
+  getSessionRuns,
 } from './write';
+
+// Discovery (autodiscovery from markers + env)
+export {
+  HARNESS_ENV_VARS,
+  resolveAmbientSessionId,
+} from './discovery';
+
+export {
+  extractPromiseTag,
+  parseTranscriptLastAssistantMessage,
+} from './transcript';
+export type {
+  SessionWhoamiArgs,
+  SessionWhoamiResult,
+} from './whoami';
+export {
+  runSessionWhoami,
+} from './whoami';
+
+export type {
+  SessionCleanupArgs,
+  SessionCleanupResult,
+} from './cleanup';
+export {
+  parseMarkerFilename,
+  runSessionCleanup,
+} from './cleanup';
+
+

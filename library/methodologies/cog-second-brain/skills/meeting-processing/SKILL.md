@@ -6,15 +6,14 @@ allowed-tools:
   - file-write
   - file-search
   - git-commit
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# COG Meeting Processing Skill
-
-Process meeting recordings and transcripts into structured outputs: decisions, action items, team dynamics analysis, and executive summaries.
-
-## Capabilities
-
-- Parse meeting transcripts and identify speakers
 - Extract decisions with context, rationale, and stakeholders
 - Identify action items with owners, priorities, and deadlines
 - Analyze team dynamics: engagement, alignment, collaboration quality

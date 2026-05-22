@@ -1,0 +1,76 @@
+# `amux-triggers` CLI subcommand surface.
+# Source: packages/triggers/src/cli.ts:18-69 (main()), package.json:28 (bin entry).
+nodeKind: InteractionPrimitive
+id: interaction-primitive:amux-triggers-enrich
+attributes:
+  displayName: "amux-triggers enrich"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux-triggers"
+  subcommandVerb: "enrich"
+  flags:
+    - "--backend:1:select trigger backend (github|gitlab|bitbucket|generic-webhook)"
+    - "--event:1:override eventName (defaults to GITHUB_EVENT_NAME or AMUX_TRIGGER_EVENT)"
+    - "--event-path:1:override path to event payload JSON (defaults to GITHUB_EVENT_PATH)"
+    - "--include-diff:0:opt into git-show-based unified-diff enrichment"
+    - "--token:1:GitHub token (defaults to GITHUB_TOKEN env var)"
+    - "--output:1:write enriched JSON to file instead of stdout"
+  subcommandExitCodes:
+    - "0:ok:enrichment completed and written"
+    - "1:error:unhandled exception (printed to stderr by isDirectRun catch handler)"
+  description: |
+    Read the workflow event payload, normalize via the selected backend, optionally enrich
+    via REST/local-git, then write the resulting NormalizedTriggerEvent JSON to --output
+    or stdout. Source: packages/triggers/src/cli.ts:50-57.
+edges:
+  subcommand_exposed_by:
+    - target: package:a5c-ai-triggers
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:amux-triggers-evaluate
+attributes:
+  displayName: "amux-triggers evaluate"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux-triggers"
+  subcommandVerb: "evaluate"
+  flags:
+    - "--backend:1:select trigger backend"
+    - "--event:1:override eventName"
+    - "--event-path:1:override event payload path"
+    - "--query:1:trigger query (key:value or JSON object)"
+    - "--include-diff:0:opt into git-show diff enrichment"
+    - "--token:1:GitHub token"
+    - "--output:1:write evaluation JSON to file"
+  subcommandExitCodes:
+    - "0:matched:trigger query matched (printed `{matched:true,reasons,event,query}`)"
+    - "78:skip:trigger query did not match (action.yml:165 treats 78 as soft-skip)"
+    - "1:error:unhandled exception (e.g. unsupported expression clause)"
+  description: |
+    Enrich the event then run evaluateTrigger against the parsed query, write
+    `{matched, reasons, event, query}` JSON to --output (or stdout), and exit
+    0/78 on match/no-match. Source: packages/triggers/src/cli.ts:59-66.
+edges:
+  subcommand_exposed_by:
+    - target: package:a5c-ai-triggers
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:amux-triggers-help
+attributes:
+  displayName: "amux-triggers --help"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux-triggers"
+  subcommandVerb: "--help"
+  flags:
+    - "--help:0:print usage and supported flags / query examples to stdout"
+    - "-h:0:short alias for --help"
+  subcommandExitCodes:
+    - "0:ok:usage printed"
+  description: |
+    Print usage, supported flags, and 3 trigger-query examples; exit 0. Also
+    fired when no command argument is supplied. Source:
+    packages/triggers/src/cli.ts:20-39.
+edges:
+  subcommand_exposed_by:
+    - target: package:a5c-ai-triggers

@@ -1,0 +1,37 @@
+nodeKind: BoardSnapshot
+id: board-snapshot:agent-mux-2026-05-02
+attributes:
+  displayName: "agent-mux board — 2026-05-02"
+  generatedAt: "2026-05-02T00:00:00Z"
+  columnIds:
+    - board-column:agent-mux-backlog
+    - board-column:agent-mux-in-progress
+    - board-column:agent-mux-in-review
+    - board-column:agent-mux-done
+  swimlanes:
+    - by-priority
+    - by-assignee
+  wipPolicy: per-column
+  moveValidation:
+    - require-acceptance-criteria-met-before-done
+    - require-pr-linked-before-in-review
+  issueCount: 27
+edges:
+  snapshots_project:
+    - target: project:agent-mux
+  has_column:
+    - target: board-column:agent-mux-backlog
+    - target: board-column:agent-mux-in-progress
+    - target: board-column:agent-mux-in-review
+    - target: board-column:agent-mux-done
+---
+nodeKind: BoardSnapshot
+id: board-snapshot:babysitter-2026-05-02
+attributes:
+  displayName: "babysitter board — 2026-05-02"
+  generatedAt: "2026-05-02T00:00:00Z"
+  wipPolicy: none
+  issueCount: 14
+edges:
+  snapshots_project:
+    - target: project:babysitter

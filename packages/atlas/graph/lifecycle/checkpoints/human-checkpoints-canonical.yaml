@@ -1,0 +1,135 @@
+nodeKind: HumanCheckpoint
+id: human-checkpoint:pre-merge-review
+attributes:
+  displayName: "Pre-merge review"
+  kind: review
+  blockingPolicy: hard
+  urgency: high
+  interactionKind: sync
+  description: |
+    Human reviews the proposed change before merge. Hard block — the run
+    pauses until the reviewer responds.
+edges:
+  notifies_via:
+    - target: channel:slack-example
+    - target: channel:claude-ai-web
+  has_strategy:
+    - target: breakpoint-strategy:binary-approval
+  routes_to_responder:
+    - target: responder-profile:tech-lead
+---
+nodeKind: HumanCheckpoint
+id: human-checkpoint:dangerous-tool-approval
+attributes:
+  displayName: "Dangerous-tool approval"
+  kind: approval
+  blockingPolicy: hard
+  description: |
+    Human approves a tool call flagged by the runtime as destructive (file
+    delete, force-push, paid API). Hard block; matches Claude Code's
+    permission-prompt UX.
+  urgency: critical
+  interactionKind: sync
+edges:
+  notifies_via:
+    - target: channel:cursor-bg-agent
+    - target: channel:claude-ai-web
+  escalates_to:
+    - target: role:incident-commander
+    - target: role:security-engineer
+  has_strategy:
+    - target: breakpoint-strategy:multiple-choice
+  routes_to_responder:
+    - target: responder-profile:on-call-incident-commander
+---
+nodeKind: HumanCheckpoint
+id: human-checkpoint:plan-edit
+attributes:
+  displayName: "Plan edit"
+  kind: edit
+  blockingPolicy: soft
+  description: |
+    Human can edit the plan before execution proceeds. Soft block — proceeds
+    after a configurable timeout if the human does not respond.
+  urgency: normal
+  interactionKind: sync
+edges:
+  notifies_via:
+    - target: channel:claude-ai-web
+  escalates_to:
+    - target: role:tech-lead
+  has_strategy:
+    - target: breakpoint-strategy:free-form-edit
+  routes_to_responder:
+    - target: responder-profile:tech-lead
+  has_answer:
+    - target: breakpoint-answer:plan-edit-example
+  records_decision_memory:
+    - target: decision-memory:plan-edit-amendments-pattern
+---
+nodeKind: HumanCheckpoint
+id: human-checkpoint:cost-escalation
+attributes:
+  displayName: "Cost escalation"
+  kind: escalation
+  blockingPolicy: hard
+  description: |
+    Run has exceeded its configured budget; escalates to a human approver
+    before continuing. Hard block.
+  urgency: high
+  interactionKind: sync
+edges:
+  notifies_via:
+    - target: channel:mailbox-example
+    - target: channel:slack-example
+  has_strategy:
+    - target: breakpoint-strategy:multi-step-decision
+  routes_to_responder:
+    - target: responder-profile:engineering-manager
+  has_answer:
+    - target: breakpoint-answer:cost-escalation-example
+  records_decision_memory:
+    - target: decision-memory:cost-escalation-latency-pattern
+---
+nodeKind: HumanCheckpoint
+id: human-checkpoint:weekly-summary-advisory
+attributes:
+  displayName: "Weekly-summary advisory"
+  kind: review
+  blockingPolicy: advisory
+  description: |
+    Run emits a summary that a human can review asynchronously without
+    blocking the loop. Advisory — feedback is recorded for next iteration.
+  urgency: low
+  interactionKind: notify-only
+edges:
+  notifies_via:
+    - target: channel:mailbox-example
+    - target: channel:slack-via-mcp
+    - target: channel:a2a-example
+  has_strategy:
+    - target: breakpoint-strategy:single-question
+  routes_to_responder:
+    - target: responder-profile:engineering-manager
+---
+nodeKind: ResumeToken
+id: resume-token:default-run-scope
+attributes:
+  displayName: "Default run-scoped resume token"
+  ttl: PT24H
+  scope: run
+  description: |
+    Default resume-token shape issued at a HumanCheckpoint with `blockingPolicy=hard`.
+    Valid for 24 hours; scoped to the run that emitted it.
+edges: {}
+---
+nodeKind: ResumeToken
+id: resume-token:session-scoped
+attributes:
+  displayName: "Session-scoped resume token"
+  ttl: PT72H
+  scope: session
+  description: |
+    Resume token redeemable across multiple invocations within the same
+    session. Used when checkpoints span turns.
+edges: {}

@@ -1,0 +1,46 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:openclaw.platform@current
+attributes:
+  displayName: OpenClaw Platform (current)
+  agentVersionId: agentVersion:openclaw:ge-0-0-0
+  subagentDefinitionFormat: none
+  packageRef: source-ref:openclaw-github
+  nativeExtensionFormat: openclaw-plugin
+  nativeExtensionManifestPath: ~/.openclaw/plugins/<name>/plugin.json
+  nativeExtensionsDirectoryPath:
+  - ~/.openclaw/plugins/
+  skillFormat: none
+  skillsDirectoryPath: []
+  customSlashCommandsPath: []
+  subagentsDirectoryPath: []
+  hooksDirectoryOrConfigPath: []
+  settingsFiles:
+  - ~/.openclaw/config.json
+  pluginRegistryPath: ''
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: api-key
+  updateChannelMechanism: npm
+  supportedChannelKinds:
+  - mcp-channel
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+  - target: agent:openclaw
+    role: platform
+  bundles:
+  - target: presentation:openclaw-cli
+  supports:
+  - target: capability:can-resume
+    versionRange: '>=1.0.0'
+    level: none
+    notes: 'Resume/fork unsupported per task brief.
+
+      '
+  - target: capability:supports-plugins
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'Plugin support per task brief; MCP also available.
+
+      '

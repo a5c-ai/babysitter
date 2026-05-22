@@ -3,6 +3,11 @@
  * @description Scan .a5c/runs and .a5c/processes, aggregate insights from completed/failed runs, summarize to docs, then clean up old data.
  * @inputs { repoRoot: string, runsDir: string, processesDir: string, dryRun: boolean, keepRecentDays: number }
  * @outputs { success: boolean, summary: string, scan: object, aggregation: object, cleanup: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:bug-fixing-from-issues, skill-area:code-review-practice]
+ *   workflows: [workflow:bug-triage, workflow:feature-development]
+ *   roles: [role:backend-engineer, role:devops-engineer]
  */
 
 import { defineTask } from "@a5c-ai/babysitter-sdk";

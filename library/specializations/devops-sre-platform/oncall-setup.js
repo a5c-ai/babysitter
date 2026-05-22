@@ -6,6 +6,13 @@
  * @complexity Medium
  * @inputs { teamMembers: array, toolChoice: string, escalationLevels: number, rotationSchedule: string, integrations: array, runbookLibrary: object }
  * @outputs { success: boolean, scheduleConfigured: boolean, escalationPolicies: array, toolingSetup: object, teamReadiness: number, artifacts: array }
+ * @graph
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:on-call-rotation, workflow:incident-response]
+ *   roles: [role:sre]
+ *   skillAreas: [skill-area:alerting-oncall, skill-area:runbook-authoring]
+ *   topics: [topic:chaos-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

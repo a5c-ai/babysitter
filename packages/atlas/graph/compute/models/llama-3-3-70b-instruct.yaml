@@ -1,0 +1,83 @@
+nodeKind: ModelVersion
+id: model:llama-3-3-70b-instruct@current
+attributes:
+  displayName: "Llama 3.3 70B Instruct"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:llama-3
+  versionRange: '>=3.3.0 <3.4.0'
+  kind: chat
+  contextWindowTokens: 128000
+  modalities:
+  - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2024-12-06'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2024-12-06'
+  knowledgeCutoffDate: '2023-12-01'
+  modelCardUrl: https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:llama-3
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:llama-3
+  served_by:
+  - provider:together-ai
+  - provider:fireworks-ai
+  - provider:groq
+  - provider:replicate
+  - provider:hyperbolic
+  speaks:
+  - model-transport:openai-compat
+  supports:
+  - target: capability:streaming
+    versionRange: '>=3.3.0 <3.4.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-3-3-70b-instruct
+  - target: capability:supports-text-streaming
+    versionRange: '>=3.3.0 <3.4.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-3-3-70b-instruct
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=3.3.0 <3.4.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-3-3-70b-instruct
+  - target: capability:can-multi-turn
+    versionRange: '>=3.3.0 <3.4.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-3-3-70b-instruct
+  - target: capability:supports-native-tools
+    versionRange: '>=3.3.0 <3.4.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-3-3-70b-instruct
+  - target: capability:parallel-tool-calls
+    versionRange: '>=3.3.0 <3.4.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-3-3-70b-instruct
+  - target: capability:requires-tool-approval
+    versionRange: '>=3.3.0 <3.4.0'
+    level: full
+    notes: 'Open-weights model deployed via third-party providers; tool execution
+      by convention requires approval at the agent/runtime layer.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-llama-3-3-70b-instruct

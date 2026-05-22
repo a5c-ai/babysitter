@@ -1,0 +1,12 @@
+nodeKind: Definition
+id: definition:marketplace.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:marketplace
+  text: |
+    a registry that publishes Blueprints and Plugins; referenced from
+    blueprint `published_in` edges (e.g. marketplace:a5c-ai)
+  status: canonical
+edges:
+  defines:
+    - term:marketplace

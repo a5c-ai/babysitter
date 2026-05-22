@@ -1,0 +1,106 @@
+---
+nodeKind: PackageSurface
+id: package:a5c-ai-krate
+attributes:
+  packageId: "@a5c-ai/krate"
+  packageName: "@a5c-ai/krate"
+  workspacePath: packages/krate/core
+  moduleType: esm
+  surfaceKinds:
+    - runtime-library
+    - bin-entrypoint
+    - controller-api
+    - local-dev-server
+  sourceOfTruthRole: application
+  publishedTo: npm
+  versionPolicy: semver
+  # Source: packages/krate/core/package.json (name, bin, scripts, description).
+edges:
+  references_path:
+    - target: path:krate-core
+  validated_by_ci:
+    - target: ci:a5c-ai-krate
+---
+nodeKind: PackageSurface
+id: package:a5c-ai-krate-sdk
+attributes:
+  packageId: "@a5c-ai/krate-sdk"
+  packageName: "@a5c-ai/krate-sdk"
+  workspacePath: packages/krate/sdk
+  moduleType: esm
+  surfaceKinds:
+    - sdk-consumer
+    - re-export-surface
+    - atlas-client
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: none
+  versionPolicy: semver
+  # Source: packages/krate/sdk/package.json plus src/index.js exports.
+edges:
+  references_path:
+    - target: path:krate-sdk
+  validated_by_ci:
+    - target: ci:a5c-ai-krate-sdk
+---
+nodeKind: PackageSurface
+id: package:a5c-ai-krate-cli
+attributes:
+  packageId: "@a5c-ai/krate-cli"
+  packageName: "@a5c-ai/krate-cli"
+  workspacePath: packages/krate/cli
+  moduleType: esm
+  surfaceKinds:
+    - cli
+    - bin-entrypoint
+    - mcp-server
+  sourceOfTruthRole: application
+  publishedTo: none
+  versionPolicy: semver
+  # Source: packages/krate/cli/package.json (krate and krate-server bins).
+edges:
+  references_path:
+    - target: path:krate-cli
+  validated_by_ci:
+    - target: ci:a5c-ai-krate-cli
+---
+nodeKind: PackageSurface
+id: package:a5c-ai-krate-web
+attributes:
+  packageId: "@a5c-ai/krate-web"
+  packageName: "@a5c-ai/krate-web"
+  workspacePath: packages/krate/web
+  moduleType: nextjs
+  surfaceKinds:
+    - webui
+    - browser-app
+    - management-console
+  sourceOfTruthRole: application
+  publishedTo: none
+  versionPolicy: semver
+  # Source: packages/krate/web/package.json (Next.js web console metadata).
+edges:
+  references_path:
+    - target: path:krate-web
+  validated_by_ci:
+    - target: ci:a5c-ai-krate-web
+---
+nodeKind: PackageSurface
+id: package:krate-helm-chart
+attributes:
+  packageId: krate
+  packageName: krate
+  workspacePath: packages/krate/charts
+  moduleType: other
+  surfaceKinds:
+    - helm-chart
+    - kubernetes-install
+    - crd-distribution
+  sourceOfTruthRole: application
+  publishedTo: none
+  versionPolicy: semver
+  # Source: packages/krate/charts/Chart.yaml (Helm chart metadata and release gate annotation).
+edges:
+  references_path:
+    - target: path:krate-chart
+  validated_by_ci:
+    - target: ci:krate-helm-chart

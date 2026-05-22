@@ -1,0 +1,33 @@
+# NodeKinds for decision types (cluster 10-roles).
+nodeKinds:
+- id: node:decision-type
+  name: DecisionType
+  origin: universal
+  prefix: decision-type
+  cluster: 10-roles
+  purpose: a category of decision that a responsibility holder makes
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: impactLevel
+    type: enum<team,org,product,company>
+    required: false
+  - name: reversibility
+    type: enum<easily-reversible,costly-to-reverse,irreversible>
+    required: false
+  - name: typicalCadence
+    type: string
+    required: false
+  incomingEdges:
+  - decision_of_type
+  outgoingEdges:
+  - informed_by
+  invariants: []
+  examples: []

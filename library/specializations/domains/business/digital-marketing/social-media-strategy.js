@@ -3,6 +3,12 @@
  * @description Comprehensive process for developing a social media strategy across platforms, including audit, audience research, platform prioritization, content pillars, and measurement framework definition
  * @inputs { businessObjectives: object, brandGuidelines: object, competitiveLandscape: object, audienceResearch: object, outputDir: string }
  * @outputs { success: boolean, strategyDocument: string, platformPriorities: array, contentPillarFramework: object, measurementPlan: object, artifacts: array }
+  * @graph
+ *   domains: [domain:digital-marketing]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
+ *   workflows: [workflow:brand-campaign-launch]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

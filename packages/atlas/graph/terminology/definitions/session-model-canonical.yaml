@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:session-model.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:session-model
+  text: |
+    persistence/control-plane/structured-transport triple
+  status: canonical
+edges:
+  defines:
+    - term:session-model

@@ -1,0 +1,512 @@
+---
+nodeKind: HookSurface
+id: hook-surface:claude.setup
+attributes:
+  eventName: "Setup (Claude Code)"
+  displayName: "Setup (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: pre
+  blocking: false
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [session_id, transcript_path, cwd, hook_event_name, trigger]
+    properties:
+      session_id: { type: string }
+      transcript_path: { type: string }
+      cwd: { type: string }
+      hook_event_name: { type: string, const: "Setup" }
+      trigger: { type: string, enum: [init, maintenance] }
+  description: |
+    Fires only on `--init-only`, `-p --init`, or `-p --maintenance`. One-time
+    initialization hook for CI / scripts / one-shot bootstrap. Has access to
+    CLAUDE_ENV_FILE for environment persistence. Distinct from SessionStart
+    which fires on every session.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.user-prompt-expansion
+attributes:
+  eventName: "UserPromptExpansion (Claude Code)"
+  displayName: "UserPromptExpansion (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: pre
+  blocking: true
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [hook_event_name, expansion_type, command_name, command_source, prompt]
+    properties:
+      hook_event_name: { type: string, const: "UserPromptExpansion" }
+      expansion_type: { type: string, enum: [slash_command, mcp_prompt] }
+      command_name: { type: string }
+      command_args: { type: string }
+      command_source: { type: string, enum: [plugin, skill, builtin, mcp] }
+      prompt: { type: string }
+  description: |
+    Fires when a slash command (or MCP prompt) expands into a prompt — before
+    the expanded prompt enters the model context. Subscribers can inspect the
+    expansion, mutate it, or block it via decision: "block" / exit 2.
+    Matchable by command name. Canonicalizes loosely to UserPromptSubmit.
+edges:
+  canonicalized_to:
+    - target: hook-surface:user-prompt-submit
+---
+nodeKind: HookSurface
+id: hook-surface:claude.permission-request
+attributes:
+  eventName: "PermissionRequest (Claude Code)"
+  displayName: "PermissionRequest (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: pre
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [hook_event_name, tool_name, tool_input]
+    properties:
+      hook_event_name: { type: string, const: "PermissionRequest" }
+      tool_name: { type: string }
+      tool_input: { type: object }
+      permission_suggestions:
+        type: array
+        items:
+          type: object
+          properties:
+            type: { type: string, const: "addRules" }
+            rules: { type: array }
+            behavior: { type: string, enum: [allow, deny, ask] }
+            destination: { type: string, enum: [localSettings, projectSettings] }
+  description: |
+    Fires when the permission dialog is about to be shown to the user.
+    Subscribers can short-circuit the dialog by returning a decision
+    (allow/deny). Output may also include updatedPermissions to write new
+    rules to settings. Distinct from PreToolUse — only fires when the
+    permission dialog would appear; PreToolUse fires for every tool call.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.permission-denied
+attributes:
+  eventName: "PermissionDenied (Claude Code)"
+  displayName: "PermissionDenied (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: post
+  blocking: false
+  family: observer
+  payloadSchema:
+    type: object
+    required: [hook_event_name, tool_name, tool_input, tool_use_id, reason]
+    properties:
+      hook_event_name: { type: string, const: "PermissionDenied" }
+      tool_name: { type: string }
+      tool_input: { type: object }
+      tool_use_id: { type: string }
+      reason: { type: string }
+  description: |
+    Fires after a tool call is denied by the auto-mode classifier.
+    Observer — cannot un-deny. Subscribers may emit retry: true to tell
+    the model it may retry the denied call.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.post-tool-use-failure
+attributes:
+  eventName: "PostToolUseFailure (Claude Code)"
+  displayName: "PostToolUseFailure (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: post
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [hook_event_name, tool_name, tool_input, tool_use_id, error_message]
+    properties:
+      hook_event_name: { type: string, const: "PostToolUseFailure" }
+      tool_name: { type: string }
+      tool_input: { type: object }
+      tool_use_id: { type: string }
+      error_message: { type: string }
+  description: |
+    Fires when a tool call fails. Same payload shape as PostToolUse but
+    with error_message instead of tool_result. Subscribers can stop the
+    agentic loop via decision: "block".
+edges:
+  canonicalized_to:
+    - target: hook-surface:post-tool-use
+---
+nodeKind: HookSurface
+id: hook-surface:claude.post-tool-batch
+attributes:
+  eventName: "PostToolBatch (Claude Code)"
+  displayName: "PostToolBatch (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: post
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [hook_event_name, tool_results]
+    properties:
+      hook_event_name: { type: string, const: "PostToolBatch" }
+      tool_results:
+        type: array
+        items:
+          type: object
+          required: [tool_name, tool_input, tool_use_id]
+          properties:
+            tool_name: { type: string }
+            tool_input: { type: object }
+            tool_use_id: { type: string }
+            tool_result: { type: [string, "null"] }
+            error_message: { type: [string, "null"] }
+  description: |
+    Fires once after a parallel batch of tool calls fully resolves, before
+    the next model call. The single hook receives all tool results in one
+    array — convenient for cross-tool reasoning. Subscribers can block the
+    next model call via decision: "block".
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.stop-failure
+attributes:
+  eventName: "StopFailure (Claude Code)"
+  displayName: "StopFailure (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: post
+  blocking: false
+  family: observer
+  payloadSchema:
+    type: object
+    required: [hook_event_name, error_type, error_message]
+    properties:
+      hook_event_name: { type: string, const: "StopFailure" }
+      error_type:
+        type: string
+        enum: [rate_limit, authentication_failed, oauth_org_not_allowed, billing_error, invalid_request, server_error, max_output_tokens, unknown]
+      error_message: { type: string }
+  description: |
+    Fires when a turn ends due to an API error (rate limit, auth, billing,
+    server error, etc.). Non-blocking — for telemetry / alerting only.
+    Output and exit code are ignored. Matcher accepts the error_type
+    enum value.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.subagent-start
+attributes:
+  eventName: "SubagentStart (Claude Code)"
+  displayName: "SubagentStart (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: pre
+  blocking: false
+  family: observer
+  payloadSchema:
+    type: object
+    required: [hook_event_name, agent_type, agent_id, prompt]
+    properties:
+      hook_event_name: { type: string, const: "SubagentStart" }
+      agent_type: { type: string }
+      agent_id: { type: string }
+      prompt: { type: string }
+  description: |
+    Fires when a subagent is spawned. Output limited to additionalContext
+    visible only to the user (not the subagent or parent). Used for UI
+    indicators / telemetry. Matchable by agent_type.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.task-created
+attributes:
+  eventName: "TaskCreated (Claude Code)"
+  displayName: "TaskCreated (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: pre
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [hook_event_name, task_description]
+    properties:
+      hook_event_name: { type: string, const: "TaskCreated" }
+      task_description: { type: string }
+  description: |
+    Fires when a task is being created via the TaskCreate tool. Exit 2 or
+    decision: "block" rolls back the creation. Used to enforce task-shape
+    policy (e.g. require a description, deny tasks above N words, etc.).
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.task-completed
+attributes:
+  eventName: "TaskCompleted (Claude Code)"
+  displayName: "TaskCompleted (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: pre
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [hook_event_name, task_description]
+    properties:
+      hook_event_name: { type: string, const: "TaskCompleted" }
+      task_description: { type: string }
+  description: |
+    Fires when a task is being marked completed. Exit 2 or decision:
+    "block" prevents the completion. Used to enforce task-acceptance gates
+    (e.g. require tests pass, require evidence link).
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.teammate-idle
+attributes:
+  eventName: "TeammateIdle (Claude Code)"
+  displayName: "TeammateIdle (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: pre
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [hook_event_name]
+    properties:
+      hook_event_name: { type: string, const: "TeammateIdle" }
+  description: |
+    Fires when an agent-team teammate is about to go idle. Exit 2 or
+    continue: false prevents idle, keeps the teammate working. Only fires
+    when CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 is set.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.config-change
+attributes:
+  eventName: "ConfigChange (Claude Code)"
+  displayName: "ConfigChange (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: pre
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [hook_event_name, source]
+    properties:
+      hook_event_name: { type: string, const: "ConfigChange" }
+      source: { type: string, enum: [user_settings, project_settings, local_settings, policy_settings, skills] }
+      previous_config: { type: [object, "null"] }
+      new_config: { type: [object, "null"] }
+  description: |
+    Fires when a configuration file changes during the session. Exit 2
+    blocks the change (except for policy_settings, which always wins).
+    Used to enforce org-wide config invariants. Matchable by source.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.instructions-loaded
+attributes:
+  eventName: "InstructionsLoaded (Claude Code)"
+  displayName: "InstructionsLoaded (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: post
+  blocking: false
+  family: observer
+  payloadSchema:
+    type: object
+    required: [hook_event_name, file_path, memory_type, load_reason]
+    properties:
+      hook_event_name: { type: string, const: "InstructionsLoaded" }
+      file_path: { type: string }
+      memory_type: { type: string, enum: [User, Project, Local, Managed] }
+      load_reason: { type: string, enum: [session_start, nested_traversal, path_glob_match, include, compact] }
+      globs: { type: array, items: { type: string } }
+      trigger_file_path: { type: string }
+      parent_file_path: { type: string }
+  description: |
+    Fires when a CLAUDE.md or .claude/rules/*.md file is loaded into
+    context. Observer-only. Used for memory / context-load telemetry +
+    audit trail of what shaped the agent's instructions for a given turn.
+    Matchable by load_reason.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.file-changed
+attributes:
+  eventName: "FileChanged (Claude Code)"
+  displayName: "FileChanged (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: post
+  blocking: false
+  family: observer
+  payloadSchema:
+    type: object
+    required: [hook_event_name, file_path, change_type]
+    properties:
+      hook_event_name: { type: string, const: "FileChanged" }
+      file_path: { type: string }
+      change_type: { type: string, enum: [created, modified, deleted] }
+  description: |
+    Fires when a watched file changes on disk. Has access to
+    CLAUDE_ENV_FILE for reactive environment management (direnv, nvm,
+    etc.). Matcher accepts literal filenames (e.g. ".envrc|.env"); regex
+    is NOT supported for this event.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.cwd-changed
+attributes:
+  eventName: "CwdChanged (Claude Code)"
+  displayName: "CwdChanged (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: post
+  blocking: false
+  family: observer
+  payloadSchema:
+    type: object
+    required: [hook_event_name, previous_cwd, cwd]
+    properties:
+      hook_event_name: { type: string, const: "CwdChanged" }
+      previous_cwd: { type: string }
+      cwd: { type: string }
+  description: |
+    Fires when the working directory changes (e.g. via cd command). Has
+    access to CLAUDE_ENV_FILE for reactive environment management.
+    Always fires (no matcher).
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.worktree-create
+attributes:
+  eventName: "WorktreeCreate (Claude Code)"
+  displayName: "WorktreeCreate (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: pre
+  blocking: true
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [hook_event_name, base_path]
+    properties:
+      hook_event_name: { type: string, const: "WorktreeCreate" }
+      base_path: { type: string }
+      worktree_path: { type: string }
+  description: |
+    Fires when a worktree is being created via --worktree or
+    isolation: "worktree". REPLACES the default git behavior: the hook is
+    expected to print the new worktree path to stdout (or return
+    hookSpecificOutput.worktreePath for HTTP hooks). Any non-zero exit
+    fails the creation entirely.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.worktree-remove
+attributes:
+  eventName: "WorktreeRemove (Claude Code)"
+  displayName: "WorktreeRemove (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: post
+  blocking: false
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [hook_event_name, worktree_path]
+    properties:
+      hook_event_name: { type: string, const: "WorktreeRemove" }
+      worktree_path: { type: string }
+  description: |
+    Fires when a worktree is being removed (session exit or subagent
+    finish). Failures are logged in debug mode but never block the
+    teardown.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.post-compact
+attributes:
+  eventName: "PostCompact (Claude Code)"
+  displayName: "PostCompact (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: post
+  blocking: false
+  family: observer
+  payloadSchema:
+    type: object
+    required: [hook_event_name, trigger]
+    properties:
+      hook_event_name: { type: string, const: "PostCompact" }
+      trigger: { type: string, enum: [manual, auto] }
+  description: |
+    Fires after context compaction completes. Pairs with PreCompact
+    (which is blocking; this one is observer-only). Used for
+    compaction-event telemetry + downstream context refresh.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.elicitation
+attributes:
+  eventName: "Elicitation (Claude Code)"
+  displayName: "Elicitation (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: pre
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [hook_event_name, mcp_server, elicitation_data]
+    properties:
+      hook_event_name: { type: string, const: "Elicitation" }
+      mcp_server: { type: string }
+      elicitation_data:
+        type: object
+        properties:
+          type: { type: string }
+          fields: { type: array }
+  description: |
+    Fires when an MCP server requests user input mid tool-call (MCP
+    Elicitation, spec rev 2025-06-18+). Hook can return action: accept |
+    decline | cancel and supply content for accept. Matchable by MCP
+    server name.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:claude.elicitation-result
+attributes:
+  eventName: "ElicitationResult (Claude Code)"
+  displayName: "ElicitationResult (Claude Code)"
+  kind: native
+  originVendor: Anthropic
+  direction: post
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [hook_event_name, mcp_server, user_response]
+    properties:
+      hook_event_name: { type: string, const: "ElicitationResult" }
+      mcp_server: { type: string }
+      user_response:
+        type: object
+        properties:
+          action: { type: string, enum: [accept, decline, cancel] }
+          content: { type: object }
+  description: |
+    Fires after the user responds to an MCP elicitation, before the
+    response is sent to the server. Hook can mutate the action or
+    content. Exit 2 forces the response to "decline".
+edges: {}

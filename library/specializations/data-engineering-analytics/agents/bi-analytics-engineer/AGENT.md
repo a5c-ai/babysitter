@@ -14,6 +14,12 @@ expertise:
   - Report automation
   - Data visualization best practices
   - Self-service enablement
+graph:
+  domains: [domain:data-engineering]
+  specializations: [specialization:data-engineering-analytics]
+  skillAreas: [skill-area:data-analytics, skill-area:data-visualization]
+  roles: [role:analytics-engineer, role:data-analyst]
+  workflows: [workflow:data-pipeline-deployment]
 ---
 
 # BI Analytics Engineer Agent

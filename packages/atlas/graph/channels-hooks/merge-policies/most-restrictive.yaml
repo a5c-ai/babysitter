@@ -1,0 +1,27 @@
+nodeKind: MergePolicy
+id: merge-policy:most-restrictive
+attributes:
+  displayName: "Most-restrictive-wins (hooks-mux default)"
+  decisionRule: most-restrictive-wins
+  envMergeRule: deep-merge
+  systemMessageStrategy: concatenate
+  arraysMergeRule: replace
+  description: |
+    The default hooks-mux merge policy. The decision verb collapses by
+    most-restrictive-wins (deny < ask < allow < continue < noop). Plain
+    objects (persistEnv, contextVars, metadata) are deep-merged with later
+    handlers overwriting earlier ones at conflicting leaves; arrays are
+    replaced wholesale rather than concatenated. systemMessage strings are
+    concatenated across handlers in registration order.
+edges:
+  merge_policy_orders_decision_verb:
+    - target: decision-verb:deny
+      rank: 1
+    - target: decision-verb:ask
+      rank: 2
+    - target: decision-verb:allow
+      rank: 3
+    - target: decision-verb:continue
+      rank: 4
+    - target: decision-verb:noop
+      rank: 5

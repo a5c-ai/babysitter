@@ -1,0 +1,91 @@
+---
+nodeKind: Role
+id: role:fullstack-engineer
+attributes:
+  displayName: "Fullstack Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds end-to-end features across frontend and backend, including API design, persistence, and UI.
+edges:
+  requires_expertise:
+    - target: skill-area:react-components
+    - target: skill-area:api-design
+    - target: skill-area:database-migrations-zero-downtime
+    - target: skill-area:unit-testing
+    - target: skill-area:integration-testing
+    - target: skill-area:web-security
+---
+nodeKind: Role
+id: role:backend-engineer
+attributes:
+  displayName: "Backend Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs and operates server-side services, APIs, data access, and async/event-driven flows.
+edges:
+  requires_expertise:
+    - target: skill-area:api-design
+    - target: skill-area:database-migrations-zero-downtime
+    - target: skill-area:postgres-tuning
+    - target: skill-area:rate-limiting
+    - target: skill-area:integration-testing
+    - target: skill-area:contract-testing
+---
+nodeKind: Role
+id: role:frontend-engineer
+attributes:
+  displayName: "Frontend Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds web UIs with attention to performance, accessibility, and design-system fidelity.
+edges:
+  requires_expertise:
+    - target: skill-area:react-components
+    - target: skill-area:react-state-management
+    - target: skill-area:web-vitals
+    - target: skill-area:web-accessibility
+    - target: skill-area:css-architecture
+    - target: skill-area:design-systems
+---
+nodeKind: Role
+id: role:security-engineer
+attributes:
+  displayName: "Security Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds and operates security tooling, performs threat modeling, drives remediation across the org.
+edges:
+  requires_expertise:
+    - target: skill-area:threat-modeling
+    - target: skill-area:sast
+    - target: skill-area:dast
+    - target: skill-area:secret-scanning
+    - target: skill-area:supply-chain-security
+    - target: skill-area:identity-security
+    - target: skill-area:network-security
+---
+nodeKind: Role
+id: role:devops-engineer
+attributes:
+  displayName: "DevOps Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Owns CI/CD, IaC, container/k8s platform plumbing, and developer-facing deploy tooling.
+edges:
+  requires_expertise:
+    - target: skill-area:gitops
+    - target: skill-area:blue-green-deployment
+    - target: skill-area:canary-rollouts
+    - target: skill-area:containerization
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:k8s-operator-development

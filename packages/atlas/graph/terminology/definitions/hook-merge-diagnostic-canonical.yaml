@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:hook-merge-diagnostic.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:hook-merge-diagnostic
+  text: |
+    a record produced by hooks-mux when merging hook surfaces from multiple sources (plugins, settings, profiles)
+  status: canonical
+edges:
+  defines:
+    - term:hook-merge-diagnostic

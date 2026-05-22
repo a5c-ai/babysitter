@@ -4,6 +4,10 @@ id: SK-FTV-002
 version: 1.0.0
 description: Develop narrative synopses that tell the complete story cinematically, serving as sales documents and production blueprints
 specialization: film-tv-production
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:content-strategy, skill-area:technical-writing, skill-area:natural-language-processing]
+  roles: [role:content-strategist, role:creative-director]
 ---
 
 # Treatment Writing Skill

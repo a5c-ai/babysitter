@@ -2,7 +2,14 @@
 name: code-review-gate
 description: Architect code review with DRY, YAGNI, abstraction, and test coverage principle enforcement
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
+
 # Code Review Gate
 
 ## Capabilities

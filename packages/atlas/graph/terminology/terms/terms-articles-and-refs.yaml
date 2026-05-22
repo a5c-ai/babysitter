@@ -1,0 +1,168 @@
+---
+nodeKind: Term
+id: term:agentic-loop
+attributes:
+  displayName: "Agentic Loop"
+  kind: concept
+  description: |
+    The "Loop 2" of a Hybrid Agentic System: a tool-using LLM-powered
+    reasoning loop that iterates until a local objective is reached
+    (read objective + constraints, decide what evidence is needed,
+    call tools, update plan, produce output). Source:
+    docs/articles/Hybrid Agentic Systems_ Two-loops Control Plane Guide.md.
+edges:
+  synonym_of:
+    - target: term:orchestration-loop
+---
+nodeKind: Term
+id: term:orchestration-loop
+attributes:
+  displayName: "Orchestration Loop"
+  kind: concept
+  description: |
+    The "Loop 1" of a Hybrid Agentic System: a deterministic process
+    stepper that reconstructs ground truth from the journal, decides
+    the run's stage, checks gates/constraints/budgets, and emits the
+    next allowed effect. Source:
+    docs/articles/Hybrid Agentic Systems_ Two-loops Control Plane Guide.md.
+edges: {}
+---
+nodeKind: Term
+id: term:stack-depth-interleaving
+attributes:
+  displayName: "Stack-Depth Interleaving"
+  kind: concept
+  description: |
+    Nesting (rather than time-multiplexing) of orchestration and
+    harness work: an orchestration step contains a harness session,
+    and that session can invoke symbolic tools mid-flight. Source:
+    docs/articles/Hybrid Agentic Systems_ Two-loops Control Plane Guide.md
+    §1 + §5.
+edges:
+  related_to:
+    - target: term:orchestration-loop
+---
+nodeKind: Term
+id: term:symbolic-tool
+attributes:
+  displayName: "Symbolic Tool"
+  kind: concept
+  description: |
+    A deterministic capability exposed to the LLM harness as a tool —
+    e.g. policy check, gate evaluation, scope rule, deterministic
+    transform. The harness consults a Symbolic Tool instead of
+    guessing policy. Source:
+    docs/articles/Hybrid Agentic Systems_ Two-loops Control Plane Guide.md.
+edges:
+  related_to:
+    - target: term:agentic-loop
+---
+nodeKind: Term
+id: term:symbolic-task
+attributes:
+  displayName: "Symbolic Task"
+  kind: concept
+  description: |
+    A deterministic capability invoked from inside the orchestration
+    loop — e.g. validator, analyzer, scheduler, reducer, diff scanner.
+    Same code surface as a Symbolic Tool but called by orchestration
+    rather than by the harness. Source:
+    docs/articles/Hybrid Agentic Systems_ Two-loops Control Plane Guide.md.
+edges:
+  related_to:
+    - target: term:agentic-loop
+---
+nodeKind: Term
+id: term:quality-gate
+attributes:
+  displayName: "Quality Gate"
+  kind: concept
+  description: |
+    A symbolic check that must pass before a run is allowed to advance
+    to the next stage. Quality gates encode "what proof is required to
+    progress" and are evaluated by the orchestration loop, often via
+    Symbolic Tasks. Source:
+    docs/articles/Hybrid Agentic Systems_ Two-loops Control Plane Guide.md.
+edges:
+  related_to:
+    - target: term:orchestration-loop
+---
+nodeKind: Term
+id: term:invocation-mode
+attributes:
+  displayName: "Invocation Mode"
+  kind: concept
+  description: |
+    Selects where a harness subprocess runs. agent-mux defines four
+    modes — local (default), docker (`docker run --rm -i ...`), ssh
+    (`ssh ... -- 'cd <cwd> && cmd ...'`), and k8s (`kubectl exec -i
+    <pod> -- ...`). The adapter contract emits a mode-agnostic
+    SpawnArgs which a pure transform rewrites for the chosen host.
+    Source: docs/agent-mux/reference/13-invocation-modes.md.
+edges:
+  related_to:
+    - target: term:agentic-loop
+---
+nodeKind: Term
+id: term:unified-hook-payload
+attributes:
+  displayName: "Unified Hook Payload"
+  kind: concept
+  description: |
+    Harness-agnostic normalised hook payload emitted by agent-mux:
+    `{ agent, hookType, sessionId, timestamp, data, raw }`. `data`
+    surfaces fields like `tool_name`, `tool_input`, `prompt`; `raw`
+    preserves the original per-harness payload for bidirectional
+    round-tripping. Source: docs/agent-mux/reference/15-hooks.md.
+edges:
+  related_to:
+    - target: term:hook-registration
+---
+nodeKind: Term
+id: term:unified-hook-result
+attributes:
+  displayName: "Unified Hook Result"
+  kind: concept
+  description: |
+    Hook handler return value in agent-mux's unified hook system —
+    `{ decision: allow|deny|modify, message?, modifiedInput?, stdout?,
+    exitCode? }`. `deny` maps to exit code 2, the convention shared by
+    most harnesses. Source: docs/agent-mux/reference/15-hooks.md.
+edges:
+  related_to:
+    - target: term:hook-registration
+---
+nodeKind: Term
+id: term:hook-registration
+attributes:
+  displayName: "Hook Registration"
+  kind: concept
+  description: |
+    A record in `.amux/hooks.json` (project) or `~/.amux/hooks.json`
+    (global) that maps `(agent, hookType) → handler(target)`. Project
+    registrations override global registrations matched by `id`.
+    Handlers are one of `builtin` (in-process), `command` (shell
+    command), or `script` (executable). Source:
+    docs/agent-mux/reference/15-hooks.md.
+edges:
+  related_to:
+    - target: term:unified-hook-payload
+---
+nodeKind: Term
+id: term:spawn-args
+attributes:
+  displayName: "SpawnArgs"
+  kind: concept
+  description: |
+    Mode-agnostic abstract spawn descriptor returned by
+    `Adapter.buildSpawnArgs()` — `{ command, args, env, cwd, stdin?,
+    shell? }`. The pure `buildInvocationCommand()` transform rewrites
+    SpawnArgs into the concrete host command for the chosen
+    InvocationMode. Source:
+    docs/agent-mux/reference/13-invocation-modes.md +
+    packages/core/src/spawn-invocation.ts.
+edges:
+  related_to:
+    - target: term:agentic-loop
+
+

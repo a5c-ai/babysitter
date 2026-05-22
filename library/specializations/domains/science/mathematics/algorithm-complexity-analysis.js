@@ -17,6 +17,13 @@
  * - Cormen et al., Introduction to Algorithms
  * - Knuth, The Art of Computer Programming
  * - Sedgewick & Flajolet, An Introduction to the Analysis of Algorithms
+ *
+ * @graph
+ *   domains: [domain:mathematics]
+ *   specializations: [specialization:computational-mathematics]
+ *   skillAreas: [skill-area:statistical-analysis, skill-area:mathematical-reasoning, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

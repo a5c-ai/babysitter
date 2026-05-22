@@ -1,0 +1,13 @@
+nodeKind: Definition
+id: definition:path-descriptor.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:path-descriptor
+  text: |
+    Typed pointer to a runtime filesystem path (run dir, session dir, MCP
+    config, plugin scope dir, vendor auth path, plugin artifact location).
+    Distinct from SourceRef which points at source-of-truth in a repo.
+  status: canonical
+edges:
+  defines:
+    - term:path-descriptor

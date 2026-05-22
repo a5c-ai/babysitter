@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:tool-server-mcp-jira.scope
+attributes:
+  subjectId: tool-server:mcp-jira
+  inScope: |
+    Atlassian Jira issue / project access — search, transitions, comments, attachments.
+  outOfScope: |
+    Confluence content (separate MCP), Jira admin / scheme-management, and Atlassian-cloud billing.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - tool-server:mcp-jira

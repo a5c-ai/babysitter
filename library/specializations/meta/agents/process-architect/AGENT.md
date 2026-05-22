@@ -11,6 +11,12 @@ expertise:
   - Error handling patterns
   - Input/output schema design
   - Process decomposition
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:orchestration-loop, skill-area:api-contract-testing]
+  topics: [topic:developer-experience, topic:architecture-decisions]
+  roles: [role:architect, role:platform-engineer, role:tech-lead]
+  workflows: [workflow:feature-development, workflow:architecture-decision-record]
 ---
 
 # Process Architect Agent

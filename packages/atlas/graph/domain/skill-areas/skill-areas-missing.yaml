@@ -1,0 +1,146 @@
+---
+nodeKind: SkillArea
+id: skill-area:ai-agent-development
+attributes:
+  displayName: "AI Agent Development"
+  description: |
+    Building autonomous and semi-autonomous AI agents with tool use, memory,
+    and multi-step reasoning. Covers agent frameworks, prompt engineering for
+    agentic tasks, and evaluation of agent reliability and safety.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:multi-agent-coordination
+      strength: required
+    - target: skill-area:prompt-engineering
+      strength: recommended
+    - target: skill-area:agentic-loops
+      strength: recommended
+    - target: skill-area:tool-use
+      strength: recommended
+    - target: skill-area:context-management
+      strength: recommended
+    - target: skill-area:eval-driven-development
+      strength: recommended
+    - target: skill-area:agent-planning-reasoning
+      strength: recommended
+    - target: skill-area:agent-simulation-testing
+      strength: recommended
+    - target: skill-area:agent-debugging-logging
+      strength: recommended
+    - target: skill-area:tool-service-integration-agents
+      strength: recommended
+    - target: skill-area:chain-of-thought-multistep-orchestration
+      strength: recommended
+    - target: skill-area:reinforcement-learning-agents
+      strength: recommended
+    - target: skill-area:prompt-instruction-tuning-agents
+      strength: recommended
+    - target: skill-area:safety-redteaming
+      strength: recommended
+    - target: skill-area:multi-turn-tool-use
+      strength: recommended
+    - target: skill-area:orchestration-loop
+      strength: recommended
+    - target: skill-area:hallucination-mitigation-fact-checking
+      strength: recommended
+    - target: skill-area:rlhf-systems
+      strength: recommended
+    - target: skill-area:ai-evaluation
+      strength: recommended
+    - target: skill-area:llm-observability
+      strength: recommended
+    - target: skill-area:llm-summarization-qa
+      strength: recommended
+    - target: skill-area:medical-agent
+      strength: recommended
+    - target: skill-area:travel-itinerary-planning
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:cloud-infrastructure
+attributes:
+  displayName: "Cloud Infrastructure"
+  description: |
+    Designing and operating scalable cloud infrastructure across AWS, Azure,
+    and GCP. Covers IaC, networking, security groups, cost optimization,
+    and multi-cloud architecture patterns.
+  domains:
+    - domain:cloud-infra
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cloud-infra
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:containerization
+      strength: recommended
+    - target: skill-area:serverless-compute
+      strength: recommended
+    - target: skill-area:serverless-cold-start-optimization
+      strength: recommended
+    - target: skill-area:cdn-edge
+      strength: recommended
+    - target: skill-area:terraform-infrastructure
+      strength: recommended
+    - target: skill-area:cloud-deployment
+      strength: recommended
+    - target: skill-area:k8s-operator-development
+      strength: recommended
+    - target: skill-area:k8s-rbac
+      strength: recommended
+    - target: skill-area:service-mesh-config
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:technical-writing
+attributes:
+  displayName: "Technical Writing"
+  description: |
+    Creating clear, accurate technical documentation for developer and end-user
+    audiences. Covers API reference, tutorials, architecture docs, and
+    docs-as-code workflows with automated freshness checks.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:deployment
+attributes:
+  displayName: "Deployment"
+  description: |
+    Application deployment strategies covering blue-green, canary, and rolling
+    deployments. Includes deployment automation, environment promotion pipelines,
+    and rollback procedures for reliable software delivery.
+  domains:
+    - domain:devops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:core-web-vitals
+attributes:
+  displayName: "Core Web Vitals"
+  description: |
+    Measuring and optimizing Google Core Web Vitals — LCP, FID/INP, and CLS —
+    for web performance. Covers performance budgets, real user monitoring,
+    and synthetic testing to meet UX quality thresholds.
+  domains:
+    - domain:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary

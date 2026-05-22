@@ -3,6 +3,12 @@
  * @description Establish and maintain requirements traceability matrices linking business objectives to functional requirements, test cases, and delivered features. Manage requirements baselines and change control.
  * @inputs { projectName: string, requirements: array, objectives: array, testCases: array, features: array, baseline: object }
  * @outputs { success: boolean, traceabilityMatrix: object, baselineDocument: object, changeLog: object, artifacts: array }
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:competitive-intelligence]
+ *   workflows: [workflow:market-analysis]
+ *   roles: [role:business-analyst, role:strategic-planner]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

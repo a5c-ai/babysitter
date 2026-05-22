@@ -1,0 +1,147 @@
+---
+nodeKind: Workflow
+id: workflow:procurement-cycle
+attributes:
+  displayName: "Procurement Cycle"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-request"
+  complexity: cross-team
+  description: |
+    Manages the end-to-end procurement process for goods and services --
+    gathering requirements and specifications from requesting teams,
+    soliciting competitive bids or quotes, evaluating proposals against
+    cost, quality, and compliance criteria, conducting vendor capability
+    assessments, negotiating contract terms with legal review, obtaining
+    budget approval, issuing purchase orders, and tracking delivery
+    against agreed timelines. Produces vendor evaluation matrix, approved
+    purchase order, and procurement audit trail. Excludes ongoing vendor
+    relationship management.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:license-auditor
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:finance
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:procurement-team
+    - target: org-unit:finance-team
+    - target: org-unit:legal-team
+---
+nodeKind: Workflow
+id: workflow:vendor-onboarding
+attributes:
+  displayName: "Vendor Onboarding"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-vendor"
+  complexity: cross-team
+  description: |
+    Onboards new vendors into organizational systems and compliance
+    frameworks -- conducting security questionnaire review and penetration
+    test evidence assessment, validating insurance and certification
+    documentation, establishing data processing agreements and SLAs,
+    configuring vendor access and integration credentials, setting up
+    invoice routing and payment terms, conducting initial risk assessment,
+    and documenting emergency contact and escalation procedures. Produces
+    vendor onboarding checklist, completed risk assessment, and vendor
+    profile in the management system. Excludes ongoing vendor performance
+    monitoring.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:planner
+    - target: role:license-auditor
+  requires_skill_area:
+    - target: skill-area:threat-modeling
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:procurement-team
+    - target: org-unit:legal-team
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:annual-compliance-review
+attributes:
+  displayName: "Annual Compliance Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annually"
+  complexity: cross-team
+  description: |
+    Conducts the annual organization-wide compliance review across
+    regulatory frameworks -- auditing adherence to SOC 2, GDPR, HIPAA, or
+    industry-specific regulations, reviewing policy document currency and
+    employee attestation completion, validating control effectiveness
+    through evidence sampling, coordinating with external auditors on gap
+    remediation timelines, assessing new regulatory requirements for
+    impact analysis, and updating the compliance risk register. Produces
+    annual compliance assessment report and remediation roadmap. Excludes
+    control implementation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+    - target: role:license-auditor
+  requires_skill_area:
+    - target: skill-area:threat-modeling
+    - target: skill-area:identity-security
+  applies_to_domain:
+    - target: domain:legal
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:dependency-audit
+  performed_by_org_unit:
+    - target: org-unit:compliance-team
+    - target: org-unit:legal-team
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:data-classification-audit
+attributes:
+  displayName: "Data Classification Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Audits data classification accuracy and access controls across
+    organizational data stores -- scanning data repositories for
+    unclassified or misclassified assets, verifying PII and sensitive data
+    labeling against classification policy, reviewing access-control lists
+    against data-classification tiers, checking encryption-at-rest and
+    in-transit compliance for each classification level, auditing
+    data-sharing agreements for classified data flows, and validating
+    data-retention enforcement. Produces classification audit report and
+    remediation actions for misclassified assets. Excludes classification
+    policy definition.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:data-scientist
+    - target: role:license-auditor
+  requires_skill_area:
+    - target: skill-area:data-governance
+    - target: skill-area:identity-security
+  applies_to_domain:
+    - target: domain:legal
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:data-governance-team
+    - target: org-unit:security-team
+    - target: org-unit:compliance-team

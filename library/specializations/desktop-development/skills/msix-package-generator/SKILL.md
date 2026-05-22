@@ -3,6 +3,12 @@ name: msix-package-generator
 description: Generate MSIX packaging configuration with manifest, assets, and signing for Windows applications
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [windows, msix, packaging, uwp, distribution]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:cross-platform-desktop, skill-area:deployment-infrastructure-management]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # msix-package-generator

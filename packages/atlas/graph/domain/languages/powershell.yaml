@@ -1,0 +1,24 @@
+nodeKind: Language
+id: language:powershell
+attributes:
+  displayName: "PowerShell"
+  paradigms:
+    - scripting
+    - object-oriented
+  description: |
+    PowerShell is a cross-platform (Windows, macOS, Linux) scripting and
+    automation language built on .NET. Unlike traditional shells that deal
+    in text streams, PowerShell pipelines pass structured .NET objects,
+    enabling rich filtering and manipulation without text parsing.
+
+    PowerShell is the primary automation language for Windows Server
+    administration, Active Directory management, Azure cloud operations
+    (Az module), and Microsoft 365 management. DSC (Desired State
+    Configuration) extends it to infrastructure-as-code. PowerShell 7+
+    (pwsh) is the modern cross-platform version; Windows PowerShell 5.1
+    remains prevalent in enterprise environments. Pester is the standard
+    testing framework.
+edges:
+  applies_to:
+    - target: domain:devops
+    - target: domain:cloud-infra

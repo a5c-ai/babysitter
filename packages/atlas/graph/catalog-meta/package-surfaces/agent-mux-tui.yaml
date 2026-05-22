@@ -1,0 +1,20 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-mux-tui
+attributes:
+  packageId: "@a5c-ai/agent-mux-tui"
+  packageName: "@a5c-ai/agent-mux-tui"
+  workspacePath: packages/agent-mux/tui
+  moduleType: typescript
+  surfaceKinds:
+    - tui
+    - bin-entrypoint
+  sourceOfTruthRole: application
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:agent-mux-tui
+  exposes_subcommand:
+    - target: interaction-primitive:agent-mux-tui-command-palette
+    - target: interaction-primitive:agent-mux-tui-prompt-input
+    - target: interaction-primitive:agent-mux-tui-model-picker

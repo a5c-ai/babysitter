@@ -9,6 +9,13 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:cloud-infrastructure, skill-area:terraform-infrastructure]
+  roles: [role:devops-engineer, role:platform-engineer]
+  topics: [topic:infrastructure-as-code]
+
 ---
 
 # GCP Cloud Skill

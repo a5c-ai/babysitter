@@ -1,0 +1,143 @@
+---
+nodeKind: Workflow
+id: workflow:experiment-design
+attributes:
+  displayName: "Experiment Design"
+  description: |
+    On-demand development workflow that takes a scientific hypothesis through the full
+    design process before any wet-lab or computational work begins. Research engineers
+    and computational scientists formulate the research question, conduct a literature
+    review to situate the study, and select the methodology — whether observational,
+    interventional, or in-silico. Statistical power calculations determine sample sizes
+    and analysis plans are pre-registered to prevent outcome bias. Experimental protocols
+    are documented in lab notebooks and reviewed by a domain expert for feasibility and
+    safety. The resulting design package is approved before resource allocation and
+    execution begin, ensuring scientific rigor and reproducibility from the outset.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-experiment"
+  complexity: complex
+edges:
+  involves_role:
+    - role:research-engineer
+    - role:computational-scientist
+    - role:lab-technician
+    - role:biomedical-engineer
+  applies_to_domain:
+    - domain:scientific-discovery
+    - domain:scientific-computing
+    - domain:mathematics
+  triggers_responsibility:
+    - responsibility:research-design
+    - responsibility:documentation
+    - responsibility:risk-assessment
+    - responsibility:knowledge-sharing
+---
+nodeKind: Workflow
+id: workflow:peer-review-cycle
+attributes:
+  displayName: "Peer Review Cycle"
+  description: |
+    Event-driven cross-team governance workflow initiated when a research manuscript or
+    technical report is submitted for external publication or internal validation. The
+    corresponding author prepares the submission package — manuscript, supplementary
+    data, and reproducibility artifacts — and targets an appropriate venue. The journal
+    or conference assigns independent peer reviewers who assess scientific rigor,
+    novelty, and presentation quality. Authors address reviewer comments through one or
+    more revision rounds, coordinating internally with collaborators and statistical
+    reviewers. Upon acceptance, the research engineer and lab technician ensure all data
+    and code are archived in a citable repository. The workflow upholds the integrity of
+    published science and ensures findings meet community standards before dissemination.
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-publication"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:research-engineer
+    - role:computational-scientist
+    - role:lab-technician
+    - role:biomedical-engineer
+    - role:technical-writer
+  applies_to_domain:
+    - domain:scientific-discovery
+    - domain:scientific-computing
+    - domain:computer-science
+  triggers_responsibility:
+    - responsibility:research-design
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+    - responsibility:stakeholder-communication
+---
+nodeKind: Workflow
+id: workflow:research-grant-lifecycle
+attributes:
+  displayName: "Research Grant Lifecycle"
+  description: |
+    Annual cross-team governance workflow covering the full arc of external research
+    funding from opportunity identification through award management and final reporting.
+    Research engineers and computational scientists identify relevant funding calls and
+    assess strategic fit. A proposal team drafts the scientific narrative, budget
+    justification, and compliance documentation against funder requirements. Legal and
+    finance review the submission before it is submitted to the funding agency. If
+    awarded, a project management cadence tracks milestones, expenditures, and deliverables
+    against the grant agreement. Progress reports are prepared at mandated intervals, and
+    a final close-out report is submitted with all required financial and scientific
+    documentation to satisfy grant obligations and maintain eligibility for future funding.
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: complex
+edges:
+  involves_role:
+    - role:research-engineer
+    - role:computational-scientist
+    - role:financial-analyst
+    - role:legal-advisor
+    - role:technical-program-manager
+  applies_to_domain:
+    - domain:scientific-discovery
+    - domain:finance
+    - domain:legal
+  triggers_responsibility:
+    - responsibility:research-design
+    - responsibility:financial-analysis
+    - responsibility:budget-management
+    - responsibility:regulatory-compliance
+    - responsibility:documentation
+    - responsibility:stakeholder-communication
+---
+nodeKind: Workflow
+id: workflow:lab-safety-audit
+attributes:
+  displayName: "Lab Safety Audit"
+  description: |
+    Annual single-team security workflow that assesses laboratory environments against
+    applicable safety regulations, institutional policies, and best practices covering
+    chemical handling, biological containment, radiation safety, and emergency
+    preparedness. A designated safety officer leads the inspection, reviewing chemical
+    inventories, waste disposal logs, equipment calibration records, and personnel
+    training certificates. Findings are classified by severity and entered into a
+    corrective action register with responsible owners and remediation deadlines.
+    High-severity findings trigger immediate corrective measures before the lab resumes
+    full operations. A final audit report is submitted to institutional safety committees
+    and retained as evidence for regulatory inspections and insurance compliance.
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:lab-technician
+    - role:biomedical-engineer
+    - role:research-engineer
+    - role:legal-advisor
+  applies_to_domain:
+    - domain:scientific-discovery
+    - domain:biomedical-engineering
+    - domain:environmental-engineering
+  triggers_responsibility:
+    - responsibility:regulatory-compliance
+    - responsibility:risk-assessment
+    - responsibility:compliance-monitoring
+    - responsibility:documentation

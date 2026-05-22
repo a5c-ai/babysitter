@@ -1,0 +1,42 @@
+nodeKind: AgentVersion
+id: agent-version:agent-mux-remote@current
+attributes:
+  agentProductId: agent:agent-mux-remote
+  versionRange: ">=1.0.0"
+  releasedAt: "2025-01-01"
+  cliCommand: "amux"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:agent-mux-remote
+  composed_of:
+    - target: agent-core-impl:agent-mux-remote.core@current
+      role: core
+    - target: agent-runtime-impl:agent-mux-remote.runtime@current
+      role: runtime
+    - target: agent-platform-impl:agent-mux-remote.platform@current
+      role: platform
+    - target: agent-ui-impl:agent-mux-remote.ui@current
+      role: ui
+  sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=1.0.0'
+      level: full
+      notes: agent-mux-remote orchestrates multi-turn remote agent sessions.
+    - target: capability:supports-text-streaming
+      versionRange: '>=1.0.0'
+      level: full
+      notes: agent-mux-remote streams text output from remote agents.
+    - target: capability:supports-mcp
+      versionRange: '>=1.0.0'
+      level: full
+      notes: agent-mux-remote integrates with MCP servers.
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=1.0.0'
+      level: full
+      notes: agent-mux-remote dispatches work to remote subagent harnesses.
+  uses_memory_system:
+    - target: memory-system:instruction-file-hierarchy

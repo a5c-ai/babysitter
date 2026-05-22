@@ -1,0 +1,18 @@
+nodeKind: PathDescriptor
+id: path:claude-plugins-dir
+attributes:
+  pathId: path:claude-plugins-dir
+  displayName: "Claude Code plugins directory"
+  path: "~/.claude/plugins/"
+  pathKind: plugin-scope
+  ownerKind: AgentRuntimeImpl
+  ownerId: agent-runtime-impl:claude-code.runtime@1.x
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+  notes: User-level Claude Code plugins (CLAUDE_PLUGIN_ROOT default scope).
+
+edges:
+  owned_by:
+    - target: agent-runtime-impl:claude-code.runtime@1.x

@@ -2,17 +2,14 @@
 name: self-optimization
 description: SONA self-optimizing neural architecture with ReasoningBank trajectory learning, EWC++ anti-forgetting, and reinforcement learning feedback loops.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Self-Optimization
-
-## Overview
-
-Implements the SONA (Self-Optimizing Neural Architecture) adaptation cycle with sub-millisecond weight updates, EWC++ to prevent catastrophic forgetting, and a ReasoningBank for trajectory-based learning.
-
-## When to Use
-
-- After task completion to extract and persist learnings
 - Improving routing and agent selection over time
 - Adapting to new project patterns without forgetting old ones
 - Building cross-session intelligence

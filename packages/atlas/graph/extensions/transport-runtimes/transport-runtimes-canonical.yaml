@@ -1,0 +1,89 @@
+nodeKind: TransportRuntime
+id: transport-runtime:terminal-cli
+attributes:
+  displayName: "Terminal CLI runtime"
+  description: |
+    Interactive terminal CLI runtime — agents are launched as a subprocess
+    attached to a TTY, with a persistent REPL-style turn loop. Used by
+    most CLI agent products (Claude Code, Codex, Gemini CLI, etc.) when
+    invoked by a human at a terminal.
+  runtimeKind: terminal-cli
+  interactive: true
+  streaming: true
+edges:
+  supports:
+    - target: capability:interactive-mode
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "Interactive terminal CLI runtime."
+    - target: capability:stdin-injection
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "Interactive terminal CLI runtime."
+---
+nodeKind: TransportRuntime
+id: transport-runtime:shell-hook-runtime
+attributes:
+  displayName: "Shell hook runtime"
+  description: |
+    Runtime hook execution surface — invokes shell-callable hook scripts
+    around session, prompt, and tool-call boundaries. Hosts agents whose
+    extensibility surface is defined via shell hook scripts (Claude Code
+    hooks, Codex hooks, Gemini CLI hooks).
+  runtimeKind: shell-hook-runtime
+  interactive: true
+  streaming: false
+edges:
+  supports:
+    - target: capability:runtime-hooks
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "Runtime hook execution surface."
+    - target: capability:stop-hook
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "Runtime hook execution surface."
+    - target: capability:stdin-injection
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "Runtime hook execution surface."
+    - target: capability:interactive-mode
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "Runtime hook execution surface."
+---
+nodeKind: TransportRuntime
+id: transport-runtime:amux-proxy
+attributes:
+  displayName: "amux-proxy runtime"
+  description: |
+    amux-proxy protocol/provider bridge — runs as a local proxy that
+    translates between agent-facing transport protocols (e.g.
+    Anthropic Messages, OpenAI Responses) and upstream provider
+    contracts. Provides observability, model discovery, and token
+    counting on top of bridged transports.
+  runtimeKind: native-process
+  interactive: false
+  streaming: true
+edges:
+  supports:
+    - target: capability:streaming
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "amux-proxy protocol/provider bridge."
+    - target: capability:proxy-transport-emulation
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "amux-proxy protocol/provider bridge."
+    - target: capability:model-discovery
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "amux-proxy protocol/provider bridge."
+    - target: capability:token-counting
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "amux-proxy protocol/provider bridge."
+    - target: capability:supports-tool-use
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "amux-proxy protocol/provider bridge."

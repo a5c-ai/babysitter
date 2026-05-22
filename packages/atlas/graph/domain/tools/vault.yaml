@@ -1,0 +1,17 @@
+nodeKind: Tool
+id: tool:vault
+attributes:
+  displayName: "HashiCorp Vault"
+  homepageUrl: "https://www.vaultproject.io"
+  kind: secrets-manager
+  description: |
+    Tool for secrets management, encryption-as-a-service, and identity-based access.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:secrets-rotation
+    - target: skill-area:identity-security
+  alternative_to:
+    - target: tool:sops
+      comparison: "Secrets management tools"

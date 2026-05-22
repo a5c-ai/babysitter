@@ -1,0 +1,50 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:claude-code-enter-plan-mode
+attributes:
+  displayName: "ExitPlanMode (Claude Code Plan-mode entry tool)"
+  description: |
+    Built-in Claude Code tool that signals the agent to enter Plan mode —
+    a read-only mode where the agent emits a plan for user approval before
+    making any file changes. Triggered by user `/plan` or by autonomous
+    decision in coordinator mode. Companion of ExitPlanMode tool.
+  schema: |
+    {
+      "type": "object",
+      "properties": {
+        "plan": { "type": "string" }
+      },
+      "required": ["plan"]
+    }
+  category: "mode-control"
+  requiresPermissionGate: false
+  supportsCancellation: true
+  abortPropagation: immediate
+  errorBehavior: user-handled
+  isSynthetic: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:claude-code-enter-worktree
+attributes:
+  displayName: "EnterWorktree (Claude Code worktree-mode entry tool)"
+  description: |
+    Built-in Claude Code tool that switches the agent's working directory
+    to an isolated worktree (separate from the user's main checkout).
+    Used for parallel-feature development, experimental changes, and
+    coordinator-spawned subtasks.
+  schema: |
+    {
+      "type": "object",
+      "properties": {
+        "branch": { "type": "string" },
+        "path": { "type": "string" }
+      },
+      "required": ["branch"]
+    }
+  category: "mode-control"
+  requiresPermissionGate: true
+  supportsCancellation: true
+  abortPropagation: immediate
+  errorBehavior: user-handled
+  isSynthetic: false
+edges: {}

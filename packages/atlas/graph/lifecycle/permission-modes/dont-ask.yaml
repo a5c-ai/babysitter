@@ -1,0 +1,13 @@
+nodeKind: PermissionMode
+id: permission-mode:claude-code-dont-ask
+attributes:
+  displayName: "Claude Code dontAsk permission mode"
+  mode: dont-ask
+  isReadOnly: false
+  requiresUserConsent: false
+  enteredVia: settings-default
+  description: |
+    Permission dialogs are suppressed for the session — auto-deny on any tool
+    that would prompt. Used by background/headless agents where no UI is
+    available. SDK-only mode (not exposed via the standard TUI).
+    — promoted from `permissionModes: [dontAsk]` flat-list attribute.

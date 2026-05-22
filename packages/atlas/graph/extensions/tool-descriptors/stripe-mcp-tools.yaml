@@ -1,0 +1,200 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:stripe.list-customers
+attributes:
+  schema: '{}'
+  displayName: "Stripe: List Customers"
+  description: List customers in the Stripe account.
+  inputSchema:
+    type: object
+    properties:
+      limit: { type: integer }
+      email: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      customers: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-stripe
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:stripe.create-customer
+attributes:
+  schema: '{}'
+  displayName: "Stripe: Create Customer"
+  description: Create a new Stripe customer.
+  inputSchema:
+    type: object
+    properties:
+      email: { type: string }
+      name: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      id: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-stripe
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:stripe.list-products
+attributes:
+  schema: '{}'
+  displayName: "Stripe: List Products"
+  description: List products in the Stripe catalog.
+  inputSchema:
+    type: object
+    properties:
+      limit: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      products: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-stripe
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:stripe.create-product
+attributes:
+  schema: '{}'
+  displayName: "Stripe: Create Product"
+  description: Create a new product.
+  inputSchema:
+    type: object
+    required: [name]
+    properties:
+      name: { type: string }
+      description: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      id: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-stripe
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:stripe.list-prices
+attributes:
+  schema: '{}'
+  displayName: "Stripe: List Prices"
+  description: List prices, optionally filtered by product.
+  inputSchema:
+    type: object
+    properties:
+      product: { type: string }
+      limit: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      prices: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-stripe
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:stripe.create-price
+attributes:
+  schema: '{}'
+  displayName: "Stripe: Create Price"
+  description: Create a price for a product.
+  inputSchema:
+    type: object
+    required: [product, unit_amount, currency]
+    properties:
+      product: { type: string }
+      unit_amount: { type: integer }
+      currency: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      id: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-stripe
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:stripe.create-payment-link
+attributes:
+  schema: '{}'
+  displayName: "Stripe: Create Payment Link"
+  description: Create a hosted payment link for a price.
+  inputSchema:
+    type: object
+    required: [price, quantity]
+    properties:
+      price: { type: string }
+      quantity: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      url: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-stripe
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:stripe.create-invoice
+attributes:
+  schema: '{}'
+  displayName: "Stripe: Create Invoice"
+  description: Create an invoice for a customer.
+  inputSchema:
+    type: object
+    required: [customer]
+    properties:
+      customer: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      id: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-stripe
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:stripe.list-invoices
+attributes:
+  schema: '{}'
+  displayName: "Stripe: List Invoices"
+  description: List invoices, optionally filtered by customer.
+  inputSchema:
+    type: object
+    properties:
+      customer: { type: string }
+      limit: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      invoices: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-stripe

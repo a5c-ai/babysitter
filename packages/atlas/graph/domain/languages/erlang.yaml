@@ -1,0 +1,23 @@
+nodeKind: Language
+id: language:erlang
+attributes:
+  displayName: "Erlang"
+  paradigms:
+    - functional
+    - concurrent
+  description: |
+    Erlang is a functional, concurrent, fault-tolerant language designed at
+    Ericsson in the 1980s for building distributed, real-time telephony
+    systems. It runs on the BEAM virtual machine and pioneered the actor
+    model for concurrency via lightweight processes and message passing.
+
+    OTP (Open Telecom Platform) provides battle-tested abstractions:
+    gen_server, supervisor trees, applications, and releases. Erlang's
+    "let it crash" philosophy and hot code reloading are cornerstones of
+    its operational model. It underpins WhatsApp, RabbitMQ, CouchDB, and
+    Ejabberd. Elixir is a modern, Ruby-inspired language that compiles to
+    BEAM bytecode and shares the entire Erlang/OTP ecosystem.
+edges:
+  applies_to:
+    - target: domain:telecommunications
+    - target: domain:software-engineering

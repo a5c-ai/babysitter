@@ -3,6 +3,12 @@
  * @description Graph of Thoughts - Explore solution space as a graph with branching, merging, and backtracking
  * @inputs { task: string, explorationDepth: number, branchingFactor: number, evaluationCriteria: array }
  * @outputs { success: boolean, solutionPath: array, explorationGraph: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning, skill-area:prioritization-frameworks]
+ *   workflows: [workflow:feature-development, workflow:release-management]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:engineering-manager, role:tech-lead, role:scrum-master]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

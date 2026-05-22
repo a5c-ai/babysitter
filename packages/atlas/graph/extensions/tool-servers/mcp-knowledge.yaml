@@ -1,0 +1,162 @@
+---
+# Knowledge Platform MCP Servers
+# MCP servers for enterprise knowledge search, RAG, and document Q&A
+
+nodeKind: ToolServer
+id: tool-server:mcp-glean
+attributes:
+  displayName: Glean MCP Server
+  description: |
+    MCP server providing access to the Glean enterprise search platform.
+    Enables AI agents to search across all connected company tools,
+    retrieve answers with citations, and access organizational knowledge
+    indexed by Glean.
+  protocol: mcp
+  category: knowledge
+  repoUrl: https://github.com/nicepkg/glean-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:glean
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-haystack
+attributes:
+  displayName: Haystack MCP Server
+  description: |
+    MCP server exposing deepset Haystack pipelines as tools for AI agents.
+    Enables agents to run RAG queries, semantic search, and document
+    retrieval through pre-configured Haystack pipelines. Supports custom
+    pipeline components and multiple retriever backends.
+  protocol: mcp
+  category: knowledge
+  repoUrl: https://github.com/deepset-ai/haystack-mcp
+  maintainer: deepset
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:haystack
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:data-science
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-qdrant
+attributes:
+  displayName: Qdrant MCP Server
+  description: |
+    MCP server providing access to Qdrant vector search. Enables AI agents
+    to perform similarity search, manage collections, upsert points with
+    embeddings and payloads, and run filtered vector queries against a
+    Qdrant instance.
+  protocol: mcp
+  category: knowledge
+  repoUrl: https://github.com/qdrant/mcp-server-qdrant
+  maintainer: Qdrant
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:qdrant
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:data-science
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-weaviate
+attributes:
+  displayName: Weaviate MCP Server
+  description: |
+    MCP server providing access to Weaviate vector database operations.
+    Enables AI agents to create schemas, import objects with vectors,
+    perform semantic and hybrid searches, and manage multi-tenant
+    Weaviate collections.
+  protocol: mcp
+  category: knowledge
+  repoUrl: https://github.com/weaviate/mcp-server-weaviate
+  maintainer: Weaviate
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:weaviate
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:data-science
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-pinecone
+attributes:
+  displayName: Pinecone MCP Server
+  description: |
+    MCP server providing access to Pinecone managed vector database.
+    Enables AI agents to create indexes, upsert vectors, query by
+    similarity with metadata filtering, and manage namespaces for
+    multi-tenant vector search.
+  protocol: mcp
+  category: knowledge
+  repoUrl: https://github.com/pinecone-io/pinecone-mcp-server
+  maintainer: Pinecone
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:pinecone
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:data-science
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-chromadb
+attributes:
+  displayName: ChromaDB MCP Server
+  description: |
+    MCP server providing access to ChromaDB embedding database.
+    Enables AI agents to create collections, add documents with
+    embeddings, query by similarity, and manage metadata filters
+    for local or client-server Chroma deployments.
+  protocol: mcp
+  category: knowledge
+  repoUrl: https://github.com/chroma-core/chroma-mcp
+  maintainer: Chroma
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:chromadb
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:data-science
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-milvus
+attributes:
+  displayName: Milvus MCP Server
+  description: |
+    MCP server providing access to Milvus vector database operations.
+    Enables AI agents to create collections, insert vectors, perform
+    similarity search with filtering, and manage indexes across
+    Milvus or Zilliz Cloud deployments.
+  protocol: mcp
+  category: knowledge
+  repoUrl: https://github.com/zilliztech/mcp-server-milvus
+  maintainer: Zilliz
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:milvus
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:data-science

@@ -1,0 +1,23 @@
+nodeKind: Role
+id: role:planner
+attributes:
+  displayName: "Planner"
+  isAgentic: true
+  requiredCapabilities:
+    - capability:supports-thinking
+  requiredDomains: []
+  description: |
+    The Planner role.
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:sprint-planning
+    - responsibility:stakeholder-communication
+  requires_expertise:
+    - target: skill-area:adr-writing
+    - target: skill-area:c4-modeling
+    - target: skill-area:context-management
+    - target: skill-area:eval-driven-development
+    - target: skill-area:agentic-loops
+  requires_capability:
+    - target: capability:supports-thinking

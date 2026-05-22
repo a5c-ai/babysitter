@@ -1,0 +1,24 @@
+nodeKind: Language
+id: language:scala
+attributes:
+  displayName: "Scala"
+  paradigms:
+    - object-oriented
+    - functional
+  description: |
+    Scala is a statically-typed, multi-paradigm language that runs on the JVM
+    and compiles to JavaScript (Scala.js) or native (Scala Native). It fuses
+    object-oriented and functional programming, offering pattern matching,
+    case classes, traits, and a powerful type system with implicits (Scala 2)
+    or given/using (Scala 3).
+
+    Scala is the primary language of the Apache Spark distributed computing
+    framework and is prominent in data engineering and streaming (Apache
+    Flink, Kafka Streams). The Akka/Pekko toolkit makes it popular for
+    actor-based concurrent systems. Functional libraries like Cats and ZIO
+    bring effect systems and typeclasses for purely functional application
+    architecture.
+edges:
+  used_by_skill_area:
+    - target: skill-area:kafka-stream-processing
+    - target: skill-area:spark-jobs

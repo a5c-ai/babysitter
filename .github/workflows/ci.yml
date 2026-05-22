@@ -9,6 +9,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  docs-quality:
+    name: Docs QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci --prefer-offline --legacy-peer-deps
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Prepare docs QA artifacts
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/docs-qa
+
+      - name: Docs quality gates
+        run: |
+          set -euo pipefail
+          npm run docs:qa 2>&1 | tee artifacts/docs-qa/docs-qa.log
+
+      - name: Upload docs QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-qa
+          path: artifacts/docs-qa
+          if-no-files-found: error
+
   test:
     name: Lint, Tests, Package
     runs-on: ubuntu-latest
@@ -16,17 +55,17 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline --legacy-peer-deps
           # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
@@ -34,11 +73,6 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p artifacts/test-logs
-
-      - name: Check command surface sync
-        run: |
-          set -euo pipefail
-          npm run check:plugin-commands 2>&1 | tee artifacts/test-logs/plugin-command-sync.log
 
       - name: Lint
         run: |
@@ -50,108 +84,241 @@ jobs:
           set -euo pipefail
           npm run verify:metadata 2>&1 | tee artifacts/test-logs/metadata.log
 
-      - name: Build
+      - name: Architecture boundary gate
         run: |
           set -euo pipefail
-          npm run build:sdk 2>&1 | tee artifacts/test-logs/build.log
+          npm run test:architecture 2>&1 | tee artifacts/test-logs/architecture.log
+
+      - name: Build runtime graph
+        run: |
+          set -euo pipefail
+          npm run build:runtime 2>&1 | tee artifacts/test-logs/build.log
 
       - name: Unit tests
         run: |
           set -euo pipefail
           npm run test:sdk 2>&1 | tee artifacts/test-logs/unit-tests.log
 
-      - name: babysitter-github plugin validation
+      - name: Build tasks-mux
         run: |
           set -euo pipefail
-          bash plugins/babysitter-github/test/plugin-validate.sh 2>&1 | tee artifacts/test-logs/babysitter-github-validate.log
+          npm run build --workspace=@a5c-ai/tasks-mux 2>&1 | tee artifacts/test-logs/tasks-mux-build.log
 
-      - name: babysitter-cursor plugin validation
+      - name: Typecheck tasks-mux
         run: |
           set -euo pipefail
-          bash plugins/babysitter-cursor/test/plugin-validate.sh 2>&1 | tee artifacts/test-logs/babysitter-cursor-validate.log
+          npm run typecheck --workspace=@a5c-ai/tasks-mux 2>&1 | tee artifacts/test-logs/tasks-mux-typecheck.log
 
-      - name: babysitter-pi plugin tests
+      - name: tasks-mux tests
         run: |
           set -euo pipefail
-          npm test --prefix plugins/babysitter-pi 2>&1 | tee artifacts/test-logs/babysitter-pi-tests.log
+          npm run test --workspace=@a5c-ai/tasks-mux 2>&1 | tee artifacts/test-logs/tasks-mux-tests.log
 
-      - name: babysitter-omp plugin tests
+      - name: Build hooks-mux
         run: |
           set -euo pipefail
-          npm test --prefix plugins/babysitter-omp 2>&1 | tee artifacts/test-logs/babysitter-omp-tests.log
+          npm run build:hooks-mux 2>&1 | tee artifacts/test-logs/hooks-mux-build.log
+
+      - name: Hooks-proxy unit tests
+        run: |
+          set -euo pipefail
+          npm run test:hooks-mux 2>&1 | tee artifacts/test-logs/hooks-mux-tests.log
+
+      - name: Build agent-mux packages
+        run: |
+          set -euo pipefail
+          npm run build:agent-mux 2>&1 | tee artifacts/test-logs/agent-mux-build.log
+
+      - name: Build Atlas packages
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/atlas 2>&1 | tee artifacts/test-logs/atlas-build.log
+
+      - name: Build triggers package
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/triggers 2>&1 | tee artifacts/test-logs/triggers-build.log
+
+      - name: Triggers unit tests
+        run: |
+          set -euo pipefail
+          npm run test:unit --workspace=@a5c-ai/triggers 2>&1 | tee artifacts/test-logs/triggers-unit-tests.log
+
+      - name: Triggers e2e tests
+        run: |
+          set -euo pipefail
+          npm run test:e2e --workspace=@a5c-ai/triggers 2>&1 | tee artifacts/test-logs/triggers-e2e-tests.log
+
+      - name: Triggers coverage tests
+        run: |
+          set -euo pipefail
+          npm run test:coverage --workspace=@a5c-ai/triggers 2>&1 | tee artifacts/test-logs/triggers-coverage.log
+
+      - name: agent-mux-tui release verification
+        run: |
+          set -euo pipefail
+          npm run verify:release --workspace=@a5c-ai/agent-mux-tui 2>&1 | tee artifacts/test-logs/agent-mux-tui-release.log
+
+      - name: agent-mux-core release verification
+        run: |
+          set -euo pipefail
+          npm run verify:release --workspace=@a5c-ai/agent-mux-core 2>&1 | tee artifacts/test-logs/agent-mux-core-release.log
+
+      - name: Build realtime flow surfaces
+        run: |
+          set -euo pipefail
+          npm run build:realtime-flow 2>&1 | tee artifacts/test-logs/realtime-flow-build.log
+
+      - name: Realtime flow tests
+        run: |
+          set -euo pipefail
+          npm run test:realtime-flow 2>&1 | tee artifacts/test-logs/realtime-flow-tests.log
+
+      - name: Realtime flow release verification
+        run: |
+          set -euo pipefail
+          npm run verify:realtime-flow-release 2>&1 | tee artifacts/test-logs/realtime-flow-release.log
+
+      - name: Install Playwright Chromium
+        run: |
+          set -euo pipefail
+          npx playwright install --with-deps chromium 2>&1 | tee artifacts/test-logs/agent-mux-webui-playwright-install.log
+
+      - name: agent-mux webui browser e2e
+        run: |
+          set -euo pipefail
+          npm run test:e2e --workspace=@a5c-ai/agent-mux-webui 2>&1 | tee artifacts/test-logs/agent-mux-webui-browser-e2e.log
+
+      - name: Build extension-mux
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/extension-mux 2>&1 | tee artifacts/test-logs/extension-mux-build.log
+
+      - name: extension-mux tests
+        run: |
+          set -euo pipefail
+          npm run test --workspace=@a5c-ai/extension-mux 2>&1 | tee artifacts/test-logs/extension-mux-tests.log
+
+      - name: Build babysitter-harness
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/agent-core 2>&1 | tee artifacts/test-logs/agent-core-build.log
+          npm run build --workspace=@a5c-ai/babysitter-agent 2>&1 | tee artifacts/test-logs/babysitter-harness-build.log
+
+      - name: agent-core tests
+        run: |
+          set -euo pipefail
+          npm run test --workspace=@a5c-ai/agent-core 2>&1 | tee artifacts/test-logs/agent-core-tests.log
+
+      - name: babysitter-harness tests
+        run: |
+          set -euo pipefail
+          npm run test --workspace=@a5c-ai/babysitter-agent 2>&1 | tee artifacts/test-logs/babysitter-harness-tests.log
+
+      - name: Generate unified plugin bundles
+        run: |
+          set -euo pipefail
+          npm run generate:plugins 2>&1 | tee artifacts/test-logs/generated-plugin-bundles.log
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-logs
           path: artifacts/test-logs
           if-no-files-found: error
 
-  packages-sdk:
-    name: SDK Matrix (os=${{ matrix.os }}, node=${{ matrix.node }})
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-2022]
-        node: [20, 22]
-    defaults:
-      run:
-        shell: bash
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: agent-mux-webui-playwright-artifacts
+          path: |
+            packages/agent-mux/webui/.tmp/playwright-report
+            packages/agent-mux/webui/.tmp/playwright-test-results
+          if-no-files-found: ignore
+
+  workspace-coverage:
+    name: Workspace Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline --legacy-peer-deps
           # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Prepare artifact directories
         run: |
           set -euo pipefail
-          mkdir -p "_ci_artifacts/cli/${{ matrix.os }}/node${{ matrix.node }}"
-          mkdir -p "_ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}"
+          mkdir -p artifacts/workspace-coverage-logs
 
-      - name: SDK lint
+      - name: Declare active workspace coverage
         run: |
           set -euo pipefail
-          npm run lint --workspace=@a5c-ai/babysitter-sdk 2>&1 | tee "_ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}/lint.log"
+          cat <<'EOF' | tee artifacts/workspace-coverage-logs/coverage-manifest.log
+          Active workspace coverage map
+          ===========================
 
-      - name: SDK build
+          Release-critical workspaces validated in other CI/release jobs:
+          - @a5c-ai/babysitter-sdk -> test + packages-sdk + release/staging publish
+          - @a5c-ai/tasks-mux -> test + release/staging publish
+          - @a5c-ai/extension-mux -> test + release/staging publish
+          - @a5c-ai/babysitter-observer-dashboard -> observer-dashboard + release/staging publish
+          - @a5c-ai/cloud -> workspace-coverage + release/staging publish + deploy-hook paths
+          - @a5c-ai/hooks-mux-* -> test + release/staging publish
+          - @a5c-ai/agent-mux-* -> test + release/staging publish
+          - @a5c-ai/babysitter + unified plugin compiler/bundles -> test + release/staging publish paths
+
+          Additional active workspaces validated in this job:
+          - @a5c-ai/agent-catalog -> ci:test + public package lifecycle policy
+          - @a5c-ai/babysitter-tui-plugins
+          - @a5c-ai/transport-mux (build + lint + typecheck + test + migration scorecard)
+
+      - name: Build atlas (agent-catalog prerequisite)
+        run: npm run build --workspace=@a5c-ai/atlas
+
+      - name: Validate agent-catalog public package policy
         run: |
           set -euo pipefail
-          npm run build --workspace=@a5c-ai/babysitter-sdk 2>&1 | tee "_ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}/build.log"
+          npm run ci:test --workspace=@a5c-ai/agent-catalog 2>&1 | tee artifacts/workspace-coverage-logs/agent-catalog-ci.log
 
-      - name: SDK tests
+      - name: Validate transport-mux workspace QA surface
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/babysitter-sdk 2>&1 | tee "_ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}/test.log"
+          npm run build --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-build.log
+          npm run lint --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-lint.log
+          npm run typecheck --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-typecheck.log
+          npm run test --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-test.log
+          npm run scorecard:migration --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-scorecard.log
 
-      - name: SDK smoke CLI
+      - name: Validate cloud deployment workspace QA surface
         run: |
           set -euo pipefail
-          npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk -- --runs-dir "_ci_artifacts/cli/${{ matrix.os }}/node${{ matrix.node }}" --keep 2>&1 | tee "_ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}/smoke.log"
+          npm run build:cloud 2>&1 | tee artifacts/workspace-coverage-logs/cloud-build.log
+          npm run test:cloud 2>&1 | tee artifacts/workspace-coverage-logs/cloud-test.log
+          npm run coverage:cloud 2>&1 | tee artifacts/workspace-coverage-logs/cloud-coverage.log
+          npm run verify:cloud-release 2>&1 | tee artifacts/workspace-coverage-logs/cloud-release.log
 
-      - name: Upload SDK artifacts
+      - name: Upload workspace coverage logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: sdk-artifacts-${{ matrix.os }}-node${{ matrix.node }}
-          if-no-files-found: warn
-          path: |
-            _ci_artifacts/cli/${{ matrix.os }}/node${{ matrix.node }}
-            _ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}
+          name: workspace-coverage-logs
+          path: artifacts/workspace-coverage-logs
+          if-no-files-found: error
 
   observer-dashboard:
     name: Observer Dashboard
@@ -160,17 +327,17 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline --legacy-peer-deps
           # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
@@ -196,7 +363,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: observer-logs
           path: artifacts/observer-logs

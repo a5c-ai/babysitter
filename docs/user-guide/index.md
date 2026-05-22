@@ -17,7 +17,7 @@ Get up and running with Babysitter in minutes.
 
 | Step | Description | Time |
 |------|-------------|------|
-| [Installation](./getting-started/installation.md) | Install the Babysitter plugin | 5 min |
+| [Installation](./getting-started/installation.md) | Install the CLI and Claude Code plugin | 5 min |
 | [Quickstart](./getting-started/quickstart.md) | Configure your environment | 5 min |
 | [First Run](./getting-started/first-run.md) | Execute your first babysitter workflow | 10 min |
 
@@ -134,9 +134,10 @@ Step-by-step learning guides that take you from beginner to expert.
 
 Deep dives into Babysitter's core capabilities.
 
+<!-- user-guide-index:features-table:start -->
 | Feature | Description |
 |---------|-------------|
-| [**Process Library**](./features/process-library.md) | **2,000+ pre-built processes** across 30+ categories - web, AI, DevOps, science, business, and more |
+| [**Process Library**](./features/process-library.md) | **2,239 JavaScript process files in the live generated snapshot**, plus methodology, shared-process, skill, and agent layers discovered under `library/` |
 | [**Two-Loops Architecture**](./features/two-loops-architecture.md) | **Hybrid agentic systems** - symbolic orchestration + agentic harness, guardrails, and evidence-driven completion |
 | [**Quality Convergence**](./features/quality-convergence.md) | **Five quality gate types** (tests, code quality, static analysis, security, performance) with 90-score patterns |
 | [**Best Practices**](./features/best-practices.md) | **Four guardrail layers**, multi-gate validation, workflow design, and team collaboration patterns |
@@ -145,8 +146,11 @@ Deep dives into Babysitter's core capabilities.
 | [Journal System](./features/journal-system.md) | Event-sourced audit trail and state reconstruction |
 | [Run Resumption](./features/run-resumption.md) | Continue interrupted workflows from any point |
 | [Parallel Execution](./features/parallel-execution.md) | Concurrent task execution for faster results |
+<!-- user-guide-index:features-table:end -->
 
-> **Highlight:** The Process Library contains ready-to-use orchestration for virtually any development task - from React components to machine learning pipelines to business process modeling. [Explore the library →](./features/process-library.md)
+<!-- user-guide-index:process-library-highlight:start -->
+> **Highlight:** The Process Library snapshot currently tracks 2,239 process files across 38 methodology families and the full specialization tree. [Explore the library →](./features/process-library.md)
+<!-- user-guide-index:process-library-highlight:end -->
 
 > **Essential Reading:** Understanding the [Two-Loops Architecture](./features/two-loops-architecture.md) is key to designing reliable, bounded agentic workflows with proper guardrails and evidence-driven completion.
 
@@ -160,6 +164,7 @@ Technical specifications and lookup resources.
 |-----------|-------------|
 | [Slash Commands](./reference/slash-commands.md) | **Core modes** (call, yolo, forever, plan) and utility commands for Claude Code |
 | [CLI Reference](./reference/cli-reference.md) | Complete command-line interface documentation |
+| [Package & Plugin Map](../package-and-plugin-map.md) | Canonical public/internal docs map for active packages, apps, and harness plugins |
 | [Configuration](./reference/configuration.md) | Environment variables and config file options |
 | [Error Catalog](./reference/error-catalog.md) | All error codes with solutions |
 | [Glossary](./reference/glossary.md) | Terminology and definitions |
@@ -214,19 +219,17 @@ Choose a path based on your role and goals.
 
 ## What's New
 
-### Version 0.0.123 (2026-01-25)
+### Version 5.0.0
 
-- Added numerous new skills and agents across various engineering domains
-- Enhanced babysitter capabilities in chemical, civil, electrical, and environmental engineering
-- New scientific discovery processes
+- Unified the public npm surface around `@a5c-ai/babysitter` for the main CLI
+- Split optional runtime orchestration into `@a5c-ai/babysitter-agent`
+- Refreshed user-facing docs to match the current package and command boundaries
 
 ### Recent Updates
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| 0.0.123 | 2026-01-25 | Engineering domain skills expansion |
-| 0.0.122 | 2026-01-24 | Bug fixes and stability improvements |
-| 0.0.121 | 2026-01-23 | Performance optimizations |
+| 5.0.0 | 2026-04-25 | CLI/runtime package split clarified across public docs |
 
 For the complete changelog, see the [GitHub Releases](https://github.com/a5c-ai/babysitter/releases).
 

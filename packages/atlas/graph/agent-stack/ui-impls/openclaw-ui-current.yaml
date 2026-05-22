@@ -1,0 +1,37 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:openclaw.ui@current
+attributes:
+  displayName: "OpenClaw UI (current) — tui-only"
+  agentVersionId: agentVersion:openclaw:ge-0-0-0
+  packageRef: source-ref:openclaw-github
+  uiKind: tui-only
+  presentationsBundled:
+    - presentation:openclaw-cli
+  themeSupport: none
+  accessibilitySupport: basic
+  notes: |
+    OpenClaw is a TUI surface; auto-approve toggle and slash-help are the
+    user-facing primitives at the UI layer.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:prompt-input
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:slash-help
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/help"
+    - target: interaction-primitive:model-picker
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:openclaw-auto-approve
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:tool-approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control

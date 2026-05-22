@@ -1,0 +1,10 @@
+nodeKind: ProactiveSurface
+id: proactive-surface:claude-code-magic-docs
+attributes:
+  displayName: "Magic docs auto-attach"
+  surfaceKind: magic-docs
+  trigger: explicit-tool-call
+  outputChannel: attachment
+  description: |
+    Composes a docs-attachment from project docs heuristically when the model
+    asks for help on a topic that maps to a docs section.

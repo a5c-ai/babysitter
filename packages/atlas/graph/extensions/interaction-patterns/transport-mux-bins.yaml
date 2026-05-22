@@ -1,0 +1,27 @@
+# Runtime CLI bin entry exposed by @a5c-ai/transport-mux.
+# The package's TransportProtocol handlers (anthropic-messages, openai-chat,
+# openai-responses, openai-completions, ollama, vllm, lmstudio, llamacpp)
+# are already modeled in catalog as ModelTransportProtocol records — those
+# are NOT duplicated here. Only the user-facing CLI bin is added.
+# Wired via @a5c-ai/transport-mux PackageSurface `exposes_subcommand` edge.
+nodeKind: InteractionPrimitive
+id: interaction-primitive:transport-mux-amux-proxy
+attributes:
+  displayName: "amux-proxy"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux-proxy"
+  subcommandVerb: ""
+  flags:
+    - "--version:0:print package version and exit"
+    - "-v:0:alias of --version"
+  subcommandExitCodes:
+    - "0:success:proxy server started or version printed"
+    - "1:general-error:invalid proxy config (validateProxyConfig errors)"
+  description: |
+    Standalone bin that boots the transport-mux HTTP proxy. Reads
+    AMUX_PROXY_* env vars (createProxyConfig + readProxyConfigFromEnv),
+    auto-mints AMUX_PROXY_AUTH_TOKEN if missing, validates, then calls
+    startProxyServer to bridge an exposed transport (e.g. anthropic-
+    messages) to a target provider/model.
+    Source: packages/transport-mux/src/bin/amux-proxy.ts:1-69.

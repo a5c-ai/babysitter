@@ -1,0 +1,303 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:capabilities-policy
+attributes:
+  displayName: Capabilities & Policy (meta)
+  clusterNumber: 8
+  scope: 'Conceptual aggregation of NodeKinds describing the capability surface: Capability (a named, discriminated capability that versioned entities can support and extensions can require) and InstallMethod (a canonical install method — npm, brew, gh-extension, curl, … — referenced by AgentVersion.installMethods, Plugin install records, and Blueprint setup). The catalog update remodel removed CapabilitySupport as a NodeKind and moved its (entity, capability, version-range, level, evidence) tuple onto edge attributes of supports. Members live in editorial cluster 8-capabilities in ontology-schema.yaml.'
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:capability
+  - target: meta-node-kind:install-method
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:capability
+attributes:
+  displayName: Capability (meta)
+  name: Capability
+  cluster: 8-capabilities
+  prefix: capability
+  origin: universal
+  purpose: a named capability that versioned entities (agents, models, runtimes, platforms, tool-servers, plugins, providers, transports) can support and that extensions (skills, plugins, primitives, profiles, launch configs, sessions, tool descriptors, subagents) can require
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:capabilities-policy
+  contains_meta_attribute:
+  - target: meta-attribute:capability--id
+  - target: meta-attribute:capability--display-name
+  - target: meta-attribute:capability--applies-to-node-kinds
+  - target: meta-attribute:capability--category
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:install-method
+attributes:
+  displayName: InstallMethod (meta)
+  name: InstallMethod
+  cluster: 8-capabilities
+  prefix: install
+  origin: universal
+  purpose: a canonical install method (npm, brew, gh-extension, curl, winget, scoop, manual, pip, nix, cargo, go-install) referenced by AgentVersion.installMethods, Plugin install records, and Blueprint setup
+  exampleCount: 11
+  invariants:
+  - 'id starts with install:'
+  - command MUST be a non-empty templated string (V-11.x)
+  - platforms list MUST be non-empty
+  - kind values MUST be unique across the catalog (one canonical InstallMethod per kind)
+edges:
+  in_cluster:
+  - target: meta-cluster:capabilities-policy
+  contains_meta_attribute:
+  - target: meta-attribute:install-method--id
+  - target: meta-attribute:install-method--kind
+  - target: meta-attribute:install-method--platforms
+  - target: meta-attribute:install-method--command
+---
+nodeKind: MetaAttribute
+id: meta-attribute:capability--id
+attributes:
+  displayName: Capability.id
+  name: id
+  parentNodeKindId: meta-node-kind:capability
+  type: id
+  required: true
+  description: id on Capability.
+edges:
+  defined_on:
+  - target: meta-node-kind:capability
+---
+nodeKind: MetaAttribute
+id: meta-attribute:capability--display-name
+attributes:
+  displayName: Capability.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:capability
+  type: string
+  required: true
+  description: displayName on Capability.
+edges:
+  defined_on:
+  - target: meta-node-kind:capability
+---
+nodeKind: MetaAttribute
+id: meta-attribute:capability--applies-to-node-kinds
+attributes:
+  displayName: Capability.appliesToNodeKinds
+  name: appliesToNodeKinds
+  parentNodeKindId: meta-node-kind:capability
+  type: list<string>
+  required: true
+  description: NodeKinds this capability can be supported by or required of.
+edges:
+  defined_on:
+  - target: meta-node-kind:capability
+---
+nodeKind: MetaAttribute
+id: meta-attribute:capability--category
+attributes:
+  displayName: Capability.category
+  name: category
+  parentNodeKindId: meta-node-kind:capability
+  type: enum<model,agent,runtime,platform,tool,session,hook,extension,reasoning,provider-feature>
+  required: true
+  description: category bucket for the capability.
+edges:
+  defined_on:
+  - target: meta-node-kind:capability
+---
+nodeKind: MetaAttribute
+id: meta-attribute:install-method--id
+attributes:
+  displayName: InstallMethod.id
+  name: id
+  parentNodeKindId: meta-node-kind:install-method
+  type: id
+  required: true
+  description: id on InstallMethod.
+edges:
+  defined_on:
+  - target: meta-node-kind:install-method
+---
+nodeKind: MetaAttribute
+id: meta-attribute:install-method--kind
+attributes:
+  displayName: InstallMethod.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:install-method
+  type: enum<npm,brew,gh-extension,curl,winget,scoop,manual,pip,nix,cargo,go-install>
+  required: true
+  description: canonical install kind discriminator.
+edges:
+  defined_on:
+  - target: meta-node-kind:install-method
+---
+nodeKind: MetaAttribute
+id: meta-attribute:install-method--platforms
+attributes:
+  displayName: InstallMethod.platforms
+  name: platforms
+  parentNodeKindId: meta-node-kind:install-method
+  type: list<enum<darwin,linux,win32,all>>
+  required: true
+  description: 'supported OS platforms; `all` is shorthand for [darwin,linux,win32].'
+edges:
+  defined_on:
+  - target: meta-node-kind:install-method
+---
+nodeKind: MetaAttribute
+id: meta-attribute:install-method--command
+attributes:
+  displayName: InstallMethod.command
+  name: command
+  parentNodeKindId: meta-node-kind:install-method
+  type: string
+  required: true
+  description: 'install-command template (e.g. `npm install -g {{package}}`).'
+edges:
+  defined_on:
+  - target: meta-node-kind:install-method
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:supports
+attributes:
+  displayName: supports (meta)
+  name: supports
+  source: []
+  target:
+  - meta-node-kind:capability
+  cardinality: N:N
+  origin: universal
+  description: 'a versioned entity supports a capability with edge attributes (versionRange, level, notes, evidenceSourceIds). Cross-cluster sources (AgentVersion, ModelVersion, AgentRuntimeImpl, AgentPlatformImpl, AgentCoreImpl, AgentProduct, ToolServer, Plugin, Provider, ProviderVersion, TransportRuntime) live in their own meta-registry files.'
+edges:
+  target_of_meta_edge:
+  - target: meta-node-kind:capability
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:supported-by
+attributes:
+  displayName: supported_by (meta)
+  name: supported_by
+  source:
+  - meta-node-kind:capability
+  target: []
+  cardinality: N:N
+  origin: universal
+  description: inverse of supports. Cross-cluster targets live in their own meta-registry files.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:capability
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:requires-capability
+attributes:
+  displayName: requires_capability (meta)
+  name: requires_capability
+  source: []
+  target:
+  - meta-node-kind:capability
+  cardinality: N:N
+  origin: universal
+  description: 'an extension / profile / launch / subagent / tool-server / install-method requires a host Capability (with level=required|recommended). Sources include InstallMethod (within-cluster) plus Skill / Plugin / InteractionPrimitive / CapabilityProfile / LaunchConfig / SessionModel / ToolDescriptor / Subagent / ToolServer (cross-cluster).'
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:install-method
+  target_of_meta_edge:
+  - target: meta-node-kind:capability
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:installs
+attributes:
+  displayName: installs (meta)
+  name: installs
+  source:
+  - meta-node-kind:install-method
+  target: []
+  cardinality: N:N
+  origin: universal
+  description: 'an InstallMethod installs a target entity (Tool, Plugin, AgentVersion, ...). Cross-cluster targets live in their own meta-registry files.'
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:install-method
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:install-method-for
+attributes:
+  displayName: install_method_for (meta)
+  name: install_method_for
+  source: []
+  target:
+  - meta-node-kind:install-method
+  cardinality: N:N
+  origin: universal
+  description: 'inverse of installs — an entity (AgentVersion, Plugin, Tool, ...) declares an InstallMethod. Cross-cluster sources live in their own meta-registry files.'
+edges:
+  target_of_meta_edge:
+  - target: meta-node-kind:install-method
+---
+nodeKind: MetaEnum
+id: meta-enum:capability-category
+attributes:
+  displayName: Capability category
+  name: category
+  values:
+  - value: model
+    description: Model-side capability (e.g. tool-use, vision, reasoning).
+  - value: agent
+    description: Agent-program capability (e.g. autonomous-loop, plan-execute).
+  - value: runtime
+    description: Agent runtime capability (e.g. session-resume, parallel-tool-calls).
+  - value: platform
+    description: Hosting platform capability (e.g. background-jobs, persistent-storage).
+  - value: tool
+    description: Tool-side capability (e.g. file-edit, shell-exec).
+  - value: session
+    description: Session-shape capability (e.g. interactive-tty, batch).
+  - value: hook
+    description: Hook surface capability (e.g. pre-tool-use, stop).
+  - value: extension
+    description: Extension-shape capability (e.g. plugin-marketplace, custom-skill).
+  - value: reasoning
+    description: Reasoning-mode capability (e.g. extended-thinking, scratchpad).
+  - value: provider-feature
+    description: Provider-side capability surfaced by a model API (e.g. prompt-caching, batch-api).
+  usedOnAttributes:
+  - meta-attribute:capability--category
+edges:
+  used_on_attribute:
+  - target: meta-attribute:capability--category
+---
+nodeKind: MetaEnum
+id: meta-enum:install-method-kind
+attributes:
+  displayName: InstallMethod kind
+  name: kind
+  values:
+  - value: npm
+    description: Node package manager.
+  - value: brew
+    description: Homebrew on macOS / Linux.
+  - value: gh-extension
+    description: GitHub CLI extension.
+  - value: curl
+    description: curl-piped install script.
+  - value: winget
+    description: Windows Package Manager.
+  - value: scoop
+    description: Scoop package manager (Windows).
+  - value: manual
+    description: Hand-rolled install with documented steps.
+  - value: pip
+    description: Python package installer.
+  - value: nix
+    description: Nix package manager.
+  - value: cargo
+    description: Rust cargo install.
+  - value: go-install
+    description: Go module install.
+  usedOnAttributes:
+  - meta-attribute:install-method--kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:install-method--kind

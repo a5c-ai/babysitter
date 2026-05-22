@@ -1,0 +1,19 @@
+nodeKind: Framework
+id: framework:qwik
+attributes:
+  displayName: "Qwik"
+  homepageUrl: "https://qwik.dev"
+  belongsToLanguageId: language:typescript
+  category: web-fullstack
+  description: |
+    Qwik — a resumable web framework that ships near-zero JavaScript by
+    default and lazy-loads handlers on interaction, with file-based
+    routing via Qwik City.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:hydration
+  alternative_to:
+    - framework:solid-start
+    - framework:astro

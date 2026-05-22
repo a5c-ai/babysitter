@@ -16,6 +16,12 @@
  * @references
  * - Chrome DevTools Performance: https://developer.chrome.com/docs/devtools/performance/
  * - Electron Performance: https://www.electronjs.org/docs/latest/tutorial/performance
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:desktop-development]
+ *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+ *   roles: [role:desktop-developer, role:fullstack-engineer]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

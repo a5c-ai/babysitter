@@ -1,0 +1,24 @@
+nodeKind: SessionSemantics
+id: session-semantics:openclaw
+attributes:
+  sessionSemanticsId: session-semantics:openclaw
+  agentId: agent:openclaw
+  versionRange: ">=0.0.0"
+  sessionDirStrategy: ".a5c/runs"
+  sessionIdSources:
+    - OPENCLAW_SESSION
+    - OPENCLAW_RUN_ID
+    - OPENCLAW_SHELL
+    - OPENCLAW_HOME
+  resumeSemantics: OpenClaw detection is currently env-driven with no shared runtime-hook support in fallback metadata.
+  stateFilePatterns:
+    - ".a5c/runs/**"
+  pidMarkerPolicy: env-or-run-dir
+  metadataFields:
+    - { key: session_id, envVars: [OPENCLAW_SESSION] }
+    - { key: run_id,     envVars: [OPENCLAW_RUN_ID] }
+edges:
+  applies_to_version:
+    - target: agentVersion:openclaw:ge-0-0-0
+  references_path:
+    - target: path:a5c-runs-dir

@@ -1,0 +1,18 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-mux
+attributes:
+  packageId: "@a5c-ai/agent-mux"
+  packageName: "@a5c-ai/agent-mux"
+  workspacePath: packages/agent-mux/sdk
+  moduleType: typescript
+  surfaceKinds:
+    - sdk
+    - bin-entrypoint
+    - umbrella-export
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+  # Source: packages/agent-mux/sdk/package.json (name @a5c-ai/agent-mux, version 0.4.9, bin.amux)
+edges:
+  references_path:
+    - target: path:agent-mux-sdk

@@ -2,17 +2,14 @@
 name: smart-routing
 description: Complexity-based task routing with Q-Learning optimization, Agent Booster WASM fast-path, and Mixture-of-Experts model selection.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Smart Routing
-
-## Overview
-
-Intelligent task routing using Q-Learning to select optimal execution paths. Simple tasks route to Agent Booster (WASM, <1ms, $0), medium tasks to efficient models, and complex tasks to Opus + multi-agent swarms.
-
-## When to Use
-
-- Optimizing cost vs. quality tradeoffs for diverse task types
 - When tasks range from simple transforms to complex multi-file changes
 - Reducing latency for common code transformations
 - Learning from routing history to improve future decisions

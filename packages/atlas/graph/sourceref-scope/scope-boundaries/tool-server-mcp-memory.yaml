@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:tool-server-mcp-memory.scope
+attributes:
+  subjectId: tool-server:mcp-memory
+  inScope: |
+    Persistent knowledge-graph memory for an agent — stores entities, relations, observations across sessions.
+  outOfScope: |
+    Vector / semantic search (use a vector-DB MCP), durable transactional storage, and multi-tenant authorization.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - tool-server:mcp-memory

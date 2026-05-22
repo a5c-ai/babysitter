@@ -2,6 +2,11 @@
 name: mythril-symbolic
 description: Symbolic execution analysis using Mythril for deep vulnerability detection in smart contracts. Supports configurable transaction depth, timeout settings, and proof-of-concept exploit generation.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:smart-contract-security, skill-area:application-security-testing, skill-area:vulnerability-scanning-remediation]
+  roles: [role:security-engineer]
 ---
 
 # Mythril Symbolic Execution Skill

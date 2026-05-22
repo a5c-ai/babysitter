@@ -1,0 +1,112 @@
+---
+nodeKind: Workflow
+id: workflow:typo-and-lint-sweep
+attributes:
+  displayName: "Typo and Lint Sweep"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Performs automated and semi-automated sweeps for typos, formatting
+    violations, and lint errors across the codebase and documentation — running
+    spell-check tools (cspell, typos-cli) against source code comments, markdown
+    files, and user-facing strings, executing language-specific linters with
+    auto-fix enabled for deterministic corrections, flagging ambiguous cases for
+    human review, batching fixes into atomic pull requests grouped by category,
+    and tracking fix rates and recurrence patterns to identify systemic sources
+    of lint drift. Produces fix PRs with categorized changes, recurrence trend
+    reports, and linter configuration update recommendations. Excludes semantic
+    code changes.
+edges:
+  involves_role:
+    - target: role:typo-fixer
+    - target: role:refactor-bot
+    - target: role:code-reviewer
+  requires_skill_area:
+    - target: skill-area:code-review-practice
+    - target: skill-area:docs-as-code
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:dx-tooling-maintenance
+    - target: responsibility:code-review-coverage
+  performed_by_org_unit:
+    - target: org-unit:engineering-productivity
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:codebase-health-refactoring-sprint
+attributes:
+  displayName: "Codebase Health Refactoring Sprint"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Executes focused refactoring sprints to improve codebase health metrics —
+    identifying hotspots using code churn and complexity analysis (cyclomatic,
+    cognitive), prioritizing refactoring targets by coupling with
+    high-change-frequency modules, executing safe automated refactoring
+    operations (extract method, rename, move) with comprehensive test
+    validation, measuring before/after complexity scores and build time impact,
+    and updating architecture documentation to reflect structural changes.
+    Produces refactoring proposals with risk assessment, complexity delta
+    reports, and architectural fitness function trends. Excludes feature
+    development.
+edges:
+  involves_role:
+    - target: role:refactor-bot
+    - target: role:staff-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:code-review-practice
+    - target: skill-area:hexagonal-architecture
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:run-architecture-review
+    - target: responsibility:code-review-coverage
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:technology-radar-curation
+attributes:
+  displayName: "Technology Radar Curation"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Curates and publishes the engineering organization's technology radar —
+    collecting adopt/trial/assess/hold nominations from engineering teams,
+    evaluating each technology against criteria of production readiness, team
+    skill availability, licensing risk, and strategic alignment, conducting
+    time-boxed exploration spikes for technologies in the assess ring,
+    facilitating cross-team radar review sessions to build consensus on ring
+    placements, publishing the updated radar with rationale narratives for each
+    movement, and tracking adoption velocity for technologies promoted to the
+    trial ring. Produces quarterly radar publications, exploration spike
+    summaries, and technology adoption trend reports. Excludes vendor contract
+    negotiation.
+edges:
+  involves_role:
+    - target: role:explorer
+    - target: role:cto
+    - target: role:principal-engineer
+  requires_skill_area:
+    - target: skill-area:adr-writing
+    - target: skill-area:monolith-vs-microservices
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:run-architecture-review
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:architecture-guild
+    - target: org-unit:engineering

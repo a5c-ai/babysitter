@@ -1,0 +1,14 @@
+nodeKind: PermissionMode
+id: permission-mode:claude-code-auto
+attributes:
+  displayName: "Claude Code auto permission mode"
+  mode: auto
+  isReadOnly: false
+  requiresUserConsent: false
+  enteredVia: settings-default
+  classifierActive: true
+  description: |
+    Per-call classifier decides whether to gate or auto-allow. The classifier
+    inspects tool name, arguments, and recent context to choose between
+    auto-allow / prompt / deny. Promoted from `permissionModes:
+    [auto]` flat-list attribute.

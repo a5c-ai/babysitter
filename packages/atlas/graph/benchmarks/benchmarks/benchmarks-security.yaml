@@ -1,0 +1,16 @@
+---
+nodeKind: Benchmark
+id: benchmark:cyber-bench
+attributes:
+  displayName: "CyberBench"
+  homepageUrl: https://cybench.github.io/
+  kind: security
+  targetsKind: AgentVersion
+  description: |
+    CyberBench (Princeton et al.) measures language-model and agent
+    capability on real-world cybersecurity capture-the-flag tasks
+    spanning crypto, web, reverse engineering, pwn, and forensics.
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+    - target: domain:security

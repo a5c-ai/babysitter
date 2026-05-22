@@ -1,0 +1,21 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:openclaw-host-env
+attributes:
+  signalId: discovery-signal:openclaw-host-env
+  signalKind: env-any
+  key: openclaw
+  matchMode: any
+  confidence: medium
+  scope: host-detection
+  signals:
+    - OPENCLAW_SESSION
+    - OPENCLAW_RUN_ID
+  argvMatches:
+    - openclaw
+  consumer: agent-mux-core
+  metadataFields:
+    - { key: session_id, envVars: [OPENCLAW_SESSION] }
+    - { key: run_id,     envVars: [OPENCLAW_RUN_ID] }
+edges:
+  applies_to:
+    - target: agent:openclaw

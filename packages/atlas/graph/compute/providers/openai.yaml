@@ -1,0 +1,94 @@
+nodeKind: Provider
+id: provider:openai
+attributes:
+  displayName: OpenAI
+  versionRange: '>=2023-06-01'
+  authMethods:
+  - api-key
+  - oauth
+  - service-account
+  authMethodNotes: 'Standard `Authorization: Bearer <api-key>` for the platform API. The
+
+    `OpenAI-Organization` and `OpenAI-Project` headers scope the request
+
+    to a specific org/project. Service-account keys are equivalent to API
+
+    keys but are tied to a project, not a user.
+
+    '
+  endpoints:
+    responses: https://api.openai.com/v1/responses
+    chat_completions: https://api.openai.com/v1/chat/completions
+    models: https://api.openai.com/v1/models
+    batches: https://api.openai.com/v1/batches
+    files: https://api.openai.com/v1/files
+    fine_tuning_jobs: https://api.openai.com/v1/fine_tuning/jobs
+    embeddings: https://api.openai.com/v1/embeddings
+  pricing: 'See https://platform.openai.com/docs/pricing for current per-model rates.
+
+    '
+  pricingTiers:
+  - name: standard
+    rateLimit: Per-org usage tier (T1..T5) governing RPM/TPM
+    priceMultiplier: 1.0
+    description: Default per-token billing for sync API.
+  - name: batch
+    rateLimit: 50k requests / 100MB per batch; processed within 24h
+    priceMultiplier: 0.5
+    description: OpenAI Batch API — 50% discount.
+  - name: scale
+    rateLimit: Reserved capacity by enterprise contract
+    priceMultiplier: 1.0
+    description: OpenAI Scale Tier — reserved throughput, optional ZDR.
+  rateLimitSignalingProtocol: 'Responses include `x-ratelimit-limit-requests`,
+
+    `x-ratelimit-limit-tokens`, `x-ratelimit-remaining-requests`,
+
+    `x-ratelimit-remaining-tokens`, `x-ratelimit-reset-requests`,
+
+    `x-ratelimit-reset-tokens`. 429 responses include `retry-after`
+
+    (seconds). Errors envelope: `{ "error": { "type":
+
+    "rate_limit_exceeded", "code": "...", "message": ... } }`.
+
+    '
+  dataResidencyOptions:
+  - us
+  - eu
+  vendorFeatures:
+  - capability:supports-prompt-caching
+  - capability:supports-batch-api
+  - capability:supports-files-api
+  slaTier: openai-enterprise-99.9
+  regions:
+  - global
+edges:
+  realizes:
+  - target: layer:2-provider
+  supports:
+  - target: capability:supports-batch-api
+    versionRange: '>=2024-01-01'
+  - target: capability:supports-files-api
+    versionRange: '>=2024-01-01'
+  - target: capability:supports-prompt-caching
+    versionRange: '>=2024-01-01'
+  - target: capability:model-discovery
+    versionRange: '>=2024-01-01'
+  - target: capability:token-counting
+    versionRange: '>=2024-01-01'
+  - target: capability:supports-json-mode
+    versionRange: '>=2023-11-01'
+    level: full
+  - target: capability:supports-structured-output
+    versionRange: '>=2024-08-01'
+    level: full
+    notes: response_format json_schema with strict=true introduced in 2024-08.
+  serves:
+  - model:gpt-5@current
+  emits_message_type:
+  - protocol-message:openai-response-created
+  - protocol-message:openai-response-output-item-added
+  - protocol-message:openai-response-output-text-delta
+  - protocol-message:openai-response-completed
+  - protocol-message:openai-response-failed

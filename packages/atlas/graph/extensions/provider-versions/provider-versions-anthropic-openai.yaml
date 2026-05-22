@@ -1,0 +1,62 @@
+nodeKind: ProviderVersion
+id: provider-version:anthropic-ge-0-0-0
+attributes:
+  displayName: "Anthropic API (>=0.0.0)"
+  providerId: provider:anthropic
+  versionRange: ">=0.0.0"
+  description: |
+    Open-ended ProviderVersion entry pinning capability claims to the
+    Anthropic Messages API across all observed versions. Used as the
+    initial import target for agent-catalog provider-version
+    capability-supports rows.
+edges:
+  supports:
+    - target: capability:streaming
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "anthropic"
+    - target: capability:supports-tool-use
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "anthropic"
+---
+nodeKind: ProviderVersion
+id: provider-version:openai-ge-0-0-0
+attributes:
+  displayName: "OpenAI API (>=0.0.0)"
+  providerId: provider:openai
+  versionRange: ">=0.0.0"
+  description: |
+    Open-ended ProviderVersion entry pinning capability claims to the
+    OpenAI chat-completions / Responses API across all observed
+    versions.
+edges:
+  supports:
+    - target: capability:streaming
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "openai"
+    - target: capability:supports-tool-use
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "openai"
+---
+nodeKind: ProviderVersion
+id: provider-version:google-ge-0-0-0
+attributes:
+  displayName: "Google Gemini API (>=0.0.0)"
+  providerId: provider:google
+  versionRange: ">=0.0.0"
+  description: |
+    Open-ended ProviderVersion entry pinning capability claims to the
+    Google Gemini GenerateContent API across all observed versions.
+edges:
+  supports:
+    - target: capability:streaming
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "google"
+    - target: capability:supports-tool-use
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "google"

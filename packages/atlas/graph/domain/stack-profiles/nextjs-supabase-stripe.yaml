@@ -1,0 +1,25 @@
+nodeKind: StackProfile
+id: stack-profile:nextjs-supabase-stripe
+attributes:
+  displayName: "Next.js + Supabase + Stripe"
+  description: |
+    A popular SaaS starter stack: Next.js (App Router with React Server
+    Components) for the full-stack application, Supabase for managed
+    PostgreSQL, row-level security, and Auth (email, OAuth, magic links),
+    and Stripe for subscription billing and payment processing.
+
+    This stack is commonly deployed on Vercel (for the Next.js app) with
+    Supabase cloud as the backend-as-a-service. Drizzle or Prisma ORM can
+    layer on top of the Supabase Postgres connection. Tailwind CSS and
+    shadcn/ui are the predominant UI libraries. The combination lets a
+    small team ship a production-ready SaaS with authentication, payments,
+    and a relational database with minimal infrastructure overhead.
+  composes:
+    - language:typescript
+    - framework:nextjs
+    - framework:react
+edges:
+  composed_of:
+    - language:typescript
+    - framework:nextjs
+    - framework:react

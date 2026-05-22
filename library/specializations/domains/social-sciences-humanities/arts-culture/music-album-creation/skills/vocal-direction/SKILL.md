@@ -3,6 +3,10 @@ name: vocal-direction
 description: Create detailed vocal specifications including style, register, techniques, emotional delivery, and influence references for AI music generation
 allowed-tools: Read, Write, Edit, WebSearch
 id: SK-MAC-007
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:audio-processing, skill-area:prompt-engineering, skill-area:content-strategy]
+  roles: [role:creative-director, role:media-engineer]
 ---
 
 # Vocal Direction

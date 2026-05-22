@@ -4,6 +4,13 @@
  * @inputs { projectName: string, framework?: string }
  * @outputs { success: boolean, seoConfig: object, optimizations: array, artifacts: array }
  * @references - Google SEO: https://developers.google.com/search/docs
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer]
+ *   skillAreas: [skill-area:seo-sem, skill-area:content-strategy]
+ *   topics: [topic:progressive-web-application]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

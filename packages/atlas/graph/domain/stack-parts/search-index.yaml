@@ -1,0 +1,22 @@
+nodeKind: StackPart
+id: stack-part:search-index
+attributes:
+  displayName: "Search Index"
+  category: data-store
+  description: |
+    Inverted-index search engine providing full-text search, faceted
+    filtering, relevance ranking, and aggregations over large document
+    collections. Distinct from relational databases (which use sequential
+    scans or B-tree indexes for exact lookups) and vector databases
+    (which use ANN for semantic similarity).
+
+    Elasticsearch and OpenSearch are the dominant enterprise choices, offering
+    powerful query DSLs, shard-based horizontal scaling, and rich aggregation
+    pipelines. Meilisearch and Typesense target developer-friendly, low-
+    latency search for application search bars. Key concerns include index
+    mapping design, analyzer configuration (language tokenization, stemming,
+    synonyms), relevance tuning, and shard sizing.
+edges:
+  implemented_by:
+    - target: tool:elasticsearch
+    - target: tool:meilisearch

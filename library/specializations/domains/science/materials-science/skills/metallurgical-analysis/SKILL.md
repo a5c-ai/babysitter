@@ -18,6 +18,11 @@ metadata:
     - Clemex
     - ASTM E112
     - ASTM E45
+graph:
+  domains: [domain:materials-science]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # Metallurgical Analysis Skill

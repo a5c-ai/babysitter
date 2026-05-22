@@ -1,0 +1,20 @@
+{
+  "scope": "Implement the first missing gap in agent-mux: a real Claude server-mode / channels transport path, including adapter/core/gateway integration, honest capability semantics, focused tests, and documentation updates.",
+  "targetScore": 95,
+  "maxRefinementPasses": 3,
+  "workspaceRoot": "C:/work/agent-mux",
+  "researchInputs": {
+    "docsToCheck": [
+      "https://code.claude.com/docs/en/channels",
+      "https://code.claude.com/docs/en/remote-control#server-mode"
+    ],
+    "repoAreas": [
+      "packages/agent-mux/adapters",
+      "packages/agent-mux/core",
+      "packages/agent-mux/gateway",
+      "packages/agent-mux/webui",
+      "tests",
+      "docs"
+    ]
+  }
+}

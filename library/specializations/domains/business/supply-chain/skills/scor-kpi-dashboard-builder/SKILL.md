@@ -12,6 +12,12 @@ metadata:
   domain: business
   category: analytics
   priority: high
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:data-analytics, skill-area:data-visualization]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:data-analyst, role:bi-developer]
 ---
 
 # SCOR KPI Dashboard Builder

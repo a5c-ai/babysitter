@@ -1,0 +1,184 @@
+# top-level CLI subcommand groups exposed by the
+# `babysitter` / `babysitter-sdk` / `babysitter-mcp-server` bins
+# from @a5c-ai/babysitter-sdk (packages/sdk).
+# Grouped at the colon-separator namespace (e.g. `run:*`, `session:*`,
+# `plugin:*`) for codegen replay; deeper leaves are enumerated in
+# packages/sdk/src/cli/main/program.ts:CORE_VALID_COMMANDS and the
+# HARNESS_RUNTIME_COMMANDS literal.
+# Wired via @a5c-ai/babysitter-sdk PackageSurface `exposes_subcommand`.
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-run
+attributes:
+  displayName: "babysitter run:{create|status|iterate|events|rebuild-state|repair-journal}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter"
+  subcommandVerb: "run"
+  flags: []
+  description: |
+    Run lifecycle commands: create a new run, inspect status, iterate
+    (advance state), stream journal events, and journal-repair utilities.
+    Source: packages/sdk/src/cli/main/program.ts:60-62 (CORE_VALID_COMMANDS).
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-task
+attributes:
+  displayName: "babysitter task:{post|cancel|list|show}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter"
+  subcommandVerb: "task"
+  flags: []
+  description: |
+    Task-level commands within a run: post a new task, cancel, list, or
+    show task details.
+    Source: packages/sdk/src/cli/main/program.ts:62 + cli/commands/taskCommands.ts.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-session
+attributes:
+  displayName: "babysitter session:{init|associate|resume|state|update|check-iteration|last-message|iteration-message|whoami|cleanup}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter"
+  subcommandVerb: "session"
+  flags: []
+  description: |
+    Session lifecycle commands (CORE variant only).
+    Source: packages/sdk/src/cli/main/program.ts:75-85.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-plugin
+attributes:
+  displayName: "babysitter plugin:{install|uninstall|update|configure|list-installed|list-plugins|add-marketplace|update-marketplace|update-registry|remove-from-registry}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter"
+  subcommandVerb: "plugin"
+  flags: []
+  description: |
+    Plugin management — install, configure, marketplace operations.
+    Source: packages/sdk/src/cli/main/program.ts:67-69.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-skill
+attributes:
+  displayName: "babysitter skill:{discover|fetch-remote}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter"
+  subcommandVerb: "skill"
+  flags: []
+  description: |
+    Skill discovery and remote-fetch.
+    Source: packages/sdk/src/cli/main/program.ts:65.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-process-library
+attributes:
+  displayName: "babysitter process-library:{clone|update|use|active}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter"
+  subcommandVerb: "process-library"
+  flags: []
+  description: |
+    Process-library management — clone, update, switch active library.
+    Source: packages/sdk/src/cli/main/program.ts:66.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-profile
+attributes:
+  displayName: "babysitter profile:{read|write|merge|render}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter"
+  subcommandVerb: "profile"
+  flags: []
+  description: |
+    Profile read/write/merge/render utilities.
+    Source: packages/sdk/src/cli/main/program.ts:67.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-instructions
+attributes:
+  displayName: "babysitter instructions:{babysit-skill|process-create|orchestrate|breakpoint-handling}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter"
+  subcommandVerb: "instructions"
+  flags: []
+  description: |
+    Emit structured instruction templates for skills, process creation,
+    orchestration, and breakpoint handling.
+    Source: packages/sdk/src/cli/main/program.ts:69-70.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-compression
+attributes:
+  displayName: "babysitter compression:{status|toggle|set|reset}, compress-output, tokens:stats"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter"
+  subcommandVerb: "compression"
+  flags: []
+  description: |
+    Output compression configuration + token statistics.
+    Source: packages/sdk/src/cli/main/program.ts:71-72.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-breakpoint
+attributes:
+  displayName: "babysitter breakpoint:{approve-rule|remove-rule|list-rules|should-auto-approve|history}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter"
+  subcommandVerb: "breakpoint"
+  flags: []
+  description: |
+    Breakpoint auto-approval rule management + history inspection.
+    Source: packages/sdk/src/cli/main/program.ts:73.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-hook
+attributes:
+  displayName: "babysitter hook:{log|run}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter"
+  subcommandVerb: "hook"
+  flags: []
+  description: |
+    Hook handlers — log a hook event, run a hook chain.
+    Source: packages/sdk/src/cli/main/program.ts:64.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-harness-runtime
+attributes:
+  displayName: "babysitter-harness {create-run|call|yolo|plan|forever|resume-run|resume|retrospect|cleanup|assimilate|doctor|contrib|anycli|session-history|help|observe|user-install|project-install|invoke|tui|daemon:start|daemon:stop|daemon:status|daemon:run|cost:stats|start-server}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter-harness"
+  subcommandVerb: "(top-level)"
+  flags: []
+  description: |
+    Harness runtime command set exposed by @a5c-ai/babysitter-agent's
+    `babysitter-harness` bin. Includes the run-orchestration verbs
+    (create-run, call, yolo, plan, forever, resume), retrospection,
+    daemon control, and TUI/observer entry points.
+    Source: packages/sdk/src/cli/main/program.ts:21-49 (HARNESS_RUNTIME_COMMANDS).
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-sdk-cli-mcp-server
+attributes:
+  displayName: "babysitter-mcp-server (stdio MCP)"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "babysitter-mcp-server"
+  subcommandVerb: "(default)"
+  flags: []
+  description: |
+    Stdio MCP server bin (`babysitter-mcp-server` → dist/cli/mcpServeEntry.js)
+    exposing babysitter task/run primitives as MCP tools.
+    Source: packages/sdk/package.json bin.babysitter-mcp-server,
+    packages/sdk/src/cli/mcpServeEntry.ts.

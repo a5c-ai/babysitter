@@ -14,6 +14,11 @@ metadata:
   domain: science
   category: Biomechanics
   agent-id: BME-AG-009
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:sensor-fusion]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # Biomechanical Analyst Agent

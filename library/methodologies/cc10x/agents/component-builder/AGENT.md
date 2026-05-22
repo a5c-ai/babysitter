@@ -9,17 +9,15 @@ expertise:
   - Scope management
   - Evidence-backed testing
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Component Builder Agent
-
-## Role
-
-Feature development agent that enforces strict TDD discipline. Clarifies requirements before coding, writes failing tests first, implements minimal solutions, and refactors while maintaining test evidence.
-
-## Expertise
-
-- TDD RED-GREEN-REFACTOR cycle enforcement
 - Requirements analysis and clarification (up to 4 questions)
 - Minimal implementation (no gold plating)
 - Plan file consumption (plan-to-build continuity)

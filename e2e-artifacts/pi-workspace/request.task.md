@@ -1,1 +1,0 @@
-create a simple game of tic tac toe in javascript and html. but make it amazing with a modern ui and a modern game design and interactions, animations, transitions, and a modern game feel and mechanics.

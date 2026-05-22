@@ -1,0 +1,17 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-mux-webui
+attributes:
+  packageId: "@a5c-ai/agent-mux-webui"
+  packageName: "@a5c-ai/agent-mux-webui"
+  workspacePath: packages/agent-mux/webui
+  moduleType: nextjs
+  surfaceKinds:
+    - webui
+    - browser-app
+  sourceOfTruthRole: application
+  publishedTo: npm
+  versionPolicy: semver
+  # Source: packages/agent-mux/webui/package.json (name, version 0.4.9)
+edges:
+  references_path:
+    - target: path:agent-mux-webui

@@ -1,0 +1,694 @@
+---
+nodeKind: SkillArea
+id: skill-area:game-engine-development
+attributes:
+  displayName: "Game Engine Development"
+  description: |
+    Designing and building game engine subsystems — rendering pipelines,
+    entity-component frameworks, resource managers, scripting runtimes,
+    and editor tooling. Covers architecture decisions around data-oriented
+    design, hot-reload, and cross-platform abstraction layers.
+  domains:
+    - specialization:game-development
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:gameplay-programming
+      strength: recommended
+    - target: skill-area:shader-programming
+      strength: recommended
+    - target: skill-area:game-engines
+      strength: recommended
+    - target: skill-area:graphics-rendering
+      strength: recommended
+    - target: skill-area:ui-menu-systems
+      strength: recommended
+    - target: skill-area:save-load-systems
+      strength: recommended
+    - target: skill-area:game-analytics-monetization
+      strength: recommended
+    - target: skill-area:game-loop
+      strength: recommended
+    - target: skill-area:scene-graphs
+      strength: recommended
+    - target: skill-area:physics-simulation
+      strength: recommended
+    - target: skill-area:asset-pipeline
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:gameplay-programming
+attributes:
+  displayName: "Gameplay Programming"
+  description: |
+    Implementing game mechanics, player controllers, camera systems,
+    combat systems, progression and economy logic, and scripted events.
+    Bridges design intent with technical implementation through rapid
+    iteration and designer-friendly configuration surfaces.
+  domains:
+    - specialization:game-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:game-physics
+      strength: recommended
+    - target: skill-area:multiplayer-networking
+      strength: helpful
+    - target: skill-area:game-audio-systems
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:game-physics
+attributes:
+  displayName: "Game Physics"
+  description: |
+    Real-time physics simulation for games — collision detection (GJK,
+    SAT, broadphase), rigid-body dynamics, ragdoll systems, cloth and
+    fluid simulation, and deterministic physics for replays and netcode.
+  domains:
+    - specialization:game-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:game-ai-pathfinding
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:desktop-ui-frameworks
+attributes:
+  displayName: "Desktop UI Frameworks"
+  description: |
+    Building desktop user interfaces with native and cross-platform
+    frameworks — Electron, Tauri, Qt/QML, GTK, WPF, SwiftUI, .NET MAUI.
+    Covers component architecture, native look-and-feel integration,
+    accessibility APIs, and platform-specific rendering pipelines.
+  domains:
+    - specialization:desktop-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:desktop-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:cross-platform-desktop
+      strength: recommended
+    - target: skill-area:desktop-system-integration
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:cross-platform-desktop
+attributes:
+  displayName: "Cross-Platform Desktop Development"
+  description: |
+    Strategies for shipping desktop applications across Windows, macOS,
+    and Linux — abstraction layers, conditional compilation, platform-
+    specific packaging (MSI, DMG, AppImage, Flatpak, Snap), and
+    automated multi-platform CI/CD builds.
+  domains:
+    - specialization:desktop-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:desktop-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:desktop-system-integration
+attributes:
+  displayName: "Desktop System Integration"
+  description: |
+    Integrating desktop apps with OS-level services — file system watchers,
+    system tray icons, global shortcuts, native notifications, drag-and-drop,
+    clipboard, auto-update mechanisms, and single-instance enforcement.
+  domains:
+    - specialization:desktop-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:desktop-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:rtos-programming
+attributes:
+  displayName: "RTOS Programming"
+  description: |
+    Programming against real-time operating system APIs — task creation
+    and prioritization, inter-task communication (queues, semaphores,
+    event groups), memory pool management, and meeting hard real-time
+    deadlines on FreeRTOS, Zephyr, and ThreadX.
+  domains:
+    - specialization:embedded-systems
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:sensor-fusion
+      strength: recommended
+    - target: skill-area:firmware-testing
+      strength: recommended
+    - target: skill-area:hardware-interface-testing
+      strength: recommended
+    - target: skill-area:real-time-behavior-testing
+      strength: recommended
+    - target: skill-area:power-consumption-testing
+      strength: recommended
+    - target: skill-area:environmental-stress-testing
+      strength: recommended
+    - target: skill-area:safety-critical-testing
+      strength: recommended
+    - target: skill-area:protocol-conformance-testing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:protocol-design
+attributes:
+  displayName: "Network Protocol Design"
+  description: |
+    Designing application-layer and transport-layer network protocols —
+    framing, versioning, backward compatibility, flow control, error
+    recovery, and specification writing. Covers binary and text protocols,
+    TLV encoding, and protocol state machines.
+  domains:
+    - specialization:network-programming
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:network-programming
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:networking
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:socket-programming
+attributes:
+  displayName: "Socket Programming"
+  description: |
+    Low-level socket APIs — TCP/UDP socket lifecycle, non-blocking I/O,
+    multiplexing (select, poll, epoll, kqueue, io_uring, IOCP),
+    connection management, and platform-specific networking quirks.
+  domains:
+    - specialization:network-programming
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:network-programming
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:protocol-design
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:observability-instrumentation
+attributes:
+  displayName: "Observability Instrumentation"
+  description: |
+    Instrumenting applications for observability — structured logging,
+    metric emission (counters, gauges, histograms), distributed trace
+    propagation (OpenTelemetry, W3C Trace Context), and span annotation.
+    Covers SDK integration, auto-instrumentation, and custom metric design.
+  domains:
+    - specialization:observability
+    - specialization:devops-sre-platform
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:observability
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:distributed-tracing
+      strength: recommended
+    - target: skill-area:alerting-oncall
+      strength: required
+    - target: skill-area:log-aggregation
+      strength: recommended
+    - target: skill-area:metrics-dashboarding
+      strength: recommended
+    - target: skill-area:observability-pipeline
+      strength: recommended
+    - target: skill-area:sli-slo-management
+      strength: recommended
+    - target: skill-area:incident-response
+      strength: recommended
+    - target: skill-area:error-tracking
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:alerting-oncall
+attributes:
+  displayName: "Alerting & On-Call Management"
+  description: |
+    Designing alert rules, routing policies, and escalation chains that
+    reduce noise and surface actionable signals. Covers alert fatigue
+    mitigation, SLO-based alerting, PagerDuty/OpsGenie configuration,
+    and on-call rotation best practices.
+  domains:
+    - specialization:observability
+    - specialization:sre
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:observability
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:incident-management
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:distributed-tracing
+attributes:
+  displayName: "Distributed Tracing"
+  description: |
+    End-to-end request tracing across distributed systems — trace context
+    propagation, span collection, trace sampling strategies, and trace
+    analysis for latency debugging. Covers OpenTelemetry, Jaeger, Zipkin,
+    and vendor-specific tracing platforms.
+  domains:
+    - specialization:observability
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:observability
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:log-aggregation
+attributes:
+  displayName: "Log Aggregation & Analysis"
+  description: |
+    Collecting, shipping, storing, and querying logs at scale — ELK stack,
+    Loki, Splunk, and cloud-native logging services. Covers structured
+    logging formats, log parsing pipelines, retention policies, and
+    cost-efficient storage tiering.
+  domains:
+    - specialization:observability
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:observability
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:metrics-dashboarding
+attributes:
+  displayName: "Metrics & Dashboarding"
+  description: |
+    Designing metric taxonomies, building actionable dashboards, and
+    managing time-series databases. Covers Prometheus, Grafana, Datadog,
+    CloudWatch, custom metric naming conventions, and dashboard-as-code
+    practices.
+  domains:
+    - specialization:observability
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:observability
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:media-encoding
+attributes:
+  displayName: "Media Encoding & Transcoding"
+  description: |
+    Video and audio encoding pipelines — codec selection (H.264, H.265,
+    VP9, AV1, AAC, Opus), bitrate ladders, FFmpeg workflow automation,
+    hardware-accelerated transcoding, and quality-vs-size tradeoffs.
+  domains:
+    - specialization:media
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:media
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:streaming-protocols
+attributes:
+  displayName: "Media Streaming Protocols"
+  description: |
+    Adaptive streaming protocols — HLS, DASH, CMAF, and WebRTC for
+    real-time communication. Covers manifest generation, segment
+    packaging, DRM integration (Widevine, FairPlay), and CDN delivery
+    optimization.
+  domains:
+    - specialization:media
+    - specialization:network-programming
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:media
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:image-processing
+attributes:
+  displayName: "Image Processing"
+  description: |
+    Programmatic image manipulation — resizing, cropping, format
+    conversion, color-space transforms, watermarking, and optimization
+    for web delivery. Covers libraries like ImageMagick, Sharp, Pillow,
+    and GPU-accelerated processing.
+  domains:
+    - specialization:media
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:media
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:backend-api-design
+attributes:
+  displayName: "Backend API Design"
+  description: |
+    Designing REST, GraphQL, and gRPC APIs for backend services — resource
+    modeling, pagination, filtering, error handling conventions, versioning
+    strategies, and documentation generation. Covers API gateway patterns,
+    rate limiting, and backward-compatible evolution.
+  domains:
+    - specialization:backend-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:backend-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:graphql-schema-design
+      strength: recommended
+    - target: skill-area:backend-async-processing
+      strength: recommended
+    - target: skill-area:api-testing
+      strength: recommended
+    - target: skill-area:solution-architecture
+      strength: helpful
+    - target: skill-area:rate-limiting
+      strength: recommended
+    - target: skill-area:webhook-verification
+      strength: recommended
+    - target: skill-area:middleware-design
+      strength: recommended
+    - target: skill-area:api-clients-sdks
+      strength: recommended
+    - target: skill-area:api-design
+      strength: recommended
+    - target: skill-area:payment-integration
+      strength: recommended
+    - target: skill-area:payment-processing
+      strength: recommended
+    - target: skill-area:e-commerce
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:backend-data-persistence
+attributes:
+  displayName: "Backend Data Persistence"
+  description: |
+    Selecting and integrating data stores — relational (PostgreSQL, MySQL),
+    document (MongoDB), key-value (Redis), and search (Elasticsearch) —
+    with backend services. Covers connection pooling, migration strategies,
+    query optimization, and multi-store architectures.
+  domains:
+    - specialization:backend-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:backend-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:caching-strategies
+      strength: recommended
+    - target: skill-area:backend-async-processing
+      strength: recommended
+    - target: skill-area:search-infrastructure
+      strength: helpful
+    - target: skill-area:database-drivers-connectors
+      strength: recommended
+    - target: skill-area:object-relational-mapping
+      strength: recommended
+    - target: skill-area:database-migrations-zero-downtime
+      strength: recommended
+    - target: skill-area:postgres-tuning
+      strength: recommended
+    - target: skill-area:graph-databases
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:backend-auth
+attributes:
+  displayName: "Backend Authentication & Authorization"
+  description: |
+    Implementing authentication and authorization in backend services —
+    session management, JWT/OAuth2/OIDC flows, RBAC/ABAC models, API
+    key management, and multi-tenant identity isolation. Covers
+    integration with identity providers (Auth0, Keycloak, Cognito).
+  domains:
+    - specialization:backend-development
+    - specialization:security-compliance
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:backend-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:backend-async-processing
+attributes:
+  displayName: "Backend Async & Background Processing"
+  description: |
+    Designing asynchronous and background processing systems — task
+    queues (Celery, BullMQ, Sidekiq), message brokers (RabbitMQ, SQS),
+    scheduled jobs, retry and dead-letter strategies, and idempotency
+    patterns for reliable background execution.
+  domains:
+    - specialization:backend-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:backend-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:event-driven-architecture
+      strength: recommended
+    - target: skill-area:messaging-queuing
+      strength: recommended
+    - target: skill-area:task-scheduling-cron-jobs
+      strength: recommended
+    - target: skill-area:kafka-stream-processing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:product-discovery
+attributes:
+  displayName: "Product Discovery"
+  description: |
+    Systematic exploration of user needs and solution viability —
+    opportunity-solution trees, assumption mapping, rapid prototyping,
+    user interviews, and experiment design. Bridges qualitative research
+    with quantitative validation to reduce product risk before committing
+    engineering resources.
+  domains:
+    - specialization:product-management
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:product-management
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:roadmap-management
+attributes:
+  displayName: "Roadmap Management"
+  description: |
+    Constructing, maintaining, and communicating product roadmaps —
+    outcome-based roadmaps, now/next/later frameworks, dependency
+    mapping, and stakeholder alignment rituals. Covers roadmap tooling
+    (Productboard, Jira, Linear) and the tension between long-term
+    vision and short-term adaptation.
+  domains:
+    - specialization:product-management
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:product-management
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:prioritization-frameworks
+attributes:
+  displayName: "Prioritization Frameworks"
+  description: |
+    Structured approaches to feature and initiative prioritization —
+    RICE, ICE, MoSCoW, weighted scoring, and opportunity cost analysis.
+    Covers translating business objectives into ranked backlogs and
+    communicating tradeoffs to stakeholders transparently.
+  domains:
+    - specialization:product-management
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:product-management
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:compliance-automation
+attributes:
+  displayName: "Compliance Automation"
+  description: |
+    Automating compliance checks and audit evidence collection —
+    policy-as-code (OPA, Sentinel), automated control testing,
+    continuous compliance monitoring, and audit-trail generation
+    for SOC 2, ISO 27001, HIPAA, and GDPR frameworks.
+  domains:
+    - specialization:security-compliance
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:security-compliance
+      confidence: primary
+    - target: specialization:legal-compliance
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:ci-security
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:vulnerability-management
+attributes:
+  displayName: "Vulnerability Management"
+  description: |
+    End-to-end vulnerability lifecycle — scanning, triage, remediation
+    tracking, and SLA enforcement. Covers CVE databases, dependency
+    scanning (Snyk, Dependabot, Trivy), container image scanning, and
+    risk-based prioritization for patching decisions.
+  domains:
+    - specialization:security-compliance
+    - specialization:security-research
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:security-compliance
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:data-science-experimentation
+attributes:
+  displayName: "Data Science Experimentation"
+  description: |
+    Experimental design and execution for data science — hypothesis
+    formulation, experiment tracking (MLflow, Weights & Biases),
+    reproducible notebook workflows, and translating exploratory
+    analysis into production-ready features.
+  domains:
+    - specialization:data-science-ml
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-science-ml
+      confidence: primary
+    - target: specialization:bioinformatics
+      confidence: secondary
+    - target: specialization:materials-science
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:feature-engineering
+attributes:
+  displayName: "Feature Engineering"
+  description: |
+    Transforming raw data into predictive features — encoding
+    strategies, feature selection, dimensionality reduction, feature
+    stores (Feast, Tecton), and automated feature generation. Covers
+    domain-specific feature design and feature drift monitoring.
+  domains:
+    - specialization:data-science-ml
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-science-ml
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:model-evaluation
+      strength: required
+---
+nodeKind: SkillArea
+id: skill-area:model-evaluation
+attributes:
+  displayName: "Model Evaluation & Selection"
+  description: |
+    Evaluating ML model performance — cross-validation strategies,
+    metric selection (precision/recall/F1, AUC-ROC, RMSE), statistical
+    significance testing, hyperparameter optimization, and model
+    comparison frameworks.
+  domains:
+    - specialization:data-science-ml
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-science-ml
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:model-serving
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:language-design
+attributes:
+  displayName: "Programming Language Design"
+  description: |
+    Designing programming languages and DSLs — syntax design, type
+    system theory, semantics (operational, denotational), memory
+    management models (GC, ownership, reference counting), and
+    language ergonomics. Covers PEG/EBNF grammars and parser design.
+  domains:
+    - specialization:programming-languages
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:programming-languages
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:compiler-implementation
+attributes:
+  displayName: "Compiler & Interpreter Implementation"
+  description: |
+    Building compilers and interpreters — lexing, parsing, AST
+    construction, type checking, IR lowering, optimization passes,
+    and code generation. Covers LLVM backend integration, JIT
+    compilation, and bytecode VM design.
+  domains:
+    - specialization:programming-languages
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:programming-languages
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:polyglot-development
+attributes:
+  displayName: "Polyglot Development"
+  description: |
+    Working effectively across multiple programming languages — FFI
+    boundaries, WASM interop, language-specific idiom translation,
+    and choosing the right language for performance, safety, and
+    team-capability constraints.
+  domains:
+    - specialization:programming-languages
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:programming-languages
+      confidence: primary

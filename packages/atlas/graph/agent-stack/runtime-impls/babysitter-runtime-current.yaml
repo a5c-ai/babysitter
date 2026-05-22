@@ -1,0 +1,61 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:babysitter.runtime@current
+attributes:
+  displayName: "babysitter Runtime (current) — task-effect dispatcher + harness adapters"
+  agentVersionId: agent-version:babysitter@current
+  packageRef: source-ref:babysitter-github
+  subagentDispatchMechanism: agent-as-tool
+  subagentChildSessionPolicy: persistent-child-session
+  subagentToolScopePolicy: explicit-allowlist
+  builtInTools:
+    - tool-descriptor:bash
+    - tool-descriptor:read
+    - tool-descriptor:write
+    - tool-descriptor:edit
+    - tool-descriptor:grep
+    - tool-descriptor:glob
+  toolRegistryDiscovery: dynamic-extension-loaded
+  hookSockets: []
+  internalSessionStateLocation: ".a5c/runs/<runId>/"
+  sessionFileFormat: event-sourced-jsonl
+  sessionFilePathConvention: ".a5c/runs/<runId>/journal/<seq>.<ulid>.json"
+  approvalGatingPrimitive: policy-engine
+  subprocessSandboxStrategy: wrapped-shell
+  runtimeIdentity: none
+  supportedMCPTransports:
+    - mcp-transport:stdio
+    - mcp-transport:streamable-http
+    - mcp-transport:http-sse
+  supportsStreaming: true
+  notes: |
+    Babysitter is a process-orchestration runtime, not a chat-loop runtime.
+    It records effects (task / breakpoint / sleep / orchestratorTask /
+    subprocess / hook intrinsics) into the journal and replays them
+    deterministically across iterations. Harness adapters (claude-code,
+    codex, cursor, opencode, gemini-cli) are spawned as subprocesses for
+    kind: 'agent' tasks; their working directories are isolated per task.
+    Babysitter exposes a built-in MCP server (see
+    packages/sdk/src/cli/mcpServeEntry.ts) for tools, and uses its own
+    breakpoint policy engine (packages/sdk/src/breakpoints/) for approval
+    gating.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:babysitter
+      role: runtime
+  bundles:
+    - target: tool-descriptor:bash
+    - target: tool-descriptor:read
+    - target: tool-descriptor:write
+    - target: tool-descriptor:edit
+    - target: tool-descriptor:grep
+    - target: tool-descriptor:glob
+  connects:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http
+    - target: mcp-transport:http-sse
+  speaks:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http
+    - target: mcp-transport:http-sse

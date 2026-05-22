@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:acronym
+attributes:
+  canonicalDefinitionId: definition:acronym.canonical
+  displayName: "Acronym"
+  kind: concept
+  references:
+    - "NodeKind:Acronym"
+  description: |
+    Abbreviation expanding to a term
+edges:
+  applies_to:
+    - target: domain:computer-science

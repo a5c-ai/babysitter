@@ -2,6 +2,14 @@
 name: tui-test-renderer
 description: Set up testing utilities for TUI components with ink-testing-library and Bubble Tea testing.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:e2e-testing]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # TUI Test Renderer

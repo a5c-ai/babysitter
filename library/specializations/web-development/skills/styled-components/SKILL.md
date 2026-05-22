@@ -2,6 +2,13 @@
 name: styled-components
 description: Styled Components theming, variants, SSR support, and patterns.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:ui-styling, skill-area:css-architecture]
+  roles: [role:frontend-engineer]
+  topics: [topic:css-in-js, topic:styled-components-pattern]
+
 ---
 
 # Styled Components Skill

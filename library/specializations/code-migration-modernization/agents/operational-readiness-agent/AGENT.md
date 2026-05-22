@@ -7,6 +7,13 @@ model: opus
 skills:
   - logging-migrator
   - documentation-generator
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:observability-instrumentation, skill-area:runbook-writing]
+  roles: [role:sre, role:devops-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Operational Readiness Agent

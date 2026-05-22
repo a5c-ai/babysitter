@@ -1,0 +1,23 @@
+nodeKind: Framework
+id: framework:directus
+attributes:
+  displayName: "Directus"
+  homepageUrl: "https://directus.io"
+  belongsToLanguageId: language:javascript
+  category: web-backend
+  description: |
+    Directus — an open-source data platform that wraps any SQL database
+    with an instant REST/GraphQL API and an admin app, supporting
+    flows / extensions / webhooks for custom logic.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:strapi
+      comparison: "Headless CMS — Directus wraps any SQL database; Strapi is code-first"
+    - target: framework:hasura
+      comparison: "Data platforms — Directus has an admin UI; Hasura is GraphQL-engine-first"
+    - target: framework:supabase
+      comparison: "CMS / BaaS platforms"

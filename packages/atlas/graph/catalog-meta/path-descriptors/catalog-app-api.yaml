@@ -1,0 +1,14 @@
+nodeKind: PathDescriptor
+id: path:catalog-api
+attributes:
+  pathId: path:catalog-api
+  displayName: "Catalog UI API surface"
+  path: "packages/catalog/src/app/api/agents"
+  pathKind: api-surface
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-catalog
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: UI/API consumer of graph-backed agent catalog rows.

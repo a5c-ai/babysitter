@@ -27,6 +27,13 @@
  * - Inclusive Design Principles: https://inclusivedesignprinciples.org/
  * - Section 508: https://www.section508.gov/
  * - EN 301 549: https://www.etsi.org/deliver/etsi_en/301500_301599/301549/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:ux-ui-design]
+ *   skillAreas: [skill-area:design-systems, skill-area:interaction-design, skill-area:accessibility-first-design]
+ *   roles: [role:product-designer, role:ux-researcher]
+ *   workflows: [workflow:user-feedback-loop, workflow:product-discovery]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,15 @@
+nodeKind: EvidenceSource
+id: evidence:mcp-spec
+attributes:
+  displayName: "Model Context Protocol specification"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://modelcontextprotocol.io/specification
+  observedAt: "2026-04-28T10:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T10:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web

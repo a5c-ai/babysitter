@@ -1,0 +1,68 @@
+---
+nodeKind: Workflow
+id: workflow:computational-experiment-validation
+attributes:
+  displayName: "Computational Experiment Validation"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-experiment"
+  complexity: single-team
+  description: |
+    Validates computational physics experiments for reproducibility and
+    correctness -- verifying numerical method convergence (mesh/timestep
+    independence), checking conservation law satisfaction, comparing
+    against analytical solutions or benchmark datasets, auditing random
+    number generator seeding strategy, confirming parallel decomposition
+    does not introduce non-determinism, and archiving environment
+    snapshots for long-term reproducibility. Excludes experiment design.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:principal-engineer
+    - target: role:test-writer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:physics
+    - target: domain:scientific-computing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:ml-team
+---
+nodeKind: Workflow
+id: workflow:particle-accelerator-data-pipeline
+attributes:
+  displayName: "Particle Accelerator Data Pipeline"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-run"
+  complexity: cross-team
+  description: |
+    Processes particle accelerator experimental data at scale --
+    ingesting detector readout streams, applying trigger-level event
+    filtering, reconstructing particle tracks and vertices, calibrating
+    detector response with known physics processes, computing
+    cross-sections with systematic uncertainty propagation, and staging
+    analysis-ready datasets (ntuples) for physics working groups.
+    Excludes physics interpretation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:platform-engineer
+    - target: role:ml-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:physics
+    - target: domain:scientific-computing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:platform-team

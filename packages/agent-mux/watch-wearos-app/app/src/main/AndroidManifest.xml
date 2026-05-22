@@ -1,0 +1,21 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="ai.a5c.amux.wear">
+  <uses-feature android:name="android.hardware.type.watch" />
+
+  <application
+    android:name=".AmuxWearApp"
+    android:allowBackup="false"
+    android:label="AgentMux Wear">
+    <receiver
+      android:name=".ui.NotificationReceiver"
+      android:exported="false" />
+    <activity
+      android:name=".MainActivity"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
+  </application>
+</manifest>

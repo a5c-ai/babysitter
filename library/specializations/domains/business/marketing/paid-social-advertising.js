@@ -3,6 +3,11 @@
  * @description Plan and execute advertising campaigns on Meta, LinkedIn, and other social platforms with audience targeting, creative optimization, and conversion tracking.
  * @inputs { platforms: array, budget: number, objectives: object, targetAudience: object, creativeAssets: array }
  * @outputs { success: boolean, campaignStructure: object, audienceStrategy: object, creativeStrategy: object, optimizationPlan: object, artifacts: array }
+  * @graph
+ *   domains: [domain:marketing]
+ *   skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+ *   workflows: [workflow:brand-campaign-launch]
+ *   roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

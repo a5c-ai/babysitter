@@ -14,6 +14,10 @@ required-skills:
   - carrier-selection-optimizer
   - load-optimization-calculator
   - transportation-spend-analyzer
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:quantitative-modeling, skill-area:data-analytics]
+  roles: [role:supply-chain-analyst, role:procurement-manager, role:operations-analyst]
 ---
 
 # Transportation Planner

@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: Strategy
   agent-id: AG-012
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:business-model-design, skill-area:strategic-analysis, skill-area:growth-strategy]
+  workflows: [workflow:product-discovery]
+  roles: [role:strategic-planner, role:business-analyst, role:product-manager]
 ---
 
 # Business Model Strategist Agent

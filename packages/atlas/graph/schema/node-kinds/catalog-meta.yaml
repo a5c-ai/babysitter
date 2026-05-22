@@ -1,0 +1,1308 @@
+# NodeKinds for cluster 13-catalog-meta.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# Current-only graph contract; no schema-evolution history is modeled here.
+
+nodeKinds:
+- id: node:claim
+  name: Claim
+  origin: universal
+  prefix: claim
+  cluster: 13-catalog-meta
+  purpose: a claim of fact about an entity attribute
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: claimId
+    type: string
+    required: false
+    notes: Stable claim id; legacy cross-walk.
+  - name: subjectId
+    type: ref<NodeKind>
+    required: true
+  - name: subjectKind
+    type: string
+    required: true
+    notes: NodeKind name of the subject.
+  - name: attribute
+    type: string
+    required: true
+  - name: value
+    type: any
+    required: true
+  - name: statement
+    type: markdown
+    required: true
+    notes: Natural-language form of the claim.
+  - name: evidenceSourceIds
+    type: list<ref<EvidenceSource>>
+    required: true
+  - name: evidenceIds
+    type: list<string>
+    required: false
+    notes: Legacy alias for evidenceSourceIds.
+  - name: confidence
+    type: enum<high
+    medium: null
+    low: null
+    unverified>: null
+    required: true
+  - name: provenanceKind
+    type: enum<vendor-doc
+    repo-inspection: null
+    community: null
+    benchmark: null
+    observation>: null
+    required: true
+  - name: evidenceStrength
+    type: enum<strong
+    adequate: null
+    weak>: null
+    required: true
+  - name: status
+    type: enum<open
+    accepted: null
+    challenged: null
+    superseded>: null
+    required: true
+  - name: unresolvedGaps
+    type: list<markdown>
+    required: false
+  - name: claimedAt
+    type: iso-timestamp
+    required: true
+  - name: claimedBy
+    type: string
+    required: true
+    notes: Opaque principal identifier (e.g. 'a5c-ai-catalog'). Was ref<Authority> before Trust Chain was de-scoped from Phase 1 ontology.
+  - name: expiresAt
+    type: iso-timestamp
+    required: false
+  - name: supersededBy
+    type: ref<Claim>
+    required: false
+  - name: note
+    type: markdown
+    required: false
+  - name: claimKind
+    type: enum<assertion,conformance,evaluation,provenance>
+    required: false
+    notes: catalog pass 19 (planner 2026-05-01) — claim discriminator. Seeded with conformance (formerly proposed as standalone ConformanceClaim NodeKind, demoted per reviewer collapse). Required-target lifted to optional pending example backfill.
+  incomingEdges:
+  - produced_evidence_for
+  - attested_by
+  outgoingEdges:
+  - evidenced_by
+  - claims
+  - conforms_to
+  invariants:
+  - evidenceSourceIds non-empty (V-2.1)
+  - supersededBy points to newer claim with same subject+attribute (V-2.7)
+  - subjectKind matches subjectId's NodeKind
+  examples: []
+- id: node:claim-test
+  name: ClaimTest
+  origin: a5c
+  prefix: claim-test
+  cluster: 13-catalog-meta
+  purpose: an automated, mock-driven test that validates or invalidates a Claim about external system behavior
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: claimId
+    type: ref<Claim>
+    required: true
+  - name: filePath
+    type: string
+    required: true
+    notes: Path to the test source file under graph/tests/claims/.
+  - name: framework
+    type: enum<node-test,pytest,playwright,bash>
+    required: true
+  - name: fixturesPath
+    type: string
+    required: false
+    notes: Path to fixture directory if the test loads cassettes.
+  - name: cadence
+    type: enum<on-commit,daily,weekly,on-demand>
+    required: true
+  - name: lastRunAt
+    type: iso-timestamp
+    required: false
+  - name: lastResult
+    type: enum<pass,fail,error,skipped,never-run>
+    required: false
+  - name: lastDurationMs
+    type: int
+    required: false
+  - name: testabilityKind
+    type: enum<path-convention,api-shape,cli-flag,env-var,header-shape,version-regex,fixture-roundtrip>
+    required: true
+    notes: Coarse taxonomy of what the test asserts.
+  incomingEdges:
+  - tested_by
+  outgoingEdges:
+  - tests_claim
+  - produced_test_run
+  - scheduled_by_ci
+  invariants:
+  - claimId resolves to a real Claim record
+  - filePath ends with .test.cjs (framework=node-test) or .test.py (framework=pytest)
+  examples: []
+- id: node:claim-test-run
+  name: ClaimTestRun
+  origin: a5c
+  prefix: claim-test-run
+  cluster: 13-catalog-meta
+  purpose: a single execution of a ClaimTest, recorded for trend analysis
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: claimTestId
+    type: ref<ClaimTest>
+    required: true
+  - name: runAt
+    type: iso-timestamp
+    required: true
+  - name: result
+    type: enum<pass,fail,error,skipped>
+    required: true
+  - name: durationMs
+    type: int
+    required: true
+  - name: output
+    type: markdown
+    required: false
+    notes: Truncated TAP output or stack trace; max 4KB.
+  - name: ciRunUrl
+    type: string
+    required: false
+  incomingEdges:
+  - produced_test_run
+  outgoingEdges:
+  - test_run_of
+  invariants:
+  - claimTestId resolves to a real ClaimTest record
+  examples: []
+- id: node:evidence-source
+  name: EvidenceSource
+  origin: universal
+  prefix: evidence
+  cluster: 13-catalog-meta
+  purpose: source backing a claim
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: evidenceId
+    type: string
+    required: false
+    notes: Vendor-stable id (e.g. doc page slug).
+  - name: kindLabel
+    type: enum<web
+    file: null
+    package: null
+    observation: null
+    attestation>: null
+    required: true
+  - name: trustLevel
+    type: ref<TrustLevel>
+    required: true
+  - name: sourcePathOrUrl
+    type: string
+    required: false
+    notes: Unified source pointer; legacy cross-walk.
+  - name: sourceUrl
+    type: url
+    required: false
+    conditional: kindLabel==web
+  - name: filePath
+    type: string
+    required: false
+    conditional: kindLabel==file
+  - name: packageId
+    type: string
+    required: false
+    conditional: kindLabel==package
+  - name: locator
+    type: string
+    required: false
+    notes: Fragment / page / heading / section anchor within the source.
+  - name: capturedAt
+    type: iso-timestamp
+    required: false
+    notes: Alias of observedAt for legacy cross-walk.
+  - name: observedAt
+    type: iso-timestamp
+    required: true
+  - name: observedBy
+    type: string
+    required: true
+    notes: Opaque principal identifier. Was ref<Authority> before Trust Chain was de-scoped from Phase 1 ontology.
+  - name: reachabilityCheck
+    type: map<string
+    any>: null
+    required: false
+  - name: reviewOwner
+    type: string
+    required: false
+    notes: Opaque principal identifier. Was ref<Authority> before Trust Chain was de-scoped from Phase 1 ontology.
+  - name: reviewedAt
+    type: iso-timestamp
+    required: false
+  - name: freshnessWindowDays
+    type: int
+    required: false
+  - name: excerpt
+    type: markdown
+    required: false
+  - name: displayName
+    type: string
+    required: false
+  incomingEdges:
+  - evidenced_by
+  outgoingEdges:
+  - produced_evidence_for
+  - at_trust_level
+  invariants:
+  - kindLabel-specific required attribute set
+  - web sources have reachabilityCheck.status=ok within freshness (V-2.5)
+  examples: []
+- id: node:evidence-policy
+  name: EvidencePolicy
+  origin: universal
+  prefix: policy
+  cluster: 13-catalog-meta
+  purpose: which claims need evidence, freshness windows, reviewer rules
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: minimumTrustLevel
+    type: ref<TrustLevel>
+    required: true
+  - name: freshnessWindowDays
+    type: int
+    required: true
+  - name: requiresAttestation
+    type: bool
+    required: false
+  - name: reviewOwnerPattern
+    type: string
+    required: false
+  - name: vendorBackedSelector
+    type: string
+    required: false
+  - name: appliesTo
+    type: list<string>
+    required: true
+  - name: description
+    type: markdown
+    required: false
+  - name: displayName
+    type: string
+    required: false
+  incomingEdges: []
+  outgoingEdges: []
+  invariants:
+  - appliesTo non-empty
+  examples: []
+- id: node:source-ref
+  name: SourceRef
+  origin: universal
+  prefix: source-ref
+  cluster: 13-catalog-meta
+  purpose: repo+ref+path pointer to source-of-truth for an artifact
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: repoUrl
+    type: url
+    required: true
+    evidence: vendor-doc-or-better
+  - name: ref
+    type: string
+    required: true
+    evidence: vendor-doc-or-better
+  - name: path
+    type: string
+    required: true
+  - name: packageManager
+    type: enum<npm
+    pip: null
+    cargo: null
+    go-mod: null
+    nix: null
+    gem: null
+    none>: null
+    required: false
+  - name: packageName
+    type: string
+    required: false
+  - name: version
+    type: string
+    required: false
+  - name: description
+    type: markdown
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: downloadUrl
+    type: url
+    required: false
+  - name: homepageUrl
+    type: url
+    required: false
+  - name: kind
+    type: string
+    required: false
+  - name: marketplaceUrl
+    type: url
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - sourced_from
+  outgoingEdges: []
+  invariants:
+  - id starts with source-ref: null
+  - repoUrl is HTTP(S)
+  examples: []
+- id: node:scope-boundary
+  name: ScopeBoundary
+  origin: universal
+  prefix: scope-boundary
+  cluster: 13-catalog-meta
+  purpose: inScope/outOfScope declaration with optional evidence
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: subjectId
+    type: ref<NodeKind>
+    required: true
+  - name: inScope
+    type: markdown
+    required: true
+  - name: outOfScope
+    type: markdown
+    required: true
+  - name: outOfScopeReasonIds
+    type: list<ref<OutOfScopeReason>>
+    required: true
+  - name: evidenceSourceIds
+    type: list<ref<EvidenceSource>>
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - in_scope
+  - out_of_scope
+  outgoingEdges:
+  - out_of_scope_reason
+  invariants:
+  - inScope and outOfScope must not overlap (V-9.1)
+  - outOfScope non-empty implies >=1 out_of_scope_reason (V-9.2)
+  examples: []
+- id: node:out-of-scope-reason
+  name: OutOfScopeReason
+  origin: universal
+  prefix: out-of-scope-reason
+  cluster: 13-catalog-meta
+  purpose: structured reason for out-of-scope
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: reasonKind
+    type: enum<volatile-data
+    runtime-only: null
+    not-design-artifact: null
+    implementation-detail: null
+    future-phase: null
+    governance-deferred>: null
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - out_of_scope_reason
+  outgoingEdges: []
+  isolatedAllowed: true
+  invariants:
+  - reasonKind enum fixed (V-9.3)
+  examples: []
+- id: node:open-question
+  name: OpenQuestion
+  origin: universal
+  prefix: open-question
+  cluster: 13-catalog-meta
+  purpose: named TBD with owner
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: owner
+    type: string
+    required: true
+    notes: Opaque principal identifier. Was ref<Authority> before Trust Chain was de-scoped from Phase 1 ontology.
+  - name: raisedAt
+    type: iso-timestamp
+    required: true
+  - name: affectedEntities
+    type: list<ref<NodeKind>>
+    required: true
+  - name: status
+    type: enum<open
+    answered: null
+    deferred: null
+    obsolete>: null
+    required: true
+  - name: resolution
+    type: markdown
+    required: false
+  incomingEdges:
+  - raised_question
+  outgoingEdges: []
+  invariants:
+  - affectedEntities non-empty
+  - status != open implies resolution is set
+  examples: []
+- id: node:gap
+  name: Gap
+  origin: a5c
+  prefix: gap
+  cluster: 13-catalog-meta
+  purpose: tracked debt-loop finding (level 1-7); first-class graph entity so gap state is queryable
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: title
+    type: string
+    required: true
+  - name: level
+    type: int
+    required: true
+  - name: priority
+    type: enum<P0
+    P1: null
+    P2: null
+    P3>: null
+    required: true
+  - name: discoveredAt
+    type: iso-timestamp
+    required: true
+  - name: source
+    type: markdown
+    required: true
+  - name: currentState
+    type: markdown
+    required: true
+  - name: desiredState
+    type: markdown
+    required: true
+  - name: propagationStatus
+    type: map<string
+    enum<not-started: null
+    in-progress: null
+    done: null
+    not-applicable>>: null
+    required: true
+  - name: owner
+    type: string
+    required: false
+    notes: Opaque principal identifier. Was ref<Authority> before Trust Chain was de-scoped from Phase 1 ontology.
+  - name: evidenceLinks
+    type: list<ref<EvidenceSource>>
+    required: false
+  - name: status
+    type: enum<open
+    in-progress: null
+    closed: null
+    deferred>: null
+    required: true
+  - name: closedAt
+    type: iso-timestamp
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  - name: propagationChain
+    type: list<map<string
+    any>>: null
+    required: false
+  - name: markdownRef
+    type: string
+    required: true
+  incomingEdges: []
+  outgoingEdges:
+  - affects
+  - blocks
+  - raised_question
+  invariants:
+  - level in 1..7
+  - status = closed implies closedAt is set
+  - status = closed implies every applicable propagationStatus entry is done or not-applicable
+  - markdownRef points at wiki/process/gaps/GAP-<level>-<priority>-<slug>.md
+  examples: []
+- id: node:deployment-target
+  name: DeploymentTarget
+  origin: universal
+  prefix: deployment-target
+  cluster: 13-catalog-meta
+  purpose: 'A named Kubernetes-cluster (or local minikube) target that the
+
+    babysitter cloud package can deploy the kanban / gateway / babysitter-
+
+    agent components to. Reifies the union of TargetConfig variants
+
+    (`minikube` | `existing` | `eks` | `aks` | `gke`) declared in
+
+    packages/cloud/src/types.ts so cluster fleets, cost reports, and
+
+    multi-tenant deployment plans become queryable as graph data.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: targetType
+    type: enum<minikube,existing,eks,aks,gke>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: environment
+    type: enum<minikube,staging,prod,custom>
+    required: true
+  - name: kubeContext
+    type: string
+    required: false
+    notes: Required when targetType = existing. The kubectl context to use.
+  - name: namespace
+    type: string
+    required: false
+  - name: cloudRegion
+    type: string
+    required: false
+    notes: Required when targetType in {eks, gke}. Vendor-specific region.
+  - name: cloudProjectId
+    type: string
+    required: false
+    notes: Required when targetType = gke.
+  - name: cloudSubscriptionId
+    type: string
+    required: false
+    notes: Required when targetType = aks.
+  - name: cloudResourceGroup
+    type: string
+    required: false
+    notes: Required when targetType = aks.
+  - name: clusterName
+    type: string
+    required: false
+    notes: Required when targetType in {eks, aks, gke}.
+  - name: minikubeProfile
+    type: string
+    required: false
+    notes: Optional minikube profile name.
+  - name: ingressHostnames
+    type: list<string>
+    required: false
+  - name: ingressTls
+    type: bool
+    required: false
+  - name: ingressClassName
+    type: string
+    required: false
+  - name: authMode
+    type: enum<local-dev,bootstrap-admin>
+    required: false
+  - name: storageClassName
+    type: string
+    required: false
+  - name: autoApplyTerraform
+    type: bool
+    required: false
+  - name: autoApplyKubernetes
+    type: bool
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges: []
+  invariants:
+  - id starts with deployment-target: null
+  - targetType = existing implies kubeContext is present
+  - targetType = eks implies cloudRegion AND clusterName are present
+  - targetType = aks implies cloudSubscriptionId AND cloudResourceGroup AND clusterName are present
+  - targetType = gke implies cloudProjectId AND cloudRegion AND clusterName are present
+  examples:
+  - graph/catalog-meta/deployment-targets/minikube-local.yaml
+  - graph/catalog-meta/deployment-targets/eks-prod.yaml
+- id: node:path-descriptor
+  name: PathDescriptor
+  origin: universal
+  prefix: path
+  cluster: 13-catalog-meta
+  purpose: 'Typed pointer to a runtime filesystem path (run dir, session dir, MCP
+
+    config, plugin scope dir, vendor auth path, plugin artifact location).
+
+    Distinct from SourceRef which points at source-of-truth in a repo.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: pathId
+    type: string
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: path
+    type: string
+    required: true
+  - name: pathPattern
+    type: string
+    required: false
+  - name: pathKind
+    type: enum<session-state-dir
+    source-of-truth-dir: null
+    api-surface: null
+    ontology-source: null
+    repo-path: null
+    manifest: null
+    container-image: null
+    run-dir: null
+    plugin-scope: null
+    mcp-config: null
+    vendor-auth: null
+    settings-file: null
+    other>: null
+    required: true
+  - name: ownerKind
+    type: string
+    required: true
+  - name: ownerId
+    type: id
+    required: true
+  - name: platform
+    type: enum<cross-platform
+    repo: null
+    linux: null
+    macos: null
+    windows: null
+    container>: null
+    required: true
+  - name: scope
+    type: enum<user
+    project: null
+    session: null
+    run: null
+    system>: null
+    required: false
+  - name: evaluationContext
+    type: enum<project
+    user: null
+    system>: null
+    required: false
+  - name: expansion
+    type: enum<literal
+    home: null
+    env-var: null
+    hash-suffix>: null
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - references_path
+  outgoingEdges:
+  - path_for
+  invariants:
+  - ownerKind is a known NodeKind and ownerId resolves
+  - pathKind=container-image implies path is a valid OCI image reference
+  examples: []
+- id: node:package-surface
+  name: PackageSurface
+  origin: universal
+  prefix: package
+  cluster: 13-catalog-meta
+  purpose: workspace package tracking — module type, surface kinds, source-of-truth role, publish target
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: packageId
+    type: string
+    required: true
+  - name: packageName
+    type: string
+    required: true
+  - name: workspacePath
+    type: string
+    required: true
+  - name: moduleType
+    type: enum<typescript
+    commonjs: null
+    esm: null
+    nextjs: null
+    python: null
+    rust: null
+    go: null
+    other>: null
+    required: true
+  - name: surfaceKinds
+    type: list<string>
+    required: true
+  - name: sourceOfTruthRole
+    type: enum<graph-source-of-truth
+    wrapper-over-graph: null
+    ontology-input: null
+    application: null
+    external>: null
+    required: true
+  - name: publishedTo
+    type: enum<npm
+    pypi: null
+    crates: null
+    none>: null
+    required: false
+  - name: versionPolicy
+    type: enum<semver
+    date: null
+    hash>: null
+    required: false
+  incomingEdges:
+  - validated_by_ci
+  outgoingEdges:
+  - references_path
+  - validated_by_ci
+  - exposes_subcommand
+  invariants:
+  - id starts with package: null
+  - surfaceKinds non-empty
+  examples: []
+- id: node:ci-surface
+  name: CiSurface
+  origin: universal
+  prefix: ci
+  cluster: 13-catalog-meta
+  purpose: CI/CD spec for a PackageSurface — scripts, publish strategy, release channels, validation, artifact expectations
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: ciId
+    type: string
+    required: true
+  - name: packageId
+    type: ref<PackageSurface>
+    required: true
+  - name: scripts
+    type: list<string>
+    required: true
+  - name: publishStrategy
+    type: enum<internal-workspace
+    npm-public: null
+    application: null
+    container-image: null
+    none>: null
+    required: true
+  - name: releaseChannels
+    type: list<string>
+    required: true
+  - name: validationCommands
+    type: list<string>
+    required: true
+  - name: artifactExpectations
+    type: list<string>
+    required: false
+  - name: triggerEvents
+    type: list<enum<push
+    pr: null
+    tag: null
+    schedule>>: null
+    required: false
+  - name: requiredApprovals
+    type: int
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - validates_package
+  invariants:
+  - packageId resolves
+  - scripts non-empty
+  examples: []
+- id: node:shared-context-spec
+  name: SharedContextSpec
+  origin: a5c
+  prefix: shared-context-spec
+  cluster: 13-catalog-meta
+  purpose: 'Stub. The shape of an a5c shared-context fabric record, attached as a
+
+    structured `Claim` on the reliability-interface. Recorded as a
+
+    NodeKind so the schema mapping referenced from coverage-checklist row
+
+    "Shared Context fabric" resolves.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: contextKind
+    type: string
+    required: false
+  - name: producerIface
+    type: string
+    required: false
+  - name: consumerIfaces
+    type: list<string>
+    required: false
+  - name: fieldSchema
+    type: list<string>
+    required: false
+    notes: |
+      Catalog pass 95 — `<name>:<type>:<required>:<description>` quadruples for
+      every field of the shared context payload. Lifted from a TypeScript
+      interface (e.g. `NormalizedTriggerEvent`) so the codegen can emit
+      the interface definition + JSON-Schema from the graph alone.
+  - name: typescriptInterface
+    type: string
+    required: false
+    notes: |
+      Catalog pass 95 — name of the canonical TypeScript interface this
+      shared-context spec materializes (e.g. `NormalizedTriggerEvent`,
+      `TriggerChange`).
+  - name: sourceCitation
+    type: string
+    required: false
+  incomingEdges:
+  - has_payload_schema
+  outgoingEdges: []
+  invariants:
+  - 'STUB: deferred to Phase 2 (extension-interfaces track).'
+  examples: []
+- id: node:run-journal-event
+  name: RunJournalEvent
+  origin: a5c
+  originContext: Babysitter SDK
+  prefix: run-journal-event
+  cluster: 13-catalog-meta
+  purpose: 'The enum of run journal event names emitted by the babysitter runtime
+
+    and persisted to the per-run journal directory (`<runDir>/journal/`).
+
+    Each event is a sequenced + ULID-tagged + sha256-checksummed JSON file
+
+    ({type, recordedAt, data, checksum}). Sourced from
+
+    packages/sdk/src/storage/journal.ts (appendEvent, JournalEvent) and
+
+    packages/sdk/src/runtime tests; the canonical event taxonomy is
+
+    drawn from observed eventType literals across the runtime.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: eventName
+    type: string
+    required: true
+    evidence: vendor-doc-or-better
+    notes: Event-type literal as written to the journal payload's `type` field.
+  - name: category
+    type: enum<run-lifecycle,effect-lifecycle,iteration,hook,cost,custom>
+    required: true
+    notes: Coarse category for grouping events in the observer dashboard.
+  - name: emittedByPhase
+    type: string
+    required: false
+    notes: Phase id during which the event is typically emitted.
+  - name: terminal
+    type: bool
+    required: false
+    notes: True for events that represent a terminal Run state (RUN_COMPLETED, RUN_FAILED).
+  - name: payloadShape
+    type: json
+    required: false
+    notes: 'JSON Schema describing the typed `data` payload field. # TODO: backfill from runtime contract tests.'
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges: []
+  invariants:
+  - id starts with run-journal-event: null
+  - category MUST match observed emission site
+  examples:
+  - graph/catalog-meta/run-journal-events/run-created.yaml
+  - graph/catalog-meta/run-journal-events/effect-requested.yaml
+  - graph/catalog-meta/run-journal-events/effect-resolved.yaml
+  - graph/catalog-meta/run-journal-events/run-completed.yaml
+  - graph/catalog-meta/run-journal-events/run-failed.yaml
+- id: node:decision-verb
+  name: DecisionVerb
+  origin: universal
+  prefix: decision-verb
+  cluster: 13-catalog-meta
+  purpose: 'Stub. The ordered enum of hook decision verbs (`deny`, `ask`, `allow`,
+
+    `continue`, `noop`) with `rank` attribute, plus an orthogonal `block`
+
+    flag. Referenced from coverage-checklist row DECISION_PRECEDENCE.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: verb
+    type: enum<deny
+    ask: null
+    allow: null
+    continue: null
+    noop>: null
+    required: true
+  - name: rank
+    type: int
+    required: true
+  - name: block
+    type: bool
+    required: false
+  incomingEdges: []
+  outgoingEdges: []
+  invariants:
+  - 'STUB: deferred to Phase 2 (channels-hooks/hook-merge track).'
+  examples: []
+- id: node:discovery-signal
+  name: DiscoverySignal
+  origin: universal
+  prefix: discovery-signal
+  cluster: 13-catalog-meta
+  purpose: 'Host-detection signal — env var, binary on PATH, file presence, registry
+
+    key, argv match, exit code, or a combination — used by agent-mux to detect
+
+    whether a particular agent harness is the active host (or installed on the
+
+    machine). Sourced from the legacy agent-catalog ontology
+
+    (packages/agent-catalog/graph/schema/ontology-schema.yaml :: DiscoverySignal)
+
+    and packages/agent-mux/core/src/host-detection.ts.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: signalId
+    type: string
+    required: true
+    notes: Stable signal id; typically equals id.
+  - name: signalKind
+    type: enum<env-var
+    env-any: null
+    binary-on-path: null
+    file-presence: null
+    registry-key: null
+    argv-match: null
+    exit-code: null
+    combination>: null
+    required: true
+    evidence: vendor-doc-or-better
+    notes: v6 supports both legacy 'env-var' and the imported 'env-any' value (env-any = at least one of a list of env vars is set).
+  - name: key
+    type: string
+    required: true
+    notes: Lookup key for this signal — e.g. agent slug, env-var name, binary basename.
+  - name: matchMode
+    type: enum<exact
+    substring: null
+    regex: null
+    semver-range: null
+    contains-array: null
+    any: null
+    all: null
+    all-present-with-absences>: null
+    required: true
+    notes: 'all-present-with-absences = all of `signals` present AND all of `absentSignals` absent (used by hooks-mux ordered-rule detector for the codex-without-claude-env case).'
+  - name: confidence
+    type: enum<low
+    medium: null
+    high>: null
+    required: true
+  - name: scope
+    type: enum<user
+    system: null
+    shell: null
+    process: null
+    host-detection: null
+    hooks-mux>: null
+    required: true
+    notes: v6 retains the legacy lexical scopes plus 'host-detection' (agent-mux/core/src/host-detection.ts) and 'hooks-mux' (hooks-mux/core/src/discovery/detector.ts ordered-rule auto-detection).
+  - name: signals
+    type: list<string>
+    required: true
+    notes: Concrete probes the signal evaluates (env var names, binary names, file paths, argv tokens).
+  - name: absentSignals
+    type: list<string>
+    required: false
+    notes: Env-var names whose ABSENCE is required for the rule to match. Used by hooks-mux ordered-rule detector (e.g. codex-without-claude-env disambiguates from claude when OPENAI_API_KEY is set but CLAUDE_PLUGIN_ROOT/CLAUDE_ENV_FILE are not). Consumed by `HooksMuxDetectionRule.absentSignals` in packages/agent-catalog/src/models.ts and packages/hooks-mux/core/src/discovery/detector.ts.
+  - name: argvMatches
+    type: list<string>
+    required: false
+    notes: Argv tokens this signal matches when scope = host-detection. Optional in v6 (legacy schema marked required but several imported signals omit it).
+  - name: consumer
+    type: string
+    required: false
+    notes: Subsystem that consumes the signal (e.g. agent-mux-core).
+  - name: metadataFields
+    type: list<map<string
+    any>>: null
+    required: false
+    notes: 'Per-signal metadata extraction recipe: { key, envVars: [...] }.'
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - detects
+  - signals_via
+  - applies_to
+  invariants:
+  - id starts with discovery-signal: null
+  - signals non-empty
+  - scope=host-detection implies at least one of (signals, argvMatches) is non-empty
+  examples:
+  - graph/extensions/discovery-signals/claude-code-host-env.yaml
+  - graph/extensions/discovery-signals/codex-host-env.yaml
+  - graph/extensions/discovery-signals/copilot-cli-host-env.yaml
+  - graph/extensions/discovery-signals/cursor-host-env.yaml
+  - graph/extensions/discovery-signals/gemini-cli-host-env.yaml
+  - graph/extensions/discovery-signals/hermes-host-env.yaml
+  - graph/extensions/discovery-signals/omp-host-env.yaml
+  - graph/extensions/discovery-signals/openclaw-host-env.yaml
+  - graph/extensions/discovery-signals/opencode-host-env.yaml
+  - graph/extensions/discovery-signals/pi-host-env.yaml
+- id: node:runtime-snapshot
+  name: RuntimeSnapshot
+  origin: derived
+  originContext: catalog pass 18 / Symphony §13.3 — aggregated cross-section snapshot (distinct from RunJournalEvent stream)
+  prefix: runtime-snapshot
+  cluster: 13-catalog-meta
+  purpose: an aggregated point-in-time cross-section of orchestrator runtime (running sessions, retrying attempts, codex totals, last rate-limit observation)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: generatedAt
+    type: iso-timestamp
+    required: true
+  - name: codexTotals
+    type: map<string
+    any>: null
+    required: false
+    notes: Inline aggregate totals block (alias for the codexTotals* breakdowns).
+  - name: snapshotStatus
+    type: enum<clean,partial,stale>
+    required: false
+  - name: runningLiveSessionIds
+    type: list<ref<LiveSession>>
+    required: false
+  - name: retryingRunAttemptIds
+    type: list<ref<RunAttempt>>
+    required: false
+  - name: codexTotalsInputTokens
+    type: int
+    required: false
+  - name: codexTotalsOutputTokens
+    type: int
+    required: false
+  - name: codexTotalsTotalTokens
+    type: int
+    required: false
+  - name: codexTotalsSecondsRunning
+    type: int
+    required: false
+  - name: lastRateLimitObservation
+    type: map<string
+    any>: null
+    required: false
+    notes: 'Inline rate-limit observation block (capturedAt, vendor, primaryLimit, secondaryLimit, rawPayloadRef). Reviewer collapse 2026-05-01: replaces the dropped RateLimitPayload NodeKind.'
+  - name: tokenAccountingSemantics
+    type: enum<absolute,delta,mixed-prefer-absolute>
+    required: false
+  incomingEdges:
+  - derives_from
+  outgoingEdges:
+  - snapshots_state
+  invariants:
+  - id starts with runtime-snapshot: null
+  examples: []
+
+- id: node:page
+  name: Page
+  origin: universal
+  prefix: page
+  cluster: 13-catalog-meta
+  purpose: wiki-style article page embedded in the graph and linked to documented graph nodes
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: title
+    type: string
+    required: true
+  - name: slug
+    type: string
+    required: true
+  - name: articlePath
+    type: path
+    required: true
+  - name: article
+    type: markdown
+    required: true
+  - name: documents
+    type: list<ref<NodeKind>>
+    required: false
+# --- Legacy NodeKind (pre-remodel data files still emit these) ---
+- id: node:process-descriptor
+  name: ProcessDescriptor
+  origin: universal
+  prefix: process
+  cluster: 13-catalog-meta
+  purpose: |
+    (LEGACY) a babysitter process definition referenced by PackageSurface
+    edges. Distinct from WorkflowDefinition (repo-versioned WORKFLOW.md) and
+    the modern Workflow/Process NodeKinds. Retained so legacy data in
+    capabilities-and-models/process-descriptor.yaml validates.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: processId
+    type: string
+    required: false
+  - name: displayName
+    type: string
+    required: true
+  - name: category
+    type: string
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: paths
+    type: list<string>
+    required: false
+  - name: inputs
+    type: list<string>
+    required: false
+  - name: outputs
+    type: list<string>
+    required: false
+  - name: ownerPackage
+    type: string
+    required: false
+  - name: executionKinds
+    type: list<string>
+    required: false
+  - name: evidenceRefs
+    type: list<string>
+    required: false
+  incomingEdges:
+  - surfaces_process
+  outgoingEdges:
+  - references_path
+  invariants: []
+  examples: []
+- id: node:agent-readiness-score
+  name: AgentReadinessScore
+  origin: ora
+  prefix: agent-readiness-score
+  cluster: 13-catalog-meta
+  purpose: A product or tool readiness score observed from Ora's agent-readiness scanner and discovery surfaces.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: domain
+    type: string
+    required: true
+  - name: productName
+    type: string
+    required: false
+  - name: score
+    type: float
+    required: true
+  - name: grade
+    type: string
+    required: true
+  - name: category
+    type: string
+    required: false
+  - name: matchScore
+    type: float
+    required: false
+  - name: tags
+    type: list<string>
+    required: false
+  - name: scoreUrl
+    type: url
+    required: false
+  - name: badgeUrl
+    type: url
+    required: false
+  - name: observedVia
+    type: string
+    required: false
+  - name: observedAt
+    type: iso-timestamp
+    required: false
+  incomingEdges:
+  - agent_readiness_score_for
+  outgoingEdges:
+  - scores_agent_readiness_of
+  - sourced_from
+  invariants: []
+  examples: []

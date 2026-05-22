@@ -1,0 +1,51 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:qwen.ui@current
+attributes:
+  displayName: "Qwen UI (current) — tui-and-cli"
+  agentVersionId: agent-version:qwen@current
+  packageRef: source-ref:qwen-code-github
+  uiKind: tui-and-cli
+  presentationsBundled:
+    - presentation:gemini-cli-tui
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  notes: |
+    Qwen Code is a fork of Gemini CLI; it ships an interactive TUI plus a
+    scripted CLI. Slash commands largely inherit from the upstream Gemini CLI.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:prompt-input
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:slash-help
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/help"
+    - target: interaction-primitive:slash-clear
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/clear"
+    - target: interaction-primitive:slash-model
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/model"
+    - target: interaction-primitive:model-picker
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:command-palette
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:file-attachment
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:tool-approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:resume-session
+      attributes:
+        mechanism: ui-control

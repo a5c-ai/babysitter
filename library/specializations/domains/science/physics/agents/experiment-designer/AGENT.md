@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: experimental
   phase: 6
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:sensor-fusion]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:research-engineer]
 ---
 
 # Experiment Designer

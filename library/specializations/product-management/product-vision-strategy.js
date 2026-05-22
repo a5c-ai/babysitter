@@ -3,6 +3,12 @@
  * @description Product Vision and Strategy Development process with vision statement crafting, strategic pillars definition, 3-year roadmap planning, target segment identification, competitive moat analysis, and success criteria establishment
  * @inputs { productName: string, industry: string, currentState: object, stakeholders: array, outputDir: string, timeHorizon: number, marketContext: object, existingVision: string }
  * @outputs { success: boolean, visionStatement: string, strategicPillars: array, roadmap: object, targetSegments: array, competitiveMoats: array, successCriteria: array, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:product-management]
+ *   skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:roadmap-management]
+ *   roles: [role:product-manager, role:product-analyst]
+ *   workflows: [workflow:product-discovery, workflow:competitive-analysis]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

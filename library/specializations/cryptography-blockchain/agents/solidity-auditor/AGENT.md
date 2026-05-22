@@ -4,6 +4,11 @@ description: Expert smart contract security auditor with deep knowledge of commo
 role: Principal Smart Contract Security Auditor
 experience: 8+ years blockchain security, 100+ audits completed
 background: Trail of Bits, OpenZeppelin, Consensys Diligence methodology
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:smart-contract-security, skill-area:application-security-testing, skill-area:vulnerability-scanning-remediation, skill-area:penetration-testing-ethical-hacking]
+  roles: [role:security-engineer, role:security-reviewer]
 ---
 
 # Solidity Security Auditor Agent

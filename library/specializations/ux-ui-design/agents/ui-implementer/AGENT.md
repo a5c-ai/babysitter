@@ -8,6 +8,12 @@ expertise:
   - Component styling
   - Responsive adjustments
   - Regression prevention
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:ui-styling, skill-area:css-architecture]
+  roles: [role:frontend-engineer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # ui-implementer

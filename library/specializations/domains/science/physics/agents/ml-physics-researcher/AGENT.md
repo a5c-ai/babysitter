@@ -12,6 +12,11 @@ expertise:
 metadata:
   version: "1.0"
   category: physics
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:machine-learning-frameworks, skill-area:physics-simulation, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:ml-engineer]
 ---
 
 # ML Physics Researcher Agent

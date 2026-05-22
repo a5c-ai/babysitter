@@ -1,0 +1,13 @@
+nodeKind: Library
+id: library:gson
+attributes:
+  displayName: "Gson"
+  belongsToLanguageId: language:java
+  category: serialization
+  description: |
+    Java library that converts Java objects into JSON and back.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:backend-api-design

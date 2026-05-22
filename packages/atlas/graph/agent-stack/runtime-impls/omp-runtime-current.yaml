@@ -1,0 +1,48 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:omp.runtime@current
+attributes:
+  displayName: OMP Runtime (current)
+  agentVersionId: agentVersion:omp:ge-0-0-0
+  subagentDispatchMechanism: none
+  packageRef: source-ref:omp-github
+  builtInTools:
+  - tool-descriptor:read
+  - tool-descriptor:write
+  - tool-descriptor:edit
+  - tool-descriptor:bash
+  toolRegistryDiscovery: static-bundled
+  hookSockets: []
+  internalSessionStateLocation: ~/.omp/agent/sessions/
+  sessionFileFormat: jsonl-tree
+  sessionFilePathConvention: ~/.omp/agent/sessions/<session-id>.jsonl
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: none
+  runtimeIdentity: api-key
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  supportsStreaming: true
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:omp
+    role: runtime
+  exposes:
+  - target: hook-surface:omp.on-event
+  - target: hook-surface:error
+  bundles:
+  - target: tool-descriptor:read
+  - target: tool-descriptor:write
+  - target: tool-descriptor:edit
+  - target: tool-descriptor:bash
+  connects:
+  - target: mcp-transport:stdio
+  supports:
+  - target: capability:supports-mcp
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'MCP via stdio.
+
+      '
+  speaks:
+    - target: mcp-transport:stdio

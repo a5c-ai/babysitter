@@ -1,0 +1,23 @@
+nodeKind: SessionSemantics
+id: session-semantics:opencode
+attributes:
+  sessionSemanticsId: session-semantics:opencode
+  agentId: agent:opencode
+  versionRange: ">=0.0.0"
+  sessionDirStrategy: ".a5c/runs"
+  sessionIdSources:
+    - AGENT_SESSION_ID
+    - OPENCODE_SESSION_ID
+    - OPENCODE_RUN_ID
+  resumeSemantics: OpenCode uses agent session IDs with optional run IDs for shell and hook flows.
+  stateFilePatterns:
+    - ".a5c/runs/**"
+  pidMarkerPolicy: env-or-run-dir
+  metadataFields:
+    - { key: session_id, envVars: [OPENCODE_SESSION] }
+    - { key: run_id,     envVars: [OPENCODE_RUN_ID] }
+edges:
+  applies_to_version:
+    - target: agentVersion:opencode:ge-0-0-0
+  references_path:
+    - target: path:a5c-runs-dir

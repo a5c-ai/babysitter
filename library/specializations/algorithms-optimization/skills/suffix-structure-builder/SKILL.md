@@ -7,6 +7,11 @@ allowed-tools:
   - Grep
   - Glob
   - Edit
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:string-matching]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # Suffix Structure Builder Skill

@@ -1,0 +1,21 @@
+nodeKind: Role
+id: role:db-migrator
+attributes:
+  displayName: "DB Migrator"
+  isAgentic: true
+  requiredCapabilities:
+    - capability:supports-tool-use
+    - capability:supports-text-streaming
+  requiredDomains:
+    - domain:databases
+  description: |
+    Agent that authors and applies database schema migrations.
+edges:
+  holds_responsibility:
+    - responsibility:data-quality
+    - responsibility:deployment-management
+  requires_capability:
+    - target: capability:supports-tool-use
+    - target: capability:supports-text-streaming
+  applies_to:
+    - target: domain:databases

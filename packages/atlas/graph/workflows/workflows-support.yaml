@@ -1,0 +1,48 @@
+---
+nodeKind: Workflow
+id: workflow:bug-triage
+attributes:
+  displayName: "Bug Triage"
+  workflowKind: support
+  triggerType: event-driven
+  typicalCadence: "daily"
+  complexity: single-team
+  description: |
+    Classifies incoming bug reports by severity and component, assigns
+    ownership, and tracks progress through resolution.
+edges:
+  involves_role:
+    - target: role:debugger
+    - target: role:engineering-manager
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:retrospective
+attributes:
+  displayName: "Retrospective"
+  workflowKind: support
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: single-team
+  description: |
+    Facilitates team reflection on recent work, identifying what went
+    well, what needs improvement, and actionable follow-ups.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:tech-lead
+  applies_to_domain:
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:postmortem-writeup
+  performed_by_org_unit:
+    - target: org-unit:engineering

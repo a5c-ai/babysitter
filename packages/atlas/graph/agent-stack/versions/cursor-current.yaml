@@ -1,0 +1,168 @@
+nodeKind: AgentVersion
+id: agentVersion:cursor:ge-0-0-0
+attributes:
+  agentId: "cursor"
+  aliases: []
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  displayName: "Cursor"
+  summary: "Cursor IDE agent"
+  sourcePackage: "cursor"
+  osSupport:
+    - "linux"
+    - "macos"
+    - "windows"
+  agentProductId: agent:cursor
+  versionRange: ">=0.0.0"
+  releasedAt: "2024-08-01"
+  cliCommand: "cursor-agent"
+  installMethods:
+    - install:curl
+  minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    installCommands:
+      - type: curl
+        command: "curl -fsS https://cursor.com/install | bash"
+    authMethods:
+      - type: api_key
+        name: "API Key"
+        envVars: [CURSOR_API_KEY]
+      - type: browser_login
+        name: "Browser Login"
+    authFiles:
+      - "~/.cursor/settings.json"
+    hostEnvSignals:
+      - CURSOR_SESSION
+      - CURSOR_AGENT_SESSION
+    sessionDir: "~/.cursor/sessions"
+    sessionPersistence: sqlite
+    approvalModes:
+      - yolo
+      - prompt
+    capabilityFlags:
+      canResume: true
+      canFork: false
+      supportsMultiTurn: true
+      sessionPersistence: sqlite
+      supportsTextStreaming: true
+      supportsToolCallStreaming: true
+      supportsThinkingStreaming: false
+      supportsNativeTools: true
+      supportsMCP: true
+      supportsParallelToolCalls: true
+      requiresToolApproval: true
+      supportsThinking: false
+      supportsJsonMode: false
+      supportsStructuredOutput: false
+      structuredSessionTransport: none
+      sessionControlPlane: self-managed
+      supportsSkills: false
+      supportsAgentsMd: true
+      skillsFormat: none
+      supportsSubagentDispatch: false
+      supportsParallelExecution: false
+      maxParallelTasks: 1
+      supportsInteractiveMode: true
+      supportsStdinInjection: false
+      supportsImageInput: true
+      supportsImageOutput: false
+      supportsFileAttachments: true
+      supportsPlugins: true
+      pluginFormats: [mcp-server]
+      supportedPlatforms: [darwin, linux, win32]
+      requiresGitRepo: false
+      requiresPty: false
+    runtimeHooks:
+      preToolUse: nonblocking
+      postToolUse: nonblocking
+      sessionStart: nonblocking
+      sessionEnd: nonblocking
+      stop: nonblocking
+      userPromptSubmit: nonblocking
+    configSchema:
+      configFormat: json
+      configFilePaths:
+        - "~/.cursor/settings.json"
+      projectConfigFilePaths:
+        - ".cursor/settings.json"
+    displayName: "Cursor"
+    defaultModelId: "cursor-fast"
+  hookSupport:
+    interactive:
+      sessionStart: native
+      stop: native
+      userPromptSubmit: native
+      preToolUse: native
+      sessionEnd: native
+    nonInteractive:
+      sessionStart: emulated
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: true
+    positionalPrompt: false
+edges:
+  version_of:
+    - agent:cursor
+  composed_of:
+    - target: agent-core-impl:cursor.core@current
+      role: core
+    - target: agent-runtime-impl:cursor.runtime@current
+      role: runtime
+    - target: agent-platform-impl:cursor.platform@current
+      role: platform
+    - target: agent-ui-impl:cursor.ui@current
+      role: ui
+    - target: knowledge-fabric-impl:cursor.knowledge@current
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:cursor-notepads
+  sourced_from: []
+  supports:
+    - target: capability:skills
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Cursor rules and AGENTS.md support provide first-party basis for reusable persistent guidance.
+    - target: capability:supports-agents-md
+      versionRange: ">=0.40.0"
+      level: full
+      notes: Cursor reads AGENTS.md (and the .cursor/rules/ directory). Source — docs.cursor.com.
+    - target: capability:supports-file-attachments
+      versionRange: ">=0.40.0"
+      level: full
+      notes: Cursor accepts drag-drop / paste of files (images, code, docs) into the chat.
+    - target: capability:supports-image-output
+      versionRange: ">=0.40.0"
+      level: partial
+      notes: Image output is provider-bound; Cursor surfaces images returned by the underlying model.
+    - target: capability:supports-thinking
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Cursor documents both IDE and terminal agent surfaces for autonomous coding tasks.
+    - target: capability:interactive-mode
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Interactive Cursor behavior backed by CLI and agent docs.
+    - target: capability:stdin-injection
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Cursor documents headless and terminal-driven execution flows.
+    - target: capability:vision-input
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Cursor's agent overview documents image-capable reads and image generation.
+    - target: capability:runtime-hooks
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Cursor exposes hooks directly; local target profile refines canonical hook names.
+    - target: capability:stop-hook
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Normalized stop-hook capability grounded in Cursor hooks + local stop-name mapping.
+    - target: capability:can-resume
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Cursor documents checkpoint restoration and persistent shell-mode context.

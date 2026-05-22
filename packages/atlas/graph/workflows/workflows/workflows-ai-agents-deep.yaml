@@ -1,0 +1,106 @@
+---
+nodeKind: Workflow
+id: workflow:rag-pipeline-evaluation
+attributes:
+  displayName: "RAG Pipeline Evaluation"
+  workflowKind: data
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Evaluates retrieval-augmented generation pipeline quality end-to-end —
+    measuring retrieval precision@k and recall@k against ground-truth relevance
+    judgments, scoring generation faithfulness and hallucination rates via LLM
+    judges, benchmarking chunking and embedding strategies, profiling latency
+    across retrieval and generation stages, and running regression suites before
+    promoting pipeline changes. Excludes RAG architecture design and embedding
+    model training.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:ai-champion
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:retrieval-augmented-generation
+    - target: skill-area:eval-driven-development
+    - target: skill-area:prompt-engineering
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:ai-tooling-evaluation
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:ai-enablement
+    - target: org-unit:ml-team
+    - target: org-unit:research-engineering
+---
+nodeKind: Workflow
+id: workflow:ai-content-moderation-review
+attributes:
+  displayName: "AI Content Moderation Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews the effectiveness of AI-powered content moderation systems —
+    measuring precision and recall of toxicity classifiers, auditing
+    false-positive rates and appeal outcomes, validating moderation policy
+    alignment with updated content guidelines, benchmarking latency for
+    real-time moderation endpoints, and testing adversarial bypass resistance.
+    Excludes moderation policy authoring and classifier training.
+edges:
+  involves_role:
+    - target: role:ai-champion
+    - target: role:security-reviewer
+    - target: role:ml-engineer
+  requires_skill_area:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:ai-safety-guardrails
+    - target: responsibility:ai-agent-usage-review
+  performed_by_org_unit:
+    - target: org-unit:ai-enablement
+    - target: org-unit:ml-team
+    - target: org-unit:application-security-team
+---
+nodeKind: Workflow
+id: workflow:multi-agent-orchestration-review
+attributes:
+  displayName: "Multi-Agent Orchestration Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-deployment"
+  complexity: cross-team
+  description: |
+    Reviews multi-agent system architectures before production deployment —
+    auditing agent role definitions, inter-agent communication protocols, state
+    graph correctness, tool-use permission boundaries, escalation and
+    human-in-the-loop gates, cost-per-invocation budgets, and failure-mode
+    handling across LangGraph/CrewAI/AutoGen-style orchestrations. Validates
+    that agent loops terminate and outputs converge. Excludes individual agent
+    prompt engineering.
+edges:
+  involves_role:
+    - target: role:ai-champion
+    - target: role:staff-engineer
+    - target: role:ml-engineer
+  requires_skill_area:
+    - target: skill-area:agentic-loops
+    - target: skill-area:tool-use
+    - target: skill-area:context-management
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:ai-safety-guardrails
+  performed_by_org_unit:
+    - target: org-unit:ai-enablement
+    - target: org-unit:architecture-guild
+    - target: org-unit:ml-team

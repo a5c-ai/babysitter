@@ -1,0 +1,22 @@
+nodeKind: LiveSession
+id: live-session:running-example
+attributes:
+  displayName: "Running Symphony LiveSession"
+  threadId: "thr_01KQHJZ9ABC"
+  turnId: "turn_01KQHJZAXYZ"
+  sessionIdComposition: "${threadId}-${turnId}"
+  agentSubprocessPid: 48217
+  startedAt: "2026-05-01T10:25:00Z"
+  lastEventAt: "2026-05-01T10:31:12Z"
+  lastEvent: turn_completed
+  lastMessage: "Applied patch to packages/cloud/src/runtime.ts"
+  turnCount: 4
+  inputTokens: 12450
+  outputTokens: 3210
+  totalTokens: 15660
+  tokenAccountingMode: absolute
+edges:
+  shadows_session:
+    - target: session:01kqex-session-001
+  driven_by_run_attempt:
+    - target: run-attempt:retrying-example

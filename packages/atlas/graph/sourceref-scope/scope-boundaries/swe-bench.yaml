@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:swe-bench.scope
+attributes:
+  subjectId: benchmark:swe-bench
+  inScope: |
+    Real-world repository issue-fix benchmark — given a GitHub issue and codebase, generate a patch that passes hidden test cases. ~2,294 issues across 12 popular Python repositories.
+  outOfScope: |
+    Single-file code generation (use HumanEval/MBPP), competitive programming (use LiveCodeBench), and non-Python repositories.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:swe-bench

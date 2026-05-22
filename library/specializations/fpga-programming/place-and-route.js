@@ -16,6 +16,12 @@
  * @references
  * - Vivado Implementation: https://docs.amd.com/r/en-US/ug904-vivado-implementation
  * - Quartus Fitter: https://www.intel.com/content/www/us/en/programmable/documentation/mwh1409960181641.html
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis, skill-area:timing-closure]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:hardware-software-integration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

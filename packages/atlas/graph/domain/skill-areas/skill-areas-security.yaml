@@ -1,0 +1,148 @@
+---
+nodeKind: SkillArea
+id: skill-area:sast
+attributes:
+  displayName: "Static Application Security Testing (SAST)"
+  description: |
+    Static analysis for security — taint tracking, rule authoring,
+    triage at scale, and CI integration.
+  domains:
+    - specialization:security-research
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:security-research
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:dast
+attributes:
+  displayName: "Dynamic Application Security Testing (DAST)"
+  description: |
+    Black-box runtime scanning of web apps and APIs — auth flows,
+    crawl coverage, and noise reduction.
+  domains:
+    - specialization:security-research
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:security-research
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:threat-modeling
+attributes:
+  displayName: "Threat Modeling"
+  description: |
+    STRIDE / PASTA / attack-tree threat modeling against system
+    designs, with prioritized mitigations and abuse cases.
+  domains:
+    - specialization:security-research
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:security-research
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:secret-scanning
+attributes:
+  displayName: "Secret Scanning"
+  description: |
+    Detecting committed secrets in code/CI artifacts — entropy and
+    pattern detectors, push protection, and secret remediation flows.
+  domains:
+    - specialization:security-research
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:security-research
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:dependency-vulnerability-mgmt
+attributes:
+  displayName: "Dependency Vulnerability Management"
+  description: |
+    SCA workflows — SBOM generation, advisory ingestion, vulnerability
+    triage, and remediation SLAs.
+  domains:
+    - specialization:security-research
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:security-research
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:supply-chain-security
+attributes:
+  displayName: "Software Supply Chain Security"
+  description: |
+    SLSA framework, signed builds (Sigstore/cosign), provenance,
+    artifact attestations, and reproducible builds.
+  domains:
+    - specialization:security-research
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: specialization:security-research
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:container-security
+attributes:
+  displayName: "Container Security"
+  description: |
+    Hardening container images and runtimes — minimal base images,
+    image scanning, seccomp/AppArmor, and admission control.
+  domains:
+    - specialization:security-research
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:security-research
+      confidence: primary
+  uses_tool:
+    - tool:docker
+    - tool:kubernetes
+---
+nodeKind: SkillArea
+id: skill-area:network-security
+attributes:
+  displayName: "Network Security"
+  description: |
+    Network-layer defense — segmentation, firewalls, mTLS, IDS/IPS,
+    and zero-trust network architectures.
+  domains:
+    - specialization:security-research
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:security-research
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:identity-security
+      strength: recommended
+    - target: skill-area:threat-detection
+      strength: recommended
+    - target: skill-area:vulnerability-management
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:identity-security
+attributes:
+  displayName: "Identity & Access Security"
+  description: |
+    Securing identity systems — OIDC/SAML, MFA design, session
+    management, account-takeover defenses, and credential hygiene.
+  domains:
+    - specialization:security-research
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:security-research
+      confidence: primary
+  uses_stack_part:
+    - stack-part:identity-provider
+    - stack-part:auth-broker

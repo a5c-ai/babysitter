@@ -1,0 +1,39 @@
+# Gemini CLI Scheduled Docs Audit — vanilla NI via Google/Vertex
+#
+# Runs weekly to check for stale documentation using Gemini CLI
+# through the Vertex AI provider.
+
+name: Gemini Docs Audit
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Monday 9am UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: a5c-ai/babysitter/packages/triggers@main
+        with:
+          harness: gemini
+          provider: google
+          model: gemini-3.1-pro-preview
+          interaction-mode: non-interactive
+          prompt: |
+            Audit the docs/ directory for staleness:
+            1. Check each markdown file's last-modified date
+            2. Cross-reference with recent code changes
+            3. Flag documents that reference deleted files or functions
+            4. Create a GitHub issue listing stale documents
+          max-turns: '15'
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_CLOUD_PROJECT: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
+          GOOGLE_GENAI_USE_VERTEXAI: 'true'

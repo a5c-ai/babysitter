@@ -1,0 +1,157 @@
+---
+nodeKind: Tool
+id: tool:aider
+attributes:
+  displayName: "Aider"
+  homepageUrl: "https://github.com/Aider-AI/aider"
+  kind: other
+  description: |
+    AI pair programming tool that runs in the terminal and edits code
+    in your local git repository. Connects to Claude, GPT-4, and other
+    LLMs to implement features, fix bugs, and refactor code with
+    automatic git commits. Supports a chat interface, voice coding,
+    and linting integration. Designed for developers who want AI
+    assistance without leaving their terminal workflow.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:autonomous-coding-engagement
+  alternative_to:
+    - target: tool:continue-dev
+      comparison: "AI coding assistants — Aider is terminal-based; Continue is IDE-embedded"
+    - target: tool:cline
+      comparison: "AI coding agents"
+    - target: tool:sweep
+      comparison: "AI coding agents"
+    - target: tool:bolt-new
+      comparison: "AI coding tools"
+    - target: tool:lovable
+      comparison: "AI coding tools"
+    - target: tool:v0-dev
+      comparison: "AI coding tools"
+    - target: tool:windsurf
+      comparison: "AI coding agents"
+    - target: tool:replit
+      comparison: "AI-assisted development platforms"
+    - target: tool:cursor
+      comparison: "AI coding assistants"
+---
+nodeKind: Tool
+id: tool:continue-dev
+attributes:
+  displayName: "Continue"
+  homepageUrl: "https://github.com/continuedev/continue"
+  kind: other
+  description: |
+    Open-source AI code assistant that integrates into VS Code and
+    JetBrains IDEs. Supports autocomplete, chat, inline editing, and
+    context-aware suggestions with any LLM provider (local or remote).
+    Features include codebase indexing, documentation context, and
+    custom slash commands. Designed as an open alternative to Copilot
+    with full model flexibility.
+edges:
+  belongs_to_language:
+    - language:typescript
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:editor-fluency
+---
+nodeKind: Tool
+id: tool:cline
+attributes:
+  displayName: "Cline"
+  homepageUrl: "https://github.com/cline/cline"
+  kind: other
+  description: |
+    Autonomous AI coding agent that runs as a VS Code extension,
+    capable of creating and editing files, executing terminal commands,
+    and using the browser. Supports Claude, GPT-4, and local models
+    with a human-in-the-loop approval flow for each action. Excels at
+    multi-file refactoring and feature implementation within the IDE.
+edges:
+  belongs_to_language:
+    - language:typescript
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:autonomous-coding-engagement
+---
+nodeKind: Tool
+id: tool:sweep
+attributes:
+  displayName: "Sweep"
+  homepageUrl: "https://github.com/sweepai/sweep"
+  kind: other
+  description: |
+    AI developer that turns GitHub issues into pull requests. Reads the
+    codebase, plans changes, writes code, and handles reviewer feedback
+    in an automated loop. Specializes in small- to medium-sized tasks
+    like bug fixes, feature additions, and refactors that can be fully
+    specified in an issue description. Integrates via GitHub App.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:bug-fixing-from-issues
+---
+nodeKind: Tool
+id: tool:bolt-new
+attributes:
+  displayName: "Bolt.new"
+  homepageUrl: "https://bolt.new"
+  kind: other
+  description: |
+    AI-powered web application builder by StackBlitz that generates,
+    runs, and deploys full-stack applications from natural language
+    prompts. Operates entirely in the browser using WebContainers,
+    enabling instant prototyping without local setup. Supports React,
+    Next.js, Vue, and other frameworks with real-time preview and
+    iterative refinement via chat.
+edges:
+  belongs_to_language:
+    - language:typescript
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:prototyping
+---
+nodeKind: Tool
+id: tool:lovable
+attributes:
+  displayName: "Lovable"
+  homepageUrl: "https://lovable.dev"
+  kind: other
+  description: |
+    AI full-stack application generator that builds production-ready
+    web apps from natural language descriptions. Produces clean React
+    and TypeScript code with Supabase integration for auth, database,
+    and storage. Features include visual editing, GitHub sync, and
+    one-click deployment. Targets non-technical founders and designers
+    who need functional prototypes quickly.
+edges:
+  belongs_to_language:
+    - language:typescript
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:prototyping
+---
+nodeKind: Tool
+id: tool:v0-dev
+attributes:
+  displayName: "v0"
+  homepageUrl: "https://v0.dev"
+  kind: other
+  description: |
+    Vercel's generative UI tool that creates React components from text
+    prompts and images. Produces shadcn/ui and Tailwind CSS code that
+    can be copied directly into Next.js projects. Specializes in frontend
+    component generation — forms, dashboards, landing pages, and data
+    displays — rather than full-stack application scaffolding. Integrates
+    with Vercel's deployment pipeline.
+edges:
+  belongs_to_language:
+    - language:typescript
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:prototyping

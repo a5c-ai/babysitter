@@ -1,0 +1,156 @@
+---
+nodeKind: Workflow
+id: workflow:paid-search-campaign-optimization
+attributes:
+  displayName: "Paid Search Campaign Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Optimizes paid search campaigns across Google and Bing ads — reviewing
+    keyword bid adjustments, quality score trends, negative keyword lists,
+    ad copy performance, match-type distribution, and budget pacing against
+    ROAS targets. Produces bid strategy adjustments and keyword
+    expansion/pruning recommendations. Excludes new campaign creation and
+    landing page design.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:growth-team
+---
+nodeKind: Workflow
+id: workflow:programmatic-media-buying-review
+attributes:
+  displayName: "Programmatic Media Buying Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Reviews programmatic display and video buying performance — evaluating
+    DSP configuration, audience segment performance, bid strategy
+    effectiveness, brand safety compliance, viewability rates, and
+    supply-path optimization. Produces media plan adjustments and audience
+    refinement recommendations. Excludes creative production and new channel
+    activation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:social-media-ad-performance-review
+attributes:
+  displayName: "Social Media Ad Performance Review"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Evaluates paid social campaign performance across Meta, TikTok, and
+    LinkedIn — analyzing creative fatigue signals, audience overlap,
+    cost-per-action trends, placement optimization, and platform-specific
+    algorithm shifts. Identifies underperforming creatives for rotation and
+    high-potential audiences for budget reallocation. Produces performance
+    dashboard updates and creative refresh recommendations. Excludes organic
+    social content planning.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:product-designer
+    - target: role:planner
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:display-retargeting-optimization
+attributes:
+  displayName: "Display Retargeting Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: single-team
+  description: |
+    Optimizes retargeting campaign performance — reviewing audience segment
+    recency windows, frequency capping thresholds, creative variant fatigue,
+    cross-device attribution accuracy, and suppression list hygiene.
+    Evaluates diminishing returns by audience tier and adjusts bid
+    multipliers accordingly. Produces audience refresh recommendations and
+    frequency cap adjustments. Excludes first-party data strategy and pixel
+    implementation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+---
+nodeKind: Workflow
+id: workflow:ad-creative-production-cycle
+attributes:
+  displayName: "Ad Creative Production Cycle"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-campaign"
+  complexity: cross-team
+  description: |
+    Manages the end-to-end creative production pipeline for advertising —
+    from creative brief intake and concept development through design
+    iteration, copywriting, format adaptation across channels, A/B variant
+    creation, stakeholder approval routing, and asset handoff to ad
+    platforms. Produces approved creative packages with platform-specific
+    specifications. Excludes media planning and campaign setup.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:planner
+    - target: role:technical-writer
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:design-team
+    - target: org-unit:content-team

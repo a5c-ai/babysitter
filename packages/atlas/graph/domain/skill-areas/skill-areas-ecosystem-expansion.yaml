@@ -1,0 +1,737 @@
+---
+nodeKind: SkillArea
+id: skill-area:software-development
+attributes:
+  displayName: "Software Development"
+  description: |
+    Core software development practices covering the full engineering lifecycle —
+    requirements analysis, architecture design, implementation, code review,
+    and iterative delivery across modern programming languages and frameworks.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:dynamic-programming
+      strength: recommended
+    - target: skill-area:graph-algorithms
+      strength: recommended
+    - target: skill-area:string-matching
+      strength: recommended
+    - target: skill-area:computational-geometry
+      strength: recommended
+    - target: skill-area:np-hard-heuristics
+      strength: recommended
+    - target: skill-area:concurrency-multithreading
+      strength: recommended
+    - target: skill-area:error-handling-exception-management
+      strength: recommended
+    - target: skill-area:file-handling
+      strength: recommended
+    - target: skill-area:parsing-data-formats
+      strength: recommended
+    - target: skill-area:command-line-interface-tools
+      strength: recommended
+    - target: skill-area:date-time-manipulation
+      strength: recommended
+    - target: skill-area:compression-archiving
+      strength: recommended
+    - target: skill-area:typescript-generic-programming
+      strength: recommended
+    - target: skill-area:python-implementation
+      strength: recommended
+    - target: skill-area:json-data-wrangling
+      strength: recommended
+    - target: skill-area:language-design
+      strength: recommended
+    - target: skill-area:compiler-implementation
+      strength: recommended
+    - target: skill-area:polyglot-development
+      strength: recommended
+    - target: skill-area:local-development
+      strength: recommended
+    - target: skill-area:developer-experience
+      strength: recommended
+    - target: skill-area:desktop-ui-frameworks
+      strength: recommended
+    - target: skill-area:bug-fixing-from-issues
+      strength: recommended
+    - target: skill-area:general-knowledge-reasoning
+      strength: recommended
+    - target: skill-area:mathematical-reasoning
+      strength: recommended
+    - target: skill-area:rust-async-runtime
+      strength: recommended
+    - target: skill-area:serialization-deserialization
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:developer-environment
+attributes:
+  displayName: "Developer Environment"
+  description: |
+    Configuring and maintaining productive developer environments — IDE setup,
+    dotfiles, shell tooling, dev containers, local service orchestration, and
+    environment parity between development and production.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:ci-cd
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:communication
+attributes:
+  displayName: "Communication & Collaboration"
+  description: |
+    Team communication and collaboration tooling — integrating chat platforms,
+    async documentation, meeting coordination, and notification routing into
+    engineering workflows to reduce context-switching and improve alignment.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:ci-cd
+attributes:
+  displayName: "CI/CD"
+  description: |
+    Continuous integration and continuous delivery pipelines — automated builds,
+    test execution, artifact publishing, environment promotion, and release
+    automation using GitHub Actions, GitLab CI, CircleCI, and similar platforms.
+  domains:
+    - domain:devops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:deployment-automation
+      strength: required
+    - target: skill-area:ci-security
+      strength: recommended
+    - target: skill-area:deployment-infrastructure-management
+      strength: recommended
+    - target: skill-area:containerization
+      strength: recommended
+    - target: skill-area:terraform-infrastructure
+      strength: recommended
+    - target: skill-area:github-actions-authoring
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:model-serving
+attributes:
+  displayName: "Model Serving"
+  description: |
+    Deploying and operating machine learning models in production — inference
+    servers, batching strategies, hardware-aware optimization, autoscaling,
+    and low-latency endpoint design for ML and LLM workloads.
+  domains:
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:llm-infrastructure
+      strength: recommended
+    - target: skill-area:model-serving-deployment
+      strength: recommended
+    - target: skill-area:model-serving-operations
+      strength: recommended
+    - target: skill-area:model-optimisation
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:ai-evaluation
+attributes:
+  displayName: "AI Evaluation"
+  description: |
+    Systematic evaluation of AI model outputs — benchmark design, human
+    preference collection, automated scoring pipelines, and red-teaming
+    for quality, safety, and alignment assessment.
+  domains:
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:platform-engineering
+attributes:
+  displayName: "Platform Engineering"
+  description: |
+    Building internal developer platforms that provide self-service
+    infrastructure, golden paths, and paved roads — reducing cognitive load
+    for application teams through abstractions over cloud primitives.
+  domains:
+    - domain:platform-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:platform-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:vulnerability-scanning
+attributes:
+  displayName: "Vulnerability Scanning"
+  description: |
+    Automated detection of known vulnerabilities in code, dependencies, containers,
+    and infrastructure — SAST, SCA, image scanning, and CVE triage using tools
+    like Trivy, Snyk, Grype, and Dependabot.
+  domains:
+    - domain:cybersecurity
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:application-security
+      strength: recommended
+    - target: skill-area:dast-scanning
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:iac-security
+attributes:
+  displayName: "IaC Security"
+  description: |
+    Security analysis of Infrastructure-as-Code configurations — detecting
+    misconfigurations in Terraform, CloudFormation, and Kubernetes manifests
+    using tools like Checkov, tfsec, KICS, and OPA Conftest.
+  domains:
+    - domain:cybersecurity
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:api-testing
+attributes:
+  displayName: "API Testing"
+  description: |
+    Testing REST, GraphQL, and gRPC APIs — contract testing, integration tests,
+    fuzz testing, load testing, and API spec validation using tools like
+    Postman, Hurl, Dredd, and k6.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:e2e-testing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:frontend-testing
+attributes:
+  displayName: "Frontend Testing"
+  description: |
+    Testing web frontend applications — unit tests, component tests, end-to-end
+    browser automation, visual regression, and accessibility testing using
+    Playwright, Cypress, Vitest, and Testing Library.
+  domains:
+    - domain:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:frontend-e2e-testing
+      strength: recommended
+    - target: skill-area:frontend-performance-testing
+      strength: recommended
+    - target: skill-area:state-management-testing
+      strength: recommended
+    - target: skill-area:react-testing
+      strength: recommended
+    - target: skill-area:visual-regression-testing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:llm-infrastructure
+attributes:
+  displayName: "LLM Infrastructure"
+  description: |
+    Building and operating infrastructure for large language model workloads —
+    GPU cluster management, inference serving frameworks, model routing, token
+    budget management, and multi-tenant LLM gateway design.
+  domains:
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:model-optimisation
+attributes:
+  displayName: "Model Optimisation"
+  description: |
+    Optimizing ML model performance and efficiency — quantization, pruning,
+    distillation, compilation (ONNX, TensorRT), and hardware-specific tuning
+    to reduce inference latency and cost without sacrificing quality.
+  domains:
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:llm-observability
+attributes:
+  displayName: "LLM Observability"
+  description: |
+    Monitoring and debugging LLM-powered applications in production — tracing
+    prompt/response chains, tracking token usage and cost, detecting drift,
+    and capturing user feedback for continuous improvement.
+  domains:
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:ui-ux-design
+attributes:
+  displayName: "UI/UX Design"
+  description: |
+    Designing user interfaces and experiences — interaction design, information
+    architecture, prototyping, design systems, and usability testing to create
+    intuitive and accessible products.
+  domains:
+    - domain:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:application-security
+attributes:
+  displayName: "Application Security"
+  description: |
+    Securing applications against common vulnerabilities — OWASP Top 10
+    mitigations, secure coding practices, threat modeling, penetration testing,
+    and security code review across web and API surfaces.
+  domains:
+    - domain:cybersecurity
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:compliance-automation
+      strength: recommended
+    - target: skill-area:vulnerability-scanning-remediation
+      strength: recommended
+    - target: skill-area:penetration-testing-ethical-hacking
+      strength: recommended
+    - target: skill-area:security-monitoring-siem
+      strength: recommended
+    - target: skill-area:endpoint-security-edr
+      strength: recommended
+    - target: skill-area:application-security-testing
+      strength: recommended
+    - target: skill-area:incident-response-forensics
+      strength: recommended
+    - target: skill-area:data-protection-dlp
+      strength: recommended
+    - target: skill-area:threat-intelligence-hunting
+      strength: recommended
+    - target: skill-area:sast
+      strength: recommended
+    - target: skill-area:dast
+      strength: recommended
+    - target: skill-area:threat-modeling
+      strength: recommended
+    - target: skill-area:secret-scanning
+      strength: recommended
+    - target: skill-area:dependency-vulnerability-mgmt
+      strength: recommended
+    - target: skill-area:supply-chain-security
+      strength: recommended
+    - target: skill-area:container-security
+      strength: recommended
+    - target: skill-area:code-cybersecurity
+      strength: recommended
+    - target: skill-area:runtime-security
+      strength: recommended
+    - target: skill-area:policy-enforcement
+      strength: recommended
+    - target: skill-area:access-control
+      strength: recommended
+    - target: skill-area:compliance-scanning
+      strength: recommended
+    - target: skill-area:iac-security
+      strength: recommended
+    - target: skill-area:risk-assessment
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:code-quality
+attributes:
+  displayName: "Code Quality"
+  description: |
+    Maintaining and improving codebase quality — static analysis, linting,
+    code complexity metrics, technical debt tracking, refactoring strategies,
+    and quality gates integrated into CI/CD pipelines.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:ci-pipeline-optimization
+      strength: helpful
+    - target: skill-area:dead-code-elimination
+      strength: recommended
+    - target: skill-area:dependency-upgrade-strategies
+      strength: recommended
+    - target: skill-area:code-analysis-linting
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:e-commerce
+attributes:
+  displayName: "E-Commerce"
+  description: |
+    Building and operating e-commerce platforms — product catalog management,
+    shopping cart, checkout flows, inventory systems, order management, and
+    integrations with payment gateways and fulfillment providers.
+  domains:
+    - domain:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:cloud-deployment
+attributes:
+  displayName: "Cloud Deployment"
+  description: |
+    Deploying applications to cloud platforms — containerized deployments,
+    managed services, multi-region strategies, blue-green and canary releases,
+    and GitOps-driven reconciliation on AWS, GCP, and Azure.
+  domains:
+    - domain:cloud-infra
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cloud-infra
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:deployment-automation
+      strength: required
+---
+nodeKind: SkillArea
+id: skill-area:frontend-development
+attributes:
+  displayName: "Frontend Development"
+  description: |
+    Building modern web frontend applications — component architecture, state
+    management, routing, API integration, accessibility, and performance
+    optimization using React, Vue, Svelte, and similar frameworks.
+  domains:
+    - domain:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:react-state-management
+      strength: required
+    - target: skill-area:frontend-performance
+      strength: recommended
+    - target: skill-area:android-native
+      strength: helpful
+    - target: skill-area:ios-native
+      strength: helpful
+    - target: skill-area:animation-transitions
+      strength: recommended
+    - target: skill-area:application-state-management
+      strength: recommended
+    - target: skill-area:web-accessibility
+      strength: recommended
+    - target: skill-area:web-performance
+      strength: recommended
+    - target: skill-area:frontend-routing
+      strength: recommended
+    - target: skill-area:form-management
+      strength: recommended
+    - target: skill-area:data-fetching-caching
+      strength: recommended
+    - target: skill-area:ui-styling
+      strength: recommended
+    - target: skill-area:design-systems
+      strength: recommended
+    - target: skill-area:server-side-rendering
+      strength: recommended
+    - target: skill-area:progressive-enhancement
+      strength: recommended
+    - target: skill-area:browser-compatibility
+      strength: recommended
+    - target: skill-area:vue-components
+      strength: recommended
+    - target: skill-area:react-components
+      strength: recommended
+    - target: skill-area:frontend-testing
+      strength: recommended
+    - target: skill-area:ui-component-libraries
+      strength: recommended
+    - target: skill-area:internationalization
+      strength: recommended
+    - target: skill-area:web-scraping
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:machine-learning
+attributes:
+  displayName: "Machine Learning"
+  description: |
+    Building and training machine learning models — supervised and unsupervised
+    learning, feature engineering, model selection, hyperparameter tuning,
+    and experiment tracking using scikit-learn, PyTorch, and TensorFlow.
+  domains:
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:natural-language-processing
+      strength: required
+    - target: skill-area:model-evaluation
+      strength: recommended
+    - target: skill-area:computer-vision
+      strength: recommended
+    - target: skill-area:deep-learning-libraries
+      strength: recommended
+    - target: skill-area:machine-learning-frameworks
+      strength: recommended
+    - target: skill-area:bias-fairness-analysis
+      strength: recommended
+    - target: skill-area:explainability-interpretation
+      strength: recommended
+    - target: skill-area:model-serving-deployment
+      strength: recommended
+    - target: skill-area:model-serving-operations
+      strength: recommended
+    - target: skill-area:ml-fine-tuning
+      strength: recommended
+    - target: skill-area:feature-engineering-pipelines
+      strength: recommended
+    - target: skill-area:model-registry-management
+      strength: recommended
+    - target: skill-area:hyperparameter-tuning-experiment-management
+      strength: recommended
+    - target: skill-area:automated-retraining
+      strength: recommended
+    - target: skill-area:ml-governance-compliance
+      strength: recommended
+    - target: skill-area:ci-cd-ml-pipelines
+      strength: recommended
+    - target: skill-area:model-monitoring-drift-detection
+      strength: recommended
+    - target: skill-area:model-optimisation
+      strength: recommended
+    - target: skill-area:training-data-testing
+      strength: recommended
+    - target: skill-area:bias-fairness-testing
+      strength: recommended
+    - target: skill-area:model-robustness-testing
+      strength: recommended
+    - target: skill-area:inference-performance-testing
+      strength: recommended
+    - target: skill-area:model-explainability-testing
+      strength: recommended
+    - target: skill-area:ml-pipeline-testing
+      strength: recommended
+    - target: skill-area:model-validation-testing
+      strength: recommended
+    - target: skill-area:data-science-experimentation
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:data-collection
+attributes:
+  displayName: "Data Collection"
+  description: |
+    Gathering and ingesting data from diverse sources — web scraping, API
+    integrations, event capture, form submissions, and batch ingestion pipelines
+    for analytics, ML training, and operational data stores.
+  domains:
+    - domain:data-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:developer-experience
+attributes:
+  displayName: "Developer Experience"
+  description: |
+    Improving the end-to-end experience of software engineers — faster feedback
+    loops, better tooling, clear documentation, streamlined onboarding, and
+    reducing friction in the daily development workflow.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:runtime-security
+attributes:
+  displayName: "Runtime Security"
+  description: |
+    Protecting applications and infrastructure at runtime — eBPF-based threat
+    detection, syscall filtering, container isolation, anomaly detection, and
+    real-time response using tools like Falco, Tetragon, and AppArmor.
+  domains:
+    - domain:cybersecurity
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:threat-detection
+attributes:
+  displayName: "Threat Detection"
+  description: |
+    Identifying malicious activity across infrastructure and applications —
+    SIEM integration, behavioral analytics, IOC correlation, and automated
+    alert triage to accelerate incident detection and response.
+  domains:
+    - domain:cybersecurity
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:policy-enforcement
+attributes:
+  displayName: "Policy Enforcement"
+  description: |
+    Enforcing security and compliance policies across infrastructure — OPA/Rego
+    policies, admission controllers, network policy, and guardrails that
+    prevent non-compliant resources from reaching production.
+  domains:
+    - domain:cybersecurity
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:access-control
+attributes:
+  displayName: "Access Control"
+  description: |
+    Designing and implementing access control systems — RBAC, ABAC, IAM
+    policies, least-privilege enforcement, privilege escalation prevention,
+    and audit logging across cloud and on-premises environments.
+  domains:
+    - domain:security
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:compliance-scanning
+attributes:
+  displayName: "Compliance Scanning"
+  description: |
+    Automated compliance checks against regulatory and internal standards —
+    CIS benchmarks, SOC 2, PCI DSS, HIPAA controls, and continuous posture
+    assessment using cloud security posture management tools.
+  domains:
+    - domain:cybersecurity
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:dast-scanning
+attributes:
+  displayName: "DAST Scanning"
+  description: |
+    Dynamic application security testing — runtime vulnerability detection
+    through active scanning of live applications, fuzzing, authenticated
+    crawling, and vulnerability validation using OWASP ZAP and Burp Suite.
+  domains:
+    - domain:cybersecurity
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:web-security-testing
+attributes:
+  displayName: "Web Security Testing"
+  description: |
+    Comprehensive security testing of web applications — manual and automated
+    vulnerability assessment, authentication bypass testing, injection attacks,
+    and security regression testing integrated into the SDLC.
+  domains:
+    - domain:cybersecurity
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:application-security
+      strength: recommended

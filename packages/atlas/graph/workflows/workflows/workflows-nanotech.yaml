@@ -1,0 +1,67 @@
+---
+nodeKind: Workflow
+id: workflow:nanofabrication-process-audit
+attributes:
+  displayName: "Nanofabrication Process Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Audits nanofabrication cleanroom processes for yield and
+    repeatability -- reviewing lithography overlay accuracy, etching
+    uniformity across wafer maps, deposition thickness control via
+    ellipsometry trending, particle contamination counts, equipment PM
+    compliance, and correlating process parameter drift with device yield
+    fallout. Produces corrective action requests for out-of-spec
+    processes. Excludes process development.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:data-scientist
+    - target: role:performance-profiler
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:nanotechnology
+    - target: domain:materials-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:research-engineering
+---
+nodeKind: Workflow
+id: workflow:nano-characterization-pipeline
+attributes:
+  displayName: "Nano-Characterization Pipeline"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-sample-batch"
+  complexity: single-team
+  description: |
+    Processes nanoscale characterization data through automated analysis
+    -- ingesting AFM topography scans, TEM/STEM micrographs, XPS
+    spectra, and nanoindentation curves, applying image segmentation for
+    particle size distribution, fitting spectral peaks for composition
+    analysis, computing hardness/modulus from Oliver-Pharr method, and
+    populating the nanomaterials property database with uncertainty
+    quantification. Excludes instrument operation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:ml-engineer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  applies_to_domain:
+    - target: domain:nanotechnology
+    - target: domain:scientific-computing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:data-team

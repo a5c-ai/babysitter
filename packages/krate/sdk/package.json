@@ -1,0 +1,14 @@
+{
+  "name": "@a5c-ai/krate-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Client SDK for the Krate Kubernetes-native forge",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": { ".": "./src/index.js" },
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

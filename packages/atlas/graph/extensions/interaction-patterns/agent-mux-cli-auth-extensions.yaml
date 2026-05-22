@@ -1,0 +1,357 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-auth-check
+attributes:
+  displayName: "amux auth check"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "auth check"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:auth state printed"
+    - "1:general-error:internal error"
+    - "5:auth-error:AUTH_ERROR"
+  description: |
+    Print authentication state for one agent (or all if no <agent>).
+    Source: packages/agent-mux/cli/src/commands/auth.ts:55-101.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-auth-setup
+attributes:
+  displayName: "amux auth setup"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "auth setup"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:setup guidance printed"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent>"
+    - "5:auth-error:AUTH_ERROR"
+  description: |
+    Print auth setup guidance (steps, env vars, docs URL) for an agent.
+    Source: packages/agent-mux/cli/src/commands/auth.ts:103-138.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-plugin-list
+attributes:
+  displayName: "amux plugin list"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "plugin list"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:native plugin list emitted"
+    - "1:general-error:plugin command failed / EXECUTION_ERROR"
+    - "2:usage-error:VALIDATION_ERROR (missing agent or unsupported sub)"
+    - "6:capability-error:agent does not support plugins"
+  description: |
+    List plugins via the agent-native plugin command. Source:
+    packages/agent-mux/cli/src/commands/plugin.ts:12-99.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-plugin-install
+attributes:
+  displayName: "amux plugin install"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "plugin install"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:install command succeeded"
+    - "1:general-error:plugin command failed / EXECUTION_ERROR"
+    - "2:usage-error:VALIDATION_ERROR"
+    - "6:capability-error:agent does not support plugins"
+  description: |
+    Install a plugin via the agent-native plugin command. Source:
+    packages/agent-mux/cli/src/commands/plugin.ts:12-99.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-plugin-enable
+attributes:
+  displayName: "amux plugin enable"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "plugin enable"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:enable succeeded"
+    - "1:general-error:plugin command failed"
+    - "2:usage-error:VALIDATION_ERROR"
+    - "6:capability-error:agent does not support plugins"
+  description: |
+    Enable a plugin via the agent-native plugin command. Source:
+    packages/agent-mux/cli/src/commands/plugin.ts:12-99.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-plugin-disable
+attributes:
+  displayName: "amux plugin disable"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "plugin disable"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:disable succeeded"
+    - "1:general-error:plugin command failed"
+    - "2:usage-error:VALIDATION_ERROR"
+    - "6:capability-error:agent does not support plugins"
+  description: |
+    Disable a plugin via the agent-native plugin command. Source:
+    packages/agent-mux/cli/src/commands/plugin.ts:12-99.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-plugin-marketplace
+attributes:
+  displayName: "amux plugin marketplace"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "plugin marketplace"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:marketplace command output"
+    - "1:general-error:plugin command failed"
+    - "2:usage-error:VALIDATION_ERROR"
+    - "6:capability-error:agent does not support plugins"
+  description: |
+    Open / query the agent-native plugin marketplace. Source:
+    packages/agent-mux/cli/src/commands/plugin.ts:12-99.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-mcp-list
+attributes:
+  displayName: "amux mcp list"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "mcp list"
+  flags:
+    - "--global:0:use global configuration (default)"
+    - "--project:0:use project-level configuration"
+  subcommandExitCodes:
+    - "0:success:listed MCP servers"
+    - "1:general-error:client.plugins.list threw"
+  description: |
+    List installed MCP servers for an agent (filters plugins by
+    format=mcp-server). Source:
+    packages/agent-mux/cli/src/commands/mcp.ts:50-74.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-mcp-install
+attributes:
+  displayName: "amux mcp install"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "mcp install"
+  flags:
+    - "--global:0:install globally (default)"
+    - "--project:0:install at project scope"
+  subcommandExitCodes:
+    - "0:success:server installed"
+    - "1:general-error:install threw / missing <server>"
+  description: |
+    Install an MCP server via client.plugins.install. Source:
+    packages/agent-mux/cli/src/commands/mcp.ts:75-84.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-mcp-uninstall
+attributes:
+  displayName: "amux mcp uninstall"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "mcp uninstall"
+  flags:
+    - "--global:0:operate on global config"
+  subcommandExitCodes:
+    - "0:success:server uninstalled"
+    - "1:general-error:uninstall threw / missing <server>"
+  description: |
+    Uninstall an MCP server via client.plugins.uninstall. Source:
+    packages/agent-mux/cli/src/commands/mcp.ts:85-94.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-skill-list
+attributes:
+  displayName: "amux skill list"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "skill list"
+  flags:
+    - "--global:0:list global skills"
+    - "--project:0:list project skills (default)"
+  subcommandExitCodes:
+    - "0:success:listed skills"
+    - "2:usage-error:missing/unknown <agent>"
+  description: |
+    List installed skill folders for an agent. Source:
+    packages/agent-mux/cli/src/commands/skill.ts:124-145.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-skill-add
+attributes:
+  displayName: "amux skill add"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "skill add"
+  flags:
+    - "--name:1:override copied skill folder name"
+    - "--force:0:overwrite if destination exists"
+    - "--global:0:install at user scope"
+    - "--project:0:install at project scope (default)"
+  subcommandExitCodes:
+    - "0:success:skill copied"
+    - "1:general-error:CONFLICT (already exists, no --force) / not-a-directory"
+    - "2:usage-error:missing source/agent"
+  description: |
+    Copy a skill folder into the agent's skills directory. Source:
+    packages/agent-mux/cli/src/commands/skill.ts:147-176.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-skill-remove
+attributes:
+  displayName: "amux skill remove"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "skill remove"
+  flags:
+    - "--global:0:remove from user scope"
+    - "--project:0:remove from project scope (default)"
+  subcommandExitCodes:
+    - "0:success:skill removed"
+    - "1:general-error:NOT_FOUND"
+    - "2:usage-error:missing skill name/agent"
+  description: |
+    Remove a skill folder by name. Source:
+    packages/agent-mux/cli/src/commands/skill.ts:178-197.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-skill-where
+attributes:
+  displayName: "amux skill where"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "skill where"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:paths printed"
+    - "2:usage-error:unknown agent"
+  description: |
+    Print global/project skill directory paths for an agent. Source:
+    packages/agent-mux/cli/src/commands/skill.ts:113-122.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-skill-agents
+attributes:
+  displayName: "amux skill agents"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "skill agents"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:agents printed"
+  description: |
+    List harnesses with known skill conventions. Source:
+    packages/agent-mux/cli/src/commands/skill.ts:91-96.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-agent-list
+attributes:
+  displayName: "amux agent list"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "agent list"
+  flags:
+    - "--global:0:list global sub-agents"
+    - "--project:0:list project sub-agents (default)"
+  subcommandExitCodes:
+    - "0:success:listed sub-agents"
+    - "2:usage-error:missing/unknown <agent>"
+  description: |
+    List installed custom sub-agent files/folders for a harness. Source:
+    packages/agent-mux/cli/src/commands/agent.ts:143-151.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-agent-add
+attributes:
+  displayName: "amux agent add"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "agent add"
+  flags:
+    - "--name:1:override copied agent file/folder name"
+    - "--force:0:overwrite if destination exists"
+    - "--global:0:install at user scope"
+    - "--project:0:install at project scope (default)"
+  subcommandExitCodes:
+    - "0:success:sub-agent copied"
+    - "1:general-error:CONFLICT or source missing"
+    - "2:usage-error:missing source/agent"
+  description: |
+    Copy a sub-agent file or folder into a harness's agents directory.
+    Source: packages/agent-mux/cli/src/commands/agent.ts:153-183.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-agent-remove
+attributes:
+  displayName: "amux agent remove"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "agent remove"
+  flags:
+    - "--global:0:remove from user scope"
+    - "--project:0:remove from project scope (default)"
+  subcommandExitCodes:
+    - "0:success:sub-agent removed"
+    - "1:general-error:NOT_FOUND"
+    - "2:usage-error:missing name/agent"
+  description: |
+    Remove a sub-agent file or folder by name. Source:
+    packages/agent-mux/cli/src/commands/agent.ts:185-204.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-agent-where
+attributes:
+  displayName: "amux agent where"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "agent where"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:paths printed"
+    - "2:usage-error:unknown agent"
+  description: |
+    Print global/project sub-agent directory paths. Source:
+    packages/agent-mux/cli/src/commands/agent.ts:132-141.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-agent-agents
+attributes:
+  displayName: "amux agent agents"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "agent agents"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:harness list printed"
+  description: |
+    List harnesses with known sub-agent conventions. Source:
+    packages/agent-mux/cli/src/commands/agent.ts:110-115.

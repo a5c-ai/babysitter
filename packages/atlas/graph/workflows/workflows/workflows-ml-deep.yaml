@@ -1,0 +1,120 @@
+---
+nodeKind: Workflow
+id: workflow:hyperparameter-tuning-cycle
+attributes:
+  displayName: "Hyperparameter Tuning Cycle"
+  workflowKind: data
+  triggerType: event-driven
+  typicalCadence: "per-experiment"
+  complexity: single-team
+  description: |
+    Orchestrates systematic hyperparameter optimization — defining search
+    spaces, launching sweep jobs (grid, random, Bayesian), tracking trial
+    results, applying early stopping, and selecting the best configuration
+    for promotion. Excludes model architecture search.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:ml-team
+    - target: org-unit:research-engineering
+---
+nodeKind: Workflow
+id: workflow:data-labeling-pipeline
+attributes:
+  displayName: "Data Labeling Pipeline"
+  workflowKind: data
+  triggerType: event-driven
+  typicalCadence: "per-dataset"
+  complexity: cross-team
+  description: |
+    Manages the end-to-end data labeling workflow — task design, labeler
+    onboarding, quality assurance sampling, inter-annotator agreement
+    measurement, active-learning-driven sample selection, and labeled dataset
+    versioning. Excludes model training.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:ml-ops
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:ml-team
+    - target: org-unit:data-team
+---
+nodeKind: Workflow
+id: workflow:model-card-maintenance
+attributes:
+  displayName: "Model Card Maintenance"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-model"
+  complexity: single-team
+  description: |
+    Creates and updates model cards documenting model purpose, training data,
+    evaluation metrics, known limitations, fairness assessments, and intended
+    use. Ensures cards are reviewed before model deployment and kept current
+    through the model lifecycle. Excludes model training.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:technical-writer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:ai-safety-guardrails
+  performed_by_org_unit:
+    - target: org-unit:ml-team
+    - target: org-unit:ai-enablement
+---
+nodeKind: Workflow
+id: workflow:ml-experiment-tracking
+attributes:
+  displayName: "ML Experiment Tracking"
+  workflowKind: data
+  triggerType: continuous
+  typicalCadence: "continuous"
+  complexity: single-team
+  description: |
+    Maintains the experiment tracking infrastructure — enforcing metadata
+    schemas, managing run lineage, pruning abandoned experiments, comparing
+    runs across dimensions, and ensuring reproducibility artifacts are stored
+    alongside results. Excludes experiment design.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:ml-platform-team
+    - target: org-unit:ml-team

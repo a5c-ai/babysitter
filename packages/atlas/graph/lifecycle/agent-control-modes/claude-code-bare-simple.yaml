@@ -1,0 +1,22 @@
+nodeKind: AgentControlMode
+id: agent-control-mode:claude-code-bare-simple
+attributes:
+  displayName: "Claude Code --bare / SIMPLE mode"
+  mode: bare-simple
+  envVar: "CLAUDE_CODE_SIMPLE"
+  persistedOnSession: false
+  workerToolInventory:
+    - Bash
+    - Read
+    - Edit
+  disablesFeatures:
+    - auto-memory
+    - auto-dream
+    - extract-memories
+    - prompt-suggestion
+    - nested-memory
+  description: |
+    Minimal posture — system prompt drops the memory section, all background
+    consolidation is disabled, worker tool inventory is just Bash/Read/Edit.
+    Used for SDK / non-interactive workflows where prompt cache hits matter
+    more than feature breadth.

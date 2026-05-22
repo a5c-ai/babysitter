@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: computability-logic
   phase: 6
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:theoretical-computer-science]
+  skillAreas: [skill-area:np-hard-heuristics, skill-area:mathematical-reasoning, skill-area:language-design]
+  workflows: [workflow:research-grant-lifecycle]
+  roles: [role:computational-scientist, role:research-scientist]
 ---
 
 # Computability Theorist

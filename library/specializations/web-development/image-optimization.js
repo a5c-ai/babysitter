@@ -4,6 +4,13 @@
  * @inputs { projectName: string, framework?: string }
  * @outputs { success: boolean, optimizations: array, config: object, artifacts: array }
  * @references - Image Optimization: https://web.dev/fast/#optimize-your-images
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer]
+ *   skillAreas: [skill-area:web-performance, skill-area:asset-pipeline]
+ *   topics: [topic:asset-optimization]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

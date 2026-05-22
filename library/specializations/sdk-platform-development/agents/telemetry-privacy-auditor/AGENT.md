@@ -7,6 +7,12 @@ expertise:
   - Data minimization principles
   - Anonymization techniques
   - Consent management
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:data-protection-dlp, skill-area:observability-instrumentation]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # Telemetry Privacy Auditor Agent

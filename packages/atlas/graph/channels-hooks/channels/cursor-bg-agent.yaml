@@ -1,0 +1,19 @@
+nodeKind: Channel
+id: channel:cursor-bg-agent
+attributes:
+  displayName: "Cursor background agent channel"
+  kind: a2a-channel
+  endpoint: "cursor://background-agents/local"
+  brokeringPrimitive: |
+    Cursor brokers messages between the IDE foreground and one or more
+    long-running background agents over a local IPC channel. Each
+    background agent runs in its own sandboxed worktree and reports
+    progress events back to the IDE; the IDE relays user messages to
+    the agent. Brokering is point-to-point (one IDE ↔ one agent) and
+    persists for the agent's lifetime.
+  persistent: true
+  description: |
+    Channel between the Cursor IDE and one of its background agents.
+    Used for the long-horizon background-agent workflow where Cursor
+    spawns an agent into a worktree and supervises it asynchronously.
+edges:

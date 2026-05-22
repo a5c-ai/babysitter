@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:automation-rule
+attributes:
+  canonicalDefinitionId: definition:automation-rule.canonical
+  displayName: "AutomationRule"
+  kind: operation
+  references:
+    - "NodeKind:AutomationRule"
+  description: |
+    A reactor rule that, on a trigger (timer cron expression or webhook
+edges:
+  applies_to:
+    - target: domain:devops
+    - target: domain:software-engineering

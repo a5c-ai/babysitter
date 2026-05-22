@@ -1,0 +1,20 @@
+nodeKind: Presentation
+id: presentation:omp-tui
+attributes:
+  displayName: "OMP TUI"
+  kind: tui
+  description: |
+    Terminal UI bundled with the OMP (oh-my-pi) community fork. Surfaced
+    through the agent-mux adapter for v6.
+  renderingTechnology: vte
+  themeSupport: none
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+  bundleSize: "~70 MB"
+  updateChannel: manual
+  accessibilityShortcuts:
+    - "Ctrl+C: cancel"
+edges:
+  bundled_with:
+    - agent-platform-impl:omp.platform@current

@@ -1,0 +1,39 @@
+nodeKind: ToolServer
+id: tool-server:sqlite-mcp
+attributes:
+  displayName: "SQLite MCP"
+  description: "MCP server providing full read/write access to SQLite databases. Enables AI agents to create tables, run queries, and append analytical insights. Supports stdio transport."
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite
+  npmPackage: "@modelcontextprotocol/server-sqlite"
+  maintainer: Anthropic
+  mcpTransports:
+    - mcp-transport:stdio
+  tools:
+    - tool-descriptor:sqlite.read-query
+    - tool-descriptor:sqlite.write-query
+    - tool-descriptor:sqlite.create-table
+    - tool-descriptor:sqlite.list-tables
+    - tool-descriptor:sqlite.describe-table
+    - tool-descriptor:sqlite.append-insight
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:sqlite.read-query
+  - target: tool-descriptor:sqlite.write-query
+  - target: tool-descriptor:sqlite.create-table
+  - target: tool-descriptor:sqlite.list-tables
+  - target: tool-descriptor:sqlite.describe-table
+  - target: tool-descriptor:sqlite.append-insight
+  implements:
+    - target: extension-interface:sandbox
+  requires_capability:
+    - target: capability:supports-mcp
+      level: required
+  sourced_from:
+    - target: source-ref:mcp-servers-registry
+  integrates_with:
+    - target: stack-part:relational-database
+  lib_applies_to_domain:
+    - target: domain:databases

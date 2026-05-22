@@ -1,0 +1,46 @@
+---
+nodeKind: Regulator
+id: regulator:eu-ai-office
+attributes:
+  displayName: "European AI Office"
+  jurisdiction: "eu"
+  homepageUrl: https://digital-strategy.ec.europa.eu/en/policies/ai-office
+  notes: |
+    EU Commission body responsible for implementing and supervising the EU
+    AI Act.
+edges:
+  regulates:
+    - target: compliance:eu-ai-act
+---
+nodeKind: Regulator
+id: regulator:nist
+attributes:
+  displayName: "National Institute of Standards and Technology"
+  jurisdiction: "us"
+  homepageUrl: https://www.nist.gov
+  notes: |
+    US federal agency producing voluntary frameworks (incl. AI RMF).
+edges:
+  regulates:
+    - target: compliance:nist-ai-rmf
+---
+nodeKind: Regulator
+id: regulator:ftc
+attributes:
+  displayName: "US Federal Trade Commission"
+  jurisdiction: "us"
+  homepageUrl: https://www.ftc.gov
+  notes: |
+    US consumer-protection regulator; enforces against deceptive AI
+    practices under Section 5.
+edges: {}
+---
+nodeKind: Regulator
+id: regulator:uk-aisi
+attributes:
+  displayName: "UK AI Safety Institute"
+  jurisdiction: "uk"
+  homepageUrl: https://www.aisi.gov.uk
+  notes: |
+    UK government institute conducting frontier-model safety evaluations.
+edges: {}

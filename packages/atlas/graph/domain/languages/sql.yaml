@@ -1,0 +1,21 @@
+nodeKind: Language
+id: language:sql
+attributes:
+  displayName: "SQL"
+  paradigms:
+    - declarative
+    - query
+  description: |
+    SQL (Structured Query Language) is the standard declarative language for
+    querying, manipulating, and defining data in relational database management
+    systems (RDBMS). Core constructs include SELECT with joins, aggregations,
+    and window functions; DML (INSERT, UPDATE, DELETE); DDL (CREATE TABLE,
+    ALTER); and transaction control (BEGIN, COMMIT, ROLLBACK).
+
+    Each RDBMS (PostgreSQL, MySQL, SQLite, SQL Server, BigQuery) extends
+    standard SQL with proprietary syntax, functions, and optimization hints.
+    Modern analytical SQL (via BigQuery, Snowflake, DuckDB) adds features
+    like PIVOT, QUALIFY, and ARRAY/STRUCT types. SQL skills are essential
+    across data science, backend engineering, data engineering, and business
+    intelligence domains.
+edges: {}

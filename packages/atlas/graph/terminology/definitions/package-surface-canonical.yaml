@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:package-surface.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:package-surface
+  text: |
+    workspace package tracking — module type, surface kinds, source-of-truth role, publish target
+  status: canonical
+edges:
+  defines:
+    - term:package-surface

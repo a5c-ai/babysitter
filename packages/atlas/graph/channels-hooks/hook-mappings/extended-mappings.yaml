@@ -1,0 +1,1140 @@
+# Extended hook mappings for unmapped hook surfaces
+# Maps agent-native hook surfaces to their agent versions
+---
+# ── Copilot native hooks ──
+nodeKind: HookMapping
+id: hook-mapping:copilot-pre-tool-native
+attributes:
+  mappingId: hook-mapping:copilot-pre-tool-native
+  hookId: hook-surface:copilot.pre-tool
+  targetId: agentVersion:copilot:ge-0-0-0
+  nativeName: pre_tool
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: copilot
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:copilot.pre-tool
+  emits_hook:
+    - target: agentVersion:copilot:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:copilot-post-tool-native
+attributes:
+  mappingId: hook-mapping:copilot-post-tool-native
+  hookId: hook-surface:copilot.post-tool
+  targetId: agentVersion:copilot:ge-0-0-0
+  nativeName: post_tool
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: copilot
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:copilot.post-tool
+  emits_hook:
+    - target: agentVersion:copilot:ge-0-0-0
+---
+# ── OpenCode native hooks ──
+nodeKind: HookMapping
+id: hook-mapping:opencode-session-idle
+attributes:
+  mappingId: hook-mapping:opencode-session-idle
+  hookId: hook-surface:opencode.session-idle
+  targetId: agentVersion:opencode:ge-0-0-0
+  nativeName: session_idle
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: opencode
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.idle
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:opencode.session-idle
+  emits_hook:
+    - target: agentVersion:opencode:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:opencode-shell-env
+attributes:
+  mappingId: hook-mapping:opencode-shell-env
+  hookId: hook-surface:opencode.shell-env
+  targetId: agentVersion:opencode:ge-0-0-0
+  nativeName: shell_env
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: opencode
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.shell_env
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:opencode.shell-env
+  emits_hook:
+    - target: agentVersion:opencode:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:opencode-on-step
+attributes:
+  mappingId: hook-mapping:opencode-on-step
+  hookId: hook-surface:opencode.on-step
+  targetId: agentVersion:opencode:ge-0-0-0
+  nativeName: on_step
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: opencode
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:opencode.on-step
+  emits_hook:
+    - target: agentVersion:opencode:ge-0-0-0
+---
+# ── Claude Code extended hooks ──
+nodeKind: HookMapping
+id: hook-mapping:claude-setup
+attributes:
+  mappingId: hook-mapping:claude-setup
+  hookId: hook-surface:claude.setup
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: Setup
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.setup
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:claude.setup
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-user-prompt-expansion
+attributes:
+  mappingId: hook-mapping:claude-user-prompt-expansion
+  hookId: hook-surface:claude.user-prompt-expansion
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: UserPromptExpansion
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: turn.prompt_expansion
+  blockCapability: true
+  mutationCapability: true
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:claude.user-prompt-expansion
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-permission-request
+attributes:
+  mappingId: hook-mapping:claude-permission-request
+  hookId: hook-surface:claude.permission-request
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: PermissionRequest
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: tool.permission_request
+  blockCapability: true
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:claude.permission-request
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-permission-denied
+attributes:
+  mappingId: hook-mapping:claude-permission-denied
+  hookId: hook-surface:claude.permission-denied
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: PermissionDenied
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.permission_denied
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:claude.permission-denied
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-post-tool-use-failure
+attributes:
+  mappingId: hook-mapping:claude-post-tool-use-failure
+  hookId: hook-surface:claude.post-tool-use-failure
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: PostToolUseFailure
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after_failure
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:claude.post-tool-use-failure
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-post-tool-batch
+attributes:
+  mappingId: hook-mapping:claude-post-tool-batch
+  hookId: hook-surface:claude.post-tool-batch
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: PostToolBatch
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after_batch
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:claude.post-tool-batch
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-stop-failure
+attributes:
+  mappingId: hook-mapping:claude-stop-failure
+  hookId: hook-surface:claude.stop-failure
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: StopFailure
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.stop_failure
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:claude.stop-failure
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-subagent-start
+attributes:
+  mappingId: hook-mapping:claude-subagent-start
+  hookId: hook-surface:claude.subagent-start
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: SubagentStart
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: subagent.start
+  blockCapability: false
+  mutationCapability: false
+  scope: subagent
+edges:
+  maps_hook:
+    - target: hook-surface:claude.subagent-start
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-task-created
+attributes:
+  mappingId: hook-mapping:claude-task-created
+  hookId: hook-surface:claude.task-created
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: TaskCreated
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: task.created
+  blockCapability: true
+  mutationCapability: false
+  scope: task
+edges:
+  maps_hook:
+    - target: hook-surface:claude.task-created
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-task-completed
+attributes:
+  mappingId: hook-mapping:claude-task-completed
+  hookId: hook-surface:claude.task-completed
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: TaskCompleted
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: task.completed
+  blockCapability: true
+  mutationCapability: false
+  scope: task
+edges:
+  maps_hook:
+    - target: hook-surface:claude.task-completed
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-teammate-idle
+attributes:
+  mappingId: hook-mapping:claude-teammate-idle
+  hookId: hook-surface:claude.teammate-idle
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: TeammateIdle
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: team.idle
+  blockCapability: true
+  mutationCapability: false
+  scope: team
+edges:
+  maps_hook:
+    - target: hook-surface:claude.teammate-idle
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-config-change
+attributes:
+  mappingId: hook-mapping:claude-config-change
+  hookId: hook-surface:claude.config-change
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: ConfigChange
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: session.config_change
+  blockCapability: true
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:claude.config-change
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-instructions-loaded
+attributes:
+  mappingId: hook-mapping:claude-instructions-loaded
+  hookId: hook-surface:claude.instructions-loaded
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: InstructionsLoaded
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.instructions_loaded
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:claude.instructions-loaded
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-file-changed
+attributes:
+  mappingId: hook-mapping:claude-file-changed
+  hookId: hook-surface:claude.file-changed
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: FileChanged
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.file_changed
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:claude.file-changed
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-cwd-changed
+attributes:
+  mappingId: hook-mapping:claude-cwd-changed
+  hookId: hook-surface:claude.cwd-changed
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: CwdChanged
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.cwd_changed
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:claude.cwd-changed
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-worktree-create
+attributes:
+  mappingId: hook-mapping:claude-worktree-create
+  hookId: hook-surface:claude.worktree-create
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: WorktreeCreate
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: session.worktree_create
+  blockCapability: true
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:claude.worktree-create
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-worktree-remove
+attributes:
+  mappingId: hook-mapping:claude-worktree-remove
+  hookId: hook-surface:claude.worktree-remove
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: WorktreeRemove
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.worktree_remove
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:claude.worktree-remove
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-post-compact
+attributes:
+  mappingId: hook-mapping:claude-post-compact
+  hookId: hook-surface:claude.post-compact
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: PostCompact
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.compact.after
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:claude.post-compact
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-elicitation
+attributes:
+  mappingId: hook-mapping:claude-elicitation
+  hookId: hook-surface:claude.elicitation
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: Elicitation
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: mcp.elicitation
+  blockCapability: true
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:claude.elicitation
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-elicitation-result
+attributes:
+  mappingId: hook-mapping:claude-elicitation-result
+  hookId: hook-surface:claude.elicitation-result
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: ElicitationResult
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: mcp.elicitation_result
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:claude.elicitation-result
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+# Claude Code canonical-named hook surfaces (claude.xxx aliased forms)
+nodeKind: HookMapping
+id: hook-mapping:claude-pre-tool-use-native
+attributes:
+  mappingId: hook-mapping:claude-pre-tool-use-native
+  hookId: hook-surface:claude.pre-tool-use
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: PreToolUse
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:claude.pre-tool-use
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-post-tool-use-native
+attributes:
+  mappingId: hook-mapping:claude-post-tool-use-native
+  hookId: hook-surface:claude.post-tool-use
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: PostToolUse
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:claude.post-tool-use
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-stop-native
+attributes:
+  mappingId: hook-mapping:claude-stop-native
+  hookId: hook-surface:claude.stop
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: Stop
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.stop
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:claude.stop
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-subagent-stop-native
+attributes:
+  mappingId: hook-mapping:claude-subagent-stop-native
+  hookId: hook-surface:claude.subagent-stop
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: SubagentStop
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: subagent.end
+  blockCapability: false
+  mutationCapability: false
+  scope: subagent
+edges:
+  maps_hook:
+    - target: hook-surface:claude.subagent-stop
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-notification-native
+attributes:
+  mappingId: hook-mapping:claude-notification-native
+  hookId: hook-surface:claude.notification
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: Notification
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: notification
+  blockCapability: false
+  mutationCapability: false
+  scope: notification
+edges:
+  maps_hook:
+    - target: hook-surface:claude.notification
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-user-prompt-submit-native
+attributes:
+  mappingId: hook-mapping:claude-user-prompt-submit-native
+  hookId: hook-surface:claude.user-prompt-submit
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: UserPromptSubmit
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: turn.user_prompt_submitted
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:claude.user-prompt-submit
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-pre-compact-native
+attributes:
+  mappingId: hook-mapping:claude-pre-compact-native
+  hookId: hook-surface:claude.pre-compact
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: PreCompact
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: session.compact.before
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:claude.pre-compact
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-session-start-native
+attributes:
+  mappingId: hook-mapping:claude-session-start-native
+  hookId: hook-surface:claude.session-start
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: SessionStart
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:claude.session-start
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:claude-session-end-native
+attributes:
+  mappingId: hook-mapping:claude-session-end-native
+  hookId: hook-surface:claude.session-end
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: SessionEnd
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:claude.session-end
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+---
+# ── Codex native hooks ──
+nodeKind: HookMapping
+id: hook-mapping:codex-on-stop-native
+attributes:
+  mappingId: hook-mapping:codex-on-stop-native
+  hookId: hook-surface:codex.on-stop
+  targetId: agentVersion:codex:ge-0-119-0
+  nativeName: OnStop
+  versionRange: ">=0.119.0"
+  requiresRuntimeHooks: true
+  adapterFamily: codex
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.stop
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:codex.on-stop
+  emits_hook:
+    - target: agentVersion:codex:ge-0-119-0
+---
+nodeKind: HookMapping
+id: hook-mapping:codex-on-tool-call-native
+attributes:
+  mappingId: hook-mapping:codex-on-tool-call-native
+  hookId: hook-surface:codex.on-tool-call
+  targetId: agentVersion:codex:ge-0-119-0
+  nativeName: OnToolCall
+  versionRange: ">=0.119.0"
+  requiresRuntimeHooks: true
+  adapterFamily: codex
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:codex.on-tool-call
+  emits_hook:
+    - target: agentVersion:codex:ge-0-119-0
+---
+# ── Cursor native hooks ──
+nodeKind: HookMapping
+id: hook-mapping:cursor-pre-tool-native
+attributes:
+  mappingId: hook-mapping:cursor-pre-tool-native
+  hookId: hook-surface:cursor.pre-tool
+  targetId: agentVersion:cursor:ge-0-0-0
+  nativeName: pre_tool
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: cursor
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:cursor.pre-tool
+  emits_hook:
+    - target: agentVersion:cursor:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:cursor-post-tool-native
+attributes:
+  mappingId: hook-mapping:cursor-post-tool-native
+  hookId: hook-surface:cursor.post-tool
+  targetId: agentVersion:cursor:ge-0-0-0
+  nativeName: post_tool
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: cursor
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:cursor.post-tool
+  emits_hook:
+    - target: agentVersion:cursor:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:cursor-session-end-native
+attributes:
+  mappingId: hook-mapping:cursor-session-end-native
+  hookId: hook-surface:cursor.session-end
+  targetId: agentVersion:cursor:ge-0-0-0
+  nativeName: sessionEnd
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: cursor
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:cursor.session-end
+  emits_hook:
+    - target: agentVersion:cursor:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:cursor-session-start-native
+attributes:
+  mappingId: hook-mapping:cursor-session-start-native
+  hookId: hook-surface:cursor.session-start
+  targetId: agentVersion:cursor:ge-0-0-0
+  nativeName: sessionStart
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: cursor
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:cursor.session-start
+  emits_hook:
+    - target: agentVersion:cursor:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:cursor-stop-native
+attributes:
+  mappingId: hook-mapping:cursor-stop-native
+  hookId: hook-surface:cursor.stop
+  targetId: agentVersion:cursor:ge-0-0-0
+  nativeName: stop
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: cursor
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.stop
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:cursor.stop
+  emits_hook:
+    - target: agentVersion:cursor:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:cursor-user-prompt-submit-native
+attributes:
+  mappingId: hook-mapping:cursor-user-prompt-submit-native
+  hookId: hook-surface:cursor.user-prompt-submit
+  targetId: agentVersion:cursor:ge-0-0-0
+  nativeName: userPromptSubmit
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: cursor
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.user_prompt_submitted
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:cursor.user-prompt-submit
+  emits_hook:
+    - target: agentVersion:cursor:ge-0-0-0
+---
+# ── Gemini native hooks ──
+nodeKind: HookMapping
+id: hook-mapping:gemini-pre-prompt-native
+attributes:
+  mappingId: hook-mapping:gemini-pre-prompt-native
+  hookId: hook-surface:gemini.pre-prompt
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: pre_prompt
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: turn.before_prompt
+  blockCapability: true
+  mutationCapability: true
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:gemini.pre-prompt
+  emits_hook:
+    - target: agentVersion:gemini:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:gemini-tool-call-pre-native
+attributes:
+  mappingId: hook-mapping:gemini-tool-call-pre-native
+  hookId: hook-surface:gemini.tool-call-pre
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: tool_call_pre
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: true
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:gemini.tool-call-pre
+  emits_hook:
+    - target: agentVersion:gemini:ge-0-0-0
+---
+nodeKind: HookMapping
+id: hook-mapping:gemini-tool-call-post-native
+attributes:
+  mappingId: hook-mapping:gemini-tool-call-post-native
+  hookId: hook-surface:gemini.tool-call-post
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: tool_call_post
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:gemini.tool-call-post
+  emits_hook:
+    - target: agentVersion:gemini:ge-0-0-0
+---
+# ── Hermes onEvent hook ──
+nodeKind: HookMapping
+id: hook-mapping:hermes-on-event-native
+attributes:
+  mappingId: hook-mapping:hermes-on-event-native
+  hookId: hook-surface:hermes.on-event
+  targetId: agent-version:hermes@current
+  nativeName: onEvent
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: hermes
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:hermes.on-event
+  emits_hook:
+    - target: agent-version:hermes@current
+---
+# ── OMP onEvent hook ──
+nodeKind: HookMapping
+id: hook-mapping:omp-on-event-native
+attributes:
+  mappingId: hook-mapping:omp-on-event-native
+  hookId: hook-surface:omp.on-event
+  targetId: agentVersion:omp:ge-0-0-0
+  nativeName: onEvent
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:omp.on-event
+  emits_hook:
+    - target: agentVersion:omp:ge-0-0-0
+---
+# ── OpenClaw onEvent hook ──
+nodeKind: HookMapping
+id: hook-mapping:openclaw-on-event-native
+attributes:
+  mappingId: hook-mapping:openclaw-on-event-native
+  hookId: hook-surface:openclaw.on-event
+  targetId: agentVersion:openclaw:ge-0-0-0
+  nativeName: onEvent
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:openclaw.on-event
+  emits_hook:
+    - target: agentVersion:openclaw:ge-0-0-0
+---
+# ── BeforePromptBuild canonical hook ──
+nodeKind: HookMapping
+id: hook-mapping:before-prompt-build-claude
+attributes:
+  mappingId: hook-mapping:before-prompt-build-claude
+  hookId: hook-surface:before-prompt-build
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: BeforePromptBuild
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: turn.before_prompt_build
+  blockCapability: false
+  mutationCapability: true
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:before-prompt-build
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0

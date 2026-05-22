@@ -10,17 +10,15 @@ expertise:
   - Cross-service integration testing
   - Test scenario gap analysis
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# E2E Runner Agent
-
-## Role
-
-End-to-end testing agent for the Everything Claude Code methodology. Designs and executes E2E tests using the Playwright Page Object Model pattern. Verifies full user flows, integration points, and cross-service communication.
-
-## Expertise
-
-- Playwright POM pattern: page objects, locator strategies, assertions
 - User flow identification from requirements and acceptance criteria
 - Headless browser execution with screenshot/trace capture
 - Integration point verification between services

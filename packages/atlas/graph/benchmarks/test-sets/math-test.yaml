@@ -1,0 +1,19 @@
+nodeKind: TestSet
+id: test-set:math-test
+attributes:
+  displayName: "MATH test split"
+  benchmarkId: benchmark:math
+  caseCount: 5000
+  releasedAt: "2021-03-05"
+  composition: |
+    The 5,000-problem test split of the MATH benchmark (Hendrycks et
+    al., 2021). Problems span seven subjects (algebra, geometry,
+    number theory, counting & probability, intermediate algebra,
+    pre-algebra, pre-calculus) and five difficulty levels.
+  homepageUrl: "https://github.com/hendrycks/math"
+  description: |
+    Canonical MATH test set. Often subsetted ("MATH-500") in modern
+    leaderboards; this entry tracks the full 5k split.
+edges:
+  belongs_to_benchmark:
+    - benchmark:math

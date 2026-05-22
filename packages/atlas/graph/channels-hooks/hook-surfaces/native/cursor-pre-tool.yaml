@@ -1,0 +1,21 @@
+nodeKind: HookSurface
+id: hook-surface:cursor.pre-tool
+attributes:
+  eventName: "pre_tool (Cursor)"
+  displayName: "pre_tool (Cursor)"
+  kind: native
+  originVendor: Cursor
+  direction: pre
+  blocking: true
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [tool, input]
+    properties:
+      tool: { type: string }
+      input: { type: object }
+  description: |
+    Cursor's pre-tool hook. Canonicalizes to pre-tool-use.
+edges:
+  canonicalized_to:
+    - target: hook-surface:pre-tool-use

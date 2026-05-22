@@ -1,0 +1,20 @@
+nodeKind: Role
+id: role:principal-engineer
+attributes:
+  displayName: "Principal Engineer"
+  isAgentic: false
+  seniority: principal
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:software-engineering
+  description: |
+    Org-wide technical leader — sets long-horizon technical direction.
+edges:
+  requires_expertise:
+    - target: skill-area:c4-modeling
+    - target: skill-area:domain-driven-design
+    - target: skill-area:hexagonal-architecture
+    - target: skill-area:adr-writing
+    - target: skill-area:monolith-vs-microservices
+  applies_to:
+    - target: domain:software-engineering

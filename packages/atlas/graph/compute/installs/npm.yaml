@@ -1,0 +1,16 @@
+nodeKind: InstallMethod
+id: install:npm
+attributes:
+  displayName: "npm (global)"
+  kind: npm
+  platforms:
+    - darwin
+    - linux
+    - win32
+  command: "npm install -g {{package}}"
+  prerequisiteCheck: "node --version"
+edges:
+  installs:
+    - agentVersion:claude:ge-0-0-0
+    - agentVersion:codex:ge-0-119-0
+    - agentVersion:cursor:ge-0-0-0

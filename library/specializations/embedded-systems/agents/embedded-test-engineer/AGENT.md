@@ -11,6 +11,11 @@ expertise:
   - Stress and endurance testing
   - Regression test automation
   - Test-driven development for embedded
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+  roles: [role:embedded-engineer]
 ---
 
 # Embedded Test Engineer Agent

@@ -1,0 +1,19 @@
+nodeKind: AgentProduct
+id: agent:claude-agent-sdk
+attributes:
+  displayName: "Claude Agent SDK"
+  vendor: "Anthropic"
+  homepageUrl: "https://github.com/anthropics/claude-agent-sdk-python"
+  primarySurface: sdk
+  supportTier: catalog-backed
+  productKind: sdk
+  stackScope: core-runtime
+  description: |
+    Anthropic's programmatic SDK for hosting agentic loops. Distinct from
+    Claude Code (the CLI/TUI). The SDK exposes the agent loop primitives —
+    turns, tool-call dispatch, context management — without bundling a
+    user-facing presentation. Consumers (other agents, applications,
+    services) provide their own platform extensibility and UI.
+edges:
+  has_version:
+    - agent-version:claude-agent-sdk@current

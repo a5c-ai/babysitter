@@ -1,0 +1,25 @@
+nodeKind: ExtensionInterface
+id: extension-interface:reliability
+attributes:
+  interfaceVersion: "1.0.0"
+  description: Reliability
+  displayName: "Reliability"
+  concern: "How agent runs survive failure, retry, and resume to a known-good state."
+  surface: |
+    Implementations expose:
+    - **Checkpoint write/read** — `checkpoint(runId, payload)` persists
+      a serializable run snapshot; `resume(runId)` reconstructs it.
+    - **Retry policy** — `retryPolicy(failure)` returns a backoff plan
+      (attempts, delay, jitter) given a typed failure.
+    - **Idempotency keys** — every side-effecting tool call is guarded
+      by an idempotency key sourced from this interface.
+    The interface guarantees at-least-once delivery of effects with
+    de-duplication on resume.
+  builtInDefault: |
+    The default implementation uses an on-disk JSON journal under
+    `.a5c/runs/<runId>/` and a fixed exponential-backoff retry policy
+    (3 attempts, base 500ms, jitter 0.2). No idempotency-key store —
+    keys are derived from `(toolId, inputHash)`.
+  notableImpls:
+    - plugin:example-portable-extension
+edges: {}

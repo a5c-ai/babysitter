@@ -1,0 +1,22 @@
+nodeKind: Role
+id: role:tech-lead
+attributes:
+  displayName: "Tech Lead"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:web-development
+  description: |
+    The Tech Lead role.
+edges:
+  requires_expertise:
+    - target: skill-area:c4-modeling
+    - target: skill-area:adr-writing
+    - target: skill-area:api-design
+    - target: skill-area:domain-driven-design
+    - target: skill-area:monolith-vs-microservices
+    - target: skill-area:dependency-upgrade-strategies
+    - target: skill-area:code-review-practice
+  applies_to:
+    - target: domain:web-development

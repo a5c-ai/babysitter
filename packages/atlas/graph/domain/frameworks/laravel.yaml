@@ -1,0 +1,17 @@
+nodeKind: Framework
+id: framework:laravel
+attributes:
+  displayName: "Laravel"
+  homepageUrl: "https://laravel.com"
+  belongsToLanguageId: language:php
+  category: web-backend
+  description: |
+    The Laravel PHP web framework.
+edges:
+  belongs_to_language:
+    - language:php
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:rails
+      comparison: "Full-stack server-side frameworks"

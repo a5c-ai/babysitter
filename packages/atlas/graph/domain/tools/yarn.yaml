@@ -1,0 +1,22 @@
+nodeKind: Tool
+id: tool:yarn
+attributes:
+  displayName: "Yarn"
+  homepageUrl: "https://yarnpkg.com"
+  kind: package-manager
+  language: language:javascript
+  releasedAt: "2016"
+  description: |
+    Package manager for JavaScript / Node.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - target: skill-area:developer-environment
+  alternative_to:
+    - target: tool:npm
+      comparison: "JavaScript package managers"
+    - target: tool:pnpm
+      comparison: "JavaScript package managers"
+    - target: tool:bun
+      comparison: "JavaScript package managers / runtimes"

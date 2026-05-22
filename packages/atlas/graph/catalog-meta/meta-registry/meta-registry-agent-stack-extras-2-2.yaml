@@ -1,0 +1,570 @@
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-resource--id
+attributes:
+  displayName: MCPResource.id
+  name: id
+  parentNodeKindId: meta-node-kind:mcp-resource
+  type: id
+  required: true
+  description: id on MCPResource.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-resource
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-resource--display-name
+attributes:
+  displayName: MCPResource.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:mcp-resource
+  type: string
+  required: true
+  description: displayName on MCPResource.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-resource
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-resource--uri
+attributes:
+  displayName: MCPResource.uri
+  name: uri
+  parentNodeKindId: meta-node-kind:mcp-resource
+  type: string
+  required: true
+  description: uri on MCPResource.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-resource
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-prompt--id
+attributes:
+  displayName: MCPPrompt.id
+  name: id
+  parentNodeKindId: meta-node-kind:mcp-prompt
+  type: id
+  required: true
+  description: id on MCPPrompt.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-prompt
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-prompt--display-name
+attributes:
+  displayName: MCPPrompt.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:mcp-prompt
+  type: string
+  required: true
+  description: displayName on MCPPrompt.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-prompt
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-prompt--name
+attributes:
+  displayName: MCPPrompt.name
+  name: name
+  parentNodeKindId: meta-node-kind:mcp-prompt
+  type: string
+  required: true
+  description: name on MCPPrompt.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-prompt
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-sampling--id
+attributes:
+  displayName: MCPSampling.id
+  name: id
+  parentNodeKindId: meta-node-kind:mcp-sampling
+  type: id
+  required: true
+  description: id on MCPSampling.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-sampling
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-sampling--display-name
+attributes:
+  displayName: MCPSampling.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:mcp-sampling
+  type: string
+  required: true
+  description: displayName on MCPSampling.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-sampling
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-root--id
+attributes:
+  displayName: MCPRoot.id
+  name: id
+  parentNodeKindId: meta-node-kind:mcp-root
+  type: id
+  required: true
+  description: id on MCPRoot.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-root
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-root--display-name
+attributes:
+  displayName: MCPRoot.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:mcp-root
+  type: string
+  required: true
+  description: displayName on MCPRoot.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-root
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-root--uri
+attributes:
+  displayName: MCPRoot.uri
+  name: uri
+  parentNodeKindId: meta-node-kind:mcp-root
+  type: string
+  required: true
+  description: uri on MCPRoot.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-root
+---
+nodeKind: MetaAttribute
+id: meta-attribute:async-job--id
+attributes:
+  displayName: AsyncJob.id
+  name: id
+  parentNodeKindId: meta-node-kind:async-job
+  type: id
+  required: true
+  description: id on AsyncJob.
+edges:
+  defined_on:
+  - target: meta-node-kind:async-job
+---
+nodeKind: MetaAttribute
+id: meta-attribute:async-job--display-name
+attributes:
+  displayName: AsyncJob.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:async-job
+  type: string
+  required: true
+  description: displayName on AsyncJob.
+edges:
+  defined_on:
+  - target: meta-node-kind:async-job
+---
+nodeKind: MetaAttribute
+id: meta-attribute:async-job--kind
+attributes:
+  displayName: AsyncJob.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:async-job
+  type: enum<batch-api,background-task,webhook-callback,scheduled-job,streaming-completion>
+  required: true
+  description: kind on AsyncJob.
+edges:
+  defined_on:
+  - target: meta-node-kind:async-job
+---
+nodeKind: MetaAttribute
+id: meta-attribute:human-checkpoint--id
+attributes:
+  displayName: HumanCheckpoint.id
+  name: id
+  parentNodeKindId: meta-node-kind:human-checkpoint
+  type: id
+  required: true
+  description: id on HumanCheckpoint.
+edges:
+  defined_on:
+  - target: meta-node-kind:human-checkpoint
+---
+nodeKind: MetaAttribute
+id: meta-attribute:human-checkpoint--display-name
+attributes:
+  displayName: HumanCheckpoint.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:human-checkpoint
+  type: string
+  required: true
+  description: displayName on HumanCheckpoint.
+edges:
+  defined_on:
+  - target: meta-node-kind:human-checkpoint
+---
+nodeKind: MetaAttribute
+id: meta-attribute:human-checkpoint--kind
+attributes:
+  displayName: HumanCheckpoint.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:human-checkpoint
+  type: enum<approval,review,escalation,edit>
+  required: true
+  description: kind on HumanCheckpoint.
+edges:
+  defined_on:
+  - target: meta-node-kind:human-checkpoint
+---
+nodeKind: MetaAttribute
+id: meta-attribute:resume-token--id
+attributes:
+  displayName: ResumeToken.id
+  name: id
+  parentNodeKindId: meta-node-kind:resume-token
+  type: id
+  required: true
+  description: id on ResumeToken.
+edges:
+  defined_on:
+  - target: meta-node-kind:resume-token
+---
+nodeKind: MetaAttribute
+id: meta-attribute:resume-token--display-name
+attributes:
+  displayName: ResumeToken.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:resume-token
+  type: string
+  required: true
+  description: displayName on ResumeToken.
+edges:
+  defined_on:
+  - target: meta-node-kind:resume-token
+---
+nodeKind: MetaAttribute
+id: meta-attribute:launch-contract--id
+attributes:
+  displayName: LaunchContract.id
+  name: id
+  parentNodeKindId: meta-node-kind:launch-contract
+  type: id
+  required: true
+  description: id on LaunchContract.
+edges:
+  defined_on:
+  - target: meta-node-kind:launch-contract
+---
+nodeKind: MetaAttribute
+id: meta-attribute:launch-contract--display-name
+attributes:
+  displayName: LaunchContract.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:launch-contract
+  type: string
+  required: false
+  description: displayName on LaunchContract.
+edges:
+  defined_on:
+  - target: meta-node-kind:launch-contract
+---
+nodeKind: MetaAttribute
+id: meta-attribute:run-attempt--id
+attributes:
+  displayName: RunAttempt.id
+  name: id
+  parentNodeKindId: meta-node-kind:run-attempt
+  type: id
+  required: true
+  description: id on RunAttempt.
+edges:
+  defined_on:
+  - target: meta-node-kind:run-attempt
+---
+nodeKind: MetaAttribute
+id: meta-attribute:run-attempt--display-name
+attributes:
+  displayName: RunAttempt.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:run-attempt
+  type: string
+  required: false
+  description: displayName on RunAttempt.
+edges:
+  defined_on:
+  - target: meta-node-kind:run-attempt
+---
+nodeKind: MetaAttribute
+id: meta-attribute:run-attempt--status
+attributes:
+  displayName: RunAttempt.status
+  name: status
+  parentNodeKindId: meta-node-kind:run-attempt
+  type: enum<running,completed,failed,aborted,retrying>
+  required: true
+  description: status on RunAttempt.
+edges:
+  defined_on:
+  - target: meta-node-kind:run-attempt
+---
+nodeKind: MetaAttribute
+id: meta-attribute:live-session--id
+attributes:
+  displayName: LiveSession.id
+  name: id
+  parentNodeKindId: meta-node-kind:live-session
+  type: id
+  required: true
+  description: id on LiveSession.
+edges:
+  defined_on:
+  - target: meta-node-kind:live-session
+---
+nodeKind: MetaAttribute
+id: meta-attribute:live-session--display-name
+attributes:
+  displayName: LiveSession.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:live-session
+  type: string
+  required: false
+  description: displayName on LiveSession.
+edges:
+  defined_on:
+  - target: meta-node-kind:live-session
+---
+nodeKind: MetaAttribute
+id: meta-attribute:orchestrator-state--id
+attributes:
+  displayName: OrchestratorState.id
+  name: id
+  parentNodeKindId: meta-node-kind:orchestrator-state
+  type: id
+  required: true
+  description: id on OrchestratorState.
+edges:
+  defined_on:
+  - target: meta-node-kind:orchestrator-state
+---
+nodeKind: MetaAttribute
+id: meta-attribute:orchestrator-state--display-name
+attributes:
+  displayName: OrchestratorState.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:orchestrator-state
+  type: string
+  required: false
+  description: displayName on OrchestratorState.
+edges:
+  defined_on:
+  - target: meta-node-kind:orchestrator-state
+---
+nodeKind: MetaAttribute
+id: meta-attribute:dispatch-preflight--id
+attributes:
+  displayName: DispatchPreflight.id
+  name: id
+  parentNodeKindId: meta-node-kind:dispatch-preflight
+  type: id
+  required: true
+  description: id on DispatchPreflight.
+edges:
+  defined_on:
+  - target: meta-node-kind:dispatch-preflight
+---
+nodeKind: MetaAttribute
+id: meta-attribute:dispatch-preflight--display-name
+attributes:
+  displayName: DispatchPreflight.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:dispatch-preflight
+  type: string
+  required: false
+  description: displayName on DispatchPreflight.
+edges:
+  defined_on:
+  - target: meta-node-kind:dispatch-preflight
+---
+nodeKind: MetaAttribute
+id: meta-attribute:reconciliation--id
+attributes:
+  displayName: Reconciliation.id
+  name: id
+  parentNodeKindId: meta-node-kind:reconciliation
+  type: id
+  required: true
+  description: id on Reconciliation.
+edges:
+  defined_on:
+  - target: meta-node-kind:reconciliation
+---
+nodeKind: MetaAttribute
+id: meta-attribute:reconciliation--display-name
+attributes:
+  displayName: Reconciliation.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:reconciliation
+  type: string
+  required: false
+  description: displayName on Reconciliation.
+edges:
+  defined_on:
+  - target: meta-node-kind:reconciliation
+---
+nodeKind: MetaAttribute
+id: meta-attribute:workflow-definition--id
+attributes:
+  displayName: WorkflowDefinition.id
+  name: id
+  parentNodeKindId: meta-node-kind:workflow-definition
+  type: id
+  required: true
+  description: id on WorkflowDefinition.
+edges:
+  defined_on:
+  - target: meta-node-kind:workflow-definition
+---
+nodeKind: MetaAttribute
+id: meta-attribute:workflow-definition--display-name
+attributes:
+  displayName: WorkflowDefinition.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:workflow-definition
+  type: string
+  required: true
+  description: displayName on WorkflowDefinition.
+edges:
+  defined_on:
+  - target: meta-node-kind:workflow-definition
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:composed-of
+attributes:
+  displayName: composed_of (meta)
+  name: composed_of
+  source:
+  - meta-node-kind:agent-product
+  - meta-node-kind:agent-version
+  target:
+  - meta-node-kind:agent-core-impl
+  - meta-node-kind:agent-runtime-impl
+  - meta-node-kind:agent-platform-impl
+  cardinality: 1:N
+  origin: universal
+  description: an agent product/version is composed of stack-layer implementations; a stack profile is composed of languages/frameworks/tools (alias of composes for ergonomics)
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:agent-product
+  - target: meta-node-kind:agent-version
+  target_of_meta_edge:
+  - target: meta-node-kind:agent-core-impl
+  - target: meta-node-kind:agent-runtime-impl
+  - target: meta-node-kind:agent-platform-impl
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:version-of
+attributes:
+  displayName: version_of (meta)
+  name: version_of
+  source:
+  - meta-node-kind:agent-version
+  target:
+  - meta-node-kind:agent-product
+  cardinality: N:1
+  origin: universal
+  description: inverse of has_version
+  inverse: meta-edge-kind:has-version
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:agent-version
+  target_of_meta_edge:
+  - target: meta-node-kind:agent-product
+  inverse_of:
+  - target: meta-edge-kind:has-version
+  in_meta_cluster:
+  - target: meta-cluster:agent-stack
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:has-version
+attributes:
+  displayName: has_version (meta)
+  name: has_version
+  source:
+  - meta-node-kind:agent-product
+  target:
+  - meta-node-kind:agent-version
+  cardinality: 1:N
+  origin: universal
+  description: an entity has a versioned instance
+  inverse: meta-edge-kind:version-of
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:agent-product
+  target_of_meta_edge:
+  - target: meta-node-kind:agent-version
+  inverse_of:
+  - target: meta-edge-kind:version-of
+  in_meta_cluster:
+  - target: meta-cluster:agent-stack
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:exposes
+attributes:
+  displayName: exposes (meta)
+  name: exposes
+  source:
+  - meta-node-kind:agent-platform-impl
+  - meta-node-kind:agent-runtime-impl
+  target:
+  - meta-node-kind:agent-host-transport
+  cardinality: N:N
+  origin: universal
+  description: an agent platform/runtime exposes a host transport or hook surface
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:agent-platform-impl
+  - target: meta-node-kind:agent-runtime-impl
+  target_of_meta_edge:
+  - target: meta-node-kind:agent-host-transport
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:uses-checkpoint
+attributes:
+  displayName: uses_checkpoint (meta)
+  name: uses_checkpoint
+  source:
+  - meta-node-kind:skill
+  - meta-node-kind:subagent
+  target:
+  - meta-node-kind:human-checkpoint
+  cardinality: N:N
+  origin: derived
+  description: a Process / Skill / Subagent declares a human-in-the-loop checkpoint
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:skill
+  - target: meta-node-kind:subagent
+  target_of_meta_edge:
+  - target: meta-node-kind:human-checkpoint
+---
+nodeKind: MetaEnum
+id: meta-enum:origin
+attributes:
+  displayName: origin (NodeKind / EdgeKind classifier)
+  name: origin
+  values:
+  - value: universal
+    description: Applies to the agentic stack at large (incl. a5c framing of universal concepts).
+  - value: standardized
+    description: Names a published external spec we adopt (e.g. MCP, OAuth).
+  - value: convergent
+    description: Emerging consensus across multiple vendors not yet ratified into a formal standard.
+  - value: a5c
+    description: Specific to the a5c product/codebase (Effect, Blueprint, RunJournalEvent, ...).
+  usedOnAttributes: []
+edges:
+  used_on_attribute: []

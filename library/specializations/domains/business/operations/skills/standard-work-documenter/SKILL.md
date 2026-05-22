@@ -11,6 +11,11 @@ metadata:
   specialization: operations
   domain: business
   category: lean-operations
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:change-management, skill-area:business-analysis, skill-area:data-analytics]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:business-analyst, role:scrum-master]
 ---
 
 # Standard Work Documenter

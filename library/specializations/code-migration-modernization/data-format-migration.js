@@ -18,6 +18,13 @@
  * - JSON Schema: https://json-schema.org/
  * - Apache NiFi: https://nifi.apache.org/
  * - Data Transformation Patterns: https://www.enterpriseintegrationpatterns.com/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:code-migration-modernization]
+ *   skillAreas: [skill-area:strangler-fig-pattern, skill-area:parallel-run-migration, skill-area:database-migrations-zero-downtime]
+ *   roles: [role:architect, role:tech-lead]
+ *   workflows: [workflow:technical-debt-reduction]
+ *   topics: [topic:refactoring]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -56,7 +63,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing transformation');
-  let transformationDesign = await ctx.task(transformationDesignTask, {
+  const transformationDesign = await ctx.task(transformationDesignTask, {
     projectName,
     formatAnalysis,
     sourceFormat,
@@ -66,18 +73,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...transformationDesign.artifacts);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      transformationDesign = await ctx.task(transformationDesignTask, { ...{
-    projectName,
-    formatAnalysis,
-    sourceFormat,
-    targetFormat,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Transformation review
+  await ctx.breakpoint({
     question: `Transformation design complete for ${projectName}. Rules: ${transformationDesign.ruleCount}. Complexity: ${transformationDesign.complexity}. Approve transformation mapping?`,
     title: 'Transformation Design Review',
     context: {
@@ -85,15 +82,9 @@ export async function process(inputs, ctx) {
       projectName,
       transformationDesign,
       recommendation: 'Review transformation rules with sample data'
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: PIPELINE DEVELOPMENT
   // ============================================================================
@@ -113,7 +104,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Validating with sample data');
-  let sampleValidation = await ctx.task(sampleValidationTask, {
+  const sampleValidation = await ctx.task(sampleValidationTask, {
     projectName,
     pipelineDevelopment,
     validationRules,
@@ -123,17 +114,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...sampleValidation.artifacts);
 
   // Quality Gate: Sample validation
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        sampleValidation = await ctx.task(sampleValidationTask, { ...{
-    projectName,
-    pipelineDevelopment,
-    validationRules,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (!sampleValidation.allPassed) {
+    await ctx.breakpoint({
       question: `Sample validation failed for ${projectName}. Failed checks: ${sampleValidation.failedCount}. Review and fix transformation?`,
       title: 'Sample Validation Failed',
       context: {
@@ -141,15 +123,9 @@ export async function process(inputs, ctx) {
         projectName,
         failures: sampleValidation.failures,
         recommendation: 'Fix transformation rules before full migration'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: FULL MIGRATION
@@ -170,7 +146,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Validating migrated data');
-  let validation = await ctx.task(dataValidationTask, {
+  const validation = await ctx.task(dataValidationTask, {
     projectName,
     fullMigration,
     validationRules,
@@ -179,17 +155,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...validation.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      validation = await ctx.task(dataValidationTask, { ...{
-    projectName,
-    fullMigration,
-    validationRules,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Data format migration complete for ${projectName}. Records migrated: ${fullMigration.recordCount}. Validation passed: ${validation.allPassed}. Approve migration?`,
     title: 'Data Format Migration Complete',
     context: {
@@ -201,15 +168,9 @@ export async function process(inputs, ctx) {
         records: fullMigration.recordCount,
         validationPassed: validation.allPassed
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -232,7 +193,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -1,0 +1,122 @@
+kind: NodeDocument
+nodes:
+  - id: source-ref:agent-catalog
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:babysitter
+  - id: source-ref:agent-mux-remote
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:agent-mux-remote
+  - id: source-ref:anthropic-skills-skill-creator
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:babysitter-sdk
+  - id: source-ref:claude-code-npm
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:claude-code
+  - id: source-ref:codex-cli
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:codex
+  - id: source-ref:copilot-cli
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:copilot-cli
+  - id: source-ref:cursor-app
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:cursor
+  - id: source-ref:gemini-cli
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:gemini-cli
+  - id: source-ref:hermes-pypi
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:hermes
+  - id: source-ref:langgraph-github
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:langgraph
+  - id: source-ref:openai-agents-sdk-github
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:openai-agents-sdk
+  - id: source-ref:openai-agents-sdk-docs
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:openai-agents-sdk
+  - id: source-ref:opencode-cli
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:opencode
+  - id: source-ref:zed-app
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:zed
+  - id: source-ref:windsurf-app
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:windsurf
+  - id: source-ref:openhands
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:openhands
+  - id: source-ref:warp-app
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:warp
+  - id: source-ref:cline-app
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:cline
+  - id: source-ref:babysitter-articles
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:babysitter
+  - id: source-ref:babysitter-agent-mux-reference
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:agent-mux
+  - id: source-ref:babysitter-sdk
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: agent:babysitter-sdk
+  - id: source-ref:context7-mcp
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: tool-server:mcp-context7
+  - id: source-ref:tavily-mcp
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: tool-server:mcp-tavily
+  - id: source-ref:firecrawl-mcp
+    kind: SourceRef
+    edges:
+      source_of:
+        - target: tool-server:mcp-firecrawl

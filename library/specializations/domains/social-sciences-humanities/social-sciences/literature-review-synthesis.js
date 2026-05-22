@@ -5,6 +5,12 @@
  * @outputs { success: boolean, reviewFindings: object, evidenceSynthesis: object, researchGaps: array, qualityScore: number, artifacts: array }
  * @recommendedSkills SK-SS-008 (systematic-review), SK-SS-011 (academic-writing-publication)
  * @recommendedAgents AG-SS-006 (policy-research-analyst), AG-SS-008 (mixed-methods-research-coordinator)
+ *
+ * @graph
+ *   domains: [domain:social-sciences]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:user-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:data-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

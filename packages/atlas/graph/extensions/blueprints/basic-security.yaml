@@ -1,0 +1,37 @@
+nodeKind: Blueprint
+id: blueprint:basic-security
+attributes:
+  displayName: "basic-security"
+  description: |
+    Install security processes, skills, agents and commands from the babysitter security-compliance
+    library into your project. Includes post-install codebase security scan.
+  installMd: "@plugins/a5c/marketplace/plugins/basic-security/install.md"
+  configureMd: "@plugins/a5c/marketplace/plugins/basic-security/configure.md"
+  uninstallMd: "@plugins/a5c/marketplace/plugins/basic-security/uninstall.md"
+  latestVersion: "1.0.0"
+  versions: ["1.0.0"]
+  tags: [security, compliance, audit, sast, vulnerability-management]
+  author: "a5c-ai"
+  packagePath: "plugins/basic-security"
+  marketplaceUrl: https://github.com/a5c-ai/babysitter
+  scope: project
+  domains:
+    - domain:security
+  requiresLanguages: []
+  requiresFrameworks: []
+  targetSurface:
+    - filesystem
+    - ci
+    - github-actions
+    - settings
+edges:
+  executable_by:
+    - target: agent:claude-code
+    - target: agent:codex
+    - target: agent:cursor
+  applies_to:
+    - target: domain:security
+      confidence: primary
+  sourced_from:
+    - target: source-ref:a5c-marketplace-basic-security
+    - target: source-ref:a5c-marketplace

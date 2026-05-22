@@ -16,6 +16,11 @@
  * @references
  * - PMI Lessons Learned: https://www.pmi.org/pmbok-guide-standards/foundational/pmbok
  * - Knowledge Management: https://www.km.gov/
+  * @graph
+ *   domains: [domain:project-management]
+ *   skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning]
+ *   workflows: [workflow:project-kickoff, workflow:project-kickoff]
+ *   roles: [role:project-manager, role:scrum-master]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

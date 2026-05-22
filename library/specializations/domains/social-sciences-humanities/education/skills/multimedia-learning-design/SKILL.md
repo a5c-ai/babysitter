@@ -2,6 +2,12 @@
 name: multimedia-learning-design
 description: Apply Mayer's multimedia learning principles to design effective audio, video, graphics, and animations that reduce cognitive load
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:animation-transitions, skill-area:audio-processing]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:media-engineer, role:product-designer]
 ---
 
 # Multimedia Learning Design

@@ -1,0 +1,92 @@
+---
+nodeKind: SkillArea
+id: skill-area:strangler-fig-pattern
+attributes:
+  displayName: "Strangler Fig Migration"
+  description: |
+    Incrementally replacing legacy systems behind a facade — routing
+    rules, feature toggles, and parallel running until cutover.
+  domains:
+    - specialization:code-migration-modernization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:code-migration-modernization
+      confidence: primary
+  uses_stack_part:
+    - stack-part:feature-flag-service
+---
+nodeKind: SkillArea
+id: skill-area:parallel-run-migration
+attributes:
+  displayName: "Parallel-Run Migration"
+  description: |
+    Running old and new implementations side-by-side and diffing
+    outputs to gain confidence before cutover.
+  domains:
+    - specialization:code-migration-modernization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:code-migration-modernization
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:schema-evolution
+attributes:
+  displayName: "Schema Evolution"
+  description: |
+    Evolving DB and message schemas without downtime — additive
+    changes, expand/contract, and dual-write strategies.
+  domains:
+    - specialization:code-migration-modernization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:code-migration-modernization
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:dependency-upgrade-strategies
+attributes:
+  displayName: "Dependency Upgrade Strategies"
+  description: |
+    Major-version upgrades — change-log triage, codemods, staged
+    rollouts, and dependency-graph triangulation.
+  domains:
+    - specialization:code-migration-modernization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:code-migration-modernization
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:dead-code-elimination
+attributes:
+  displayName: "Dead Code Elimination"
+  description: |
+    Identifying and removing unreachable code — coverage analysis,
+    knip/ts-prune-style tools, and feature-flag cleanup.
+  domains:
+    - specialization:code-migration-modernization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:code-migration-modernization
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:monorepo-extraction
+attributes:
+  displayName: "Monorepo Extraction"
+  description: |
+    Extracting a service or library out of (or into) a monorepo
+    while preserving git history and CI invariants.
+  domains:
+    - specialization:code-migration-modernization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:code-migration-modernization
+      confidence: primary

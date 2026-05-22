@@ -1,0 +1,406 @@
+# =============================================================================
+# Expanded Specializations — filling domain gaps
+# =============================================================================
+---
+nodeKind: Specialization
+id: specialization:distributed-systems
+attributes:
+  displayName: "Distributed Systems"
+  parentDomainId: domain:distributed-systems
+  description: |
+    Design and implementation of distributed systems — consensus protocols,
+    replication, partitioning, consistency models, and fault-tolerant
+    architectures for large-scale coordinated computing.
+edges:
+  specializes:
+    - domain:distributed-systems
+  contains:
+    - skill-area:consensus-algorithm-design
+    - skill-area:distributed-storage-design
+    - skill-area:distributed-tracing-design
+    - skill-area:gossip-protocol
+    - skill-area:CRDTs
+    - skill-area:leader-election
+    - skill-area:sharding-strategy
+    - skill-area:replication-strategy
+    - skill-area:partition-tolerance
+    - skill-area:eventual-consistency-patterns
+    - skill-area:distributed-locking
+    - skill-area:distributed-caching
+    - skill-area:multi-region-architecture
+---
+nodeKind: Specialization
+id: specialization:database-internals
+attributes:
+  displayName: "Database Internals"
+  parentDomainId: domain:databases
+  description: |
+    Deep internals of database systems — storage engine design, query
+    optimization, transaction processing, indexing structures, and
+    building custom database engines from scratch.
+edges:
+  specializes:
+    - domain:databases
+  contains:
+    - skill-area:query-optimizer-internals
+    - skill-area:storage-engine-design
+    - skill-area:index-design
+    - skill-area:transaction-isolation
+    - skill-area:MVCC
+    - skill-area:write-ahead-logging
+    - skill-area:compaction-strategies
+    - skill-area:column-store-design
+    - skill-area:time-series-database-design
+    - skill-area:graph-database-design
+    - skill-area:document-store-design
+    - skill-area:connection-pool-tuning
+---
+nodeKind: Specialization
+id: specialization:compiler-design
+attributes:
+  displayName: "Compiler Design"
+  parentDomainId: domain:compiler-engineering
+  description: |
+    Designing and building compilers, interpreters, and language tooling —
+    lexing, parsing, type systems, intermediate representations, code
+    generation, and optimization passes.
+edges:
+  specializes:
+    - domain:compiler-engineering
+  contains:
+    - skill-area:language-design
+    - skill-area:compiler-implementation
+    - skill-area:parsing-data-formats
+---
+nodeKind: Specialization
+id: specialization:operating-systems
+attributes:
+  displayName: "Operating Systems"
+  parentDomainId: domain:systems-programming
+  description: |
+    Operating system design and implementation — kernel development,
+    process management, memory management, filesystems, device drivers,
+    and bootloaders for general-purpose and embedded OSes.
+edges:
+  specializes:
+    - domain:systems-programming
+  contains:
+    - skill-area:kernel-development
+    - skill-area:device-driver-development
+    - skill-area:bootloader-development
+    - skill-area:RTOS-development
+    - skill-area:memory-management-systems
+    - skill-area:filesystem-design
+    - skill-area:concurrency-multithreading
+---
+nodeKind: Specialization
+id: specialization:network-engineering
+attributes:
+  displayName: "Network Engineering"
+  parentDomainId: domain:networking
+  description: |
+    Network infrastructure design and protocol engineering — TCP/IP
+    stacks, DNS systems, TLS, routing, load balancing, and building
+    high-performance network services.
+edges:
+  specializes:
+    - domain:networking
+  contains:
+    - skill-area:network-protocol-implementation
+    - skill-area:tcp-ip-stack
+    - skill-area:dns-implementation
+    - skill-area:tls-implementation
+    - skill-area:tcp-tuning
+    - skill-area:udp-protocol-design
+    - skill-area:http2-multiplexing
+    - skill-area:websocket-design
+    - skill-area:dns-design
+    - skill-area:network-buffers
+---
+nodeKind: Specialization
+id: specialization:embedded-firmware
+attributes:
+  displayName: "Embedded Firmware"
+  parentDomainId: domain:embedded-systems
+  description: |
+    Firmware development for microcontrollers and embedded processors —
+    bare-metal programming, RTOS integration, peripheral drivers,
+    bootloaders, OTA updates, and hardware-software co-design.
+edges:
+  specializes:
+    - domain:embedded-systems
+  contains:
+    - skill-area:firmware-development
+    - skill-area:bootloader-design
+    - skill-area:peripheral-interfacing
+    - skill-area:hardware-abstraction-layer
+    - skill-area:low-power-design
+    - skill-area:rtos-programming
+    - skill-area:device-driver-development
+---
+nodeKind: Specialization
+id: specialization:real-time-systems
+attributes:
+  displayName: "Real-Time Systems"
+  parentDomainId: domain:embedded-systems
+  description: |
+    Designing systems with hard and soft real-time constraints —
+    deterministic scheduling, priority management, worst-case execution
+    analysis, and certification for safety-critical applications.
+edges:
+  specializes:
+    - domain:embedded-systems
+  contains:
+    - skill-area:RTOS-development
+    - skill-area:rtos-programming
+    - skill-area:real-time-os
+    - skill-area:real-time-behavior-testing
+    - skill-area:safety-critical-testing
+---
+nodeKind: Specialization
+id: specialization:computer-graphics
+attributes:
+  displayName: "Computer Graphics"
+  parentDomainId: domain:gaming
+  description: |
+    Real-time and offline rendering — rasterization, ray tracing,
+    shader programming, GPU pipeline optimization, physically-based
+    rendering, and graphics engine architecture.
+edges:
+  specializes:
+    - domain:gaming
+  contains:
+    - skill-area:graphics-rendering
+    - skill-area:shader-programming
+    - skill-area:scene-graphs
+    - skill-area:asset-pipeline
+    - skill-area:cuda-kernels
+    - skill-area:compute-shaders
+    - skill-area:WebGPU-programming
+---
+nodeKind: Specialization
+id: specialization:audio-engineering
+attributes:
+  displayName: "Audio Engineering"
+  parentDomainId: domain:media-entertainment
+  description: |
+    Digital audio processing and engineering — DSP algorithms, spatial
+    audio, codec design, audio streaming, real-time audio pipelines,
+    and audio for games, media, and communication platforms.
+edges:
+  specializes:
+    - domain:media-entertainment
+  contains:
+    - skill-area:audio-processing
+    - skill-area:game-audio-systems
+    - skill-area:media-encoding
+    - skill-area:streaming-protocols
+---
+nodeKind: Specialization
+id: specialization:game-engine-dev
+attributes:
+  displayName: "Game Engine Development"
+  parentDomainId: domain:gaming
+  description: |
+    Building game engines from scratch — render pipelines, entity-component
+    systems, physics integration, asset management, scripting layers,
+    and engine-level performance optimization.
+edges:
+  specializes:
+    - domain:gaming
+  contains:
+    - skill-area:game-engine-development
+    - skill-area:game-loop
+    - skill-area:graphics-rendering
+    - skill-area:physics-simulation
+    - skill-area:scene-graphs
+    - skill-area:shader-programming
+    - skill-area:asset-pipeline
+    - skill-area:game-audio-systems
+---
+nodeKind: Specialization
+id: specialization:search-infrastructure
+attributes:
+  displayName: "Search Infrastructure"
+  parentDomainId: domain:search-engineering
+  description: |
+    Building search systems at scale — indexing pipelines, ranking
+    algorithms, query understanding, relevance tuning, typeahead,
+    faceted search, and search quality evaluation.
+edges:
+  specializes:
+    - domain:search-engineering
+  contains:
+    - skill-area:search-indexing
+    - skill-area:search-infrastructure
+    - skill-area:document-indexing
+    - skill-area:natural-language-processing
+---
+nodeKind: Specialization
+id: specialization:recommendation-infrastructure
+attributes:
+  displayName: "Recommendation Infrastructure"
+  parentDomainId: domain:recommendation-systems
+  description: |
+    Building recommendation systems — collaborative filtering, content-based
+    models, real-time personalization, feature stores, candidate generation,
+    ranking, and A/B testing recommendation quality.
+edges:
+  specializes:
+    - domain:recommendation-systems
+  contains:
+    - skill-area:feature-engineering
+    - skill-area:model-serving
+    - skill-area:ab-testing-experimentation
+    - skill-area:real-time-analytics
+    - skill-area:stream-processing-design
+---
+nodeKind: Specialization
+id: specialization:ad-serving
+attributes:
+  displayName: "Ad Serving"
+  parentDomainId: domain:advertising-tech
+  description: |
+    Ad serving infrastructure — real-time bidding, ad auction design,
+    targeting and personalization, frequency capping, viewability
+    measurement, and ad delivery optimization at scale.
+edges:
+  specializes:
+    - domain:advertising-tech
+  contains:
+    - skill-area:real-time-analytics
+    - skill-area:stream-processing-design
+    - skill-area:API-rate-limiting-design
+    - skill-area:user-segmentation
+    - skill-area:attribution-modeling
+---
+nodeKind: Specialization
+id: specialization:fraud-prevention
+attributes:
+  displayName: "Fraud Prevention"
+  parentDomainId: domain:fintech
+  description: |
+    Building fraud detection and prevention systems — rule engines,
+    ML-based anomaly detection, transaction risk scoring, identity
+    verification, device fingerprinting, and real-time decisioning.
+edges:
+  specializes:
+    - domain:fintech
+  contains:
+    - skill-area:feature-engineering
+    - skill-area:real-time-analytics
+    - skill-area:stream-processing-design
+    - skill-area:threat-detection
+    - skill-area:risk-assessment
+---
+nodeKind: Specialization
+id: specialization:identity-management
+attributes:
+  displayName: "Identity Management"
+  parentDomainId: domain:security
+  description: |
+    Identity and access management systems — SSO, federation (SAML,
+    OIDC), directory services, RBAC/ABAC policy engines, MFA,
+    passwordless authentication, and identity lifecycle management.
+edges:
+  specializes:
+    - domain:security
+  contains:
+    - skill-area:authentication
+    - skill-area:authentication-authorization
+    - skill-area:oauth-flows
+    - skill-area:identity-security
+    - skill-area:access-control
+    - skill-area:zero-trust-architecture
+---
+nodeKind: Specialization
+id: specialization:payment-processing-spec
+attributes:
+  displayName: "Payment Processing"
+  parentDomainId: domain:fintech
+  description: |
+    Building payment systems — payment gateway integration, PCI-DSS
+    compliance, tokenization, recurring billing, refund handling,
+    multi-currency support, and payment orchestration layers.
+edges:
+  specializes:
+    - domain:fintech
+  contains:
+    - skill-area:payment-processing
+    - skill-area:payment-integration
+    - skill-area:subscription-billing-design
+    - skill-area:compliance-as-code
+---
+nodeKind: Specialization
+id: specialization:regulatory-compliance
+attributes:
+  displayName: "Regulatory Compliance"
+  parentDomainId: domain:compliance
+  description: |
+    Engineering for regulatory compliance — SOC 2, HIPAA, PCI-DSS,
+    GDPR, SOX controls, automated evidence collection, audit trail
+    design, and compliance-as-code integration in CI/CD.
+edges:
+  specializes:
+    - domain:compliance
+  contains:
+    - skill-area:compliance-as-code
+    - skill-area:compliance-automation
+    - skill-area:compliance-scanning
+    - skill-area:policy-as-code
+    - skill-area:data-governance
+---
+nodeKind: Specialization
+id: specialization:clinical-informatics-expanded
+attributes:
+  displayName: "Clinical Informatics (Expanded)"
+  parentDomainId: domain:healthcare
+  description: |
+    Advanced clinical informatics — EHR integration (HL7 FHIR),
+    clinical decision support systems, patient data interoperability,
+    medical imaging pipelines, and healthcare AI applications.
+edges:
+  specializes:
+    - domain:healthcare
+  contains:
+    - skill-area:data-validation-sanitization
+    - skill-area:serialization-deserialization
+    - skill-area:compliance-as-code
+    - skill-area:document-processing
+---
+nodeKind: Specialization
+id: specialization:precision-agriculture
+attributes:
+  displayName: "Precision Agriculture"
+  parentDomainId: domain:agriculture
+  description: |
+    Technology for precision farming — satellite/drone imagery analysis,
+    IoT sensor networks, yield prediction models, variable-rate
+    application systems, and geospatial data pipelines for agriculture.
+edges:
+  specializes:
+    - domain:agriculture
+  contains:
+    - skill-area:geospatial-data-analysis
+    - skill-area:sensor-fusion
+    - skill-area:time-series-analysis
+    - skill-area:computer-vision
+---
+nodeKind: Specialization
+id: specialization:autonomous-navigation
+attributes:
+  displayName: "Autonomous Navigation"
+  parentDomainId: domain:autonomous-vehicles
+  description: |
+    Navigation systems for autonomous vehicles and robots — path
+    planning, SLAM, sensor fusion, localization, HD map integration,
+    and decision-making under uncertainty for self-driving systems.
+edges:
+  specializes:
+    - domain:autonomous-vehicles
+  contains:
+    - skill-area:slam
+    - skill-area:sensor-fusion
+    - skill-area:motion-planning
+    - skill-area:computer-vision
+    - skill-area:ros-development

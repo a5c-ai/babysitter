@@ -14,6 +14,11 @@ expertise:
 metadata:
   version: "1.0"
   category: aerospace-engineering
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:compliance-automation, skill-area:statistical-analysis, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Certification Specialist Agent

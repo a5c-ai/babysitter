@@ -1,0 +1,54 @@
+---
+nodeKind: PlatformService
+id: platform-service:dokploy-app
+attributes:
+  displayName: "Dokploy App"
+  description: |
+    Self-hosted application deployed from a Git repo or Docker image.
+  category: compute
+  providedByPlatformId: platform:dokploy
+  implementsStackPartIds:
+    - stack-part:container-runtime
+edges:
+  provided_by:
+    - platform:dokploy
+  implements_stack_part:
+    - stack-part:container-runtime
+    - target: stack-part:container-runtime
+---
+nodeKind: PlatformService
+id: platform-service:dokploy-database
+attributes:
+  displayName: "Dokploy Database"
+  description: |
+    One-click self-hosted Postgres/MySQL/MongoDB instance.
+  category: database
+  providedByPlatformId: platform:dokploy
+  implementsStackPartIds:
+    - stack-part:relational-database
+    - stack-part:managed-postgres
+edges:
+  provided_by:
+    - platform:dokploy
+  implements_stack_part:
+    - stack-part:relational-database
+    - stack-part:managed-postgres
+    - target: stack-part:relational-database
+    - target: stack-part:managed-postgres
+---
+nodeKind: PlatformService
+id: platform-service:dokploy-domain
+attributes:
+  displayName: "Dokploy Domain"
+  description: |
+    Domain + automatic Let's Encrypt TLS via Traefik.
+  category: networking
+  providedByPlatformId: platform:dokploy
+  implementsStackPartIds:
+    - stack-part:reverse-proxy
+edges:
+  provided_by:
+    - platform:dokploy
+  implements_stack_part:
+    - stack-part:reverse-proxy
+    - target: stack-part:reverse-proxy

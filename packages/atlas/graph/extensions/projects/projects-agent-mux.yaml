@@ -1,0 +1,38 @@
+nodeKind: Project
+id: project:agent-mux
+attributes:
+  displayName: "agent-mux"
+  slug: "agent-mux"
+  description: "Multi-agent run orchestration surfaces (gateway, webui, ui, tui)."
+  trackerKind: issue-tracker:linear
+  archived: false
+edges:
+  has_board_snapshot:
+    - target: board-snapshot:agent-mux-2026-05-02
+  has_backlog_snapshot:
+    - target: backlog-snapshot:agent-mux-2026-05-02
+---
+nodeKind: Project
+id: project:babysitter
+attributes:
+  displayName: "babysitter"
+  slug: "babysitter"
+  description: "Babysitter SDK + orchestration runtime."
+  trackerKind: issue-tracker:github-issues
+  archived: false
+edges:
+  has_board_snapshot:
+    - target: board-snapshot:babysitter-2026-05-02
+  groups_workspace:
+    - target: workspace:local-developer-default
+---
+nodeKind: Project
+id: project:graph
+attributes:
+  displayName: "graph (v6)"
+  slug: "graph-v6"
+  description: "Phase 1 ontology and validator for the agentic stack."
+  archived: false
+edges:
+  groups_workspace:
+    - target: workspace:local-developer-default

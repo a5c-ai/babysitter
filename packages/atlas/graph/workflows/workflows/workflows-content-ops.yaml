@@ -1,0 +1,95 @@
+---
+nodeKind: Workflow
+id: workflow:content-localization-pipeline
+attributes:
+  displayName: "Content Localization Pipeline"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Orchestrates the end-to-end localisation of product content into target
+    locales — extracting translatable strings, routing to translation vendors
+    or machine-translation with human review, validating locale-specific
+    formatting (dates, currency, plurals), running screenshot-based layout
+    regression to catch text overflow, and syncing translated assets back into
+    the build pipeline. Produces locale-readiness reports per release. Excludes
+    original content authoring.
+edges:
+  involves_role:
+    - target: role:i18n-extractor
+    - target: role:technical-writer
+    - target: role:qa-lead
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:mobile
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:editorial-calendar-review
+attributes:
+  displayName: "Editorial Calendar Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "biweekly"
+  complexity: single-team
+  description: |
+    Reviews and adjusts the editorial calendar at a fixed cadence — evaluating
+    upcoming publication dates against strategic priorities, checking author
+    assignment gaps, verifying SEO keyword alignment per piece, assessing
+    seasonal and event-driven timing, and reconciling with product launch
+    schedules. Produces an updated calendar with status flags and escalation
+    items. Excludes content creation and copywriting.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:planner
+    - target: role:devrel
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:content-performance-analysis
+attributes:
+  displayName: "Content Performance Analysis"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Analyses the effectiveness of published content across channels — measuring
+    page views, time-on-page, bounce rate, conversion attribution, social
+    shares, and SEO ranking changes per asset; segmenting by funnel stage,
+    persona, and content type; identifying top performers and underperformers;
+    and recommending refresh, repurpose, or retire actions. Produces a content
+    performance scorecard. Excludes content rewriting.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:marketing
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:analytics-team

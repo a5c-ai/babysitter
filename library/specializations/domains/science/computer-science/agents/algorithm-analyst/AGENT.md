@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: algorithm-theory
   phase: 6
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:theoretical-computer-science]
+  skillAreas: [skill-area:np-hard-heuristics, skill-area:dynamic-programming, skill-area:mathematical-reasoning]
+  workflows: [workflow:research-grant-lifecycle]
+  roles: [role:computational-scientist, role:research-engineer]
 ---
 
 # Algorithm Analyst

@@ -1,0 +1,401 @@
+# =============================================================================
+# Expanded Methodologies — engineering, design, prioritization, operations
+# =============================================================================
+---
+nodeKind: Methodology
+id: methodology:behavior-driven-development
+attributes:
+  displayName: "Behavior-Driven Development (BDD)"
+  description: |
+    A collaborative development practice where developers, testers, and business
+    stakeholders co-author executable specifications in plain-language Given/When/Then
+    scenarios. Builds on TDD by shifting focus from implementation to behavior,
+    using tools like Cucumber, SpecFlow, and Behave to automate acceptance criteria
+    as living documentation.
+  methodologyKind: quality-focused
+  origin: "Dan North"
+  yearIntroduced: "2006"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:qa-testing
+---
+nodeKind: Methodology
+id: methodology:acceptance-test-driven-development
+attributes:
+  displayName: "Acceptance Test-Driven Development (ATDD)"
+  description: |
+    A practice where the whole team collaboratively defines acceptance criteria
+    before development begins, then uses those criteria to drive implementation.
+    Unlike BDD which emphasizes behavior language, ATDD focuses on concrete
+    examples that become automated acceptance tests, ensuring every feature
+    meets explicit customer-defined expectations before being marked complete.
+  methodologyKind: quality-focused
+  origin: "Ken Pugh"
+  yearIntroduced: "2003"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:qa-testing
+---
+nodeKind: Methodology
+id: methodology:mob-programming
+attributes:
+  displayName: "Mob Programming"
+  description: |
+    A software development approach where the whole team works on the same thing,
+    at the same time, in the same space, and at the same computer. One person
+    acts as the Driver (typing), while the rest are Navigators (directing strategy).
+    Roles rotate on a timer. Produces high-quality code through continuous review
+    and shared ownership while rapidly spreading knowledge across the team.
+  methodologyKind: collaborative
+  origin: "Woody Zuill"
+  yearIntroduced: "2012"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:ensemble-programming
+attributes:
+  displayName: "Ensemble Programming"
+  description: |
+    An evolution of mob programming with more structured facilitation and explicit
+    roles beyond Driver/Navigator — including Researcher, Archivist, and Sponsor.
+    Emphasizes psychological safety, intentional inclusion, and structured turn-taking
+    to make whole-team collaboration effective for diverse groups and remote settings.
+  methodologyKind: collaborative
+  origin: "Maaret Pyhäjärvi, Woody Zuill"
+  yearIntroduced: "2020"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:trunk-based-development
+attributes:
+  displayName: "Trunk-Based Development"
+  description: |
+    A source-control branching model where developers collaborate on code in a
+    single branch (trunk/main), using short-lived feature branches (< 1 day) or
+    committing directly to trunk. Relies on feature flags, branch-by-abstraction,
+    and comprehensive CI to keep trunk always releasable. Enables continuous
+    integration and reduces merge conflicts dramatically.
+  methodologyKind: engineering-practice
+  origin: "Paul Hammant"
+  yearIntroduced: "2013"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:devops
+---
+nodeKind: Methodology
+id: methodology:GitFlow
+attributes:
+  displayName: "GitFlow"
+  description: |
+    A branching model for Git that defines a strict branching structure with
+    dedicated branches for features, releases, hotfixes, and development. Uses
+    long-lived develop and main branches with merge-based integration. Well-suited
+    for projects with scheduled release cycles but criticized for complexity
+    in continuous delivery environments.
+  methodologyKind: engineering-practice
+  origin: "Vincent Driessen"
+  yearIntroduced: "2010"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:devops
+---
+nodeKind: Methodology
+id: methodology:basecamp-method
+attributes:
+  displayName: "Basecamp Method (Shape Up)"
+  description: |
+    The organizational methodology behind Shape Up, practiced at Basecamp/37signals.
+    Operates in six-week cycles with a two-week cooldown. Small teams (1 designer +
+    1-2 programmers) get shaped pitches with fixed time/variable scope. No backlogs,
+    no estimation — bets are placed each cycle. Emphasizes appetite over estimates,
+    hill charts for progress tracking, and circuit breakers to kill stalled projects.
+  methodologyKind: agile
+  origin: "Jason Fried, David Heinemeier Hansson, Ryan Singer"
+  yearIntroduced: "2019"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:project-management
+---
+nodeKind: Methodology
+id: methodology:lean-startup
+attributes:
+  displayName: "Lean Startup"
+  description: |
+    An entrepreneurial methodology centered on the Build-Measure-Learn feedback loop.
+    Teams build minimum viable products (MVPs), measure real customer behavior with
+    actionable metrics (not vanity metrics), and learn whether to pivot or persevere.
+    Innovation accounting tracks progress toward product-market fit, while validated
+    learning replaces elaborate upfront business plans.
+  methodologyKind: product-development
+  origin: "Eric Ries"
+  yearIntroduced: "2008"
+edges:
+  applies_to:
+    - domain:entrepreneurship
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:design-thinking
+attributes:
+  displayName: "Design Thinking"
+  description: |
+    A human-centered innovation methodology with five phases: Empathize, Define,
+    Ideate, Prototype, and Test. Prioritizes deep user empathy and reframes problems
+    as opportunities. Uses rapid prototyping and iterative testing to converge on
+    solutions that are desirable (user need), viable (business), and feasible
+    (technology). Widely adopted beyond design into strategy and organizational change.
+  methodologyKind: design-thinking
+  origin: "IDEO, Stanford d.school"
+  yearIntroduced: "1991"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:strategy
+---
+nodeKind: Methodology
+id: methodology:OKR-framework
+attributes:
+  displayName: "OKR Framework"
+  description: |
+    Objectives and Key Results — a goal-setting framework where teams define
+    qualitative Objectives (what to achieve) supported by 3-5 measurable Key Results
+    (how to measure achievement). OKRs cascade from company to team to individual
+    level, with quarterly cadence and public transparency. Scoring uses 0.0-1.0
+    scale where 0.7 is considered successful (stretch goals).
+  methodologyKind: management
+  origin: "Andy Grove (Intel), popularized by John Doerr"
+  yearIntroduced: "1968"
+edges:
+  applies_to:
+    - domain:strategy
+    - domain:project-management
+---
+nodeKind: Methodology
+id: methodology:RICE-prioritization
+attributes:
+  displayName: "RICE Prioritization"
+  description: |
+    A scoring framework for prioritizing features and initiatives by evaluating
+    four factors: Reach (how many users affected), Impact (degree of effect per user),
+    Confidence (certainty of estimates), and Effort (person-months required). The
+    RICE score (Reach x Impact x Confidence / Effort) produces a single comparable
+    number for stack-ranking competing priorities objectively.
+  methodologyKind: prioritization
+  origin: "Intercom"
+  yearIntroduced: "2016"
+edges:
+  applies_to:
+    - domain:project-management
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:MoSCoW-prioritization
+attributes:
+  displayName: "MoSCoW Prioritization"
+  description: |
+    A prioritization technique that classifies requirements into four categories:
+    Must have (non-negotiable for the release), Should have (important but not
+    critical), Could have (desirable if time permits), and Won't have (explicitly
+    out of scope this time). Used within timeboxed iterations to manage scope
+    and set clear stakeholder expectations about delivery guarantees.
+  methodologyKind: prioritization
+  origin: "Dai Clegg"
+  yearIntroduced: "1994"
+edges:
+  applies_to:
+    - domain:project-management
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:Eisenhower-matrix
+attributes:
+  displayName: "Eisenhower Matrix"
+  description: |
+    A time management and decision-making framework that classifies tasks along
+    two axes — urgency and importance — into four quadrants: Do (urgent + important),
+    Schedule (important + not urgent), Delegate (urgent + not important), and
+    Eliminate (neither). Forces explicit prioritization and helps teams resist
+    the tyranny of the urgent over the truly important.
+  methodologyKind: prioritization
+  origin: "Dwight D. Eisenhower, popularized by Stephen Covey"
+  yearIntroduced: "1954"
+edges:
+  applies_to:
+    - domain:project-management
+    - domain:strategy
+---
+nodeKind: Methodology
+id: methodology:DORA-metrics-framework
+attributes:
+  displayName: "DORA Metrics Framework"
+  description: |
+    A research-backed framework measuring software delivery performance through
+    four key metrics: Deployment Frequency, Lead Time for Changes, Change Failure
+    Rate, and Mean Time to Recovery (MTTR). Teams are classified as Elite, High,
+    Medium, or Low performers. The framework demonstrates that speed and stability
+    are complementary, not trade-offs, and predicts organizational performance.
+  methodologyKind: measurement
+  origin: "Nicole Forsgren, Jez Humble, Gene Kim (DORA/Google)"
+  yearIntroduced: "2014"
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:Google-SRE-methodology
+attributes:
+  displayName: "Google SRE Methodology"
+  description: |
+    Site Reliability Engineering as practiced at Google — treating operations as
+    a software engineering problem. Defines service reliability through SLIs, SLOs,
+    and error budgets. When error budget is exhausted, feature velocity slows to
+    focus on reliability. Includes practices like toil budgeting (< 50% ops work),
+    blameless postmortems, progressive rollouts, and on-call engineering rotations.
+  methodologyKind: operations
+  origin: "Google (Ben Treynor Sloss)"
+  yearIntroduced: "2003"
+edges:
+  applies_to:
+    - domain:site-reliability
+    - domain:devops
+---
+nodeKind: Methodology
+id: methodology:chaos-engineering-methodology
+attributes:
+  displayName: "Chaos Engineering"
+  description: |
+    A discipline of experimenting on distributed systems to build confidence in
+    their ability to withstand turbulent conditions. Follows a scientific method:
+    define steady state, hypothesize about system behavior, inject real-world
+    failures (network partitions, instance kills, latency injection), observe
+    divergence from steady state. Practices include game days, automated chaos
+    experiments, and blast radius containment.
+  methodologyKind: operations
+  origin: "Netflix (Casey Rosenthal, Nora Jones)"
+  yearIntroduced: "2011"
+edges:
+  applies_to:
+    - domain:site-reliability
+    - domain:distributed-systems
+---
+nodeKind: Methodology
+id: methodology:wardley-mapping
+attributes:
+  displayName: "Wardley Mapping"
+  description: |
+    A strategy tool for mapping the landscape of a business or technology
+    ecosystem. Places components on a value chain (vertical axis, user-visible
+    to invisible) against their evolution stage (horizontal axis: Genesis,
+    Custom, Product, Commodity). Reveals strategic plays like build vs. buy
+    decisions, where to invest, and anticipating market movements through
+    climatic patterns and doctrine.
+  methodologyKind: strategy
+  origin: "Simon Wardley"
+  yearIntroduced: "2005"
+edges:
+  applies_to:
+    - domain:strategy
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:story-mapping
+attributes:
+  displayName: "Story Mapping"
+  description: |
+    A collaborative planning technique that arranges user stories into a two-dimensional
+    map. The horizontal axis represents the user journey (activities and tasks in
+    sequence), while the vertical axis represents priority (walking skeleton at top,
+    enhancements below). Slicing horizontally produces viable release increments
+    that deliver end-to-end user value rather than isolated features.
+  methodologyKind: product-development
+  origin: "Jeff Patton"
+  yearIntroduced: "2005"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:project-management
+---
+nodeKind: Methodology
+id: methodology:team-topologies
+attributes:
+  displayName: "Team Topologies"
+  description: |
+    An organizational design framework defining four fundamental team types —
+    Stream-aligned, Enabling, Complicated Subsystem, and Platform — and three
+    interaction modes: Collaboration, X-as-a-Service, and Facilitating. Uses
+    Conway's Law deliberately to evolve team structures that minimize cognitive
+    load and produce architectures matching desired system boundaries.
+  methodologyKind: management
+  origin: "Matthew Skelton, Manuel Pais"
+  yearIntroduced: "2019"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:project-management
+---
+nodeKind: Methodology
+id: methodology:continuous-discovery-habits
+attributes:
+  displayName: "Continuous Discovery Habits"
+  description: |
+    A product discovery framework where teams conduct weekly touchpoints with
+    customers, using opportunity solution trees to connect business outcomes to
+    customer needs to solutions. Emphasizes assumption mapping, small experiments
+    to test assumptions, and comparing multiple solutions before committing to build.
+    Integrates discovery into the regular delivery cadence rather than treating it
+    as a separate upfront phase.
+  methodologyKind: product-development
+  origin: "Teresa Torres"
+  yearIntroduced: "2021"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:strategy
+---
+nodeKind: Methodology
+id: methodology:specification-by-example
+attributes:
+  displayName: "Specification by Example"
+  description: |
+    A collaborative requirements technique where teams illustrate requirements
+    using realistic examples. Key examples become executable specifications that
+    serve as both documentation and automated tests. The process involves deriving
+    scope from goals, specifying collaboratively, illustrating with examples,
+    refining the specification, automating validation, and evolving a living
+    documentation system.
+  methodologyKind: quality-focused
+  origin: "Gojko Adzic"
+  yearIntroduced: "2011"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:qa-testing
+---
+nodeKind: Methodology
+id: methodology:kanban-method
+attributes:
+  displayName: "Kanban Method (David Anderson)"
+  description: |
+    A change management method for knowledge work that starts from current
+    processes and evolves incrementally. Six core practices: visualize workflow,
+    limit work in progress, manage flow, make policies explicit, implement
+    feedback loops, and improve collaboratively. Uses cumulative flow diagrams,
+    lead time distributions, and flow efficiency metrics to drive continuous
+    improvement without prescribed roles or ceremonies.
+  methodologyKind: agile
+  origin: "David J. Anderson"
+  yearIntroduced: "2007"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:project-management

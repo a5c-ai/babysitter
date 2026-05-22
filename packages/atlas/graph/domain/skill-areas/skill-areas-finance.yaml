@@ -1,0 +1,121 @@
+---
+nodeKind: SkillArea
+id: skill-area:financial-modeling
+attributes:
+  displayName: "Financial Modeling"
+  description: |
+    Building robust financial models to support investment, operational, and strategic
+    decisions — discounted cash flow (DCF) analysis, three-statement models, scenario
+    and sensitivity analysis, and pro-forma statement construction. Emphasizes model
+    architecture best practices: auditability, assumption transparency, and version
+    discipline. Used by finance teams, investors, and operators to quantify tradeoffs
+    and stress-test business assumptions.
+  domains:
+    - domain:finance
+    - domain:venture-capital
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:finance
+      confidence: primary
+    - target: specialization:corporate-finance
+      confidence: secondary
+    - target: specialization:finance-accounting
+      confidence: secondary
+    - target: specialization:venture-capital
+      confidence: secondary
+    - target: domain:venture-capital
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:valuation-analysis
+      strength: required
+    - target: skill-area:quantitative-modeling
+      strength: recommended
+    - target: skill-area:algorithmic-trading
+      strength: recommended
+    - target: skill-area:portfolio-construction
+      strength: recommended
+    - target: skill-area:financial-risk-modeling
+      strength: recommended
+    - target: skill-area:market-data-engineering
+      strength: recommended
+    - target: skill-area:trade-lifecycle
+      strength: recommended
+    - target: skill-area:financial-regulation
+      strength: recommended
+    - target: skill-area:technical-analysis
+      strength: recommended
+    - target: skill-area:financial-planning
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:valuation-analysis
+attributes:
+  displayName: "Valuation Analysis"
+  description: |
+    Estimating the intrinsic and relative value of companies, assets, or securities
+    using comparable company analysis, precedent transaction analysis, DCF, and
+    LBO modeling. Synthesizes financial statements, industry multiples, and deal
+    context into defensible valuation ranges for M&A, fundraising, and strategic
+    decisions. Requires judgment about appropriate peer selection, normalization
+    adjustments, and the limits of each methodology.
+  domains:
+    - domain:finance
+    - domain:venture-capital
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:finance
+      confidence: primary
+    - target: domain:venture-capital
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:budgeting-forecasting
+attributes:
+  displayName: "Budgeting and Forecasting"
+  description: |
+    Constructing operating budgets, rolling forecasts, and long-range financial
+    plans that translate strategic priorities into resource allocation decisions.
+    Covers driver-based modeling, variance analysis, budget governance, and
+    forecast accuracy improvement. Bridges the finance function with business
+    unit partners to produce plans that are credible, owned, and updatable as
+    conditions change.
+  domains:
+    - domain:finance
+    - domain:operations
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:finance
+      confidence: primary
+    - target: domain:operations
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:investment-analysis
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:investment-analysis
+attributes:
+  displayName: "Investment Analysis"
+  description: |
+    Evaluating investment opportunities through fundamental research, portfolio
+    theory, risk-return assessment, and due diligence frameworks. Covers equity
+    and credit analysis, capital allocation decision-making, scenario modeling,
+    and investment memo construction. Applied across venture capital, private
+    equity, and corporate development contexts to decide where to deploy capital
+    and how to monitor it post-investment.
+  domains:
+    - domain:finance
+    - domain:venture-capital
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:finance
+      confidence: primary
+    - target: domain:venture-capital
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:valuation-analysis
+      strength: recommended

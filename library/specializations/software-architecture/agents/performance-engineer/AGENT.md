@@ -10,6 +10,14 @@ expertise:
   - APM tool interpretation
   - Capacity planning
   - Performance modeling
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:principal-engineer, role:sre]
+  skillAreas: [skill-area:performance-monitoring-profiling, skill-area:caching-strategies]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:design-patterns]
+
 ---
 
 # Performance Engineer Agent

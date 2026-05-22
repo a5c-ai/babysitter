@@ -1,0 +1,12 @@
+{
+  "name": "token-optimizer",
+  "version": "1.0.0",
+  "description": "Token Optimizer tool to reduce context waste and optimize token usage.",
+  "author": "alexgreensh",
+  "keywords": [
+    "token",
+    "optimizer",
+    "context",
+    "compression"
+  ]
+}

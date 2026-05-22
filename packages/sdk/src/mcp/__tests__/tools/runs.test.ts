@@ -156,16 +156,7 @@ describe("run_status", () => {
       runId: "01STATUS",
       processId: "test/process",
     } as Awaited<ReturnType<typeof readRunMetadata>>);
-
-    mockedLoadJournal.mockResolvedValue([
-      {
-        seq: 1,
-        type: "RUN_CREATED",
-        recordedAt: "2026-01-01T00:00:00Z",
-        data: { runId: "01STATUS" },
-        checksum: "abc",
-      },
-    ] as Awaited<ReturnType<typeof loadJournal>>);
+    mockedLoadJournal.mockResolvedValue([]);
 
     const handler = getToolHandler(server, "run_status");
     const result = await handler({ runId: "01STATUS", runsDir: "/tmp/runs" });
@@ -181,21 +172,26 @@ describe("run_status", () => {
       runId: "01WAIT",
       processId: "test/process",
     } as Awaited<ReturnType<typeof readRunMetadata>>);
-
     mockedLoadJournal.mockResolvedValue([
       {
         seq: 1,
+        ulid: "01REQ",
+        filename: "000001.01REQ.json",
+        path: "/tmp/runs/01WAIT/journal/000001.01REQ.json",
         type: "RUN_CREATED",
         recordedAt: "2026-01-01T00:00:00Z",
         data: { runId: "01WAIT" },
-        checksum: "abc",
+        checksum: "x",
       },
       {
         seq: 2,
+        ulid: "01REQ2",
+        filename: "000002.01REQ2.json",
+        path: "/tmp/runs/01WAIT/journal/000002.01REQ2.json",
         type: "EFFECT_REQUESTED",
         recordedAt: "2026-01-01T00:00:01Z",
-        data: { effectId: "eff-1", kind: "node", label: "do-stuff" },
-        checksum: "def",
+        data: { effectId: "eff-1", kind: "node" },
+        checksum: "y",
       },
     ] as Awaited<ReturnType<typeof loadJournal>>);
 
@@ -205,44 +201,35 @@ describe("run_status", () => {
     const data = parseResult(result) as {
       state: string;
       pendingEffects: Array<{ effectId: string }>;
-      pendingByKind: Record<string, number>;
     };
     expect(data.state).toBe("waiting");
     expect(data.pendingEffects).toHaveLength(1);
     expect(data.pendingEffects[0].effectId).toBe("eff-1");
-    expect(data.pendingByKind).toEqual({ node: 1 });
   });
 
   it("returns 'completed' when run has completed", async () => {
     mockedReadRunMetadata.mockResolvedValue({
       runId: "01DONE",
       processId: "test/process",
-      completionProof: "proof-abc",
     } as Awaited<ReturnType<typeof readRunMetadata>>);
-
     mockedLoadJournal.mockResolvedValue([
       {
         seq: 1,
-        type: "RUN_CREATED",
-        recordedAt: "2026-01-01T00:00:00Z",
-        data: { runId: "01DONE" },
-        checksum: "abc",
-      },
-      {
-        seq: 2,
+        ulid: "01DONE",
+        filename: "000001.01DONE.json",
+        path: "/tmp/runs/01DONE/journal/000001.01DONE.json",
         type: "RUN_COMPLETED",
-        recordedAt: "2026-01-01T00:01:00Z",
+        recordedAt: "2026-01-01T00:00:02Z",
         data: {},
-        checksum: "ghi",
+        checksum: "z",
       },
     ] as Awaited<ReturnType<typeof loadJournal>>);
 
     const handler = getToolHandler(server, "run_status");
     const result = await handler({ runId: "01DONE", runsDir: "/tmp/runs" });
 
-    const data = parseResult(result) as { state: string; completionProof: string };
+    const data = parseResult(result) as { state: string };
     expect(data.state).toBe("completed");
-    expect(data.completionProof).toBe("proof-abc");
   });
 
   it("returns 'failed' when run has failed", async () => {
@@ -250,21 +237,16 @@ describe("run_status", () => {
       runId: "01FAIL",
       processId: "test/process",
     } as Awaited<ReturnType<typeof readRunMetadata>>);
-
     mockedLoadJournal.mockResolvedValue([
       {
         seq: 1,
-        type: "RUN_CREATED",
-        recordedAt: "2026-01-01T00:00:00Z",
-        data: { runId: "01FAIL" },
-        checksum: "abc",
-      },
-      {
-        seq: 2,
+        ulid: "01FAIL",
+        filename: "000001.01FAIL.json",
+        path: "/tmp/runs/01FAIL/journal/000001.01FAIL.json",
         type: "RUN_FAILED",
-        recordedAt: "2026-01-01T00:01:00Z",
-        data: { error: "something broke" },
-        checksum: "fail",
+        recordedAt: "2026-01-01T00:00:02Z",
+        data: {},
+        checksum: "z",
       },
     ] as Awaited<ReturnType<typeof loadJournal>>);
 
@@ -275,15 +257,15 @@ describe("run_status", () => {
     expect(data.state).toBe("failed");
   });
 
-  it("returns error when metadata read fails", async () => {
-    mockedReadRunMetadata.mockRejectedValue(new Error("Run not found"));
+  it("returns error when run not found", async () => {
+    mockedReadRunMetadata.mockRejectedValue(new Error("Run not found: nonexistent"));
 
     const handler = getToolHandler(server, "run_status");
     const result = await handler({ runId: "nonexistent", runsDir: "/tmp/runs" });
 
     expect(result.isError).toBe(true);
     const data = parseResult(result) as { error: string };
-    expect(data.error).toBe("Run not found");
+    expect(data.error).toBe("Run not found: nonexistent");
   });
 });
 
@@ -292,17 +274,23 @@ describe("run_events", () => {
     mockedLoadJournal.mockResolvedValue([
       {
         seq: 1,
+        ulid: "01A",
+        filename: "000001.01A.json",
+        path: "/tmp/runs/01EVENTS/journal/000001.01A.json",
         type: "RUN_CREATED",
         recordedAt: "2026-01-01T00:00:00Z",
         data: { runId: "01EVENTS" },
-        checksum: "abc",
+        checksum: "a",
       },
       {
         seq: 2,
+        ulid: "01B",
+        filename: "000002.01B.json",
+        path: "/tmp/runs/01EVENTS/journal/000002.01B.json",
         type: "EFFECT_REQUESTED",
         recordedAt: "2026-01-01T00:00:01Z",
         data: { effectId: "eff-1" },
-        checksum: "def",
+        checksum: "b",
       },
     ] as Awaited<ReturnType<typeof loadJournal>>);
 
@@ -318,24 +306,33 @@ describe("run_events", () => {
     mockedLoadJournal.mockResolvedValue([
       {
         seq: 1,
+        ulid: "01A",
+        filename: "000001.01A.json",
+        path: "/tmp/runs/01EVENTS/journal/000001.01A.json",
         type: "RUN_CREATED",
         recordedAt: "2026-01-01T00:00:00Z",
         data: {},
-        checksum: "abc",
+        checksum: "a",
       },
       {
         seq: 2,
+        ulid: "01B",
+        filename: "000002.01B.json",
+        path: "/tmp/runs/01EVENTS/journal/000002.01B.json",
         type: "EFFECT_REQUESTED",
         recordedAt: "2026-01-01T00:00:01Z",
         data: { effectId: "eff-1" },
-        checksum: "def",
+        checksum: "b",
       },
       {
         seq: 3,
+        ulid: "01C",
+        filename: "000003.01C.json",
+        path: "/tmp/runs/01EVENTS/journal/000003.01C.json",
         type: "EFFECT_REQUESTED",
         recordedAt: "2026-01-01T00:00:02Z",
         data: { effectId: "eff-2" },
-        checksum: "ghi",
+        checksum: "c",
       },
     ] as Awaited<ReturnType<typeof loadJournal>>);
 
@@ -346,17 +343,35 @@ describe("run_events", () => {
       filterType: "EFFECT_REQUESTED",
     });
 
-    const data = parseResult(result) as { total: number; matching: number; showing: number };
+    const data = parseResult(result) as { total: number; matching: number; showing: number; events: unknown[] };
     expect(data.total).toBe(3);
     expect(data.matching).toBe(2);
     expect(data.showing).toBe(2);
+    expect(data.events).toHaveLength(2);
   });
 
-  it("applies limit and reverse", async () => {
+  it("applies reverse and limit locally", async () => {
     mockedLoadJournal.mockResolvedValue([
-      { seq: 1, type: "RUN_CREATED", recordedAt: "t1", data: {}, checksum: "a" },
-      { seq: 2, type: "EFFECT_REQUESTED", recordedAt: "t2", data: { effectId: "e1" }, checksum: "b" },
-      { seq: 3, type: "EFFECT_RESOLVED", recordedAt: "t3", data: { effectId: "e1" }, checksum: "c" },
+      {
+        seq: 2,
+        ulid: "01B",
+        filename: "000002.01B.json",
+        path: "/tmp/runs/01EVENTS/journal/000002.01B.json",
+        type: "EFFECT_REQUESTED",
+        recordedAt: "t2",
+        data: { effectId: "e1" },
+        checksum: "b",
+      },
+      {
+        seq: 3,
+        ulid: "01C",
+        filename: "000003.01C.json",
+        path: "/tmp/runs/01EVENTS/journal/000003.01C.json",
+        type: "EFFECT_RESOLVED",
+        recordedAt: "t3",
+        data: { effectId: "e1" },
+        checksum: "c",
+      },
     ] as Awaited<ReturnType<typeof loadJournal>>);
 
     const handler = getToolHandler(server, "run_events");
@@ -371,6 +386,17 @@ describe("run_events", () => {
     expect(data.showing).toBe(2);
     expect(data.events[0].seq).toBe(3);
     expect(data.events[1].seq).toBe(2);
+  });
+
+  it("returns error when run not found", async () => {
+    mockedLoadJournal.mockRejectedValue(new Error("Run not found: nonexistent"));
+
+    const handler = getToolHandler(server, "run_events");
+    const result = await handler({ runId: "nonexistent", runsDir: "/tmp/runs" });
+
+    expect(result.isError).toBe(true);
+    const data = parseResult(result) as { error: string };
+    expect(data.error).toBe("Run not found: nonexistent");
   });
 });
 

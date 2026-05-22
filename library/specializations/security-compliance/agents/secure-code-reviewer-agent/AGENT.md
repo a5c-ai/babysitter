@@ -9,6 +9,13 @@ expertise:
   - Input validation analysis
   - Error handling review
   - Secure code recommendations
+graph:
+  domains: [domain:security, domain:software-engineering]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:sast, skill-area:backend-security, skill-area:authentication-authorization]
+  topics: [topic:defense-in-depth, topic:zero-trust-architecture]
+  roles: [role:security-engineer, role:backend-engineer]
+  workflows: [workflow:code-review, workflow:pull-request-lifecycle]
 ---
 
 # Secure Code Reviewer Agent

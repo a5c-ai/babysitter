@@ -3,6 +3,12 @@
  * @description Complete Feature Definition and PRD Creation process with problem statement analysis, user story generation, acceptance criteria definition, technical specifications, design requirements, success metrics tracking, and stakeholder alignment
  * @inputs { featureName: string, problemStatement: string, targetUsers: array, businessGoals: array, outputDir: string, priorityLevel: string, timeline: object, stakeholders: array }
  * @outputs { success: boolean, prdDocument: string, userStories: array, acceptanceCriteria: array, technicalSpecs: object, successMetrics: array, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:product-management]
+ *   skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:stakeholder-management]
+ *   roles: [role:product-manager, role:product-analyst]
+ *   workflows: [workflow:product-discovery, workflow:competitive-analysis]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

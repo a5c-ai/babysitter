@@ -1,0 +1,31 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:gemini-cli.knowledge@current
+attributes:
+  displayName: "Gemini CLI Knowledge Fabric — GEMINI.md"
+  agentVersionId: agentVersion:gemini:ge-0-0-0
+  description: |
+    Gemini CLI's knowledge fabric is built on GEMINI.md files that provide
+    persistent project-level and user-level instructions. Like Claude Code's
+    CLAUDE.md, these files are read at session bootstrap and injected into
+    the system prompt. Gemini CLI supports nested GEMINI.md files in
+    subdirectories for scoped context. The knowledge persists on the
+    filesystem and is retrieved via file-hierarchy traversal.
+  knowledgeFileFormats:
+    - "GEMINI.md"
+  knowledgeScopes:
+    - project
+    - user
+  autoExtractionSupport: false
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: filesystem
+  notes: |
+    Gemini CLI follows the AGENTS.md / CLAUDE.md pattern with its own
+    GEMINI.md files. Knowledge retrieval is file-hierarchy based with
+    project and user scopes. No auto-memory extraction or vector-based
+    retrieval has been documented.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agentVersion:gemini:ge-0-0-0
+      role: knowledge-fabric

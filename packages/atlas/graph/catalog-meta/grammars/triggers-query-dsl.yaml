@@ -1,0 +1,51 @@
+# Source: parseQuery() at packages/triggers/src/query.ts:75-100,
+# evaluateExpression() at lines 55-73, globToRegExp() at lines 20-37.
+nodeKind: Grammar
+id: grammar:amux-triggers-query-dsl
+attributes:
+  displayName: "amux-triggers TriggerQuery DSL"
+  dslName: TriggerQuery
+  surfaceVariants:
+    - "compact-key-value"
+    - "json-object"
+    - "expression-clause"
+  productions:
+    - "<Query>             ::= <CompactQuery> | <JsonQuery>"
+    - "<CompactQuery>      ::= <Segment> ( WS <Segment> )*"
+    - "<Segment>           ::= <Pair> | <BareTerm>"
+    - "<Pair>              ::= <Key> COLON <Value>"
+    - "<Key>               ::= 'event' | 'action' | 'text' | 'contains' | 'diff' | 'path' | 'file' | 'branch' | 'label'"
+    - "<Value>             ::= STRING_LITERAL"
+    - "<BareTerm>          ::= STRING_LITERAL                  ; folds into query.text"
+    - "<JsonQuery>         ::= '{' <JsonField> ( ',' <JsonField> )* '}' ; parsed via JSON.parse if input.startsWith('{')"
+    - "<JsonField>         ::= '\"' <Key> '\"' ':' ( STRING | LIST<STRING> )"
+    - "<JsonField>         ::= '\"expression\"' ':' STRING       ; <ExprClause>"
+    - "<ExprClause>        ::= <ExprAtom> ( WS '&&' WS <ExprAtom> )*"
+    - "<ExprAtom>          ::= <Field> WS '~'  WS QUOTED_STRING ; case-insensitive contains"
+    - "<ExprAtom>          ::= <Field> WS '==' WS QUOTED_STRING ; equality (membership for list-valued fields)"
+    - "<Field>             ::= IDENT ( ('.' | '-') IDENT )*"
+    - "<PathGlob>          ::= ( '**' | '*' | '?' | LITERAL )*  ; ** = any, * = non-slash, ? = single, all else literal"
+  tokens:
+    - "IDENT          := [A-Za-z][\\w.-]*"
+    - "STRING_LITERAL := non-whitespace run after the COLON"
+    - "QUOTED_STRING  := single- or double-quoted string"
+    - "COLON          := ':'"
+    - "WS             := /\\s+/"
+    - "AMP_AMP        := '&&'"
+    - "TILDE          := '~'"
+    - "EQ_EQ          := '=='"
+  operators:
+    - "~  : binary contains (case-insensitive substring; for list-valued fields, joins with newline first)"
+    - "== : binary equals (for list-valued fields, membership)"
+    - "&& : binary clause-and (whitespace-padded; only top-level conjunction supported)"
+    - ":  : key-value separator in compact form"
+  globSyntax: "** matches any (including '/'); * matches non-slash; ? matches single non-slash; all other regex specials are literally escaped (packages/triggers/src/query.ts:20-37)."
+  parserEntrypoint: "parseQuery (packages/triggers/src/query.ts:75); evaluateExpression (packages/triggers/src/query.ts:55); globToRegExp (packages/triggers/src/query.ts:20)"
+  sourceCitation: "packages/triggers/src/query.ts:20-100"
+edges:
+  grammar_parses_for:
+    - target: operational-trigger:amux-triggers-github
+    - target: operational-trigger:amux-triggers-gitlab
+    - target: operational-trigger:amux-triggers-bitbucket
+    - target: operational-trigger:amux-triggers-generic-webhook
+    - target: operational-trigger:amux-triggers-action

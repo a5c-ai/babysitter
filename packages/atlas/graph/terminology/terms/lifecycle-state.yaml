@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:lifecycle-state
+attributes:
+  canonicalDefinitionId: definition:lifecycle-state.canonical
+  displayName: "LifecycleState"
+  kind: lifecycle-state
+  references:
+    - "NodeKind:LifecycleState"
+  description: |
+    A state in a state machine
+edges:
+  applies_to:
+    - target: domain:software-engineering

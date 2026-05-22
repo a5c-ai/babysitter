@@ -5,6 +5,12 @@ version: 1.0.0
 category: Transformation
 skill-id: SK-DEA-003
 allowed-tools: Read, Grep, Glob, Bash, WebFetch
+graph:
+  domains: [domain:data-engineering]
+  specializations: [specialization:data-engineering-analytics]
+  skillAreas: [skill-area:dbt-modeling, skill-area:data-warehouse-modeling]
+  roles: [role:analytics-engineer, role:data-engineer]
+  workflows: [workflow:data-pipeline-deployment]
 ---
 
 # dbt Project Analyzer

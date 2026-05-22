@@ -1,0 +1,208 @@
+nodeKind: ToolServer
+id: tool-server:mcp-mysql
+attributes:
+  displayName: MySQL MCP Server
+  description: |
+    MCP server providing access to MySQL databases.
+    Enables AI agents to inspect schemas, list tables, and execute
+    read-only or read-write SQL queries against MySQL instances.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/benborla/mcp-server-mysql
+  npmPackage: "@benborla29/mcp-server-mysql"
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:managed-mysql
+  - target: stack-part:relational-database
+  lib_applies_to_domain:
+  - target: domain:databases
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-dynamodb
+attributes:
+  displayName: DynamoDB MCP Server
+  description: |
+    MCP server providing access to Amazon DynamoDB.
+    Enables AI agents to list tables, describe table schemas, scan,
+    query, and perform CRUD operations on DynamoDB items.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/aws/aws-mcp-servers
+  maintainer: AWS
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform-service:aws-dynamodb
+  - target: stack-part:nosql-database
+  - target: platform:aws
+  lib_applies_to_domain:
+  - target: domain:databases
+  - target: domain:cloud-infra
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-neo4j
+attributes:
+  displayName: Neo4j MCP Server
+  description: |
+    MCP server providing access to Neo4j graph databases.
+    Enables AI agents to run Cypher queries, explore graph schemas,
+    manage nodes and relationships, and build knowledge graphs.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/neo4j-contrib/mcp-neo4j
+  maintainer: Neo4j
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:neo4j
+  - target: stack-part:graph-database
+  lib_applies_to_domain:
+  - target: domain:databases
+  - target: domain:data-science
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-pinecone
+attributes:
+  displayName: Pinecone MCP Server
+  description: |
+    MCP server providing access to Pinecone vector database.
+    Enables AI agents to create and manage indexes, upsert vectors,
+    query by similarity, and manage namespaces for RAG applications.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/pinecone-io/pinecone-mcp
+  maintainer: Pinecone
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:vector-database
+  lib_applies_to_domain:
+  - target: domain:data-science
+  - target: domain:machine-learning
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-weaviate
+attributes:
+  displayName: Weaviate MCP Server
+  description: |
+    MCP server providing access to Weaviate vector search engine.
+    Enables AI agents to manage collections, perform vector and hybrid
+    searches, and use Weaviate as persistent memory for RAG pipelines.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/weaviate/mcp-server-weaviate
+  maintainer: Weaviate
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:vector-database
+  lib_applies_to_domain:
+  - target: domain:data-science
+  - target: domain:machine-learning
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-qdrant
+attributes:
+  displayName: Qdrant MCP Server
+  description: |
+    MCP server providing access to Qdrant vector search engine.
+    Enables AI agents to store and retrieve memories, perform similarity
+    searches, and manage collections for semantic search applications.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/qdrant/mcp-server-qdrant
+  maintainer: Qdrant
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:vector-database
+  lib_applies_to_domain:
+  - target: domain:data-science
+  - target: domain:machine-learning
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-snowflake
+attributes:
+  displayName: Snowflake MCP Server
+  description: |
+    MCP server providing access to Snowflake data warehouse.
+    Enables AI agents to execute SQL queries, list databases, schemas,
+    and tables, and explore metadata in Snowflake environments.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/Snowflake-Labs/mcp
+  maintainer: Snowflake
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:data-scientist
+      confidence: high
+      evidence: "Warehouse queries and metadata support analytics investigation."
+    - target: workflow:data-pipeline-monitoring
+      confidence: high
+      evidence: "Warehouse state and query results project pipeline health and data freshness."
+  integrates_with:
+  - target: stack-part:data-warehouse
+  lib_applies_to_domain:
+  - target: domain:databases
+  - target: domain:data-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-bigquery
+attributes:
+  displayName: BigQuery MCP Server
+  description: |
+    MCP server providing access to Google BigQuery.
+    Enables AI agents to run SQL queries, list datasets and tables,
+    inspect schemas, and analyze large-scale data in BigQuery.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/ergut/mcp-bigquery
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform-service:gcp-bigquery
+  - target: stack-part:data-warehouse
+  - target: platform:gcp
+  lib_applies_to_domain:
+  - target: domain:databases
+  - target: domain:data-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-cassandra
+attributes:
+  displayName: Cassandra MCP Server
+  description: |
+    MCP server providing access to Apache Cassandra databases.
+    Enables AI agents to execute CQL queries, list keyspaces and tables,
+    describe schemas, and manage data in Cassandra clusters.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/datastax/cassandra-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:nosql-database
+  lib_applies_to_domain:
+  - target: domain:databases

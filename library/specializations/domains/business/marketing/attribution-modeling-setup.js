@@ -3,6 +3,11 @@
  * @description Implement multi-touch attribution to understand channel contribution to conversions. Compare first-touch, last-touch, and data-driven models.
  * @inputs { channelData: object, conversionData: object, customerJourney: object, existingAttribution: object }
  * @outputs { success: boolean, attributionModel: object, modelComparison: object, channelContribution: object, recommendations: array, artifacts: array }
+  * @graph
+ *   domains: [domain:marketing]
+ *   skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+ *   workflows: [workflow:brand-campaign-launch]
+ *   roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

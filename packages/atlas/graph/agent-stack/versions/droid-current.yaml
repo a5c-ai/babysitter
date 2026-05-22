@@ -1,0 +1,44 @@
+nodeKind: AgentVersion
+id: agent-version:droid@current
+attributes:
+  agentProductId: agent:droid
+  versionRange: ">=1.0.0"
+  releasedAt: "2025-01-01"
+  cliCommand: "droid"
+  installMethods:
+    - install:npm
+    - install:brew
+    - install:curl
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:droid
+  composed_of:
+    - target: agent-core-impl:droid.core@current
+      role: core
+    - target: agent-runtime-impl:droid.runtime@current
+      role: runtime
+    - target: agent-platform-impl:droid.platform@current
+      role: platform
+    - target: agent-ui-impl:droid.ui@current
+      role: ui
+  sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Droid operates as a multi-turn coding agent.
+    - target: capability:supports-text-streaming
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Droid streams model output in the terminal.
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Droid drives file edits and commands via tool-use.
+    - target: capability:supports-mcp
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Droid supports MCP server integration.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern

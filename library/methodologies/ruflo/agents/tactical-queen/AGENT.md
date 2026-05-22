@@ -9,17 +9,15 @@ expertise:
   - Checkpoint enforcement
   - Bottleneck detection and resolution
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Tactical Queen Agent
-
-## Role
-
-Tactical Queen in the Ruflo agent hierarchy. Manages execution-level coordination, schedules tasks across worker agents, enforces checkpoints, and detects bottlenecks.
-
-## Expertise
-
-- Real-time task scheduling and dependency resolution
 - Worker agent workload balancing
 - Checkpoint frequency management
 - Anti-drift enforcement at tactical level

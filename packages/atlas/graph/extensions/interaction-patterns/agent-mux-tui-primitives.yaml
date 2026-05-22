@@ -1,0 +1,38 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-tui-command-palette
+attributes:
+  displayName: "amux TUI command palette"
+  kind: tui-command
+  surface: prompt-ui
+  description: |
+    Fuzzy-filterable picker that unifies registered TuiViews and TuiCommands
+    into a single overlay; consumers fire view-switch or command-run via
+    `onPick`. Supports incremental query, cursor up/down, enter to confirm,
+    escape to cancel.
+    Source: packages/agent-mux/tui/src/command-palette.tsx:6-130.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-tui-prompt-input
+attributes:
+  displayName: "amux TUI prompt input"
+  kind: tui-command
+  surface: prompt-ui
+  description: |
+    Multi-segment composer used by the TUI to author user prompts. Tracks
+    text, paste-blob, and file-attachment segments; supports up/down history
+    recall, shift+tab cycling, escape to cancel, and a configurable large
+    paste threshold (default 80 chars) that compresses paste segments.
+    Source: packages/agent-mux/tui/src/prompt-input.tsx:5-200.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-tui-model-picker
+attributes:
+  displayName: "amux TUI model picker"
+  kind: tui-command
+  surface: prompt-ui
+  description: |
+    Fuzzy-filterable picker over `{ agent, modelId }` options for switching
+    the active model on a session. Same up/down cursor + enter/escape grammar
+    as the command palette; filtered by a case-insensitive substring match
+    on either agent or modelId.
+    Source: packages/agent-mux/tui/src/model-picker.tsx:5-95.

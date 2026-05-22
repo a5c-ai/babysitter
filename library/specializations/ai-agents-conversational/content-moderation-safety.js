@@ -16,6 +16,9 @@
  * - OpenAI Moderation: https://platform.openai.com/docs/guides/moderation
  * - Perspective API: https://developers.perspectiveapi.com/
  * - Azure Content Safety: https://azure.microsoft.com/en-us/products/ai-services/ai-content-safety
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

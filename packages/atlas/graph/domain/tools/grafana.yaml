@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:grafana
+attributes:
+  displayName: "Grafana"
+  homepageUrl: "https://grafana.com"
+  kind: observability
+  languageApplicability: neutral
+  description: |
+    Open-source analytics and interactive visualization platform for metrics and logs.
+edges:
+  tool_used_by:
+    - target: skill-area:observability-pipeline
+  used_for:
+    - skill-area:metrics-dashboarding
+    - skill-area:observability-instrumentation
+  alternative_to:
+    - target: tool:datadog
+      comparison: "APM/dashboards — Grafana is open-source visualization; Datadog is all-in-one SaaS"
+    - target: tool:prometheus
+      comparison: "Monitoring and observability platforms"

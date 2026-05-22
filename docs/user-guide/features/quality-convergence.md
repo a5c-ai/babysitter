@@ -1061,7 +1061,7 @@ const [coverage, lint, security] = await ctx.parallel.all([
 - [Parallel Execution](./parallel-execution.md) - Optimize quality checks with parallelism
 - [Breakpoints](./breakpoints.md) - Add approval gates to quality convergence workflows
 - [Best Practices](./best-practices.md) - Patterns for setting targets, custom scoring strategies, and balancing speed vs thoroughness
-- [Process Library](./process-library.md) - Browse 2,000+ pre-built processes with quality convergence
+- [Process Library](./process-library.md) - Browse the SDK-managed library and current process counts
 - [Two-Loops Architecture](./two-loops-architecture.md) - Deep dive into the evidence-driven completion model
 
 ---
@@ -1070,9 +1070,9 @@ const [coverage, lint, security] = await ctx.parallel.all([
 
 Babysitter offers two levels of reusable workflows:
 
-### Methodologies (19+) - The "How"
+### Methodologies (38 directories in this repo snapshot) - The "How"
 
-**Quality convergence works with ANY of Babysitter's 19+ methodologies** - not just TDD. Methodologies define your development approach:
+**Quality convergence works with ANY of Babysitter's methodology families** - not just TDD. In this repository snapshot there are 38 methodology directories under `library/methodologies/`.
 
 | Methodology | Best For | Quality Focus |
 |-------------|----------|---------------|
@@ -1083,23 +1083,25 @@ Babysitter offers two levels of reusable workflows:
 | **Domain-Driven Design** | Complex business domains | Domain model integrity, bounded contexts |
 
 **Browse methodologies:**
-- [All 19+ methodologies with source code](../reference/glossary.md#methodology)
-- [Methodologies folder](../../../plugins/babysitter/skills/babysit/process/methodologies/)
+- [Methodology overview](../reference/glossary.md#methodology)
+- [Methodologies folder](../../../library/methodologies/)
 
-### Domain Processes (2,000+) - The "What"
+### Domain Processes - The "What"
 
-Beyond methodologies, Babysitter includes **2,000+ domain-specific processes** for specific tasks:
+Beyond methodologies, Babysitter includes the following generated specialization snapshot from the live repository tree:
 
+<!-- quality-convergence:domains:start -->
 | Domain | Processes | Examples |
 |--------|-----------|----------|
-| **Development** | 680+ | Web APIs, mobile apps, DevOps pipelines |
-| **Business** | 430+ | Legal contracts, HR workflows, marketing campaigns |
-| **Science & Engineering** | 550+ | Quantum algorithms, aerospace systems, biomedical devices |
-| **Social Sciences** | 150+ | Research methodologies, survey analysis |
+| **Development and technical specializations** | 837 | Web APIs, mobile apps, DevOps pipelines, AI, security, and related technical workflows |
+| **Business domains** | 490 | Legal contracts, HR workflows, marketing campaigns, finance, logistics, and related domains |
+| **Science & engineering domains** | 551 | Quantum algorithms, aerospace systems, biomedical devices, mathematics, and related domains |
+| **Social sciences & humanities** | 160 | Education, healthcare, arts, philosophy, and social-science research |
+<!-- quality-convergence:domains:end -->
 
 **Browse processes:**
 - [Process Library](./process-library.md) - Full catalog with descriptions
-- [Specializations folder](../../../plugins/babysitter/skills/babysit/process/specializations/)
+- [Specializations folder](../../../library/specializations/)
 
 ---
 

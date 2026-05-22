@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:capability-profile
+attributes:
+  canonicalDefinitionId: definition:capability-profile.canonical
+  displayName: "CapabilityProfile"
+  kind: capability
+  references:
+    - "NodeKind:CapabilityProfile"
+  description: |
+    A swappable capability bundle
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

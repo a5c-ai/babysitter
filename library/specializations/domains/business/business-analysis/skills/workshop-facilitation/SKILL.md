@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-016
   category: Facilitation
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:stakeholder-management, skill-area:requirements-engineering, skill-area:business-analysis]
+  workflows: [workflow:market-analysis]
+  roles: [role:business-analyst, role:organizational-development-specialist]
 ---
 
 # Workshop Facilitation Toolkit

@@ -3,6 +3,12 @@ name: macos-entitlements-generator
 description: Generate entitlements.plist with appropriate sandbox capabilities for macOS applications
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [macos, entitlements, sandbox, security, apple]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-system-integration, skill-area:application-security-testing]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # macos-entitlements-generator

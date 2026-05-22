@@ -8,6 +8,14 @@ expertise:
   - Help text and documentation
   - Error message crafting
   - User workflow optimization
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:interaction-design]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # CLI UX Architect Agent

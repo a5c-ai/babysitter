@@ -1,0 +1,11 @@
+id: example-stack-layers
+query:
+  kind: Layer
+  sort: attributes.position
+  missing:
+    - attributes.parentLayerId
+render:
+  template: wiki/generators/templates/examples/layers.md.tmpl
+output:
+  path: wiki/generated/example-stack-layers.md
+

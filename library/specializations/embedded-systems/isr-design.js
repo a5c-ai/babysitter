@@ -18,6 +18,12 @@
  * - Interrupt Handling Best Practices: https://interrupt.memfault.com/blog/interrupt-handling-best-practices
  * - ISR Design: https://www.embedded.com/interrupt-handling-part-1/
  * - RTOS and Interrupts: https://www.freertos.org/RTOS-task-notifications.html
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

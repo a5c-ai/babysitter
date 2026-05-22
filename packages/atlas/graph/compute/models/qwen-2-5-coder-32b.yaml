@@ -1,0 +1,70 @@
+nodeKind: ModelVersion
+id: model:qwen-2-5-coder-32b@current
+attributes:
+  displayName: "Qwen 2.5 Coder 32B"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:qwen-2-5
+  versionRange: '>=2.5.0 <2.6.0'
+  kind: code-completion
+  contextWindowTokens: 131072
+  modalities:
+  - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2024-11-12'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2024-11-12'
+  modelCardUrl: https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:qwen-2-5
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:qwen-2-5
+  served_by:
+  - provider:together-ai
+  - provider:fireworks-ai
+  - provider:hyperbolic
+  speaks:
+  - model-transport:openai-compat
+  supports:
+  - target: capability:streaming
+    versionRange: '>=2.5.0 <2.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-qwen-2-5-coder-32b
+  - target: capability:supports-text-streaming
+    versionRange: '>=2.5.0 <2.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-qwen-2-5-coder-32b
+  - target: capability:can-multi-turn
+    versionRange: '>=2.5.0 <2.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-qwen-2-5-coder-32b
+  - target: capability:supports-native-tools
+    versionRange: '>=2.5.0 <2.6.0'
+    level: partial
+    notes: 'Coder models accept tool/function-call schemas via Hermes-style prompting;
+      not as robust as the general 72B Instruct.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-qwen-2-5-coder-32b
+  - target: capability:requires-tool-approval
+    versionRange: '>=2.5.0 <2.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-qwen-2-5-coder-32b

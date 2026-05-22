@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:jenkins
+attributes:
+  displayName: "Jenkins"
+  homepageUrl: "https://www.jenkins.io"
+  kind: ci
+  description: |
+    Open-source automation server for building, testing, and deploying software.
+edges:
+  tool_used_by:
+    - target: skill-area:gitops
+  alternative_to:
+    - target: tool:github-actions
+      comparison: "CI/CD — Jenkins is self-hosted; GitHub Actions is SaaS"
+    - target: tool:gitlab-ci
+      comparison: "CI/CD — Jenkins is self-hosted; GitLab CI is managed"
+    - target: tool:circleci
+      comparison: "CI/CD — Jenkins is self-hosted; CircleCI is SaaS"
+    - target: tool:buildkite
+      comparison: "CI/CD — Jenkins is fully self-hosted; Buildkite has hosted control-plane"

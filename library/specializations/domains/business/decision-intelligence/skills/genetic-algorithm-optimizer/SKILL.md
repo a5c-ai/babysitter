@@ -16,6 +16,10 @@ metadata:
     - DEAP
     - pymoo
     - geneticalgorithm
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:quantitative-modeling, skill-area:strategic-analysis, skill-area:data-analysis]
+  roles: [role:data-scientist, role:quantitative-analyst, role:operations-analyst]
 ---
 
 # Genetic Algorithm Optimizer

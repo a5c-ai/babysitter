@@ -1,0 +1,11 @@
+nodeKind: Specialization
+id: specialization:postgres-tuning
+attributes:
+  displayName: "PostgreSQL Performance Tuning"
+  parentDomainId: domain:databases
+  description: |
+    PostgreSQL performance tuning — query plans, indexes, vacuum/autovacuum,
+    connection pooling, and replication topology.
+edges:
+  specializes:
+    - domain:databases

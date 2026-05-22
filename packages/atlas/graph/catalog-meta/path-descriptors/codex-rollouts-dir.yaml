@@ -1,0 +1,17 @@
+nodeKind: PathDescriptor
+id: path:codex-rollouts-dir
+attributes:
+  pathId: path:codex-rollouts-dir
+  displayName: "Codex rollouts directory"
+  path: "~/.codex/rollouts/"
+  pathKind: session-state-dir
+  ownerKind: AgentPlatformImpl
+  ownerId: agent-platform-impl:codex.platform@1.x
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+
+edges:
+  owned_by:
+    - target: agent-platform-impl:codex.platform@1.x

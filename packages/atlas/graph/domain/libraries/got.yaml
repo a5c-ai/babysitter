@@ -1,0 +1,13 @@
+nodeKind: Library
+id: library:got
+attributes:
+  displayName: "Got"
+  belongsToLanguageId: language:javascript
+  category: http-client
+  description: |
+    Human-friendly and powerful HTTP request library for Node.js.
+edges:
+  belongs_to_language:
+    - language:javascript
+  library_used_by:
+    - target: skill-area:backend-api-design

@@ -104,12 +104,19 @@ You should see version numbers for all four tools. If not, address the missing r
 
 ### Method 1: Quick Install (Recommended)
 
-Copy and paste this single command to install everything:
+Copy and paste this to install the main CLI and the Claude Code plugin:
 
 ```bash
-claude plugin marketplace add a5c-ai/babysitter && \
+npm install -g @a5c-ai/babysitter@latest && \
+claude plugin marketplace add a5c-ai/babysitter-claude && \
 claude plugin install --scope user babysitter@a5c.ai && \
 claude plugin enable --scope user babysitter@a5c.ai
+```
+
+If you also want headless runtime commands such as `babysitter-agent call`, install the optional runtime CLI too:
+
+```bash
+npm install -g @a5c-ai/babysitter-agent@latest
 ```
 
 Then restart Claude Code and skip to [Verification](#verification).
@@ -118,16 +125,15 @@ Then restart Claude Code and skip to [Verification](#verification).
 
 If you prefer to understand each step, follow along below.
 
-#### Step 1: Install the CLI Packages
-
-Install the Babysitter CLI packages globally:
+#### Step 1: Install the Main CLI
 
 ```bash
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest
 ```
 
 **What this installs:**
-- `@a5c-ai/babysitter-sdk` - Orchestration runtime and commands
+- `@a5c-ai/babysitter` - Recommended user-facing package for the `babysitter` CLI
+- `@a5c-ai/babysitter-sdk` - Installed as the underlying SDK/core CLI implementation
 
 **Expected output:**
 ```
@@ -136,16 +142,29 @@ added 1 packages in 15s
 
 **Verify installation:**
 ```bash
-npx -y @a5c-ai/babysitter-sdk@latest --version
+babysitter --version
 ```
 
-#### Step 2: Install the Claude Code Plugin
+#### Step 2: Install the Optional Runtime CLI
 
-The plugin integrates Babysitter with Claude Code, providing the `/babysit` skill.
+Install this only if you need `babysitter-agent` commands for headless orchestration, the internal harness, daemon utilities, MCP serving, or the TUI:
+
+```bash
+npm install -g @a5c-ai/babysitter-agent@latest
+```
+
+**Verify installation:**
+```bash
+babysitter-agent --version
+```
+
+#### Step 3: Install the Claude Code Plugin
+
+The plugin integrates Babysitter with Claude Code and enables the `/babysitter:*` slash-command surface.
 
 ```bash
 # Add the plugin repository
-claude plugin marketplace add a5c-ai/babysitter
+claude plugin marketplace add a5c-ai/babysitter-claude
 
 # Install the plugin
 claude plugin install --scope user babysitter@a5c.ai
@@ -160,7 +179,7 @@ Plugin 'babysitter@a5c.ai' installed successfully
 Plugin 'babysitter@a5c.ai' enabled
 ```
 
-#### Step 3: Restart Claude Code
+#### Step 4: Restart Claude Code
 
 **Important:** You must restart Claude Code for the plugin to load.
 
@@ -191,7 +210,7 @@ nvm use 22
 
 **Installation:**
 ```bash
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest
 ```
 
 **Permission Issues?**
@@ -205,7 +224,7 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
 source ~/.zshrc
 
 # Then retry installation
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest
 ```
 
 ### Linux
@@ -220,7 +239,7 @@ sudo apt-get install -y nodejs
 node --version  # Should show v22.x.x
 
 # Install Babysitter
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest
 ```
 
 **Fedora/RHEL/CentOS:**
@@ -230,13 +249,13 @@ curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash -
 sudo yum install -y nodejs
 
 # Install Babysitter
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest
 ```
 
 **Arch Linux:**
 ```bash
 sudo pacman -S nodejs npm
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest
 ```
 
 ### Windows
@@ -260,7 +279,7 @@ wsl --install
 3. Open Git Bash and run:
 
 ```bash
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest
 ```
 
 **Note:** Some shell commands in Babysitter may require Git Bash or WSL. PowerShell/CMD support is limited.
@@ -269,13 +288,13 @@ npm install -g @a5c-ai/babysitter-sdk@latest
 
 ## Plugin Installation
 
-The Claude Code plugin provides the `/babysit` skill that orchestrates Babysitter runs.
+The Claude Code plugin provides the `/babysitter:*` command surface that orchestrates Babysitter runs.
 
 ### Install the Plugin
 
 ```bash
 # Step 1: Add the marketplace repository
-claude plugin marketplace add a5c-ai/babysitter
+claude plugin marketplace add a5c-ai/babysitter-claude
 ```
 
 **Expected:** `Marketplace 'a5c.ai' added`
@@ -392,20 +411,30 @@ Let's confirm everything is working correctly.
 
 Run each command and verify the expected result:
 
-#### 1. SDK Installed
+#### 1. Core CLI Installed
 ```bash
-npx -y @a5c-ai/babysitter-sdk@latest --version
+babysitter --version
 ```
-**Expected:** Version number (e.g., `0.0.123`)
+**Expected:** Current release version (for this repository, `5.0.0`)
 
-#### 2. Plugin Active
+#### 2. Optional Runtime CLI Installed
+
+If you installed `@a5c-ai/babysitter-agent`:
+
+```bash
+babysitter-agent --version
+```
+
+**Expected:** Current release version (for this repository, `5.0.0`)
+
+#### 3. Plugin Active
 In Claude Code, type:
 ```
 /skills
 ```
 **Expected:** "babysit" appears in the list
 
-#### 3. Full Integration Test
+#### 4. Full Integration Test
 In Claude Code:
 ```
 claude "/babysitter:call echo hello world"
@@ -417,8 +446,9 @@ claude "/babysitter:call echo hello world"
 | Check | Command | Expected |
 |-------|---------|----------|
 | jq | `jq --version` | jq-1.6 or higher |
-| SDK | `npx @a5c-ai/babysitter-sdk --version` | Version number |
-| Plugin | `/skills` in Claude Code | "babysitter:call" listed |
+| Core CLI | `babysitter --version` | `5.0.0` |
+| Runtime CLI | `babysitter-agent --version` | `5.0.0` if installed |
+| Plugin | `/skills` in Claude Code | "babysit" listed |
 
 **All checks passed?** You're ready for the [Quickstart](./quickstart.md)!
 
@@ -428,10 +458,10 @@ claude "/babysitter:call echo hello world"
 
 Babysitter is actively developed. Keep your installation current for the latest features and fixes.
 
-### Update SDK Packages
+### Update CLI Packages
 
 ```bash
-npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk
+npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-agent
 ```
 
 ### Update Claude Code Plugin
@@ -449,8 +479,11 @@ claude plugin update babysitter@a5c.ai
 ### Check Current Versions
 
 ```bash
-# SDK version
-npx -y @a5c-ai/babysitter-sdk@latest --version
+# Core CLI version
+babysitter --version
+
+# Runtime CLI version (if installed)
+babysitter-agent --version
 
 # Plugin version
 claude plugin list | grep babysitter
@@ -486,23 +519,20 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
 source ~/.zshrc
 
 # Retry installation
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest
 ```
 
 #### "Cannot find module '@a5c-ai/babysitter-sdk'"
 
-**Problem:** SDK not installed globally or PATH issue.
+**Problem:** You are importing the SDK in code, but `@a5c-ai/babysitter-sdk` is not installed in that project.
 
 **Solution:**
 ```bash
-# Verify global packages
-npm list -g @a5c-ai/babysitter-sdk
+# Install the SDK as a project dependency when authoring custom processes
+npm install @a5c-ai/babysitter-sdk
 
-# If not found, install
-npm install -g @a5c-ai/babysitter-sdk@latest
-
-# Alternative: use npx (always works)
-npx -y @a5c-ai/babysitter-sdk@latest --version
+# Verify the main CLI separately
+babysitter --version
 ```
 
 ### Plugin Issues
@@ -517,7 +547,7 @@ npx -y @a5c-ai/babysitter-sdk@latest --version
 claude plugin list
 
 # If not listed, install
-claude plugin marketplace add a5c-ai/babysitter
+claude plugin marketplace add a5c-ai/babysitter-claude
 claude plugin install --scope user babysitter@a5c.ai
 claude plugin enable --scope user babysitter@a5c.ai
 
@@ -531,7 +561,7 @@ claude plugin enable --scope user babysitter@a5c.ai
 **Solution:**
 ```bash
 # Add the marketplace first
-claude plugin marketplace add a5c-ai/babysitter
+claude plugin marketplace add a5c-ai/babysitter-claude
 
 # Then install
 claude plugin install --scope user babysitter@a5c.ai
@@ -588,6 +618,6 @@ claude "/babysitter:call <your request>"
 claude "/babysitter:call resume the babysitter run"
 
 # Update everything
-npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk
+npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-agent
 claude plugin update babysitter@a5c.ai
 ```

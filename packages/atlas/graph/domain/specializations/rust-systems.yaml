@@ -1,0 +1,11 @@
+nodeKind: Specialization
+id: specialization:rust-systems
+attributes:
+  displayName: "Rust Systems Programming"
+  parentDomainId: domain:software-engineering
+  description: |
+    Rust for systems programming — memory-safe concurrency, async
+    runtimes (tokio), low-level FFI, and high-performance services.
+edges:
+  specializes:
+    - domain:software-engineering

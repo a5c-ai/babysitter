@@ -7,6 +7,13 @@ metadata:
   version: "1.0.0"
   category: cloud-security
   backlog-id: SK-012
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:penetration-testing-ethical-hacking, skill-area:identity-security]
+  roles: [role:security-engineer]
+  workflows: [workflow:penetration-testing-cycle, workflow:vulnerability-management]
+  topics: [topic:zero-trust-architecture]
 ---
 
 # cloud-security-testing

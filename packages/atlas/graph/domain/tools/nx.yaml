@@ -1,0 +1,16 @@
+nodeKind: Tool
+id: tool:nx
+attributes:
+  displayName: "Nx"
+  homepageUrl: "https://nx.dev"
+  kind: build-tool
+  description: |
+    Smart, fast, and extensible build system with first-class monorepo support.
+edges:
+  belongs_to_language:
+    - target: language:typescript
+  used_for:
+    - target: skill-area:ci-pipeline-optimization
+  alternative_to:
+    - target: tool:bazel
+      comparison: "Build systems — Nx is TypeScript-first monorepo; Bazel is multi-language"

@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:hook-surface.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:hook-surface
+  text: |
+    a concrete hook event name (PreToolUse, PhaseChange, etc.)
+  status: canonical
+edges:
+  defines:
+    - term:hook-surface

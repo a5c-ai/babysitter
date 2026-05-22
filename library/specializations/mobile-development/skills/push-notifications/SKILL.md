@@ -2,6 +2,13 @@
 name: push-notifications
 description: Multi-platform push notification skill for implementing APNs (iOS), FCM (Android), and cross-platform notification systems with rich media, deep linking, and background processing capabilities.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:push-notifications, skill-area:ios-native]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Push Notifications Skill

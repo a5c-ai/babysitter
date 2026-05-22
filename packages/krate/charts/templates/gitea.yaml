@@ -1,0 +1,104 @@
+{{- if .Values.gitea.enabled -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "krate.fullname" . }}-gitea-admin
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+  username: {{ .Values.gitea.admin.username | quote }}
+  password: {{ .Values.gitea.admin.password | quote }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "krate.fullname" . }}-gitea-data
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+spec:
+  accessModes: {{ .Values.gitea.persistence.accessModes | toJson }}
+  resources:
+    requests:
+      storage: {{ .Values.gitea.persistence.size }}
+  {{- if .Values.gitea.persistence.storageClassName }}
+  storageClassName: {{ .Values.gitea.persistence.storageClassName | quote }}
+  {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "krate.fullname" . }}-gitea
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gitea-backend
+spec:
+  replicas: {{ .Values.gitea.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: gitea-backend
+  template:
+    metadata:
+      labels:
+        {{- include "krate.labels" . | nindent 8 }}
+        app.kubernetes.io/component: gitea-backend
+    spec:
+      containers:
+        - name: gitea
+          image: "{{ .Values.gitea.image.repository }}:{{ .Values.gitea.image.tag }}"
+          imagePullPolicy: {{ .Values.gitea.image.pullPolicy }}
+          env:
+            - name: GITEA__server__ROOT_URL
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/" (include "krate.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.rootUrl | quote }}
+            - name: GITEA__server__SSH_DOMAIN
+              value: {{ default (printf "%s-gitea-http.%s.svc.cluster.local" (include "krate.fullname" .) .Release.Namespace) .Values.gitea.sshDomain | quote }}
+            - name: GITEA__security__INSTALL_LOCK
+              value: "true"
+            - name: GITEA_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "krate.fullname" . }}-gitea-admin
+                  key: username
+            - name: GITEA_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "krate.fullname" . }}-gitea-admin
+                  key: password
+          ports:
+            - name: http
+              containerPort: 3000
+            - name: ssh
+              containerPort: 2222
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "krate.fullname" . }}-gitea-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "krate.fullname" . }}-gitea-http
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: gitea-backend
+  ports:
+    - name: http
+      port: {{ .Values.gitea.service.httpPort }}
+      targetPort: http
+    - name: ssh
+      port: {{ .Values.gitea.service.sshPort }}
+      targetPort: ssh
+{{- end -}}

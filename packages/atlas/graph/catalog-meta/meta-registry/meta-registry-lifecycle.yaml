@@ -1,0 +1,188 @@
+nodeKind: MetaCluster
+id: meta-cluster:lifecycle
+attributes:
+  displayName: Lifecycle
+  clusterNumber: 6
+  scope: Current lifecycle records for runs, sessions, invocations, states, phases, and runtime journal taxonomy.
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:run
+attributes:
+  displayName: Run (meta)
+  name: Run
+  cluster: 6-lifecycle
+  prefix: run
+  origin: universal
+  purpose: bounded orchestration unit (event-sourced; journaled)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:lifecycle
+  contains_meta_attribute:
+  - target: meta-attribute:run--id
+  - target: meta-attribute:run--display-name
+  - target: meta-attribute:run--status
+  - target: meta-attribute:run--started-at
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:run-journal-event
+attributes:
+  displayName: RunJournalEvent (meta)
+  name: RunJournalEvent
+  cluster: 13-catalog-meta
+  prefix: run-journal-event
+  origin: a5c
+  purpose: enum of run journal event names emitted by the babysitter runtime and persisted to the per-run journal directory
+  exampleCount: 0
+  invariants:
+  - 'id starts with run-journal-event:'
+  - category MUST match observed emission site
+edges:
+  in_cluster:
+  - target: meta-cluster:lifecycle
+  contains_meta_attribute:
+  - target: meta-attribute:run-journal-event--id
+  - target: meta-attribute:run-journal-event--event-name
+  - target: meta-attribute:run-journal-event--category
+  - target: meta-attribute:run-journal-event--terminal
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:workspace
+attributes:
+  displayName: Workspace (meta)
+  name: Workspace
+  cluster: 4-surfacing-path
+  prefix: workspace
+  origin: universal
+  purpose: project context with sessions+repos
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:lifecycle
+  contains_meta_attribute:
+  - target: meta-attribute:workspace--id
+  - target: meta-attribute:workspace--display-name
+  - target: meta-attribute:workspace--root-path
+  - target: meta-attribute:workspace--materialization
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:session
+attributes:
+  displayName: Session (meta)
+  name: Session
+  cluster: 6-lifecycle
+  prefix: session
+  origin: universal
+  purpose: persisted conversational state
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:lifecycle
+  contains_meta_attribute:
+  - target: meta-attribute:session--id
+  - target: meta-attribute:session--workspace-id
+  - target: meta-attribute:session--created-at
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:phase
+attributes:
+  displayName: Phase (meta)
+  name: Phase
+  cluster: 6-lifecycle
+  prefix: phase
+  origin: universal
+  purpose: a named state in a phase machine
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:lifecycle
+  contains_meta_attribute:
+  - target: meta-attribute:phase--id
+  - target: meta-attribute:phase--display-name
+  - target: meta-attribute:phase--order
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:phase-transition
+attributes:
+  displayName: PhaseTransition (meta)
+  name: PhaseTransition
+  cluster: 6-lifecycle
+  prefix: phase-transition
+  origin: universal
+  purpose: transition between two phases (gateable)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:lifecycle
+  contains_meta_attribute:
+  - target: meta-attribute:phase-transition--id
+  - target: meta-attribute:phase-transition--from-phase-id
+  - target: meta-attribute:phase-transition--to-phase-id
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:phase-machine
+attributes:
+  displayName: PhaseMachine (meta)
+  name: PhaseMachine
+  cluster: 6-lifecycle
+  prefix: phase-machine
+  origin: a5c
+  purpose: a finite-state machine over Phase nodes declared by a reliability-interface impl
+  exampleCount: 1
+  invariants:
+  - phases list MUST contain >= 2 entries
+  - terminalPhases MUST contain >= 1 entry and every entry MUST appear in phases
+  - initialPhase MUST appear in phases
+edges:
+  in_cluster:
+  - target: meta-cluster:lifecycle
+  contains_meta_attribute:
+  - target: meta-attribute:phase-machine--id
+  - target: meta-attribute:phase-machine--display-name
+  - target: meta-attribute:phase-machine--initial-phase
+  - target: meta-attribute:phase-machine--arbitration-policy
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:invocation
+attributes:
+  displayName: Invocation (meta)
+  name: Invocation
+  cluster: 6-lifecycle
+  prefix: invocation
+  origin: universal
+  purpose: bounded agent execution (one process spawn or equivalent)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:lifecycle
+  contains_meta_attribute:
+  - target: meta-attribute:invocation--id
+  - target: meta-attribute:invocation--agent-version-id
+  - target: meta-attribute:invocation--status
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:background-monitor
+attributes:
+  displayName: BackgroundMonitor (meta)
+  name: BackgroundMonitor
+  cluster: 7-extensions
+  prefix: background-monitor
+  origin: universal
+  purpose: long-running monitor process bundled in a plugin
+  exampleCount: 1
+  invariants:
+  - lifecycle and triggers must be coherent (on-demand lifecycle excludes session-start trigger)
+edges:
+  in_cluster:
+  - target: meta-cluster:lifecycle
+  contains_meta_attribute:
+  - target: meta-attribute:background-monitor--id
+  - target: meta-attribute:background-monitor--display-name
+  - target: meta-attribute:background-monitor--lifecycle
+  - target: meta-attribute:background-monitor--triggers

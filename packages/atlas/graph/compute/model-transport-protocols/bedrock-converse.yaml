@@ -1,0 +1,135 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:bedrock-converse
+attributes:
+  displayName: "AWS Bedrock Converse"
+  vendor: "Amazon Web Services"
+  specUrl: "https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_Converse.html"
+  streamingFraming: aws-event-stream
+  toolUseSchema: |
+    Bedrock Converse defines a unified, provider-agnostic tool-use
+    schema. Tool calls appear as `toolUse` content blocks in
+    `output.message.content` with `toolUseId`, `name`, and `input`.
+    Tool results are returned in subsequent user-role messages as
+    `toolResult` blocks referencing the same `toolUseId`.
+  thinkingChannel: content-block
+  cacheControl: explicit
+  firstSpecVersion: "2024-05-30"
+  currentSpecVersion: "2024-05-30"
+  status: standard
+  requestBodyShape: |
+    POST /model/{modelId}/converse
+    POST /model/{modelId}/converse-stream
+    JSON body (top-level fields):
+      - `messages` (required, array of `{role: "user"|"assistant",
+        content: ContentBlock[]}`)
+      - `system` (optional, array of `{text}` system blocks)
+      - `inferenceConfig` (optional, `{maxTokens, temperature, topP,
+        stopSequences}`)
+      - `toolConfig` (optional, `{tools: [{toolSpec: {name, description,
+        inputSchema: {json: <JSONSchema>}}}], toolChoice?: {auto|any|tool}}`)
+      - `guardrailConfig` (optional, `{guardrailIdentifier, guardrailVersion,
+        trace?}`)
+      - `additionalModelRequestFields` (optional, opaque object passed
+        to the underlying provider — used for Anthropic `thinking` etc.)
+      - `additionalModelResponseFieldPaths` (optional, list of JSON paths
+        to surface from the provider response)
+      - `promptVariables` (optional)
+      - `requestMetadata` (optional)
+    A `ContentBlock` is one of: `{text}`, `{image: {format, source: {bytes}}}`,
+    `{document: {format, name, source: {bytes}}}`, `{video: ...}`,
+    `{toolUse}`, `{toolResult}`, `{guardContent}`, `{cachePoint: {type: "default"}}`,
+    `{reasoningContent: {reasoningText: {text, signature}}}`.
+  responseBodyShape: |
+    Non-streaming (Converse):
+      HTTP 200 `application/json`:
+        {
+          "output": { "message": { "role": "assistant",
+                                   "content": [ ContentBlock, ... ] } },
+          "stopReason": "end_turn"|"tool_use"|"max_tokens"|"stop_sequence"|"guardrail_intervened"|"content_filtered",
+          "usage": { "inputTokens": int, "outputTokens": int,
+                     "totalTokens": int,
+                     "cacheReadInputTokens"?: int,
+                     "cacheWriteInputTokens"?: int },
+          "metrics": { "latencyMs": int },
+          "additionalModelResponseFields"?: { ... },
+          "trace"?: { "guardrail"?: ... }
+        }
+    Streaming (ConverseStream):
+      HTTP 200 `application/vnd.amazon.eventstream` — AWS EventStream
+      frames carrying typed events (see streamingEventTypes).
+  streamingEventTypes:
+    - messageStart
+    - contentBlockStart
+    - contentBlockDelta
+    - contentBlockStop
+    - messageStop
+    - metadata
+    - internalServerException
+    - modelStreamErrorException
+    - validationException
+    - throttlingException
+    - serviceUnavailableException
+  toolCallWireFormat: |
+    A `toolUse` content block in `output.message.content`:
+      { "toolUse": { "toolUseId": "tooluse_...",
+                     "name": "<tool_name>",
+                     "input": { ... } } }
+    `toolUseId` is the correlation handle echoed on the matching
+    `toolResult`.
+  toolResultWireFormat: |
+    A `toolResult` content block in a subsequent user-role message:
+      { "toolResult": { "toolUseId": "tooluse_...",
+                        "content": [ {text|json|image|document}, ... ],
+                        "status"?: "success"|"error" } }
+  errorEnvelope: |
+    Non-2xx response, `application/json`:
+      { "message": string, "__type": "<ExceptionName>" }
+    Common `__type` values: `ValidationException`, `AccessDeniedException`,
+    `ThrottlingException`, `ServiceQuotaExceededException`,
+    `ModelTimeoutException`, `ModelErrorException`,
+    `ModelNotReadyException`, `InternalServerException`,
+    `ServiceUnavailableException`.
+    `x-amzn-RequestId` and `x-amzn-ErrorType` headers are populated.
+  cacheControlWireFormat: |
+    Provider-agnostic prompt caching is expressed as a `cachePoint`
+    content block inserted between cacheable prefix content and the
+    rest of the messages / system / tools:
+      { "cachePoint": { "type": "default" } }
+    Cache accounting is reported as `usage.cacheReadInputTokens` and
+    `usage.cacheWriteInputTokens` on the response.
+    per-region and per-model availability of cachePoint (rolled out
+    across Anthropic and other providers in 2024-2025).
+  rateLimitSignaling: |
+    On HTTP 429 `ThrottlingException`: standard AWS retry semantics
+    apply. No per-tenant remaining-budget headers are documented;
+    quota state is exported via CloudWatch service-quotas metrics.
+    `retry-after` may be returned on throttling responses.
+  reasoningWireFormat: |
+    Reasoning is carried as `reasoningContent` content blocks on the
+    assistant message:
+      { "reasoningContent": { "reasoningText": { "text": "...",
+                                                 "signature": "<opaque>" } } }
+    or, when redacted server-side:
+      { "reasoningContent": { "redactedContent": "<base64-bytes>" } }
+    Provider-specific reasoning controls (e.g. Anthropic
+    `thinking.budget_tokens`) are forwarded via
+    `additionalModelRequestFields`.
+  authHeaderFormat: |
+    AWS Signature Version 4:
+      `Authorization: AWS4-HMAC-SHA256 ...`
+      `x-amz-date: <ISO8601>`
+      `x-amz-security-token: <session-token>`   (for STS / role creds)
+    Endpoint: `https://bedrock-runtime.<region>.amazonaws.com`.
+  versioningHeader: |
+    No protocol-version header on the request. The Converse API itself
+    is versioned implicitly through the AWS service endpoint;
+    provider-specific overrides are passed via
+    `additionalModelRequestFields` (e.g. `anthropic_version` /
+    `anthropic_beta`).
+edges:
+  realizes:
+    - target: layer:3-transport
+  served_by:
+    - provider:aws-bedrock
+  spoken_by:
+    - model:claude-opus-4-7@current

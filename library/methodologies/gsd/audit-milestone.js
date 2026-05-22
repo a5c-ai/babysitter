@@ -3,6 +3,12 @@
  * @description GSD milestone audit - verify milestone definition-of-done
  * @inputs { milestoneId: string, milestoneName: string, phases: array }
  * @outputs { success: boolean, ready: boolean, issues: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:backend-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

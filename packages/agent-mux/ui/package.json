@@ -1,0 +1,90 @@
+{
+  "name": "@a5c-ai/agent-mux-ui",
+  "version": "5.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Shared UI foundation and session-flow projection surface for browser and React Native agent-mux apps",
+  "author": "a5c-ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux/ui#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/agent-mux/ui"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "agent-mux",
+    "ui",
+    "session-flow",
+    "timeline",
+    "realtime",
+    "react-native-web",
+    "react-native",
+    "gateway"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./gateway": {
+      "import": {
+        "types": "./dist/gateway.d.ts",
+        "default": "./dist/gateway.js"
+      }
+    },
+    "./protocol": {
+      "import": {
+        "types": "./dist/protocol/v1.d.ts",
+        "default": "./dist/protocol/v1.js"
+      }
+    },
+    "./session-flow": {
+      "import": {
+        "types": "./dist/session-flow.d.ts",
+        "default": "./dist/session-flow.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "npm run clean && npm run codegen && tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "build:realtime": "npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/agent-mux-core && npm run build",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "codegen": "tsx src/codegen/swift-types.ts && tsx src/codegen/kotlin-types.ts",
+    "test": "vitest run --root ../../.. --config vitest.config.ts packages/agent-mux/ui",
+    "test:realtime": "vitest run --root ../../.. --config vitest.config.ts \"packages/agent-mux/ui/src/session-flow*.test.ts\" \"packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx\" \"packages/agent-mux/ui/src/release-verification.test.ts\"",
+    "verify:release": "node ./scripts/verify-release.mjs",
+    "prepublishOnly": "npm run build:realtime && npm run test:realtime && npm run verify:release"
+  },
+  "dependencies": {
+    "@a5c-ai/agent-mux-core": "5.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-native": "^0.85.3",
+    "react-native-web": "^0.21.2",
+    "ts-morph": "^25.0.1",
+    "ws": "^8.18.3",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0"
+  }
+}

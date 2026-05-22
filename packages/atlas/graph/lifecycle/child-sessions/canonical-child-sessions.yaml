@@ -1,0 +1,61 @@
+---
+nodeKind: ChildSession
+id: child-session:claude-code-task-001
+attributes:
+  displayName: "claude-code Task tool spawn (general-purpose)"
+  parentSessionId: session:01kqex-session-001
+  spawnTrigger: subagent-dispatch
+  subagentId: subagent:claude-code.general-purpose
+  invokingToolId: tool-descriptor:agent
+  lifecyclePolicy: ephemeral
+  startedAt: "2026-04-28T10:05:00Z"
+  endedAt: "2026-04-28T10:07:32Z"
+  status: completed
+  returnedTo: "parent session ToolResult for tool-descriptor:agent invocation"
+edges:
+  parent_session:
+    - target: session:01kqex-session-001
+  runs_subagent:
+    - target: subagent:claude-code.general-purpose
+  runs_skill:
+    - target: skill:react-tdd
+  invoking_tool:
+    - target: tool-descriptor:agent
+---
+nodeKind: ChildSession
+id: child-session:babysitter-task-001
+attributes:
+  displayName: "babysitter subprocess kind:'agent' subtask"
+  parentSessionId: session:01kqex-session-001
+  spawnTrigger: subagent-dispatch
+  subagentId: subagent:babysitter-define-task
+  lifecyclePolicy: persistent
+  startedAt: "2026-04-29T14:00:00Z"
+  endedAt: "2026-04-29T14:18:45Z"
+  status: completed
+  returnedTo: "babysitter run journal effect resolution"
+edges:
+  parent_session:
+    - target: session:01kqex-session-001
+  runs_subagent:
+    - target: subagent:babysitter-define-task
+---
+nodeKind: ChildSession
+id: child-session:claude-code-plan-mode-session
+attributes:
+  displayName: "claude-code Plan mode persona session"
+  parentSessionId: session:01kqex-session-001
+  spawnTrigger: subagent-dispatch
+  subagentId: subagent:claude-code.plan
+  invokingToolId: tool-descriptor:agent
+  lifecyclePolicy: ephemeral
+  startedAt: "2026-04-30T09:12:00Z"
+  endedAt: "2026-04-30T09:14:50Z"
+  status: completed
+edges:
+  parent_session:
+    - target: session:01kqex-session-001
+  runs_subagent:
+    - target: subagent:claude-code.plan
+  invoking_tool:
+    - target: tool-descriptor:agent

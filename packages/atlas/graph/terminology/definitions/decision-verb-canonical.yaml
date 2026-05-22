@@ -1,0 +1,13 @@
+nodeKind: Definition
+id: definition:decision-verb.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:decision-verb
+  text: |
+    Stub. The ordered enum of hook decision verbs (`deny`, `ask`, `allow`,
+    `continue`, `noop`) with `rank` attribute, plus an orthogonal `block`
+    flag. Referenced from coverage-checklist row DECISION_PRECEDENCE.
+  status: canonical
+edges:
+  defines:
+    - term:decision-verb

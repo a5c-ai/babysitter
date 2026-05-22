@@ -1,7 +1,7 @@
 import { JsonRecord } from "../storage/types";
 
 // Known task kinds (custom kinds are also allowed as any string)
-export type KnownTaskKind = "node" | "breakpoint" | "orchestrator_task" | "sleep";
+export type KnownTaskKind = "node" | "breakpoint" | "orchestrator_task" | "sleep" | "subprocess";
 
 // TaskKind accepts any string (including custom task kinds)
 export type TaskKind = string;
@@ -36,12 +36,27 @@ export interface SleepTaskOptions {
   targetEpochMs: number;
 }
 
+export interface SubprocessTaskOptions {
+  processPath: string;
+  exportName?: string;
+  processId?: string;
+  prompt?: string;
+  inputs?: unknown;
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
+  harness?: string;
+  model?: string;
+  maxIterations?: number;
+  shareSession?: boolean;
+  metadata?: JsonRecord;
+}
+
 export interface EffectExecutionHints {
-  /** Preferred harness CLI (e.g., 'pi', 'claude-code'). Only used by internal harness. */
+  /** Preferred internal harness CLI (e.g., 'pi', 'claude-code'). Not a universal cross-plugin contract. */
   harness?: string;
   /** Preferred model identifier (e.g., 'claude-opus-4-6'). Used for subagent model selection. */
   model?: string;
-  /** Free-form permission list. Only used by internal harness. */
+  /** Internal harness permission hints. Plugins may ignore them; do not treat them as a security boundary. */
   permissions?: string[];
 }
 
@@ -57,6 +72,7 @@ export interface TaskDef {
   breakpoint?: BreakpointTaskOptions;
   orchestratorTask?: OrchestratorTaskOptions;
   sleep?: SleepTaskOptions;
+  subprocess?: SubprocessTaskOptions;
   [key: string]: unknown;
 }
 
@@ -130,6 +146,15 @@ export interface DefinedTask<TArgs = unknown, _TResult = unknown> {
 
 export interface TaskInvokeOptions {
   label?: string;
+  /**
+   * Explicit invocation key for retry/idempotent patterns. When provided, the ReplayCursor
+   * is NOT advanced - all calls with the same key resolve to the same effect slot.
+   * Use dotted-namespace kebab-case (e.g., 'bootstrap.fetch-data') unique within the process.
+   * This prevents the phantom duplicate effects bug when ctx.task() is inside a retry loop.
+   */
+  key?: string;
+  /** @deprecated Use `key`. */
+  stableKey?: string;
 }
 
 export interface TaskSerializerContext {

@@ -2,6 +2,10 @@
 name: interpretive-writing
 description: Create accessible interpretive content for diverse audiences including labels, wall text, catalog essays, educational materials, and digital content
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:content-strategy, skill-area:technical-writing, skill-area:accessibility-first-design]
+  roles: [role:technical-writer, role:ux-writer]
 ---
 
 # Interpretive Writing

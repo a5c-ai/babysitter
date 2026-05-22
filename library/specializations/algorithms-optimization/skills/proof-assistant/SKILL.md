@@ -6,6 +6,11 @@ allowed-tools:
   - Write
   - Grep
   - Glob
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:dynamic-programming]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # Proof Assistant Skill

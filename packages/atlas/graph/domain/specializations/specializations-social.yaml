@@ -1,0 +1,68 @@
+---
+nodeKind: Specialization
+id: specialization:instructional-design
+attributes:
+  displayName: "Instructional Design"
+  parentDomainId: domain:education
+  description: |
+    Systematic design of learning experiences grounded in cognitive and
+    instructional science. Covers ADDIE and SAM models, learning-objective
+    taxonomy (Bloom's revised), multimedia design principles, and accessibility
+    standards (WCAG, Section 508). Addresses e-learning authoring (Articulate,
+    Adobe Captivate), LMS integration (Canvas, Moodle), and competency-based
+    assessment design. Increasingly applies adaptive learning algorithms and
+    AI-assisted content generation to personalize instruction at scale.
+edges:
+  specializes:
+    - domain:education
+---
+nodeKind: Specialization
+id: specialization:clinical-informatics
+attributes:
+  displayName: "Clinical Informatics"
+  parentDomainId: domain:healthcare
+  description: |
+    Application of information science and technology to clinical workflows,
+    patient safety, and health-system operations. Covers EHR implementation and
+    optimization (Epic, Cerner), clinical decision-support systems, order sets,
+    and CPOE governance. Addresses interoperability standards (HL7 FHIR, CDA),
+    real-world data analytics, and quality-improvement initiatives (PDSA cycles,
+    HEDIS measures). Bridges clinical domain expertise with software engineering
+    to improve care outcomes and reduce clinician burden.
+edges:
+  specializes:
+    - domain:healthcare
+---
+nodeKind: Specialization
+id: specialization:digital-humanities
+attributes:
+  displayName: "Digital Humanities"
+  parentDomainId: domain:humanities
+  description: |
+    Computational methods applied to humanistic inquiry — text mining, corpus
+    linguistics, network analysis of historical correspondence, and GIS mapping
+    of cultural data. Covers distant reading techniques, topic modeling, OCR and
+    transcription pipelines for archival materials, and digital edition publication
+    (TEI-XML). Bridges traditional interpretive scholarship with data-science
+    tooling to enable large-scale analysis of literary, historical, and cultural
+    corpora.
+edges:
+  specializes:
+    - domain:humanities
+---
+nodeKind: Specialization
+id: specialization:applied-ethics
+attributes:
+  displayName: "Applied Ethics"
+  parentDomainId: domain:philosophy
+  description: |
+    Practical application of ethical frameworks — consequentialism, deontology,
+    virtue ethics, and care ethics — to real-world domains including technology,
+    medicine, law, and business. Covers AI ethics and alignment, bioethics
+    (informed consent, resource allocation), environmental ethics, and corporate
+    social responsibility. Provides structured argumentation tools for ethics
+    reviews, responsible-AI assessments, and policy recommendation processes
+    where values conflicts must be systematically analyzed and resolved.
+edges:
+  specializes:
+    - domain:philosophy

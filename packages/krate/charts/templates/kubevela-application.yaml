@@ -1,0 +1,36 @@
+{{- $kubevela := .Values.kubevela | default dict -}}
+{{- $argocd := .Values.argocd | default dict -}}
+{{- if and ($kubevela.enabled | default false) ($argocd.enabled | default false) -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.kubevela.applicationName | default (printf "%s-kubevela" (include "krate.fullname" .)) }}
+  namespace: {{ .Values.argocd.namespace | quote }}
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+    krate.a5c.ai/capability-plane: kubevela
+spec:
+  project: {{ .Values.argocd.project | quote }}
+  source:
+    repoURL: {{ .Values.kubevela.chart.repoURL | quote }}
+    chart: {{ .Values.kubevela.chart.chart | quote }}
+    targetRevision: {{ .Values.kubevela.chart.targetRevision | quote }}
+    helm:
+      releaseName: {{ .Values.kubevela.releaseName | quote }}
+      values: |
+        {{- toYaml .Values.kubevela.chart.values | nindent 8 }}
+  destination:
+    server: {{ .Values.argocd.destination.server | quote }}
+    namespace: {{ .Values.kubevela.namespace | quote }}
+  ignoreDifferences:
+    - group: apiregistration.k8s.io
+      kind: APIService
+      jsonPointers:
+        - /spec
+  syncPolicy:
+    automated:
+      prune: {{ .Values.kubevela.syncPolicy.prune }}
+      selfHeal: {{ .Values.kubevela.syncPolicy.selfHeal }}
+    syncOptions:
+      - CreateNamespace=true
+{{- end }}

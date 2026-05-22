@@ -1,0 +1,84 @@
+---
+nodeKind: ObservabilityBackend
+id: obs-backend:datadog
+attributes:
+  displayName: "Datadog"
+  kind: multi
+  vendor: "Datadog"
+  endpoints:
+    apm: "https://trace.agent.datadoghq.com"
+    metrics: "https://api.datadoghq.com/api/v1/series"
+  protocols: [otlp-http, statsd, datadog-agent]
+  notes: |
+    SaaS APM, metrics, and logs platform; ingests OTLP traces and metrics
+    plus a proprietary agent protocol.
+edges: {}
+---
+nodeKind: ObservabilityBackend
+id: obs-backend:honeycomb
+attributes:
+  displayName: "Honeycomb"
+  kind: trace
+  vendor: "Honeycomb.io"
+  endpoints:
+    otlp: "https://api.honeycomb.io"
+  protocols: [otlp-grpc, otlp-http]
+  notes: |
+    Wide-event tracing backend; native OTLP ingestion.
+edges: {}
+---
+nodeKind: ObservabilityBackend
+id: obs-backend:grafana-cloud
+attributes:
+  displayName: "Grafana Cloud"
+  kind: multi
+  vendor: "Grafana Labs"
+  protocols: [otlp-grpc, otlp-http, prometheus-remote-write, loki, tempo]
+  notes: |
+    Hosted Grafana stack: Mimir for metrics, Loki for logs, Tempo for traces.
+edges: {}
+---
+nodeKind: ObservabilityBackend
+id: obs-backend:splunk
+attributes:
+  displayName: "Splunk Observability Cloud"
+  kind: multi
+  vendor: "Splunk"
+  protocols: [otlp-grpc, otlp-http, hec]
+  notes: |
+    Enterprise log + APM platform with native HEC and OTLP ingest.
+edges: {}
+---
+nodeKind: ObservabilityBackend
+id: obs-backend:new-relic
+attributes:
+  displayName: "New Relic"
+  kind: multi
+  vendor: "New Relic"
+  protocols: [otlp-http, new-relic-agent]
+  notes: |
+    APM + infra + logs SaaS; first-class OTLP support.
+edges: {}
+---
+nodeKind: ObservabilityBackend
+id: obs-backend:prometheus
+attributes:
+  displayName: "Prometheus (self-hosted)"
+  kind: metric
+  vendor: "Prometheus / CNCF"
+  protocols: [prometheus-remote-write, otlp-http]
+  notes: |
+    Open-source pull-based metrics database; OTLP ingest via the prometheus
+    receiver.
+edges: {}
+---
+nodeKind: ObservabilityBackend
+id: obs-backend:jaeger
+attributes:
+  displayName: "Jaeger"
+  kind: trace
+  vendor: "CNCF"
+  protocols: [otlp-grpc, otlp-http, jaeger-thrift]
+  notes: |
+    Open-source distributed tracing system; CNCF graduated.
+edges: {}

@@ -15,6 +15,11 @@ metadata:
   domain: business
   category: Change Control
   id: AG-009
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:change-management, skill-area:stakeholder-management, skill-area:business-analysis]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:change-manager, role:business-analyst]
 ---
 
 # Change Control Manager Agent

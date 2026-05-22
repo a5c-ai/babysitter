@@ -19,6 +19,12 @@
  * - SHRM Onboarding Guide: https://www.shrm.org/resourcesandtools/hr-topics/talent-acquisition/pages/new-employee-onboarding-guide.aspx
  * - BambooHR Onboarding: https://www.bamboohr.com/blog/new-employee-onboarding-guide
  * - Gallup Onboarding Research: https://www.gallup.com/workplace/247172/getting-onboarding-right.aspx
+  * @graph
+ *   domains: [domain:human-resources]
+ *   specializations: [specialization:talent-management]
+ *   skillAreas: [skill-area:talent-acquisition-strategy, skill-area:performance-management, skill-area:organizational-design, skill-area:learning-development]
+ *   workflows: [workflow:talent-acquisition-pipeline]
+ *   roles: [role:hr-manager, role:talent-recruiter]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

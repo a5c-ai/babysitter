@@ -1,0 +1,38 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:codex.platform@1.x
+attributes:
+  displayName: Codex CLI Platform (1.x)
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  subagentDefinitionFormat: none
+  packageRef: source-ref:codex-github
+  nativeExtensionFormat: codex-extension
+  nativeExtensionManifestPath: "~/.codex/extensions/<name>/extension.toml"
+  nativeExtensionsDirectoryPath:
+    - "~/.codex/extensions/"
+  skillFormat: none
+  skillsDirectoryPath: []
+  customSlashCommandsPath: []
+  subagentsDirectoryPath: []
+  hooksDirectoryOrConfigPath: []
+  settingsFiles:
+    - "~/.codex/config.toml"
+    - ".codex/config.toml"
+    - "~/.codex/auth.json"
+  pluginRegistryPath: ""
+  capabilityProfileRegistry: true
+  launchConfigRegistry: false
+  platformIdentityStrategy: api-key
+  updateChannelMechanism: npm
+  supportedChannelKinds: []
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  supports:
+    - target: capability:requires-tool-approval
+      versionRange: '>=0.1.0'
+      level: full
+  composes:
+    - target: agent:codex
+      role: platform
+  bundles:
+    - target: presentation:codex-cli-tui

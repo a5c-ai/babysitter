@@ -6,6 +6,13 @@
  * @outputs { success: boolean, complianceProgram: object, riskAssessment: object, policies: array, artifacts: array }
  * @recommendedSkills SK-HC-003 (regulatory-compliance-assessment), SK-HC-006 (health-data-integration)
  * @recommendedAgents AG-HC-002 (compliance-readiness-manager), AG-HC-005 (clinical-informatics-specialist)
+ *
+ * @graph
+ *   domains: [domain:healthcare]
+ *   specializations: [specialization:clinical-informatics]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:data-governance]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

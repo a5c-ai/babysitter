@@ -1,0 +1,1233 @@
+# =============================================================================
+# AI / ML SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:llm-evaluation
+attributes:
+  displayName: "LLM Evaluation"
+  description: |
+    Techniques for evaluating large language model quality, including
+    automated benchmarks, human evaluation, and domain-specific metrics.
+    Covers BLEU/ROUGE, LLM-as-judge, Elo rating, and eval harness design.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: domain:ml-ai
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:eval-driven-development
+      strength: recommended
+    - target: skill-area:bias-fairness-analysis
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:inference-optimization
+attributes:
+  displayName: "Inference Optimization"
+  description: |
+    Techniques for reducing LLM and ML inference latency and cost —
+    quantization, speculative decoding, KV-cache optimization,
+    batching strategies, and hardware-aware serving tuning.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ai
+      confidence: primary
+    - target: specialization:ml-inference-serving
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:model-compression
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:model-compression
+attributes:
+  displayName: "Model Compression"
+  description: |
+    Reducing model size for deployment — knowledge distillation,
+    pruning, quantization (INT8/INT4/GPTQ/AWQ), and low-rank
+    adaptation for efficient on-device or edge inference.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ai
+      confidence: primary
+    - target: specialization:ml-inference-serving
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:inference-optimization
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:vector-database-design
+attributes:
+  displayName: "Vector Database Design"
+  description: |
+    Designing and operating vector databases for similarity search —
+    index types (HNSW, IVF, PQ), distance metrics, sharding,
+    hybrid search, and performance tuning for embedding workloads.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: specialization:data-engineering-analytics
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:retrieval-augmented-generation
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:embedding-strategy
+attributes:
+  displayName: "Embedding Strategy"
+  description: |
+    Choosing, fine-tuning, and deploying embedding models — sentence
+    transformers, domain adaptation, chunking strategies,
+    dimensionality reduction, and embedding evaluation benchmarks.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ai
+      confidence: primary
+    - target: specialization:ai-agents-conversational
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:vector-database-design
+      strength: recommended
+    - target: skill-area:retrieval-augmented-generation
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:AI-safety-alignment
+attributes:
+  displayName: "AI Safety & Alignment"
+  description: |
+    Techniques for aligning AI systems with human values and intent —
+    RLHF, constitutional AI, reward hacking mitigation, red-teaming
+    protocols, and safety evaluation frameworks.
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: domain:ml-ai
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:safety-redteaming
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:red-teaming-AI
+attributes:
+  displayName: "AI Red Teaming"
+  description: |
+    Adversarial testing of AI systems — jailbreak techniques, prompt
+    injection attacks, automated red-team harnesses, and building
+    systematic vulnerability taxonomies for language models.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ai
+      confidence: primary
+    - target: domain:security
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:AI-safety-alignment
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:synthetic-data-generation
+attributes:
+  displayName: "Synthetic Data Generation"
+  description: |
+    Creating synthetic training and evaluation datasets — LLM-based
+    generation, augmentation pipelines, privacy-preserving synthesis,
+    and quality validation against real-world distributions.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ai
+      confidence: primary
+    - target: domain:data-science
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:llm-evaluation
+      strength: helpful
+    - target: skill-area:ml-fine-tuning
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:multi-modal-AI
+attributes:
+  displayName: "Multi-Modal AI"
+  description: |
+    Building systems that process multiple modalities — vision-language
+    models, audio-text, image generation, cross-modal retrieval,
+    and multi-modal fusion architectures.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ai
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:computer-vision
+      strength: helpful
+    - target: skill-area:natural-language-processing
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:AI-agent-evaluation
+attributes:
+  displayName: "AI Agent Evaluation"
+  description: |
+    Evaluating autonomous AI agents end-to-end — task completion
+    metrics, trajectory analysis, tool-use correctness, safety
+    boundary testing, and benchmark harness design.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: domain:ml-ai
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:llm-evaluation
+      strength: recommended
+    - target: skill-area:agent-simulation-testing
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:AI-agent-guardrails
+attributes:
+  displayName: "AI Agent Guardrails"
+  description: |
+    Runtime safety controls for AI agents — output filtering,
+    tool permission boundaries, budget and rate limits, human-in-the-loop
+    gates, and containment policies for autonomous systems.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: domain:security
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:AI-safety-alignment
+      strength: recommended
+    - target: skill-area:AI-agent-evaluation
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:context-window-management
+attributes:
+  displayName: "Context Window Management"
+  description: |
+    Strategies for managing LLM context limits — summarization,
+    sliding windows, hierarchical memory, compaction, priority-based
+    truncation, and long-context architecture design.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:token-optimization
+      strength: helpful
+    - target: skill-area:agentic-loops
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:token-optimization
+attributes:
+  displayName: "Token Optimization"
+  description: |
+    Reducing token usage for cost and latency — prompt compression,
+    caching strategies (prompt caching, KV caching), structured
+    output schemas, and token-aware prompt engineering.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: domain:ml-ai
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:context-window-management
+      strength: recommended
+
+# =============================================================================
+# Platform / Infrastructure SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:service-catalog-management
+attributes:
+  displayName: "Service Catalog Management"
+  description: |
+    Building and maintaining internal service catalogs — ownership
+    metadata, dependency graphs, health scorecards, and developer
+    portal integration (Backstage, Port, Cortex).
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:platform-engineering
+      confidence: primary
+    - target: specialization:devops-sre-platform
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:platform-engineering
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:internal-developer-platform
+attributes:
+  displayName: "Internal Developer Platform"
+  description: |
+    Designing self-service developer platforms — infrastructure
+    abstraction, template engines, developer portals, workflow
+    orchestration, and platform-as-product thinking.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:platform-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:service-catalog-management
+      strength: recommended
+    - target: skill-area:golden-path-design
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:golden-path-design
+attributes:
+  displayName: "Golden Path Design"
+  description: |
+    Creating opinionated, paved-road templates for common development
+    workflows — service scaffolding, CI/CD templates, standard
+    observability, and compliance-by-default configurations.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:platform-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:internal-developer-platform
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:self-service-infrastructure
+attributes:
+  displayName: "Self-Service Infrastructure"
+  description: |
+    Enabling teams to provision infrastructure without ops tickets —
+    Terraform modules-as-service, Crossplane compositions, Pulumi
+    automation APIs, and guardrail-enforced provisioning flows.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:platform-engineering
+      confidence: primary
+    - target: domain:cloud-infra
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:internal-developer-platform
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:cost-engineering-cloud
+attributes:
+  displayName: "Cloud Cost Engineering"
+  description: |
+    Proactive cost optimization beyond monitoring — rightsizing
+    automation, spot/preemptible strategies, reserved instance
+    planning, waste detection, and unit-economics alignment.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cloud-infra
+      confidence: primary
+    - target: domain:finops
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:FinOps
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:FinOps
+attributes:
+  displayName: "FinOps"
+  description: |
+    Financial operations for cloud — cost allocation, showback/chargeback
+    models, budgeting cycles, anomaly detection, and FinOps
+    Foundation framework adoption across engineering and finance.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:finops
+      confidence: primary
+    - target: domain:cloud-infra
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:capacity-forecasting
+attributes:
+  displayName: "Capacity Forecasting"
+  description: |
+    Predicting infrastructure demand — load modeling, seasonal
+    decomposition, headroom calculation, auto-scaling policy
+    design, and capacity review processes for growth planning.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cloud-infra
+      confidence: primary
+    - target: specialization:devops-sre-platform
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:cost-engineering-cloud
+      strength: helpful
+    - target: skill-area:sli-slo-management
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:multi-region-architecture
+attributes:
+  displayName: "Multi-Region Architecture"
+  description: |
+    Designing systems that operate across geographic regions —
+    data residency, conflict resolution (CRDTs), failover routing,
+    latency-aware placement, and regional compliance constraints.
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: domain:cloud-infra
+      confidence: primary
+    - target: specialization:software-architecture
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:zero-downtime-deployment
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:zero-downtime-deployment
+attributes:
+  displayName: "Zero-Downtime Deployment"
+  description: |
+    Deploying without user-visible interruption — rolling updates,
+    blue/green/canary patterns, database migration sequencing,
+    feature flags for backward-compatible rollouts.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:devops-sre-platform
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:blue-green-deployment
+      strength: helpful
+    - target: skill-area:canary-rollouts
+      strength: helpful
+    - target: skill-area:database-migrations-zero-downtime
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:database-migration
+attributes:
+  displayName: "Database Migration"
+  description: |
+    Planning and executing database migrations — cross-engine
+    migration (MySQL to Postgres), version upgrades, data
+    transformation pipelines, rollback strategies, and validation.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:databases
+      confidence: primary
+    - target: specialization:backend-development
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:database-migrations-zero-downtime
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:connection-pool-tuning
+attributes:
+  displayName: "Connection Pool Tuning"
+  description: |
+    Configuring and optimizing database connection pools — pool sizing
+    formulas, connection lifecycle, PgBouncer/ProxySQL, leak detection,
+    and load-aware scaling for high-throughput systems.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:databases
+      confidence: primary
+    - target: specialization:backend-development
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:postgres-tuning
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:CDN-optimization
+attributes:
+  displayName: "CDN Optimization"
+  description: |
+    Optimizing content delivery networks — cache key design, purge
+    strategies, origin shielding, edge compute (workers),
+    and performance tuning for global content distribution.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cloud-infra
+      confidence: primary
+    - target: specialization:web-development
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:cdn-edge
+      strength: helpful
+    - target: skill-area:web-performance
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:edge-computing-design
+attributes:
+  displayName: "Edge Computing Design"
+  description: |
+    Designing applications for edge deployment — edge-cloud
+    coordination, data synchronization, latency-sensitive processing,
+    edge-native databases, and deployment to CDN edge/IoT gateways.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cloud-infra
+      confidence: primary
+    - target: domain:iot
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:CDN-optimization
+      strength: helpful
+
+# =============================================================================
+# Security SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:zero-trust-architecture
+attributes:
+  displayName: "Zero Trust Architecture"
+  description: |
+    Implementing zero-trust security models — identity-centric access,
+    micro-segmentation, continuous verification, device posture
+    assessment, and BeyondCorp-style architectures.
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+    - target: specialization:security-research
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:network-security
+      strength: recommended
+    - target: skill-area:identity-security
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:SBOM-management
+attributes:
+  displayName: "SBOM Management"
+  description: |
+    Software Bill of Materials lifecycle — SPDX/CycloneDX generation,
+    ingestion into vulnerability management systems, license
+    compliance scanning, and regulatory reporting automation.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:security-research
+      confidence: primary
+    - target: domain:security
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:supply-chain-security
+      strength: recommended
+    - target: skill-area:dependency-vulnerability-mgmt
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:container-hardening
+attributes:
+  displayName: "Container Hardening"
+  description: |
+    Securing container images and runtimes beyond scanning — distroless
+    builds, read-only filesystems, capability dropping, seccomp
+    profiles, and runtime behavior enforcement (Falco, KubeArmor).
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:security-research
+      confidence: primary
+    - target: specialization:devops-sre-platform
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:container-security
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:network-segmentation
+attributes:
+  displayName: "Network Segmentation"
+  description: |
+    Dividing networks into isolated security zones — VLANs, VPCs,
+    service mesh policies, micro-segmentation enforcement, and
+    east-west traffic inspection for lateral movement prevention.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+    - target: domain:networking
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:zero-trust-architecture
+      strength: recommended
+    - target: skill-area:network-security
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:WAF-configuration
+attributes:
+  displayName: "WAF Configuration"
+  description: |
+    Web Application Firewall management — rule authoring, false-positive
+    tuning, bot detection, rate limiting, OWASP Core Rule Set
+    customization, and WAF-as-code deployment workflows.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+    - target: specialization:web-development
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:web-security
+      strength: helpful
+    - target: skill-area:application-security
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:certificate-management
+attributes:
+  displayName: "Certificate Management"
+  description: |
+    TLS/mTLS certificate lifecycle — automated issuance (ACME/Let's
+    Encrypt), rotation, revocation, cert-manager in Kubernetes,
+    and monitoring for expiration and chain-of-trust issues.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+    - target: specialization:devops-sre-platform
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:key-rotation
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:key-rotation
+attributes:
+  displayName: "Key Rotation"
+  description: |
+    Automated rotation of cryptographic keys and secrets — vault-based
+    rotation, envelope encryption key management, grace periods,
+    zero-downtime rotation patterns, and audit logging.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+    - target: specialization:security-research
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:secrets-rotation
+      strength: helpful
+    - target: skill-area:secret-zero-bootstrap
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:secret-zero-bootstrap
+attributes:
+  displayName: "Secret Zero Bootstrap"
+  description: |
+    Solving the secret-zero problem — machine identity bootstrapping,
+    platform-native auth (IAM roles, workload identity), trusted
+    platform modules, and initial secret injection without pre-shared keys.
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+    - target: specialization:devops-sre-platform
+      confidence: secondary
+
+# =============================================================================
+# Developer Experience SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:developer-onboarding
+attributes:
+  displayName: "Developer Onboarding"
+  description: |
+    Designing frictionless onboarding experiences — one-command dev
+    environments, interactive tutorials, progressive disclosure
+    of complexity, and time-to-first-commit optimization.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:platform-engineering
+      confidence: primary
+    - target: specialization:sdk-platform-development
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:developer-experience
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:SDK-design
+attributes:
+  displayName: "SDK Design"
+  description: |
+    Designing language-idiomatic SDKs — client generation from OpenAPI,
+    ergonomic error handling, pagination abstractions, retry policies,
+    and consistent patterns across language targets.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:sdk-platform-development
+      confidence: primary
+    - target: domain:api-development
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:api-design
+      strength: recommended
+    - target: skill-area:sdk-codegen
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:API-ergonomics
+attributes:
+  displayName: "API Ergonomics"
+  description: |
+    Making APIs intuitive and delightful — naming conventions, consistent
+    error shapes, progressive disclosure, sensible defaults, and
+    developer journey mapping for API consumers.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:api-development
+      confidence: primary
+    - target: specialization:sdk-platform-development
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:api-design
+      strength: recommended
+    - target: skill-area:SDK-design
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:developer-documentation
+attributes:
+  displayName: "Developer Documentation"
+  description: |
+    Writing effective developer docs — tutorials, how-to guides,
+    reference docs, explanation pages (Diataxis framework), code
+    samples, and docs-as-code CI/CD pipelines.
+  expertiseLevels: [beginner, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:technical-documentation
+      confidence: primary
+    - target: specialization:sdk-platform-development
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:reference-docs
+      strength: helpful
+    - target: skill-area:tutorial-design
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:changelog-management
+attributes:
+  displayName: "Changelog Management"
+  description: |
+    Maintaining meaningful changelogs — conventional commits,
+    automated changelog generation, audience-appropriate release
+    notes, and migration guide authoring for breaking changes.
+  expertiseLevels: [beginner, intermediate]
+edges:
+  applies_to:
+    - target: specialization:sdk-platform-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:semver-discipline
+      strength: helpful
+    - target: skill-area:breaking-change-management
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:semantic-versioning
+attributes:
+  displayName: "Semantic Versioning"
+  description: |
+    Applying semver rigorously — API surface definition, breaking vs.
+    non-breaking change classification, pre-release channels,
+    and tooling for automated version bumps and compliance checks.
+  expertiseLevels: [beginner, intermediate]
+edges:
+  applies_to:
+    - target: specialization:sdk-platform-development
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:semver-discipline
+      strength: recommended
+    - target: skill-area:changelog-management
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:monorepo-management
+attributes:
+  displayName: "Monorepo Management"
+  description: |
+    Operating large monorepos effectively — Nx/Turborepo/Bazel workspace
+    design, affected-based CI, dependency graph visualization,
+    code ownership (CODEOWNERS), and publish orchestration.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: specialization:devops-sre-platform
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:build-system-optimization
+      strength: recommended
+    - target: skill-area:ci-pipeline-optimization
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:dependency-management
+attributes:
+  displayName: "Dependency Management"
+  description: |
+    Managing third-party dependencies — lockfile strategies, version
+    pinning policies, automated update tools (Dependabot/Renovate),
+    license auditing, and vendoring decisions.
+  expertiseLevels: [beginner, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:dependency-vulnerability-mgmt
+      strength: helpful
+    - target: skill-area:SBOM-management
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:build-system-optimization
+attributes:
+  displayName: "Build System Optimization"
+  description: |
+    Speeding up builds — incremental compilation, remote caching
+    (Turborepo/Bazel remote cache), parallelization, tree-shaking,
+    and build profiling for CI and local development.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: specialization:devops-sre-platform
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:monorepo-management
+      strength: helpful
+    - target: skill-area:ci-pipeline-optimization
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:IDE-extension-development
+attributes:
+  displayName: "IDE Extension Development"
+  description: |
+    Building IDE/editor extensions — VS Code extension API, Language
+    Server Protocol (LSP), syntax highlighting (TextMate grammars),
+    debugger adapters (DAP), and extension marketplace publishing.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: specialization:cli-mcp-development
+      confidence: secondary
+
+# =============================================================================
+# Data SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:data-mesh-design
+attributes:
+  displayName: "Data Mesh Design"
+  description: |
+    Implementing data mesh principles — domain-oriented data ownership,
+    data-as-a-product, self-serve data platform infrastructure,
+    and federated computational governance.
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: domain:data-engineering
+      confidence: primary
+    - target: specialization:data-engineering-analytics
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:data-contract
+      strength: recommended
+    - target: skill-area:data-governance
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:data-contract
+attributes:
+  displayName: "Data Contracts"
+  description: |
+    Defining and enforcing contracts between data producers and
+    consumers — schema registries, SLA agreements, quality
+    expectations, versioning, and contract testing automation.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-engineering
+      confidence: primary
+    - target: specialization:data-engineering-analytics
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:data-quality
+      strength: helpful
+    - target: skill-area:data-mesh-design
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:data-catalog-management
+attributes:
+  displayName: "Data Catalog Management"
+  description: |
+    Building and operating data catalogs — automated discovery,
+    metadata enrichment, search and tagging, lineage visualization,
+    and integration with tools like DataHub, Amundsen, or OpenMetadata.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:data-lineage
+      strength: recommended
+    - target: skill-area:data-governance
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:real-time-analytics
+attributes:
+  displayName: "Real-Time Analytics"
+  description: |
+    Building analytics systems with sub-second latency — OLAP engines
+    (ClickHouse, Druid, Pinot), materialized views, incremental
+    aggregation, and serving-layer design for dashboards and APIs.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-engineering
+      confidence: primary
+    - target: specialization:data-engineering-analytics
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:stream-processing-design
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:stream-processing-design
+attributes:
+  displayName: "Stream Processing Design"
+  description: |
+    Designing event stream processing systems — Kafka Streams, Flink,
+    exactly-once semantics, windowing strategies, watermarks,
+    late-data handling, and stream-table duality.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-engineering
+      confidence: primary
+    - target: specialization:data-engineering-analytics
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:kafka-stream-processing
+      strength: helpful
+    - target: skill-area:real-time-analytics
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:change-data-capture
+attributes:
+  displayName: "Change Data Capture"
+  description: |
+    Capturing and propagating database changes in real time —
+    Debezium, log-based CDC, outbox pattern, schema evolution
+    in CDC pipelines, and CDC-to-analytics integration.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-engineering
+      confidence: primary
+    - target: domain:databases
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:stream-processing-design
+      strength: helpful
+    - target: skill-area:event-driven-architecture
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:data-lakehouse-architecture
+attributes:
+  displayName: "Data Lakehouse Architecture"
+  description: |
+    Combining data lake flexibility with warehouse reliability —
+    Delta Lake, Apache Iceberg, Hudi, table formats, time-travel
+    queries, and unified batch/streaming table management.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:data-warehouse-modeling
+      strength: helpful
+    - target: skill-area:columnar-storage
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:feature-engineering-production
+attributes:
+  displayName: "Production Feature Engineering"
+  description: |
+    Operationalizing feature pipelines — feature stores (Feast, Tecton),
+    online/offline consistency, point-in-time correctness, feature
+    monitoring, and serving features at low latency for inference.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-engineering
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:feature-engineering
+      strength: recommended
+    - target: skill-area:feature-engineering-pipelines
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:experiment-design-AB-testing
+attributes:
+  displayName: "Experiment Design & A/B Testing"
+  description: |
+    Designing statistically rigorous experiments — sample size
+    calculation, randomization units, metric selection, sequential
+    testing, interaction effects, and experiment platform architecture.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: specialization:data-science-ml
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:a-b-testing
+      strength: recommended
+    - target: skill-area:product-analytics
+      strength: helpful
+
+# =============================================================================
+# Business / Product SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:growth-engineering
+attributes:
+  displayName: "Growth Engineering"
+  description: |
+    Engineering for user acquisition and retention — funnel
+    instrumentation, experimentation platforms, referral systems,
+    activation flows, and growth loop implementation.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: specialization:product-management
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:conversion-optimization
+      strength: recommended
+    - target: skill-area:a-b-testing
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:conversion-optimization
+attributes:
+  displayName: "Conversion Optimization"
+  description: |
+    Systematic improvement of conversion funnels — landing page
+    optimization, checkout flow design, form UX, pricing page
+    experiments, and multi-variate testing at scale.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:digital-marketing
+      confidence: primary
+    - target: specialization:product-management
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:a-b-testing
+      strength: recommended
+    - target: skill-area:growth-engineering
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:customer-journey-mapping
+attributes:
+  displayName: "Customer Journey Mapping"
+  description: |
+    Mapping end-to-end customer experiences — touchpoint identification,
+    emotion mapping, pain-point analysis, journey orchestration,
+    and cross-channel experience design.
+  expertiseLevels: [beginner, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:customer-experience
+      confidence: primary
+    - target: specialization:product-management
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:user-research
+      strength: helpful
+    - target: skill-area:product-discovery
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:pricing-strategy
+attributes:
+  displayName: "Pricing Strategy"
+  description: |
+    Designing and optimizing pricing models — value-based pricing,
+    tiered/usage-based structures, willingness-to-pay research,
+    price elasticity testing, and competitive pricing analysis.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:entrepreneurship
+      confidence: primary
+    - target: domain:strategy
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:business-model-design
+      strength: helpful
+    - target: skill-area:subscription-billing-design
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:marketplace-dynamics
+attributes:
+  displayName: "Marketplace Dynamics"
+  description: |
+    Understanding and engineering marketplace behavior — supply/demand
+    balancing, matching algorithms, trust/reputation systems,
+    take-rate optimization, and liquidity bootstrapping.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:entrepreneurship
+      confidence: primary
+    - target: domain:strategy
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:two-sided-platform-design
+      strength: recommended
+    - target: skill-area:growth-strategy
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:two-sided-platform-design
+attributes:
+  displayName: "Two-Sided Platform Design"
+  description: |
+    Architecting platforms that serve two distinct user groups —
+    network effects, chicken-and-egg strategies, cross-side
+    subsidization, and platform governance models.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:entrepreneurship
+      confidence: primary
+    - target: domain:strategy
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:marketplace-dynamics
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:subscription-billing-design
+attributes:
+  displayName: "Subscription Billing Design"
+  description: |
+    Engineering subscription and recurring billing systems — plan
+    management, proration logic, dunning flows, usage metering,
+    tax compliance, and integration with payment processors.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:fintech
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:payment-processing
+      strength: recommended
+    - target: skill-area:pricing-strategy
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:revenue-attribution
+attributes:
+  displayName: "Revenue Attribution"
+  description: |
+    Attributing revenue to marketing and product touchpoints —
+    multi-touch attribution models, incrementality testing, media
+    mix modeling, and building attribution data pipelines.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:digital-marketing
+      confidence: primary
+    - target: domain:business-intelligence
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:digital-marketing-analytics
+      strength: helpful
+    - target: skill-area:data-analytics
+      strength: helpful

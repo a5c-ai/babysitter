@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022", "DOM"],
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "moduleResolution": "node",
+    "types": ["node"],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/**/__tests__",
+    "src/harness/agenticTools.ts",
+    "src/harness/agenticTools/**",
+    "src/harness/backgroundProcessRegistry.ts",
+    "src/harness/deferredToolRegistry.ts"
+  ],
+  "references": [
+    { "path": "../sdk" },
+    { "path": "../agent-core" }
+  ]
+}

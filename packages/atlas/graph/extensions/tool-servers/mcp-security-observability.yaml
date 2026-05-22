@@ -1,0 +1,194 @@
+nodeKind: ToolServer
+id: tool-server:mcp-trivy
+attributes:
+  displayName: Trivy MCP Server
+  description: |
+    MCP server providing access to Trivy security scanning capabilities.
+    Enables AI agents to scan containers, filesystems, Git repositories, Kubernetes
+    clusters, and IaC files for vulnerabilities, misconfigurations, and secrets.
+  protocol: mcp
+  category: security
+  repoUrl: https://github.com/aquasecurity/trivy-mcp
+  maintainer: Aqua Security
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:trivy
+  lib_applies_to_domain:
+  - target: domain:cybersecurity
+  - target: domain:devops
+---
+nodeKind: ToolServer
+id: tool-server:mcp-owasp-zap
+attributes:
+  displayName: OWASP ZAP MCP Server
+  description: |
+    MCP server that exposes OWASP ZAP dynamic application security testing as a tool.
+    Enables AI agents to orchestrate ZAP actions including spider crawling, active scanning,
+    OpenAPI spec imports, and security report generation for web applications.
+  protocol: mcp
+  category: security
+  repoUrl: https://github.com/dtkmn/mcp-zap-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:owasp-zap
+  lib_applies_to_domain:
+  - target: domain:cybersecurity
+  - target: domain:software-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-opa
+attributes:
+  displayName: OPA MCP Server
+  description: |
+    MCP server providing a first-class Open Policy Agent and Rego authoring environment.
+    Enables AI agents to evaluate Rego policies, explain decisions, generate test skeletons,
+    describe policies, and suggest fixes using curated OPA knowledge and safe execution boundaries.
+  protocol: mcp
+  category: security
+  repoUrl: https://github.com/OrygnsCode/opa-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:opa
+  lib_applies_to_domain:
+  - target: domain:cybersecurity
+  - target: domain:devops
+---
+nodeKind: ToolServer
+id: tool-server:mcp-checkov
+attributes:
+  displayName: Checkov Security Scanner MCP Server
+  description: |
+    MCP server (AWS sample) integrating Checkov alongside Semgrep and Bandit for
+    comprehensive code and IaC security analysis. Enables AI coding assistants to
+    automatically scan infrastructure definitions for misconfigurations and compliance violations.
+  protocol: mcp
+  category: security
+  repoUrl: https://github.com/aws-samples/sample-mcp-security-scanner
+  maintainer: AWS Samples
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:checkov
+  lib_applies_to_domain:
+  - target: domain:cybersecurity
+  - target: domain:devops
+---
+nodeKind: ToolServer
+id: tool-server:mcp-falco
+attributes:
+  displayName: Falco MCP Server
+  description: |
+    Lightweight MCP server that exposes the Falcosidekick event search API as a tool.
+    Enables AI agents to query and analyze Falco runtime security events, inspect anomalous
+    container and host activity, and investigate threat detection alerts via HTTP.
+  protocol: mcp
+  category: security
+  repoUrl: https://github.com/maratsal/falco-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:falco
+  lib_applies_to_domain:
+  - target: domain:cybersecurity
+  - target: domain:devops
+---
+nodeKind: ToolServer
+id: tool-server:mcp-opentelemetry
+attributes:
+  displayName: OpenTelemetry MCP Server
+  description: |
+    Unified MCP server by Traceloop for querying OpenTelemetry traces across multiple backends
+    including Jaeger, Grafana Tempo, and Traceloop. Enables AI agents to analyze distributed
+    traces for automated debugging, root cause analysis, and LLM observability workflows.
+  protocol: mcp
+  category: observability
+  repoUrl: https://github.com/traceloop/opentelemetry-mcp-server
+  maintainer: Traceloop
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:opentelemetry
+  - target: tool:jaeger
+  - target: tool:tempo
+  - target: stack-part:tracing
+  lib_applies_to_domain:
+  - target: domain:observability
+  - target: domain:devops
+---
+nodeKind: ToolServer
+id: tool-server:mcp-jaeger
+attributes:
+  displayName: Jaeger MCP Server
+  description: |
+    Read-only MCP server providing direct access to Jaeger distributed tracing data over stdio.
+    Enables AI agents to list services, discover operations, search traces by service and time,
+    and retrieve full span details with parent/child relationships and per-service statistics.
+  protocol: mcp
+  category: observability
+  repoUrl: https://github.com/mshegolev/jaeger-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:jaeger
+  - target: stack-part:tracing
+  lib_applies_to_domain:
+  - target: domain:observability
+  - target: domain:devops
+---
+nodeKind: ToolServer
+id: tool-server:mcp-loki
+attributes:
+  displayName: Loki MCP Server
+  description: |
+    Official MCP server by Grafana Labs for querying and analyzing log data from Grafana Loki.
+    Enables AI agents to execute LogQL queries, search log streams by label selectors, and
+    perform intelligent log analysis and troubleshooting workflows.
+  protocol: mcp
+  category: observability
+  repoUrl: https://github.com/grafana/loki-mcp
+  maintainer: Grafana Labs
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:loki
+  - target: stack-part:logging
+  lib_applies_to_domain:
+  - target: domain:observability
+  - target: domain:devops
+---
+nodeKind: ToolServer
+id: tool-server:mcp-tempo
+attributes:
+  displayName: Grafana Tempo MCP Server
+  description: |
+    Official MCP server by Grafana Labs for querying distributed tracing data from Grafana Tempo.
+    Enables AI agents to search traces, inspect spans and service dependencies, and correlate
+    tracing data with logs and metrics in the Grafana observability stack.
+  protocol: mcp
+  category: observability
+  repoUrl: https://github.com/grafana/tempo-mcp-server
+  maintainer: Grafana Labs
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:tempo
+  - target: stack-part:tracing
+  lib_applies_to_domain:
+  - target: domain:observability
+  - target: domain:devops

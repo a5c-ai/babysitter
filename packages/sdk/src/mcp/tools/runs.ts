@@ -1,14 +1,11 @@
 import * as path from "path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
+import { z } from "zod/v3";
 import {
   createRun,
   orchestrateIteration,
 } from "../../runtime";
-import {
-  loadJournal,
-  readRunMetadata,
-} from "../../storage";
+import { loadJournal, readRunMetadata } from "../../storage";
 import { rebuildStateCache } from "../../runtime/replay/stateCache";
 import type { JournalEvent } from "../../storage/types";
 import { toolResult, toolError } from "../util/errors";
@@ -27,63 +24,58 @@ function parseEntrypoint(entrypoint: string): { importPath: string; exportName?:
   return { importPath, exportName };
 }
 
-const RUN_LIFECYCLE_TYPES = new Set(["RUN_CREATED", "RUN_COMPLETED", "RUN_FAILED"]);
+function deriveRunState(
+  events: JournalEvent[],
+): "created" | "running" | "waiting" | "completed" | "failed" {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const type = events[index].type;
+    if (type === "RUN_COMPLETED") return "completed";
+    if (type === "RUN_FAILED") return "failed";
+  }
 
-function findLastLifecycleEvent(events: JournalEvent[]): JournalEvent | undefined {
-  for (let i = events.length - 1; i >= 0; i--) {
-    if (RUN_LIFECYCLE_TYPES.has(events[i].type)) {
-      return events[i];
+  const requested = new Set<string>();
+  const resolved = new Set<string>();
+  for (const event of events) {
+    if (event.type === "EFFECT_REQUESTED") {
+      const effectId = (event.data as Record<string, unknown>).effectId as string | undefined;
+      if (effectId) requested.add(effectId);
+    } else if (event.type === "EFFECT_RESOLVED" || event.type === "EFFECT_CANCELLED") {
+      const effectId = (event.data as Record<string, unknown>).effectId as string | undefined;
+      if (effectId) resolved.add(effectId);
     }
   }
-  return undefined;
-}
 
-function deriveRunState(
-  lastLifecycleEventType: string | undefined,
-  pendingCount: number
-): string {
-  if (lastLifecycleEventType === "RUN_COMPLETED") return "completed";
-  if (lastLifecycleEventType === "RUN_FAILED") return "failed";
-  if (pendingCount > 0) return "waiting";
+  const pending = [...requested].filter((id) => !resolved.has(id));
+  if (pending.length > 0) return "waiting";
+
+  const hasCreated = events.some((event) => event.type === "RUN_CREATED");
+  if (hasCreated && resolved.size > 0) return "running";
   return "created";
 }
 
-function countPendingEffects(events: JournalEvent[]): {
-  pendingEffects: Array<{ effectId: string; kind: string; label?: string }>;
-  pendingByKind: Record<string, number>;
-} {
-  const requested = new Map<string, { effectId: string; kind: string; label?: string }>();
+function derivePendingEffects(events: JournalEvent[]): Array<{ effectId: string; kind?: string }> {
+  const requested = new Map<string, { effectId: string; kind?: string }>();
   const resolved = new Set<string>();
 
   for (const event of events) {
     if (event.type === "EFFECT_REQUESTED") {
-      const data = event.data as { effectId?: string; kind?: string; label?: string };
-      if (data.effectId) {
-        requested.set(data.effectId, {
-          effectId: data.effectId,
-          kind: data.kind ?? "unknown",
-          label: data.label,
+      const data = event.data as Record<string, unknown>;
+      const effectId = data.effectId as string | undefined;
+      if (effectId) {
+        requested.set(effectId, {
+          effectId,
+          kind: typeof data.kind === "string" ? data.kind : undefined,
         });
       }
-    } else if (event.type === "EFFECT_RESOLVED") {
-      const data = event.data as { effectId?: string };
-      if (data.effectId) {
-        resolved.add(data.effectId);
-      }
+    } else if (event.type === "EFFECT_RESOLVED" || event.type === "EFFECT_CANCELLED") {
+      const effectId = (event.data as Record<string, unknown>).effectId as string | undefined;
+      if (effectId) resolved.add(effectId);
     }
   }
 
-  const pendingEffects: Array<{ effectId: string; kind: string; label?: string }> = [];
-  const pendingByKind: Record<string, number> = {};
-
-  for (const [effectId, info] of requested) {
-    if (!resolved.has(effectId)) {
-      pendingEffects.push(info);
-      pendingByKind[info.kind] = (pendingByKind[info.kind] ?? 0) + 1;
-    }
-  }
-
-  return { pendingEffects, pendingByKind };
+  return [...requested.entries()]
+    .filter(([id]) => !resolved.has(id))
+    .map(([, info]) => info);
 }
 
 export function registerRunTools(server: McpServer): void {
@@ -145,26 +137,27 @@ export function registerRunTools(server: McpServer): void {
       runsDir: z.string().optional().describe("Override runs directory path"),
     },
     async (args) => {
+      const runsDir = resolveRunDir(args.runsDir);
+      const runDir = path.join(runsDir, args.runId);
       try {
-        const runsDir = resolveRunDir(args.runsDir);
-        const runDir = path.join(runsDir, args.runId);
+        const [metadata, events] = await Promise.all([
+          readRunMetadata(runDir),
+          loadJournal(runDir),
+        ]);
 
-        const metadata = await readRunMetadata(runDir);
-        const journal = await loadJournal(runDir);
-
-        const lastLifecycleEvent = findLastLifecycleEvent(journal);
-        const { pendingEffects, pendingByKind } = countPendingEffects(journal);
-        const state = deriveRunState(lastLifecycleEvent?.type, pendingEffects.length);
-
-        const completionProof = state === "completed" ? metadata.completionProof : undefined;
+        const pendingEffects = derivePendingEffects(events);
+        const pendingByKind: Record<string, number> = {};
+        for (const effect of pendingEffects) {
+          const kind = effect.kind ?? "unknown";
+          pendingByKind[kind] = (pendingByKind[kind] ?? 0) + 1;
+        }
 
         return toolResult({
           runId: metadata.runId,
           processId: metadata.processId,
-          state,
+          state: deriveRunState(events),
           pendingEffects,
           pendingByKind,
-          completionProof: completionProof ?? null,
         });
       } catch (err) {
         return toolError(err instanceof Error ? err.message : String(err));
@@ -206,6 +199,16 @@ export function registerRunTools(server: McpServer): void {
           });
         }
 
+        if (result.status === "process-error") {
+          return toolResult({
+            status: "process-error",
+            recoverable: true,
+            error: result.error instanceof Error ? result.error.message : result.error,
+            hint: "The process code has a bug. Fix the process file and retry the iteration.",
+            metadata: result.metadata,
+          });
+        }
+
         // status === "waiting"
         return toolResult({
           status: "waiting",
@@ -237,27 +240,20 @@ export function registerRunTools(server: McpServer): void {
       reverse: z.boolean().optional().describe("Return events in reverse chronological order"),
     },
     async (args) => {
+      const runsDir = resolveRunDir(args.runsDir);
+      const filterType = args.filterType?.toUpperCase();
       try {
-        const runsDir = resolveRunDir(args.runsDir);
         const runDir = path.join(runsDir, args.runId);
-
-        const journal = await loadJournal(runDir);
-
-        // Apply type filter
-        const filterType = args.filterType?.toUpperCase();
-        const filtered = filterType
-          ? journal.filter((event) => event.type.toUpperCase() === filterType)
-          : journal;
-
-        // Apply ordering
-        const ordered = args.reverse ? filtered.slice().reverse() : filtered;
-
-        // Apply limit
+        const allEvents = await loadJournal(runDir);
+        const matchingEvents = filterType
+          ? allEvents.filter((event) => event.type === filterType)
+          : allEvents;
+        const ordered = args.reverse ? matchingEvents.slice().reverse() : matchingEvents;
         const limited = args.limit !== undefined ? ordered.slice(0, args.limit) : ordered;
 
         return toolResult({
-          total: journal.length,
-          matching: filtered.length,
+          total: allEvents.length,
+          matching: matchingEvents.length,
           showing: limited.length,
           events: limited.map((event) => ({
             seq: event.seq,

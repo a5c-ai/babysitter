@@ -1,0 +1,2896 @@
+# Krate first-class Kubernetes CRD kind inventory. Generated from packages/krate/charts/crds/*.yaml.
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-stack
+attributes:
+  displayName: Krate AgentStack
+  description: AgentStack declares an executable agent stack for a Krate project, including the agent composition that
+    dispatch controllers can select for repository work. It is owned by the agent-dispatch service and participates in
+    governed agent execution. Atlas models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and
+    source-backed Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact
+    resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentStack
+  plural: agentstacks
+  singular: agentstack
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentStack
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-subagent
+attributes:
+  displayName: Krate AgentSubagent
+  description: AgentSubagent defines a reusable subagent role inside an agent stack, giving Krate a Kubernetes-native way
+    to govern specialist agent participation. It is owned by the agent-dispatch service and participates in governed
+    agent execution. Atlas models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed
+    Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentSubagent
+  plural: agentsubagents
+  singular: agentsubagent
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentSubagent
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-tool-profile
+attributes:
+  displayName: Krate AgentToolProfile
+  description: AgentToolProfile describes the tools an agent may call during a dispatch run, forming the policy boundary
+    between agent capability and operator approval. It is owned by the agent-dispatch service and participates in
+    governed agent execution. Atlas models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and
+    source-backed Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact
+    resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentToolProfile
+  plural: agenttoolprofiles
+  singular: agenttoolprofile
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentToolProfile
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-mcp-server
+attributes:
+  displayName: Krate AgentMcpServer
+  description: AgentMcpServer registers MCP server endpoints that can be attached to agent stacks and surfaced through
+    dispatch-time tool configuration. It is owned by the agent-dispatch service and participates in governed agent
+    execution. Atlas models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed
+    Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentMcpServer
+  plural: agentmcpservers
+  singular: agentmcpserver
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentMcpServer
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-skill
+attributes:
+  displayName: Krate AgentSkill
+  description: AgentSkill catalogs task-specific agent skills so dispatch planning can bind repository work to curated
+    operating procedures. It is owned by the agent-dispatch service and participates in governed agent execution. Atlas
+    models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentSkill
+  plural: agentskills
+  singular: agentskill
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentSkill
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-trigger-rule
+attributes:
+  displayName: Krate AgentTriggerRule
+  description: AgentTriggerRule routes events such as pull-request changes, labels, schedules, or webhook signals into
+    agent dispatch workflows. It is owned by the agent-dispatch service and participates in governed agent execution.
+    Atlas models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API
+    metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentTriggerRule
+  plural: agenttriggerrules
+  singular: agenttriggerrule
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentTriggerRule
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-context-label
+attributes:
+  displayName: Krate AgentContextLabel
+  description: AgentContextLabel labels context fragments and repository facts so Krate can assemble scoped prompt bundles
+    with provenance. It is owned by the agent-dispatch service and participates in governed agent execution. Atlas
+    models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentContextLabel
+  plural: agentcontextlabels
+  singular: agentcontextlabel
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentContextLabel
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-krate-workspace-policy
+attributes:
+  displayName: Krate KrateWorkspacePolicy
+  description: KrateWorkspacePolicy sets branch, file-scope, cleanup, and workspace-lifecycle rules for isolated agent
+    worktrees. It is owned by the policy service and participates in admission, approval, or governance evidence. It is
+    owned by the agent-dispatch service and participates in governed agent execution. Atlas models it as a agent CRD
+    with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy,
+    UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: KrateWorkspacePolicy
+  plural: krateworkspacepolicies
+  singular: krateworkspacepolicy
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-policy
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:KrateWorkspacePolicy
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-policy
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-service-account
+attributes:
+  displayName: Krate AgentServiceAccount
+  description: AgentServiceAccount models the Kubernetes service account identity an agent uses while operating inside
+    Krate-managed resources. It is owned by the policy service and participates in admission, approval, or governance
+    evidence. It is owned by the agent-dispatch service and participates in governed agent execution. Atlas models it as
+    a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so
+    controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentServiceAccount
+  plural: agentserviceaccounts
+  singular: agentserviceaccount
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-policy
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentServiceAccount
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-policy
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-role-binding
+attributes:
+  displayName: Krate AgentRoleBinding
+  description: AgentRoleBinding binds agent identities to Krate roles, translating organization policy into concrete
+    Kubernetes RBAC-like permissions. It is owned by the policy service and participates in admission, approval, or
+    governance evidence. It is owned by the agent-dispatch service and participates in governed agent execution. Atlas
+    models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentRoleBinding
+  plural: agentrolebindings
+  singular: agentrolebinding
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-policy
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentRoleBinding
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-policy
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-secret-grant
+attributes:
+  displayName: Krate AgentSecretGrant
+  description: AgentSecretGrant authorizes limited agent access to named secrets and records that the access path is
+    governed rather than implicit. It is owned by the policy service and participates in admission, approval, or
+    governance evidence. It is owned by the agent-dispatch service and participates in governed agent execution. Atlas
+    models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentSecretGrant
+  plural: agentsecretgrants
+  singular: agentsecretgrant
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-policy
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentSecretGrant
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-policy
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-config-grant
+attributes:
+  displayName: Krate AgentConfigGrant
+  description: AgentConfigGrant authorizes limited agent access to configuration data needed for a dispatch run or tool
+    profile. It is owned by the policy service and participates in admission, approval, or governance evidence. It is
+    owned by the agent-dispatch service and participates in governed agent execution. Atlas models it as a agent CRD
+    with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy,
+    UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentConfigGrant
+  plural: agentconfiggrants
+  singular: agentconfiggrant
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-policy
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentConfigGrant
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-policy
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-adapter
+attributes:
+  displayName: Krate AgentAdapter
+  description: AgentAdapter declares an adapter for a concrete agent implementation so Krate can dispatch through
+    agent-mux without becoming an agent runtime. It is owned by the agent-dispatch service and participates in governed
+    agent execution. Atlas models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed
+    Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentAdapter
+  plural: agentadapters
+  singular: agentadapter
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentAdapter
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-transport-binding
+attributes:
+  displayName: Krate AgentTransportBinding
+  description: AgentTransportBinding binds an agent adapter to a transport path, allowing Codex, Claude, Gemini, or other
+    agents to be routed consistently. It is owned by the agent-dispatch service and participates in governed agent
+    execution. Atlas models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed
+    Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentTransportBinding
+  plural: agenttransportbindings
+  singular: agenttransportbinding
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentTransportBinding
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-provider-config
+attributes:
+  displayName: Krate AgentProviderConfig
+  description: AgentProviderConfig stores model-provider connection metadata and secret references used by agent adapters
+    and gateway policies. It is owned by the agent-dispatch service and participates in governed agent execution. Atlas
+    models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentProviderConfig
+  plural: agentproviderconfigs
+  singular: agentproviderconfig
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentProviderConfig
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-krate-project
+attributes:
+  displayName: Krate KrateProject
+  description: KrateProject groups repositories, workspaces, policies, and agent stacks into a project-level unit for
+    platform governance. It is owned by the forge service and participates in repository collaboration workflows. Atlas
+    models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: KrateProject
+  plural: krateprojects
+  singular: krateproject
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-forge
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:KrateProject
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-forge
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-gateway-config
+attributes:
+  displayName: Krate AgentGatewayConfig
+  description: AgentGatewayConfig configures dispatch gateway behavior for choosing adapters, enforcing routing rules, and
+    brokering agent sessions. It is owned by the agent-dispatch service and participates in governed agent execution.
+    Atlas models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API
+    metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentGatewayConfig
+  plural: agentgatewayconfigs
+  singular: agentgatewayconfig
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentGatewayConfig
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-memory-repository
+attributes:
+  displayName: Krate AgentMemoryRepository
+  description: AgentMemoryRepository defines the durable company-brain memory repository where organizational knowledge,
+    decisions, and patterns are stored. It is owned by the company-brain service and participates in durable
+    organizational memory. It is owned by the agent-dispatch service and participates in governed agent execution. It is
+    owned by the forge service and participates in repository collaboration workflows. Atlas models it as a agent CRD
+    with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy,
+    UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentMemoryRepository
+  plural: agentmemoryrepositories
+  singular: agentmemoryrepository
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-company-brain
+    - platform-service:krate-agent-dispatch
+    - platform-service:krate-forge
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentMemoryRepository
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-company-brain
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+    - target: platform-service:krate-forge
+      family: agent
+  maps_to_external_resource:
+    - target: tool:gitea
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-memory-source
+attributes:
+  displayName: Krate AgentMemorySource
+  description: AgentMemorySource registers source systems or paths that feed company-brain memory ingestion and refresh
+    workflows. It is owned by the company-brain service and participates in durable organizational memory. It is owned
+    by the agent-dispatch service and participates in governed agent execution. Atlas models it as a agent CRD with
+    Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy, UI/API,
+    and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentMemorySource
+  plural: agentmemorysources
+  singular: agentmemorysource
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-company-brain
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentMemorySource
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-company-brain
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-memory-ontology
+attributes:
+  displayName: Krate AgentMemoryOntology
+  description: AgentMemoryOntology describes the schema and semantic categories used to organize Krate company-brain
+    knowledge. It is owned by the company-brain service and participates in durable organizational memory. It is owned
+    by the agent-dispatch service and participates in governed agent execution. Atlas models it as a agent CRD with
+    Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy, UI/API,
+    and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentMemoryOntology
+  plural: agentmemoryontologies
+  singular: agentmemoryontology
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-company-brain
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentMemoryOntology
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-company-brain
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-memory-association
+attributes:
+  displayName: Krate AgentMemoryAssociation
+  description: AgentMemoryAssociation links memory records to repositories, projects, work items, or agent sessions so
+    retrieval is contextual. It is owned by the company-brain service and participates in durable organizational memory.
+    It is owned by the agent-dispatch service and participates in governed agent execution. Atlas models it as a agent
+    CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller,
+    policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentMemoryAssociation
+  plural: agentmemoryassociations
+  singular: agentmemoryassociation
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-company-brain
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: true
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:AgentMemoryAssociation
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-company-brain
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-krate-workspace
+attributes:
+  displayName: Krate KrateWorkspace
+  description: KrateWorkspace declares the desired workspace for a repository task, including branch and checkout context
+    used by agent dispatch. It is owned by the agent-dispatch service and participates in governed agent execution.
+    Atlas models it as a agent CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API
+    metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: KrateWorkspace
+  plural: krateworkspaces
+  singular: krateworkspace
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/agent-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: agent
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-agent-resources
+      locator: agent-resources.yaml:KrateWorkspace
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: agent
+    - target: platform-service:krate-agent-dispatch
+      family: agent
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-ref-policy
+attributes:
+  displayName: Krate RefPolicy
+  description: RefPolicy defines Git reference policy such as protected branches and allowed update patterns for
+    repository governance. It is owned by the policy service and participates in admission, approval, or governance
+    evidence. It is owned by the forge service and participates in repository collaboration workflows. Atlas models it
+    as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so
+    controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: RefPolicy
+  plural: refpolicies
+  singular: refpolicy
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-policy
+    - platform-service:krate-forge
+  hasStatus: false
+  hasConditions: false
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:RefPolicy
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-policy
+      family: aggregated
+    - target: platform-service:krate-forge
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-runner-pool
+attributes:
+  displayName: Krate RunnerPool
+  description: RunnerPool describes a pool of execution capacity for CI jobs and agent dispatch jobs in Krate. It is owned
+    by the CI service and participates in pipeline, runner, or artifact lifecycle. Atlas models it as a aggregated CRD
+    with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy,
+    UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: RunnerPool
+  plural: runnerpools
+  singular: runnerpool
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-ci
+  hasStatus: false
+  hasConditions: false
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:RunnerPool
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-ci
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-webhook-subscription
+attributes:
+  displayName: Krate WebhookSubscription
+  description: WebhookSubscription records which repository or platform events should be emitted to external or internal
+    webhook consumers. It is owned by the forge service and participates in repository collaboration workflows. Atlas
+    models it as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API
+    metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: WebhookSubscription
+  plural: webhooksubscriptions
+  singular: webhooksubscription
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-forge
+  hasStatus: false
+  hasConditions: false
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:WebhookSubscription
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-forge
+      family: aggregated
+  maps_to_external_resource:
+    - target: tool:gitea
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-view
+attributes:
+  displayName: Krate View
+  description: View stores declarative UI/query views so teams can share operational slices of Krate resources through
+    GitOps. It is owned by the forge service and participates in repository collaboration workflows. Atlas models it as
+    a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so
+    controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: View
+  plural: views
+  singular: view
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-forge
+  hasStatus: false
+  hasConditions: false
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:View
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-forge
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-selector
+attributes:
+  displayName: Krate Selector
+  description: Selector captures reusable selection logic for matching repositories, work items, agents, or resources in
+    workflows. It is owned by the forge service and participates in repository collaboration workflows. Atlas models it
+    as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so
+    controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: Selector
+  plural: selectors
+  singular: selector
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-forge
+  hasStatus: false
+  hasConditions: false
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:Selector
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-forge
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-pull-request
+attributes:
+  displayName: Krate PullRequest
+  description: PullRequest models pull-request state in the aggregated API, including review, CI, and merge lifecycle
+    state for Krate repositories. It is owned by the forge service and participates in repository collaboration
+    workflows. Atlas models it as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed
+    Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: PullRequest
+  plural: pullrequests
+  singular: pullrequest
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-forge
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:PullRequest
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-forge
+      family: aggregated
+  maps_to_external_resource:
+    - target: tool:gitea
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-issue
+attributes:
+  displayName: Krate Issue
+  description: Issue models issue/work-item state used to drive human and agent-assisted repository workflows. It is owned
+    by the forge service and participates in repository collaboration workflows. Atlas models it as a aggregated CRD
+    with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy,
+    UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: Issue
+  plural: issues
+  singular: issue
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-forge
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:Issue
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-forge
+      family: aggregated
+  maps_to_external_resource:
+    - target: tool:gitea
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-review
+attributes:
+  displayName: Krate Review
+  description: Review records pull-request review decisions and commentary as first-class workflow state. It is owned by
+    the forge service and participates in repository collaboration workflows. Atlas models it as a aggregated CRD with
+    Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy, UI/API,
+    and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: Review
+  plural: reviews
+  singular: review
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-forge
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:Review
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-forge
+      family: aggregated
+  maps_to_external_resource:
+    - target: tool:gitea
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-pipeline
+attributes:
+  displayName: Krate Pipeline
+  description: Pipeline defines CI pipeline desired state for repository validation and agent-produced changes. It is
+    owned by the CI service and participates in pipeline, runner, or artifact lifecycle. Atlas models it as a aggregated
+    CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller,
+    policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: Pipeline
+  plural: pipelines
+  singular: pipeline
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-ci
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:Pipeline
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-ci
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-job
+attributes:
+  displayName: Krate Job
+  description: Job tracks a concrete pipeline or agent-dispatch execution unit, including status emitted by
+    runners/controllers. It is owned by the CI service and participates in pipeline, runner, or artifact lifecycle.
+    Atlas models it as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes
+    API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: Job
+  plural: jobs
+  singular: job
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-ci
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:Job
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-ci
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-webhook-delivery
+attributes:
+  displayName: Krate WebhookDelivery
+  description: WebhookDelivery captures delivery attempts, signatures, and outcomes for Krate webhook events. It is owned
+    by the forge service and participates in repository collaboration workflows. Atlas models it as a aggregated CRD
+    with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy,
+    UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: WebhookDelivery
+  plural: webhookdeliveries
+  singular: webhookdelivery
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-forge
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:WebhookDelivery
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-forge
+      family: aggregated
+  maps_to_external_resource:
+    - target: tool:gitea
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-dispatch-run
+attributes:
+  displayName: Krate AgentDispatchRun
+  description: AgentDispatchRun tracks a full agent dispatch lifecycle from request through workspace setup, session
+    execution, and result collection. It is owned by the agent-dispatch service and participates in governed agent
+    execution. Atlas models it as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed
+    Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentDispatchRun
+  plural: agentdispatchruns
+  singular: agentdispatchrun
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentDispatchRun
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-dispatch-attempt
+attributes:
+  displayName: Krate AgentDispatchAttempt
+  description: AgentDispatchAttempt records an individual retry or execution attempt within an agent dispatch run. It is
+    owned by the agent-dispatch service and participates in governed agent execution. Atlas models it as a aggregated
+    CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller,
+    policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentDispatchAttempt
+  plural: agentdispatchattempts
+  singular: agentdispatchattempt
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentDispatchAttempt
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-session
+attributes:
+  displayName: Krate AgentSession
+  description: AgentSession represents the live or historical agent session bound to a dispatch run and transport backend.
+    It is owned by the agent-dispatch service and participates in governed agent execution. Atlas models it as a
+    aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so
+    controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentSession
+  plural: agentsessions
+  singular: agentsession
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentSession
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-context-bundle
+attributes:
+  displayName: Krate AgentContextBundle
+  description: AgentContextBundle captures the assembled prompt/context package passed to an agent, including repository
+    state, policy, and memory excerpts. It is owned by the agent-dispatch service and participates in governed agent
+    execution. Atlas models it as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed
+    Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentContextBundle
+  plural: agentcontextbundles
+  singular: agentcontextbundle
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentContextBundle
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-krate-artifact
+attributes:
+  displayName: Krate KrateArtifact
+  description: KrateArtifact records generated artifacts from CI jobs or agent runs, such as logs, patches, reports, and
+    build outputs. It is owned by the CI service and participates in pipeline, runner, or artifact lifecycle. Atlas
+    models it as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API
+    metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: KrateArtifact
+  plural: krateartifacts
+  singular: krateartifact
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-ci
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:KrateArtifact
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-ci
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-approval
+attributes:
+  displayName: Krate AgentApproval
+  description: AgentApproval models a human approval gate for sensitive agent actions such as secret access, destructive
+    tools, or write-back. It is owned by the agent-dispatch service and participates in governed agent execution. Atlas
+    models it as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API
+    metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentApproval
+  plural: agentapprovals
+  singular: agentapproval
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentApproval
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-trigger-execution
+attributes:
+  displayName: Krate AgentTriggerExecution
+  description: AgentTriggerExecution records an evaluated trigger firing and the dispatch or workflow outcome it produced.
+    It is owned by the agent-dispatch service and participates in governed agent execution. Atlas models it as a
+    aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so
+    controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentTriggerExecution
+  plural: agenttriggerexecutions
+  singular: agenttriggerexecution
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentTriggerExecution
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-capability-requirement
+attributes:
+  displayName: Krate AgentCapabilityRequirement
+  description: AgentCapabilityRequirement states capability prerequisites that an agent stack or dispatch request must
+    satisfy before execution. It is owned by the agent-dispatch service and participates in governed agent execution.
+    Atlas models it as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes
+    API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentCapabilityRequirement
+  plural: agentcapabilityrequirements
+  singular: agentcapabilityrequirement
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentCapabilityRequirement
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-work-item-session-link
+attributes:
+  displayName: Krate WorkItemSessionLink
+  description: WorkItemSessionLink links issues, pull requests, or other work items to the agent sessions that acted on
+    them. It is owned by the agent-dispatch service and participates in governed agent execution. Atlas models it as a
+    aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so
+    controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: WorkItemSessionLink
+  plural: workitemsessionlinks
+  singular: workitemsessionlink
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:WorkItemSessionLink
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-work-item-workspace-link
+attributes:
+  displayName: Krate WorkItemWorkspaceLink
+  description: WorkItemWorkspaceLink links work items to the workspaces and branches provisioned for their execution. It
+    is owned by the agent-dispatch service and participates in governed agent execution. Atlas models it as a aggregated
+    CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller,
+    policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: WorkItemWorkspaceLink
+  plural: workitemworkspacelinks
+  singular: workitemworkspacelink
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:WorkItemWorkspaceLink
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-session-transcript
+attributes:
+  displayName: Krate AgentSessionTranscript
+  description: AgentSessionTranscript stores transcript metadata for an agent session so review, audit, and memory
+    extraction can reference the conversation. It is owned by the agent-dispatch service and participates in governed
+    agent execution. Atlas models it as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and
+    source-backed Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact
+    resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentSessionTranscript
+  plural: agentsessiontranscripts
+  singular: agentsessiontranscript
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentSessionTranscript
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-session-attachment
+attributes:
+  displayName: Krate AgentSessionAttachment
+  description: AgentSessionAttachment records files or auxiliary data attached to an agent session for context, evidence,
+    or review. It is owned by the agent-dispatch service and participates in governed agent execution. Atlas models it
+    as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so
+    controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentSessionAttachment
+  plural: agentsessionattachments
+  singular: agentsessionattachment
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentSessionAttachment
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-krate-workspace-runtime
+attributes:
+  displayName: Krate KrateWorkspaceRuntime
+  description: KrateWorkspaceRuntime tracks observed runtime state for a workspace, including checkout, pod, runner, and
+    cleanup status. It is owned by the agent-dispatch service and participates in governed agent execution. Atlas models
+    it as a aggregated CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so
+    controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: KrateWorkspaceRuntime
+  plural: krateworkspaceruntimes
+  singular: krateworkspaceruntime
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:KrateWorkspaceRuntime
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-memory-snapshot
+attributes:
+  displayName: Krate AgentMemorySnapshot
+  description: AgentMemorySnapshot captures a point-in-time company-brain memory snapshot made available to a dispatch
+    run. It is owned by the company-brain service and participates in durable organizational memory. It is owned by the
+    agent-dispatch service and participates in governed agent execution. Atlas models it as a aggregated CRD with
+    Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy, UI/API,
+    and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentMemorySnapshot
+  plural: agentmemorysnapshots
+  singular: agentmemorysnapshot
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-company-brain
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentMemorySnapshot
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-company-brain
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-memory-query
+attributes:
+  displayName: Krate AgentMemoryQuery
+  description: AgentMemoryQuery records semantic or filtered retrieval requests against company-brain memory. It is owned
+    by the company-brain service and participates in durable organizational memory. It is owned by the agent-dispatch
+    service and participates in governed agent execution. Atlas models it as a aggregated CRD with Namespaced scope,
+    v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy, UI/API, and provider
+    edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentMemoryQuery
+  plural: agentmemoryqueries
+  singular: agentmemoryquery
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-company-brain
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentMemoryQuery
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-company-brain
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-memory-update
+attributes:
+  displayName: Krate AgentMemoryUpdate
+  description: AgentMemoryUpdate tracks proposed or accepted memory mutations extracted from agent sessions or human
+    curation. It is owned by the company-brain service and participates in durable organizational memory. It is owned by
+    the agent-dispatch service and participates in governed agent execution. Atlas models it as a aggregated CRD with
+    Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy, UI/API,
+    and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentMemoryUpdate
+  plural: agentmemoryupdates
+  singular: agentmemoryupdate
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-company-brain
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentMemoryUpdate
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-company-brain
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-agent-run-memory-import
+attributes:
+  displayName: Krate AgentRunMemoryImport
+  description: AgentRunMemoryImport imports validated session knowledge into durable memory after dispatch completion and
+    review. It is owned by the company-brain service and participates in durable organizational memory. It is owned by
+    the agent-dispatch service and participates in governed agent execution. Atlas models it as a aggregated CRD with
+    Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy, UI/API,
+    and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AgentRunMemoryImport
+  plural: agentrunmemoryimports
+  singular: agentrunmemoryimport
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/aggregated-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: aggregated
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-company-brain
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-aggregated-resources
+      locator: aggregated-resources.yaml:AgentRunMemoryImport
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: aggregated
+    - target: platform-service:krate-company-brain
+      family: aggregated
+    - target: platform-service:krate-agent-dispatch
+      family: aggregated
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-external-backend-provider
+attributes:
+  displayName: Krate ExternalBackendProvider
+  description: ExternalBackendProvider declares an external system provider such as a forge, issue tracker, or CI service
+    that Krate can synchronize with. It is owned by the external-backends service and participates in provider
+    synchronization. It is owned by the agent-dispatch service and participates in governed agent execution. Atlas
+    models it as a external-backend CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes
+    API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: ExternalBackendProvider
+  plural: externalbackendproviders
+  singular: externalbackendprovider
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/external-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: external-backend
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-external-backends
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-external-resources
+      locator: external-resources.yaml:ExternalBackendProvider
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: external-backend
+    - target: platform-service:krate-external-backends
+      family: external-backend
+    - target: platform-service:krate-agent-dispatch
+      family: external-backend
+  maps_to_external_resource:
+    - target: provider:github
+      relationship: capability-manifest
+    - target: vcs-host:github
+      relationship: mirror
+    - target: issue-tracker:github-issues
+      relationship: mirror
+    - target: platform-service:krate-external-backends
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-external-backend-binding
+attributes:
+  displayName: Krate ExternalBackendBinding
+  description: ExternalBackendBinding binds a Krate organization, project, or repository to a configured external provider
+    instance. It is owned by the external-backends service and participates in provider synchronization. Atlas models it
+    as a external-backend CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: ExternalBackendBinding
+  plural: externalbackendbindings
+  singular: externalbackendbinding
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/external-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: external-backend
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-external-backends
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-external-resources
+      locator: external-resources.yaml:ExternalBackendBinding
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: external-backend
+    - target: platform-service:krate-external-backends
+      family: external-backend
+  maps_to_external_resource:
+    - target: provider:github
+      relationship: capability-manifest
+    - target: vcs-host:github
+      relationship: mirror
+    - target: issue-tracker:github-issues
+      relationship: mirror
+    - target: platform-service:krate-external-backends
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-external-backend-sync-policy
+attributes:
+  displayName: Krate ExternalBackendSyncPolicy
+  description: ExternalBackendSyncPolicy defines sync direction, cadence, conflict rules, and write permissions for an
+    external backend integration. It is owned by the external-backends service and participates in provider
+    synchronization. It is owned by the policy service and participates in admission, approval, or governance evidence.
+    Atlas models it as a external-backend CRD with Namespaced scope, v1alpha1 storage version, and source-backed
+    Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: ExternalBackendSyncPolicy
+  plural: externalbackendsyncpolicies
+  singular: externalbackendsyncpolicy
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/external-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: external-backend
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-external-backends
+    - platform-service:krate-policy
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-external-resources
+      locator: external-resources.yaml:ExternalBackendSyncPolicy
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: external-backend
+    - target: platform-service:krate-external-backends
+      family: external-backend
+    - target: platform-service:krate-policy
+      family: external-backend
+  maps_to_external_resource:
+    - target: provider:github
+      relationship: capability-manifest
+    - target: vcs-host:github
+      relationship: mirror
+    - target: issue-tracker:github-issues
+      relationship: mirror
+    - target: platform-service:krate-external-backends
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-external-provider-capability-manifest
+attributes:
+  displayName: Krate ExternalProviderCapabilityManifest
+  description: ExternalProviderCapabilityManifest describes the operations, objects, limits, and auth surfaces supported
+    by a provider integration. It is owned by the external-backends service and participates in provider
+    synchronization. It is owned by the agent-dispatch service and participates in governed agent execution. Atlas
+    models it as a external-backend CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes
+    API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: ExternalProviderCapabilityManifest
+  plural: externalprovidercapabilitymanifests
+  singular: externalprovidercapabilitymanifest
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/external-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: external-backend
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-external-backends
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-external-resources
+      locator: external-resources.yaml:ExternalProviderCapabilityManifest
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: external-backend
+    - target: platform-service:krate-external-backends
+      family: external-backend
+    - target: platform-service:krate-agent-dispatch
+      family: external-backend
+  maps_to_external_resource:
+    - target: provider:github
+      relationship: capability-manifest
+    - target: vcs-host:github
+      relationship: mirror
+    - target: issue-tracker:github-issues
+      relationship: mirror
+    - target: platform-service:krate-external-backends
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-external-webhook-delivery
+attributes:
+  displayName: Krate ExternalWebhookDelivery
+  description: ExternalWebhookDelivery records webhook deliveries received from or sent to external backend providers. It
+    is owned by the external-backends service and participates in provider synchronization. It is owned by the forge
+    service and participates in repository collaboration workflows. Atlas models it as a external-backend CRD with
+    Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy, UI/API,
+    and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: ExternalWebhookDelivery
+  plural: externalwebhookdeliveries
+  singular: externalwebhookdelivery
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/external-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: external-backend
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-external-backends
+    - platform-service:krate-forge
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-external-resources
+      locator: external-resources.yaml:ExternalWebhookDelivery
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: external-backend
+    - target: platform-service:krate-external-backends
+      family: external-backend
+    - target: platform-service:krate-forge
+      family: external-backend
+  maps_to_external_resource:
+    - target: tool:gitea
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-external-sync-event
+attributes:
+  displayName: Krate ExternalSyncEvent
+  description: ExternalSyncEvent captures a discrete synchronization event between Krate resources and external provider
+    objects. It is owned by the external-backends service and participates in provider synchronization. Atlas models it
+    as a external-backend CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: ExternalSyncEvent
+  plural: externalsyncevents
+  singular: externalsyncevent
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/external-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: external-backend
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-external-backends
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-external-resources
+      locator: external-resources.yaml:ExternalSyncEvent
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: external-backend
+    - target: platform-service:krate-external-backends
+      family: external-backend
+  maps_to_external_resource:
+    - target: provider:github
+      relationship: capability-manifest
+    - target: vcs-host:github
+      relationship: mirror
+    - target: issue-tracker:github-issues
+      relationship: mirror
+    - target: platform-service:krate-external-backends
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-external-sync-state
+attributes:
+  displayName: Krate ExternalSyncState
+  description: ExternalSyncState stores durable sync cursor and health state for a provider binding. It is owned by the
+    external-backends service and participates in provider synchronization. Atlas models it as a external-backend CRD
+    with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller, policy,
+    UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: ExternalSyncState
+  plural: externalsyncstates
+  singular: externalsyncstate
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/external-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: external-backend
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-external-backends
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-external-resources
+      locator: external-resources.yaml:ExternalSyncState
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: external-backend
+    - target: platform-service:krate-external-backends
+      family: external-backend
+  maps_to_external_resource:
+    - target: provider:github
+      relationship: capability-manifest
+    - target: vcs-host:github
+      relationship: mirror
+    - target: issue-tracker:github-issues
+      relationship: mirror
+    - target: platform-service:krate-external-backends
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-external-write-intent
+attributes:
+  displayName: Krate ExternalWriteIntent
+  description: ExternalWriteIntent records an intended write to an external provider so policy, rate limits, and conflict
+    checks can gate mutation. It is owned by the external-backends service and participates in provider synchronization.
+    Atlas models it as a external-backend CRD with Namespaced scope, v1alpha1 storage version, and source-backed
+    Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: ExternalWriteIntent
+  plural: externalwriteintents
+  singular: externalwriteintent
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/external-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: external-backend
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-external-backends
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-external-resources
+      locator: external-resources.yaml:ExternalWriteIntent
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: external-backend
+    - target: platform-service:krate-external-backends
+      family: external-backend
+  maps_to_external_resource:
+    - target: provider:github
+      relationship: capability-manifest
+    - target: vcs-host:github
+      relationship: mirror
+    - target: issue-tracker:github-issues
+      relationship: mirror
+    - target: platform-service:krate-external-backends
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-external-sync-conflict
+attributes:
+  displayName: Krate ExternalSyncConflict
+  description: ExternalSyncConflict represents a detected divergence between Krate desired state and an external provider
+    object that needs resolution. It is owned by the external-backends service and participates in provider
+    synchronization. Atlas models it as a external-backend CRD with Namespaced scope, v1alpha1 storage version, and
+    source-backed Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact
+    resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: ExternalSyncConflict
+  plural: externalsyncconflicts
+  singular: externalsyncconflict
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/external-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: external-backend
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-external-backends
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-external-resources
+      locator: external-resources.yaml:ExternalSyncConflict
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: external-backend
+    - target: platform-service:krate-external-backends
+      family: external-backend
+  maps_to_external_resource:
+    - target: provider:github
+      relationship: capability-manifest
+    - target: vcs-host:github
+      relationship: mirror
+    - target: issue-tracker:github-issues
+      relationship: mirror
+    - target: platform-service:krate-external-backends
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-external-object-link
+attributes:
+  displayName: Krate ExternalObjectLink
+  description: ExternalObjectLink links a Krate resource to the corresponding object in an external provider, such as a
+    GitHub issue or repository. It is owned by the external-backends service and participates in provider
+    synchronization. Atlas models it as a external-backend CRD with Namespaced scope, v1alpha1 storage version, and
+    source-backed Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact
+    resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: ExternalObjectLink
+  plural: externalobjectlinks
+  singular: externalobjectlink
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/external-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: external-backend
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-external-backends
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-external-resources
+      locator: external-resources.yaml:ExternalObjectLink
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: external-backend
+    - target: platform-service:krate-external-backends
+      family: external-backend
+  maps_to_external_resource:
+    - target: provider:github
+      relationship: capability-manifest
+    - target: vcs-host:github
+      relationship: mirror
+    - target: issue-tracker:github-issues
+      relationship: mirror
+    - target: platform-service:krate-external-backends
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-policy-profile
+attributes:
+  displayName: Krate PolicyProfile
+  description: PolicyProfile groups policy templates and bindings into an organization-level governance profile for Krate
+    resources and agents. It is owned by the policy service and participates in admission, approval, or governance
+    evidence. Atlas models it as a policy CRD with Namespaced scope, v1alpha1 storage version, and source-backed
+    Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: PolicyProfile
+  plural: policyprofiles
+  singular: policyprofile
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/policy-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: policy
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-policy
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-policy-resources
+      locator: policy-resources.yaml:PolicyProfile
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: policy
+    - target: platform-service:krate-policy
+      family: policy
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-policy-template
+attributes:
+  displayName: Krate PolicyTemplate
+  description: PolicyTemplate defines reusable policy logic that can be bound to resource families, repositories, or agent
+    operations. It is owned by the policy service and participates in admission, approval, or governance evidence. Atlas
+    models it as a policy CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: PolicyTemplate
+  plural: policytemplates
+  singular: policytemplate
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/policy-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: policy
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-policy
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-policy-resources
+      locator: policy-resources.yaml:PolicyTemplate
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: policy
+    - target: platform-service:krate-policy
+      family: policy
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-policy-binding
+attributes:
+  displayName: Krate PolicyBinding
+  description: PolicyBinding attaches a policy template or profile to a concrete scope, enabling admission or workflow
+    enforcement. It is owned by the policy service and participates in admission, approval, or governance evidence.
+    Atlas models it as a policy CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API
+    metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: PolicyBinding
+  plural: policybindings
+  singular: policybinding
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/policy-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: policy
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-policy
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-policy-resources
+      locator: policy-resources.yaml:PolicyBinding
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: policy
+    - target: platform-service:krate-policy
+      family: policy
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-policy-exception-request
+attributes:
+  displayName: Krate PolicyExceptionRequest
+  description: PolicyExceptionRequest records a requested exception to policy enforcement so Krate can preserve
+    auditability and bounded approval. It is owned by the policy service and participates in admission, approval, or
+    governance evidence. Atlas models it as a policy CRD with Namespaced scope, v1alpha1 storage version, and
+    source-backed Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact
+    resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: PolicyExceptionRequest
+  plural: policyexceptionrequests
+  singular: policyexceptionrequest
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/policy-resources.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: policy
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-policy
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-policy-resources
+      locator: policy-resources.yaml:PolicyExceptionRequest
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: policy
+    - target: platform-service:krate-policy
+      family: policy
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-repository
+attributes:
+  displayName: Krate Repository
+  description: Repository declares a Krate-hosted repository and its forge identity, backing storage, and organization
+    ownership. It is owned by the forge service and participates in repository collaboration workflows. Atlas models it
+    as a repository-identity CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API
+    metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: Repository
+  plural: repositories
+  singular: repository
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/repositories.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: repository-identity
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-forge
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-repositories
+      locator: repositories.yaml:Repository
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: repository-identity
+    - target: platform-service:krate-forge
+      family: repository-identity
+  maps_to_external_resource:
+    - target: tool:gitea
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-branch-protection
+attributes:
+  displayName: Krate BranchProtection
+  description: BranchProtection defines branch protection requirements such as reviews, status checks, and merge
+    restrictions. It is owned by the forge service and participates in repository collaboration workflows. Atlas models
+    it as a repository-identity CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API
+    metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: BranchProtection
+  plural: branchprotections
+  singular: branchprotection
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/repositories.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: repository-identity
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-forge
+  hasStatus: false
+  hasConditions: false
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-repositories
+      locator: repositories.yaml:BranchProtection
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: repository-identity
+    - target: platform-service:krate-forge
+      family: repository-identity
+  maps_to_external_resource:
+    - target: tool:gitea
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-organization
+attributes:
+  displayName: Krate Organization
+  description: Organization models a tenant organization that owns repositories, users, teams, policies, and namespace
+    bindings. It is owned by the identity and tenancy service and participates in organization-scoped access control.
+    Atlas models it as a repository-identity CRD with Namespaced scope, v1alpha1 storage version, and source-backed
+    Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: Organization
+  plural: organizations
+  singular: organization
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/repositories.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: repository-identity
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-identity
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-repositories
+      locator: repositories.yaml:Organization
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: repository-identity
+    - target: platform-service:krate-identity
+      family: repository-identity
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-org-namespace-binding
+attributes:
+  displayName: Krate OrgNamespaceBinding
+  description: OrgNamespaceBinding binds a Krate organization to Kubernetes namespaces where its resources are hosted or
+    reconciled. It is owned by the identity and tenancy service and participates in organization-scoped access control.
+    Atlas models it as a repository-identity CRD with Namespaced scope, v1alpha1 storage version, and source-backed
+    Kubernetes API metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: OrgNamespaceBinding
+  plural: orgnamespacebindings
+  singular: orgnamespacebinding
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/repositories.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: repository-identity
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-identity
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-repositories
+      locator: repositories.yaml:OrgNamespaceBinding
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: repository-identity
+    - target: platform-service:krate-identity
+      family: repository-identity
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-sshkey
+attributes:
+  displayName: Krate SSHKey
+  description: SSHKey stores SSH public-key metadata used for Git access and repository authentication. It is owned by the
+    identity and tenancy service and participates in organization-scoped access control. Atlas models it as a
+    repository-identity CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: SSHKey
+  plural: sshkeys
+  singular: sshkey
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/repositories.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: repository-identity
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-identity
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-repositories
+      locator: repositories.yaml:SSHKey
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: repository-identity
+    - target: platform-service:krate-identity
+      family: repository-identity
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-repository-permission
+attributes:
+  displayName: Krate RepositoryPermission
+  description: RepositoryPermission grants a user, team, or service identity access to a repository with a specific
+    permission level. It is owned by the identity and tenancy service and participates in organization-scoped access
+    control. It is owned by the forge service and participates in repository collaboration workflows. Atlas models it as
+    a repository-identity CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: RepositoryPermission
+  plural: repositorypermissions
+  singular: repositorypermission
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/repositories.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: repository-identity
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-identity
+    - platform-service:krate-forge
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-repositories
+      locator: repositories.yaml:RepositoryPermission
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: repository-identity
+    - target: platform-service:krate-identity
+      family: repository-identity
+    - target: platform-service:krate-forge
+      family: repository-identity
+  maps_to_external_resource:
+    - target: tool:gitea
+      relationship: desired-state
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-user
+attributes:
+  displayName: Krate User
+  description: User represents a human or service user participating in Krate organizations and repository workflows. It
+    is owned by the identity and tenancy service and participates in organization-scoped access control. Atlas models it
+    as a repository-identity CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API
+    metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: User
+  plural: users
+  singular: user
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/repositories.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: repository-identity
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-identity
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-repositories
+      locator: repositories.yaml:User
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: repository-identity
+    - target: platform-service:krate-identity
+      family: repository-identity
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-team
+attributes:
+  displayName: Krate Team
+  description: Team groups users for repository permissions, review ownership, and organization policy targeting. It is
+    owned by the identity and tenancy service and participates in organization-scoped access control. Atlas models it as
+    a repository-identity CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: Team
+  plural: teams
+  singular: team
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/repositories.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: repository-identity
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-identity
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-repositories
+      locator: repositories.yaml:Team
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: repository-identity
+    - target: platform-service:krate-identity
+      family: repository-identity
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-invite
+attributes:
+  displayName: Krate Invite
+  description: Invite tracks invitations for users to join organizations or teams with auditable acceptance state. It is
+    owned by the identity and tenancy service and participates in organization-scoped access control. Atlas models it as
+    a repository-identity CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata
+    so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: Invite
+  plural: invites
+  singular: invite
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/repositories.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: repository-identity
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-identity
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-repositories
+      locator: repositories.yaml:Invite
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: repository-identity
+    - target: platform-service:krate-identity
+      family: repository-identity
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-identity-mapping
+attributes:
+  displayName: Krate IdentityMapping
+  description: IdentityMapping maps external identities from auth providers to Krate users, teams, or service accounts. It
+    is owned by the identity and tenancy service and participates in organization-scoped access control. Atlas models it
+    as a repository-identity CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API
+    metadata so controller, policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: IdentityMapping
+  plural: identitymappings
+  singular: identitymapping
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/repositories.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: repository-identity
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-identity
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-repositories
+      locator: repositories.yaml:IdentityMapping
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: repository-identity
+    - target: platform-service:krate-identity
+      family: repository-identity
+---
+nodeKind: KubernetesCrdKind
+id: kubernetes-crd-kind:krate-auth-provider
+attributes:
+  displayName: Krate AuthProvider
+  description: AuthProvider configures an authentication provider used to federate users into Krate identity and tenancy.
+    It is owned by the identity and tenancy service and participates in organization-scoped access control. It is owned
+    by the agent-dispatch service and participates in governed agent execution. Atlas models it as a repository-identity
+    CRD with Namespaced scope, v1alpha1 storage version, and source-backed Kubernetes API metadata so controller,
+    policy, UI/API, and provider edges can target the exact resource kind.
+  apiGroup: krate.a5c.ai
+  version: v1alpha1
+  servedVersions:
+    - v1alpha1
+  storageVersion: v1alpha1
+  kind: AuthProvider
+  plural: authproviders
+  singular: authprovider
+  scope: Namespaced
+  sourceFile: packages/krate/charts/crds/repositories.yaml
+  schemaPath: spec.versions[name=v1alpha1].schema.openAPIV3Schema
+  family: repository-identity
+  owningPlatformId: platform:krate
+  platformServiceIds:
+    - platform-service:krate-identity
+    - platform-service:krate-agent-dispatch
+  hasStatus: true
+  hasConditions: false
+  statusFieldPath: status
+edges:
+  defined_by_crd_source:
+    - target: evidence:krate-crd-source-repositories
+      locator: repositories.yaml:AuthProvider
+  belongs_to_resource_family:
+    - target: topic:krate-crd-inventory
+      family: repository-identity
+    - target: platform-service:krate-identity
+      family: repository-identity
+    - target: platform-service:krate-agent-dispatch
+      family: repository-identity

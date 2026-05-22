@@ -1,0 +1,73 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:pi.runtime@current
+attributes:
+  displayName: Pi Runtime (current)
+  agentVersionId: agentVersion:pi:ge-0-0-0
+  subagentDispatchMechanism: none
+  packageRef: source-ref:pi-github
+  builtInTools:
+  - tool-descriptor:read
+  - tool-descriptor:write
+  - tool-descriptor:edit
+  - tool-descriptor:bash
+  toolRegistryDiscovery: static-bundled
+  hookSockets: []
+  internalSessionStateLocation: ~/.pi/agent/sessions/
+  sessionFileFormat: jsonl-tree
+  sessionFilePathConvention: ~/.pi/agent/sessions/<session-id>.jsonl
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: none
+  runtimeIdentity: api-key
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  supportsStreaming: true
+  harnessFeatures:
+    skillInvocation: |
+      Skills are invoked via formatSkillInvocation in the harness layer.
+      The harness formats skill calls into the agent loop and dispatches
+      them as structured tool-use interactions.
+    promptTemplates: |
+      Pi's harness includes a prompt-template system for composing system
+      prompts, tool descriptions, and context injection. Templates are
+      parameterized and resolved at session start.
+    compaction: |
+      The AgentHarness implements branch-summarization compaction. When
+      context window usage exceeds a configurable threshold, older
+      conversation branches are summarized and replaced with condensed
+      representations. Settings include threshold percentage and
+      summarization strategy.
+    sessionManagement: |
+      Session state is managed by the harness with JSONL-tree persistence.
+      Sessions support resume, fork, and branch operations. The harness
+      tracks conversation structure as a tree of turns.
+    executionEnvironment: |
+      The harness provides an execution-env abstraction layer that
+      normalizes OS, shell, and filesystem access across platforms.
+      Tool implementations (bash, read, write, edit) are dispatched
+      through this abstraction.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:pi
+    role: runtime
+  bundles:
+  - target: tool-descriptor:read
+  - target: tool-descriptor:write
+  - target: tool-descriptor:edit
+  - target: tool-descriptor:bash
+  connects:
+  - target: mcp-transport:stdio
+  supports:
+  - target: capability:supports-mcp
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'MCP via stdio.
+
+      '
+  compaction_policy_applied_by:
+  - target: compaction-policy:pi-coding-agent
+  output_guard_applied_by:
+  - target: output-guard:pi-coding-agent
+  speaks:
+    - target: mcp-transport:stdio

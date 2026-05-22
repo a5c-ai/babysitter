@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:openclaw-hooks-mux
+attributes:
+  signalId: discovery-signal:openclaw-hooks-mux
+  signalKind: env-any
+  key: openclaw
+  matchMode: all
+  confidence: medium
+  scope: hooks-mux
+  signals:
+    - OPENCLAW_SHELL
+    - OPENCLAW_HOME
+  absentSignals: []
+  argvMatches: []
+  metadataFields: []
+  consumer: hooks-mux-core
+  notes: 'Ordered adapter auto-detection rule used by hooks-mux. Verbatim from legacy discovery:openclaw:hooks-mux:10.'
+edges:
+  applies_to:
+    - target: agent:openclaw

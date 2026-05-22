@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:server-sent-events.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:server-sent-events
+  text: |
+    Server-Sent Events (SSE): a unidirectional HTTP streaming protocol from server to client over a long-lived connection. Used by some MCPTransport variants.
+  status: canonical
+edges:
+  defines:
+    - term:server-sent-events

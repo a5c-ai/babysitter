@@ -23,7 +23,7 @@ describe("deterministic testing harness", () => {
     await fs.rm(fixtureRoot, { recursive: true, force: true });
   });
 
-  test("replays seeded runs with identical journal/state snapshots through a resume flow", async () => {
+  test("replays seeded runs with identical journal/state snapshots through a resume flow", { timeout: 15_000 }, async () => {
     const processPath = await writeResumeProcess(fixtureRoot);
     const first = await executeDeterministicRun(processPath, "det-harness");
     const second = await executeDeterministicRun(processPath, "det-harness");

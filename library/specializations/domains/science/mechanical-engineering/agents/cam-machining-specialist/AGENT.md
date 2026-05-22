@@ -18,6 +18,10 @@ metadata:
   phase: 3
   experience: 12+ years CNC programming
   background: Precision machining, mold/die, aerospace components
+graph:
+  domains: [domain:mechanical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # CAM and Machining Specialist Agent

@@ -8,6 +8,11 @@ expertise:
   - Prime number algorithms
   - Combinatorics calculations
   - Mathematical proof construction
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:dynamic-programming]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # Number Theory Specialist Agent

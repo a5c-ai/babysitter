@@ -1,0 +1,14 @@
+nodeKind: Library
+id: library:polars
+attributes:
+  displayName: "Polars"
+  belongsToLanguageId: language:python
+  category: data-structures
+  description: |
+    Fast multi-threaded DataFrame library implemented in Rust with Python and other bindings.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-analysis

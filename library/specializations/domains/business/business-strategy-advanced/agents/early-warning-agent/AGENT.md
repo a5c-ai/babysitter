@@ -11,6 +11,12 @@ expertise:
   - Environmental Scanning
   - Alert Triage and Prioritization
   - Proactive Risk Communication
+graph:
+  domains: [domain:strategy]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:competitive-intelligence, skill-area:risk-assessment, skill-area:strategic-analysis]
+  workflows: [workflow:strategic-planning]
+  roles: [role:strategic-planner, role:competitive-intelligence-analyst]
 ---
 
 # Early Warning Agent

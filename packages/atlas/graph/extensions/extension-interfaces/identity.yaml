@@ -1,0 +1,14 @@
+nodeKind: ExtensionInterface
+id: extension-interface:identity
+attributes:
+  interfaceVersion: "1.0.0"
+  description: Identity
+  displayName: "Identity"
+  concern: "Who the agent is acting as — principal, scopes, and delegation chain."
+  surface: |
+    `principal()`, `scopes()`, `assume(role)`. Sourced from OIDC, SAML,
+    or a local profile.
+  builtInDefault: |
+    Single anonymous principal; no scopes; no delegation.
+  notableImpls: []
+edges: {}

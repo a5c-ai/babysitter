@@ -8,6 +8,13 @@
  * // Input: { target: { type: "argument", content: "..." }, targetType: "argument", context: {...} }
  * // Output: { vulnerabilities: [...], attackVectors: [...], robustnessAssessment: { score: 0.65, weaknesses: [...] } }
  * @references Red teaming methodology, Adversarial analysis, Devil's advocate technique, Pre-mortem analysis
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -53,34 +60,20 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Attack Simulation
-  let attackSimulation = await ctx.task(simulateAttacksTask, {
+  const attackSimulation = await ctx.task(simulateAttacksTask, {
     attackVectors: attackVectors.vectors,
     target: targetAnalysis.analyzedTarget,
     simulationParameters: inputs.context?.simulationParams
   });
 
   // Quality Gate: Critical Vulnerabilities
-      let lastFeedback = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback) {
-        attackSimulation = await ctx.task(simulateAttacksTask, { ...{
-    attackVectors: attackVectors.vectors,
-    target: targetAnalysis.analyzedTarget,
-    simulationParameters: inputs.context?.simulationParams
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint('critical-vulnerabilities-found', {
+  if (attackSimulation.criticalVulnerabilities.length > 0) {
+    await ctx.breakpoint('critical-vulnerabilities-found', {
       message: 'Critical vulnerabilities discovered',
       criticalVulnerabilities: attackSimulation.criticalVulnerabilities,
-      immediateRecommendations: attackSimulation.immediateActions,
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    }  }
+      immediateRecommendations: attackSimulation.immediateActions
+    });
+  }
 
   // Phase 7: Defense Evasion Analysis
   const evasionAnalysis = await ctx.task(analyzeDefenseEvasionTask, {

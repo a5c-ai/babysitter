@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentMuxGatewayProtocolV1",
+  "type": "object",
+  "oneOf": [
+    { "type": "object", "properties": { "type": { "const": "auth" }, "token": { "type": "string" } }, "required": ["type", "token"] },
+    { "type": "object", "properties": { "type": { "const": "hello" }, "protocolVersions": { "type": "array", "items": { "const": "1" } }, "serverVersion": { "type": "string" }, "serverTime": { "type": "string" } }, "required": ["type", "protocolVersions", "serverVersion", "serverTime"] },
+    { "type": "object", "properties": { "type": { "const": "error" }, "code": { "type": "string" }, "message": { "type": "string" } }, "required": ["type", "code", "message"] },
+    { "type": "object", "properties": { "type": { "const": "subscribe" }, "runId": { "type": "string" }, "sinceSeq": { "type": "integer" } }, "required": ["type", "runId"] },
+    { "type": "object", "properties": { "type": { "const": "unsubscribe" }, "runId": { "type": "string" } }, "required": ["type", "runId"] },
+    { "type": "object", "properties": { "type": { "const": "session.subscribe" }, "sessionId": { "type": "string" } }, "required": ["type", "sessionId"] },
+    { "type": "object", "properties": { "type": { "const": "session.unsubscribe" }, "sessionId": { "type": "string" } }, "required": ["type", "sessionId"] },
+    { "type": "object", "properties": { "type": { "const": "session.start" }, "agent": { "type": "string" }, "prompt": { "type": "string" }, "model": { "type": "string" }, "attachments": { "type": "array", "items": { "type": "object" } }, "approvalMode": { "enum": ["yolo", "prompt", "deny"] }, "sessionId": { "type": "string" }, "runId": { "type": "string" }, "cwd": { "type": "string" }, "workspaceId": { "type": "string" }, "forkSessionId": { "type": "string" } }, "required": ["type", "agent", "prompt"] },
+    { "type": "object", "properties": { "type": { "const": "session.message" }, "sessionId": { "type": "string" }, "prompt": { "type": "string" }, "agent": { "type": "string" }, "model": { "type": "string" }, "attachments": { "type": "array", "items": { "type": "object" } }, "approvalMode": { "enum": ["yolo", "prompt", "deny"] } }, "required": ["type", "sessionId", "prompt"] },
+    { "type": "object", "properties": { "type": { "const": "ping" } }, "required": ["type"] },
+    { "type": "object", "properties": { "type": { "const": "pong" } }, "required": ["type"] },
+    { "type": "object", "properties": { "type": { "const": "run.event" }, "runId": { "type": "string" }, "seq": { "type": "integer" }, "source": { "type": "string" }, "event": { "type": "object" } }, "required": ["type", "runId", "seq", "source", "event"] },
+    { "type": "object", "properties": { "type": { "const": "hook.request" }, "hookRequestId": { "type": "string" }, "runId": { "type": "string" }, "hookKind": { "type": "string" }, "payload": { "type": "object" }, "deadlineTs": { "type": "integer" } }, "required": ["type", "hookRequestId", "runId", "hookKind", "payload", "deadlineTs"] },
+    { "type": "object", "properties": { "type": { "const": "hook.decision" }, "hookRequestId": { "type": "string" }, "decision": { "enum": ["allow", "deny"] }, "reason": { "type": "string" } }, "required": ["type", "hookRequestId", "decision"] },
+    { "type": "object", "properties": { "type": { "const": "hook.resolved" }, "hookRequestId": { "type": "string" }, "resolvedBy": { "type": "string" }, "decision": { "enum": ["allow", "deny"] } }, "required": ["type", "hookRequestId", "resolvedBy", "decision"] }
+  ]
+}

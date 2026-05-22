@@ -6,6 +6,12 @@
  * @recommendedSkills SK-FTV-010 (sound-design-direction)
  * @recommendedAgents AG-FTV-006 (production-coordinator-agent)
  * @crossSpecialization music-album-creation (for original score)
+ *
+ * @graph
+ *   domains: [domain:arts-culture]
+ *   skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:data-analysis]
+ *   roles: [role:creative-director, role:design-lead]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

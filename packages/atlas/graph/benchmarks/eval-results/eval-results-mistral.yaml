@@ -1,0 +1,60 @@
+---
+nodeKind: EvalResult
+id: eval-result:mmlu.mistral-large-2.001
+attributes:
+  evalRunId: eval-run:mmlu.mistral-large-2.2024-07
+  metricName: accuracy
+  score: 0.840
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-07-24T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mmlu.mistral-large-2.2024-07
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:human-eval.mistral-large-2.001
+attributes:
+  evalRunId: eval-run:human-eval.mistral-large-2.2024-07
+  metricName: pass@1
+  score: 0.920
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-07-24T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:human-eval.mistral-large-2.2024-07
+  scored_against:
+    - target: benchmark:human-eval
+---
+nodeKind: EvalResult
+id: eval-result:human-eval.codestral-25-01.001
+attributes:
+  evalRunId: eval-run:human-eval.codestral-25-01.2025-01
+  metricName: pass@1
+  score: 0.866
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-01-13T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:human-eval.codestral-25-01.2025-01
+  scored_against:
+    - target: benchmark:human-eval
+---
+nodeKind: EvalResult
+id: eval-result:multipl-e.codestral-25-01.001
+attributes:
+  evalRunId: eval-run:multipl-e.codestral-25-01.2025-01
+  metricName: pass@1
+  score: 0.711
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-01-13T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:multipl-e.codestral-25-01.2025-01
+  scored_against:
+    - target: benchmark:multipl-e

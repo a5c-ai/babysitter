@@ -1,0 +1,110 @@
+nodeKind: ToolServer
+id: tool-server:mcp-homebrew
+attributes:
+  displayName: Homebrew MCP Server
+  description: |
+    MCP server exposing Homebrew package management commands as individual tools
+    for installing, uninstalling, searching, upgrading, and maintaining macOS
+    development environments through direct brew command execution.
+    Fully MCP spec-compliant (stdio, JSON-RPC 2.0) and designed for Claude Desktop
+    and other LLM clients.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/jeannier/homebrew-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:homebrew
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-winget
+attributes:
+  displayName: WinGet MCP Server
+  description: |
+    Official built-in MCP server for the Windows Package Manager (WinGet), enabling
+    AI agents and development tools to search for available packages, understand
+    package details, and assist with installation and upgrade workflows.
+    Integrated into the winget CLI and documented on Microsoft Learn.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/microsoft/winget-cli
+  maintainer: Microsoft
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:winget
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-nixos
+attributes:
+  displayName: MCP-NixOS Server
+  description: |
+    MCP server providing accurate, real-time information about NixOS packages,
+    options, Home Manager settings, nix-darwin configuration, and Nixvim options
+    by querying official NixOS web APIs.
+    Works on any OS (Windows, macOS, Linux) without requiring a local Nix installation;
+    runnable via uvx with no prior install needed.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/utensils/mcp-nixos
+  maintainer: Utensils
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:nix
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-bruno
+attributes:
+  displayName: Bruno MCP Server
+  description: |
+    MCP server that enables AI agents to run Bruno API collections programmatically
+    and receive detailed test results including success/failure status, test summaries,
+    failure details, and execution timings.
+    Published on npm as the `bruno-mcp` package and installable via Smithery.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/hungthai1401/bruno-mcp
+  npmPackage: bruno-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:bruno
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:api-development
+---
+nodeKind: ToolServer
+id: tool-server:mcp-swagger
+attributes:
+  displayName: Swagger MCP Server
+  description: |
+    MCP server that scrapes a Swagger UI or OpenAPI JSON specification and dynamically
+    generates strongly-typed MCP tools at runtime — one tool per API endpoint.
+    Supports automatic endpoint discovery, parameter validation, and authentication
+    (basic, API key, bearer token) via configurable flags.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/danishjsheikh/swagger-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:sse
+edges:
+  integrates_with:
+  - target: tool:swagger-editor
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:api-development

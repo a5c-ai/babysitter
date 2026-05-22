@@ -1,0 +1,22 @@
+nodeKind: SessionSemantics
+id: session-semantics:omp
+attributes:
+  sessionSemanticsId: session-semantics:omp
+  agentId: agent:omp
+  versionRange: ">=0.0.0"
+  sessionDirStrategy: ".a5c/runs"
+  sessionIdSources:
+    - OMP_SESSION_ID
+    - OMP_RUN_ID
+  resumeSemantics: Oh-My-Pi reuses Pi-style run/session identifiers.
+  stateFilePatterns:
+    - ".a5c/runs/**"
+  pidMarkerPolicy: env-or-run-dir
+  metadataFields:
+    - { key: session_id, envVars: [OMP_SESSION_ID] }
+    - { key: run_id,     envVars: [OMP_RUN_ID] }
+edges:
+  applies_to_version:
+    - target: agentVersion:omp:ge-0-0-0
+  references_path:
+    - target: path:a5c-runs-dir

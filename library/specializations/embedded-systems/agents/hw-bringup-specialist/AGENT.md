@@ -11,6 +11,11 @@ expertise:
   - First-light firmware development
   - PCB debugging techniques
   - Schematic review and validation
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+  roles: [role:embedded-engineer]
 ---
 
 # Hardware Bring-Up Specialist Agent

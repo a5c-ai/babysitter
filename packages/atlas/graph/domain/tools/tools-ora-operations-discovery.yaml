@@ -1,0 +1,540 @@
+---
+nodeKind: Tool
+id: tool:fireflies-ai
+attributes:
+  displayName: "Fireflies.ai"
+  homepageUrl: "https://fireflies.ai"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    AI meeting transcription and notes platform surfaced by Ora for team communication, education, and operational-review workflows.
+  ora:
+    domain: fireflies.ai
+    score: 69
+    grade: C
+    category: "Productivity"
+    tags: ["meeting notes", "transcription", "ai notetaker", "meeting recording", "conversation intelligence"]
+    scoreUrl: https://ora.run/score/fireflies.ai
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:project-manager
+      confidence: medium
+      evidence: "Meeting transcripts and summaries support project follow-up and stakeholder communication."
+    - target: workflow:retrospective
+      confidence: medium
+      evidence: "Recorded discussions and action items can feed team retrospectives and post-meeting analysis."
+    - target: workflow:curriculum-update-cycle
+      confidence: medium
+      evidence: "Lecture and seminar transcripts can surface course-content updates and student questions."
+---
+nodeKind: Tool
+id: tool:otter-ai
+attributes:
+  displayName: "Otter.ai"
+  homepageUrl: "https://otter.ai"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    AI speech-to-text and meeting-summary platform surfaced by Ora for meeting notes, training, and support handoff workflows.
+  ora:
+    domain: otter.ai
+    score: 68
+    grade: C
+    category: "Productivity"
+    tags: ["meeting notes", "transcription", "ai notetaker", "meeting summary", "speech to text"]
+    scoreUrl: https://ora.run/score/otter.ai
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:documentation-engineer
+      confidence: medium
+      evidence: "Meeting summaries and transcripts support converting discussions into durable documentation."
+    - target: workflow:knowledge-base-maintenance
+      confidence: medium
+      evidence: "Recorded support and training discussions can become knowledge-base inputs."
+    - target: workflow:clinical-trial-data-management
+      confidence: low
+      evidence: "Transcripts can support research-team meeting notes without acting as an EHR system."
+---
+nodeKind: Tool
+id: tool:nylas
+attributes:
+  displayName: "Nylas"
+  homepageUrl: "https://www.nylas.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Email, calendar, and contacts API platform surfaced by Ora for scheduling, support, and communication automation workflows.
+  ora:
+    domain: nylas.com
+    score: 72
+    grade: B
+    category: "Communication & Support"
+    tags: ["email api", "calendar api", "contacts api", "email integration", "scheduling"]
+    scoreUrl: https://ora.run/score/nylas.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "Calendar and email APIs support integration platforms and workflow automation surfaces."
+    - target: workflow:email-support-workflow
+      confidence: high
+      evidence: "Email APIs are direct projection points for shared-inbox, ticket, and support workflows."
+    - target: workflow:access-review
+      confidence: low
+      evidence: "Calendar and directory context can support scheduling evidence reviews and access-review meetings."
+---
+nodeKind: Tool
+id: tool:loops
+attributes:
+  displayName: "Loops"
+  homepageUrl: "https://loops.so"
+  kind: workflow-automation
+  languageApplicability: neutral
+  description: |
+    Email automation platform surfaced by Ora for transactional messaging, lifecycle campaigns, and product-led growth workflows.
+  ora:
+    domain: loops.so
+    score: 71
+    grade: B
+    category: "Communication & Support"
+    tags: ["email marketing", "transactional email", "email automation", "newsletters"]
+    scoreUrl: https://ora.run/score/loops.so
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:marketing-manager
+      confidence: high
+      evidence: "Lifecycle and transactional email automation supports marketing campaign operations."
+    - target: workflow:customer-marketing-campaign
+      confidence: high
+      evidence: "Audience-triggered email sequences are direct customer-marketing projection points."
+    - target: workflow:demand-generation-campaign
+      confidence: medium
+      evidence: "Newsletter and automation metrics support demand-generation campaign review."
+---
+nodeKind: Tool
+id: tool:bigcommerce
+attributes:
+  displayName: "BigCommerce"
+  homepageUrl: "https://www.bigcommerce.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Commerce platform surfaced by Ora for storefront, catalog, inventory, orders, and customer-support workflows.
+  ora:
+    domain: bigcommerce.com
+    score: 72
+    grade: B
+    category: "E-commerce"
+    tags: ["ecommerce", "online store", "storefront", "headless commerce"]
+    scoreUrl: https://ora.run/score/bigcommerce.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:product-manager
+      confidence: medium
+      evidence: "Storefront, catalog, and order data support ecommerce product workflow analysis."
+    - target: role:customer-experience-manager
+      confidence: medium
+      evidence: "Order and storefront context supports customer journey and support escalation review."
+    - target: workflow:end-to-end-customer-journey-audit
+      confidence: high
+      evidence: "Commerce events and order state are core customer-journey projection points."
+---
+nodeKind: Tool
+id: tool:medusa
+attributes:
+  displayName: "Medusa"
+  homepageUrl: "https://medusajs.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Open-source headless commerce platform surfaced by Ora for storefront API, order, product, and inventory workflows.
+  ora:
+    domain: medusajs.com
+    score: 68
+    grade: C
+    category: "E-commerce"
+    tags: ["ecommerce", "headless commerce", "open source ecommerce", "storefront api"]
+    scoreUrl: https://ora.run/score/medusajs.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "Headless commerce APIs support integration and platform customization work."
+    - target: workflow:end-to-end-customer-journey-audit
+      confidence: medium
+      evidence: "Order and product-state APIs support customer journey reconstruction."
+    - target: workflow:technical-support-escalation
+      confidence: medium
+      evidence: "Order and storefront context helps support engineers diagnose commerce escalations."
+---
+nodeKind: Tool
+id: tool:saleor
+attributes:
+  displayName: "Saleor"
+  homepageUrl: "https://saleor.io"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    GraphQL-first headless commerce platform surfaced by Ora for storefront, catalog, checkout, and order workflows.
+  ora:
+    domain: saleor.io
+    score: 68
+    grade: C
+    category: "E-commerce"
+    tags: ["ecommerce", "headless commerce", "graphql", "open source ecommerce"]
+    scoreUrl: https://ora.run/score/saleor.io
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "GraphQL commerce APIs support platform extension and integration workflows."
+    - target: workflow:customer-journey-optimization
+      confidence: medium
+      evidence: "Checkout and catalog data supports customer journey optimization."
+    - target: workflow:schema-migration
+      confidence: low
+      evidence: "Commerce schema changes require coordinated migration and API compatibility review."
+---
+nodeKind: Tool
+id: tool:onelogin
+attributes:
+  displayName: "OneLogin"
+  homepageUrl: "https://www.onelogin.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Identity and access management platform surfaced by Ora for SSO, directory, access, and compliance workflows.
+  ora:
+    domain: onelogin.com
+    score: 0
+    grade: F
+    category: "Identity & Auth"
+    tags: ["sso", "identity", "access management", "directory"]
+    scoreUrl: https://ora.run/score/onelogin.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:head-of-security
+      confidence: medium
+      evidence: "Identity provider state supports security governance and access-control review."
+    - target: role:security-reviewer
+      confidence: medium
+      evidence: "SSO and directory metadata supports application access review."
+    - target: workflow:access-control-audit
+      confidence: high
+      evidence: "Identity and SSO configuration are direct access-control audit projection points."
+---
+nodeKind: Tool
+id: tool:jumpcloud
+attributes:
+  displayName: "JumpCloud"
+  homepageUrl: "https://jumpcloud.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Directory, identity, and device-management platform surfaced by Ora for access governance and compliance workflows.
+  ora:
+    domain: jumpcloud.com
+    score: 0
+    grade: F
+    category: "Identity & Auth"
+    tags: ["directory", "identity", "device management", "sso", "ldap"]
+    scoreUrl: https://ora.run/score/jumpcloud.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:head-of-security
+      confidence: medium
+      evidence: "Directory and device inventory support security posture and access governance."
+    - target: workflow:access-review
+      confidence: high
+      evidence: "Directory memberships and device context are core access-review projection points."
+    - target: workflow:soc2-audit-preparation
+      confidence: medium
+      evidence: "Identity and device controls provide SOC 2 control evidence."
+---
+nodeKind: Tool
+id: tool:fireworks-ai
+attributes:
+  displayName: "Fireworks AI"
+  homepageUrl: "https://fireworks.ai"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    LLM inference and model-serving API surfaced by Ora for LLMOps, prompt evaluation, and model monitoring workflows.
+  ora:
+    domain: fireworks.ai
+    score: 75
+    grade: B
+    category: "AI & ML"
+    tags: ["llm", "inference", "ai api", "fast inference", "model serving"]
+    scoreUrl: https://ora.run/score/fireworks.ai
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:ml-engineer
+      confidence: high
+      evidence: "Hosted inference supports model-serving and evaluation workflows."
+    - target: workflow:agent-evaluation-cycle
+      confidence: medium
+      evidence: "Model API outputs can be compared across prompts, eval suites, and agent runs."
+    - target: workflow:llm-cost-optimization
+      confidence: medium
+      evidence: "Inference provider choice affects cost, latency, and throughput trade-offs."
+---
+nodeKind: Tool
+id: tool:anthropic
+attributes:
+  displayName: "Anthropic"
+  homepageUrl: "https://www.anthropic.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    LLM provider surfaced by Ora for prompt engineering, agent evaluation, safety, and model governance workflows.
+  ora:
+    domain: anthropic.com
+    score: 72
+    grade: B
+    category: "AI & ML"
+    tags: ["llm", "claude", "chat", "ai api", "language model", "completions", "safety"]
+    scoreUrl: https://ora.run/score/anthropic.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:ml-engineer
+      confidence: high
+      evidence: "Model APIs support prompt evaluation and agent behavior testing."
+    - target: workflow:prompt-engineering-iteration
+      confidence: high
+      evidence: "Claude prompt and tool-use behavior is directly relevant to prompt iteration."
+    - target: workflow:ai-safety-guardrail-maintenance
+      confidence: medium
+      evidence: "Safety-focused model behavior supports guardrail review and governance."
+---
+nodeKind: Tool
+id: tool:mistral
+attributes:
+  displayName: "Mistral AI"
+  homepageUrl: "https://mistral.ai"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    LLM provider surfaced by Ora for inference, prompt evaluation, and open-model workflow selection.
+  ora:
+    domain: mistral.ai
+    score: 69
+    grade: C
+    category: "AI & ML"
+    tags: ["llm", "language model", "open source ai", "ai api", "completions"]
+    scoreUrl: https://ora.run/score/mistral.ai
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:ml-engineer
+      confidence: medium
+      evidence: "Model APIs support LLM evaluation and deployment trade-off analysis."
+    - target: workflow:agent-evaluation-cycle
+      confidence: medium
+      evidence: "Model outputs can be benchmarked during agent evaluation cycles."
+    - target: workflow:ai-model-license-compliance
+      confidence: medium
+      evidence: "Open-model selection requires license and governance review."
+---
+nodeKind: Tool
+id: tool:openai
+attributes:
+  displayName: "OpenAI"
+  homepageUrl: "https://openai.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    AI platform surfaced by Ora for LLM, embeddings, image, prompt-evaluation, and agentic workflow development.
+  ora:
+    domain: openai.com
+    score: 64
+    grade: C
+    category: "AI & ML"
+    tags: ["llm", "gpt", "chat", "embeddings", "ai api", "language model", "completions", "image generation"]
+    scoreUrl: https://ora.run/score/openai.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:ml-engineer
+      confidence: high
+      evidence: "LLM and embedding APIs support agent development and evaluation."
+    - target: workflow:agent-evaluation-cycle
+      confidence: high
+      evidence: "Model responses and tool-use traces can be measured through agent evaluation cycles."
+    - target: workflow:prompt-engineering-iteration
+      confidence: high
+      evidence: "Prompt and response behavior are direct inputs to prompt iteration."
+---
+nodeKind: Tool
+id: tool:deepseek
+attributes:
+  displayName: "DeepSeek"
+  homepageUrl: "https://www.deepseek.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    LLM provider surfaced by Ora for coding-agent, prompt-evaluation, and model-comparison workflows.
+  ora:
+    domain: deepseek.com
+    score: 62
+    grade: C
+    category: "AI & ML"
+    tags: ["llm", "language model", "coding ai", "ai api", "completions"]
+    scoreUrl: https://ora.run/score/deepseek.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:ml-engineer
+      confidence: medium
+      evidence: "Coding-focused model APIs support model comparison and evaluation."
+    - target: workflow:agent-evaluation-cycle
+      confidence: medium
+      evidence: "Agent and coding-benchmark outputs can be compared against other LLM providers."
+    - target: workflow:developer-productivity-index-review
+      confidence: low
+      evidence: "Coding-agent performance can inform developer productivity review when measured carefully."
+---
+nodeKind: Tool
+id: tool:turso
+attributes:
+  displayName: "Turso"
+  homepageUrl: "https://turso.tech"
+  kind: sql-tool
+  languageApplicability: neutral
+  description: |
+    SQLite/libSQL edge database platform surfaced by Ora for database administration, query, and application data workflows.
+  ora:
+    domain: turso.tech
+    score: 72
+    grade: B
+    category: "Infrastructure & DevOps"
+    tags: ["database", "sqlite", "edge database", "embedded database", "libsql", "serverless database"]
+    scoreUrl: https://ora.run/score/turso.tech
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:database-administrator
+      confidence: medium
+      evidence: "Database metadata and query surfaces support administration and performance review."
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "Edge database infrastructure supports application platform design and operations."
+    - target: workflow:query-performance-review
+      confidence: medium
+      evidence: "Query and replica behavior can be reviewed as part of performance tuning."
+---
+nodeKind: Tool
+id: tool:neon
+attributes:
+  displayName: "Neon"
+  homepageUrl: "https://neon.tech"
+  kind: sql-tool
+  languageApplicability: neutral
+  description: |
+    Serverless Postgres platform surfaced by Ora for database administration, branching, migrations, and query workflows.
+  ora:
+    domain: neon.tech
+    score: 68
+    grade: C
+    category: "Developer Tools"
+    tags: ["database", "postgres", "serverless database", "branching", "edge"]
+    scoreUrl: https://ora.run/score/neon.tech
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:database-administrator
+      confidence: high
+      evidence: "Postgres branches and query metadata support database administration."
+    - target: workflow:schema-migration
+      confidence: high
+      evidence: "Database branching and migration history are direct schema-migration projection points."
+    - target: workflow:query-performance-review
+      confidence: medium
+      evidence: "Postgres query behavior supports performance review."
+---
+nodeKind: Tool
+id: tool:redis
+attributes:
+  displayName: "Redis"
+  homepageUrl: "https://redis.io"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    In-memory data store surfaced by Ora for database administration, cache operations, and application reliability workflows.
+  ora:
+    domain: redis.io
+    score: 62
+    grade: C
+    category: "Infrastructure & DevOps"
+    tags: ["database", "cache", "key-value store", "redis", "in-memory data"]
+    scoreUrl: https://ora.run/score/redis.io
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:site-reliability-engineer
+      confidence: medium
+      evidence: "Cache metrics and keyspace state support reliability investigations."
+    - target: role:database-administrator
+      confidence: medium
+      evidence: "Redis persistence, memory, and query behavior support database operations."
+    - target: workflow:query-performance-review
+      confidence: medium
+      evidence: "Cache hit rates and slowlog data inform query and latency review."
+---
+nodeKind: Tool
+id: tool:supabase
+attributes:
+  displayName: "Supabase"
+  homepageUrl: "https://supabase.com"
+  kind: sql-tool
+  languageApplicability: neutral
+  description: |
+    Postgres-backed app platform surfaced by Ora for database, auth, realtime, and application backend workflows.
+  ora:
+    domain: supabase.com
+    score: 69
+    grade: C
+    category: "Developer Tools"
+    tags: ["database", "postgres", "auth", "realtime", "storage", "backend as a service"]
+    scoreUrl: https://ora.run/score/supabase.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:platform-engineer
+      confidence: high
+      evidence: "Managed database, auth, storage, and realtime APIs support platform workflows."
+    - target: role:database-administrator
+      confidence: medium
+      evidence: "Postgres metadata and migrations support database administration."
+    - target: workflow:schema-migration
+      confidence: medium
+      evidence: "Supabase projects require coordinated schema and API migration review."

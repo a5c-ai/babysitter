@@ -8,6 +8,13 @@ expertise:
   - Infrastructure as code
   - Scaling strategies
   - Monitoring setup
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:model-serving-deployment, skill-area:ci-cd-ml-pipelines]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development, workflow:ml-model-lifecycle]
+
 ---
 
 # Agent Deployment Engineer

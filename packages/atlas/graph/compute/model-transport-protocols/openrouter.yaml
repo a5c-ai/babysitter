@@ -1,0 +1,18 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:openrouter
+attributes:
+  displayName: "OpenRouter"
+  vendor: "OpenRouter"
+  specUrl: "https://openrouter.ai/docs/api-reference"
+  streamingFraming: sse
+  thinkingChannel: none
+  status: standard
+  authHeaderFormat: |
+    `Authorization: Bearer <OPENROUTER_API_KEY>` plus optional
+    `HTTP-Referer: <site-url>` and `X-Title: <app-name>` headers used
+    for attribution and rate-limit policy.
+edges:
+  realizes:
+    - target: layer:3-transport
+  spoken_by:
+    - target: agent-core-impl:hermes.core@current

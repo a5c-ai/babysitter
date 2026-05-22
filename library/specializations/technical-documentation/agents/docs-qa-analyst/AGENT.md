@@ -6,6 +6,12 @@ backlog-id: AG-004
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:technical-documentation]
+  skillAreas: [skill-area:docs-as-code, skill-area:code-analysis-linting]
+  roles: [role:technical-writer, role:documentation-engineer]
+  topics: [topic:accessibility]
 ---
 
 # docs-qa-analyst

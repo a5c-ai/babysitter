@@ -1,0 +1,15 @@
+nodeKind: ModelFamily
+id: model-family:gemini-3
+attributes:
+  displayName: "Gemini 3"
+  vendor: "Google"
+  homepageUrl: "https://ai.google.dev/gemini-api/docs/gemini-3"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:gemini-3-pro@current
+    - model:gemini-3-flash@current
+    - model:gemini-3-1-pro@current
+    - model:gemini-3-1-deep-think@current
+    - model:gemini-3-1-flash-lite@current

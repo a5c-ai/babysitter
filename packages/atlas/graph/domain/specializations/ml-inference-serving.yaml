@@ -1,0 +1,11 @@
+nodeKind: Specialization
+id: specialization:ml-inference-serving
+attributes:
+  displayName: "ML Inference Serving"
+  parentDomainId: domain:ml-ops
+  description: |
+    Serving ML / LLM inference at scale — vLLM, TGI, TensorRT-LLM,
+    Triton, batching, KV-cache management, and GPU autoscaling.
+edges:
+  specializes:
+    - domain:ml-ops

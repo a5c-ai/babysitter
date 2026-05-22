@@ -3,6 +3,12 @@
  * @description Systematic industry analysis using Michael Porter's Five Forces framework to assess industry attractiveness and competitive dynamics
  * @inputs { industryName: string, companyContext: object, marketData: object, competitorInfo: array }
  * @outputs { success: boolean, fiveForces: object, industryAttractiveness: object, strategicRecommendations: array, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:change-management-leadership, skill-area:market-sizing]
+ *   workflows: [workflow:strategic-planning]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

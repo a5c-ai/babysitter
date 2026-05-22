@@ -1,0 +1,21 @@
+nodeKind: ToolServer
+id: tool-server:anycli-tool-example
+attributes:
+  displayName: "AnyCLI Tool Example"
+  description: "Example tool server demonstrating the AnyCLI protocol. Wraps arbitrary CLI commands as tool descriptors for AI agent invocation. Reference implementation for custom protocol adapters."
+  protocol: anycli
+  category: devtools
+  repoUrl: https://github.com/a5c-ai/babysitter
+  maintainer: a5c-ai
+  tools:
+    - tool-descriptor:long-build
+  sourceRef: source-ref:a5c-anycli-examples
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:long-build
+  implements:
+    - target: extension-interface:reactor
+  sourced_from:
+    - target: source-ref:a5c-anycli-examples
+  lib_applies_to_domain:
+    - target: domain:software-engineering

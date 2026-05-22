@@ -1,0 +1,33 @@
+# NodeKinds for cluster 13-methodologies.
+nodeKinds:
+- id: node:methodology
+  name: Methodology
+  origin: universal
+  prefix: methodology
+  cluster: 13-methodologies
+  purpose: a software development methodology or framework that guides how work is organized and executed
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: methodologyKind
+    type: enum<agile,plan-driven,hybrid,design-thinking,quality-focused,ai-assisted,research,orchestration>
+    required: false
+  - name: origin
+    type: string
+    required: false
+  - name: yearIntroduced
+    type: string
+    required: false
+  incomingEdges:
+  - follows_methodology
+  outgoingEdges:
+  - applies_to
+  invariants: []
+  examples: []

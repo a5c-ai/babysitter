@@ -2,6 +2,12 @@
  * @file debt-facility-covenant-compliance.js
  * @description Managing debt agreements, monitoring covenant compliance, preparing compliance certificates, and optimizing capital structure
  * @module specializations/domains/business/finance-accounting
+  * @graph
+ *   domains: [domain:finance]
+ *   specializations: [specialization:corporate-finance]
+ *   skillAreas: [skill-area:financial-modeling, skill-area:budgeting-forecasting, skill-area:investment-analysis, skill-area:valuation-analysis]
+ *   workflows: [workflow:financial-planning, workflow:budget-planning]
+ *   roles: [role:financial-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -52,7 +58,7 @@ export async function process(inputs, ctx) {
     debtAgreements: inputs.debtAgreements
   }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
     }
-  const reviewApproval = await ctx.breakpoint('calculation-review', {
+    const reviewApproval = await ctx.breakpoint('calculation-review', {
     message: 'Review covenant calculations before compliance testing',
     data: calculationResult,
     expert: 'owner',
@@ -86,7 +92,7 @@ export async function process(inputs, ctx) {
     priorPeriodCovenants: inputs.priorPeriodCovenants
   }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
       }
-  const analysisApproval = await ctx.breakpoint('covenant-alert', {
+      const analysisApproval = await ctx.breakpoint('covenant-alert', {
       message: 'ALERT: Covenants at risk of breach - review and develop mitigation plan',
       data: { compliance: complianceResult, trends: trendResult },
       expert: 'owner',
@@ -96,9 +102,8 @@ export async function process(inputs, ctx) {
       });
       if (analysisApproval.approved) break;
       lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
-    } }
-
-  // Step 6: Compliance Certificate Preparation
+    }
+    // Step 6: Compliance Certificate Preparation
   const certificateResult = await ctx.task(prepareComplianceCertificateTask, {
     complianceResults: complianceResult,
     financialStatements: inputs.financialStatements,
@@ -123,7 +128,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-  // Task definitions
+// Task definitions
 export const reviewDebtPortfolioTask = defineTask('review-debt-portfolio', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'debt-management' },

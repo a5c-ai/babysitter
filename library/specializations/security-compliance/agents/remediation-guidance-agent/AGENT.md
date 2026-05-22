@@ -9,6 +9,13 @@ expertise:
   - Configuration remediation
   - Effort estimation
   - Remediation tracking
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:vulnerability-management, skill-area:application-security-testing]
+  roles: [role:security-engineer, role:backend-engineer]
+  workflows: [workflow:vulnerability-management]
+
 ---
 
 # Remediation Guidance Agent

@@ -2,6 +2,7 @@
 
 **Version:** 1.1
 **Last Updated:** 2026-01-26
+Last refreshed: 2026-04-25
 **Audience:** All users
 
 This glossary provides definitions for technical terms and concepts used in Babysitter documentation. Terms are organized alphabetically with cross-references to related concepts and links to detailed documentation.
@@ -111,7 +112,9 @@ Any file produced during a run, stored in the `artifacts/` directory. Common art
 The orchestration framework for Claude Code that enables deterministic, event-sourced workflow management. Babysitter provides structured multi-step workflows with quality gates, human approval checkpoints, and session persistence.
 
 **Components:**
-- SDK (`@a5c-ai/babysitter-sdk`) - Core runtime, CLI
+- Main CLI (`@a5c-ai/babysitter`) - Recommended end-user install for `babysitter`
+- SDK (`@a5c-ai/babysitter-sdk`) - Public SDK/library and core CLI implementation
+- Runtime CLI (`@a5c-ai/babysitter-agent`) - Optional runtime/orchestration commands
 - Plugin (`babysitter@a5c.ai`) - Claude Code integration
 
 **Related:** [SDK](#sdk), [Plugin](#plugin)
@@ -122,7 +125,7 @@ The orchestration framework for Claude Code that enables deterministic, event-so
 
 The primary Claude Code skill for orchestrating runs. The skill manages the orchestration loop, executing iterations until completion.
 
-**Location:** `plugins/babysitter/skills/babysit/SKILL.md`
+**Location:** `plugins/babysitter-unified/skills/babysit/SKILL.md`
 
 **Invocation:**
 ```bash
@@ -176,7 +179,7 @@ The command-line tool for managing Babysitter runs. Provides commands for run li
 
 **Installation:**
 ```bash
-npm install -g @a5c-ai/babysitter-sdk
+npm install -g @a5c-ai/babysitter
 ```
 
 **Related:** [SDK](#sdk)
@@ -327,7 +330,7 @@ An architectural pattern where all state changes are recorded as immutable event
 
 A methodology focused on rapid task completion. GSD emphasizes pragmatic execution over extensive planning.
 
-**Location:** `plugins/babysitter/skills/babysit/process/gsd/`
+**Location:** `library/methodologies/gsd/`
 
 **Related:** [Methodology](#methodology), [TDD](#tdd-test-driven-development)
 
@@ -342,7 +345,7 @@ A shell script executed at specific lifecycle points during orchestration. Hooks
 **Discovery Priority:**
 1. Per-repo: `.a5c/hooks/<hook-name>/`
 2. Per-user: `~/.config/babysitter/hooks/<hook-name>/`
-3. Plugin: `plugins/babysitter/hooks/<hook-name>/`
+3. Plugin: `plugins/babysitter-unified/hooks/<hook-name>/`
 
 **Hook Types:**
 - `on-run-start` - When run is created
@@ -361,7 +364,7 @@ A shell script executed at specific lifecycle points during orchestration. Hooks
 
 ### Hook Dispatcher
 
-The component that discovers and executes hooks. Located at `plugins/babysitter/hooks/hook-dispatcher.sh`. Responsible for finding hooks, executing them with payloads, and collecting results.
+The component that discovers and executes hooks. The maintained hook source lives under `plugins/babysitter-unified/hooks/`. It is responsible for finding hooks, executing them with payloads, and collecting results.
 
 **Related:** [Hook](#hook)
 
@@ -537,36 +540,25 @@ A high-level structured approach or pattern for software development. Methodolog
 
 **Key distinction:** Methodology = high-level concept/pattern; Process = low-level code implementation of a methodology.
 
-**You can use ANY methodology and get great results.** Babysitter includes 19+ built-in methodologies - pick the one that fits your project style, or let Babysitter choose automatically based on your request.
+**You can use ANY methodology and get great results.** In this repository snapshot, Babysitter includes 38 methodology directories under `library/methodologies/` - pick the one that fits your project style, or let Babysitter choose automatically based on your request.
 
-**Built-in Methodologies (19+):**
+**Built-in Methodologies (examples from the current library):**
 
 | Methodology | Description | Source |
 |-------------|-------------|--------|
-| **TDD Quality Convergence** | Test-first development with iterative quality improvement | [tdd-quality-convergence.js](../../../plugins/babysitter/skills/babysit/process/tdd-quality-convergence.js) |
-| **GSD (Get Stuff Done)** | Rapid, pragmatic 8-phase execution | [gsd/](../../../plugins/babysitter/skills/babysit/process/gsd/) |
-| **Spec-Kit** | Specification-driven development with governance | [SPEC-KIT.md](../../../plugins/babysitter/skills/babysit/process/SPEC-KIT.md) |
-| **ATDD/TDD** | Acceptance test-driven and test-driven development | [atdd-tdd/](../../../plugins/babysitter/skills/babysit/process/methodologies/atdd-tdd/) |
-| **BDD/Specification by Example** | Behavior-driven development with Gherkin | [bdd-specification-by-example/](../../../plugins/babysitter/skills/babysit/process/methodologies/bdd-specification-by-example/) |
-| **Domain-Driven Design** | Strategic and tactical DDD patterns | [domain-driven-design/](../../../plugins/babysitter/skills/babysit/process/methodologies/domain-driven-design/) |
-| **Feature-Driven Development** | Feature-centric with parking lot tracking | [feature-driven-development/](../../../plugins/babysitter/skills/babysit/process/methodologies/feature-driven-development/) |
-| **Hypothesis-Driven Development** | Experimentation and validation framework | [hypothesis-driven-development/](../../../plugins/babysitter/skills/babysit/process/methodologies/hypothesis-driven-development/) |
-| **Example Mapping** | BDD workshop technique for requirements | [example-mapping/](../../../plugins/babysitter/skills/babysit/process/methodologies/example-mapping/) |
-| **Scrum** | Sprint-based iterative development | [scrum/](../../../plugins/babysitter/skills/babysit/process/methodologies/scrum/) |
-| **Kanban** | Pull-based system with WIP limits | [kanban/](../../../plugins/babysitter/skills/babysit/process/methodologies/kanban/) |
-| **Extreme Programming (XP)** | XP engineering practices (pair programming, TDD) | [extreme-programming/](../../../plugins/babysitter/skills/babysit/process/methodologies/extreme-programming/) |
-| **Shape Up** | 6-week cycle product development | [shape-up/](../../../plugins/babysitter/skills/babysit/process/methodologies/shape-up/) |
-| **Jobs to Be Done** | Outcome-focused development | [jobs-to-be-done/](../../../plugins/babysitter/skills/babysit/process/methodologies/jobs-to-be-done/) |
-| **Impact Mapping** | Goal-to-feature traceability | [impact-mapping/](../../../plugins/babysitter/skills/babysit/process/methodologies/impact-mapping/) |
-| **Event Storming** | Collaborative domain modeling workshop | [event-storming/](../../../plugins/babysitter/skills/babysit/process/methodologies/event-storming/) |
-| **Double Diamond** | Design thinking framework | [double-diamond/](../../../plugins/babysitter/skills/babysit/process/methodologies/double-diamond/) |
-| **V-Model** | Verification and validation phases | [v-model/](../../../plugins/babysitter/skills/babysit/process/methodologies/v-model/) |
-| **Spiral Model** | Risk-driven iterative development | [spiral-model/](../../../plugins/babysitter/skills/babysit/process/methodologies/spiral-model/) |
-| **Waterfall** | Sequential SDLC phases | [waterfall/](../../../plugins/babysitter/skills/babysit/process/methodologies/waterfall/) |
-| **RUP** | Rational Unified Process | [rup/](../../../plugins/babysitter/skills/babysit/process/methodologies/rup/) |
-| **Cleanroom** | Cleanroom software engineering | [cleanroom/](../../../plugins/babysitter/skills/babysit/process/methodologies/cleanroom/) |
+| **TDD Quality Convergence** | Test-first development with iterative quality improvement | `library/tdd-quality-convergence.js` |
+| **GSD (Get Stuff Done)** | Rapid, pragmatic 8-phase execution | [gsd/](../../../library/methodologies/gsd/README.md) |
+| **Spec-Kit** | Specification-driven development with governance | [spec-kit/](../../../library/methodologies/spec-kit/README.md) |
+| **ATDD/TDD** | Acceptance test-driven and test-driven development | [atdd-tdd/](../../../library/methodologies/atdd-tdd/README.md) |
+| **BDD/Specification by Example** | Behavior-driven development with Gherkin | [bdd-specification-by-example/](../../../library/methodologies/bdd-specification-by-example/README.md) |
+| **Domain-Driven Design** | Strategic and tactical DDD patterns | [domain-driven-design/](../../../library/methodologies/domain-driven-design/README.md) |
+| **Feature-Driven Development** | Feature-centric with parking lot tracking | [feature-driven-development/](../../../library/methodologies/feature-driven-development/README.md) |
+| **Hypothesis-Driven Development** | Experimentation and validation framework | [hypothesis-driven-development/](../../../library/methodologies/hypothesis-driven-development/README.md) |
+| **Example Mapping** | BDD workshop technique for requirements | [example-mapping/](../../../library/methodologies/example-mapping/README.md) |
+| **Scrum** | Sprint-based iterative development | [scrum/](../../../library/methodologies/scrum/README.md) |
+| **Kanban** | Pull-based system with WIP limits | [kanban/](../../../library/methodologies/kanban/README.md) |
 
-Each methodology has one or more [Process](#process) implementations in the codebase. Browse all methodologies at [`plugins/babysitter/skills/babysit/process/methodologies/`](../../../plugins/babysitter/skills/babysit/process/methodologies/).
+Each methodology has one or more [Process](#process) implementations in the codebase. Browse all methodologies at [`library/methodologies/`](../../../library/methodologies/).
 
 **Related:** [Process](#process), [TDD Quality Convergence](#tdd-quality-convergence), [Process Library](../features/process-library.md)
 
@@ -651,7 +643,7 @@ A Claude Code extension package. The Babysitter plugin (`babysitter@a5c.ai`) pro
 
 **Installation:**
 ```bash
-claude plugin marketplace add a5c-ai/babysitter
+claude plugin marketplace add a5c-ai/babysitter-claude
 claude plugin install --scope user babysitter@a5c.ai
 ```
 
@@ -665,13 +657,16 @@ A JavaScript/TypeScript function that is the *low-level code implementation* of 
 
 **Key distinction:** Process = low-level code implementation; [Methodology](#methodology) = high-level concept/pattern that a process implements.
 
-**Babysitter includes 2,000+ ready-to-use processes** organized by domain:
+<!-- glossary:process-library:start -->
+**Babysitter currently exposes 2,239 JavaScript process files in the live repository tree** organized across methodologies, shared processes, and specializations.
 
 | Domain | Processes | Browse |
 |--------|-----------|--------|
-| **Development** | 680+ (web, mobile, DevOps, AI, security) | [Browse →](../../../plugins/babysitter/skills/babysit/process/specializations/) |
-| **Business** | 430+ (legal, HR, marketing, finance) | [Browse →](../../../plugins/babysitter/skills/babysit/process/specializations/domains/business/) |
-| **Science & Engineering** | 550+ (physics, aerospace, biomedical) | [Browse →](../../../plugins/babysitter/skills/babysit/process/specializations/domains/science/) |
+| **Development and technical specializations** | 837 | [Browse →](../../../library/specializations/) |
+| **Business domains** | 490 | [Browse →](../../../library/specializations/domains/business/) |
+| **Science & engineering domains** | 551 | [Browse →](../../../library/specializations/domains/science/) |
+| **Social sciences & humanities** | 160 | [Browse →](../../../library/specializations/domains/social-sciences-humanities/) |
+<!-- glossary:process-library:end -->
 
 **Structure:**
 ```javascript
@@ -854,7 +849,7 @@ The core Babysitter package providing the orchestration runtime, CLI, and APIs.
 
 **Installation:**
 ```bash
-npm install -g @a5c-ai/babysitter-sdk
+npm install @a5c-ai/babysitter-sdk
 ```
 
 **Components:**
@@ -871,7 +866,7 @@ npm install -g @a5c-ai/babysitter-sdk
 
 A unique identifier for a Claude Code session. Used for state isolation in in-session loops.
 
-**Environment Variable:** `BABYSITTER_SESSION_ID`
+**Environment Variable:** `AGENT_SESSION_ID`
 
 **Related:** [In-Session Loop](#in-session-loop)
 
@@ -984,7 +979,7 @@ A monotonically increasing number tracking state changes. Increments with each j
 
 A Claude Code hook that intercepts exit attempts during in-session loops. Decides whether to allow exit or continue the loop.
 
-**Location:** `plugins/babysitter/hooks/babysitter-stop-hook.sh`
+**Location:** generated from `plugins/babysitter-unified/hooks/stop.sh`
 
 **Output (block):**
 ```json

@@ -1,0 +1,111 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-run-create
+attributes:
+  displayName: "Babysitter run:create"
+  description: |
+    Create a new babysitter run from a process descriptor. CLI: `babysitter run:create`.
+    Also reachable via the `/babysitter:call` slash command in host harnesses.
+  kind: cli
+  surface: cli
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat, plan]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:lifecycle
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-run-iterate
+attributes:
+  displayName: "Babysitter run:iterate"
+  description: |
+    Iterate a babysitter run — drive the next step of the orchestrator
+    state machine. CLI: `babysitter run:iterate <runId>`.
+  kind: cli
+  surface: cli
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:lifecycle
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-task-post
+attributes:
+  displayName: "Babysitter task:post"
+  description: |
+    Post a task result back to the babysitter orchestrator. CLI:
+    `babysitter task:post <taskId> --status <ok|fail|...>`. Used by
+    subagents to report completion and by users to satisfy breakpoints.
+  kind: cli
+  surface: cli
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:lifecycle
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-breakpoint-approve
+attributes:
+  displayName: "Babysitter breakpoint approve"
+  description: |
+    Approve a breakpoint task that the orchestrator paused on. Mechanically
+    a `babysitter task:post --status ok` against a `kind: breakpoint` task,
+    or a UI control in agent-mux/observer surfaces.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:approval
+  availableInModes: [chat, plan]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:approval
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-observer-dashboard
+attributes:
+  displayName: "Babysitter observer dashboard"
+  description: |
+    Real-time browser dashboard observing live babysitter runs — task
+    progress, journal events, orchestration state. Launched via
+    `/babysitter:observe` slash command or `babysitter observer` CLI.
+  kind: telemetry
+  surface: editor-ui
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:telemetry
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-mcp-server
+attributes:
+  displayName: "Babysitter MCP server"
+  description: |
+    MCP server interface exposed by babysitter — lets host harnesses
+    invoke run-create / run-iterate / task-post / observer / doctor
+    actions as MCP tool calls instead of CLI subcommands.
+  kind: cli
+  surface: cli
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:telemetry

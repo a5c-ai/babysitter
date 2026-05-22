@@ -1,0 +1,11 @@
+nodeKind: Term
+id: term:test-driven-development
+attributes:
+  canonicalDefinitionId: definition:test-driven-development.canonical
+  displayName: "Test-Driven Development"
+  kind: concept
+  description: |
+    A development methodology where tests are written before implementation.
+edges:
+  applies_to:
+    - target: domain:software-engineering

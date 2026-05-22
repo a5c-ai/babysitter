@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:agent-product.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:agent-product
+  text: |
+    productized agent (Claude Code, Codex, ...) — the umbrella
+  status: canonical
+edges:
+  defines:
+    - term:agent-product

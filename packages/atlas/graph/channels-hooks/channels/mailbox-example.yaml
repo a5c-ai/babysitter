@@ -1,0 +1,14 @@
+nodeKind: Channel
+id: channel:mailbox-example
+attributes:
+  displayName: "Mailbox example channel"
+  kind: mailbox-channel
+  endpoint: "redis://localhost:6379/agent-mailbox"
+  brokeringPrimitive: |
+    A Redis-backed list serves as the mailbox. Producers LPUSH
+    messages; consumers BRPOP. Persistence lasts until consumed or
+    until Redis eviction.
+  persistent: true
+  description: |
+    Asynchronous handoff mailbox between producer and consumer agents.
+edges:

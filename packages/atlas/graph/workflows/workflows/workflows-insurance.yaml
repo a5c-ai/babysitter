@@ -1,0 +1,72 @@
+---
+nodeKind: Workflow
+id: workflow:claims-processing-audit
+attributes:
+  displayName: "Claims Processing Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Audits the insurance claims processing pipeline for accuracy and
+    regulatory compliance -- sampling adjudicated claims for correct
+    coverage-determination logic, verifying reserve calculations against
+    actuarial guidelines, reviewing automated-decision model outputs for
+    bias indicators, validating state-specific regulatory rule application,
+    and reconciling paid amounts against policy limits and deductible
+    schedules. Produces audit finding reports, model fairness assessments,
+    and regulatory compliance scorecards. Excludes claims adjudication
+    itself.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:security-reviewer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:insurance
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:regulatory-filing
+  performed_by_org_unit:
+    - target: org-unit:compliance-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:underwriting-model-validation
+attributes:
+  displayName: "Underwriting Model Validation"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Validates the statistical and machine-learning models used in insurance
+    underwriting -- back-testing loss-ratio predictions against actual
+    experience, evaluating model discrimination and calibration metrics
+    (AUC, Brier score), running regulatory-mandated adverse-impact analyses
+    across protected classes, reviewing feature-importance stability for
+    concept drift, and comparing challenger models against incumbent
+    production models. Produces model validation reports, regulatory
+    compliance documentation, and champion-challenger comparison summaries.
+    Excludes model development and retraining.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:insurance
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:ai-safety-guardrails
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:ml-team
+    - target: org-unit:compliance-team

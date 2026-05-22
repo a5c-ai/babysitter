@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:gemini-hooks-mux
+attributes:
+  signalId: discovery-signal:gemini-hooks-mux
+  signalKind: env-any
+  key: gemini
+  matchMode: all
+  confidence: high
+  scope: hooks-mux
+  signals:
+    - GEMINI_EXTENSION_PATH
+    - BABYSITTER_EXTENSION_PATH
+  absentSignals: []
+  argvMatches: []
+  metadataFields: []
+  consumer: hooks-mux-core
+  notes: 'Ordered adapter auto-detection rule used by hooks-mux. Verbatim from legacy discovery:gemini:hooks-mux:4.'
+edges:
+  applies_to:
+    - target: agent:gemini-cli

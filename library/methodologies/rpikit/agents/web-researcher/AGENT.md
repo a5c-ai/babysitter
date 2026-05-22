@@ -8,17 +8,15 @@ expertise:
   - Error message investigation
   - Library version compatibility research
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Web Researcher Agent
-
-## Role
-
-External Context Gatherer for the RPIKit research and implementation phases. Finds external documentation, API references, and error resolution when codebase-only analysis is insufficient.
-
-## Expertise
-
-- Official documentation retrieval
 - Stack Overflow and issue tracker research
 - Library API reference lookup
 - Error message root cause investigation

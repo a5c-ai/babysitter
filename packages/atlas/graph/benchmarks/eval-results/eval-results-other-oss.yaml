@@ -1,0 +1,60 @@
+---
+nodeKind: EvalResult
+id: eval-result:mmlu.phi-3-medium.001
+attributes:
+  evalRunId: eval-run:mmlu.phi-3-medium.2024-05
+  metricName: accuracy
+  score: 0.766
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-05-21T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mmlu.phi-3-medium.2024-05
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:mmlu.gemma-2-27b.001
+attributes:
+  evalRunId: eval-run:mmlu.gemma-2-27b.2024-06
+  metricName: accuracy
+  score: 0.752
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-06-27T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mmlu.gemma-2-27b.2024-06
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:gsm8k.gemma-2-27b.001
+attributes:
+  evalRunId: eval-run:gsm8k.gemma-2-27b.2024-06
+  metricName: accuracy
+  score: 0.740
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-06-27T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gsm8k.gemma-2-27b.2024-06
+  scored_against:
+    - target: benchmark:gsm8k
+---
+nodeKind: EvalResult
+id: eval-result:mmlu.command-r-plus.001
+attributes:
+  evalRunId: eval-run:mmlu.command-r-plus.2024-08
+  metricName: accuracy
+  score: 0.757
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-08-30T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mmlu.command-r-plus.2024-08
+  scored_against:
+    - target: benchmark:mmlu

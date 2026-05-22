@@ -1,0 +1,232 @@
+---
+nodeKind: PlatformService
+id: platform-service:gcp-cloud-run
+attributes:
+  displayName: "Google Cloud Run"
+  description: |
+    Serverless container runtime that scales to zero on Knative.
+  category: compute
+  providedByPlatformId: platform:gcp
+  implementsStackPartIds:
+    - stack-part:container-runtime
+edges:
+  provided_by:
+    - platform:gcp
+  implements_stack_part:
+    - stack-part:container-runtime
+    - target: stack-part:container-runtime
+  integrates_with:
+    - target: platform-service:gcp-pubsub
+      attributes: { nature: native }
+    - target: platform-service:gcp-cloud-build
+      attributes: { nature: native }
+    - target: platform-service:gcp-artifact-registry
+      attributes: { nature: native }
+  depends_on:
+    - target: platform-service:gcp-iam
+      attributes: { kind: required }
+---
+nodeKind: PlatformService
+id: platform-service:gcp-cloud-functions
+attributes:
+  displayName: "Google Cloud Functions"
+  description: |
+    Event-driven function-as-a-service (gen2 runs on Cloud Run).
+  category: compute
+  providedByPlatformId: platform:gcp
+  implementsStackPartIds:
+    - stack-part:serverless-runtime
+edges:
+  provided_by:
+    - platform:gcp
+  implements_stack_part:
+    - stack-part:serverless-runtime
+    - target: stack-part:serverless-runtime
+  integrates_with:
+    - target: platform-service:gcp-pubsub
+      attributes: { nature: native }
+    - target: platform-service:gcp-gcs
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:gcp-pubsub
+attributes:
+  displayName: "Google Cloud Pub/Sub"
+  description: |
+    Globally distributed pub/sub messaging at scale.
+  category: messaging
+  providedByPlatformId: platform:gcp
+  implementsStackPartIds:
+    - stack-part:pubsub-service
+    - stack-part:event-bus
+edges:
+  provided_by:
+    - platform:gcp
+  implements_stack_part:
+    - stack-part:pubsub-service
+    - stack-part:event-bus
+    - target: stack-part:pubsub-service
+    - target: stack-part:event-bus
+  integrates_with:
+    - target: platform-service:gcp-cloud-functions
+      attributes: { nature: native }
+    - target: platform-service:gcp-cloud-run
+      attributes: { nature: native }
+    - target: platform-service:gcp-bigquery
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:gcp-bigquery
+attributes:
+  displayName: "Google BigQuery"
+  description: |
+    Serverless petabyte-scale data warehouse with separation of storage and compute.
+  category: database
+  providedByPlatformId: platform:gcp
+  implementsStackPartIds:
+    - stack-part:data-warehouse
+edges:
+  provided_by:
+    - platform:gcp
+  implements_stack_part:
+    - stack-part:data-warehouse
+    - target: stack-part:data-warehouse
+  integrates_with:
+    - target: platform-service:gcp-pubsub
+      attributes: { nature: native }
+    - target: platform-service:gcp-gcs
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:gcp-gcs
+attributes:
+  displayName: "Google Cloud Storage"
+  description: |
+    Unified object storage across multi-regional, regional, and archival classes.
+  category: storage
+  providedByPlatformId: platform:gcp
+  implementsStackPartIds:
+    - stack-part:object-storage
+edges:
+  provided_by:
+    - platform:gcp
+  implements_stack_part:
+    - stack-part:object-storage
+    - target: stack-part:object-storage
+  integrates_with:
+    - target: platform-service:gcp-bigquery
+      attributes: { nature: native }
+    - target: platform-service:gcp-cloud-functions
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:gcp-cloud-sql
+attributes:
+  displayName: "Google Cloud SQL"
+  description: |
+    Managed Postgres, MySQL, and SQL Server.
+  category: database
+  providedByPlatformId: platform:gcp
+  implementsStackPartIds:
+    - stack-part:relational-database
+    - stack-part:managed-postgres
+    - stack-part:managed-mysql
+edges:
+  provided_by:
+    - platform:gcp
+  implements_stack_part:
+    - stack-part:relational-database
+    - stack-part:managed-postgres
+    - stack-part:managed-mysql
+    - target: stack-part:relational-database
+    - target: stack-part:managed-postgres
+    - target: stack-part:managed-mysql
+---
+nodeKind: PlatformService
+id: platform-service:gcp-firestore
+attributes:
+  displayName: "Google Firestore"
+  description: |
+    Managed serverless document database with realtime sync.
+  category: database
+  providedByPlatformId: platform:gcp
+  implementsStackPartIds:
+    - stack-part:nosql-database
+edges:
+  provided_by:
+    - platform:gcp
+  implements_stack_part:
+    - stack-part:nosql-database
+    - target: stack-part:nosql-database
+---
+nodeKind: PlatformService
+id: platform-service:gcp-cloud-build
+attributes:
+  displayName: "Google Cloud Build"
+  description: |
+    Managed CI/CD service that builds container images and runs pipelines.
+  category: build-deploy
+  providedByPlatformId: platform:gcp
+  implementsStackPartIds: []
+edges:
+  provided_by:
+    - platform:gcp
+  integrates_with:
+    - target: platform-service:gcp-artifact-registry
+      attributes: { nature: native }
+    - target: platform-service:gcp-cloud-run
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:gcp-iam
+attributes:
+  displayName: "Google Cloud IAM"
+  description: |
+    Identity and access management across Google Cloud resources.
+  category: security
+  providedByPlatformId: platform:gcp
+  implementsStackPartIds:
+    - stack-part:identity-provider
+edges:
+  provided_by:
+    - platform:gcp
+  implements_stack_part:
+    - stack-part:identity-provider
+    - target: stack-part:identity-provider
+---
+nodeKind: PlatformService
+id: platform-service:gcp-gke
+attributes:
+  displayName: "Google Kubernetes Engine"
+  description: |
+    Managed Kubernetes including Autopilot mode.
+  category: compute
+  providedByPlatformId: platform:gcp
+  implementsStackPartIds:
+    - stack-part:kubernetes-cluster
+edges:
+  provided_by:
+    - platform:gcp
+  implements_stack_part:
+    - stack-part:kubernetes-cluster
+    - target: stack-part:kubernetes-cluster
+  integrates_with:
+    - target: platform-service:gcp-artifact-registry
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:gcp-artifact-registry
+attributes:
+  displayName: "Google Artifact Registry"
+  description: |
+    Universal artifact repository (containers, language packages).
+  category: build-deploy
+  providedByPlatformId: platform:gcp
+  implementsStackPartIds:
+    - stack-part:container-registry
+edges:
+  provided_by:
+    - platform:gcp
+  implements_stack_part:
+    - stack-part:container-registry
+    - target: stack-part:container-registry

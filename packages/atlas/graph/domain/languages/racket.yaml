@@ -1,0 +1,15 @@
+nodeKind: Language
+id: language:racket
+attributes:
+  displayName: "Racket"
+  paradigms:
+    - functional
+    - lisp
+    - language-oriented
+  description: |
+    Racket — a Scheme-derived general-purpose language with a strong
+    macro system used for language-oriented programming and education.
+edges:
+  applies_to:
+    - target: domain:computer-science
+    - target: domain:education

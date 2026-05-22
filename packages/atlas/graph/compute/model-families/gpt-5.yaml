@@ -1,0 +1,15 @@
+nodeKind: ModelFamily
+id: model-family:gpt-5
+attributes:
+  displayName: "GPT-5"
+  vendor: "OpenAI"
+  homepageUrl: "https://platform.openai.com/docs/models"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:gpt-5@current
+    - model:gpt-5-mini@current
+    - model:gpt-5.4@current
+    - model:gpt-5.4-mini@current
+    - model:gpt-5.5@current

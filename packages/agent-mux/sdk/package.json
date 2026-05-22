@@ -1,0 +1,61 @@
+{
+  "name": "@a5c-ai/agent-mux",
+  "version": "5.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Unified dispatch layer for local CLI-based AI coding agents",
+  "author": "a5c-ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux/sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/agent-mux/sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "agent-mux",
+    "amux",
+    "claude",
+    "codex",
+    "coding-agent",
+    "llm",
+    "ai",
+    "sdk"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "amux": "./dist/bin/amux.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "test": "vitest run --config ../../../vitest.config.ts \"../tests/**/*.test.ts\" \"../tests/**/*.test.tsx\"",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@a5c-ai/agent-mux-core": "5.0.0",
+    "@a5c-ai/agent-mux-adapters": "5.0.0",
+    "@a5c-ai/agent-mux-cli": "5.0.0"
+  }
+}

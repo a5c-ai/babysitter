@@ -1,0 +1,701 @@
+# Krate Kubernetes controllers and platform services connected to CRD kinds.
+---
+nodeKind: KubernetesController
+id: kubernetes-controller:krate-core-controller
+attributes:
+  displayName: Krate Core Controller
+  description: Krate controller loop that watches the product CRD surface and reconciles desired state, status, and
+    conditions for Krate resources.
+  owningPlatformId: platform:krate
+  controllerKind: composite
+  runtime: nodejs-kubernetes-controller
+  sourcePath: packages/krate/core/src/kubernetes-controller.js
+  reconciliationScope: multi-namespace
+edges:
+  watches_resource:
+    - target: kubernetes-crd-kind:krate-agent-stack
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-subagent
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-tool-profile
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-mcp-server
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-skill
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-trigger-rule
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-context-label
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-krate-workspace-policy
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-service-account
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-role-binding
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-secret-grant
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-config-grant
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-adapter
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-transport-binding
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-provider-config
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-krate-project
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-gateway-config
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-memory-repository
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-memory-source
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-memory-ontology
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-memory-association
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-krate-workspace
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-ref-policy
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-runner-pool
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-webhook-subscription
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-view
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-selector
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-pull-request
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-issue
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-review
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-pipeline
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-job
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-webhook-delivery
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-dispatch-run
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-dispatch-attempt
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-session
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-context-bundle
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-krate-artifact
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-approval
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-trigger-execution
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-capability-requirement
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-work-item-session-link
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-work-item-workspace-link
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-session-transcript
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-session-attachment
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-krate-workspace-runtime
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-memory-snapshot
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-memory-query
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-memory-update
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-agent-run-memory-import
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-backend-provider
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-backend-binding
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-backend-sync-policy
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-provider-capability-manifest
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-webhook-delivery
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-sync-event
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-sync-state
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-write-intent
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-sync-conflict
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-object-link
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-policy-profile
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-policy-template
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-policy-binding
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-policy-exception-request
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-repository
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-branch-protection
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-organization
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-org-namespace-binding
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-sshkey
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-repository-permission
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-user
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-team
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-invite
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-identity-mapping
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-auth-provider
+      watchType: primary
+  reconciles_resource:
+    - target: kubernetes-crd-kind:krate-agent-stack
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-subagent
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-tool-profile
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-mcp-server
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-skill
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-trigger-rule
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-context-label
+      mode: full
+    - target: kubernetes-crd-kind:krate-krate-workspace-policy
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-service-account
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-role-binding
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-secret-grant
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-config-grant
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-adapter
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-transport-binding
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-provider-config
+      mode: full
+    - target: kubernetes-crd-kind:krate-krate-project
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-gateway-config
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-memory-repository
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-memory-source
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-memory-ontology
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-memory-association
+      mode: full
+    - target: kubernetes-crd-kind:krate-krate-workspace
+      mode: full
+    - target: kubernetes-crd-kind:krate-ref-policy
+      mode: full
+    - target: kubernetes-crd-kind:krate-runner-pool
+      mode: full
+    - target: kubernetes-crd-kind:krate-webhook-subscription
+      mode: full
+    - target: kubernetes-crd-kind:krate-view
+      mode: full
+    - target: kubernetes-crd-kind:krate-selector
+      mode: full
+    - target: kubernetes-crd-kind:krate-pull-request
+      mode: full
+    - target: kubernetes-crd-kind:krate-issue
+      mode: full
+    - target: kubernetes-crd-kind:krate-review
+      mode: full
+    - target: kubernetes-crd-kind:krate-pipeline
+      mode: full
+    - target: kubernetes-crd-kind:krate-job
+      mode: full
+    - target: kubernetes-crd-kind:krate-webhook-delivery
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-dispatch-run
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-dispatch-attempt
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-session
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-context-bundle
+      mode: full
+    - target: kubernetes-crd-kind:krate-krate-artifact
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-approval
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-trigger-execution
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-capability-requirement
+      mode: full
+    - target: kubernetes-crd-kind:krate-work-item-session-link
+      mode: full
+    - target: kubernetes-crd-kind:krate-work-item-workspace-link
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-session-transcript
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-session-attachment
+      mode: full
+    - target: kubernetes-crd-kind:krate-krate-workspace-runtime
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-memory-snapshot
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-memory-query
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-memory-update
+      mode: full
+    - target: kubernetes-crd-kind:krate-agent-run-memory-import
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-backend-provider
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-backend-binding
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-backend-sync-policy
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-provider-capability-manifest
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-webhook-delivery
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-sync-event
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-sync-state
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-write-intent
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-sync-conflict
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-object-link
+      mode: full
+    - target: kubernetes-crd-kind:krate-policy-profile
+      mode: full
+    - target: kubernetes-crd-kind:krate-policy-template
+      mode: full
+    - target: kubernetes-crd-kind:krate-policy-binding
+      mode: full
+    - target: kubernetes-crd-kind:krate-policy-exception-request
+      mode: full
+    - target: kubernetes-crd-kind:krate-repository
+      mode: full
+    - target: kubernetes-crd-kind:krate-branch-protection
+      mode: full
+    - target: kubernetes-crd-kind:krate-organization
+      mode: full
+    - target: kubernetes-crd-kind:krate-org-namespace-binding
+      mode: full
+    - target: kubernetes-crd-kind:krate-sshkey
+      mode: full
+    - target: kubernetes-crd-kind:krate-repository-permission
+      mode: full
+    - target: kubernetes-crd-kind:krate-user
+      mode: full
+    - target: kubernetes-crd-kind:krate-team
+      mode: full
+    - target: kubernetes-crd-kind:krate-invite
+      mode: full
+    - target: kubernetes-crd-kind:krate-identity-mapping
+      mode: full
+    - target: kubernetes-crd-kind:krate-auth-provider
+      mode: full
+  emits_resource_status:
+    - target: kubernetes-crd-kind:krate-agent-stack
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-subagent
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-tool-profile
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-mcp-server
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-skill
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-trigger-rule
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-context-label
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-krate-workspace-policy
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-service-account
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-role-binding
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-secret-grant
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-config-grant
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-adapter
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-transport-binding
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-provider-config
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-krate-project
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-gateway-config
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-memory-repository
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-memory-source
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-memory-ontology
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-memory-association
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-krate-workspace
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-pull-request
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-issue
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-review
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-pipeline
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-job
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-webhook-delivery
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-dispatch-run
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-dispatch-attempt
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-session
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-context-bundle
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-krate-artifact
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-approval
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-trigger-execution
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-capability-requirement
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-work-item-session-link
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-work-item-workspace-link
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-session-transcript
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-session-attachment
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-krate-workspace-runtime
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-memory-snapshot
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-memory-query
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-memory-update
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-agent-run-memory-import
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-backend-provider
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-backend-binding
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-backend-sync-policy
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-provider-capability-manifest
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-webhook-delivery
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-sync-event
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-sync-state
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-write-intent
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-sync-conflict
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-object-link
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-policy-profile
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-policy-template
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-policy-binding
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-policy-exception-request
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-repository
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-organization
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-org-namespace-binding
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-sshkey
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-repository-permission
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-user
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-team
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-invite
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-identity-mapping
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-auth-provider
+      statusPath: status
+---
+nodeKind: KubernetesController
+id: kubernetes-controller:krate-external-sync-controller
+attributes:
+  displayName: Krate External Backend Sync Controller
+  description: Krate controller path for provider capability manifests, external object links, write intents, conflicts,
+    sync events, and provider webhook deliveries.
+  owningPlatformId: platform:krate
+  controllerKind: sync-controller
+  runtime: nodejs-kubernetes-controller
+  sourcePath: packages/krate/core/src/kubernetes-controller.js
+  reconciliationScope: multi-namespace
+edges:
+  watches_resource:
+    - target: kubernetes-crd-kind:krate-external-backend-provider
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-backend-binding
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-backend-sync-policy
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-provider-capability-manifest
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-webhook-delivery
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-sync-event
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-sync-state
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-write-intent
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-sync-conflict
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-external-object-link
+      watchType: primary
+  reconciles_resource:
+    - target: kubernetes-crd-kind:krate-external-backend-provider
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-backend-binding
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-backend-sync-policy
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-provider-capability-manifest
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-webhook-delivery
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-sync-event
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-sync-state
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-write-intent
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-sync-conflict
+      mode: full
+    - target: kubernetes-crd-kind:krate-external-object-link
+      mode: full
+  emits_resource_status:
+    - target: kubernetes-crd-kind:krate-external-backend-provider
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-backend-binding
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-backend-sync-policy
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-provider-capability-manifest
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-webhook-delivery
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-sync-event
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-sync-state
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-write-intent
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-sync-conflict
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-external-object-link
+      statusPath: status
+---
+nodeKind: KubernetesController
+id: kubernetes-controller:krate-policy-admission
+attributes:
+  displayName: Krate Policy Admission Integration
+  description: Krate policy governance integration that binds Krate policy resources to Kyverno-backed admission and
+    exception workflows.
+  owningPlatformId: platform:krate
+  controllerKind: admission-controller
+  runtime: kyverno-admission-webhook
+  sourcePath: packages/krate/charts/crds/policy-resources.yaml
+  reconciliationScope: multi-namespace
+edges:
+  watches_resource:
+    - target: kubernetes-crd-kind:krate-policy-profile
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-policy-template
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-policy-binding
+      watchType: primary
+    - target: kubernetes-crd-kind:krate-policy-exception-request
+      watchType: primary
+  reconciles_resource:
+    - target: kubernetes-crd-kind:krate-policy-profile
+      mode: policy-only
+    - target: kubernetes-crd-kind:krate-policy-template
+      mode: policy-only
+    - target: kubernetes-crd-kind:krate-policy-binding
+      mode: policy-only
+    - target: kubernetes-crd-kind:krate-policy-exception-request
+      mode: policy-only
+  emits_resource_status:
+    - target: kubernetes-crd-kind:krate-policy-profile
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-policy-template
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-policy-binding
+      statusPath: status
+    - target: kubernetes-crd-kind:krate-policy-exception-request
+      statusPath: status
+---
+nodeKind: PlatformService
+id: platform-service:krate-external-backends
+attributes:
+  displayName: Krate External Backends
+  description: Provider integration service for capability manifests, bindings, sync state, webhook delivery, write
+    intents, conflicts, and external object links.
+  category: build-deploy
+  providedByPlatformId: platform:krate
+  platformId: platform:krate
+edges:
+  provided_by:
+    - platform:krate
+  integrates_with:
+    - provider:github
+    - vcs-host:github
+    - issue-tracker:github-issues
+  serves_kubernetes_resource:
+    - target: kubernetes-crd-kind:krate-external-backend-provider
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-external-backend-binding
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-external-backend-sync-policy
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-external-provider-capability-manifest
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-external-webhook-delivery
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-external-sync-event
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-external-sync-state
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-external-write-intent
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-external-sync-conflict
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-external-object-link
+      serviceMode: controller-api
+---
+nodeKind: PlatformService
+id: platform-service:krate-identity
+attributes:
+  displayName: Krate Identity and Tenancy
+  description: Organization, namespace binding, user, team, invite, identity mapping, auth provider, SSH key, and
+    repository permission service for Krate tenancy.
+  category: security
+  providedByPlatformId: platform:krate
+  platformId: platform:krate
+edges:
+  provided_by:
+    - platform:krate
+  serves_kubernetes_resource:
+    - target: kubernetes-crd-kind:krate-organization
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-org-namespace-binding
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-sshkey
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-repository-permission
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-user
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-team
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-invite
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-identity-mapping
+      serviceMode: controller-api
+    - target: kubernetes-crd-kind:krate-auth-provider
+      serviceMode: controller-api
+  governs_resource:
+    - target: kubernetes-crd-kind:krate-organization
+      governanceMode: rbac
+    - target: kubernetes-crd-kind:krate-org-namespace-binding
+      governanceMode: rbac
+    - target: kubernetes-crd-kind:krate-sshkey
+      governanceMode: rbac
+    - target: kubernetes-crd-kind:krate-repository-permission
+      governanceMode: rbac
+    - target: kubernetes-crd-kind:krate-user
+      governanceMode: rbac
+    - target: kubernetes-crd-kind:krate-team
+      governanceMode: rbac
+    - target: kubernetes-crd-kind:krate-invite
+      governanceMode: rbac
+    - target: kubernetes-crd-kind:krate-identity-mapping
+      governanceMode: rbac
+    - target: kubernetes-crd-kind:krate-auth-provider
+      governanceMode: rbac
+---
+nodeKind: AgentGovernanceImpl
+id: agent-governance-impl:krate-policy-resources@current
+attributes:
+  displayName: Krate Policy Resource Governance
+  agentVersionId: agent-version:babysitter@current
+  packageRef: source-ref:babysitter-sdk
+  componentKind: policy-engine
+  governedSurfaces:
+    - PolicyProfile
+    - PolicyTemplate
+    - PolicyBinding
+    - PolicyExceptionRequest
+    - Kyverno admission reports
+  riskControls:
+    - admission-policy
+    - policy-exception-review
+    - agent-tool-governance
+    - workspace-boundary-enforcement
+  evidenceProduced:
+    - Krate status conditions
+    - Kyverno policy reports
+    - policy exception requests
+  notes: Models Krate policy CRDs as governance resources connected to Kyverno-backed admission and exception semantics.
+edges:
+  realizes:
+    - layer:14-governance
+  composes:
+    - target: agent:babysitter
+      role: governance
+  depends_on:
+    - tool:kyverno
+  governs_resource:
+    - target: kubernetes-crd-kind:krate-policy-profile
+      governanceMode: admission
+    - target: kubernetes-crd-kind:krate-policy-template
+      governanceMode: admission
+    - target: kubernetes-crd-kind:krate-policy-binding
+      governanceMode: admission
+    - target: kubernetes-crd-kind:krate-policy-exception-request
+      governanceMode: admission

@@ -3,6 +3,12 @@
  * @description Strategic assessment for mergers, acquisitions, and divestitures including synergy analysis and integration planning
  * @inputs { organizationName: string, dealType: string, targetInfo: object, acquirerInfo: object, marketContext: object }
  * @outputs { success: boolean, strategicRationale: object, synergyValuation: object, integrationFramework: object, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:change-management-leadership, skill-area:market-sizing]
+ *   workflows: [workflow:strategic-planning]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

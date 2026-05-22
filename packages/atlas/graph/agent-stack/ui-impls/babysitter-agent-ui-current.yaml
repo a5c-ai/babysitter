@@ -1,0 +1,41 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:babysitter-agent.ui@current
+attributes:
+  displayName: "babysitter-agent UI (current) — CLI binary"
+  agentVersionId: agentVersion:babysitter-agent:ge-5-0-0
+  packageRef: source-ref:babysitter-github
+  uiKind: cli-only
+  presentationsBundled:
+    - presentation:babysitter-agent-cli
+  themeSupport: none
+  accessibilitySupport: basic
+  notes: |
+    babysitter-agent's user-facing surface is its CLI binary. Programmatic
+    consumers should use @a5c-ai/babysitter-sdk directly (no UI). Operator
+    UIs (TUI, web, mobile) are delivered via the agent-mux package family.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  bundled_with:
+    - target: presentation:babysitter-agent-cli
+  supports_interaction_primitive:
+    - target: interaction-primitive:babysitter-run-create
+      attributes:
+        mechanism: native-api
+        invocationToken: "babysitter run:create"
+    - target: interaction-primitive:babysitter-run-iterate
+      attributes:
+        mechanism: native-api
+        invocationToken: "babysitter run:iterate"
+    - target: interaction-primitive:babysitter-task-post
+      attributes:
+        mechanism: native-api
+        invocationToken: "babysitter task:post"
+    - target: interaction-primitive:babysitter-doctor
+      attributes:
+        mechanism: native-api
+        invocationToken: "babysitter doctor"
+    - target: interaction-primitive:babysitter-mcp-server
+      attributes:
+        mechanism: native-api
+        invocationToken: "babysitter mcp"

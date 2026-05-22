@@ -3,6 +3,13 @@
  * @description Create a new agent with AGENT.md and README.md including role definition, expertise, and prompt templates
  * @inputs { agentName: string, description: string, role: string, expertise: array, specialization: string, outputDir: string }
  * @outputs { success: boolean, agentPath: string, files: array, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   skillAreas: [skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+ *   topics: [topic:developer-experience, topic:architecture-decisions]
+ *   roles: [role:platform-engineer, role:tech-lead, role:architect]
+ *   workflows: [workflow:feature-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -250,7 +257,12 @@ export const agentMdGenerationTask = defineTask('agent-md-generation', (args, ta
         '   expertise:',
         '     - Expertise area 1',
         '     - Expertise area 2',
+        '   graph:',
+        '     domains: [domain:software-engineering]',
+        '     roles: [role:your-role]',
+        '     topics: [topic:your-topic]',
         '   ---',
+        '   Read packages/atlas/graph/domain/ to find valid graph node IDs. At minimum include one domain: node and one role: node in the graph frontmatter.',
         '2. # Agent Name Agent header',
         '3. ## Overview section',
         '4. ## Capabilities section with bullet points',
@@ -338,6 +350,7 @@ export const agentValidationTask = defineTask('agent-validation', (args, taskCtx
         '  - description is comprehensive',
         '  - role is defined',
         '  - expertise array has items',
+        '  - Has graph: frontmatter block with at least one domain: node ID',
         '  - Has required sections',
         'Validate README.md:',
         '  - Has overview section',

@@ -1,0 +1,65 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:pi.core@current
+attributes:
+  displayName: Pi Core (current)
+  agentVersionId: agentVersion:pi:ge-0-0-0
+  packageRef: source-ref:pi-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: 'Tool-use loop over Anthropic Messages or OpenAI Responses; tool
+    calls are
+
+    serialized (no parallel tool dispatch). Loop advances on the provider''s native
+
+    end-of-turn signal.
+
+    '
+  contextManagementStrategy: harness-managed
+  compactionTriggerNotes: |
+    Pi implements client-side compaction via its AgentHarness. The compaction
+    system uses branch summarization — when context approaches limits, the
+    harness summarizes conversation branches and replaces them with compact
+    summaries. Compaction settings are configurable (threshold, strategy).
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: |
+    Sub-tasks are modeled as ordinary tool calls whose handler may itself
+    spawn a nested Pi session. The harness supports skill invocation via
+    formatSkillInvocation for structured skill dispatch.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: 'Final assistant text is streamed to stdout; tool-call deltas
+    stream concurrently.
+
+    Session ends when the provider end-of-turn fires.
+
+    '
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: pi-internal
+  supportedTransportProtocols:
+  - model-transport:anthropic-messages
+  - model-transport:openai-responses
+  - model-transport:openai-chat-completions
+  parallelToolCallHandling: sequentialized
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+  codingAgentLayer: |
+    The coding-agent package (packages/coding-agent) layers on the agent
+    harness to provide: CLI entry point and argument parsing, operational
+    modes (interactive, headless, scripted), configuration management with
+    migrations, package-manager integration for dependency operations, and
+    the core coding-agent loop that orchestrates tool use for software
+    engineering tasks.
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:pi
+    role: core
+  speaks:
+  - target: model-transport:anthropic-messages
+  - target: model-transport:openai-responses
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full

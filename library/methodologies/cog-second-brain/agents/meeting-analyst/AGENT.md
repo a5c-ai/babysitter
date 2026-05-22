@@ -2,13 +2,17 @@
 name: meeting-analyst
 description: Processes meeting recordings and transcripts into structured decisions, action items, and team dynamics analysis
 role: Transcript Processing & Meeting Intelligence
----
-
-# Meeting Analyst Agent
-
-**Name:** Meeting Analyst
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 **Role:** Transcript Processing & Meeting Intelligence
 **Source:** [COG Second Brain](https://github.com/huytieu/COG-second-brain)
+
+---
 
 ## Identity
 

@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:mcp-stdio
+attributes:
+  displayName: "MCP over stdio"
+  description: |
+    The entity speaks the Model Context Protocol over a stdio
+    transport (subprocess stdin/stdout JSON-RPC framing).
+  appliesToNodeKinds: ["AgentVersion", "ToolServer"]
+  category: agent
+edges: {}

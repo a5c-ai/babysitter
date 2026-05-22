@@ -1,0 +1,17 @@
+nodeKind: OutputGuard
+id: output-guard:claude-code-aup-refusal
+attributes:
+  displayName: "Claude Code AUP refusal guard"
+  appliesTo: assistant-text
+  phase: post-call
+  detectorKinds: [refusal-stop-reason, aup-violation]
+  onTrigger: rewrite
+  severity: block-call
+  description: |
+    Detects BetaStopReason='refusal' on a completed assistant turn. Logs
+    tengu_refusal_api_response and replaces the assistant content with the
+    AUP-pointing message (https://www.anthropic.com/legal/aup), plus a
+    /model claude-sonnet-4-20250514 switch suggestion when the active model
+    is not already that variant. Marked as an isApiErrorMessage with
+    error='invalid_request' so downstream UI treats it as a non-retryable
+    block-call.

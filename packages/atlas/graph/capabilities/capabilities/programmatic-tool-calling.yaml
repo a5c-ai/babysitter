@@ -1,0 +1,11 @@
+nodeKind: Capability
+id: capability:programmatic-tool-calling
+attributes:
+  displayName: "Programmatic tool calling"
+  description: |
+    The entity can expose a single code-execution tool that lets the model
+    discover, type, batch, and call other tools from generated code instead of
+    emitting one model-level tool call per operation.
+  appliesToNodeKinds: ["AgentVersion", "AgentCoreImpl"]
+  category: tool
+edges: {}

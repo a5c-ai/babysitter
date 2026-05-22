@@ -1,0 +1,666 @@
+# MemorySystem instances — concrete memory persistence/retrieval systems.
+# Agent-native memory systems, external memory services, and abstract patterns.
+---
+nodeKind: MemorySystem
+id: memory-system:claude-code-auto-memory
+attributes:
+  displayName: "Claude Code Auto-Memory"
+  description: |
+    Claude Code's file-based auto-memory system. Automatically extracts salient
+    facts, preferences, and project-specific knowledge from conversations and
+    persists them to MEMORY.md files under ~/.claude/projects/<hash>/memory/.
+    The MEMORY.md index file links to per-topic memory files. Background
+    consolidation (auto-dream) runs post-session to merge, deduplicate, and
+    reorganize extracted memories. Memory is scoped at both project and user
+    levels, with project-level CLAUDE.md providing instruction memory and
+    user-level MEMORY.md providing learned-context memory. Security validation
+    rejects path traversal, null bytes, UNC paths, and drive-root writes.
+  memoryKind: file-based
+  persistence: user-scoped
+  autoExtraction: true
+  consolidation: auto-dream
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: semantic
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:cline-memory-bank
+attributes:
+  displayName: "Cline Memory Bank"
+  description: |
+    Cline's structured memory bank stored in .cline/memory/ with categorical
+    markdown files. Categories include activeContext.md (current session state),
+    productContext.md (what the product does), progress.md (development
+    progress), systemPatterns.md (recurring code patterns), and techContext.md
+    (technology decisions). Files are read at session start and optionally
+    updated at session end. The structured-category approach trades flexibility
+    for consistency — every project gets the same memory organization, making
+    cross-project knowledge navigation predictable.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: true
+  consolidation: on-write
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:windsurf-memories
+attributes:
+  displayName: "Windsurf Memories"
+  description: |
+    Windsurf's proprietary codebase pattern learning system. Windsurf Memories
+    learns from how developers interact with a codebase — coding patterns,
+    naming conventions, architecture preferences — and applies that learned
+    context in future sessions. The system is proprietary and integrated into
+    the Cascade agent, with no user-visible memory files. Persistence is
+    managed server-side through Windsurf's cloud infrastructure. Unlike
+    file-based memory systems, Windsurf Memories operates as an opaque
+    learned-context layer that cannot be manually inspected or edited.
+  memoryKind: proprietary
+  persistence: user-scoped
+  autoExtraction: true
+  consolidation: periodic
+  storageFormat: custom
+  privacyFilter: false
+  deduplication: semantic
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:cursor-notepads
+attributes:
+  displayName: "Cursor Notepads"
+  description: |
+    Cursor's manual knowledge capture system. Notepads are user-created
+    scratchpads that persist context, decisions, and notes across sessions.
+    Unlike auto-memory systems, Notepads require explicit user action to
+    create and maintain. They complement Cursor's .cursorrules instruction
+    files by providing a free-form space for knowledge that does not fit
+    into rule format. Cursor also supports .cursor/rules/*.mdc files for
+    structured rule-based memory with glob-scoped applicability.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:roo-code-memory
+attributes:
+  displayName: "Roo Code Memory"
+  description: |
+    Roo Code's file-based memory system in .roo/memory/. As a Cline fork,
+    Roo Code inherits the structured memory bank pattern with categorical
+    markdown files. Roo Code extends this with per-mode memory — each
+    custom mode (code, architect, review, etc.) can maintain its own memory
+    context, so architectural decisions stay in architect mode memory while
+    implementation details stay in code mode memory. Memory is read at
+    session start and updated during/after sessions.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: true
+  consolidation: on-write
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:openclaw-soul-memory
+attributes:
+  displayName: "OpenClaw SOUL + Memory"
+  description: |
+    OpenClaw's dual-file memory pattern using SOUL.md for agent identity and
+    MEMORY.md for learned context. SOUL.md defines the agent's personality,
+    communication style, and core behaviors — it is the persistent "who am I"
+    file. MEMORY.md captures learned facts, project context, and session
+    observations — the "what have I learned" file. The separation of identity
+    from knowledge allows the same agent persona to be reused across projects
+    while project-specific memories remain local.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:codex-agents-md
+attributes:
+  displayName: "Codex AGENTS.md"
+  description: |
+    Codex CLI's instruction-file memory system. AGENTS.md is the sole
+    persistent knowledge file, read at session bootstrap and injected into
+    the system prompt. There is no auto-memory extraction, no background
+    consolidation, and no user-level memory scope. Knowledge must be
+    manually authored and maintained. The simplicity is intentional — Codex
+    runs in a sandboxed environment where filesystem writes outside the
+    sandbox boundary are prohibited, making auto-memory extraction
+    architecturally difficult.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: false
+  consolidation: none
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+# External memory services
+---
+nodeKind: MemorySystem
+id: memory-system:mem0-service
+attributes:
+  displayName: "Mem0 Memory Service"
+  description: |
+    API-based memory service that automatically extracts, stores, and retrieves
+    relevant memories from conversations. Provides user-level, session-level,
+    agent-level, and organization-level memory scopes through a simple
+    add/search API. Uses an LLM to identify facts, preferences, and decisions
+    from conversations and persists them without manual curation. Supports
+    multiple vector store backends (Chroma, Qdrant, Pinecone) for semantic
+    retrieval. The closest third-party analog to Claude Code's auto-memory
+    system, with the key trade-off being accuracy of automated extraction.
+  memoryKind: api-service
+  persistence: cross-agent
+  autoExtraction: true
+  consolidation: on-write
+  storageFormat: vector-db
+  privacyFilter: false
+  deduplication: semantic
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  memory_system_integrates:
+    - target: tool:mem0
+---
+nodeKind: MemorySystem
+id: memory-system:zep-service
+attributes:
+  displayName: "Zep Memory Service"
+  description: |
+    Long-term memory server for AI assistants that persists, summarizes, and
+    retrieves conversation history with entity extraction and temporal
+    awareness. Enriches memories with structured entity graphs — tracking
+    people, organizations, and concepts mentioned across conversations.
+    Fact retrieval is time-weighted, so recent knowledge is prioritized.
+    REST API and SDKs for Python and TypeScript. Particularly suited for
+    long-running agent relationships where context evolution matters.
+  memoryKind: api-service
+  persistence: cross-agent
+  autoExtraction: true
+  consolidation: periodic
+  storageFormat: vector-db
+  privacyFilter: false
+  deduplication: semantic
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  memory_system_integrates:
+    - target: tool:zep
+---
+nodeKind: MemorySystem
+id: memory-system:mempalace-service
+attributes:
+  displayName: "MemPalace Memory Service"
+  description: |
+    Benchmarked agent memory system with quality scoring and retrieval ranking.
+    Memories are stored with relevance scores that decay or strengthen over
+    time based on usage patterns. The benchmarking focus means MemPalace
+    prioritizes measurable retrieval accuracy (92.2% fact recall reported)
+    over feature breadth. Scored retrieval ranks memories by relevance,
+    recency, and usage frequency, returning the most contextually appropriate
+    memories for the current conversation.
+  memoryKind: api-service
+  persistence: cross-agent
+  autoExtraction: true
+  consolidation: periodic
+  storageFormat: custom
+  privacyFilter: false
+  deduplication: semantic
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  memory_system_integrates:
+    - target: tool:mempalace
+---
+nodeKind: MemorySystem
+id: memory-system:agentmemory-service
+attributes:
+  displayName: "agentmemory Cross-Agent Memory"
+  description: |
+    Cross-agent persistent memory system with SHA-256 content-addressable
+    deduplication and privacy filtering. The memory processing pipeline
+    runs: SHA-256 dedup (reject exact duplicates) -> privacy filter (strip
+    secrets, credentials, PII) -> store raw observation -> LLM compress
+    (extract structured facts, concepts, narrative) -> vector embedding ->
+    dual index (BM25 for keyword, vector for semantic). Supports cross-agent
+    memory sharing where memories extracted by one agent are retrievable by
+    another. Designed for accuracy-critical deployments where memory integrity
+    and privacy are non-negotiable.
+  memoryKind: hybrid
+  persistence: cross-agent
+  autoExtraction: true
+  consolidation: on-write
+  storageFormat: vector-db
+  privacyFilter: true
+  deduplication: sha256
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  memory_system_integrates:
+    - target: tool:agentmemory
+---
+# Abstract memory patterns
+---
+nodeKind: MemorySystem
+id: memory-system:file-based-markdown-pattern
+attributes:
+  displayName: "File-Based Markdown Memory Pattern"
+  description: |
+    The canonical agent memory pattern: markdown files in a project or user
+    directory, loaded at session start and optionally updated at session end.
+    Used by Claude Code (MEMORY.md), Cline (.cline/memory/), Roo Code
+    (.roo/memory/), and OpenClaw (SOUL.md + MEMORY.md). The pattern is
+    portable (any agent that reads files can use it), version-controllable
+    (git tracks changes), inspectable (humans can read and edit), and
+    composable (multiple files can be combined). The primary limitation is
+    retrieval — file-hierarchy traversal does not scale to large memory
+    corpora, and there is no semantic search without additional tooling.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:vector-backed-recall-pattern
+attributes:
+  displayName: "Vector-Backed Recall Pattern"
+  description: |
+    Memory system pattern where past interactions are embedded as vectors for
+    semantic retrieval. Each memory entry (fact, observation, decision) is
+    embedded using a text embedding model and stored in a vector database.
+    At retrieval time, the current conversation context is embedded and used
+    as a query to find semantically relevant memories via approximate nearest
+    neighbor search. Used by Mem0, Zep, and agentmemory. The pattern excels
+    at semantic matching (finding memories about similar topics regardless of
+    exact wording) but requires embedding infrastructure and can miss
+    memories that are relevant for structural rather than semantic reasons.
+  memoryKind: vector-backed
+  persistence: cross-agent
+  autoExtraction: true
+  consolidation: none
+  storageFormat: vector-db
+  privacyFilter: false
+  deduplication: semantic
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:auto-dream-consolidation-pattern
+attributes:
+  displayName: "Auto-Dream Consolidation Pattern"
+  description: |
+    Memory consolidation pattern where a background subagent periodically
+    reviews accumulated memories and rewrites them into a coherent, pruned
+    form. The process reads all existing memory files, identifies contradicted
+    facts (deletes them), duplicate entries (merges them), stale observations
+    (prunes them), and valid facts (keeps them), then rewrites the memory
+    directory with a clean, organized structure. Claude Code implements this
+    as the auto-dream cycle — a forked subagent with restricted tool surface
+    (read-only Bash, scoped Write) that fires after a configurable number of
+    sessions. The consolidation lock prevents concurrent dream processes from
+    corrupting memory files.
+  memoryKind: file-based
+  persistence: user-scoped
+  autoExtraction: false
+  consolidation: auto-dream
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: semantic
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+# Agent-native memory systems — additional agents
+---
+nodeKind: MemorySystem
+id: memory-system:gemini-cli-memory
+attributes:
+  displayName: "Gemini CLI Memory"
+  description: |
+    Gemini CLI's instruction-file memory system. GEMINI.md is the primary
+    persistent knowledge file, read at session start and injected into the
+    system context. Supports a project-root → nested-directory hierarchy
+    where inner GEMINI.md files extend or override outer ones. Gemini CLI
+    also reads AGENTS.md as an alternate instruction file, providing
+    cross-agent compatibility with Codex and Amp workflows.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:amp-memory
+attributes:
+  displayName: "Amp Memory"
+  description: |
+    Amp's memory system combining AGENTS.md instruction files with
+    Sourcegraph's code intelligence context. AGENTS.md (at project root
+    and in nested directories) provides persistent project-level guidance
+    read at session bootstrap. Sourcegraph code intelligence enriches this
+    with cross-repository symbol search, definition lookup, and historical
+    code context — forming a hybrid memory layer where static instruction
+    files are augmented by live code intelligence retrieved on demand.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:pi-memory
+attributes:
+  displayName: "Pi Memory"
+  description: |
+    Pi's CLAUDE.md-compatible instruction file memory. Pi reads CLAUDE.md
+    (and supports AGENTS.md) at session start, following the same project
+    root → user home hierarchy as Claude Code. This cross-format compatibility
+    means projects instrumented for Claude Code also provide memory context
+    for Pi sessions without any additional files. Pi extends this with its
+    own skill and session management context, but the base memory layer is
+    intentionally compatible with Claude Code's instruction file standard.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:kilo-code-memory
+attributes:
+  displayName: "Kilo Code Memory"
+  description: |
+    Kilo Code's AGENTS.md-based memory system with Kilo Code-specific
+    extensions. AGENTS.md files at project root and nested directories
+    carry project instructions, conventions, and accumulated guidance read
+    at session bootstrap. Kilo Code extends the base AGENTS.md pattern
+    with per-mode memory scoping (similar to Roo Code's mode isolation)
+    — allowing different instruction contexts for code, architect, and
+    review modes within the same project.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:goose-memory
+attributes:
+  displayName: "Goose Memory"
+  description: |
+    Goose's AGENTS.md + profile configuration memory layer. AGENTS.md
+    provides project-scoped persistent guidance read at session start.
+    Goose profiles (goose configure) add user-level configuration memory
+    — preferred models, extension settings, and behavioral defaults that
+    persist across projects. The two-layer model separates project-specific
+    knowledge (AGENTS.md) from user-level preferences (profile), mirroring
+    the project/user scope split in Claude Code.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:devin-memory
+attributes:
+  displayName: "Devin Persistent Workspace Memory"
+  description: |
+    Devin's persistent workspace memory system spanning autonomous sessions.
+    Devin maintains a knowledge base accumulation layer that records project
+    context, architectural decisions, encountered patterns, and deployment
+    procedures across sessions. Memory is stored server-side in Devin's
+    cloud infrastructure and made available at the start of new sessions
+    on the same repository. The system supports explicit knowledge injection
+    via the Devin UI and implicit accumulation through completed task
+    histories, allowing teams to build up a shared Devin memory that
+    improves task completion rates over time.
+  memoryKind: proprietary
+  persistence: project-scoped
+  autoExtraction: true
+  consolidation: periodic
+  storageFormat: custom
+  privacyFilter: false
+  deduplication: semantic
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
+id: memory-system:aider-memory
+attributes:
+  displayName: "Aider Memory"
+  description: |
+    Aider's multi-file memory system combining .aider.conf.yml configuration,
+    conventions files (.aider.conventions.md or CONVENTIONS.md), and the
+    aider repo map as project-scoped memory. .aider.conf.yml persists CLI
+    defaults and model preferences. Conventions files carry project-specific
+    coding standards and patterns injected into every session. The repo map
+    (a compressed representation of all file symbols and their relationships)
+    provides structural project memory — enabling Aider to understand which
+    files and functions are relevant for a given task without full codebase
+    ingestion. Together these form a layered memory architecture: preferences
+    → conventions → structural map.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: false
+  consolidation: none
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+# Cloud/platform memory services
+---
+nodeKind: MemorySystem
+id: memory-system:cloudflare-agent-memory
+attributes:
+  displayName: "Cloudflare Agent Memory"
+  description: |
+    Cloudflare's managed persistent memory service for AI agents, built on
+    Durable Objects and Vectorize. Provides ingest, remember, recall, and
+    forget operations through a REST API. Memories are stored in Durable
+    Objects for strong consistency and optionally indexed in Vectorize for
+    semantic retrieval. Supports team-shared memory profiles where multiple
+    users or agent instances share a common memory namespace. Designed for
+    agents deployed on Cloudflare Workers, but usable from any HTTP client.
+    No self-hosted infrastructure required — Cloudflare manages replication,
+    failover, and global distribution.
+  memoryKind: api-service
+  persistence: cross-agent
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: vector-db
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  memory_system_integrates:
+    - target: tool:cloudflare-agent-memory
+---
+nodeKind: MemorySystem
+id: memory-system:memories-sh
+attributes:
+  displayName: "memories.sh"
+  description: |
+    Local-first unified state layer for coding agents supporting four memory
+    types: session (volatile, cleared per session), semantic (memory.md —
+    persisted facts and preferences), episodic (daily logs of agent
+    interactions), and procedural (workflows and reusable task patterns).
+    Designed as a cross-agent compatibility layer — supports Cursor,
+    Claude Code, GitHub Copilot, Windsurf, Cline, Roo, and Gemini through
+    a shared filesystem layout that each agent can read. All memory is
+    local-first (no cloud dependency), stored as plain files under
+    ~/.memories/, and version-controllable with git. The unified memory
+    type taxonomy makes memories.sh the reference implementation of the
+    four-type memory model.
+  memoryKind: file-based
+  persistence: user-scoped
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  memory_system_integrates:
+    - target: tool:memories-sh
+  integrates_with:
+    - target: agentVersion:cursor:ge-0-0-0
+    - target: agentVersion:claude:ge-0-0-0
+    - target: agentVersion:copilot:ge-0-0-0
+    - target: agent-version:windsurf@current
+    - target: agent-version:cline@current
+    - target: agent-version:roo-code@current
+    - target: agentVersion:gemini:ge-0-0-0
+---
+nodeKind: MemorySystem
+id: memory-system:memori-labs
+attributes:
+  displayName: "Memori Labs Agent Memory"
+  description: |
+    Agent-native memory infrastructure from Memori Labs that structures
+    memory from agent execution traces. Rather than requiring agents to
+    explicitly write memories, Memori Labs processes execution traces (tool
+    calls, reasoning steps, outcomes) to extract structured memory entries
+    automatically. LLM-agnostic — works with any model provider. Memories
+    are organized by entity, event, and procedure types and are retrievable
+    via a REST API. The trace-driven extraction approach means memory
+    accumulates as a side effect of normal agent operation rather than
+    requiring dedicated memory management steps.
+  memoryKind: api-service
+  persistence: cross-agent
+  autoExtraction: true
+  consolidation: on-write
+  storageFormat: custom
+  privacyFilter: false
+  deduplication: semantic
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  memory_system_integrates:
+    - target: tool:memori-labs
+---
+nodeKind: MemorySystem
+id: memory-system:vercel-ai-memory
+attributes:
+  displayName: "Vercel AI SDK Memory"
+  description: |
+    Vercel AI SDK's built-in memory system for agent applications
+    (ai-sdk.dev/docs/agents/memory). Provides a structured memory API
+    integrated directly into the AI SDK agent loop — agents can read and
+    write memories using the same tool-use interface as other AI SDK tools.
+    Supports multiple storage backends (KV, Postgres, Upstash) through
+    Vercel's storage adapters. Memory scoping follows the AI SDK user/
+    session/agent model, with memories persisted in Vercel's managed
+    infrastructure or self-hosted backends. Designed for Next.js-based AI
+    applications where server actions and edge functions serve as the memory
+    persistence layer.
+  memoryKind: api-service
+  persistence: cross-agent
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: custom
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  memory_system_integrates:
+    - target: tool:vercel-ai-memory
+# Abstract memory patterns — additional
+---
+nodeKind: MemorySystem
+id: memory-system:instruction-file-hierarchy
+attributes:
+  displayName: "Instruction File Hierarchy Pattern"
+  description: |
+    The canonical instruction-file memory pattern used across coding agents:
+    a filesystem hierarchy of instruction files where project root → nested
+    directories → user home forms a layered scope. Each level can provide,
+    extend, or override instructions from outer scopes. Implementations
+    include CLAUDE.md (Claude Code, Pi), AGENTS.md (Codex, Amp, Gemini CLI,
+    Goose, OpenCode), .cursorrules and .cursor/rules/*.mdc (Cursor),
+    .clinerules (Cline), .windsurfrules (Windsurf), and .roorules (Roo Code).
+    The pattern is version-controllable, diff-readable, and requires no
+    runtime infrastructure. Cross-agent convergence is visible: Cursor added
+    AGENTS.md support, Pi adopted CLAUDE.md. The hierarchy depth and merge
+    semantics (override vs append) vary by agent but the core pattern —
+    scoped instruction files loaded at session start — is universal.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric

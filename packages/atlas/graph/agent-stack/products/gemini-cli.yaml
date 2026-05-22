@@ -1,0 +1,20 @@
+nodeKind: AgentProduct
+id: agent:gemini-cli
+attributes:
+  displayName: "Gemini CLI"
+  vendor: "Google"
+  homepageUrl: "https://ai.google.dev/"
+  primarySurface: cli
+  supportTier: catalog-backed
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Google's command-line coding agent built on the Gemini model family.
+    Drives Gemini models over the generateContent API and integrates
+    with the local workspace through file and shell tool use.
+edges:
+  has_version:
+    - agentVersion:gemini:ge-0-0-0
+  composed_of:
+    - target: language:typescript
+      role: core

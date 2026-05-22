@@ -8,6 +8,11 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:user-research]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:data-analyst, role:ux-researcher]
 ---
 
 # Survey Design and Administration Skill

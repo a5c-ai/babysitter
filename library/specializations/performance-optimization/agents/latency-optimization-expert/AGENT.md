@@ -6,6 +6,12 @@ backlog-id: AG-008
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:performance-optimization]
+  skillAreas: [skill-area:profiling-cpu, skill-area:tcp-tuning]
+  roles: [role:backend-engineer, role:sre]
+  topics: [topic:observability-driven-development]
 ---
 
 # latency-optimization-expert

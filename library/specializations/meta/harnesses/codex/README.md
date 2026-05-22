@@ -57,7 +57,7 @@ The manifest is the primary entry point for the plugin system. It declares all p
     "email": "support@a5c.ai",
     "url": "https://github.com/a5c-ai/babysitter"
   },
-  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-codex#readme",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-unified/per-harness/codex#readme",
   "repository": "https://github.com/a5c-ai/babysitter",
   "license": "MIT",
   "keywords": ["babysitter", "codex", "orchestration", "hooks", "skills"],
@@ -164,7 +164,7 @@ Plugins can provide:
 - **App connectors** (ChatGPT integration via `.app.json`)
 - **Hooks** (lifecycle event handlers via `hooks.json`)
 
-> **Reference**: [codex-rs/plugin/](https://github.com/openai/codex/tree/main/codex-rs/plugin) (accessed 2026-04-02), [plugins/babysitter-codex/.codex-plugin/plugin.json](https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-codex/.codex-plugin/plugin.json) (accessed 2026-04-02)
+> **Reference**: [codex-rs/plugin/](https://github.com/openai/codex/tree/main/codex-rs/plugin) (accessed 2026-04-02), [plugins/babysitter-unified/per-harness/codex](https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-unified/per-harness/codex) (accessed 2026-05-06)
 
 ---
 
@@ -242,7 +242,7 @@ skills/
 
 Each skill is auto-discoverable by the agent and serves as an invokable entry point.
 
-> **Reference**: [developers.openai.com/codex/cli/slash-commands](https://developers.openai.com/codex/cli/slash-commands) (accessed 2026-04-02), [plugins/babysitter-codex/skills/](https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-codex/skills/) (accessed 2026-04-02)
+> **Reference**: [developers.openai.com/codex/cli/slash-commands](https://developers.openai.com/codex/cli/slash-commands) (accessed 2026-04-02), [plugins/babysitter-unified/per-harness/codex](https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-unified/per-harness/codex) (accessed 2026-05-06)
 
 ---
 
@@ -336,7 +336,7 @@ User-level hooks can also be configured in `~/.codex/config.toml`:
 - `PreToolUse` can return approve/deny/modify outcomes
 - Legacy `notify` hook available for end-of-turn notifications
 
-> **Reference**: [codex-rs/hooks/](https://github.com/openai/codex/tree/main/codex-rs/hooks) (accessed 2026-04-02), [plugins/babysitter-codex/hooks.json](https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-codex/hooks.json) (accessed 2026-04-02)
+> **Reference**: [codex-rs/hooks/](https://github.com/openai/codex/tree/main/codex-rs/hooks) (accessed 2026-04-02), [plugins/babysitter-unified/per-harness/codex](https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-unified/per-harness/codex) (accessed 2026-05-06)
 
 ---
 
@@ -533,7 +533,7 @@ The Babysitter SDK includes a Codex adapter at `packages/sdk/src/harness/codex.t
 - Plugin installation via `babysitter-codex` npm package
 - Harness invocation via `invokeHarness()` with Codex-specific flag mapping
 
-The `plugins/babysitter-codex/` directory contains the Babysitter plugin for Codex with hooks, skills, assets, and version tracking.
+The Codex-specific source lives under `plugins/babysitter-unified/per-harness/codex/`, and generated Codex plugin bundles are produced from that unified source during plugin compilation.
 
 ---
 

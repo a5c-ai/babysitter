@@ -1,0 +1,555 @@
+nodeKind: AgentVersion
+id: agent-version:aider@current
+attributes:
+  agentProductId: agent:aider
+  versionRange: '>=0.50.0'
+  releasedAt: '2024-01-01'
+  cliCommand: aider
+  installMethods:
+  - install:pip
+  minSchemaVersion: 6.0.0
+edges:
+  version_of:
+  - agent:aider
+  composed_of:
+  - target: knowledge-fabric-impl:aider.knowledge@current
+    role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:aider-memory
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=0.50.0'
+    level: full
+    notes: Aider streams model output by default.
+  - target: capability:can-multi-turn
+    versionRange: '>=0.50.0'
+    level: full
+    notes: Aider maintains multi-turn chat context with /commit etc.
+---
+nodeKind: AgentVersion
+id: agent-version:continue@current
+attributes:
+  agentProductId: agent:continue
+  versionRange: '>=0.8.0'
+  releasedAt: '2024-01-01'
+  cliCommand: continue
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  version_of:
+  - agent:continue
+  composed_of:
+  - target: knowledge-fabric-impl:continue.knowledge@current
+    role: knowledge-fabric
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=0.8.0'
+    level: full
+    notes: Continue streams completions in the IDE.
+  - target: capability:supports-mcp
+    versionRange: '>=0.9.0'
+    level: full
+    notes: Continue supports MCP servers as of late-2024 releases.
+  - target: capability:can-multi-turn
+    versionRange: '>=0.8.0'
+    level: full
+    notes: Continue's chat panel maintains multi-turn context.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern
+---
+nodeKind: AgentVersion
+id: agent-version:cline@current
+attributes:
+  agentProductId: agent:cline
+  versionRange: '>=3.0.0'
+  releasedAt: '2024-07-01'
+  cliCommand: cline
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  version_of:
+  - agent:cline
+  composed_of:
+  - target: knowledge-fabric-impl:cline.knowledge@current
+    role: knowledge-fabric
+  uses_memory_system:
+  - target: memory-system:cline-memory-bank
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=3.0.0'
+    level: full
+    notes: Cline streams model output token-by-token in the VS Code panel.
+  - target: capability:supports-mcp
+    versionRange: '>=3.0.0'
+    level: full
+    notes: Cline ships with native MCP server support (configurable via cline_mcp_settings.json).
+  - target: capability:supports-tool-use
+    versionRange: '>=3.0.0'
+    level: full
+    notes: Cline drives terminal commands and file edits via tool-use.
+---
+nodeKind: AgentVersion
+id: agent-version:roo-code@current
+attributes:
+  agentProductId: agent:roo-code
+  versionRange: '>=3.0.0'
+  releasedAt: '2024-10-01'
+  cliCommand: roo
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  version_of:
+  - agent:roo-code
+  composed_of:
+  - target: knowledge-fabric-impl:roo-code.knowledge@current
+    role: knowledge-fabric
+  uses_memory_system:
+  - target: memory-system:roo-code-memory
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=3.0.0'
+    level: full
+    notes: Roo Code (Cline fork) preserves streaming behavior.
+  - target: capability:supports-mcp
+    versionRange: '>=3.0.0'
+    level: full
+    notes: Roo Code inherits MCP support from Cline lineage.
+---
+nodeKind: AgentVersion
+id: agent-version:goose@current
+attributes:
+  agentProductId: agent:goose
+  versionRange: '>=1.0.0'
+  releasedAt: '2024-09-01'
+  cliCommand: goose
+  installMethods:
+  - install:brew
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: knowledge-fabric-impl:goose.knowledge@current
+    role: knowledge-fabric
+  version_of:
+  - agent:goose
+  uses_memory_system:
+  - target: memory-system:goose-memory
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=1.0.0'
+    level: full
+    notes: Block's Goose streams responses through its CLI/desktop.
+  - target: capability:supports-mcp
+    versionRange: '>=1.0.0'
+    level: full
+    notes: Goose extensions are MCP servers.
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0'
+    level: full
+---
+nodeKind: AgentVersion
+id: agent-version:devin@current
+attributes:
+  agentProductId: agent:devin
+  versionRange: '>=1.0.0'
+  releasedAt: '2024-03-12'
+  cliCommand: devin
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: knowledge-fabric-impl:devin.knowledge@current
+    role: knowledge-fabric
+  version_of:
+  - agent:devin
+  uses_memory_system:
+  - target: memory-system:devin-memory
+  sourced_from: []
+  supports:
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0'
+    level: full
+    notes: Devin sessions are inherently multi-turn.
+  - target: capability:streaming
+    versionRange: '>=1.0.0'
+    level: partial
+    notes: Devin's hosted UI streams progress; programmatic API streaming is limited.
+---
+nodeKind: AgentVersion
+id: agent-version:zed@current
+attributes:
+  agentProductId: agent:zed
+  versionRange: '>=0.150.0'
+  releasedAt: '2024-05-01'
+  cliCommand: zed
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: knowledge-fabric-impl:zed.knowledge@current
+    role: knowledge-fabric
+  version_of:
+  - agent:zed
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=0.150.0'
+    level: full
+    notes: Zed's Assistant panel streams completions.
+  - target: capability:supports-mcp
+    versionRange: '>=0.160.0'
+    level: experimental
+    notes: Zed added MCP-style context server support; surface API still evolving.
+  - target: capability:streaming
+    versionRange: current
+    level: full
+    notes: Zed Assistant streams completions in the editor.
+  - target: capability:can-multi-turn
+    versionRange: current
+    level: full
+    notes: Multi-turn chat in the assistant panel.
+  - target: capability:supports-mcp
+    versionRange: current
+    level: full
+    notes: Zed shipped native MCP server support in 2025.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern
+---
+nodeKind: AgentVersion
+id: agent-version:windsurf@current
+attributes:
+  agentProductId: agent:windsurf
+  versionRange: '>=1.0.0'
+  releasedAt: '2024-11-01'
+  cliCommand: windsurf
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  version_of:
+  - agent:windsurf
+  composed_of:
+  - target: knowledge-fabric-impl:windsurf.knowledge@current
+    role: knowledge-fabric
+  uses_memory_system:
+  - target: memory-system:windsurf-memories
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=1.0.0'
+    level: full
+    notes: Windsurf (Cascade) streams completions.
+  - target: capability:supports-mcp
+    versionRange: '>=1.0.0'
+    level: full
+    notes: Windsurf Cascade supports MCP servers.
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0'
+    level: full
+  - target: capability:streaming
+    versionRange: current
+    level: full
+    notes: Windsurf Cascade streams turn output.
+  - target: capability:can-multi-turn
+    versionRange: current
+    level: full
+    notes: Cascade is multi-turn agentic by design.
+  - target: capability:supports-mcp
+    versionRange: current
+    level: full
+    notes: Windsurf added MCP plugin support in late 2024.
+  - target: capability:extended-thinking
+    versionRange: current
+    level: partial
+    notes: Inherits extended-thinking when backed by reasoning models (Sonnet 4.5+,
+      GPT-5).
+---
+nodeKind: AgentVersion
+id: agent-version:replit-agent@current
+attributes:
+  agentProductId: agent:replit-agent
+  versionRange: '>=1.0.0'
+  releasedAt: '2024-09-01'
+  cliCommand: replit
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: knowledge-fabric-impl:replit-agent.knowledge@current
+    role: knowledge-fabric
+  version_of:
+  - agent:replit-agent
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=1.0.0'
+    level: full
+    notes: Replit Agent streams progress in browser.
+  - target: capability:streaming
+    versionRange: current
+    level: full
+    notes: Streams agent thoughts and edits in the Replit workspace.
+  - target: capability:can-multi-turn
+    versionRange: current
+    level: full
+    notes: Iterative back-and-forth edits with the user.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern
+---
+nodeKind: AgentVersion
+id: agent-version:bolt@current
+attributes:
+  agentProductId: agent:bolt
+  versionRange: '>=1.0.0'
+  releasedAt: '2024-10-01'
+  cliCommand: bolt
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: knowledge-fabric-impl:bolt.knowledge@current
+    role: knowledge-fabric
+  version_of:
+  - agent:bolt
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=1.0.0'
+    level: full
+    notes: Bolt.new streams generation in WebContainers.
+  - target: capability:streaming
+    versionRange: current
+    level: full
+    notes: bolt.new streams generated app code as it builds.
+  - target: capability:can-multi-turn
+    versionRange: current
+    level: full
+    notes: Iterative refinement of a generated app via chat.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern
+---
+nodeKind: AgentVersion
+id: agent-version:v0@current
+attributes:
+  agentProductId: agent:v0
+  versionRange: '>=1.0.0'
+  releasedAt: '2023-10-01'
+  cliCommand: v0
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: knowledge-fabric-impl:v0.knowledge@current
+    role: knowledge-fabric
+  version_of:
+  - agent:v0
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=1.0.0'
+    level: full
+    notes: Vercel v0 streams generated component code.
+  - target: capability:streaming
+    versionRange: current
+    level: full
+    notes: v0.dev streams component / page generations.
+  - target: capability:can-multi-turn
+    versionRange: current
+    level: full
+    notes: Conversational refinement of generated UI.
+  uses_memory_system:
+    - target: memory-system:instruction-file-hierarchy
+---
+nodeKind: AgentVersion
+id: agent-version:lovable@current
+attributes:
+  agentProductId: agent:lovable
+  versionRange: '>=1.0.0'
+  releasedAt: '2024-01-01'
+  cliCommand: lovable
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: knowledge-fabric-impl:lovable.knowledge@current
+    role: knowledge-fabric
+  version_of:
+  - agent:lovable
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=1.0.0'
+    level: full
+    notes: Lovable streams generation.
+  - target: capability:streaming
+    versionRange: current
+    level: full
+    notes: Lovable streams generated app code.
+  - target: capability:can-multi-turn
+    versionRange: current
+    level: full
+    notes: Iterative chat-driven refinement.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern
+---
+nodeKind: AgentVersion
+id: agent-version:openhands@current
+attributes:
+  agentProductId: agent:openhands
+  versionRange: '>=0.10.0'
+  releasedAt: '2024-03-01'
+  cliCommand: openhands
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: knowledge-fabric-impl:openhands.knowledge@current
+    role: knowledge-fabric
+  version_of:
+  - agent:openhands
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=0.10.0'
+    level: full
+    notes: OpenHands streams agent steps via its event-stream.
+  - target: capability:supports-mcp
+    versionRange: '>=0.20.0'
+    level: experimental
+    notes: OpenHands added MCP integration support in 0.2x line.
+  - target: capability:supports-tool-use
+    versionRange: '>=0.10.0'
+    level: full
+    notes: OpenHands' core action interface is tool-use.
+  - target: capability:streaming
+    versionRange: current
+    level: full
+    notes: OpenHands streams agent reasoning + tool output.
+  - target: capability:can-multi-turn
+    versionRange: current
+    level: full
+    notes: Long agent loops with multi-turn dialogue.
+  - target: capability:supports-mcp
+    versionRange: current
+    level: partial
+    notes: MCP support added via plugins; not all transports verified.
+  - target: capability:streaming
+    versionRange: current
+    level: full
+    notes: Streams tool-call deltas where the backing model supports it.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern
+---
+nodeKind: AgentVersion
+id: agent-version:warp@current
+attributes:
+  agentProductId: agent:warp
+  versionRange: '>=0.2024.0'
+  releasedAt: '2022-04-01'
+  cliCommand: warp
+  installMethods:
+  - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  composed_of:
+  - target: knowledge-fabric-impl:warp.knowledge@current
+    role: knowledge-fabric
+  version_of:
+  - agent:warp
+  sourced_from: []
+  supports:
+  - target: capability:streaming
+    versionRange: '>=0.2024.0'
+    level: full
+    notes: Warp Agent streams output in the terminal.
+  - target: capability:can-multi-turn
+    versionRange: '>=0.2024.0'
+    level: full
+    notes: Warp Agent maintains conversation context per session.
+  - target: capability:streaming
+    versionRange: current
+    level: full
+    notes: Warp Agent Mode streams output in the terminal.
+  - target: capability:can-multi-turn
+    versionRange: current
+    level: full
+    notes: Multi-turn agent loop with the user.
+  - target: capability:supports-mcp
+    versionRange: current
+    level: full
+    notes: Warp added native MCP support in 2025.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern
+---
+nodeKind: AgentVersion
+id: agent-version:openai-agents-sdk@current
+attributes:
+  agentProductId: agent:openai-agents-sdk
+  versionRange: '>=0.1.0'
+  releasedAt: '2025-03-11'
+  cliCommand: '<sdk:openai-agents>'
+  installMethods:
+    - install:pip
+  minSchemaVersion: 6.0.0
+edges:
+  version_of:
+    - agent:openai-agents-sdk
+  composed_of:
+    - target: agent-core-impl:openai-agents-sdk.core@current
+      role: core
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
+      role: runtime
+  sourced_from: []
+  supports:
+    - target: capability:streaming
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Runner.run_streamed() yields a typed event stream.
+    - target: capability:supports-tool-use
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Function tools and OpenAI hosted tools dispatched per turn.
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Handoffs invoke nested agent runs.
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+    - target: capability:supports-guardrails
+      versionRange: '>=0.1.0'
+      level: full
+      notes: |
+        Input and output guardrails run in parallel with agent execution.
+        InputGuardrail validates user input; OutputGuardrail validates
+        agent responses. Guardrails can tripwire to halt execution.
+    - target: capability:supports-handoffs
+      versionRange: '>=0.1.0'
+      level: full
+      notes: |
+        Structured agent-to-agent handoffs modeled as tool calls. Handoff
+        transfers conversation ownership to another Agent instance with
+        defined input filters and output types.
+    - target: capability:supports-tracing
+      versionRange: '>=0.1.0'
+      level: full
+      notes: |
+        Built-in tracing captures the full execution flow — LLM calls,
+        tool invocations, handoffs, and guardrail checks. Traces are
+        exportable to external backends for debugging and observability.
+  uses_memory_system:
+    - target: memory-system:vector-backed-recall-pattern

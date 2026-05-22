@@ -3,6 +3,11 @@
  * @description Process for creating, structuring, and maintaining self-service knowledge content with quality controls
  * @inputs { contentRequirements: array, existingArticles: array, audienceProfiles: object, styleGuide: object }
  * @outputs { success: boolean, contentPlan: object, articles: array, qualityReport: object, artifacts: array }
+  * @graph
+ *   domains: [domain:customer-experience]
+ *   skillAreas: [skill-area:customer-success, skill-area:user-research, skill-area:product-discovery]
+ *   workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+ *   roles: [role:product-designer, role:customer-success-manager, role:ux-researcher]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

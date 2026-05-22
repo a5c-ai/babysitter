@@ -2,6 +2,14 @@
 name: prettier
 description: Prettier configuration and integration.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:code-analysis-linting, skill-area:code-review-practice]
+  roles: [role:frontend-engineer]
+  workflows: [workflow:code-review]
+  topics: [topic:developer-experience]
+
 ---
 
 # Prettier Skill

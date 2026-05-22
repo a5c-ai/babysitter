@@ -3,6 +3,12 @@ name: macos-notarization-workflow
 description: Automate Apple notarization with xcrun notarytool for macOS application distribution
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [macos, notarization, codesign, apple, distribution]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-system-integration, skill-area:deployment-infrastructure-management]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # macos-notarization-workflow

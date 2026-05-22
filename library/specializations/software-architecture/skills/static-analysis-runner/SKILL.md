@@ -6,6 +6,14 @@ allowed-tools:
   - Read
   - Write
   - Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:code-analysis-linting, skill-area:sast]
+  roles: [role:tech-lead, role:principal-engineer]
+  workflows: [workflow:code-review]
+  topics: [topic:code-review-best-practices]
+
 ---
 
 # Static Analysis Runner Skill

@@ -1,0 +1,134 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:vibe-kanban-task-card
+attributes:
+  displayName: "Vibe Kanban Task Card"
+  description: |
+    Draggable kanban card representing a single agent work item. Each card
+    contains task description, assigned coding agent, git worktree path,
+    progress indicators, and inline code review gates at column transitions.
+    Cards can be dragged between columns (todo, in-progress, review, done)
+    to trigger agent lifecycle actions. The card surface shows real-time
+    streaming output from the assigned agent, branch status, and PR readiness.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:vibe-kanban-agent-picker
+attributes:
+  displayName: "Vibe Kanban Agent Picker"
+  description: |
+    Agent selection control for assigning a coding agent (Claude Code,
+    Codex, Gemini CLI, etc.) to a kanban task card. Supports choosing
+    from 10+ registered agents and configuring per-agent worktree
+    isolation settings. The picker displays agent availability, supported
+    capabilities, and recent execution history to inform selection.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:vibe-kanban-branch-view
+attributes:
+  displayName: "Vibe Kanban Branch View"
+  description: |
+    Parallel branch status visualization showing all active git branches
+    created by agent tasks. Displays branch name, diff stats, CI status,
+    merge readiness, and the owning agent for each branch. Enables quick
+    navigation between parallel workstreams and conflict detection across
+    concurrent agent branches.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:vibe-kanban-pr-review
+attributes:
+  displayName: "Vibe Kanban PR Review"
+  description: |
+    Integrated pull request review tool embedded in the kanban board.
+    When a task card moves to the review column, the PR review primitive
+    shows the full diff, CI results, screenshot comparisons, and provides
+    approve/request-changes controls. Supports inline comments and
+    agent-generated review summaries.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:review
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:vibe-kanban-workspace-isolation
+attributes:
+  displayName: "Vibe Kanban Workspace Isolation"
+  description: |
+    Per-task workspace directory isolation primitive. Each kanban task card
+    gets a dedicated git worktree directory, ensuring agents cannot
+    interfere with each other's file operations. The isolation boundary
+    includes separate terminal sessions, environment variables, and dev
+    server ports per workspace.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:vibe-kanban-progress-stream
+attributes:
+  displayName: "Vibe Kanban Progress Stream"
+  description: |
+    Real-time agent output streaming primitive. Captures stdout, stderr,
+    and structured tool-use events from running agents and renders them
+    in the task card's live output pane. Supports collapsible output
+    sections, auto-scroll, and filtering by event type (tool calls,
+    file edits, terminal commands).
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:observability
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:vibe-kanban-multi-agent-dispatch
+attributes:
+  displayName: "Vibe Kanban Multi-Agent Dispatch"
+  description: |
+    Dispatch work to multiple coding agents simultaneously. Supports
+    batch assignment of tasks to agents, parallel execution tracking,
+    and coordinated completion handling. The dispatch control shows
+    agent load balancing, queue depth, and estimated completion times
+    across all active agents.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction

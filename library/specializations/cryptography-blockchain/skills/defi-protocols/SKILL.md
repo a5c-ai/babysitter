@@ -2,6 +2,11 @@
 name: defi-protocols
 description: Integration expertise for major DeFi protocols including Uniswap, Aave, Compound, Chainlink, Curve, and Balancer. Supports swaps, liquidity provision, lending, borrowing, oracles, and flash loans.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:smart-contract-development-testing, skill-area:on-chain-data-oracle-integration, skill-area:token-nft-management]
+  roles: [role:backend-engineer, role:security-engineer]
 ---
 
 # DeFi Protocol Integration Skill

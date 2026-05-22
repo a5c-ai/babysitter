@@ -2,6 +2,13 @@
 name: design-tokens
 description: Design token management, generation, and multi-platform support.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:design-systems, skill-area:ui-styling]
+  roles: [role:frontend-engineer, role:product-designer]
+  topics: [topic:atomic-design]
+
 ---
 
 # Design Tokens Skill

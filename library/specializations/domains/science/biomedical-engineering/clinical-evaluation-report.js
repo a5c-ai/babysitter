@@ -17,6 +17,12 @@
  * - MEDDEV 2.7/1 Rev 4 Clinical Evaluation
  * - EU MDR 2017/745 Article 61 Clinical Evaluation
  * - MDCG 2020-13 Clinical Evaluation Assessment Report Template
+ *
+ * @graph
+ *   domains: [domain:biomedical-engineering]
+ *   skillAreas: [skill-area:data-analysis, skill-area:sensor-fusion, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:biomedical-engineer, role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

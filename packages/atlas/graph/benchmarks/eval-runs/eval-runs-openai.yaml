@@ -1,0 +1,151 @@
+---
+nodeKind: EvalRun
+id: eval-run:gpqa.gpt-5.2025-08
+attributes:
+  target: "model:gpt-5@current"
+  benchmarkId: benchmark:gpqa
+  testSetId: test-set:gpqa-diamond-2024
+  targetId: model:gpt-5@current
+  runAt: "2025-08-07T00:00:00Z"
+  runBy: "openai"
+  configHash: "sha256:placeholder-gpt-5-gpqa"
+edges:
+  evaluates_target:
+    - model:gpt-5@current
+  for_benchmark:
+    - benchmark:gpqa
+---
+nodeKind: EvalRun
+id: eval-run:human-eval.gpt-5.2025-08
+attributes:
+  target: "model:gpt-5@current"
+  benchmarkId: benchmark:human-eval
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:gpt-5@current
+  runAt: "2025-08-07T00:00:00Z"
+  runBy: "openai"
+  configHash: "sha256:placeholder-gpt-5-human-eval"
+edges:
+  evaluates_target:
+    - model:gpt-5@current
+  for_benchmark:
+    - benchmark:human-eval
+---
+nodeKind: EvalRun
+id: eval-run:mmlu.o1.2024-12
+attributes:
+  target: "model:o1@current"
+  benchmarkId: benchmark:mmlu
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:o1@current
+  runAt: "2024-12-05T00:00:00Z"
+  runBy: "openai"
+  configHash: "sha256:placeholder-o1-mmlu"
+edges:
+  evaluates_target:
+    - model:o1@current
+  for_benchmark:
+    - benchmark:mmlu
+---
+nodeKind: EvalRun
+id: eval-run:math.o3.2025-04
+attributes:
+  target: "model:o3@current"
+  benchmarkId: benchmark:math
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:o3@current
+  runAt: "2025-04-16T00:00:00Z"
+  runBy: "openai"
+  configHash: "sha256:placeholder-o3-math"
+edges:
+  evaluates_target:
+    - model:o3@current
+  for_benchmark:
+    - benchmark:math
+---
+nodeKind: EvalRun
+id: eval-run:bfcl.gpt-5.2025-08
+attributes:
+  target: "model:gpt-5@current"
+  benchmarkId: benchmark:berkeley-function-calling
+  testSetId: test-set:bfcl-v3
+  targetId: model:gpt-5@current
+  runAt: "2025-08-07T00:00:00Z"
+  runBy: "berkeley-gorilla"
+  configHash: "sha256:placeholder-gpt-5-bfcl-v3"
+edges:
+  evaluates_target:
+    - model:gpt-5@current
+  uses_test_set:
+    - test-set:bfcl-v3
+  for_benchmark:
+    - benchmark:berkeley-function-calling
+---
+nodeKind: EvalRun
+id: eval-run:gpqa-diamond.gpt-5.2025-08
+attributes:
+  target: "model:gpt-5@current"
+  benchmarkId: benchmark:gpqa
+  testSetId: test-set:gpqa-diamond-2024
+  targetId: model:gpt-5@current
+  runAt: "2025-08-07T00:00:00Z"
+  runBy: "openai"
+  configHash: "sha256:placeholder-gpt-5-gpqa-diamond"
+edges:
+  evaluates_target:
+    - model:gpt-5@current
+  uses_test_set:
+    - test-set:gpqa-diamond-2024
+  for_benchmark:
+    - benchmark:gpqa
+---
+nodeKind: EvalRun
+id: eval-run:human-eval-plus.gpt-5.2025-08
+attributes:
+  target: "model:gpt-5@current"
+  benchmarkId: benchmark:bigcode-evalplus
+  targetId: model:gpt-5@current
+  runAt: "2025-08-07T00:00:00Z"
+  runBy: "evalplus-leaderboard"
+  configHash: "sha256:placeholder-gpt-5-evalplus"
+edges:
+  evaluates_target:
+    - model:gpt-5@current
+  for_benchmark:
+    - benchmark:bigcode-evalplus
+---
+nodeKind: EvalRun
+id: eval-run:gpqa-diamond.gpt-5-4.2026-03-17
+attributes:
+  target: "model:gpt-5.4@current"
+  benchmarkId: benchmark:gpqa
+  testSetId: test-set:gpqa-diamond-2024
+  targetId: model:gpt-5.4@current
+  runAt: "2026-03-17T00:00:00Z"
+  runBy: "openai"
+  configHash: "sha256:openai-gpt-5-4-gpqa-diamond-2026-03-17"
+edges:
+  evaluates_target:
+    - model:gpt-5.4@current
+  uses_test_set:
+    - test-set:gpqa-diamond-2024
+  for_benchmark:
+    - benchmark:gpqa
+---
+nodeKind: EvalRun
+id: eval-run:gpqa-diamond.gpt-5-4-mini.2026-03-17
+attributes:
+  target: "model:gpt-5.4-mini@current"
+  benchmarkId: benchmark:gpqa
+  testSetId: test-set:gpqa-diamond-2024
+  targetId: model:gpt-5.4-mini@current
+  runAt: "2026-03-17T00:00:00Z"
+  runBy: "openai"
+  configHash: "sha256:openai-gpt-5-4-mini-gpqa-diamond-2026-03-17"
+edges:
+  evaluates_target:
+    - model:gpt-5.4-mini@current
+  uses_test_set:
+    - test-set:gpqa-diamond-2024
+  for_benchmark:
+    - benchmark:gpqa

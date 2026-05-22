@@ -1,0 +1,351 @@
+{
+  "projectName": "Global Smart Manufacturing Intelligence Platform",
+  "domainDescription": "Enterprise-scale IoT platform for smart manufacturing across 150+ global facilities with real-time production optimization, predictive maintenance, quality management, and regulatory compliance across multiple jurisdictions.",
+  "ontologyScope": "encyclopedic",
+  "graphDepth": "complete",
+  "wikiTarget": "full-reference",
+  "projectComplexity": "enterprise",
+  "stakeholderContext": "multi-organizational",
+  "domainType": "manufacturing-iot",
+  "riskProfile": "high",
+  "targetQuality": 92,
+  "maxIterationsPerPhase": 8,
+
+  "complexityFactors": {
+    "technical": {
+      "dataVolume": "10TB+ daily from 50K+ sensors per facility",
+      "realTimeRequirements": "Sub-second response for safety-critical alerts",
+      "systemIntegration": "Integration with 200+ legacy manufacturing systems",
+      "geographicDistribution": "Global deployment across 6 continents",
+      "regulatoryComplexity": "Compliance with manufacturing regulations in 45+ countries"
+    },
+    "organizational": {
+      "stakeholderComplexity": "500+ stakeholders across engineering, operations, quality, safety, compliance",
+      "culturalDiversity": "Multi-cultural teams across different time zones and languages",
+      "changeDynamics": "Rapid technology evolution requiring continuous adaptation",
+      "businessCritical": "Production downtime costs $50K+ per minute per facility"
+    }
+  },
+
+  "strategicContext": {
+    "businessGoals": {
+      "primary": [
+        {
+          "goal": "Operational Excellence Through Intelligence",
+          "metric": "15% reduction in overall equipment effectiveness (OEE) variability",
+          "timeline": "18 months",
+          "rationale": "Consistent high performance across all facilities drives competitive advantage",
+          "stakeholders": ["COO", "Plant Managers", "Operations Teams"]
+        },
+        {
+          "goal": "Predictive Quality Management",
+          "metric": "40% reduction in quality incidents and 25% reduction in scrap/rework",
+          "timeline": "12 months",
+          "rationale": "Proactive quality management reduces costs and improves customer satisfaction",
+          "stakeholders": ["Quality Directors", "Manufacturing Engineers", "Customer Service"]
+        },
+        {
+          "goal": "Predictive Maintenance Optimization",
+          "metric": "30% reduction in unplanned downtime and 20% reduction in maintenance costs",
+          "timeline": "24 months",
+          "rationale": "AI-driven maintenance prevents failures and optimizes resource allocation",
+          "stakeholders": ["Maintenance Managers", "Reliability Engineers", "Finance"]
+        },
+        {
+          "goal": "Global Regulatory Compliance Automation",
+          "metric": "100% compliance with manufacturing regulations, zero violations",
+          "timeline": "Ongoing",
+          "rationale": "Automated compliance reduces risk and operational overhead",
+          "stakeholders": ["Compliance Officers", "Legal Teams", "Quality Assurance"]
+        },
+        {
+          "goal": "Supply Chain Intelligence",
+          "metric": "20% reduction in supply chain disruptions and inventory optimization",
+          "timeline": "18 months",
+          "rationale": "Real-time supply chain visibility enables proactive risk management",
+          "stakeholders": ["Supply Chain Directors", "Procurement Teams", "Logistics"]
+        }
+      ],
+      "technical": [
+        {
+          "goal": "Real-Time Data Processing at Scale",
+          "metric": "Process 100M+ data points per minute with <500ms latency",
+          "rationale": "Manufacturing decisions require real-time data to be effective"
+        },
+        {
+          "goal": "Edge-Cloud Hybrid Architecture",
+          "metric": "99.9% uptime with seamless edge-cloud orchestration",
+          "rationale": "Manufacturing cannot tolerate connectivity issues or cloud dependencies"
+        },
+        {
+          "goal": "Semantic Interoperability",
+          "metric": "Automated integration with 95% of manufacturing systems",
+          "rationale": "Ontology-driven integration reduces manual configuration and maintenance"
+        }
+      ]
+    },
+
+    "userNeeds": {
+      "functionalNeeds": {
+        "plantManagers": [
+          {
+            "need": "Real-Time Production Dashboard",
+            "description": "Unified view of production status, quality metrics, and performance across all lines",
+            "priority": "critical",
+            "complexity": "high",
+            "linkedGoals": ["Operational Excellence Through Intelligence"]
+          },
+          {
+            "need": "Predictive Analytics for Planning",
+            "description": "Forecasting production capacity, maintenance windows, and quality outcomes",
+            "priority": "high",
+            "complexity": "very high",
+            "linkedGoals": ["Predictive Quality Management", "Predictive Maintenance Optimization"]
+          }
+        ],
+        "maintenanceTeams": [
+          {
+            "need": "Predictive Maintenance Recommendations",
+            "description": "AI-driven maintenance recommendations with reasoning and confidence levels",
+            "priority": "critical",
+            "complexity": "very high",
+            "linkedGoals": ["Predictive Maintenance Optimization"]
+          },
+          {
+            "need": "Mobile Field Service Integration",
+            "description": "Mobile access to maintenance data, work orders, and diagnostic information",
+            "priority": "high",
+            "complexity": "moderate",
+            "linkedGoals": ["Operational Excellence Through Intelligence"]
+          }
+        ],
+        "qualityEngineers": [
+          {
+            "need": "Root Cause Analysis Automation",
+            "description": "Automated analysis of quality issues with suggested corrective actions",
+            "priority": "critical",
+            "complexity": "very high",
+            "linkedGoals": ["Predictive Quality Management"]
+          },
+          {
+            "need": "Statistical Process Control Integration",
+            "description": "Real-time SPC charts with automated alerts and trend analysis",
+            "priority": "high",
+            "complexity": "high",
+            "linkedGoals": ["Predictive Quality Management"]
+          }
+        ],
+        "complianceOfficers": [
+          {
+            "need": "Automated Compliance Reporting",
+            "description": "Generate regulatory reports automatically from operational data",
+            "priority": "critical",
+            "complexity": "very high",
+            "linkedGoals": ["Global Regulatory Compliance Automation"]
+          },
+          {
+            "need": "Audit Trail Management",
+            "description": "Comprehensive audit trails for all manufacturing and quality decisions",
+            "priority": "critical",
+            "complexity": "high",
+            "linkedGoals": ["Global Regulatory Compliance Automation"]
+          }
+        ]
+      },
+      "nonFunctionalNeeds": {
+        "performance": [
+          {
+            "need": "Real-Time Response",
+            "description": "Sub-second response for safety-critical alerts and production decisions",
+            "measurement": "<500ms end-to-end latency",
+            "linkedConstraints": ["Real-Time Processing Requirements"]
+          },
+          {
+            "need": "Massive Scale Processing",
+            "description": "Handle data from 7.5M+ sensors across global facilities",
+            "measurement": "100M+ events per minute processing capacity",
+            "linkedConstraints": ["Data Volume and Throughput"]
+          }
+        ],
+        "reliability": [
+          {
+            "need": "High Availability",
+            "description": "Manufacturing operations cannot tolerate significant downtime",
+            "measurement": "99.9% uptime with <5 minute recovery time",
+            "linkedConstraints": ["Business Critical Operations"]
+          },
+          {
+            "need": "Disaster Recovery",
+            "description": "Rapid recovery from facility or regional outages",
+            "measurement": "RTO <30 minutes, RPO <5 minutes",
+            "linkedConstraints": ["Geographic Distribution Requirements"]
+          }
+        ],
+        "security": [
+          {
+            "need": "Industrial Security",
+            "description": "Protection against cyber threats to manufacturing systems",
+            "standards": ["IEC 62443", "NIST Cybersecurity Framework"],
+            "linkedConstraints": ["Manufacturing Security Regulations"]
+          },
+          {
+            "need": "Data Sovereignty",
+            "description": "Compliance with data localization requirements in each jurisdiction",
+            "standards": ["GDPR", "Local data protection laws"],
+            "linkedConstraints": ["Multi-Jurisdictional Compliance"]
+          }
+        ]
+      },
+      "emotionalNeeds": [
+        {
+          "need": "Trust in AI Recommendations",
+          "description": "Operations teams must trust AI-driven recommendations for critical decisions",
+          "designImplications": ["Explainable AI interfaces", "Confidence scoring", "Override capabilities"],
+          "affectedStakeholders": ["Plant Managers", "Maintenance Teams", "Quality Engineers"]
+        },
+        {
+          "need": "Operational Control and Autonomy",
+          "description": "Local teams need to maintain control while benefiting from global intelligence",
+          "designImplications": ["Local override capabilities", "Customizable dashboards", "Local performance metrics"],
+          "affectedStakeholders": ["Plant Operations", "Local Management"]
+        }
+      ]
+    },
+
+    "constraints": {
+      "regulatoryConstraints": [
+        {
+          "constraint": "Manufacturing Safety Regulations",
+          "description": "Compliance with OSHA, EU Safety Directives, and local safety regulations",
+          "jurisdictions": ["USA", "EU", "Canada", "Australia", "Brazil", "Mexico", "China", "India"],
+          "affectedAreas": ["Safety alert systems", "Incident reporting", "Risk assessment automation"],
+          "implementation": "Real-time safety monitoring with automated regulatory reporting"
+        },
+        {
+          "constraint": "Product Quality Standards",
+          "description": "Compliance with ISO 9001, industry-specific quality standards, and customer requirements",
+          "standards": ["ISO 9001", "AS9100 (Aerospace)", "ISO/TS 16949 (Automotive)", "FDA 21 CFR Part 820 (Medical)"],
+          "affectedAreas": ["Quality management systems", "Traceability", "Statistical process control"],
+          "implementation": "Automated quality compliance monitoring and reporting"
+        },
+        {
+          "constraint": "Environmental Regulations",
+          "description": "Compliance with environmental protection and sustainability regulations",
+          "standards": ["ISO 14001", "EPA regulations", "EU REACH", "Local environmental laws"],
+          "affectedAreas": ["Emissions monitoring", "Waste tracking", "Energy consumption reporting"],
+          "implementation": "Real-time environmental monitoring and automated compliance reporting"
+        },
+        {
+          "constraint": "Data Protection and Privacy",
+          "description": "Protection of sensitive manufacturing and employee data",
+          "standards": ["GDPR", "CCPA", "Local data protection laws"],
+          "affectedAreas": ["Data collection", "Data processing", "Cross-border data transfers"],
+          "implementation": "Privacy-preserving analytics and data sovereignty compliance"
+        }
+      ],
+      "technicalConstraints": [
+        {
+          "constraint": "Legacy System Integration",
+          "description": "Must integrate with existing MES, ERP, SCADA, and PLCs without disruption",
+          "affectedSystems": ["SAP ERP", "Wonderware MES", "GE iFIX SCADA", "Siemens PLCs", "Rockwell Automation"],
+          "limitations": ["Limited API availability", "Proprietary protocols", "Downtime restrictions"],
+          "workarounds": ["Protocol converters", "Edge computing adapters", "Gradual migration strategies"]
+        },
+        {
+          "constraint": "Network Infrastructure Limitations",
+          "description": "Varying network capabilities across global facilities",
+          "limitations": ["Bandwidth constraints in remote facilities", "Latency issues for global communications", "Intermittent connectivity"],
+          "requirements": "Edge-first architecture with offline capability and intelligent data synchronization"
+        },
+        {
+          "constraint": "Real-Time Processing Requirements",
+          "description": "Manufacturing processes require deterministic real-time response",
+          "requirements": ["<500ms response time for safety alerts", "<100ms for critical control loops", "Predictable performance under load"],
+          "implementation": "Edge computing with local processing and cloud coordination"
+        }
+      ],
+      "businessConstraints": [
+        {
+          "constraint": "Operational Continuity",
+          "description": "Cannot disrupt existing production during implementation",
+          "affectedAreas": ["Deployment strategy", "Training", "Change management"],
+          "requirements": ["Gradual rollout", "Parallel operations during transition", "Rapid rollback capability"],
+          "implementation": "Phased deployment with extensive testing and validation"
+        },
+        {
+          "constraint": "Multi-Cultural and Multi-Language Support",
+          "description": "Global workforce with diverse languages and cultural contexts",
+          "requirements": ["Support for 15+ languages", "Cultural adaptation of user interfaces", "Local timezone support"],
+          "implementation": "Internationalization framework with local customization capabilities"
+        },
+        {
+          "constraint": "Capital Investment Approval Process",
+          "description": "Large capital investments require extensive business case validation",
+          "requirements": ["Clear ROI demonstration", "Phased investment approach", "Risk mitigation strategies"],
+          "implementation": "Detailed business value tracking and incremental deployment"
+        }
+      ],
+      "organizationalConstraints": [
+        {
+          "constraint": "Skills and Training Limitations",
+          "description": "Limited availability of IoT and AI expertise in manufacturing workforce",
+          "affectedAreas": ["System complexity", "Training requirements", "Change adoption"],
+          "requirements": ["Intuitive interfaces", "Extensive training programs", "Change management support"],
+          "implementation": "User-centered design with comprehensive training and support"
+        },
+        {
+          "constraint": "Global Coordination Challenges",
+          "description": "Coordinating across multiple time zones, cultures, and business units",
+          "affectedAreas": ["Project management", "Stakeholder alignment", "Decision making"],
+          "requirements": ["Asynchronous collaboration tools", "Regional autonomy with global coordination", "Clear governance"],
+          "implementation": "Federated governance model with regional implementation teams"
+        }
+      ]
+    }
+  },
+
+  "expectedArtifacts": {
+    "strategicAlignment": {
+      "complexityManagement": "Modular ontology architecture handling manufacturing, IoT, quality, maintenance, and compliance domains",
+      "stakeholderAlignment": "Multi-level stakeholder engagement framework managing 500+ stakeholders across global organization",
+      "riskMitigation": "Comprehensive risk management covering technical, operational, regulatory, and business risks",
+      "changeManagement": "Phased deployment strategy with extensive training and change support"
+    },
+    "modularOntologyDesign": {
+      "coreManufacturingDomain": "Production processes, equipment, materials, quality standards",
+      "iotSensorDomain": "Sensor types, data streams, edge devices, connectivity patterns",
+      "predictiveMaintenanceDomain": "Equipment health, failure patterns, maintenance strategies",
+      "qualityManagementDomain": "Quality metrics, inspection processes, defect classification",
+      "complianceDomain": "Regulatory requirements, audit trails, reporting frameworks",
+      "supplyChainDomain": "Supplier networks, logistics, inventory management"
+    },
+    "enterpriseIntegration": {
+      "apiFirst": "RESTful and GraphQL APIs for all manufacturing data and AI services",
+      "eventDriven": "Real-time event streaming for production updates and alerts",
+      "edgeCloud": "Hybrid edge-cloud architecture for real-time processing and global coordination",
+      "legacyAdapters": "Protocol converters and adapters for existing manufacturing systems"
+    },
+    "qualityFramework": {
+      "multiDimensional": "Technical quality (performance, reliability), business quality (ROI, goal achievement), stakeholder quality (satisfaction, adoption)",
+      "continuousMonitoring": "Real-time quality dashboards with automated alerts and trend analysis",
+      "businessValueTracking": "Comprehensive ROI measurement and goal achievement monitoring"
+    },
+    "encyclopedia": {
+      "manufacturingConcepts": "Complete manufacturing domain knowledge including processes, equipment, standards",
+      "iotPatterns": "IoT implementation patterns, edge computing strategies, sensor management",
+      "predictiveAnalytics": "AI/ML models, predictive algorithms, decision support systems",
+      "complianceReference": "Global regulatory requirements, audit procedures, reporting standards",
+      "bestPractices": "Industry best practices, lessons learned, optimization strategies"
+    }
+  },
+
+  "implementationStrategy": {
+    "phaseApproach": "3-phase implementation: Pilot (2 facilities, 6 months), Regional (20 facilities, 12 months), Global (150+ facilities, 18 months)",
+    "riskMitigation": "Parallel operations during transition, rapid rollback capability, extensive testing",
+    "stakeholderManagement": "Regional implementation teams with global coordination, executive steering committee",
+    "qualityGates": "Go/no-go decisions between phases based on quality metrics and business value achievement",
+    "changeManagement": "Comprehensive training programs, change champions network, continuous support"
+  },
+
+  "notes": "This enterprise example demonstrates the full complexity of ontology-driven development in a global manufacturing environment with multiple regulatory jurisdictions, massive scale requirements, complex stakeholder networks, and critical business requirements. The enhanced methodology provides the framework for managing this complexity while delivering measurable business value."
+}

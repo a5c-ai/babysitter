@@ -1,0 +1,107 @@
+---
+nodeKind: Domain
+id: domain:backend
+attributes:
+  displayName: "Backend"
+  description: |
+    Backend domain aligned manually from the imported technical-domain layer.
+    Represents server-side application development and service
+    implementation as a broad taxonomy bucket in Atlas.
+edges:
+  contains:
+    - target: specialization:backend-python-django
+    - target: specialization:go-microservices
+---
+nodeKind: Domain
+id: domain:frontend
+attributes:
+  displayName: "Frontend"
+  description: |
+    Frontend domain aligned manually from the imported technical-domain layer.
+    Represents browser UI development, client rendering, and web-facing
+    interaction design in Atlas.
+edges:
+  contains:
+    - target: specialization:web-development
+    - target: specialization:frontend-react
+    - target: specialization:ux-ui-design
+---
+nodeKind: Domain
+id: domain:fullstack
+attributes:
+  displayName: "Fullstack"
+  description: |
+    Fullstack domain aligned manually from the imported technical-domain layer.
+    Represents application work that spans client and server surfaces.
+edges:
+  contains:
+    - target: specialization:webapp-fullstack-typescript
+    - target: specialization:webapp-fullstack-python
+---
+nodeKind: Domain
+id: domain:ml-ai
+attributes:
+  displayName: "ML/AI"
+  description: |
+    ML/AI domain aligned manually from the imported technical-domain layer.
+    Atlas uses it as the broad umbrella above model fine-tuning,
+    inference-serving, and agent-oriented AI application work.
+edges:
+  contains:
+    - target: specialization:ai-agents-conversational
+    - target: specialization:llm-fine-tuning
+    - target: specialization:ml-inference-serving
+    - target: topic:claude-code-mcp
+    - target: topic:agent-context-management
+    - target: topic:agent-tool-use
+    - target: topic:multi-agent-orchestration
+    - target: topic:vibe-kanban
+    - target: topic:agent-run-lifecycle
+    - target: topic:parallel-agent-execution
+    - target: topic:agent-process-library
+    - target: topic:agent-effect-system
+    - target: topic:agent-plugin-system
+    - target: topic:a2a-protocol
+    - target: topic:agent-dispatch
+    - target: topic:event-driven-dispatch
+    - target: topic:human-in-the-loop
+    - target: topic:agent-session-management
+    - target: topic:agent-orchestration-products
+---
+nodeKind: Domain
+id: domain:qa-testing
+attributes:
+  displayName: "QA/Testing"
+  description: |
+    QA/Testing domain aligned manually from the imported technical-domain layer.
+    Atlas uses it as the broad quality-engineering bucket above its test
+    automation specialization.
+edges:
+  contains:
+    - target: specialization:qa-testing-automation
+    - target: topic:quality-assurance
+---
+nodeKind: Domain
+id: domain:blockchain
+attributes:
+  displayName: "Blockchain"
+  description: |
+    Blockchain domain aligned manually from the imported technical-domain layer.
+    Atlas reuses the existing cryptography-and-blockchain specialization
+    rather than duplicating specific frameworks or protocols.
+edges:
+  contains:
+    - target: specialization:cryptography-blockchain
+---
+nodeKind: Domain
+id: domain:iot
+attributes:
+  displayName: "IoT"
+  description: |
+    IoT domain aligned manually from the imported technical-domain layer.
+    Atlas connects it to adjacent embedded and robotics specializations
+    instead of introducing duplicate product nodes.
+edges:
+  contains:
+    - target: specialization:embedded-systems
+    - target: specialization:robotics-simulation

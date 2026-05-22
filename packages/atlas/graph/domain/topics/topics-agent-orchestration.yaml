@@ -1,0 +1,214 @@
+---
+nodeKind: Topic
+id: topic:vibe-kanban
+attributes:
+  displayName: "Vibe-Kanban"
+  description: |
+    Vibe-Kanban as a cross-cutting topic - visual kanban-style interfaces for
+    managing agent tasks and workflows. Combines a task board UI with agent
+    orchestration for intuitive workflow management. Issues on kanban columns
+    become isolated workspaces with dedicated git worktrees, terminals, and
+    dev servers. Agents are dispatched per-card, and review gates map
+    naturally to column transitions (todo -> in-progress -> review -> done).
+    Exemplified by BloopAI/vibe-kanban which supports 10+ coding agents with
+    per-agent worktree isolation and inline code review.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:agent-run-lifecycle
+attributes:
+  displayName: "Agent Run Lifecycle"
+  description: |
+    Agent Run Lifecycle as a cross-cutting topic - the phases an agent run
+    progresses through from creation to completion. Covers the state machine:
+    created, iterating (replaying resolved effects and advancing), waiting
+    (blocked on a breakpoint or sleep effect), completed, and failed. Includes
+    session binding between orchestrator and sub-agent, journal tracking via
+    append-only event logs (RUN_CREATED, EFFECT_REQUESTED, EFFECT_RESOLVED,
+    RUN_COMPLETED, RUN_FAILED), run lock acquisition, and deterministic replay
+    from journal state. Central to the Babysitter SDK runtime model.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:breakpoint-orchestration
+attributes:
+  displayName: "Breakpoint Orchestration"
+  description: |
+    Breakpoint Orchestration as a cross-cutting topic - human-in-the-loop
+    patterns for incorporating human judgment into automated agent workflows.
+    Covers breakpoint placement strategy (sparse by default, dense when
+    requirements are ambiguous), auto-approval rules for low-risk operations,
+    rejection loops where breakpoint feedback is incorporated and the task
+    retried, breakpoint routing to domain experts for specialized decisions,
+    and the spectrum from fully-automated (yolo mode) to maximally-supervised
+    execution. Breakpoints are first-class effects in the Babysitter SDK
+    requested via ctx.breakpoint().
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:parallel-agent-execution
+attributes:
+  displayName: "Parallel Agent Execution"
+  description: |
+    Parallel Agent Execution as a cross-cutting topic - dispatching multiple
+    agents concurrently to work on independent tasks. Covers ctx.parallel.all()
+    and ctx.parallel.map() for fan-out dispatch, worktree isolation to prevent
+    merge conflicts during parallel file edits, result aggregation and quality
+    scoring across parallel branches, synchronization barriers before
+    dependent phases, and failure handling when one parallel branch fails
+    while others succeed. Enables significant throughput gains for
+    decomposable tasks like multi-file refactoring or independent feature
+    implementation.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:agent-process-library
+attributes:
+  displayName: "Agent Process Library"
+  description: |
+    Agent Process Library as a cross-cutting topic - reusable process
+    definitions composed from the babysitter process library. Covers shared
+    components (methodologies like TDD, code review, planning), specialization-
+    specific processes (domain-scoped workflows), and cross-domain processes
+    in specializations/shared/. Process definitions use defineTask from the
+    SDK and compose effects (agent, shell, skill, breakpoint, sleep) into
+    deterministic replay-safe workflows. The library enables teams to codify
+    and share proven development workflows as executable process definitions.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:agent-effect-system
+attributes:
+  displayName: "Agent Effect System"
+  description: |
+    Agent Effect System as a cross-cutting topic - the effect execution model
+    that drives agent orchestration. The lifecycle is: task requested (process
+    calls ctx.task/ctx.breakpoint/ctx.sleepUntil), effect pending (runtime
+    throws an effect-pending exception), effect executed (external
+    orchestration resolves the effect via babysitter task:post), result
+    posted (next replay iteration advances deterministically). Effect kinds
+    include agent (sub-agent dispatch), shell (command execution), skill
+    (skill invocation), breakpoint (human approval gate), and sleep (time
+    gate). The effect system enables deterministic replay and recovery.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:agent-journal
+attributes:
+  displayName: "Agent Journal"
+  description: |
+    Agent Journal as a cross-cutting topic - the append-only event log that
+    tracks run state for agent orchestration. Journal events include
+    RUN_CREATED, EFFECT_REQUESTED, EFFECT_RESOLVED, RUN_COMPLETED, and
+    RUN_FAILED. The journal enables deterministic replay (rebuilding run state
+    from the event stream), recovery after interruption (resuming from the
+    last resolved effect), and audit trails for compliance. The state cache
+    is derived data from the journal; if it drifts, run:rebuild-state
+    reconstructs it. Malformed entries can be repaired via
+    run:repair-journal.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:harness-integration
+attributes:
+  displayName: "Harness Integration"
+  description: |
+    Harness Integration as a cross-cutting topic - how different agent
+    harnesses integrate with the babysitter SDK for orchestrated workflows.
+    Covers adapter implementations for Claude Code, Codex, Gemini CLI,
+    oh-my-pi (OMP), OpenCode, Pi, Cursor, Copilot CLI, Hermes, and others.
+    Each adapter translates between the unified AgentAdapter interface and
+    the native CLI of its target agent, handling spawn arguments, event
+    parsing (JSONL/SSE/streaming), session management, thinking
+    normalization, and platform-specific behavior. The hooks-mux layer
+    normalizes hook events across harnesses.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:hook-driven-automation
+attributes:
+  displayName: "Hook-Driven Automation"
+  description: |
+    Hook-Driven Automation as a cross-cutting topic - using pre/post tool-use
+    hooks, session start/end hooks, stop hooks, and notification hooks to
+    automate agent behavior without modifying the agent's core logic. Covers
+    PreToolUse hooks for approval and input mutation, PostToolUse hooks for
+    side-effects and logging, Stop hooks for driving orchestration loops
+    (the babysitter harness pattern), SessionStart hooks for context
+    injection, and the hooks-mux fan-out/merge architecture that
+    aggregates results from multiple hook sources into a single decision.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:agent-plugin-system
+attributes:
+  displayName: "Agent Plugin System"
+  description: |
+    Agent Plugin System as a cross-cutting topic - the plugin architecture
+    for extending agent capabilities through installable packages. Covers
+    plugin components: skills (slash-command units), agents (sub-agent
+    definitions), commands (custom CLI commands), hooks (lifecycle
+    interception), and MCP servers (external tool integration). Plugins
+    are distributed as .claude-plugin packages via npm registries and
+    installed via install.md manifests. The plugin.json manifest declares
+    components, harness targets, template variables, and extra file sets.
+    Supports per-harness install surfaces for cross-agent compatibility.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:a2a-protocol
+attributes:
+  displayName: "Agent-to-Agent (A2A) Protocol"
+  description: |
+    Agent-to-Agent (A2A) Protocol as a cross-cutting topic - Google's open
+    protocol for inter-agent communication. A2A enables agents built on
+    different frameworks and by different vendors to discover each other's
+    capabilities (via Agent Cards), negotiate interaction modalities, and
+    exchange structured messages, artifacts, and streaming updates. The
+    protocol defines a JSON-RPC 2.0 transport, task lifecycle management
+    (submitted, working, input-required, completed, failed, canceled),
+    push notifications via webhooks, and SSE-based streaming for long-
+    running tasks. Complementary to MCP (which connects agents to tools),
+    A2A connects agents to other agents across organizational boundaries.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:information-trust-tiers
+attributes:
+  displayName: "Information Trust Tiers"
+  description: |
+    Information Trust Tiers as a cross-cutting topic - modeling confidence
+    and provenance of graph assertions to distinguish between different
+    levels of reliability. Defines four tiers: authoritative (sourced from
+    vendor documentation, official specs, or first-party APIs), verified
+    (confirmed through automated testing or manual validation), inferred
+    (generated by LLM analysis, cross-referencing, or pattern matching),
+    and unverified (community-contributed, anecdotal, or not yet validated).
+    Enables consumers of graph data to filter by confidence level and
+    prioritize verification of high-impact unverified claims.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:cybersecurity

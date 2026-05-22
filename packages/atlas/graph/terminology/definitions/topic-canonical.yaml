@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:topic.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:topic
+  text: |
+    granular topic (oauth-flows, ssl-certs, ...)
+  status: canonical
+edges:
+  defines:
+    - term:topic

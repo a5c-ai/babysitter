@@ -1,0 +1,75 @@
+---
+nodeKind: PathDescriptor
+id: path:krate-core
+attributes:
+  pathId: path:krate-core
+  displayName: "Krate core workspace"
+  path: "packages/krate/core"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-krate
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Core @a5c-ai/krate ESM package with controller API, demo/server bins, and validation scripts.
+---
+nodeKind: PathDescriptor
+id: path:krate-sdk
+attributes:
+  pathId: path:krate-sdk
+  displayName: "Krate SDK workspace"
+  path: "packages/krate/sdk"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-krate-sdk
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Private @a5c-ai/krate-sdk re-export package for Krate controllers, resource helpers, and Atlas graph client.
+---
+nodeKind: PathDescriptor
+id: path:krate-cli
+attributes:
+  pathId: path:krate-cli
+  displayName: "Krate CLI workspace"
+  path: "packages/krate/cli"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-krate-cli
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Private @a5c-ai/krate-cli package exposing the krate CLI and krate-server MCP/server bin.
+---
+nodeKind: PathDescriptor
+id: path:krate-web
+attributes:
+  pathId: path:krate-web
+  displayName: "Krate web workspace"
+  path: "packages/krate/web"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-krate-web
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Next.js Krate web console package for the browser management UI.
+---
+nodeKind: PathDescriptor
+id: path:krate-chart
+attributes:
+  pathId: path:krate-chart
+  displayName: "Krate Helm chart workspace"
+  path: "packages/krate/charts"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:krate-helm-chart
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Helm application chart containing Krate CRDs, controller/API deployments, services, RBAC, GitOps templates, and release-gate annotations.

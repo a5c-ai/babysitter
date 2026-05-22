@@ -10,17 +10,15 @@ expertise:
   - Resource utilization improvement
   - Routing efficiency optimization
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Optimizer Agent
-
-## Role
-
-Worker agent specializing in performance tuning and cost optimization. Analyzes execution metrics, identifies inefficiencies, and recommends optimizations for token usage, latency, and resource utilization.
-
-## Expertise
-
-- Performance profiling and bottleneck identification
 - Token usage analysis and reduction strategies
 - Cost optimization across routing tiers
 - Cache hit rate analysis and improvement

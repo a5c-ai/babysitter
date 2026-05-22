@@ -2,6 +2,14 @@
 name: yargs-scaffolder
 description: Generate Yargs-based CLI applications with commands, positional args, middleware, and TypeScript support. Creates a complete scaffolded CLI application with modern patterns.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:cli-tooling]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # Yargs Scaffolder

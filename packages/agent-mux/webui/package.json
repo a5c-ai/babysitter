@@ -1,0 +1,74 @@
+{
+  "name": "@a5c-ai/agent-mux-webui",
+  "version": "5.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Browser app for agent-mux gateway control, monitoring, and realtime session-detail flow inspection",
+  "author": "a5c-ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux/webui#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/agent-mux/webui"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "agent-mux",
+    "webui",
+    "session-flow",
+    "timeline",
+    "realtime",
+    "vite",
+    "react-native-web",
+    "gateway"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist-types/src/main.d.ts",
+  "files": [
+    "dist",
+    "dist-types",
+    "public",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "npm run clean && npm run build --workspace=@a5c-ai/agent-mux-ui && vite build && tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "build:realtime": "npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/agent-mux-core && npm run build --workspace=@a5c-ai/agent-mux-ui && npm run build",
+    "clean": "rimraf dist dist-types tsconfig.tsbuildinfo",
+    "dev": "vite",
+    "test": "vitest run --config vitest.config.ts",
+    "test:e2e": "npm run build:realtime && npm run build --workspace=@a5c-ai/agent-mux-gateway && playwright test --config playwright.config.ts",
+    "test:e2e:headed": "npm run build:realtime && npm run build --workspace=@a5c-ai/agent-mux-gateway && playwright test --config playwright.config.ts --headed",
+    "test:e2e:install": "playwright install chromium",
+    "test:realtime": "vitest run --root ../../.. --config vitest.config.ts \"packages/agent-mux/webui/src/pages/SessionDetailPage.test.ts\" \"packages/agent-mux/webui/src/pages/SessionDetailPage.route.test.tsx\" \"packages/agent-mux/webui/src/release-verification.test.ts\"",
+    "verify:release": "node ./scripts/verify-release.mjs",
+    "prepublishOnly": "npm run build:realtime && npm run test && npm run verify:release"
+  },
+  "dependencies": {
+    "@a5c-ai/agent-mux-ui": "5.0.0",
+    "@a5c-ai/compendium": "0.1.0",
+    "@tanstack/react-virtual": "^3.13.19",
+    "lucide-react": "^0.469.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom-v6": "npm:react-router-dom@^6.30.2",
+    "ulid": "^3.0.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "vite": "^8.0.0"
+  }
+}

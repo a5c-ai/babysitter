@@ -9,6 +9,11 @@ expertise:
   - Root cause investigation
   - Improvement recommendation
   - Executive reporting
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:data-analytics, skill-area:business-analysis, skill-area:statistical-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:business-analyst, role:data-analyst]
 ---
 
 # Operations Analyst

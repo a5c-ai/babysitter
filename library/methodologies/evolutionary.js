@@ -3,6 +3,12 @@
  * @description Evolutionary Algorithm - Generate population, evaluate fitness, select, crossover, mutate, repeat
  * @inputs { task: string, populationSize: number, generations: number, mutationRate: number, fitnessThreshold: number }
  * @outputs { success: boolean, bestSolution: object, finalPopulation: array, evolutionHistory: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:backend-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

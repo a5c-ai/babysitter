@@ -9,6 +9,13 @@ skills:
   - dependency-updater
   - vulnerability-scanner
   - license-compliance-checker
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:dependency-upgrade-strategies, skill-area:dependency-vulnerability-mgmt]
+  roles: [role:backend-engineer, role:dependency-updater, role:dependency-updater-bot]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Dependency Modernization Agent

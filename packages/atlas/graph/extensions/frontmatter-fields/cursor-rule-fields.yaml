@@ -1,0 +1,39 @@
+nodeKind: FrontmatterField
+id: frontmatter-field:cursor-rule-description
+attributes:
+  displayName: "Cursor .mdc: description"
+  name: description
+  valueType: string
+  required: "no"
+  appliesTo: cursor-rule
+  description: |
+    Short prose triggering description. When provided without `globs`, the
+    Cursor Agent reads this and includes the rule when it determines
+    relevance based on the description content.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:cursor-rule-globs
+attributes:
+  displayName: "Cursor .mdc: globs"
+  name: globs
+  valueType: glob
+  required: "no"
+  appliesTo: cursor-rule
+  description: |
+    File path patterns for automatic attachment. Auto-attaches the rule
+    when a matching file is in context. Supports multiple patterns
+    separated by commas (e.g. `src/**/*.tsx, docs/**/*.md`).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:cursor-rule-always-apply
+attributes:
+  displayName: "Cursor .mdc: alwaysApply"
+  name: alwaysApply
+  valueType: bool
+  required: "no"
+  defaultValue: "false"
+  appliesTo: cursor-rule
+  description: |
+    When true, the rule is always included in context (globs and
+    description are ignored). When false, attachment is determined by
+    the globs / description matrix.

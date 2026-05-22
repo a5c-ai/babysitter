@@ -3,6 +3,12 @@
  * @description Generate unit and E2E tests from UAT criteria for a completed phase
  * @inputs { phaseId: string, phaseName: string, projectDir: string, targetCoverage: number }
  * @outputs { success: boolean, testsGenerated: number, testsPassed: number, testsFailed: number, coveragePercent: number }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:backend-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

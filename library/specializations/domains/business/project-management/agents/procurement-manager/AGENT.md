@@ -15,6 +15,11 @@ metadata:
   domain: business
   category: Procurement Management
   id: AG-011
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:procurement-management, skill-area:vendor-management-ops, skill-area:stakeholder-management]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:procurement-manager, role:operations-analyst]
 ---
 
 # Procurement Manager Agent

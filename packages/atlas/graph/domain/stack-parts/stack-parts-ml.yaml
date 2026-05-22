@@ -1,0 +1,35 @@
+---
+nodeKind: StackPart
+id: stack-part:model-registry
+attributes:
+  displayName: "Model Registry"
+  category: infrastructure
+  description: |
+    Versioned ML model artifact registry (SageMaker Model Registry, Vertex
+    AI Model Registry, MLflow).
+edges:
+  implemented_by:
+    - target: tool:mlflow
+---
+nodeKind: StackPart
+id: stack-part:model-serving
+attributes:
+  displayName: "Model Serving / Inference Endpoint"
+  category: runtime
+  description: |
+    Managed inference endpoint (SageMaker Endpoints, Vertex AI Endpoints,
+    Bedrock, Azure ML Online Endpoints).
+edges:
+  implemented_by:
+    - target: tool:bentoml
+---
+nodeKind: StackPart
+id: stack-part:feature-store
+attributes:
+  displayName: "Feature Store"
+  category: data-store
+  description: |
+    Online/offline ML feature store (SageMaker FS, Vertex FS, Feast).
+edges:
+  implemented_by:
+    - target: tool:feast

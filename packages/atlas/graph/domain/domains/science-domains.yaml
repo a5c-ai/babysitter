@@ -1,0 +1,178 @@
+---
+nodeKind: Domain
+id: domain:aerospace-engineering
+attributes:
+  displayName: "Aerospace Engineering"
+  description: |
+    Aerodynamics, propulsion, avionics, and space systems.
+edges:
+  contains:
+    - specialization:aerospace-engineering
+---
+nodeKind: Domain
+id: domain:automotive-engineering
+attributes:
+  displayName: "Automotive Engineering"
+  description: |
+    Vehicle systems, ADAS, powertrain, and automotive software.
+edges:
+  contains:
+    - specialization:automotive-engineering
+---
+nodeKind: Domain
+id: domain:biomedical-engineering
+attributes:
+  displayName: "Biomedical Engineering"
+  description: |
+    Medical devices, health informatics, and clinical systems.
+edges:
+  contains:
+    - specialization:biomedical-engineering
+---
+nodeKind: Domain
+id: domain:chemical-engineering
+attributes:
+  displayName: "Chemical Engineering"
+  description: |
+    Process design, reaction engineering, and materials processing.
+edges:
+  contains:
+    - specialization:chemical-engineering
+---
+nodeKind: Domain
+id: domain:civil-engineering
+attributes:
+  displayName: "Civil Engineering"
+  description: |
+    Structural analysis, construction management, and infrastructure.
+edges:
+  contains:
+    - specialization:civil-engineering
+---
+nodeKind: Domain
+id: domain:electrical-engineering
+attributes:
+  displayName: "Electrical Engineering"
+  description: |
+    Circuit design, signal processing, and power systems.
+edges:
+  contains:
+    - specialization:electrical-engineering
+---
+nodeKind: Domain
+id: domain:environmental-engineering
+attributes:
+  displayName: "Environmental Engineering"
+  description: |
+    Environmental monitoring, sustainability, and remediation.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:industrial-engineering
+attributes:
+  displayName: "Industrial Engineering"
+  description: |
+    Manufacturing systems, quality control, and lean operations.
+edges:
+  contains:
+    - specialization:industrial-engineering
+---
+nodeKind: Domain
+id: domain:materials-science
+attributes:
+  displayName: "Materials Science"
+  description: |
+    Material characterization, composites, and advanced materials.
+edges:
+  contains:
+    - specialization:materials-science
+---
+nodeKind: Domain
+id: domain:mechanical-engineering
+attributes:
+  displayName: "Mechanical Engineering"
+  description: |
+    Mechanical design, thermodynamics, and manufacturing.
+edges:
+  contains:
+    - specialization:mechanical-engineering
+---
+nodeKind: Domain
+id: domain:nanotechnology
+attributes:
+  displayName: "Nanotechnology"
+  description: |
+    Nanofabrication, nano-characterization, and nanomaterials.
+edges:
+  contains:
+    - specialization:nanotechnology
+---
+nodeKind: Domain
+id: domain:physics
+attributes:
+  displayName: "Physics"
+  description: |
+    Computational physics, simulation, and experimental data analysis.
+edges:
+  contains:
+    - specialization:physics
+---
+nodeKind: Domain
+id: domain:quantum-computing
+attributes:
+  displayName: "Quantum Computing"
+  description: |
+    Quantum algorithms, error correction, and quantum hardware.
+edges:
+  contains:
+    - specialization:quantum-computing
+---
+nodeKind: Domain
+id: domain:computer-science
+attributes:
+  displayName: "Computer Science"
+  description: |
+    Theoretical and applied computer science — algorithms, computational complexity,
+    programming language theory, formal methods, type systems, automata theory,
+    and computer architecture. Bridges pure mathematics and software engineering,
+    underpinning cryptography, AI, databases, and distributed systems research.
+    Distinct from software engineering in its focus on mathematical foundations
+    and provable correctness rather than production delivery.
+edges:
+  contains:
+    - specialization:quantum-computing
+    - specialization:theoretical-computer-science
+    - specialization:formal-methods
+---
+nodeKind: Domain
+id: domain:mathematics
+attributes:
+  displayName: "Mathematics"
+  description: |
+    Pure and applied mathematics spanning algebra, analysis, topology, number
+    theory, combinatorics, probability, statistics, and numerical methods.
+    Includes optimization, operations research, and mathematical logic. Provides
+    the foundational language for physics, computer science, economics, and
+    machine learning — and is increasingly relevant to formal verification and
+    AI reasoning research.
+edges:
+  contains:
+    - specialization:computational-mathematics
+    - specialization:statistical-methods
+---
+nodeKind: Domain
+id: domain:scientific-discovery
+attributes:
+  displayName: "Scientific Discovery"
+  description: |
+    Cross-disciplinary research methodology focused on the scientific method,
+    hypothesis generation, experimental design, and reproducibility. Covers
+    systematic innovation frameworks (TRIZ, design of experiments), literature
+    synthesis, open science practices, and AI-assisted discovery workflows.
+    Acts as a meta-domain enabling rigor and creativity across all scientific
+    and engineering fields.
+edges:
+  contains:
+    - specialization:scientific-research-methods

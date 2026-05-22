@@ -15,6 +15,12 @@
  * - libffi: https://sourceware.org/libffi/
  * - Rust FFI: https://doc.rust-lang.org/nomicon/ffi.html
  * - Python ctypes: https://docs.python.org/3/library/ctypes.html
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:programming-languages]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+ *   roles: [role:backend-engineer]
+ *   workflows: [workflow:sdk-api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -2,6 +2,13 @@
 name: logging-migrator
 description: Migrate logging infrastructure with format standardization, structured logging, and aggregation setup
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:log-aggregation, skill-area:observability-instrumentation]
+  roles: [role:devops-engineer, role:sre]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Logging Migrator Skill

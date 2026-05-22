@@ -11,6 +11,10 @@ expertise:
   - Risk metric calculation
   - Sensitivity analysis
   - Communication of uncertainty
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:quantitative-modeling, skill-area:statistical-analysis, skill-area:financial-risk-modeling]
+  roles: [role:data-scientist, role:quantitative-analyst, role:research-scientist]
 ---
 
 # Probabilistic Modeler

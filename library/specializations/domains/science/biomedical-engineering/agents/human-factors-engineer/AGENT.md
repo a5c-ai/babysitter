@@ -14,6 +14,11 @@ metadata:
   domain: science
   category: Design Control
   agent-id: BME-AG-005
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:compliance-automation]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # Human Factors Engineer Agent

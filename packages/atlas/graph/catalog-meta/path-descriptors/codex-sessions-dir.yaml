@@ -1,0 +1,17 @@
+nodeKind: PathDescriptor
+id: path:codex-sessions-dir
+attributes:
+  pathId: path:codex-sessions-dir
+  displayName: "Codex sessions directory"
+  path: "~/.codex/sessions/"
+  pathKind: session-state-dir
+  ownerKind: AgentPlatformImpl
+  ownerId: agent-platform-impl:codex.platform@1.x
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+
+edges:
+  owned_by:
+    - target: agent-platform-impl:codex.platform@1.x

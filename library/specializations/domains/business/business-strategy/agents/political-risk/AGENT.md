@@ -16,6 +16,12 @@ metadata:
   domain: business
   category: Political Analysis
   agent-id: AG-020
+graph:
+  domains: [domain:strategy]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:risk-assessment, skill-area:strategic-analysis, skill-area:geopolitical-analysis]
+  workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+  roles: [role:risk-analyst, role:strategic-planner]
 ---
 
 # Political Risk Analyst Agent

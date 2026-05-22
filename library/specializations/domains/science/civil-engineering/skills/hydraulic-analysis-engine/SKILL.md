@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Water Resources
   skill-id: CIV-SK-023
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Hydraulic Analysis Engine Skill

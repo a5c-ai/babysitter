@@ -9,6 +9,13 @@ expertise:
   - Performance optimization
   - Gesture handling
   - Scroll-based animations
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:frontend-engineer]
+  skillAreas: [skill-area:animation-transitions, skill-area:ui-styling]
+  topics: [topic:component-based-architecture]
+
 ---
 
 # Animation Developer Agent

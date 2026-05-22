@@ -14,8 +14,8 @@ Complete reference for all `babysitter plugin:*` commands. Every command support
 
 Most plugin commands require a scope flag indicating where configuration is stored:
 
-- `--global` — User-wide configuration stored in `~/.babysitter/`
-- `--project` — Project-specific configuration stored in `<projectDir>/.babysitter/`
+- `--global` — User-wide configuration stored in `~/.a5c/`
+- `--project` — Project-specific configuration stored in `<projectDir>/.a5c/`
 
 When `--project` is used, the current working directory is treated as the project root.
 
@@ -51,7 +51,7 @@ babysitter plugin:add-marketplace --marketplace-url https://github.com/a5c-ai/ba
   "success": true,
   "url": "https://github.com/a5c-ai/babysitter-marketplace.git",
   "scope": "global",
-  "directory": "/home/user/.babysitter/marketplaces/babysitter-marketplace"
+  "directory": "/home/user/.a5c/marketplaces/babysitter-marketplace"
 }
 ```
 
@@ -142,7 +142,7 @@ babysitter plugin:list-plugins --marketplace-name babysitter-marketplace --globa
       "description": "Core babysitter plugin for AI-assisted development",
       "latestVersion": "0.0.176",
       "versions": ["0.0.176", "0.0.175", "0.0.174"],
-      "packagePath": "plugins/babysitter",
+      "packagePath": "plugins/babysitter-unified",
       "tags": ["core", "development"],
       "author": "a5c-ai"
     }
@@ -178,7 +178,7 @@ Installs a plugin from a marketplace. Updates the marketplace first, resolves th
 ### Usage
 
 ```
-babysitter plugin:install <plugin-name> --marketplace-name <name> --global|--project [--plugin-version <ver>] [--json] [--verbose]
+babysitter plugin:install <plugin-name> [--marketplace-name <name>] --global|--project [--plugin-version <ver>] [--json] [--verbose]
 ```
 
 The plugin name can be provided as a positional argument or via `--plugin-name`.
@@ -188,7 +188,6 @@ The plugin name can be provided as a positional argument or via `--plugin-name`.
 | Flag | Description |
 |------|-------------|
 | `<plugin-name>` or `--plugin-name <name>` | Name of the plugin to install |
-| `--marketplace-name <name>` | Marketplace containing the plugin |
 | `--global` or `--project` | Scope for the installation |
 
 ### Optional Flags
@@ -196,6 +195,7 @@ The plugin name can be provided as a positional argument or via `--plugin-name`.
 | Flag | Description |
 |------|-------------|
 | `--plugin-version <ver>` | Specific version to install. If omitted, the latest version from the marketplace manifest is used. |
+| `--marketplace-name <name>` | Marketplace containing the plugin. If omitted, the CLI tries to auto-resolve a single configured marketplace for the selected scope. |
 
 ### Example
 
@@ -212,7 +212,7 @@ babysitter plugin:install babysitter@a5c.ai --marketplace-name babysitter-market
   "marketplace": "babysitter-marketplace",
   "scope": "global",
   "instructions": "# Install babysitter@a5c.ai\n\n1. Copy the plugin configuration...\n",
-  "processFile": "/home/user/.babysitter/marketplaces/babysitter-marketplace/plugins/babysitter/install-process.js"
+  "processFile": "/home/user/.a5c/marketplaces/babysitter-marketplace/plugins/babysitter-unified/install-process.js"
 }
 ```
 
@@ -279,7 +279,7 @@ Updates an installed plugin to a newer version. Resolves the migration chain fro
 ### Usage
 
 ```
-babysitter plugin:update <plugin-name> --marketplace-name <name> --global|--project [--plugin-version <ver>] [--json] [--verbose]
+babysitter plugin:update <plugin-name> [--marketplace-name <name>] --global|--project [--plugin-version <ver>] [--json] [--verbose]
 ```
 
 ### Required Flags
@@ -287,7 +287,6 @@ babysitter plugin:update <plugin-name> --marketplace-name <name> --global|--proj
 | Flag | Description |
 |------|-------------|
 | `<plugin-name>` or `--plugin-name <name>` | Name of the plugin to update |
-| `--marketplace-name <name>` | Marketplace containing the plugin |
 | `--global` or `--project` | Scope where the plugin is installed |
 
 ### Optional Flags
@@ -295,6 +294,7 @@ babysitter plugin:update <plugin-name> --marketplace-name <name> --global|--proj
 | Flag | Description |
 |------|-------------|
 | `--plugin-version <ver>` | Specific target version. If omitted, the latest version from the marketplace manifest is used. |
+| `--marketplace-name <name>` | Marketplace containing the plugin. If omitted, the CLI tries to auto-resolve a single configured marketplace for the selected scope. |
 
 ### Example
 
@@ -360,7 +360,7 @@ Reads configuration instructions for an installed plugin from its plugin package
 ### Usage
 
 ```
-babysitter plugin:configure <plugin-name> --marketplace-name <name> --global|--project [--json] [--verbose]
+babysitter plugin:configure <plugin-name> [--marketplace-name <name>] --global|--project [--json] [--verbose]
 ```
 
 ### Required Flags
@@ -368,13 +368,12 @@ babysitter plugin:configure <plugin-name> --marketplace-name <name> --global|--p
 | Flag | Description |
 |------|-------------|
 | `<plugin-name>` or `--plugin-name <name>` | Name of the plugin to configure |
-| `--marketplace-name <name>` | Marketplace containing the plugin |
 | `--global` or `--project` | Scope for the configuration |
 
 ### Example
 
 ```bash
-babysitter plugin:configure babysitter@a5c.ai --marketplace-name babysitter-marketplace --project --json
+babysitter plugin:configure babysitter@a5c.ai --project --json
 ```
 
 ### JSON Output
@@ -490,7 +489,7 @@ babysitter plugin:update-registry babysitter@a5c.ai --plugin-version 0.0.176 --m
   "scope": "global",
   "installedAt": "2026-03-01T10:30:00.000Z",
   "updatedAt": "2026-03-06T09:00:00.000Z",
-  "packagePath": "/home/user/.babysitter/marketplaces/babysitter-marketplace/plugins/babysitter",
+  "packagePath": "/home/user/.a5c/marketplaces/babysitter-marketplace/plugins/babysitter-unified",
   "metadata": {}
 }
 ```

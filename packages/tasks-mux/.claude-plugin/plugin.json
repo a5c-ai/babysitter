@@ -1,0 +1,12 @@
+{
+  "name": "breakpoints-mux",
+  "version": "5.0.0",
+  "description": "Route questions to domain experts instead of asking the current user",
+  "mcpServers": {
+    "breakpoints-mux": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/mcp/index.js"],
+      "env": {}
+    }
+  }
+}

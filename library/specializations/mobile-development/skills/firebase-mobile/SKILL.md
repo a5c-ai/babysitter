@@ -5,6 +5,13 @@ version: 1.0.0
 category: Backend Services
 slug: firebase-mobile
 status: active
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:push-notifications, skill-area:analytics-tracking]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Firebase Mobile Skill

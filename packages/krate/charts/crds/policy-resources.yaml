@@ -1,0 +1,228 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: policyprofiles.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: policyprofiles
+    singular: policyprofile
+    kind: PolicyProfile
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - displayName
+            - mode
+            properties:
+              organizationRef:
+                type: string
+              displayName:
+                type: string
+              mode:
+                type: string
+                enum: [audit, enforce, mixed]
+              templateRefs:
+                type: array
+                items:
+                  type: string
+              bindings:
+                type: array
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+              exceptionPolicy:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              failurePolicy:
+                type: string
+                enum: [failClosed, failOpen]
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: policytemplates.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: policytemplates
+    singular: policytemplate
+    kind: PolicyTemplate
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - displayName
+            - targetKinds
+            - kyverno
+            properties:
+              organizationRef:
+                type: string
+              displayName:
+                type: string
+              description:
+                type: string
+              category:
+                type: string
+              severity:
+                type: string
+                enum: [low, medium, high, critical]
+              targetKinds:
+                type: array
+                items:
+                  type: string
+              parameters:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              kyverno:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              rollout:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              remediation:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: policybindings.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: policybindings
+    singular: policybinding
+    kind: PolicyBinding
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - templateRef
+            - mode
+            properties:
+              organizationRef:
+                type: string
+              templateRef:
+                type: string
+              profileRef:
+                type: string
+              mode:
+                type: string
+                enum: [audit, enforce]
+              match:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              parameters:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              generatedPolicyName:
+                type: string
+              suspend:
+                type: boolean
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: policyexceptionrequests.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: policyexceptionrequests
+    singular: policyexceptionrequest
+    kind: PolicyExceptionRequest
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - policyRef
+            - justification
+            - expiresAt
+            properties:
+              organizationRef:
+                type: string
+              policyRef:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              ruleNames:
+                type: array
+                items:
+                  type: string
+              resourceRef:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              repository:
+                type: string
+              pullRequest:
+                type: string
+              pipeline:
+                type: string
+              job:
+                type: string
+              requestedBy:
+                type: string
+              justification:
+                type: string
+              expiresAt:
+                type: string
+              riskAcceptance:
+                type: string
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    subresources:
+      status: {}

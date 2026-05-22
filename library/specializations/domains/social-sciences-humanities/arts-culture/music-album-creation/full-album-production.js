@@ -6,6 +6,12 @@
  * @recommendedSkills SK-MAC-001 through SK-MAC-010 (all music-album-creation skills)
  * @recommendedAgents AG-MAC-001 (lyricist), AG-MAC-002 (producer), AG-MAC-003 (visual), AG-MAC-004 (persona), AG-MAC-005 (curator)
  * @composedProcesses artist-persona-creation, album-conceptualization, song-composition
+ *
+ * @graph
+ *   domains: [domain:arts-culture]
+ *   skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:data-analysis]
+ *   roles: [role:creative-director, role:design-lead]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

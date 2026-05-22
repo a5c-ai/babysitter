@@ -1,0 +1,95 @@
+nodeKind: EnvVar
+id: env-var:claude-code-auto-compact-window
+attributes:
+  displayName: CLAUDE_CODE_AUTO_COMPACT_WINDOW
+  description: Set the context capacity in tokens used for auto-compaction calculations.
+  name: CLAUDE_CODE_AUTO_COMPACT_WINDOW
+  category: memory
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-autocompact-pct-override
+attributes:
+  displayName: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE
+  description: Percentage of context capacity (1-100) at which auto-compaction triggers.
+  name: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE
+  category: memory
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-claude-mds
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_CLAUDE_MDS
+  description: Set to 1 to prevent loading any CLAUDE.md memory files into context.
+  name: CLAUDE_CODE_DISABLE_CLAUDE_MDS
+  category: memory
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-auto-memory
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_AUTO_MEMORY
+  description: Set to 1 to disable auto memory; set to 0 to force auto memory on during rollout.
+  name: CLAUDE_CODE_DISABLE_AUTO_MEMORY
+  category: memory
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-additional-directories-claude-md
+attributes:
+  displayName: CLAUDE_CODE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD
+  description: Set to 1 to load memory files from directories specified with --add-dir.
+  name: CLAUDE_CODE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD
+  category: memory
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-skip-prompt-history
+attributes:
+  displayName: CLAUDE_CODE_SKIP_PROMPT_HISTORY
+  description: Set to 1 to skip writing prompt history and session transcripts to disk.
+  name: CLAUDE_CODE_SKIP_PROMPT_HISTORY
+  category: memory
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-resume-interrupted-turn
+attributes:
+  displayName: CLAUDE_CODE_RESUME_INTERRUPTED_TURN
+  description: Set to 1 to automatically resume if the previous session ended mid-turn.
+  name: CLAUDE_CODE_RESUME_INTERRUPTED_TURN
+  category: memory
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-1m-context
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_1M_CONTEXT
+  description: Set to 1 to disable 1M context window support.
+  name: CLAUDE_CODE_DISABLE_1M_CONTEXT
+  category: memory
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

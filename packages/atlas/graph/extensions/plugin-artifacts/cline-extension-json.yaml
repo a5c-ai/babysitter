@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:cline-extension-json
+attributes:
+  artifactId: plugin-artifact:cline-extension-json
+  displayName: "Cline VS Code extension package.json"
+  targetId: plugin-target:cline
+  artifactKind: manifest
+  pathPattern: "package.json"
+  installerSurface: "extension-manifest"
+edges:
+  emits_artifact:
+    - target: plugin-target:cline

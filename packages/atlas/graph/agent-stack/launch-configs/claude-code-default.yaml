@@ -1,0 +1,43 @@
+nodeKind: LaunchConfig
+id: launch-config:claude-code.default
+attributes:
+  agentVersionId: agentVersion:claude:ge-0-0-0
+  displayName: "Claude Code (default)"
+  model: model:claude-opus-4-7@current
+  env: {}
+  commArgs: []
+  description: |
+    Default launch recipe for Claude Code 1.x. Spawns the `claude` CLI
+    with no extra argv, no environment overrides, no transport proxy,
+    and the version's default capability profile, against the current
+    Opus 4.7 model.
+edges:
+  requires_capability:
+    - target: capability:streaming
+      versionRange: '>=1.0.0'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0'
+      level: full
+  runs_via:
+    - target: execution:local-host
+---
+nodeKind: LaunchConfig
+id: launch-config:claude.dangerously-bypass-approvals-and-sandbox
+attributes:
+  agentVersionId: agentVersion:claude:ge-0-0-0
+  displayName: Claude Code dangerous bypass launch
+  env: {}
+  commArgs:
+    - --dangerously-skip-permissions
+  description: |-
+    Claude Code launch recipe for `--dangerously-skip-permissions`, which
+    auto-approves all tool calls without user confirmation. Intended for
+    CI/test environments where interactive approval is not possible.
+edges:
+  requires_capability:
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+  runs_via:
+    - target: execution:local-host

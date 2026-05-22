@@ -1,121 +1,99 @@
 # Rate Limit Handler -- Configuration
 
-## 1. Adjust Backoff Parameters
+## 1. Adjust Settings
 
-Edit `.claude/rate-limit-handler/config.json`:
+Edit `~/.claude-auto-retry.json`:
 
 ```json
 {
-  "minCooldown": 30,
-  "maxCooldown": 300,
-  "multiplier": 2,
-  "enableLog": true,
-  "rateLimitPatterns": [...]
+  "maxRetries": 5,
+  "pollIntervalSeconds": 5,
+  "marginSeconds": 60,
+  "fallbackWaitHours": 5,
+  "retryMessage": "Continue where you left off.",
+  "customPatterns": []
 }
 ```
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `minCooldown` | `30` | Initial cooldown in seconds after first rate limit |
-| `maxCooldown` | `300` | Maximum cooldown cap in seconds |
-| `multiplier` | `2` | Cooldown multiplier per consecutive rate limit (exponential backoff) |
-| `enableLog` | `true` | Write rate limit events to `rate-limits.log` |
+| `maxRetries` | `5` | Maximum retry attempts per rate-limit event |
+| `pollIntervalSeconds` | `5` | How often (seconds) the monitor checks the terminal for rate limit messages |
+| `marginSeconds` | `60` | Extra seconds to wait after the parsed reset time before retrying |
+| `fallbackWaitHours` | `5` | Default wait hours if the reset time cannot be parsed |
+| `retryMessage` | `"Continue where you left off."` | Message sent to Claude when retrying after a rate limit |
+| `customPatterns` | `[]` | Additional regex patterns to detect rate limit messages beyond built-in ones |
+
+All fields are optional. Missing or invalid values fall back to safe defaults automatically.
 
 ### Recommended settings by use case:
 
-**Solo developer, dedicated API key:**
+**Default (conservative):**
 ```json
-{ "minCooldown": 15, "maxCooldown": 120, "multiplier": 2 }
+{ "maxRetries": 5, "marginSeconds": 60, "pollIntervalSeconds": 5 }
 ```
 
-**Team with shared API key:**
+**Aggressive retry (minimize downtime):**
 ```json
-{ "minCooldown": 30, "maxCooldown": 600, "multiplier": 2 }
+{ "maxRetries": 10, "marginSeconds": 30, "pollIntervalSeconds": 3 }
 ```
 
-**CI/CD pipeline (time-sensitive):**
+**CI/CD or unattended (long tolerance):**
 ```json
-{ "minCooldown": 10, "maxCooldown": 60, "multiplier": 1.5 }
+{ "maxRetries": 20, "marginSeconds": 120, "fallbackWaitHours": 8 }
 ```
 
-## 2. Customize Rate Limit Detection Patterns
+## 2. Custom Rate Limit Patterns
 
-The `rateLimitPatterns` array controls which `PostToolUseFailure` error strings trigger the handler. Each pattern is matched case-insensitively via `grep -iE`:
+Add regex patterns to `customPatterns` to detect rate limit messages from custom or updated Claude responses:
 
 ```json
 {
-  "rateLimitPatterns": [
-    "rate.limit",
-    "rate_limit",
-    "429",
-    "too many requests",
-    "quota exceeded",
-    "overloaded",
-    "throttle",
-    "capacity"
+  "customPatterns": [
+    "usage cap reached",
+    "try again in \\d+ minutes"
   ]
 }
 ```
 
-Add patterns for custom APIs that return rate limit errors with different messages.
+Built-in patterns already cover standard Anthropic rate limit messages. Custom patterns are checked in addition to the defaults.
 
-Note: `StopFailure` hook matches on the structured `error` enum field (`"rate_limit"`), not these patterns.
-
-## 3. View Rate Limit Log
+## 3. Check Status
 
 ```bash
-cat .claude/rate-limit-handler/rate-limits.log
+claude-auto-retry status
 ```
 
-Recent entries:
-```bash
-tail -20 .claude/rate-limit-handler/rate-limits.log
-```
+Shows whether the monitor is active, recent detections, and current configuration.
 
-## 4. View Current State
+## 4. View Logs
 
 ```bash
-cat .claude/rate-limit-handler/state.json
+# Tail today's log file in real-time
+claude-auto-retry logs
 ```
 
-Fields:
-- `consecutive` -- number of consecutive rate limits without full recovery
-- `lastCooldown` -- last calculated cooldown in seconds
-- `lastEventAt` -- timestamp of last rate limit
-- `resumeAfter` -- recommended resume time
-- `lastHook` -- which hook triggered (`PostToolUseFailure` or `StopFailure`)
-- `lastTool` -- tool that was rate-limited (if applicable)
+Logs include timestamps, detected rate limit messages, parsed reset times, wait durations, and retry attempts.
 
-## 5. Reset Rate Limit State
+## 5. Custom Retry Message
 
-If the handler is in a high-backoff state and you want to reset:
-
-```bash
-echo '{"consecutive": 0, "lastCooldown": 0}' > .claude/rate-limit-handler/state.json
-```
-
-## 6. Disable/Enable Logging
-
-Set `enableLog` to `false` in `config.json`:
+Set `retryMessage` to control what Claude sees when the session resumes:
 
 ```json
-{ "enableLog": false }
+{ "retryMessage": "Continue with the implementation. Pick up where you left off." }
 ```
 
-Clear existing log:
+## 6. Temporarily Disable
+
+To stop auto-retry without uninstalling, launch Claude directly instead of through the shell wrapper:
+
 ```bash
-> .claude/rate-limit-handler/rate-limits.log
+# This bypasses the tmux wrapper
+command claude
 ```
 
-## 7. Temporarily Disable the Handler
+Or set `maxRetries` to `0`:
 
-Remove the hook entries from `.claude/settings.json`. Re-add them to re-enable (see install.md Step 11).
-
-## 8. Understanding the Hook Architecture
-
-| Hook | Fires when | Can influence Claude? | What it does |
-|------|-----------|----------------------|--------------|
-| `PostToolUseFailure` | Any tool call fails | Yes -- `additionalContext` injected into Claude's context | Detects rate limit patterns, tracks state, tells Claude to back off |
-| `StopFailure` | Anthropic API returns 429 | No -- output is **ignored** | Logs event and updates state for next session |
-| `SessionStart` | New session begins | Yes -- stdout added to Claude's context | Warns Claude about recent rate limits |
-| `PostToolUse` | Any tool call succeeds | No (just resets internal state) | Decrements consecutive counter for gradual recovery |
+```json
+{ "maxRetries": 0 }
+```

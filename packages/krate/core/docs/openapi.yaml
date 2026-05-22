@@ -1,0 +1,1275 @@
+openapi: 3.0.3
+info:
+  title: Krate API
+  version: 1.0.0
+  description: |
+    Kubernetes-native Git forge HTTP API. Krate provides resource management,
+    agent orchestration, external backend sync, secret management, and real-time
+    event streaming for developer platforms built on Kubernetes.
+  contact:
+    name: a5c.ai
+    url: https://a5c.ai
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3080
+    description: Local development server
+  - url: https://krate.example.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Health and readiness checks
+  - name: Controller
+    description: Controller snapshot and UI model
+  - name: Organizations
+    description: Organization management
+  - name: Resources
+    description: Kubernetes resource CRUD (org-scoped)
+  - name: Secrets
+    description: Secret management (AgentSecretGrant resources)
+  - name: SecretGrants
+    description: Fine-grained secret grant management
+  - name: External
+    description: External backend sync, conflict resolution, and write intents
+  - name: Agents
+    description: Agent dispatch, memory queries, and event streaming
+  - name: Webhooks
+    description: Webhook ingestion for external provider events
+
+paths:
+  /healthz:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns 200 OK when the server is healthy and ready to serve requests.
+      operationId: getHealth
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  project:
+                    type: string
+                    example: Krate
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/controller:
+    get:
+      tags: [Controller]
+      summary: Get controller UI model
+      description: |
+        Returns a full controller snapshot formatted as a UI model, optionally
+        scoped to a specific organization. Includes resources, org list, agents,
+        status, and dashboard views.
+      operationId: getController
+      parameters:
+        - name: org
+          in: query
+          description: Organization slug to scope the UI model to
+          required: false
+          schema:
+            type: string
+            example: default
+      responses:
+        '200':
+          description: Controller UI model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ControllerUiModel'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs:
+    get:
+      tags: [Organizations]
+      summary: List organizations
+      description: Returns all organizations from the controller snapshot.
+      operationId: listOrganizations
+      responses:
+        '200':
+          description: Organization list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  organizations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OrgSummary'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [Organizations]
+      summary: Create organization
+      description: Creates a new organization resource.
+      operationId: createOrganization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  description: Organization slug (DNS-safe label)
+                  example: acme
+                displayName:
+                  type: string
+                  description: Human-readable organization name
+                  example: Acme Corp
+      responses:
+        '201':
+          description: Organization created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KrateResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/resources:
+    get:
+      tags: [Resources]
+      summary: List resources by kind
+      description: |
+        Lists all resources of the specified kind within the organization's
+        namespace. Defaults to 'Repository' if kind is not specified.
+      operationId: listResources
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+        - name: kind
+          in: query
+          description: Kubernetes resource kind to list (e.g. Repository, AgentStack)
+          required: false
+          schema:
+            type: string
+            example: Repository
+      responses:
+        '200':
+          description: Resource list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [Resources]
+      summary: Apply (create or update) a resource
+      description: |
+        Creates or updates a Kubernetes resource in the organization's namespace.
+        The org context is automatically injected into metadata and spec.
+      operationId: applyResource
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KrateResource'
+            example:
+              apiVersion: krate.a5c.ai/v1alpha1
+              kind: AgentStack
+              metadata:
+                name: my-stack
+              spec:
+                organizationRef: default
+                description: My agent stack
+      responses:
+        '201':
+          description: Resource applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplyResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/resources/{kind}/{name}:
+    get:
+      tags: [Resources]
+      summary: Get a resource
+      description: Returns a single resource by kind and name within the organization namespace.
+      operationId: getResource
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+        - $ref: '#/components/parameters/KindParam'
+        - $ref: '#/components/parameters/NameParam'
+      responses:
+        '200':
+          description: Resource object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KrateResource'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [Resources]
+      summary: Delete a resource
+      description: Deletes the resource with the given kind and name from the organization namespace.
+      operationId: deleteResource
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+        - $ref: '#/components/parameters/KindParam'
+        - $ref: '#/components/parameters/NameParam'
+      responses:
+        '200':
+          description: Resource deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/secrets:
+    get:
+      tags: [Secrets]
+      summary: List secrets
+      description: |
+        Lists all secrets (AgentSecretGrant resources) for the organization.
+        Returns a simplified view with name, type, createdAt, and grants.
+      operationId: listSecrets
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+      responses:
+        '200':
+          description: Secret list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  secrets:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SecretItem'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [Secrets]
+      summary: Create a secret
+      description: |
+        Creates an AgentSecretGrant resource that registers a secret reference
+        with the specified permissions and grant target.
+      operationId: createSecret
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  description: Secret name
+                  example: github-token
+                grantedTo:
+                  type: string
+                  description: Agent or system the secret is granted to
+                  example: agent-stack-builder
+                permissions:
+                  type: array
+                  items:
+                    type: string
+                    enum: [read, write, admin]
+                  default: [read]
+                data:
+                  type: object
+                  description: Optional secret data (key-value pairs)
+                  additionalProperties:
+                    type: string
+      responses:
+        '201':
+          description: Secret created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplyResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/secrets/{name}:
+    delete:
+      tags: [Secrets]
+      summary: Delete a secret
+      description: Deletes the AgentSecretGrant with the given name from the organization.
+      operationId: deleteSecret
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+        - $ref: '#/components/parameters/NameParam'
+      responses:
+        '200':
+          description: Secret deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/secret-grants:
+    get:
+      tags: [SecretGrants]
+      summary: List secret grants
+      description: Lists all AgentSecretGrant resources for the organization (full resource view).
+      operationId: listSecretGrants
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+      responses:
+        '200':
+          description: Secret grant list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceList'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [SecretGrants]
+      summary: Create a secret grant
+      description: |
+        Creates an AgentSecretGrant resource granting a specific agent access
+        to a named secret with the specified permissions.
+      operationId: createSecretGrant
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [secretName, grantedTo]
+              properties:
+                name:
+                  type: string
+                  description: Grant resource name (auto-generated if omitted)
+                  example: grant-github-token
+                secretName:
+                  type: string
+                  description: Name of the secret to grant access to
+                  example: github-token
+                grantedTo:
+                  type: string
+                  description: Agent stack or system receiving the grant
+                  example: agent-stack-builder
+                permissions:
+                  type: array
+                  items:
+                    type: string
+                    enum: [read, write, admin]
+                  default: [read]
+      responses:
+        '201':
+          description: Secret grant created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplyResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/external/sync:
+    post:
+      tags: [External]
+      summary: Sync external binding
+      description: |
+        Triggers a synchronization of a named external binding (e.g. GitHub repository
+        adapter). Reconciles local resource state against the external provider.
+      operationId: syncExternal
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncInput'
+            example:
+              bindingName: github-binding
+              kind: Repository
+              localName: my-repo
+              spec: {}
+              externalEnvelope:
+                nativeId: '123456'
+                url: https://github.com/org/repo
+                etag: abc123
+                providerRef: github
+      responses:
+        '200':
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  synced:
+                    type: boolean
+                  resource:
+                    $ref: '#/components/schemas/KrateResource'
+                  conflicts:
+                    type: array
+                    items:
+                      type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/external/conflicts/{name}/resolve:
+    post:
+      tags: [External]
+      summary: Resolve external conflict
+      description: |
+        Resolves a named external sync conflict using the specified strategy.
+        Strategies: local-wins, remote-wins, or manual (provide resolvedValue).
+      operationId: resolveConflict
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+        - name: name
+          in: path
+          required: true
+          description: Conflict resource name
+          schema:
+            type: string
+            example: repo-conflict-abc123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [strategy]
+              properties:
+                strategy:
+                  type: string
+                  enum: [local-wins, remote-wins, manual]
+                  description: Conflict resolution strategy
+                resolvedValue:
+                  type: object
+                  description: Merged spec value (required for manual strategy)
+                resources:
+                  type: object
+                  description: Additional resource context
+      responses:
+        '200':
+          description: Conflict resolved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resolved:
+                    type: boolean
+                  conflictName:
+                    type: string
+                  strategy:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/external/write-intents/{name}/approve:
+    post:
+      tags: [External]
+      summary: Approve write intent
+      description: |
+        Approves a pending external write intent, allowing the agent to commit
+        changes to the external provider (e.g. push a branch to GitHub).
+      operationId: approveWriteIntent
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+        - name: name
+          in: path
+          required: true
+          description: Write intent resource name
+          schema:
+            type: string
+            example: write-intent-push-abc
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approvedBy:
+                  type: string
+                  description: Identity of the approver
+                  example: alice
+                resources:
+                  type: object
+                  description: Additional resource context for the approval
+      responses:
+        '200':
+          description: Write intent approved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  approved:
+                    type: boolean
+                  intentName:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/external/write-intents/{name}/cancel:
+    post:
+      tags: [External]
+      summary: Cancel write intent
+      description: Cancels a pending external write intent, preventing the agent from writing to the external provider.
+      operationId: cancelWriteIntent
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+        - name: name
+          in: path
+          required: true
+          description: Write intent resource name
+          schema:
+            type: string
+            example: write-intent-push-abc
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cancelledBy:
+                  type: string
+                  description: Identity of the person cancelling the intent
+                  example: alice
+                resources:
+                  type: object
+                  description: Additional resource context
+      responses:
+        '200':
+          description: Write intent cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cancelled:
+                    type: boolean
+                  intentName:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/agents/dispatch:
+    post:
+      tags: [Agents]
+      summary: Dispatch an agent run
+      description: |
+        Dispatches a new AgentDispatchRun against the named stack. The agent will
+        process the prompt in the context of the specified repository and branch.
+      operationId: dispatchAgent
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DispatchInput'
+            example:
+              stackRef: claude-code-stack
+              repository: my-repo
+              branch: main
+              prompt: Fix the failing tests in the auth module
+      responses:
+        '201':
+          description: Agent run dispatched
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run:
+                    $ref: '#/components/schemas/KrateResource'
+                  runName:
+                    type: string
+                    description: Name of the created AgentDispatchRun
+                  status:
+                    type: string
+                    example: dispatched
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/agents/runs/{name}/cancel:
+    post:
+      tags: [Agents]
+      summary: Cancel an agent run
+      description: Requests cancellation of a running AgentDispatchRun.
+      operationId: cancelAgentRun
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+        - name: name
+          in: path
+          required: true
+          description: AgentDispatchRun resource name
+          schema:
+            type: string
+            example: run-abc123
+      responses:
+        '200':
+          description: Run cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cancelled:
+                    type: boolean
+                  runName:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/agents/memory/query:
+    post:
+      tags: [Agents]
+      summary: Query agent memory
+      description: |
+        Queries the agent memory graph or grep index. Supports graph traversal,
+        grep-style pattern matching, and semantic search strategies.
+      operationId: queryAgentMemory
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemoryQueryInput'
+            example:
+              query: deployment pipeline failures in main branch
+              strategy: graph
+              topK: 10
+              context:
+                organizationRef: default
+      responses:
+        '200':
+          description: Memory query results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryQueryResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/agents/events/stream:
+    get:
+      tags: [Agents]
+      summary: SSE event stream
+      description: |
+        Server-Sent Events stream for real-time agent and system events.
+        Emits a "connected" event on open, then "heartbeat" every 30 seconds.
+        Event data is JSON-encoded: `{ type, payload }`.
+
+        **Note:** This endpoint returns `text/event-stream` and does not accept
+        standard JSON requests. Use the EventSource API in browsers.
+      operationId: streamAgentEvents
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+      responses:
+        '200':
+          description: SSE event stream established
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  Newline-delimited SSE events. Each event is:
+                  `data: {"type":"<event-type>","payload":{...}}\n\n`
+              example: |
+                data: {"type":"connected"}
+
+                data: {"type":"heartbeat"}
+
+                data: {"type":"run.status.changed","payload":{"runName":"run-abc","phase":"Running"}}
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/agents/approvals/{name}/decide:
+    post:
+      tags: [Agents]
+      summary: Decide on an agent approval
+      description: |
+        Approves or denies a pending AgentApproval resource. The agent run
+        that triggered the approval will proceed or be blocked accordingly.
+      operationId: decideAgentApproval
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+        - name: name
+          in: path
+          required: true
+          description: AgentApproval resource name
+          schema:
+            type: string
+            example: approval-abc123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision]
+              properties:
+                decision:
+                  type: string
+                  enum: [approve, deny]
+                  description: Approval decision
+                decidedBy:
+                  type: string
+                  description: Identity of the decision maker
+                  example: alice
+                reason:
+                  type: string
+                  description: Optional reason for the decision
+                  example: Approved for hotfix deployment
+      responses:
+        '200':
+          description: Approval decision recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decided:
+                    type: boolean
+                  decision:
+                    type: string
+                    enum: [approve, deny]
+                  approvalName:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/agents/webhooks/ingest:
+    post:
+      tags: [Webhooks]
+      summary: Ingest agent webhook event
+      description: |
+        Ingests a raw webhook payload (from GitHub, Gitea, or other providers)
+        and dispatches it to matching AgentTriggerRule resources. Normalizes
+        the event type from the payload structure automatically.
+      operationId: ingestAgentWebhook
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookPayload'
+            example:
+              action: opened
+              pull_request:
+                number: 42
+                title: Fix auth bug
+                head:
+                  ref: fix/auth-bug
+              repository:
+                full_name: org/my-repo
+              sender:
+                login: alice
+      responses:
+        '200':
+          description: Webhook processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processed:
+                    type: boolean
+                  triggeredRules:
+                    type: array
+                    items:
+                      type: string
+                  dispatchedRuns:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/orgs/{org}/webhooks/ingest:
+    post:
+      tags: [Webhooks]
+      summary: Ingest webhook event (alias)
+      description: Alias for `/api/orgs/{org}/agents/webhooks/ingest`. Accepts the same payload and produces the same result.
+      operationId: ingestWebhook
+      parameters:
+        - $ref: '#/components/parameters/OrgParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookPayload'
+      responses:
+        '200':
+          description: Webhook processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processed:
+                    type: boolean
+                  triggeredRules:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  parameters:
+    OrgParam:
+      name: org
+      in: path
+      required: true
+      description: Organization slug
+      schema:
+        type: string
+        example: default
+    KindParam:
+      name: kind
+      in: path
+      required: true
+      description: Kubernetes resource kind
+      schema:
+        type: string
+        example: Repository
+    NameParam:
+      name: name
+      in: path
+      required: true
+      description: Resource name
+      schema:
+        type: string
+        example: my-repo
+
+  responses:
+    BadRequest:
+      description: Bad request — invalid input or malformed JSON
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    KrateResource:
+      type: object
+      description: A Krate (Kubernetes-style) resource object
+      required: [apiVersion, kind, metadata]
+      properties:
+        apiVersion:
+          type: string
+          example: krate.a5c.ai/v1alpha1
+        kind:
+          type: string
+          description: Resource kind (e.g. Repository, AgentStack)
+          example: AgentStack
+        metadata:
+          type: object
+          required: [name]
+          properties:
+            name:
+              type: string
+              example: my-stack
+            namespace:
+              type: string
+              example: krate-org-default
+            labels:
+              type: object
+              additionalProperties:
+                type: string
+            annotations:
+              type: object
+              additionalProperties:
+                type: string
+            creationTimestamp:
+              type: string
+              format: date-time
+        spec:
+          type: object
+          description: Resource spec (kind-specific fields)
+          additionalProperties: true
+        status:
+          type: object
+          description: Resource status (set by controller)
+          additionalProperties: true
+
+    ResourceList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/KrateResource'
+        total:
+          type: integer
+          description: Total number of items
+          example: 5
+        kind:
+          type: string
+          description: Resource kind that was listed
+          example: Repository
+
+    ApplyResult:
+      type: object
+      properties:
+        resource:
+          $ref: '#/components/schemas/KrateResource'
+        created:
+          type: boolean
+          description: True if created, false if updated
+        name:
+          type: string
+          description: Resource name
+
+    DeleteResult:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+        name:
+          type: string
+        kind:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: not_found
+        message:
+          type: string
+          description: Human-readable error message
+          example: Resource not found
+        code:
+          type: integer
+          description: HTTP status code
+          example: 404
+
+    OrgSummary:
+      type: object
+      properties:
+        slug:
+          type: string
+          example: acme
+        displayName:
+          type: string
+          example: Acme Corp
+        namespace:
+          type: string
+          example: krate-org-acme
+
+    ControllerUiModel:
+      type: object
+      description: UI-facing snapshot of the controller state
+      properties:
+        org:
+          $ref: '#/components/schemas/OrgSummary'
+        orgs:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrgSummary'
+        namespace:
+          type: string
+        status:
+          type: string
+          enum: [ok, degraded, unknown]
+        resources:
+          type: array
+          items:
+            type: object
+        agents:
+          type: object
+          properties:
+            stacks:
+              type: object
+            runs:
+              type: object
+            rules:
+              type: object
+            approvals:
+              type: object
+        views:
+          type: object
+
+    SecretItem:
+      type: object
+      description: Simplified secret view (from AgentSecretGrant)
+      properties:
+        name:
+          type: string
+          example: github-token
+        type:
+          type: string
+          example: Opaque
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        namespace:
+          type: string
+          example: krate-org-default
+        grants:
+          type: array
+          items:
+            type: string
+          description: List of agents or systems that have access
+
+    MemoryQueryInput:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          description: Natural language or pattern query
+          example: deployment failures in the auth module
+        strategy:
+          type: string
+          enum: [graph, grep, semantic, auto]
+          default: auto
+          description: Query strategy to use
+        topK:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+          description: Maximum number of results to return
+        context:
+          type: object
+          description: Additional context for the query
+          properties:
+            organizationRef:
+              type: string
+              example: default
+            repository:
+              type: string
+            namespace:
+              type: string
+
+    MemoryQueryResult:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              score:
+                type: number
+              content:
+                type: string
+              metadata:
+                type: object
+        total:
+          type: integer
+        strategy:
+          type: string
+
+    DispatchInput:
+      type: object
+      required: [stackRef]
+      properties:
+        stackRef:
+          type: string
+          description: Name of the AgentStack to dispatch
+          example: claude-code-stack
+        repository:
+          type: string
+          description: Repository name for the agent run context
+          example: my-repo
+        branch:
+          type: string
+          description: Git branch the agent should operate on
+          default: main
+          example: fix/auth-bug
+        prompt:
+          type: string
+          description: Initial prompt or task for the agent
+          example: Fix the failing tests in the auth module
+        context:
+          type: object
+          description: Additional context passed to the agent
+          additionalProperties: true
+
+    SyncInput:
+      type: object
+      required: [kind, localName]
+      properties:
+        bindingName:
+          type: string
+          description: Name of the TransportBinding to sync
+          example: github-binding
+        kind:
+          type: string
+          description: Resource kind being synced
+          example: Repository
+        localName:
+          type: string
+          description: Local resource name
+          example: my-repo
+        namespace:
+          type: string
+          description: Kubernetes namespace (defaults to org namespace)
+        spec:
+          type: object
+          description: Local resource spec
+          additionalProperties: true
+        externalEnvelope:
+          type: object
+          description: External provider metadata
+          properties:
+            nativeId:
+              type: string
+              description: External provider's identifier
+              example: '123456'
+            url:
+              type: string
+              format: uri
+              example: https://github.com/org/repo
+            etag:
+              type: string
+              description: ETag / version for optimistic concurrency
+            providerRef:
+              type: string
+              example: github
+        watermark:
+          type: string
+          description: Sync watermark for incremental syncs
+
+    WebhookPayload:
+      type: object
+      description: |
+        Raw webhook payload from an external provider (GitHub, Gitea, etc.).
+        The server automatically normalizes the event type from the payload structure.
+      properties:
+        action:
+          type: string
+          description: Webhook action (opened, created, labeled, etc.)
+          example: opened
+        pull_request:
+          type: object
+          description: Pull request data (if applicable)
+        issue:
+          type: object
+          description: Issue data (if applicable)
+        comment:
+          type: object
+          description: Comment data (if applicable)
+        label:
+          type: object
+          description: Label data (if applicable)
+        repository:
+          type: object
+          description: Repository data
+          properties:
+            full_name:
+              type: string
+              example: org/my-repo
+        sender:
+          type: object
+          description: Actor who triggered the event
+          properties:
+            login:
+              type: string
+              example: alice
+        workflow_run:
+          type: object
+          description: CI workflow run data (for pipeline events)
+        ref:
+          type: string
+          description: Git ref (for push events)
+        commits:
+          type: array
+          description: Commit list (for push events)
+          items:
+            type: object

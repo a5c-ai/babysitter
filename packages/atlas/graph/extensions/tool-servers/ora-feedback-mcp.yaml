@@ -1,0 +1,81 @@
+nodeKind: ToolServer
+id: tool-server:ora-feedback-mcp
+attributes:
+  displayName: Ora feedback MCP
+  description: |
+    Ora MCP surface for agent-only feedback submission and feedback retrieval around product agent-readiness checks.
+    Complements the read-only OpenAPI endpoints with write operations gated for agent verification.
+  protocol: mcp-streamable-http
+  provenance: built-in
+  category: ai
+  maintainer: Ora
+  repoUrl: https://ora.run
+  sourceRef: source-ref:ora-mcp
+  mcpTransports:
+    - mcp-transport:streamable-http
+  tools:
+    - tool-descriptor:ora.submit-feedback
+    - tool-descriptor:ora.get-feedback
+edges:
+  integrates_with:
+    - target: tool:ora-agent-readiness
+  contains_tool_descriptor:
+    - target: tool-descriptor:ora.submit-feedback
+    - target: tool-descriptor:ora.get-feedback
+  sourced_from:
+    - target: source-ref:ora-mcp
+  supports_work:
+    - target: responsibility:ai-tooling-evaluation
+      confidence: high
+      evidence: "Agent feedback records capture outcomes, friction points, recommendations, and layer scores."
+    - target: workflow:ai-usage-review
+      confidence: medium
+      evidence: "Feedback retrieval supports review loops for how agents experience product integrations."
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:ora.submit-feedback
+attributes:
+  displayName: Ora submit_feedback
+  category: feedback
+  vendor: Ora
+  mode: mcp-tool
+  description: |
+    Submits agent feedback for an Ora product check, including task outcome, friction points,
+    recommendations, user intent, and optional layer scores.
+  schema: |
+    {
+      "type": "object",
+      "required": ["domain", "agent_id", "task_description", "outcome", "content", "recommendation"],
+      "properties": {
+        "domain": { "type": "string" },
+        "agent_id": { "type": "string" },
+        "task_description": { "type": "string" },
+        "outcome": { "type": "string" },
+        "content": { "type": "string" },
+        "recommendation": { "type": "string" },
+        "user_intent": { "type": "string" },
+        "friction_points": { "type": "array", "items": { "type": "string" } },
+        "layer_scores": { "type": "object" }
+      }
+    }
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:ora.get-feedback
+attributes:
+  displayName: Ora get_feedback
+  category: feedback
+  vendor: Ora
+  mode: mcp-tool
+  description: |
+    Retrieves product feedback records from Ora for a domain so agents can inspect prior integration outcomes.
+  schema: |
+    {
+      "type": "object",
+      "required": ["domain"],
+      "properties": {
+        "domain": { "type": "string" },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 100 }
+      }
+    }
+edges: {}

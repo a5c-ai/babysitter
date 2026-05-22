@@ -18,6 +18,13 @@
  * @references
  * - ERC-1155 Standard: https://eips.ethereum.org/EIPS/eip-1155
  * - OpenZeppelin ERC1155: https://docs.openzeppelin.com/contracts/4.x/erc1155
+ * @graph
+ *   domains: [domain:security]
+ *   specializations: [specialization:cryptography-blockchain]
+ *   skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+ *   roles: [role:security-engineer]
+ *   topics: [topic:hmac-signing, topic:ssl-certs]
+ *   workflows: [workflow:crypto-protocol-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,518 @@
+---
+nodeKind: Topic
+id: topic:chunking-strategies
+attributes:
+  displayName: "Chunking Strategies"
+  description: |
+    Chunking Strategies as a cross-cutting topic — methods for splitting
+    documents into meaningful units for embedding and retrieval. Covers
+    fixed-size chunking with token or character windows, semantic chunking
+    that detects topic boundaries using embedding similarity, parent-child
+    chunking that maintains hierarchical document structure, sliding window
+    approaches with configurable overlap, and code-aware chunking that
+    respects AST boundaries. The choice of strategy directly impacts
+    retrieval precision, recall, and the coherence of retrieved context
+    passed to LLMs.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:embedding-pipeline
+attributes:
+  displayName: "Embedding Pipeline"
+  description: |
+    Embedding Pipeline as a cross-cutting topic — the end-to-end flow from
+    raw documents through chunking, embedding model inference, and vector
+    store ingestion. Covers batch embedding for initial corpus loading vs
+    streaming embedding for real-time document updates, embedding model
+    selection (OpenAI ada-002, Cohere embed-v3, open-source models like
+    E5, BGE, GTE), dimensionality trade-offs, normalization strategies,
+    and pipeline orchestration patterns for keeping embeddings synchronized
+    with source documents as they change.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+    - domain:data-science
+---
+nodeKind: Topic
+id: topic:dense-retrieval
+attributes:
+  displayName: "Dense Retrieval"
+  description: |
+    Dense Retrieval as a cross-cutting topic — similarity search using
+    dense vector representations of queries and documents. Covers
+    approximate nearest neighbor algorithms (HNSW, IVF, DiskANN),
+    embedding space geometry, query-document asymmetry (bi-encoder
+    architectures), distance metrics (cosine, dot product, L2), and
+    the fundamental trade-off between index build time, memory usage,
+    and retrieval latency. Dense retrieval excels at semantic matching
+    but struggles with exact keyword lookups and rare terms.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:data-science
+---
+nodeKind: Topic
+id: topic:sparse-retrieval
+attributes:
+  displayName: "Sparse Retrieval"
+  description: |
+    Sparse Retrieval as a cross-cutting topic — keyword-based retrieval
+    using sparse vector representations. Covers BM25 as the dominant
+    baseline, TF-IDF weighting, learned sparse retrieval models (SPLADE,
+    DeepImpact), inverted index construction, and the strengths of sparse
+    methods for exact term matching, rare vocabulary, and domain-specific
+    terminology where dense models lack training signal.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:data-science
+---
+nodeKind: Topic
+id: topic:hybrid-retrieval
+attributes:
+  displayName: "Hybrid Retrieval"
+  description: |
+    Hybrid Retrieval as a cross-cutting topic — combining dense vector
+    similarity with sparse keyword matching for better retrieval quality.
+    Covers reciprocal rank fusion (RRF) for merging ranked lists,
+    linear score combination with tunable weights, Weaviate's built-in
+    hybrid search, Pinecone's sparse-dense vectors, and the empirical
+    finding that hybrid consistently outperforms either method alone
+    on diverse query types. The key design decision is the fusion
+    strategy and how to weight semantic vs lexical signals.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:data-science
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:re-ranking
+attributes:
+  displayName: "Re-Ranking"
+  description: |
+    Re-Ranking as a cross-cutting topic — applying cross-encoder models
+    to re-score retrieved documents for relevance after initial retrieval.
+    Covers the bi-encoder (fast, approximate) vs cross-encoder (slow,
+    accurate) trade-off, popular re-ranker models (Cohere Rerank, BGE
+    Reranker, cross-encoder/ms-marco), ColBERT-style late interaction
+    for efficient re-ranking, and the retrieve-then-rerank pipeline
+    pattern where a cheap first-stage retriever fetches candidates and
+    an expensive re-ranker selects the best.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:data-science
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:graph-rag
+attributes:
+  displayName: "Graph RAG"
+  description: |
+    Graph RAG as a cross-cutting topic — combining knowledge graphs with
+    retrieval-augmented generation for multi-hop reasoning over structured
+    and unstructured data. Covers Microsoft's GraphRAG pattern (community
+    detection, summarization hierarchies, global search), entity-relation
+    extraction from documents into graph form, graph traversal as retrieval,
+    and the advantage over flat vector RAG for questions requiring synthesis
+    across multiple documents or reasoning about relationships between
+    entities. Graph RAG excels at "what is the overall theme?" queries
+    that flat retrieval cannot answer.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+    - domain:data-science
+---
+nodeKind: Topic
+id: topic:multi-agent-knowledge-sharing
+attributes:
+  displayName: "Multi-Agent Knowledge Sharing"
+  description: |
+    Multi-Agent Knowledge Sharing as a cross-cutting topic — protocols and
+    patterns for agents to share, discover, and update organizational
+    knowledge collaboratively. Covers shared memory stores that multiple
+    agents read from and write to, knowledge broadcasting (one agent
+    discovers a fact, all agents benefit), conflict resolution when agents
+    produce contradictory knowledge, knowledge ownership and provenance
+    in multi-agent systems, and the Blackboard architecture pattern where
+    agents post partial solutions to a shared workspace.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:knowledge-freshness
+attributes:
+  displayName: "Knowledge Freshness"
+  description: |
+    Knowledge Freshness as a cross-cutting topic — detecting and managing
+    stale knowledge in organizational knowledge systems. Covers time-based
+    decay models (knowledge expires after N days without verification),
+    change-detection triggers (source document modified, invalidate
+    derived embeddings), freshness scoring in retrieval ranking, Guru-style
+    verification workflows with assigned knowledge owners, and the
+    distinction between stable knowledge (architectural principles) and
+    volatile knowledge (API versions, team rosters) that requires
+    different freshness policies.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:knowledge-access-control
+attributes:
+  displayName: "Knowledge Access Control"
+  description: |
+    Knowledge Access Control as a cross-cutting topic — row-level security
+    and permission-aware retrieval in knowledge systems. Covers inheriting
+    access permissions from source systems (only retrieve Confluence pages
+    the user can see), role-based knowledge partitioning (engineering sees
+    code context, sales sees deal context), metadata-based filtering in
+    vector stores, document-level ACLs in RAG pipelines, and the security
+    challenge of preventing knowledge leakage through semantic similarity
+    (a nearby vector might expose restricted content even if the exact
+    document is filtered).
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:knowledge-feedback-loop
+attributes:
+  displayName: "Knowledge Feedback Loop"
+  description: |
+    Knowledge Feedback Loop as a cross-cutting topic — human-in-the-loop
+    correction and continuous improvement cycles for organizational
+    knowledge systems. Covers thumbs-up/down signals on retrieved answers,
+    expert correction workflows (user fixes a wrong answer, system learns),
+    retrieval quality monitoring dashboards, embedding model fine-tuning
+    on domain-specific relevance judgments, and the flywheel effect where
+    usage data improves retrieval which increases usage.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:agentic-rag
+attributes:
+  displayName: "Agentic RAG"
+  description: |
+    Agentic RAG as a cross-cutting topic — agents that actively reason
+    about what to retrieve, iterate on retrieval results, and update
+    knowledge rather than passively returning the top-k nearest vectors.
+    Covers query planning (decompose complex questions into sub-queries),
+    self-reflective retrieval (evaluate if retrieved context is sufficient,
+    re-query if not), tool-augmented retrieval (agent uses calculator,
+    code execution, or API calls alongside vector search), corrective
+    RAG (detect hallucination, re-retrieve), and the shift from
+    "retrieve then generate" to "reason, retrieve, reason, retrieve"
+    loops that characterize agentic knowledge work.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:memory-to-knowledge-bridge
+attributes:
+  displayName: "Memory-to-Knowledge Bridge"
+  description: |
+    Memory-to-Knowledge Bridge as a cross-cutting topic — how per-session
+    agent memory (Mem0, Zep, conversation buffer) feeds into and reads
+    from persistent organizational knowledge (vector stores, knowledge
+    graphs). The bridge pattern: session memory captures entities, facts,
+    and decisions during a conversation; an extraction pipeline identifies
+    durable knowledge worth persisting; that knowledge is written to the
+    organizational fabric (vector store, knowledge graph, or structured
+    store); subsequent sessions retrieve from the fabric to bootstrap
+    context. This is the mechanism that turns ephemeral agent interactions
+    into lasting organizational intelligence.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:context-to-fabric-sync
+attributes:
+  displayName: "Context-to-Fabric Sync"
+  description: |
+    Context-to-Fabric Sync as a cross-cutting topic — how compacted
+    conversation context from agent runtime flows into the knowledge
+    fabric for long-term retention. When an agent session compacts its
+    context window (via background consolidation or compaction policies),
+    the compacted summaries, extracted entities, and decision records
+    can be persisted to the organizational knowledge layer rather than
+    being discarded. Covers compaction-triggered write-back, selective
+    persistence (only persist high-value summaries), deduplication
+    against existing fabric knowledge, and the feedback loop where
+    future sessions retrieve previously compacted knowledge to avoid
+    re-discovering the same information.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:auto-memory
+attributes:
+  displayName: "Auto-Memory"
+  description: |
+    Auto-Memory as a cross-cutting topic — agent-driven automatic memory
+    extraction and persistence without explicit user action. Covers the
+    mechanisms by which agents identify salient facts, preferences, and
+    decisions during conversations and persist them for future sessions.
+    Includes Claude Code's extract-memories fork that runs at turn-end,
+    Mem0's LLM-driven extraction pipeline, Cline's memory bank updates,
+    and the fundamental design tension between extraction accuracy (avoiding
+    noise) and completeness (not missing important context). Auto-memory
+    transforms ephemeral conversations into durable organizational knowledge
+    automatically, but the quality of extraction determines whether the
+    accumulated memories help or hinder future sessions.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:memory-to-knowledge-bridge
+    - topic:memory-consolidation
+    - topic:organizational-memory
+---
+nodeKind: Topic
+id: topic:memory-consolidation
+attributes:
+  displayName: "Memory Consolidation"
+  description: |
+    Memory Consolidation as a cross-cutting topic — background processes that
+    merge, deduplicate, prune, and reorganize accumulated agent memories.
+    Covers Claude Code's auto-dream cycle (a forked subagent with restricted
+    tool surface that rewrites the memory directory), periodic consolidation
+    in Zep and Mem0 (time-weighted decay, entity merging), and the general
+    pattern of treating memory as a living document that requires maintenance.
+    Without consolidation, auto-memory systems accumulate noise, contradictions,
+    and redundancy that degrades retrieval quality over time. The key design
+    decisions are frequency (per-session, periodic, on-demand), scope (what
+    memories to touch), and safety (locks to prevent concurrent corruption).
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:auto-memory
+    - topic:organizational-memory
+    - topic:knowledge-freshness
+---
+nodeKind: Topic
+id: topic:memory-scoping
+attributes:
+  displayName: "Memory Scoping"
+  description: |
+    Memory Scoping as a cross-cutting topic — the hierarchy of scopes at
+    which agent memories are stored, retrieved, and isolated. Covers
+    session-only memory (context window, dies with session), project-scoped
+    memory (persists per-project across sessions), user-scoped memory
+    (follows the user across projects), org-scoped memory (shared across
+    team members), and cross-agent memory (shared across different agent
+    products). Each scope level introduces new challenges: project-scoped
+    memory needs project identification, user-scoped needs user identity,
+    org-scoped needs access control, and cross-agent needs format
+    interoperability. Claude Code implements project + user scopes, Mem0
+    adds agent + org scopes, and agentmemory targets cross-agent sharing.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:auto-memory
+    - topic:knowledge-access-control
+    - topic:memory-consolidation
+---
+nodeKind: Topic
+id: topic:memory-security
+attributes:
+  displayName: "Memory Security"
+  description: |
+    Memory Security as a cross-cutting topic — protecting agent memory from
+    injection attacks, credential leakage, and unauthorized access. Covers
+    path validation (Claude Code rejects traversal, UNC, null-byte, and
+    drive-root paths), privacy filtering (agentmemory strips secrets and
+    PII before persistence), scope isolation (memories from one project
+    should not leak to another), and prompt injection via memory (an
+    attacker plants instructions in a file that gets ingested as memory,
+    hijacking future sessions). Memory security is particularly critical
+    for auto-memory systems where the agent decides what to persist —
+    a compromised extraction step could persist attacker-controlled content.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:auto-memory
+    - topic:memory-scoping
+    - topic:knowledge-access-control
+---
+nodeKind: Topic
+id: topic:memory-deduplication
+attributes:
+  displayName: "Memory Deduplication"
+  description: |
+    Memory Deduplication as a cross-cutting topic — strategies for detecting
+    and removing duplicate memory entries across extraction cycles. Covers
+    SHA-256 content-addressable dedup (exact match, used by agentmemory),
+    semantic dedup (embedding similarity threshold, used by auto-dream
+    consolidation), and hybrid approaches that combine exact and semantic
+    matching. Without deduplication, auto-memory systems accumulate
+    redundant entries that waste context window space and dilute retrieval
+    quality. The key trade-off is between aggressive dedup (risking loss of
+    subtly different memories) and conservative dedup (accumulating near-
+    duplicates that clutter retrieval results).
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:auto-memory
+    - topic:memory-consolidation
+---
+nodeKind: Topic
+id: topic:instruction-file-standard
+attributes:
+  displayName: "Instruction File Standard"
+  description: |
+    Instruction File Standard as a cross-cutting topic — the convergence
+    and divergence of agent instruction file formats across coding agents.
+    Covers CLAUDE.md (Claude Code, Pi), AGENTS.md (Codex, Amp, OpenCode),
+    .cursorrules and .cursor/rules/*.mdc (Cursor), .clinerules (Cline),
+    .windsurfrules (Windsurf), .roorules (Roo Code), and .continuerules
+    (Continue). The proliferation of agent-specific instruction files
+    creates a maintenance burden for projects that support multiple agents.
+    Cross-agent compatibility is emerging: Cursor added AGENTS.md support,
+    Pi adopted CLAUDE.md. The open question is whether the ecosystem will
+    converge on a single standard or maintain per-agent formats with
+    translation layers.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:auto-memory
+    - topic:memory-scoping
+---
+nodeKind: Topic
+id: topic:unified-agent-memory
+attributes:
+  displayName: "Unified Agent Memory"
+  description: |
+    Unified Agent Memory as a cross-cutting topic — compatibility layers
+    and shared protocols that allow multiple agent products to read from and
+    write to a common memory store. The core problem: each coding agent has
+    its own memory format and location, so a developer switching between
+    Claude Code, Cursor, and Windsurf must maintain separate memory files
+    with duplicated or drifted content. Unified memory layers (memories.sh,
+    agentmemory, memsearch patterns) address this by defining a canonical
+    storage layout that all participating agents can read. The four-type
+    taxonomy (session / semantic / episodic / procedural) is the emerging
+    schema for unified memory, with memories.sh as the reference
+    implementation. Key design tensions: storage format (plain files vs
+    vector DB), update semantics (each agent writes independently vs a
+    central service mediates), and conflict resolution when two agents
+    write different values for the same fact.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:instruction-file-standard
+    - topic:memory-scoping
+    - topic:memory-type-taxonomy
+---
+nodeKind: Topic
+id: topic:cloud-agent-memory
+attributes:
+  displayName: "Cloud Agent Memory"
+  description: |
+    Cloud Agent Memory as a cross-cutting topic — managed cloud services
+    that provide persistent memory storage for AI agents without requiring
+    self-hosted infrastructure. Covers Cloudflare Agent Memory (Durable
+    Objects + Vectorize, REST API, team-shared profiles), Vercel AI SDK
+    Memory (storage-adapter-backed, Next.js-native), Databricks AI Memory
+    (notebook and agent memory with Unity Catalog governance), and hosted
+    tiers of Mem0 and Zep. The key trade-offs vs local-file memory are
+    operational simplicity (no infrastructure to run), cross-device access
+    (memories available from any client), and cross-team sharing (org-scoped
+    namespaces), offset by cloud dependency, latency for retrieval, and
+    vendor lock-in. Cloud memory is particularly valuable for long-lived
+    agents (Devin sessions, multi-day workflows) where local state is
+    insufficient.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:unified-agent-memory
+    - topic:memory-scoping
+    - topic:memory-to-knowledge-bridge
+---
+nodeKind: Topic
+id: topic:memory-type-taxonomy
+attributes:
+  displayName: "Memory Type Taxonomy"
+  description: |
+    Memory Type Taxonomy as a cross-cutting topic — the classification of
+    agent memory into distinct types with different persistence, update,
+    and retrieval semantics. The four-type model (popularized by memories.sh)
+    identifies: session memory (volatile, cleared per run — equivalent to
+    context window scratch space), semantic memory (persisted facts and
+    preferences — the "what I know" layer, typically memory.md), episodic
+    memory (dated logs of past interactions — the "what I did" layer,
+    supporting retrospection and audit), and procedural memory (workflows
+    and reusable task patterns — the "how I do things" layer). This taxonomy
+    maps to cognitive psychology's memory model (working memory, semantic
+    long-term memory, episodic long-term memory, procedural long-term
+    memory) and provides a principled framework for deciding what to
+    persist, where, and for how long. Different agent products emphasize
+    different memory types: Claude Code primarily implements semantic memory
+    (MEMORY.md), Cline emphasizes structured semantic categories, and
+    memories.sh is the only system that explicitly models all four types.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:unified-agent-memory
+    - topic:auto-memory
+    - topic:memory-scoping
+    - topic:memory-consolidation
+---
+nodeKind: Topic
+id: topic:auto-discovery
+attributes:
+  displayName: "Auto-Discovery"
+  description: |
+    Auto-Discovery as a cross-cutting topic — automated discovery of new
+    tools, MCP servers, frameworks, and libraries from npm registry trending
+    data and GitHub trending repositories for graph enrichment. Covers
+    polling strategies (npm trending API, GitHub trending scraping, release
+    feed monitoring), signal filtering (filter noise from star counts vs
+    genuine adoption signals), deduplication against already-known nodes,
+    candidate scoring (stars, weekly downloads, MCP-compatibility),
+    and the human-in-the-loop review step before auto-generated nodes are
+    committed to the graph. Auto-discovery closes the gap between the
+    ecosystem's rate of change and the graph's coverage without requiring
+    full manual curation for every new tool release.
+edges:
+  applies_to:
+    - domain:software-engineering
+  related_topics:
+    - topic:knowledge-freshness
+    - topic:agentic-rag

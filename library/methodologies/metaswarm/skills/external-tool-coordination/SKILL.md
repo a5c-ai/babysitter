@@ -2,17 +2,14 @@
 name: external-tool-coordination
 description: Coordinate external AI tool integration (OpenAI Codex, Google Gemini) for cross-model adversarial review and delegated implementation.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# External Tool Coordination
-
-## Overview
-
-When configured via `.metaswarm/external-tools.yaml`, coordinate external AI tools for delegated implementation and cross-model adversarial review.
-
-## When to Use
-
-- When external AI tools are configured and available
 - For cross-model adversarial review (writer reviewed by different model)
 - When delegating implementation to cheaper external models
 - For escalation chains across tools

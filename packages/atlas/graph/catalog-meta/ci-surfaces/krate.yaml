@@ -1,0 +1,125 @@
+---
+nodeKind: CiSurface
+id: ci:a5c-ai-krate
+attributes:
+  ciId: "@a5c-ai/krate"
+  packageId: package:a5c-ai-krate
+  scripts:
+    - build
+    - test
+    - validate:docs
+    - package:check
+    - smoke
+    - check
+  publishStrategy: npm-public
+  releaseChannels:
+    - staging
+    - npm
+  validationCommands:
+    - "npm run check --workspace=@a5c-ai/krate"
+    - "npm run package:check --workspace=@a5c-ai/krate"
+  artifactExpectations:
+    - "packages/krate/core/dist/**"
+    - "packages/krate/core/bin/krate-demo.mjs"
+    - "packages/krate/core/bin/krate-server.mjs"
+  triggerEvents:
+    - push
+    - pr
+    - tag
+edges:
+  validates_package:
+    - target: package:a5c-ai-krate
+---
+nodeKind: CiSurface
+id: ci:a5c-ai-krate-sdk
+attributes:
+  ciId: "@a5c-ai/krate-sdk"
+  packageId: package:a5c-ai-krate-sdk
+  scripts:
+    - test
+  publishStrategy: internal-workspace
+  releaseChannels:
+    - ci
+  validationCommands:
+    - "npm test --workspace=@a5c-ai/krate-sdk"
+  artifactExpectations:
+    - "packages/krate/sdk/src/index.js"
+  triggerEvents:
+    - push
+    - pr
+edges:
+  validates_package:
+    - target: package:a5c-ai-krate-sdk
+---
+nodeKind: CiSurface
+id: ci:a5c-ai-krate-cli
+attributes:
+  ciId: "@a5c-ai/krate-cli"
+  packageId: package:a5c-ai-krate-cli
+  scripts:
+    - test
+    - start
+  publishStrategy: internal-workspace
+  releaseChannels:
+    - ci
+  validationCommands:
+    - "npm test --workspace=@a5c-ai/krate-cli"
+  artifactExpectations:
+    - "packages/krate/cli/bin/krate.mjs"
+    - "packages/krate/cli/bin/krate-server.mjs"
+  triggerEvents:
+    - push
+    - pr
+edges:
+  validates_package:
+    - target: package:a5c-ai-krate-cli
+---
+nodeKind: CiSurface
+id: ci:a5c-ai-krate-web
+attributes:
+  ciId: "@a5c-ai/krate-web"
+  packageId: package:a5c-ai-krate-web
+  scripts:
+    - build
+    - test
+    - lint
+  publishStrategy: application
+  releaseChannels:
+    - ci
+  validationCommands:
+    - "npm run build --workspace=@a5c-ai/krate-web"
+    - "npm test --workspace=@a5c-ai/krate-web"
+  artifactExpectations:
+    - "packages/krate/web/.next/**"
+    - "packages/krate/web/app/**"
+  triggerEvents:
+    - push
+    - pr
+edges:
+  validates_package:
+    - target: package:a5c-ai-krate-web
+---
+nodeKind: CiSurface
+id: ci:krate-helm-chart
+attributes:
+  ciId: krate-helm-chart
+  packageId: package:krate-helm-chart
+  scripts:
+    - npm-run-check
+    - helm-template
+  publishStrategy: application
+  releaseChannels:
+    - staging
+  validationCommands:
+    - "npm run check --workspace=@a5c-ai/krate"
+    - "helm template krate packages/krate/charts"
+  artifactExpectations:
+    - "packages/krate/charts/Chart.yaml"
+    - "packages/krate/charts/crds/*.yaml"
+    - "packages/krate/charts/templates/*.yaml"
+  triggerEvents:
+    - push
+    - pr
+edges:
+  validates_package:
+    - target: package:krate-helm-chart

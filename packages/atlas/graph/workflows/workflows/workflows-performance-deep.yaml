@@ -1,0 +1,105 @@
+---
+nodeKind: Workflow
+id: workflow:latency-profiling-deep-dive
+attributes:
+  displayName: "Latency Profiling Deep Dive"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-issue"
+  complexity: single-team
+  description: |
+    Investigates end-to-end request latency anomalies through systematic
+    profiling -- capturing distributed traces, analyzing per-service latency
+    contributions, identifying slow database queries via explain plans, profiling
+    serialization/deserialization overhead, measuring network round-trip times
+    between services, correlating latency spikes with GC pauses or thread
+    contention, generating flame graphs for critical code paths, and producing
+    targeted optimization recommendations with expected latency improvements.
+    Excludes load testing and performance budgeting.
+edges:
+  involves_role:
+    - target: role:performance-profiler
+    - target: role:debugger
+    - target: role:backend-engineer
+  requires_skill_area:
+    - target: skill-area:profiling-cpu
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity
+---
+nodeKind: Workflow
+id: workflow:memory-leak-investigation
+attributes:
+  displayName: "Memory Leak Investigation"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-issue"
+  complexity: single-team
+  description: |
+    Systematically diagnoses and resolves memory leaks in production or staging
+    services -- capturing heap snapshots over time, analyzing object retention
+    graphs, identifying leaked allocations by class and call site, correlating
+    memory growth with traffic patterns or specific endpoints, profiling native
+    memory via tools like jemalloc or valgrind, differentiating true leaks from
+    excessive caching, producing a root-cause report with fix recommendations,
+    and verifying the fix stabilizes RSS under sustained load. Excludes
+    preventive memory budgeting.
+edges:
+  involves_role:
+    - target: role:performance-profiler
+    - target: role:debugger
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:profiling-memory
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity
+---
+nodeKind: Workflow
+id: workflow:database-connection-pool-tuning
+attributes:
+  displayName: "Database Connection Pool Tuning"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-regression"
+  complexity: single-team
+  description: |
+    Analyzes and optimizes database connection pool configurations -- profiling
+    connection checkout latency, identifying pool exhaustion events, measuring
+    connection idle timeout effectiveness, evaluating pool size against
+    concurrent query load, analyzing connection leak patterns via stack trace
+    attribution, testing pool warm-up strategies, validating
+    PgBouncer/ProxySQL intermediate pooler settings, and recommending pool
+    parameter changes with load-test validation. Excludes query optimization
+    and schema migration.
+edges:
+  involves_role:
+    - target: role:database-administrator
+    - target: role:performance-profiler
+    - target: role:backend-engineer
+  requires_skill_area:
+    - target: skill-area:postgres-tuning
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:databases
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:database-team
+    - target: org-unit:engineering

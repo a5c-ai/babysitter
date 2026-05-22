@@ -1,0 +1,24 @@
+nodeKind: Language
+id: language:nim
+attributes:
+  displayName: "Nim"
+  paradigms:
+    - imperative
+    - object-oriented
+    - functional
+    - metaprogramming
+  description: |
+    Nim is a statically-typed, compiled, multi-paradigm language that
+    transpiles to C, C++, or JavaScript, giving it broad deployment reach
+    while preserving Python-like readability.
+
+    Nim features a powerful macro system for compile-time metaprogramming,
+    manual memory management alongside an optional garbage collector, and
+    zero-overhead interop with C libraries. It is used in game development,
+    systems programming, CLI tooling, and embedded contexts where both
+    expressiveness and performance matter. The Nimble package manager and
+    the Karax web frontend framework round out its ecosystem.
+edges:
+  applies_to:
+    - target: domain:systems-programming
+    - target: domain:software-engineering

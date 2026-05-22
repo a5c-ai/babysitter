@@ -1,0 +1,39 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:pikiclaw.ui@current
+attributes:
+  displayName: "PikiClaw UI (current) — mobile"
+  agentVersionId: agent-version:pikiclaw@current
+  packageRef: source-ref:pikiclaw-app
+  uiKind: mobile
+  presentationsBundled:
+    - presentation:pikiclaw-mobile
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  notes: |
+    Native mobile UI with touch-optimized controls for agent interaction,
+    voice input, camera-based vision input, and plugin marketplace browsing.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:prompt-input
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:pikiclaw-voice-input
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:pikiclaw-plugin-marketplace
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:file-attachment
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:pikiclaw-skill-invoke
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:pikiclaw-agent-select
+      attributes:
+        mechanism: ui-control

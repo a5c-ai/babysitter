@@ -1,0 +1,149 @@
+# Krate package inventory and Atlas gap map.
+# Source of truth: packages/krate/charts/crds/*.yaml and packages/krate runtime/docs surfaces.
+---
+nodeKind: Topic
+id: topic:krate-crd-inventory
+attributes:
+  displayName: "Krate CRD Inventory"
+  description: |
+    Machine-readable inventory topic for Krate's Kubernetes-native API surface.
+    packages/krate/charts/crds currently defines 75 CustomResourceDefinition
+    documents across agent resources, aggregated forge/CI/session/memory
+    resources, external backend resources, policy resources, and repository /
+    organization / identity resources.
+edges:
+  relates_to:
+    - platform:krate
+    - agent-platform-impl:krate.platform@current
+    - platform-service:krate-forge
+    - platform-service:krate-agent-dispatch
+    - platform-service:krate-company-brain
+    - platform-service:krate-policy
+---
+nodeKind: EvidenceSource
+id: evidence:krate-crd-source-agent-resources
+attributes:
+  displayName: "Krate agent CRD source"
+  kindLabel: file
+  sourcePathOrUrl: packages/krate/charts/crds/agent-resources.yaml
+  filePath: packages/krate/charts/crds/agent-resources.yaml
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-14T00:00:00Z'
+  observedBy: codex
+  locator: krate-crds:agent-resources
+edges:
+  evidences:
+    - claim:krate-crd-kind-count-75
+---
+nodeKind: EvidenceSource
+id: evidence:krate-crd-source-aggregated-resources
+attributes:
+  displayName: "Krate aggregated resource CRD source"
+  kindLabel: file
+  sourcePathOrUrl: packages/krate/charts/crds/aggregated-resources.yaml
+  filePath: packages/krate/charts/crds/aggregated-resources.yaml
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-14T00:00:00Z'
+  observedBy: codex
+  locator: krate-crds:aggregated-resources
+edges:
+  evidences:
+    - claim:krate-crd-kind-count-75
+---
+nodeKind: EvidenceSource
+id: evidence:krate-crd-source-external-resources
+attributes:
+  displayName: "Krate external backend CRD source"
+  kindLabel: file
+  sourcePathOrUrl: packages/krate/charts/crds/external-resources.yaml
+  filePath: packages/krate/charts/crds/external-resources.yaml
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-14T00:00:00Z'
+  observedBy: codex
+  locator: krate-crds:external-resources
+edges:
+  evidences:
+    - claim:krate-crd-kind-count-75
+---
+nodeKind: EvidenceSource
+id: evidence:krate-crd-source-policy-resources
+attributes:
+  displayName: "Krate policy CRD source"
+  kindLabel: file
+  sourcePathOrUrl: packages/krate/charts/crds/policy-resources.yaml
+  filePath: packages/krate/charts/crds/policy-resources.yaml
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-14T00:00:00Z'
+  observedBy: codex
+  locator: krate-crds:policy-resources
+edges:
+  evidences:
+    - claim:krate-crd-kind-count-75
+---
+nodeKind: EvidenceSource
+id: evidence:krate-crd-source-repositories
+attributes:
+  displayName: "Krate repository and identity CRD source"
+  kindLabel: file
+  sourcePathOrUrl: packages/krate/charts/crds/repositories.yaml
+  filePath: packages/krate/charts/crds/repositories.yaml
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-14T00:00:00Z'
+  observedBy: codex
+  locator: krate-crds:repositories
+edges:
+  evidences:
+    - claim:krate-crd-kind-count-75
+---
+nodeKind: Claim
+id: claim:krate-crd-kind-count-75
+attributes:
+  subjectId: platform:krate
+  subjectKind: Platform
+  attribute: crdKindCount
+  value: 75
+  statement: |
+    packages/krate currently defines 75 Kubernetes CustomResourceDefinition
+    documents under packages/krate/charts/crds: 22 agent resources, 28
+    aggregated forge/CI/session/memory resources, 10 external backend resources,
+    4 policy resources, and 11 repository/organization/identity resources.
+  evidenceSourceIds:
+    - evidence:krate-crd-source-agent-resources
+    - evidence:krate-crd-source-aggregated-resources
+    - evidence:krate-crd-source-external-resources
+    - evidence:krate-crd-source-policy-resources
+    - evidence:krate-crd-source-repositories
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-14T00:00:00Z'
+  claimedBy: codex
+  claimKind: assertion
+edges:
+  claims:
+    - platform:krate
+  evidenced_by:
+    - evidence:krate-crd-source-agent-resources
+    - evidence:krate-crd-source-aggregated-resources
+    - evidence:krate-crd-source-external-resources
+    - evidence:krate-crd-source-policy-resources
+    - evidence:krate-crd-source-repositories
+---
+nodeKind: TestableClaim
+id: claim-test:krate-crd-kind-count-75
+attributes:
+  displayName: "Krate CRD inventory count is 75"
+  description: |
+    Verifies the packages/krate/charts/crds source files define exactly 75
+    CustomResourceDefinition documents. This claim prevents stale Atlas prose
+    from drifting behind the package resource model.
+  testStatus: untested
+  testType: unit
+  testCommand: "node -e \"const fs=require('fs'),yaml=require('yaml'),p='packages/krate/charts/crds';let n=0;for(const f of fs.readdirSync(p).filter(x=>x.endsWith('.yaml'))){for(const d of yaml.parseAllDocuments(fs.readFileSync(p+'/'+f,'utf8'))){if(d.toJSON()?.kind==='CustomResourceDefinition')n++;}}process.exit(n===75?0:1)\""
+  category: graph-integrity
+  priority: high
+edges:
+  asserts_about:
+    - platform:krate
+    - topic:krate-crd-inventory

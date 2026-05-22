@@ -7,6 +7,11 @@ expertise:
   - Suffix structure expertise
   - Hashing technique application
   - Pattern matching optimization
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:string-matching, skill-area:dynamic-programming]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # String Algorithm Specialist Agent

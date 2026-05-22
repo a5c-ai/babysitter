@@ -1,0 +1,31 @@
+nodeKind: Gap
+id: gap:source-file-pinning-for-agent-implementations
+attributes:
+  title: "Pin implementation claims to exact source files"
+  level: 2
+  priority: P2
+  discoveredAt: "2026-05-04T00:00:00Z"
+  source: |
+    Some implementation claims are currently backed by broad repository or
+    public documentation evidence rather than exact source-file evidence.
+  currentState: |
+    A5C and Codex implementation records have graph-local and public-document
+    evidence, but some runtime/core/platform internals are not pinned to exact
+    stable source-file URLs.
+  desiredState: |
+    Exact source-file EvidenceSource records exist for command-reference,
+    core-loop, runtime dispatch, platform registry, UI primitive, stop-detection,
+    tool-dispatch, and Responses event-handling claims where those details are
+    asserted by implementation-specific graph nodes.
+  propagationStatus:
+    agent-stack: not-started
+    evidence-sources: not-started
+    claims: not-started
+  status: open
+  markdownRef: catalog-meta/open-questions/source-pinning-questions-2026-05.yaml
+  owner: "@a5c-ai/catalog-stewards"
+edges:
+  raised_question:
+    - target: open-question:a5c-public-command-reference-source-pinning
+    - target: open-question:a5c-implementation-source-file-pinning
+    - target: open-question:codex-runtime-source-file-pinning

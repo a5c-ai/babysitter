@@ -1,0 +1,118 @@
+---
+nodeKind: ModelProviderVersion
+id: providerVersion:anthropic:ge-0-0-0
+attributes:
+  providerVersionId: "providerVersion:anthropic:ge-0-0-0"
+  providerId: "anthropic"
+  versionRange: ">=0.0.0"
+  apiBasePatterns: []
+  authSignals:
+    - "ANTHROPIC_API_KEY"
+  envSignals:
+    - "CLAUDE_ENV_FILE"
+    - "CLAUDE_CODE_SESSION_ID"
+  regionConstraints: []
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-agent-mux-host"
+    - "web-anthropic-claude-code"
+---
+nodeKind: ModelProviderVersion
+id: providerVersion:openai:ge-0-0-0
+attributes:
+  providerVersionId: "providerVersion:openai:ge-0-0-0"
+  providerId: "openai"
+  versionRange: ">=0.0.0"
+  apiBasePatterns: []
+  authSignals:
+    - "OPENAI_API_KEY"
+  envSignals:
+    - "CODEX_THREAD_ID"
+    - "CODEX_SESSION_ID"
+    - "CODEX_PLUGIN_ROOT"
+  regionConstraints: []
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-hooks-detector"
+    - "web-openai-codex-skills"
+---
+nodeKind: ModelProviderVersion
+id: providerVersion:google:ge-0-0-0
+attributes:
+  providerVersionId: "providerVersion:google:ge-0-0-0"
+  providerId: "google"
+  versionRange: ">=0.0.0"
+  apiBasePatterns: []
+  authSignals:
+    - "GOOGLE_API_KEY"
+  envSignals:
+    - "GEMINI_SESSION_ID"
+    - "GEMINI_CWD"
+    - "GEMINI_PROJECT_DIR"
+  regionConstraints: []
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-gemini"
+    - "web-gemini-hooks"
+---
+nodeKind: ModelProviderVersion
+id: providerVersion:github:ge-0-0-0
+attributes:
+  providerVersionId: "providerVersion:github:ge-0-0-0"
+  providerId: "github"
+  versionRange: ">=0.0.0"
+  apiBasePatterns: []
+  authSignals:
+    - "GITHUB_TOKEN"
+    - "COPILOT_GITHUB_TOKEN"
+  envSignals:
+    - "COPILOT_SESSION_ID"
+    - "COPILOT_CLI_SESSION"
+    - "GH_COPILOT_SESSION"
+  regionConstraints: []
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-copilot"
+    - "web-github-copilot-agent"
+---
+nodeKind: ModelProviderVersion
+id: providerVersion:bedrock:ge-0-0-0
+attributes:
+  providerVersionId: "providerVersion:bedrock:ge-0-0-0"
+  providerId: "bedrock"
+  versionRange: ">=0.0.0"
+  apiBasePatterns: []
+  authSignals: []
+  envSignals: []
+  regionConstraints: []
+  evidenceRefs:
+    - "repo-transport-mux-readme"
+    - "repo-transport-mux-architecture"
+---
+nodeKind: ModelProviderVersion
+id: providerVersion:vertex:ge-0-0-0
+attributes:
+  providerVersionId: "providerVersion:vertex:ge-0-0-0"
+  providerId: "vertex"
+  versionRange: ">=0.0.0"
+  apiBasePatterns: []
+  authSignals: []
+  envSignals: []
+  regionConstraints: []
+  evidenceRefs:
+    - "repo-transport-mux-readme"
+    - "repo-transport-mux-architecture"
+---
+nodeKind: ModelProviderVersion
+id: providerVersion:foundry:ge-0-0-0
+attributes:
+  providerVersionId: "providerVersion:foundry:ge-0-0-0"
+  providerId: "foundry"
+  versionRange: ">=0.0.0"
+  apiBasePatterns: []
+  authSignals: []
+  envSignals: []
+  regionConstraints: []
+  evidenceRefs:
+    - "repo-transport-mux-readme"
+    - "repo-transport-mux-architecture"

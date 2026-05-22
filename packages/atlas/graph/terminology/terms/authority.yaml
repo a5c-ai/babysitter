@@ -1,0 +1,12 @@
+nodeKind: Term
+id: term:authority
+attributes:
+  canonicalDefinitionId: definition:authority.canonical
+  displayName: "Authority"
+  kind: concept
+  description: |
+    Deprecated trust-scoring concept retained for legacy references.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:cybersecurity

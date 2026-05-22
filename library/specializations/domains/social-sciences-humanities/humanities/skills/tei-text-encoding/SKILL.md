@@ -2,6 +2,12 @@
 name: tei-text-encoding
 description: Encode texts following Text Encoding Initiative standards for digital editions, annotations, and scholarly apparatus
 allowed-tools: Read, Grep, Write, Edit, Glob, Bash
+graph:
+  domains: [domain:humanities]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:document-processing, skill-area:parsing-data-formats, skill-area:docs-as-code]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:technical-writer, role:data-engineer]
 ---
 
 # TEI Text Encoding

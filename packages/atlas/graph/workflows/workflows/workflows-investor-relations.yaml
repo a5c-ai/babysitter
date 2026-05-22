@@ -1,0 +1,76 @@
+---
+nodeKind: Workflow
+id: workflow:earnings-call-preparation
+attributes:
+  displayName: "Earnings Call Preparation"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Prepares the quarterly earnings call from financial close through live
+    event -- coordinating with finance on results finalization and variance
+    narratives, drafting the earnings press release and supplemental data
+    tables, preparing CEO and CFO scripts with key-message talking points,
+    rehearsing Q&A responses for anticipated analyst questions, coordinating
+    with legal on forward-looking statement disclosures and Reg-FD
+    compliance, managing logistics for webcast platform and operator
+    briefing, and archiving transcript and replay for regulatory retention.
+    Produces earnings press release, management script, and Q&A preparation
+    document. Excludes financial auditing.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:public-relations
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:investor-relations
+    - target: org-unit:finance-team
+    - target: org-unit:legal-team
+---
+nodeKind: Workflow
+id: workflow:shareholder-engagement-cycle
+attributes:
+  displayName: "Shareholder Engagement Cycle"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Manages proactive shareholder engagement between earnings cycles --
+    analyzing shareholder register changes and ownership concentration
+    shifts, scheduling non-deal roadshow meetings with target institutional
+    investors, preparing investor-day presentations with deep-dive
+    business-unit content, tracking investor feedback themes and sentiment
+    evolution, coordinating proxy-season engagement on governance and ESG
+    proposals, benchmarking shareholder-engagement cadence against peer
+    companies, and maintaining the investor CRM with contact history and
+    preference profiles. Produces shareholder engagement summary and investor
+    feedback report. Excludes proxy solicitation execution.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:public-relations
+    - target: domain:sustainability-esg
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:investor-relations
+    - target: org-unit:finance-team
+    - target: org-unit:esg-sustainability-team

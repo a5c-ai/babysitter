@@ -25,6 +25,12 @@
  * @references
  * - Playwright Electron: https://playwright.dev/docs/api/class-electron
  * - Related issue: https://github.com/a5c-ai/babysitter/issues/59
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:desktop-development]
+ *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+ *   roles: [role:desktop-developer, role:fullstack-engineer]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -79,6 +85,7 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/desktop-development/incremental-feature-e2e-gate', timestamp: startTime }
     };
   }
+
   // ============================================================================
   // PHASE 3: GENERATE E2E TESTS FOR UNCOVERED ROUTES/FEATURES
   // ============================================================================
@@ -122,7 +129,7 @@ export async function process(inputs, ctx) {
     convergenceAttempts++;
     ctx.log('info', `Phase 5: Convergence attempt ${convergenceAttempts}/${maxConvergenceAttempts} — ${finalResult.failingTests.length} tests failing`);
 
-    let fixResult = await ctx.task(fixFailingE2eTestsTask, {
+    const fixResult = await ctx.task(fixFailingE2eTestsTask, {
       projectName, framework, testFramework,
       failingTests: finalResult.failingTests,
       existingE2eDir
@@ -134,6 +141,7 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...(finalResult.artifacts || []));
   }
+
   // ============================================================================
   // PHASE 6: QUALITY GATE — PASS/FAIL DECISION
   // ============================================================================
@@ -141,16 +149,8 @@ export async function process(inputs, ctx) {
   const totalNewTests = (routeTests.testsAdded || 0) + (featureTests.testsAdded || 0);
   const gatePassed = finalResult.allPassing && totalNewTests > 0;
 
-      let lastFeedback = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback) {
-        fixResult = await ctx.task(fixFailingE2eTestsTask, { ...{
-      projectName, framework, testFramework,
-      failingTests: finalResult.failingTests,
-      existingE2eDir
-    }, feedback: lastFeedback, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (!gatePassed) {
+    await ctx.breakpoint({
       question: [
         `**E2E Gate ${gatePassed ? 'PASSED' : 'FAILED'}**`,
         '',
@@ -164,15 +164,9 @@ export async function process(inputs, ctx) {
         'The E2E gate did not pass. Review and decide whether to proceed anyway or fix the issues.'
       ].join('\n'),
       title: 'E2E Gate Result',
-      context: { runId: ctx.runId, gatePassed, totalNewTests },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      context: { runId: ctx.runId, gatePassed, totalNewTests }
+    });
+  }
 
   return {
     success: gatePassed,
@@ -190,7 +184,8 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/desktop-development/incremental-feature-e2e-gate', timestamp: startTime }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -9,17 +9,15 @@ expertise:
   - Multi-language proficiency
   - Agent Booster transform application
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Coder Agent
-
-## Role
-
-Worker agent specializing in code implementation. Produces code from specifications, applies test-driven development, and can leverage Agent Booster for simple transforms.
-
-## Expertise
-
-- Implementation from detailed specifications and work units
 - Test-driven development (write tests first, implement to pass)
 - Code refactoring and modernization patterns
 - Multi-language implementation (TypeScript, Python, Go, Rust, etc.)

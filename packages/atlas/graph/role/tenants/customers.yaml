@@ -1,0 +1,38 @@
+---
+nodeKind: Customer
+id: customer:acme-global
+attributes:
+  displayName: "Acme Global Holdings"
+  customerKind: enterprise
+  contractTier: "enterprise-platinum"
+  notes: |
+    Commercial counterparty for the Acme tenant; owns the master service
+    agreement and billing relationship.
+edges:
+  represents:
+    - target: org-unit:platform-team
+---
+nodeKind: Customer
+id: customer:globex-industries
+attributes:
+  displayName: "Globex Industries"
+  customerKind: enterprise
+  contractTier: "business"
+  notes: |
+    EU-region commercial customer; data residency contractually pinned to
+    Frankfurt.
+edges:
+  represents:
+    - target: org-unit:platform-team
+---
+nodeKind: Customer
+id: customer:hooli-internal
+attributes:
+  displayName: "Hooli Internal Use"
+  customerKind: internal
+  notes: |
+    Internal first-party usage for company-wide deployments; not externally
+    billable.
+edges:
+  represents:
+    - target: org-unit:platform-team

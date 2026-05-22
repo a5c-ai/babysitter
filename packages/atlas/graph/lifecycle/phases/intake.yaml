@@ -1,0 +1,11 @@
+nodeKind: Phase
+id: phase:intake
+attributes:
+  order: 1
+  displayName: "Intake"
+  phaseMachineId: phase-machine:default-process
+  description: |
+    The intake phase of the default process phase machine.
+edges:
+  belongs_to_phase_machine:
+    - phase-machine:default-process

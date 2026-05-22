@@ -2,6 +2,12 @@
 name: accessibility-udl-specialist
 description: Ensure learning experiences are accessible and inclusive for all learners using UDL principles and accessibility standards
 required-skills: multimedia-learning-design, accessibility-compliance-auditing, quality-assurance-review
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:accessibility-first-design, skill-area:usability-testing]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:product-designer, role:ux-researcher]
 ---
 
 # Accessibility and UDL Specialist Agent

@@ -1,0 +1,15 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-kanban
+attributes:
+  packageId: "@a5c-ai/kanban"
+  packageName: "@a5c-ai/kanban"
+  workspacePath: packages/kanban
+  moduleType: typescript
+  surfaceKinds:
+    - ui-consumer
+  sourceOfTruthRole: application
+  publishedTo: none
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:catalog-api

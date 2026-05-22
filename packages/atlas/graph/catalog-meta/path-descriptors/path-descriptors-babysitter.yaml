@@ -1,0 +1,214 @@
+nodeKind: PathDescriptor
+id: path:user-profile
+attributes:
+  pathId: user-profile
+  displayName: Babysitter user profile
+  path: ~/.a5c/profile.json
+  pathKind: config-file
+  ownerKind: GraphDocument
+  ownerId: graph:agent-catalog
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+  notes: 'Per-user babysitter profile produced by /babysitter:user-install.
+
+    Captures specialties, preferences, and tool selections feeding
+
+    later run defaults.
+
+    '
+edges:
+  owned_by:
+    - target: graph:agent-catalog
+
+---
+nodeKind: PathDescriptor
+id: path:project-config
+attributes:
+  pathId: project-config
+  displayName: Babysitter project config
+  path: .a5c/config.yaml
+  pathKind: config-file
+  ownerKind: GraphDocument
+  ownerId: graph:agent-catalog
+  platform: cross-platform
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: 'Per-project babysitter configuration produced by
+
+    /babysitter:project-install. Pinned to the project''s process
+
+    library, default harness, and CI/CD integration choices.
+
+    '
+edges:
+  owned_by:
+    - target: graph:agent-catalog
+
+---
+nodeKind: PathDescriptor
+id: path:journal-events
+attributes:
+  pathId: journal-events
+  displayName: Babysitter run journal events
+  path: .a5c/runs/<runId>/journal/events.jsonl
+  pathKind: event-log
+  ownerKind: GraphDocument
+  ownerId: graph:agent-catalog
+  platform: cross-platform
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: 'Append-only JSONL event log for a single run. Source of truth for
+
+    replaying ground state during the orchestration loop. Lives under
+
+    `.a5c/runs/<runId>/` (see path:a5c-runs-dir).
+
+    '
+edges:
+  owned_by:
+    - target: graph:agent-catalog
+
+---
+nodeKind: PathDescriptor
+id: path:run-tasks-dir
+attributes:
+  pathId: run-tasks-dir
+  displayName: Babysitter run tasks directory
+  path: .a5c/runs/<runId>/tasks/
+  pathKind: session-state-dir
+  ownerKind: GraphDocument
+  ownerId: graph:agent-catalog
+  platform: cross-platform
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: 'Per-task working directories within a single run. Each task gets
+
+    its own subdir for inputs, intermediate artifacts, and outputs.
+
+    '
+edges:
+  owned_by:
+    - target: graph:agent-catalog
+
+---
+nodeKind: PathDescriptor
+id: path:run-effects-dir
+attributes:
+  pathId: run-effects-dir
+  displayName: Babysitter run effects directory
+  path: .a5c/runs/<runId>/effects/
+  pathKind: session-state-dir
+  ownerKind: GraphDocument
+  ownerId: graph:agent-catalog
+  platform: cross-platform
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: 'Per-run record of side-effects (file writes, shell commands,
+
+    network calls) emitted by the orchestrator. Diagnosed by the
+
+    /babysitter:doctor command.
+
+    '
+edges:
+  owned_by:
+    - target: graph:agent-catalog
+
+---
+nodeKind: PathDescriptor
+id: path:run-locks-dir
+attributes:
+  pathId: run-locks-dir
+  displayName: Babysitter run locks directory
+  path: .a5c/runs/<runId>/locks/
+  pathKind: session-state-dir
+  ownerKind: GraphDocument
+  ownerId: graph:agent-catalog
+  platform: cross-platform
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: 'Per-run filesystem lock directory used to serialise concurrent
+
+    orchestrator instances. Inspected by /babysitter:doctor.
+
+    '
+edges:
+  owned_by:
+    - target: graph:agent-catalog
+
+---
+nodeKind: PathDescriptor
+id: path:run-history-insights
+attributes:
+  pathId: run-history-insights
+  displayName: Run history insights digest
+  path: docs/run-history-insights.md
+  pathKind: doc-file
+  ownerKind: GraphDocument
+  ownerId: graph:agent-catalog
+  platform: cross-platform
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: 'Aggregated insights document produced by /babysitter:cleanup
+
+    before pruning old runs. Captures patterns from
+
+    completed/failed runs for later reuse.
+
+    '
+edges:
+  owned_by:
+    - target: graph:agent-catalog
+
+---
+nodeKind: PathDescriptor
+id: path:amux-hooks-project
+attributes:
+  pathId: amux-hooks-project
+  displayName: agent-mux project hooks registry
+  path: .amux/hooks.json
+  pathKind: config-file
+  ownerKind: GraphDocument
+  ownerId: graph:agent-catalog
+  platform: cross-platform
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: 'Project-scope hook-registration store consumed by agent-mux''s
+
+    unified hook system. Maps `(agent, hookType) → handler(target)`;
+
+    overrides matching ids in the global ~/.amux/hooks.json. Source:
+
+    docs/agent-mux/reference/15-hooks.md.
+
+    '
+---
+nodeKind: PathDescriptor
+id: path:amux-hooks-global
+attributes:
+  pathId: amux-hooks-global
+  displayName: agent-mux global hooks registry
+  path: ~/.amux/hooks.json
+  pathKind: config-file
+  ownerKind: GraphDocument
+  ownerId: graph:agent-catalog
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+  notes: 'User-scope hook registrations for agent-mux; overridden per-id
+
+    by `.amux/hooks.json` (project). Source:
+
+    docs/agent-mux/reference/15-hooks.md.
+
+    '

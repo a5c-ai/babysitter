@@ -18,6 +18,10 @@ metadata:
     - can
     - can-fd
     - communication
+graph:
+  domains: [domain:automotive-engineering]
+  skillAreas: [skill-area:sensor-fusion, skill-area:motion-planning, skill-area:physics-simulation]
+  roles: [role:systems-integration-engineer, role:embedded-engineer]
 ---
 
 # CAN/CAN-FD Communication Skill

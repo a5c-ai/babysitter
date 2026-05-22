@@ -17,6 +17,9 @@
  * - Slither: https://github.com/crytic/slither
  * - Mythril: https://github.com/ConsenSys/mythril
  * - SWC Registry: https://swcregistry.io/
+ * @graph
+ *   domains: [domain:cybersecurity]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

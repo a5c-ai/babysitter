@@ -3,6 +3,11 @@
  * @description Process for systematically following up with customers on their feedback and communicating improvements made
  * @inputs { feedbackItems: array, improvementActions: array, customerContacts: object, communicationConfig: object }
  * @outputs { success: boolean, followUpPlan: object, communicationsSent: array, closureReport: object, artifacts: array }
+  * @graph
+ *   domains: [domain:customer-experience]
+ *   skillAreas: [skill-area:customer-success, skill-area:user-research, skill-area:product-discovery]
+ *   workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+ *   roles: [role:product-designer, role:customer-success-manager, role:ux-researcher]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

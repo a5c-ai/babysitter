@@ -1,0 +1,393 @@
+nodeKind: ToolServer
+id: tool-server:mcp-e2b
+attributes:
+  displayName: E2B MCP Server
+  description: |
+    MCP server for running code in secure E2B sandboxes. Added as a concrete tool-server companion
+    for the Ora-discovered E2B agent-sandbox product.
+  protocol: mcp-stdio
+  provenance: custom
+  category: devtools
+  maintainer: E2B
+  repoUrl: https://github.com/e2b-dev/mcp-server
+  sourceRef: source-ref:e2b-mcp-server
+  mcpTransports:
+    - mcp-transport:stdio
+  ora:
+    discoveredFor: ["MCP server for repository code review pull request analysis"]
+    domain: e2b.dev
+    score: 69
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:e2b
+  sourced_from:
+    - target: source-ref:e2b-mcp-server
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:test-writer
+      confidence: high
+      evidence: "Sandbox execution supports reproducible test and code-validation workflows."
+    - target: workflow:test-automation-pipeline
+      confidence: high
+      evidence: "E2B provides isolated code execution for agent-driven validation loops."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-smithery-registry-candidate
+attributes:
+  displayName: Smithery MCP registry candidate
+  description: |
+    Candidate MCP registry/server integration for finding installable MCP servers. Ora surfaced Smithery
+    for MCP registry intents, so this node marks a tool-server discovery gap rather than a verified runtime endpoint.
+  protocol: mcp-streamable-http
+  provenance: custom
+  category: ai
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: smithery.ai
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:smithery
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: responsibility:ai-tooling-evaluation
+      confidence: medium
+      evidence: "Registry discovery can close missing-tool-server coverage during agent adoption planning."
+    - target: workflow:ai-agent-adoption-rollout
+      confidence: medium
+      evidence: "Registry lookup supports selecting MCP servers for role-specific gaps."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-tinybird-candidate
+attributes:
+  displayName: Tinybird MCP candidate
+  description: |
+    Candidate MCP server for Tinybird real-time analytics and data APIs, recorded because Ora surfaced Tinybird
+    for analytics and data-product intents but the graph lacked a specific ToolServer.
+  protocol: mcp-stdio
+  provenance: custom
+  category: analytics
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: tinybird.co
+    score: 75
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:tinybird
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:data-scientist
+      confidence: medium
+      evidence: "Real-time analytics APIs support data exploration and production metric workflows."
+    - target: workflow:data-pipeline-monitoring
+      confidence: medium
+      evidence: "Tinybird is relevant to live data-product monitoring and analytics pipelines."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-power-bi-candidate
+attributes:
+  displayName: Power BI MCP candidate
+  description: |
+    Candidate MCP server for dashboard and dataset interrogation in Power BI, recorded from Ora analytics discovery
+    as a gap for business-intelligence workflows.
+  protocol: mcp-stdio
+  provenance: custom
+  category: analytics
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: powerbi.microsoft.com
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:power-bi
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:data-scientist
+      confidence: medium
+      evidence: "BI dashboard access supports analytics review and stakeholder reporting."
+    - target: workflow:data-pipeline-monitoring
+      confidence: medium
+      evidence: "Dashboard health and dataset refreshes are common analytics-monitoring projection points."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-databricks-candidate
+attributes:
+  displayName: Databricks MCP candidate
+  description: |
+    Candidate MCP server for Databricks workspace, SQL warehouse, and notebook workflows. Ora surfaced Databricks
+    for data analytics intents while the graph lacked a Databricks-specific ToolServer.
+  protocol: mcp-stdio
+  provenance: custom
+  category: analytics
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: databricks.com
+    score: 71
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:databricks
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:data-scientist
+      confidence: medium
+      evidence: "Workspace and warehouse access supports data-science investigation and pipeline review."
+    - target: role:ml-engineer
+      confidence: medium
+      evidence: "Databricks notebooks and ML workflows are relevant to model-development responsibilities."
+    - target: workflow:data-pipeline-monitoring
+      confidence: medium
+      evidence: "Databricks jobs and SQL warehouses are common data-pipeline monitoring surfaces."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-hex-candidate
+attributes:
+  displayName: Hex MCP candidate
+  description: |
+    Candidate MCP server for Hex notebooks, apps, and analytic documents, captured from Ora data-workflow discovery
+    as a missing analytics ToolServer association.
+  protocol: mcp-stdio
+  provenance: custom
+  category: analytics
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: hex.tech
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:hex
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:data-scientist
+      confidence: medium
+      evidence: "Notebook and app access supports exploratory analytics and reproducible reporting."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-gitbook-candidate
+attributes:
+  displayName: GitBook MCP candidate
+  description: |
+    Candidate MCP server for GitBook spaces and documentation content. Ora surfaced GitBook for documentation
+    intents while the graph lacked a docs-platform ToolServer association.
+  protocol: mcp-stdio
+  provenance: custom
+  category: cms
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: gitbook.com
+    score: 65
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:gitbook
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:technical-writer
+      confidence: medium
+      evidence: "Documentation content access supports authoring, review, and publishing workflows."
+    - target: workflow:developer-documentation-review
+      confidence: medium
+      evidence: "GitBook is a developer-docs publishing system relevant to review projections."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-deepl-candidate
+attributes:
+  displayName: DeepL MCP candidate
+  description: |
+    Candidate MCP server for DeepL translation/localization operations, recorded from Ora documentation and
+    multilingual-product discovery as a missing technical-writing support server.
+  protocol: mcp-stdio
+  provenance: custom
+  category: productivity
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: deepl.com
+    score: 78
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:deepl
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:technical-writer
+      confidence: medium
+      evidence: "Localization support helps docs teams project content across language variants."
+    - target: responsibility:write-user-docs
+      confidence: medium
+      evidence: "Translation tooling supports multilingual user documentation workflows."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-wiz-candidate
+attributes:
+  displayName: Wiz MCP candidate
+  description: |
+    Candidate MCP server for Wiz cloud-security posture data. Ora surfaced Wiz for cloud and Kubernetes security
+    operations while the graph lacked a Wiz-specific ToolServer association.
+  protocol: mcp-stdio
+  provenance: custom
+  category: security
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: wiz.io
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:wiz
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:security-reviewer
+      confidence: medium
+      evidence: "Cloud posture findings support security review and risk triage."
+    - target: workflow:vulnerability-management
+      confidence: medium
+      evidence: "CNAPP findings are relevant inputs to vulnerability-management workflows."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-digitalocean-candidate
+attributes:
+  displayName: DigitalOcean MCP candidate
+  description: |
+    Candidate MCP server for DigitalOcean resources such as droplets, Kubernetes, networking, and databases,
+    recorded from Ora infrastructure discovery as a cloud-operations ToolServer gap.
+  protocol: mcp-stdio
+  provenance: custom
+  category: cloud
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: digitalocean.com
+    score: 68
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:digitalocean
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "Cloud resource access supports platform operations and infrastructure changes."
+    - target: role:cloud-architect
+      confidence: medium
+      evidence: "Provider inventory and service metadata support architecture review."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-coreweave-candidate
+attributes:
+  displayName: CoreWeave MCP candidate
+  description: |
+    Candidate MCP server for CoreWeave GPU-cloud resources, recorded from Ora infrastructure discovery as a
+    missing AI-infrastructure ToolServer association.
+  protocol: mcp-stdio
+  provenance: custom
+  category: cloud
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: coreweave.com
+    score: 72
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:coreweave
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "GPU-cloud inventory and workload controls support AI platform operations."
+    - target: role:ml-engineer
+      confidence: medium
+      evidence: "Compute availability and workload metadata support model training and inference workflows."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-nebius-candidate
+attributes:
+  displayName: Nebius MCP candidate
+  description: |
+    Candidate MCP server for Nebius AI infrastructure and GPU compute resources, captured from Ora infrastructure
+    discovery as a missing cloud/ML ToolServer association.
+  protocol: mcp-stdio
+  provenance: custom
+  category: cloud
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: nebius.com
+    score: 62
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:nebius
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "AI infrastructure controls support platform operations and capacity management."
+    - target: role:ml-engineer
+      confidence: medium
+      evidence: "GPU compute resources are relevant to model-development and inference workflows."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-adobe-creative-cloud-candidate
+attributes:
+  displayName: Adobe Creative Cloud MCP candidate
+  description: |
+    Candidate MCP server for Adobe design assets and creative workflows, recorded from Ora design-system discovery
+    as a missing product-design ToolServer association.
+  protocol: mcp-stdio
+  provenance: custom
+  category: design
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: adobe.com
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:adobe-creative-cloud
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:product-designer
+      confidence: medium
+      evidence: "Creative asset access supports product design and design-system workflow projections."
+    - target: workflow:design-system-maintenance
+      confidence: medium
+      evidence: "Design assets are relevant to component and brand-system maintenance."

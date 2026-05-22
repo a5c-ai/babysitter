@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "composite": true
+  },
+  "references": [
+    { "path": "packages/observability" },
+    { "path": "packages/core" },
+    { "path": "packages/adapters" },
+    { "path": "packages/cli" },
+    { "path": "packages/agent-mux" },
+    { "path": "packages/gateway" },
+    { "path": "packages/ui" },
+    { "path": "packages/mobile-ios-app" },
+    { "path": "packages/mobile-android-app" },
+    { "path": "packages/webui" },
+    { "path": "packages/harness-mock" },
+    { "path": "packages/tui" }
+  ],
+  "files": []
+}

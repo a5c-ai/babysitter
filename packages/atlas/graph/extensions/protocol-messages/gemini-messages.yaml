@@ -1,0 +1,114 @@
+# ProtocolMessage records for Google Gemini generateContent API.
+#
+# Source: https://ai.google.dev/api/generate-content (fetched 2026-05-05).
+# Wired from agent-core-impl:gemini-cli.core@current via emits_message_type.
+nodeKind: ProtocolMessage
+id: protocol-message:gemini-content
+attributes:
+  displayName: "Gemini Content (request/response envelope)"
+  messageType: Content
+  subtype: none
+  direction: user-to-core
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: Content
+    fields: ["role", "parts[]"]
+  description: |
+    The role-tagged conversation envelope (role: user|model|system) carrying
+    one or more Part objects. Used as both the request body's `contents[]`
+    items and inside Candidate responses.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:gemini-part-text
+attributes:
+  displayName: "Gemini Part / text"
+  messageType: Part
+  subtype: text
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: Part
+    fields: ["text"]
+  description: |
+    A text part inside a Content envelope — model-emitted prose or user
+    prompt text.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:gemini-part-inline-data
+attributes:
+  displayName: "Gemini Part / inlineData"
+  messageType: Part
+  subtype: inlineData
+  direction: user-to-core
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: Part
+    fields: ["inlineData(mimeType, data)"]
+  description: |
+    Binary content (image, audio, etc.) inlined as base64 with its MIME type.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:gemini-part-function-call
+attributes:
+  displayName: "Gemini Part / functionCall"
+  messageType: Part
+  subtype: functionCall
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: Part
+    fields: ["functionCall(name, args)"]
+  description: |
+    Model-emitted tool-call request. The Gemini CLI tool-use loop dispatches
+    these to the local tool registry.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:gemini-part-function-response
+attributes:
+  displayName: "Gemini Part / functionResponse"
+  messageType: Part
+  subtype: functionResponse
+  direction: user-to-core
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: Part
+    fields: ["functionResponse(name, response)"]
+  description: |
+    Tool-execution result fed back into the next generateContent turn.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:gemini-candidate
+attributes:
+  displayName: "Gemini Candidate"
+  messageType: Candidate
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: Candidate
+    fields: ["content", "finishReason", "safetyRatings[]", "index"]
+  description: |
+    A single completion candidate returned by generateContent. Carries a
+    Content envelope plus finishReason (STOP / MAX_TOKENS / SAFETY / etc.).
+---
+nodeKind: ProtocolMessage
+id: protocol-message:gemini-generate-content-response
+attributes:
+  displayName: "Gemini GenerateContentResponse"
+  messageType: GenerateContentResponse
+  subtype: none
+  direction: core-to-user
+  terminal: true
+  errorCategory: none
+  payloadSchema:
+    type: GenerateContentResponse
+    fields: ["candidates[]", "promptFeedback", "usageMetadata", "modelVersion", "responseId"]
+  description: |
+    The top-level non-streaming response envelope. The streamGenerateContent
+    SSE variant emits a stream of these progressively.

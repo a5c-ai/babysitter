@@ -19,6 +19,12 @@
  * - National Nanotechnology Coordinated Infrastructure (NNCI): https://nnci.net/
  * - SEMI Standards for Nanoelectronics: https://www.semi.org/
  * - Focused Ion Beam (FIB) Systems: https://www.fei.com/technologies/focused-ion-beam/
+ *
+ * @graph
+ *   domains: [domain:nanotechnology]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -33,7 +39,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Process Flow Design
-  let processFlowDesign = await ctx.task(processFlowDesignTask, {
+  const processFlowDesign = await ctx.task(processFlowDesignTask, {
     deviceArchitecture,
     processModules,
     criticalInterfaces
@@ -48,16 +54,9 @@ export async function process(inputs, ctx) {
       recommendations: processFlowDesign.recommendations
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      processFlowDesign = await ctx.task(processFlowDesignTask, { ...{
-    deviceArchitecture,
-    processModules,
-    criticalInterfaces
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review process flow design
+  await ctx.breakpoint({
     question: `Review ${deviceArchitecture.type} process flow. ${processFlowDesign.totalSteps} steps across ${processModules.length} modules. Approve to proceed?`,
     title: 'Process Flow Design Review',
     context: {
@@ -70,48 +69,28 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: processFlowDesign
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Process Compatibility Analysis
-  let compatibilityAnalysis = await ctx.task(compatibilityAnalysisTask, {
+  const compatibilityAnalysis = await ctx.task(compatibilityAnalysisTask, {
     processFlowDesign,
     processModules,
     deviceArchitecture
   });
 
   // Quality Gate: All processes must be compatible
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        compatibilityAnalysis = await ctx.task(compatibilityAnalysisTask, { ...{
-    processFlowDesign,
-    processModules,
-    deviceArchitecture
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (!compatibilityAnalysis.allCompatible) {
+    await ctx.breakpoint({
       question: `Process compatibility issues detected: ${compatibilityAnalysis.incompatibilities.length} incompatibilities. Review and resolve?`,
       title: 'Process Compatibility Warning',
       context: {
         runId: ctx.runId,
         incompatibilities: compatibilityAnalysis.incompatibilities,
         recommendations: compatibilityAnalysis.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 3: Interface Analysis (Iterative Optimization)
   let integrationIteration = 0;
@@ -134,7 +113,7 @@ export async function process(inputs, ctx) {
       });
 
       // Interface optimization
-      let interfaceOptimization = await ctx.task(interfaceOptimizationTask, {
+      const interfaceOptimization = await ctx.task(interfaceOptimizationTask, {
         interface: criticalInterface,
         characterization: interfaceCharacterization,
         processFlowDesign,
@@ -153,17 +132,8 @@ export async function process(inputs, ctx) {
         optimized: interfaceOptimized
       });
 
-          let lastFeedback_iterationApproval = null;
-        for (let attempt = 0; attempt < 3; attempt++) {
-          if (lastFeedback_iterationApproval) {
-            interfaceOptimization = await ctx.task(interfaceOptimizationTask, { ...{
-        interface: criticalInterface,
-        characterization: interfaceCharacterization,
-        processFlowDesign,
-        iteration: interfaceIteration
-      }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-          }
-  const iterationApproval = await ctx.breakpoint({
+      if (!interfaceOptimized && interfaceIteration < maxIntegrationIterations) {
+        await ctx.breakpoint({
           question: `Interface '${criticalInterface}' optimization iteration ${interfaceIteration}: Quality score ${interfaceQuality}/100. Continue optimization?`,
           title: 'Interface Optimization Progress',
           context: {
@@ -171,19 +141,14 @@ export async function process(inputs, ctx) {
             interface: criticalInterface,
             qualityScore: interfaceQuality,
             recommendations: interfaceOptimization.recommendations
-          },
-          expert: 'owner',
-          tags: ['approval-gate'],
-          previousFeedback: lastFeedback_iterationApproval || undefined,
-          attempt: attempt > 0 ? attempt + 1 : undefined
-          });
-          if (iterationApproval.approved) break;
-          lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-        }     }
+          }
+        });
+      }
     }
   }
+
   // Phase 4: Yield Modeling
-  let yieldModeling = await ctx.task(yieldModelingTask, {
+  const yieldModeling = await ctx.task(yieldModelingTask, {
     processFlowDesign,
     compatibilityAnalysis,
     interfaceOptimizationHistory,
@@ -191,17 +156,8 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Predicted yield must meet target
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        yieldModeling = await ctx.task(yieldModelingTask, { ...{
-    processFlowDesign,
-    compatibilityAnalysis,
-    interfaceOptimizationHistory,
-    yieldTarget
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (yieldModeling.predictedYield < yieldTarget) {
+    await ctx.breakpoint({
       question: `Predicted yield ${yieldModeling.predictedYield.toFixed(1)}% below target ${yieldTarget}%. Review yield limiters and proceed?`,
       title: 'Yield Target Warning',
       context: {
@@ -210,15 +166,9 @@ export async function process(inputs, ctx) {
         yieldTarget,
         yieldLimiters: yieldModeling.yieldLimiters,
         recommendations: yieldModeling.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 5: Failure Mode Analysis
   const failureModeAnalysis = await ctx.task(failureModeAnalysisTask, {
@@ -253,7 +203,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Integration Documentation
-  let integrationDocumentation = await ctx.task(integrationDocumentationTask, {
+  const integrationDocumentation = await ctx.task(integrationDocumentationTask, {
     deviceArchitecture,
     processFlowDesign,
     compatibilityAnalysis,
@@ -265,22 +215,8 @@ export async function process(inputs, ctx) {
     processValidation
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      integrationDocumentation = await ctx.task(integrationDocumentationTask, { ...{
-    deviceArchitecture,
-    processFlowDesign,
-    compatibilityAnalysis,
-    interfaceOptimizationHistory,
-    yieldModeling,
-    failureModeAnalysis,
-    testStructureDesign,
-    metrologyPlan,
-    processValidation
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Process flow approval
+  await ctx.breakpoint({
     question: `Nanodevice integration complete. Predicted yield: ${yieldModeling.predictedYield.toFixed(1)}%. ${failureModeAnalysis.criticalFailureModes.length} critical failure modes identified. Approve process flow?`,
     title: 'Nanodevice Integration Approval',
     context: {
@@ -292,15 +228,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/integration-report.md', format: 'markdown', content: integrationDocumentation.markdown },
         { path: 'artifacts/process-flow.json', format: 'json', content: processFlowDesign.processFlow }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     processFlow: {
@@ -326,7 +256,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const processFlowDesignTask = defineTask('process-flow-design', (args, taskCtx) => ({
   kind: 'agent',

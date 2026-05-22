@@ -2,6 +2,12 @@
 name: logic-analyst-agent
 description: Evaluates arguments for logical validity and soundness, formalizes reasoning, and identifies fallacies
 required-skills: formal-logic-analysis, argument-mapping-reconstruction, fallacy-detection-analysis
+graph:
+  domains: [domain:philosophy]
+  specializations: [specialization:applied-ethics]
+  skillAreas: [skill-area:natural-language-processing, skill-area:parsing-data-formats, skill-area:data-analysis]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:computational-scientist]
 ---
 
 # Logic Analyst Agent

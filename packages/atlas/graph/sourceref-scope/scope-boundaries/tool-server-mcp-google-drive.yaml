@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:tool-server-mcp-google-drive.scope
+attributes:
+  subjectId: tool-server:mcp-google-drive
+  inScope: |
+    Read / list / search files in Google Drive via the Drive API.
+  outOfScope: |
+    Editing or creating Drive files, Google Docs / Sheets content modification, and Drive admin operations.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - tool-server:mcp-google-drive

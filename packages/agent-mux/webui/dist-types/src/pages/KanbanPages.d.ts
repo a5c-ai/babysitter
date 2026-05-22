@@ -1,0 +1,14 @@
+export declare function ProjectsPage(): JSX.Element;
+export declare function AutomationsPage(): JSX.Element;
+export declare function KanbanSettingsPage(): JSX.Element;
+export declare function ProjectBoardPage(): JSX.Element;
+export declare function ProjectListPage(): JSX.Element;
+export declare function ProjectIssuePage(): JSX.Element;
+export declare function IssueDetailPage(): JSX.Element;
+export declare function ProjectIssueCreatePage(): JSX.Element;
+export declare function ProjectWorkspaceCreatePage(): JSX.Element;
+export declare function IssueWorkspaceCreatePage(): JSX.Element;
+export declare function HostWorkspaceCreatePage(): JSX.Element;
+export declare function KanbanRunsPage(): JSX.Element;
+export declare function KanbanWorkspacesPage(): JSX.Element;
+export declare function KanbanInboxPage(): JSX.Element;

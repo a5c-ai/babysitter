@@ -11,6 +11,10 @@ expertise:
   - Consistency validation
   - Stakeholder aggregation
   - Recommendation synthesis
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:strategic-analysis, skill-area:quantitative-modeling, skill-area:business-analysis]
+  roles: [role:strategic-planner, role:data-analyst, role:business-analyst]
 ---
 
 # MCDA Facilitator

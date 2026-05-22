@@ -18,6 +18,12 @@
  * - ARM AMBA AXI Protocol: https://developer.arm.com/documentation/ihi0022/latest
  * - AXI4-Stream Protocol: https://developer.arm.com/documentation/ihi0051/latest
  * - Xilinx AXI Reference: https://docs.amd.com/r/en-US/ug1037-vivado-axi-reference-guide
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

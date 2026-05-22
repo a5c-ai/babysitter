@@ -1,0 +1,190 @@
+---
+nodeKind: Role
+id: role:bug-triager
+attributes:
+  displayName: "Bug Triager (Bot)"
+  isAgentic: true
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Agentic role that classifies incoming bug reports, assigns severity, deduplicates, and routes to owners.
+edges:
+  holds_responsibility:
+    - responsibility:triage-incoming-issues
+    - responsibility:stakeholder-communication
+  requires_expertise:
+    - target: skill-area:context-management
+    - target: skill-area:tool-use
+    - target: skill-area:agentic-loops
+---
+nodeKind: Role
+id: role:release-manager-bot
+attributes:
+  displayName: "Release Manager (Bot)"
+  isAgentic: true
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Agentic role that coordinates release branches, version bumps, changelogs, and gate checks.
+edges:
+  holds_responsibility:
+    - responsibility:release-coordination
+    - responsibility:changelog-maintenance
+    - responsibility:deployment-management
+  requires_expertise:
+    - target: skill-area:semver-discipline
+    - target: skill-area:gitops
+    - target: skill-area:blue-green-deployment
+    - target: skill-area:canary-rollouts
+---
+nodeKind: Role
+id: role:changelog-writer
+attributes:
+  displayName: "Changelog Writer (Bot)"
+  isAgentic: true
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Agentic role that summarizes merged PRs into user-facing release notes.
+edges:
+  holds_responsibility:
+    - responsibility:changelog-maintenance
+    - responsibility:documentation
+  requires_expertise:
+    - target: skill-area:reference-docs
+    - target: skill-area:semver-discipline
+    - target: skill-area:docs-as-code
+---
+nodeKind: Role
+id: role:adr-writer
+attributes:
+  displayName: "ADR Writer (Bot)"
+  isAgentic: true
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Agentic role that drafts ADRs from design discussions and PR threads.
+edges:
+  holds_responsibility:
+    - responsibility:adr-curation
+    - responsibility:documentation
+    - responsibility:architecture-decision
+  requires_expertise:
+    - target: skill-area:adr-writing
+    - target: skill-area:c4-modeling
+    - target: skill-area:reference-docs
+---
+nodeKind: Role
+id: role:flaky-test-detector
+attributes:
+  displayName: "Flaky Test Detector (Bot)"
+  isAgentic: true
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Agentic role that monitors CI history, flags non-deterministic tests, and proposes quarantines.
+edges:
+  holds_responsibility:
+    - responsibility:flaky-test-quarantine
+    - responsibility:test-strategy
+  requires_expertise:
+    - target: skill-area:integration-testing
+    - target: skill-area:e2e-testing
+    - target: skill-area:observability-pipeline
+---
+nodeKind: Role
+id: role:perf-regression-detector
+attributes:
+  displayName: "Performance Regression Detector (Bot)"
+  isAgentic: true
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Agentic role that compares perf benchmarks across commits and surfaces regressions.
+edges:
+  holds_responsibility:
+    - responsibility:performance-budget-tracking
+    - responsibility:performance-optimization
+  requires_expertise:
+    - target: skill-area:performance-testing
+    - target: skill-area:load-testing
+    - target: skill-area:web-vitals
+    - target: skill-area:profiling-cpu
+---
+nodeKind: Role
+id: role:cost-tracker
+attributes:
+  displayName: "Cost Tracker (Bot)"
+  isAgentic: true
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Agentic role that monitors cloud and LLM-API spend, flags anomalies, and proposes optimizations.
+edges:
+  holds_responsibility:
+    - responsibility:cost-optimization
+    - responsibility:budget-management
+  requires_expertise:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:terraform-infrastructure
+---
+nodeKind: Role
+id: role:sre-runbook-author
+attributes:
+  displayName: "SRE Runbook Author (Bot)"
+  isAgentic: true
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Agentic role that produces and updates runbooks from incident timelines and alert configs.
+edges:
+  holds_responsibility:
+    - responsibility:runbook-authoring
+    - responsibility:documentation
+    - responsibility:postmortem-writeup
+  requires_expertise:
+    - target: skill-area:runbook-writing
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+    - target: skill-area:sli-slo-management
+---
+nodeKind: Role
+id: role:dependency-updater-bot
+attributes:
+  displayName: "Dependency Updater (Bot)"
+  isAgentic: true
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Agentic role that proposes safe dependency upgrades, runs tests, and opens PRs.
+edges:
+  holds_responsibility:
+    - responsibility:dependency-audit
+    - responsibility:upgrade-dependencies-weekly
+    - responsibility:security-review
+  requires_expertise:
+    - target: skill-area:dependency-upgrade-strategies
+    - target: skill-area:dependency-vulnerability-mgmt
+    - target: skill-area:semver-discipline
+    - target: skill-area:supply-chain-security
+---
+nodeKind: Role
+id: role:security-scanner-bot
+attributes:
+  displayName: "Security Scanner (Bot)"
+  isAgentic: true
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Agentic role that runs SAST/DAST/secret-scan tools and triages findings into actionable issues.
+edges:
+  holds_responsibility:
+    - responsibility:security-review
+    - responsibility:run-security-scans
+    - responsibility:dependency-audit
+  requires_expertise:
+    - target: skill-area:sast
+    - target: skill-area:dast
+    - target: skill-area:secret-scanning
+    - target: skill-area:dependency-vulnerability-mgmt
+    - target: skill-area:container-security

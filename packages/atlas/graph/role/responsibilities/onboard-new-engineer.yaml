@@ -1,0 +1,14 @@
+nodeKind: Responsibility
+id: responsibility:onboard-new-engineer
+attributes:
+  displayName: "Onboard new engineer"
+  cadence: as-needed
+  requiredSkills: []
+  description: |
+    Onboard new engineer.
+edges:
+  held_by:
+    - target: role:engineering-manager
+    - target: role:tech-lead
+  requires_expertise:
+    - target: skill-area:tutorial-design

@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:continue-models-yaml
+attributes:
+  artifactId: plugin-artifact:continue-models-yaml
+  displayName: "Continue config.yaml (model definitions)"
+  targetId: plugin-target:continue
+  artifactKind: settings-fragment
+  pathPattern: "~/.continue/config.yaml"
+  installerSurface: "settings-merge"
+edges:
+  emits_artifact:
+    - target: plugin-target:continue

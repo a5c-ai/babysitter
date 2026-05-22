@@ -2,6 +2,12 @@
 name: user-research-synthesis
 description: Specialized skill for synthesizing qualitative user research into actionable insights. Analyzes interview transcripts, extracts patterns and themes, identifies pain points, creates affinity diagrams, and generates persona attributes from research data.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:user-research, skill-area:product-discovery]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # User Research Synthesis Skill

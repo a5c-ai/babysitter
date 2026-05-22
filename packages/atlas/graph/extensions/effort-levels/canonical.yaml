@@ -1,0 +1,47 @@
+nodeKind: EffortLevel
+id: effort-level:low
+attributes:
+  displayName: "Effort: low"
+  name: low
+  relativeReasoningCost: 1
+  description: |
+    Minimal extended thinking — fastest, cheapest. Good for quick lookups
+    and well-scoped tool calls.
+---
+nodeKind: EffortLevel
+id: effort-level:medium
+attributes:
+  displayName: "Effort: medium"
+  name: medium
+  relativeReasoningCost: 2
+  description: |
+    Default effort level — balanced reasoning depth and latency.
+---
+nodeKind: EffortLevel
+id: effort-level:high
+attributes:
+  displayName: "Effort: high"
+  name: high
+  relativeReasoningCost: 3
+  description: |
+    Deep reasoning — multi-step planning, complex refactor design.
+---
+nodeKind: EffortLevel
+id: effort-level:xhigh
+attributes:
+  displayName: "Effort: xhigh"
+  name: xhigh
+  relativeReasoningCost: 4
+  description: |
+    Extra-high effort — model-version-gated (only newer Opus tiers expose
+    this level).
+---
+nodeKind: EffortLevel
+id: effort-level:max
+attributes:
+  displayName: "Effort: max"
+  name: max
+  relativeReasoningCost: 5
+  description: |
+    Maximum effort — uncapped extended thinking budget. Highest latency
+    and cost; available only on the most capable model versions.

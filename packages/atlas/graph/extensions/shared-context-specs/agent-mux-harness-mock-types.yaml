@@ -1,0 +1,100 @@
+# Public type schemas for the four mock-surface families
+# in @a5c-ai/agent-mux-harness-mock (subprocess, http, websocket, sdk). Each
+# scenario is parameterized by a `HarnessScenario` plus a per-execution-type
+# config, and produces a per-execution-type handle. Source: packages/
+# agent-mux/harness-mock/src/types.ts. Wired via the
+# @a5c-ai/agent-mux-harness-mock PackageSurface `has_payload_schema` edge.
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-harness-mock-harness-scenario
+attributes:
+  displayName: "HarnessScenario (top-level)"
+  contextKind: "test-fixture-config"
+  typescriptInterface: "HarnessScenario"
+  producerIface: "test authors / packages/agent-mux/harness-mock/src/scenarios/* presets"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-harness-mock startMock (multi-execution.ts)"
+  fieldSchema:
+    - "harness:enum<HarnessType>:required:Which harness to simulate (claude-code|codex|gemini|...)"
+    - "name:string:optional:Human-readable scenario name"
+    - "executionType:enum<subprocess|http|websocket|sdk>:optional:Default subprocess"
+    - "process:ref<ProcessBehavior>:optional:exit code, timing, crash signals"
+    - "output:list<OutputChunk>:optional:Stdout/stderr chunks with delays"
+    - "interactions:list<StdinInteraction>:optional:Stdin pattern→response pairs"
+    - "expectedEnv|expectedArgs|expectedCwd:optional:Subprocess assertion bundle"
+    - "events:list<MockEvent>:optional:Pre-canned event taxonomy items"
+    - "fileOperations:list<FileOperation>:optional:File ops to simulate"
+    - "telemetry:object:optional:{ spans?, metrics? } simulated telemetry"
+    - "runtimeHooks:{ steps: list<RuntimeHookScenarioStep> }:optional:Hook interception script"
+    - "httpServer:ref<HttpServerConfig>:optional:Required when executionType=http"
+    - "websocketServer:ref<WebSocketConfig>:optional:Required when executionType=websocket"
+    - "sdk:ref<SdkConfig>:optional:Required when executionType=sdk"
+  sourceCitation: "packages/agent-mux/harness-mock/src/types.ts:335-408"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-harness-mock-stdin-interaction
+attributes:
+  displayName: "StdinInteraction (subprocess approval grammar)"
+  contextKind: "test-fixture-config"
+  typescriptInterface: "StdinInteraction"
+  producerIface: "scenarios/interactive.ts buildInteractiveScenario"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-harness-mock mock-process.ts (subprocess driver)"
+  fieldSchema:
+    - "triggerPattern:string:required:Substring that, when seen on stdout/stderr, triggers the response"
+    - "response:string:required:Bytes to write to stdin (empty disables auto-reply)"
+    - "delayMs:int:optional:Delay before writing the response"
+    - "timeoutMs:int:optional:If set, fire onTimeout when no external stdin arrives"
+    - "onAllow:{ output, exitCode }:optional:Branch when response is non-empty"
+    - "onDeny:{ output, exitCode }:optional:Branch when external driver supplies a deny token"
+    - "onTimeout:{ output, exitCode }:optional:Branch when timeoutMs elapses"
+  sourceCitation: "packages/agent-mux/harness-mock/src/types.ts:115-148"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-harness-mock-http-server-config
+attributes:
+  displayName: "HttpServerConfig"
+  contextKind: "test-fixture-config"
+  typescriptInterface: "HttpServerConfig"
+  producerIface: "test authors / harness scenarios for http adapters"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-harness-mock http-mock.ts HttpServerMock"
+  fieldSchema:
+    - "routes:list<HttpRouteConfig>:required:Method/path/handler tuples"
+    - "port|host:optional:Listen address override"
+    - "tls:optional:Optional TLS config block"
+  sourceCitation: "packages/agent-mux/harness-mock/src/types.ts:185-232"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-harness-mock-websocket-config
+attributes:
+  displayName: "WebSocketConfig"
+  contextKind: "test-fixture-config"
+  typescriptInterface: "WebSocketConfig"
+  producerIface: "test authors / harness scenarios for websocket adapters"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-harness-mock websocket-mock.ts WebSocketServerMock"
+  fieldSchema:
+    - "messages:list<{ type, payload, delayMs? }>:optional:Server→client scripted frames"
+    - "expectedFrames:list<...>:optional:Client→server frames the test expects"
+    - "closeAfterMs:int:optional:Auto-close timer"
+    - "port|host:optional:Listen address override"
+  sourceCitation: "packages/agent-mux/harness-mock/src/types.ts:233-267"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:agent-mux-harness-mock-mock-event
+attributes:
+  displayName: "MockEvent (canonical event taxonomy entry)"
+  contextKind: "test-fixture-config"
+  typescriptInterface: "MockEvent"
+  producerIface: "scenario authors"
+  consumerIfaces:
+    - "@a5c-ai/agent-mux-harness-mock multi-execution.ts (event playback)"
+  fieldSchema:
+    - "type:string:required:Event type matching the agent-mux event taxonomy"
+    - "<payload fields>:varies:optional:Per-event-type properties (run-start, tool-call, run-complete, ...)"
+  sourceCitation: "packages/agent-mux/harness-mock/src/types.ts:149-159"
+edges: {}

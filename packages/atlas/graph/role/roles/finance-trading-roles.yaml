@@ -1,0 +1,188 @@
+---
+nodeKind: Role
+id: role:quantitative-analyst
+attributes:
+  displayName: "Quantitative Analyst"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:quantitative-finance
+  description: |
+    Develops mathematical models for pricing, risk, and trading strategies —
+    stochastic modeling, statistical arbitrage, and backtesting frameworks.
+edges:
+  requires_expertise:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  holds_responsibility:
+    - target: responsibility:model-validation
+---
+nodeKind: Role
+id: role:trading-systems-engineer
+attributes:
+  displayName: "Trading Systems Engineer"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:algorithmic-trading
+  description: |
+    Builds and maintains low-latency trading infrastructure — order
+    management systems, execution engines, and market connectivity.
+edges:
+  requires_expertise:
+    - target: skill-area:rust-async-runtime
+    - target: skill-area:rate-limiting
+    - target: skill-area:kafka-stream-processing
+  holds_responsibility:
+    - target: responsibility:trading-system-reliability
+---
+nodeKind: Role
+id: role:portfolio-manager
+attributes:
+  displayName: "Portfolio Manager"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:portfolio-management
+  description: |
+    Manages investment portfolios — asset allocation decisions, rebalancing,
+    risk budgeting, and performance attribution.
+edges:
+  requires_expertise:
+    - target: skill-area:python-data-pipelines
+  holds_responsibility:
+    - target: responsibility:portfolio-rebalancing
+---
+nodeKind: Role
+id: role:risk-analyst
+attributes:
+  displayName: "Risk Analyst"
+  isAgentic: false
+  seniority: mid
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:financial-risk-management
+  description: |
+    Quantifies and monitors financial risk exposures — VaR, stress testing,
+    scenario analysis, and limit monitoring across asset classes.
+edges:
+  requires_expertise:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  holds_responsibility:
+    - target: responsibility:risk-reporting
+---
+nodeKind: Role
+id: role:research-analyst
+attributes:
+  displayName: "Research Analyst"
+  isAgentic: false
+  seniority: mid
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:capital-markets
+  description: |
+    Conducts fundamental and quantitative research — market analysis,
+    sector deep-dives, alternative data analysis, and investment theses.
+edges:
+  requires_expertise:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  holds_responsibility:
+    - target: responsibility:research-publication
+---
+nodeKind: Role
+id: role:compliance-officer
+attributes:
+  displayName: "Compliance Officer"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:regulatory-finance
+  description: |
+    Ensures trading and investment activities comply with financial
+    regulations — surveillance, reporting, and regulatory examination prep.
+edges:
+  requires_expertise:
+    - target: skill-area:observability-pipeline
+  holds_responsibility:
+    - target: responsibility:regulatory-reporting
+---
+nodeKind: Role
+id: role:operational-risk-analyst
+attributes:
+  displayName: "Operational Risk Analyst"
+  isAgentic: false
+  seniority: mid
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:operations
+  description: |
+    Identifies and quantifies operational risks across the business —
+    process failures, vendor dependencies, and control effectiveness.
+edges:
+  requires_expertise:
+    - target: skill-area:observability-pipeline
+  holds_responsibility:
+    - target: responsibility:review-architecture-changes
+---
+nodeKind: Role
+id: role:security-risk-analyst
+attributes:
+  displayName: "Security Risk Analyst"
+  isAgentic: false
+  seniority: mid
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:cybersecurity-grc
+  description: |
+    Assesses cybersecurity risks — threat likelihood, impact scoring,
+    control gap analysis, and risk treatment planning.
+edges:
+  requires_expertise:
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+  holds_responsibility:
+    - target: responsibility:run-security-scans
+---
+nodeKind: Role
+id: role:business-analyst
+attributes:
+  displayName: "Business Analyst"
+  isAgentic: false
+  seniority: mid
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:operations
+  description: |
+    Analyzes business processes, gathers requirements, and bridges
+    stakeholders and engineering — data-driven decision support.
+edges:
+  requires_expertise:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:domain-driven-design
+  holds_responsibility:
+    - target: responsibility:write-rfc-documents
+---
+nodeKind: Role
+id: role:data-analyst
+attributes:
+  displayName: "Data Analyst"
+  isAgentic: false
+  seniority: mid
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:business-intelligence
+  description: |
+    Extracts insights from data — SQL queries, dashboards, ad-hoc
+    analysis, and business metric reporting.
+edges:
+  requires_expertise:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:postgres-tuning
+  holds_responsibility:
+    - target: responsibility:slo-definition

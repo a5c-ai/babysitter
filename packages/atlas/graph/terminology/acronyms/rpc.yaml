@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:rpc
+attributes:
+  acronym: "RPC"
+  expandsToTermId: term:remote-procedure-call
+  description: |
+    Acronym for RPC.
+edges:
+  expands_to:
+    - term:remote-procedure-call

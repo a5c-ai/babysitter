@@ -17,6 +17,12 @@
  *   constraints: { budget: 150000, duration: 12, facility: 'internal' }
  * });
  * @references MIL-STD-810, RTCA DO-160, ISO 16750, SAE J1211
+ *
+ * @graph
+ *   domains: [domain:mechanical-engineering]
+ *   skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

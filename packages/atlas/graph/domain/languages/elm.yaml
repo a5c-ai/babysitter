@@ -1,0 +1,14 @@
+nodeKind: Language
+id: language:elm
+attributes:
+  displayName: "Elm"
+  paradigms:
+    - functional
+    - pure
+  description: |
+    Elm — a delightful pure-functional language for the browser frontend
+    with strong type inference and no runtime exceptions.
+edges:
+  applies_to:
+    - target: domain:frontend
+    - target: domain:web-development

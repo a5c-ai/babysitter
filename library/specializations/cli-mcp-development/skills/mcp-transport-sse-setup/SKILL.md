@@ -2,6 +2,14 @@
 name: mcp-transport-sse-setup
 description: Configure HTTP/SSE transport for web-based MCP servers with proper endpoints, authentication, and CORS.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation, skill-area:mcp-sse-transport]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # MCP Transport SSE Setup

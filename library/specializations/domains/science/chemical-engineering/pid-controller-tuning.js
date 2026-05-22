@@ -3,6 +3,12 @@
  * @description Systematically tune PID controllers using model-based and empirical methods for optimal process performance
  * @inputs { processName: string, controlLoops: array, tuningMethod: string, performanceTargets: object, outputDir: string }
  * @outputs { success: boolean, tuningParameters: array, performanceMetrics: object, documentation: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:chemical-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

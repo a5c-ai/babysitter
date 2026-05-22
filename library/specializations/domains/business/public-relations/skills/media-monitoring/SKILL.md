@@ -17,6 +17,10 @@ metadata:
     - Cision API
     - Meltwater API
     - Brandwatch API
+graph:
+  domains: [domain:public-relations]
+  skillAreas: [skill-area:brand-positioning, skill-area:digital-marketing-analytics, skill-area:market-research]
+  roles: [role:marketing-strategist, role:content-strategist, role:data-analyst]
 ---
 
 # Media Monitoring Skill

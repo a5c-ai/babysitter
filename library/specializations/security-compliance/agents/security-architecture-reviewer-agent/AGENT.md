@@ -9,6 +9,14 @@ expertise:
   - Cloud security architecture
   - Threat modeling
   - Security control design
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:threat-modeling, skill-area:application-security-testing]
+  roles: [role:security-engineer, role:architect]
+  workflows: [workflow:security-audit]
+  topics: [topic:zero-trust-architecture, topic:defense-in-depth]
+
 ---
 
 # Security Architecture Reviewer Agent

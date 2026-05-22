@@ -1,0 +1,258 @@
+nodeKind: Claim
+id: claim:codex-research-cli-local-open-source
+attributes:
+  subjectId: agent:codex
+  subjectKind: AgentProduct
+  attribute: description
+  value: OpenAI local terminal coding agent
+  statement: |-
+    Codex CLI is modeled as OpenAI's local terminal coding agent that can read, change, and run code in the selected workspace, and OpenAI describes it as open source and built in Rust.
+  evidenceSourceIds:
+    - evidence:codex-research-openai-cli-doc
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Adds current OpenAI developer documentation provenance for the Codex AgentProduct description.
+edges:
+  about_subject:
+    - agent:codex
+  backed_by_evidence:
+    - evidence:codex-research-openai-cli-doc
+---
+nodeKind: Claim
+id: claim:codex-research-approval-and-sandbox-controls
+attributes:
+  subjectId: agent-runtime-impl:codex.runtime@1.x
+  subjectKind: AgentRuntimeImpl
+  attribute: approvalAndSandboxControls
+  value: approval-policy plus sandbox-mode
+  statement: |-
+    Codex runtime controls combine approval policy and sandbox mode: the approval policy determines when Codex must ask before crossing boundaries, and the sandbox defines file and network boundaries for local commands.
+  evidenceSourceIds:
+    - evidence:codex-research-openai-approvals-security-doc
+    - evidence:codex-research-openai-sandbox-doc
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Supports approvalGatingPrimitive and subprocessSandboxStrategy attributes on the Codex runtime model.
+edges:
+  about_subject:
+    - agent-runtime-impl:codex.runtime@1.x
+  backed_by_evidence:
+    - evidence:codex-research-openai-approvals-security-doc
+    - evidence:codex-research-openai-sandbox-doc
+---
+nodeKind: Claim
+id: claim:codex-research-config-files
+attributes:
+  subjectId: agent-platform-impl:codex.platform@1.x
+  subjectKind: AgentPlatformImpl
+  attribute: settingsFiles
+  value: ~/.codex/config.toml and .codex/config.toml
+  statement: |-
+    Codex reads user-level configuration from ~/.codex/config.toml and supports project-scoped overrides with .codex/config.toml files.
+  evidenceSourceIds:
+    - evidence:codex-research-openai-config-doc
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Adds current OpenAI developer documentation provenance for Codex platform configuration files.
+edges:
+  about_subject:
+    - agent-platform-impl:codex.platform@1.x
+  backed_by_evidence:
+    - evidence:codex-research-openai-config-doc
+---
+nodeKind: Claim
+id: claim:codex-research-mcp-support
+attributes:
+  subjectId: agent-runtime-impl:codex.runtime@1.x
+  subjectKind: AgentRuntimeImpl
+  attribute: supportedMCPTransports
+  value: stdio and streamable-http capable MCP integration
+  statement: |-
+    Codex supports Model Context Protocol integrations in the CLI and IDE extension, including STDIO server configuration and OpenAI-documented multi-agent MCP server usage.
+  evidenceSourceIds:
+    - evidence:codex-research-openai-mcp-doc
+    - evidence:codex-research-openai-agents-sdk-doc
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Adds current OpenAI developer documentation provenance for Codex MCP runtime support.
+edges:
+  about_subject:
+    - agent-runtime-impl:codex.runtime@1.x
+  backed_by_evidence:
+    - evidence:codex-research-openai-mcp-doc
+    - evidence:codex-research-openai-agents-sdk-doc
+---
+nodeKind: Claim
+id: claim:codex-research-cli-slash-commands
+attributes:
+  subjectId: agent-ui-impl:codex.ui@current
+  subjectKind: AgentUIImpl
+  attribute: supportsInteractionPrimitives
+  value: /model /fast /personality /permissions /agent /status /mcp /diff /theme
+  statement: |-
+    Codex CLI slash commands provide keyboard-first control in interactive sessions, including model, fast, personality, permissions, agent, status, MCP, diff, and theme commands.
+  evidenceSourceIds:
+    - evidence:codex-research-openai-slash-commands-doc
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Adds current OpenAI developer documentation provenance for Codex CLI interaction primitives.
+edges:
+  about_subject:
+    - agent-ui-impl:codex.ui@current
+  backed_by_evidence:
+    - evidence:codex-research-openai-slash-commands-doc
+---
+nodeKind: Claim
+id: claim:codex-research-cli-approval-flag
+attributes:
+  subjectId: agent-runtime-impl:codex.runtime@1.x
+  subjectKind: AgentRuntimeImpl
+  attribute: approvalGatingPrimitive
+  value: --ask-for-approval values plus --full-auto and --dangerously-bypass-approvals-and-sandbox
+  statement: |-
+    Codex CLI exposes `--ask-for-approval <APPROVAL_POLICY>` values for untrusted, on-failure, on-request, and never modes, plus `--full-auto` and `--dangerously-bypass-approvals-and-sandbox` convenience launch flags.
+  evidenceSourceIds:
+    - evidence:codex-research-openai-cli-reference-doc
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Adds current command-line help provenance for Codex approval controls and launch recipes.
+edges:
+  about_subject:
+    - agent-runtime-impl:codex.runtime@1.x
+  backed_by_evidence:
+    - evidence:codex-research-openai-cli-reference-doc
+---
+nodeKind: Claim
+id: claim:codex-research-mcp-server-tool-schemas
+attributes:
+  subjectId: tool-server:codex-mcp-server
+  subjectKind: ToolServer
+  attribute: tools
+  value: codex and codex-reply JSON schemas from Codex MCP tools/list
+  statement: |-
+    The Codex MCP server in @openai/codex 0.120.0 exposes codex and codex-reply tools. The codex tool requires prompt and returns threadId plus content; codex-reply requires prompt, accepts threadId and the deprecated conversationId alias, and returns threadId plus content.
+  evidenceSourceIds:
+    - evidence:codex-research-mcp-server-schema-probe
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Supports exact inputSchema and outputSchema attributes on the Codex MCP ToolDescriptor nodes.
+edges:
+  about_subject:
+    - tool-server:codex-mcp-server
+  backed_by_evidence:
+    - evidence:codex-research-mcp-server-schema-probe
+---
+nodeKind: Claim
+id: claim:codex-research-approval-policy-permission-modes
+attributes:
+  subjectId: agent-runtime-impl:codex.runtime@1.x
+  subjectKind: AgentRuntimeImpl
+  attribute: operates_in_permission_mode
+  value: untrusted, on-failure, on-request, never
+  statement: |-
+    Codex CLI 0.120.0 exposes four `--ask-for-approval` values: `untrusted`, `on-failure`, `on-request`, and `never`. The CLI help marks `on-failure` as deprecated and recommends `on-request` for interactive runs or `never` for non-interactive runs.
+  evidenceSourceIds:
+    - evidence:codex-research-cli-help-0-120-0
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Supports the current Codex PermissionMode nodes and replaces stale suggest/auto-edit/full-auto approval-mode modeling.
+edges:
+  about_subject:
+    - agent-runtime-impl:codex.runtime@1.x
+  backed_by_evidence:
+    - evidence:codex-research-cli-help-0-120-0
+---
+nodeKind: Claim
+id: claim:codex-research-cli-convenience-launch-flags
+attributes:
+  subjectId: launch-config:codex.full-auto
+  subjectKind: LaunchConfig
+  attribute: commArgs
+  value: --full-auto and --dangerously-bypass-approvals-and-sandbox
+  statement: |-
+    Codex CLI 0.120.0 documents `--full-auto` as a convenience alias for low-friction sandboxed automatic execution equivalent to `-a on-request --sandbox workspace-write`, and documents `--dangerously-bypass-approvals-and-sandbox` as an extremely dangerous flag that skips confirmations and sandboxing for externally sandboxed environments.
+  evidenceSourceIds:
+    - evidence:codex-research-cli-help-0-120-0
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Supports Codex LaunchConfig nodes for CLI convenience and bypass flags.
+edges:
+  about_subject:
+    - launch-config:codex.full-auto
+    - launch-config:codex.dangerously-bypass-approvals-and-sandbox
+  backed_by_evidence:
+    - evidence:codex-research-cli-help-0-120-0
+---
+nodeKind: Claim
+id: claim:codex-research-sandbox-modes
+attributes:
+  subjectId: agent-runtime-impl:codex.runtime@1.x
+  subjectKind: AgentRuntimeImpl
+  attribute: subprocessSandboxStrategy
+  value: read-only, workspace-write, danger-full-access
+  statement: |-
+    Codex CLI 0.120.0 exposes three `--sandbox` values: `read-only`, `workspace-write`, and `danger-full-access`. These modes are modeled as Codex-specific Sandbox nodes and launch recipes.
+  evidenceSourceIds:
+    - evidence:codex-research-cli-help-0-120-0
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Supports Codex Sandbox nodes and --sandbox LaunchConfig recipes.
+edges:
+  about_subject:
+    - agent-runtime-impl:codex.runtime@1.x
+    - sandbox:codex-read-only
+    - sandbox:codex-workspace-write
+    - sandbox:codex-danger-full-access
+  backed_by_evidence:
+    - evidence:codex-research-cli-help-0-120-0
+

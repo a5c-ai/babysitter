@@ -17,6 +17,12 @@
  * - ISO 7206 Series - Implants for surgery - Partial and total hip joint prostheses
  * - ASTM F1717 - Standard Test Methods for Spinal Implant Constructs
  * - ISO 14242 - Implants for surgery - Wear of total hip-joint prostheses
+ *
+ * @graph
+ *   domains: [domain:biomedical-engineering]
+ *   skillAreas: [skill-area:data-analysis, skill-area:sensor-fusion, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:biomedical-engineer, role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

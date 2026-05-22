@@ -1,0 +1,15 @@
+nodeKind: Benchmark
+id: benchmark:human-eval
+attributes:
+  displayName: "HumanEval"
+  homepageUrl: https://github.com/openai/human-eval
+  kind: function-completion
+  targetsKind: ModelVersion
+  description: |
+    Hand-written programming problems for evaluating code generation.
+edges:
+  covers:
+    - target: skill-area:python-implementation
+      attributes:
+        coverage: full
+        weight: 0.5

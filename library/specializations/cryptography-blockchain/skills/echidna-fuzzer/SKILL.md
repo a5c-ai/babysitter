@@ -2,6 +2,11 @@
 name: echidna-fuzzer
 description: Property-based testing and fuzzing using Echidna for smart contracts. Includes invariant definition, corpus management, coverage analysis, and CI/CD integration for comprehensive security testing.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:smart-contract-security, skill-area:smart-contract-development-testing, skill-area:application-security-testing]
+  roles: [role:security-engineer, role:qa-engineer]
 ---
 
 # Echidna Fuzzing Skill

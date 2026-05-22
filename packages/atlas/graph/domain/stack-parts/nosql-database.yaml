@@ -1,0 +1,22 @@
+nodeKind: StackPart
+id: stack-part:nosql-database
+attributes:
+  displayName: "NoSQL Database"
+  category: data-store
+  description: |
+    Non-relational databases that trade ACID transactions and rigid schemas
+    for flexible data models, horizontal scalability, and high write
+    throughput. Sub-categories include document stores (MongoDB, Firestore),
+    key-value stores (DynamoDB, Redis), wide-column stores (Cassandra,
+    ScyllaDB), and eventually-consistent distributed databases.
+
+    Best suited for workloads with heterogeneous record shapes, massive
+    scale-out requirements, or access patterns that fit a single-document
+    or single-key read. Often paired with a relational DB for structured
+    transactional data. Schema validation, indexing strategies, and
+    consistency tuning are key operational concerns.
+edges:
+  implemented_by:
+    - target: platform-service:aws-dynamodb
+    - target: platform-service:gcp-firestore
+    - target: platform-service:azure-cosmos-db

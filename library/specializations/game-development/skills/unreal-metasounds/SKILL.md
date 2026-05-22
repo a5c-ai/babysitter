@@ -2,6 +2,11 @@
 name: unreal-metasounds
 description: Unreal Engine MetaSounds skill for procedural audio, real-time synthesis, and advanced audio graphs.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-audio-systems, skill-area:audio-processing]
+  roles: [role:game-developer]
 ---
 
 # Unreal MetaSounds Skill

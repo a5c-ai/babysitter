@@ -1,0 +1,21 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:opencode-host-env
+attributes:
+  signalId: discovery-signal:opencode-host-env
+  signalKind: env-any
+  key: opencode
+  matchMode: any
+  confidence: medium
+  scope: host-detection
+  signals:
+    - OPENCODE_SESSION
+    - OPENCODE_RUN_ID
+  argvMatches:
+    - opencode
+  consumer: agent-mux-core
+  metadataFields:
+    - { key: session_id, envVars: [OPENCODE_SESSION] }
+    - { key: run_id,     envVars: [OPENCODE_RUN_ID] }
+edges:
+  applies_to:
+    - target: agent:opencode

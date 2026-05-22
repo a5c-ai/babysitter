@@ -12,6 +12,11 @@ metadata:
   domain: business
   category: Program Management
   id: SK-019
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:roadmap-planning, skill-area:stakeholder-management, skill-area:cross-team-coordination]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:technical-program-manager, role:scrum-master]
 ---
 
 # Dependency Mapper

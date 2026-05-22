@@ -1,0 +1,55 @@
+---
+nodeKind: SourceRef
+id: source-ref:zed-app
+attributes:
+  description: "Zed editor (open-source, primary repo)"
+  displayName: "Zed editor"
+  repoUrl: https://github.com/zed-industries/zed
+  ref: main
+  path: "."
+  kind: git
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:windsurf-app
+attributes:
+  description: "Windsurf IDE by Codeium (proprietary download)"
+  displayName: "Windsurf IDE"
+  repoUrl: https://windsurf.com/download
+  ref: stable
+  path: "."
+  kind: download
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:openhands
+attributes:
+  description: "OpenHands (formerly OpenDevin) — open agent framework by All-Hands-AI"
+  displayName: "OpenHands"
+  repoUrl: https://github.com/All-Hands-AI/OpenHands
+  ref: main
+  path: "."
+  kind: git
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:warp-app
+attributes:
+  description: "Warp Terminal (proprietary download)"
+  displayName: "Warp Terminal"
+  repoUrl: https://www.warp.dev/download
+  ref: stable
+  path: "."
+  kind: download
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:cline-app
+attributes:
+  description: "Cline (formerly Claude Dev) VS Code extension"
+  displayName: "Cline"
+  repoUrl: https://github.com/cline/cline
+  ref: main
+  path: "."
+  kind: git
+edges: {}

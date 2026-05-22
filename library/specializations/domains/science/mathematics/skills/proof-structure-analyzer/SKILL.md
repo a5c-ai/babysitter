@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: theorem-proving
   phase: 6
+graph:
+  domains: [domain:mathematics]
+  specializations: [specialization:computational-mathematics]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:compiler-implementation, skill-area:language-design]
+  workflows: [workflow:experiment-design]
+  roles: [role:computational-scientist, role:research-scientist]
 ---
 
 # Proof Structure Analyzer

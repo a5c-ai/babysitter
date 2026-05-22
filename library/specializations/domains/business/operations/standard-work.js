@@ -17,6 +17,11 @@
  * - Toyota Production System (TPS) Standard Work
  * - Liker, J. (2004). The Toyota Way
  * - Rother, M. & Harris, R. (2001). Creating Continuous Flow
+  * @graph
+ *   domains: [domain:operations]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

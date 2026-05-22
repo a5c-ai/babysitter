@@ -18,6 +18,11 @@ metadata:
     - flight-test
     - validation
     - certification
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:sensor-fusion, skill-area:statistical-analysis, skill-area:physics-simulation]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # Flight Test Planning Skill

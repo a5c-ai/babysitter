@@ -1,19 +1,14 @@
 ---
 name: requesting-code-review
 description: Use when completing tasks, implementing major features, or before merging to verify work meets requirements.
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Requesting Code Review
-
-## Overview
-
-Dispatch code-reviewer agent to catch issues before they cascade.
-
-**Core principle:** Review early, review often.
-
-## When to Request
-
-- After each task in subagent-driven development
 - After completing major features
 - Before merge to main
 

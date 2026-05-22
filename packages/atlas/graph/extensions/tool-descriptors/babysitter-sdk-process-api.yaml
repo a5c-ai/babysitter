@@ -1,0 +1,47 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:babysitter-sdk-process-api
+attributes:
+  displayName: "Babysitter SDK Process API"
+  schema: '{}'
+  category: governance-orchestration
+  description: |
+    Programmatic process/effect API exposed by @a5c-ai/babysitter-sdk. Process
+    authors call `ctx.task`, `ctx.breakpoint`, `ctx.parallel`, `ctx.sleep`, and
+    task posting APIs; the SDK records effect requests/resolutions, validates
+    task output schemas, gates approval points, and emits audit evidence.
+  inputSchema:
+    type: object
+    properties:
+      process:
+        type: string
+      effect:
+        type: string
+      args:
+        type: object
+  outputSchema:
+    type: object
+    properties:
+      effectId:
+        type: string
+      status:
+        type: string
+      resultRef:
+        type: string
+      completionProof:
+        type: object
+  mode: governed
+  streamable: true
+  timeoutMs: 600000
+  vendor: a5c-ai
+  requiresPermissionGate: true
+  supportsCancellation: true
+  abortPropagation: cooperative
+  errorBehavior: returns-tool-error
+edges:
+  realizes:
+    - target: layer:14-governance
+  assesses_policy:
+    - target: content-policy:default-acceptable-use
+  requires_capability:
+    - target: capability:programmatic-tool-calling
+      level: required

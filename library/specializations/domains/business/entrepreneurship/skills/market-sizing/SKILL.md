@@ -13,6 +13,11 @@ metadata:
   domain: business
   category: Market Analysis
   skill-id: SK-003
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:market-sizing, skill-area:market-research, skill-area:strategic-analysis]
+  workflows: [workflow:product-discovery]
+  roles: [role:strategic-planner, role:business-analyst, role:data-analyst]
 ---
 
 # Market Sizing Calculator Skill

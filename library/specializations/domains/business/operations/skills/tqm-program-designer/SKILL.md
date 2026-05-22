@@ -11,6 +11,11 @@ metadata:
   specialization: operations
   domain: business
   category: quality-management
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:change-management-leadership, skill-area:organizational-design, skill-area:compliance-automation]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:hr-manager, role:strategic-planner]
 ---
 
 # TQM Program Designer

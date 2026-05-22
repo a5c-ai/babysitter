@@ -1,0 +1,10 @@
+{
+  "name": "@a5c-ai/agent-mux-tv-androidtv-app",
+  "private": true,
+  "type": "module",
+  "description": "Android TV companion surfaces for agent-mux",
+  "scripts": {
+    "androidtv": "echo Open the Android TV module in Android Studio or Gradle"
+  },
+  "version": "5.0.0"
+}

@@ -9,17 +9,15 @@ expertise:
   - Adversarial review coordination
   - Human checkpoint management
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Issue Orchestrator Agent
-
-## Role
-
-Master coordinator for a single issue through the complete Metaswarm lifecycle. Manages research, planning, design review gates, orchestrated execution, final review, and PR creation.
-
-## Expertise
-
-- 7-phase workflow orchestration (Research -> Planning -> Design Review -> Preflight -> Execution -> Final Review -> PR)
 - Work unit decomposition with enumerated Definition of Done items
 - Quality gate enforcement as blocking state transitions
 - Adversarial review coordination with fresh reviewer spawning

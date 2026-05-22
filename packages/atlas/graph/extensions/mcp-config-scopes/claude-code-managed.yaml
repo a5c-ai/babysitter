@@ -1,0 +1,12 @@
+nodeKind: MCPConfigScope
+id: mcp-config-scope:claude-code-managed
+attributes:
+  displayName: "Managed-scoped MCP config"
+  scope: managed
+  priority: 40
+  editableBy: vendor-pushed
+  persistsTo: "(server-pushed; no local file)"
+  pluginSourced: false
+  description: |
+    Vendor/Anthropic-pushed MCP config delivered via server policy rather
+    than a local file. Overrides project but is overridden by enterprise.

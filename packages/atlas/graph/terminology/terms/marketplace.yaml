@@ -1,0 +1,12 @@
+nodeKind: Term
+id: term:marketplace
+attributes:
+  canonicalDefinitionId: definition:marketplace.canonical
+  displayName: "Marketplace"
+  kind: extension-shape
+  references: []
+  description: |
+    A registry that publishes Blueprints and Plugins; referenced from
+edges:
+  applies_to:
+    - target: domain:software-engineering

@@ -8,6 +8,14 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:container-security, skill-area:vulnerability-scanning-remediation]
+  roles: [role:security-engineer, role:devops-engineer]
+  workflows: [workflow:vulnerability-management, workflow:security-audit]
+  topics: [topic:zero-trust-architecture]
+
 ---
 
 # Container Security Scanner Skill

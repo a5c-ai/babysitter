@@ -1,0 +1,60 @@
+nodeKind: ModelVersion
+id: model:gemma-2-27b@current
+attributes:
+  displayName: "Gemma 2 27B"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:gemma-2
+  versionRange: '>=2.0.0 <3.0.0'
+  kind: chat
+  contextWindowTokens: 8192
+  modalities:
+  - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2024-06-27'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2024-06-27'
+  modelCardUrl: https://huggingface.co/google/gemma-2-27b-it
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:gemma-2
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:gemma-2
+  served_by:
+  - provider:together-ai
+  - provider:groq
+  speaks:
+  - model-transport:openai-compat
+  supports:
+  - target: capability:streaming
+    versionRange: '>=2.0.0 <3.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-gemma-2-27b
+  - target: capability:supports-text-streaming
+    versionRange: '>=2.0.0 <3.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-gemma-2-27b
+  - target: capability:can-multi-turn
+    versionRange: '>=2.0.0 <3.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-gemma-2-27b
+  - target: capability:requires-tool-approval
+    versionRange: '>=2.0.0 <3.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-gemma-2-27b

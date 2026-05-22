@@ -7,6 +7,13 @@ model: opus
 skills:
   - rollback-automation-skill
   - data-migration-validator
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:deployment-infrastructure-management, skill-area:gitops]
+  roles: [role:sre, role:devops-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Rollback Specialist Agent

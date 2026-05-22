@@ -1,0 +1,159 @@
+nodeKind: AgentVersion
+id: agentVersion:opencode:ge-0-0-0
+attributes:
+  agentId: "opencode"
+  aliases: []
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  displayName: "OpenCode"
+  summary: "Terminal-native coding agent with configurable providers"
+  sourcePackage: "opencode"
+  osSupport:
+    - "linux"
+    - "macos"
+    - "windows"
+  agentProductId: agent:opencode
+  versionRange: ">=0.0.0"
+  releasedAt: "2025-01-01"
+  cliCommand: "opencode"
+  installMethods:
+    - install:npm
+    - install:brew
+    - install:curl
+  minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "Provider API Key"
+        envVars: [ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY]
+      - type: oauth
+        name: "OAuth Login"
+    authFiles:
+      - "~/.config/opencode/opencode.json"
+    hostEnvSignals:
+      - OPENCODE_SESSION_ID
+      - OPENCODE_CONFIG
+    sessionDir: "~/.config/opencode/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
+    capabilityFlags:
+      canResume: true
+      canFork: true
+      supportsMultiTurn: true
+      sessionPersistence: file
+      supportsTextStreaming: true
+      supportsToolCallStreaming: true
+      supportsThinkingStreaming: false
+      supportsNativeTools: true
+      supportsMCP: true
+      supportsParallelToolCalls: true
+      requiresToolApproval: true
+      supportsThinking: false
+      supportsJsonMode: true
+      supportsStructuredOutput: true
+      structuredSessionTransport: restart-per-turn
+      sessionControlPlane: self-managed
+      supportsSkills: true
+      supportsAgentsMd: true
+      skillsFormat: file
+      supportsSubagentDispatch: true
+      supportsParallelExecution: true
+      maxParallelTasks: 5
+      supportsInteractiveMode: false
+      supportsStdinInjection: false
+      supportsImageInput: true
+      supportsImageOutput: false
+      supportsFileAttachments: true
+      supportsPlugins: true
+      pluginFormats: [mcp-server]
+      pluginRegistries:
+        - name: mcp
+          url: https://modelcontextprotocol.io
+          searchable: false
+      supportedPlatforms: [darwin, linux, win32]
+      requiresGitRepo: false
+      requiresPty: false
+    runtimeHooks:
+      preToolUse: nonblocking
+      postToolUse: nonblocking
+      sessionStart: nonblocking
+      sessionEnd: nonblocking
+      stop: nonblocking
+      userPromptSubmit: nonblocking
+    configSchema:
+      configFormat: json
+      configFilePaths:
+        - "~/.config/opencode/opencode.json"
+      projectConfigFilePaths:
+        - ".opencode/config.json"
+    displayName: "OpenCode"
+    defaultModelId: "claude-3-5-sonnet-20241022"
+  hookSupport:
+    interactive:
+      sessionStart: native
+      stop: emulated
+      userPromptSubmit: native
+      preToolUse: native
+      sessionEnd: native
+    nonInteractive:
+      sessionStart: emulated
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: true
+    positionalPrompt: true
+edges:
+  version_of:
+    - agent:opencode
+  composed_of:
+    - target: agent-core-impl:opencode.core@1.x
+      role: core
+    - target: agent-runtime-impl:opencode.runtime@1.x
+      role: runtime
+    - target: agent-platform-impl:opencode.platform@1.x
+      role: platform
+    - target: agent-ui-impl:opencode.ui@current
+      role: ui
+    - target: knowledge-fabric-impl:opencode.knowledge@current
+      role: knowledge-fabric
+  sourced_from: []
+  supports:
+    - target: capability:skills
+      versionRange: ">=0.0.0"
+      level: full
+      notes: OpenCode documents reusable command surfaces — first-party basis for the local skills abstraction.
+    - target: capability:supports-thinking
+      versionRange: ">=0.0.0"
+      level: full
+      notes: OpenCode documented as an interactive terminal coding surface backed by configurable providers.
+    - target: capability:interactive-mode
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Interactive terminal use documented directly in OpenCode TUI docs.
+    - target: capability:stdin-injection
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Public docs thinner for non-interactive prompt injection; local fallback metadata remains primary.
+    - target: capability:vision-input
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Public OpenCode docs lack strong technical detail for image input.
+    - target: capability:runtime-hooks
+      versionRange: ">=0.0.0"
+      level: full
+      notes: OpenCode plugins expose hook-based extensibility — first-party basis for runtime hooks.
+    - target: capability:stop-hook
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Local ontology normalizes stop-hook separately; first-party support is the broader plugin hook system.
+    - target: capability:can-resume
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Public OpenCode docs describe where sessions are stored.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern

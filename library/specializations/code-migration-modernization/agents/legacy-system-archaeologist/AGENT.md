@@ -8,6 +8,13 @@ skills:
   - static-code-analyzer
   - architecture-analyzer
   - dependency-scanner
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:code-analysis-linting, skill-area:monolith-vs-microservices]
+  roles: [role:architect, role:tech-lead]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Legacy System Archaeologist Agent

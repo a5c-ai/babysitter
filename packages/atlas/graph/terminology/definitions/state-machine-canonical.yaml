@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:state-machine.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:state-machine
+  text: |
+    a named state machine over a NodeKind
+  status: canonical
+edges:
+  defines:
+    - term:state-machine

@@ -43,11 +43,21 @@ explicit user input for a breakpoint.
 This is not considered bypassing the orchestration model as long as each
 iteration and effect is handled through the CLI and run journal.
 
+If the loop is stuck because the process logic is wrong or because the same
+shell/effect keeps failing with no path to success, you must repair the run
+instead of blindly retrying. Read the process file and run artifacts, then
+modify the process file itself and/or adjust the relevant journal/task files so
+that the next iteration can advance honestly.
+
 Common mistakes to avoid:
 - wrong: Stopping the session and waiting for a hook callback that will never
   arrive.
 - correct: Continuing the orchestration loop in-turn: iterate, perform effects,
   post results, iterate again until the run completes.
+- wrong: Re-running the same failing shell task forever after it is clear the
+  process logic or recorded effect state is broken.
+- correct: Repairing the process definition and, when necessary, the run's
+  journal/task artifacts, then continuing iteration from the repaired state.
 - wrong: Skipping the CLI and executing tasks directly without the journal.
 - correct: Using `run:iterate` and `task:post` for every step, even when driving
   the loop yourself.

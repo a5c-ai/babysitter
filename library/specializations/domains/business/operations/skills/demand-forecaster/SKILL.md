@@ -11,6 +11,11 @@ metadata:
   specialization: operations
   domain: business
   category: capacity-planning
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analytics, skill-area:quantitative-modeling]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:data-analyst, role:procurement-manager]
 ---
 
 # Demand Forecaster

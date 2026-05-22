@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:interaction-primitive-category
+attributes:
+  canonicalDefinitionId: definition:interaction-primitive-category.canonical
+  displayName: "InteractionPrimitiveCategory"
+  kind: primitive
+  references:
+    - "NodeKind:InteractionPrimitiveCategory"
+  description: |
+    Editorial grouping for InteractionPrimitives (control, navigation, context, approval, voice, telemetry, multimodal, collaborative)
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

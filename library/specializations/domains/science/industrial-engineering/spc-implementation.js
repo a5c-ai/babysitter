@@ -16,6 +16,12 @@
  * - Montgomery, Introduction to Statistical Quality Control
  * - Wheeler, Understanding Statistical Process Control
  * - AIAG SPC Manual
+ *
+ * @graph
+ *   domains: [domain:industrial-engineering]
+ *   skillAreas: [skill-area:statistical-analysis, skill-area:organizational-design, skill-area:data-analysis]
+ *   roles: [role:operations-analyst, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

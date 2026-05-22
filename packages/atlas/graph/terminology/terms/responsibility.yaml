@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:responsibility
+attributes:
+  canonicalDefinitionId: definition:responsibility.canonical
+  displayName: "Responsibility"
+  kind: role
+  references:
+    - "NodeKind:Responsibility"
+  description: |
+    Atomic accountable unit
+edges:
+  applies_to:
+    - target: domain:software-engineering

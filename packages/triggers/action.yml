@@ -1,0 +1,413 @@
+name: Agent Mux
+description: Run any coding agent from GitHub Actions — supports all harnesses (Claude Code, Codex, Pi, Gemini CLI, Copilot CLI, etc.) with trigger evaluation, provider proxy, babysitter plugin, and bridge modes.
+author: a5c-ai
+
+branding:
+  icon: terminal
+  color: purple
+
+inputs:
+  # ── Core inputs ──────────────────────────────────────────────────────
+  command:
+    description: agent-mux command to execute after trigger evaluation.
+    required: false
+    default: launch
+  harness:
+    description: Coding agent harness to use (claude, codex, pi, gemini, copilot, cursor, opencode, hermes).
+    required: true
+  provider:
+    description: Model provider (foundry, google, anthropic, bedrock, openai).
+    required: false
+  model:
+    description: Model name to use (e.g. gpt-5.5, gemini-3.1-pro-preview, claude-sonnet-4).
+    required: false
+  prompt:
+    description: Prompt or task to send to the agent.
+    required: false
+
+  # ── Invocation mode ──────────────────────────────────────────────────
+  interaction-mode:
+    description: |
+      How to launch the harness in CI:
+        non-interactive — plain NI mode (-p / exec)
+        bridged-hooks — NI + emulated babysitter lifecycle hooks (--bridge-hooks)
+        bridged-interactive — NI externally, interactive internally via PTY (--bridge-interactive)
+    required: false
+    default: non-interactive
+  max-turns:
+    description: Maximum model turns before the agent exits.
+    required: false
+    default: '15'
+
+  # ── Provider / proxy ─────────────────────────────────────────────────
+  with-proxy:
+    description: Start transport-mux proxy if the harness doesn't support the provider natively.
+    required: false
+    default: 'true'
+  proxy-log-level:
+    description: Proxy log level (error, warn, info, debug).
+    required: false
+    default: error
+
+  # ── Babysitter plugin ────────────────────────────────────────────────
+  babysitter-plugin:
+    description: Install the babysitter plugin into the harness before running.
+    required: false
+    default: 'false'
+  process-file:
+    description: Path to a babysitter process definition (.mjs) to copy into .a5c/processes/.
+    required: false
+  babysitter-prompt-prefix:
+    description: |
+      Slash command prefix for babysitter invocation. Harness-specific:
+        claude → /babysitter:yolo
+        codex → $babysitter:yolo
+        other → Invoke the babysitter:yolo command to:
+    required: false
+
+  # ── Legacy / compatibility ───────────────────────────────────────────
+  args:
+    description: Space-delimited fallback arguments passed to amux after the command.
+    required: false
+  args-json:
+    description: JSON string array of additional arguments passed to amux after the command. Prefer this for values containing spaces or shell-sensitive characters.
+    required: false
+  adapter:
+    description: Alias for harness (backward compatibility).
+    required: false
+  plugins:
+    description: Newline-delimited plugin specs installed after harness setup. Each line is passed to amux plugin install <adapter> <plugin>.
+    required: false
+
+  # ── Trigger evaluation ───────────────────────────────────────────────
+  trigger-backend:
+    description: Trigger backend to normalize. Supports github, gitlab, bitbucket, generic-webhook.
+    required: false
+    default: github
+  trigger-query:
+    description: Query used to decide whether agent-mux should run.
+    required: false
+  include-diff:
+    description: Include local git diff patches in trigger enrichment.
+    required: false
+    default: 'true'
+
+  # ── Auth / tokens ────────────────────────────────────────────────────
+  use-a5c-token-exchange:
+    description: Use a5c-ai/generate-token-action@main before running trigger enrichment and agent-mux.
+    required: false
+    default: 'false'
+  github-token:
+    description: GitHub token fallback for API enrichment.
+    required: false
+    default: ${{ github.token }}
+
+  # ── Environment ──────────────────────────────────────────────────────
+  node-version:
+    description: Node.js version.
+    required: false
+    default: '22'
+  working-directory:
+    description: Working directory for amux execution.
+    required: false
+    default: ${{ github.workspace }}
+  pre-run:
+    description: Optional shell commands to run after trigger match and before amux.
+    required: false
+  post-run:
+    description: Optional shell commands to run after amux when trigger matched.
+    required: false
+
+outputs:
+  matched:
+    description: Whether trigger-query matched the enriched event.
+    value: ${{ steps.trigger.outputs.matched }}
+  event:
+    description: Path to enriched event JSON.
+    value: ${{ steps.trigger.outputs.event }}
+  exit-code:
+    description: agent-mux exit code. Empty when trigger did not match.
+    value: ${{ steps.amux.outputs.exit-code }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Generate a5c GitHub App token
+      id: a5c-token
+      if: ${{ inputs.use-a5c-token-exchange == 'true' }}
+      continue-on-error: true
+      uses: a5c-ai/generate-token-action@main
+
+    - name: Resolve action runtime
+      id: resolve-runtime
+      shell: bash
+      env:
+        ACTION_REF: ${{ github.action_ref }}
+      run: |
+        set -euo pipefail
+        WORKSPACE="${GITHUB_WORKSPACE:-$(pwd)}"
+        if [ -d "$WORKSPACE/packages/agent-mux/cli" ] && [ -f "$WORKSPACE/packages/triggers/action.yml" ]; then
+          echo "mode=monorepo" >> "$GITHUB_OUTPUT"
+          echo "tag=staging" >> "$GITHUB_OUTPUT"
+        elif [ "$ACTION_REF" = "staging" ]; then
+          echo "mode=external" >> "$GITHUB_OUTPUT"
+          echo "tag=staging" >> "$GITHUB_OUTPUT"
+        else
+          echo "mode=external" >> "$GITHUB_OUTPUT"
+          echo "tag=latest" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Install runtime packages
+      shell: bash
+      env:
+        NPM_TAG: ${{ steps.resolve-runtime.outputs.tag }}
+      run: |
+        set -euo pipefail
+        echo "Installing @a5c-ai packages with tag: $NPM_TAG"
+        npm install -g --legacy-peer-deps @a5c-ai/agent-mux-cli@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/triggers@$NPM_TAG
+        npm install -g --legacy-peer-deps @a5c-ai/hooks-mux-cli@$NPM_TAG 2>/dev/null || echo "hooks-mux-cli install skipped (optional)"
+        which amux && amux --version || { echo "ERROR: amux not found after install"; exit 1; }
+
+    - name: Install harness
+      if: ${{ inputs.harness != '' || inputs.adapter != '' }}
+      shell: bash
+      env:
+        INPUT_HARNESS: ${{ inputs.harness || inputs.adapter }}
+        INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+      run: |
+        set -euo pipefail
+        cd "$INPUT_WORKING_DIRECTORY"
+        # Map adapter names to amux agent aliases
+        AMUX_AGENT="$INPUT_HARNESS"
+        case "$INPUT_HARNESS" in
+          claude-code) AMUX_AGENT="claude" ;;
+          gemini-cli) AMUX_AGENT="gemini" ;;
+          copilot-cli) AMUX_AGENT="copilot" ;;
+          cursor-cli) AMUX_AGENT="cursor" ;;
+        esac
+        amux install "$AMUX_AGENT" || true
+
+    - name: Install babysitter plugin
+      if: ${{ inputs.babysitter-plugin == 'true' }}
+      shell: bash
+      env:
+        INPUT_HARNESS: ${{ inputs.harness || inputs.adapter }}
+        INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        INPUT_PROCESS_FILE: ${{ inputs.process-file }}
+      run: |
+        set -euo pipefail
+        cd "$INPUT_WORKING_DIRECTORY"
+
+        # Map to SDK harness names
+        SDK_HARNESS="$INPUT_HARNESS"
+        case "$INPUT_HARNESS" in
+          claude-code) SDK_HARNESS="claude" ;;
+          gemini-cli) SDK_HARNESS="gemini" ;;
+          copilot-cli) SDK_HARNESS="copilot" ;;
+          cursor-cli) SDK_HARNESS="cursor" ;;
+        esac
+
+        # Install babysitter plugin — try SDK installer first, fall back to direct harness commands
+        if ! babysitter harness:install-plugin "$SDK_HARNESS" --workspace "$INPUT_WORKING_DIRECTORY" 2>/dev/null; then
+          echo "Plugin installer unavailable — installing plugin directly"
+          case "$SDK_HARNESS" in
+            claude)
+              claude plugin marketplace add a5c-ai/babysitter-claude 2>/dev/null || true
+              claude plugin install --scope project babysitter@a5c.ai 2>/dev/null || true
+              ;;
+            *)
+              mkdir -p .a5c
+              echo '{"type":"module"}' > .a5c/package.json 2>/dev/null || true
+              ;;
+          esac
+        fi
+
+        # Copy process file if provided (skip if already in target dir)
+        if [ -n "$INPUT_PROCESS_FILE" ]; then
+          mkdir -p .a5c/processes
+          TARGET=".a5c/processes/$(basename "$INPUT_PROCESS_FILE")"
+          [ "$(realpath "$INPUT_PROCESS_FILE" 2>/dev/null)" = "$(realpath "$TARGET" 2>/dev/null)" ] || cp "$INPUT_PROCESS_FILE" .a5c/processes/
+        fi
+
+    - name: Install plugins (legacy)
+      if: ${{ inputs.plugins != '' }}
+      shell: bash
+      env:
+        ACTION_ROOT: ${{ github.action_path }}
+        INPUT_ADAPTER: ${{ inputs.adapter || inputs.harness }}
+        INPUT_PLUGINS: ${{ inputs.plugins }}
+      run: |
+        set -euo pipefail
+        while IFS= read -r plugin; do
+          [ -z "$plugin" ] && continue
+          amux plugin install "$INPUT_ADAPTER" "$plugin"
+        done <<< "$INPUT_PLUGINS"
+
+    - name: Evaluate trigger
+      id: trigger
+      shell: bash
+      env:
+        ACTION_ROOT: ${{ github.action_path }}
+        INPUT_TRIGGER_BACKEND: ${{ inputs.trigger-backend }}
+        INPUT_TRIGGER_QUERY: ${{ inputs.trigger-query }}
+        INPUT_INCLUDE_DIFF: ${{ inputs.include-diff }}
+        EFFECTIVE_GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || inputs.github-token }}
+      run: |
+        set -euo pipefail
+        EVENT_FILE="$RUNNER_TEMP/agent-mux-event.json"
+        RESULT_FILE="$RUNNER_TEMP/agent-mux-trigger.json"
+        INCLUDE_DIFF_ARGS=()
+        if [ "$INPUT_INCLUDE_DIFF" = "true" ]; then
+          INCLUDE_DIFF_ARGS+=(--include-diff)
+        fi
+        triggers enrich \
+          --backend "$INPUT_TRIGGER_BACKEND" \
+          --token "$EFFECTIVE_GITHUB_TOKEN" \
+          "${INCLUDE_DIFF_ARGS[@]}" \
+          --output "$EVENT_FILE"
+        if [ -z "$INPUT_TRIGGER_QUERY" ]; then
+          echo '{"matched":true,"reasons":["no trigger query configured"]}' > "$RESULT_FILE"
+        elif triggers evaluate \
+          --backend "$INPUT_TRIGGER_BACKEND" \
+          --query "$INPUT_TRIGGER_QUERY" \
+          --token "$EFFECTIVE_GITHUB_TOKEN" \
+          "${INCLUDE_DIFF_ARGS[@]}" \
+          --output "$RESULT_FILE"; then
+          true
+        else
+          status=$?
+          if [ "$status" -ne 78 ]; then
+            exit "$status"
+          fi
+        fi
+        MATCHED=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')).matched ? 'true' : 'false')" "$RESULT_FILE")
+        echo "matched=$MATCHED" >> "$GITHUB_OUTPUT"
+        echo "event=$EVENT_FILE" >> "$GITHUB_OUTPUT"
+        cat "$RESULT_FILE"
+
+    - name: Pre-run pipeline commands
+      if: ${{ steps.trigger.outputs.matched == 'true' && inputs.pre-run != '' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        INPUT_PRE_RUN: ${{ inputs.pre-run }}
+        AMUX_TRIGGER_EVENT_PATH: ${{ steps.trigger.outputs.event }}
+      run: |
+        set -euo pipefail
+        bash -euo pipefail -c "$INPUT_PRE_RUN"
+
+    - name: Run agent-mux
+      id: amux
+      if: ${{ steps.trigger.outputs.matched == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        ACTION_ROOT: ${{ github.action_path }}
+        INPUT_COMMAND: ${{ inputs.command }}
+        INPUT_HARNESS: ${{ inputs.harness || inputs.adapter }}
+        INPUT_PROVIDER: ${{ inputs.provider }}
+        INPUT_MODEL: ${{ inputs.model }}
+        INPUT_PROMPT: ${{ inputs.prompt }}
+        INPUT_INTERACTION_MODE: ${{ inputs.interaction-mode }}
+        INPUT_MAX_TURNS: ${{ inputs.max-turns }}
+        INPUT_WITH_PROXY: ${{ inputs.with-proxy }}
+        INPUT_PROXY_LOG_LEVEL: ${{ inputs.proxy-log-level }}
+        INPUT_BABYSITTER_PLUGIN: ${{ inputs.babysitter-plugin }}
+        INPUT_BABYSITTER_PREFIX: ${{ inputs.babysitter-prompt-prefix }}
+        INPUT_ARGS: ${{ inputs.args }}
+        INPUT_ARGS_JSON: ${{ inputs.args-json }}
+        AMUX_TRIGGER_EVENT_PATH: ${{ steps.trigger.outputs.event }}
+      run: |
+        set -euo pipefail
+        AMUX="amux"
+
+        # Map harness names to amux aliases
+        AMUX_HARNESS="$INPUT_HARNESS"
+        case "$INPUT_HARNESS" in
+          claude-code) AMUX_HARNESS="claude" ;;
+          gemini-cli) AMUX_HARNESS="gemini" ;;
+          copilot-cli) AMUX_HARNESS="copilot" ;;
+          cursor-cli) AMUX_HARNESS="cursor" ;;
+        esac
+
+        # Build command args
+        ARGS=()
+        if [ "$INPUT_COMMAND" = "launch" ] || [ "$INPUT_COMMAND" = "run" ]; then
+          ARGS+=("$INPUT_COMMAND")
+          [ -n "$AMUX_HARNESS" ] && ARGS+=("$AMUX_HARNESS")
+          [ -n "$INPUT_PROVIDER" ] && ARGS+=("$INPUT_PROVIDER")
+        else
+          ARGS+=("$INPUT_COMMAND")
+        fi
+
+        # Model
+        [ -n "$INPUT_MODEL" ] && ARGS+=(--model "$INPUT_MODEL")
+
+        # Prompt — with optional babysitter prefix
+        if [ -n "$INPUT_PROMPT" ]; then
+          EFFECTIVE_PROMPT="$INPUT_PROMPT"
+          if [ "$INPUT_BABYSITTER_PLUGIN" = "true" ] && [ -n "$INPUT_BABYSITTER_PREFIX" ]; then
+            EFFECTIVE_PROMPT="$INPUT_BABYSITTER_PREFIX $INPUT_PROMPT"
+          fi
+          ARGS+=(--prompt "$EFFECTIVE_PROMPT")
+        fi
+
+        # Interaction mode flags
+        case "$INPUT_INTERACTION_MODE" in
+          non-interactive)
+            ARGS+=(--no-interactive)
+            ;;
+          bridged-hooks)
+            ARGS+=(--no-interactive --bridge-hooks)
+            ;;
+          bridged-interactive)
+            ARGS+=(--no-interactive --bridge-interactive)
+            ;;
+        esac
+
+        # Max turns
+        [ -n "$INPUT_MAX_TURNS" ] && ARGS+=(--max-turns "$INPUT_MAX_TURNS")
+
+        # Proxy
+        if [ "$INPUT_WITH_PROXY" = "true" ]; then
+          ARGS+=(--with-proxy-if-needed)
+          [ -n "$INPUT_PROXY_LOG_LEVEL" ] && ARGS+=(--proxy-log-level "$INPUT_PROXY_LOG_LEVEL")
+        fi
+
+        # Auto-approve permissions
+        ARGS+=(--yolo)
+
+        # Extra args
+        if [ -n "$INPUT_ARGS_JSON" ]; then
+          mapfile -t EXTRA_ARGS < <(node -e "const value = JSON.parse(process.env.INPUT_ARGS_JSON || '[]'); if (!Array.isArray(value)) throw new Error('args-json must be a JSON array'); for (const item of value) console.log(String(item));")
+          ARGS+=("${EXTRA_ARGS[@]}")
+        elif [ -n "$INPUT_ARGS" ]; then
+          read -r -a EXTRA_ARGS <<< "$INPUT_ARGS"
+          ARGS+=("${EXTRA_ARGS[@]}")
+        fi
+
+        echo "::group::amux ${ARGS[*]}"
+        if $AMUX "${ARGS[@]}"; then
+          echo "exit-code=0" >> "$GITHUB_OUTPUT"
+        else
+          status=$?
+          echo "exit-code=$status" >> "$GITHUB_OUTPUT"
+          exit "$status"
+        fi
+        echo "::endgroup::"
+
+    - name: Post-run pipeline commands
+      if: ${{ steps.trigger.outputs.matched == 'true' && inputs.post-run != '' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        INPUT_POST_RUN: ${{ inputs.post-run }}
+        AMUX_TRIGGER_EVENT_PATH: ${{ steps.trigger.outputs.event }}
+      run: |
+        set -euo pipefail
+        bash -euo pipefail -c "$INPUT_POST_RUN"

@@ -1,0 +1,34 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-cursor-plugin-json
+attributes:
+  artifactId: plugin-artifact:babysitter-cursor-plugin-json
+  displayName: "babysitter-cursor plugin.json"
+  targetId: plugin-target:cursor
+  artifactKind: manifest
+  pathPattern: "plugin.json"
+  installerSurface: "plugin.json"
+  scriptVariants:
+    - "shell-hooks"
+  contextFiles:
+    - plugins/babysitter-cursor/plugin.json
+    - plugins/babysitter-cursor/hooks.json
+edges:
+  emits_artifact:
+    - target: plugin-target:cursor
+---
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-cursor-hooks-json
+attributes:
+  artifactId: plugin-artifact:babysitter-cursor-hooks-json
+  displayName: "babysitter-cursor hooks.json"
+  targetId: plugin-target:cursor
+  artifactKind: settings-fragment
+  pathPattern: "hooks.json"
+  installerSurface: "hooks.json"
+  scriptVariants:
+    - "shell-via-hooks-mux-cli"
+  contextFiles:
+    - plugins/babysitter-cursor/hooks.json
+edges:
+  emits_artifact:
+    - target: plugin-target:cursor

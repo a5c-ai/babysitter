@@ -1,0 +1,62 @@
+---
+nodeKind: Workflow
+id: workflow:ros2-integration-testing
+attributes:
+  displayName: "ROS2 Integration Testing"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: cross-team
+  description: |
+    Validates integration of ROS2 nodes across the robot software stack —
+    launching multi-node test scenarios, verifying topic pub/sub contracts,
+    testing service call latencies, exercising action server lifecycle, checking
+    QoS profile compatibility, and detecting message serialization regressions.
+    Excludes individual node unit tests.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:implementer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:ros-development
+    - target: skill-area:integration-testing
+  applies_to_domain:
+    - target: domain:robotics
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:review-prs-merge-decisions
+    - target: responsibility:flaky-test-quarantine
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:sensor-fusion-calibration
+attributes:
+  displayName: "Sensor Fusion Calibration"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-deployment"
+  complexity: single-team
+  description: |
+    Calibrates and validates multi-sensor fusion pipelines — collecting
+    synchronized sensor data, computing intrinsic and extrinsic calibration
+    parameters, validating IMU-camera-LiDAR alignment, measuring fusion
+    accuracy against ground truth, and certifying calibration quality before
+    field deployment. Excludes sensor hardware selection.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:sensor-fusion
+    - target: skill-area:slam
+  applies_to_domain:
+    - target: domain:robotics
+    - target: domain:scientific-computing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:research-engineering

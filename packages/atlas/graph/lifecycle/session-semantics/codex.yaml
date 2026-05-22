@@ -1,0 +1,24 @@
+nodeKind: SessionSemantics
+id: session-semantics:codex
+attributes:
+  sessionSemanticsId: session-semantics:codex
+  agentId: agent:codex
+  versionRange: ">=0.0.0"
+  sessionDirStrategy: ".a5c/runs"
+  sessionIdSources:
+    - CODEX_THREAD_ID
+    - CODEX_SESSION_ID
+    - CODEX_PLUGIN_ROOT
+  resumeSemantics: |
+    Codex session binding relies on thread/session IDs and plugin-root state.
+  stateFilePatterns:
+    - ".a5c/runs/**"
+  pidMarkerPolicy: env-or-run-dir
+  metadataFields:
+    - { key: session_id, envVars: [CODEX_SESSION_ID] }
+    - { key: run_id,     envVars: [CODEX_RUN_ID] }
+edges:
+  applies_to_version:
+    - target: agentVersion:codex:ge-0-119-0
+  references_path:
+    - target: path:a5c-runs-dir

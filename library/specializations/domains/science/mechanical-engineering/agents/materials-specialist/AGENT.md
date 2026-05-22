@@ -18,6 +18,10 @@ metadata:
   phase: 2
   experience: 15+ years materials engineering
   background: Metals, polymers, composites, failure analysis
+graph:
+  domains: [domain:mechanical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Materials Specialist Agent

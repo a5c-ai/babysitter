@@ -1,0 +1,89 @@
+nodeKind: ModelVersion
+id: model:gemini-2-0-flash@current
+attributes:
+  displayName: "Gemini 2.0 Flash"
+  supportsExtendedThinking: false
+  modelFamilyId: model-family:gemini-2-0
+  versionRange: '>=2.0.0 <2.1.0'
+  kind: multimodal
+  contextWindowTokens: 1000000
+  costPerMTokInput: 0.1
+  costPerMTokOutput: 0.4
+  supportsThinking: false
+  supportsThinkingBudgetTokens: false
+  modalities:
+  - text
+  - image
+  - audio
+  - video
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: audio
+      direction: input
+    - kind: video
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-02-05'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-02-05'
+  knowledgeCutoffDate: '2024-08-01'
+  safetyTier: google-deepmind-asl-2
+  modelCardUrl: https://ai.google.dev/gemini-api/docs/models/gemini
+  supportsFineTuning: true
+  fineTuningKind: lora
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:gemini-2-0
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:gemini-2-0
+  served_by:
+  - provider:google
+  - provider:gcp-vertex
+  speaks:
+  - model-transport:gemini-generate-content
+  supports:
+  - target: capability:supports-batch-api
+    versionRange: '>=2.0.0 <2.1.0'
+    level: full
+    notes: 'Gemini Batch Mode (batchPredict / file-batches) provides 50% cost reduction.
+
+      '
+    evidenceSourceIds:
+    - evidence:google-models-page
+  - target: capability:parallel-tool-calls
+    versionRange: '>=2.0.0 <2.1.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-models-page
+  - target: capability:supports-prompt-caching
+    versionRange: '>=2.0.0 <2.1.0'
+    level: full
+    notes: 'Google Gemini supports explicit context caching via the cachedContent
+      API.
+
+      '
+    evidenceSourceIds:
+    - evidence:google-models-page
+  - target: capability:streaming
+    versionRange: '>=2.0.0 <2.1.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-models-page
+  - target: capability:supports-text-streaming
+    versionRange: '>=2.0.0 <2.1.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-models-page
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=2.0.0 <2.1.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-models-page

@@ -3,7 +3,7 @@ import os from "os";
 import path from "path";
 import { promises as fs } from "fs";
 import { createRunDir } from "../../storage/createRunDir";
-import { appendEvent } from "../../storage/journal";
+import { appendEvent, loadJournal } from "../../storage/journal";
 import { orchestrateIteration } from "../orchestrateIteration";
 import { commitEffectResult } from "../commitEffectResult";
 
@@ -36,6 +36,177 @@ function writeProcessFile(dir: string, filename: string) {
 }
 
 describe("orchestrateIteration integration", () => {
+  test("runs ctx.onCleanup callbacks after successful completion", async () => {
+    const processDir = path.join(tmpRoot, "processes-cleanup-success");
+    const cleanupDir = path.join(tmpRoot, "scratch-success");
+    await fs.mkdir(processDir, { recursive: true });
+    await fs.mkdir(cleanupDir, { recursive: true });
+
+    const processPath = path.join(processDir, "cleanup-success.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      import { promises as fs } from "fs";
+
+      export async function process(inputs, ctx) {
+        ctx.onCleanup(async () => {
+          await fs.rm(inputs.cleanupDir, { recursive: true, force: true });
+        });
+        return { ok: true };
+      }
+      `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-cleanup-success",
+      request: "cleanup success",
+      processPath,
+      inputs: { cleanupDir },
+    });
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-cleanup-success" } });
+
+    const result = await orchestrateIteration({ runDir });
+    expect(result.status).toBe("completed");
+    await expect(fs.stat(cleanupDir)).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  test("does not run ctx.onCleanup callbacks while waiting for effects", async () => {
+    const processDir = path.join(tmpRoot, "processes-cleanup-waiting");
+    const cleanupDir = path.join(tmpRoot, "scratch-waiting");
+    await fs.mkdir(processDir, { recursive: true });
+    await fs.mkdir(cleanupDir, { recursive: true });
+
+    const processPath = path.join(processDir, "cleanup-waiting.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      import { promises as fs } from "fs";
+
+      const echoTask = {
+        id: "cleanup-waiting-task",
+        async build() {
+          return { kind: "node", title: "cleanup waiting" };
+        }
+      };
+
+      export async function process(inputs, ctx) {
+        ctx.onCleanup(async () => {
+          await fs.rm(inputs.cleanupDir, { recursive: true, force: true });
+        });
+        await ctx.task(echoTask, {});
+        return { ok: true };
+      }
+      `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-cleanup-waiting",
+      request: "cleanup waiting",
+      processPath,
+      inputs: { cleanupDir },
+    });
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-cleanup-waiting" } });
+
+    const waiting = await orchestrateIteration({ runDir });
+    expect(waiting.status).toBe("waiting");
+    await expect(fs.stat(cleanupDir)).resolves.toBeDefined();
+  });
+
+  test("runs ctx.onCleanup callbacks for failed and process-error terminal paths", async () => {
+    const processDir = path.join(tmpRoot, "processes-cleanup-failures");
+    const failedDir = path.join(tmpRoot, "scratch-failed");
+    const processErrorDir = path.join(tmpRoot, "scratch-process-error");
+    await fs.mkdir(processDir, { recursive: true });
+    await fs.mkdir(failedDir, { recursive: true });
+    await fs.mkdir(processErrorDir, { recursive: true });
+
+    const processPath = path.join(processDir, "cleanup-failures.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      import { promises as fs } from "fs";
+      import { RunFailedError } from "${path.resolve("src/runtime/exceptions.ts").replace(/\\/g, "\\\\")}";
+
+      export async function process(inputs, ctx) {
+        ctx.onCleanup(async () => {
+          await fs.rm(inputs.cleanupDir, { recursive: true, force: true });
+        });
+        if (inputs.mode === "failed") {
+          throw new RunFailedError("planned failure");
+        }
+        throw new Error("planned process error");
+      }
+      `,
+      "utf8",
+    );
+
+    const failedRun = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-cleanup-failed",
+      request: "cleanup failed",
+      processPath,
+      inputs: { cleanupDir: failedDir, mode: "failed" },
+    });
+    await appendEvent({ runDir: failedRun.runDir, eventType: "RUN_CREATED", event: { runId: "run-cleanup-failed" } });
+    const failed = await orchestrateIteration({ runDir: failedRun.runDir });
+    expect(failed.status).toBe("failed");
+    await expect(fs.stat(failedDir)).rejects.toMatchObject({ code: "ENOENT" });
+
+    const processErrorRun = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-cleanup-process-error",
+      request: "cleanup process error",
+      processPath,
+      inputs: { cleanupDir: processErrorDir, mode: "process-error" },
+    });
+    await appendEvent({ runDir: processErrorRun.runDir, eventType: "RUN_CREATED", event: { runId: "run-cleanup-process-error" } });
+    const processError = await orchestrateIteration({ runDir: processErrorRun.runDir });
+    expect(processError.status).toBe("process-error");
+    await expect(fs.stat(processErrorDir)).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  test("reports ctx.onCleanup callback errors without masking completion", async () => {
+    const processDir = path.join(tmpRoot, "processes-cleanup-error");
+    await fs.mkdir(processDir, { recursive: true });
+    const processPath = path.join(processDir, "cleanup-error.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      export async function process(_inputs, ctx) {
+        ctx.onCleanup(() => {
+          throw new Error("cleanup exploded");
+        });
+        return { ok: true };
+      }
+      `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-cleanup-error",
+      request: "cleanup error",
+      processPath,
+      inputs: {},
+    });
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-cleanup-error" } });
+
+    const metrics: Record<string, unknown>[] = [];
+    const result = await orchestrateIteration({ runDir, logger: (entry) => metrics.push(entry) });
+    expect(result.status).toBe("completed");
+    expect(metrics).toContainEqual(
+      expect.objectContaining({
+        metric: "process.cleanup",
+        status: "error",
+        message: "cleanup exploded",
+      }),
+    );
+  });
+
   test("waits for effects and completes after commit", async () => {
     const processDir = path.join(tmpRoot, "processes");
     await fs.mkdir(processDir, { recursive: true });
@@ -74,6 +245,52 @@ describe("orchestrateIteration integration", () => {
     if (secondIteration.status === "completed") {
       expect(secondIteration.output).toEqual({ doubled: 10 });
     }
+  });
+
+  test("does not append duplicate RUN_COMPLETED when iterating an already completed run", async () => {
+    const processDir = path.join(tmpRoot, "processes-completed-replay");
+    await fs.mkdir(processDir, { recursive: true });
+    const processPath = await writeProcessFile(processDir, "completed-replay.mjs");
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-completed-replay",
+      request: "integration",
+      processPath,
+      inputs: { value: 5 },
+    });
+
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-completed-replay" } });
+
+    const firstIteration = await orchestrateIteration({ runDir });
+    expect(firstIteration.status).toBe("waiting");
+    if (firstIteration.status !== "waiting") {
+      throw new Error("Expected waiting status");
+    }
+
+    await commitEffectResult({
+      runDir,
+      effectId: firstIteration.nextActions[0].effectId,
+      result: {
+        status: "ok",
+        value: { value: 5 },
+      },
+    });
+
+    const completion = await orchestrateIteration({ runDir });
+    expect(completion.status).toBe("completed");
+    if (completion.status === "completed") {
+      expect(completion.output).toEqual({ doubled: 10 });
+    }
+
+    const replay = await orchestrateIteration({ runDir });
+    expect(replay.status).toBe("completed");
+    if (replay.status === "completed") {
+      expect(replay.output).toEqual({ doubled: 10 });
+    }
+
+    const journal = await loadJournal(runDir);
+    expect(journal.filter((event) => event.type === "RUN_COMPLETED")).toHaveLength(1);
   });
 
   test("emits replay iteration metrics with logger instrumentation", async () => {
@@ -122,6 +339,90 @@ describe("orchestrateIteration integration", () => {
     expect(replayMetrics).toHaveLength(2);
     expect(replayMetrics.map((entry) => entry.status as string)).toEqual(["waiting", "completed"]);
     replayMetrics.forEach((entry) => expect(entry.runId as string).toBe(runId));
+  });
+
+  test("returns waiting instead of crashing when ctx.task() is not awaited", async () => {
+    const processDir = path.join(tmpRoot, "processes-unawaited");
+    await fs.mkdir(processDir, { recursive: true });
+
+    // Write a process file that calls ctx.task() WITHOUT await (floating promise)
+    const processPath = path.join(processDir, "unawaited.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      const echoTask = {
+        id: "echo-task",
+        async build(args) {
+          return { kind: "node", title: "echo", metadata: args };
+        }
+      };
+
+      export async function process(inputs, ctx) {
+        // Deliberately NOT awaiting — this is the bug scenario
+        ctx.task(echoTask, { value: inputs.value });
+        return { done: true };
+      }
+      `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-unawaited",
+      request: "unawaited-test",
+      processPath,
+      inputs: { value: 42 },
+    });
+
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-unawaited" } });
+
+    // Should return "waiting" (detecting the stray EFFECT_REQUESTED in the
+    // journal) rather than crashing with an unhandled rejection or failing
+    // with a journal sequence gap.
+    const result = await orchestrateIteration({ runDir });
+    expect(result.status).toBe("waiting");
+    if (result.status === "waiting") {
+      expect(result.nextActions.length).toBeGreaterThan(0);
+    }
+  });
+
+  test("completes non-interactive breakpoints that append PROCESS_LOG events concurrently", async () => {
+    const processDir = path.join(tmpRoot, "processes-breakpoints");
+    await fs.mkdir(processDir, { recursive: true });
+
+    const processPath = path.join(processDir, "parallel-breakpoints.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      export async function process(_inputs, ctx) {
+        await Promise.all([
+          ctx.breakpoint({ label: "deploy gate" }, { label: "deploy gate" }),
+          ctx.breakpoint({ label: "pr gate" }, { label: "pr gate" })
+        ]);
+        return { ok: true };
+      }
+      `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-non-interactive-breakpoints",
+      request: "parallel breakpoint test",
+      processPath,
+      inputs: {},
+      extraMetadata: { nonInteractive: true },
+    });
+
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-non-interactive-breakpoints" } });
+
+    const result = await orchestrateIteration({ runDir });
+    expect(result.status).toBe("completed");
+
+    const journal = await loadJournal(runDir);
+    expect(journal.map((event) => event.seq)).toEqual(journal.map((_, index) => index + 1));
+    expect(journal.filter((event) => event.type === "PROCESS_LOG")).toHaveLength(2);
+    expect(journal.some((event) => event.type === "RUN_FAILED")).toBe(false);
   });
 
   test("completes replay correctly after cwd changes when the run was created from a relative runsDir", async () => {

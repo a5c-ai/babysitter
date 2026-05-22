@@ -17,6 +17,12 @@
  * - CasADi: https://web.casadi.org/
  * - ACADO: https://acado.github.io/
  * - CVXPY: https://cvxpy.org/
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

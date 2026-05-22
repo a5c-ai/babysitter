@@ -1,0 +1,64 @@
+name: Harness Probe
+
+on:
+  schedule:
+    # Run weekly on Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      harnesses:
+        description: 'Comma-separated list of harnesses to probe (empty = all)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    # Only run on the canonical repo and when the required API key secret is available.
+    # (On forks / without secrets, this job is silently skipped.)
+    if: github.repository == 'a5c-ai/agent-mux' && vars.HARNESS_PROBE_ENABLED == 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install harness CLIs
+        run: |
+          # Install claude-code and codex CLIs for probing
+          npm install -g @anthropic-ai/claude-code || true
+          npm install -g @openai/codex || true
+
+      - name: Run harness probes
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          npx tsx packages/harness-mock/src/probe.ts --output-dir .harness-profiles
+        continue-on-error: true
+
+      - name: Compare profiles to baselines
+        run: |
+          if [ -d .harness-profiles ]; then
+            echo "Probe profiles captured:"
+            ls -la .harness-profiles/
+          else
+            echo "No profiles captured"
+          fi
+
+      - name: Upload probe results
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-profiles-${{ github.run_id }}
+          path: .harness-profiles/
+          retention-days: 90
+        if: always()

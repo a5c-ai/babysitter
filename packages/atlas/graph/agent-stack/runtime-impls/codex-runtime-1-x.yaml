@@ -1,0 +1,71 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:codex.runtime@1.x
+attributes:
+  displayName: Codex CLI Runtime (1.x)
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  subagentDispatchMechanism: handoff
+  subagentChildSessionPolicy: ephemeral-child-session
+  subagentToolScopePolicy: inherit-parent
+  packageRef: source-ref:codex-github
+  builtInTools:
+  - tool-descriptor:read
+  - tool-descriptor:bash
+  toolRegistryDiscovery: static-bundled
+  hookSockets:
+  - hook-surface:codex.on-tool-call
+  - hook-surface:codex.on-stop
+  internalSessionStateLocation: ~/.codex/sessions/
+  sessionFileFormat: jsonl
+  sessionFilePathConvention: ~/.codex/sessions/<session-id>.jsonl
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: native-sandbox
+  runtimeIdentity: none
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+  supportsStreaming: true
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:codex
+    role: runtime
+  exposes:
+  - target: hook-surface:codex.on-tool-call
+  - target: hook-surface:codex.on-stop
+  bundles:
+  - target: tool-descriptor:read
+  - target: tool-descriptor:bash
+  connects:
+  - target: mcp-transport:stdio
+  - target: mcp-transport:streamable-http
+  supports:
+  - target: capability:mcp-stdio
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+  - target: capability:supports-mcp
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Codex CLI supports MCP server configuration for local and remote tool integrations.
+      '
+  - target: capability:mcp-streamable-http
+    versionRange: '>=1.0.0 <2.0.0'
+    level: partial
+    notes: 'Modeled from OpenAI Codex MCP documentation covering remote MCP server integration alongside stdio configuration.
+      '
+  - target: capability:supports-subagent-dispatch
+    versionRange: '*'
+    level: full
+    notes: 'OpenAI Agents SDK handoff primitive.
+      '
+  operates_in_permission_mode:
+  - target: permission-mode:codex-untrusted
+  - target: permission-mode:codex-on-failure
+  - target: permission-mode:codex-on-request
+  - target: permission-mode:codex-never
+  has_env_var:
+  - target: env-var:openai-api-key
+  - target: env-var:openai-base-url
+  speaks:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http

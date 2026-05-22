@@ -1,0 +1,12 @@
+nodeKind: Term
+id: term:expertise-level
+attributes:
+  canonicalDefinitionId: definition:expertise-level.canonical
+  displayName: "ExpertiseLevel"
+  kind: concept
+  references: []
+  description: |
+    Novice/intermediate/expert/authoritative
+edges:
+  applies_to:
+    - target: domain:software-engineering

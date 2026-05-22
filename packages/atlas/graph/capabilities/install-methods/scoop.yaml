@@ -1,0 +1,9 @@
+nodeKind: InstallMethod
+id: install:scoop
+attributes:
+  displayName: "scoop"
+  kind: scoop
+  platforms: [win32]
+  command: "scoop install {{package}}"
+  prerequisiteCheck: "scoop --version"
+edges: {}

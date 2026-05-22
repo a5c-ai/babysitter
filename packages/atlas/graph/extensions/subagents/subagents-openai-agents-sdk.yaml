@@ -1,0 +1,47 @@
+---
+nodeKind: Subagent
+id: subagent:openai-agents-sdk.triage
+attributes:
+  displayName: "Triage Agent (OpenAI Agents SDK example)"
+  provenance: built-in
+  subjectId: agentVersion:codex:ge-0-119-0
+  roleId: role:planner
+  systemPrompt: |
+    Canonical example agent from the OpenAI Agents SDK quickstart. Acts
+    as an orchestrator that decides which downstream specialised agent
+    should handle the user's request, then issues a handoff.
+  tools: []
+  triggers: |
+    Invoked at the start of any conversation that uses the
+    triage→specialist handoff pattern from the SDK documentation.
+  description: |
+    Documented in https://openai.github.io/openai-agents-python/quickstart/
+    as the prototypical entry-point agent in the multi-agent example.
+edges:
+  roles_played_by:
+    - target: role:planner
+  implements:
+    - target: extension-interface:orchestration
+---
+nodeKind: Subagent
+id: subagent:openai-agents-sdk.guardrail
+attributes:
+  displayName: "Guardrail Agent (OpenAI Agents SDK example)"
+  provenance: built-in
+  subjectId: agentVersion:codex:ge-0-119-0
+  roleId: role:code-reviewer
+  systemPrompt: |
+    Canonical guardrail agent example from the OpenAI Agents SDK. Runs
+    alongside the primary agent and short-circuits the run when the
+    input or output violates a configured policy.
+  tools: []
+  triggers: |
+    Invoked before/after the primary agent via the SDK's `input_guardrails`
+    or `output_guardrails` configuration.
+  description: |
+    Documented in https://openai.github.io/openai-agents-python/guardrails/.
+edges:
+  roles_played_by:
+    - target: role:code-reviewer
+  implements:
+    - target: extension-interface:reflection

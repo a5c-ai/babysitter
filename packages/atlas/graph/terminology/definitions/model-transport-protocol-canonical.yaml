@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:model-transport-protocol.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:model-transport-protocol
+  text: |
+    an LLM wire protocol (Anthropic Messages, OpenAI Responses, Gemini, ...)
+  status: canonical
+edges:
+  defines:
+    - term:model-transport-protocol

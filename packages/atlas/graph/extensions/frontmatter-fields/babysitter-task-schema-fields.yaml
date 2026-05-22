@@ -1,0 +1,192 @@
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-id
+attributes:
+  displayName: "defineTask: id"
+  name: id
+  valueType: string
+  required: "yes"
+  appliesTo: task-schema
+  description: |
+    Stable task identifier (kebab-case dotted-namespace recommended).
+    Required when the spec uses `id`; mutually exclusive with `name`.
+    Source: packages/sdk/src/tasks/defineTask.ts (DefineTaskObjectSpec.id).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-name
+attributes:
+  displayName: "defineTask: name"
+  name: name
+  valueType: string
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    Alternate identifier accepted in the object form when `id` is omitted.
+    Source: packages/sdk/src/tasks/defineTask.ts (DefineTaskObjectSpec.name).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-kind
+attributes:
+  displayName: "defineTask: kind"
+  name: kind
+  valueType: enum
+  required: "yes"
+  appliesTo: task-schema
+  description: |
+    TaskKind discriminator. Known values: node | breakpoint |
+    orchestrator_task | sleep | subprocess; custom strings also accepted.
+    Source: packages/sdk/src/tasks/types.ts (KnownTaskKind / TaskKind).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-title
+attributes:
+  displayName: "defineTask: title"
+  name: title
+  valueType: string
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    Human-readable title surfaced in UI. Source: packages/sdk/src/tasks/types.ts (TaskDef.title).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-description
+attributes:
+  displayName: "defineTask: description"
+  name: description
+  valueType: string
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    Free-form description. Source: packages/sdk/src/tasks/defineTask.ts (DefineTaskOptions.description) + TaskDef.description.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-labels
+attributes:
+  displayName: "defineTask: labels"
+  name: labels
+  valueType: list
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    Free-form tag list propagated to invocations. Source: packages/sdk/src/tasks/defineTask.ts (DefineTaskOptions.labels) + TaskDef.labels.
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-source
+attributes:
+  displayName: "defineTask: source"
+  name: source
+  valueType: string
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    Source-of-truth path for the task definition (origin file). Source: packages/sdk/src/tasks/defineTask.ts (DefineTaskOptions.source).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-inputs
+attributes:
+  displayName: "defineTask: inputs"
+  name: inputs
+  valueType: object
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    Optional input schema (JSON-schema-shaped object). Stored as metadata
+    for tooling but not enforced at runtime in the object form. Source:
+    packages/sdk/src/tasks/defineTask.ts (DefineTaskObjectSpec.inputs).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-outputs
+attributes:
+  displayName: "defineTask: outputs"
+  name: outputs
+  valueType: object
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    Optional output schema (JSON-schema-shaped object). Source:
+    packages/sdk/src/tasks/defineTask.ts (DefineTaskObjectSpec.outputs).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-io
+attributes:
+  displayName: "defineTask: io"
+  name: io
+  valueType: object
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    TaskIOHints carrying inputJsonPath / outputJsonPath / stdoutPath /
+    stderrPath for effect IO redirection. Source:
+    packages/sdk/src/tasks/types.ts (TaskIOHints).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-metadata
+attributes:
+  displayName: "defineTask: metadata"
+  name: metadata
+  valueType: object
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    Free-form JsonRecord propagated to the journal. Source:
+    packages/sdk/src/tasks/types.ts (TaskDef.metadata).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-execution
+attributes:
+  displayName: "defineTask: execution"
+  name: execution
+  valueType: object
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    EffectExecutionHints (harness, model, permissions) — internal hints
+    plugins may honor. Source: packages/sdk/src/tasks/types.ts (EffectExecutionHints).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-node
+attributes:
+  displayName: "defineTask: node"
+  name: node
+  valueType: object
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    NodeTaskOptions (entry / args / env / cwd / timeoutMs) for kind=node.
+    Source: packages/sdk/src/tasks/types.ts (NodeTaskOptions).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-breakpoint
+attributes:
+  displayName: "defineTask: breakpoint"
+  name: breakpoint
+  valueType: object
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    BreakpointTaskOptions (payload, confirmationRequired) for kind=breakpoint. Source:
+    packages/sdk/src/tasks/types.ts (BreakpointTaskOptions).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-sleep
+attributes:
+  displayName: "defineTask: sleep"
+  name: sleep
+  valueType: object
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    SleepTaskOptions (iso, targetEpochMs) for kind=sleep. Source:
+    packages/sdk/src/tasks/types.ts (SleepTaskOptions).
+---
+nodeKind: FrontmatterField
+id: frontmatter-field:task-schema-subprocess
+attributes:
+  displayName: "defineTask: subprocess"
+  name: subprocess
+  valueType: object
+  required: "no"
+  appliesTo: task-schema
+  description: |
+    SubprocessTaskOptions (processPath, exportName, prompt, harness, model,
+    inputSchema, outputSchema, etc.) for kind=subprocess. Source:
+    packages/sdk/src/tasks/types.ts (SubprocessTaskOptions).

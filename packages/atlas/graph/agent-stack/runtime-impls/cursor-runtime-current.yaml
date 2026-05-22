@@ -1,0 +1,97 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:cursor.runtime@current
+attributes:
+  displayName: Cursor Runtime (current)
+  agentVersionId: agentVersion:cursor:ge-0-0-0
+  subagentDispatchMechanism: none
+  subagentChildSessionPolicy: inline-no-child-session
+  subagentToolScopePolicy: inherit-parent
+  packageRef: source-ref:cursor-binary
+  builtInTools:
+  - tool-descriptor:read
+  - tool-descriptor:write
+  - tool-descriptor:edit
+  - tool-descriptor:bash
+  - tool-descriptor:grep
+  - tool-descriptor:web-search
+  toolRegistryDiscovery: static-bundled
+  hookSockets:
+  - hook-surface:cursor.pre-tool
+  - hook-surface:cursor.post-tool
+  - hook-surface:cursor.user-prompt-submit
+  - hook-surface:cursor.stop
+  - hook-surface:cursor.session-start
+  - hook-surface:cursor.session-end
+  internalSessionStateLocation: ~/.cursor/sessions/
+  sessionFileFormat: jsonl
+  sessionFilePathConvention: ~/.cursor/sessions/<session-id>.jsonl
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: platform-deferred
+  runtimeIdentity: api-key
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  - mcp-transport:http-sse
+  supportsStreaming: true
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:cursor
+    role: runtime
+  exposes:
+  - target: hook-surface:cursor.pre-tool
+  - target: hook-surface:cursor.post-tool
+  - target: hook-surface:cursor.user-prompt-submit
+  - target: hook-surface:cursor.stop
+  - target: hook-surface:cursor.session-start
+  - target: hook-surface:cursor.session-end
+  bundles:
+  - target: tool-descriptor:read
+  - target: tool-descriptor:write
+  - target: tool-descriptor:edit
+  - target: tool-descriptor:bash
+  - target: tool-descriptor:grep
+  - target: tool-descriptor:web-search
+  connects:
+  - target: mcp-transport:stdio
+  supports:
+  - target: capability:mcp-elicitation
+    versionRange: '>=0.40.0'
+    level: partial
+    notes: 'TODO: verify Cursor''s elicitation support level; as of cataloguing
+      Cursor''s MCP client speaks the 2025-03-26 baseline plus selective
+      2025-06-18 features. Marked partial pending confirmation from
+      https://docs.cursor.com/context/model-context-protocol
+      '
+  - target: capability:mcp-resource-links
+    versionRange: '>=0.40.0'
+    level: partial
+    notes: 'TODO: confirm Cursor''s handling of resource link payloads from MCP
+      tool results (introduced in MCP 2025-06-18). Marked partial pending
+      review of https://docs.cursor.com/context/model-context-protocol
+      '
+  - target: capability:mcp-stdio
+    versionRange: '*'
+    level: full
+    notes: 'Cursor''s MCP integration brokers stdio-transport servers configured
+      in the project or user MCP settings.
+      '
+  - target: capability:mcp-structured-tool-output
+    versionRange: '>=0.40.0'
+    level: partial
+    notes: 'TODO: confirm whether Cursor''s MCP client consumes
+      `structuredContent` payloads or only flattens them to text.
+      '
+  - target: capability:supports-mcp
+    versionRange: '>=0.40.0'
+    level: full
+    notes: 'Cursor connects MCP servers via stdio transport. Configured per-project
+      or globally.
+      '
+  has_env_var:
+  - target: env-var:cursor-config-dir
+
+
+  speaks:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:http-sse

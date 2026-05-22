@@ -1,0 +1,45 @@
+nodeKind: Provider
+id: provider:ollama
+attributes:
+  displayName: "Ollama"
+  vendor: "Ollama (community)"
+  versionRange: ">=0.1.0"
+  authMethods:
+    - api-key
+  authMethodNotes: |
+    Local-first server (default `http://localhost:11434`). No auth on the
+    bare local server; `api-key` is used when fronting Ollama via a proxy
+    (e.g. cloud Ollama deployments). The `api-key` enum value is selected
+    here as the closest auth-method match.
+  endpoints:
+    base: "http://localhost:11434"
+    chat: "http://localhost:11434/api/chat"
+    generate: "http://localhost:11434/api/generate"
+    embed: "http://localhost:11434/api/embed"
+    tags: "http://localhost:11434/api/tags"
+    show: "http://localhost:11434/api/show"
+  pricing: |
+    Free for local execution. Cloud-hosted Ollama deployments price
+    independently.
+  rateLimitSignalingProtocol: |
+    None on the local server. HTTP 5xx surfaces upstream model-runtime
+    errors. JSON error envelope: `{ "error": "..." }`.
+  dataResidencyOptions:
+    - on-prem
+  vendorFeatures: []
+  slaTier: "ollama-no-sla"
+  regions:
+    - on-prem
+edges:
+  realizes:
+    - target: layer:2-provider
+  serves:
+    - model:llama-3-3-70b-instruct@current
+    - model:gemma-2-27b@current
+  emits_message_type:
+    - protocol-message:ollama-chat-message
+    - protocol-message:ollama-chat-stream-chunk
+    - protocol-message:ollama-chat-stream-done
+    - protocol-message:ollama-generate-response
+    - protocol-message:ollama-generate-stream-chunk
+    - protocol-message:ollama-embed-response

@@ -9,44 +9,59 @@
 
 import { existsSync } from "node:fs";
 import {
-  createClaudeCodeContext,
-  createCodexContext,
-  createPiContext,
   composeBabysitSkillPrompt,
   composeProcessCreatePrompt,
   composeOrchestrationPrompt,
   composeBreakpointPrompt,
+  PART_STRATA_MAP,
+  composeByStrata,
+  detectExecutionContext,
+  deriveCapabilityFlags,
+  renderCapabilityProcessGuide,
+  processPathsForCapabilities,
 } from "../../prompts";
-import type { PromptContext } from "../../prompts";
+import type { PromptContext, StratumTaggedPart } from "../../prompts";
 import {
   resolveActiveProcessLibrary,
   getDefaultProcessLibrarySpec,
 } from "../../processLibrary/active";
-import { getAdapterByName } from "../../harness/registry";
+import {
+  createPromptContextForHarness,
+  getAdapterByName,
+  KNOWN_HARNESSES,
+} from "../../harness/registry";
+import {
+  detectCallerHarness,
+  detectCallerHarnessViaHooksMux,
+} from "../../harness/discovery";
 import { getSessionFilePath } from "../../session/parse";
+import {
+  createDefaultCliSetupSnippet,
+  createPromptContext,
+} from "../../prompts/contextShared";
+import { detectExistingRun, formatExistingRunBlock } from "./detectExistingRun";
 
 export interface InstructionsCommandArgs {
   subcommand: "babysit-skill" | "process-create" | "orchestrate" | "breakpoint-handling";
-  harness: string;
+  harness?: string;
   interactive: boolean | undefined;
   json: boolean;
+  showStrata?: boolean;
 }
 
-/**
- * Legacy fallback map — used only when an adapter does not implement
- * `getPromptContext()`.  New harnesses should add the method to their
- * adapter instead of extending this map.
- */
-const KNOWN_HARNESSES: Record<string, (overrides?: Partial<PromptContext>) => PromptContext> = {
-  "claude-code": createClaudeCodeContext,
-  "codex": createCodexContext,
-  "pi": createPiContext,
+type ResolvedInstructionsHarness = {
+  harness: string;
+  source: "explicit" | "caller" | "hooks-mux" | "fallback";
+  warnings: string[];
+  evidence: string[];
 };
 
 type ComposerEntry = {
   fn: (ctx: PromptContext) => string;
   promptType: string;
   partsIncluded: string[];
+  /** Tagged parts for strata-aware composition (GAP-PROMPT-001) */
+  strataParts: string[];
 };
 
 const COMPOSERS: Record<InstructionsCommandArgs["subcommand"], ComposerEntry> = {
@@ -55,11 +70,21 @@ const COMPOSERS: Record<InstructionsCommandArgs["subcommand"], ComposerEntry> = 
     promptType: "babysit-skill",
     partsIncluded: [
       "non-negotiables", "dependencies", "interview", "user-profile",
-      "process-creation", "intent-fidelity-checks", "run-creation",
+      "process-creation", "intent-fidelity-checks", "run-overlap-detection", "run-creation",
       "iteration", "effects", "breakpoint-handling", "results-posting",
       "loop-control", "completion-proof", "task-kinds", "task-examples",
       "quick-reference", "recovery", "process-guidelines", "critical-rules",
       "see-also",
+      "project-instructions",
+    ],
+    strataParts: [
+      "renderNonNegotiables", "renderDependencies", "renderInterview", "renderUserProfile",
+      "renderProcessCreation", "renderIntentFidelityChecks", "renderRunOverlapDetection",
+      "renderRunCreation", "renderIteration", "renderEffects", "renderBreakpointHandling",
+      "renderResultsPosting", "renderLoopControl", "renderCompletionProof",
+      "renderTaskKinds", "renderTaskExamples", "renderQuickReference", "renderRecovery",
+      "renderProcessGuidelines", "renderCriticalRules", "renderSeeAlso",
+      "renderProjectInstructions",
     ],
   },
   "process-create": {
@@ -68,50 +93,124 @@ const COMPOSERS: Record<InstructionsCommandArgs["subcommand"], ComposerEntry> = 
     partsIncluded: [
       "interview", "user-profile", "process-creation",
       "intent-fidelity-checks", "process-guidelines",
-      "task-kinds", "task-examples",
+      "parallel-phase-detection", "task-kinds", "task-examples",
+      "project-instructions",
+    ],
+    strataParts: [
+      "renderInterview", "renderUserProfile", "renderProcessCreation",
+      "renderIntentFidelityChecks", "renderProcessGuidelines",
+      "renderParallelPhaseDetection", "renderTaskKinds", "renderTaskExamples",
+      "renderProjectInstructions",
     ],
   },
   "orchestrate": {
     fn: composeOrchestrationPrompt,
     promptType: "orchestrate",
     partsIncluded: [
-      "run-creation", "iteration", "effects", "breakpoint-handling",
+      "run-overlap-detection", "run-creation", "iteration", "effects", "breakpoint-handling",
       "results-posting", "loop-control", "completion-proof",
       "quick-reference", "recovery", "critical-rules",
+    ],
+    strataParts: [
+      "renderRunOverlapDetection", "renderRunCreation", "renderIteration", "renderEffects",
+      "renderBreakpointHandling", "renderResultsPosting", "renderLoopControl",
+      "renderCompletionProof", "renderQuickReference", "renderRecovery", "renderCriticalRules",
     ],
   },
   "breakpoint-handling": {
     fn: composeBreakpointPrompt,
     promptType: "breakpoint-handling",
     partsIncluded: ["breakpoint-handling", "results-posting"],
+    strataParts: ["renderBreakpointHandling", "renderResultsPosting"],
   },
 };
 
 /**
  * Resolve a PromptContext factory by harness name.
- *
- * Prefers the adapter's own `getPromptContext()` method when available,
- * falling back to the legacy KNOWN_HARNESSES map for adapters that have
- * not yet been updated.  Returns undefined for completely unknown names.
  */
 function resolveContextFactory(
   harness: string,
 ): ((overrides?: Partial<PromptContext>) => PromptContext) | undefined {
-  // Try adapter-based resolution first
-  const adapter = getAdapterByName(harness);
-  if (adapter?.getPromptContext) {
-    return (overrides?: Partial<PromptContext>) => {
-      const base = adapter.getPromptContext!({ interactive: overrides?.interactive });
-      // Merge any additional overrides beyond interactive
-      if (overrides) {
-        return { ...base, ...overrides };
-      }
-      return base;
+  if (harness === "custom") {
+    return (overrides?: Partial<PromptContext>) =>
+      createPessimisticPromptContext(overrides);
+  }
+  if (!getAdapterByName(harness)?.getPromptContext) {
+    return undefined;
+  }
+  return (overrides?: Partial<PromptContext>) => {
+    const context = createPromptContextForHarness(harness, overrides);
+    if (!context) {
+      throw new Error(`Harness "${harness}" does not provide a prompt context.`);
+    }
+    return context;
+  };
+}
+
+function createPessimisticPromptContext(
+  overrides?: Partial<PromptContext>,
+): PromptContext {
+  return createPromptContext(
+    {
+      harness: "custom",
+      harnessLabel: "Custom Harness",
+      capabilities: ["task-tool", "breakpoint-routing"],
+      pluginRootVar: "",
+      loopControlTerm: "in-turn",
+      sessionBindingFlags: "",
+      hookDriven: false,
+      interactiveToolName: "",
+      sessionEnvVars: "`--session-id`, `AGENT_SESSION_ID`, or the PID-scoped session marker fallback",
+      resumeFlags: "",
+      cliSetupSnippet: createDefaultCliSetupSnippet(),
+      iterateFlags: "",
+      hasIntentFidelityChecks: false,
+      hasNonNegotiables: false,
+    },
+    overrides,
+  );
+}
+
+function resolveInstructionsHarness(
+  harness: string | undefined,
+): ResolvedInstructionsHarness {
+  if (harness) {
+    return {
+      harness,
+      source: "explicit",
+      warnings: [],
+      evidence: [],
     };
   }
 
-  // Fallback to legacy map
-  return KNOWN_HARNESSES[harness];
+  const caller = detectCallerHarness();
+  if (caller) {
+    return {
+      harness: caller.name,
+      source: "caller",
+      warnings: [],
+      evidence: caller.matchedEnvVars,
+    };
+  }
+
+  const hooksMuxCaller = detectCallerHarnessViaHooksMux();
+  if (hooksMuxCaller) {
+    return {
+      harness: hooksMuxCaller.name,
+      source: "hooks-mux",
+      warnings: [],
+      evidence: hooksMuxCaller.matchedEnvVars,
+    };
+  }
+
+  return {
+    harness: "custom",
+    source: "fallback",
+    warnings: [
+      "Host discovery failed for `instructions:*`; using the pessimistic custom-harness prompt context.",
+    ],
+    evidence: [],
+  };
 }
 
 /**
@@ -128,7 +227,7 @@ async function tryResolveProcessLibraryRoot(): Promise<{
     if (resolved.binding?.dir) {
       const defaultSpec = getDefaultProcessLibrarySpec();
       return {
-        processLibraryRoot: resolved.binding.dir,
+        processLibraryRoot: defaultSpec.processRoot,
         processLibraryReferenceRoot: defaultSpec.referenceRoot,
       };
     }
@@ -138,15 +237,6 @@ async function tryResolveProcessLibraryRoot(): Promise<{
   return {};
 }
 
-/**
- * Detect whether the session-start hook has actually run by checking for the
- * session state file it creates (`<stateDir>/<sessionId>.md`).
- *
- * Some adapters can resolve a session ID from env vars alone (e.g.
- * GEMINI_SESSION_ID, CODEX_SESSION_ID) without the hook ever firing.
- * The definitive signal is the state file — the hook writes it as a
- * side effect of `babysitter hook:run --hook-type session-start`.
- */
 function detectHooksActive(harness: string): boolean {
   const adapter = getAdapterByName(harness);
   if (!adapter) return false;
@@ -167,19 +257,20 @@ function detectHooksActive(harness: string): boolean {
 export async function handleInstructionsCommand(
   args: InstructionsCommandArgs,
 ): Promise<number> {
-  const factory = resolveContextFactory(args.harness);
+  const resolvedHarness = resolveInstructionsHarness(args.harness);
+  const factory = resolveContextFactory(resolvedHarness.harness);
   if (!factory) {
-    const known = Object.keys(KNOWN_HARNESSES).join(", ");
+    const known = KNOWN_HARNESSES.map((spec) => spec.name).join(", ");
     if (args.json) {
       console.log(
         JSON.stringify({
           error: "unknown_harness",
-          message: `Unknown harness "${args.harness}". Known harnesses: ${known}`,
+          message: `Unknown harness "${resolvedHarness.harness}". Known harnesses: ${known}`,
         }),
       );
     } else {
       console.error(
-        `[instructions] Unknown harness "${args.harness}". Known harnesses: ${known}`,
+        `[instructions] Unknown harness "${resolvedHarness.harness}". Known harnesses: ${known}`,
       );
     }
     return 1;
@@ -207,30 +298,55 @@ export async function handleInstructionsCommand(
   const libraryInfo = await tryResolveProcessLibraryRoot();
 
   // Detect whether hooks are actually active in this session.
-  // If the session-start hook never ran (no breadcrumb file), override
-  // hookDriven to false so the agent drives the loop in-turn.
-  const hooksActive = detectHooksActive(args.harness);
+  // hookDriven=false when: non-interactive mode, or session-start hook never ran.
+  // Non-interactive mode never has hooks — the agent must drive the loop in-turn.
+  const hooksActive = args.interactive !== false && detectHooksActive(resolvedHarness.harness);
   const hookOverride: Partial<PromptContext> = {};
   if (!hooksActive) {
     hookOverride.hookDriven = false;
   }
+
+  // Detect execution context (CI, trigger, branch, actor) and derive
+  // capability flags so the babysit skill can select context-appropriate
+  // library processes when dispatching (e.g. GitHub collaboration,
+  // scheduled reporting, local-dev relaxations).
+  const executionContext = detectExecutionContext();
+  const capabilityFlags = deriveCapabilityFlags(executionContext);
+  const existingRun = await detectExistingRun();
 
   const ctx = factory({
     interactive: args.interactive,
     ...libraryInfo,
     ...hookOverride,
   });
-  const content = composer.fn(ctx);
+
+  // GAP-PROMPT-001: Use strata-aware composition when --show-strata is set
+  let content: string;
+  if (args.showStrata) {
+    const taggedParts: StratumTaggedPart[] = composer.strataParts
+      .map(name => PART_STRATA_MAP[name])
+      .filter((p): p is StratumTaggedPart => p != null);
+    content = composeByStrata(taggedParts, ctx, { showStrata: true });
+  } else {
+    content = composer.fn(ctx);
+  }
 
   if (args.json) {
     console.log(
       JSON.stringify(
         {
-          harness: args.harness,
+          harness: resolvedHarness.harness,
+          harnessSource: resolvedHarness.source,
+          discoveryEvidence: resolvedHarness.evidence,
           interactive: args.interactive,
           promptType: composer.promptType,
           hookDriven: ctx.hookDriven,
           hooksDetected: hooksActive,
+          warnings: resolvedHarness.warnings,
+          executionContext,
+          capabilityFlags,
+          suggestedProcesses: processPathsForCapabilities(capabilityFlags),
+          existingRun: existingRun ?? null,
           content,
           partsIncluded: composer.partsIncluded,
         },
@@ -239,14 +355,26 @@ export async function handleInstructionsCommand(
       ),
     );
   } else {
-    if (!hooksActive && ctx.hookDriven !== false) {
-      // Context factory defaulted hookDriven to true, but we overrode it.
-      // This is a no-op because the override already happened, but it
-      // clarifies the JSON output. The text output is self-explanatory
-      // from the generated instructions.
-    }
-    console.log(content);
+    for (const warning of resolvedHarness.warnings) console.error(`[instructions] Warning: ${warning}`);
+    console.log(formatTextOutput(executionContext, capabilityFlags, existingRun, content));
   }
 
   return 0;
+}
+
+function formatTextOutput(executionContext: ReturnType<typeof detectExecutionContext>, capabilityFlags: ReturnType<typeof deriveCapabilityFlags>, existingRun: Awaited<ReturnType<typeof detectExistingRun>>, content: string): string {
+  const caps = Object.entries(capabilityFlags).filter(([, v]) => v).map(([k]) => k);
+  const header = [
+    '## Execution Context', '',
+    `- CI: \`${executionContext.ci}\``,
+    `- Trigger: \`${executionContext.trigger}\``,
+    executionContext.branch.ref ? `- Branch: \`${executionContext.branch.ref}\`` : undefined,
+    executionContext.repo ? `- Repo: \`${executionContext.repo.owner}/${executionContext.repo.name}\`` : undefined,
+    executionContext.actor ? `- Actor: \`${executionContext.actor.login}\`${executionContext.actor.isBot ? ' (bot)' : ''}` : undefined,
+    '', `Active context capabilities: ${caps.length > 0 ? caps.map(c => `\`${c}\``).join(', ') : '_(none)_'}`,
+    '', 'When selecting library processes to dispatch, prefer those whose triggers match the active capabilities above.', '', '---', '',
+  ].filter((l): l is string => l !== undefined).join('\n');
+  const guide = renderCapabilityProcessGuide(capabilityFlags);
+  const runBlock = existingRun ? formatExistingRunBlock(existingRun) : '';
+  return header + guide + runBlock + content;
 }

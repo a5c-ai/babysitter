@@ -1,0 +1,84 @@
+---
+nodeKind: Modality
+id: modality:text
+attributes:
+  modalityId: "text"
+  direction: "bidirectional"
+  label: "Text prompts and responses"
+  mediaType: "text/plain"
+  semanticCategory: "text"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-anthropic-claude-code"
+---
+nodeKind: Modality
+id: modality:image
+attributes:
+  modalityId: "image"
+  direction: "input"
+  label: "Image input"
+  mediaType: "image/*"
+  semanticCategory: "image"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+---
+nodeKind: Modality
+id: modality:hooks
+attributes:
+  modalityId: "hooks"
+  direction: "bidirectional"
+  label: "Lifecycle hooks"
+  mediaType: "text/plain"
+  semanticCategory: "hooks"
+  evidenceRefs:
+    - "repo-target-index"
+    - "web-gemini-hooks"
+---
+nodeKind: Modality
+id: modality:mcp
+attributes:
+  modalityId: "mcp"
+  direction: "bidirectional"
+  label: "Model Context Protocol"
+  mediaType: "text/plain"
+  semanticCategory: "mcp"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-github-copilot-agent"
+---
+nodeKind: Modality
+id: modality:commands
+attributes:
+  modalityId: "commands"
+  direction: "input"
+  label: "Slash commands and command surfaces"
+  mediaType: "text/plain"
+  semanticCategory: "commands"
+  evidenceRefs:
+    - "repo-target-claude"
+    - "repo-target-codex"
+    - "repo-target-cursor"
+    - "repo-target-copilot"
+---
+nodeKind: Modality
+id: modality:json
+attributes:
+  modalityId: "json"
+  direction: "bidirectional"
+  label: "Structured JSON payloads"
+  mediaType: "application/json"
+  semanticCategory: "json"
+  evidenceRefs:
+    - "repo-transport-mux-architecture"
+---
+nodeKind: Modality
+id: modality:stream-events
+attributes:
+  modalityId: "stream-events"
+  direction: "output"
+  label: "Streaming events"
+  mediaType: "text/plain"
+  semanticCategory: "stream-events"
+  evidenceRefs:
+    - "repo-transport-mux-readme"
+    - "repo-transport-mux-architecture"

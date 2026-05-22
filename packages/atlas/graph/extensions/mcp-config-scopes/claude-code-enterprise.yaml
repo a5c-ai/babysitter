@@ -1,0 +1,12 @@
+nodeKind: MCPConfigScope
+id: mcp-config-scope:claude-code-enterprise
+attributes:
+  displayName: "Enterprise-scoped MCP config"
+  scope: enterprise
+  priority: 50
+  editableBy: enterprise-admin
+  persistsTo: "/etc/claude-code/managed-mcp.json"
+  pluginSourced: false
+  description: |
+    Enterprise-administered MCP servers pushed via centralized policy.
+    End-users cannot disable or override locally.

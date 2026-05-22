@@ -1,0 +1,51 @@
+# Attribute patches for records whose canonical files use CRLF.
+# These products are developer tools, editors, CI systems, or system profilers
+# with no meaningful single target programming language for Tool→language coverage.
+---
+nodeKind: Tool
+id: tool:jenkins
+attributes:
+  patch: true
+  languageApplicability: neutral
+---
+nodeKind: Tool
+id: tool:vscode
+attributes:
+  patch: true
+  languageApplicability: neutral
+---
+nodeKind: Tool
+id: tool:jetbrains-idea
+attributes:
+  patch: true
+  languageApplicability: neutral
+---
+nodeKind: Tool
+id: tool:vim
+attributes:
+  patch: true
+  languageApplicability: neutral
+---
+nodeKind: Tool
+id: tool:neovim
+attributes:
+  patch: true
+  languageApplicability: neutral
+---
+nodeKind: Tool
+id: tool:emacs
+attributes:
+  patch: true
+  languageApplicability: neutral
+---
+nodeKind: Tool
+id: tool:helix
+attributes:
+  patch: true
+  languageApplicability: neutral
+---
+nodeKind: Tool
+id: tool:perf
+attributes:
+  patch: true
+  languageApplicability: neutral

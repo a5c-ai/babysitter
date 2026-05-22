@@ -1,0 +1,138 @@
+nodeKind: ModelVersion
+id: model:claude-opus-4-7@current
+attributes:
+  displayName: "Claude 4.7 Opus"
+  modelFamilyId: model-family:claude-opus-4
+  versionRange: '>=4.7.0 <4.8.0'
+  kind: chat
+  contextWindowTokens: 1000000
+  costPerMTokInput: 5.0
+  costPerMTokOutput: 25.0
+  supportsExtendedThinking: true
+  supportsAdaptiveThinking: true
+  thinkingEffortLevels:
+  - low
+  - medium
+  - high
+  supportsThinkingBudgetTokens: true
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-01-15'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-01-15'
+  knowledgeCutoffDate: '2025-08-01'
+  safetyTier: anthropic-asl-3
+  modelCardUrl: https://www.anthropic.com/claude/opus
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:claude-opus-4
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:claude-opus-4
+  supersedes:
+  - target: model:claude-opus-4-6@current
+  served_by:
+  - provider:anthropic
+  - provider:aws-bedrock
+  - provider:gcp-vertex
+  speaks:
+  - model-transport:anthropic-messages
+  supports:
+  - target: capability:adaptive-thinking
+    versionRange: '>=4.7.0 <5.0.0'
+    level: full
+    notes: 'Adaptive thinking introduced with Opus 4.7 — model autonomously
+      engages extended reasoning without an explicit caller budget.
+      '
+    evidenceSourceIds:
+    - evidence:anthropic-models-doc
+  - target: capability:supports-batch-api
+    versionRange: '>=4.7.0 <4.8.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:extended-thinking
+    versionRange: '>=4.7.0 <5.0.0'
+    level: full
+    notes: 'Opus 4.7 supports caller-controlled extended thinking with an
+      allocatable thinking-budget.
+      '
+    evidenceSourceIds:
+    - evidence:anthropic-models-doc
+  - target: capability:parallel-tool-calls
+    versionRange: '>=4.7.0 <4.8.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-prompt-caching
+    versionRange: '>=4.7.0 <5.0.0'
+    level: full
+    notes: 'Anthropic API exposes prompt caching for Claude 4.x models including
+      Opus 4.7.
+      '
+    evidenceSourceIds:
+    - evidence:anthropic-models-doc
+  - target: capability:streaming
+    versionRange: '>=4.7.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-doc
+  - target: capability:supports-text-streaming
+    versionRange: '>=4.7.0 <4.8.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-thinking-budget-tokens
+    versionRange: '>=4.7.0 <5.0.0'
+    level: full
+    notes: '`thinking.budget_tokens` is accepted; values above the model''s max
+      are clamped server-side, not rejected.
+      '
+    evidenceSourceIds:
+    - evidence:anthropic-api-thinking-2026-01
+  - target: capability:supports-thinking-streaming
+    versionRange: '>=4.7.0 <4.8.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-thinking
+    versionRange: '>=4.7.0 <5.0.0'
+    level: full
+    notes: 'Anthropic API exposes the `thinking` content block on Opus 4.7;
+      extended thinking is a first-class feature.
+      '
+    evidenceSourceIds:
+    - evidence:anthropic-api-thinking-2026-01
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=4.7.0 <4.8.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-tool-use
+    versionRange: '>=4.7.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-tool-use-2026
+  - target: capability:vision-input
+    versionRange: '>=4.7.0 <5.0.0'
+    level: full
+    notes: 'Opus 4.7 accepts image modality inputs per its modalities list.
+      '
+    evidenceSourceIds:
+    - evidence:anthropic-models-doc
+  supports_effort_level:
+  - target: effort-level:low
+  - target: effort-level:medium
+  - target: effort-level:high

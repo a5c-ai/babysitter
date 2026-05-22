@@ -1,0 +1,14 @@
+nodeKind: StackPart
+id: stack-part:metrics
+attributes:
+  displayName: "Metrics"
+  category: observability
+  description: |
+    Time-series metrics collection and alerting. Examples: Prometheus, Datadog, New Relic.
+  commonImplementations:
+    - tool:prometheus
+    - tool:datadog
+edges:
+  implemented_by:
+    - tool:prometheus
+    - tool:datadog

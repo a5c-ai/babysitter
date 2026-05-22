@@ -1,0 +1,58 @@
+{
+  "version": "v1",
+  "adapter": "gemini",
+  "description": "Gemini CLI native hook event payloads for compatibility regression testing",
+  "events": [
+    {
+      "nativeEventName": "SessionStart",
+      "stdin": {
+        "cwd": "/home/user/project",
+        "model": "gemini-2.5-pro",
+        "extensionPath": "/home/user/.gemini/extensions/babysitter",
+        "prompt": "Help me refactor the auth module"
+      },
+      "env": {
+        "PWD": "/home/user/project",
+        "GEMINI_SESSION_ID": "gemini-test-session-123"
+      },
+      "expected": {
+        "phase": "session.start",
+        "supportLevel": "native",
+        "adapter": "gemini"
+      }
+    },
+    {
+      "nativeEventName": "BeforeTool",
+      "stdin": {
+        "cwd": "/home/user/project",
+        "model": "gemini-2.5-pro",
+        "toolName": "write_file",
+        "toolInput": { "path": "src/config.ts", "content": "export const config = {}" },
+        "toolCallId": "tc_001"
+      },
+      "env": {},
+      "expected": {
+        "phase": "tool.before",
+        "supportLevel": "native",
+        "adapter": "gemini",
+        "payloadKeys": ["toolName", "toolInput", "toolCallId"]
+      }
+    },
+    {
+      "nativeEventName": "AfterAgent",
+      "stdin": {
+        "cwd": "/home/user/project",
+        "model": "gemini-2.5-pro",
+        "lastMessage": "I have completed the analysis.",
+        "reason": "completed"
+      },
+      "env": {},
+      "expected": {
+        "phase": "turn.after_agent",
+        "supportLevel": "native",
+        "adapter": "gemini",
+        "payloadKeys": ["lastMessage", "reason"]
+      }
+    }
+  ]
+}

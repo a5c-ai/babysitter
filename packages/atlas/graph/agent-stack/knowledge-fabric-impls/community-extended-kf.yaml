@@ -1,0 +1,90 @@
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:claude-sh.knowledge@current
+attributes:
+  displayName: "claude-sh Knowledge Fabric"
+  agentVersionId: agent-version:claude-sh@current
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:goose.knowledge@current
+attributes:
+  displayName: "Goose Knowledge Fabric"
+  agentVersionId: agent-version:goose@current
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:devin.knowledge@current
+attributes:
+  displayName: "Devin Knowledge Fabric"
+  agentVersionId: agent-version:devin@current
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:zed.knowledge@current
+attributes:
+  displayName: "Zed Knowledge Fabric"
+  agentVersionId: agent-version:zed@current
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:replit-agent.knowledge@current
+attributes:
+  displayName: "Replit Agent Knowledge Fabric"
+  agentVersionId: agent-version:replit-agent@current
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:bolt.knowledge@current
+attributes:
+  displayName: "Bolt Knowledge Fabric"
+  agentVersionId: agent-version:bolt@current
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:v0.knowledge@current
+attributes:
+  displayName: "v0 Knowledge Fabric"
+  agentVersionId: agent-version:v0@current
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:lovable.knowledge@current
+attributes:
+  displayName: "Lovable Knowledge Fabric"
+  agentVersionId: agent-version:lovable@current
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:openhands.knowledge@current
+attributes:
+  displayName: "OpenHands Knowledge Fabric"
+  agentVersionId: agent-version:openhands@current
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:warp.knowledge@current
+attributes:
+  displayName: "Warp Knowledge Fabric"
+  agentVersionId: agent-version:warp@current
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric

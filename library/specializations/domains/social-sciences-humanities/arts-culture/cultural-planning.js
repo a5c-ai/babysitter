@@ -21,6 +21,12 @@
  * }
  * @recommendedSkills SK-AC-010 (cultural-policy-analysis), SK-AC-013 (stakeholder-facilitation), SK-AC-015 (arts-advocacy-communication)
  * @recommendedAgents AG-AC-009 (cultural-policy-agent), AG-AC-002 (arts-administrator-agent)
+ *
+ * @graph
+ *   domains: [domain:arts-culture]
+ *   skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:data-analysis]
+ *   roles: [role:creative-director, role:design-lead]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

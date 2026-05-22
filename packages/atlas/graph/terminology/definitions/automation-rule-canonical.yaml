@@ -1,0 +1,18 @@
+nodeKind: Definition
+id: definition:automation-rule.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:automation-rule
+  text: |
+    A reactor rule that, on a trigger (timer cron expression or webhook
+    delivery), creates a canonical kanban issue from a fixed task template
+    and routes it onto a target board. AutomationRule sits between an
+    external signal (clock or HTTP delivery) and a `Run` / kanban issue:
+    it does NOT mutate the board directly — it always emits a canonical
+    issue which is then projected onto a derived board. Sourced from
+    packages/agent-mux/core/src/automation.ts (AutomationRule,
+    TimerAutomationTrigger, WebhookAutomationTrigger).
+  status: canonical
+edges:
+  defines:
+    - term:automation-rule

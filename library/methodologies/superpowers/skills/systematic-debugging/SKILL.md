@@ -1,22 +1,17 @@
 ---
 name: systematic-debugging
 description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes. Requires root cause investigation first.
----
-
-# Systematic Debugging
-
-## Overview
-
-Random fixes waste time and create new bugs. ALWAYS find root cause before attempting fixes.
-
-**Core principle:** No fixes without root cause investigation first.
-
-## The Four Phases
-
-1. **Root Cause Investigation** - Read errors, reproduce, check changes, gather evidence at component boundaries
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 2. **Pattern Analysis** - Find working examples, compare against references, identify differences
 3. **Hypothesis and Testing** - Form single hypothesis, test minimally, one variable at a time
 4. **Implementation** - Create failing test case, implement single fix, verify
+
+---
 
 ## When 3+ Fixes Fail
 

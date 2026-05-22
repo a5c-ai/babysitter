@@ -1,0 +1,19 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:blueprint-adr.scope
+attributes:
+  subjectId: blueprint:adr
+  inScope: |
+    Authoring an Architecture Decision Record from a problem statement —
+    context, options considered, decision, and consequences. Produces
+    a markdown ADR file under docs/adr/ with sequential numbering.
+  outOfScope: |
+    Implementation of the chosen option (delegated to system-design /
+    code-review), decision auditing / governance workflows, multi-
+    document architectural narratives (use a separate design-doc
+    blueprint), and post-decision monitoring.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - blueprint:adr

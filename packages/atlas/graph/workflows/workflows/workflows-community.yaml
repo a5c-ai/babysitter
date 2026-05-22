@@ -1,0 +1,166 @@
+---
+nodeKind: Workflow
+id: workflow:community-health-metrics-review
+attributes:
+  displayName: "Community Health Metrics Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews community platform health and engagement metrics to guide community
+    strategy -- analyzing monthly active users, daily active users, and
+    lurker-to-contributor ratios across community channels (forum, Discord,
+    Slack, GitHub Discussions), measuring response time distributions for
+    community questions and comparing staff vs peer responses, tracking
+    sentiment trends through automated and manual content analysis, evaluating
+    content creation rates (posts, replies, code samples, tutorials) by member
+    cohort, assessing new member activation rates from registration through
+    first meaningful contribution, reviewing community-sourced bug reports and
+    feature requests that translated into product changes, and benchmarking
+    community health indicators against comparable developer communities.
+    Produces monthly community health dashboard, engagement trend analysis, and
+    strategic recommendation brief. Excludes community platform development.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:community-team
+    - target: org-unit:developer-relations-team
+---
+nodeKind: Workflow
+id: workflow:community-moderation-cycle
+attributes:
+  displayName: "Community Moderation Cycle"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Operates the ongoing moderation workflow across community platforms --
+    reviewing flagged content against community guidelines with consistent
+    enforcement criteria, processing reported posts through severity-tiered
+    response protocols (warning, edit, removal, ban), managing appeal workflows
+    with documented decision rationale and escalation to community leadership,
+    monitoring automated moderation tool effectiveness including spam filters,
+    toxicity detectors, and link scanners, tracking moderation action volumes
+    and response times by platform and content type, identifying emerging policy
+    gaps where existing guidelines do not clearly address new behavior patterns,
+    coordinating with legal on content that raises intellectual property or
+    liability concerns, and maintaining moderation decision logs for
+    transparency reporting. Produces daily moderation queue summary, weekly
+    enforcement statistics, and quarterly policy gap analysis. Excludes
+    guideline authoring.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:community-team
+    - target: org-unit:developer-relations-team
+---
+nodeKind: Workflow
+id: workflow:community-event-planning
+attributes:
+  displayName: "Community Event Planning"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Plans and coordinates community events across virtual and in-person formats
+    -- identifying event opportunities aligned with community interests through
+    topic polling and engagement signal analysis, defining event formats
+    (meetups, hackathons, AMAs, workshops, conference talks) matched to
+    community maturity and size, coordinating speaker sourcing from internal
+    experts and community champions, managing event logistics including platform
+    setup, registration, promotion timelines, and day-of facilitation, creating
+    pre-event content and post-event recaps to maximize reach beyond live
+    attendees, tracking registration-to-attendance conversion and post-event
+    engagement lift, evaluating event ROI through attendee surveys, community
+    growth attribution, and content consumption metrics, and maintaining an
+    annual event calendar synchronized with product launches and industry
+    conferences. Produces event planning briefs, post-event reports, and annual
+    event calendar. Excludes venue procurement.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:planner
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:ai-knowledge-sharing
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:community-team
+    - target: org-unit:developer-relations-team
+    - target: org-unit:devrel
+---
+nodeKind: Workflow
+id: workflow:developer-community-content-cycle
+attributes:
+  displayName: "Developer Community Content Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Manages the creation and distribution of developer-focused community
+    content -- identifying high-demand topics through community question
+    analysis, search analytics, and trending technology signals, coordinating
+    content creation across tutorials, blog posts, code samples, video
+    walkthroughs, and newsletter editions, managing community contributor
+    submissions through editorial review and technical accuracy validation,
+    scheduling content publication across channels (blog, documentation, social,
+    newsletter, community forum) with appropriate cross-promotion, tracking
+    content performance through views, engagement, share rates, and downstream
+    community activity, maintaining a content backlog prioritized by community
+    impact and strategic alignment, repurposing high-performing content into
+    derivative formats, and curating community-generated content for
+    amplification. Produces editorial calendar, content performance dashboard,
+    and contributor acknowledgment reports. Excludes product documentation
+    maintenance.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:technical-writer
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:ai-knowledge-sharing
+  performed_by_org_unit:
+    - target: org-unit:community-team
+    - target: org-unit:developer-relations-team
+    - target: org-unit:devrel

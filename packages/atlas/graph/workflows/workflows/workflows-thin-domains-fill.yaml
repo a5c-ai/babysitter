@@ -1,0 +1,989 @@
+---
+nodeKind: Workflow
+id: workflow:genomic-data-pipeline-validation
+attributes:
+  displayName: "Genomic Data Pipeline Validation"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Validates genomic data processing pipelines end-to-end -- verifying
+    FASTQ quality filtering against Phred score thresholds, checking
+    alignment accuracy against reference genome assemblies
+    (GRCh38/T2T-CHM13), benchmarking variant calling sensitivity and
+    specificity on truth-set datasets (e.g., Genome in a Bottle),
+    auditing annotation databases for currency and completeness, testing
+    pipeline reproducibility across compute environments and software
+    versions, and confirming output formats meet VCF specification and
+    downstream analysis requirements. Produces validation report with
+    concordance metrics and pipeline certification status. Excludes
+    pipeline development and wet-lab sample preparation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:test-writer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:bioinformatics
+    - target: domain:scientific-computing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:hotel-revenue-management-review
+attributes:
+  displayName: "Hotel Revenue Management Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Reviews hotel revenue management strategy and pricing effectiveness
+    -- analyzing occupancy rate trends against competitive set
+    benchmarks, evaluating dynamic pricing algorithm performance across
+    room types and booking channels, reviewing demand forecast accuracy
+    by comparing predicted vs actual pick-up curves, auditing rate parity
+    compliance across OTA and direct booking channels, assessing group
+    and corporate rate discount depth against margin thresholds, and
+    modeling revenue impact of promotions, length-of-stay restrictions,
+    and overbooking policies. Produces RevPAR analysis, pricing
+    recommendation matrix, and channel performance scorecard. Excludes
+    rate negotiation execution.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-warehouse-modeling
+  applies_to_domain:
+    - target: domain:hospitality
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:behavioral-research-ethics-review
+attributes:
+  displayName: "Behavioral Research Ethics Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Reviews behavioral research protocols for ethical compliance and data
+    protection -- evaluating informed consent procedures and participant
+    debriefing adequacy, verifying IRB/ethics board approval
+    documentation and amendment tracking, assessing data anonymization
+    and re-identification risk for sensitive behavioral datasets,
+    auditing survey instruments and experimental designs for potential
+    participant harm or coercion, reviewing data retention and
+    destruction schedules against institutional policy and GDPR
+    requirements, and validating that algorithmic analysis of behavioral
+    data respects participant consent scope. Produces ethics compliance
+    assessment, risk classification report, and remediation requirements.
+    Excludes research design authoring.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:planner
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:data-governance
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:social-sciences
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:compliance-team
+    - target: org-unit:research-engineering
+    - target: org-unit:legal-team
+---
+nodeKind: Workflow
+id: workflow:livestock-monitoring-pipeline
+attributes:
+  displayName: "Livestock Monitoring Pipeline"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Operates the livestock health and welfare monitoring pipeline --
+    ingesting sensor telemetry from wearable devices (activity,
+    rumination, temperature), processing GPS and accelerometer data to
+    detect lameness and heat-stress indicators, running anomaly detection
+    models against herd behavioral baselines, correlating feed intake and
+    weight gain data with health alerts, generating early-warning
+    notifications for veterinary intervention, and reconciling
+    sensor-derived metrics with manual health check records. Produces
+    daily herd health dashboard, anomaly alert log, and welfare
+    compliance summary. Excludes veterinary treatment and feed
+    formulation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:ml-engineer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:sensor-fusion
+  applies_to_domain:
+    - target: domain:agriculture
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:data-platform-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:digital-preservation-audit
+attributes:
+  displayName: "Digital Preservation Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Audits digital preservation practices for cultural heritage
+    collections -- verifying fixity checks (checksums, PREMIS metadata)
+    on archived digital objects, assessing format obsolescence risk for
+    file types in the repository, reviewing migration and normalization
+    histories for fidelity loss, auditing access-control policies against
+    institutional preservation mandates, evaluating storage replication
+    and geographic distribution against NDSA Levels of Preservation, and
+    testing disaster recovery procedures for digital asset repositories.
+    Produces preservation health scorecard, format risk matrix, and
+    remediation priority queue. Excludes digitization capture work.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:security-reviewer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-governance
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:arts-culture
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:airworthiness-compliance-review
+attributes:
+  displayName: "Airworthiness Compliance Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Reviews aircraft airworthiness compliance against regulatory
+    requirements -- verifying maintenance records and AD (Airworthiness
+    Directive) compliance status, auditing component time-tracking
+    against life-limit thresholds, reviewing Service Bulletin
+    implementation status and deferral justifications, validating MEL
+    (Minimum Equipment List) dispatch decisions against MMEL criteria,
+    assessing Continued Airworthiness Management Organization (CAMO)
+    documentation completeness, and cross-referencing fleet reliability
+    data with ATA chapter fault trends. Produces airworthiness status
+    report, overdue-item register, and regulatory submission package.
+    Excludes maintenance execution.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:security-reviewer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:integration-testing
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:aviation
+    - target: domain:aerospace-engineering
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:dependency-audit
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:biocompatibility-testing-cycle
+attributes:
+  displayName: "Biocompatibility Testing Cycle"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Manages the biocompatibility testing lifecycle for medical devices
+    per ISO 10993 -- selecting appropriate biological evaluation
+    endpoints based on device contact type and duration, coordinating
+    cytotoxicity, sensitization, and irritation testing with accredited
+    labs, reviewing extractable and leachable study protocols against
+    material composition data, tracking testing status across the
+    biological evaluation matrix, evaluating historical biocompatibility
+    data for predicate device equivalence claims, and compiling
+    biological evaluation reports for regulatory submission. Produces
+    biological evaluation plan, test status tracker, and BER (Biological
+    Evaluation Report). Excludes device design changes.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:test-writer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:integration-testing
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:biomedical-engineering
+    - target: domain:healthcare
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:research-engineering
+---
+nodeKind: Workflow
+id: workflow:chemical-process-safety-review
+attributes:
+  displayName: "Chemical Process Safety Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews chemical process safety management across production
+    facilities -- conducting HAZOP (Hazard and Operability) study
+    follow-ups on action items, verifying Safety Instrumented System
+    (SIS) integrity testing records against SIL targets, auditing
+    Process Hazard Analysis documentation for completeness and currency,
+    reviewing Management of Change records for safety-critical
+    modifications, assessing pressure relief device inspection and
+    testing compliance, evaluating near-miss and incident investigation
+    findings for systemic root causes, and validating emergency response
+    procedure drill results. Produces process safety scorecard,
+    overdue-action register, and PSM compliance report. Excludes
+    engineering design work.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:chemical-engineering
+    - target: domain:industrial-engineering
+  triggers_responsibility:
+    - target: responsibility:respond-incidents
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:carbon-credit-verification
+attributes:
+  displayName: "Carbon Credit Verification"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Verifies carbon credit projects against registry standards and
+    additionality criteria -- reviewing project design documents against
+    Verra VCS or Gold Standard methodologies, validating baseline
+    emission scenarios and monitoring plans, auditing measurement data
+    quality from on-site sensors and remote sensing sources, assessing
+    permanence risk buffers and leakage accounting, cross-checking
+    issuance volumes against verified emission reductions, evaluating
+    co-benefit claims (biodiversity, community impact) against SDG
+    indicators, and reconciling credit retirement records with offset
+    claims. Produces verification opinion report, credit issuance
+    recommendation, and data quality assessment. Excludes carbon project
+    development.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:security-reviewer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:cleantech
+    - target: domain:sustainability-esg
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:esg-sustainability-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:construction-safety-inspection
+attributes:
+  displayName: "Construction Safety Inspection"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Conducts jobsite safety inspections across active construction
+    projects -- auditing personal protective equipment compliance and
+    fall protection systems, inspecting scaffolding and temporary
+    structure integrity, reviewing excavation and confined-space entry
+    permits, verifying crane and heavy equipment inspection certificates,
+    assessing housekeeping and material storage against fire prevention
+    standards, documenting OSHA recordable incident trends and near-miss
+    reports, evaluating subcontractor safety program compliance, and
+    tracking corrective action closure rates from prior inspections.
+    Produces weekly safety inspection report, violation log with photo
+    evidence, and corrective action tracker. Excludes safety training
+    delivery.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:security-reviewer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:incident-response
+  applies_to_domain:
+    - target: domain:construction
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:respond-incidents
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:facilities-team
+    - target: org-unit:compliance-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:scenario-planning-workshop
+attributes:
+  displayName: "Scenario Planning Workshop"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Facilitates structured scenario planning workshops for strategic
+    decision-making -- identifying critical uncertainties and driving
+    forces from environmental scanning, constructing internally
+    consistent scenario narratives along orthogonal axes of uncertainty,
+    quantifying scenario-specific impacts on key business metrics using
+    simulation models, stress-testing current strategy and investment
+    portfolio against each scenario, identifying robust options that
+    perform well across multiple futures, mapping early warning
+    indicators for each scenario trajectory, and synthesizing actionable
+    hedging and adaptation recommendations. Produces scenario set
+    documentation, impact heatmaps, strategic option evaluation matrix,
+    and indicator monitoring dashboard. Excludes strategy execution.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-warehouse-modeling
+  applies_to_domain:
+    - target: domain:decision-intelligence
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:business-intelligence-team
+---
+nodeKind: Workflow
+id: workflow:digital-assessment-integrity-audit
+attributes:
+  displayName: "Digital Assessment Integrity Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Audits the integrity and fairness of digital assessment platforms --
+    reviewing proctoring system effectiveness against known circumvention
+    techniques, analyzing item exposure rates and test security breach
+    indicators, evaluating adaptive testing algorithm fairness across
+    demographic subgroups using DIF (Differential Item Functioning)
+    analysis, auditing score computation and grade boundary accuracy,
+    verifying accommodation delivery for students with disabilities,
+    assessing data privacy compliance for biometric proctoring data, and
+    reviewing question bank refresh cadence against item exposure
+    thresholds. Produces assessment integrity scorecard, item security
+    risk report, and fairness analysis summary. Excludes test content
+    authoring.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:security-reviewer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:data-governance
+  applies_to_domain:
+    - target: domain:edtech
+    - target: domain:education
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:energy-trading-risk-review
+attributes:
+  displayName: "Energy Trading Risk Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Reviews energy trading positions and risk exposure -- analyzing
+    mark-to-market valuations across power, natural gas, and renewable
+    energy certificate portfolios, computing Value-at-Risk and
+    Conditional VaR metrics against board-approved risk limits,
+    evaluating counterparty credit exposure and collateral adequacy,
+    reviewing hedge effectiveness ratios for physical delivery positions,
+    assessing volumetric risk from weather-driven demand variability,
+    auditing trade capture system integrity and reconciliation breaks,
+    and stress-testing portfolio performance under extreme price
+    scenarios. Produces trading risk dashboard, limit utilization report,
+    and counterparty exposure summary. Excludes trade execution.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:energy
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:risk-management-team
+    - target: org-unit:analytics-team
+    - target: org-unit:finance-team
+---
+nodeKind: Workflow
+id: workflow:sustainable-fashion-audit
+attributes:
+  displayName: "Sustainable Fashion Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Audits fashion and apparel supply chain sustainability practices --
+    verifying raw material certifications (GOTS, OEKO-TEX, BCI) against
+    supplier declarations, assessing water and chemical usage against
+    ZDHC MRSL (Manufacturing Restricted Substances List) compliance,
+    evaluating circular design attributes (recyclability, mono-material
+    composition, durability testing), auditing factory working conditions
+    and wage compliance against BSCI or SA8000 standards, tracking
+    garment lifecycle carbon footprint from fiber-to-shelf using LCA
+    data, and reviewing packaging sustainability against plastic
+    reduction targets. Produces sustainability compliance scorecard,
+    supplier risk matrix, and remediation action plan. Excludes product
+    design decisions.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:data-governance
+  applies_to_domain:
+    - target: domain:fashion-apparel
+    - target: domain:sustainability-esg
+    - target: domain:supply-chain
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:dependency-audit
+  performed_by_org_unit:
+    - target: org-unit:esg-sustainability-team
+    - target: org-unit:procurement-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:mobile-workforce-safety-check
+attributes:
+  displayName: "Mobile Workforce Safety Check"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Monitors mobile workforce safety and lone worker compliance --
+    validating daily check-in completion rates from field technicians
+    against safety policy thresholds, reviewing GPS-based location
+    tracking for workers in hazardous or remote zones, verifying that Job
+    Safety Analysis forms are completed before high-risk task execution,
+    monitoring fatigue indicators from driving telemetry and shift
+    duration data, auditing tool and vehicle safety inspection
+    completion, triaging SOS alerts and welfare check escalations, and
+    tracking safety certification expiration for field staff. Produces
+    daily workforce safety dashboard, overdue check-in escalation list,
+    and certification expiry forecast. Excludes safety training delivery.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:incident-commander
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:incident-response
+  applies_to_domain:
+    - target: domain:field-services
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:respond-incidents
+    - target: responsibility:on-call-handoff
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:incident-response-team
+---
+nodeKind: Workflow
+id: workflow:fraud-detection-model-review
+attributes:
+  displayName: "Fraud Detection Model Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews fraud detection model performance and drift -- analyzing
+    precision-recall tradeoffs across transaction segments and payment
+    methods, evaluating model drift by comparing feature distribution
+    shifts between training and production data, auditing false positive
+    rates and their impact on customer friction and operational review
+    costs, reviewing rule engine threshold calibration against emerging
+    fraud typologies, assessing model fairness across demographic and
+    geographic cohorts to prevent discriminatory blocking, validating
+    challenger model A/B test results against champion performance, and
+    reviewing fraud loss ratios against industry benchmarks. Produces
+    model performance report, drift analysis, fairness audit summary, and
+    threshold tuning recommendations. Excludes model retraining
+    execution.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:fintech
+    - target: domain:security
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:ml-platform-team
+    - target: org-unit:risk-management-team
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:supply-chain-traceability-audit
+attributes:
+  displayName: "Supply Chain Traceability Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits food and beverage supply chain traceability from farm to fork
+    -- validating lot tracking and batch genealogy records across
+    production stages, testing one-up-one-back traceability drill
+    response times against FDA FSMA 204 requirements, reviewing supplier
+    GS1 barcode and GTIN compliance for serialized tracking, assessing
+    cold chain temperature monitoring data integrity across logistics
+    partners, auditing allergen cross-contact controls and label accuracy
+    against ingredient sourcing changes, evaluating recall simulation
+    exercise results and root-cause-to-notification latency, and
+    verifying blockchain or EPCIS-based provenance claims against
+    physical audit evidence. Produces traceability audit report, mock
+    recall performance scorecard, and data gap remediation plan. Excludes
+    supplier onboarding.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:security-reviewer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:data-lineage
+  applies_to_domain:
+    - target: domain:food-beverage
+    - target: domain:supply-chain
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:procurement-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:public-procurement-compliance
+attributes:
+  displayName: "Public Procurement Compliance"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Reviews government procurement actions for compliance with public
+    acquisition regulations -- verifying solicitation documents against
+    FAR/DFARS or equivalent national procurement codes, auditing
+    evaluation criteria consistency and source selection documentation,
+    reviewing small business and socio-economic set-aside compliance,
+    validating cost-reasonableness determinations and independent
+    government cost estimates, assessing conflict-of-interest
+    declarations from evaluation panel members, tracking contract
+    modification justifications and approval chains, and validating
+    protest-period documentation and debriefing records. Produces
+    procurement compliance checklist, deviation log, and corrective
+    action recommendations. Excludes contract award execution.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-governance
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:government
+    - target: domain:legal
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:dependency-audit
+  performed_by_org_unit:
+    - target: org-unit:compliance-team
+    - target: org-unit:legal-team
+    - target: org-unit:procurement-team
+---
+nodeKind: Workflow
+id: workflow:medical-data-interoperability-review
+attributes:
+  displayName: "Medical Data Interoperability Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews health data interoperability implementation against standards
+    and regulatory requirements -- validating FHIR R4 resource
+    conformance and CapabilityStatement accuracy, auditing HL7 v2
+    message parsing and transformation fidelity across integration
+    engines, assessing C-CDA document generation and consumption against
+    ONC certification criteria, reviewing SMART on FHIR app
+    authorization flows and scope management, evaluating terminology
+    service accuracy for SNOMED CT, LOINC, and RxNorm code mappings,
+    testing bulk data export compliance with CMS interoperability rules,
+    and auditing patient matching algorithm performance across data
+    sources. Produces interoperability conformance report, terminology
+    mapping accuracy scorecard, and integration gap analysis. Excludes
+    EHR system development.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:data-scientist
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:api-design
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:healthtech
+    - target: domain:healthcare
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:compliance-team
+    - target: org-unit:data-platform-team
+---
+nodeKind: Workflow
+id: workflow:actuarial-model-validation
+attributes:
+  displayName: "Actuarial Model Validation"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Validates actuarial models used for reserving, pricing, and capital
+    adequacy -- reviewing loss development triangle selections and trend
+    assumptions, testing Generalized Linear Model and gradient-boosted
+    model implementations against independent replications, evaluating
+    model discrimination and calibration metrics on holdout datasets,
+    assessing parameter stability across re-estimation windows, auditing
+    exposure base accuracy and premium-to-loss linkage, stress-testing
+    reserve adequacy under adverse scenario assumptions, reviewing ASOP
+    (Actuarial Standard of Practice) compliance in documentation, and
+    benchmarking model outputs against industry loss benchmarks. Produces
+    model validation report, backtesting results, and remediation
+    recommendations. Excludes model development and rate filing.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:ml-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:insurance
+    - target: domain:finance
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:risk-management-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:legal-ai-bias-audit
+attributes:
+  displayName: "Legal AI Bias Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Audits AI systems used in legal workflows for bias and fairness --
+    evaluating contract review model performance disparities across
+    document types, jurisdictions, and languages, testing e-discovery
+    relevance models for demographic and topic bias in responsive
+    document identification, assessing predictive coding consistency
+    between reviewers and model predictions, reviewing litigation outcome
+    prediction models for protected-class correlation leakage, auditing
+    legal research tool ranking algorithms for citation bias, evaluating
+    explainability and transparency of AI-assisted legal reasoning, and
+    verifying compliance with emerging AI governance regulations (EU AI
+    Act, state-level requirements). Produces bias audit report, fairness
+    metric dashboard, and mitigation recommendations. Excludes model
+    retraining.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:security-reviewer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:legaltech
+    - target: domain:legal
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:ml-platform-team
+    - target: org-unit:legal-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:maritime-environmental-compliance
+attributes:
+  displayName: "Maritime Environmental Compliance"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews fleet environmental compliance against IMO regulations and
+    port state requirements -- auditing MARPOL Annex VI SOx and NOx
+    emission records against Emission Control Area transit logs,
+    verifying ballast water management system treatment records and BWM
+    Convention compliance, reviewing Oil Record Book and Garbage Record
+    Book entries for completeness and accuracy, assessing Carbon
+    Intensity Indicator (CII) ratings and EEXI compliance status for
+    each vessel, evaluating scrubber washwater discharge monitoring data
+    against MEPC guidelines, auditing fuel oil changeover procedures for
+    SECA zone compliance, and tracking SEEMP (Ship Energy Efficiency
+    Management Plan) implementation effectiveness. Produces fleet
+    environmental compliance report, CII improvement roadmap, and
+    regulatory risk matrix. Excludes vessel retrofitting.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:maritime
+    - target: domain:environmental-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:compliance-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:content-rights-management-audit
+attributes:
+  displayName: "Content Rights Management Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits content rights and licensing compliance across publishing and
+    distribution channels -- reviewing rights metadata accuracy for
+    territorial, language, and format restrictions in the asset
+    management system, verifying royalty calculation logic against
+    contract terms for each rights holder, auditing digital distribution
+    platform compliance with geo-restriction and windowing requirements,
+    assessing DRM implementation effectiveness and circumvention incident
+    logs, reviewing sublicensing and syndication agreements for rights
+    chain integrity, tracking rights reversion dates and renewal option
+    deadlines, and reconciling usage reporting from distribution partners
+    against internal analytics. Produces rights compliance audit report,
+    royalty reconciliation summary, and expiring-rights forecast.
+    Excludes rights acquisition negotiation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-governance
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:media-publishing
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:legal-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:environmental-remediation-planning
+attributes:
+  displayName: "Environmental Remediation Planning"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Plans and reviews environmental remediation activities for mine sites
+    -- assessing contamination characterization data from soil,
+    groundwater, and surface water sampling programs, evaluating
+    remediation technology feasibility studies for contaminant-specific
+    effectiveness, reviewing mine closure and reclamation plans against
+    regulatory bond requirements, modeling contaminant transport and fate
+    under proposed remediation scenarios, assessing progressive
+    rehabilitation milestone achievement against approved mine plans,
+    auditing acid mine drainage treatment system performance data, and
+    reconciling rehabilitation cost estimates against financial assurance
+    provisions. Produces remediation feasibility assessment, closure plan
+    progress report, and financial assurance adequacy review. Excludes
+    remediation construction work.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:mining
+    - target: domain:environmental-engineering
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:donor-stewardship-cycle
+attributes:
+  displayName: "Donor Stewardship Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Manages the donor stewardship lifecycle for nonprofit fundraising --
+    segmenting donor base by giving level, recency, and engagement
+    score, generating personalized impact reports showing how donations
+    were deployed against program outcomes, tracking stewardship
+    touchpoint completion (thank-you calls, recognition events, site
+    visits) against donor-tier stewardship plans, analyzing donor
+    retention and upgrade rates by acquisition channel and giving
+    program, reviewing planned giving pipeline and pledge payment
+    schedules, evaluating major-gift cultivation stage progression
+    against moves management targets, and producing board-ready
+    fundraising performance summaries. Produces donor stewardship
+    dashboard, retention analysis report, and cultivation pipeline
+    review. Excludes gift solicitation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-warehouse-modeling
+  applies_to_domain:
+    - target: domain:nonprofit
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:analytics-team

@@ -9,6 +9,11 @@ expertise:
   - Documentation curation
   - Knowledge organization
   - Source validation
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:ai-agent-development]
+  topics: [topic:knowledge-management, topic:developer-experience]
+  roles: [role:platform-engineer, role:tech-lead]
 ---
 
 # Specialization Curator Agent

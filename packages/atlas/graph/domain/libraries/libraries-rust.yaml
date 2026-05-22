@@ -1,0 +1,47 @@
+---
+nodeKind: Library
+id: library:reqwest
+attributes:
+  displayName: "reqwest"
+  belongsToLanguageId: language:rust
+  description: |
+    Ergonomic Rust HTTP client built on hyper with async and blocking
+    APIs, JSON helpers, and TLS via rustls or native-tls.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:hyper
+---
+nodeKind: Library
+id: library:sea-orm
+attributes:
+  displayName: "SeaORM"
+  belongsToLanguageId: language:rust
+  description: |
+    Async, dynamic ORM for Rust built on SQLx with relational mapping,
+    migrations, and a query builder.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:diesel-rs
+    - library:sqlx-rust
+---
+nodeKind: Library
+id: library:clap
+attributes:
+  displayName: "clap"
+  belongsToLanguageId: language:rust
+  description: |
+    Rust CLI argument parser with derive and builder APIs, validation,
+    subcommands, and shell completion generation.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:cli-design

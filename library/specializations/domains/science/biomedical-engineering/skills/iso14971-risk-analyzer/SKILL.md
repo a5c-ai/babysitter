@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Risk Management
   skill-id: BME-SK-008
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:compliance-automation]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # ISO 14971 Risk Analyzer Skill

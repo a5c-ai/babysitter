@@ -19,6 +19,11 @@
  *
  * @inputs { projectDir: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:ai-agent-development, skill-area:orchestration-loop]
+ *   topics: [topic:developer-experience, topic:integrations]
+ *   roles: [role:platform-engineer]
  */
 
 import {
@@ -33,6 +38,8 @@ import {
   writePluginTestsTask,
   setupCiCdTask,
   createSyncScriptTask,
+  validateAssimilationTask,
+  fixValidationFailuresTask,
   verifyAssimilationTask,
   refineAssimilationTask,
 } from './shared-assimilation.js';
@@ -87,7 +94,7 @@ export async function process(inputs, ctx) {
   //      --sandbox enabled|disabled, --approve-mcps, --api-key, --trust.
   //   7. Session model: Cursor has UUID-based session IDs, session listing
   //      (agent ls), session resume (--resume/--continue). No auto-set env var
-  //      for session ID detection — BABYSITTER_SESSION_ID used as cross-harness fallback if set externally.
+  //      for session ID detection — AGENT_SESSION_ID used as cross-harness fallback if set externally.
   //   8. Plugin manifest and marketplace — verify from official docs:
   //      .cursor-plugin/plugin.json manifest format (skills/hooks as path
   //      strings not arrays/objects, no contextFileName field), Cursor
@@ -293,7 +300,21 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...syncScript.filesCreated, ...syncScript.filesModified);
 
   // ==========================================================================
-  // PHASE 7: VERIFY + CONVERGE
+  // PHASE 7: VALIDATE
+  // ==========================================================================
+
+  ctx.log('phase:validate', 'Running concrete validation checks for the assimilation');
+
+  let validation = await ctx.task(validateAssimilationTask, {
+    projectDir,
+    harnessName,
+    adapterName,
+    pluginDir,
+    integrationFiles,
+  });
+
+  // ==========================================================================
+  // PHASE 8: VERIFY + CONVERGE
   // ==========================================================================
 
   ctx.log('phase:verify', 'Scoring assimilation quality');
@@ -304,25 +325,51 @@ export async function process(inputs, ctx) {
     targetQuality,
     integrationFiles,
     research,
+    validation,
   });
 
   finalQuality = verification.qualityScore;
   iterations = 1;
 
-  while (finalQuality < targetQuality && iterations < maxIterations) {
+  while ((!validation.passed || finalQuality < targetQuality) && iterations < maxIterations) {
     iterations++;
-    ctx.log('phase:converge', `Refinement iteration ${iterations}`);
+    ctx.log('phase:converge', `Validation/refinement iteration ${iterations}`);
 
-    const refinement = await ctx.task(refineAssimilationTask, {
+    if (!validation.passed) {
+      ctx.log('phase:fix-validation', `Fixing validation failures for iteration ${iterations}`);
+
+      const validationFixes = await ctx.task(fixValidationFailuresTask, {
+        projectDir,
+        harnessName,
+        adapterName,
+        pluginDir,
+        validation,
+        integrationFiles,
+      });
+
+      integrationFiles.push(...validationFixes.filesCreated, ...validationFixes.filesModified);
+    }
+
+    if (finalQuality < targetQuality) {
+      const refinement = await ctx.task(refineAssimilationTask, {
+        projectDir,
+        harnessName,
+        iteration: iterations,
+        issues: verification.issues,
+        recommendations: verification.recommendations,
+        integrationFiles,
+      });
+
+      integrationFiles.push(...refinement.filesCreated, ...refinement.filesModified);
+    }
+
+    validation = await ctx.task(validateAssimilationTask, {
       projectDir,
       harnessName,
-      iteration: iterations,
-      issues: verification.issues,
-      recommendations: verification.recommendations,
+      adapterName,
+      pluginDir,
       integrationFiles,
     });
-
-    integrationFiles.push(...refinement.filesCreated, ...refinement.filesModified);
 
     verification = await ctx.task(verifyAssimilationTask, {
       projectDir,
@@ -330,14 +377,15 @@ export async function process(inputs, ctx) {
       targetQuality,
       integrationFiles,
       research,
+      validation,
     });
 
     finalQuality = verification.qualityScore;
-    ctx.log('phase:converge:score', `Quality: ${finalQuality}/${targetQuality}`);
+    ctx.log('phase:converge:score', `Quality: ${finalQuality}/${targetQuality}; validation: ${validation.passed ? 'passed' : 'failed'}`);
   }
 
   return {
-    success: finalQuality >= targetQuality,
+    success: validation.passed && finalQuality >= targetQuality,
     integrationFiles: [...new Set(integrationFiles)],
     finalQuality,
     iterations,

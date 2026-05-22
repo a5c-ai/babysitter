@@ -16,6 +16,12 @@
  * @references
  * - GPU Gems 3 - Parallel Prefix Sum: https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing
  * - Optimizing Parallel Reduction in CUDA: https://developer.download.nvidia.com/assets/cuda/files/reduction.pdf
+ * @graph
+ *   domains: [domain:scientific-computing]
+ *   specializations: [specialization:gpu-programming]
+ *   skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders]
+ *   roles: [role:computational-scientist, role:ml-engineer]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

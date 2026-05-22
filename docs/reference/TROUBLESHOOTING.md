@@ -28,10 +28,8 @@ Run these commands first to get an overview of your setup:
 
 ```bash
 # Check installation status
-bash plugins/babysitter/scripts/verify-install.sh
 
 # Check runtime health
-bash plugins/babysitter/scripts/health-check.sh --verbose
 
 # Check SDK CLI version
 npx -y @a5c-ai/babysitter-sdk@latest --version
@@ -156,7 +154,7 @@ $CLI run:iterate <runId> --json --iteration <n>
 
 ```bash
 ls -la .a5c/hooks/<hook-name>/
-ls -la plugins/babysitter/hooks/<hook-name>/
+ls -la plugins/babysitter-unified/hooks/<hook-name>.sh
 ```
 
 Hooks must have the executable bit set (`-rwxr-xr-x`).
@@ -166,7 +164,7 @@ Hooks must have the executable bit set (`-rwxr-xr-x`).
 Hooks are discovered in this priority order:
 1. `.a5c/hooks/<hook-name>/` (per-repo, highest priority)
 2. `~/.config/babysitter/hooks/<hook-name>/` (per-user)
-3. `plugins/babysitter/hooks/<hook-name>/` (plugin, lowest priority)
+3. `plugins/babysitter-unified/hooks/<hook-name>.sh` (maintained plugin source)
 
 **Step 3: Test hook manually**
 
@@ -178,14 +176,14 @@ echo '{"runId":"test-123","status":"completed"}' | .a5c/hooks/on-run-complete/my
 **Step 4: Check hook dispatcher**
 
 ```bash
-# Test the generic dispatcher
-echo '{"runId":"test-123"}' | plugins/babysitter/hooks/hook-dispatcher.sh on-run-start
+# Test the maintained plugin hook entrypoint
+echo '{"session_id":"test-123"}' | plugins/babysitter-unified/hooks/session-start.sh
 ```
 
 **Step 5: Check hook registration (for Claude Code hooks)**
 
 ```bash
-cat plugins/babysitter/hooks/hooks.json | jq '.'
+cat plugins/babysitter-unified/plugin.json | jq '.hooks'
 ```
 
 ### Solution
@@ -194,7 +192,7 @@ cat plugins/babysitter/hooks/hooks.json | jq '.'
 
 ```bash
 chmod +x .a5c/hooks/<hook-name>/*.sh
-chmod +x plugins/babysitter/hooks/<hook-name>/*.sh
+chmod +x plugins/babysitter-unified/hooks/*.sh
 ```
 
 **Fix hook script errors:**
@@ -381,10 +379,10 @@ $CLI run:create \
 
 ```bash
 # State files are stored per session
-ls -la plugins/babysitter/skills/babysit/state/
+ls -la ~/.a5c/state/
 
 # View state file contents
-cat plugins/babysitter/skills/babysit/state/<session-id>.md
+cat ~/.a5c/state/<session-id>.md
 ```
 
 **Step 2: Check stop hook logs**
@@ -398,14 +396,14 @@ cat /tmp/babysitter-stop-hook.log
 The session ID is set by the SessionStart hook. Check if it was persisted:
 
 ```bash
-# Check if BABYSITTER_SESSION_ID is set
-echo "$BABYSITTER_SESSION_ID"
+# Check if AGENT_SESSION_ID is set
+echo "$AGENT_SESSION_ID"
 ```
 
 **Step 4: Check hook registration**
 
 ```bash
-cat plugins/babysitter/hooks/hooks.json | jq '.hooks'
+cat plugins/babysitter-unified/plugin.json | jq '.hooks'
 ```
 
 Should include both `SessionStart` and `Stop` hooks.
@@ -414,7 +412,7 @@ Should include both `SessionStart` and `Stop` hooks.
 
 ```bash
 echo '{"session_id":"test-123","transcript_path":"/tmp/test.jsonl"}' | \
-  plugins/babysitter/hooks/babysitter-stop-hook.sh
+  plugins/babysitter-unified/hooks/stop.sh
 ```
 
 ### Solution
@@ -423,25 +421,25 @@ echo '{"session_id":"test-123","transcript_path":"/tmp/test.jsonl"}' | \
 
 If the state file is missing, the setup script may have failed:
 
-1. Check that `BABYSITTER_SESSION_ID` is available:
+1. Check that `AGENT_SESSION_ID` is available:
    ```bash
-   echo "$BABYSITTER_SESSION_ID"
+   echo "$AGENT_SESSION_ID"
    ```
 2. If not set, the SessionStart hook may have failed
 3. Check hook registration in `hooks.json`
 
 **Session ID not persisted:**
 
-Babysitter first looks for `BABYSITTER_SESSION_ID`. If that is absent, the
+Babysitter first looks for `AGENT_SESSION_ID`. If that is absent, the
 SessionStart hook can persist it through `CLAUDE_ENV_FILE` as a fallback.
 Check:
 
-1. whether `BABYSITTER_SESSION_ID` is already present in the current Claude session
+1. whether `AGENT_SESSION_ID` is already present in the current Claude session
 2. if not, whether `CLAUDE_ENV_FILE` is set
 3. whether that file is writable
 4. whether the hook is executable:
    ```bash
-   chmod +x plugins/babysitter/hooks/babysitter-session-start-hook.sh
+   chmod +x plugins/babysitter-unified/hooks/session-start.sh
    ```
 
 **Iteration limit reached too quickly:**
@@ -450,7 +448,7 @@ If the loop stops due to "iteration too fast":
 
 ```bash
 # Check the stop reason in logs
-grep "iteration_too_fast" /tmp/babysitter-stop-hook.log
+grep "max_iterations_reached\|completion_proof_matched" /tmp/babysitter-stop-hook.log
 ```
 
 This protection triggers if iterations average under 15 seconds. Ensure your work takes meaningful time.
@@ -471,8 +469,13 @@ The completion promise must match exactly:
 If the state file has invalid YAML:
 
 ```bash
-# Delete the state file to stop the loop
-rm plugins/babysitter/skills/babysit/state/<session-id>.md
+# Mark the state file inactive to stop the loop
+python - <<'PY'
+from pathlib import Path
+p = Path.home() / '.a5c' / 'state' / '<session-id>.md'
+s = p.read_text()
+p.write_text(s.replace('active: true', 'active: false', 1))
+PY
 ```
 
 Then start fresh with `/babysitter:babysit`.
@@ -490,7 +493,6 @@ Then start fresh with `/babysitter:babysit`.
 
 ### Symptoms
 
-- `verify-install.sh` reports failures
 - "Command not found" errors for babysitter CLI
 - Missing dependencies (Node.js, npm, jq)
 - Plugin structure errors
@@ -500,7 +502,6 @@ Then start fresh with `/babysitter:babysit`.
 **Step 1: Run verification script**
 
 ```bash
-bash plugins/babysitter/scripts/verify-install.sh --json
 ```
 
 **Step 2: Check individual dependencies**
@@ -528,8 +529,8 @@ npx -y @a5c-ai/babysitter-sdk@latest --version
 **Step 4: Check plugin structure**
 
 ```bash
-ls -la plugins/babysitter/
-# Should contain: hooks/, skills/, commands/, plugin.json, README.md
+ls -la plugins/babysitter-unified/
+# Should contain: hooks/, skills/, per-harness/, plugin.json, versions.json
 ```
 
 ### Solution
@@ -583,7 +584,8 @@ If directories are missing, re-clone the plugin:
 
 ```bash
 git clone https://github.com/a5c-ai/babysitter.git /tmp/babysitter-fresh
-cp -r /tmp/babysitter-fresh/plugins/babysitter/* plugins/babysitter/
+npm --prefix /tmp/babysitter-fresh install
+npm --prefix /tmp/babysitter-fresh run generate:plugins
 ```
 
 **Clear npx cache:**
@@ -601,7 +603,6 @@ npx -y @a5c-ai/babysitter-sdk@latest --version
 
 - Use a Node.js version manager (nvm, fnm)
 - Pin SDK version in your project (optional)
-- Run `verify-install.sh` after updates
 - Keep the plugin updated with git pull
 
 ---
@@ -620,7 +621,7 @@ npx -y @a5c-ai/babysitter-sdk@latest --version
 **Step 1: Check hook permissions**
 
 ```bash
-ls -la plugins/babysitter/hooks/**/*.sh
+ls -la plugins/babysitter-unified/hooks/*.sh
 ls -la .a5c/hooks/**/*.sh
 ```
 
@@ -633,10 +634,10 @@ Hooks should have execute permission (`-rwxr-xr-x` or at least `-rwx------`).
 ls -la .a5c/runs/
 
 # State directory
-ls -la plugins/babysitter/skills/babysit/state/
+ls -la ~/.a5c/state/
 
 # Plugin directory
-ls -la plugins/babysitter/
+ls -la plugins/babysitter-unified/
 ```
 
 **Step 3: Check file ownership**
@@ -654,7 +655,7 @@ Ensure the current user owns the directories.
 touch .a5c/runs/.write-test && rm .a5c/runs/.write-test
 
 # Test state directory
-touch plugins/babysitter/skills/babysit/state/.write-test && rm plugins/babysitter/skills/babysit/state/.write-test
+touch ~/.a5c/state/.write-test && rm ~/.a5c/state/.write-test
 ```
 
 ### Solution
@@ -663,8 +664,7 @@ touch plugins/babysitter/skills/babysit/state/.write-test && rm plugins/babysitt
 
 ```bash
 # Make all hooks executable
-chmod +x plugins/babysitter/hooks/**/*.sh
-chmod +x plugins/babysitter/skills/babysit/scripts/*.sh
+chmod +x plugins/babysitter-unified/hooks/*.sh
 chmod +x .a5c/hooks/**/*.sh
 ```
 
@@ -676,11 +676,11 @@ chmod 755 .a5c
 chmod 755 .a5c/runs
 
 # Fix state directory
-chmod 755 plugins/babysitter/skills/babysit/state
+chmod 755 ~/.a5c/state
 
 # Create state directory if missing
-mkdir -p plugins/babysitter/skills/babysit/state
-chmod 755 plugins/babysitter/skills/babysit/state
+mkdir -p ~/.a5c/state
+chmod 755 ~/.a5c/state
 ```
 
 **Fix ownership:**
@@ -688,7 +688,7 @@ chmod 755 plugins/babysitter/skills/babysit/state
 ```bash
 # Change ownership to current user
 sudo chown -R $(whoami) .a5c/
-sudo chown -R $(whoami) plugins/babysitter/
+sudo chown -R $(whoami) plugins/babysitter-unified/
 ```
 
 **SELinux/AppArmor issues (Linux):**
@@ -710,7 +710,7 @@ On Windows (Git Bash/WSL):
 ```bash
 # Git Bash may not preserve execute bits
 # Mark hooks as executable in git
-git update-index --chmod=+x plugins/babysitter/hooks/**/*.sh
+git update-index --chmod=+x plugins/babysitter-unified/hooks/*.sh
 ```
 
 ### Prevention
@@ -730,7 +730,6 @@ git update-index --chmod=+x plugins/babysitter/hooks/**/*.sh
 
 A: Run the verification script:
 ```bash
-bash plugins/babysitter/scripts/verify-install.sh
 ```
 
 **Q: What Node.js version is required?**
@@ -754,7 +753,12 @@ A: You can:
 1. Stop the iteration loop (Ctrl+C if running in terminal)
 2. Delete the session state file for in-session loops:
    ```bash
-   rm plugins/babysitter/skills/babysit/state/<session-id>.md
+   python - <<'PY'
+from pathlib import Path
+p = Path.home() / '.a5c' / 'state' / '<session-id>.md'
+s = p.read_text()
+p.write_text(s.replace('active: true', 'active: false', 1))
+PY
    ```
 
 **Q: How do I resume a failed run?**
@@ -773,7 +777,7 @@ $CLI run:events <runId> --limit 100 --json | jq '.events'
 
 **Q: Can I run multiple orchestrations in parallel?**
 
-A: Yes. Each run has its own directory and state. For in-session loops, each Claude Code session has isolated state via `BABYSITTER_SESSION_ID`.
+A: Yes. Each run has its own directory and state. For in-session loops, each Claude Code session has isolated state via `AGENT_SESSION_ID`.
 
 ### Hooks
 
@@ -809,19 +813,24 @@ A:
 A:
 1. Use `--max-iterations` to set a limit
 2. Output the completion proof: `<promise>SECRET</promise>`
-3. Delete the state file:
+3. Mark the state file inactive:
    ```bash
-   rm plugins/babysitter/skills/babysit/state/<session-id>.md
+   python - <<'PY'
+from pathlib import Path
+p = Path.home() / '.a5c' / 'state' / '<session-id>.md'
+s = p.read_text()
+p.write_text(s.replace('active: true', 'active: false', 1))
+PY
    ```
 
 **Q: Where is the session state stored?**
 
-A: `plugins/babysitter/skills/babysit/state/${BABYSITTER_SESSION_ID}.md`
+A: `~/.a5c/state/${AGENT_SESSION_ID}.md`
 
 **Q: What happens if I close Claude Code during a loop?**
 
 A: The state file remains. When you restart, the loop will not resume automatically. You can:
-- Delete the state file to clear it
+- Mark the state file inactive to clear hook blocking while retaining recovery context
 - Start a new loop with `/babysitter:babysit`
 
 ### Troubleshooting Commands
@@ -830,7 +839,6 @@ A: The state file remains. When you restart, the loop will not resume automatica
 
 A: The health check provides a comprehensive overview:
 ```bash
-bash plugins/babysitter/scripts/health-check.sh --verbose
 ```
 
 **Q: How do I get verbose output from the CLI?**
@@ -853,10 +861,10 @@ $CLI task:list <runId> --pending --json | jq '.tasks'
 
 ### Documentation
 
-- **Plugin Specification:** `plugins/babysitter/BABYSITTER_PLUGIN_SPECIFICATION.md`
-- **Hooks Guide:** `plugins/babysitter/skills/babysit/reference/HOOKS.md`
+- **Plugin Specification:** `plugins/babysitter-unified/plugin.json`
+- **Hooks Guide:** `plugins/babysitter-unified/skills/babysit/SKILL.md`
 - **SDK Reference:** `packages/sdk/sdk.md`
-- **In-Session Loops:** `plugins/babysitter/IN_SESSION_LOOP_MECHANISM.md`
+- **In-Session Loops:** `packages/sdk/src/cli/commands/instructions.ts`
 
 ### CLI Help
 
@@ -872,12 +880,10 @@ When reporting issues, collect:
 
 1. **System info:**
    ```bash
-   bash plugins/babysitter/scripts/verify-install.sh --json
    ```
 
 2. **Health check:**
    ```bash
-   bash plugins/babysitter/scripts/health-check.sh --json
    ```
 
 3. **Run status (if applicable):**
@@ -907,3 +913,7 @@ When reporting issues, collect:
 - Version: 1.0.0
 - Component: Babysitter Plugin Troubleshooting Guide
 - Status: Production
+
+
+
+

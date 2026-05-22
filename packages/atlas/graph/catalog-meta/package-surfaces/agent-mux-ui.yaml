@@ -1,0 +1,17 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-mux-ui
+attributes:
+  packageId: "@a5c-ai/agent-mux-ui"
+  packageName: "@a5c-ai/agent-mux-ui"
+  workspacePath: packages/agent-mux/ui
+  moduleType: typescript
+  surfaceKinds:
+    - ui-shared
+    - react-component-library
+  sourceOfTruthRole: application
+  publishedTo: npm
+  versionPolicy: semver
+  # Source: packages/agent-mux/ui/package.json (name, version 0.4.9)
+edges:
+  references_path:
+    - target: path:agent-mux-ui

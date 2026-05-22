@@ -13,6 +13,10 @@ metadata:
   domain: business
   category: Stakeholder Communications
   skill-id: SK-014
+graph:
+  domains: [domain:public-relations]
+  skillAreas: [skill-area:competitive-intelligence, skill-area:market-research, skill-area:brand-strategy]
+  roles: [role:marketing-strategist, role:content-strategist, role:legal-advisor]
 ---
 
 # Government Affairs Intelligence Skill

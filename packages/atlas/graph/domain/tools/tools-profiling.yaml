@@ -1,0 +1,65 @@
+---
+nodeKind: Tool
+id: tool:perf
+attributes:
+  displayName: "perf"
+  homepageUrl: "https://perf.wiki.kernel.org"
+  kind: profiler
+  description: |
+    Linux performance counters tool for sampling CPU profiles, tracing
+    syscalls, and inspecting hardware events.
+edges:
+  tool_used_by:
+    - target: skill-area:profiling-cpu
+  used_for:
+    - skill-area:frontend-performance
+  alternative_to:
+    - target: tool:flamegraph
+      comparison: "Profiling — perf samples CPU profiles; FlameGraph visualizes stack traces"
+    - target: tool:py-spy
+      comparison: "Profiling — perf is Linux system-level; py-spy is Python-specific"
+---
+nodeKind: Tool
+id: tool:flamegraph
+attributes:
+  displayName: "FlameGraph"
+  homepageUrl: "https://github.com/brendangregg/FlameGraph"
+  kind: profiler
+  description: |
+    Brendan Gregg's tooling for turning sampled stack traces into
+    interactive flame-graph SVGs.
+edges:
+  belongs_to_language:
+    - language:perl
+  tool_used_by:
+    - target: skill-area:profiling-cpu
+  used_for:
+    - skill-area:frontend-performance
+  alternative_to:
+    - target: tool:perf
+      comparison: "Profiling — FlameGraph visualizes stack traces; perf samples CPU profiles"
+    - target: tool:py-spy
+      comparison: "Profiling — FlameGraph is a visualization tool; py-spy is a Python sampling profiler"
+---
+nodeKind: Tool
+id: tool:py-spy
+attributes:
+  displayName: "py-spy"
+  homepageUrl: "https://github.com/benfred/py-spy"
+  kind: profiler
+  language: language:python
+  description: |
+    Sampling profiler for Python that runs without modifying or
+    restarting the target process; emits flamegraphs and top views.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:profiling-cpu
+  used_for:
+    - skill-area:frontend-performance
+  alternative_to:
+    - target: tool:perf
+      comparison: "Profiling — py-spy is Python-specific; perf is Linux system-level"
+    - target: tool:flamegraph
+      comparison: "Profiling — py-spy is a Python sampling profiler; FlameGraph is a visualization tool"

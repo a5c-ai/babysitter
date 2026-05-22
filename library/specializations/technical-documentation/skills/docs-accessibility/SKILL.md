@@ -6,6 +6,12 @@ backlog-id: SK-019
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:technical-documentation]
+  skillAreas: [skill-area:accessibility-testing, skill-area:docs-as-code]
+  roles: [role:technical-writer, role:documentation-engineer]
+  topics: [topic:accessibility]
 ---
 
 # Documentation Accessibility Skill

@@ -1,0 +1,17 @@
+nodeKind: PathDescriptor
+id: path:cursor-rules-dir
+attributes:
+  pathId: path:cursor-rules-dir
+  displayName: "Cursor rules directory"
+  path: ".cursor/rules/"
+  pathKind: plugin-scope
+  ownerKind: AgentRuntimeImpl
+  ownerId: agent-runtime-impl:cursor.runtime@current
+  platform: cross-platform
+  scope: project
+  evaluationContext: project
+  expansion: literal
+
+edges:
+  owned_by:
+    - target: agent-runtime-impl:cursor.runtime@current

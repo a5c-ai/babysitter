@@ -1,0 +1,19 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-f720a5f988fe
+attributes:
+  displayName: 'Catalog source reference: https://evalplus.github.io/leaderboard.html'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://evalplus.github.io/leaderboard.html
+  sourcePathOrUrl: https://evalplus.github.io/leaderboard.html
+  locator: Source reference for catalog entities in graph/benchmarks/eval-results/eval-results-anthropic.yaml,
+    graph/benchmarks/eval-results/eval-results-openai.yaml, graph/benchmarks/eval-results/extended-eval-results.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web

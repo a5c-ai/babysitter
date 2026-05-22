@@ -1,0 +1,32 @@
+nodeKind: DevicePair
+id: device-pair:agent-mux-mobile-ios
+attributes:
+  displayName: "agent-mux mobile (iOS) paired device"
+  deviceKind: mobile
+  platform: ios
+  pairingMethod: qr-code
+  pairedAt: "2026-05-02T00:00:00Z"
+  pushCapable: true
+  revoked: false
+---
+nodeKind: DevicePair
+id: device-pair:agent-mux-mobile-android
+attributes:
+  displayName: "agent-mux mobile (Android) paired device"
+  deviceKind: mobile
+  platform: android
+  pairingMethod: short-code
+  pairedAt: "2026-05-02T00:00:00Z"
+  pushCapable: true
+  revoked: false
+---
+nodeKind: DevicePair
+id: device-pair:agent-mux-web-desktop
+attributes:
+  displayName: "agent-mux web desktop paired session"
+  deviceKind: desktop
+  platform: web
+  pairingMethod: oauth
+  pairedAt: "2026-05-02T00:00:00Z"
+  pushCapable: false
+  revoked: false

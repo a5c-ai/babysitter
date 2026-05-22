@@ -19,6 +19,12 @@
  * - Colloidal Nanoparticle Synthesis: A Best Practices Guide: https://pubs.acs.org/doi/10.1021/acs.chemmater.0c00095
  * - Sol-Gel Synthesis of Nanoparticles: https://www.sciencedirect.com/topics/chemistry/sol-gel-process
  * - Nanoparticle synthesis methods: A comprehensive review: https://www.sciencedirect.com/science/article/pii/S2352507X21000336
+ *
+ * @graph
+ *   domains: [domain:nanotechnology]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -36,7 +42,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Precursor Selection and Reaction Design
-  let reactionDesign = await ctx.task(reactionDesignTask, {
+  const reactionDesign = await ctx.task(reactionDesignTask, {
     nanoparticleType,
     targetSize,
     targetShape,
@@ -53,18 +59,9 @@ export async function process(inputs, ctx) {
       recommendations: reactionDesign.recommendations
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      reactionDesign = await ctx.task(reactionDesignTask, { ...{
-    nanoparticleType,
-    targetSize,
-    targetShape,
-    materialSystem,
-    applicationRequirements
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review reaction design
+  await ctx.breakpoint({
     question: `Review proposed synthesis route for ${nanoparticleType} nanoparticles. Approve to proceed with optimization?`,
     title: 'Synthesis Route Review',
     context: {
@@ -79,15 +76,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: reactionDesign
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Parameter Optimization with Iterative Refinement
   let iteration = 0;
   let currentYield = 0;
@@ -108,7 +99,7 @@ export async function process(inputs, ctx) {
     });
 
     // Synthesis simulation/prediction
-    let synthesisSimulation = await ctx.task(synthesisSimulationTask, {
+    const synthesisSimulation = await ctx.task(synthesisSimulationTask, {
       parameters: parameterOptimization.optimizedParameters,
       reactionDesign,
       targetSize,
@@ -128,17 +119,8 @@ export async function process(inputs, ctx) {
 
     optimizedParameters = parameterOptimization.optimizedParameters;
 
-        let lastFeedback_iterationApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval) {
-          synthesisSimulation = await ctx.task(synthesisSimulationTask, { ...{
-      parameters: parameterOptimization.optimizedParameters,
-      reactionDesign,
-      targetSize,
-      targetShape
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+    if (currentYield < targetYield || currentPurity < targetPurity) {
+      await ctx.breakpoint({
         question: `Iteration ${iteration}: Yield=${currentYield}%, Purity=${currentPurity}%. Continue optimization?`,
         title: 'Optimization Progress Review',
         context: {
@@ -148,16 +130,11 @@ export async function process(inputs, ctx) {
           currentPurity,
           targetYield,
           targetPurity
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // Phase 3: Purification Protocol Development
   const purificationProtocol = await ctx.task(purificationProtocolTask, {
     nanoparticleType,
@@ -168,7 +145,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Size and Shape Control Validation
-  let sizeShapeValidation = await ctx.task(sizeShapeValidationTask, {
+  const sizeShapeValidation = await ctx.task(sizeShapeValidationTask, {
     nanoparticleType,
     targetSize,
     targetShape,
@@ -177,18 +154,8 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Size/shape must meet specifications
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        sizeShapeValidation = await ctx.task(sizeShapeValidationTask, { ...{
-    nanoparticleType,
-    targetSize,
-    targetShape,
-    optimizedParameters,
-    reactionDesign
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (!sizeShapeValidation.meetsSpecifications) {
+    await ctx.breakpoint({
       question: `Size/shape validation failed. Size deviation: ${sizeShapeValidation.sizeDeviation}nm. Review and approve alternative approach?`,
       title: 'Size/Shape Control Warning',
       context: {
@@ -196,15 +163,9 @@ export async function process(inputs, ctx) {
         targetSize,
         achievedSize: sizeShapeValidation.achievedSize,
         recommendations: sizeShapeValidation.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 5: Batch Reproducibility Assessment
   const reproducibilityAssessment = await ctx.task(reproducibilityAssessmentTask, {
@@ -226,7 +187,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Protocol Documentation
-  let protocolDocumentation = await ctx.task(protocolDocumentationTask, {
+  const protocolDocumentation = await ctx.task(protocolDocumentationTask, {
     nanoparticleType,
     targetSize,
     targetShape,
@@ -239,23 +200,8 @@ export async function process(inputs, ctx) {
     optimizationHistory
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      protocolDocumentation = await ctx.task(protocolDocumentationTask, { ...{
-    nanoparticleType,
-    targetSize,
-    targetShape,
-    materialSystem,
-    reactionDesign,
-    optimizedParameters,
-    purificationProtocol,
-    qcProtocol,
-    reproducibilityAssessment,
-    optimizationHistory
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Protocol Approval
+  await ctx.breakpoint({
     question: `Nanoparticle synthesis protocol complete. Reproducibility: ${reproducibilityAssessment.score}/100. Approve for production use?`,
     title: 'Protocol Approval',
     context: {
@@ -269,15 +215,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/synthesis-protocol.md', format: 'markdown', content: protocolDocumentation.markdown },
         { path: 'artifacts/protocol-parameters.json', format: 'json', content: optimizedParameters }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     protocol: {
@@ -303,7 +243,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const reactionDesignTask = defineTask('reaction-design', (args, taskCtx) => ({
   kind: 'agent',

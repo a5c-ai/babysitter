@@ -11,7 +11,12 @@
 
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
-import { DEFAULTS, CONFIG_ENV_VARS } from "../../config/defaults";
+import { getReadableRunsDirs, resolveExistingRunDir } from "../../config";
+import {
+  supportsColors,
+  printSingleRunTable,
+  printAggregateTable,
+} from "./tokensStatsFormatting";
 
 // ============================================================================
 // Types
@@ -83,30 +88,6 @@ export interface TokensStatsOptions {
 }
 
 // ============================================================================
-// ANSI Colors
-// ============================================================================
-
-const COLORS = {
-  reset: "\x1b[0m",
-  bold: "\x1b[1m",
-  dim: "\x1b[2m",
-  cyan: "\x1b[36m",
-  green: "\x1b[32m",
-  yellow: "\x1b[33m",
-  red: "\x1b[31m",
-} as const;
-
-function supportsColors(): boolean {
-  if (process.env.NO_COLOR !== undefined) return false;
-  if (process.env.FORCE_COLOR !== undefined) return true;
-  return Boolean(process.stdout?.isTTY);
-}
-
-function col(text: string, color: keyof typeof COLORS, useColors: boolean): string {
-  return useColors ? `${COLORS[color]}${text}${COLORS.reset}` : text;
-}
-
-// ============================================================================
 // Journal Reading
 // ============================================================================
 
@@ -171,7 +152,6 @@ function computeRunStats(runId: string, events: CompressionEvent[]): RunCompress
 
   const tokensSaved = originalTokens - compressedTokens;
   const reductionPct = originalTokens > 0 ? (tokensSaved / originalTokens) * 100 : 0;
-
   const date = events.length > 0 ? (events[0].recordedAt ?? "") : "";
 
   return {
@@ -190,8 +170,8 @@ function computeRunStats(runId: string, events: CompressionEvent[]): RunCompress
 // Single Run
 // ============================================================================
 
-async function statsForRun(runsDir: string, runId: string): Promise<RunCompressionStats | null> {
-  const runDir = path.join(runsDir, runId);
+async function statsForRun(runId: string, runsDirOverride?: string): Promise<RunCompressionStats | null> {
+  const runDir = resolveExistingRunDir(runId, { override: runsDirOverride });
   const journalDir = path.join(runDir, "journal");
 
   let stat;
@@ -211,28 +191,39 @@ async function statsForRun(runsDir: string, runId: string): Promise<RunCompressi
 // All Runs
 // ============================================================================
 
-async function statsForAllRuns(runsDir: string): Promise<AggregateStats> {
-  let entries: string[];
-  try {
-    entries = await fs.readdir(runsDir);
-  } catch {
-    entries = [];
-  }
-
+async function statsForAllRuns(readableRunsDirs: string[]): Promise<AggregateStats> {
   const runs: RunCompressionStats[] = [];
-  for (const entry of entries) {
-    const runDir = path.join(runsDir, entry);
+  const seenRunDirs = new Set<string>();
+
+  for (const runsDir of readableRunsDirs) {
+    let entries: string[];
     try {
-      const s = await fs.stat(runDir);
-      if (!s.isDirectory()) continue;
+      entries = await fs.readdir(runsDir);
     } catch {
-      continue;
+      entries = [];
     }
-    const journalDir = path.join(runDir, "journal");
-    const events = await readJournalDir(journalDir);
-    const compressionEvents = extractCompressionEvents(events);
-    if (compressionEvents.length === 0) continue;
-    runs.push(computeRunStats(entry, compressionEvents));
+
+    for (const entry of entries) {
+      const runDir = path.join(runsDir, entry);
+      let normalizedRunDir: string;
+      try {
+        const s = await fs.stat(runDir);
+        if (!s.isDirectory()) continue;
+        normalizedRunDir = path.resolve(runDir);
+      } catch {
+        continue;
+      }
+      if (seenRunDirs.has(normalizedRunDir)) {
+        continue;
+      }
+      seenRunDirs.add(normalizedRunDir);
+
+      const journalDir = path.join(runDir, "journal");
+      const events = await readJournalDir(journalDir);
+      const compressionEvents = extractCompressionEvents(events);
+      if (compressionEvents.length === 0) continue;
+      runs.push(computeRunStats(entry, compressionEvents));
+    }
   }
 
   let totalOriginal = 0;
@@ -258,132 +249,15 @@ async function statsForAllRuns(runsDir: string): Promise<AggregateStats> {
 }
 
 // ============================================================================
-// Formatting
-// ============================================================================
-
-function fmtNum(n: number): string {
-  return n.toLocaleString("en-US");
-}
-
-function fmtPct(n: number): string {
-  return `${n.toFixed(1)}%`;
-}
-
-function pad(s: string, width: number, right = false): string {
-  if (right) return s.padStart(width);
-  return s.padEnd(width);
-}
-
-function printSingleRunTable(stats: RunCompressionStats, useColors: boolean): void {
-  console.log("");
-  console.log(col(`Run: ${stats.runId}`, "bold", useColors));
-  console.log(col(`Date: ${stats.date}`, "dim", useColors));
-  console.log("");
-
-  if (stats.eventCount === 0) {
-    console.log(col("  No COMPRESSION_APPLIED events found in this run.", "yellow", useColors));
-    console.log("");
-    return;
-  }
-
-  // Summary row
-  console.log(col("  Summary", "cyan", useColors));
-  console.log(`  Events:            ${col(fmtNum(stats.eventCount), "bold", useColors)}`);
-  console.log(`  Original tokens:   ${col(fmtNum(stats.originalTokens), "bold", useColors)}`);
-  console.log(`  Compressed tokens: ${col(fmtNum(stats.compressedTokens), "bold", useColors)}`);
-  console.log(`  Tokens saved:      ${col(fmtNum(stats.tokensSaved), "green", useColors)}`);
-  console.log(`  Reduction:         ${col(fmtPct(stats.reductionPct), "green", useColors)}`);
-  console.log("");
-
-  const layers = Object.keys(stats.byLayer).sort();
-  if (layers.length > 0) {
-    console.log(col("  By Layer", "cyan", useColors));
-    const hdr = [
-      pad("Layer", 8),
-      pad("Events", 8, true),
-      pad("Original", 12, true),
-      pad("Compressed", 12, true),
-      pad("Saved", 12, true),
-      pad("Reduction", 10, true),
-    ].join("  ");
-    console.log(col(`  ${hdr}`, "dim", useColors));
-    console.log(col(`  ${"-".repeat(hdr.length)}`, "dim", useColors));
-    for (const layer of layers) {
-      const l = stats.byLayer[layer];
-      const redPct = l.originalTokens > 0 ? (l.tokensSaved / l.originalTokens) * 100 : 0;
-      const row = [
-        pad(`Layer ${layer}`, 8),
-        pad(fmtNum(l.eventCount), 8, true),
-        pad(fmtNum(l.originalTokens), 12, true),
-        pad(fmtNum(l.compressedTokens), 12, true),
-        pad(fmtNum(l.tokensSaved), 12, true),
-        pad(fmtPct(redPct), 10, true),
-      ].join("  ");
-      console.log(`  ${row}`);
-    }
-    console.log("");
-  }
-}
-
-function printAggregateTable(agg: AggregateStats, useColors: boolean): void {
-  console.log("");
-  console.log(col("Token Compression Stats — All Runs", "bold", useColors));
-  console.log("");
-
-  if (agg.totalRuns === 0) {
-    console.log(col("  No runs with COMPRESSION_APPLIED events found.", "yellow", useColors));
-    console.log("");
-    return;
-  }
-
-  console.log(`  Total runs with compression: ${col(fmtNum(agg.totalRuns), "bold", useColors)}`);
-  console.log(`  Total events:                ${col(fmtNum(agg.totalEvents), "bold", useColors)}`);
-  console.log(`  Total original tokens:       ${col(fmtNum(agg.totalOriginalTokens), "bold", useColors)}`);
-  console.log(`  Total compressed tokens:     ${col(fmtNum(agg.totalCompressedTokens), "bold", useColors)}`);
-  console.log(`  Total tokens saved:          ${col(fmtNum(agg.totalTokensSaved), "green", useColors)}`);
-  console.log(`  Overall reduction:           ${col(fmtPct(agg.overallReductionPct), "green", useColors)}`);
-  console.log("");
-
-  if (agg.runs.length > 0) {
-    console.log(col("  Per-Run Breakdown", "cyan", useColors));
-    const hdr = [
-      pad("Run ID", 28),
-      pad("Date", 24),
-      pad("Events", 8, true),
-      pad("Original", 12, true),
-      pad("Compressed", 12, true),
-      pad("Reduction", 10, true),
-    ].join("  ");
-    console.log(col(`  ${hdr}`, "dim", useColors));
-    console.log(col(`  ${"-".repeat(hdr.length)}`, "dim", useColors));
-
-    const sorted = [...agg.runs].sort((a, b) => b.tokensSaved - a.tokensSaved);
-    for (const r of sorted) {
-      const row = [
-        pad(r.runId, 28),
-        pad(r.date.slice(0, 24), 24),
-        pad(fmtNum(r.eventCount), 8, true),
-        pad(fmtNum(r.originalTokens), 12, true),
-        pad(fmtNum(r.compressedTokens), 12, true),
-        pad(fmtPct(r.reductionPct), 10, true),
-      ].join("  ");
-      console.log(`  ${row}`);
-    }
-    console.log("");
-  }
-}
-
-// ============================================================================
 // Main Handler
 // ============================================================================
 
 export async function handleTokensStats(options: TokensStatsOptions): Promise<number> {
-  const runsDir = options.runsDir ?? process.env[CONFIG_ENV_VARS.RUNS_DIR] ?? DEFAULTS.runsDir;
-  const resolvedRunsDir = path.resolve(runsDir);
+  const readableRunsDirs = getReadableRunsDirs({ override: options.runsDir });
   const useColors = supportsColors();
 
   if (options.all) {
-    const agg = await statsForAllRuns(resolvedRunsDir);
+    const agg = await statsForAllRuns(readableRunsDirs);
     if (options.json) {
       console.log(JSON.stringify(agg, null, 2));
     } else {
@@ -393,9 +267,9 @@ export async function handleTokensStats(options: TokensStatsOptions): Promise<nu
   }
 
   if (options.runId) {
-    const stats = await statsForRun(resolvedRunsDir, options.runId);
+    const stats = await statsForRun(options.runId, options.runsDir);
     if (!stats) {
-      const msg = `Run not found: ${options.runId} (looked in ${resolvedRunsDir})`;
+      const msg = `Run not found: ${options.runId} (looked in ${readableRunsDirs.join(", ")})`;
       if (options.json) {
         console.error(JSON.stringify({ error: msg }));
       } else {

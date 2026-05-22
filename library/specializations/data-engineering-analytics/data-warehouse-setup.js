@@ -3,6 +3,9 @@
  * @description Comprehensive data warehouse setup covering platform selection, architecture design, security, optimization, and cost management
  * @inputs { platform: string, requirements: object, cloudProvider: string, enableOptimization: boolean }
  * @outputs { success: boolean, architecture: object, securityConfig: object, optimizationPlan: object, artifacts: array }
+ * @graph
+ *   domains: [domain:data-engineering]
+ *   workflows: [workflow:data-pipeline-deployment]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,287 @@
+---
+nodeKind: Domain
+id: domain:marketing
+attributes:
+  displayName: "Marketing"
+  description: |
+    Marketing strategy, campaigns, analytics, and brand management.
+edges:
+  contains:
+    - specialization:digital-marketing-strategy
+---
+nodeKind: Domain
+id: domain:sales
+attributes:
+  displayName: "Sales"
+  description: |
+    Sales processes, pipeline management, CRM, and revenue operations.
+edges:
+  contains:
+    - specialization:sales
+---
+nodeKind: Domain
+id: domain:customer-experience
+attributes:
+  displayName: "Customer Experience"
+  description: |
+    Customer success, support, feedback loops, and satisfaction measurement.
+edges:
+  contains:
+    - specialization:customer-experience
+---
+nodeKind: Domain
+id: domain:finance
+attributes:
+  displayName: "Finance"
+  description: |
+    Financial planning, accounting, budgeting, and audit.
+edges:
+  contains:
+    - specialization:corporate-finance
+---
+nodeKind: Domain
+id: domain:human-resources
+attributes:
+  displayName: "Human Resources"
+  description: |
+    Recruiting, onboarding, performance management, and culture.
+edges:
+  contains:
+    - specialization:talent-management
+---
+nodeKind: Domain
+id: domain:legal
+attributes:
+  displayName: "Legal"
+  description: |
+    Contract management, compliance, IP, and regulatory affairs.
+edges:
+  contains:
+    - specialization:legal-compliance
+---
+nodeKind: Domain
+id: domain:operations
+attributes:
+  displayName: "Operations"
+  description: |
+    Business operations, process optimization, and supply chain.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:logistics
+attributes:
+  displayName: "Logistics"
+  description: |
+    Supply chain logistics, warehousing, fulfillment, and distribution.
+edges:
+  contains:
+    - specialization:logistics
+---
+nodeKind: Domain
+id: domain:business-intelligence
+attributes:
+  displayName: "Business Intelligence"
+  description: |
+    BI, analytics, reporting, dashboards, and decision intelligence.
+edges:
+  contains:
+    - specialization:data-engineering-analytics
+---
+nodeKind: Domain
+id: domain:public-relations
+attributes:
+  displayName: "Public Relations"
+  description: |
+    PR, communications, media relations, and crisis comms.
+edges:
+  contains:
+    - specialization:public-relations
+---
+nodeKind: Domain
+id: domain:digital-marketing
+attributes:
+  displayName: "Digital Marketing"
+  description: |
+    SEO, SEM, social media, content marketing, and growth.
+edges:
+  contains:
+    - specialization:digital-marketing-strategy
+---
+nodeKind: Domain
+id: domain:project-management
+attributes:
+  displayName: "Project Management"
+  description: |
+    Project planning, resource allocation, risk management, and delivery.
+edges:
+  contains:
+    - specialization:product-management
+---
+nodeKind: Domain
+id: domain:entrepreneurship
+attributes:
+  displayName: "Entrepreneurship"
+  description: |
+    Startup operations, fundraising, product-market fit, and growth.
+edges:
+  contains:
+    - specialization:entrepreneurship
+---
+nodeKind: Domain
+id: domain:venture-capital
+attributes:
+  displayName: "Venture Capital"
+  description: |
+    Deal flow, due diligence, portfolio management, and fund operations.
+edges:
+  contains:
+    - specialization:venture-capital
+---
+nodeKind: Domain
+id: domain:knowledge-management
+attributes:
+  displayName: "Knowledge Management"
+  description: |
+    Knowledge bases, documentation culture, and organizational learning.
+edges:
+  contains:
+    - specialization:knowledge-management
+    - topic:knowledge-management
+    - topic:company-brain
+    - topic:knowledge-fabric-architecture
+    - topic:knowledge-graph-construction
+    - topic:organizational-memory
+    - topic:semantic-chunking
+    - topic:chunking-strategies
+    - topic:embedding-pipeline
+    - topic:dense-retrieval
+    - topic:hybrid-retrieval
+    - topic:re-ranking
+    - topic:graph-rag
+    - topic:multi-agent-knowledge-sharing
+    - topic:knowledge-freshness
+    - topic:knowledge-access-control
+    - topic:knowledge-feedback-loop
+    - topic:agentic-rag
+    - topic:memory-to-knowledge-bridge
+    - topic:context-to-fabric-sync
+    - topic:auto-memory
+    - topic:memory-consolidation
+    - topic:memory-scoping
+    - topic:memory-security
+    - topic:memory-deduplication
+    - topic:instruction-file-standard
+    - topic:unified-agent-memory
+    - topic:cloud-agent-memory
+    - topic:memory-type-taxonomy
+---
+nodeKind: Domain
+id: domain:advertising
+attributes:
+  displayName: "Advertising"
+  description: |
+    Advertising strategy, media buying, ad-tech, programmatic, creative production, and campaign measurement across channels.
+edges:
+  contains:
+    - specialization:digital-marketing-strategy
+---
+nodeKind: Domain
+id: domain:finops
+attributes:
+  displayName: "FinOps"
+  description: |
+    Cloud and AI financial operations — cost visibility, optimization, budgeting, showback/chargeback, and unit economics.
+edges:
+  contains:
+    - specialization:corporate-finance
+---
+nodeKind: Domain
+id: domain:business-development
+attributes:
+  displayName: "Business Development"
+  description: |
+    Business development, strategic partnerships, channel sales, alliances, and ecosystem growth.
+edges:
+  contains:
+    - specialization:sales
+    - specialization:business-strategy
+---
+nodeKind: Domain
+id: domain:strategy
+attributes:
+  displayName: "Strategy"
+  description: |
+    Corporate and product strategy, competitive analysis, market research, and strategic planning.
+edges:
+  contains:
+    - specialization:strategic-consulting
+---
+nodeKind: Domain
+id: domain:community
+attributes:
+  displayName: "Community"
+  description: |
+    Community building, engagement, moderation, events, developer advocacy, and ecosystem health.
+edges:
+  contains:
+    - specialization:public-relations
+---
+nodeKind: Domain
+id: domain:procurement
+attributes:
+  displayName: "Procurement"
+  description: |
+    Strategic sourcing, vendor evaluation, contract negotiation, and procurement operations.
+edges:
+  contains:
+    - specialization:supply-chain-optimization
+---
+nodeKind: Domain
+id: domain:customer-relations
+attributes:
+  displayName: "Customer Relations"
+  description: |
+    Customer relationship management, account management, retention, and lifecycle marketing.
+edges:
+  contains:
+    - specialization:customer-experience
+---
+nodeKind: Domain
+id: domain:revenue-operations
+attributes:
+  displayName: "Revenue Operations"
+  description: |
+    Revenue operations spanning marketing, sales, and customer success — pipeline, forecasting, and GTM alignment.
+edges:
+  contains:
+    - specialization:sales
+    - specialization:marketing
+---
+nodeKind: Domain
+id: domain:compliance
+attributes:
+  displayName: "Compliance"
+  description: |
+    Regulatory compliance, policy management, and audit workflows. Covers
+    GDPR, SOX, HIPAA, and industry-specific compliance frameworks alongside
+    risk assessment and controls monitoring.
+edges:
+  contains:
+    - specialization:legal-compliance
+    - specialization:security-compliance
+---
+nodeKind: Domain
+id: domain:machine-learning
+attributes:
+  displayName: "Machine Learning"
+  description: |
+    Machine learning workflows covering model development, training pipelines,
+    evaluation, and deployment. Spans supervised, unsupervised, and reinforcement
+    learning alongside MLOps practices for production model management.
+edges:
+  contains:
+    - specialization:data-science-ml
+    - specialization:llm-fine-tuning
+    - specialization:ml-inference-serving

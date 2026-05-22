@@ -1,0 +1,13 @@
+nodeKind: Library
+id: library:undici
+attributes:
+  displayName: "undici"
+  belongsToLanguageId: language:javascript
+  category: http-client
+  description: |
+    An HTTP/1.1 client for Node.js, written from scratch — backs Node's built-in fetch.
+edges:
+  belongs_to_language:
+    - language:javascript
+  library_used_by:
+    - target: skill-area:backend-api-design

@@ -3,6 +3,12 @@
  * @description RPIKit Research Phase - Systematic codebase exploration following "The Iron Law": understand the problem before exploring code. Four phases: understand request, explore codebase, document findings, transition.
  * @inputs { question: string, projectRoot?: string, priorContext?: string, constraints?: object }
  * @outputs { success: boolean, researchDocument: object, findings: array, openQuestions: array, recommendations: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning, skill-area:prioritization-frameworks]
+ *   workflows: [workflow:feature-development, workflow:release-management]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:engineering-manager, role:tech-lead, role:scrum-master]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

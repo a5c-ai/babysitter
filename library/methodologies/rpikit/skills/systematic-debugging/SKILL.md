@@ -2,17 +2,14 @@
 name: systematic-debugging
 description: Structured debugging methodology using hypothesis-driven investigation, log analysis, and bisection to isolate and resolve defects.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Systematic Debugging
-
-## Overview
-
-Structured approach to investigating and resolving defects using hypothesis-driven methodology rather than trial-and-error.
-
-## When to Use
-
-- Step verification fails during implementation
 - Unexpected behavior discovered during testing
 - Bug reports require investigation
 - Performance issues need root cause analysis

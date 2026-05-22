@@ -1,0 +1,10 @@
+nodeKind: StackPart
+id: stack-part:identity-provider
+attributes:
+  displayName: "Identity Provider"
+  category: security
+  description: |
+    Issues authentication and authorization tokens via OIDC/OAuth/SAML. Examples: Auth0, Okta, Keycloak, Supabase Auth.
+edges:
+  stack_part_used_by:
+    - target: skill-area:identity-security

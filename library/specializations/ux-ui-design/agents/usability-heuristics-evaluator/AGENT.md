@@ -8,6 +8,12 @@ expertise:
   - Issue documentation
   - Competitive heuristic analysis
   - Recommendation prioritization
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:usability-testing, skill-area:design-critique]
+  roles: [role:ux-researcher, role:product-designer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # Usability Heuristics Evaluator Agent

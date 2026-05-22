@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:execution.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:execution
+  text: |
+    where/how work runs (local/docker/ssh/k8s/cloud/direct)
+  status: canonical
+edges:
+  defines:
+    - term:execution

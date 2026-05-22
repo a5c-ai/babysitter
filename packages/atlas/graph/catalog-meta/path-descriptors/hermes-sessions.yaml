@@ -1,0 +1,17 @@
+nodeKind: PathDescriptor
+id: path:hermes-sessions
+attributes:
+  pathId: path:hermes-sessions
+  displayName: "Hermes sessions directory"
+  path: "~/.hermes/sessions/"
+  pathKind: session-state-dir
+  ownerKind: AgentPlatformImpl
+  ownerId: agent-platform-impl:hermes.platform@current
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+
+edges:
+  owned_by:
+    - target: agent-platform-impl:hermes.platform@current

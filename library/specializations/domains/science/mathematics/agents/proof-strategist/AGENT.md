@@ -14,6 +14,12 @@ metadata:
   domain: science
   category: pure-mathematics
   phase: 6
+graph:
+  domains: [domain:mathematics]
+  specializations: [specialization:computational-mathematics]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:compiler-implementation, skill-area:np-hard-heuristics]
+  workflows: [workflow:experiment-design]
+  roles: [role:computational-scientist, role:research-scientist]
 ---
 
 # Proof Strategist

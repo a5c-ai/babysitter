@@ -1,0 +1,42 @@
+nodeKind: PluginTarget
+id: plugin-target:devin
+attributes:
+  displayName: "Devin"
+  hostAgent: agent:devin
+  adapterFamily: shell-hook
+  manifestFormat: "n/a"
+  commandFormat: none
+  hookRegistrationFormat: none
+  skillHandling: unsupported
+  marketplacePath: null
+  adapterName: devin
+  scriptVariants: []
+  distribution:
+    - manual
+  distributionModel: workspace-generated
+  npmPublishable: false
+  installLayout:
+    harnessHomeRelative: ""
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ""
+    installLifecycle: none
+    activationMessage: restart
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: unsupported
+  launchBehavior:
+    promptDelivery: stdin
+    promptFlag: null
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: false
+    needsIdleKill: true
+edges:
+  hosted_by:
+    - target: agent:devin

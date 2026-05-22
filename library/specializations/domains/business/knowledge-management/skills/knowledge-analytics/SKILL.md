@@ -13,6 +13,10 @@ metadata:
   domain: business
   category: Analytics
   skill-id: SK-019
+graph:
+  domains: [domain:knowledge-management]
+  skillAreas: [skill-area:data-analytics, skill-area:data-governance, skill-area:data-quality]
+  roles: [role:information-architect, role:data-analyst, role:analytics-engineer]
 ---
 
 # Knowledge Analytics Skill

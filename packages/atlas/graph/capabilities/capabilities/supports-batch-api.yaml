@@ -1,0 +1,13 @@
+nodeKind: Capability
+id: capability:supports-batch-api
+attributes:
+  displayName: "Supports batch API"
+  description: |
+    The provider exposes an asynchronous batch inference surface that
+    accepts a file of requests, processes them within a vendor-specified
+    SLA window (typically 24h), and returns results at a discounted rate.
+    OpenAI Batch API and Anthropic Message Batches are the canonical
+    examples.
+  appliesToNodeKinds: ["Provider"]
+  category: provider-feature
+edges: {}

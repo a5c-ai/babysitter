@@ -1,0 +1,21 @@
+nodeKind: Role
+id: role:performance-profiler
+attributes:
+  displayName: "Performance Profiler"
+  isAgentic: true
+  requiredCapabilities:
+    - capability:supports-tool-use
+    - capability:supports-text-streaming
+  requiredDomains:
+    - domain:software-engineering
+  description: |
+    Agent that profiles code paths and proposes performance fixes.
+edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:performance-budget-tracking
+  requires_capability:
+    - target: capability:supports-tool-use
+    - target: capability:supports-text-streaming
+  applies_to:
+    - target: domain:software-engineering

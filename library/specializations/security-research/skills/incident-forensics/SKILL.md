@@ -7,6 +7,12 @@ metadata:
   version: "1.0.0"
   category: digital-forensics
   backlog-id: SK-015
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:incident-response-forensics, skill-area:security-monitoring-siem]
+  roles: [role:security-engineer]
+  workflows: [workflow:vulnerability-management, workflow:penetration-testing-cycle]
 ---
 
 # incident-forensics

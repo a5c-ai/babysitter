@@ -9,7 +9,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: "module",
-    project: ["./tsconfig.json"]
+    project: ["./tsconfig.eslint.json"]
   },
   plugins: ["@typescript-eslint"],
   extends: [
@@ -18,6 +18,10 @@ module.exports = {
   ],
   ignorePatterns: ["**/dist/**", "node_modules/**", "**/__tests__/**"],
   rules: {
+    "max-lines": [
+      "warn",
+      { "max": 400, "skipBlankLines": false, "skipComments": false }
+    ],
     "@typescript-eslint/no-unused-vars": [
       "error",
       { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }

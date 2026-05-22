@@ -1,0 +1,1200 @@
+# NodeKinds for cluster 2-compute-path.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:model-family
+  name: ModelFamily
+  origin: universal
+  prefix: model-family
+  cluster: 2-compute-path
+  purpose: a family of models
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: vendor
+    type: string
+    required: true
+  - name: homepageUrl
+    type: url
+    required: true
+    evidence: vendor-doc-or-better
+  incomingEdges: []
+  outgoingEdges:
+  - has_version
+  invariants:
+  - id starts with model-family: null
+  examples: []
+- id: node:model-version
+  name: ModelVersion
+  origin: universal
+  prefix: model
+  cluster: 2-compute-path
+  purpose: a specific versioned model
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: modelFamilyId
+    type: ref<ModelFamily>
+    required: true
+  - name: versionRange
+    type: versionRange
+    required: true
+    evidence: vendor-doc-or-better
+  - name: kind
+    type: enum<chat,reasoning,embedding,vision,audio,multimodal,code-completion,classification>
+    required: true
+    evidence: vendor-doc-or-better
+    notes: Coarse functional class. Distinguishes embedding-only / vision-only / classification variants from chat models so queries like 'find all embedding models' are first-class.
+  - name: contextWindowTokens
+    type: tokens
+    required: true
+    evidence: vendor-doc-or-better
+  - name: costPerMTokInput
+    type: cost-per-million-tokens
+    required: true
+    evidence: vendor-doc-or-better
+    notes: USD per 1,000,000 input tokens. Renamed from costPer1kInputTokens (closes GAP-L1-P0 claude-models-pricing-and-lineup; the type is per-million, the previous name lied).
+  - name: costPerMTokOutput
+    type: cost-per-million-tokens
+    required: true
+    evidence: vendor-doc-or-better
+    notes: USD per 1,000,000 output tokens.
+  - name: supportsExtendedThinking
+    type: bool
+    required: true
+    evidence: vendor-doc-or-better
+    notes: Anthropic 'extended thinking' (visible reasoning budget). Replaces conflated `supportsThinking` boolean (closes GAP-L1-P1 adaptive-thinking-vs-extended-thinking; partial — full split awaits Phase 2).
+  - name: supportsAdaptiveThinking
+    type: bool
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Opus-4.7-style adaptive thinking mode (model decides when to think). Distinct from extended thinking.
+  - name: thinkingEffortLevels
+    type: list<enum<low
+    medium: null
+    high: null
+    max>>: null
+    required: false
+    evidence: vendor-doc-or-better
+  - name: supportsThinkingBudgetTokens
+    type: bool
+    required: true
+    evidence: vendor-doc-or-better
+  - name: modalities
+    type: list<enum<text,image,audio,video,embedding,tool-output>>
+    required: true
+    evidence: vendor-doc-or-better
+    notes: Collapsed from former Modality NodeKind (remodel 2026-04-29). Values are bare enum strings, not refs.
+  - name: modalityDirections
+    type: list<object>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'D8 (planner 2026-05-01) — refines `modalities` with direction. Each entry: { kind: text|image|audio|video|embedding|tool-output, direction: input|output|bidirectional }. Lighter-touch than splitting Modality enum; resolves multimodal-output coverage gap (TTS / image-gen / audio-gen).'
+  - name: lifecycleStatus
+    type: enum<preview,ga,deprecated,eol>
+    required: true
+    evidence: vendor-doc-or-better
+    notes: Current vendor-published lifecycle status. Replaces ad-hoc inference from deprecationDate/eolDate.
+  - name: lifecycleStatusChangedAt
+    type: iso-date
+    required: false
+    notes: Date of the most recent lifecycleStatus transition (traceability).
+  - name: knowledgeCutoffDate
+    type: iso-date
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Vendor-published training-data knowledge cutoff.
+  - name: safetyTier
+    type: string
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Vendor-specific safety tier (Anthropic ASL-x, OpenAI safety category, etc.). Free-form because vendor taxonomies diverge.
+  - name: modelCardUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: supportsFineTuning
+    type: bool
+    required: false
+    evidence: vendor-doc-or-better
+  - name: fineTuningKind
+    type: enum<full,lora,adapter,none>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Kind of fine-tuning surface. Required when supportsFineTuning is true.
+  - name: releaseDate
+    type: iso-date
+    required: true
+  - name: deprecationDate
+    type: iso-date
+    required: false
+  - name: eolDate
+    type: iso-date
+    required: false
+  - name: regions
+    type: list<string>
+    required: true
+  - name: supportsThinking
+    type: bool
+    required: false
+  incomingEdges:
+  - has_version
+  - serves
+  - provides_cost_for
+  outgoingEdges:
+  - version_of
+  - served_by
+  - speaks
+  - priced_by
+  invariants:
+  - supportsThinkingBudgetTokens=true requires supportsExtendedThinking=true
+  - thinkingEffortLevels (when set) requires supportsExtendedThinking=true
+  - supportsAdaptiveThinking=true and supportsExtendedThinking=true MAY both be true (adaptive is independent of extended)
+  - eolDate >= deprecationDate >= releaseDate (when present)
+  - lifecycleStatus=deprecated requires deprecationDate to be set
+  - lifecycleStatus=eol requires eolDate to be set
+  - fineTuningKind in {full,lora,adapter} requires supportsFineTuning=true
+  - per-model capability bindings (parallel-tool-calls, prompt-caching, batch-api, etc.) bind via the `supports` edge (catalog pass 9c remodel), not as boolean attributes
+  examples: []
+- id: node:provider
+  name: Provider
+  origin: universal
+  prefix: provider
+  cluster: 2-compute-path
+  purpose: entity serving inference for one or more model versions
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: versionRange
+    type: versionRange
+    required: true
+  - name: authMethods
+    type: list<enum<api-key,oauth,browser-login,service-account,iam,device-code,workload-identity,gcp-adc>>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: authMethodNotes
+    type: markdown
+    required: false
+    notes: Non-obvious auth requirements (e.g. Bedrock IAM permissions; Vertex ADC + project enablement).
+  - name: endpoints
+    type: map<string
+    url>: null
+    required: true
+    evidence: vendor-doc-or-better
+  - name: pricing
+    type: markdown
+    required: false
+  - name: pricingTiers
+    type: list<map>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'Each entry: { name, rateLimit, priceMultiplier, description? }. Captures free / pro / enterprise / batch / interactive / priority tiers. priceMultiplier is relative to base per-model price.'
+  - name: rateLimitSignalingProtocol
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: How the provider communicates rate-limit state (headers, status codes, Retry-After semantics, error envelope shape).
+  - name: dataResidencyOptions
+    type: list<string>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Region/jurisdiction strings the provider exposes for data-residency compliance. Distinct from `regions` (where the API is reachable).
+  - name: vendorFeatures
+    type: list<ref<Capability>>
+    required: false
+    notes: 'Vendor-specific features beyond the wire-protocol baseline (prompt-caching, batch-api, files-api, bedrock-guardrails, vertex-reasoning-engine). Richer per-version claims live on the `supports` edge (catalog pass 9c remodel: was on CapabilitySupport).'
+  - name: slaTier
+    type: string
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Vendor-published SLA tier. Free-form because vendor SLAs are not standardized.
+  - name: regions
+    type: list<string>
+    required: true
+  - name: vendor
+    type: string
+    required: false
+  incomingEdges:
+  - served_by
+  - provides_cost_for
+  - version_of
+  outgoingEdges:
+  - serves
+  invariants:
+  - endpoints non-empty
+  - reachable from at least one ModelVersion via served_by
+  - pricingTiers entries MUST have unique `name` within the provider
+  - vendorFeatures refs MUST resolve to a Capability whose appliesToNodeKinds includes Provider or ModelVersion
+  examples: []
+- id: node:provider-version
+  name: ProviderVersion
+  origin: universal
+  prefix: provider-version
+  cluster: 2-compute-path
+  purpose: 'a versioned release of a model provider''s API (e.g. anthropic API v1,
+
+    openai chat-completions API). Lets capability-supports be pinned to a
+
+    provider version range rather than just the provider entity.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: providerId
+    type: ref<Provider>
+    required: true
+  - name: versionRange
+    type: string
+    required: true
+    notes: Semver range
+  - name: releasedAt
+    type: iso-date
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - supports
+  - version_of
+  outgoingEdges:
+  - version_of_provider
+  invariants:
+  - id starts with provider-version: null
+  - versionRange must be a valid semver range
+  examples: []
+- id: node:model-transport-protocol
+  name: ModelTransportProtocol
+  origin: standard
+  prefix: model-transport
+  cluster: 2-compute-path
+  purpose: an LLM wire protocol (Anthropic Messages, OpenAI Responses, Gemini, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: vendor
+    type: string
+    required: true
+  - name: specUrl
+    type: url
+    required: true
+    evidence: vendor-doc-or-better
+  - name: usageEnvelope
+    type: enum<anthropic-usage,openai-usage,gemini-usage-metadata,bedrock-usage,none>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Per-protocol cost/usage envelope shape. Anthropic Messages emits `usage{input_tokens,output_tokens,cache_creation_input_tokens,cache_read_input_tokens}`; OpenAI Responses/ChatCompletions emits `usage{prompt_tokens,completion_tokens,total_tokens,reasoning_tokens?}`; Gemini emits `usageMetadata{promptTokenCount,candidatesTokenCount,totalTokenCount}`; Bedrock emits `usage{inputTokens,outputTokens,totalTokens}`. Resolves OQ oq:cost-usage-envelope as gap-of-record — no cross-vendor standard exists.
+  - name: thinkingChannel
+    type: enum<content-block,item,part,none>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Per-protocol thinking/reasoning channel surface. Anthropic Messages = `content-block` (type=`thinking`); OpenAI Responses = `item` (type=`reasoning`); Gemini = `part` (thought=true). Resolves OQ oq:thinking-channel-mapping as gap-of-record (extends OQ oq:thinking-streaming-envelopes).
+  - name: streamingFraming
+    type: enum<sse,jsonl,grpc-stream,custom,aws-event-stream>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Wire-level streaming framing. Anthropic/OpenAI = sse; Gemini = sse; Bedrock Converse = grpc-stream/sse hybrid; OpenAI-compat local = sse/jsonl.
+  - name: requestBodyShape
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Canonical request body structure on the wire (top-level fields, required vs. optional).
+  - name: responseBodyShape
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Canonical non-streaming response body structure on the wire.
+  - name: streamingEventTypes
+    type: list<string>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'Ordered list of event types observed on a streamed response. Anthropic Messages: message_start, content_block_start, content_block_delta, content_block_stop, message_delta, message_stop. OpenAI Responses: response.created, response.output_text.delta, response.output_text.done, response.completed (plus item-level events). Gemini: streamed `GenerateContentResponse` chunks carrying delta parts.'
+  - name: toolCallWireFormat
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'Concrete shape of a tool/function call on the wire. Anthropic: `tool_use` content block with `id, name, input`. OpenAI Responses: `function_call` item with `call_id, name, arguments` (JSON string). OpenAI ChatCompletions: assistant message `tool_calls[]` with `id, type=function, function{name, arguments}`. Gemini: `functionCall` part with `name, args`.'
+  - name: toolResultWireFormat
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'Concrete shape of a tool/function result on the wire. Anthropic: `tool_result` content block with `tool_use_id, content`. OpenAI Responses: `function_call_output` item with `call_id, output`. OpenAI ChatCompletions: message with `role: tool, tool_call_id, content`. Gemini: `functionResponse` part with `name, response`.'
+  - name: errorEnvelope
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Concrete error response body shape (HTTP status + envelope field names + error type/code surface).
+  - name: cacheControlWireFormat
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'On-the-wire mechanism for prompt caching. Anthropic: per-block `cache_control: {type: "ephemeral", ttl?}`. OpenAI: implicit automatic caching plus optional `prompt_cache_key`. Gemini: server-side `cachedContent` resource referenced by name.'
+  - name: rateLimitSignaling
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'Headers / body fields used to signal rate-limit state. Anthropic: `anthropic-ratelimit-requests-*`, `anthropic-ratelimit-tokens-*`, `retry-after`. OpenAI: `x-ratelimit-remaining-requests`, `x-ratelimit-remaining-tokens`, `x-ratelimit-reset-*`, `retry-after`. Gemini: HTTP 429 plus `retry-after`.'
+  - name: reasoningWireFormat
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'Wire shape carrying reasoning / extended-thinking output, including any signature or redaction fields. Anthropic: `thinking` content block with optional `signature`, plus `redacted_thinking` variant. OpenAI Responses: `reasoning` item carrying summary text. Gemini: `thoughts`/thought-marked parts.'
+  - name: authHeaderFormat
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'Authentication header shape for first-party endpoints. Anthropic: `x-api-key: <key>`. OpenAI: `Authorization: Bearer <key>`. Gemini: `x-goog-api-key: <key>` (Vertex uses `Authorization: Bearer <oauth-token>`).'
+  - name: versioningHeader
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'How protocol version is negotiated. Anthropic: mandatory `anthropic-version: 2023-06-01` plus `anthropic-beta` opt-ins. OpenAI: no general API version header; specific betas use `OpenAI-Beta: <feature>=v<n>`. Gemini: path-versioned (`/v1`, `/v1beta`).'
+  - name: aliasOf
+    type: id
+    required: false
+  - name: cacheControl
+    type: string
+    required: false
+  - name: currentSpecVersion
+    type: string
+    required: false
+  - name: firstSpecVersion
+    type: string
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  - name: status
+    type: string
+    required: false
+  - name: toolUseSchema
+    type: code
+    required: false
+  - name: streamEventKinds
+    type: list<enum<content-delta,tool-input-delta,thinking-delta,citation-delta,message-stop,error-event,ping>>
+    required: false
+    notes: Canonical stream-event kinds emitted on a streamed response (D7, planner 2026-05-01). Enum-typed companion to the free-form `streamingEventTypes` list — used for cross-protocol comparison.
+  incomingEdges:
+  - speaks
+  - bridges
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:mcp-transport
+  name: MCPTransport
+  origin: standard
+  originDate: 2024-11-05
+  originContext: MCP spec 2024-11-05
+  prefix: mcp-transport
+  cluster: 2-compute-path
+  purpose: an MCP wire transport (stdio, Streamable HTTP, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<stdio
+    streamable-http: null
+    sse: null
+    websocket>: null
+    required: true
+  - name: specUrl
+    type: url
+    required: true
+    evidence: vendor-doc-or-better
+  - name: specVersion
+    type: string
+    required: true
+    evidence: vendor-doc-or-better
+  - name: specRevisions
+    type: list<string>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: currentSpecRevision
+    type: string
+    required: true
+    evidence: vendor-doc-or-better
+  - name: streaming
+    type: enum<none,partial,full>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: status
+    type: enum<live,deprecated,community,draft>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: connectionLifecycle
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'Connection lifecycle: handshake, `initialize` request → `initialize` response → `notifications/initialized`, ready, and shutdown semantics for this transport.'
+  - name: capabilityNegotiation
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Shape of the `initialize` request and response — `protocolVersion`, `clientInfo`/`serverInfo`, the exchanged `capabilities` object — as carried over this transport.
+  - name: notificationModel
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: How JSON-RPC notifications and server-pushed events are delivered on this transport (channel, ordering, delivery guarantees).
+  - name: reconnectPolicy
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Reconnect / session-resumption semantics. For Streamable HTTP this includes the `Mcp-Session-Id` header and SSE `Last-Event-ID` resumption.
+  - name: authentication
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Authentication model on this transport (none for stdio; bearer tokens / OAuth Resource Server flow per the 2025-06-18 spec for HTTP-based transports).
+  - name: streamingFraming
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'Wire framing details: SSE `event:`/`data:` delimiters, JSON-RPC message-id discipline, content-length / newline-delimited framing on stdio.'
+  incomingEdges:
+  - speaks
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:mcp-resource
+  name: MCPResource
+  origin: standard
+  originContext: MCP spec — server-exposed resources
+  prefix: mcp-resource
+  cluster: 2-compute-path
+  purpose: MCP server-exposed read-only resource (uri + mimeType)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: uri
+    type: string
+    required: true
+  - name: mimeType
+    type: string
+    required: false
+  - name: subscribable
+    type: bool
+    required: false
+    notes: Whether the resource supports `resources/subscribe` updates per MCP spec.
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - exposes_resource
+  outgoingEdges: []
+  invariants:
+  - id starts with mcp-resource: null
+  examples: []
+- id: node:mcp-prompt
+  name: MCPPrompt
+  origin: standard
+  originContext: MCP spec — server-exposed prompts
+  prefix: mcp-prompt
+  cluster: 2-compute-path
+  purpose: MCP server-exposed prompt template (name + arguments)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: name
+    type: string
+    required: true
+  - name: arguments
+    type: list<object>
+    required: false
+    notes: Per MCP spec each argument has { name, description?, required? }.
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - exposes_prompt
+  outgoingEdges: []
+  invariants:
+  - id starts with mcp-prompt: null
+  examples: []
+- id: node:mcp-sampling
+  name: MCPSampling
+  origin: standard
+  originContext: MCP spec — server-requested sampling capability
+  prefix: mcp-sampling
+  cluster: 2-compute-path
+  purpose: MCP server-requested model sampling capability (modelPreferences + systemPrompt)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: modelPreferences
+    type: object
+    required: false
+    notes: Per MCP spec — hints, costPriority, speedPriority, intelligencePriority.
+  - name: systemPrompt
+    type: string
+    required: false
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - exposes_sampling
+  outgoingEdges: []
+  invariants:
+  - id starts with mcp-sampling: null
+  examples: []
+- id: node:mcp-root
+  name: MCPRoot
+  origin: standard
+  originContext: MCP spec — host-advertised filesystem roots
+  prefix: mcp-root
+  cluster: 2-compute-path
+  purpose: MCP filesystem root scope advertised by host (uri-scoped)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: uri
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - exposes_root
+  outgoingEdges: []
+  invariants:
+  - id starts with mcp-root: null
+  examples: []
+- id: node:async-job
+  name: AsyncJob
+  origin: universal
+  originContext: D5 / planner 2026-05-01 — async / long-running job submission primitive
+  prefix: async-job
+  cluster: 2-compute-path
+  purpose: async / long-running job submission primitive (batch APIs, webhooks, scheduled jobs)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<batch-api,background-task,webhook-callback,scheduled-job,streaming-completion>
+    required: true
+  - name: statusModel
+    type: enum<polling,webhook,sse,websocket>
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - async_job_used_by
+  outgoingEdges: []
+  invariants:
+  - id starts with async-job: null
+  examples: []
+- id: node:agent-host-transport
+  name: AgentHostTransport
+  origin: standard
+  prefix: agent-host-transport
+  cluster: 2-compute-path
+  purpose: how a host talks to an agent process (stdio, http, ws, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<stdio
+    http: null
+    websocket>: null
+    required: true
+  - name: specUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: inboundMessageFormat
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Concrete format the host uses to deliver work to the agent (e.g. JSON object on stdin per turn, HTTP request body shape, framed JSONL).
+  - name: outboundMessageFormat
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Concrete format the agent emits back to the host (e.g. line-delimited JSON / JSONL events on stdout, HTTP response body, WebSocket frames).
+  - name: signalForwarding
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: How the host signals interrupt/cancel/shutdown to the agent process (POSIX signals on stdio; cancel RPC / abort message on http/ws; close-frame on ws).
+  - name: ptySemantics
+    type: markdown
+    required: false
+    evidence: vendor-doc-or-better
+    notes: When `stdio+pty` is used vs. plain stdio — terminal semantics preserved (raw mode, ANSI, resize), and which agents require it. Only meaningful for kind=stdio-pty (or stdio entries describing PTY-aware behavior).
+  - name: supportedAgentControlVerbs
+    type: list<enum<interrupt,abort,cancel,pause,resume,yield,checkpoint>>
+    required: false
+    notes: Agent-control verbs the host transport supports (D2, planner 2026-05-01). Enum extension rather than NodeKind — uniform shape.
+  - name: streamEventKinds
+    type: list<enum<content-delta,tool-input-delta,thinking-delta,citation-delta,message-stop,error-event,ping,session-started,startup-failed,turn-completed,turn-failed,turn-cancelled,turn-ended-with-error,turn-input-required,approval-auto-approved,unsupported-tool-call,notification,other-message,malformed>>
+    required: false
+    notes: Stream-event kinds the transport emits. catalog pass 18 extends with the Symphony §10.4 AgentEventTaxonomy values (session-started ... malformed) on top of the catalog pass 17 D7 baseline.
+  - name: rateLimitObservation
+    type: map<string
+    any>: null
+    required: false
+    notes: 'catalog pass 18 attribute block (capturedAt, vendor, primaryLimit{used,max,resetAt}, secondaryLimit, rawPayloadRef). Reviewer collapse 2026-05-01: replaces the dropped RateLimitPayload NodeKind — captured snapshot is ephemeral runtime data, not a catalog entity.'
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - exposes
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:transport-proxy
+  name: TransportProxy
+  origin: standard
+  prefix: transport-proxy
+  cluster: 2-compute-path
+  purpose: optional interposer (recording, integrity, multiplexing)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: capabilities
+    type: list<enum<recording
+    integrity: null
+    multiplexing: null
+    fan-out: null
+    redaction>>: null
+    required: true
+  - name: bridges
+    type: list<string>
+    required: false
+  - name: kinds
+    type: list<string>
+    required: false
+  - name: signsResponses
+    type: bool
+    required: false
+  - name: rateLimitObservation
+    type: map<string
+    any>: null
+    required: false
+    notes: 'catalog pass 18 attribute block (capturedAt, vendor, primaryLimit{used,max,resetAt}, secondaryLimit, rawPayloadRef). Reviewer collapse 2026-05-01: replaces the dropped RateLimitPayload NodeKind — captured snapshot is ephemeral runtime data, not a catalog entity.'
+  incomingEdges: []
+  outgoingEdges:
+  - bridges
+  invariants: []
+  examples: []
+- id: node:transport-runtime
+  name: TransportRuntime
+  origin: universal
+  prefix: transport-runtime
+  cluster: 2-compute-path
+  purpose: 'a runtime mechanism that hosts an agent''s transport surface (e.g.
+
+    terminal-cli, shell-hook-runtime, mcp-server, stdio-protocol). Distinct
+
+    from `AgentHostTransport` (which is the agent''s own host) and
+
+    `TransportProxy` (which is a relay).
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: runtimeKind
+    type: enum<terminal-cli,shell-hook-runtime,mcp-stdio,mcp-sse,mcp-http,websocket,http-rest,native-process,in-process>
+    required: true
+  - name: interactive
+    type: bool
+    required: false
+  - name: streaming
+    type: bool
+    required: false
+  incomingEdges:
+  - supports
+  - runs_in_runtime
+  outgoingEdges:
+  - hosts_transport_protocol
+  invariants:
+  - id starts with transport-runtime: null
+  examples: []
+- id: node:api-error-class
+  name: APIErrorClass
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code services/api/errors.ts (APIConnectionError,
+    APIConnectionTimeoutError, APIError, APIUserAbortError, FallbackTriggeredError;
+    classifyAPIError + getAssistantMessageFromError branches at L523/560/573/etc).
+    Distinguishes wire-level connection errors from authoritative HTTP errors,
+    user-aborts, and synthetic fallback-triggered errors emitted after
+    MAX_529_RETRIES. Distinct from ErrorCategory (the normalized retry/severity
+    label) — APIErrorClass is the SDK-thrown class hierarchy.
+  prefix: api-error-class
+  cluster: 2-compute-path
+  purpose: |
+    A canonical SDK-thrown error class (APIConnectionError,
+    APIConnectionTimeoutError, APIError, APIUserAbortError,
+    FallbackTriggeredError, CannotRetryError) with its HTTP status / cause
+    fingerprint and recovery posture. Maps to one or more ErrorCategory
+    entries; transports use it to decide retry, fallback, auth-cache clear,
+    or keep-alive teardown.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: className
+    type: string
+    required: true
+    notes: SDK class name (claude-code APIError, APIConnectionError, APIConnectionTimeoutError, APIUserAbortError, FallbackTriggeredError, CannotRetryError).
+  - name: layer
+    type: enum<connection,timeout,http-status,abort,synthetic-fallback,sdk-misuse>
+    required: true
+  - name: httpStatus
+    type: int
+    required: false
+    notes: Status code when layer=http-status (e.g. 401, 413, 429, 500, 529).
+  - name: causeFingerprint
+    type: list<string>
+    required: false
+    notes: claude-code extractConnectionErrorDetails — ECONNRESET, EPIPE, ENOTFOUND, ETIMEDOUT etc.
+  - name: triggersAuthCacheClear
+    type: bool
+    required: false
+    notes: claude-code 401 → clearApiKeyHelperCache; OAuth 401 → handleOAuth401Error; Bedrock/Vertex auth → clear creds.
+  - name: triggersKeepAliveTeardown
+    type: bool
+    required: false
+    notes: claude-code disableKeepAlive() called on ECONNRESET/EPIPE.
+  - name: triggersFallbackModel
+    type: bool
+    required: false
+    notes: claude-code FallbackTriggeredError after MAX_529_RETRIES.
+  - name: userVisibleMessage
+    type: markdown
+    required: false
+    notes: claude-code constants like REPEATED_529_ERROR_MESSAGE, INVALID_API_KEY_ERROR_MESSAGE, OAUTH_ORG_NOT_ALLOWED_ERROR_MESSAGE.
+  - name: mappedErrorCategoryIds
+    type: list<ref<ErrorCategory>>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - emits_api_error
+  outgoingEdges:
+  - mapped_to_error_category
+  invariants:
+  - id starts with api-error-class:
+  - layer=http-status implies httpStatus is set
+  examples:
+  - graph/compute/api-error-classes/claude-code-api-connection-timeout.yaml
+  - graph/compute/api-error-classes/claude-code-fallback-triggered.yaml
+  - graph/compute/api-error-classes/claude-code-api-user-abort.yaml
+- id: node:transport-client
+  name: TransportClient
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code services/api/client.ts + services/api/claude.ts
+    (createBetaClient, persistent connection pool, idle/response timeouts,
+    keep-alive policy, OAuth refresh on 401, AWS/GCP/Anthropic-direct
+    credential precedence) + pi-mono coding-agent agent-session-runtime.ts
+    AgentSessionRuntime client wiring. Distinct from RetryPolicy (which only
+    declares retry curves) and Provider (which is the vendor) — TransportClient
+    is the live HTTP/streaming client + its timeout/keep-alive/auth-refresh
+    posture.
+  prefix: transport-client
+  cluster: 2-compute-path
+  purpose: |
+    A configured transport client targeting a Provider/ProviderVersion with
+    declarative timeouts, keep-alive policy, retry-policy binding, OAuth/auth
+    refresh hooks, mock-mode injection, and credential precedence. Captures
+    real ops nuances: per-stream idle vs response vs total timeouts,
+    persistent connection pool sizing, ECONNRESET teardown, mock rate-limit
+    injection (testing).
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: providerId
+    type: ref<Provider>
+    required: true
+  - name: providerVersionId
+    type: ref<ProviderVersion>
+    required: false
+  - name: idleTimeoutMs
+    type: int
+    required: false
+    notes: Per-chunk idle timeout for streaming responses (claude-code first-token + per-chunk).
+  - name: responseTimeoutMs
+    type: int
+    required: false
+    notes: End-to-end response timeout (non-streaming).
+  - name: totalTimeoutMs
+    type: int
+    required: false
+  - name: firstTokenTimeoutMs
+    type: int
+    required: false
+    notes: claude-code firstTokenDate.ts TTFT-based stall detector.
+  - name: keepAliveEnabled
+    type: bool
+    required: false
+  - name: keepAliveTeardownOnCodes
+    type: list<string>
+    required: false
+    notes: claude-code disableKeepAlive on ECONNRESET, EPIPE.
+  - name: persistentPoolSize
+    type: int
+    required: false
+  - name: retryPolicyId
+    type: ref<RetryPolicy>
+    required: false
+  - name: tokenBudgetId
+    type: ref<TokenBudget>
+    required: false
+  - name: oauthRefreshOn401
+    type: bool
+    required: false
+    notes: claude-code handleOAuth401Error refreshes OAuth tokens before retry.
+  - name: clearAuthCacheOn401
+    type: bool
+    required: false
+    notes: claude-code clearApiKeyHelperCache called for non-OAuth 401.
+  - name: credentialPrecedence
+    type: list<enum<env-var,oauth,bedrock-iam,vertex-adc,api-key-helper,settings,keychain>>
+    required: false
+    notes: claude-code auth resolution order (getAnthropicApiKeyWithSource, getClaudeAIOAuthTokens, Bedrock IAM, Vertex ADC).
+  - name: mockModeEnabled
+    type: bool
+    required: false
+    notes: claude-code services/rateLimitMocking — /mock-limits command injects synthetic rate-limit headers for testing.
+  - name: dumpsPrompts
+    type: bool
+    required: false
+    notes: claude-code services/api/dumpPrompts.ts — when CLAUDE_CODE_DUMP_PROMPTS is set, every request body is written to disk.
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - uses_transport_client
+  outgoingEdges:
+  - client_targets_provider
+  - client_uses_retry_policy
+  - client_uses_token_budget
+  invariants:
+  - id starts with transport-client:
+  examples:
+  - graph/compute/transport-clients/claude-code-anthropic-direct.yaml
+  - graph/compute/transport-clients/claude-code-bedrock.yaml
+- id: node:capacity-cascade-signal
+  name: CapacityCascadeSignal
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code services/api/withRetry.ts REPEATED_529_ERROR_MESSAGE +
+    FOREGROUND_529_RETRY_SOURCES + FastMode cooldown + handleFastModeOverageRejection.
+    Signals that the upstream is in a capacity-cascade state — retries should
+    bail (background sources), trigger fallback model (foreground after
+    MAX_529_RETRIES), or enter fast-mode cooldown. Distinct from ErrorCategory
+    (a single error type) — CapacityCascadeSignal is the cross-call observation
+    that gates retry/fallback decisions.
+  prefix: capacity-cascade-signal
+  cluster: 2-compute-path
+  purpose: |
+    A cross-call observation about provider capacity state — repeated 529s,
+    fast-mode rejection (anthropic-ratelimit-unified-overage-disabled-reason),
+    permanent overage rejection — that drives whether retries continue,
+    fallback model fires, or fast mode is disabled session-wide.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: signalKind
+    type: enum<repeated-overload-529,fast-mode-cooldown,fast-mode-permanent-rejection,background-bail,foreground-fallback-trigger>
+    required: true
+  - name: thresholdAttempts
+    type: int
+    required: false
+    notes: claude-code MAX_529_RETRIES=3 for foreground-fallback-trigger.
+  - name: cooldownMs
+    type: int
+    required: false
+    notes: claude-code MIN_COOLDOWN_MS=600000, DEFAULT_FAST_MODE_FALLBACK_HOLD_MS=1800000 (30min).
+  - name: triggerHeader
+    type: string
+    required: false
+    notes: claude-code anthropic-ratelimit-unified-overage-disabled-reason header for permanent rejection.
+  - name: actionOnSignal
+    type: enum<bail,trigger-fallback,disable-fast-mode-session,enter-cooldown,emit-telemetry>
+    required: true
+  - name: telemetryEvent
+    type: string
+    required: false
+    notes: claude-code tengu_api_529_background_dropped emitted when background-bail fires.
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - emits_cascade_signal
+  outgoingEdges: []
+  invariants:
+  - id starts with capacity-cascade-signal:
+  examples:
+  - graph/compute/capacity-cascade-signals/claude-code-repeated-529.yaml
+  - graph/compute/capacity-cascade-signals/claude-code-fast-mode-cooldown.yaml
+- id: node:transcript-ingress-endpoint
+  name: TranscriptIngressEndpoint
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code services/api/sessionIngress.ts
+    (appendSessionLogImpl, lastUuidMap, sequentialAppendBySession, MAX_RETRIES,
+    BASE_DELAY_MS, Last-Uuid header, 409 stale-state recovery). The session
+    transcript is streamed to a per-session ingress URL that uses Last-Uuid
+    chaining for ordering, sequential per-session writes, and 409 stale-UUID
+    recovery semantics.
+  prefix: transcript-ingress
+  cluster: 2-compute-path
+  purpose: |
+    A remote transcript-ingress endpoint that receives streamed session
+    entries with Last-Uuid chaining, per-session sequential writes, retryable
+    transient failures, and 409 stale-state recovery (server returns
+    x-last-uuid; client adopts and retries).
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: endpointUrl
+    type: url
+    required: true
+  - name: ingressMethod
+    type: enum<PUT,POST>
+    required: false
+    notes: claude-code uses axios.put for append.
+  - name: lastUuidHeader
+    type: string
+    required: false
+    notes: claude-code Last-Uuid request header carries the previously stored uuid for chain validation.
+  - name: serverLastUuidHeader
+    type: string
+    required: false
+    notes: claude-code x-last-uuid response header — used to recover from 409 stale-state when the entry was stored despite the client thinking it failed.
+  - name: maxRetries
+    type: int
+    required: false
+    notes: claude-code MAX_RETRIES=10.
+  - name: baseDelayMs
+    type: int
+    required: false
+    notes: claude-code BASE_DELAY_MS=500.
+  - name: failsImmediatelyOn
+    type: list<int>
+    required: false
+    notes: claude-code fails immediately on 401 (auth).
+  - name: sequentialPerSession
+    type: bool
+    required: false
+    notes: claude-code getOrCreateSequentialAppend wraps appends in a per-session sequential() to prevent concurrent writes.
+  - name: authMethod
+    type: enum<oauth,api-key,bearer>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - persists_transcript_to
+  outgoingEdges: []
+  invariants:
+  - id starts with transcript-ingress:
+  examples:
+  - graph/compute/transcript-ingress-endpoints/claude-code-claude-ai-ingress.yaml
+# --- Legacy NodeKinds (pre-remodel data files still emit these) ---
+- id: node:model-provider-product
+  name: ModelProviderProduct
+  origin: universal
+  prefix: provider
+  cluster: 2-compute-path
+  purpose: |
+    (LEGACY) a model provider as a commercial product entity. Superseded by
+    Provider NodeKind (cluster 2-compute-path). Retained so legacy data in
+    capabilities-and-models/model-provider-product.yaml validates.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: providerId
+    type: string
+    required: false
+  - name: displayName
+    type: string
+    required: true
+  - name: kindLabel
+    type: string
+    required: false
+  - name: vendor
+    type: string
+    required: false
+  - name: homepage
+    type: url
+    required: false
+  - name: apiFamilies
+    type: list<string>
+    required: false
+  - name: authKinds
+    type: list<string>
+    required: false
+  - name: evidenceRefs
+    type: list<string>
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - has_version
+  invariants: []
+  examples: []
+- id: node:model-provider-version
+  name: ModelProviderVersion
+  origin: universal
+  prefix: providerVersion
+  cluster: 2-compute-path
+  purpose: |
+    (LEGACY) a versioned release of a model provider's API. Superseded by
+    ProviderVersion NodeKind (cluster 2-compute-path). Retained so legacy data
+    in capabilities-and-models/model-provider-version.yaml validates.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: providerVersionId
+    type: string
+    required: false
+  - name: providerId
+    type: string
+    required: false
+  - name: versionRange
+    type: string
+    required: false
+  - name: apiBasePatterns
+    type: list<string>
+    required: false
+  - name: authSignals
+    type: list<string>
+    required: false
+  - name: envSignals
+    type: list<string>
+    required: false
+  - name: regionConstraints
+    type: list<string>
+    required: false
+  - name: evidenceRefs
+    type: list<string>
+    required: false
+  incomingEdges:
+  - has_version
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:transport-protocol
+  name: TransportProtocol
+  origin: universal
+  prefix: transportProtocol
+  cluster: 2-compute-path
+  purpose: |
+    (LEGACY) a transport protocol for agent communication (terminal-cli,
+    shell-hook-runtime, etc.). Superseded by ModelTransportProtocol,
+    MCPTransport, and AgentHostTransport NodeKinds. Retained so legacy data
+    in capabilities-and-models/transport-protocol.yaml validates.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: transportId
+    type: string
+    required: false
+  - name: label
+    type: string
+    required: false
+  - name: protocolKind
+    type: string
+    required: false
+  - name: interactive
+    type: string
+    required: false
+  - name: streaming
+    type: string
+    required: false
+  - name: requestShape
+    type: string
+    required: false
+  - name: responseShape
+    type: string
+    required: false
+  - name: evidenceRefs
+    type: list<string>
+    required: false
+  incomingEdges:
+  - uses_transport
+  outgoingEdges: []
+  invariants: []
+  examples: []
+

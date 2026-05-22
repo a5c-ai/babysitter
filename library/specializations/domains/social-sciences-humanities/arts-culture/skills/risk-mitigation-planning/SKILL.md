@@ -2,6 +2,10 @@
 name: risk-mitigation-planning
 description: Develop comprehensive risk management plans for collections and cultural venues including disaster preparedness, security protocols, and insurance coordination
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:compliance-automation, skill-area:data-governance, skill-area:incident-management]
+  roles: [role:compliance-officer, role:operations-analyst]
 ---
 
 # Risk Mitigation Planning

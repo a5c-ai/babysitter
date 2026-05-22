@@ -1,0 +1,115 @@
+---
+nodeKind: Workflow
+id: workflow:cyber-risk-scenario-modeling
+attributes:
+  displayName: "Cyber Risk Scenario Modeling"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Quantifies cybersecurity risk exposure using structured risk
+    frameworks -- applying FAIR (Factor Analysis of Information Risk)
+    methodology to model loss event frequency and loss magnitude for
+    priority threat scenarios, incorporating vulnerability assessment
+    results and threat intelligence into calibration inputs, running
+    Monte Carlo simulations to produce annualized loss expectancy
+    distributions, developing loss exceedance curves for executive risk
+    communication, comparing scenario-based risk quantification against
+    cyber insurance coverage limits, and prioritizing security
+    investments based on risk-reduction return on investment. Produces
+    cyber risk quantification reports, loss exceedance curves, and
+    investment prioritization matrices. Excludes security control
+    implementation and insurance procurement.
+edges:
+  involves_role:
+    - target: role:security-risk-analyst
+    - target: role:security-reviewer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:threat-modeling
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:cybersecurity-grc
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:threat-modeling
+    - target: responsibility:risk-reporting
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:risk-management-team
+---
+nodeKind: Workflow
+id: workflow:threat-intelligence-feed-review
+attributes:
+  displayName: "Threat Intelligence Feed Review"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Evaluates and tunes threat intelligence sources and
+    indicator-of-compromise feeds -- reviewing feed quality metrics
+    including true-positive rate, timeliness, and relevance to
+    organizational threat landscape, deduplicating and normalizing IOCs
+    across commercial, open-source, and ISAC feeds, tuning detection
+    rules and SIEM correlation logic based on feed performance, retiring
+    stale or low-fidelity indicators that generate false positives,
+    assessing coverage gaps against MITRE ATT&CK techniques relevant to
+    the organization, and evaluating emerging threat intelligence vendors.
+    Produces feed quality scorecard, tuning recommendations, and coverage
+    gap report. Excludes incident response and threat hunting.
+edges:
+  involves_role:
+    - target: role:security-risk-analyst
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:threat-modeling
+  applies_to_domain:
+    - target: domain:cybersecurity-grc
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:threat-modeling
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:application-security-team
+---
+nodeKind: Workflow
+id: workflow:security-control-maturity-assessment
+attributes:
+  displayName: "Security Control Maturity Assessment"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Assesses security control maturity against industry frameworks --
+    mapping implemented controls to NIST CSF, CIS Controls, and ISO
+    27001 requirement sets, scoring each control domain on a maturity
+    scale from initial through optimized, identifying control gaps where
+    framework requirements lack corresponding implementations, evaluating
+    automation level and evidence-collection maturity for each control,
+    benchmarking maturity scores against industry peers and regulatory
+    expectations, and developing prioritized roadmaps to advance maturity
+    in lagging domains. Produces control maturity heat map, gap analysis,
+    and maturity advancement roadmap. Excludes control implementation and
+    framework selection.
+edges:
+  involves_role:
+    - target: role:security-risk-analyst
+    - target: role:security-reviewer
+    - target: role:principal-engineer
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:identity-security
+  applies_to_domain:
+    - target: domain:cybersecurity-grc
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:compliance-team

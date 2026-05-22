@@ -19,6 +19,13 @@
  * - Coalition Formation: https://plato.stanford.edu/entries/game-theory/#CoalGame
  * - Bargaining Theory: https://www.nobelprize.org/prizes/economic-sciences/1994/summary/
  * - Multi-Party Negotiation: https://www.sciencedirect.com/topics/economics-econometrics-and-finance/negotiation
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

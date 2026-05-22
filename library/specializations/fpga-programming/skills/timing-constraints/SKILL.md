@@ -2,6 +2,11 @@
 name: timing-constraints
 description: Expert skill for developing and validating timing constraints. Writes SDC (Synopsys Design Constraints) and XDC files for FPGA timing closure.
 allowed-tools: Read, Grep, Write, Edit, Bash, Glob
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis, skill-area:timing-closure]
+  roles: [role:embedded-engineer]
 ---
 
 # Timing Constraints Skill

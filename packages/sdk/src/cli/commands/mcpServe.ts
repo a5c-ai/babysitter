@@ -2,12 +2,31 @@
  * mcp:serve command - Launch the babysitter MCP server on stdio transport.
  *
  * stdout is reserved for MCP protocol messages; all logging goes to stderr.
+ * WebSocket transport is available via @a5c-ai/babysitter-agent.
  */
 
 import { createBabysitterMcpServer } from "../../mcp";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
-export async function handleMcpServe(args: { json: boolean }): Promise<number> {
+function installShutdownHandlers(shutdownFn: () => Promise<void>): void {
+  process.on("SIGINT", () => void shutdownFn());
+  process.on("SIGTERM", () => void shutdownFn());
+}
+
+export async function handleMcpServe(args: {
+  json: boolean;
+  transport?: string;
+}): Promise<number> {
+  const transportType = args.transport ?? "stdio";
+
+  if (transportType === "ws" || transportType === "websocket") {
+    process.stderr.write(
+      "WebSocket transport has moved to @a5c-ai/babysitter-agent.\n" +
+      "Use babysitter-agent mcp:serve --transport websocket instead.\n",
+    );
+    return 1;
+  }
+
   const server = createBabysitterMcpServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
@@ -15,22 +34,14 @@ export async function handleMcpServe(args: { json: boolean }): Promise<number> {
   process.stderr.write(
     args.json
       ? JSON.stringify({ status: "running", transport: "stdio" }) + "\n"
-      : "Babysitter MCP server running on stdio\n"
+      : "Babysitter MCP server running on stdio\n",
   );
 
-  // Graceful shutdown on SIGINT / SIGTERM
-  const shutdown = async () => {
+  installShutdownHandlers(async () => {
     process.stderr.write("Shutting down MCP server...\n");
     await server.close();
     process.exit(0);
-  };
-
-  process.on("SIGINT", () => void shutdown());
-  process.on("SIGTERM", () => void shutdown());
-
-  // Keep the process alive — the transport manages its own I/O loop.
-  // Return a code that the CLI runner will never actually see (we exit via signal).
-  return await new Promise<number>(() => {
-    // intentionally never resolves
   });
+
+  return await new Promise<number>(() => {});
 }

@@ -1,0 +1,11 @@
+nodeKind: Topic
+id: topic:circuit-breakers
+attributes:
+  displayName: "Circuit Breakers"
+  description: |
+    Circuit Breakers as a cross-cutting topic — failure isolation,
+    half-open probing, and bulkhead patterns for resilient services.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:devops

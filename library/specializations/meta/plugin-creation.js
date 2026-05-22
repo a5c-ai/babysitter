@@ -7,6 +7,13 @@
  * @agent process-architect specializations/meta/agents/process-architect/AGENT.md
  * @agent quality-assessor specializations/meta/agents/quality-assessor/AGENT.md
  * @agent technical-writer specializations/meta/agents/technical-writer/AGENT.md
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture, specialization:sdk-platform-development]
+ *   skillAreas: [skill-area:plugin-systems, skill-area:sdk-codegen]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:platform-engineer, role:tech-lead, role:architect]
+ *   workflows: [workflow:feature-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

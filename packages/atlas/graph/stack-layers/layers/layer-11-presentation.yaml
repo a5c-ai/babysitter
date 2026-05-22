@@ -1,0 +1,25 @@
+nodeKind: Layer
+id: layer:11-presentation
+attributes:
+  displayName: Presentation
+  position: 11
+  path: surfacing
+  scope: Outermost rendering surface for humans or downstream systems.
+  summary: |
+    The presentation layer renders agent work to humans or downstream systems:
+    terminal UI, CLI, web UI, IDE panel, API endpoint, JSON stream, structured
+    event log, or dashboard. Realized by `Presentation` instances such as TUI,
+    CLI, web, IDE, and API surfaces.
+  responsibilities:
+    - Render prompts, transcripts, plans, tool calls, approvals, and results.
+    - Provide human-readable and machine-readable output modes.
+    - Own layout, accessibility, theme, streaming display, and navigation affordances.
+  examples:
+    - TUI, CLI, web app, IDE side panel, notebook/chat surface.
+    - REST/WebSocket API, JSON stream, structured event log, dashboard.
+    - LangGraph app UI, LangSmith trace view, custom workflow console.
+  fitNotes: |
+    Products can be headless and still fit the stack through an API or event
+    stream presentation. Presentation can be supplied by a host IDE/web app
+    rather than by the agent framework itself.
+edges: {}

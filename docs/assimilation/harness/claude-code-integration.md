@@ -62,7 +62,7 @@ Claude Code starts session
   stdin: {session_id}   babysitter hook:run --hook-type session-start
         |                    |
         v                    v
-  Write BABYSITTER_SESSION_ID   Create baseline state file
+  Write AGENT_SESSION_ID   Create baseline state file
   to CLAUDE_ENV_FILE            {stateDir}/{sessionId}.md
         |
         v
@@ -104,7 +104,7 @@ Claude Code starts session
 
 ## 1. Plugin Manifest Registration
 
-**File:** `plugins/babysitter/plugin.json`
+**Generated bundle manifest:** `artifacts/generated-plugins/claude-code/plugin.json`
 
 The plugin manifest declares two hooks, three skills, and metadata:
 
@@ -123,7 +123,7 @@ The plugin manifest declares two hooks, three skills, and metadata:
 }
 ```
 
-Additionally, `plugins/babysitter/hooks/hooks.json` provides a secondary hook descriptor used by Claude Code's native hook system:
+Additionally, `artifacts/generated-plugins/claude-code/hooks/hooks.json` provides the Claude Code hook registration file for the generated bundle:
 
 ```json
 {
@@ -149,14 +149,14 @@ Additionally, `plugins/babysitter/hooks/hooks.json` provides a secondary hook de
 | Variable | Description |
 |----------|-------------|
 | `CLAUDE_PLUGIN_ROOT` | Absolute path to the installed plugin directory |
-| `BABYSITTER_SESSION_ID` | Cross-harness session identifier (written to `CLAUDE_ENV_FILE` by session-start hook) |
+| `AGENT_SESSION_ID` | Cross-harness session identifier (written to `CLAUDE_ENV_FILE` by session-start hook) |
 | `CLAUDE_ENV_FILE` | Path to env file for persisting exports across hook invocations |
 
 ---
 
 ## 2. SessionStart Hook
 
-**Shell entry:** `plugins/babysitter/hooks/babysitter-session-start-hook.sh`
+**Generated shell entry:** `artifacts/generated-plugins/claude-code/hooks/babysitter-proxied-session-start.sh`
 **TypeScript handler:** `packages/sdk/src/harness/claudeCode.ts` -> `handleSessionStartHookImpl()`
 
 ### Execution Flow
@@ -202,7 +202,7 @@ The handler performs three operations:
 
 1. **Parse stdin** -- Reads JSON input containing `{ session_id: string }`.
 
-2. **Append to CLAUDE_ENV_FILE** -- If the `CLAUDE_ENV_FILE` environment variable is set, appends `export BABYSITTER_SESSION_ID="{sessionId}"` to make the session ID available to subsequent hook invocations.
+2. **Append to CLAUDE_ENV_FILE** -- If the `CLAUDE_ENV_FILE` environment variable is set, appends `export AGENT_SESSION_ID="{sessionId}"` to make the session ID available to subsequent hook invocations.
 
 3. **Create baseline state file** -- Writes a session state file at `{pluginRoot}/skills/babysit/state/{sessionId}.md` with initial values:
 
@@ -210,7 +210,7 @@ The handler performs three operations:
 ---
 active: true
 iteration: 1
-max_iterations: 256
+max_iterations: 65000
 run_id: ""
 started_at: "2026-03-02T10:00:00Z"
 last_iteration_at: "2026-03-02T10:00:00Z"
@@ -248,7 +248,7 @@ Session state files use Markdown with YAML frontmatter. The frontmatter stores m
 ---
 active: true
 iteration: 3
-max_iterations: 256
+max_iterations: 65000
 run_id: "my-run-abc123"
 started_at: "2026-03-02T10:00:00Z"
 last_iteration_at: "2026-03-02T10:05:30Z"
@@ -264,7 +264,7 @@ Build a REST API with authentication and rate limiting for the user service.
 |-------|------|-------------|
 | `active` | boolean | Whether the session loop is active |
 | `iteration` | number | Current iteration number (1-based) |
-| `max_iterations` | number | Maximum allowed iterations (0 = unlimited, default: 256) |
+| `max_iterations` | number | Maximum allowed iterations (0 = unlimited, default: 65000) |
 | `run_id` | string | Associated run ID (empty string before `run:create`) |
 | `started_at` | string | ISO 8601 timestamp of session start |
 | `last_iteration_at` | string | ISO 8601 timestamp of last iteration |
@@ -327,7 +327,7 @@ babysitter run:create \
   --request req-456 \
   --prompt "Build the API" \
   --harness claude-code \
-  --session-id "${BABYSITTER_SESSION_ID}" \
+  --session-id "${AGENT_SESSION_ID}" \
   --plugin-root "${CLAUDE_PLUGIN_ROOT}" \
   --json \
   --dry-run
@@ -400,7 +400,7 @@ After successful binding, the state file is updated:
 ---
 active: true
 iteration: 1
-max_iterations: 256
+max_iterations: 65000
 run_id: "my-run-abc123"
 started_at: "2026-03-02T10:00:00Z"
 last_iteration_at: "2026-03-02T10:00:00Z"
@@ -414,7 +414,7 @@ Build a REST API with authentication and rate limiting for the user service.
 
 ## 5. The Stop Hook -- Core Orchestration Loop Control
 
-**Shell entry:** `plugins/babysitter/hooks/babysitter-stop-hook.sh`
+**Generated shell entry:** `artifacts/generated-plugins/claude-code/hooks/babysitter-proxied-stop.sh`
 **TypeScript handler:** `handleStopHookImpl()` in `packages/sdk/src/harness/claudeCode.ts`
 
 The stop hook is the central mechanism that converts Claude Code's single-turn execution model into a multi-iteration orchestration loop. Every time Claude attempts to end its response, the stop hook intercepts and decides whether to allow the exit or block it with new context.
@@ -456,12 +456,9 @@ handleStopHookImpl()
         +-- 4. Read session state
         |
         +-- 5. Check max iterations
-        |       +-- [iteration >= maxIterations] --> APPROVE + cleanup
+        |       +-- [iteration >= maxIterations] --> APPROVE + mark inactive
         |
-        +-- 6. Check iteration timing (runaway loop detection)
-        |       +-- [avg of last 3 <= 15s, after iter 5] --> APPROVE + cleanup
-        |
-        +-- 7. No runId bound? --> APPROVE + cleanup
+        +-- 6. No runId bound? --> APPROVE + mark inactive
 ```
 
 #### Phase 3: Run State Evaluation
@@ -474,7 +471,7 @@ handleStopHookImpl()
         |       +-- Build effect index
         |       +-- Determine: completed / failed / waiting / created
         |       +-- Count pending effects by kind
-        |       +-- [run state unknown] --> APPROVE + cleanup
+        |       +-- [run state unknown] --> ERROR/APPROVE without deleting state
         |
         +-- 9. Parse transcript for <promise> tag
         |       |
@@ -485,7 +482,7 @@ handleStopHookImpl()
         |
         +-- 10. Check completion proof
         |       |
-        |       +-- [run completed AND promise matches proof] --> APPROVE + cleanup
+        |       +-- [run completed AND promise matches proof] --> APPROVE + mark inactive
 ```
 
 #### Phase 4: Output (Block Decision)
@@ -578,7 +575,7 @@ The stop hook receives JSON on stdin:
 {
   "decision": "block",
   "reason": "Babysitter iteration 3 | Continue orchestration (run:iterate).\n\nBuild a REST API...",
-  "systemMessage": "\uD83D\uDD04 Babysitter iteration 3/256 [waiting]"
+  "systemMessage": "\uD83D\uDD04 Babysitter iteration 3/65000 [waiting]"
 }
 ```
 
@@ -630,7 +627,6 @@ Each stop hook invocation appends a `STOP_HOOK_INVOKED` event to the run journal
 | No `session_id` in hook input | (no event recorded) |
 | No session state file found | (no event recorded) |
 | `iteration >= maxIterations` | `max_iterations_reached` |
-| Iteration avg <= 15s (after iter 5) | `iteration_too_fast` |
 | No `runId` bound to session | (cleanup, no event) |
 | Run state unknown/unreadable | `run_state_unknown` |
 | Promise tag matches completion proof | `completion_proof_matched` |
@@ -738,7 +734,7 @@ The `task:post` command:
 
 ## 7. Native Orchestration Hooks
 
-**Dispatcher:** `plugins/babysitter/hooks/hook-dispatcher.sh`
+**SDK hook discovery:** `packages/sdk/src/hooks/dispatcher.ts`
 
 The hook dispatcher executes native babysitter lifecycle hooks (distinct from Claude Code's `SessionStart`/`Stop` hooks). These hooks are triggered by the SDK runtime during `run:iterate`.
 
@@ -774,7 +770,7 @@ Within each directory, scripts are sorted alphabetically and executed sequential
 
 ### Breakpoint Hook Dispatcher
 
-**File:** `plugins/babysitter/hooks/on-breakpoint-dispatcher.sh`
+**Unified source hooks:** `plugins/babysitter-unified/hooks/`
 
 A specialized dispatcher for breakpoint events. Same three-tier discovery as the generic dispatcher but specific to the `on-breakpoint` hook type. Receives breakpoint payload on stdin via `BREAKPOINT_PAYLOAD` environment variable.
 
@@ -842,64 +838,23 @@ run:iterate detects breakpoint effect
 
 ---
 
-## 9. Session Check-Iteration (Runaway Loop Detection)
+## 9. Session Check-Iteration
 
 **CLI command:** `babysitter session:check-iteration`
 **Handler:** `handleSessionCheckIteration()` in `packages/sdk/src/cli/commands/session.ts`
 
-The stop hook and the `session:check-iteration` command both implement runaway loop detection to prevent infinite iteration loops.
+The stop hook and `session:check-iteration` enforce only the max-iterations limit. Iteration-speed stopping is disabled; iteration timing is retained only as diagnostic data.
 
-### Detection Mechanisms
+### Max Iterations Guard
 
-#### 1. Max Iterations Guard
+``` 
+IF iteration >= maxIterations (default 65000):
+    APPROVE exit, mark session inactive
+``` 
 
-```
-IF iteration >= maxIterations (default 256):
-    APPROVE exit, cleanup state file
-```
+### Timing Diagnostics
 
-#### 2. Iteration Speed Guard (Runaway Detection)
-
-```
-IF iteration >= 5:
-    Calculate durations of last 3 iterations
-    IF average duration <= 15 seconds:
-        APPROVE exit (runaway detected), cleanup state file
-```
-
-The `iterationTimes` array stores the last 3 iteration durations in seconds. Durations are calculated from the difference between the current timestamp and `lastIterationAt`.
-
-### Timing Calculation
-
-**Concrete example:**
-
-```
-lastIterationAt = "2026-03-02T10:05:00Z"  (epoch: 1740909900)
-currentTime     = "2026-03-02T10:05:45Z"  (epoch: 1740909945)
-duration        = 1740909945 - 1740909900 = 45 seconds
-
-existingTimes = [62, 58]
-updatedTimes  = [62, 58, 45]   (appended, kept last 3)
-average       = (62 + 58 + 45) / 3 = 55s  --> NOT too fast (> 15s threshold)
-```
-
-```typescript
-function updateIterationTimes(
-  existingTimes: number[],
-  lastIterationAt: string,   // ISO 8601
-  currentTime: string        // ISO 8601
-): number[] {
-  const duration = epochSeconds(currentTime) - epochSeconds(lastIterationAt);
-  if (duration <= 0) return existingTimes;
-  return [...existingTimes, duration].slice(-3);  // Keep last 3
-}
-
-function isIterationTooFast(iterationTimes: number[]): boolean {
-  if (iterationTimes.length < 3) return false;
-  const avg = sum(iterationTimes) / iterationTimes.length;
-  return avg <= 15;  // 15 seconds threshold
-}
-```
+The `iterationTimes` array stores recent iteration durations in seconds for diagnostics, but it does not stop or approve the loop by itself.
 
 ### session:check-iteration Output
 
@@ -910,7 +865,7 @@ function isIterationTooFast(iterationTimes: number[]): boolean {
   "nextIteration": 4,
   "updatedIterationTimes": [45, 62, 58],
   "iteration": 3,
-  "maxIterations": 256,
+  "maxIterations": 65000,
   "runId": "my-run-abc123",
   "prompt": "Build the API..."
 }
@@ -922,7 +877,6 @@ When `shouldContinue` is `false`, includes `reason` and `stopMessage`:
 {
   "found": true,
   "shouldContinue": false,
-  "reason": "iteration_too_fast",
   "averageTime": 8.3,
   "threshold": 15,
   "stopMessage": "Average iteration time too fast (8.3s <= 15s)"
@@ -975,7 +929,7 @@ Stop hook fires
         v
   Compare: promiseValue === completionProof
         |
-        +-- [match] -> APPROVE exit, cleanup state file
+        +-- [match] -> APPROVE exit, mark state inactive
         |
         +-- [no match] -> BLOCK with hint:
               "Run completed! Extract completionProof from run:status --json,
@@ -1033,24 +987,14 @@ run:iterate returns { status: "completed", completionProof: "abc123..." }
   Claude Code session ends normally
 ```
 
-### Session Cleanup
+### Session Completion Marking
 
-On any approve decision, the stop hook calls `cleanupSession()` which deletes the session state file:
-
-```typescript
-async function cleanupSession(filePath: string): Promise<void> {
-  try {
-    await deleteSessionFile(filePath);
-  } catch {
-    // Best-effort cleanup
-  }
-}
-```
+On approve decisions that end hook blocking, the stop hook retains the session state file and marks it inactive instead of deleting it. This preserves recovery context while ensuring later `hook:run` calls return without blocking even if the run remains associated in the retained state file.
 
 This ensures that:
-- Subsequent sessions are not contaminated by old state
-- The next `SessionStart` hook creates a fresh baseline
-- No orphaned state files accumulate over time
+- Completion and guard exits are auditable after the fact
+- The next hook invocation does not block on inactive retained state
+- Recovery tooling can still inspect the previous session/run association
 
 ---
 
@@ -1080,11 +1024,11 @@ interface HarnessAdapter {
 
 ### Adapter Detection
 
-The registry probes adapters in priority order. The Claude Code adapter reports active when either `BABYSITTER_SESSION_ID` or `CLAUDE_ENV_FILE` is set:
+The registry probes adapters in priority order. The Claude Code adapter reports active when either `AGENT_SESSION_ID` or `CLAUDE_ENV_FILE` is set:
 
 ```typescript
 isActive(): boolean {
-  return !!(process.env.BABYSITTER_SESSION_ID || process.env.CLAUDE_ENV_FILE);
+  return !!(process.env.AGENT_SESSION_ID || process.env.CLAUDE_ENV_FILE);
 }
 ```
 
@@ -1114,13 +1058,14 @@ babysitter hook:run --hook-type stop --harness claude-code
 
 | File | Role |
 |------|------|
-| `plugins/babysitter/plugin.json` | Plugin manifest with hook and skill declarations |
-| `plugins/babysitter/hooks/hooks.json` | Secondary hook descriptor for Claude Code hook system |
-| `plugins/babysitter/hooks/babysitter-session-start-hook.sh` | Shell entry for SessionStart hook |
-| `plugins/babysitter/hooks/babysitter-stop-hook.sh` | Shell entry for Stop hook |
-| `plugins/babysitter/hooks/hook-dispatcher.sh` | Generic hook dispatcher (per-repo/per-user/plugin) |
-| `plugins/babysitter/hooks/on-breakpoint-dispatcher.sh` | Breakpoint-specific hook dispatcher |
-| `plugins/babysitter/skills/babysit/SKILL.md` | Primary orchestration skill definition |
+| `plugins/babysitter-unified/plugin.json` | Unified source manifest used to generate harness-specific bundles |
+| `artifacts/generated-plugins/claude-code/plugin.json` | Generated Claude Code plugin manifest |
+| `artifacts/generated-plugins/claude-code/hooks/hooks.json` | Claude Code hook registration file |
+| `artifacts/generated-plugins/claude-code/hooks/babysitter-proxied-session-start.sh` | Generated shell entry for SessionStart |
+| `artifacts/generated-plugins/claude-code/hooks/babysitter-proxied-stop.sh` | Generated shell entry for Stop |
+| `packages/sdk/src/hooks/dispatcher.ts` | SDK hook discovery for native babysitter lifecycle hooks |
+| `plugins/babysitter-unified/hooks/` | Unified source hook implementations copied into generated bundles |
+| `plugins/babysitter-unified/skills/babysit/SKILL.md` | Primary orchestration skill definition |
 | `packages/sdk/src/harness/types.ts` | HarnessAdapter interface definition |
 | `packages/sdk/src/harness/claudeCode.ts` | Claude Code adapter (stop hook, session-start, binding) |
 | `packages/sdk/src/harness/nullAdapter.ts` | No-op fallback adapter |
@@ -1134,3 +1079,9 @@ babysitter hook:run --hook-type stop --harness claude-code
 | `packages/sdk/src/cli/commands/session.ts` | session:* CLI commands including check-iteration |
 | `packages/sdk/src/cli/commands/runIterate.ts` | run:iterate CLI command |
 | `packages/sdk/src/cli/completionProof.ts` | Completion proof derivation (SHA-256) |
+
+
+
+
+
+

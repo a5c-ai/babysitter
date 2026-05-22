@@ -7,6 +7,13 @@ metadata:
   version: "1.0.0"
   category: test-data-management
   backlog-id: SK-015
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:data-quality-testing]
+  roles: [role:qa-engineer, role:backend-engineer]
+  topics: [topic:test-driven-development]
+
 ---
 
 # test-data-generation

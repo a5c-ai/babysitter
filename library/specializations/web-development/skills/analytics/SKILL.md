@@ -2,6 +2,13 @@
 name: analytics
 description: Google Analytics 4, tag management, and event tracking.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:analytics-tracking, skill-area:data-analytics]
+  roles: [role:frontend-engineer, role:fullstack-engineer]
+  topics: [topic:developer-experience]
+
 ---
 
 # Analytics Skill

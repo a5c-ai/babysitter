@@ -1,0 +1,303 @@
+nameOverride: ""
+
+fullnameOverride: ""
+
+namespaceOverride: ""
+
+
+
+global:
+
+  imageRegistry: ""
+
+  imagePullSecrets: []
+
+
+
+image:
+
+  repository: krate/mvp-model
+
+  tag: "0.1.0"
+
+  pullPolicy: IfNotPresent
+
+  controller:
+    repository: ""
+    tag: ""
+
+  web:
+    repository: ""
+    tag: ""
+
+
+
+demo:
+  enabled: true
+  storageClassName: standard
+  objectStore:
+    mode: local-dev-minio
+  postgres:
+    mode: local-dev-postgres
+  nats:
+    mode: local-dev-nats
+
+
+api:
+
+  replicas: 1
+
+  service:
+
+    port: 80
+  resources: {}
+
+
+apiService:
+  enabled: false
+
+
+
+
+controllers:
+
+  replicas: 1
+
+  resources: {}
+
+
+
+
+
+
+
+
+web:
+
+  replicas: 1
+
+  service:
+
+    port: 80
+
+  resources: {}
+
+
+
+webhookWorker:
+
+  replicas: 1
+
+  resources: {}
+
+
+
+serviceAccount:
+
+  create: true
+
+  annotations: {}
+
+
+
+rbac:
+
+  create: true
+
+
+
+networkPolicy:
+
+  enabled: true
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []
+
+oidc:
+  issuerUrl: ""
+  clientId: ""
+  existingSecret: ""
+
+
+
+admin:
+  org: ""
+  username: ""
+
+auth:
+  session:
+    cookieName: krate_session
+  delegatedIdentity:
+    enabled: false
+    userHeader: x-forwarded-user
+    groupsHeader: x-forwarded-groups
+    emailHeader: x-forwarded-email
+    localDevelopment:
+      enabled: false
+      user: local-developer
+      email: local-developer@example.test
+      groups: krate:repo-admins
+  github:
+    enabled: true
+    clientId: ""
+    clientSecret: ""
+    existingSecret: ""
+    scopes: "read:user user:email"
+    authorizationUrl: https://github.com/login/oauth/authorize
+    tokenUrl: https://github.com/login/oauth/access_token
+    userInfoUrl: https://api.github.com/user
+  sso:
+    enabled: false
+    providerName: Workspace SSO
+    issuerUrl: ""
+    authorizationUrl: ""
+    tokenUrl: ""
+    userInfoUrl: ""
+    clientId: ""
+    clientSecret: ""
+    existingSecret: ""
+    scopes: "openid profile email groups"
+
+externalDependencies:
+  postgres:
+    enabled: false
+    host: ""
+    port: 5432
+    database: krate
+    existingSecret: ""
+  objectStorage:
+    enabled: false
+    endpoint: ""
+    bucket: krate-artifacts
+    existingSecret: ""
+  nats:
+    enabled: false
+    url: ""
+    existingSecret: ""
+  arc:
+    enabled: false
+    runnerScaleSet: ""
+  kyverno:
+    enabled: false
+    mode: auto
+    namespace: kyverno
+    policyNamespace: krate-system
+    requireForEnforceMode: true
+    discoverExisting: true
+    managed:
+      enabled: false
+      installMethod: argocd
+      chartRepoURL: https://kyverno.github.io/kyverno/
+      chart: kyverno
+      targetRevision: "3.x"
+      releaseName: kyverno
+      values: {}
+    policyReporter:
+      enabled: false
+      mode: external
+      namespace: policy-reporter
+    defaultPolicyPack:
+      enabled: true
+      mode: audit
+      installExamples: true
+  gatekeeper:
+    enabled: false
+    constraintNamespace: gatekeeper-system
+
+autoscaling:
+  api:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+  controllers:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+  web:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+  webhookWorker:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+gitea:
+  enabled: true
+  image:
+    repository: gitea/gitea
+    tag: "1.22-rootless"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  rootUrl: ""
+  sshDomain: ""
+  httpUrl: ""
+  service:
+    httpPort: 3000
+    sshPort: 22
+  admin:
+    username: krate-admin
+    password: change-me
+  persistence:
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ""
+
+argocd:
+  enabled: true
+  namespace: argocd
+  applicationName: krate
+  project: default
+  repoURL: ""
+  targetRevision: main
+  path: charts/krate
+  syncPolicy:
+    automated: true
+    prune: true
+    selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: krate-system
+
+
+
+kyverno:
+  install: false
+
+kserve:
+  enabled: false
+  discoverExisting: true
+
+agents:
+  enabled: true
+  agentMux:
+    enabled: false
+    gateway: ""
+
+kubevela:
+  install: false
+  enabled: true
+  applicationName: krate-kubevela
+  namespace: vela-system
+  releaseName: kubevela
+  chart:
+    repoURL: https://kubevela.github.io/charts
+    chart: vela-core
+    targetRevision: "1.10.8"
+    values: {}
+  syncPolicy:
+    prune: true
+    selfHeal: true
+  addons:
+    fluxcd:
+      enabled: true
+      onlyHelmComponents: true

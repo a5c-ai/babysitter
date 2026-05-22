@@ -1,0 +1,650 @@
+---
+nodeKind: Role
+id: role:instructional-designer
+attributes:
+  displayName: "Instructional Designer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs learning experiences by analyzing learner needs, defining
+    learning objectives, structuring content sequences, and selecting
+    appropriate delivery methods. Applies instructional design models
+    (ADDIE, SAM) to produce effective curricula for diverse audiences.
+edges:
+  holds_responsibility:
+    - responsibility:curriculum-alignment
+    - responsibility:learning-objective-measurement
+  applies_to:
+    - target: domain:education
+    - target: domain:corporate-training
+---
+nodeKind: Role
+id: role:e-learning-developer
+attributes:
+  displayName: "E-Learning Developer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds interactive digital learning content — SCORM/xAPI modules,
+    video-based courses, simulations, and gamified exercises. Translates
+    instructional designs into engaging multimedia experiences using
+    authoring tools and learning platforms.
+edges:
+  holds_responsibility:
+    - responsibility:curriculum-alignment
+    - responsibility:learning-objective-measurement
+  applies_to:
+    - target: domain:online-learning
+    - target: domain:edtech
+---
+nodeKind: Role
+id: role:learning-experience-designer
+attributes:
+  displayName: "Learning Experience Designer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Combines UX design principles with learning science to create
+    learner-centered educational experiences. Conducts learner research,
+    maps learning journeys, prototypes interactions, and measures
+    engagement and outcome metrics across digital learning products.
+edges:
+  holds_responsibility:
+    - responsibility:learning-objective-measurement
+    - responsibility:student-outcome-tracking
+  applies_to:
+    - target: domain:online-learning
+    - target: domain:education
+---
+nodeKind: Role
+id: role:academic-advisor
+attributes:
+  displayName: "Academic Advisor"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Guides students through academic program requirements, course selection,
+    and degree planning. Monitors progress toward graduation, identifies
+    at-risk students, coordinates with faculty, and connects students to
+    support services.
+edges:
+  holds_responsibility:
+    - responsibility:student-outcome-tracking
+    - responsibility:accreditation-compliance
+  applies_to:
+    - target: domain:higher-education
+---
+nodeKind: Role
+id: role:registrar
+attributes:
+  displayName: "Registrar"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Manages official student records, course catalogs, enrollment processes,
+    and transcript issuance. Ensures academic policy compliance, maintains
+    data integrity across student information systems, and supports
+    institutional reporting and accreditation.
+edges:
+  holds_responsibility:
+    - responsibility:accreditation-compliance
+    - responsibility:student-outcome-tracking
+  applies_to:
+    - target: domain:higher-education
+    - target: domain:student-information-systems
+---
+nodeKind: Role
+id: role:admissions-officer
+attributes:
+  displayName: "Admissions Officer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Evaluates applications, manages the admissions funnel, and shapes
+    incoming class composition. Reviews credentials, conducts interviews,
+    applies holistic review criteria, and coordinates recruitment outreach
+    to prospective students.
+edges:
+  holds_responsibility:
+    - responsibility:student-outcome-tracking
+    - responsibility:accreditation-compliance
+  applies_to:
+    - target: domain:higher-education
+---
+nodeKind: Role
+id: role:curriculum-developer
+attributes:
+  displayName: "Curriculum Developer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs, writes, and revises curricula aligned to educational standards
+    and competency frameworks. Collaborates with subject matter experts,
+    maps scope and sequence, selects resources, and builds assessment
+    rubrics to measure curricular effectiveness.
+edges:
+  holds_responsibility:
+    - responsibility:curriculum-alignment
+    - responsibility:learning-objective-measurement
+    - responsibility:accreditation-compliance
+  applies_to:
+    - target: domain:K12-education
+    - target: domain:higher-education
+---
+nodeKind: Role
+id: role:energy-analyst
+attributes:
+  displayName: "Energy Analyst"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Analyzes energy consumption patterns, forecasts demand, evaluates
+    supply options, and models economic scenarios for energy projects.
+    Produces reports on energy markets, regulatory impacts, and
+    cost-benefit analyses for generation and efficiency investments.
+edges:
+  holds_responsibility:
+    - responsibility:energy-efficiency-compliance
+    - responsibility:carbon-emissions-reporting
+  applies_to:
+    - target: domain:energy
+    - target: domain:renewable-energy
+---
+nodeKind: Role
+id: role:grid-engineer
+attributes:
+  displayName: "Grid Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs, operates, and optimizes electrical grid infrastructure —
+    transmission planning, distribution automation, protection relay
+    coordination, and power flow analysis. Ensures grid stability
+    while integrating distributed energy resources.
+edges:
+  holds_responsibility:
+    - responsibility:grid-reliability
+    - responsibility:renewable-integration
+  applies_to:
+    - target: domain:grid-modernization
+    - target: domain:energy
+---
+nodeKind: Role
+id: role:sustainability-analyst
+attributes:
+  displayName: "Sustainability Analyst"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Tracks and reports on environmental, social, and governance metrics —
+    greenhouse gas inventories, water usage, waste diversion, and social
+    impact indicators. Supports ESG reporting frameworks (GRI, SASB, TCFD)
+    and identifies sustainability improvement opportunities.
+edges:
+  holds_responsibility:
+    - responsibility:carbon-emissions-reporting
+    - responsibility:environmental-permit-compliance
+  applies_to:
+    - target: domain:sustainability-esg
+    - target: domain:climate-adaptation
+---
+nodeKind: Role
+id: role:environmental-compliance-officer
+attributes:
+  displayName: "Environmental Compliance Officer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Ensures organizational compliance with environmental regulations —
+    air quality permits, water discharge limits, hazardous waste handling,
+    and environmental impact assessments. Manages regulatory filings,
+    audits, and corrective action plans.
+edges:
+  holds_responsibility:
+    - responsibility:environmental-permit-compliance
+    - responsibility:carbon-emissions-reporting
+    - responsibility:energy-efficiency-compliance
+  applies_to:
+    - target: domain:environmental-engineering
+    - target: domain:sustainability-esg
+---
+nodeKind: Role
+id: role:climate-modeler
+attributes:
+  displayName: "Climate Modeler"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds and runs computational models of climate systems — general
+    circulation models, regional downscaling, emission scenario projections,
+    and extreme weather event simulations. Translates model outputs into
+    actionable risk assessments for policy and infrastructure planning.
+edges:
+  holds_responsibility:
+    - responsibility:carbon-emissions-reporting
+    - responsibility:data-quality
+  applies_to:
+    - target: domain:climate-science
+    - target: domain:climate-adaptation
+---
+nodeKind: Role
+id: role:renewable-energy-engineer
+attributes:
+  displayName: "Renewable Energy Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs and commissions renewable energy systems — solar array layout,
+    wind turbine siting, energy yield modeling, and grid interconnection
+    studies. Manages technical aspects of project development from
+    feasibility through construction and performance verification.
+edges:
+  holds_responsibility:
+    - responsibility:renewable-integration
+    - responsibility:energy-efficiency-compliance
+  applies_to:
+    - target: domain:renewable-energy
+    - target: domain:energy
+---
+nodeKind: Role
+id: role:carbon-accountant
+attributes:
+  displayName: "Carbon Accountant"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Quantifies and verifies greenhouse gas emissions across organizational
+    boundaries — Scope 1, 2, and 3 inventories, carbon offset validation,
+    and emissions factor management. Ensures compliance with carbon
+    reporting standards (GHG Protocol, ISO 14064).
+edges:
+  holds_responsibility:
+    - responsibility:carbon-emissions-reporting
+    - responsibility:environmental-permit-compliance
+  applies_to:
+    - target: domain:sustainability-esg
+    - target: domain:carbon-capture
+---
+nodeKind: Role
+id: role:BIM-coordinator
+attributes:
+  displayName: "BIM Coordinator"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Manages federated Building Information Models across project teams —
+    coordinates model authoring standards, runs clash detection workflows,
+    maintains the common data environment, and ensures LOD compliance at
+    each project milestone. Acts as the single point of truth for BIM data.
+edges:
+  holds_responsibility:
+    - responsibility:building-code-compliance
+    - responsibility:structural-integrity-verification
+  applies_to:
+    - target: domain:building-information-modeling
+    - target: domain:construction
+---
+nodeKind: Role
+id: role:structural-analyst
+attributes:
+  displayName: "Structural Analyst"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Performs structural analysis and design calculations — finite element
+    modeling, load path analysis, seismic and wind engineering studies,
+    and progressive collapse evaluation. Verifies that structural designs
+    meet safety factors and building code requirements.
+edges:
+  holds_responsibility:
+    - responsibility:structural-integrity-verification
+    - responsibility:building-code-compliance
+  applies_to:
+    - target: domain:structural-engineering
+    - target: domain:construction
+---
+nodeKind: Role
+id: role:MEP-engineer
+attributes:
+  displayName: "MEP Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs mechanical, electrical, and plumbing systems for buildings —
+    HVAC sizing, electrical distribution, plumbing layouts, and fire
+    protection. Coordinates with architects and structural engineers to
+    integrate building services within spatial and budgetary constraints.
+edges:
+  holds_responsibility:
+    - responsibility:building-code-compliance
+    - responsibility:fire-safety-compliance
+    - responsibility:energy-efficiency-compliance
+  applies_to:
+    - target: domain:HVAC-systems
+    - target: domain:construction
+---
+nodeKind: Role
+id: role:site-supervisor
+attributes:
+  displayName: "Site Supervisor"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Oversees day-to-day construction site operations — coordinates trades,
+    enforces safety protocols, monitors quality of workmanship, tracks
+    schedule adherence, and manages material deliveries. Serves as the
+    primary field contact for the project management team.
+edges:
+  holds_responsibility:
+    - responsibility:building-code-compliance
+    - responsibility:fire-safety-compliance
+  applies_to:
+    - target: domain:construction
+    - target: domain:residential-construction
+---
+nodeKind: Role
+id: role:quantity-surveyor
+attributes:
+  displayName: "Quantity Surveyor"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Manages construction project costs from inception to completion —
+    prepares bills of quantities, evaluates tenders, tracks cost variations,
+    and produces final account reconciliations. Ensures projects are
+    delivered within budget through rigorous cost control.
+edges:
+  holds_responsibility:
+    - responsibility:building-code-compliance
+    - responsibility:structural-integrity-verification
+  applies_to:
+    - target: domain:construction
+    - target: domain:commercial-real-estate
+---
+nodeKind: Role
+id: role:construction-project-manager
+attributes:
+  displayName: "Construction Project Manager"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Plans, coordinates, and controls construction projects end to end —
+    scope definition, scheduling, resource allocation, subcontractor
+    management, and stakeholder communication. Balances time, cost, and
+    quality constraints across all project phases.
+edges:
+  holds_responsibility:
+    - responsibility:building-code-compliance
+    - responsibility:structural-integrity-verification
+    - responsibility:fire-safety-compliance
+  applies_to:
+    - target: domain:construction
+    - target: domain:commercial-real-estate
+---
+nodeKind: Role
+id: role:building-inspector
+attributes:
+  displayName: "Building Inspector"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Inspects construction work at defined milestones to verify compliance
+    with building codes, approved plans, and safety regulations. Issues
+    inspection reports, identifies violations, and approves work for
+    progression to the next phase.
+edges:
+  holds_responsibility:
+    - responsibility:building-code-compliance
+    - responsibility:fire-safety-compliance
+    - responsibility:structural-integrity-verification
+  applies_to:
+    - target: domain:construction
+    - target: domain:residential-construction
+---
+nodeKind: Role
+id: role:engineering-program-manager
+attributes:
+  displayName: "Engineering Program Manager"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Drives cross-team engineering programs — coordinates dependencies
+    across multiple squads, manages program-level risks, tracks milestones
+    and deliverables, and escalates blockers. Bridges engineering execution
+    with business objectives across large initiatives.
+edges:
+  holds_responsibility:
+    - responsibility:cross-team-alignment
+    - responsibility:engineering-roadmap
+    - responsibility:technical-strategy
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+---
+nodeKind: Role
+id: role:staff-data-scientist
+attributes:
+  displayName: "Staff Data Scientist"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Senior individual contributor who drives high-impact data science
+    initiatives — defines analytical frameworks, mentors junior scientists,
+    sets modeling standards, and partners with leadership on data-driven
+    strategy. Influences technical direction across multiple data teams.
+edges:
+  holds_responsibility:
+    - responsibility:data-strategy
+    - responsibility:cross-team-alignment
+  applies_to:
+    - target: domain:data-science
+    - target: domain:ml-ai
+---
+nodeKind: Role
+id: role:principal-data-engineer
+attributes:
+  displayName: "Principal Data Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Senior technical leader for data infrastructure — defines data platform
+    architecture, sets standards for pipeline reliability and data quality,
+    mentors engineers, and drives technology selection for data systems.
+    Operates across multiple teams to ensure coherent data strategy.
+edges:
+  holds_responsibility:
+    - responsibility:data-strategy
+    - responsibility:architecture-governance
+    - responsibility:platform-roadmap
+  applies_to:
+    - target: domain:data-engineering
+---
+nodeKind: Role
+id: role:chief-architect
+attributes:
+  displayName: "Chief Architect"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Organization-wide technical authority for system architecture — sets
+    architectural principles, governs technology standards, chairs the
+    architecture review board, and ensures technical coherence across
+    all product lines and platforms.
+edges:
+  holds_responsibility:
+    - responsibility:architecture-governance
+    - responsibility:technical-strategy
+    - responsibility:engineering-roadmap
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+---
+nodeKind: Role
+id: role:head-of-platform
+attributes:
+  displayName: "Head of Platform"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Leads the platform engineering organization — defines the internal
+    developer platform strategy, manages infrastructure teams, sets
+    reliability targets, and ensures platform capabilities enable
+    product teams to ship independently and safely.
+edges:
+  holds_responsibility:
+    - responsibility:platform-roadmap
+    - responsibility:engineering-roadmap
+    - responsibility:cross-team-alignment
+  applies_to:
+    - target: domain:platform-engineering
+    - target: domain:cloud-infra
+---
+nodeKind: Role
+id: role:head-of-security
+attributes:
+  displayName: "Head of Security"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Leads the security organization — defines security strategy, manages
+    application and infrastructure security teams, oversees vulnerability
+    management, and drives security culture across engineering. Reports
+    security posture to executive leadership.
+edges:
+  holds_responsibility:
+    - responsibility:security-posture
+    - responsibility:technical-strategy
+    - responsibility:incident-postmortem-quality
+  applies_to:
+    - target: domain:cybersecurity
+    - target: domain:security
+---
+nodeKind: Role
+id: role:head-of-data
+attributes:
+  displayName: "Head of Data"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Leads the data organization spanning data engineering, analytics, and
+    data science — defines data strategy, governs data quality standards,
+    manages the data platform, and ensures data capabilities align with
+    business objectives across all departments.
+edges:
+  holds_responsibility:
+    - responsibility:data-strategy
+    - responsibility:engineering-roadmap
+    - responsibility:cross-team-alignment
+  applies_to:
+    - target: domain:data-engineering
+    - target: domain:data-science
+---
+nodeKind: Role
+id: role:head-of-AI
+attributes:
+  displayName: "Head of AI"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Leads the organization's AI strategy and execution — defines the ML/AI
+    roadmap, manages research and applied AI teams, evaluates emerging
+    AI capabilities, and ensures responsible AI practices. Partners with
+    product leadership to identify high-impact AI applications.
+edges:
+  holds_responsibility:
+    - responsibility:AI-strategy
+    - responsibility:technical-strategy
+    - responsibility:engineering-roadmap
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:data-science
+---
+nodeKind: Role
+id: role:director-of-engineering
+attributes:
+  displayName: "Director of Engineering"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Manages multiple engineering teams and their managers — sets hiring
+    plans, defines team structure, drives technical execution of the
+    engineering roadmap, and ensures engineering culture and practices
+    scale with organizational growth.
+edges:
+  holds_responsibility:
+    - responsibility:engineering-hiring
+    - responsibility:engineering-roadmap
+    - responsibility:team-velocity-tracking
+  applies_to:
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:VP-of-product
+attributes:
+  displayName: "VP of Product"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Leads the product management organization — sets product vision and
+    strategy, manages product managers, coordinates roadmap prioritization
+    across product lines, and aligns product direction with company
+    objectives and market opportunities.
+edges:
+  holds_responsibility:
+    - responsibility:cross-team-alignment
+    - responsibility:engineering-roadmap
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:e-commerce
+---
+nodeKind: Role
+id: role:chief-learning-officer
+attributes:
+  displayName: "Chief Learning Officer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Leads the organization's learning and development strategy — defines
+    competency frameworks, manages training programs, evaluates learning
+    effectiveness, and aligns workforce development with business goals.
+    Champions a culture of continuous learning.
+edges:
+  holds_responsibility:
+    - responsibility:curriculum-alignment
+    - responsibility:learning-objective-measurement
+    - responsibility:accreditation-compliance
+  applies_to:
+    - target: domain:corporate-training
+    - target: domain:education

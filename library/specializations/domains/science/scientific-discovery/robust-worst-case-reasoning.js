@@ -18,6 +18,13 @@
  * - Ben-Tal, El Ghaoui, Nemirovski (2009). Robust Optimization
  * - Bertsimas & Sim (2004). The Price of Robustness
  * - Sniedovich (2012). Black Swans, New Nostradamuses, and the Art of Risk Management
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

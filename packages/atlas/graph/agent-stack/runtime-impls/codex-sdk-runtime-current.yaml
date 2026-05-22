@@ -1,0 +1,39 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:codex-sdk.runtime@current
+attributes:
+  displayName: Codex SDK Runtime (current)
+  agentVersionId: agent-version:codex-sdk@current
+  packageRef: source-ref:codex-github
+  subagentDispatchMechanism: none
+  builtInTools: []
+  toolRegistryDiscovery: dynamic-extension-loaded
+  hookSockets: []
+  internalSessionStateLocation: host-managed
+  sessionFileFormat: jsonl
+  sessionFilePathConvention: host-managed
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: platform-deferred
+  runtimeIdentity: none
+  supportedMCPTransports:
+    - mcp-transport:stdio
+    - mcp-transport:streamable-http
+  supportsStreaming: true
+  notes: |
+    The Codex SDK variant bypasses the Codex Rust runtime entirely. The
+    host program drives `openai.chat.completions.create({stream:true})`
+    or the Responses API directly and supplies its own tools/MCP. There
+    is no daemon, no built-in tool catalogue, and no session-on-disk
+    convention — all of that is the host program's responsibility.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:codex-sdk
+      role: runtime
+  bundles: []
+  connects:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http
+  speaks:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http

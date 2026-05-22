@@ -10,6 +10,11 @@ expertise:
   - Dynamic library loading
   - Platform-specific considerations
   - Safety and sandboxing
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:compiler-implementation, skill-area:language-design]
+  roles: [role:backend-engineer]
 ---
 
 # FFI and Interop Engineer Agent

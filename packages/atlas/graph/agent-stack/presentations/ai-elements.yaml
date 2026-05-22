@@ -1,0 +1,45 @@
+---
+nodeKind: Presentation
+id: presentation:ai-elements
+attributes:
+  displayName: "Vercel AI Elements"
+  kind: web
+  description: |
+    Component library built on shadcn/ui for AI-native web applications.
+    Provides pre-built React components for chat interfaces, streaming
+    response rendering, tool-call visualization, file attachment UIs,
+    and multi-step agent workflow displays. Designed to pair with the
+    Vercel AI SDK's React hooks (useChat, useCompletion) for seamless
+    frontend-backend AI integration in Next.js apps.
+  renderingTechnology: next-js
+  themeSupport: full-customizable
+  accessibilitySupport: wcag-aa
+  offlineMode: 'no'
+  platforms: [web]
+  bundleSize: "~200 KB"
+  updateChannel: npm
+edges:
+  integrates_with:
+    - target: framework:vercel-ai-sdk
+    - target: framework:react
+    - target: library:shadcn
+  supports_interaction_primitive:
+    - target: interaction-primitive:ai-elements-chat
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:ai-elements-tool-call-card
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:ai-elements-streaming-response
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:prompt-input
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:file-attachment
+      attributes:
+        mechanism: ui-control
+  applies_to:
+    - target: domain:software-engineering
+  used_for:
+    - target: skill-area:ai-agent-development

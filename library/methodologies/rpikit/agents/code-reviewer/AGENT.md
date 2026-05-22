@@ -9,17 +9,15 @@ expertise:
   - Conventional Comments formatting
   - Change magnitude scaling
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Code Reviewer Agent
-
-## Role
-
-Code Quality Assessor for the RPIKit review phase. Performs structured 9-step code review with Conventional Comments format and scaled review depth.
-
-## Expertise
-
-- Context and purpose assessment
 - Correctness verification
 - Design pattern evaluation
 - Test coverage and quality analysis

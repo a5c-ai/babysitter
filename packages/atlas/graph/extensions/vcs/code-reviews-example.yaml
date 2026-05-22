@@ -1,0 +1,30 @@
+---
+nodeKind: CodeReview
+id: code-review:acme-app-1234-r1
+attributes:
+  pullRequestId: pull-request:acme-app-1234
+  verdict: changes-requested
+  reviewedAt: "2026-04-29T15:20:00Z"
+  body: |
+    Looks great overall. Please add a unit test for the early-abort path and
+    document the new BudgetPolicy attribute in the README.
+edges:
+  reviews:
+    - target: pull-request:acme-app-1234
+  submitted_by:
+    - target: role:tech-lead
+---
+nodeKind: CodeReview
+id: code-review:acme-app-1234-r2
+attributes:
+  pullRequestId: pull-request:acme-app-1234
+  verdict: commented
+  reviewedAt: "2026-04-29T09:45:00Z"
+  body: |
+    Static-analysis findings: 0 critical, 2 minor (unused import, missing
+    type annotation).
+edges:
+  reviews:
+    - target: pull-request:acme-app-1234
+  submitted_by:
+    - target: role:code-reviewer

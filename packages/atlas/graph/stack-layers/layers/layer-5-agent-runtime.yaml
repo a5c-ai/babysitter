@@ -1,0 +1,28 @@
+nodeKind: Layer
+id: layer:5-agent-runtime
+attributes:
+  displayName: Agent-Runtime
+  position: 5
+  path: compute
+  scope: Host process and operational runtime for an agent core.
+  summary: |
+    The runtime hosts an agent process around the core: built-in tools,
+    internal session state, tool registry, hook sockets, approval primitives,
+    subprocess execution posture, streaming, output guards, and runtime
+    identity. Realized by `AgentRuntimeImpl` instances.
+  responsibilities:
+    - Maintain internal session and transcript state.
+    - Provide built-in tools, dynamic tool discovery, hooks, and approvals.
+    - Manage subprocess/tool execution posture and streaming events.
+    - Enforce runtime output, resume, and journal/event contracts.
+  examples:
+    - LangGraph checkpointer/store, thread state, interrupts, streaming runtime.
+    - Claude Code/Codex/Gemini CLI process runtimes.
+    - a5c unified runtime, Pi-compatible session profiles, agent-mux remote runtime.
+    - Built-in file/shell/search tools, approval gates, session files.
+  fitNotes: |
+    Frameworks can leave runtime to the host app; CLI products often combine
+    core and runtime in one binary. a5c runtime is modeled as a unified
+    same-layer implementation that can map Pi, Claude, Codex, LangGraph, and
+    agent-mux runtime profiles without depending on one of them.
+edges: {}

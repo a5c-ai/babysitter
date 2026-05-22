@@ -19,6 +19,12 @@
  * - RTL Design Best Practices: https://www.intel.com/content/www/us/en/programmable/documentation/mwh1409960181641.html
  * - FPGA Architecture Design: https://docs.amd.com/r/en-US/ug949-vivado-design-methodology
  * - Hardware Design Patterns: https://zipcpu.com/
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-010
   category: Communication
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:strategic-analysis, skill-area:business-analysis, skill-area:executive-communication]
+  workflows: [workflow:market-analysis]
+  roles: [role:strategic-planner, role:business-analyst]
 ---
 
 # Pyramid Principle Structuring

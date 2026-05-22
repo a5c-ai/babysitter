@@ -455,14 +455,16 @@ babysitter harness:install oh-my-pi
 
 ```bash
 babysitter harness:install-plugin oh-my-pi
-# or: npx @a5c-ai/babysitter-pi install --harness oh-my-pi
+# or use the native package installer:
+omp plugin install @a5c-ai/babysitter-omp
 ```
 
 **Workspace-scoped installation:**
 
 ```bash
 babysitter harness:install-plugin oh-my-pi --workspace /path/to/repo
-# or: npx @a5c-ai/babysitter-pi install --harness oh-my-pi --workspace /path/to/repo
+# or run the published package installer directly:
+npx --yes @a5c-ai/babysitter-omp install --workspace /path/to/repo
 ```
 
 ### Discovery

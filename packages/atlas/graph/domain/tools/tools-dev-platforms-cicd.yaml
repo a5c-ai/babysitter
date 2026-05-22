@@ -1,0 +1,305 @@
+---
+nodeKind: Tool
+id: tool:replit
+attributes:
+  languageApplicability: neutral
+  displayName: "Replit"
+  homepageUrl: "https://replit.com"
+  kind: other
+  description: |
+    Browser-based collaborative IDE and cloud execution environment that
+    lets developers write, run, and deploy full-stack applications directly
+    from the browser with zero local setup.
+edges:
+  tool_used_by:
+    - target: skill-area:software-development
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:local-development
+  alternative_to:
+    - target: tool:gitpod
+      comparison: "Cloud dev environments"
+    - target: tool:codespaces
+      comparison: "Cloud dev environments"
+    - target: tool:stackblitz
+      comparison: "Browser-based dev environments"
+    - target: tool:codesandbox
+      comparison: "Browser-based dev environments"
+---
+nodeKind: Tool
+id: tool:gitpod
+attributes:
+  languageApplicability: neutral
+  displayName: "Gitpod"
+  homepageUrl: "https://www.gitpod.io"
+  kind: other
+  description: |
+    On-demand cloud development environment platform (now rebranded as Ona)
+    that spins up pre-configured, containerised workspaces from any Git
+    repository in seconds, eliminating local environment drift.
+edges:
+  tool_used_by:
+    - target: skill-area:software-development
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:local-development
+  alternative_to:
+    - target: tool:codespaces
+      comparison: "Cloud dev environments — Gitpod is vendor-neutral; Codespaces is GitHub-integrated"
+    - target: tool:replit
+      comparison: "Cloud dev environments"
+    - target: tool:stackblitz
+      comparison: "Cloud dev environments"
+    - target: tool:codesandbox
+      comparison: "Cloud dev environments"
+---
+nodeKind: Tool
+id: tool:codespaces
+attributes:
+  languageApplicability: neutral
+  displayName: "GitHub Codespaces"
+  homepageUrl: "https://github.com/features/codespaces"
+  kind: other
+  description: |
+    GitHub's hosted development environment service that provisions instant,
+    fully configured VS Code workspaces in the cloud backed by devcontainer
+    definitions stored alongside the repository.
+edges:
+  tool_used_by:
+    - target: skill-area:software-development
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:local-development
+  alternative_to:
+    - target: tool:gitpod
+      comparison: "Cloud dev environments — Codespaces is GitHub-integrated; Gitpod is vendor-neutral"
+    - target: tool:replit
+      comparison: "Cloud dev environments"
+    - target: tool:stackblitz
+      comparison: "Cloud dev environments"
+    - target: tool:codesandbox
+      comparison: "Cloud dev environments"
+---
+nodeKind: Tool
+id: tool:stackblitz
+attributes:
+  languageApplicability: neutral
+  displayName: "StackBlitz"
+  homepageUrl: "https://stackblitz.com"
+  kind: other
+  description: |
+    In-browser full-stack development environment powered by WebContainers
+    that runs Node.js natively in the browser with npm, a dev server, and
+    hot-module reloading — no install required.
+edges:
+  tool_used_by:
+    - target: skill-area:software-development
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:local-development
+  alternative_to:
+    - target: tool:codesandbox
+      comparison: "Browser-based dev environments"
+    - target: tool:replit
+      comparison: "Browser-based dev environments"
+    - target: tool:gitpod
+      comparison: "Cloud dev environments"
+    - target: tool:codespaces
+      comparison: "Cloud dev environments"
+---
+nodeKind: Tool
+id: tool:codesandbox
+attributes:
+  languageApplicability: neutral
+  displayName: "CodeSandbox"
+  homepageUrl: "https://codesandbox.io"
+  kind: other
+  description: |
+    Cloud sandbox platform for rapid web prototyping and collaboration;
+    provides pre-configured browser-based environments for frontend and
+    full-stack projects with instant sharing and forking.
+edges:
+  tool_used_by:
+    - target: skill-area:software-development
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:local-development
+  alternative_to:
+    - target: tool:stackblitz
+      comparison: "Browser-based dev environments"
+    - target: tool:replit
+      comparison: "Browser-based dev environments"
+    - target: tool:gitpod
+      comparison: "Cloud dev environments"
+    - target: tool:codespaces
+      comparison: "Cloud dev environments"
+---
+nodeKind: Tool
+id: tool:cursor
+attributes:
+  languageApplicability: neutral
+  displayName: "Cursor"
+  homepageUrl: "https://www.cursor.com"
+  kind: other
+  description: |
+    AI-first code editor built on VS Code that embeds a large-language-model
+    assistant for autocomplete, inline edits, multi-file refactors, and
+    natural-language codebase Q&A directly in the editor.
+edges:
+  supports_work:
+    - target: role:code-reviewer
+      confidence: medium
+      evidence: "AI coding IDE support helps inspect code changes and propose review fixes."
+    - target: role:test-writer
+      confidence: medium
+      evidence: "AI coding workflows can draft and refine tests around code changes."
+  tool_used_by:
+    - target: skill-area:software-development
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:editor-fluency
+  alternative_to:
+    - target: tool:vscode
+      comparison: "Code editors / IDEs"
+    - target: tool:jetbrains-idea
+      comparison: "Code editors / IDEs"
+    - target: tool:neovim
+      comparison: "Code editors / IDEs"
+---
+nodeKind: Tool
+id: tool:windsurf
+attributes:
+  languageApplicability: neutral
+  displayName: "Windsurf"
+  homepageUrl: "https://windsurf.com"
+  kind: other
+  description: |
+    AI-powered IDE by Codeium (formerly Codeium Editor) that provides
+    agentic coding flows — Cascade — capable of multi-step autonomous edits,
+    terminal commands, and web search directly within the editor.
+edges:
+  tool_used_by:
+    - target: skill-area:software-development
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:editor-fluency
+  alternative_to:
+    - target: tool:cursor
+      comparison: "AI-powered IDEs — Windsurf has Cascade agentic flows; Cursor has inline AI edits"
+    - target: tool:aider
+      comparison: "AI coding assistants — Windsurf is an IDE; Aider is terminal-based"
+    - target: tool:cline
+      comparison: "AI coding agents"
+---
+nodeKind: Tool
+id: tool:buildkite
+attributes:
+  languageApplicability: neutral
+  displayName: "Buildkite"
+  homepageUrl: "https://buildkite.com"
+  kind: ci
+  description: |
+    Hybrid CI/CD platform that runs pipeline agents on your own
+    infrastructure while providing a hosted control-plane for pipeline
+    orchestration, test analytics, and artifact management.
+edges:
+  tool_used_by:
+    - target: skill-area:ci-cd
+  used_for:
+    - target: skill-area:ci-cd
+    - target: skill-area:deployment-automation
+  alternative_to:
+    - target: tool:github-actions
+      comparison: "CI/CD — Buildkite is hybrid; GitHub Actions is fully hosted"
+    - target: tool:gitlab-ci
+      comparison: "CI/CD — Buildkite is hybrid; GitLab CI is integrated"
+    - target: tool:circleci
+      comparison: "CI/CD — Buildkite is hybrid; CircleCI is fully hosted"
+    - target: tool:jenkins
+      comparison: "CI/CD — Buildkite has hosted control-plane; Jenkins is fully self-hosted"
+---
+nodeKind: Tool
+id: tool:drone-ci
+attributes:
+  languageApplicability: neutral
+  displayName: "Drone CI"
+  homepageUrl: "https://www.drone.io"
+  kind: ci
+  description: |
+    Container-native CI/CD platform where every pipeline step runs in an
+    isolated Docker container, defined entirely in a single declarative
+    .drone.yml file committed to the repository.
+edges:
+  tool_used_by:
+    - target: skill-area:ci-cd
+  used_for:
+    - target: skill-area:ci-cd
+    - target: skill-area:deployment-automation
+  alternative_to:
+    - target: tool:woodpecker
+      comparison: "Self-hosted CI — Drone CI is the original; Woodpecker is its community fork"
+---
+nodeKind: Tool
+id: tool:woodpecker
+attributes:
+  languageApplicability: neutral
+  displayName: "Woodpecker CI"
+  homepageUrl: "https://woodpecker-ci.org"
+  kind: ci
+  description: |
+    Community-maintained open-source fork of Drone CI that adds multi-platform
+    support, enhanced secrets management, and active upstream development
+    while retaining full .woodpecker.yml pipeline compatibility.
+edges:
+  tool_used_by:
+    - target: skill-area:ci-cd
+  used_for:
+    - target: skill-area:ci-cd
+    - target: skill-area:deployment-automation
+  alternative_to:
+    - target: tool:drone-ci
+      comparison: "Self-hosted CI — Woodpecker is a community fork of Drone CI"
+---
+nodeKind: Tool
+id: tool:earthly
+attributes:
+  displayName: "Earthly"
+  homepageUrl: "https://earthly.dev"
+  kind: ci
+  description: |
+    Build automation tool that combines Makefile and Dockerfile concepts into
+    reproducible, containerised builds expressed in an Earthfile; runs
+    identically on local machines and any CI system.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:ci-cd
+  used_for:
+    - target: skill-area:ci-cd
+    - target: skill-area:ci-pipeline-optimization
+  alternative_to:
+    - target: tool:dagger
+      comparison: "Reproducible CI — Earthly uses Makefiles+Dockerfiles; Dagger uses typed modules"
+---
+nodeKind: Tool
+id: tool:dagger
+attributes:
+  displayName: "Dagger"
+  homepageUrl: "https://dagger.io"
+  kind: ci
+  description: |
+    Programmable CI/CD engine that runs pipelines inside containers using a
+    typed module system (Daggerverse); pipelines run identically on a laptop
+    or in any CI provider, with built-in caching and LLM/MCP integration.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:ci-cd
+  used_for:
+    - target: skill-area:ci-cd
+    - target: skill-area:ci-pipeline-optimization
+  alternative_to:
+    - target: tool:earthly
+      comparison: "Reproducible CI — Dagger uses typed modules; Earthly uses Makefiles+Dockerfiles"

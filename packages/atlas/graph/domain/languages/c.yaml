@@ -1,0 +1,23 @@
+nodeKind: Language
+id: language:c
+attributes:
+  displayName: "C"
+  paradigms:
+    - imperative
+    - systems
+  description: |
+    C is a procedural, compiled, low-level programming language that has
+    been the lingua franca of systems programming since the 1970s. It
+    provides direct memory access through pointers, manual memory management
+    (malloc/free), and minimal runtime overhead, making it ideal for
+    operating systems, compilers, and embedded firmware.
+
+    The C standard library is available on virtually every platform.
+    Modern C (C11, C17, C23) adds thread support, atomics, generics via
+    _Generic, and improved Unicode handling. C is ABI-compatible with most
+    languages' FFI, making it the universal interop substrate. GCC and
+    Clang are the dominant compilers; Valgrind, AddressSanitizer, and
+    UBSan are common correctness tools.
+edges:
+  used_by_skill_area:
+    - target: skill-area:firmware-development

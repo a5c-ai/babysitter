@@ -1,0 +1,21 @@
+nodeKind: Claim
+id: claim:claude-code-cli-command
+attributes:
+  subjectKind: "AgentVersion"
+  statement: "Claude Code 1.x is launched via the `claude` CLI command."
+  confidence: "high"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "strong"
+  status: "accepted"
+  subjectId: agentVersion:claude:ge-0-0-0
+  attribute: cliCommand
+  value: "claude"
+  evidenceSourceIds:
+    - evidence:anthropic-models-doc
+  claimedAt: "2026-04-28T10:00:00Z"
+  claimedBy: a5c-ai-team
+edges:
+  about_subject:
+    - agentVersion:claude:ge-0-0-0
+  backed_by_evidence:
+    - evidence:anthropic-models-doc

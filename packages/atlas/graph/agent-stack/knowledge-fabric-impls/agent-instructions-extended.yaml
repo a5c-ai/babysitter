@@ -1,0 +1,294 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:cline.knowledge@current
+attributes:
+  displayName: "Cline Knowledge Fabric — .clinerules + memory files"
+  agentVersionId: agent-version:cline@current
+  description: |
+    Cline's knowledge fabric uses .clinerules files for project-level persistent
+    instructions and conventions. Cline also maintains memory bank files in
+    .cline/ directory that persist context about the project across sessions.
+    The memory bank includes activeContext.md, productContext.md, progress.md,
+    systemPatterns.md, and techContext.md. These are read at session start and
+    optionally updated at session end. Retrieval is file-hierarchy based.
+  knowledgeFileFormats:
+    - ".clinerules"
+    - ".cline/memory/*.md"
+  knowledgeScopes:
+    - project
+  autoExtractionSupport: true
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: filesystem
+  notes: |
+    Cline's memory bank is a structured set of markdown files that the agent
+    reads at session start and can update during/after sessions. This gives
+    Cline a form of auto-memory extraction similar to Claude Code's MEMORY.md.
+    The .clinerules file is analogous to .cursorrules or CLAUDE.md — persistent
+    instructions that survive across sessions.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agent-version:cline@current
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:cline-memory-bank
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:windsurf.knowledge@current
+attributes:
+  displayName: "Windsurf Knowledge Fabric — .windsurfrules"
+  agentVersionId: agent-version:windsurf@current
+  description: |
+    Windsurf's knowledge fabric is built on .windsurfrules files that provide
+    project-level persistent instructions for the Cascade agent. These files
+    are read at session bootstrap and injected into the system prompt, similar
+    to .cursorrules. Windsurf also supports global rules configured in the
+    IDE settings. Knowledge is retrieved via file-hierarchy traversal.
+  knowledgeFileFormats:
+    - ".windsurfrules"
+  knowledgeScopes:
+    - project
+    - user
+  autoExtractionSupport: false
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: filesystem
+  notes: |
+    Windsurf's knowledge fabric is minimal — .windsurfrules is the primary
+    mechanism for persistent project context. There is no auto-memory
+    extraction or vector-based retrieval. Global rules provide user-level
+    knowledge scope. The Cascade agent reads these at session start.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agent-version:windsurf@current
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:windsurf-memories
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:aider.knowledge@current
+attributes:
+  displayName: "Aider Knowledge Fabric — .aider.conf.yml + conventions"
+  agentVersionId: agent-version:aider@current
+  description: |
+    Aider's knowledge fabric uses .aider.conf.yml for configuration and
+    conventions files for project-level instructions. The --read flag allows
+    specifying files to include as read-only context. Aider also supports
+    a .aider.chat.history.md file that persists conversation history across
+    sessions. The repo map feature automatically extracts a summary of the
+    codebase structure for context.
+  knowledgeFileFormats:
+    - ".aider.conf.yml"
+    - "CONVENTIONS.md"
+    - ".aider.chat.history.md"
+  knowledgeScopes:
+    - project
+  autoExtractionSupport: false
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: filesystem
+  notes: |
+    Aider's repo map is a notable knowledge feature — it automatically builds
+    a tree-sitter-based map of the repository showing classes, functions, and
+    their relationships. This derived knowledge helps the agent understand
+    codebase structure without reading every file. The conventions file and
+    .aider.conf.yml provide persistent project instructions.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agent-version:aider@current
+      role: knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:continue.knowledge@current
+attributes:
+  displayName: "Continue Knowledge Fabric — .continuerules + config context"
+  agentVersionId: agent-version:continue@current
+  description: |
+    Continue's knowledge fabric uses .continuerules files and config.json
+    context providers for persistent project-level instructions. The
+    config.json file defines context providers that can pull knowledge from
+    various sources including files, URLs, databases, and custom APIs.
+    Continue also supports @-mention syntax for manually anchoring specific
+    files or documentation as context.
+  knowledgeFileFormats:
+    - ".continuerules"
+    - ".continue/config.json"
+  knowledgeScopes:
+    - project
+    - user
+  autoExtractionSupport: false
+  retrievalStrategy: hybrid
+  knowledgePersistence: filesystem
+  notes: |
+    Continue's context provider system is its distinguishing knowledge fabric
+    feature — it supports pluggable context sources beyond static files.
+    Context providers can pull from documentation sites, databases, APIs,
+    and even vector stores. The .continuerules file provides static project
+    instructions similar to other agent rule files.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agent-version:continue@current
+      role: knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:roo-code.knowledge@current
+attributes:
+  displayName: "Roo Code Knowledge Fabric — .roorules + memory"
+  agentVersionId: agent-version:roo-code@current
+  description: |
+    Roo Code's knowledge fabric uses .roorules files for project-level
+    persistent instructions. As a Cline fork, Roo Code inherits the memory
+    bank pattern with .roo/ directory for structured memory files. Roo Code
+    also supports custom modes with per-mode instruction files, allowing
+    different knowledge contexts for different tasks (code, architect,
+    review, etc.).
+  knowledgeFileFormats:
+    - ".roorules"
+    - ".roo/memory/*.md"
+    - ".roomodes"
+  knowledgeScopes:
+    - project
+  autoExtractionSupport: true
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: filesystem
+  notes: |
+    Roo Code extends Cline's knowledge model with custom modes — each mode
+    can have its own instruction set, making the knowledge fabric contextual
+    to the task at hand. The .roorules file provides baseline project
+    instructions, while mode-specific files add task-appropriate context.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agent-version:roo-code@current
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:roo-code-memory
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:amp.knowledge@current
+attributes:
+  displayName: "Amp Knowledge Fabric — AGENTS.md"
+  agentVersionId: agent-version:amp@current
+  description: |
+    Sourcegraph Amp uses AGENTS.md files as its primary knowledge fabric.
+    AGENTS.md provides persistent project-level instructions and conventions
+    that are read at session bootstrap. Amp also leverages Sourcegraph's
+    code intelligence for codebase-level knowledge retrieval — the same
+    search and navigation infrastructure that powers Sourcegraph's code
+    search product.
+  knowledgeFileFormats:
+    - "AGENTS.md"
+  knowledgeScopes:
+    - project
+  autoExtractionSupport: false
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: filesystem
+  notes: |
+    Amp's knowledge fabric benefits from Sourcegraph's code intelligence
+    platform — precise code navigation, cross-repository search, and
+    dependency graph awareness. The AGENTS.md file provides the human-authored
+    instruction layer, while Sourcegraph provides the code-derived knowledge
+    layer. This combination is unique among agent knowledge fabrics.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agent-version:amp@current
+      role: knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:openclaw.knowledge@current
+attributes:
+  displayName: "OpenClaw Knowledge Fabric — .agents directory + .crabbox.yaml"
+  agentVersionId: agentVersion:openclaw:ge-0-0-0
+  description: |
+    OpenClaw's knowledge fabric is built on the .agents directory pattern and
+    .crabbox.yaml configuration. The .agents directory contains agent-specific
+    instruction files that persist across sessions. The .crabbox.yaml file
+    defines project-level configuration including tool permissions and
+    workflow definitions. Knowledge is filesystem-based with file-hierarchy
+    retrieval.
+  knowledgeFileFormats:
+    - ".agents/*.md"
+    - ".crabbox.yaml"
+  knowledgeScopes:
+    - project
+  autoExtractionSupport: false
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: filesystem
+  notes: |
+    OpenClaw's .agents directory pattern allows multiple instruction files
+    for different agent personas or task types, similar to Roo Code's modes
+    but directory-based rather than configuration-based.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agentVersion:openclaw:ge-0-0-0
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:openclaw-soul-memory
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:pi.knowledge@current
+attributes:
+  displayName: "Pi Knowledge Fabric — CLAUDE.md (Claude Code compatible)"
+  agentVersionId: agentVersion:pi:ge-0-0-0
+  description: |
+    Pi uses Claude Code's CLAUDE.md file format as its knowledge fabric,
+    providing cross-compatibility with Claude Code's instruction system.
+    CLAUDE.md files at project root and nested directories provide persistent
+    instructions and context that survive across sessions. Pi reads these
+    files at session bootstrap and injects them into the system prompt.
+  knowledgeFileFormats:
+    - "CLAUDE.md"
+  knowledgeScopes:
+    - project
+  autoExtractionSupport: false
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: filesystem
+  notes: |
+    Pi's adoption of CLAUDE.md as its knowledge format means projects
+    configured for Claude Code automatically work with Pi. This cross-agent
+    compatibility is a strategic advantage — teams do not need to maintain
+    separate instruction files for different agents.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agentVersion:pi:ge-0-0-0
+      role: knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:opencode.knowledge@current
+attributes:
+  displayName: "OpenCode Knowledge Fabric — AGENTS.md"
+  agentVersionId: agentVersion:opencode:ge-0-0-0
+  description: |
+    OpenCode uses AGENTS.md as its primary knowledge fabric file. AGENTS.md
+    provides persistent project-level instructions read at session bootstrap.
+    OpenCode's HTTP-based architecture means the knowledge context is loaded
+    once and shared across the session. There is no auto-memory extraction
+    or user-level knowledge scope.
+  knowledgeFileFormats:
+    - "AGENTS.md"
+  knowledgeScopes:
+    - project
+  autoExtractionSupport: false
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: filesystem
+  notes: |
+    OpenCode follows the AGENTS.md convention used by Codex and Amp. The
+    knowledge fabric is minimal and file-hierarchy based. No vector-based
+    retrieval or auto-memory extraction has been documented.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agentVersion:opencode:ge-0-0-0
+      role: knowledge-fabric

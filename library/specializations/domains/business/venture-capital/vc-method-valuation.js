@@ -3,6 +3,11 @@
  * @description Valuation based on expected exit value, target return multiples, and ownership dilution modeling for early-stage companies without meaningful revenue or earnings
  * @inputs { companyName: string, stage: string, projections: object, comparables: array, targetReturn: number }
  * @outputs { success: boolean, valuation: object, scenarioAnalysis: object, sensitivity: object, artifacts: array }
+  * @graph
+ *   domains: [domain:venture-capital]
+ *   skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+ *   roles: [role:financial-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

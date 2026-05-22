@@ -1,0 +1,53 @@
+nodeKind: AgentGovernanceImpl
+id: agent-governance-impl:babysitter-plugin.governance@current
+attributes:
+  displayName: "Babysitter Plugin Governance (current)"
+  agentVersionId: agent-version:babysitter@current
+  packageRef: source-ref:babysitter-plugin
+  componentKind: plugin-governance
+  governedSurfaces:
+    - babysitter-plugin manifests
+    - generated platform plugins
+    - harness stop hooks
+    - task-tool and breakpoint routing surfaces
+    - hook merge decisions
+    - installed skill and command bundles
+  riskControls:
+    - plugin supply-chain provenance
+    - hook fanout and merge-policy enforcement
+    - permission escalation through generated plugin hooks
+    - prompt/harness intent fidelity
+    - non-interactive orchestration guardrails
+    - audit evidence for delegated runs
+  evidenceProduced:
+    - plugin.json and generated manifest artifacts
+    - hooks.json and hook merge diagnostics
+    - run journal effect events
+    - task:post result records
+    - completion proof
+  notes: |
+    Babysitter plugin governance is the control component that makes a
+    babysitter plugin safe to install into concrete agent platforms. It governs
+    plugin manifests, generated hook surfaces, skill entrypoints, task-tool
+    routing, breakpoint routing, and non-interactive orchestration policy. The
+    same governance component projects into concrete platform plugins such as
+    babysitter-codex and babysitter-claude through PluginTarget integration
+    surfaces.
+edges:
+  realizes:
+    - target: layer:14-governance
+  composes:
+    - target: agent:babysitter
+      role: governance
+  implements:
+    - target: extension-interface:governance
+  targets_plugin_surface:
+    - target: plugin-target:codex
+    - target: plugin-target:claude-code
+  depends_on:
+    - target: source-ref:babysitter-plugin
+  supports:
+    - target: capability:supports-mcp
+      versionRange: ">=5.0.0"
+      level: partial
+      notes: Governance spans MCP and hook surfaces when a platform plugin exposes them.

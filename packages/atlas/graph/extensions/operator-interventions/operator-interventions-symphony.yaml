@@ -1,0 +1,48 @@
+nodeKind: OperatorInterventionPoint
+id: operator-intervention:edit-workflow
+attributes:
+  displayName: "Edit WORKFLOW.md (auto re-applied)"
+  kind: edit-workflow
+  triggerSurface: filesystem
+  sideEffects:
+    - auto-reapply
+  idempotent: true
+---
+nodeKind: OperatorInterventionPoint
+id: operator-intervention:change-tracker-state
+attributes:
+  displayName: "Change tracker state to terminal (stop+clean)"
+  kind: change-tracker-state
+  triggerSurface: tracker-ui
+  sideEffects:
+    - stop-and-clean
+  idempotent: true
+---
+nodeKind: OperatorInterventionPoint
+id: operator-intervention:restart-service
+attributes:
+  displayName: "Restart Symphony orchestrator service"
+  kind: restart-service
+  triggerSurface: signal
+  sideEffects:
+    - stop-no-cleanup
+    - requeue
+  idempotent: true
+---
+nodeKind: OperatorInterventionPoint
+id: operator-intervention:drain-orchestrator
+attributes:
+  displayName: "Drain orchestrator (stop accepting new dispatches)"
+  kind: drain-orchestrator
+  triggerSurface: api-endpoint
+  sideEffects: []
+  idempotent: true
+---
+nodeKind: OperatorInterventionPoint
+id: operator-intervention:trigger-refresh
+attributes:
+  displayName: "Trigger operational refresh (re-poll tracker)"
+  kind: trigger-refresh
+  triggerSurface: api-endpoint
+  sideEffects: []
+  idempotent: true

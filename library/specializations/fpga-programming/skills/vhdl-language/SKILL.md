@@ -2,6 +2,11 @@
 name: vhdl-language
 description: Deep expertise in VHDL language constructs, IEEE 1076 standard compliance, and synthesis coding guidelines. Expert skill for generating synthesizable VHDL code.
 allowed-tools: Read, Grep, Write, Edit, Bash, Glob
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+  roles: [role:embedded-engineer]
 ---
 
 # VHDL Language Skill

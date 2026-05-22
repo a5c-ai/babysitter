@@ -1,0 +1,23 @@
+nodeKind: Language
+id: language:javascript
+attributes:
+  displayName: "JavaScript"
+  paradigms:
+    - imperative
+    - object-oriented
+    - functional
+  description: |
+    JavaScript is the dynamic, prototype-based, event-driven language that
+    runs natively in web browsers and, via Node.js / Deno / Bun, on the
+    server. It is the only language that executes directly in the browser,
+    making it the universal language of the web frontend.
+
+    Modern JavaScript (ES2015+) features classes, modules (ESM), async/await,
+    optional chaining, nullish coalescing, destructuring, and generators.
+    The npm/pnpm/Yarn ecosystem hosts millions of packages. JavaScript
+    powers React, Vue, Angular, Svelte, and every other major UI framework.
+    On the server, Express, Fastify, and NestJS are common choices. JSDoc
+    enables type annotations without a compilation step.
+edges:
+  used_by_skill_area:
+    - target: skill-area:react-testing

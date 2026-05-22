@@ -1,0 +1,161 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:maps.geocode
+attributes:
+  schema: '{}'
+  displayName: "Maps: Geocode"
+  description: Convert a street address to coordinates.
+  inputSchema:
+    type: object
+    required: [address]
+    properties:
+      address: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      lat: { type: number }
+      lng: { type: number }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-google-maps
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:maps.reverse-geocode
+attributes:
+  schema: '{}'
+  displayName: "Maps: Reverse Geocode"
+  description: Convert coordinates to a postal address.
+  inputSchema:
+    type: object
+    required: [latitude, longitude]
+    properties:
+      latitude: { type: number }
+      longitude: { type: number }
+  outputSchema:
+    type: object
+    properties:
+      address: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-google-maps
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:maps.search-places
+attributes:
+  schema: '{}'
+  displayName: "Maps: Search Places"
+  description: Text search for places matching a query.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+      location: { type: object }
+      radius: { type: number }
+  outputSchema:
+    type: object
+    properties:
+      places: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-google-maps
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:maps.place-details
+attributes:
+  schema: '{}'
+  displayName: "Maps: Place Details"
+  description: Return details for a specific place_id.
+  inputSchema:
+    type: object
+    required: [place_id]
+    properties:
+      place_id: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      place: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-google-maps
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:maps.directions
+attributes:
+  schema: '{}'
+  displayName: "Maps: Directions"
+  description: Return turn-by-turn directions between origin and destination.
+  inputSchema:
+    type: object
+    required: [origin, destination]
+    properties:
+      origin: { type: string }
+      destination: { type: string }
+      mode: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      routes: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-google-maps
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:maps.distance-matrix
+attributes:
+  schema: '{}'
+  displayName: "Maps: Distance Matrix"
+  description: Return travel-time/distance for origin/destination pairs.
+  inputSchema:
+    type: object
+    required: [origins, destinations]
+    properties:
+      origins: { type: array, items: { type: string } }
+      destinations: { type: array, items: { type: string } }
+      mode: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      matrix: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-google-maps
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:maps.elevation
+attributes:
+  schema: '{}'
+  displayName: "Maps: Elevation"
+  description: Return elevations for a list of coordinates.
+  inputSchema:
+    type: object
+    required: [locations]
+    properties:
+      locations: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-google-maps

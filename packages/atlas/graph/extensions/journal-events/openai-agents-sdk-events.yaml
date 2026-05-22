@@ -1,0 +1,135 @@
+nodeKind: JournalEvent
+id: journal-event:openai-agents-raw-responses-stream-event
+attributes:
+  displayName: "OpenAI Agents SDK / RawResponsesStreamEvent"
+  eventName: raw_response_event
+  kind: response
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Pass-through wrapper around Responses API streaming events (response.output_text.delta, response.output_item.added, etc.)."
+  payloadSchema:
+    type: RawResponsesStreamEvent
+    fields: ["data(ResponseStreamEvent)"]
+  sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RawResponsesStreamEvent)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:openai-agents-run-item-message-output-created
+attributes:
+  displayName: "OpenAI Agents SDK / RunItemStreamEvent message_output_created"
+  eventName: run_item_stream_event.message_output_created
+  kind: response
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "An assistant message-output item has been finalized in the run."
+  payloadSchema:
+    type: RunItemStreamEvent
+    fields: ["name=message_output_created", "item(MessageOutputItem)"]
+  sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RunItemStreamEvent)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:openai-agents-run-item-tool-called
+attributes:
+  displayName: "OpenAI Agents SDK / RunItemStreamEvent tool_called"
+  eventName: run_item_stream_event.tool_called
+  kind: request
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Runner is about to invoke a function/hosted tool."
+  payloadSchema:
+    type: RunItemStreamEvent
+    fields: ["name=tool_called", "item(ToolCallItem)"]
+  sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RunItemStreamEvent)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:openai-agents-run-item-tool-output
+attributes:
+  displayName: "OpenAI Agents SDK / RunItemStreamEvent tool_output"
+  eventName: run_item_stream_event.tool_output
+  kind: response
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "A tool call has returned and its output is being threaded back into the loop."
+  payloadSchema:
+    type: RunItemStreamEvent
+    fields: ["name=tool_output", "item(ToolCallOutputItem)"]
+  sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RunItemStreamEvent)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:openai-agents-run-item-handoff-requested
+attributes:
+  displayName: "OpenAI Agents SDK / RunItemStreamEvent handoff_requested"
+  eventName: run_item_stream_event.handoff_requested
+  kind: request
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Current agent has emitted a handoff tool call targeting another Agent."
+  payloadSchema:
+    type: RunItemStreamEvent
+    fields: ["name=handoff_requested", "item(HandoffCallItem)"]
+  sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RunItemStreamEvent)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:openai-agents-run-item-handoff-occurred
+attributes:
+  displayName: "OpenAI Agents SDK / RunItemStreamEvent handoff_occured"
+  eventName: run_item_stream_event.handoff_occured
+  kind: state-change
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Control has transitioned into the target Agent."
+  payloadSchema:
+    type: RunItemStreamEvent
+    fields: ["name=handoff_occured", "item(HandoffOutputItem)"]
+  sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RunItemStreamEvent)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:openai-agents-run-item-reasoning-item-created
+attributes:
+  displayName: "OpenAI Agents SDK / RunItemStreamEvent reasoning_item_created"
+  eventName: run_item_stream_event.reasoning_item_created
+  kind: response
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "A reasoning item (thinking trace) has been finalized in the run."
+  payloadSchema:
+    type: RunItemStreamEvent
+    fields: ["name=reasoning_item_created", "item(ReasoningItem)"]
+  sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RunItemStreamEvent)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:openai-agents-agent-updated-stream-event
+attributes:
+  displayName: "OpenAI Agents SDK / AgentUpdatedStreamEvent"
+  eventName: agent_updated_stream_event
+  kind: state-change
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Active agent has changed (typically following a handoff)."
+  payloadSchema:
+    type: AgentUpdatedStreamEvent
+    fields: ["new_agent(Agent)"]
+  sourceCitation: "openai.github.io/openai-agents-python/streaming/ (AgentUpdatedStreamEvent)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current

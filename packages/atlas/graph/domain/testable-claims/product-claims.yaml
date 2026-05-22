@@ -1,0 +1,798 @@
+# Testable claims for agent products — verifies graph data integrity
+# Each claim asserts something about the product's graph record/edges
+---
+nodeKind: TestableClaim
+id: claim:aider-has-version
+attributes:
+  displayName: "Aider has agent version record"
+  description: |
+    Aider (agent:aider) has a has_version edge pointing to its
+    agent-version:aider@current record, confirming the product is
+    properly wired in the graph with version metadata.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.from==='agent:aider'&&e.kind==='has_version')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:aider
+---
+nodeKind: TestableClaim
+id: claim:aider-has-plugin-target
+attributes:
+  displayName: "Aider has plugin target"
+  description: |
+    Aider (agent:aider) has a plugin-target:aider node connected
+    via hosted_by edge, indicating the product supports plugin
+    extensibility in the graph model.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.kind==='hosted_by'&&e.from==='plugin-target:aider'&&e.to==='agent:aider')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:aider
+---
+nodeKind: TestableClaim
+id: claim:continue-is-ide-agent
+attributes:
+  displayName: "Continue is an IDE side-panel agent"
+  description: |
+    Continue (agent:continue) is described as an IDE side-panel agent
+    for VS Code and JetBrains, distinguishing it from terminal-based
+    agents in the catalog.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:continue'];process.exit(r&&String(r.description||'').includes('IDE')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:continue
+---
+nodeKind: TestableClaim
+id: claim:cline-is-vscode-extension
+attributes:
+  displayName: "Cline is a VS Code extension"
+  description: |
+    Cline (agent:cline) is described as running as a VS Code extension,
+    confirming its distribution model is IDE-embedded rather than
+    standalone CLI.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:cline'];process.exit(r&&String(r.description||'').includes('VS Code')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:cline
+---
+nodeKind: TestableClaim
+id: claim:roo-code-is-cline-fork
+attributes:
+  displayName: "Roo Code is described as a fork of Cline"
+  description: |
+    Roo Code (agent:roo-code) is described as an open-source fork of
+    Cline, documenting the lineage relationship between these two
+    VS Code extension agents.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:roo-code'];process.exit(r&&String(r.description||'').toLowerCase().includes('fork of cline')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:roo-code
+---
+nodeKind: TestableClaim
+id: claim:goose-supports-mcp
+attributes:
+  displayName: "Goose supports MCP tool servers"
+  description: |
+    Goose (agent:goose) description mentions MCP tool servers,
+    confirming it supports Model Context Protocol integration
+    for tool extensibility.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:goose'];process.exit(r&&String(r.description||'').includes('MCP')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:goose
+---
+nodeKind: TestableClaim
+id: claim:devin-is-hosted-agent
+attributes:
+  displayName: "Devin is a hosted autonomous agent"
+  description: |
+    Devin (agent:devin) is described as a hosted autonomous software
+    engineering agent from Cognition, distinguishing it from local/CLI
+    agents in the catalog.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:devin'];process.exit(r&&String(r.description||'').includes('hosted')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:devin
+---
+nodeKind: TestableClaim
+id: claim:devin-integrates-orchestration
+attributes:
+  displayName: "Devin integrates with orchestration topics"
+  description: |
+    Devin (agent:devin) has integrates_with edges to orchestration-related
+    topics including agent-orchestration-products, agent-dispatch, and
+    parallel-agent-execution.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const edges=i.edges.filter(e=>e.from==='agent:devin'&&e.kind==='integrates_with');process.exit(edges.length>=3?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:devin
+---
+nodeKind: TestableClaim
+id: claim:zed-is-multiplayer-editor
+attributes:
+  displayName: "Zed is described as a multiplayer editor"
+  description: |
+    Zed (agent:zed) is described as a high-performance multiplayer
+    code editor, distinguishing it from single-user IDE agents.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:zed'];process.exit(r&&String(r.description||'').includes('multiplayer')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:zed
+---
+nodeKind: TestableClaim
+id: claim:windsurf-has-cascade
+attributes:
+  displayName: "Windsurf features Cascade AI flow"
+  description: |
+    Windsurf (agent:windsurf) description mentions Cascade, its
+    distinctive AI flow that reads, edits, and runs code across
+    the workspace.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:windsurf'];process.exit(r&&String(r.description||'').includes('Cascade')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:windsurf
+---
+nodeKind: TestableClaim
+id: claim:replit-agent-is-hosted
+attributes:
+  displayName: "Replit Agent runs in cloud IDE"
+  description: |
+    Replit Agent (agent:replit-agent) is described as a hosted coding
+    agent inside the Replit cloud IDE, confirming its cloud-native
+    deployment model.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:replit-agent'];process.exit(r&&String(r.description||'').includes('cloud IDE')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:replit-agent
+---
+nodeKind: TestableClaim
+id: claim:bolt-uses-webcontainers
+attributes:
+  displayName: "Bolt runs via WebContainers"
+  description: |
+    Bolt (agent:bolt) description mentions WebContainers, confirming
+    its unique in-browser execution environment for Node.js
+    development.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:bolt'];process.exit(r&&String(r.description||'').includes('WebContainers')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:bolt
+---
+nodeKind: TestableClaim
+id: claim:v0-generates-react
+attributes:
+  displayName: "v0 produces React/Next.js components"
+  description: |
+    v0 (agent:v0) description confirms it produces React/Next.js +
+    Tailwind components, establishing its specialization as a
+    generative UI tool.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:v0'];process.exit(r&&String(r.description||'').includes('React')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:v0
+---
+nodeKind: TestableClaim
+id: claim:lovable-generates-fullstack
+attributes:
+  displayName: "Lovable generates full-stack web apps"
+  description: |
+    Lovable (agent:lovable) description confirms it generates
+    full-stack web apps with React + Supabase from natural-language
+    prompts.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:lovable'];process.exit(r&&String(r.description||'').includes('Supabase')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:lovable
+---
+nodeKind: TestableClaim
+id: claim:openhands-has-docker-sandbox
+attributes:
+  displayName: "OpenHands runs in sandboxed Docker runtime"
+  description: |
+    OpenHands (agent:openhands) description mentions sandboxed Docker
+    runtime, confirming its security isolation model for autonomous
+    code execution.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:openhands'];process.exit(r&&String(r.description||'').includes('Docker')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:openhands
+---
+nodeKind: TestableClaim
+id: claim:warp-has-agent-mode
+attributes:
+  displayName: "Warp has Agent Mode for multi-step tasks"
+  description: |
+    Warp (agent:warp) description mentions Agent Mode that executes
+    multi-step shell tasks, distinguishing it from simple terminal
+    emulators.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:warp'];process.exit(r&&String(r.description||'').includes('Agent Mode')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:warp
+---
+nodeKind: TestableClaim
+id: claim:droid-supports-parallel-subagents
+attributes:
+  displayName: "Droid supports parallel subagent execution"
+  description: |
+    Factory Droid (agent:droid) description mentions parallel subagent
+    execution, confirming its multi-agent orchestration capability.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:droid'];process.exit(r&&String(r.description||'').includes('parallel')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:droid
+---
+nodeKind: TestableClaim
+id: claim:sweep-ai-creates-prs
+attributes:
+  displayName: "Sweep AI autonomously creates pull requests"
+  description: |
+    Sweep AI (agent:sweep-ai) description confirms it takes GitHub
+    issues and autonomously creates pull requests, establishing its
+    CI/CD integration pattern.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:sweep-ai'];process.exit(r&&String(r.description||'').includes('pull requests')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:sweep-ai
+---
+nodeKind: TestableClaim
+id: claim:paperclip-is-multi-tenant
+attributes:
+  displayName: "Paperclip provides multi-tenant architecture"
+  description: |
+    Paperclip (agent:paperclip) description mentions company-scoped
+    multi-tenant architecture, confirming it serves as a control
+    plane for AI-agent companies.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:paperclip'];process.exit(r&&String(r.description||'').includes('multi-tenant')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:paperclip
+---
+nodeKind: TestableClaim
+id: claim:openai-agents-sdk-has-runner
+attributes:
+  displayName: "OpenAI Agents SDK exposes a Runner"
+  description: |
+    OpenAI Agents SDK (agent:openai-agents-sdk) description confirms
+    it exposes a Runner that drives a streaming agent loop over the
+    Responses API.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:openai-agents-sdk'];process.exit(r&&String(r.description||'').includes('Runner')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:openai-agents-sdk
+---
+nodeKind: TestableClaim
+id: claim:langgraph-has-graph-sdk
+attributes:
+  displayName: "LangGraph provides graph/state/checkpoint orchestration"
+  description: |
+    LangGraph (agent:langgraph) description confirms it supplies
+    graph/state/checkpoint orchestration for controllable agents,
+    establishing its architectural pattern.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:langgraph'];process.exit(r&&String(r.description||'').includes('graph')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:langgraph
+---
+nodeKind: TestableClaim
+id: claim:hermes-distributed-via-pypi
+attributes:
+  displayName: "Hermes is distributed via PyPI"
+  description: |
+    Hermes (agent:hermes) description confirms it is distributed via
+    PyPI, establishing its Python packaging distribution model.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:hermes'];process.exit(r&&String(r.description||'').includes('PyPI')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:hermes
+---
+nodeKind: TestableClaim
+id: claim:babysitter-has-breakpoints
+attributes:
+  displayName: "Babysitter supports breakpoint approval"
+  description: |
+    Babysitter (agent:babysitter) defines automation rules including
+    defines_automation_rule edges, confirming its orchestration model
+    includes approval/breakpoint primitives for human-in-the-loop
+    workflows.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const edges=i.edges.filter(e=>e.from==='agent:babysitter'&&e.kind==='defines_automation_rule');process.exit(edges.length>=2?0:1)\""
+  category: graph-integrity
+  priority: high
+edges:
+  asserts_about:
+    - agent:babysitter
+---
+nodeKind: TestableClaim
+id: claim:babysitter-sdk-has-source-ref
+attributes:
+  displayName: "Babysitter SDK has source reference"
+  description: |
+    Babysitter SDK (agent:babysitter-sdk) has source_of edges pointing
+    to it from source reference nodes, confirming proper source
+    provenance tracking in the graph.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const edges=i.edges.filter(e=>e.to==='agent:babysitter-sdk'&&e.kind==='source_of');process.exit(edges.length>=1?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:babysitter-sdk
+---
+nodeKind: TestableClaim
+id: claim:babysitter-agent-has-version-5
+attributes:
+  displayName: "Babysitter Agent version is >=5.0.0"
+  description: |
+    Babysitter Agent (agent:babysitter-agent) has a has_version edge
+    to agentVersion:babysitter-agent:ge-5-0-0, confirming the v5+
+    version pin in the graph.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.from==='agent:babysitter-agent'&&e.kind==='has_version'&&e.to.includes('ge-5-0-0'))?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:babysitter-agent
+---
+nodeKind: TestableClaim
+id: claim:claude-agent-sdk-distinct-from-claude-code
+attributes:
+  displayName: "Claude Agent SDK is distinct from Claude Code"
+  description: |
+    Claude Agent SDK (agent:claude-agent-sdk) description explicitly
+    states it is distinct from Claude Code (the CLI/TUI), confirming
+    these are separate products in the graph.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:claude-agent-sdk'];process.exit(r&&String(r.description||'').includes('Distinct from')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:claude-agent-sdk
+---
+nodeKind: TestableClaim
+id: claim:amp-has-sourcegraph-context
+attributes:
+  displayName: "Amp leverages Sourcegraph code intelligence"
+  description: |
+    Sourcegraph Amp (agent:amp) description confirms it leverages
+    Sourcegraph's code intelligence for cross-repository context,
+    a unique capability among CLI agents.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:amp'];process.exit(r&&String(r.description||'').toLowerCase().includes('sourcegraph')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:amp
+---
+nodeKind: TestableClaim
+id: claim:qwen-is-gemini-fork
+attributes:
+  displayName: "Qwen Code is a fork of Gemini CLI"
+  description: |
+    Qwen Code (agent:qwen) description confirms it is a fork of
+    Google's Gemini CLI adapted for Qwen3-Coder models, establishing
+    the lineage relationship.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:qwen'];process.exit(r&&String(r.description||'').includes('fork')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:qwen
+---
+nodeKind: TestableClaim
+id: claim:symphony-polls-issue-tracker
+attributes:
+  displayName: "Symphony polls an issue tracker"
+  description: |
+    Symphony (agent:symphony) description confirms it polls an issue
+    tracker (Linear), creates isolated workspaces, and runs coding
+    agent sessions, establishing its orchestration pattern.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:symphony'];process.exit(r&&String(r.description||'').includes('Linear')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:symphony
+---
+nodeKind: TestableClaim
+id: claim:vibe-kanban-orchestrates-parallel
+attributes:
+  displayName: "Vibe Kanban orchestrates parallel agents"
+  description: |
+    Vibe Kanban (agent:vibe-kanban) description confirms it manages
+    multiple coding agents (Claude Code, Codex, Gemini CLI) in
+    parallel via a kanban interface.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:vibe-kanban'];process.exit(r&&String(r.description||'').includes('parallel')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:vibe-kanban
+---
+nodeKind: TestableClaim
+id: claim:vibe-kanban-uses-react
+attributes:
+  displayName: "Vibe Kanban is composed of React framework"
+  description: |
+    Vibe Kanban (agent:vibe-kanban) has a composed_of edge to
+    framework:react, confirming its frontend technology stack
+    is tracked in the graph.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.from==='agent:vibe-kanban'&&e.kind==='composed_of'&&e.to==='framework:react')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:vibe-kanban
+---
+nodeKind: TestableClaim
+id: claim:openclaw-uses-typescript-and-rust
+attributes:
+  displayName: "OpenClaw is composed of TypeScript and Rust"
+  description: |
+    OpenClaw (agent:openclaw) has composed_of edges to both
+    language:typescript and language:rust, confirming the dual-language
+    implementation is tracked in the graph.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const ts=i.edges.some(e=>e.from==='agent:openclaw'&&e.kind==='composed_of'&&e.to==='language:typescript');const rs=i.edges.some(e=>e.from==='agent:openclaw'&&e.kind==='composed_of'&&e.to==='language:rust');process.exit(ts&&rs?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:openclaw
+---
+nodeKind: TestableClaim
+id: claim:opencode-is-provider-agnostic
+attributes:
+  displayName: "OpenCode is provider-agnostic"
+  description: |
+    OpenCode (agent:opencode) description confirms it is provider-agnostic,
+    driving Anthropic, OpenAI, Google, and other models through a
+    unified loop.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:opencode'];process.exit(r&&String(r.description||'').includes('Provider-agnostic')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:opencode
+---
+nodeKind: TestableClaim
+id: claim:omp-is-pi-fork
+attributes:
+  displayName: "OMP is a community fork of Pi"
+  description: |
+    OMP (agent:omp) description confirms it is a community fork of Pi
+    (oh-my-pi), establishing the lineage relationship between these
+    agents.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:omp'];process.exit(r&&String(r.description||'').includes('fork of Pi')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:omp
+---
+nodeKind: TestableClaim
+id: claim:nanoclaw-has-sandboxed-containers
+attributes:
+  displayName: "NanoClaw provides sandboxed container execution"
+  description: |
+    NanoClaw (agent:nanoclaw) description confirms agents run in
+    isolated containers with controlled file system and network
+    access.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:nanoclaw'];process.exit(r&&String(r.description||'').includes('container')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:nanoclaw
+---
+nodeKind: TestableClaim
+id: claim:nanny-is-minimal-orchestrator
+attributes:
+  displayName: "Nanny provides minimal orchestration structure"
+  description: |
+    Nanny (agent:nanny) description confirms it provides minimal
+    orchestration structure with task queuing, retry logic, and
+    status tracking, while giving maximum autonomy to the agent.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:nanny'];process.exit(r&&String(r.description||'').includes('task queuing')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:nanny
+---
+nodeKind: TestableClaim
+id: claim:cli-anything-generates-wrappers
+attributes:
+  displayName: "CLI Anything generates CLI wrappers"
+  description: |
+    CLI Anything (agent:cli-anything) description confirms it generates
+    thin CLI interfaces around existing tools and applications, making
+    them agent-native.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:cli-anything'];process.exit(r&&String(r.description||'').includes('CLI')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:cli-anything
+---
+nodeKind: TestableClaim
+id: claim:cyclop-one-uses-vision
+attributes:
+  displayName: "Cyclop One is powered by Claude vision"
+  description: |
+    Cyclop One (agent:cyclop-one) description confirms it is an
+    autonomous macOS desktop agent powered by Claude vision that
+    captures the screen and reasons about what it sees.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:cyclop-one'];process.exit(r&&String(r.description||'').includes('vision')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:cyclop-one
+---
+nodeKind: TestableClaim
+id: claim:psclaudecode-is-powershell
+attributes:
+  displayName: "PSClaudeCode is a PowerShell implementation"
+  description: |
+    PSClaudeCode (agent:psclaudecode) description confirms it is a
+    PowerShell implementation of the Claude Code agent loop,
+    targeting Windows-native environments.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:psclaudecode'];process.exit(r&&String(r.description||'').includes('PowerShell')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:psclaudecode
+---
+nodeKind: TestableClaim
+id: claim:claude-sh-zero-deps
+attributes:
+  displayName: "claude-sh has zero npm dependencies"
+  description: |
+    claude-sh (agent:claude-sh) description confirms it has zero npm
+    dependencies, using only curl and jq, making it a pure-shell
+    reimplementation of Claude Code.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:claude-sh'];process.exit(r&&String(r.description||'').includes('Zero npm')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:claude-sh
+---
+nodeKind: TestableClaim
+id: claim:agent-mux-bridges-transport
+attributes:
+  displayName: "Agent-mux bridges to remote agents via transport"
+  description: |
+    Agent-mux (agent:agent-mux) has used_by edges from multiple
+    transport protocols (anthropic, openai-chat, openai-responses),
+    confirming its multi-transport bridging capability.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const edges=i.edges.filter(e=>e.to==='agent:agent-mux'&&e.kind==='used_by');process.exit(edges.length>=2?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:agent-mux
+---
+nodeKind: TestableClaim
+id: claim:a5c-has-core-platform-runtime
+attributes:
+  displayName: "a5c has core, platform, and runtime impl nodes"
+  description: |
+    a5c (agent:a5c) has composes edges from core, platform, and runtime
+    implementation nodes, confirming the full product decomposition is
+    modeled in the graph.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const edges=i.edges.filter(e=>e.to==='agent:a5c'&&e.kind==='composes');process.exit(edges.length>=3?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:a5c
+---
+nodeKind: TestableClaim
+id: claim:codex-sdk-distinct-from-codex-cli
+attributes:
+  displayName: "Codex SDK is distinct from Codex CLI"
+  description: |
+    Codex SDK (agent:codex-sdk) description explicitly states it is
+    distinct from Codex (the CLI), confirming these are separate
+    products in the graph.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:codex-sdk'];process.exit(r&&String(r.description||'').includes('Distinct from')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:codex-sdk
+---
+nodeKind: TestableClaim
+id: claim:codex-app-server-is-json-rpc
+attributes:
+  displayName: "Codex App-Server exposes JSON-RPC service"
+  description: |
+    Codex App-Server (agent:codex-app-server) description confirms
+    it exposes Codex's agentic loop as a JSON-RPC service over
+    stdio, SSE, or WebSocket.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:codex-app-server'];process.exit(r&&String(r.description||'').includes('JSON-RPC')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:codex-app-server
+---
+nodeKind: TestableClaim
+id: claim:pikiclaw-is-mobile-first
+attributes:
+  displayName: "PikiClaw is a mobile-first agent platform"
+  description: |
+    PikiClaw (agent:pikiclaw) description confirms it is a mobile-first
+    AI agent platform, distinguishing it from desktop/terminal agents
+    in the catalog.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:pikiclaw'];process.exit(r&&String(r.description||'').includes('Mobile-first')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:pikiclaw
+---
+nodeKind: TestableClaim
+id: claim:pi-has-multi-package-workspace
+attributes:
+  displayName: "Pi is structured as a multi-package workspace"
+  description: |
+    Pi (agent:pi) description confirms it is structured as a
+    multi-package workspace, establishing its modular architecture
+    pattern.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const r=i.records['agent:pi'];process.exit(r&&String(r.description||'').includes('multi-package')?0:1)\""
+  category: graph-integrity
+  priority: medium
+edges:
+  asserts_about:
+    - agent:pi
+---
+nodeKind: TestableClaim
+id: claim:agent-mux-remote-has-source-ref
+attributes:
+  displayName: "Agent-mux-remote has source reference"
+  description: |
+    Agent-mux-remote (agent:agent-mux-remote) has a source_of edge
+    pointing to it, confirming proper source provenance tracking.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.to==='agent:agent-mux-remote'&&e.kind==='source_of')?0:1)\""
+  category: graph-integrity
+  priority: low
+edges:
+  asserts_about:
+    - agent:agent-mux-remote

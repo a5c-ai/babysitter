@@ -3,6 +3,13 @@
  * @description Systematic refactoring plan creation process with technical debt identification, prioritization, test safety net creation, and actionable implementation roadmap
  * @inputs { codebasePath: string, projectName: string, technicalDebtSources: array, targetQualityScore: number, refactoringBudget: object, constraints: object }
  * @outputs { success: boolean, refactoringPlan: string, technicalDebtInventory: object, prioritizedBacklog: array, testCoverage: object, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:technical-debt-reduction]
+ *   roles: [role:tech-lead, role:principal-engineer]
+ *   skillAreas: [skill-area:code-analysis-linting]
+ *   topics: [topic:refactoring, topic:technical-debt, topic:design-patterns]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

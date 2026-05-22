@@ -1,0 +1,27 @@
+nodeKind: AdapterModel
+id: adapter-model:cursor:cursor-fast
+attributes:
+  harness: cursor
+  modelId: cursor-fast
+  displayName: Cursor Fast
+  deprecated: false
+  contextWindow: 128000
+  maxOutputTokens: 8192
+  supportsThinking: false
+  supportsToolCalling: true
+  supportsParallelToolCalls: true
+  supportsToolCallStreaming: true
+  supportsJsonMode: false
+  supportsStructuredOutput: false
+  supportsTextStreaming: true
+  supportsThinkingStreaming: false
+  supportsImageInput: true
+  supportsImageOutput: false
+  supportsFileInput: true
+  cliArgKey: "--model"
+  cliArgValue: cursor-fast
+  lastUpdated: "2025-01-01"
+  source: bundled
+edges:
+  model_for:
+    - target: agent:cursor

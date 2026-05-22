@@ -1,0 +1,17 @@
+nodeKind: Definition
+id: definition:run-journal-event.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:run-journal-event
+  text: |
+    The enum of run journal event names emitted by the babysitter runtime
+    and persisted to the per-run journal directory (`<runDir>/journal/`).
+    Each event is a sequenced + ULID-tagged + sha256-checksummed JSON file
+    ({type, recordedAt, data, checksum}). Sourced from
+    packages/sdk/src/storage/journal.ts (appendEvent, JournalEvent) and
+    packages/sdk/src/runtime tests; the canonical event taxonomy is
+    drawn from observed eventType literals across the runtime.
+  status: canonical
+edges:
+  defines:
+    - term:run-journal-event

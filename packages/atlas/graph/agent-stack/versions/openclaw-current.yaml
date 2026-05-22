@@ -1,0 +1,141 @@
+nodeKind: AgentVersion
+id: agentVersion:openclaw:ge-0-0-0
+attributes:
+  agentId: "openclaw"
+  aliases: []
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  displayName: "OpenClaw"
+  summary: "OpenClaw CLI coding agent"
+  sourcePackage: "openclaw"
+  osSupport:
+    - "linux"
+    - "macos"
+    - "windows"
+  agentProductId: agent:openclaw
+  versionRange: ">=0.0.0"
+  releasedAt: "2025-01-01"
+  cliCommand: "openclaw"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "Provider API Key"
+        envVars: [ANTHROPIC_API_KEY, OPENAI_API_KEY]
+    authFiles:
+      - "~/.openclaw/config.json"
+    hostEnvSignals:
+      - OPENCLAW_SESSION
+      - OPENCLAW_RUN_ID
+    sessionDir: "~/.openclaw/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
+    capabilityFlags:
+      canResume: false
+      canFork: false
+      supportsMultiTurn: true
+      sessionPersistence: file
+      supportsTextStreaming: true
+      supportsToolCallStreaming: true
+      supportsThinkingStreaming: false
+      supportsNativeTools: true
+      supportsMCP: true
+      supportsParallelToolCalls: true
+      requiresToolApproval: true
+      supportsThinking: false
+      supportsJsonMode: false
+      supportsStructuredOutput: false
+      structuredSessionTransport: none
+      sessionControlPlane: self-managed
+      supportsSkills: false
+      supportsAgentsMd: false
+      skillsFormat: none
+      supportsSubagentDispatch: false
+      supportsParallelExecution: false
+      maxParallelTasks: 1
+      supportsInteractiveMode: true
+      supportsStdinInjection: true
+      supportsImageInput: false
+      supportsImageOutput: false
+      supportsFileAttachments: false
+      supportsPlugins: true
+      pluginFormats: [mcp-server]
+      supportedPlatforms: [darwin, linux, win32]
+      requiresGitRepo: false
+      requiresPty: false
+    runtimeHooks:
+      preToolUse: nonblocking
+      postToolUse: nonblocking
+      sessionStart: nonblocking
+      sessionEnd: nonblocking
+      stop: nonblocking
+      userPromptSubmit: nonblocking
+    configSchema:
+      configFormat: json
+      configFilePaths:
+        - "~/.openclaw/config.json"
+    displayName: "OpenClaw"
+    defaultModelId: "default"
+  hookSupport:
+    interactive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+    nonInteractive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: false
+    sessionResume: true
+    positionalPrompt: false
+edges:
+  version_of:
+    - agent:openclaw
+  composed_of:
+    - target: agent-core-impl:openclaw.core@current
+      role: core
+    - target: agent-runtime-impl:openclaw.runtime@current
+      role: runtime
+    - target: agent-platform-impl:openclaw.platform@current
+      role: platform
+    - target: agent-ui-impl:openclaw.ui@current
+      role: ui
+    - target: knowledge-fabric-impl:openclaw.knowledge@current
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:openclaw-soul-memory
+  sourced_from: []
+  supports:
+    - target: capability:skills
+      versionRange: ">=0.0.0"
+      level: full
+      notes: OpenClaw fallback metadata; runtime hooks and stop hooks remain unsupported in current shared metadata.
+    - target: capability:supports-thinking
+      versionRange: ">=0.0.0"
+      level: full
+      notes: OpenClaw fallback metadata.
+    - target: capability:interactive-mode
+      versionRange: ">=0.0.0"
+      level: full
+      notes: OpenClaw fallback metadata.
+    - target: capability:stdin-injection
+      versionRange: ">=0.0.0"
+      level: full
+      notes: OpenClaw fallback metadata.
+    - target: capability:vision-input
+      versionRange: ">=0.0.0"
+      level: full
+      notes: OpenClaw fallback metadata.
+    - target: capability:can-resume
+      versionRange: ">=0.0.0"
+      level: full
+      notes: OpenClaw fallback metadata.

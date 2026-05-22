@@ -6,6 +6,11 @@ backlog-id: AG-009
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:technical-documentation]
+  skillAreas: [skill-area:docs-as-code, skill-area:deployment-infrastructure-management]
+  roles: [role:technical-writer, role:documentation-engineer]
 ---
 
 # docs-platform-engineer
@@ -330,7 +335,7 @@ plugins: [
     '@docusaurus/plugin-content-docs',
     {
       id: 'cli',
-      path: '../packages/cli/docs',
+      path: '../packages/agent-mux/cli/docs',
       routeBasePath: 'cli',
       sidebarPath: require.resolve('./sidebars-cli.js'),
     },

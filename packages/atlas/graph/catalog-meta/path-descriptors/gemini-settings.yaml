@@ -1,0 +1,17 @@
+nodeKind: PathDescriptor
+id: path:gemini-settings
+attributes:
+  pathId: path:gemini-settings
+  displayName: "Gemini CLI settings.json"
+  path: "~/.gemini/settings.json"
+  pathKind: settings-file
+  ownerKind: AgentPlatformImpl
+  ownerId: agent-platform-impl:gemini-cli.platform@current
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+
+edges:
+  owned_by:
+    - target: agent-platform-impl:gemini-cli.platform@current

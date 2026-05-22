@@ -18,11 +18,22 @@ vi.mock("node:child_process", () => ({
   execFile: vi.fn(),
 }));
 
-// Mock node:fs to control detectConfig behaviour.
-vi.mock("node:fs", () => ({
-  promises: {
-    access: vi.fn().mockRejectedValue(new Error("ENOENT")),
-  },
+// Mock node:fs to control detectConfig behaviour while preserving sync helpers
+// that other imported modules use during initialization.
+vi.mock("node:fs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs")>();
+  return {
+    ...actual,
+    promises: {
+      ...actual.promises,
+      access: vi.fn().mockRejectedValue(new Error("ENOENT")),
+    },
+  };
+});
+
+// Force discoverHarnessesViaAmux to throw so legacy probe path is exercised.
+vi.mock("../install", () => ({
+  discoverHarnessesViaAmux: vi.fn().mockRejectedValue(new Error("agent-mux not available")),
 }));
 
 import {
@@ -92,7 +103,8 @@ function stubExecFile(
 // ---------------------------------------------------------------------------
 
 const CALLER_ENV_KEYS = [
-  "BABYSITTER_SESSION_ID",
+  "AGENT_SESSION_ID",
+  "AGENT_SESSION_ID",
   "CLAUDE_ENV_FILE",
   "CODEX_THREAD_ID",
   "CODEX_SESSION_ID",
@@ -135,8 +147,8 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("KNOWN_HARNESSES", () => {
-  it("contains exactly 9 harness specs", () => {
-    expect(KNOWN_HARNESSES).toHaveLength(9);
+  it("contains exactly 10 harness specs", () => {
+    expect(KNOWN_HARNESSES).toHaveLength(10);
   });
 
   it("includes all expected harness names", () => {
@@ -149,7 +161,7 @@ describe("KNOWN_HARNESSES", () => {
     expect(names).toContain("cursor");
     expect(names).toContain("opencode");
     expect(names).toContain("github-copilot");
-    expect(names).toContain("internal");
+    expect(names).toContain("unified");
   });
 });
 
@@ -243,12 +255,12 @@ describe("checkCliAvailable", () => {
 // ---------------------------------------------------------------------------
 
 describe("discoverHarnesses", () => {
-  it("returns results for all 9 known harnesses", async () => {
+  it("returns results for all 10 known harnesses", async () => {
     stubExecFile({});
 
     const results = await discoverHarnesses();
 
-    expect(results).toHaveLength(9);
+    expect(results).toHaveLength(10);
     const names = results.map((r) => r.name);
     expect(names).toContain("claude-code");
     expect(names).toContain("codex");
@@ -257,7 +269,7 @@ describe("discoverHarnesses", () => {
     expect(names).toContain("gemini-cli");
     expect(names).toContain("cursor");
     expect(names).toContain("opencode");
-    expect(names).toContain("internal");
+    expect(names).toContain("unified");
   });
 
   it("returns results sorted alphabetically by name", async () => {
@@ -314,10 +326,6 @@ describe("discoverHarnesses", () => {
     expect(pi?.capabilities).toContain("headless-prompt");
     expect(pi?.capabilities).not.toContain("stop-hook");
 
-    const internal = results.find((r) => r.name === "internal");
-    expect(internal?.capabilities).toContain("programmatic");
-    expect(internal?.capabilities).toContain("session-binding");
-    expect(internal?.installed).toBe(true);
   });
 
   it("sets cliCommand from the spec", async () => {
@@ -378,14 +386,14 @@ describe("detectCallerHarness", () => {
     expect(caller!.matchedEnvVars).toContain("CLAUDE_ENV_FILE");
   });
 
-  it("detects opencode from BABYSITTER_SESSION_ID alone", () => {
-    // OpenCode self-injects BABYSITTER_SESSION_ID via shell.env and uses it for caller detection.
-    process.env.BABYSITTER_SESSION_ID = "session-abc";
+  it("detects opencode from AGENT_SESSION_ID alone", () => {
+    // OpenCode self-injects AGENT_SESSION_ID via shell.env and uses it for caller detection.
+    process.env.AGENT_SESSION_ID = "session-abc";
 
     const caller = detectCallerHarness();
     expect(caller).not.toBeNull();
     expect(caller!.name).toBe("opencode");
-    expect(caller!.matchedEnvVars).toContain("BABYSITTER_SESSION_ID");
+    expect(caller!.matchedEnvVars).toContain("AGENT_SESSION_ID");
   });
 
   it("detects codex via CODEX_THREAD_ID", () => {

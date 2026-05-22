@@ -1,0 +1,105 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:opencode.runtime@1.x
+attributes:
+  displayName: OpenCode Runtime (1.x)
+  agentVersionId: agentVersion:opencode:ge-0-0-0
+  subagentDispatchMechanism: task-tool
+  subagentChildSessionPolicy: ephemeral-child-session
+  subagentToolScopePolicy: inherit-parent
+  packageRef: source-ref:opencode-github
+  builtInTools:
+  - tool-descriptor:read
+  - tool-descriptor:write
+  - tool-descriptor:edit
+  - tool-descriptor:bash
+  - tool-descriptor:grep
+  toolRegistryDiscovery: static-bundled
+  hookSockets:
+  - hook-surface:opencode.session-idle
+  - hook-surface:opencode.shell-env
+  internalSessionStateLocation: ~/.config/opencode/sessions/
+  sessionFileFormat: jsonl
+  sessionFilePathConvention: ~/.config/opencode/sessions/<session-id>.jsonl
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: wrapped-shell
+  runtimeIdentity: api-key
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  supportsStreaming: true
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:opencode
+    role: runtime
+  exposes:
+  - target: hook-surface:opencode.session-idle
+  - target: hook-surface:opencode.shell-env
+  - target: hook-surface:opencode.on-step
+  bundles:
+  - target: tool-descriptor:read
+  - target: tool-descriptor:write
+  - target: tool-descriptor:edit
+  - target: tool-descriptor:bash
+  - target: tool-descriptor:grep
+  connects:
+  - target: mcp-transport:stdio
+  supports:
+  - target: capability:mcp-elicitation
+    versionRange: '>=1.0.0 <2.0.0'
+    level: none
+    notes: 'TODO: verify OpenCode MCP client revision. As of cataloguing
+
+      OpenCode''s MCP integration is stdio-only and does not appear to
+
+      surface elicitation prompts. Marked `none` pending source review
+
+      of https://github.com/sst/opencode
+
+      '
+  - target: capability:mcp-resource-links
+    versionRange: '>=1.0.0 <2.0.0'
+    level: none
+    notes: 'TODO: verify OpenCode handling of MCP resource-link payloads
+
+      (introduced in MCP 2025-06-18). Marked `none` pending review of
+
+      https://github.com/sst/opencode
+
+      '
+  - target: capability:mcp-stdio
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'OpenCode brokers MCP servers configured per project; stdio is the
+
+      default transport.
+
+      '
+  - target: capability:mcp-structured-tool-output
+    versionRange: '>=1.0.0 <2.0.0'
+    level: none
+    notes: 'TODO: verify OpenCode handling of MCP `structuredContent` payloads
+
+      (MCP 2025-06-18). As of cataloguing OpenCode flattens tool output
+
+      to text. Marked `none` pending review of
+
+      https://github.com/sst/opencode
+
+      '
+  - target: capability:supports-mcp
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'MCP via stdio.
+
+      '
+  - target: capability:supports-subagent-dispatch
+    versionRange: '*'
+    level: partial
+    notes: 'TODO verify -- OpenCode appears to use a Task-style dispatch pattern.
+
+      '
+
+
+  speaks:
+    - target: mcp-transport:stdio

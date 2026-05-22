@@ -1,0 +1,528 @@
+---
+nodeKind: MetaAttribute
+id: meta-attribute:platform-service--category
+attributes:
+  displayName: PlatformService.category
+  name: category
+  parentNodeKindId: meta-node-kind:platform-service
+  type: enum<compute,storage,database,messaging,networking,observability,security,ml,build-deploy,other>
+  required: true
+  description: category on PlatformService.
+edges:
+  defined_on:
+  - target: meta-node-kind:platform-service
+---
+nodeKind: MetaAttribute
+id: meta-attribute:platform-service--provided-by-platform-id
+attributes:
+  displayName: PlatformService.providedByPlatformId
+  name: providedByPlatformId
+  parentNodeKindId: meta-node-kind:platform-service
+  type: ref<Platform>
+  required: true
+  description: providedByPlatformId on PlatformService.
+edges:
+  defined_on:
+  - target: meta-node-kind:platform-service
+---
+nodeKind: MetaAttribute
+id: meta-attribute:issue-tracker--id
+attributes:
+  displayName: IssueTracker.id
+  name: id
+  parentNodeKindId: meta-node-kind:issue-tracker
+  type: id
+  required: true
+  description: id on IssueTracker.
+edges:
+  defined_on:
+  - target: meta-node-kind:issue-tracker
+---
+nodeKind: MetaAttribute
+id: meta-attribute:issue-tracker--vendor
+attributes:
+  displayName: IssueTracker.vendor
+  name: vendor
+  parentNodeKindId: meta-node-kind:issue-tracker
+  type: enum<linear,github-issues,jira,gitlab-issues,asana,clickup,sentry>
+  required: true
+  description: vendor on IssueTracker.
+edges:
+  defined_on:
+  - target: meta-node-kind:issue-tracker
+---
+nodeKind: MetaAttribute
+id: meta-attribute:issue-tracker--protocol-style
+attributes:
+  displayName: IssueTracker.protocolStyle
+  name: protocolStyle
+  parentNodeKindId: meta-node-kind:issue-tracker
+  type: enum<graphql,rest,sql>
+  required: false
+  description: protocolStyle on IssueTracker.
+edges:
+  defined_on:
+  - target: meta-node-kind:issue-tracker
+---
+nodeKind: MetaAttribute
+id: meta-attribute:issue-tracker--write-boundary
+attributes:
+  displayName: IssueTracker.writeBoundary
+  name: writeBoundary
+  parentNodeKindId: meta-node-kind:issue-tracker
+  type: enum<agent-writes,orchestrator-writes,both>
+  required: false
+  description: writeBoundary on IssueTracker.
+edges:
+  defined_on:
+  - target: meta-node-kind:issue-tracker
+---
+nodeKind: MetaAttribute
+id: meta-attribute:issue-tracker-protocol--id
+attributes:
+  displayName: IssueTrackerProtocol.id
+  name: id
+  parentNodeKindId: meta-node-kind:issue-tracker-protocol
+  type: id
+  required: true
+  description: id on IssueTrackerProtocol.
+edges:
+  defined_on:
+  - target: meta-node-kind:issue-tracker-protocol
+---
+nodeKind: MetaAttribute
+id: meta-attribute:issue-tracker-protocol--display-name
+attributes:
+  displayName: IssueTrackerProtocol.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:issue-tracker-protocol
+  type: string
+  required: true
+  description: displayName on IssueTrackerProtocol.
+edges:
+  defined_on:
+  - target: meta-node-kind:issue-tracker-protocol
+---
+nodeKind: MetaAttribute
+id: meta-attribute:issue-tracker-protocol--query-semantics
+attributes:
+  displayName: IssueTrackerProtocol.querySemantics
+  name: querySemantics
+  parentNodeKindId: meta-node-kind:issue-tracker-protocol
+  type: enum<graphql,rest,sql>
+  required: false
+  description: querySemantics on IssueTrackerProtocol.
+edges:
+  defined_on:
+  - target: meta-node-kind:issue-tracker-protocol
+---
+nodeKind: MetaAttribute
+id: meta-attribute:issue--id
+attributes:
+  displayName: Issue.id
+  name: id
+  parentNodeKindId: meta-node-kind:issue
+  type: id
+  required: true
+  description: id on Issue.
+edges:
+  defined_on:
+  - target: meta-node-kind:issue
+---
+nodeKind: MetaAttribute
+id: meta-attribute:issue--identifier
+attributes:
+  displayName: Issue.identifier
+  name: identifier
+  parentNodeKindId: meta-node-kind:issue
+  type: string
+  required: false
+  description: identifier on Issue (tracker-native identifier, e.g. PROJ-123).
+edges:
+  defined_on:
+  - target: meta-node-kind:issue
+---
+nodeKind: MetaAttribute
+id: meta-attribute:issue--state
+attributes:
+  displayName: Issue.state
+  name: state
+  parentNodeKindId: meta-node-kind:issue
+  type: string
+  required: false
+  description: state on Issue.
+edges:
+  defined_on:
+  - target: meta-node-kind:issue
+---
+nodeKind: MetaAttribute
+id: meta-attribute:error-category--id
+attributes:
+  displayName: ErrorCategory.id
+  name: id
+  parentNodeKindId: meta-node-kind:error-category
+  type: id
+  required: true
+  description: id on ErrorCategory.
+edges:
+  defined_on:
+  - target: meta-node-kind:error-category
+---
+nodeKind: MetaAttribute
+id: meta-attribute:error-category--layer
+attributes:
+  displayName: ErrorCategory.layer
+  name: layer
+  parentNodeKindId: meta-node-kind:error-category
+  type: enum<agent-runner,tracker,workflow-config,workspace,observability>
+  required: true
+  description: layer on ErrorCategory.
+edges:
+  defined_on:
+  - target: meta-node-kind:error-category
+---
+nodeKind: MetaAttribute
+id: meta-attribute:error-category--retryable
+attributes:
+  displayName: ErrorCategory.retryable
+  name: retryable
+  parentNodeKindId: meta-node-kind:error-category
+  type: bool
+  required: true
+  description: retryable on ErrorCategory.
+edges:
+  defined_on:
+  - target: meta-node-kind:error-category
+---
+nodeKind: MetaAttribute
+id: meta-attribute:error-category--severity
+attributes:
+  displayName: ErrorCategory.severity
+  name: severity
+  parentNodeKindId: meta-node-kind:error-category
+  type: enum<transient,permanent,configuration>
+  required: true
+  description: severity on ErrorCategory.
+edges:
+  defined_on:
+  - target: meta-node-kind:error-category
+---
+nodeKind: MetaAttribute
+id: meta-attribute:failure-class--id
+attributes:
+  displayName: FailureClass.id
+  name: id
+  parentNodeKindId: meta-node-kind:failure-class
+  type: id
+  required: true
+  description: id on FailureClass.
+edges:
+  defined_on:
+  - target: meta-node-kind:failure-class
+---
+nodeKind: MetaAttribute
+id: meta-attribute:failure-class--display-name
+attributes:
+  displayName: FailureClass.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:failure-class
+  type: string
+  required: true
+  description: displayName on FailureClass.
+edges:
+  defined_on:
+  - target: meta-node-kind:failure-class
+---
+nodeKind: MetaAttribute
+id: meta-attribute:failure-class--scope
+attributes:
+  displayName: FailureClass.scope
+  name: scope
+  parentNodeKindId: meta-node-kind:failure-class
+  type: enum<workflow-config,workspace,agent-session,tracker,observability>
+  required: true
+  description: scope on FailureClass.
+edges:
+  defined_on:
+  - target: meta-node-kind:failure-class
+---
+nodeKind: MetaAttribute
+id: meta-attribute:recovery-strategy--id
+attributes:
+  displayName: RecoveryStrategy.id
+  name: id
+  parentNodeKindId: meta-node-kind:recovery-strategy
+  type: id
+  required: true
+  description: id on RecoveryStrategy.
+edges:
+  defined_on:
+  - target: meta-node-kind:recovery-strategy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:recovery-strategy--action
+attributes:
+  displayName: RecoveryStrategy.action
+  name: action
+  parentNodeKindId: meta-node-kind:recovery-strategy
+  type: enum<skip-dispatch,retry-with-backoff,skip-tick,keep-workers,best-effort-log,escalate-to-operator>
+  required: true
+  description: action on RecoveryStrategy.
+edges:
+  defined_on:
+  - target: meta-node-kind:recovery-strategy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:recovery-strategy--backoff-spec-strategy
+attributes:
+  displayName: RecoveryStrategy.backoffSpecStrategy
+  name: backoffSpecStrategy
+  parentNodeKindId: meta-node-kind:recovery-strategy
+  type: enum<none,linear,exponential,exponential-jitter,constant>
+  required: false
+  description: backoffSpecStrategy on RecoveryStrategy.
+edges:
+  defined_on:
+  - target: meta-node-kind:recovery-strategy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:partial-state-recovery--id
+attributes:
+  displayName: PartialStateRecovery.id
+  name: id
+  parentNodeKindId: meta-node-kind:partial-state-recovery
+  type: id
+  required: true
+  description: id on PartialStateRecovery.
+edges:
+  defined_on:
+  - target: meta-node-kind:partial-state-recovery
+---
+nodeKind: MetaAttribute
+id: meta-attribute:partial-state-recovery--persistent-state-kinds
+attributes:
+  displayName: PartialStateRecovery.persistentStateKinds
+  name: persistentStateKinds
+  parentNodeKindId: meta-node-kind:partial-state-recovery
+  type: list<enum<none,terminal-workspaces-cleaned,completed-issue-set,run-journals>>
+  required: true
+  description: persistentStateKinds on PartialStateRecovery.
+edges:
+  defined_on:
+  - target: meta-node-kind:partial-state-recovery
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:contains
+attributes:
+  displayName: contains (meta)
+  name: contains
+  source:
+  - meta-node-kind:domain
+  - meta-node-kind:specialization
+  target:
+  - meta-node-kind:specialization
+  - meta-node-kind:topic
+  cardinality: 1:N
+  origin: universal
+  description: a domain contains specializations / topics; a specialization contains topics
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:domain
+  - target: meta-node-kind:specialization
+  target_of_meta_edge:
+  - target: meta-node-kind:specialization
+  - target: meta-node-kind:topic
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:belongs-to-language
+attributes:
+  displayName: belongs_to_language (meta)
+  name: belongs_to_language
+  source:
+  - meta-node-kind:framework
+  - meta-node-kind:library
+  - meta-node-kind:tool
+  target:
+  - meta-node-kind:language
+  cardinality: N:1
+  origin: universal
+  description: a framework / library / tool belongs to a programming language
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:framework
+  - target: meta-node-kind:library
+  - target: meta-node-kind:tool
+  target_of_meta_edge:
+  - target: meta-node-kind:language
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:implements-stack-part
+attributes:
+  displayName: implements_stack_part (meta)
+  name: implements_stack_part
+  source:
+  - meta-node-kind:platform-service
+  target:
+  - meta-node-kind:stack-part
+  cardinality: N:N
+  origin: universal
+  description: a platform-service implements one or more abstract stack-parts
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:platform-service
+  target_of_meta_edge:
+  - target: meta-node-kind:stack-part
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:provided-by
+attributes:
+  displayName: provided_by (meta)
+  name: provided_by
+  source:
+  - meta-node-kind:platform-service
+  target:
+  - meta-node-kind:platform
+  cardinality: N:1
+  origin: universal
+  description: a platform-service is provided by exactly one platform
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:platform-service
+  target_of_meta_edge:
+  - target: meta-node-kind:platform
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:implements-protocol
+attributes:
+  displayName: implements_protocol (meta)
+  name: implements_protocol
+  source:
+  - meta-node-kind:issue-tracker
+  target:
+  - meta-node-kind:issue-tracker-protocol
+  cardinality: N:1
+  origin: standard
+  description: an issue-tracker implements a tracker protocol
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:issue-tracker
+  target_of_meta_edge:
+  - target: meta-node-kind:issue-tracker-protocol
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:from-tracker
+attributes:
+  displayName: from_tracker (meta)
+  name: from_tracker
+  source:
+  - meta-node-kind:issue
+  target:
+  - meta-node-kind:issue-tracker
+  cardinality: N:1
+  origin: standard
+  description: an issue originates from a tracker
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:issue
+  target_of_meta_edge:
+  - target: meta-node-kind:issue-tracker
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:categorized-as
+attributes:
+  displayName: categorized_as (meta)
+  name: categorized_as
+  source:
+  - meta-node-kind:error-category
+  target:
+  - meta-node-kind:failure-class
+  cardinality: N:1
+  origin: standard
+  description: an error-category maps into a failure-class
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:error-category
+  target_of_meta_edge:
+  - target: meta-node-kind:failure-class
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:handles-failure
+attributes:
+  displayName: handles_failure (meta)
+  name: handles_failure
+  source:
+  - meta-node-kind:recovery-strategy
+  target:
+  - meta-node-kind:failure-class
+  cardinality: N:1
+  origin: standard
+  description: a recovery-strategy handles a failure-class
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:recovery-strategy
+  target_of_meta_edge:
+  - target: meta-node-kind:failure-class
+---
+nodeKind: MetaEnum
+id: meta-enum:platform-kind
+attributes:
+  displayName: Platform kind
+  name: kind
+  values:
+  - value: cloud-provider
+    description: Public cloud provider (AWS, GCP, Azure, ...).
+  - value: k8s-distribution
+    description: Kubernetes distribution (EKS, GKE, AKS, OpenShift, ...).
+  - value: paas
+    description: Hosted PaaS (Heroku, Vercel, Fly.io, Render, ...).
+  - value: self-hosted-paas
+    description: Self-hosted PaaS / internal-developer-platform.
+  usedOnAttributes:
+  - meta-attribute:platform--kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:platform--kind
+---
+nodeKind: MetaEnum
+id: meta-enum:tracker-vendor
+attributes:
+  displayName: IssueTracker vendor
+  name: vendor
+  values:
+  - value: linear
+    description: Linear.app issue tracker.
+  - value: github-issues
+    description: GitHub Issues.
+  - value: jira
+    description: Atlassian Jira.
+  - value: gitlab-issues
+    description: GitLab Issues.
+  - value: asana
+    description: Asana.
+  - value: clickup
+    description: ClickUp.
+  - value: sentry
+    description: Sentry (error-tracking, used as issue-tracker for errors).
+  usedOnAttributes:
+  - meta-attribute:issue-tracker--vendor
+edges:
+  used_on_attribute:
+  - target: meta-attribute:issue-tracker--vendor
+---
+nodeKind: MetaEnum
+id: meta-enum:error-severity
+attributes:
+  displayName: Error severity
+  name: severity
+  values:
+  - value: transient
+    description: Likely to succeed on retry; intermittent / network / rate-limit.
+  - value: permanent
+    description: Will not succeed on retry without intervention.
+  - value: configuration
+    description: Caused by misconfiguration; needs operator action.
+  usedOnAttributes:
+  - meta-attribute:error-category--severity
+edges:
+  used_on_attribute:
+  - target: meta-attribute:error-category--severity

@@ -1,0 +1,23 @@
+nodeKind: Language
+id: language:swift
+attributes:
+  displayName: "Swift"
+  paradigms:
+    - object-oriented
+    - functional
+    - protocol-oriented
+  description: |
+    Swift is Apple's compiled, statically-typed, multi-paradigm language
+    introduced in 2014 as the successor to Objective-C for Apple platforms.
+    It combines protocol-oriented design, value semantics (structs and enums),
+    and modern concurrency (async/await, actors) with a focus on safety and
+    expressiveness.
+
+    Swift is the primary language for iOS, macOS, watchOS, and tvOS
+    development using UIKit (imperative) and SwiftUI (declarative reactive).
+    On the server side, the Swift Server Working Group maintains frameworks
+    such as Vapor and Hummingbird. Swift's ownership model and
+    borrow-checker (in Swift 5.9+) bring Rust-like safety guarantees.
+edges:
+  used_by_skill_area:
+    - target: skill-area:ios-native

@@ -1,0 +1,114 @@
+---
+nodeKind: EvidenceSource
+id: evidence:mcp-spec-2025-06-18
+attributes:
+  displayName: "Model Context Protocol specification (2025-06-18)"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://modelcontextprotocol.io/specification/2025-06-18
+  sourcePathOrUrl: https://modelcontextprotocol.io/specification/2025-06-18
+  locator: "spec root anchor"
+  capturedAt: "2026-04-30T00:00:00Z"
+  observedAt: "2026-04-30T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-30T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:mcp-spec-2025-11-25
+attributes:
+  displayName: "Model Context Protocol specification (2025-11-25)"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://modelcontextprotocol.io/specification/2025-11-25
+  sourcePathOrUrl: https://modelcontextprotocol.io/specification/2025-11-25
+  locator: "spec root anchor"
+  capturedAt: "2026-04-30T00:00:00Z"
+  observedAt: "2026-04-30T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-30T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:openai-agents-sdk-docs
+attributes:
+  displayName: "OpenAI Agents SDK (Python) documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://openai.github.io/openai-agents-python/
+  sourcePathOrUrl: https://openai.github.io/openai-agents-python/
+  locator: "docs landing — Quickstart"
+  capturedAt: "2026-04-30T00:00:00Z"
+  observedAt: "2026-04-30T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-30T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:google-adk-docs
+attributes:
+  displayName: "Google Agent Development Kit (ADK) documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://google.github.io/adk-docs/
+  sourcePathOrUrl: https://google.github.io/adk-docs/
+  locator: "docs landing — Get started"
+  capturedAt: "2026-04-30T00:00:00Z"
+  observedAt: "2026-04-30T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-30T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:vendor-anthropic-blog-claude-4-5-launch
+attributes:
+  displayName: "Anthropic — Claude Sonnet 4.5 launch announcement"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://www.anthropic.com/news/claude-sonnet-4-5
+  sourcePathOrUrl: https://www.anthropic.com/news/claude-sonnet-4-5
+  locator: "post body — capabilities + benchmarks section"
+  capturedAt: "2026-04-30T00:00:00Z"
+  observedAt: "2026-04-30T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-30T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:vendor-openai-blog-gpt-5-launch
+attributes:
+  displayName: "OpenAI — GPT-5 launch announcement"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://openai.com/index/introducing-gpt-5/
+  sourcePathOrUrl: https://openai.com/index/introducing-gpt-5/
+  locator: "post body — capabilities + safety section"
+  capturedAt: "2026-04-30T00:00:00Z"
+  observedAt: "2026-04-30T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-30T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc

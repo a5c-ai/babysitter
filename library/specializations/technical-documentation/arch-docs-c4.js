@@ -3,6 +3,13 @@
  * @description Complete C4 Model architecture documentation process for technical documentation with focus on clarity, accessibility, and multiple audience levels (executive, developer, operations)
  * @inputs { systemName: string, projectContext: string, targetAudiences: array, requirements: array, technologies: array, users: array, externalSystems: array, deploymentArchitecture: object, outputDir: string, documentationStyle: object }
  * @outputs { success: boolean, documentationPackage: object, contextDiagram: string, containerDiagram: string, componentDiagrams: array, supplementaryDiagrams: array, narrativeDocument: string, audienceGuides: array, artifacts: array, qualityScore: number }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:technical-documentation]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:accessibility-first-design]
+ *   roles: [role:technical-writer, role:documentation-engineer]
+ *   topics: [topic:accessibility]
+ *   workflows: [workflow:documentation-sprint]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

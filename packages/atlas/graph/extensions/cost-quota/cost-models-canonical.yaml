@@ -1,0 +1,64 @@
+---
+nodeKind: CostModel
+id: cost-model:openai-gpt-4-turbo-2024-04
+attributes:
+  displayName: "OpenAI GPT-4 Turbo (2024-04) per-token cost"
+  costKind: per-token
+  currency: USD
+  tiers:
+    - { name: input, ratePerMTokInput: 10.00 }
+    - { name: output, ratePerMTokOutput: 30.00 }
+  effectiveFrom: "2024-04-09"
+  notes: |
+    Public list price for gpt-4-turbo-2024-04-09 per million tokens.
+edges:
+  provides_cost_for:
+    - target: provider:openai
+---
+nodeKind: CostModel
+id: cost-model:anthropic-claude-3-5-sonnet
+attributes:
+  displayName: "Anthropic Claude 3.5 Sonnet per-token cost"
+  costKind: per-token
+  currency: USD
+  tiers:
+    - { name: input, ratePerMTokInput: 3.00 }
+    - { name: output, ratePerMTokOutput: 15.00 }
+  effectiveFrom: "2024-06-20"
+  notes: |
+    Public list price for Claude 3.5 Sonnet per million input/output tokens.
+edges:
+  provides_cost_for:
+    - target: provider:anthropic
+---
+nodeKind: CostModel
+id: cost-model:google-gemini-1-5-pro
+attributes:
+  displayName: "Google Gemini 1.5 Pro per-token cost"
+  costKind: tiered
+  currency: USD
+  tiers:
+    - { name: input-le-128k, threshold: 128000, ratePerMTokInput: 1.25 }
+    - { name: output-le-128k, threshold: 128000, ratePerMTokOutput: 5.00 }
+  effectiveFrom: "2024-05-14"
+  notes: |
+    Public list price for Gemini 1.5 Pro at the <=128K context tier.
+edges:
+  provides_cost_for:
+    - target: provider:google
+---
+nodeKind: CostModel
+id: cost-model:aws-bedrock-claude-3-haiku
+attributes:
+  displayName: "AWS Bedrock Claude 3 Haiku per-token cost"
+  costKind: per-token
+  currency: USD
+  tiers:
+    - { name: input, ratePerMTokInput: 0.25 }
+    - { name: output, ratePerMTokOutput: 1.25 }
+  effectiveFrom: "2024-03-13"
+  notes: |
+    AWS Bedrock list price for anthropic.claude-3-haiku-20240307-v1:0.
+edges:
+  provides_cost_for:
+    - target: provider:aws-bedrock

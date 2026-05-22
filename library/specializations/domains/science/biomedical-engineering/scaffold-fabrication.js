@@ -17,6 +17,12 @@
  * - Lanza R. Principles of Tissue Engineering (5th Edition)
  * - ISO 13485 Medical Devices Quality Management
  * - FDA Guidance on Combination Products
+ *
+ * @graph
+ *   domains: [domain:biomedical-engineering]
+ *   skillAreas: [skill-area:data-analysis, skill-area:sensor-fusion, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:biomedical-engineer, role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

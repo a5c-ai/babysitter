@@ -17,6 +17,12 @@
  * - compute-sanitizer: https://docs.nvidia.com/cuda/compute-sanitizer/
  * - CUDA-GDB: https://docs.nvidia.com/cuda/cuda-gdb/
  * - Nsight Debugger: https://docs.nvidia.com/nsight-visual-studio-edition/
+ * @graph
+ *   domains: [domain:scientific-computing]
+ *   specializations: [specialization:gpu-programming]
+ *   skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders]
+ *   roles: [role:computational-scientist, role:ml-engineer]
+ *   workflows: [workflow:bug-triage]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -67,7 +73,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...debugInstrumentation.artifacts);
 
   // Phase 6: Issue Resolution
-  let issueResolution = await ctx.task(issueResolutionTask, {
+  const issueResolution = await ctx.task(issueResolutionTask, {
     projectName, memoryErrors, raceConditions, correctnessValidation, outputDir
   });
   artifacts.push(...issueResolution.artifacts);
@@ -76,25 +82,14 @@ export async function process(inputs, ctx) {
     ...memoryErrors.issues,
     ...raceConditions.issues,
     ...correctnessValidation.issues
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      issueResolution = await ctx.task(issueResolutionTask, { ...{
-    projectName, memoryErrors, raceConditions, correctnessValidation, outputDir
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  ];
+
+  await ctx.breakpoint({
     question: `GPU debugging complete for ${projectName}. Found ${allIssues.length} issues. Review report?`,
     title: 'GPU Debugging Complete',
-    context: { runId: ctx.runId, allIssues, issueResolution },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, allIssues, issueResolution }
+  });
+
   return {
     success: allIssues.length === 0 || issueResolution.allResolved,
     projectName,

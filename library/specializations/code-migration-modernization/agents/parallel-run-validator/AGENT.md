@@ -8,6 +8,13 @@ skills:
   - migration-validator
   - data-migration-validator
   - performance-baseline-capturer
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:parallel-run-migration, skill-area:regression-testing]
+  roles: [role:qa-engineer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Parallel Run Validator Agent

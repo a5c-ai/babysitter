@@ -17,6 +17,12 @@
  * - Automotive SPICE 3.1
  * - ISO 26262 Software Development
  * - MISRA C:2012 Guidelines
+ *
+ * @graph
+ *   domains: [domain:automotive-engineering]
+ *   skillAreas: [skill-area:sensor-fusion, skill-area:motion-planning, skill-area:physics-simulation]
+ *   roles: [role:systems-integration-engineer, role:embedded-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -38,22 +44,14 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Software Architecture Design
-  let swArchitecture = await ctx.task(swArchitectureTask, {
+  const swArchitecture = await ctx.task(swArchitectureTask, {
     projectName,
     swRequirements,
     safetyRelevant
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      swArchitecture = await ctx.task(swArchitectureTask, { ...{
-    projectName,
-    swRequirements,
-    safetyRelevant
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Architecture review
+  await ctx.breakpoint({
     question: `Review software architecture for ${projectName}. Approve architecture?`,
     title: 'Software Architecture Review',
     context: {
@@ -65,15 +63,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: swArchitecture
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Software Implementation
   const swImplementation = await ctx.task(swImplementationTask, {
     projectName,
@@ -82,58 +74,35 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Static Analysis and MISRA
-  let staticAnalysis = await ctx.task(staticAnalysisTask, {
+  const staticAnalysis = await ctx.task(staticAnalysisTask, {
     projectName,
     swImplementation,
     safetyRelevant
   });
 
   // Quality Gate: MISRA compliance
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        staticAnalysis = await ctx.task(staticAnalysisTask, { ...{
-    projectName,
-    swImplementation,
-    safetyRelevant
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (staticAnalysis.misraViolations > 0) {
+    await ctx.breakpoint({
       question: `Static analysis found ${staticAnalysis.misraViolations} MISRA violations. Review and approve remediation plan?`,
       title: 'MISRA Violations Found',
       context: {
         runId: ctx.runId,
         staticAnalysis,
         recommendation: 'Fix all mandatory rules, document deviations for advisory rules'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 5: Unit and Integration Testing
-  let softwareTesting = await ctx.task(softwareTestingTask, {
+  const softwareTesting = await ctx.task(softwareTestingTask, {
     projectName,
     swImplementation,
     swRequirements,
     aspiceTarget
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      softwareTesting = await ctx.task(softwareTestingTask, { ...{
-    projectName,
-    swImplementation,
-    swRequirements,
-    aspiceTarget
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Software release approval
+  await ctx.breakpoint({
     question: `ECU Software Development complete for ${projectName}. Test coverage: ${softwareTesting.coverage}%. Approve release?`,
     title: 'Software Release Approval',
     context: {
@@ -144,15 +113,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/software-release.json`, format: 'json', content: swImplementation },
         { path: `artifacts/test-reports.json`, format: 'json', content: softwareTesting }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,

@@ -7,6 +7,12 @@ expertise:
   - Unix conventions
   - Command structure design
   - Help text and error messaging
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:cli-design, skill-area:api-design]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # CLI UX Reviewer Agent

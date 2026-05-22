@@ -1,0 +1,75 @@
+---
+nodeKind: HookSurface
+id: hook-surface:before-tool-selection
+attributes:
+  displayName: "Before Tool Selection"
+  hookPhase: pre
+  description: |
+    Fires before the model selects which tool to invoke. Allows agents
+    to inject tool-selection guidance or restrict available tools.
+  isNative: true
+  availableInProducts:
+    - agent:gemini-cli
+---
+nodeKind: HookSurface
+id: hook-surface:before-model
+attributes:
+  displayName: "Before Model"
+  hookPhase: pre
+  description: |
+    Fires before the model inference call. Allows request modification,
+    prompt injection, or request interception.
+  isNative: true
+  availableInProducts:
+    - agent:gemini-cli
+---
+nodeKind: HookSurface
+id: hook-surface:after-model
+attributes:
+  displayName: "After Model"
+  hookPhase: post
+  description: |
+    Fires after the model returns a response. Allows response filtering,
+    logging, or augmentation before the agent processes the output.
+  isNative: true
+  availableInProducts:
+    - agent:gemini-cli
+---
+nodeKind: HookSurface
+id: hook-surface:before-agent
+attributes:
+  displayName: "Before Agent"
+  hookPhase: pre
+  description: |
+    Fires before an agent session begins. Allows initialization,
+    environment setup, or agent configuration injection.
+  isNative: true
+  availableInProducts:
+    - agent:gemini-cli
+---
+nodeKind: HookSurface
+id: hook-surface:error
+attributes:
+  displayName: "Error"
+  hookPhase: post
+  description: |
+    Fires when an error occurs during agent execution. Allows
+    error reporting, recovery logic, or user notification.
+  isNative: true
+  availableInProducts:
+    - agent:copilot-cli
+    - agent:omp
+    - agent:openclaw
+---
+nodeKind: HookSurface
+id: hook-surface:tool-permission-request
+attributes:
+  displayName: "Tool Permission Request"
+  hookPhase: pre
+  description: |
+    Fires when the agent requests permission to execute a tool.
+    Allows custom authorization logic, gateway-based auth checks,
+    or automatic approval/denial based on policy.
+  isNative: true
+  availableInProducts:
+    - agent:openclaw

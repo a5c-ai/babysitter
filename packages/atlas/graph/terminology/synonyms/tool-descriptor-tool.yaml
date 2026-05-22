@@ -1,0 +1,13 @@
+nodeKind: Synonym
+id: synonym:tool-descriptor-tool
+attributes:
+  termAId: term:tool-descriptor
+  termBId: term:tool-server
+  direction: bidirectional
+  note: |
+    Informal usage of "tool" often conflates the canonical ToolDescriptor (callable schema) with its hosting ToolServer.
+edges:
+  synonym_a:
+    - term:tool-descriptor
+  synonym_b:
+    - term:tool-server

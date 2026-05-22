@@ -1,0 +1,22 @@
+nodeKind: HookMapping
+id: hook-mapping:post-tool-use-opencode
+attributes:
+  mappingId: hook-mapping:post-tool-use-opencode
+  hookId: hook-surface:post-tool-use
+  targetId: agentVersion:opencode:ge-0-0-0
+  nativeName: on_step
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: opencode
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:post-tool-use
+  emits_hook:
+    - target: agentVersion:opencode:ge-0-0-0

@@ -1,0 +1,34 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-openclaw-plugin-json
+attributes:
+  artifactId: plugin-artifact:babysitter-openclaw-plugin-json
+  displayName: "babysitter-openclaw plugin.json"
+  targetId: plugin-target:openclaw
+  artifactKind: manifest
+  pathPattern: "plugin.json"
+  installerSurface: "plugin.json"
+  scriptVariants:
+    - "shell-hooks"
+  contextFiles:
+    - plugins/babysitter-openclaw/plugin.json
+    - plugins/babysitter-openclaw/openclaw.plugin.json
+edges:
+  emits_artifact:
+    - target: plugin-target:openclaw
+---
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-openclaw-hooks-json
+attributes:
+  artifactId: plugin-artifact:babysitter-openclaw-hooks-json
+  displayName: "babysitter-openclaw hooks.json"
+  targetId: plugin-target:openclaw
+  artifactKind: settings-fragment
+  pathPattern: "hooks.json"
+  installerSurface: "hooks.json"
+  scriptVariants:
+    - "shell-via-hooks-mux-cli"
+  contextFiles:
+    - plugins/babysitter-openclaw/hooks.json
+edges:
+  emits_artifact:
+    - target: plugin-target:openclaw

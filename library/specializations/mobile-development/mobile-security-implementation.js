@@ -17,6 +17,13 @@
  * - OWASP MASVS: https://owasp.org/www-project-mobile-application-security/
  * - iOS Security: https://developer.apple.com/documentation/security
  * - Android Security: https://developer.android.com/topic/security/best-practices
+ * @graph
+ *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:symmetric-encryption]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:mobile-app-submission, workflow:release-management]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -60,21 +67,14 @@ export async function process(inputs, ctx) {
       appName, platforms, securityLevel, compliance, outputDir
     });
     artifacts.push(...result.artifacts);
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Security implementation complete for ${appName}. Ready for security audit?`,
     title: 'Security Review',
-    context: { runId: ctx.runId, appName, securityLevel, compliance },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, appName, securityLevel, compliance }
+  });
+
   const endTime = ctx.now();
   return {
     success: true,

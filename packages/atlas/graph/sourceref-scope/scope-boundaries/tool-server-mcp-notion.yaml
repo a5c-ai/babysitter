@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:tool-server-mcp-notion.scope
+attributes:
+  subjectId: tool-server:mcp-notion
+  inScope: |
+    Notion workspace access — pages, databases, blocks, search, comments.
+  outOfScope: |
+    Other knowledge bases (Confluence, Coda), Notion workspace-admin operations, and cross-workspace migrations.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - tool-server:mcp-notion

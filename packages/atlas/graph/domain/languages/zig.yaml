@@ -1,0 +1,21 @@
+nodeKind: Language
+id: language:zig
+attributes:
+  displayName: "Zig"
+  paradigms:
+    - imperative
+    - systems
+  description: |
+    Zig is a general-purpose, statically-typed systems programming language
+    designed as a modern alternative to C — offering manual memory control
+    with no hidden allocations, comptime for compile-time code execution,
+    and explicit error handling without exceptions.
+
+    Zig has no preprocessor or macro system; metaprogramming is achieved
+    purely through comptime. It can cross-compile out of the box and can
+    seamlessly import C headers. Its allocator interface makes it a natural
+    fit for embedded and resource-constrained contexts. Zig is also used as
+    a C/C++ build system and ships a bundled Clang-based C compiler.
+edges:
+  applies_to:
+    - target: domain:software-engineering

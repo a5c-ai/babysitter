@@ -9,6 +9,11 @@ expertise:
   - Countermeasure implementation
   - Results documentation
   - 30-60-90 day follow-up
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:change-management, skill-area:stakeholder-management, skill-area:business-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:business-analyst, role:scrum-master]
 ---
 
 # Kaizen Facilitator

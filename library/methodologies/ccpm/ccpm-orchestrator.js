@@ -3,6 +3,12 @@
  * @description Claude Code PM (CCPM) - Full lifecycle spec-driven orchestrator: PRD creation, epic planning, task decomposition, GitHub sync, parallel execution, tracking
  * @inputs { projectName: string, projectDescription: string, featureName: string, githubRepo?: string, parallelAgents?: number, qualityThreshold?: number }
  * @outputs { success: boolean, prd: object, epic: object, tasks: array, githubIssues: array, executionResults: array, trackingReport: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:prioritization-frameworks, skill-area:product-discovery, skill-area:roadmap-planning]
+ *   workflows: [workflow:product-discovery, workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:engineering-manager, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

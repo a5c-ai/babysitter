@@ -1,0 +1,14 @@
+nodeKind: PermissionMode
+id: permission-mode:claude-code-accept-edits
+attributes:
+  displayName: "Claude Code accept-edits permission mode"
+  mode: accept-edits
+  isReadOnly: false
+  requiresUserConsent: false
+  enteredVia: settings-default
+  description: |
+    File edits/writes auto-allow without prompts; bash and other non-edit
+    write tools still gate via the standard permission dialog. Useful for
+    quick refactors where the user pre-trusts edits but not arbitrary shell
+    commands. Promoted from `permissionModes: [acceptEdits]`
+    flat-list attribute on Claude Code agent core/runtime.

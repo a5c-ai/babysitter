@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "AgentMux Android TV",
+    "slug": "agent-mux-android-tv",
+    "scheme": "agentmux-android-tv",
+    "version": "0.0.0",
+    "orientation": "landscape",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#08111f"
+    }
+  }
+}

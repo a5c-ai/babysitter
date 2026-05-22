@@ -18,6 +18,12 @@
  * - JEDEC DDR4 Standard: https://www.jedec.org/standards-documents/docs/jesd79-4
  * - Xilinx MIG: https://docs.amd.com/r/en-US/ug586_7Series_MIS
  * - Intel EMIF: https://www.intel.com/content/www/us/en/programmable/documentation/bhc1410334853449.html
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

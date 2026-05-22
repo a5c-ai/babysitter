@@ -1,0 +1,163 @@
+nodeKind: Workflow
+id: workflow:release-management
+attributes:
+  displayName: "Release Management"
+  description: |
+    Cross-team coordination workflow that governs the planning, preparation, execution,
+    and post-release monitoring of a scheduled software release. Begins with a release
+    planning meeting where the release manager, engineering leads, and product managers
+    align on scope, cut-off dates, and go/no-go criteria. A release branch is cut, final
+    smoke tests and regression suites run in staging, and the release notes are drafted.
+    On release day the release manager coordinates deployment across environments, monitors
+    error rates and key metrics, and communicates status to stakeholders. Post-release a
+    brief retrospective captures what went well and what to improve next cycle.
+  workflowKind: release
+  triggerType: scheduled
+  typicalCadence: "per-release-cycle"
+  complexity: complex
+edges:
+  involves_role:
+    - role:release-manager
+    - role:engineering-manager
+    - role:devops-engineer
+    - role:qa-engineer
+    - role:product-manager
+    - role:tech-lead
+  applies_to_domain:
+    - domain:devops
+    - domain:software-engineering
+  triggers_responsibility:
+    - responsibility:release-coordination
+    - responsibility:deployment-management
+    - responsibility:stakeholder-communication
+    - responsibility:documentation
+---
+nodeKind: Workflow
+id: workflow:hotfix-deployment
+attributes:
+  displayName: "Hotfix Deployment"
+  description: |
+    Expedited workflow triggered by a critical production incident requiring an immediate
+    code fix outside the normal release cycle. The on-call engineer diagnoses the root
+    cause, develops a minimal targeted patch on a hotfix branch, and fast-tracks review
+    with an abbreviated two-engineer sign-off. Automated tests must still pass. The patch
+    is deployed to production through the standard pipeline but with priority scheduling.
+    Monitoring is heightened for 30-60 minutes post-deploy, and a follow-up ticket is
+    created to address any shortcuts taken. A post-mortem is scheduled if impact was
+    significant.
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "on-incident"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:sre
+    - role:devops-engineer
+    - role:backend-engineer
+    - role:tech-lead
+    - role:incident-commander
+  applies_to_domain:
+    - domain:devops
+    - domain:software-engineering
+  triggers_responsibility:
+    - responsibility:deployment-management
+    - responsibility:incident-response
+    - responsibility:on-call
+---
+nodeKind: Workflow
+id: workflow:feature-flag-rollout
+attributes:
+  displayName: "Feature Flag Rollout"
+  description: |
+    On-demand workflow for safely releasing a new feature to a controlled percentage of
+    users before a full rollout. The feature owner configures a flag in the feature-flag
+    management system, sets an initial audience (e.g., internal users or 1% of traffic),
+    and monitors product and error metrics. The rollout percentage is incrementally
+    increased as confidence grows, with predefined thresholds that trigger automatic or
+    manual rollback if error rates spike. Once 100% rollout is stable, the flag is
+    retired and the conditional code cleaned up. Reduces blast radius of new features
+    and decouples deployment from release.
+  workflowKind: release
+  triggerType: on-demand
+  typicalCadence: "per-feature"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:backend-engineer
+    - role:product-manager
+    - role:devops-engineer
+    - role:sre
+  applies_to_domain:
+    - domain:devops
+    - domain:software-engineering
+    - domain:observability
+  triggers_responsibility:
+    - responsibility:deployment-management
+    - responsibility:risk-assessment
+    - responsibility:metric-definition
+---
+nodeKind: Workflow
+id: workflow:canary-deployment
+attributes:
+  displayName: "Canary Deployment"
+  description: |
+    Infrastructure-level progressive deployment workflow that routes a small percentage
+    of live production traffic to a new service version while the majority continues to
+    hit the stable version. SRE and DevOps engineers configure traffic splitting in the
+    load balancer or service mesh, define canary success criteria (latency p99, error
+    rate, business KPIs), and set up automated rollback triggers. Observability tooling
+    continuously compares canary versus baseline metrics. If the canary is healthy over
+    a defined bake time, traffic shifts fully to the new version; if anomalies are
+    detected the canary is rolled back automatically. Minimises customer impact from
+    bad releases in complex distributed systems.
+  workflowKind: release
+  triggerType: on-demand
+  typicalCadence: "per-release"
+  complexity: complex
+edges:
+  involves_role:
+    - role:sre
+    - role:devops-engineer
+    - role:platform-engineer
+    - role:backend-engineer
+    - role:release-manager
+  applies_to_domain:
+    - domain:devops
+    - domain:cloud-infra
+    - domain:observability
+  triggers_responsibility:
+    - responsibility:deployment-management
+    - responsibility:risk-assessment
+    - responsibility:sla-management
+    - responsibility:capacity-planning
+---
+nodeKind: Workflow
+id: workflow:rollback-procedure
+attributes:
+  displayName: "Rollback Procedure"
+  description: |
+    Emergency workflow activated when a deployment introduces regressions severe enough
+    to require reverting to the previous stable version. The on-call SRE or engineer
+    identifies the bad deployment via dashboards or alerts, confirms the rollback decision
+    with the incident commander, and executes the rollback through the deployment pipeline
+    or manually via CLI tooling. Database migrations may require special handling to ensure
+    backward compatibility. After rollback, services are verified healthy, affected users
+    are notified, and the deployment is flagged for post-mortem investigation. Speed and
+    decisiveness are the primary objectives.
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "on-failure"
+  complexity: simple
+edges:
+  involves_role:
+    - role:sre
+    - role:devops-engineer
+    - role:incident-commander
+    - role:on-call
+  applies_to_domain:
+    - domain:devops
+    - domain:infrastructure
+  triggers_responsibility:
+    - responsibility:deployment-management
+    - responsibility:incident-response
+    - responsibility:disaster-recovery

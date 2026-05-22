@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:cursor-container-image
+attributes:
+  artifactId: plugin-artifact:cursor-container-image
+  displayName: "Cursor container image"
+  targetId: plugin-target:cursor
+  artifactKind: container-image
+  pathPattern: "ghcr.io/cursor/cursor-agent"
+  installerSurface: "latest"
+  scriptVariants:
+    - preinstalled
+edges:
+  emits_artifact:
+    - target: plugin-target:cursor

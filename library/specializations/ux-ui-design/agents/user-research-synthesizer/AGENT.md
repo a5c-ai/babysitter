@@ -8,6 +8,12 @@ expertise:
   - Statistical analysis
   - Insight extraction
   - Pattern recognition
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:user-research, skill-area:data-analysis]
+  roles: [role:ux-researcher]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # User Research Synthesizer Agent

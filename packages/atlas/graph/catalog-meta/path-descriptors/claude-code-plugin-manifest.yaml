@@ -1,0 +1,19 @@
+nodeKind: PathDescriptor
+id: path:claude-code-plugin-manifest
+attributes:
+  pathId: claude-code-plugin-manifest
+  displayName: "Claude Code plugin manifest path"
+  path: ".claude-plugin/plugin.json"
+  pathKind: manifest
+  ownerKind: PluginArtifact
+  ownerId: plugin-artifact:claude-code-manifest
+  platform: cross-platform
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: |
+    Canonical relative location of the Claude Code plugin manifest within
+    a plugin tree. The plugin loader expects `.claude-plugin/plugin.json`
+    at the plugin root. Referenced by the Claude Code plugin-manifest
+    PluginArtifact.
+edges: {}

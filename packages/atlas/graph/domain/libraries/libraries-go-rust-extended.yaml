@@ -1,0 +1,265 @@
+---
+nodeKind: Library
+id: library:chi
+attributes:
+  displayName: "Chi"
+  belongsToLanguageId: language:go
+  category: http-server
+  description: |
+    Lightweight, idiomatic Go HTTP router built on net/http; supports
+    middleware, URL parameters, sub-routers, and context-driven handlers.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:fiber
+    - library:gorilla-mux
+    - library:mux
+---
+nodeKind: Library
+id: library:fiber
+attributes:
+  displayName: "Fiber"
+  belongsToLanguageId: language:go
+  category: http-server
+  description: |
+    Express-inspired Go web framework built on fasthttp for high throughput;
+    provides routing, middleware, WebSocket, and template rendering.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:gorilla-mux
+attributes:
+  displayName: "Gorilla Mux"
+  belongsToLanguageId: language:go
+  category: http-server
+  description: |
+    Powerful HTTP request router and dispatcher for Go with regex-based
+    route matching, subrouters, and middleware support.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:pgx
+attributes:
+  displayName: "pgx"
+  belongsToLanguageId: language:go
+  category: other
+  description: |
+    High-performance PostgreSQL driver and toolkit for Go with native
+    protocol support, batch queries, COPY, and type extensions.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:sqlx-go
+    - library:gorm
+---
+nodeKind: Library
+id: library:sqlx-go
+attributes:
+  displayName: "sqlx (Go)"
+  belongsToLanguageId: language:go
+  category: other
+  description: |
+    Extension of Go's database/sql with struct scanning, named queries,
+    and safe parameterized statements across multiple SQL drivers.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+---
+nodeKind: Library
+id: library:zap
+attributes:
+  displayName: "Zap"
+  belongsToLanguageId: language:go
+  category: logging
+  description: |
+    High-performance, structured logging library for Go by Uber; offers
+    zero-allocation sugared and strongly-typed logger interfaces.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:observability-instrumentation
+  alternative_to:
+    - library:zerolog
+---
+nodeKind: Library
+id: library:zerolog
+attributes:
+  displayName: "zerolog"
+  belongsToLanguageId: language:go
+  category: logging
+  description: |
+    Zero-allocation JSON logger for Go optimized for latency-sensitive
+    paths with a chainable builder API and leveled logging.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:observability-instrumentation
+---
+nodeKind: Library
+id: library:actix
+attributes:
+  displayName: "Actix Web"
+  belongsToLanguageId: language:rust
+  category: http-server
+  description: |
+    Powerful, pragmatic Rust web framework built on Actix actor system;
+    provides routing, extractors, middleware, and WebSocket support.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:warp
+    - library:rocket
+---
+nodeKind: Library
+id: library:warp
+attributes:
+  displayName: "Warp"
+  belongsToLanguageId: language:rust
+  category: http-server
+  description: |
+    Composable Rust web framework built on Hyper using Filter combinators
+    for routing, authentication, and request handling.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:rocket
+attributes:
+  displayName: "Rocket"
+  belongsToLanguageId: language:rust
+  category: http-server
+  description: |
+    Type-safe, async Rust web framework with a macro-driven API for
+    routing, request guards, fairings (middleware), and form handling.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:sqlx-rust
+attributes:
+  displayName: "SQLx (Rust)"
+  belongsToLanguageId: language:rust
+  category: other
+  description: |
+    Async, compile-time verified SQL library for Rust supporting PostgreSQL,
+    MySQL, and SQLite with type-safe query macros and connection pools.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:diesel-rs
+    - library:sea-orm
+    - library:sqlx-pg
+---
+nodeKind: Library
+id: library:sea-query
+attributes:
+  displayName: "SeaQuery"
+  belongsToLanguageId: language:rust
+  category: other
+  description: |
+    Dynamic SQL query builder for Rust that generates SQL for PostgreSQL,
+    MySQL, and SQLite without macros, used by SeaORM under the hood.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:sqlx-rust
+---
+nodeKind: Library
+id: library:tracing-rs
+attributes:
+  displayName: "Tracing (Rust)"
+  belongsToLanguageId: language:rust
+  category: tracing
+  description: |
+    Structured, async-aware diagnostics framework for Rust providing
+    spans, events, and subscribers for logging and distributed tracing.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:observability-instrumentation
+  alternative_to:
+    - library:structlog
+---
+nodeKind: Library
+id: library:clap-rs
+attributes:
+  displayName: "Clap (Rust)"
+  belongsToLanguageId: language:rust
+  category: other
+  description: |
+    Full-featured command-line argument parser for Rust with derive macros,
+    subcommands, shell completion generation, and validation.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:cli-design
+  alternative_to:
+    - library:clap
+---
+nodeKind: Library
+id: library:rayon
+attributes:
+  displayName: "Rayon"
+  belongsToLanguageId: language:rust
+  category: concurrency
+  description: |
+    Data parallelism library for Rust that converts sequential iterators
+    into parallel ones using a work-stealing thread pool.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - library:crossbeam
+    - library:tokio
+---
+nodeKind: Library
+id: library:crossbeam
+attributes:
+  displayName: "Crossbeam"
+  belongsToLanguageId: language:rust
+  category: concurrency
+  description: |
+    Collection of Rust concurrency primitives including channels, deques,
+    epoch-based memory reclamation, and scoped threads.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-async-processing

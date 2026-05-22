@@ -1,0 +1,164 @@
+---
+nodeKind: SkillArea
+id: skill-area:bug-fixing-from-issues
+attributes:
+  displayName: "Bug Fixing from Issue Descriptions"
+  description: |
+    Fixing software bugs given a natural-language issue description and a
+    repository — reproducing the failure, localizing the fault, producing
+    a minimal patch, and validating against the issue's acceptance signal.
+    Covers the SWE-bench / SWE-bench-Verified class of evaluations.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:browser-automation
+attributes:
+  displayName: "Browser Automation"
+  description: |
+    Controlling a real or headless browser to complete web tasks —
+    navigating, filling forms, asserting on rendered DOM, and recovering
+    from anti-bot or stale-element states. Covers the WebArena /
+    BrowseComp class of agent benchmarks.
+  domains:
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:web-action-grounding
+      strength: recommended
+    - target: skill-area:web-scraping
+      strength: recommended
+    - target: skill-area:desktop-automation
+      strength: recommended
+    - target: skill-area:mobile-gui-automation
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:safety-redteaming
+attributes:
+  displayName: "Safety Red-Teaming"
+  description: |
+    Adversarial probing of model and agent safety — eliciting policy
+    violations, jailbreak resistance, and harmful-content refusals under
+    structured attack taxonomies. Covers the HarmBench class of safety
+    evaluations.
+  domains:
+    - domain:security
+  expertiseLevels: [intermediate, expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:multi-turn-tool-use
+attributes:
+  displayName: "Multi-Turn Tool Use"
+  description: |
+    Extended multi-turn tool-using agent loops — maintaining state across
+    many tool calls, recovering from tool errors, and following operator
+    constraints over a long horizon. Covers the tau-bench class of
+    multi-turn evaluations. Sibling to skill-area:tool-use (single-call
+    function correctness) and skill-area:agentic-loops (planning).
+  domains:
+    - specialization:ai-agents-conversational
+  prerequisiteSkillAreas:
+    - skill-area:tool-use
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  requires_skill_area:
+    - skill-area:tool-use
+---
+nodeKind: SkillArea
+id: skill-area:mathematical-reasoning
+attributes:
+  displayName: "Mathematical Reasoning"
+  description: |
+    Formal and informal mathematical problem solving — arithmetic,
+    word problems, algebra, proof sketching, and symbolic manipulation.
+    Covers the MATH and GSM8K classes of math benchmarks.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: specialization:mathematics
+      confidence: primary
+    - target: specialization:physics
+      confidence: secondary
+    - target: specialization:computational-mathematics
+      confidence: primary
+    - target: specialization:theoretical-computer-science
+      confidence: secondary
+    - target: specialization:formal-methods
+      confidence: secondary
+    - target: specialization:quantum-computing
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:desktop-automation
+attributes:
+  displayName: "Desktop Automation"
+  description: |
+    Controlling a desktop GUI (Windows / macOS / Linux) to complete
+    user-facing tasks — window management, keyboard/mouse input, OCR-driven
+    target acquisition, and recovery from focus or modal-dialog state.
+    Covers the OSWorld class of desktop-agent benchmarks.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:general-knowledge-reasoning
+attributes:
+  displayName: "General Knowledge Reasoning"
+  description: |
+    Broad-domain question answering and reasoning across STEM, humanities,
+    and professional subjects — multi-choice and short-answer formats.
+    Covers the MMLU and GPQA classes of knowledge benchmarks.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:python-implementation
+attributes:
+  displayName: "Python Function Implementation"
+  description: |
+    Implementing Python functions from natural-language specifications and
+    docstrings, validated by hidden unit tests. Covers the HumanEval class
+    of code-synthesis benchmarks.
+  domains:
+    - domain:software-engineering
+  requiresLanguages:
+    - language:python
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  uses_language:
+    - language:python
+    - target: language:python

@@ -1,6 +1,11 @@
 ---
 name: deploy
 description: Deploy the application to a target environment. Use when deploying code, releasing, or pushing to staging/production. Requires explicit user invocation.
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:deployment]
+  topics: [topic:ci-cd, topic:release-management]
+  roles: [role:platform-engineer, role:backend-engineer]
 argument-hint: [environment] [--skip-tests] [--dry-run]
 disable-model-invocation: true
 user-invocable: true

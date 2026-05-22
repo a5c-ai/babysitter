@@ -1,0 +1,94 @@
+nodeKind: PluginTarget
+id: plugin-target:pi
+attributes:
+  displayName: "Pi"
+  hostAgent: agent:pi
+  adapterFamily: programmatic
+  adapterName: pi
+  manifestFormat: "state-only"
+  commandFormat: markdown-commands
+  skillHandling: derived-from-commands
+  hookRegistrationFormat: null
+  hookRegistrationOutputPath: null
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
+  marketplacePath: null
+  pluginRootEnvVar: null
+  pluginRootEnvVarForExtension: PI_PLUGIN_ROOT
+  scriptVariants:
+    - javascript
+  distribution:
+    - npm-cli
+  distributionModel: workspace-generated
+  npmPublishable: true
+  installLayout: null
+  packageMetadata:
+    moduleType: module
+    binScriptExt: ".cjs"
+    installLifecycle: none
+    activationMessage: restart
+    peerDependencyPackage: "@mariozechner/pi-coding-agent"
+    emitCjsWrappers: false
+  componentSupport:
+    agents: native
+    context: native
+  cliCommand: "pi"
+  callerEnvVars:
+    - "PI_SESSION_ID"
+  configPaths:
+    - ".pi"
+  processNames:
+    - "pi"
+  capabilities:
+    - Programmatic
+    - SessionBinding
+    - HeadlessPrompt
+  adapterModule: "@a5c-ai/agent-mux-adapters/pi-adapter"
+  externalRepo: "a5c-ai/babysitter-pi"
+  externalPackageName: "@a5c-ai/babysitter-pi"
+  generatedSourceDir: "pi"
+  marketplaceSpecs: []
+  requiredSurfaceFile: "AGENTS.md"
+  promptCapabilities:
+    - skills
+    - slash-commands
+    - task-tool
+    - harness-routing
+    - programmatic-session
+  loopControlTerm: skill-driven
+  hookDriven: false
+  interactiveToolName: "AskUserQuestion"
+  sessionEnvVarsDescription: "PID-scoped session marker (authoritative); PI_SESSION_ID and AGENT_SESSION_ID are fallbacks"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: "Installed skill"
+  defaultTransportId: openai-chat
+  hooksMuxFamily: in-process
+  sessionIdQuality: native
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: false
+  supportsBlock: true
+  supportsAsk: false
+  supportsToolInputMutation: true
+  supportsToolResultMutation: false
+  supportsPersistedEnv: true
+  envPersistenceMode: runtime_hook
+  toolInterceptionScope: all
+  launchBehavior:
+    promptDelivery: cli-flag
+    promptFlag: "-p"
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: false
+    needsIdleKill: true
+
+edges:
+  hosted_by:
+    - target: agent:pi
+    - target: agent-platform-impl:pi.platform@current

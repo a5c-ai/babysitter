@@ -9,6 +9,11 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:concurrency-multithreading, skill-area:language-design]
+  roles: [role:backend-engineer]
 ---
 
 # Concurrency Primitives Skill

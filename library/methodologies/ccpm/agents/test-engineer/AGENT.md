@@ -1,3 +1,13 @@
+---
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead, role:flaky-test-detector, role:test-writer]
+---
+
 # Test Engineer Agent
 
 **Role:** Test suite designer, quality validator, and integration test specialist

@@ -18,6 +18,10 @@ metadata:
     - iso-26262
     - asil
     - hazard-analysis
+graph:
+  domains: [domain:automotive-engineering]
+  skillAreas: [skill-area:sensor-fusion, skill-area:motion-planning, skill-area:physics-simulation]
+  roles: [role:systems-integration-engineer, role:embedded-engineer]
 ---
 
 # ISO 26262 Compliance Skill

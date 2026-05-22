@@ -3,6 +3,13 @@
  * @description Comprehensive test strategy development process with requirements analysis, risk assessment, test pyramid definition, automation strategy, and quality metrics
  * @inputs { projectName: string, requirements: array, architecture: object, team: object, constraints: object }
  * @outputs { success: boolean, strategyDocument: string, automationRoadmap: object, qualityMetrics: object, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development, workflow:bug-triage]
+ *   roles: [role:qa-engineer, role:tech-lead]
+ *   skillAreas: [skill-area:e2e-testing, skill-area:unit-testing]
+ *   topics: [topic:test-driven-development, topic:continuous-integration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

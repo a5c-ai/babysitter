@@ -1,6 +1,11 @@
 ---
 name: power-optimization-expert
 description: Expert in ultra-low-power embedded system design. Specializes in sleep mode optimization, power state machines, battery life estimation, and power measurement techniques for battery-powered devices.
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development, skill-area:low-power-design]
+  roles: [role:embedded-engineer]
 ---
 
 # Power Optimization Expert Agent

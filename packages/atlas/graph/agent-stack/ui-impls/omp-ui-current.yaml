@@ -1,0 +1,34 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:omp.ui@current
+attributes:
+  displayName: "OMP UI (current) — tui-only"
+  agentVersionId: agentVersion:omp:ge-0-0-0
+  packageRef: source-ref:omp-github
+  uiKind: tui-only
+  presentationsBundled:
+    - presentation:omp-tui
+  themeSupport: none
+  accessibilitySupport: basic
+  notes: |
+    OMP runs a TUI; user-facing primitives at the UI layer are slash-help and
+    thinking-toggle.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:prompt-input
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:slash-help
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/help"
+    - target: interaction-primitive:model-picker
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:tool-approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control

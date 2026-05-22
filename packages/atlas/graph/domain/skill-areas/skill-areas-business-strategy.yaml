@@ -1,0 +1,143 @@
+---
+nodeKind: SkillArea
+id: skill-area:strategic-analysis
+attributes:
+  displayName: "Strategic Analysis"
+  description: |
+    Applying structured analytical frameworks to diagnose competitive position and
+    inform strategic decisions — SWOT, Porter's Five Forces, PESTEL, and value
+    chain analysis. Translates environmental and internal data into coherent strategic
+    narratives that leadership can act on. Bridges qualitative judgment with
+    quantitative benchmarks to surface the most consequential strategic choices.
+  domains:
+    - domain:strategy
+    - domain:business-intelligence
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:strategy
+      confidence: primary
+    - target: domain:business-intelligence
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:competitive-intelligence
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:business-model-design
+attributes:
+  displayName: "Business Model Design"
+  description: |
+    Designing and stress-testing business models using canvases and frameworks such
+    as the Business Model Canvas and value proposition design. Maps customer segments,
+    channels, revenue streams, and cost structures to identify sustainable competitive
+    advantage. Enables entrepreneurs and strategists to prototype and iterate on how
+    an organization creates, delivers, and captures value before committing resources.
+  domains:
+    - domain:strategy
+    - domain:entrepreneurship
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:strategy
+      confidence: primary
+    - target: domain:entrepreneurship
+      confidence: secondary
+    - target: specialization:entrepreneurship
+      confidence: secondary
+    - target: specialization:venture-capital
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:competitive-intelligence
+attributes:
+  displayName: "Competitive Intelligence"
+  description: |
+    Systematically gathering, synthesizing, and acting on intelligence about
+    competitors, market dynamics, and emerging trends. Covers primary and secondary
+    research methods, win/loss analysis, battlecard development, and trend forecasting
+    to give go-to-market and product teams an actionable view of the competitive
+    landscape. Informs positioning, pricing, and feature prioritization decisions.
+  domains:
+    - domain:strategy
+    - domain:marketing
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:strategy
+      confidence: primary
+    - target: domain:marketing
+      confidence: secondary
+    - target: specialization:marketing
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:market-sizing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:market-sizing
+attributes:
+  displayName: "Market Sizing"
+  description: |
+    Estimating the addressable opportunity for a product or business using TAM, SAM,
+    and SOM frameworks alongside bottom-up and top-down modeling techniques. Combines
+    industry data, customer segmentation, and pricing assumptions to produce
+    defensible opportunity assessments for investors, executives, and product teams.
+    Essential for prioritizing where to compete and how to allocate resources.
+  domains:
+    - domain:strategy
+    - domain:venture-capital
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:strategy
+      confidence: primary
+    - target: domain:venture-capital
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:growth-strategy
+attributes:
+  displayName: "Growth Strategy"
+  description: |
+    Developing scalable plans for organic and inorganic growth — go-to-market
+    expansion, geographic entry, channel strategy, and partnership playbooks.
+    Synthesizes market sizing, unit economics, and competitive positioning into
+    sequenced growth roadmaps that product, sales, and marketing can execute against.
+    Includes frameworks for scaling teams, operations, and revenue in parallel.
+  domains:
+    - domain:strategy
+    - domain:business-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:strategy
+      confidence: primary
+    - target: domain:business-development
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:change-management-leadership
+attributes:
+  displayName: "Change Management and Transformation Leadership"
+  description: |
+    Leading complex organizational change initiatives — digital transformations,
+    restructurings, and cultural shifts — using structured change methodologies
+    such as Kotter and Prosci ADKAR. Covers stakeholder engagement, communication
+    planning, resistance management, capability building, and adoption measurement.
+    Ensures that strategic decisions translate into durable behavioral change across
+    the organization rather than stalling in implementation.
+  domains:
+    - domain:strategy
+    - domain:human-resources
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:strategy
+      confidence: primary
+    - target: domain:human-resources
+      confidence: secondary
+    - target: specialization:human-resources
+      confidence: secondary
+    - target: specialization:talent-management
+      confidence: secondary

@@ -1,0 +1,20 @@
+nodeKind: Presentation
+id: presentation:pi-tui
+attributes:
+  displayName: "Pi TUI"
+  kind: tui
+  description: |
+    Terminal UI bundled with the Pi CLI agent. Surfaced through the
+    agent-mux adapter for v6.
+  renderingTechnology: terminal-emulator
+  themeSupport: none
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+  bundleSize: "~5 MB"
+  updateChannel: manual
+  accessibilityShortcuts:
+    - "Ctrl+C: cancel"
+edges:
+  bundled_with:
+    - agent-platform-impl:pi.platform@current

@@ -1,0 +1,565 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: externalbackendproviders.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: externalbackendproviders
+    singular: externalbackendprovider
+    kind: ExternalBackendProvider
+    shortNames:
+    - ebp
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Type
+      type: string
+      jsonPath: .spec.providerType
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - providerType
+            - endpoint
+            properties:
+              organizationRef:
+                type: string
+              providerType:
+                type: string
+              endpoint:
+                type: string
+              authRef:
+                type: string
+              tlsVerify:
+                type: boolean
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: externalbackendbindings.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: externalbackendbindings
+    singular: externalbackendbinding
+    kind: ExternalBackendBinding
+    shortNames:
+    - ebb
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Provider
+      type: string
+      jsonPath: .spec.providerRef
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - providerRef
+            - credentialRef
+            properties:
+              organizationRef:
+                type: string
+              providerRef:
+                type: string
+              credentialRef:
+                type: string
+              scope:
+                type: string
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: externalbackendsyncpolicies.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: externalbackendsyncpolicies
+    singular: externalbackendsyncpolicy
+    kind: ExternalBackendSyncPolicy
+    shortNames:
+    - ebsp
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Provider
+      type: string
+      jsonPath: .spec.providerRef
+    - name: Interval
+      type: string
+      jsonPath: .spec.syncInterval
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - providerRef
+            - syncInterval
+            properties:
+              organizationRef:
+                type: string
+              providerRef:
+                type: string
+              syncInterval:
+                type: string
+              conflictResolution:
+                type: string
+              retryPolicy:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: externalprovidercapabilitymanifests.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: externalprovidercapabilitymanifests
+    singular: externalprovidercapabilitymanifest
+    kind: ExternalProviderCapabilityManifest
+    shortNames:
+    - epcm
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Provider
+      type: string
+      jsonPath: .spec.providerRef
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - providerRef
+            - capabilities
+            properties:
+              organizationRef:
+                type: string
+              providerRef:
+                type: string
+              capabilities:
+                type: array
+                items:
+                  type: string
+              apiVersion:
+                type: string
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: externalwebhookdeliveries.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: externalwebhookdeliveries
+    singular: externalwebhookdelivery
+    kind: ExternalWebhookDelivery
+    shortNames:
+    - ewd
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Provider
+      type: string
+      jsonPath: .spec.providerRef
+    - name: EventType
+      type: string
+      jsonPath: .spec.eventType
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - providerRef
+            - eventType
+            - payload
+            properties:
+              organizationRef:
+                type: string
+              providerRef:
+                type: string
+              eventType:
+                type: string
+              payload:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: externalsyncevents.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: externalsyncevents
+    singular: externalsyncevent
+    kind: ExternalSyncEvent
+    shortNames:
+    - ese
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Provider
+      type: string
+      jsonPath: .spec.providerRef
+    - name: EventKind
+      type: string
+      jsonPath: .spec.eventKind
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - providerRef
+            - eventKind
+            - resourceRef
+            properties:
+              organizationRef:
+                type: string
+              providerRef:
+                type: string
+              eventKind:
+                type: string
+              resourceRef:
+                type: string
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: externalsyncstates.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: externalsyncstates
+    singular: externalsyncstate
+    kind: ExternalSyncState
+    shortNames:
+    - ess
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Provider
+      type: string
+      jsonPath: .spec.providerRef
+    - name: Phase
+      type: string
+      jsonPath: .spec.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - providerRef
+            - resourceRef
+            - phase
+            properties:
+              organizationRef:
+                type: string
+              providerRef:
+                type: string
+              resourceRef:
+                type: string
+              phase:
+                type: string
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: externalwriteintents.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: externalwriteintents
+    singular: externalwriteintent
+    kind: ExternalWriteIntent
+    shortNames:
+    - ewi
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Provider
+      type: string
+      jsonPath: .spec.providerRef
+    - name: Operation
+      type: string
+      jsonPath: .spec.operation
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - providerRef
+            - resourceRef
+            - operation
+            properties:
+              organizationRef:
+                type: string
+              providerRef:
+                type: string
+              resourceRef:
+                type: string
+              operation:
+                type: string
+              payload:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: externalsyncconflicts.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: externalsyncconflicts
+    singular: externalsyncconflict
+    kind: ExternalSyncConflict
+    shortNames:
+    - esc
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Provider
+      type: string
+      jsonPath: .spec.providerRef
+    - name: ConflictKind
+      type: string
+      jsonPath: .spec.conflictKind
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - providerRef
+            - resourceRef
+            - conflictKind
+            properties:
+              organizationRef:
+                type: string
+              providerRef:
+                type: string
+              resourceRef:
+                type: string
+              conflictKind:
+                type: string
+              diff:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: externalobjectlinks.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: externalobjectlinks
+    singular: externalobjectlink
+    kind: ExternalObjectLink
+    shortNames:
+    - eol
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Provider
+      type: string
+      jsonPath: .spec.providerRef
+    - name: ExternalID
+      type: string
+      jsonPath: .spec.externalId
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - providerRef
+            - externalId
+            - localRef
+            properties:
+              organizationRef:
+                type: string
+              providerRef:
+                type: string
+              externalId:
+                type: string
+              localRef:
+                type: string
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true

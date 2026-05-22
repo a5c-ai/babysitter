@@ -7,6 +7,13 @@ metadata:
   version: "1.0.0"
   category: observability
   backlog-id: SK-003
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:observability-instrumentation, skill-area:metrics-dashboarding]
+  roles: [role:sre, role:devops-engineer]
+  topics: [topic:observability-driven-development]
+
 ---
 
 # prometheus-grafana

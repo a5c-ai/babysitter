@@ -1,0 +1,27 @@
+nodeKind: Provider
+id: provider:voyageai
+attributes:
+  displayName: "Voyage AI"
+  vendor: "Voyage AI Inc."
+  versionRange: ">=2024-01-01"
+  authMethods:
+    - api-key
+  authMethodNotes: |
+    Standard `Authorization: Bearer <api-key>` for the Voyage AI Embeddings API.
+  endpoints:
+    embed: "https://api.voyageai.com/v1/embeddings"
+  pricing: |
+    See https://docs.voyageai.com/pricing/ for current per-model rates.
+  rateLimitSignalingProtocol: |
+    HTTP 429 with `Retry-After` header.
+  dataResidencyOptions:
+    - us
+  vendorFeatures: []
+  slaTier: "voyageai-standard"
+  regions:
+    - global
+edges:
+  realizes:
+    - target: layer:2-provider
+  serves:
+    - model:voyageai-voyage-3@current

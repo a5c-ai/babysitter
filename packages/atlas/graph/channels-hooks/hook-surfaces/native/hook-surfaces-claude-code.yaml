@@ -1,0 +1,154 @@
+---
+nodeKind: HookSurface
+id: hook-surface:claude.post-tool-use
+attributes:
+  eventName: "PostToolUse (Claude)"
+  displayName: "PostToolUse (Claude)"
+  kind: native
+  originVendor: Anthropic
+  direction: post
+  blocking: false
+  family: shell-hook
+  description: |
+    Claude Code's PostToolUse hook. Fired after a tool invocation
+    completes (success or failure). Cannot block the call itself but
+    can mutate session state.
+edges:
+  canonicalized_to:
+    - target: hook-surface:post-tool-use
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+      attrs: { since: "1.0.0" }
+---
+nodeKind: HookSurface
+id: hook-surface:claude.stop
+attributes:
+  eventName: "Stop (Claude)"
+  displayName: "Stop (Claude)"
+  kind: native
+  originVendor: Anthropic
+  direction: event
+  blocking: false
+  family: shell-hook
+  description: |
+    Claude Code's Stop hook. Fires when the main agent stops.
+edges:
+  canonicalized_to:
+    - target: hook-surface:stop
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+      attrs: { since: "1.0.0" }
+---
+nodeKind: HookSurface
+id: hook-surface:claude.subagent-stop
+attributes:
+  eventName: "SubagentStop (Claude)"
+  displayName: "SubagentStop (Claude)"
+  kind: native
+  originVendor: Anthropic
+  direction: event
+  blocking: false
+  family: shell-hook
+  description: |
+    Claude Code's SubagentStop hook. Fires when a Claude Code
+    sub-agent (Task tool) completes.
+edges:
+  canonicalized_to:
+    - target: hook-surface:subagent-stop
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+      attrs: { since: "1.0.0" }
+---
+nodeKind: HookSurface
+id: hook-surface:claude.notification
+attributes:
+  eventName: "Notification (Claude)"
+  displayName: "Notification (Claude)"
+  kind: native
+  originVendor: Anthropic
+  direction: event
+  blocking: false
+  family: shell-hook
+  description: |
+    Claude Code's Notification hook. Fires when a user-visible
+    notification is emitted (e.g. waiting for user input).
+edges:
+  canonicalized_to:
+    - target: hook-surface:notification
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+      attrs: { since: "1.0.0" }
+---
+nodeKind: HookSurface
+id: hook-surface:claude.user-prompt-submit
+attributes:
+  eventName: "UserPromptSubmit (Claude)"
+  displayName: "UserPromptSubmit (Claude)"
+  kind: native
+  originVendor: Anthropic
+  direction: pre
+  blocking: true
+  family: shell-hook
+  description: |
+    Claude Code's UserPromptSubmit hook. Fires when the user submits
+    a prompt; can rewrite or block the prompt.
+edges:
+  canonicalized_to:
+    - target: hook-surface:user-prompt-submit
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+      attrs: { since: "1.0.0" }
+---
+nodeKind: HookSurface
+id: hook-surface:claude.pre-compact
+attributes:
+  eventName: "PreCompact (Claude)"
+  displayName: "PreCompact (Claude)"
+  kind: native
+  originVendor: Anthropic
+  direction: pre
+  blocking: true
+  family: shell-hook
+  description: |
+    Claude Code's PreCompact hook. Fires before context compaction;
+    can block or alter compaction.
+edges:
+  canonicalized_to:
+    - target: hook-surface:pre-compact
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+      attrs: { since: "1.0.0" }
+---
+nodeKind: HookSurface
+id: hook-surface:claude.session-start
+attributes:
+  eventName: "SessionStart (Claude)"
+  displayName: "SessionStart (Claude)"
+  kind: native
+  originVendor: Anthropic
+  direction: event
+  blocking: false
+  family: shell-hook
+  description: |
+    Claude Code's SessionStart hook. Fires when a session begins.
+edges:
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+      attrs: { since: "1.0.0" }
+---
+nodeKind: HookSurface
+id: hook-surface:claude.session-end
+attributes:
+  eventName: "SessionEnd (Claude)"
+  displayName: "SessionEnd (Claude)"
+  kind: native
+  originVendor: Anthropic
+  direction: event
+  blocking: false
+  family: shell-hook
+  description: |
+    Claude Code's SessionEnd hook. Fires when a session terminates.
+edges:
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+      attrs: { since: "1.0.0" }

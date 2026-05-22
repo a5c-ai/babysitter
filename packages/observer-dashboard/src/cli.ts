@@ -14,7 +14,6 @@
 import { execSync } from "child_process";
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
-import https from "https";
 
 interface CliOptions {
   port?: string;
@@ -206,43 +205,6 @@ function findNextBin(): string {
   return "next";
 }
 
-/**
- * Check npm registry for a newer version and print an update notice.
- * Non-blocking — fires and forgets so it never delays startup.
- */
-function checkForUpdate(currentVersion: string): void {
-  if (currentVersion === "unknown") return;
-
-  const url =
-    "https://registry.npmjs.org/@a5c-ai/babysitter-observer-dashboard/latest";
-
-  const req = https.get(url, { timeout: 3000 }, (res) => {
-    let data = "";
-    res.on("data", (chunk: Buffer) => {
-      data += chunk;
-    });
-    res.on("end", () => {
-      try {
-        const latest = JSON.parse(data).version as string;
-        if (latest && latest !== currentVersion) {
-          console.log(
-            `\n  Update available: ${currentVersion} → ${latest}` +
-              `\n  Run: npm i -g @a5c-ai/babysitter-observer-dashboard@latest\n`
-          );
-        }
-      } catch {
-        // Silently ignore parse errors
-      }
-    });
-  });
-
-  req.on("error", () => {
-    // Silently ignore network errors — update check is best-effort
-  });
-
-  req.end();
-}
-
 function main(): void {
   const opts = parseArgs(process.argv);
 
@@ -255,9 +217,6 @@ function main(): void {
     printUsage();
     process.exit(0);
   }
-
-  // Non-blocking update check
-  checkForUpdate(getVersion());
 
   // Map CLI flags to environment variables
   if (opts.port) {

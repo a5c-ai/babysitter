@@ -1,0 +1,13 @@
+nodeKind: Library
+id: library:httpx
+attributes:
+  displayName: "HTTPX"
+  belongsToLanguageId: language:python
+  category: http-client
+  description: |
+    Next-generation HTTP client for Python with sync and async APIs and HTTP/2 support.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design

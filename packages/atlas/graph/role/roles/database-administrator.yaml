@@ -1,0 +1,24 @@
+nodeKind: Role
+id: role:database-administrator
+attributes:
+  displayName: "Database Administrator"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:databases
+  description: |
+    Operates production databases — backups, replication, performance, and schema migrations.
+edges:
+  holds_responsibility:
+    - responsibility:data-quality
+    - responsibility:performance-optimization
+    - responsibility:disaster-recovery
+    - responsibility:capacity-planning
+  requires_expertise:
+    - target: skill-area:postgres-tuning
+    - target: skill-area:database-migrations-zero-downtime
+    - target: skill-area:schema-evolution
+    - target: skill-area:data-warehouse-modeling
+  applies_to:
+    - target: domain:databases

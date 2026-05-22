@@ -1,0 +1,152 @@
+nodeKind: EvidenceSource
+id: evidence:openai-api-pricing-2026-05
+attributes:
+  displayName: "OpenAI API pricing, May 2026"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://openai.com/api/pricing/
+  sourcePathOrUrl: https://openai.com/api/pricing/
+  locator: "GPT-5.5 / GPT-5.4 pricing table"
+  capturedAt: "2026-05-04T00:00:00Z"
+  observedAt: "2026-05-04T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-04T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-gemini-3-model-cards-2026
+attributes:
+  displayName: "Google DeepMind Gemini 3 and 3.1 model cards"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://deepmind.google/models/model-cards/gemini-3-1-pro/
+  sourcePathOrUrl: https://deepmind.google/models/model-cards/gemini-3-1-pro/
+  locator: "Gemini 3.1 Pro / Flash-Lite / Deep Think model pages"
+  capturedAt: "2026-05-04T00:00:00Z"
+  observedAt: "2026-05-04T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-04T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-gemini-3-developer-guide
+attributes:
+  displayName: "Gemini 3 developer guide"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://ai.google.dev/gemini-api/docs/gemini-3
+  sourcePathOrUrl: https://ai.google.dev/gemini-api/docs/gemini-3
+  locator: "Gemini 3 API developer guide"
+  capturedAt: "2026-05-04T00:00:00Z"
+  observedAt: "2026-05-04T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-04T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:openai-gpt-5-4-model-doc-2026-05
+attributes:
+  displayName: "OpenAI GPT-5.4 model documentation, May 2026"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://developers.openai.com/api/docs/models/gpt-5.4
+  sourcePathOrUrl: https://developers.openai.com/api/docs/models/gpt-5.4
+  locator: "GPT-5.4 context window, max output tokens, knowledge cutoff, pricing"
+  capturedAt: "2026-05-04T00:00:00Z"
+  observedAt: "2026-05-04T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-04T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:openai-gpt-5-4-mini-model-doc-2026-05
+attributes:
+  displayName: "OpenAI GPT-5.4 mini model documentation, May 2026"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://developers.openai.com/api/docs/models/gpt-5.4-mini
+  sourcePathOrUrl: https://developers.openai.com/api/docs/models/gpt-5.4-mini
+  locator: "GPT-5.4 mini context window, max output tokens, knowledge cutoff, pricing"
+  capturedAt: "2026-05-04T00:00:00Z"
+  observedAt: "2026-05-04T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-04T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:openai-gpt-5-5-model-doc-2026-05
+attributes:
+  displayName: "OpenAI GPT-5.5 model documentation, May 2026"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://developers.openai.com/api/docs/models/gpt-5.5
+  sourcePathOrUrl: https://developers.openai.com/api/docs/models/gpt-5.5
+  locator: "GPT-5.5 context window, max output tokens, knowledge cutoff, pricing"
+  capturedAt: "2026-05-04T00:00:00Z"
+  observedAt: "2026-05-04T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-04T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:openai-gpt-5-4-mini-launch-benchmarks-2026-03
+attributes:
+  displayName: "OpenAI GPT-5.4 mini and nano launch benchmarks"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://openai.com/index/introducing-gpt-5-4-mini-and-nano/
+  sourcePathOrUrl: https://openai.com/index/introducing-gpt-5-4-mini-and-nano/
+  locator: "Benchmark table comparing GPT-5.4, GPT-5.4 mini, GPT-5.4 nano, and GPT-5 mini"
+  capturedAt: "2026-05-04T00:00:00Z"
+  observedAt: "2026-05-04T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-04T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-gemini-3-1-pro-benchmark-table-2026-05
+attributes:
+  displayName: "Google DeepMind Gemini 3.1 Pro benchmark table"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://deepmind.google/models/gemini/pro/
+  sourcePathOrUrl: https://deepmind.google/models/gemini/pro/
+  locator: "Performance table for Gemini 3.1 Pro Thinking and Gemini 3 Pro Thinking"
+  capturedAt: "2026-05-04T00:00:00Z"
+  observedAt: "2026-05-04T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-04T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+

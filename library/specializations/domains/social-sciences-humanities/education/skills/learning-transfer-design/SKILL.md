@@ -2,6 +2,12 @@
 name: learning-transfer-design
 description: Design instructional strategies that promote knowledge and skill transfer to real-world application contexts
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:interaction-design, skill-area:tutorial-design]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:product-designer, role:technical-writer]
 ---
 
 # Learning Transfer Design

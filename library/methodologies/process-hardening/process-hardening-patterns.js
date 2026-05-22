@@ -12,6 +12,13 @@
  *
  * Usage:
  *   import { safeTask, circuitBreaker, verificationGate } from './process-hardening-patterns.js';
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:collaboration]
+ *   skillAreas: [skill-area:code-review-practice, skill-area:code-analysis-linting]
+ *   workflows: [workflow:code-review, workflow:pull-request-lifecycle]
+ *   topics: [topic:code-review-best-practices]
+ *   roles: [role:tech-lead, role:engineering-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

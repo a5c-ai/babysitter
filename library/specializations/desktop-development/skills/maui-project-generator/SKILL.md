@@ -3,6 +3,12 @@ name: maui-project-generator
 description: Generate .NET MAUI project with platform-specific handlers for desktop and mobile
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [maui, dotnet, cross-platform, xaml, csharp]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # maui-project-generator

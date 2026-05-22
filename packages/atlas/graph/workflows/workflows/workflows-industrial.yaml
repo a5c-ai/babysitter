@@ -1,0 +1,101 @@
+---
+nodeKind: Workflow
+id: workflow:lean-manufacturing-kaizen
+attributes:
+  displayName: "Lean Manufacturing Kaizen"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: single-team
+  description: |
+    Facilitates continuous improvement events on manufacturing lines --
+    mapping current-state value streams, identifying muda/muri/mura
+    waste categories, running time-motion studies with IoT sensor data,
+    implementing 5S workplace organization changes, measuring cycle time
+    and takt time improvements, and tracking A3 problem-solving
+    follow-through to closure. Excludes capital equipment procurement.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+    - target: role:performance-profiler
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:industrial-engineering
+    - target: domain:mechanical-engineering
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:quality-control-audit
+attributes:
+  displayName: "Quality Control Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Audits manufacturing quality control systems -- reviewing SPC chart
+    effectiveness and control limit settings, validating measurement
+    system analysis (Gage R&R) studies, checking nonconformance tracking
+    and CAPA closure rates, verifying calibration schedules for
+    inspection equipment, and confirming process capability indices (Cpk)
+    meet customer requirements. Excludes corrective action
+    implementation.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:test-writer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:industrial-engineering
+    - target: domain:materials-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:production-scheduling-optimization
+attributes:
+  displayName: "Production Scheduling Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: single-team
+  description: |
+    Optimizes production scheduling across manufacturing cells -- solving
+    job-shop sequencing with constraint programming, balancing
+    work-in-progress inventory against due-date adherence, incorporating
+    machine maintenance windows, adjusting for real-time yield data, and
+    publishing shift-level work orders with material staging
+    requirements. Excludes demand forecasting and raw material
+    procurement.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:graph-algorithms
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:industrial-engineering
+    - target: domain:mechanical-engineering
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:engineering

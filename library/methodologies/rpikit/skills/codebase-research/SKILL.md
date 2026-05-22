@@ -2,17 +2,14 @@
 name: codebase-research
 description: Systematic codebase exploration following the Iron Law - understand the problem before exploring code. Four phases with file-finder and web-researcher agents.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Codebase Research
-
-## Overview
-
-Perform systematic codebase exploration to understand how existing systems work. Follows the Iron Law: "Do NOT explore the codebase until the problem is understood."
-
-## When to Use
-
-- Implementation direction is clear but codebase understanding is needed
 - Investigating how an existing feature works before modifying it
 - Understanding dependencies and data flows before planning
 - Gathering context for a known goal

@@ -1,0 +1,10 @@
+nodeKind: RunJournalEvent
+id: run-journal-event:effect-requested
+attributes:
+  eventName: EFFECT_REQUESTED
+  category: effect-lifecycle
+  terminal: false
+  description: |
+    Emitted when an Effect (unit of external work) is yielded by the
+    orchestrator and the runtime has registered the request. Carries
+    the effectId, taskId, invocationKey, and the typed effect spec.

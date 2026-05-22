@@ -1,0 +1,39 @@
+nodeKind: IssueTrackerProtocol
+id: issue-tracker-protocol:minimal
+attributes:
+  displayName: "Symphony §11.1 minimal portable contract"
+  operations:
+    - "listActiveIssues(filter) -> Issue[]"
+    - "transitionIssue(issueId, targetState) -> void"
+    - "appendComment(issueId, body) -> void"
+  description: "Three-op minimum that any tracker must implement to drive Symphony orchestration."
+---
+nodeKind: IssueTrackerProtocol
+id: issue-tracker-protocol:linear
+attributes:
+  displayName: "Linear GraphQL protocol binding"
+  operations:
+    - "issues(filter) GraphQL query"
+    - "issueUpdate(id, stateId) GraphQL mutation"
+    - "commentCreate(issueId, body) GraphQL mutation"
+  description: "Linear-specific GraphQL realization of Symphony tracker contract."
+---
+nodeKind: IssueTrackerProtocol
+id: issue-tracker-protocol:github
+attributes:
+  displayName: "GitHub Issues REST protocol binding"
+  operations:
+    - "GET /repos/{o}/{r}/issues?labels=..."
+    - "PATCH /repos/{o}/{r}/issues/{n} (state)"
+    - "POST /repos/{o}/{r}/issues/{n}/comments"
+  description: "GitHub Issues REST realization of Symphony tracker contract."
+---
+nodeKind: IssueTrackerProtocol
+id: issue-tracker-protocol:jira
+attributes:
+  displayName: "Jira REST protocol binding"
+  operations:
+    - "GET /rest/api/3/search?jql=..."
+    - "POST /rest/api/3/issue/{key}/transitions"
+    - "POST /rest/api/3/issue/{key}/comment"
+  description: "Jira REST realization of Symphony tracker contract."

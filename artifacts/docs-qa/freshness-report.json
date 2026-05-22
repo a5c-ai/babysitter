@@ -1,0 +1,322 @@
+{
+  "generatedDocMaxAgeDays": 45,
+  "humanDocReportAgeDays": 120,
+  "generatedDocsChecked": 8,
+  "staleGeneratedDocs": [],
+  "staleHumanUpdatedDocs": [],
+  "publishedDocsChecked": 159,
+  "historicalDocsExcluded": 315,
+  "landingPagesChecked": 18,
+  "metadataFailures": [],
+  "invalidCliReferences": [],
+  "invalidPackageReferences": [],
+  "plannedPackageReferences": [
+    {
+      "file": "docs/v6-spec-and-roadmap/agent-mux-integration.md",
+      "line": 40,
+      "packageName": "@a5c-ai/amux-proxy"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
+      "line": 54,
+      "packageName": "@a5c-ai/hooks-mux"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
+      "line": 65,
+      "packageName": "@a5c-ai/hooks-mux"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
+      "line": 68,
+      "packageName": "@a5c-ai/agent-runtime"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
+      "line": 70,
+      "packageName": "@a5c-ai/agent-platform"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
+      "line": 71,
+      "packageName": "@a5c-ai/agent-platform-meta-plugins"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
+      "line": 73,
+      "packageName": "@a5c-ai/agent-platform-orchestration-plugin"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
+      "line": 77,
+      "packageName": "@a5c-ai/catalog"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
+      "line": 78,
+      "packageName": "@a5c-ai/observer-dashboard"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
+      "line": 127,
+      "packageName": "@a5c-ai/agent-runtime"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
+      "line": 128,
+      "packageName": "@a5c-ai/agent-platform"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/current-state.md",
+      "line": 10,
+      "packageName": "@a5c-ai/hooks-mux"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/implementation/foundation-layer.md",
+      "line": 58,
+      "packageName": "@a5c-ai/agent-runtime"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/implementation/foundation-layer.md",
+      "line": 58,
+      "packageName": "@a5c-ai/agent-platform"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/implementation/platform-layer.md",
+      "line": 53,
+      "packageName": "@a5c-ai/agent-platform"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/implementation/platform-layer.md",
+      "line": 53,
+      "packageName": "@a5c-ai/agent-platform-meta-plugins"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/implementation/platform-layer.md",
+      "line": 53,
+      "packageName": "@a5c-ai/agent-platform-orchestration-plugin"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/package-specs.md",
+      "line": 102,
+      "packageName": "@a5c-ai/agent-runtime"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/package-specs.md",
+      "line": 103,
+      "packageName": "@a5c-ai/agent-platform"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/package-specs.md",
+      "line": 104,
+      "packageName": "@a5c-ai/agent-platform-meta-plugins"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/package-specs.md",
+      "line": 105,
+      "packageName": "@a5c-ai/agent-platform-orchestration-plugin"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/package-specs.md",
+      "line": 111,
+      "packageName": "@a5c-ai/agent-platform-meta-plugins"
+    },
+    {
+      "file": "docs/v6-spec-and-roadmap/unified-stack-architecture.md",
+      "line": 16,
+      "packageName": "@a5c-ai/hooks-mux"
+    }
+  ],
+  "versionClaims": [
+    {
+      "file": "docs/agent-mux/archive/design/amux-provider-config.md",
+      "line": 5,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/archive/design/launcher.md",
+      "line": 5,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/archive/design/provider-mux.md",
+      "line": 5,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/01-core-types-and-client.md",
+      "line": 3,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/02-run-options-and-profiles.md",
+      "line": 3,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/03-run-handle-and-interaction.md",
+      "line": 3,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/05-adapter-system.md",
+      "line": 3,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/06-capabilities-and-models.md",
+      "line": 3,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/07-session-manager.md",
+      "line": 3,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/08-config-and-auth.md",
+      "line": 3,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/09-plugin-manager.md",
+      "line": 3,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/10-cli-reference.md",
+      "line": 3,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/11-process-lifecycle-and-platform.md",
+      "line": 3,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/12-built-in-adapters.md",
+      "line": 3,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/13-invocation-modes.md",
+      "line": 3,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/reference/TROUBLESHOOTING.md",
+      "line": 5,
+      "claim": "1.0.0"
+    },
+    {
+      "file": "docs/user-guide/01-discovery-analysis.md",
+      "line": 3,
+      "claim": "1.0"
+    },
+    {
+      "file": "docs/user-guide/02-audience-personas.md",
+      "line": 3,
+      "claim": "1.0"
+    },
+    {
+      "file": "docs/user-guide/03-information-architecture.md",
+      "line": 3,
+      "claim": "1.0"
+    },
+    {
+      "file": "docs/user-guide/features/architecture-overview.md",
+      "line": 3,
+      "claim": "1.0"
+    },
+    {
+      "file": "docs/user-guide/features/best-practices.md",
+      "line": 3,
+      "claim": "2.0"
+    },
+    {
+      "file": "docs/user-guide/features/breakpoints.md",
+      "line": 3,
+      "claim": "3.0"
+    },
+    {
+      "file": "docs/user-guide/features/hooks.md",
+      "line": 3,
+      "claim": "1.1"
+    },
+    {
+      "file": "docs/user-guide/features/journal-system.md",
+      "line": 3,
+      "claim": "1.1"
+    },
+    {
+      "file": "docs/user-guide/features/parallel-execution.md",
+      "line": 3,
+      "claim": "1.1"
+    },
+    {
+      "file": "docs/user-guide/features/process-definitions.md",
+      "line": 3,
+      "claim": "1.1"
+    },
+    {
+      "file": "docs/user-guide/features/quality-convergence.md",
+      "line": 3,
+      "claim": "2.1"
+    },
+    {
+      "file": "docs/user-guide/features/run-resumption.md",
+      "line": 3,
+      "claim": "1.1"
+    },
+    {
+      "file": "docs/user-guide/features/two-loops-architecture.md",
+      "line": 3,
+      "claim": "1.1"
+    },
+    {
+      "file": "docs/user-guide/index.md",
+      "line": 222,
+      "claim": "5.0.0"
+    },
+    {
+      "file": "docs/user-guide/reference/cli-reference.md",
+      "line": 3,
+      "claim": "1.1"
+    },
+    {
+      "file": "docs/user-guide/reference/configuration.md",
+      "line": 3,
+      "claim": "1.0"
+    },
+    {
+      "file": "docs/user-guide/reference/error-catalog.md",
+      "line": 3,
+      "claim": "1.0"
+    },
+    {
+      "file": "docs/user-guide/reference/security.md",
+      "line": 3,
+      "claim": "1.0"
+    },
+    {
+      "file": "docs/user-guide/reference/slash-commands.md",
+      "line": 3,
+      "claim": "1.0 | **Last Updated:** 2026-03-05"
+    },
+    {
+      "file": "docs/user-guide/reference/troubleshooting.md",
+      "line": 3,
+      "claim": "1.0"
+    },
+    {
+      "file": "docs/user-guide/tutorials/beginner-rest-api.md",
+      "line": 3,
+      "claim": "1.0"
+    },
+    {
+      "file": "docs/user-guide/tutorials/intermediate-custom-process.md",
+      "line": 3,
+      "claim": "1.0"
+    }
+  ]
+}

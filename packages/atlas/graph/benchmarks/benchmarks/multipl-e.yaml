@@ -1,0 +1,10 @@
+nodeKind: Benchmark
+id: benchmark:multipl-e
+attributes:
+  displayName: "MultiPL-E"
+  homepageUrl: https://github.com/nuprl/MultiPL-E
+  kind: code-generation
+  targetsKind: ModelVersion
+  description: |
+    MultiPL-E — multi-language extension of HumanEval / MBPP across 18+ programming languages.
+edges: {}

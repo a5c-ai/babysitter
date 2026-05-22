@@ -1,0 +1,12 @@
+nodeKind: Term
+id: term:large-language-model
+attributes:
+  canonicalDefinitionId: definition:large-language-model.canonical
+  displayName: "Large Language Model"
+  kind: concept
+  description: |
+    A neural language model trained at billion+ parameter scale.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:data-science

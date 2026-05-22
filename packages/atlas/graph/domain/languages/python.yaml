@@ -1,0 +1,28 @@
+nodeKind: Language
+id: language:python
+attributes:
+  displayName: "Python"
+  paradigms:
+    - imperative
+    - object-oriented
+    - functional
+  description: |
+    Python is a dynamically-typed, interpreted, multi-paradigm language that
+    prioritizes readability and rapid development. Its vast ecosystem and
+    simple syntax make it the dominant language for data science, machine
+    learning, scientific computing, and backend web development.
+
+    The PyPI package index hosts over half a million packages. Key
+    ecosystems include: data science (NumPy, pandas, Matplotlib, scikit-learn),
+    ML (PyTorch, TensorFlow, JAX, Hugging Face), web (Django, FastAPI, Flask),
+    and DevOps tooling (Ansible, AWS CDK). Python 3.12+ introduced a
+    per-interpreter GIL and improved performance. Type annotations (mypy,
+    pyright, Pydantic) have become standard in production codebases.
+edges:
+  used_by_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:autonomous-research-engineering
+    - target: skill-area:python-implementation
+    - target: skill-area:spark-jobs
+    - target: skill-area:web-scraping

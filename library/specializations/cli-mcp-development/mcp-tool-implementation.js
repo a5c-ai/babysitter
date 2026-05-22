@@ -22,6 +22,13 @@
  * @references
  * - MCP Tools Concept: https://modelcontextprotocol.io/docs/concepts/tools
  * - JSON Schema: https://json-schema.org/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:cli-mcp-development]
+ *   skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation, skill-area:mcp-tool-design]
+ *   roles: [role:backend-engineer, role:platform-engineer]
+ *   workflows: [workflow:sdk-api-design]
+ *   topics: [topic:developer-experience]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

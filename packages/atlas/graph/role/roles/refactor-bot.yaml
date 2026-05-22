@@ -1,0 +1,21 @@
+nodeKind: Role
+id: role:refactor-bot
+attributes:
+  displayName: "Refactor Bot"
+  isAgentic: true
+  requiredCapabilities:
+    - capability:supports-tool-use
+    - capability:supports-text-streaming
+  requiredDomains:
+    - domain:software-engineering
+  description: |
+    Agent that performs mechanical code refactors — renames, extractions, and pattern migrations.
+edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:performance-optimization
+  requires_capability:
+    - target: capability:supports-tool-use
+    - target: capability:supports-text-streaming
+  applies_to:
+    - target: domain:software-engineering

@@ -1,0 +1,299 @@
+nodeKind: Responsibility
+id: responsibility:code-review
+attributes:
+  displayName: "Code Review"
+  description: |
+    Reviewing pull requests and proposed code changes to ensure correctness, maintainability,
+    and adherence to team standards. Providing constructive feedback, catching bugs early,
+    and sharing knowledge across the team through structured critique.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:incident-response
+attributes:
+  displayName: "Incident Response"
+  description: |
+    Detecting, triaging, and resolving production incidents within defined SLA windows.
+    Coordinating cross-functional responders, communicating status to stakeholders,
+    and leading post-incident reviews to prevent recurrence.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:architecture-decision
+attributes:
+  displayName: "Architecture Decision"
+  description: |
+    Evaluating technology choices and system design trade-offs, then documenting decisions
+    as Architecture Decision Records (ADRs). Ensuring architectural choices align with
+    long-term scalability, security, and operational goals of the organization.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:deployment-management
+attributes:
+  displayName: "Deployment Management"
+  description: |
+    Coordinating and executing the release of software artifacts to production and
+    pre-production environments. Managing rollout strategies, feature flags, and
+    rollback procedures to minimize downtime and customer impact.
+  cadence: sprint
+---
+nodeKind: Responsibility
+id: responsibility:test-strategy
+attributes:
+  displayName: "Test Strategy"
+  description: |
+    Defining and maintaining the overall approach to quality assurance, including unit,
+    integration, end-to-end, and performance testing. Selecting tooling, establishing
+    coverage thresholds, and ensuring testing practices scale with team growth.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:security-audit
+attributes:
+  displayName: "Security Audit"
+  description: |
+    Conducting systematic reviews of code, infrastructure, and processes to identify
+    vulnerabilities and compliance gaps. Producing audit findings with risk ratings
+    and remediation timelines, then tracking resolution to completion.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:performance-optimization
+attributes:
+  displayName: "Performance Optimization"
+  description: |
+    Profiling systems to identify bottlenecks, then designing and implementing improvements
+    to throughput, latency, and resource efficiency. Validating optimizations with
+    benchmarks and ensuring regressions are caught before reaching production.
+  cadence: sprint
+---
+nodeKind: Responsibility
+id: responsibility:capacity-planning
+attributes:
+  displayName: "Capacity Planning"
+  description: |
+    Forecasting infrastructure resource needs based on growth projections and historical
+    usage trends. Coordinating with finance and engineering to procure capacity ahead
+    of demand and avoid performance degradation or outages.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:sprint-planning
+attributes:
+  displayName: "Sprint Planning"
+  description: |
+    Facilitating the selection and scoping of work for an upcoming iteration, ensuring
+    the team commits to a realistic and valuable set of deliverables. Aligning engineering
+    capacity with product priorities and surfacing dependencies before work begins.
+  cadence: sprint
+---
+nodeKind: Responsibility
+id: responsibility:stakeholder-communication
+attributes:
+  displayName: "Stakeholder Communication"
+  description: |
+    Translating technical progress, risks, and decisions into clear narratives for
+    non-technical stakeholders. Maintaining regular cadences of updates through reports,
+    demos, and meetings to build trust and support informed decision-making.
+  cadence: weekly
+---
+nodeKind: Responsibility
+id: responsibility:hiring
+attributes:
+  displayName: "Hiring"
+  description: |
+    Sourcing, screening, and evaluating candidates to grow the team with skilled and
+    culturally aligned individuals. Designing interview processes, calibrating assessments,
+    and ensuring an equitable and efficient candidate experience.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:mentoring
+attributes:
+  displayName: "Mentoring"
+  description: |
+    Supporting the professional growth of team members through regular one-on-ones,
+    goal-setting, and structured feedback. Sharing expertise, modeling best practices,
+    and helping individuals navigate technical and career challenges.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:budget-management
+attributes:
+  displayName: "Budget Management"
+  description: |
+    Tracking and controlling expenditures against allocated budgets for headcount,
+    tooling, infrastructure, and vendor contracts. Forecasting variances and negotiating
+    trade-offs to maximize the value delivered per dollar invested.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:compliance-monitoring
+attributes:
+  displayName: "Compliance Monitoring"
+  description: |
+    Continuously assessing adherence to regulatory requirements, internal policies,
+    and industry standards such as SOC 2, GDPR, or HIPAA. Flagging gaps, coordinating
+    remediation efforts, and maintaining audit-ready evidence artifacts.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:data-quality
+attributes:
+  displayName: "Data Quality"
+  description: |
+    Establishing and enforcing data validation rules, freshness SLAs, and lineage
+    documentation to ensure the accuracy and reliability of analytical and operational
+    data. Investigating anomalies and coordinating fixes with upstream data producers.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:customer-escalation
+attributes:
+  displayName: "Customer Escalation"
+  description: |
+    Handling high-priority customer issues that exceed frontline support capabilities
+    by coordinating engineering, product, and leadership responses. Communicating
+    timelines and resolutions directly to affected customers to preserve trust.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:release-coordination
+attributes:
+  displayName: "Release Coordination"
+  description: |
+    Orchestrating the end-to-end release lifecycle from code freeze through post-deployment
+    verification, aligning across engineering, QA, product, and operations teams.
+    Managing release calendars, go/no-go gates, and communication to all stakeholders.
+  cadence: sprint
+---
+nodeKind: Responsibility
+id: responsibility:documentation
+attributes:
+  displayName: "Documentation"
+  description: |
+    Authoring, reviewing, and maintaining technical and product documentation including
+    API references, runbooks, architecture diagrams, and user guides. Ensuring docs
+    stay accurate and discoverable as systems and processes evolve.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:vendor-evaluation
+attributes:
+  displayName: "Vendor Evaluation"
+  description: |
+    Researching and assessing third-party tools, services, and platforms against
+    defined technical, commercial, and security criteria. Producing evaluation reports
+    and recommendations to guide procurement and partnership decisions.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:risk-assessment
+attributes:
+  displayName: "Risk Assessment"
+  description: |
+    Identifying, quantifying, and prioritizing technical and operational risks across
+    projects and infrastructure. Developing mitigation strategies and tracking their
+    implementation to reduce exposure over time.
+  cadence: sprint
+---
+nodeKind: Responsibility
+id: responsibility:access-control
+attributes:
+  displayName: "Access Control"
+  description: |
+    Managing identity and permission lifecycles for systems, services, and data stores
+    according to the principle of least privilege. Conducting periodic access reviews
+    and remediating excessive grants to maintain a strong security posture.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:backlog-grooming
+attributes:
+  displayName: "Backlog Grooming"
+  description: |
+    Refining, estimating, and prioritizing items in the product and engineering backlog
+    to keep the queue ready for upcoming sprints. Clarifying acceptance criteria,
+    splitting large stories, and removing stale or lower-priority items.
+  cadence: sprint
+---
+nodeKind: Responsibility
+id: responsibility:on-call
+attributes:
+  displayName: "On-Call"
+  description: |
+    Being available outside business hours to respond to automated alerts and critical
+    production issues as part of a rotation. Triaging alerts, taking immediate remediation
+    actions, and escalating when incidents exceed defined severity thresholds.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:user-research
+attributes:
+  displayName: "User Research"
+  description: |
+    Planning and executing qualitative and quantitative studies to understand user
+    needs, behaviors, and pain points. Synthesizing findings into actionable insights
+    that inform product strategy and design decisions.
+  cadence: sprint
+---
+nodeKind: Responsibility
+id: responsibility:metric-definition
+attributes:
+  displayName: "Metric Definition"
+  description: |
+    Identifying and formalizing the key performance indicators and success metrics
+    that measure product health and team outcomes. Ensuring metrics are instrumented,
+    agreed upon by stakeholders, and reviewed regularly for continued relevance.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:contract-negotiation
+attributes:
+  displayName: "Contract Negotiation"
+  description: |
+    Leading or supporting the negotiation of commercial agreements with vendors,
+    partners, and customers to secure favorable terms while managing legal and
+    financial risk. Coordinating with legal counsel and finance throughout the process.
+  cadence: annual
+---
+nodeKind: Responsibility
+id: responsibility:change-approval
+attributes:
+  displayName: "Change Approval"
+  description: |
+    Reviewing and authorizing proposed changes to production systems and critical
+    processes through a structured change advisory board or lightweight approval
+    workflow. Balancing speed of delivery with risk mitigation for the organization.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:knowledge-sharing
+attributes:
+  displayName: "Knowledge Sharing"
+  description: |
+    Organizing and facilitating the transfer of expertise across team members through
+    tech talks, pair programming, wikis, and internal documentation. Building a learning
+    culture that reduces silos and accelerates onboarding of new contributors.
+  cadence: weekly
+---
+nodeKind: Responsibility
+id: responsibility:disaster-recovery
+attributes:
+  displayName: "Disaster Recovery"
+  description: |
+    Designing, testing, and maintaining plans to restore critical systems and data
+    following catastrophic failures. Conducting regular drills, validating recovery
+    time objectives, and updating runbooks as system architectures change.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:sla-management
+attributes:
+  displayName: "SLA Management"
+  description: |
+    Defining, monitoring, and reporting on service-level agreements with internal
+    and external customers. Coordinating engineering and operations responses when
+    SLA targets are at risk and driving improvements to close performance gaps.
+  cadence: weekly

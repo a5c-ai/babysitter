@@ -1,0 +1,35 @@
+nodeKind: EnvVar
+id: env-var:claude-code-remote
+attributes:
+  displayName: CLAUDE_CODE_REMOTE
+  description: Set automatically to true when running as a cloud session; read to detect cloud environment.
+  name: CLAUDE_CODE_REMOTE
+  category: remote-cloud
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-remote-session-id
+attributes:
+  displayName: CLAUDE_CODE_REMOTE_SESSION_ID
+  description: Set automatically in cloud sessions to the current session's ID; use to construct session links.
+  name: CLAUDE_CODE_REMOTE_SESSION_ID
+  category: remote-cloud
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:ccr-force-bundle
+attributes:
+  displayName: CCR_FORCE_BUNDLE
+  description: Set to 1 to force `claude --remote` to bundle and upload the local repository.
+  name: CCR_FORCE_BUNDLE
+  category: remote-cloud
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

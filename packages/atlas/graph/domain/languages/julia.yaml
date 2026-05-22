@@ -1,0 +1,26 @@
+nodeKind: Language
+id: language:julia
+attributes:
+  displayName: "Julia"
+  paradigms:
+    - multiple-dispatch
+    - scientific
+    - imperative
+  description: |
+    Julia is a high-level, dynamically-typed language with a JIT compiler
+    (based on LLVM) designed specifically for high-performance numerical and
+    scientific computing. It aims to solve the "two-language problem" —
+    letting researchers prototype in an expressive language without rewriting
+    hot paths in C/Fortran.
+
+    Julia's multiple dispatch system is central to its design and enables
+    highly generic, composable libraries. Key packages include Flux.jl
+    (machine learning), DifferentialEquations.jl, Plots.jl, and
+    DataFrames.jl. Julia supports distributed and parallel computing via
+    Distributed.jl and CUDA.jl for GPU kernels. Its type inference and
+    specialization produce code competitive with compiled languages for
+    numerical workloads.
+edges:
+  applies_to:
+    - target: domain:scientific-computing
+    - target: domain:data-science

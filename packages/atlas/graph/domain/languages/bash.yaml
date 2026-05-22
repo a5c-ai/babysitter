@@ -1,0 +1,24 @@
+nodeKind: Language
+id: language:bash
+attributes:
+  displayName: "Bash"
+  paradigms:
+    - scripting
+    - imperative
+  description: |
+    Bash (Bourne Again SHell) is the default command interpreter on most
+    Linux systems and macOS. It is used for scripting automation tasks,
+    CI/CD pipeline steps, system administration, and gluing together CLI
+    tools via pipelines and process substitution.
+
+    Key features include here-documents, arrays, associative arrays,
+    arithmetic expansion, brace expansion, and the rich set of POSIX
+    utilities (awk, sed, grep, find) commonly used alongside it. ShellCheck
+    is the standard linter. Bash scripts are ubiquitous in DevOps, cloud
+    infrastructure, and system administration contexts. For complex logic,
+    Python or Go is often preferred, but Bash remains essential for
+    environment setup, build scripts, and one-liners.
+edges:
+  applies_to:
+    - target: domain:devops
+    - target: domain:software-engineering

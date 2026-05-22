@@ -1,0 +1,9 @@
+nodeKind: OutputStyle
+id: output-style:claude-code-learning
+attributes:
+  displayName: "Learning output style"
+  name: "Learning"
+  source: built-in
+  description: "Pauses for the user to ask follow-ups; emphasizes pedagogy over speed."
+  keepCodingInstructions: true
+  invocationMode: user-selected

@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Geotechnical Analysis
   skill-id: CIV-SK-009
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Slope Stability Analyzer Skill

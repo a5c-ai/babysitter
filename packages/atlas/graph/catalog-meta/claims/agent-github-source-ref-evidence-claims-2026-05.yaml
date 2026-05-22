@@ -1,0 +1,527 @@
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-claude-code-github-ref
+attributes:
+  subjectId: source-ref:claude-code-github
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:claude-code-github ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:claude-code-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-claude-code-github-repourl
+attributes:
+  subjectId: source-ref:claude-code-github
+  attribute: repoUrl
+  value: https://github.com/anthropics/claude-code
+  subjectKind: SourceRef
+  statement: source-ref:claude-code-github repoUrl is https://github.com/anthropics/claude-code.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:claude-code-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-codex-github-ref
+attributes:
+  subjectId: source-ref:codex-github
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:codex-github ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:codex-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-codex-github-repourl
+attributes:
+  subjectId: source-ref:codex-github
+  attribute: repoUrl
+  value: https://github.com/openai/codex
+  subjectKind: SourceRef
+  statement: source-ref:codex-github repoUrl is https://github.com/openai/codex.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:codex-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-cursor-binary-ref
+attributes:
+  subjectId: source-ref:cursor-binary
+  attribute: ref
+  value: stable
+  subjectKind: SourceRef
+  statement: source-ref:cursor-binary ref is stable.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:cursor-binary
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-cursor-binary-repourl
+attributes:
+  subjectId: source-ref:cursor-binary
+  attribute: repoUrl
+  value: https://www.cursor.com/
+  subjectKind: SourceRef
+  statement: source-ref:cursor-binary repoUrl is https://www.cursor.com/.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:cursor-binary
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-gemini-cli-github-ref
+attributes:
+  subjectId: source-ref:gemini-cli-github
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:gemini-cli-github ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:gemini-cli-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-gemini-cli-github-repourl
+attributes:
+  subjectId: source-ref:gemini-cli-github
+  attribute: repoUrl
+  value: https://github.com/google-gemini/gemini-cli
+  subjectKind: SourceRef
+  statement: source-ref:gemini-cli-github repoUrl is https://github.com/google-gemini/gemini-cli.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:gemini-cli-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-gh-copilot-github-ref
+attributes:
+  subjectId: source-ref:gh-copilot-github
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:gh-copilot-github ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:gh-copilot-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-gh-copilot-github-repourl
+attributes:
+  subjectId: source-ref:gh-copilot-github
+  attribute: repoUrl
+  value: https://github.com/github/gh-copilot
+  subjectKind: SourceRef
+  statement: source-ref:gh-copilot-github repoUrl is https://github.com/github/gh-copilot.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:gh-copilot-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-hermes-agent-pypi-ref
+attributes:
+  subjectId: source-ref:hermes-agent-pypi
+  attribute: ref
+  value: latest
+  subjectKind: SourceRef
+  statement: source-ref:hermes-agent-pypi ref is latest.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:hermes-agent-pypi
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-hermes-agent-pypi-repourl
+attributes:
+  subjectId: source-ref:hermes-agent-pypi
+  attribute: repoUrl
+  value: https://pypi.org/project/hermes-agent/
+  subjectKind: SourceRef
+  statement: source-ref:hermes-agent-pypi repoUrl is https://pypi.org/project/hermes-agent/.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:hermes-agent-pypi
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-omp-github-ref
+attributes:
+  subjectId: source-ref:omp-github
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:omp-github ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:omp-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-omp-github-repourl
+attributes:
+  subjectId: source-ref:omp-github
+  attribute: repoUrl
+  value: https://github.com/oh-my-pi/omp
+  subjectKind: SourceRef
+  statement: source-ref:omp-github repoUrl is https://github.com/oh-my-pi/omp.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:omp-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-openclaw-github-ref
+attributes:
+  subjectId: source-ref:openclaw-github
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:openclaw-github ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:openclaw-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-openclaw-github-repourl
+attributes:
+  subjectId: source-ref:openclaw-github
+  attribute: repoUrl
+  value: https://github.com/openclaw/openclaw
+  subjectKind: SourceRef
+  statement: source-ref:openclaw-github repoUrl is https://github.com/openclaw/openclaw.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:openclaw-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-opencode-github-ref
+attributes:
+  subjectId: source-ref:opencode-github
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:opencode-github ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:opencode-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-opencode-github-repourl
+attributes:
+  subjectId: source-ref:opencode-github
+  attribute: repoUrl
+  value: https://github.com/sst/opencode
+  subjectKind: SourceRef
+  statement: source-ref:opencode-github repoUrl is https://github.com/sst/opencode.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:opencode-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-pi-github-ref
+attributes:
+  subjectId: source-ref:pi-github
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:pi-github ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:pi-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-pi-github-repourl
+attributes:
+  subjectId: source-ref:pi-github
+  attribute: repoUrl
+  value: https://github.com/pi-labs/pi
+  subjectKind: SourceRef
+  statement: source-ref:pi-github repoUrl is https://github.com/pi-labs/pi.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:pi-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-agent-mux-github-ref
+attributes:
+  subjectId: source-ref:agent-mux-github
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:agent-mux-github ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:agent-mux-github
+---
+nodeKind: Claim
+id: claim:agent-github-source-ref-source-ref-agent-mux-github-repourl
+attributes:
+  subjectId: source-ref:agent-mux-github
+  attribute: repoUrl
+  value: https://github.com/a5c-ai/agent-mux
+  subjectKind: SourceRef
+  statement: source-ref:agent-mux-github repoUrl is https://github.com/a5c-ai/agent-mux.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-github-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:agent-mux-github

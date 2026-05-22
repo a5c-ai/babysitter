@@ -7,6 +7,12 @@ expertise:
   - Test strategy design
   - Edge case identification
   - Testing patterns and anti-patterns
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:code-analysis-linting, skill-area:integration-testing]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # Test Coverage Analyzer Agent

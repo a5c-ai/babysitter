@@ -18,6 +18,12 @@ metadata:
     - structure-prediction
     - alphafold
     - protein
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:machine-learning-frameworks, skill-area:python-data-pipelines, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:biomedical-engineer]
 ---
 
 # AlphaFold Predictor Skill

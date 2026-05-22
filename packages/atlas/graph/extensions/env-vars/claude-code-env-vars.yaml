@@ -1,0 +1,168 @@
+nodeKind: EnvVar
+id: env-var:anthropic-api-key
+attributes:
+  displayName: ANTHROPIC_API_KEY
+  description: Primary auth credential for the Anthropic API.
+  name: ANTHROPIC_API_KEY
+  category: auth
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-use-bedrock
+attributes:
+  displayName: CLAUDE_CODE_USE_BEDROCK
+  description: When set to 1, route model calls through AWS Bedrock instead of the Anthropic API.
+  name: CLAUDE_CODE_USE_BEDROCK
+  category: bedrock
+  valueType: bool
+  defaultValue: "0"
+  featureGate: true
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-use-vertex
+attributes:
+  displayName: CLAUDE_CODE_USE_VERTEX
+  description: When set to 1, route model calls through Google Vertex AI.
+  name: CLAUDE_CODE_USE_VERTEX
+  category: vertex
+  valueType: bool
+  defaultValue: "0"
+  featureGate: true
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-experimental-agent-teams
+attributes:
+  displayName: CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS
+  description: Experimental gate enabling the agent-teams feature (team-create, send-message tools).
+  name: CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS
+  category: subagents
+  valueType: bool
+  defaultValue: "0"
+  featureGate: true
+  introducedInVersion: ">=2.1.32"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:disable-autoupdater
+attributes:
+  displayName: DISABLE_AUTOUPDATER
+  description: Opt out of plugin auto-updates from the official marketplace.
+  name: DISABLE_AUTOUPDATER
+  category: plugins
+  valueType: bool
+  defaultValue: "0"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:force-autoupdate-plugins
+attributes:
+  displayName: FORCE_AUTOUPDATE_PLUGINS
+  description: Force plugin auto-update on every launch.
+  name: FORCE_AUTOUPDATE_PLUGINS
+  category: plugins
+  valueType: bool
+  defaultValue: "0"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:disable-deep-link-registration
+attributes:
+  displayName: disableDeepLinkRegistration
+  description: settings.json key (also surfaced as env passthrough in some launchers) that opts out of registering claude-cli:// URI handlers.
+  name: disableDeepLinkRegistration
+  category: ui
+  valueType: enum
+  defaultValue: "enable"
+  introducedInVersion: ">=2.1.91"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-max-output-tokens
+attributes:
+  displayName: CLAUDE_CODE_MAX_OUTPUT_TOKENS
+  description: Cap on assistant output tokens per turn.
+  name: CLAUDE_CODE_MAX_OUTPUT_TOKENS
+  category: output
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:max-thinking-tokens
+attributes:
+  displayName: MAX_THINKING_TOKENS
+  description: Cap on extended-thinking budget per turn.
+  name: MAX_THINKING_TOKENS
+  category: thinking
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:bash-default-timeout-ms
+attributes:
+  displayName: BASH_DEFAULT_TIMEOUT_MS
+  description: Default timeout for the Bash tool when no per-call timeout is supplied.
+  name: BASH_DEFAULT_TIMEOUT_MS
+  category: shell
+  valueType: int
+  defaultValue: "120000"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:mcp-timeout
+attributes:
+  displayName: MCP_TIMEOUT
+  description: Default timeout (ms) for MCP tool calls.
+  name: MCP_TIMEOUT
+  category: network-timeout
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-project-dir
+attributes:
+  displayName: CLAUDE_PROJECT_DIR
+  description: Resolved absolute path to the active project directory; available as a substitution variable inside skills/commands.
+  name: CLAUDE_PROJECT_DIR
+  category: prompt
+  valueType: path
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-nonessential-traffic
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC
+  description: Suppress non-essential telemetry/network traffic (analytics, autoupdate pings).
+  name: CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC
+  category: telemetry
+  valueType: bool
+  defaultValue: "0"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

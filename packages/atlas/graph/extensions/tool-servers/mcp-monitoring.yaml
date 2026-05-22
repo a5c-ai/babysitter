@@ -1,0 +1,166 @@
+nodeKind: ToolServer
+id: tool-server:mcp-datadog
+attributes:
+  displayName: Datadog MCP Server
+  description: |
+    MCP server providing access to the Datadog observability platform.
+    Enables AI agents to query metrics, search logs, inspect traces,
+    manage monitors and dashboards, and coordinate incident response.
+  protocol: mcp
+  category: monitoring
+  repoUrl: https://github.com/DataDog/datadog-mcp-server
+  maintainer: Datadog
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:incident-commander
+      confidence: high
+      evidence: "Metrics, logs, traces, monitors, and dashboards support incident command."
+    - target: responsibility:incident-command
+      confidence: high
+      evidence: "Observability telemetry is a primary incident-command input."
+    - target: workflow:incident-response
+      confidence: high
+      evidence: "Datadog telemetry supports incident detection, diagnosis, and response."
+  integrates_with:
+  - target: tool:datadog
+  - target: stack-part:metrics
+  - target: stack-part:logging
+  lib_applies_to_domain:
+  - target: domain:observability
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-grafana
+attributes:
+  displayName: Grafana MCP Server
+  description: |
+    MCP server providing access to Grafana dashboards and data sources.
+    Enables AI agents to query dashboard panels, inspect data sources,
+    retrieve incident details, and explore metrics with optimized context usage.
+  protocol: mcp
+  category: monitoring
+  repoUrl: https://github.com/grafana/mcp-grafana
+  maintainer: Grafana Labs
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:incident-commander
+      confidence: high
+      evidence: "Dashboard and data-source access supports service health assessment."
+    - target: workflow:on-call-rotation-management
+      confidence: medium
+      evidence: "On-call review often depends on dashboard and alert context."
+    - target: workflow:incident-response
+      confidence: high
+      evidence: "Grafana dashboards and metrics are core incident-response projections."
+  integrates_with:
+  - target: tool:grafana
+  - target: stack-part:metrics
+  lib_applies_to_domain:
+  - target: domain:observability
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-prometheus
+attributes:
+  displayName: Prometheus MCP Server
+  description: |
+    MCP server providing access to Prometheus metrics.
+    Enables AI agents to translate natural language into PromQL queries,
+    execute them against Prometheus, and analyze time-series metric data.
+  protocol: mcp
+  category: monitoring
+  repoUrl: https://github.com/pab1it0/prometheus-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:prometheus
+  - target: stack-part:metrics
+  - target: stack-part:time-series-database
+  lib_applies_to_domain:
+  - target: domain:observability
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-pagerduty
+attributes:
+  displayName: PagerDuty MCP Server
+  description: |
+    MCP server providing access to PagerDuty incident management.
+    Enables AI agents to list and acknowledge incidents, manage on-call
+    schedules, trigger alerts, and coordinate incident response workflows.
+  protocol: mcp
+  category: monitoring
+  repoUrl: https://github.com/PagerDuty/mcp-server-pagerduty
+  maintainer: PagerDuty
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: responsibility:incident-response-coordination
+      confidence: high
+      evidence: "PagerDuty incident and schedule access directly supports response coordination."
+    - target: workflow:on-call-rotation-management
+      confidence: high
+      evidence: "On-call schedules, escalations, and incidents are PagerDuty-native workflow surfaces."
+    - target: workflow:incident-response
+      confidence: high
+      evidence: "Incident acknowledgement, escalation, and coordination are response-critical actions."
+  integrates_with:
+  - target: tool:pagerduty
+  lib_applies_to_domain:
+  - target: domain:observability
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-newrelic
+attributes:
+  displayName: New Relic MCP Server
+  description: |
+    MCP server providing access to New Relic observability data.
+    Enables AI agents to query telemetry via NRQL, investigate alerts,
+    analyze application performance, and generate monitoring insights.
+  protocol: mcp
+  category: monitoring
+  repoUrl: https://github.com/newrelic/mcp-server
+  maintainer: New Relic
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:tracing
+  - target: stack-part:metrics
+  lib_applies_to_domain:
+  - target: domain:observability
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-splunk
+attributes:
+  displayName: Splunk MCP Server
+  description: |
+    MCP server providing access to Splunk Enterprise and Cloud.
+    Enables AI agents to run SPL searches, browse indexes, access
+    CIM data models, and analyze machine data and security events.
+  protocol: mcp
+  category: monitoring
+  repoUrl: https://github.com/deslicer/mcp-for-splunk
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:logging
+  lib_applies_to_domain:
+  - target: domain:observability
+  - target: domain:cybersecurity

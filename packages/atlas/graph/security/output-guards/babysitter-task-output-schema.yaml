@@ -1,0 +1,21 @@
+nodeKind: OutputGuard
+id: output-guard:babysitter-task-output-schema
+attributes:
+  displayName: "Babysitter task outputSchema guard"
+  appliesTo: tool-result
+  phase: post-call
+  detectorKinds: [format-violation]
+  onTrigger: block
+  severity: block-call
+  description: |
+    Per-task structural guard. The babysitter SDK accepts an
+    `outputSchema` on agent task definitions (see
+    packages/sdk/src/tasks/types.ts:46 and
+    packages/sdk/src/prompts/templates/task-kinds.md). At result-posting
+    time the SDK validates the task result against the per-task JSON
+    schema and rejects shape-mismatched results, surfacing a structured
+    error on the journal as part of EFFECT_RESOLVED with status=error.
+    Distinct from `output-guard:claude-code-aup-refusal` (post-call
+    refusal-rewrite over assistant text) — this guard is structural over
+    tool/effect results, not safety/AUP over assistant content.
+edges: {}

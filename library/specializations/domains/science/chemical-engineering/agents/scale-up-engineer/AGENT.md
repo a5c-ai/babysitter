@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Development
   agent-id: CE-AG-006
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Scale-Up Engineer Agent

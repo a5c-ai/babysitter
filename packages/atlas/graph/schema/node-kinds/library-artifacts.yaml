@@ -1,0 +1,122 @@
+# NodeKinds for cluster 12-library.
+nodeKinds:
+- id: node:library-process
+  name: LibraryProcess
+  origin: generated
+  prefix: lib-process
+  cluster: 12-library
+  purpose: a process definition from the babysitter process library
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: false
+  - name: libraryPath
+    type: string
+    required: true
+  - name: specialization
+    type: string
+    required: false
+  - name: references
+    type: list<string>
+    required: false
+  - name: example
+    type: markdown
+    required: false
+  - name: usesAgents
+    type: list<string>
+    required: false
+  - name: usesSkills
+    type: list<string>
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - lib_applies_to_domain
+  - lib_requires_skill_area
+  - lib_involves_role
+  - lib_belongs_to_specialization
+  - lib_implements_workflow
+  - lib_covers_topic
+  - uses_agent
+  - uses_skill
+  - follows_methodology
+  invariants: []
+  examples: []
+- id: node:library-skill
+  name: LibrarySkill
+  origin: generated
+  prefix: lib-skill
+  cluster: 12-library
+  purpose: a skill definition from the babysitter process library
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: false
+  - name: libraryPath
+    type: string
+    required: true
+  - name: specialization
+    type: string
+    required: false
+  - name: contentSummary
+    type: markdown
+    required: false
+  incomingEdges:
+  - used_by_process_skill
+  outgoingEdges:
+  - lib_applies_to_domain
+  - lib_requires_skill_area
+  - lib_involves_role
+  - lib_belongs_to_specialization
+  - lib_covers_topic
+  invariants: []
+  examples: []
+- id: node:library-agent
+  name: LibraryAgent
+  origin: generated
+  prefix: lib-agent
+  cluster: 12-library
+  purpose: an agent persona from the babysitter process library
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: false
+  - name: libraryPath
+    type: string
+    required: true
+  - name: specialization
+    type: string
+    required: false
+  - name: role
+    type: string
+    required: false
+  - name: expertise
+    type: list<string>
+    required: false
+  incomingEdges:
+  - used_by_process
+  outgoingEdges:
+  - lib_applies_to_domain
+  - lib_requires_skill_area
+  - lib_involves_role
+  - lib_belongs_to_specialization
+  - lib_covers_topic
+  invariants: []
+  examples: []

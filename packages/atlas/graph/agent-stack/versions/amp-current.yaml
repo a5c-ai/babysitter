@@ -1,0 +1,44 @@
+nodeKind: AgentVersion
+id: agent-version:amp@current
+attributes:
+  agentProductId: agent:amp
+  versionRange: ">=2.0.0"
+  releasedAt: "2025-01-01"
+  cliCommand: "amp"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:amp
+  composed_of:
+    - target: agent-core-impl:amp.core@current
+      role: core
+    - target: agent-runtime-impl:amp.runtime@current
+      role: runtime
+    - target: agent-platform-impl:amp.platform@current
+      role: platform
+    - target: agent-ui-impl:amp.ui@current
+      role: ui
+    - target: knowledge-fabric-impl:amp.knowledge@current
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:amp-memory
+  sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=2.0.0'
+      level: full
+      notes: Amp runs multi-turn agentic coding sessions.
+    - target: capability:supports-text-streaming
+      versionRange: '>=2.0.0'
+      level: full
+      notes: Amp streams model output in real time.
+    - target: capability:supports-tool-use
+      versionRange: '>=2.0.0'
+      level: full
+      notes: Amp drives file edits and terminal commands via tool-use.
+    - target: capability:supports-mcp
+      versionRange: '>=2.0.0'
+      level: full
+      notes: Amp supports MCP servers for extensibility.

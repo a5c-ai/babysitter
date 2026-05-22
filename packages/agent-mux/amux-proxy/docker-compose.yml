@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  amux-proxy:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      AMUX_PROXY_TARGET_PROVIDER: bedrock
+      AMUX_PROXY_TARGET_MODEL: "bedrock/anthropic.claude-sonnet-4-20250514-v1:0"
+      AMUX_PROXY_EXPOSED_TRANSPORT: anthropic
+      AMUX_PROXY_PORT: "8080"
+      AMUX_PROXY_HOST: "0.0.0.0"
+      AMUX_PROXY_AUTH_TOKEN: "${AMUX_PROXY_AUTH_TOKEN:-changeme}"
+      AWS_REGION_NAME: "${AWS_REGION_NAME:-us-east-1}"
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

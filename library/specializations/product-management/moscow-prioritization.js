@@ -3,6 +3,12 @@
  * @description MoSCoW prioritization framework implementation for product requirements with stakeholder engagement, Must/Should/Could/Won't categorization, validation workshops, release scope definition, and MVP specification
  * @inputs { requirements: array, stakeholders: array, timeframe: string, constraints: object, outputDir: string, businessGoals: array }
  * @outputs { success: boolean, prioritizedRequirements: object, mvpScope: object, releaseScope: array, stakeholderAlignment: object, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:product-management]
+ *   skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:prioritization-frameworks]
+ *   roles: [role:product-manager, role:product-analyst]
+ *   workflows: [workflow:product-discovery, workflow:competitive-analysis]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: Service Management
   id: AG-012
+graph:
+  domains: [domain:customer-experience]
+  skillAreas: [skill-area:customer-success, skill-area:business-analysis, skill-area:statistical-analysis]
+  workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+  roles: [role:customer-success-manager, role:business-analyst, role:operations-analyst]
 ---
 
 # Problem Management Analyst Agent

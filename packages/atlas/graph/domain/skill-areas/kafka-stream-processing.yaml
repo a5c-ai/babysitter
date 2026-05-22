@@ -1,0 +1,33 @@
+nodeKind: SkillArea
+id: skill-area:kafka-stream-processing
+attributes:
+  displayName: "Kafka Stream Processing"
+  description: |
+    Building real-time data pipelines on Apache Kafka: Kafka Streams DSL,
+    ksqlDB, exactly-once semantics, stateful aggregations, windowing,
+    consumer-group rebalancing, and schema management with Schema Registry.
+  domains:
+    - domain:data-engineering
+    - topic:event-driven-architecture
+  requiresLanguages:
+    - language:java
+    - language:scala
+  requiresStackParts:
+    - stack-part:message-queue
+    - stack-part:event-bus
+  expertiseLevels: [intermediate, expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:data-engineering
+      confidence: primary
+    - target: specialization:redis-ops
+      confidence: secondary
+    - target: topic:event-driven-architecture
+      confidence: secondary
+  uses_stack_part:
+    - stack-part:message-queue
+    - stack-part:event-bus
+  uses_language:
+    - language:java
+    - target: language:java
+    - target: language:scala

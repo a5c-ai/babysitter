@@ -7,6 +7,13 @@ metadata:
   version: "1.0.0"
   category: accessibility-testing
   backlog-id: SK-011
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:accessibility-testing, skill-area:web-accessibility]
+  roles: [role:qa-engineer, role:frontend-engineer]
+  topics: [topic:accessibility, topic:test-driven-development]
+
 ---
 
 # axe-accessibility

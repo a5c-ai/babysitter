@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: optics-photonics
   phase: 6
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:computational-scientist, role:research-engineer]
 ---
 
 # Lumerical Photonics Simulator

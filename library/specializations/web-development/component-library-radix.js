@@ -4,6 +4,13 @@
  * @inputs { projectName: string, styling?: string }
  * @outputs { success: boolean, primitives: array, components: array, artifacts: array }
  * @references - Radix UI: https://www.radix-ui.com/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer, role:product-designer]
+ *   skillAreas: [skill-area:design-systems, skill-area:ui-component-libraries]
+ *   topics: [topic:accessibility, topic:component-based-architecture]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

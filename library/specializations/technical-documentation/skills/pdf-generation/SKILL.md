@@ -6,6 +6,11 @@ backlog-id: SK-020
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:technical-documentation]
+  skillAreas: [skill-area:docs-as-code, skill-area:document-processing]
+  roles: [role:technical-writer, role:documentation-engineer]
 ---
 
 # PDF Generation Skill

@@ -1,0 +1,78 @@
+---
+nodeKind: Responsibility
+id: responsibility:ai-agent-adoption-strategy
+attributes:
+  displayName: "AI Agent Adoption Strategy"
+  cadence: quarterly
+  description: |
+    Define and evolve the org-wide strategy for AI agent adoption —
+    which workflows to automate, risk guardrails, and success metrics.
+edges:
+  held_by:
+    - target: role:ai-champion
+    - target: role:staff-engineer
+  requires_expertise:
+    - target: skill-area:agentic-loops
+    - target: skill-area:prompt-engineering
+---
+nodeKind: Responsibility
+id: responsibility:ai-agent-usage-review
+attributes:
+  displayName: "AI Agent Usage Review"
+  cadence: scheduled
+  description: |
+    Periodic review of AI agent usage patterns, cost, quality, and safety
+    across teams — surface wins, anti-patterns, and policy violations.
+edges:
+  held_by:
+    - target: role:ai-champion
+  requires_expertise:
+    - target: skill-area:eval-driven-development
+    - target: skill-area:context-management
+---
+nodeKind: Responsibility
+id: responsibility:ai-tooling-evaluation
+attributes:
+  displayName: "AI Tooling Evaluation"
+  cadence: on-demand
+  description: |
+    Evaluate new AI agent products, models, and SDKs for fit — run
+    benchmarks, assess integration cost, and publish recommendations.
+edges:
+  held_by:
+    - target: role:ai-champion
+    - target: role:ml-engineer
+  requires_expertise:
+    - target: skill-area:eval-driven-development
+    - target: skill-area:tool-use
+---
+nodeKind: Responsibility
+id: responsibility:ai-safety-guardrails
+attributes:
+  displayName: "AI Safety Guardrails"
+  cadence: continuous
+  description: |
+    Maintain and enforce guardrails for AI agent operations — prompt
+    injection defenses, output validation, and human-in-the-loop gates.
+edges:
+  held_by:
+    - target: role:ai-champion
+    - target: role:security-reviewer
+  requires_expertise:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:agentic-loops
+---
+nodeKind: Responsibility
+id: responsibility:ai-knowledge-sharing
+attributes:
+  displayName: "AI Knowledge Sharing"
+  cadence: scheduled
+  description: |
+    Run internal demos, workshops, and office hours to upskill teams on
+    effective AI agent usage and prompt engineering patterns.
+edges:
+  held_by:
+    - target: role:ai-champion
+    - target: role:technical-writer
+  requires_expertise:
+    - target: skill-area:prompt-engineering

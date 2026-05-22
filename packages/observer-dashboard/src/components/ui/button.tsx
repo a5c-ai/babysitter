@@ -3,15 +3,15 @@ import { cn } from "@/lib/cn";
 import { Slot } from "@radix-ui/react-slot";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium italic tracking-[0.04em] transition-all duration-200 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 font-serif",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-[var(--primary-hover)] hover:shadow-glow-primary hover:scale-[1.02] active:scale-[0.98]",
-        neon: "bg-transparent border border-primary text-primary hover:shadow-glow-primary hover:bg-primary-muted hover:scale-[1.02] active:scale-[0.98]",
-        outline: "border border-border-hover bg-transparent hover:bg-muted hover:border-primary/30 hover:scale-[1.02]",
-        ghost: "hover:bg-muted hover:text-foreground hover:border-primary/10",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-glow-error hover:scale-[1.02] active:scale-[0.98]",
+        default: "border-primary/60 bg-primary text-primary-foreground shadow-sm hover:bg-[var(--primary-hover)] hover:shadow-md",
+        neon: "border-primary/40 bg-primary-muted text-primary hover:border-primary/60 hover:bg-primary-muted/80 hover:shadow-glow-primary",
+        outline: "border-border-hover bg-transparent text-foreground hover:bg-card hover:border-primary/30 hover:shadow-sm",
+        ghost: "border-transparent bg-transparent text-foreground-secondary hover:bg-muted hover:text-foreground",
+        destructive: "border-destructive/60 bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-glow-error",
       },
       size: {
         default: "h-9 px-4 py-2",

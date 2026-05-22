@@ -4,131 +4,1292 @@
   "url": "https://github.com/a5c-ai/babysitter.git",
   "owner": "a5c-ai",
   "plugins": {
+    "a11y": {
+      "name": "a11y",
+      "description": "Install accessibility feedback loops — lint rules (jsx-a11y/vue-a11y/angular-eslint/htmlhint/djlint), pre-commit hooks, GitHub Actions workflow, and runtime scanning via Axe/Playwright, Lighthouse CI, or pa11y. Per-stack recommendations for React, Vue, Angular, plain HTML, and Python templates.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/a11y",
+      "tags": [
+        "accessibility",
+        "a11y",
+        "wcag",
+        "lint",
+        "ci",
+        "quality"
+      ],
+      "author": "a5c-ai"
+    },
     "basic-security": {
       "name": "basic-security",
       "description": "Install security processes, skills, agents and commands from the babysitter security-compliance library into your project. Includes post-install codebase security scan.",
       "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "versions": [
+        "1.0.0"
+      ],
       "packagePath": "plugins/basic-security",
-      "tags": ["security", "compliance", "audit", "sast", "vulnerability-management"],
+      "tags": [
+        "security",
+        "compliance",
+        "audit",
+        "sast",
+        "vulnerability-management"
+      ],
       "author": "a5c-ai"
     },
     "sound-hooks": {
       "name": "sound-hooks",
       "description": "Play sound effects on Claude Code lifecycle events via hooks in .claude/settings.json — searches and downloads themed mp3 files for session start, tool use, errors, and notifications. Optional babysitter hooks integration.",
       "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "versions": [
+        "1.0.0"
+      ],
       "packagePath": "plugins/sound-hooks",
-      "tags": ["hooks", "sound", "notifications", "ux", "claude-code"],
+      "tags": [
+        "hooks",
+        "sound",
+        "notifications",
+        "ux",
+        "claude-code"
+      ],
       "author": "a5c-ai"
     },
-    "github-actions-cicd": {
-      "name": "github-actions-cicd",
-      "description": "Set up babysitter-powered GitHub Actions workflows with triggers on issue comments, PR events, labels, schedules, and manual dispatch. Based on docs/github-actions-setup.md.",
+    "github-actions-cicd-claude-code": {
+      "name": "github-actions-cicd-claude-code",
+      "description": "Set up babysitter-powered GitHub Actions workflows for Claude Code using anthropics/claude-code-action@v1. Triggers on issue comments, PR events, labels, schedules, and manual dispatch.",
       "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
-      "packagePath": "plugins/github-actions-cicd",
-      "tags": ["cicd", "github-actions", "automation", "devops", "workflows"],
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/github-actions-cicd-claude-code",
+      "tags": [
+        "cicd",
+        "github-actions",
+        "automation",
+        "devops",
+        "workflows",
+        "claude-code"
+      ],
+      "author": "a5c-ai"
+    },
+    "github-actions-cicd-codex": {
+      "name": "github-actions-cicd-codex",
+      "description": "Set up babysitter-powered GitHub Actions workflows for Codex using openai/codex-action@v1. Triggers on issue comments, PR events, labels, schedules, and manual dispatch.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/github-actions-cicd-codex",
+      "tags": [
+        "cicd",
+        "github-actions",
+        "automation",
+        "devops",
+        "workflows",
+        "codex",
+        "openai"
+      ],
+      "author": "a5c-ai"
+    },
+    "github-actions-cicd-gemini-cli": {
+      "name": "github-actions-cicd-gemini-cli",
+      "description": "Set up babysitter-powered GitHub Actions workflows for Gemini CLI using google-github-actions/run-gemini-cli@v1. Supports API key, Vertex AI, and Workload Identity Federation auth.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/github-actions-cicd-gemini-cli",
+      "tags": [
+        "cicd",
+        "github-actions",
+        "automation",
+        "devops",
+        "workflows",
+        "gemini-cli",
+        "google"
+      ],
+      "author": "a5c-ai"
+    },
+    "github-actions-cicd-babysitter": {
+      "name": "github-actions-cicd-babysitter",
+      "description": "Set up babysitter-powered GitHub Actions workflows using the official harness-agnostic Babysitter Action (a5c-ai/babysitter@main). Supports pi, claude-code, codex, gemini-cli, and more through a single action with multi-provider credential handling.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/github-actions-cicd-babysitter",
+      "tags": [
+        "cicd",
+        "github-actions",
+        "automation",
+        "devops",
+        "workflows",
+        "harness-agnostic",
+        "multi-provider"
+      ],
+      "author": "a5c-ai"
+    },
+    "i18n": {
+      "name": "i18n",
+      "description": "Install internationalization feedback loops — lint rules for hardcoded strings (eslint-plugin-i18next/formatjs/vue-i18n/angular-localize/flake8-i18n), extraction and validation tooling (i18next-parser, FormatJS, gettext/Babel), pre-commit checks, and a GitHub Actions workflow that gates untranslated strings from merging. Per-stack for React, Vue, Angular, plain JS, and Python.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/i18n",
+      "tags": [
+        "i18n",
+        "internationalization",
+        "translation",
+        "lint",
+        "ci",
+        "quality"
+      ],
       "author": "a5c-ai"
     },
     "rate-limit-handler": {
       "name": "rate-limit-handler",
-      "description": "Configure Claude Code hooks to detect and handle API rate limit errors with exponential backoff, jitter, and automatic retry. Prevents sessions from getting stuck on rate limits.",
-      "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "description": "Automatically retry Claude Code sessions on Anthropic subscription rate limits. Uses claude-auto-retry to detect rate limit messages, parse reset times, wait for cooldown, and send a continuation message via tmux.",
+      "latestVersion": "2.0.0",
+      "versions": [
+        "1.0.0",
+        "2.0.0"
+      ],
       "packagePath": "plugins/rate-limit-handler",
-      "tags": ["rate-limit", "hooks", "retry", "backoff", "resilience", "claude-code"],
+      "tags": [
+        "rate-limit",
+        "retry",
+        "auto-retry",
+        "tmux",
+        "resilience",
+        "claude-code"
+      ],
       "author": "a5c-ai"
     },
     "project-deployment": {
       "name": "project-deployment",
       "description": "Set up deployment infrastructure, CI/CD pipelines, and cloud provisioning. Supports Terraform+K8s+Helm on AWS/GCP/Azure, Vercel/Cloudflare+Supabase, Docker containers, and serverless. Copies relevant devops-sre-platform processes from the library.",
       "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "versions": [
+        "1.0.0"
+      ],
       "packagePath": "plugins/project-deployment",
-      "tags": ["deployment", "cicd", "terraform", "kubernetes", "helm", "aws", "gcp", "azure", "vercel", "cloudflare", "docker", "serverless", "infrastructure"],
+      "tags": [
+        "deployment",
+        "cicd",
+        "terraform",
+        "kubernetes",
+        "helm",
+        "aws",
+        "gcp",
+        "azure",
+        "vercel",
+        "cloudflare",
+        "docker",
+        "serverless",
+        "infrastructure"
+      ],
       "author": "a5c-ai"
     },
     "testing-suite": {
       "name": "testing-suite",
       "description": "Set up comprehensive testing infrastructure — unit, integration, Storybook component tests in browser, E2E, visual regression, and coverage enforcement in CI/CD. Flexible framework selection based on stack. Copies QA testing processes from the library.",
       "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "versions": [
+        "1.0.0"
+      ],
       "packagePath": "plugins/testing-suite",
-      "tags": ["testing", "unit-tests", "integration-tests", "e2e", "storybook", "coverage", "playwright", "vitest", "tdd", "quality"],
+      "tags": [
+        "testing",
+        "unit-tests",
+        "integration-tests",
+        "e2e",
+        "storybook",
+        "coverage",
+        "playwright",
+        "vitest",
+        "tdd",
+        "quality"
+      ],
       "author": "a5c-ai"
     },
     "themes": {
       "name": "themes",
       "description": "Apply any theme to your project — sound effects, design system, conversational personality, and decorative assets. No predefined list: name any movie, game, art style, mood, character, or concept and the installer interviews you, researches the theme, then searches, downloads, and generates all resources. Includes all sound-hooks functionality plus CLAUDE.md integration for themed speech patterns and visual design tokens. Assets stored in .a5c/themes/ with symlink switching.",
       "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "versions": [
+        "1.0.0"
+      ],
       "packagePath": "plugins/themes",
-      "tags": ["themes", "design-system", "sounds", "hooks", "ux", "branding", "conversational-style", "assets", "claude-code"],
+      "tags": [
+        "themes",
+        "design-system",
+        "sounds",
+        "hooks",
+        "ux",
+        "branding",
+        "conversational-style",
+        "assets",
+        "claude-code"
+      ],
       "author": "a5c-ai"
     },
     "agentsh": {
       "name": "agentsh",
       "description": "Install and integrate agentsh sandbox enforcement for AI agent sessions. Intercepts all Bash tool calls via hooks, routing them through agentsh exec for policy-based command control, file protection, and network filtering. Auto-detects current harness (Claude Code, Codex, Gemini CLI) and installs appropriate hooks. Includes default sandbox policy, session lifecycle management, and platform detection.",
       "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "versions": [
+        "1.0.0"
+      ],
       "packagePath": "plugins/agentsh",
-      "tags": ["security", "sandbox", "agentsh", "hooks", "bash-wrapper", "command-control", "network-filter", "file-protection", "policy"],
+      "tags": [
+        "security",
+        "sandbox",
+        "agentsh",
+        "hooks",
+        "bash-wrapper",
+        "command-control",
+        "network-filter",
+        "file-protection",
+        "policy"
+      ],
       "author": "a5c-ai"
     },
     "dev-browser": {
       "name": "dev-browser",
       "description": "Install dev-browser for sandboxed browser automation in AI agent sessions. Adds the skill with full Playwright API reference, pre-approves Bash permissions, and configures CLAUDE.md. Supports headless mode, persistent named pages, AI-optimized DOM snapshots, and screenshots.",
       "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "versions": [
+        "1.0.0"
+      ],
       "packagePath": "plugins/dev-browser",
-      "tags": ["browser", "automation", "playwright", "screenshots", "scraping", "testing", "web", "sandbox", "skill"],
+      "tags": [
+        "browser",
+        "automation",
+        "playwright",
+        "screenshots",
+        "scraping",
+        "testing",
+        "web",
+        "sandbox",
+        "skill"
+      ],
       "author": "a5c-ai"
     },
     "qmd": {
       "name": "qmd",
       "description": "Install qmd on-device hybrid search engine for markdown files. Combines BM25, vector semantic search, and LLM re-ranking running locally with GGUF models. Sets up MCP server integration, indexes project collections, installs skill and CLAUDE.md config.",
       "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "versions": [
+        "1.0.0"
+      ],
       "packagePath": "plugins/qmd",
-      "tags": ["search", "documentation", "markdown", "vector-search", "embeddings", "mcp", "knowledge-base", "local", "rag"],
+      "tags": [
+        "search",
+        "documentation",
+        "markdown",
+        "vector-search",
+        "embeddings",
+        "mcp",
+        "knowledge-base",
+        "local",
+        "rag"
+      ],
       "author": "a5c-ai"
     },
     "claude-mem": {
       "name": "claude-mem",
       "description": "Install claude-mem persistent memory for Claude Code sessions. Automatically captures session context via lifecycle hooks, compresses observations with AI, and provides cross-session knowledge retrieval via MCP search tools and web UI. Token-efficient 3-layer search workflow.",
       "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "versions": [
+        "1.0.0"
+      ],
       "packagePath": "plugins/claude-mem",
-      "tags": ["memory", "persistence", "context", "sessions", "mcp", "hooks", "search", "observations", "claude-code"],
+      "tags": [
+        "memory",
+        "persistence",
+        "context",
+        "sessions",
+        "mcp",
+        "hooks",
+        "search",
+        "observations",
+        "claude-code"
+      ],
       "author": "a5c-ai"
     },
     "status-line": {
       "name": "status-line",
       "description": "Add a babysitter run indicator to the Claude Code status line. Displays the current run ID when a session is associated with a babysitter run. Uses a lightweight shell script that reads session state from YAML frontmatter.",
-      "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "latestVersion": "1.1.0",
+      "versions": [
+        "1.0.0",
+        "1.1.0"
+      ],
       "packagePath": "plugins/status-line",
-      "tags": ["status-line", "ux", "claude-code", "session", "run-indicator", "observability"],
+      "tags": [
+        "status-line",
+        "ux",
+        "claude-code",
+        "session",
+        "run-indicator",
+        "observability"
+      ],
       "author": "a5c-ai"
     },
     "prompt-master": {
       "name": "prompt-master",
       "description": "Install the prompt-master skill for generating optimized prompts across 30+ AI tools. Supports automatic tool detection, 12 prompt templates, 35 anti-pattern diagnostics, and prompt decompiler mode. Optional UserPromptSubmit hook auto-detects prompt-generation requests. Optional profile integration recommends prompt-master in new babysitter processes.",
       "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "versions": [
+        "1.0.0"
+      ],
       "packagePath": "plugins/prompt-master",
-      "tags": ["skill", "prompts", "prompt-engineering", "multi-tool", "hooks", "claude-code", "cursor", "midjourney", "chatgpt"],
+      "tags": [
+        "skill",
+        "prompts",
+        "prompt-engineering",
+        "multi-tool",
+        "hooks",
+        "claude-code",
+        "cursor",
+        "midjourney",
+        "chatgpt"
+      ],
       "author": "a5c-ai"
     },
     "welcome": {
       "name": "welcome",
       "description": "Add a contextual welcome screen to every Claude Code session. Interviews you about your role and preferences, researches the project's tech stack and conventions, then generates a tailored /welcome skill and session-start hook that shows project status, recent activity, and suggested next actions.",
       "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "versions": [
+        "1.0.0"
+      ],
       "packagePath": "plugins/welcome",
-      "tags": ["skill", "hooks", "session-start", "dashboard", "onboarding", "ux", "project-status", "claude-code"],
+      "tags": [
+        "skill",
+        "hooks",
+        "session-start",
+        "dashboard",
+        "onboarding",
+        "ux",
+        "project-status",
+        "claude-code"
+      ],
       "author": "a5c-ai"
+    },
+    "llm-wiki": {
+      "name": "llm-wiki",
+      "description": "Set up a structured LLM Wiki knowledge base using Karpathy's three-layer pattern (raw sources, wiki pages, schema). Interviews you about domain, scope, and preferences, then creates the wiki directory, schema, skills (/wiki-ingest, /wiki-query, /wiki-lint), and agent instruction integration. Supports project-scoped and global wikis with optional qmd semantic search.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/llm-wiki",
+      "tags": [
+        "wiki",
+        "knowledge-base",
+        "documentation",
+        "ingest",
+        "schema",
+        "search",
+        "skills",
+        "claude-code"
+      ],
+      "author": "a5c-ai"
+    },
+    "mempalace": {
+      "name": "mempalace",
+      "description": "Install MemPalace AI memory system — mine projects and conversations into a searchable palace backed by ChromaDB. 19 MCP tools, auto-save hooks, 5 guided skills. Stores everything verbatim, makes it findable. Local only, no cloud.",
+      "latestVersion": "3.0.14",
+      "versions": [
+        "3.0.14"
+      ],
+      "packagePath": "plugins/mempalace",
+      "tags": [
+        "memory",
+        "persistence",
+        "chromadb",
+        "mcp",
+        "search",
+        "mining",
+        "conversations",
+        "palace",
+        "local",
+        "rag"
+      ],
+      "author": "milla-jovovich",
+      "repository": "https://github.com/milla-jovovich/mempalace"
+    },
+    "ctx": {
+      "name": "ctx",
+      "description": "Install ctx intelligent skill and agent recommendation system. Maintains a knowledge graph of 1,450+ skills and 427 agents, scans repos to detect tech stacks, recommends relevant skills per session, monitors context mid-session, and converts large skills into micro-skill pipelines. Includes lifecycle hooks and staleness tracking.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/ctx",
+      "tags": [
+        "skills",
+        "agents",
+        "discovery",
+        "recommendations",
+        "knowledge-graph",
+        "context",
+        "micro-skills",
+        "hooks",
+        "claude-code"
+      ],
+      "author": "stevesolun",
+      "repository": "https://github.com/stevesolun/ctx"
+    },
+    "graphify": {
+      "name": "graphify",
+      "description": "Install safishamsi/graphify -- an AI coding assistant skill that turns any folder of code, docs, papers, images, or videos into a queryable knowledge graph. Supports Claude Code, Codex, OpenCode, Cursor, Gemini CLI, Copilot CLI, Aider, OpenClaw, Factory Droid, and Trae.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/graphify",
+      "tags": [
+        "knowledge-graph",
+        "graphrag",
+        "skill",
+        "code-understanding",
+        "documentation",
+        "multimodal"
+      ],
+      "author": "safishamsi"
+    },
+    "performance": {
+      "name": "performance",
+      "description": "Install performance feedback loops — bundle size budgets (size-limit/bundlesize), Lighthouse CI performance budgets, load-testing harness (k6/Artillery), and a PR regression gate that fails when frontend bundles, backend latency, or throughput degrade beyond thresholds.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/performance",
+      "tags": [
+        "performance",
+        "lighthouse",
+        "k6",
+        "artillery",
+        "bundle-size",
+        "load-testing",
+        "ci",
+        "regression-gate",
+        "quality"
+      ],
+      "author": "a5c-ai"
+    },
+    "observability": {
+      "name": "observability",
+      "description": "Install observability feedback loops — OpenTelemetry SDK wiring (traces + metrics), structured logging (pino/winston/structlog/slog), error reporting (Sentry or Datadog APM), and a log-format lint that prevents regressions to unstructured console/print output. Supports Node, Python, and Go.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/observability",
+      "tags": [
+        "observability",
+        "opentelemetry",
+        "tracing",
+        "logging",
+        "sentry",
+        "datadog",
+        "metrics",
+        "pino",
+        "structlog"
+      ],
+      "author": "a5c-ai"
+    },
+    "docs-quality": {
+      "name": "docs-quality",
+      "description": "Install documentation quality feedback loops — markdownlint for style, lychee for broken-link detection, cspell for spelling with per-project dictionaries, and a doc-coverage metric tracking documented vs. undocumented public symbols. Stack-agnostic with per-language coverage tooling.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/docs-quality",
+      "tags": [
+        "documentation",
+        "markdownlint",
+        "lychee",
+        "cspell",
+        "doc-coverage",
+        "lint",
+        "ci",
+        "quality"
+      ],
+      "author": "a5c-ai"
+    },
+    "api-contract": {
+      "name": "api-contract",
+      "description": "Install API contract feedback loops — Spectral OpenAPI linting, drift detection via schemathesis or Dredd against a running service, and an oasdiff breaking-change PR gate. Works with any HTTP API that has an OpenAPI/Swagger spec.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/api-contract",
+      "tags": [
+        "api",
+        "openapi",
+        "spectral",
+        "schemathesis",
+        "dredd",
+        "oasdiff",
+        "contract-testing",
+        "breaking-changes",
+        "ci"
+      ],
+      "author": "a5c-ai"
+    },
+    "dependency-hygiene": {
+      "name": "dependency-hygiene",
+      "description": "Install dependency hygiene feedback loops — automated update PRs via Renovate or Dependabot, license allowlist audit (license-checker/pip-licenses/go-licenses), CycloneDX SBOM generation with syft, and an outdated-dependency CI gate that fails when deps drift too far behind upstream.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/dependency-hygiene",
+      "tags": [
+        "dependencies",
+        "renovate",
+        "dependabot",
+        "license-audit",
+        "sbom",
+        "syft",
+        "cyclonedx",
+        "supply-chain",
+        "ci"
+      ],
+      "author": "a5c-ai"
+    },
+    "container-security": {
+      "name": "container-security",
+      "description": "Install container security feedback loops — hadolint Dockerfile linting, Trivy image + filesystem vulnerability scanning, a distroless/rootless posture checklist audit, and docker-compose lint that catches privileged mode, host networking, and :latest tags before they deploy.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/container-security",
+      "tags": [
+        "container",
+        "docker",
+        "hadolint",
+        "trivy",
+        "security",
+        "distroless",
+        "rootless",
+        "compose",
+        "vulnerability-scan"
+      ],
+      "author": "a5c-ai"
+    },
+    "iac-quality": {
+      "name": "iac-quality",
+      "description": "Install infrastructure-as-code quality feedback loops — tflint for Terraform best practices with provider rulesets, Checkov for security misconfigurations across Terraform/Kubernetes/Helm/CloudFormation, OPA/Rego custom policies via conftest, and terraform fmt in pre-commit.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/iac-quality",
+      "tags": [
+        "iac",
+        "terraform",
+        "tflint",
+        "checkov",
+        "opa",
+        "rego",
+        "conftest",
+        "kubernetes",
+        "compliance",
+        "security"
+      ],
+      "author": "a5c-ai"
+    },
+    "data-privacy": {
+      "name": "data-privacy",
+      "description": "Install data privacy feedback loops — PII detection via Microsoft Presidio against source/fixtures/logs, a data classification map template (PII/PHI/Financial/Public), a GDPR/CCPA readiness checklist, and a PR gate that requires privacy-doc updates whenever schemas change.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/data-privacy",
+      "tags": [
+        "privacy",
+        "pii",
+        "gdpr",
+        "ccpa",
+        "presidio",
+        "data-classification",
+        "compliance",
+        "dsar",
+        "audit"
+      ],
+      "author": "a5c-ai"
+    },
+    "secrets-management": {
+      "name": "secrets-management",
+      "description": "Install secrets-management feedback loops — gitleaks pre-commit hook to block secrets pre-commit, truffleHog CI on PR diffs and full history, a rotation runbook with inventory and procedures, and a pluggable Vault / AWS Secrets Manager / GCP Secret Manager integration stub.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/secrets-management",
+      "tags": [
+        "secrets",
+        "gitleaks",
+        "trufflehog",
+        "vault",
+        "rotation",
+        "kms",
+        "security",
+        "pre-commit",
+        "ci"
+      ],
+      "author": "a5c-ai"
+    },
+    "release-automation": {
+      "name": "release-automation",
+      "description": "Semantic-release/release-please wiring with conventional-commit enforcement, auto-changelog, and release workflow (Node, Python, Go).",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/release-automation",
+      "tags": [
+        "release",
+        "semver",
+        "changelog",
+        "conventional-commits",
+        "ci",
+        "node",
+        "python",
+        "go"
+      ],
+      "author": "a5c-ai"
+    },
+    "feature-flags": {
+      "name": "feature-flags",
+      "description": "OpenFeature/LaunchDarkly/Unleash SDK wiring, PR-time flag audits, and scheduled stale-flag cleanup with schema-validated flag registry.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/feature-flags",
+      "tags": [
+        "feature-flags",
+        "openfeature",
+        "launchdarkly",
+        "unleash",
+        "governance",
+        "ci"
+      ],
+      "author": "a5c-ai"
+    },
+    "db-migrations-safety": {
+      "name": "db-migrations-safety",
+      "description": "Squawk (Postgres) and atlas-schema linting, shadow-DB apply check, and PR review checklist that blocks dangerous DDL before production.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/db-migrations-safety",
+      "tags": [
+        "database",
+        "migrations",
+        "postgres",
+        "squawk",
+        "atlas",
+        "safety",
+        "ci"
+      ],
+      "author": "a5c-ai"
+    },
+    "monorepo-hygiene": {
+      "name": "monorepo-hygiene",
+      "description": "Workspace dependency consistency (syncpack), shared tsconfig/pyproject base, turbo/nx wiring, and dep-graph drift CI (madge, depcruise).",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/monorepo-hygiene",
+      "tags": [
+        "monorepo",
+        "turbo",
+        "nx",
+        "syncpack",
+        "dep-graph",
+        "typescript",
+        "ci"
+      ],
+      "author": "a5c-ai"
+    },
+    "codeowners": {
+      "name": "codeowners",
+      "description": "Generate CODEOWNERS from git history + path patterns, validate on every PR, and auto-assign reviewers via GitHub.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/codeowners",
+      "tags": [
+        "codeowners",
+        "governance",
+        "review",
+        "github",
+        "ci"
+      ],
+      "author": "a5c-ai"
+    },
+    "pr-templates": {
+      "name": "pr-templates",
+      "description": "Issue and PR templates, semantic-PR title lint, and PR-size labeler with configurable thresholds.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/pr-templates",
+      "tags": [
+        "pr",
+        "issues",
+        "templates",
+        "semantic-pr",
+        "size-labeler",
+        "github"
+      ],
+      "author": "a5c-ai"
+    },
+    "branch-protection": {
+      "name": "branch-protection",
+      "description": "Branch protection rules as YAML, applied via GitHub API with drift detection and required-checks matrix per branch.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/branch-protection",
+      "tags": [
+        "branch-protection",
+        "governance",
+        "github-api",
+        "required-checks",
+        "ci"
+      ],
+      "author": "a5c-ai"
+    },
+    "stale-bot": {
+      "name": "stale-bot",
+      "description": "actions/stale workflow with per-kind rules for issues and PRs, exempt labels, and configurable inactivity windows and messaging.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/stale-bot",
+      "tags": [
+        "stale",
+        "triage",
+        "issues",
+        "pull-requests",
+        "automation",
+        "github"
+      ],
+      "author": "a5c-ai"
+    },
+    "auto-labeler": {
+      "name": "auto-labeler",
+      "description": "Path-based PR labeling, conventional-commit type labels, PR-size labels, and release-label triggers for semantic-release tooling.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/auto-labeler",
+      "tags": [
+        "labels",
+        "auto-labeler",
+        "conventional-commits",
+        "release",
+        "github"
+      ],
+      "author": "a5c-ai"
+    },
+    "community-health": {
+      "name": "community-health",
+      "description": "Full community health file set: CODE_OF_CONDUCT, CONTRIBUTING, SUPPORT, SECURITY, FUNDING.yml, and issue templates for a 100% community profile.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/community-health",
+      "tags": [
+        "community",
+        "governance",
+        "code-of-conduct",
+        "security-policy",
+        "contributing",
+        "github"
+      ],
+      "author": "a5c-ai"
+    },
+    "devcontainer": {
+      "name": "devcontainer",
+      "description": "Reproducible development containers: .devcontainer/ per stack (Node/Python/Go/Rust), features, post-create scripts, VS Code extensions, devcontainers/ci workflow.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/devcontainer",
+      "tags": [
+        "devcontainer",
+        "docker",
+        "codespaces",
+        "vscode",
+        "reproducibility"
+      ],
+      "author": "a5c-ai"
+    },
+    "codespaces-gitpod": {
+      "name": "codespaces-gitpod",
+      "description": "Cloud development workspaces: .gitpod.yml + GitHub Codespaces config with prebuilds, port forwarding, and parallel setup hooks.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/codespaces-gitpod",
+      "tags": [
+        "codespaces",
+        "gitpod",
+        "cloud-dev",
+        "prebuilds",
+        "onboarding"
+      ],
+      "author": "a5c-ai"
+    },
+    "mise-asdf": {
+      "name": "mise-asdf",
+      "description": "Pin runtime tool versions with mise or asdf: .tool-versions / .mise.toml + CI cache + pre-commit ensure-installed hook.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/mise-asdf",
+      "tags": [
+        "mise",
+        "asdf",
+        "toolchain",
+        "versioning",
+        "reproducibility"
+      ],
+      "author": "a5c-ai"
+    },
+    "nix-flake": {
+      "name": "nix-flake",
+      "description": "Hermetic, reproducible dev shells and builds via Nix flakes: flake.nix scaffold, direnv .envrc, CI with Nix binary cache.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/nix-flake",
+      "tags": [
+        "nix",
+        "flakes",
+        "direnv",
+        "reproducibility",
+        "hermetic"
+      ],
+      "author": "a5c-ai"
+    },
+    "env-management": {
+      "name": "env-management",
+      "description": ".env.example linting, dotenv-linter pre-commit, secret scanning, and missing-variable CI gate that ties source references to declared env vars.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/env-management",
+      "tags": [
+        "env",
+        "dotenv",
+        "secrets",
+        "gitleaks",
+        "configuration"
+      ],
+      "author": "a5c-ai"
+    },
+    "slsa-provenance": {
+      "name": "slsa-provenance",
+      "description": "SLSA Level 3 build provenance for releases via slsa-github-generator, Sigstore/cosign signing, and verification tooling.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/slsa-provenance",
+      "tags": [
+        "slsa",
+        "provenance",
+        "sigstore",
+        "cosign",
+        "supply-chain"
+      ],
+      "author": "a5c-ai"
+    },
+    "sbom": {
+      "name": "sbom",
+      "description": "Software Bill of Materials generation with Syft or CycloneDX: PR diff checks, vulnerability scan, release attestations.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/sbom",
+      "tags": [
+        "sbom",
+        "syft",
+        "cyclonedx",
+        "grype",
+        "supply-chain"
+      ],
+      "author": "a5c-ai"
+    },
+    "scorecard": {
+      "name": "scorecard",
+      "description": "OpenSSF Scorecard workflow with code-scanning upload, README badge, and auto-opened remediation issues for failing checks.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/scorecard",
+      "tags": [
+        "scorecard",
+        "openssf",
+        "security",
+        "remediation",
+        "supply-chain"
+      ],
+      "author": "a5c-ai"
+    },
+    "signed-commits": {
+      "name": "signed-commits",
+      "description": "Enforce verified, signed commits: SSH/GPG/gitsign setup, pre-commit enforce hook, CI verification, and branch protection wiring.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/signed-commits",
+      "tags": [
+        "signing",
+        "gpg",
+        "ssh",
+        "sigstore",
+        "gitsign",
+        "supply-chain"
+      ],
+      "author": "a5c-ai"
+    },
+    "release-please": {
+      "name": "release-please",
+      "description": "Set up release-please via googleapis/release-please-action — Conventional Commits drive release PRs, changelogs, tags, and GitHub Releases. Supports simple mode and manifest mode for monorepos with linked/fixed package groups, node-workspace plugin, and customizable changelog sections.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/release-please",
+      "tags": [
+        "release",
+        "versioning",
+        "changelog",
+        "conventional-commits",
+        "github-actions",
+        "monorepo",
+        "automation"
+      ],
+      "author": "a5c-ai"
+    },
+    "changesets": {
+      "name": "changesets",
+      "description": "Set up changesets for versioning and publishing — contributors declare intent via .changeset/*.md files, the changesets/action collects them into a Version Packages PR that bumps versions, writes changelogs, and publishes to npm on merge. Supports fixed and linked groups, prerelease channels, snapshot releases, and private registries.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/changesets",
+      "tags": [
+        "release",
+        "versioning",
+        "changelog",
+        "npm",
+        "pnpm",
+        "monorepo",
+        "github-actions",
+        "automation"
+      ],
+      "author": "a5c-ai"
+    },
+    "autorelease": {
+      "name": "autorelease",
+      "description": "Lightweight tag-on-merge release automation using release-drafter for PR-label-driven version resolution and changelog drafting, plus a publish workflow that promotes the draft to a tagged GitHub Release. No manifest files, no Conventional Commits required — just PR labels. Alternative to release-please and changesets for simpler projects.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/autorelease",
+      "tags": [
+        "release",
+        "release-drafter",
+        "changelog",
+        "github-actions",
+        "labels",
+        "automation",
+        "tag-on-merge"
+      ],
+      "author": "a5c-ai"
+    },
+    "helm-chart": {
+      "name": "helm-chart",
+      "description": "Scaffold a Helm chart with Chart.yaml, templates, values.schema.json, and a full CI feedback loop — helm lint, chart-testing, helm-docs README generation, kubeconform schema validation against a target Kubernetes version, helm unittest, and an OCI release workflow. Supports application, library, and subchart-dependency layouts.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/helm-chart",
+      "tags": [
+        "kubernetes",
+        "helm",
+        "charts",
+        "helm-docs",
+        "kubeconform",
+        "oci",
+        "ci",
+        "infrastructure"
+      ],
+      "author": "a5c-ai"
+    },
+    "kustomize": {
+      "name": "kustomize",
+      "description": "Scaffold a Kustomize project with base/ and overlays/{dev,staging,prod}, optional Components and ApplicationSet-friendly layouts. Adds CI that runs kustomize build per overlay, validates rendered YAML with kubeconform, and automates image tag/digest pinning via kustomize edit set image.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/kustomize",
+      "tags": [
+        "kubernetes",
+        "kustomize",
+        "overlays",
+        "kubeconform",
+        "gitops",
+        "ci",
+        "infrastructure"
+      ],
+      "author": "a5c-ai"
+    },
+    "argocd-gitops": {
+      "name": "argocd-gitops",
+      "description": "Scaffold an Argo CD GitOps layout — AppProject, Application manifests, app-of-apps bootstrap, ApplicationSet for multi-cluster/multi-tenant, sync-wave ordering, automated sync with self-heal and prune, and CI that lints Applications and detects drift between git and cluster state.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/argocd-gitops",
+      "tags": [
+        "kubernetes",
+        "argocd",
+        "gitops",
+        "applicationset",
+        "sync-waves",
+        "drift-detection",
+        "ci",
+        "infrastructure"
+      ],
+      "author": "a5c-ai"
+    },
+    "terraform-module": {
+      "name": "terraform-module",
+      "description": "Scaffold a reusable Terraform module with canonical layout (main/variables/outputs/versions), examples/, tests/, and a CI feedback loop — terraform fmt, validate, tflint with provider plugins, terraform-docs README injection, tfsec security scanning, terraform test, and a tag-based release workflow for the Terraform Registry.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/terraform-module",
+      "tags": [
+        "terraform",
+        "iac",
+        "tflint",
+        "terraform-docs",
+        "tfsec",
+        "modules",
+        "ci",
+        "infrastructure"
+      ],
+      "author": "a5c-ai"
+    },
+    "runbooks": {
+      "name": "runbooks",
+      "description": "Scaffold operational runbooks — docs/runbooks/ tree, service template, on-call rotation doc, incident severity matrix, blameless postmortem template, and PagerDuty/Opsgenie integration with runbook_url annotations wired into Prometheus alerts and alert payloads.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/runbooks",
+      "tags": [
+        "runbooks",
+        "on-call",
+        "incident-response",
+        "sre",
+        "pagerduty",
+        "opsgenie",
+        "operations"
+      ],
+      "author": "a5c-ai"
+    },
+    "dora-metrics": {
+      "name": "dora-metrics",
+      "description": "Track DORA four keys (deployment frequency, lead time, change failure rate, MTTR) via GitHub API. Scheduled workflow computes metrics over a rolling window and opens a monthly report issue with prior-period delta and Accelerate performance bands.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/dora-metrics",
+      "tags": [
+        "dora",
+        "metrics",
+        "devops",
+        "github-actions",
+        "deployment-frequency",
+        "lead-time",
+        "mttr"
+      ],
+      "author": "a5c-ai"
+    },
+    "slo-config": {
+      "name": "slo-config",
+      "description": "SLO-as-code for Prometheus — define SLOs in YAML, generate recording + MWMB burn-rate alerting rules via sloth (or OpenSLO/pyrra), enforce CI drift checks, wire runbook_url annotations, and document the error-budget policy.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/slo-config",
+      "tags": [
+        "slo",
+        "sli",
+        "error-budget",
+        "prometheus",
+        "sloth",
+        "openslo",
+        "sre",
+        "reliability"
+      ],
+      "author": "a5c-ai"
+    },
+    "adr": {
+      "name": "adr",
+      "description": "Scaffold Architecture Decision Records — docs/adr/ tree, Michael Nygard (or MADR / Y-statement) template, adr-tools or log4brains installation, and a PR nudge bot that suggests creating an ADR when architecture-touching paths change (nudge only, never blocking).",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/adr",
+      "tags": [
+        "adr",
+        "architecture",
+        "documentation",
+        "decisions",
+        "log4brains",
+        "adr-tools"
+      ],
+      "author": "a5c-ai"
+    },
+    "contribution-graph": {
+      "name": "contribution-graph",
+      "description": "Contributor analytics via GitHub API — monthly stats dashboard (top committers, first-time contributors), first-interaction welcome bot for new issues/PRs, optional all-contributors integration, and README shields.io badges.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/contribution-graph",
+      "tags": [
+        "contributors",
+        "community",
+        "github-actions",
+        "onboarding",
+        "all-contributors",
+        "welcome-bot"
+      ],
+      "author": "a5c-ai"
+    },
+    "changelog-enforcer": {
+      "name": "changelog-enforcer",
+      "description": "Require a CHANGELOG.md entry per PR — Keep-a-Changelog scaffold plus dangoslen/changelog-enforcer action (or changesets / release-please / custom shell check). Skip-label support for Dependabot, docs-only, and release PRs so the gate informs rather than obstructs.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/changelog-enforcer",
+      "tags": [
+        "changelog",
+        "keep-a-changelog",
+        "changesets",
+        "release-please",
+        "github-actions",
+        "releases"
+      ],
+      "author": "a5c-ai"
+    },
+    "repo-archival": {
+      "name": "repo-archival",
+      "description": "Dignified end-of-life for a repository — archival checklist with notice/final-release/export/archive phases, README redirect template, dependency-graph and CI config snapshot export, and templated stakeholder notification script for GitHub, Slack, npm, and PyPI.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/repo-archival",
+      "tags": [
+        "archival",
+        "deprecation",
+        "sunset",
+        "migration",
+        "end-of-life",
+        "repository"
+      ],
+      "author": "a5c-ai"
+    },
+    "monorepo-split": {
+      "name": "monorepo-split",
+      "description": "Extract a package from a monorepo into its own repository with preserved history via git filter-repo (or git subtree fallback). Includes CI carryover script, package-manifest surgery for workspace:* deps, and guidance for rewiring the monorepo to consume the extracted package.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/monorepo-split",
+      "tags": [
+        "monorepo",
+        "git",
+        "filter-repo",
+        "subtree",
+        "migration",
+        "refactor",
+        "history-preservation"
+      ],
+      "author": "a5c-ai"
+    },
+    "token-optimizer": {
+      "name": "token-optimizer",
+      "description": "Token Optimizer tool to reduce context waste and optimize token usage.",
+      "latestVersion": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "packagePath": "plugins/token-optimizer",
+      "tags": [
+        "token",
+        "optimizer",
+        "context",
+        "compression",
+        "cost",
+        "efficiency"
+      ],
+      "author": "alexgreensh"
     }
   }
 }

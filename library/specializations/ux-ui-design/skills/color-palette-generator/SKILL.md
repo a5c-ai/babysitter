@@ -8,6 +8,12 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:color-theory, skill-area:visual-design]
+  roles: [role:product-designer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # Color Palette Generator Skill

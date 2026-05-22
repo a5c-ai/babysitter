@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:remote-procedure-call.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:remote-procedure-call
+  text: |
+    Remote Procedure Call (RPC): a protocol pattern where a typed function call crosses a process or network boundary, with arguments and results marshalled.
+  status: canonical
+edges:
+  defines:
+    - term:remote-procedure-call

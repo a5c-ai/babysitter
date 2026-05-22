@@ -1,0 +1,26 @@
+nodeKind: StateMachine
+id: state-machine:session
+attributes:
+  governsNodeKindId: "node-kind:Session"
+  displayName: "Session"
+  targetNodeKind: Session
+  description: |
+    Lifecycle for an agent session (the persistent conversation thread that
+    can outlive any single invocation).
+  states:
+    - id: session.created
+      displayName: "Session / created"
+      terminal: false
+      description: The 'created' state of the session state machine.
+    - id: session.active
+      displayName: "Session / active"
+      terminal: false
+      description: The 'active' state of the session state machine.
+    - id: session.suspended
+      displayName: "Session / suspended"
+      terminal: false
+      description: The 'suspended' state of the session state machine.
+    - id: session.terminated
+      displayName: "Session / terminated"
+      terminal: true
+      description: The 'terminated' state of the session state machine.

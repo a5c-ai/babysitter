@@ -1,0 +1,58 @@
+---
+nodeKind: Workflow
+id: workflow:crash-triage
+attributes:
+  displayName: "Mobile Crash Triage"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "daily"
+  complexity: single-team
+  description: |
+    Triages mobile app crash reports from Crashlytics or similar tools —
+    grouping by stack trace, assigning severity based on crash-free rate
+    impact, identifying regressions from recent releases, and routing to
+    responsible teams. Excludes root-cause debugging.
+edges:
+  involves_role:
+    - target: role:debugger
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:mobile
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:anr-analysis
+attributes:
+  displayName: "ANR Analysis"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Investigates Application Not Responding (ANR) events on Android —
+    analyzing main-thread traces, identifying blocking operations, correlating
+    with device and OS version, and validating fixes against ANR-rate metrics.
+    Excludes iOS hang analysis.
+edges:
+  involves_role:
+    - target: role:debugger
+    - target: role:performance-profiler
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:react-state-management
+  applies_to_domain:
+    - target: domain:mobile
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering

@@ -14,6 +14,11 @@ metadata:
   domain: science
   category: Specialized Domain
   agent-id: BME-AG-022
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:data-governance]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-scientist]
 ---
 
 # Clinical Study Manager Agent

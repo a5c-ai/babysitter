@@ -1,7 +1,7 @@
 ### 4. Get Effects
 
 ```bash
-$CLI task:list .a5c/runs/<runId> --pending --json
+$CLI task:list <runDir> --pending --json
 ```
 
 **Output:**
@@ -32,6 +32,10 @@ IMPORTANT:
 - If a pending effect is `shell` or legacy `node`, the orchestrating agent must
   execute that work intentionally and then post the result via `task:post`.
   Never assume the SDK or host will auto-run it.
+- If a shell/effect keeps failing because the process logic is wrong, the
+  command is impossible, or the recorded run state is inconsistent, do not just
+  retry forever. Repair the process file itself and/or the relevant journal/task
+  files, then continue the loop from the corrected state.
 - When delegating substantial work to an agent or skill, pass a generous
   timeout budget and instruct the worker to execute the task fully and return
   the actual result, not a plan.

@@ -1,0 +1,23 @@
+nodeKind: Role
+id: role:devrel
+attributes:
+  displayName: "Developer Relations"
+  isAgentic: false
+  seniority: mid
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:software-engineering
+  description: |
+    Developer Relations — bridges product and developer community via docs, talks, and samples.
+edges:
+  holds_responsibility:
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+    - responsibility:ai-knowledge-sharing
+  requires_expertise:
+    - target: skill-area:tutorial-design
+    - target: skill-area:reference-docs
+    - target: skill-area:docs-as-code
+    - target: skill-area:api-doc-generation
+  applies_to:
+    - target: domain:software-engineering

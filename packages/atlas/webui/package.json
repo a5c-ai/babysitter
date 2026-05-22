@@ -1,0 +1,53 @@
+{
+  "name": "@a5c-ai/atlas-webui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Read-only Next.js explorer for the Atlas catalog graph (NodeKinds, EdgeKinds, records).",
+  "scripts": {
+    "predev": "cd .. && npm run build",
+    "dev": "next dev",
+    "prebuild": "cd .. && npm run build",
+    "build": "next build",
+    "start": "next start",
+    "db:init": "tsx scripts/init-db.ts",
+    "test:smoke": "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts"
+  },
+  "dependencies": {
+    "@a5c-ai/atlas": "*",
+    "@a5c-ai/compendium": "^0.1.1",
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@swc/helpers": "^0.5.15",
+    "@upsetjs/venn.js": "^2.0.0",
+    "@xyflow/react": "^12.10.2",
+    "clsx": "^2.1.1",
+    "cytoscape": "^3.33.1",
+    "cytoscape-cose-bilkent": "^4.1.0",
+    "cytoscape-fcose": "^2.2.0",
+    "d3": "^7.9.0",
+    "d3-sankey": "^0.12.3",
+    "dagre-d3-es": "7.0.14",
+    "fuse.js": "^7.3.0",
+    "js-yaml": "^4.1.0",
+    "lodash-es": "^4.17.23",
+    "lucide-react": "^1.14.0",
+    "mcp-handler": "^1.1.0",
+    "mermaid": "^11.14.0",
+    "next": "16.2.6",
+    "pg": "^8.16.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "roughjs": "^4.6.6",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20",
+    "@types/pg": "^8.15.6",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
+}

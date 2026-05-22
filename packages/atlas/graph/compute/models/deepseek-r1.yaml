@@ -1,0 +1,88 @@
+nodeKind: ModelVersion
+id: model:deepseek-r1@current
+attributes:
+  displayName: "DeepSeek R1"
+  costPerMTokInput: 0.55
+  costPerMTokOutput: 2.19
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:deepseek
+  versionRange: '>=1.0.0 <2.0.0'
+  kind: reasoning
+  contextWindowTokens: 128000
+  modalities:
+  - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-01-20'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-01-20'
+  modelCardUrl: https://huggingface.co/deepseek-ai/DeepSeek-R1
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:deepseek
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:deepseek
+  served_by:
+  - provider:deepseek
+  - provider:together-ai
+  - provider:fireworks-ai
+  - provider:hyperbolic
+  speaks:
+  - model-transport:openai-compat
+  supports:
+  - target: capability:streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1
+  - target: capability:supports-text-streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1
+  - target: capability:supports-thinking
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Reasoning model emits a chain-of-thought / `<think>` block before the
+      final answer.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1
+  - target: capability:extended-thinking
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Long-form deliberation is the model''s primary mode of operation.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1
+  - target: capability:supports-thinking-streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: partial
+    notes: 'Reasoning tokens stream as part of the text stream; structured separation
+      depends on the inference server.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1
+  - target: capability:requires-tool-approval
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1

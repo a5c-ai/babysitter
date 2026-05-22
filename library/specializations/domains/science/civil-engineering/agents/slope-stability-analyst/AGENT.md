@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Geotechnical Engineering
   agent-id: CIV-AG-008
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Slope Stability Analyst Agent

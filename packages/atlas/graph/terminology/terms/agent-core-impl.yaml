@@ -1,0 +1,17 @@
+nodeKind: Term
+id: term:agent-core-impl
+attributes:
+  canonicalDefinitionId: definition:agent-core-impl.canonical
+  displayName: "AgentCoreImpl"
+  kind: concept
+  references:
+    - "NodeKind:AgentCoreImpl"
+  description: |
+    Concrete loop+transport-client impl
+edges:
+  subsumes:
+    - target: term:agentic-loop
+    - target: term:orchestration-loop
+  references:
+    - target: capability:supports-tool-use
+    - target: capability:streaming

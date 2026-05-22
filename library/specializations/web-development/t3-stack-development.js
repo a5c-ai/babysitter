@@ -18,6 +18,13 @@
  * - tRPC: https://trpc.io/
  * - Prisma: https://www.prisma.io/
  * - NextAuth.js: https://next-auth.js.org/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:fullstack-engineer]
+ *   skillAreas: [skill-area:backend-api-design, skill-area:react-state-management]
+ *   topics: [topic:api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -135,6 +142,9 @@ export async function process(inputs, ctx) {
   });
 
   artifacts.push(...componentsSetup.artifacts);
+
+  // TypeScript hard gate (issue #65)
+  const tsCheck = await ctx.task(tsCheckTask, { projectName });
 
     let lastFeedback = null;
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -521,6 +531,8 @@ export const componentsSetupTask = defineTask('t3-components', (args, taskCtx) =
   },
   labels: ['web', 't3', 'components', 'react']
 }));
+
+export const tsCheckTask = defineTask('typescript-check', (args, taskCtx) => ({ kind: 'shell', title: 'TypeScript compilation check', shell: { command: 'npx tsc --noEmit 2>&1', expectedExitCode: 0, timeout: 120000 }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['typescript', 'compilation', 'hard-gate'] }));
 
 export const validationSetupTask = defineTask('zod-validation', (args, taskCtx) => ({
   kind: 'agent',

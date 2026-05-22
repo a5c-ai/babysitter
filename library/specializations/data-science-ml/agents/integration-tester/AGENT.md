@@ -9,6 +9,13 @@ expertise:
   - Resilience testing
   - Coverage analysis
   - Test reporting
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:ml-pipeline-testing, skill-area:model-validation-testing]
+  roles: [role:ml-engineer, role:qa-engineer]
+  workflows: [workflow:ml-model-lifecycle]
+
 ---
 
 # integration-tester

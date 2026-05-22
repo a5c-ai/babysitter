@@ -1,0 +1,544 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:context-engineering
+attributes:
+  displayName: Context Engineering (meta)
+  clusterNumber: 19
+  scope: 'Conceptual aggregation of NodeKinds describing the context-engineering surface: VectorStore (retrieval index), EmbeddingModelProfile (binding of an embedding ModelVersion to a usage configuration), MemoryStore (persistent agent memory: vector / document / knowledge-graph / prompt-cache / conversation-buffer / summarized-history), PromptTemplate (versioned system / user / few-shot scaffold; collapses FewShotExampleSet) and ContextBundle (packaged template + retrieval + memory bindings). Members live in editorial cluster context-engineering in ontology-schema.yaml.'
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:vector-store
+  - target: meta-node-kind:embedding-model-profile
+  - target: meta-node-kind:memory-store
+  - target: meta-node-kind:prompt-template
+  - target: meta-node-kind:context-bundle
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:vector-store
+attributes:
+  displayName: VectorStore (meta)
+  name: VectorStore
+  cluster: context-engineering
+  prefix: vector-store
+  origin: standard
+  purpose: a vector database / index used for retrieval (Pinecone, Weaviate, pgvector, Qdrant, in-process FAISS, ...)
+  exampleCount: 0
+  invariants:
+  - 'id starts with vector-store:'
+edges:
+  in_cluster:
+  - target: meta-cluster:context-engineering
+  contains_meta_attribute:
+  - target: meta-attribute:vector-store--id
+  - target: meta-attribute:vector-store--store-kind
+  - target: meta-attribute:vector-store--dimensionality
+  - target: meta-attribute:vector-store--distance-metric
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:embedding-model-profile
+attributes:
+  displayName: EmbeddingModelProfile (meta)
+  name: EmbeddingModelProfile
+  cluster: context-engineering
+  prefix: embedding-profile
+  origin: standard
+  purpose: a profile binding an embedding ModelVersion to a usage configuration (dimensionality, normalization, pooling)
+  exampleCount: 0
+  invariants:
+  - 'id starts with embedding-profile:'
+edges:
+  in_cluster:
+  - target: meta-cluster:context-engineering
+  contains_meta_attribute:
+  - target: meta-attribute:embedding-model-profile--id
+  - target: meta-attribute:embedding-model-profile--model-version-id
+  - target: meta-attribute:embedding-model-profile--normalization
+  - target: meta-attribute:embedding-model-profile--pooling
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:memory-store
+attributes:
+  displayName: MemoryStore (meta)
+  name: MemoryStore
+  cluster: context-engineering
+  prefix: memory-store
+  origin: standard
+  purpose: a persistent memory surface used by an AgentVersion. Collapses KnowledgeGraphRef into the `kind` discriminator.
+  exampleCount: 0
+  invariants:
+  - 'id starts with memory-store:'
+edges:
+  in_cluster:
+  - target: meta-cluster:context-engineering
+  contains_meta_attribute:
+  - target: meta-attribute:memory-store--id
+  - target: meta-attribute:memory-store--kind
+  - target: meta-attribute:memory-store--scope
+  - target: meta-attribute:memory-store--ttl-seconds
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:prompt-template
+attributes:
+  displayName: PromptTemplate (meta)
+  name: PromptTemplate
+  cluster: context-engineering
+  prefix: prompt-template
+  origin: standard
+  purpose: a versioned prompt template (system / user / few-shot scaffold). Collapses FewShotExampleSet into the `examples` attribute.
+  exampleCount: 0
+  invariants:
+  - 'id starts with prompt-template:'
+edges:
+  in_cluster:
+  - target: meta-cluster:context-engineering
+  contains_meta_attribute:
+  - target: meta-attribute:prompt-template--id
+  - target: meta-attribute:prompt-template--template-kind
+  - target: meta-attribute:prompt-template--variables
+  - target: meta-attribute:prompt-template--version
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:context-bundle
+attributes:
+  displayName: ContextBundle (meta)
+  name: ContextBundle
+  cluster: context-engineering
+  prefix: context-bundle
+  origin: standard
+  purpose: a packaged bundle of prompt templates, retrieval surfaces, and memory bindings used to assemble agent context for a given task / domain
+  exampleCount: 0
+  invariants:
+  - 'id starts with context-bundle:'
+edges:
+  in_cluster:
+  - target: meta-cluster:context-engineering
+  contains_meta_attribute:
+  - target: meta-attribute:context-bundle--id
+  - target: meta-attribute:context-bundle--display-name
+  - target: meta-attribute:context-bundle--domain
+---
+nodeKind: MetaAttribute
+id: meta-attribute:vector-store--id
+attributes:
+  displayName: VectorStore.id
+  name: id
+  parentNodeKindId: meta-node-kind:vector-store
+  type: id
+  required: true
+  description: id on VectorStore.
+edges:
+  defined_on:
+  - target: meta-node-kind:vector-store
+---
+nodeKind: MetaAttribute
+id: meta-attribute:vector-store--store-kind
+attributes:
+  displayName: VectorStore.storeKind
+  name: storeKind
+  parentNodeKindId: meta-node-kind:vector-store
+  type: enum<pinecone,weaviate,qdrant,pgvector,faiss,chroma,milvus,redis,other>
+  required: false
+  description: vendor / engine of the vector store.
+edges:
+  defined_on:
+  - target: meta-node-kind:vector-store
+---
+nodeKind: MetaAttribute
+id: meta-attribute:vector-store--dimensionality
+attributes:
+  displayName: VectorStore.dimensionality
+  name: dimensionality
+  parentNodeKindId: meta-node-kind:vector-store
+  type: int
+  required: false
+  description: vector dimensionality stored.
+edges:
+  defined_on:
+  - target: meta-node-kind:vector-store
+---
+nodeKind: MetaAttribute
+id: meta-attribute:vector-store--distance-metric
+attributes:
+  displayName: VectorStore.distanceMetric
+  name: distanceMetric
+  parentNodeKindId: meta-node-kind:vector-store
+  type: enum<cosine,euclidean,dot-product,manhattan>
+  required: false
+  description: similarity / distance metric.
+edges:
+  defined_on:
+  - target: meta-node-kind:vector-store
+---
+nodeKind: MetaAttribute
+id: meta-attribute:embedding-model-profile--id
+attributes:
+  displayName: EmbeddingModelProfile.id
+  name: id
+  parentNodeKindId: meta-node-kind:embedding-model-profile
+  type: id
+  required: true
+  description: id on EmbeddingModelProfile.
+edges:
+  defined_on:
+  - target: meta-node-kind:embedding-model-profile
+---
+nodeKind: MetaAttribute
+id: meta-attribute:embedding-model-profile--model-version-id
+attributes:
+  displayName: EmbeddingModelProfile.modelVersionId
+  name: modelVersionId
+  parentNodeKindId: meta-node-kind:embedding-model-profile
+  type: ref<ModelVersion>
+  required: false
+  description: bound embedding ModelVersion (cross-cluster ref).
+edges:
+  defined_on:
+  - target: meta-node-kind:embedding-model-profile
+---
+nodeKind: MetaAttribute
+id: meta-attribute:embedding-model-profile--normalization
+attributes:
+  displayName: EmbeddingModelProfile.normalization
+  name: normalization
+  parentNodeKindId: meta-node-kind:embedding-model-profile
+  type: enum<l2,none,unit-norm>
+  required: false
+  description: vector normalization strategy.
+edges:
+  defined_on:
+  - target: meta-node-kind:embedding-model-profile
+---
+nodeKind: MetaAttribute
+id: meta-attribute:embedding-model-profile--pooling
+attributes:
+  displayName: EmbeddingModelProfile.pooling
+  name: pooling
+  parentNodeKindId: meta-node-kind:embedding-model-profile
+  type: enum<mean,cls,max,last-token>
+  required: false
+  description: token pooling strategy.
+edges:
+  defined_on:
+  - target: meta-node-kind:embedding-model-profile
+---
+nodeKind: MetaAttribute
+id: meta-attribute:memory-store--id
+attributes:
+  displayName: MemoryStore.id
+  name: id
+  parentNodeKindId: meta-node-kind:memory-store
+  type: id
+  required: true
+  description: id on MemoryStore.
+edges:
+  defined_on:
+  - target: meta-node-kind:memory-store
+---
+nodeKind: MetaAttribute
+id: meta-attribute:memory-store--kind
+attributes:
+  displayName: MemoryStore.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:memory-store
+  type: enum<vector,document,knowledge-graph,prompt-cache,conversation-buffer,summarized-history>
+  required: false
+  description: discriminator for the memory backing.
+edges:
+  defined_on:
+  - target: meta-node-kind:memory-store
+---
+nodeKind: MetaAttribute
+id: meta-attribute:memory-store--scope
+attributes:
+  displayName: MemoryStore.scope
+  name: scope
+  parentNodeKindId: meta-node-kind:memory-store
+  type: enum<session,user,tenant,global>
+  required: false
+  description: visibility / lifetime scope.
+edges:
+  defined_on:
+  - target: meta-node-kind:memory-store
+---
+nodeKind: MetaAttribute
+id: meta-attribute:memory-store--ttl-seconds
+attributes:
+  displayName: MemoryStore.ttlSeconds
+  name: ttlSeconds
+  parentNodeKindId: meta-node-kind:memory-store
+  type: int
+  required: false
+  description: time-to-live for memory entries, in seconds.
+edges:
+  defined_on:
+  - target: meta-node-kind:memory-store
+---
+nodeKind: MetaAttribute
+id: meta-attribute:prompt-template--id
+attributes:
+  displayName: PromptTemplate.id
+  name: id
+  parentNodeKindId: meta-node-kind:prompt-template
+  type: id
+  required: true
+  description: id on PromptTemplate.
+edges:
+  defined_on:
+  - target: meta-node-kind:prompt-template
+---
+nodeKind: MetaAttribute
+id: meta-attribute:prompt-template--template-kind
+attributes:
+  displayName: PromptTemplate.templateKind
+  name: templateKind
+  parentNodeKindId: meta-node-kind:prompt-template
+  type: enum<system,user,assistant,few-shot,scaffold>
+  required: false
+  description: discriminator for the template role.
+edges:
+  defined_on:
+  - target: meta-node-kind:prompt-template
+---
+nodeKind: MetaAttribute
+id: meta-attribute:prompt-template--variables
+attributes:
+  displayName: PromptTemplate.variables
+  name: variables
+  parentNodeKindId: meta-node-kind:prompt-template
+  type: list<string>
+  required: false
+  description: declared template variables.
+edges:
+  defined_on:
+  - target: meta-node-kind:prompt-template
+---
+nodeKind: MetaAttribute
+id: meta-attribute:prompt-template--version
+attributes:
+  displayName: PromptTemplate.version
+  name: version
+  parentNodeKindId: meta-node-kind:prompt-template
+  type: semver
+  required: false
+  description: semver of the template body.
+edges:
+  defined_on:
+  - target: meta-node-kind:prompt-template
+---
+nodeKind: MetaAttribute
+id: meta-attribute:context-bundle--id
+attributes:
+  displayName: ContextBundle.id
+  name: id
+  parentNodeKindId: meta-node-kind:context-bundle
+  type: id
+  required: true
+  description: id on ContextBundle.
+edges:
+  defined_on:
+  - target: meta-node-kind:context-bundle
+---
+nodeKind: MetaAttribute
+id: meta-attribute:context-bundle--display-name
+attributes:
+  displayName: ContextBundle.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:context-bundle
+  type: string
+  required: true
+  description: displayName on ContextBundle.
+edges:
+  defined_on:
+  - target: meta-node-kind:context-bundle
+---
+nodeKind: MetaAttribute
+id: meta-attribute:context-bundle--domain
+attributes:
+  displayName: ContextBundle.domain
+  name: domain
+  parentNodeKindId: meta-node-kind:context-bundle
+  type: string
+  required: false
+  description: domain / task scope this bundle assembles context for.
+edges:
+  defined_on:
+  - target: meta-node-kind:context-bundle
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:embeds-with
+attributes:
+  displayName: embeds_with (meta)
+  name: embeds_with
+  source:
+  - meta-node-kind:context-bundle
+  target:
+  - meta-node-kind:embedding-model-profile
+  cardinality: N:1
+  origin: universal
+  description: a ContextBundle embeds with an EmbeddingModelProfile.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:context-bundle
+  target_of_meta_edge:
+  - target: meta-node-kind:embedding-model-profile
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:embeds-into
+attributes:
+  displayName: embeds_into (meta)
+  name: embeds_into
+  source:
+  - meta-node-kind:embedding-model-profile
+  target:
+  - meta-node-kind:vector-store
+  cardinality: N:N
+  origin: universal
+  description: an EmbeddingModelProfile embeds into a VectorStore (binds embedding output to storage backend).
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:embedding-model-profile
+  target_of_meta_edge:
+  - target: meta-node-kind:vector-store
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:bundles-template
+attributes:
+  displayName: bundles_template (meta)
+  name: bundles_template
+  source:
+  - meta-node-kind:context-bundle
+  target:
+  - meta-node-kind:prompt-template
+  cardinality: N:N
+  origin: universal
+  description: a ContextBundle bundles one or more PromptTemplates.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:context-bundle
+  target_of_meta_edge:
+  - target: meta-node-kind:prompt-template
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:backed-by-memory
+attributes:
+  displayName: backed_by_memory (meta)
+  name: backed_by_memory
+  source:
+  - meta-node-kind:context-bundle
+  target:
+  - meta-node-kind:memory-store
+  cardinality: N:N
+  origin: universal
+  description: a ContextBundle is backed by one or more MemoryStores.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:context-bundle
+  target_of_meta_edge:
+  - target: meta-node-kind:memory-store
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:uses-vector-store
+attributes:
+  displayName: uses_vector_store (meta)
+  name: uses_vector_store
+  source: []
+  target:
+  - meta-node-kind:vector-store
+  cardinality: N:N
+  origin: universal
+  description: 'an AgentVersion uses a VectorStore for retrieval. Cross-cluster: AgentVersion meta-record lives in meta-registry-agent-stack.yaml.'
+edges:
+  target_of_meta_edge:
+  - target: meta-node-kind:vector-store
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:has-memory
+attributes:
+  displayName: has_memory (meta)
+  name: has_memory
+  source: []
+  target:
+  - meta-node-kind:memory-store
+  cardinality: N:N
+  origin: universal
+  description: 'an AgentVersion has a MemoryStore attached. Cross-cluster: AgentVersion meta-record lives in meta-registry-agent-stack.yaml.'
+edges:
+  target_of_meta_edge:
+  - target: meta-node-kind:memory-store
+---
+nodeKind: MetaEnum
+id: meta-enum:vector-store-kind
+attributes:
+  displayName: VectorStore storeKind
+  name: storeKind
+  values:
+  - value: pinecone
+    description: Pinecone managed vector DB.
+  - value: weaviate
+    description: Weaviate vector DB.
+  - value: qdrant
+    description: Qdrant vector DB.
+  - value: pgvector
+    description: pgvector extension for PostgreSQL.
+  - value: faiss
+    description: In-process FAISS index.
+  - value: chroma
+    description: Chroma vector DB.
+  - value: milvus
+    description: Milvus vector DB.
+  - value: redis
+    description: Redis with vector search.
+  - value: other
+    description: Other vector engine not enumerated.
+  usedOnAttributes:
+  - meta-attribute:vector-store--store-kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:vector-store--store-kind
+---
+nodeKind: MetaEnum
+id: meta-enum:memory-store-kind
+attributes:
+  displayName: MemoryStore kind
+  name: kind
+  values:
+  - value: vector
+    description: Vector-backed memory (semantic recall).
+  - value: document
+    description: Document store memory (raw text / chunks).
+  - value: knowledge-graph
+    description: Knowledge-graph memory (collapsed KnowledgeGraphRef NodeKind).
+  - value: prompt-cache
+    description: Prompt-cache memory (provider-side prefix cache).
+  - value: conversation-buffer
+    description: Recent-turn conversation buffer.
+  - value: summarized-history
+    description: Summarized conversation history.
+  usedOnAttributes:
+  - meta-attribute:memory-store--kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:memory-store--kind
+---
+nodeKind: MetaEnum
+id: meta-enum:prompt-template-kind
+attributes:
+  displayName: PromptTemplate templateKind
+  name: templateKind
+  values:
+  - value: system
+    description: System prompt.
+  - value: user
+    description: User prompt template.
+  - value: assistant
+    description: Assistant turn template.
+  - value: few-shot
+    description: Few-shot example scaffold.
+  - value: scaffold
+    description: Generic scaffold (chain-of-thought / planning frame).
+  usedOnAttributes:
+  - meta-attribute:prompt-template--template-kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:prompt-template--template-kind

@@ -1,0 +1,56 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:copilot-cli.core@current
+attributes:
+  displayName: GitHub Copilot CLI Core (current)
+  agentVersionId: agentVersion:copilot:ge-0-0-0
+  packageRef: source-ref:gh-copilot-github
+  loopIteratorPolicy: server-managed
+  loopIteratorNotes: 'The Copilot CLI does not run a local tool-use loop. It opens
+    an HTTPS request to
+
+    `api.githubcopilot.com` and streams the server''s response (chat-style) back to
+
+    the user''s terminal. There is no local tool dispatch or turn boundary management.
+
+    '
+  contextManagementStrategy: server-managed
+  compactionTriggerNotes: 'Context-management is fully server-side and not exposed
+    to the CLI.
+
+    '
+  subagentInvokerPolicy: not-applicable
+  subagentInvokerNotes: 'Copilot CLI does not expose a subagent primitive; the server
+    may internally
+
+    decompose tasks but the protocol remains a single chat session.
+
+    '
+  resultSynthesisPolicy: server-managed
+  resultSynthesisNotes: 'Server emits the final answer as a streamed text response;
+    the CLI prints it
+
+    line-by-line and exits when the stream closes.
+
+    '
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: gh-cli
+  supportedTransportProtocols:
+  - model-transport:github-copilot
+  parallelToolCallHandling: not-supported
+  streamingFidelity: partial
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:copilot-cli
+    role: core
+  speaks:
+  - target: model-transport:github-copilot
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full

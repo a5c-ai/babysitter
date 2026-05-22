@@ -2,6 +2,13 @@
 name: technical-debt-quantifier
 description: Measure, categorize, and prioritize technical debt for migration planning and remediation
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:code-analysis-linting, skill-area:prioritization-frameworks]
+  roles: [role:tech-lead, role:engineering-manager]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Technical Debt Quantifier Skill

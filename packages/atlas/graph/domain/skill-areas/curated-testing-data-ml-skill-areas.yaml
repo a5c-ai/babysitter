@@ -1,0 +1,491 @@
+---
+nodeKind: SkillArea
+id: skill-area:date-time-manipulation
+attributes:
+  displayName: "Date and Time Manipulation"
+  description: |
+    Working with time values and calendars - parsing, formatting, time zones,
+    recurrence rules, duration math, and clock-related edge cases.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:compression-archiving
+attributes:
+  displayName: "Compression and Archiving"
+  description: |
+    Packaging and compressing data - archive formats, streaming compression,
+    integrity checks, extraction safety, and storage tradeoffs.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  requires_skill_area:
+    - skill-area:file-handling
+---
+nodeKind: SkillArea
+id: skill-area:functional-testing
+attributes:
+  displayName: "Functional Testing"
+  description: |
+    Validating user-visible behavior against intended requirements - feature
+    coverage, business flows, and observable correctness across scenarios.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+  requires_skill_area:
+    - skill-area:acceptance-testing
+---
+nodeKind: SkillArea
+id: skill-area:security-testing
+attributes:
+  displayName: "Security Testing"
+  description: |
+    Exercising systems for exploitable weaknesses - auth bypass, input abuse,
+    insecure defaults, exposure paths, and regression-prone controls.
+  domains:
+    - specialization:qa-testing-automation
+    - domain:security
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+    - target: domain:security
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:backend-security
+---
+nodeKind: SkillArea
+id: skill-area:usability-testing
+attributes:
+  displayName: "Usability Testing"
+  description: |
+    Evaluating whether interfaces are understandable and efficient - task
+    completion, friction points, learnability, and user feedback patterns.
+  domains:
+    - specialization:qa-testing-automation
+    - specialization:ux-ui-design
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+    - target: specialization:ux-ui-design
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:compatibility-testing
+attributes:
+  displayName: "Compatibility Testing"
+  description: |
+    Verifying behavior across supported environments - platform matrices,
+    dependency versions, rendering/runtime differences, and integration seams.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:stress-testing
+attributes:
+  displayName: "Stress Testing"
+  description: |
+    Pushing systems beyond expected load or capacity - degradation behavior,
+    bottleneck discovery, recovery shape, and failure containment.
+  domains:
+    - specialization:qa-testing-automation
+    - specialization:performance-optimization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+    - target: specialization:performance-optimization
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:load-testing
+---
+nodeKind: SkillArea
+id: skill-area:sanity-testing
+attributes:
+  displayName: "Sanity Testing"
+  description: |
+    Running targeted narrow checks after small changes - focused validation of
+    touched behavior before broader regression or release gates.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+  requires_skill_area:
+    - skill-area:smoke-testing
+---
+nodeKind: SkillArea
+id: skill-area:ui-testing
+attributes:
+  displayName: "UI Testing"
+  description: |
+    Testing interface behavior across rendered states - interaction fidelity,
+    visual structure, control semantics, and user-facing regressions.
+  domains:
+    - specialization:web-development
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:component-testing
+---
+nodeKind: SkillArea
+id: skill-area:ab-testing-experimentation
+attributes:
+  displayName: "A/B Testing and Experimentation"
+  description: |
+    Designing controlled experiments in product surfaces - variant delivery,
+    exposure tracking, statistical interpretation, and rollout decisions.
+  domains:
+    - specialization:web-development
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: domain:data-science
+      confidence: secondary
+  uses_stack_part:
+    - stack-part:experiment-platform
+---
+nodeKind: SkillArea
+id: skill-area:training-data-testing
+attributes:
+  displayName: "Training Data Testing"
+  description: |
+    Validating model-training datasets - label quality, split hygiene,
+    leakage detection, representativeness, and dataset change regressions.
+  domains:
+    - domain:data-science
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:data-quality-testing
+---
+nodeKind: SkillArea
+id: skill-area:bias-fairness-testing
+attributes:
+  displayName: "Bias and Fairness Testing"
+  description: |
+    Evaluating model behavior across populations or slices - disparate impact,
+    harm analysis, fairness metrics, and mitigation verification.
+  domains:
+    - domain:data-science
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:model-validation-testing
+---
+nodeKind: SkillArea
+id: skill-area:model-robustness-testing
+attributes:
+  displayName: "Model Robustness Testing"
+  description: |
+    Probing model stability under perturbations and hard cases - adversarial
+    inputs, distribution shifts, boundary conditions, and failure modes.
+  domains:
+    - domain:ml-ops
+    - specialization:ml-inference-serving
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+    - target: specialization:ml-inference-serving
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:model-validation-testing
+---
+nodeKind: SkillArea
+id: skill-area:inference-performance-testing
+attributes:
+  displayName: "Inference Performance Testing"
+  description: |
+    Measuring serving-path model performance - latency, throughput, batching
+    effects, cold starts, and resource usage under realistic traffic.
+  domains:
+    - specialization:ml-inference-serving
+    - specialization:performance-optimization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ml-inference-serving
+      confidence: primary
+    - target: specialization:performance-optimization
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:performance-testing
+    - skill-area:model-serving-operations
+---
+nodeKind: SkillArea
+id: skill-area:model-explainability-testing
+attributes:
+  displayName: "Model Explainability Testing"
+  description: |
+    Validating interpretability techniques and explanation quality - feature
+    attribution stability, explanation usefulness, and auditability needs.
+  domains:
+    - domain:data-science
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:model-validation-testing
+---
+nodeKind: SkillArea
+id: skill-area:ml-pipeline-testing
+attributes:
+  displayName: "ML Pipeline Testing"
+  description: |
+    Testing end-to-end ML workflows - data ingest, feature generation,
+    training, validation, registration, and deployment handoffs.
+  domains:
+    - domain:ml-ops
+    - specialization:data-engineering-analytics
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+    - target: specialization:data-engineering-analytics
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:integration-testing
+---
+nodeKind: SkillArea
+id: skill-area:data-analysis
+attributes:
+  displayName: "Data Analysis"
+  description: |
+    Interpreting datasets to answer questions - exploratory analysis,
+    trend finding, segmentation, and decision-support framing.
+  domains:
+    - domain:data-science
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:machine-learning
+      strength: required
+    - target: skill-area:data-visualization
+      strength: recommended
+    - target: skill-area:feature-engineering
+      strength: required
+    - target: skill-area:streaming-realtime-processing
+      strength: helpful
+    - target: skill-area:statistical-analysis
+      strength: recommended
+    - target: skill-area:geospatial-data-analysis
+      strength: recommended
+    - target: skill-area:data-preprocessing
+      strength: recommended
+    - target: skill-area:data-analytics
+      strength: recommended
+    - target: skill-area:data-collection
+      strength: recommended
+    - target: skill-area:time-series-analysis
+      strength: recommended
+    - target: skill-area:big-data-tools
+      strength: recommended
+    - target: skill-area:data-quality
+      strength: recommended
+    - target: skill-area:etl-pipelines
+      strength: recommended
+    - target: skill-area:spark-jobs
+      strength: recommended
+    - target: skill-area:dbt-modeling
+      strength: recommended
+    - target: skill-area:data-lineage
+      strength: recommended
+    - target: skill-area:data-governance
+      strength: recommended
+    - target: skill-area:batch-vs-stream-tradeoffs
+      strength: recommended
+    - target: skill-area:columnar-storage
+      strength: recommended
+    - target: skill-area:python-data-pipelines
+      strength: recommended
+    - target: skill-area:data-quality-testing
+      strength: recommended
+    - target: skill-area:data-pipeline-testing
+      strength: recommended
+    - target: skill-area:etl-testing
+      strength: recommended
+    - target: skill-area:reproducibility-testing
+      strength: recommended
+    - target: skill-area:statistical-testing
+      strength: recommended
+    - target: skill-area:analytics-tracking
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:statistical-analysis
+attributes:
+  displayName: "Statistical Analysis"
+  description: |
+    Applying descriptive and inferential statistics - distributions,
+    hypothesis framing, uncertainty, effect sizes, and model assumptions.
+  domains:
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: specialization:statistical-methods
+      confidence: secondary
+    - target: specialization:scientific-research-methods
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:data-analysis
+---
+nodeKind: SkillArea
+id: skill-area:geospatial-data-analysis
+attributes:
+  displayName: "Geospatial Data Analysis"
+  description: |
+    Analyzing location-based data - coordinate systems, joins over space,
+    geofences, map-centric aggregations, and spatial anomaly detection.
+  domains:
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: specialization:civil-engineering
+      confidence: secondary
+    - target: specialization:environmental-engineering
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:data-analysis
+---
+nodeKind: SkillArea
+id: skill-area:statistical-testing
+attributes:
+  displayName: "Statistical Testing"
+  description: |
+    Running significance and confidence checks over data or experiments -
+    test selection, assumptions, multiple comparisons, and interpretation.
+  domains:
+    - domain:data-science
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:statistical-analysis
+---
+nodeKind: SkillArea
+id: skill-area:data-pipeline-testing
+attributes:
+  displayName: "Data Pipeline Testing"
+  description: |
+    Verifying data movement and transformation paths - schema contracts,
+    idempotency, freshness, correctness, and backfill safety.
+  domains:
+    - specialization:data-engineering-analytics
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-engineering-analytics
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:integration-testing
+---
+nodeKind: SkillArea
+id: skill-area:etl-testing
+attributes:
+  displayName: "ETL Testing"
+  description: |
+    Testing extract-transform-load jobs specifically - source assumptions,
+    transformation correctness, warehouse landing, and rerun reliability.
+  domains:
+    - specialization:data-engineering-analytics
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-engineering-analytics
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:etl-pipelines
+    - skill-area:data-pipeline-testing
+---
+nodeKind: SkillArea
+id: skill-area:reproducibility-testing
+attributes:
+  displayName: "Reproducibility Testing"
+  description: |
+    Confirming that analyses or model results can be rerun consistently -
+    deterministic inputs, environment capture, version pinning, and drift checks.
+  domains:
+    - domain:data-science
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:data-analysis

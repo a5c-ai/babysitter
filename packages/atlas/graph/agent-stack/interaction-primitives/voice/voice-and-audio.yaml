@@ -1,0 +1,44 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:voice-dictation
+attributes:
+  displayName: "Voice dictation"
+  kind: voice
+  surface: voice
+  description: |
+    User dictates a prompt by voice; the host transcribes (typically via a
+    cloud STT service) and feeds the transcript into the agent input pipeline.
+    Requires `microphone` IO surface support.
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tts-narration
+attributes:
+  displayName: "TTS narration"
+  kind: voice
+  surface: voice
+  description: |
+    Agent output is narrated by a TTS engine. Requires the underlying model
+    to support output-direction `audio` (see ModelVersion.modalityDirections,
+    D8) or a separate TTS provider.
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:wake-word
+attributes:
+  displayName: "Wake-word activation"
+  kind: voice
+  surface: voice
+  description: |
+    Always-listening mode that activates the agent on a configurable wake
+    word. Used in voice-first assistants. Requires `microphone` IO surface
+    plus persistent permission grant.
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction

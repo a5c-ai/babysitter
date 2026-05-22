@@ -1,0 +1,115 @@
+---
+nodeKind: Workflow
+id: workflow:employee-engagement-pulse-check
+attributes:
+  displayName: "Employee Engagement Pulse Check"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Conducts rapid pulse surveys to track employee engagement between full
+    culture surveys -- designing concise pulse instruments (5-10 questions)
+    targeting specific engagement dimensions such as manager effectiveness,
+    workload balance, and career development satisfaction, distributing surveys
+    through HRIS-integrated channels with anonymity guarantees, analyzing
+    response rates and engagement scores by team, location, and tenure segment,
+    computing eNPS (employee Net Promoter Score) trends and benchmarking
+    against industry norms, identifying teams with significant score declines
+    for targeted intervention, tracking action item completion from prior pulse
+    cycles, and escalating persistent low-engagement areas to HR leadership.
+    Produces pulse survey dashboard and action-tracking report. Excludes
+    intervention design.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:business-intelligence-team
+---
+nodeKind: Workflow
+id: workflow:succession-planning-review
+attributes:
+  displayName: "Succession Planning Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Reviews succession readiness for critical leadership and specialist roles
+    -- identifying mission-critical positions where vacancy would significantly
+    impact operations, assessing internal talent pipeline against readiness
+    dimensions (skills, experience, aspiration), mapping potential successors
+    into readiness categories (ready-now, ready-in-1-year, ready-in-2-years)
+    with gap analysis, reviewing individual development plan progress for
+    high-potential successors, evaluating external talent market conditions for
+    roles with thin internal benches, conducting calibration sessions with
+    senior leadership to validate assessments and resolve competing succession
+    claims, and updating the succession planning dashboard with risk scores and
+    development investment recommendations. Produces succession readiness
+    report and development plan updates. Excludes individual talent
+    acquisition.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:workplace-diversity-metrics-review
+attributes:
+  displayName: "Workplace Diversity Metrics Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews workplace diversity and inclusion metrics for organizational
+    accountability -- analyzing representation data across gender, ethnicity,
+    age, and disability dimensions at each organizational level, computing pay
+    equity ratios controlling for role, level, tenure, and geography,
+    evaluating retention and promotion rates by demographic cohort to identify
+    systemic disparities, benchmarking diversity metrics against industry and
+    peer-company data, reviewing hiring funnel conversion rates by demographic
+    to identify pipeline leakage points, tracking progress against published
+    diversity goals and commitments, and preparing data for regulatory
+    reporting requirements such as EEO-1 filings. Produces diversity metrics
+    dashboard and equity analysis report. Excludes DEI program design.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:business-intelligence-team

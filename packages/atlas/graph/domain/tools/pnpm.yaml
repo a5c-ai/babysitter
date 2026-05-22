@@ -1,0 +1,22 @@
+nodeKind: Tool
+id: tool:pnpm
+attributes:
+  displayName: "pnpm"
+  homepageUrl: "https://pnpm.io"
+  kind: package-manager
+  language: language:javascript
+  releasedAt: "2017"
+  description: |
+    Fast, disk-space-efficient package manager for JavaScript with content-addressable store.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - target: skill-area:developer-environment
+  alternative_to:
+    - target: tool:npm
+      comparison: "JavaScript package managers"
+    - target: tool:yarn
+      comparison: "JavaScript package managers"
+    - target: tool:bun
+      comparison: "JavaScript package managers / runtimes"

@@ -30,6 +30,12 @@
  * - Product Marketing Alliance GTM: https://productmarketingalliance.com/go-to-market-strategy/
  * - Pragmatic Institute Framework: https://www.pragmaticinstitute.com/resources/articles/product/product-launch-checklist/
  * - Reforge Product Strategy: https://www.reforge.com/blog/product-launch-strategy
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:product-management]
+ *   skillAreas: [skill-area:product-strategy, skill-area:product-analytics]
+ *   roles: [role:product-manager, role:product-analyst]
+ *   workflows: [workflow:product-discovery, workflow:competitive-analysis, workflow:team-formation]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

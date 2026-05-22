@@ -1,0 +1,10 @@
+nodeKind: Topic
+id: topic:webhook-verification
+attributes:
+  displayName: "Webhook Verification"
+  description: |
+    Webhook Verification as a cross-cutting topic of expertise.
+edges:
+  applies_to:
+    - domain:security
+    - domain:web-development

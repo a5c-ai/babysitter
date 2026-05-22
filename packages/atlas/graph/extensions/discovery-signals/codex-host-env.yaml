@@ -1,0 +1,22 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:codex-host-env
+attributes:
+  signalId: discovery-signal:codex-host-env
+  signalKind: env-any
+  key: codex
+  matchMode: any
+  confidence: medium
+  scope: host-detection
+  signals:
+    - CODEX_SESSION_ID
+    - CODEX_RUN_ID
+    - CODEX_CLI
+  argvMatches:
+    - codex
+  consumer: agent-mux-core
+  metadataFields:
+    - { key: session_id, envVars: [CODEX_SESSION_ID] }
+    - { key: run_id,     envVars: [CODEX_RUN_ID] }
+edges:
+  applies_to:
+    - target: agent:codex

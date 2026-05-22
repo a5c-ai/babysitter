@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Regulatory
   agent-id: CIV-AG-025
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Environmental Compliance Specialist Agent

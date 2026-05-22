@@ -1,0 +1,149 @@
+---
+nodeKind: Topic
+id: topic:company-brain
+attributes:
+  displayName: "Company Brain"
+  description: |
+    Company Brain as a cross-cutting topic — the centralized organizational
+    knowledge layer that captures, organizes, and makes queryable everything
+    a company knows. Covers persistent knowledge stores that outlive individual
+    agent sessions, cross-agent knowledge sharing, organizational memory
+    architecture, and the distinction between per-session context management
+    and enterprise-wide knowledge persistence.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:memory-to-knowledge-bridge
+    - topic:multi-agent-knowledge-sharing
+    - topic:knowledge-access-control
+    - topic:knowledge-freshness
+---
+nodeKind: Topic
+id: topic:knowledge-fabric-architecture
+attributes:
+  displayName: "Knowledge Fabric Architecture"
+  description: |
+    Knowledge Fabric Architecture as a cross-cutting topic — designing
+    systems that weave together disparate knowledge sources into a unified,
+    queryable fabric. Covers knowledge source integration patterns, domain
+    partitioning, trust and staleness models, update propagation strategies,
+    and the infrastructure connecting vector stores, knowledge graphs, and
+    document indexes into a coherent organizational intelligence layer.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:context-to-fabric-sync
+    - topic:knowledge-access-control
+    - topic:knowledge-feedback-loop
+    - topic:multi-agent-knowledge-sharing
+---
+nodeKind: Topic
+id: topic:rag-pipeline-design
+attributes:
+  displayName: "RAG Pipeline Design"
+  description: |
+    RAG Pipeline Design as a cross-cutting topic — retrieval-augmented
+    generation pipeline patterns for grounding LLM responses in organizational
+    knowledge. Covers document ingestion, chunking strategies, embedding model
+    selection, vector store configuration, retrieval ranking, re-ranking,
+    context window assembly, and evaluation of retrieval quality (MRR, nDCG,
+    recall@k). Spans both prototyping patterns and production-grade pipelines.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:chunking-strategies
+    - topic:embedding-pipeline
+    - topic:dense-retrieval
+    - topic:hybrid-retrieval
+    - topic:re-ranking
+    - topic:agentic-rag
+---
+nodeKind: Topic
+id: topic:knowledge-graph-construction
+attributes:
+  displayName: "Knowledge Graph Construction"
+  description: |
+    Knowledge Graph Construction as a cross-cutting topic — building and
+    maintaining structured representations of organizational entities,
+    relationships, and facts. Covers entity extraction from unstructured
+    text, relation linking, schema design for knowledge graphs, graph
+    databases (Neo4j, Amazon Neptune, TigerGraph), ontology alignment,
+    and incremental graph updates from streaming knowledge sources.
+edges:
+  applies_to:
+    - domain:software-engineering
+  related_topics:
+    - topic:graph-rag
+---
+nodeKind: Topic
+id: topic:organizational-memory
+attributes:
+  displayName: "Organizational Memory"
+  description: |
+    Organizational Memory as a cross-cutting topic — persistent knowledge
+    that spans agent sessions, user interactions, and time. Covers the
+    distinction between episodic memory (specific events), semantic memory
+    (general knowledge), and procedural memory (how-to knowledge). Addresses
+    memory consolidation, forgetting curves, knowledge decay detection,
+    and strategies for keeping organizational memory fresh and trustworthy.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+  related_topics:
+    - topic:memory-to-knowledge-bridge
+    - topic:context-to-fabric-sync
+    - topic:knowledge-freshness
+    - topic:knowledge-feedback-loop
+---
+nodeKind: Topic
+id: topic:knowledge-provenance
+attributes:
+  displayName: "Knowledge Provenance"
+  description: |
+    Knowledge Provenance as a cross-cutting topic — tracking the source,
+    confidence, and staleness of organizational knowledge. Covers attribution
+    chains (who said what, when, in what context), confidence scoring for
+    inferred vs authoritative knowledge, temporal decay models, conflict
+    resolution when sources disagree, and audit trails for knowledge-driven
+    decisions.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:semantic-chunking
+attributes:
+  displayName: "Semantic Chunking"
+  description: |
+    Semantic Chunking as a cross-cutting topic — strategies for splitting
+    documents into meaningful units for embedding and retrieval. Covers
+    fixed-size chunking, sentence-level splitting, semantic boundary
+    detection, hierarchical chunking (parent-child relationships),
+    code-aware chunking (function/class boundaries), overlap strategies,
+    and the impact of chunk size on retrieval precision and recall.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:multi-source-knowledge-fusion
+attributes:
+  displayName: "Multi-Source Knowledge Fusion"
+  description: |
+    Multi-Source Knowledge Fusion as a cross-cutting topic — combining
+    knowledge from multiple heterogeneous sources into a coherent view.
+    Covers entity resolution across sources, schema alignment, conflict
+    detection and resolution, confidence-weighted merging, temporal
+    ordering of contradictory facts, and federated retrieval patterns
+    that query multiple backends in parallel.
+edges:
+  applies_to:
+    - domain:software-engineering

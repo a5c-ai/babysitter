@@ -3,6 +3,11 @@
  * @description Process for identifying root causes of recurring incidents and implementing permanent fixes to prevent future occurrences
  * @inputs { incidents: array, problemData: object, knownErrors: array, changeManagement: object }
  * @outputs { success: boolean, problemRecord: object, rootCauseAnalysis: object, permanentFix: object, artifacts: array }
+  * @graph
+ *   domains: [domain:customer-experience]
+ *   skillAreas: [skill-area:customer-success, skill-area:user-research, skill-area:product-discovery]
+ *   workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+ *   roles: [role:product-designer, role:customer-success-manager, role:ux-researcher]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

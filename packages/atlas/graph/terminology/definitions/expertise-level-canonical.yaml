@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:expertise-level.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:expertise-level
+  text: |
+    novice/intermediate/expert/authoritative
+  status: canonical
+edges:
+  defines:
+    - term:expertise-level

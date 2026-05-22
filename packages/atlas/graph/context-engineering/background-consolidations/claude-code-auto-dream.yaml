@@ -1,0 +1,24 @@
+nodeKind: BackgroundConsolidation
+id: background-consolidation:claude-code-auto-dream
+attributes:
+  displayName: "Auto-dream consolidation"
+  kind: auto-dream
+  forkLabel: "auto_dream"
+  querySource: "auto_dream"
+  skipTranscript: true
+  cacheSafeFork: true
+  toolRestrictions:
+    - "Bash: read-only commands only (ls, find, grep, cat, stat, wc, head, tail)"
+    - "Edit/Write: scoped to memory root via createAutoMemCanUseTool"
+  canUseToolFactory: "createAutoMemCanUseTool"
+  lockId: consolidation-lock:claude-code-auto-dream-default
+  emitsTelemetryEvents:
+    - tengu_auto_dream_fired
+    - tengu_auto_dream_completed
+    - tengu_auto_dream_failed
+  featureGate: "tengu_onyx_plover"
+edges:
+  consolidation_guarded_by_lock:
+    - target: consolidation-lock:claude-code-auto-dream-default
+  consolidates_memory_system:
+    - target: memory-system:claude-code-auto-memory

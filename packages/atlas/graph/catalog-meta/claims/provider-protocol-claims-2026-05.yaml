@@ -1,0 +1,183 @@
+nodeKind: Claim
+id: claim:cohere-provider-v2-chat-endpoints
+attributes:
+  subjectId: provider:cohere
+  subjectKind: Provider
+  attribute: endpoints
+  value: Cohere v2 provider exposes chat, chat-stream, embed, rerank, and models API surfaces.
+  statement: Cohere v2 provider endpoint modeling is grounded in the Cohere chat/chat-stream API documentation and the existing provider endpoint map.
+  evidenceSourceIds:
+    - evidence:provider-protocol-cohere-chat-stream-docs
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - provider:cohere
+  backed_by_evidence:
+    - evidence:provider-protocol-cohere-chat-stream-docs
+---
+nodeKind: Claim
+id: claim:cohere-chat-stream-protocol-events
+attributes:
+  subjectId: provider:cohere
+  subjectKind: Provider
+  attribute: emits_message_type
+  value: Cohere chat-stream emits message/content/tool-call start, delta, end, and message-end stream events modeled as ProtocolMessage nodes.
+  statement: Cohere chat-stream event taxonomy is modeled through provider:cohere emits_message_type edges to the Cohere ProtocolMessage records.
+  evidenceSourceIds:
+    - evidence:provider-protocol-cohere-chat-stream-docs
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - provider:cohere
+  backed_by_evidence:
+    - evidence:provider-protocol-cohere-chat-stream-docs
+---
+nodeKind: Claim
+id: claim:mistral-provider-chat-endpoints
+attributes:
+  subjectId: provider:mistral
+  subjectKind: Provider
+  attribute: endpoints
+  value: Mistral provider exposes v1 chat completions, FIM completions, embeddings, and models API surfaces.
+  statement: Mistral provider endpoint modeling is grounded in the Mistral chat API documentation and the existing provider endpoint map.
+  evidenceSourceIds:
+    - evidence:provider-protocol-mistral-chat-api-docs
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - provider:mistral
+  backed_by_evidence:
+    - evidence:provider-protocol-mistral-chat-api-docs
+---
+nodeKind: Claim
+id: claim:mistral-chat-protocol-messages
+attributes:
+  subjectId: provider:mistral
+  subjectKind: Provider
+  attribute: emits_message_type
+  value: Mistral chat messages are modeled as system, user, assistant, tool, stream chunk, and stream terminal ProtocolMessage records.
+  statement: Mistral chat protocol modeling is represented by provider:mistral emits_message_type edges to Mistral ProtocolMessage records.
+  evidenceSourceIds:
+    - evidence:provider-protocol-mistral-chat-api-docs
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - provider:mistral
+  backed_by_evidence:
+    - evidence:provider-protocol-mistral-chat-api-docs
+---
+nodeKind: Claim
+id: claim:ollama-provider-native-api-endpoints
+attributes:
+  subjectId: provider:ollama
+  subjectKind: Provider
+  attribute: endpoints
+  value: Ollama native HTTP API exposes chat, generate, embed, tags, and show endpoints on the local server.
+  statement: Ollama provider endpoint modeling is grounded in the Ollama HTTP API documentation and the existing provider endpoint map.
+  evidenceSourceIds:
+    - evidence:provider-protocol-ollama-api-docs
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - provider:ollama
+  backed_by_evidence:
+    - evidence:provider-protocol-ollama-api-docs
+---
+nodeKind: Claim
+id: claim:ollama-native-protocol-messages
+attributes:
+  subjectId: provider:ollama
+  subjectKind: Provider
+  attribute: emits_message_type
+  value: Ollama native API responses are modeled as chat, chat-stream, generate, generate-stream, and embed ProtocolMessage records.
+  statement: Ollama native protocol modeling is represented by provider:ollama emits_message_type edges to Ollama ProtocolMessage records.
+  evidenceSourceIds:
+    - evidence:provider-protocol-ollama-api-docs
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - provider:ollama
+  backed_by_evidence:
+    - evidence:provider-protocol-ollama-api-docs
+---
+nodeKind: Claim
+id: claim:openai-agents-sdk-runner-streaming-events
+attributes:
+  subjectId: agent-runtime-impl:openai-agents-sdk.runtime@current
+  subjectKind: AgentRuntimeImpl
+  attribute: emits_journal_event
+  value: OpenAI Agents SDK Runner streaming emits raw response, run item, and agent updated stream events modeled as JournalEvent nodes.
+  statement: OpenAI Agents SDK runtime journal-event modeling is grounded in the Runner streaming event taxonomy.
+  evidenceSourceIds:
+    - evidence:openai-agents-sdk-streaming-docs
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - agent-runtime-impl:openai-agents-sdk.runtime@current
+  backed_by_evidence:
+    - evidence:openai-agents-sdk-streaming-docs
+---
+nodeKind: Claim
+id: claim:openai-agents-sdk-handoffs-as-tools
+attributes:
+  subjectId: agent-core-impl:openai-agents-sdk.core@current
+  subjectKind: AgentCoreImpl
+  attribute: subagentInvokerPolicy
+  value: OpenAI Agents SDK handoffs are modeled as tool-call based delegation to another Agent.
+  statement: OpenAI Agents SDK core handoff modeling uses tool-call delegation because handoffs are represented as tools to the model.
+  evidenceSourceIds:
+    - evidence:openai-agents-sdk-handoffs-docs
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - agent-core-impl:openai-agents-sdk.core@current
+  backed_by_evidence:
+    - evidence:openai-agents-sdk-handoffs-docs

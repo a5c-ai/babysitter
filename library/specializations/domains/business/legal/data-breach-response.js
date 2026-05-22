@@ -16,6 +16,12 @@
  * @references
  * - OneTrust Breach Management: https://www.onetrust.com/
  * - GDPR Art 33/34: https://gdpr.eu/article-33-notification-of-a-personal-data-breach/
+  * @graph
+ *   domains: [domain:legal]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -26,7 +32,8 @@ export async function process(inputs, ctx) {
     action = 'respond', // 'respond', 'assess', 'notify', 'remediate'
     incidentDetails = {},
     outputDir = 'breach-response-output'
-  } = inputs;
+  }
+  = inputs;
 
   const startTime = ctx.now();
   const artifacts = [];
@@ -69,7 +76,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
       }
-  const phase3Review = await ctx.breakpoint({
+      const phase3Review = await ctx.breakpoint({
       question: `High severity breach ${incidentId}. ${assessment.affectedIndividuals} individuals affected. Regulatory notification likely required. Proceed with notification assessment?`,
       title: 'High Severity Breach Alert',
       context: {
@@ -86,9 +93,8 @@ export async function process(inputs, ctx) {
       });
       if (phase3Review.approved) break;
       lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
-
-  // Phase 4: Notification Assessment
+    }
+    // Phase 4: Notification Assessment
   const notificationAssessment = await ctx.task(notificationAssessmentTask, {
     incidentId,
     assessment,
@@ -146,7 +152,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Breach response for ${incidentId} complete. Severity: ${assessment.severity}. DPA notified: ${dpaNotification ? 'Yes' : 'No'}. Review post-incident report?`,
     title: 'Breach Response Review',
     context: {
@@ -191,7 +197,6 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/legal/data-breach-response', timestamp: startTime }
   };
 }
-
 export const incidentDetectionTask = defineTask('incident-detection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Detect and log incident',

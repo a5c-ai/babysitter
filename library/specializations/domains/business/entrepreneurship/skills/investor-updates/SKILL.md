@@ -11,6 +11,11 @@ metadata:
   domain: business
   category: Investor Relations
   skill-id: SK-016
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:financial-planning, skill-area:investment-analysis, skill-area:stakeholder-management]
+  workflows: [workflow:product-discovery]
+  roles: [role:financial-analyst, role:strategic-planner, role:partnerships-manager]
 ---
 
 # Investor Update Generator Skill

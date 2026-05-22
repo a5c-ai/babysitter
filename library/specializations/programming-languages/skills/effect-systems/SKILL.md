@@ -2,6 +2,11 @@
 name: effect-systems
 description: Expert skill for designing and implementing algebraic effect systems including effect annotation, inference, handlers, polymorphism, and row-based effect typing.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+  roles: [role:backend-engineer]
 ---
 
 # Effect Systems Skill

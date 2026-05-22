@@ -2,6 +2,12 @@
 name: critical-thinking-educator-agent
 description: Designs and delivers critical thinking instruction and assessment
 required-skills: fallacy-detection-analysis, socratic-dialogue-facilitation, argument-mapping-reconstruction
+graph:
+  domains: [domain:philosophy]
+  specializations: [specialization:applied-ethics]
+  skillAreas: [skill-area:natural-language-processing, skill-area:learning-development, skill-area:deep-web-research]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:research-analyst]
 ---
 
 # Critical Thinking Educator Agent

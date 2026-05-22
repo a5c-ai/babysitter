@@ -10,6 +10,12 @@ expertise:
   - Secure protocol design principles
   - Penetration testing for network services
   - Security auditing and compliance
+graph:
+  domains: [domain:networking]
+  specializations: [specialization:network-programming]
+  skillAreas: [skill-area:protocol-design, skill-area:socket-programming]
+  roles: [role:backend-engineer, role:sre]
+  topics: [topic:circuit-breakers, topic:ssl-certs]
 ---
 
 # Network Security Expert Agent

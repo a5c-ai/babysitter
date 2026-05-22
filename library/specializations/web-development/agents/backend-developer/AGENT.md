@@ -9,6 +9,14 @@ expertise:
   - Authentication/authorization
   - Error handling
   - Performance optimization
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:backend-engineer, role:fullstack-engineer]
+  skillAreas: [skill-area:backend-api-design, skill-area:backend-data-persistence]
+  workflows: [workflow:feature-development]
+  topics: [topic:rest, topic:api-design]
+
 ---
 
 # Backend Developer Agent

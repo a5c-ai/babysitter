@@ -1,0 +1,608 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-compact
+attributes:
+  displayName: "/compact"
+  description: |
+    Summarize the conversation in-place to free tokens. Optional
+    instructions string customizes the compaction prompt.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:context
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:context
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-rewind
+attributes:
+  displayName: "/rewind"
+  description: |
+    Revert conversation AND code to a prior point. Aliases /checkpoint, /undo.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:control
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  in_category:
+    - target: interaction-primitive-category:control
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-branch
+attributes:
+  displayName: "/branch"
+  description: |
+    Branch the conversation off a specific turn into a named branch.
+    Alias /fork. Branches are returnable via /resume.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:control
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:control
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-diff
+attributes:
+  displayName: "/diff"
+  description: |
+    Per-turn diff browser — inspect what changed since a prior turn or
+    across the whole session.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:telemetry
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-review
+attributes:
+  displayName: "/review"
+  description: |
+    Trigger an in-session code review pass over the staged / current diff.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:control
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:control
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-security-review
+attributes:
+  displayName: "/security-review"
+  description: |
+    Trigger a security-focused review pass — looks for injection, auth/
+    authz gaps, secret handling, deserialization, SSRF, unsafe deps.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:control
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:control
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-export
+attributes:
+  displayName: "/export"
+  description: |
+    Dump the conversation to disk or clipboard. Optional filename arg.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:control
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:control
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-copy
+attributes:
+  displayName: "/copy"
+  description: |
+    Copy the last response (or a specified Nth) to clipboard, with an
+    optional code-block picker.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:control
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:control
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-sandbox
+attributes:
+  displayName: "/sandbox"
+  description: |
+    Switch the active Layer-9 sandbox enforcement substrate (Seatbelt,
+    landlock, etc.) without restarting the session.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:approval
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  in_category:
+    - target: interaction-primitive-category:approval
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-tasks
+attributes:
+  displayName: "/tasks"
+  description: |
+    View background bash / agent tasks. Alias /bashes.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:telemetry
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-skills
+attributes:
+  displayName: "/skills"
+  description: |
+    Manage and invoke installed Skills. Manually trigger a Skill that is
+    normally model-invoked: /<skill-name> with optional $ARGUMENTS.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:context
+  availableInModes: [chat, plan]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:context
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-plugin
+attributes:
+  displayName: "/plugin"
+  description: |
+    Install / list / uninstall plugins. Plugin commands are namespaced
+    plugin-name:command-name once installed.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  in_category:
+    - target: interaction-primitive-category:configuration
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-statusline
+attributes:
+  displayName: "/statusline"
+  description: |
+    Configure the always-on status indicator (model, mode, cost, tokens).
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:configuration
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-voice
+attributes:
+  displayName: "/voice"
+  description: |
+    Toggle voice dictation in TUI — hold|tap|off mode.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:configuration
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-recap
+attributes:
+  displayName: "/recap"
+  description: |
+    Generate a one-line summary of the session.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:context
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:context
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-btw
+attributes:
+  displayName: "/btw"
+  description: |
+    Quick out-of-band side question that doesn't pollute history.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:context
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:context
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-effort
+attributes:
+  displayName: "/effort"
+  description: |
+    Change reasoning effort: low|medium|high|xhigh|max.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:configuration
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-context
+attributes:
+  displayName: "/context"
+  description: |
+    Inspect the current context window usage with a colored grid +
+    bloat warnings.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:telemetry
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-schedule
+attributes:
+  displayName: "/schedule"
+  description: |
+    Run a prompt on a cron or one-shot schedule. Cron-driven prompts.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  in_category:
+    - target: interaction-primitive-category:lifecycle
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-loop
+attributes:
+  displayName: "/loop"
+  description: |
+    Re-run the current prompt on a fixed interval until cancelled.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  in_category:
+    - target: interaction-primitive-category:lifecycle
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-teleport
+attributes:
+  displayName: "/teleport"
+  description: |
+    Pull a remote / web session into the local TUI. Alias /tp.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:collaborative
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  in_category:
+    - target: interaction-primitive-category:collaborative
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-remote-control
+attributes:
+  displayName: "/remote-control"
+  description: |
+    Expose this session to be driven from elsewhere — claude.ai drives
+    the local TUI. Alias /rc.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:collaborative
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  in_category:
+    - target: interaction-primitive-category:collaborative
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-desktop
+attributes:
+  displayName: "/desktop"
+  description: |
+    Cross-shell continuation — move the same session into the desktop app.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:collaborative
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  in_category:
+    - target: interaction-primitive-category:collaborative
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-mobile
+attributes:
+  displayName: "/mobile"
+  description: |
+    Cross-shell continuation — move the same session into the mobile app.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:collaborative
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  in_category:
+    - target: interaction-primitive-category:collaborative
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-plan
+attributes:
+  displayName: "/plan"
+  description: |
+    Enter plan-mode — agent plans without acting. Optional description.
+    Shift+Tab also cycles into plan mode.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:control
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:control
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-cost
+attributes:
+  displayName: "/cost"
+  description: |
+    Running token + dollar tally. Aliases /usage, /stats.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:telemetry
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-doctor
+attributes:
+  displayName: "/doctor"
+  description: |
+    Diagnostics — version, model, connectivity, login state, environment.
+    Counterpart /status.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:telemetry
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-add-dir
+attributes:
+  displayName: "/add-dir"
+  description: |
+    Grant access to a directory beyond cwd. Counterpart launch flag --add-dir.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:context
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  in_category:
+    - target: interaction-primitive-category:context
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-memory
+attributes:
+  displayName: "/memory"
+  description: |
+    Inspect or edit long-term memory files (CLAUDE.md, auto-memory toggle).
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:context
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:context
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-rename
+attributes:
+  displayName: "/rename"
+  description: |
+    Name a session for the picker.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:lifecycle
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-theme
+attributes:
+  displayName: "/theme"
+  description: |
+    Change the color theme — light/dark/auto/colorblind/ANSI/custom.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:configuration
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-hooks
+attributes:
+  displayName: "/hooks"
+  description: |
+    Inspect / edit installed hook bindings.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:configuration
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-agents
+attributes:
+  displayName: "/agents"
+  description: |
+    Manage subagents — list, install, invoke. Subagents triggered by name
+    or by Task tool delegation.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:configuration
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-login
+attributes:
+  displayName: "/login"
+  description: |
+    Authenticate via OAuth browser-login flow. Counterpart /logout.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:configuration
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-release-notes
+attributes:
+  displayName: "/release-notes"
+  description: |
+    View the changelog inline.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:telemetry
+  realizes:
+    - target: layer:10-interaction

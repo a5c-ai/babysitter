@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:out-of-scope-reason
+attributes:
+  canonicalDefinitionId: definition:out-of-scope-reason.canonical
+  displayName: "OutOfScopeReason"
+  kind: concept
+  references:
+    - "NodeKind:OutOfScopeReason"
+  description: |
+    Structured reason for out-of-scope
+edges:
+  applies_to:
+    - target: domain:software-engineering

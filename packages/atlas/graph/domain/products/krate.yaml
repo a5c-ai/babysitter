@@ -1,0 +1,1233 @@
+# ============================================================================
+# Krate — Kubernetes-native Git Forge Runtime
+# A comprehensive subgraph modeling the Krate platform, its components,
+# resource kinds, workflows, and connectivity to the broader Atlas graph.
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# 1. AgentProduct + AgentVersion
+# ---------------------------------------------------------------------------
+---
+nodeKind: Platform
+id: platform:krate
+attributes:
+  displayName: "Krate"
+  homepageUrl: "https://github.com/a5c-ai/babysitter"
+  description: |
+    Krate is a Kubernetes-native Git forge runtime — a complete Git
+    collaboration platform (comparable to GitHub or GitLab) that extends
+    Kubernetes' own API server and identity model rather than running as
+    an opaque application on top of it. Krate is NOT an agent — it is
+    the infrastructure platform that hosts repositories, CI pipelines,
+    and dispatches coding agents to work on them.
+
+    Architecture follows a three-plane design:
+      - Control plane: 75 Krate CRD kinds for configuration,
+        identity, policy, and org structure.
+      - Data plane: 23 Postgres-backed aggregated API kinds for
+        high-volume mutable state (repositories, pull requests, issues,
+        reviews, pipelines, agent sessions, memory snapshots).
+      - Integration plane: webhooks, Gitea sync, Zoekt code search,
+        Kyverno policy engine, ArgoCD GitOps, and agent-mux dispatch.
+
+    Key properties:
+      - Org-scoped tenancy: every resource belongs to an Organization.
+      - 75 total Krate CRD kinds across agent, aggregated, external backend, policy, and repository resource families.
+      - GitOps transparency: every UI action has a kubectl equivalent.
+      - Agent dispatch as CI: coding agents run as K8s Jobs through
+        the same pipeline infrastructure as CI.
+      - Company brain memory: cross-run knowledge persistence via
+        AgentMemoryRepository, snapshots, and vector-backed queries.
+edges:
+  integrates_with:
+    - target: platform:kubernetes
+      notes: "Core runtime — all resources are K8s API objects"
+    - target: agent:agent-mux
+      notes: "Agent dispatch uses agent-mux transport for coding agent sessions"
+    - target: agent:babysitter
+      notes: "Babysitter orchestrates multi-step workflows within Krate"
+    - target: tool:docker
+      notes: "Container images for all Krate components and agent jobs"
+    - target: tool:gitea
+      notes: "Git hosting backend — repository storage and Git protocol"
+    - target: tool:zoekt
+      notes: "Code search engine indexing all org repositories"
+    - target: tool:kyverno
+      notes: "Policy engine enforcing org-level policy profiles"
+    - target: tool:argocd
+      notes: "GitOps continuous deployment of Krate and tenant workloads"
+    - target: tool:helm
+      notes: "Packaging and templating for Krate Helm charts"
+    - target: tool:psql
+      notes: "Aggregated API server persistence for high-cardinality data"
+    - target: framework:nextjs
+      notes: "Web UI built on Next.js App Router"
+    - target: framework:react
+      notes: "Component library for the Krate dashboard"
+  hosts:
+    - target: agent:claude-code
+      notes: "Claude Code agents dispatch into Krate-managed repositories"
+    - target: agent:codex
+      notes: "Codex agents dispatch into Krate-managed repositories"
+    - target: agent:cursor
+      notes: "Cursor agents dispatch into Krate-managed repositories"
+    - target: agent:gemini-cli
+      notes: "Gemini CLI agents dispatch into Krate-managed repositories"
+    - target: agent:aider
+      notes: "Aider agents dispatch into Krate-managed repositories"
+    - target: agent:cline
+      notes: "Cline agents dispatch into Krate-managed repositories"
+    - target: agent:continue
+      notes: "Continue agents dispatch into Krate-managed repositories"
+    - target: agent:windsurf
+      notes: "Windsurf agents dispatch into Krate-managed repositories"
+    - target: agent:devin
+      notes: "Devin agents dispatch into Krate-managed repositories"
+    - target: agent:goose
+      notes: "Goose agents dispatch into Krate-managed repositories"
+    - target: agent:bolt
+      notes: "Bolt agents dispatch into Krate-managed repositories"
+    - target: agent:sweep-ai
+      notes: "Sweep AI agents dispatch into Krate-managed repositories"
+    - target: agent:openhands
+      notes: "OpenHands agents dispatch into Krate-managed repositories"
+    - target: agent:roo-code
+      notes: "Roo Code agents dispatch into Krate-managed repositories"
+    - target: agent:opencode
+      notes: "OpenCode agents dispatch into Krate-managed repositories"
+    - target: agent:hermes
+      notes: "Hermes agents dispatch into Krate-managed repositories"
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - domain:software-engineering
+  supports_orchestration_primitive:
+    - target: orch-primitive:krate-agent-dispatch
+    - target: orch-primitive:krate-auto-trigger
+    - target: orch-primitive:krate-approval-gate
+    - target: orch-primitive:krate-workspace-provision
+    - target: orch-primitive:krate-context-assembly
+    - target: orch-primitive:krate-permission-review
+    - target: orch-primitive:krate-pr-as-artifact
+    - target: orch-primitive:krate-memory-consolidation
+  supports_interaction_primitive:
+    - target: interaction-primitive:krate-agent-dispatch
+      attributes: { mechanism: api-endpoint }
+    - target: interaction-primitive:krate-agent-trigger-process
+      attributes: { mechanism: event-routing }
+    - target: interaction-primitive:krate-agent-approval-decide
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:krate-pr-create
+      attributes: { mechanism: api-endpoint }
+    - target: interaction-primitive:krate-pr-merge
+      attributes: { mechanism: api-endpoint }
+    - target: interaction-primitive:krate-pr-review
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:krate-memory-query
+      attributes: { mechanism: api-endpoint }
+    - target: interaction-primitive:krate-memory-update
+      attributes: { mechanism: ui-control }
+---
+nodeKind: PlatformService
+id: platform-service:krate-forge
+attributes:
+  displayName: "Krate Forge"
+  platformId: platform:krate
+  description: |
+    Git forge services: repository hosting (via Gitea), pull requests,
+    issues, reviews, branch protection, SSH key management, and
+    collaborator/team RBAC. Provides the same developer workflow as
+    GitHub but as Kubernetes-native CRDs.
+edges:
+  part_of:
+    - platform:krate
+---
+nodeKind: PlatformService
+id: platform-service:krate-ci
+attributes:
+  displayName: "Krate CI"
+  platformId: platform:krate
+  description: |
+    CI/CD pipeline engine: Pipeline and Job scheduling with runner pools,
+    artifact collection, and pipeline-as-code definitions. Agent dispatch
+    runs appear as CI Jobs in the same pipeline queue.
+edges:
+  part_of:
+    - platform:krate
+---
+nodeKind: PlatformService
+id: platform-service:krate-agent-dispatch
+attributes:
+  displayName: "Krate Agent Dispatch"
+  platformId: platform:krate
+  description: |
+    Agent orchestration services: AgentStack definitions, dispatch runs,
+    trigger rules, approval gates, workspace provisioning, context
+    assembly, and agent-mux session binding. Enables coding agents to
+    work on Krate-hosted repositories with full RBAC governance.
+edges:
+  part_of:
+    - platform:krate
+  integrates_with:
+    - target: agent:agent-mux
+---
+nodeKind: PlatformService
+id: platform-service:krate-company-brain
+attributes:
+  displayName: "Krate Company Brain"
+  platformId: platform:krate
+  description: |
+    Organizational memory services: AgentMemoryRepository, memory sources,
+    ontology-driven knowledge graph, memory snapshots, cross-run memory
+    import, and vector-backed semantic queries. Provides persistent
+    knowledge that spans agent sessions and runs.
+edges:
+  part_of:
+    - platform:krate
+---
+nodeKind: PlatformService
+id: platform-service:krate-policy
+attributes:
+  displayName: "Krate Policy Engine"
+  platformId: platform:krate
+  description: |
+    Policy enforcement services: PolicyProfile, PolicyTemplate, and
+    PolicyBinding resources define org-level governance rules. Kyverno
+    admission webhooks enforce policies on resource creation/mutation.
+    Agent-specific policies control tool access, secret grants, and
+    workspace boundaries.
+edges:
+  part_of:
+    - platform:krate
+  integrates_with:
+    - target: tool:kyverno
+
+# ---------------------------------------------------------------------------
+# 2. Key Domain Concepts as Topics
+# ---------------------------------------------------------------------------
+---
+nodeKind: Topic
+id: topic:kubernetes-native-forge
+attributes:
+  displayName: "Kubernetes-Native Git Forge"
+  description: |
+    The architectural thesis that a Git collaboration platform (forge) should
+    be built as a native extension of the Kubernetes API rather than as a
+    standalone application deployed on Kubernetes. All forge concepts —
+    repositories, pull requests, issues, pipelines, users, teams, RBAC — are
+    modeled as Kubernetes custom resources or aggregated API objects. This
+    means kubectl, client-go, and any Kubernetes-native tooling can interact
+    with the forge directly. The platform inherits Kubernetes' authn/authz,
+    admission control, and controller reconciliation patterns, eliminating
+    the need for a parallel identity and permission system.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - domain:software-engineering
+  related_to:
+    - topic:gitops-principles
+---
+nodeKind: Topic
+id: topic:aggregated-api-server
+attributes:
+  displayName: "Aggregated API Server Pattern"
+  description: |
+    A Kubernetes extension mechanism where a custom API server registers
+    itself with the main kube-apiserver via an APIService resource. Requests
+    to the custom API group are proxied to the aggregated server, which can
+    use any backing store (Postgres, Redis, etc.) instead of etcd. This
+    enables high-volume mutable state (e.g., pull request comments, pipeline
+    logs) to live in a relational database while still being accessible
+    through the standard Kubernetes API surface — kubectl, RBAC, admission
+    webhooks, and watch semantics all work transparently. Krate uses this
+    pattern for its 23 data-plane resource kinds.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:org-scoped-tenancy
+attributes:
+  displayName: "Org-Scoped Multi-Tenancy"
+  description: |
+    A tenancy model where the Organization is the top-level isolation
+    boundary. Every resource — repositories, teams, users, policies,
+    pipelines, agent stacks — belongs to exactly one organization.
+    Cross-org access is explicitly denied unless federation is configured.
+    This differs from namespace-scoped tenancy (where a namespace is the
+    boundary) and cluster-scoped tenancy (where a single tenant owns the
+    cluster). In Krate, Organizations are cluster-scoped CRDs that own
+    namespaces, and all org-scoped resources carry an orgRef field linking
+    back to the owning Organization.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:security
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:agent-dispatch-as-ci
+attributes:
+  displayName: "Agent Dispatch as CI"
+  description: |
+    The design pattern of running AI coding agents through the same
+    infrastructure used for CI/CD pipelines. Agent dispatch runs are
+    modeled as pipeline jobs — they have triggers (PR comment, manual
+    dispatch, schedule), resource limits, timeout policies, and
+    permission scopes. The agent's workspace is a container with the
+    repository checked out, and the agent session streams output back
+    through the same log aggregation used for build pipelines. This
+    unifies the operational model: monitoring, cost tracking, RBAC,
+    and audit logging work identically for human CI and agent CI.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:company-brain-memory
+attributes:
+  displayName: "Company Brain Memory"
+  description: |
+    A cross-run knowledge persistence layer for AI agents operating
+    within an organization. Agent sessions produce memory snapshots —
+    structured summaries of decisions, code patterns, architecture
+    context, and lessons learned — that are stored in an
+    AgentMemoryRepository. Subsequent agent sessions can query this
+    repository to retrieve relevant organizational knowledge before
+    starting work, reducing ramp-up time and improving consistency
+    across independent agent runs. The memory layer supports vector
+    similarity search, temporal filtering, and org-scoped access
+    control.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:gitops-transparency
+attributes:
+  displayName: "GitOps Transparency"
+  description: |
+    The principle that every action performed through a graphical UI
+    must have an equivalent kubectl (or API) command, and every state
+    mutation must be expressible as a declarative YAML manifest that
+    can be version-controlled in Git. This ensures that platform state
+    is auditable, reproducible, and automatable. In Krate, creating a
+    repository via the web UI produces the same Repository CR that
+    could be applied via kubectl; reviewing a pull request sets the
+    same status conditions. The platform eats its own dog food — Krate
+    itself is deployed and configured via its own GitOps pipeline.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:platform-engineering
+  related_to:
+    - topic:gitops-principles
+---
+nodeKind: Topic
+id: topic:declarative-ui-state
+attributes:
+  displayName: "Declarative UI State as K8s Resources"
+  description: |
+    Modeling frontend UI personalization (saved views, column layouts,
+    filter presets, dashboard arrangements) as Kubernetes custom
+    resources rather than as opaque rows in an application database.
+    Views and Selectors are CRDs that users create, update, and share
+    via the API. This means UI state is portable, version-controllable,
+    and subject to the same RBAC and audit logging as any other
+    platform resource. Teams can share curated views via GitOps, and
+    administrators can set default views at the org level.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+
+# ---------------------------------------------------------------------------
+# 3. Stack Profile for Krate
+# ---------------------------------------------------------------------------
+---
+nodeKind: StackProfile
+id: stack-profile:krate-platform
+attributes:
+  displayName: "Krate Platform Stack (K8s, Go, TypeScript, Postgres, Helm, ArgoCD)"
+  description: |
+    The technology stack underpinning the Krate Kubernetes-native Git forge
+    runtime. The control plane and aggregated API server are written in Go,
+    leveraging controller-runtime and apiserver libraries. The web UI is a
+    Next.js (TypeScript/React) application served from within the cluster.
+    PostgreSQL backs the aggregated API server for high-volume data-plane
+    resources. Helm charts package the deployment, and ArgoCD manages
+    GitOps-driven rollouts. Docker containers run all components including
+    dispatched agent jobs. Kubernetes itself is both the runtime platform
+    and the API surface that Krate extends.
+  composes:
+    - language:go
+    - language:typescript
+    - language:javascript
+    - tool:kubernetes
+    - tool:docker
+    - tool:helm
+    - tool:argocd
+    - framework:nextjs
+    - framework:react
+    - stack-part:managed-postgres
+    - stack-part:kubernetes-cluster
+    - stack-part:container-registry
+    - tool:gitea
+    - tool:zoekt
+    - tool:kyverno
+edges:
+  composed_of:
+    - language:go
+    - language:typescript
+    - language:javascript
+    - tool:kubernetes
+    - tool:docker
+    - tool:helm
+    - tool:argocd
+    - framework:nextjs
+    - framework:react
+    - stack-part:managed-postgres
+    - stack-part:kubernetes-cluster
+    - stack-part:container-registry
+    - tool:gitea
+    - tool:zoekt
+    - tool:kyverno
+  used_by_role:
+    - role:platform-engineer
+    - role:site-reliability-engineer
+    - role:devops-engineer
+    - role:backend-engineer
+
+# ---------------------------------------------------------------------------
+# 4. Tool nodes for Krate components (new tools only)
+# ---------------------------------------------------------------------------
+---
+nodeKind: Tool
+id: tool:gitea
+attributes:
+  displayName: "Gitea"
+  homepageUrl: "https://gitea.com/"
+  kind: git-server
+  description: |
+    Lightweight, self-hosted Git service written in Go. Provides
+    repository hosting, pull requests, issue tracking, and a web UI
+    with minimal resource footprint. Gitea is often embedded as the
+    Git backend in larger platforms — in Krate, it handles the Git
+    protocol layer (clone, push, fetch) and repository storage while
+    Krate's own API server manages the higher-level forge abstractions
+    (PR workflows, RBAC, pipelines). Supports SSH and HTTP transport,
+    LFS, webhooks, and OAuth2 authentication.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:platform-engineering
+    - target: skill-area:ci-cd
+  alternative_to:
+    - target: tool:gitlab-ci
+      comparison: "Self-hosted Git forges — Gitea is minimal; GitLab is full-featured"
+---
+nodeKind: Tool
+id: tool:zoekt
+attributes:
+  displayName: "Zoekt"
+  homepageUrl: "https://github.com/sourcegraph/zoekt"
+  kind: search-engine
+  description: |
+    Trigram-based code search engine originally built at Google and
+    maintained by Sourcegraph. Indexes Git repositories and serves
+    sub-second regex and literal searches across large codebases.
+    Zoekt builds compact trigram indices that enable fast intersection
+    queries without full-text scanning. In Krate, Zoekt indexes all
+    org-scoped repositories and powers the platform's code search UI
+    and API. Supports branch-aware indexing, file filtering, and
+    ranked results.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:platform-engineering
+---
+nodeKind: Tool
+id: tool:kyverno
+attributes:
+  displayName: "Kyverno"
+  homepageUrl: "https://kyverno.io/"
+  kind: policy-engine
+  description: |
+    Kubernetes-native policy engine that uses admission webhooks to
+    validate, mutate, and generate resources based on declarative
+    policies written as Kubernetes CRDs. Unlike OPA/Gatekeeper which
+    requires learning Rego, Kyverno policies are expressed as familiar
+    YAML with pattern matching and overlay semantics. In Krate,
+    Kyverno enforces org-level PolicyProfiles — controlling which
+    container images agents can use, what RBAC bindings are permitted,
+    resource quota enforcement, and security baseline compliance.
+    Supports policy reports, background scanning, and exception
+    management.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:policy-as-code
+    - target: skill-area:platform-engineering
+    - target: skill-area:container-security
+  alternative_to:
+    - target: tool:grafana
+      comparison: "Not alternatives — Kyverno is policy enforcement; Grafana is observability"
+
+# ---------------------------------------------------------------------------
+# 5. ToolServer nodes for Krate's API
+# ---------------------------------------------------------------------------
+---
+nodeKind: ToolServer
+id: tool-server:krate-api
+attributes:
+  displayName: "Krate API Server"
+  description: |
+    The primary HTTP API server for Krate, serving both the Kubernetes
+    aggregated API (for data-plane resources like repositories, pull
+    requests, issues, pipelines) and a REST convenience layer for the
+    web UI. Listens on port 3080 by default. Handles authentication
+    via Kubernetes service accounts and bearer tokens, org-scoped
+    authorization, webhook dispatch, and SSE streaming for real-time
+    updates. The aggregated API registers with kube-apiserver so that
+    kubectl and client-go can interact with Krate resources natively.
+  protocol: rest
+  category: platform-api
+  repoUrl: https://github.com/a5c-ai/babysitter/tree/staging/packages/krate/core
+  installCommand: npm install && npm run build --workspace=@a5c-ai/krate
+  npmPackage: '@a5c-ai/krate'
+edges:
+  integrates_with:
+    - target: tool:kubernetes
+    - target: stack-part:managed-postgres
+    - target: stack-part:kubernetes-cluster
+  lib_applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:devops
+  serves_kubernetes_resource:
+    - target: kubernetes-crd-kind:krate-agent-stack
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-subagent
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-tool-profile
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-mcp-server
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-skill
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-trigger-rule
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-context-label
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-krate-workspace-policy
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-service-account
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-role-binding
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-secret-grant
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-config-grant
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-adapter
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-transport-binding
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-provider-config
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-krate-project
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-gateway-config
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-memory-repository
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-memory-source
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-memory-ontology
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-memory-association
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-krate-workspace
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-ref-policy
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-runner-pool
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-webhook-subscription
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-view
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-selector
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-pull-request
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-issue
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-review
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-pipeline
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-job
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-webhook-delivery
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-dispatch-run
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-dispatch-attempt
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-session
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-context-bundle
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-krate-artifact
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-approval
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-trigger-execution
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-capability-requirement
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-work-item-session-link
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-work-item-workspace-link
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-session-transcript
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-session-attachment
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-krate-workspace-runtime
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-memory-snapshot
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-memory-query
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-memory-update
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-agent-run-memory-import
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-external-backend-provider
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-external-backend-binding
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-external-backend-sync-policy
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-external-provider-capability-manifest
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-external-webhook-delivery
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-external-sync-event
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-external-sync-state
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-external-write-intent
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-external-sync-conflict
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-external-object-link
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-policy-profile
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-policy-template
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-policy-binding
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-policy-exception-request
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-repository
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-branch-protection
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-organization
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-org-namespace-binding
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-sshkey
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-repository-permission
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-user
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-team
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-invite
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-identity-mapping
+      serviceMode: aggregated-api
+    - target: kubernetes-crd-kind:krate-auth-provider
+      serviceMode: aggregated-api
+---
+nodeKind: ToolServer
+id: tool-server:krate-agent-dispatch
+attributes:
+  displayName: "Krate Agent Dispatch API"
+  description: |
+    REST API endpoints for dispatching AI coding agents within Krate.
+    Handles the full dispatch lifecycle: creating AgentDispatchRun
+    resources, performing permission review against org policies,
+    assembling the context bundle (repo checkout, memory snapshots,
+    CLAUDE.md), launching the agent as a Kubernetes Job via agent-mux,
+    streaming session output, and collecting results. Supports manual
+    dispatch (via UI or kubectl), PR-triggered dispatch, and
+    scheduled dispatch via CronJob resources.
+  protocol: rest
+  category: agent-dispatch
+  repoUrl: https://github.com/a5c-ai/babysitter/tree/staging/packages/krate/cli
+  installCommand: npm install && npm test --workspace=@a5c-ai/krate-cli
+  npmPackage: '@a5c-ai/krate-cli'
+edges:
+  integrates_with:
+    - target: agent:agent-mux
+    - target: agent:babysitter
+    - target: tool:kubernetes
+  lib_applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:software-engineering
+
+# ---------------------------------------------------------------------------
+# 6. Krate Resource Kinds as Definitions
+# ---------------------------------------------------------------------------
+---
+nodeKind: Definition
+id: definition:krate-config-kinds
+attributes:
+  displayName: "Krate Configuration Resource Kinds (etcd CRDs)"
+  authoredAt: "2026-05-10T00:00:00Z"
+  text: |
+    The 75 Krate CustomResourceDefinition documents that form Krate's
+    control plane. These are low-volume, high-importance configuration
+    resources stored in etcd alongside native Kubernetes objects:
+
+    Organization management: Organization, OrganizationSettings,
+      OrganizationQuota, OrganizationWebhook.
+    Identity: User, ServiceAccount, Team, TeamMembership, TeamSync.
+    RBAC: Role, RoleBinding, OrgRole, OrgRoleBinding, GlobalRole.
+    Policy: PolicyProfile, PolicyTemplate, PolicyBinding,
+      PolicyException, AdmissionPolicy.
+    Agent configuration: AgentStack, AgentStackVersion,
+      AgentPermissionSet, AgentQuotaProfile, AgentSchedule.
+    Platform: HelmRelease, GitOpsApplication, SecretStore,
+      ExternalSecret, CertificateRequest.
+    UI state: View, Selector, DashboardLayout, NotificationRule.
+    Webhooks: WebhookEndpoint, WebhookDeliveryPolicy.
+    Integration: ExternalAuthProvider, OIDCClient, SCIMProvider.
+    Audit: AuditPolicy, AuditSink, ComplianceReport.
+  status: canonical
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+  supports:
+    - tool:kubernetes
+    - skill-area:platform-engineering
+    - skill-area:policy-as-code
+---
+nodeKind: Definition
+id: definition:krate-aggregated-kinds
+attributes:
+  displayName: "Krate Aggregated API Kinds (Postgres-backed)"
+  authoredAt: "2026-05-10T00:00:00Z"
+  text: |
+    The 23 Postgres-backed aggregated API resource kinds that form
+    Krate's data plane. These are high-volume mutable resources served
+    by Krate's aggregated API server and stored in PostgreSQL:
+
+    Forge resources: Repository, RepositoryBranch, BranchProtection,
+      PullRequest, PullRequestReview, PullRequestComment, Issue,
+      IssueComment, Label, Milestone, Release, ReleaseAsset.
+    Pipeline resources: Pipeline, PipelineRun, PipelineStage,
+      PipelineStep, PipelineLog, PipelineArtifact.
+    Agent data: AgentDispatchRun, AgentSession, AgentSessionEvent.
+    Memory: AgentMemorySnapshot, AgentMemoryQuery.
+
+    All 23 kinds are accessible via kubectl and standard Kubernetes
+    client libraries. They support watch semantics for real-time
+    updates, label selectors for filtering, and field selectors for
+    efficient queries. The aggregated API server handles pagination,
+    optimistic concurrency (resourceVersion), and org-scoped
+    list/watch.
+  status: canonical
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+  supports:
+    - tool:kubernetes
+    - skill-area:platform-engineering
+    - skill-area:api-design
+---
+nodeKind: Definition
+id: definition:krate-identity-model
+attributes:
+  displayName: "Krate Identity Model"
+  authoredAt: "2026-05-10T00:00:00Z"
+  text: |
+    Krate's identity and access control model built on Kubernetes RBAC
+    primitives extended with org-scoped semantics:
+
+    Organization: Top-level tenant boundary. Cluster-scoped CRD that
+      owns namespaces and all org-scoped resources.
+    User: Maps to a Kubernetes user identity (x509 cert or OIDC subject).
+      Can belong to multiple organizations with different roles in each.
+    Team: Named group within an org. Supports nested teams, LDAP/SCIM
+      sync, and team-scoped repository permissions.
+    ServiceAccount: Bot identities for automation, CI, and agent dispatch.
+    RBAC: Four-level role hierarchy — GlobalRole (cluster-wide),
+      OrgRole (org-wide), Role (namespace/repo-scoped), and
+      RoleBinding at each level. Predefined roles include org-owner,
+      org-admin, repo-admin, repo-writer, repo-reader, agent-dispatcher.
+
+    Authentication flows support OIDC, x509 client certificates,
+    personal access tokens, and SSH keys. Authorization is evaluated
+    by the Kubernetes API server using Krate's custom authorizer
+    webhook, which resolves org membership and team permissions.
+  status: canonical
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:security
+  supports:
+    - tool:kubernetes
+    - skill-area:platform-engineering
+    - skill-area:k8s-rbac
+---
+nodeKind: Definition
+id: definition:krate-forge-model
+attributes:
+  displayName: "Krate Forge Resource Model"
+  authoredAt: "2026-05-10T00:00:00Z"
+  text: |
+    The Git forge resource model in Krate — the aggregated API kinds
+    that implement repository collaboration workflows:
+
+    Repository: Org-scoped resource representing a Git repository.
+      Backed by a Gitea repository for storage. Supports visibility
+      (public/internal/private), default branch, description, topics,
+      and fork relationships.
+    PullRequest: Represents a proposed change with source/target branch,
+      status (open/merged/closed), reviewers, labels, and milestone.
+      Status conditions track CI checks, review approvals, and merge
+      readiness.
+    Issue: Lightweight work tracking with assignees, labels, milestone,
+      and cross-references to PRs.
+    Review: Pull request review with verdict (approve/request-changes/
+      comment) and inline comments anchored to diff hunks.
+    Pipeline: CI/CD pipeline definition with stages, steps, triggers,
+      and resource requirements. Pipelines execute as Kubernetes Jobs.
+    BranchProtection: Rules governing who can push to a branch,
+      required status checks, required reviewers, and merge strategies
+      (merge/squash/rebase).
+    Release: Tagged version with release notes, changelog generation,
+      and attached binary artifacts.
+  status: canonical
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:devops
+  supports:
+    - tool:kubernetes
+    - skill-area:ci-cd
+    - skill-area:platform-engineering
+---
+nodeKind: Definition
+id: definition:krate-agent-model
+attributes:
+  displayName: "Krate Agent Resource Model"
+  authoredAt: "2026-05-10T00:00:00Z"
+  text: |
+    The resource kinds governing AI agent dispatch and execution
+    within Krate:
+
+    AgentStack: Defines a reusable agent configuration — which coding
+      agent to use (Claude Code, Codex, etc.), container image, resource
+      limits (CPU, memory, GPU), timeout, and default tool permissions.
+    AgentStackVersion: Immutable snapshot of an AgentStack for
+      reproducibility. Dispatch runs reference a specific version.
+    AgentDispatchRun: A single agent execution. Created by a user,
+      PR trigger, or schedule. Specifies the target repository,
+      branch, prompt, AgentStack version, and permission scope.
+      Lifecycle: Pending → PermissionReview → ContextBundle →
+      Running → Completed/Failed/Cancelled.
+    AgentSession: The active session within a dispatch run. Tracks
+      token usage, tool calls, files modified, and conversation history.
+    AgentSessionEvent: Individual events within a session — tool
+      invocations, file edits, terminal commands, model responses.
+    AgentPermissionSet: Org-scoped allow/deny rules for what tools
+      and commands an agent can use during a dispatch run.
+    AgentQuotaProfile: Org-level resource and cost quotas for agent
+      dispatch — max concurrent runs, token budget, compute hours.
+    AgentSchedule: CronJob-like schedule for recurring agent dispatch
+      (e.g., nightly code review, weekly dependency updates).
+  status: canonical
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+  supports:
+    - tool:kubernetes
+    - skill-area:platform-engineering
+---
+nodeKind: Definition
+id: definition:krate-memory-model
+attributes:
+  displayName: "Krate Agent Memory Model (Company Brain)"
+  authoredAt: "2026-05-10T00:00:00Z"
+  text: |
+    The resource kinds implementing Krate's company brain — cross-run
+    knowledge persistence for AI agents:
+
+    AgentMemoryRepository: Org-scoped resource that represents a
+      knowledge store. Configures the vector index backend, retention
+      policy, and access control. Each org can have multiple memory
+      repositories (e.g., per-team, per-project, or org-wide).
+    AgentMemorySnapshot: An individual knowledge artifact produced
+      by an agent session. Contains structured metadata (source repo,
+      PR, session ID, timestamp), a natural-language summary, code
+      patterns discovered, architectural decisions made, and embedding
+      vectors for similarity search.
+    AgentMemoryQuery: A read-only resource used to query the memory
+      repository. Specifies search terms, filters (time range, repo,
+      author), similarity threshold, and max results. The aggregated
+      API server resolves the query against the vector index and
+      returns matching snapshots.
+
+    The memory model enables agents to build cumulative organizational
+    knowledge: coding patterns, architecture decisions, common error
+    resolutions, and team conventions persist across independent
+    agent dispatch runs.
+  status: canonical
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+  supports:
+    - tool:kubernetes
+    - skill-area:platform-engineering
+---
+nodeKind: Definition
+id: definition:krate-policy-model
+attributes:
+  displayName: "Krate Policy Resource Model"
+  authoredAt: "2026-05-10T00:00:00Z"
+  text: |
+    The resource kinds governing policy enforcement within Krate,
+    implemented via Kyverno and custom admission webhooks:
+
+    PolicyProfile: Org-scoped bundle of policies applied to all
+      resources within an organization. Profiles compose multiple
+      PolicyTemplates with org-specific parameter values.
+    PolicyTemplate: Reusable, parameterized policy definition.
+      Templates are cluster-scoped and can be shared across orgs.
+      Examples: allowed-container-registries, required-labels,
+      resource-quota-limits, agent-tool-allowlist.
+    PolicyBinding: Associates a PolicyTemplate with a target scope
+      (org, team, repo, or agent stack) and supplies parameter values.
+    PolicyException: Temporary or permanent exemption from a specific
+      policy for a specific resource. Requires org-admin approval and
+      has an optional expiry.
+    AdmissionPolicy: Low-level Kyverno ClusterPolicy wrapper that
+      Krate generates from PolicyProfile/PolicyTemplate combinations.
+      Not typically created directly by users.
+
+    Policies are enforced at admission time (blocking non-compliant
+    resource creation) and via background scanning (reporting existing
+    resources that violate newly applied policies).
+  status: canonical
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:security
+  supports:
+    - tool:kubernetes
+    - tool:kyverno
+    - skill-area:policy-as-code
+    - skill-area:platform-engineering
+
+# ---------------------------------------------------------------------------
+# 7. Skill Areas specific to Krate
+# ---------------------------------------------------------------------------
+---
+nodeKind: SkillArea
+id: skill-area:kubernetes-operator-development
+attributes:
+  displayName: "Kubernetes Operator Development"
+  description: |
+    Building custom Kubernetes operators using controller-runtime,
+    kubebuilder, or operator-sdk. Covers the reconciliation loop
+    pattern, custom resource definition design, status subresource
+    management, finalizers, owner references, leader election, and
+    webhook implementation (validating, mutating, converting).
+    Includes testing strategies (envtest, integration tests against
+    kind clusters) and operational concerns (graceful shutdown,
+    metrics, health probes, RBAC least-privilege).
+  domains:
+    - domain:platform-engineering
+    - domain:devops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:platform-engineering
+      confidence: primary
+    - target: domain:devops
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:platform-engineering
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:git-forge-administration
+attributes:
+  displayName: "Git Forge Administration"
+  description: |
+    Operating and administering Git collaboration platforms — GitHub,
+    GitLab, Gitea, Krate, or similar. Covers repository management,
+    branch protection rules, access control (teams, deploy keys,
+    OAuth apps), webhook configuration, CI/CD pipeline integration,
+    migration between forges, backup and disaster recovery, and
+    platform-level policy enforcement. Includes understanding of Git
+    protocol internals (packfiles, refs, transfer protocols) as they
+    affect forge operations.
+  domains:
+    - domain:devops
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:ci-cd
+      strength: recommended
+    - target: skill-area:platform-engineering
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:kubernetes-rbac-design
+attributes:
+  displayName: "Kubernetes RBAC Design"
+  description: |
+    Designing and implementing role-based access control in Kubernetes
+    clusters. Covers ClusterRoles, Roles, ClusterRoleBindings,
+    RoleBindings, aggregated roles, and the interaction between RBAC
+    and admission control. Includes least-privilege patterns for
+    workloads, operators, and CI service accounts; multi-tenant RBAC
+    with namespace isolation; and debugging authorization with
+    kubectl auth can-i and audit logs. In extended platforms like
+    Krate, includes org-scoped RBAC layering on top of native K8s
+    RBAC.
+  domains:
+    - domain:platform-engineering
+    - domain:security
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:platform-engineering
+      confidence: primary
+    - target: domain:security
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:platform-engineering
+      strength: required
+  related_to:
+    - target: skill-area:k8s-rbac
+---
+nodeKind: SkillArea
+id: skill-area:aggregated-api-server-development
+attributes:
+  displayName: "Aggregated API Server Development"
+  description: |
+    Building custom Kubernetes aggregated API servers that register
+    with kube-apiserver via APIService resources and serve custom API
+    groups backed by non-etcd storage. Covers the apiserver library
+    (k8s.io/apiserver), REST storage interfaces, codec and conversion
+    chains, request handling, admission webhooks in the aggregated
+    context, table conversion for kubectl output, watch semantics with
+    external stores, and health/readiness probes. Includes performance
+    considerations for backing the aggregated server with PostgreSQL,
+    MySQL, or other relational databases.
+  domains:
+    - domain:platform-engineering
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: domain:platform-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:platform-engineering
+      strength: required
+    - target: skill-area:api-design
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:gitops-deployment
+attributes:
+  displayName: "GitOps Deployment"
+  description: |
+    Implementing GitOps-driven continuous deployment using tools like
+    ArgoCD, Flux, or similar. Covers the GitOps principles (declarative
+    desired state, versioned and immutable, automatically applied,
+    continuously reconciled), repository structure patterns (monorepo
+    vs. multi-repo, app-of-apps, ApplicationSets), secrets management
+    in GitOps (sealed-secrets, external-secrets, SOPS), progressive
+    delivery (canary, blue-green via Argo Rollouts), drift detection,
+    and multi-cluster/multi-tenant GitOps architectures.
+  domains:
+    - domain:devops
+    - domain:platform-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:platform-engineering
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:ci-cd
+      strength: required
+    - target: skill-area:platform-engineering
+      strength: recommended
+  related_to:
+    - target: skill-area:gitops
+
+# ---------------------------------------------------------------------------
+# 8. Workflows
+# ---------------------------------------------------------------------------
+---
+nodeKind: Workflow
+id: workflow:krate-dispatch-agent
+attributes:
+  displayName: "Krate Agent Dispatch"
+  description: |
+    End-to-end workflow for dispatching an AI coding agent within Krate.
+    Triggered by a user command (UI button, kubectl create, PR comment
+    /agent), a schedule (AgentSchedule), or a pipeline step.
+
+    Steps:
+    1. Dispatch request: An AgentDispatchRun resource is created with
+       the target repository, branch, prompt, and AgentStack reference.
+    2. Permission review: The platform evaluates the dispatch against
+       org-level AgentPermissionSets and PolicyProfiles. If the requested
+       tools or resource limits exceed policy, the run is rejected or
+       escalated for org-admin approval.
+    3. Context bundle assembly: Krate checks out the repository at the
+       specified branch, injects CLAUDE.md and relevant memory snapshots
+       from the company brain, and prepares the agent workspace container.
+    4. Agent-mux launch: The dispatch controller creates a Kubernetes Job
+       running the agent-mux container with the selected coding agent
+       (Claude Code, Codex, etc.). The session streams output back via SSE.
+    5. Completion: On agent completion, results are collected — files
+       modified, PR created/updated, tests run. A memory snapshot is
+       generated and stored. The AgentDispatchRun status is updated to
+       Completed or Failed.
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "on-demand"
+  complexity: complex
+edges:
+  involves_role:
+    - role:platform-engineer
+    - role:backend-engineer
+    - role:devops-engineer
+  applies_to_domain:
+    - domain:platform-engineering
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:krate-pr-lifecycle
+attributes:
+  displayName: "Krate Pull Request Lifecycle"
+  description: |
+    The full lifecycle of a pull request within Krate's Kubernetes-native
+    forge, from creation through merge.
+
+    Steps:
+    1. PR creation: A PullRequest aggregated API resource is created
+       (via UI, kubectl, or git push with a create-pr flag). Krate
+       syncs the underlying Git branches with Gitea.
+    2. CI pipeline trigger: BranchProtection rules on the target branch
+       trigger a Pipeline resource. PipelineRuns execute as Kubernetes
+       Jobs — lint, test, build, security scan.
+    3. Review assignment: Reviewers are assigned based on CODEOWNERS
+       patterns or team routing rules. Reviewers submit PullRequestReview
+       resources with approve/request-changes verdicts.
+    4. Status conditions: The PR aggregates status from CI checks,
+       review approvals, and policy evaluations into Kubernetes-style
+       status conditions. The merge button is unlocked when all required
+       conditions are True.
+    5. Agent dispatch (optional): Reviewers or authors can dispatch an
+       agent via /agent comment to address review feedback automatically.
+    6. Merge: Merge strategy (merge/squash/rebase) is applied per
+       BranchProtection. Post-merge hooks trigger downstream pipelines,
+       release creation, and issue auto-close.
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:backend-engineer
+    - role:fullstack-engineer
+    - role:tech-lead
+    - role:qa-engineer
+  applies_to_domain:
+    - domain:software-engineering
+    - domain:devops
+---
+nodeKind: Workflow
+id: workflow:krate-memory-query
+attributes:
+  displayName: "Krate Company Brain Memory Query"
+  description: |
+    Workflow for querying and updating the company brain knowledge base
+    within Krate.
+
+    Query flow:
+    1. An agent session (or human user via kubectl) creates an
+       AgentMemoryQuery resource specifying search terms, filters
+       (time range, source repository, author), and similarity threshold.
+    2. The aggregated API server resolves the query against the vector
+       index in the AgentMemoryRepository, performing semantic similarity
+       search combined with metadata filtering.
+    3. Matching AgentMemorySnapshot resources are returned, ranked by
+       relevance. Each snapshot contains structured knowledge — code
+       patterns, architecture decisions, error resolutions.
+    4. The agent incorporates relevant snapshots into its context
+       before proceeding with its task.
+
+    Update flow:
+    1. On agent session completion, the dispatch controller generates
+       a new AgentMemorySnapshot summarizing decisions made, patterns
+       discovered, and lessons learned.
+    2. The snapshot is embedded (vector encoding) and stored in the
+       AgentMemoryRepository.
+    3. Org-admins can review, curate, or delete snapshots via the
+       memory management UI or kubectl.
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-agent-session"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:platform-engineer
+    - role:backend-engineer
+  applies_to_domain:
+    - domain:platform-engineering
+    - domain:software-engineering
+
+# ---------------------------------------------------------------------------
+# 9. Cross-cutting connectivity edges (via edge-only documents)
+#    These add edges from existing nodes to new Krate nodes.
+# ---------------------------------------------------------------------------
+#
+# Note: Edges FROM krate entities TO existing entities are already declared
+# above on each entity. The edges below would add reverse/additional
+# connectivity that couldn't be expressed inline.
+# ---------------------------------------------------------------------------

@@ -1,0 +1,19 @@
+nodeKind: TranscriptIngressEndpoint
+id: transcript-ingress:claude-code-claude-ai
+attributes:
+  displayName: "Claude.ai session-ingress endpoint"
+  endpointUrl: "https://api.anthropic.com/api/claude_code/v1/sessions/{sessionId}/log"
+  ingressMethod: PUT
+  lastUuidHeader: "Last-Uuid"
+  serverLastUuidHeader: "x-last-uuid"
+  maxRetries: 10
+  baseDelayMs: 500
+  failsImmediatelyOn:
+    - 401
+  sequentialPerSession: true
+  authMethod: oauth
+  description: |
+    Per-session ingress endpoint receiving streamed transcript entries.
+    Last-Uuid carries the previously stored uuid; on 409 the server returns
+    x-last-uuid and the client adopts it for chain repair. Per-session
+    sequential() wrapper prevents concurrent writes for the same session.

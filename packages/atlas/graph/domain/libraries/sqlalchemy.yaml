@@ -1,0 +1,15 @@
+nodeKind: Library
+id: library:sqlalchemy
+attributes:
+  displayName: "SQLAlchemy"
+  belongsToLanguageId: language:python
+  category: orm
+  description: |
+    Python SQL toolkit and Object-Relational Mapper — Core (SQL expression) plus ORM layers.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:flask-sqlalchemy

@@ -1,0 +1,12 @@
+nodeKind: Domain
+id: domain:networking
+attributes:
+  displayName: "Networking"
+  description: |
+    Networking domain — TCP/IP, routing, switching, load balancing, DNS,
+    TLS, service mesh, and software-defined networking.
+edges:
+  contains:
+    - specialization:network-programming
+    - topic:data-in-transit-encryption
+    - topic:load-balancing

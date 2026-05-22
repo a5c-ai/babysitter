@@ -1,0 +1,236 @@
+# NodeKinds for cluster 5-communication-primitives.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:channel
+  name: Channel
+  origin: universal
+  prefix: channel
+  clusters:
+  - 5-communication-primitives
+  - 3-agent-stack
+  purpose: brokered communication surface
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: kind
+    type: enum<mcp-channel,a2a-channel,chat-channel,mailbox-channel,http-sse-channel,webhook,email,sms,push,slack,desktop-notification,system-tray>
+    required: true
+    notes: Collapsed from former ChannelKind NodeKind (remodel 2026-04-29). Widened from 4→5 to accommodate `http-sse-channel`. Further widened 2026-05-01 (D-bonus.notifications) with notification-channel kinds (webhook,email,sms,push,slack,desktop-notification,system-tray) — collapses NotificationChannel proposal to existing Channel.kind.
+  - name: brokeringPrimitive
+    type: string
+    required: false
+  - name: endpoint
+    type: string
+    required: false
+  - name: persistent
+    type: bool
+    required: false
+  incomingEdges:
+  - notifies_via
+  outgoingEdges:
+  - notifies_checkpoint
+  invariants:
+  - kind value within enum (V-7.1)
+  examples: []
+- id: node:hook-surface
+  name: HookSurface
+  origin: universal
+  prefix: hook-surface
+  cluster: 5-communication-primitives
+  purpose: a concrete hook event name (PreToolUse, PhaseChange, etc.)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: eventName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: family
+    type: enum<shell-hook,in-process,observer>
+    required: true
+    notes: Collapsed from former HookFamily NodeKind (remodel 2026-04-29).
+  - name: blocking
+    type: bool
+    required: false
+  - name: direction
+    type: string
+    required: false
+  - name: kind
+    type: string
+    required: false
+  - name: originVendor
+    type: string
+    required: false
+  - name: payloadSchema
+    type: any
+    required: false
+  - name: trigger
+    type: string
+    required: false
+  - name: vendor
+    type: string
+    required: false
+  incomingEdges:
+  - emits_hook
+  outgoingEdges:
+  - uses_merge_policy
+  invariants:
+  - family value within enum (V-7.3)
+  examples: []
+- id: node:merge-policy
+  name: MergePolicy
+  origin: a5c
+  prefix: merge-policy
+  cluster: 5-communication-primitives
+  purpose: 'A named conflict-resolution policy applied by hooks-mux when fanning out
+
+    a single hook event across multiple registered handlers (plugins,
+
+    settings layers, capability profiles). MergePolicy reifies the rules
+
+    that produce a `HookMergeDiagnostic`: which decision verb wins, how
+
+    `persistEnv` / `unsetEnv` / `contextVars` / `additionalContext` /
+
+    `systemMessage` collapse across handlers, and what to do on protected-
+
+    prefix or namespace conflicts. Sourced from
+
+    packages/hooks-mux/core/src/merge-engine/merge.ts (MergeOptions,
+
+    MergedExecutionResult).
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: decisionRule
+    type: enum<most-restrictive-wins,last-writer-wins>
+    required: true
+    evidence: vendor-doc-or-better
+    notes: How the decision verb (deny<ask<allow<continue<noop) is collapsed. hooks-mux uses most-restrictive-wins; the lowest-rank verb across all handlers wins.
+  - name: envMergeRule
+    type: enum<deep-merge,last-writer-wins,fail-on-conflict,protected-prefixes,namespace-required>
+    required: true
+    evidence: vendor-doc-or-better
+    notes: Collapse rule for persistEnv / contextVars maps. Mirrors the conflictPolicy field of MergeOptions.
+  - name: protectedPrefixes
+    type: list<string>
+    required: false
+    notes: Required when envMergeRule = protected-prefixes. Keys with one of these prefixes may not be overwritten by a later handler.
+  - name: namespaceRequired
+    type: bool
+    required: false
+    notes: When envMergeRule = namespace-required, every key MUST start with a SOMETHING_ namespace prefix or it is rejected.
+  - name: systemMessageStrategy
+    type: enum<concatenate,keep-first>
+    required: true
+    evidence: vendor-doc-or-better
+    notes: How systemMessage strings from multiple handlers are combined.
+  - name: arraysMergeRule
+    type: enum<replace,concatenate>
+    required: true
+    notes: How list-valued fields are merged. hooks-mux's deepMerge replaces arrays rather than concatenating.
+  - name: stopReasonRule
+    type: enum<first-non-empty,last-writer-wins,concatenate>
+    required: false
+    notes: 'How Stop hook stopReason strings collapse. # TODO: confirm exact rule from merge.ts.'
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - merge_policy_used_by
+  outgoingEdges: []
+  invariants:
+  - id starts with merge-policy: null
+  - envMergeRule = protected-prefixes implies protectedPrefixes is non-empty
+  - envMergeRule = namespace-required implies namespaceRequired = true
+  examples:
+  - graph/channels-hooks/merge-policies/most-restrictive.yaml
+  - graph/channels-hooks/merge-policies/protected-prefixes.yaml
+- id: node:hook-mapping
+  name: HookMapping
+  origin: universal
+  prefix: hook-mapping
+  cluster: 5-communication-primitives
+  purpose: per-(agent, canonical-hook) mapping recording the agent's native event name, version range, payload shape, and delivery
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: mappingId
+    type: string
+    required: true
+  - name: hookId
+    type: ref<HookSurface>
+    required: true
+  - name: targetId
+    type: id
+    required: true
+    notes: ref<AgentVersion> | ref<PluginTarget>
+  - name: nativeName
+    type: string
+    required: true
+    evidence: vendor-doc-or-better
+  - name: versionRange
+    type: versionRange
+    required: true
+    evidence: vendor-doc-or-better
+  - name: requiresRuntimeHooks
+    type: bool
+    required: true
+  - name: adapterFamily
+    type: string
+    required: false
+  - name: payloadShape
+    type: json
+    required: false
+    evidence: vendor-doc-or-better
+  - name: delivery
+    type: enum<shell
+    in-process: null
+    observer>: null
+    required: false
+  - name: blocking
+    type: bool
+    required: false
+  - name: supportLevel
+    type: enum<supported
+    degraded: null
+    unsupported>: null
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  - name: family
+    type: enum<shell-hook,in-process,observer>
+    required: false
+    notes: Collapsed from former HookFamily NodeKind. Optional on HookMapping (often inherited from the referenced HookSurface).
+  incomingEdges:
+  - emits_hook
+  outgoingEdges:
+  - maps_hook
+  invariants:
+  - hookId resolves to a canonical HookSurface
+  - targetId resolves
+  examples: []
+

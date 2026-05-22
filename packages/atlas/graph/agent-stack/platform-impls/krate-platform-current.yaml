@@ -1,0 +1,40 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:krate.platform@current
+attributes:
+  displayName: "Krate Platform (current) — K8s-native agent governance"
+  packageRef: source-ref:babysitter-sdk
+  nativeExtensionFormat: kubernetes-crd
+  nativeExtensionManifestPath: charts/krate/crds/
+  subagentDefinitionFormat: agent-stack-crd
+  subagentsDirectoryPath:
+    - charts/krate/crds/
+  hooksDirectoryOrConfigPath: []
+  settingsFiles: []
+  pluginRegistryPath: ""
+  capabilityProfileRegistry: true
+  launchConfigRegistry: false
+  platformIdentityStrategy: kubernetes-rbac
+  notes: |
+    Krate's platform layer provides the governance and extension model
+    for agent work on Krate-managed repositories. NOT an agent runtime —
+    Krate delegates agent execution to agent-mux. This impl covers:
+
+    - Agent Stack CRDs: AgentStack, AgentSubagent, AgentToolProfile,
+      AgentMcpServer, AgentSkill — declarative agent configuration
+    - Permission model: AgentServiceAccount, AgentRoleBinding,
+      AgentSecretGrant, AgentConfigGrant — K8s-native RBAC for agents
+    - Policy engine: PolicyProfile, PolicyTemplate, PolicyBinding —
+      org-level governance rules enforced via Kyverno admission webhooks
+    - Workspace policy: AgentWorkspacePolicy — branch naming, file
+      scope, cleanup rules for agent worktrees
+    - Trigger rules: AgentTriggerRule — event→dispatch routing
+    - Provider config: AgentProviderConfig — LLM API key/endpoint mgmt
+    - Gateway config: AgentGatewayConfig — multi-agent routing rules
+
+    75 Krate CRDs total. All queryable via kubectl.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+    - target: platform:krate
+      role: platform

@@ -1,0 +1,167 @@
+---
+nodeKind: BreakpointStrategy
+id: breakpoint-strategy:single-question
+attributes:
+  displayName: "Single Question"
+  strategyKind: single-question
+  description: |
+    The decision asks one yes/no or short-answer question with no
+    branching. Simplest shape; default for `kind=approval` checkpoints.
+  defaultTimeoutSec: 3600
+edges: {}
+---
+nodeKind: BreakpointStrategy
+id: breakpoint-strategy:multiple-choice
+attributes:
+  displayName: "Multiple Choice"
+  strategyKind: multiple-choice
+  description: |
+    The decision presents the responder with a fixed set of choices
+    (typically 2-5). Each choice can carry an attached payload that the
+    agent will use after resolution.
+  defaultTimeoutSec: 3600
+edges: {}
+---
+nodeKind: BreakpointStrategy
+id: breakpoint-strategy:free-form-edit
+attributes:
+  displayName: "Free-form Edit"
+  strategyKind: free-form-edit
+  description: |
+    The responder can edit a structured payload (e.g. the proposed plan,
+    a Markdown patch, a JSON document) and return the edited form. Used
+    by `kind=edit` checkpoints (plan-edit, etc.).
+  defaultTimeoutSec: 7200
+edges: {}
+---
+nodeKind: BreakpointStrategy
+id: breakpoint-strategy:multi-step-decision
+attributes:
+  displayName: "Multi-step Decision"
+  strategyKind: multi-step-decision
+  description: |
+    The decision is staged over multiple turns of responder input —
+    e.g. choose category, then refine specifics, then confirm. Used for
+    risk-tier decisions where blanket approval is too coarse.
+  defaultTimeoutSec: 14400
+edges: {}
+---
+nodeKind: BreakpointStrategy
+id: breakpoint-strategy:binary-approval
+attributes:
+  displayName: "Binary Approval"
+  strategyKind: binary-approval
+  description: |
+    Approve or deny only — no edit, no rationale required. Default for
+    high-frequency `kind=approval` checkpoints (dangerous-tool-approval,
+    cost-escalation).
+  defaultTimeoutSec: 1800
+edges: {}
+---
+nodeKind: ResponderProfile
+id: responder-profile:tech-lead
+attributes:
+  displayName: "Tech Lead"
+  allowedRoleIds:
+    - role:tech-lead
+  backend: web
+  description: |
+    Routes to whoever currently holds the `role:tech-lead` assignment
+    on this project. Reachable via the standard web channel; tech-lead
+    expected to respond within an hour during business hours.
+edges: {}
+---
+nodeKind: ResponderProfile
+id: responder-profile:on-call-incident-commander
+attributes:
+  displayName: "On-call Incident Commander"
+  allowedRoleIds:
+    - role:incident-commander
+  backend: slack
+  description: |
+    Pages the rotating on-call incident-commander. Reachable via the
+    incident-response Slack channel; expected response time is
+    measured in minutes for hard-blocking checkpoints.
+edges: {}
+---
+nodeKind: ResponderProfile
+id: responder-profile:engineering-manager
+attributes:
+  displayName: "Engineering Manager"
+  allowedRoleIds:
+    - role:engineering-manager
+  backend: email
+  description: |
+    Routes to the engineering manager via email. Used for
+    cost-escalation, vendor-evaluation, and other decisions whose
+    SLA tolerates an asynchronous response cycle.
+edges: {}
+---
+nodeKind: BreakpointAnswer
+id: breakpoint-answer:plan-edit-example
+attributes:
+  checkpointId: human-checkpoint:plan-edit
+  content: |
+    Approved with the following amendments:
+    - Add a database-migration safety check before step 3.
+    - Re-order steps 5 and 6 so the integration tests run after the
+      schema is finalized.
+  answeredBy: role:tech-lead
+  answeredAt: "2026-04-29T14:30:00Z"
+  rating: thumbs-up
+  ratingNotes: "Plan was well-structured; only needed two ordering tweaks."
+edges:
+  answer_for:
+    - target: human-checkpoint:plan-edit
+---
+nodeKind: BreakpointAnswer
+id: breakpoint-answer:cost-escalation-example
+attributes:
+  checkpointId: human-checkpoint:cost-escalation
+  content: |
+    Approve $200 over the daily budget for this run only. Do not raise
+    the daily cap; require re-escalation if the run consumes more than
+    50% of the headroom.
+  answeredBy: role:engineering-manager
+  answeredAt: "2026-04-30T09:15:00Z"
+  rating: scored
+  ratingNumeric: 0.7
+  ratingNotes: "Approval was correct but came 3 hours after the run paused; faster channel needed."
+edges:
+  answer_for:
+    - target: human-checkpoint:cost-escalation
+---
+nodeKind: DecisionMemory
+id: decision-memory:plan-edit-amendments-pattern
+attributes:
+  displayName: "Plan-edit amendment pattern"
+  lesson: |
+    When a tech-lead amends a plan via the plan-edit checkpoint, the
+    amendments most often address (a) ordering of integration tests
+    relative to schema changes, and (b) inserting safety checks before
+    destructive steps. Future plan-generation can pre-emptively include
+    these patterns.
+  applicabilityTags:
+    - "plan-approval"
+    - "schema-change"
+    - "integration-tests"
+  recordedAt: "2026-04-29T15:00:00Z"
+  recordedBy: role:tech-lead
+edges: {}
+---
+nodeKind: DecisionMemory
+id: decision-memory:cost-escalation-latency-pattern
+attributes:
+  displayName: "Cost-escalation latency lesson"
+  lesson: |
+    Cost-escalation checkpoints routed via email backend regularly
+    incur 2-4 hour response latency. For runs paused mid-execution,
+    consider routing to slack backend with email as fallback after
+    a 30-minute timeout.
+  applicabilityTags:
+    - "cost-escalation"
+    - "responder-routing"
+    - "latency"
+  recordedAt: "2026-04-30T10:00:00Z"
+  recordedBy: role:engineering-manager
+edges: {}

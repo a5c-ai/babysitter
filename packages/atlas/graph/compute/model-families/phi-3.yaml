@@ -1,0 +1,12 @@
+nodeKind: ModelFamily
+id: model-family:phi-3
+attributes:
+  displayName: "Phi-3"
+  vendor: "Microsoft"
+  homepageUrl: "https://azure.microsoft.com/en-us/products/phi"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:phi-3-medium@current
+    - model:phi-3-mini@current

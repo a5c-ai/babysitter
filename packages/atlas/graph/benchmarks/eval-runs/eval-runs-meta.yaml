@@ -1,0 +1,128 @@
+---
+nodeKind: EvalRun
+id: eval-run:swe-bench-verified.llama-4-405b.2024-07
+attributes:
+  target: "model:llama-4-405b-instruct@current"
+  benchmarkId: benchmark:swe-bench-verified
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:llama-4-405b-instruct@current
+  runAt: "2024-07-23T00:00:00Z"
+  runBy: "meta"
+  configHash: "sha256:placeholder-llama-4-405b-swe-bench-verified"
+edges:
+  evaluates_target:
+    - model:llama-4-405b-instruct@current
+  uses_test_set:
+    - test-set:swe-bench-verified-2024-12
+  for_benchmark:
+    - benchmark:swe-bench-verified
+---
+nodeKind: EvalRun
+id: eval-run:human-eval.llama-4-405b.2024-07
+attributes:
+  target: "model:llama-4-405b-instruct@current"
+  benchmarkId: benchmark:human-eval
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:llama-4-405b-instruct@current
+  runAt: "2024-07-23T00:00:00Z"
+  runBy: "meta"
+  configHash: "sha256:placeholder-llama-4-405b-human-eval"
+edges:
+  evaluates_target:
+    - model:llama-4-405b-instruct@current
+  for_benchmark:
+    - benchmark:human-eval
+---
+nodeKind: EvalRun
+id: eval-run:mmlu.llama-4-405b.2024-07
+attributes:
+  target: "model:llama-4-405b-instruct@current"
+  benchmarkId: benchmark:mmlu
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:llama-4-405b-instruct@current
+  runAt: "2024-07-23T00:00:00Z"
+  runBy: "meta"
+  configHash: "sha256:placeholder-llama-4-405b-mmlu"
+edges:
+  evaluates_target:
+    - model:llama-4-405b-instruct@current
+  for_benchmark:
+    - benchmark:mmlu
+---
+nodeKind: EvalRun
+id: eval-run:swe-bench.llama-3-1-405b.2024-07
+attributes:
+  target: "model:llama-3-1-405b-instruct@current"
+  benchmarkId: benchmark:swe-bench-verified
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:llama-3-1-405b-instruct@current
+  runAt: "2024-07-23T00:00:00Z"
+  runBy: "artificial-analysis"
+  configHash: "sha256:placeholder-llama-3-1-405b-swebench"
+edges:
+  evaluates_target:
+    - model:llama-3-1-405b-instruct@current
+  uses_test_set:
+    - test-set:swe-bench-verified-2024-12
+  for_benchmark:
+    - benchmark:swe-bench-verified
+---
+nodeKind: EvalRun
+id: eval-run:mmlu.llama-3-1-405b.2024-07
+attributes:
+  target: "model:llama-3-1-405b-instruct@current"
+  benchmarkId: benchmark:mmlu
+  targetId: model:llama-3-1-405b-instruct@current
+  runAt: "2024-07-23T00:00:00Z"
+  runBy: "meta"
+  configHash: "sha256:placeholder-llama-3-1-405b-mmlu"
+edges:
+  evaluates_target:
+    - model:llama-3-1-405b-instruct@current
+  for_benchmark:
+    - benchmark:mmlu
+---
+nodeKind: EvalRun
+id: eval-run:human-eval.llama-3-1-405b.2024-07
+attributes:
+  target: "model:llama-3-1-405b-instruct@current"
+  benchmarkId: benchmark:human-eval
+  targetId: model:llama-3-1-405b-instruct@current
+  runAt: "2024-07-23T00:00:00Z"
+  runBy: "meta"
+  configHash: "sha256:placeholder-llama-3-1-405b-humaneval"
+edges:
+  evaluates_target:
+    - model:llama-3-1-405b-instruct@current
+  for_benchmark:
+    - benchmark:human-eval
+---
+nodeKind: EvalRun
+id: eval-run:mmlu.llama-3-3-70b.2024-12
+attributes:
+  target: "model:llama-3-3-70b-instruct@current"
+  benchmarkId: benchmark:mmlu
+  targetId: model:llama-3-3-70b-instruct@current
+  runAt: "2024-12-06T00:00:00Z"
+  runBy: "meta"
+  configHash: "sha256:placeholder-llama-3-3-70b-mmlu"
+edges:
+  evaluates_target:
+    - model:llama-3-3-70b-instruct@current
+  for_benchmark:
+    - benchmark:mmlu
+---
+nodeKind: EvalRun
+id: eval-run:human-eval.llama-3-3-70b.2024-12
+attributes:
+  target: "model:llama-3-3-70b-instruct@current"
+  benchmarkId: benchmark:human-eval
+  targetId: model:llama-3-3-70b-instruct@current
+  runAt: "2024-12-06T00:00:00Z"
+  runBy: "meta"
+  configHash: "sha256:placeholder-llama-3-3-70b-humaneval"
+edges:
+  evaluates_target:
+    - model:llama-3-3-70b-instruct@current
+  for_benchmark:
+    - benchmark:human-eval

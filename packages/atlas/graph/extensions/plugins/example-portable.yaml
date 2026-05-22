@@ -1,0 +1,45 @@
+nodeKind: Plugin
+id: plugin:example-portable-extension
+attributes:
+  displayName: "Example Portable Extension"
+  vendor: "a5c-ai"
+  homepageUrl: "https://github.com/a5c-ai/plugins/example-portable-extension"
+  installFormats: [npm, marketplace]
+  description: |
+    A portable extension demonstrating cross-host packaging: a single
+    source compiled to both Claude Code and Codex via the extension-mux.
+    Bundles the React TDD skill and the code-reviewer subagent.
+edges:
+  installs_into:
+    - target: agent:claude-code
+      installMethod: marketplace
+    - target: agent:codex
+      installMethod: npm
+  contains_skill:
+    - target: skill:react-tdd
+  contains_subagent:
+    - target: subagent:code-reviewer
+  contains_tool_server:
+    - target: tool-server:filesystem-mcp
+  contains_lsp_server:
+    - target: lsp-server:example-typescript
+  contains_monitor:
+    - target: background-monitor:plugin-watch
+  contains_bin:
+    - target: binary-provider:plugin-bin
+  ships_settings:
+    - target: settings-template:plugin-defaults
+  compiles_to:
+    - target: agentVersion:claude:ge-0-0-0
+    - target: agentVersion:codex:ge-0-119-0
+  implements:
+    - target: extension-interface:reliability
+    - target: extension-interface:reflection
+  applies_to:
+    - target: specialization:frontend-react
+      confidence: primary
+  requires_capability:
+    - target: capability:supports-mcp
+      level: required
+  sourced_from:
+    - target: source-ref:a5c-plugins-example-portable

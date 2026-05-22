@@ -11,6 +11,12 @@
  *   testPhase: 'beta',
  *   targetPlatforms: ['PC', 'PlayStation 5', 'Xbox Series X']
  * });
+ * @graph
+ *   domains: [domain:gaming]
+ *   specializations: [specialization:game-development]
+ *   skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+ *   roles: [role:game-developer]
+ *   workflows: [workflow:game-prototype-iteration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

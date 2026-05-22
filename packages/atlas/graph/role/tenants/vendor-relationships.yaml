@@ -1,0 +1,41 @@
+---
+nodeKind: VendorRelationship
+id: vendor-rel:openai
+attributes:
+  displayName: "OpenAI vendor relationship"
+  vendorName: "OpenAI"
+  relationshipKind: paid
+  startedAt: "2023-06-01"
+  notes: |
+    Direct paid API relationship with OpenAI; usage flows through the
+    platform's master API key.
+edges:
+  with_organization:
+    - target: org-unit:platform-team
+---
+nodeKind: VendorRelationship
+id: vendor-rel:anthropic
+attributes:
+  displayName: "Anthropic vendor relationship"
+  vendorName: "Anthropic"
+  relationshipKind: partner
+  startedAt: "2024-02-15"
+  notes: |
+    Enterprise agreement with Anthropic; volume-discounted pricing on Claude
+    family models.
+edges:
+  with_organization:
+    - target: org-unit:platform-team
+---
+nodeKind: VendorRelationship
+id: vendor-rel:aws-bedrock
+attributes:
+  displayName: "AWS Bedrock vendor relationship"
+  vendorName: "Amazon Web Services"
+  relationshipKind: reseller
+  startedAt: "2024-04-01"
+  notes: |
+    Cloud-marketplace consumption of foundation models via AWS Bedrock.
+edges:
+  with_organization:
+    - target: org-unit:platform-team

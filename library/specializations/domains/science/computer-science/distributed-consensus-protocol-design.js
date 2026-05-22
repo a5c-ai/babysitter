@@ -3,6 +3,13 @@
  * @description Design and verify distributed consensus protocols with safety and liveness proofs
  * @inputs { systemModelDescription: string, safetyRequirements: array, livenessRequirements: array }
  * @outputs { success: boolean, protocolSpecification: object, formalSpecification: object, proofs: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:computer-science]
+ *   specializations: [specialization:theoretical-computer-science]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:graph-algorithms]
+ *   workflows: [workflow:research-grant-lifecycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

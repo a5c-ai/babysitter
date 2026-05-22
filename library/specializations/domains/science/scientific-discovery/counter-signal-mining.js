@@ -12,6 +12,13 @@
  *   miningResults: object,
  *   insights: array
  * }
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -51,7 +58,7 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Identify Failures and Unexpected Results
   ctx.log('info', 'Identifying failures and unexpected results');
-  let failureDetection = await ctx.task(detectFailuresTask, {
+  const failureDetection = await ctx.task(detectFailuresTask, {
     dataset,
     baseline,
     domain
@@ -60,16 +67,9 @@ export async function process(inputs, ctx) {
   counterSignals.push(...failureDetection.failures.map(f => ({
     ...f,
     type: 'failure'
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      failureDetection = await ctx.task(detectFailuresTask, { ...{
-    dataset,
-    baseline,
-    domain
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  })));
+
+  await ctx.breakpoint({
     question: `Identified ${counterSignals.length} counter-signals. Review before mining?`,
     title: 'Counter-Signal Mining - Detection Complete',
     context: {
@@ -78,15 +78,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/baseline.json', format: 'json' },
         { path: 'artifacts/counter-signals.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Classify Counter-Signals
   ctx.log('info', 'Classifying counter-signals');
   const classification = await ctx.task(classifyCounterSignalsTask, {

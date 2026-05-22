@@ -17,6 +17,12 @@
  * - Debugging Embedded Systems with Oscilloscopes: https://www.embedded.com/debugging-embedded-systems-with-oscilloscopes/
  * - Signal Integrity: https://www.embedded.com/signal-integrity-basics/
  * - Protocol Analysis: https://www.saleae.com/learn/
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:firmware-release-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

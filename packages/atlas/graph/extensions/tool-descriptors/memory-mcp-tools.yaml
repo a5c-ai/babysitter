@@ -1,0 +1,195 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:memory.create-entities
+attributes:
+  schema: '{}'
+  displayName: "Memory: Create Entities"
+  description: Add entities (nodes) to the knowledge graph.
+  inputSchema:
+    type: object
+    required: [entities]
+    properties:
+      entities: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      entities: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-memory
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:memory.create-relations
+attributes:
+  schema: '{}'
+  displayName: "Memory: Create Relations"
+  description: Add directed relations between entities.
+  inputSchema:
+    type: object
+    required: [relations]
+    properties:
+      relations: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      relations: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-memory
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:memory.add-observations
+attributes:
+  schema: '{}'
+  displayName: "Memory: Add Observations"
+  description: Append observations to existing entities.
+  inputSchema:
+    type: object
+    required: [observations]
+    properties:
+      observations: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-memory
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:memory.delete-entities
+attributes:
+  schema: '{}'
+  displayName: "Memory: Delete Entities"
+  description: Remove entities (and their relations) from the graph.
+  inputSchema:
+    type: object
+    required: [entityNames]
+    properties:
+      entityNames: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-memory
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:memory.delete-observations
+attributes:
+  schema: '{}'
+  displayName: "Memory: Delete Observations"
+  description: Remove specific observations from entities.
+  inputSchema:
+    type: object
+    required: [deletions]
+    properties:
+      deletions: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-memory
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:memory.delete-relations
+attributes:
+  schema: '{}'
+  displayName: "Memory: Delete Relations"
+  description: Remove relations between entities.
+  inputSchema:
+    type: object
+    required: [relations]
+    properties:
+      relations: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-memory
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:memory.read-graph
+attributes:
+  schema: '{}'
+  displayName: "Memory: Read Graph"
+  description: Return the full knowledge graph (entities and relations).
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      graph: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-memory
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:memory.search-nodes
+attributes:
+  schema: '{}'
+  displayName: "Memory: Search Nodes"
+  description: Search the graph by query string and return matching nodes.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      nodes: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-memory
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:memory.open-nodes
+attributes:
+  schema: '{}'
+  displayName: "Memory: Open Nodes"
+  description: Open one or more nodes by name and return their data.
+  inputSchema:
+    type: object
+    required: [names]
+    properties:
+      names: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      nodes: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-memory

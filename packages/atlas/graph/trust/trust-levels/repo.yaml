@@ -1,0 +1,13 @@
+nodeKind: TrustLevel
+id: trust-level:repo
+attributes:
+  displayName: "Repo"
+  level: repo
+  freshnessWindowDaysDefault: 30
+  description: |
+    First-party source-of-truth from this repository (committed code,
+    package layouts, in-repo docs). Used by EvidenceSource entries that
+    point at files inside the catalog's own monorepo (e.g. babysitter
+    packages/*). Highest-trust evidence for facts about this repo's
+    own behavior; not authoritative for external vendor surfaces.
+edges: {}

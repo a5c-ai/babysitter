@@ -1,0 +1,340 @@
+nodeKind: Role
+id: role:backend-engineer
+attributes:
+  displayName: "Backend Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    Designs, builds, and maintains server-side services, APIs, and data pipelines that
+    power product features and internal platforms. Works closely with frontend engineers
+    and data engineers to define contracts and optimize data flows. Owns reliability,
+    performance, and security of the services within their domain, and participates in
+    on-call rotations to ensure production health.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:on-call
+    - responsibility:performance-optimization
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:software-engineering
+      level: expert
+    - target: domain:databases
+      level: intermediate
+    - target: specialization:backend-python-django
+      level: intermediate
+---
+nodeKind: Role
+id: role:frontend-engineer
+attributes:
+  displayName: "Frontend Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    Crafts responsive, accessible, and performant user interfaces that translate product
+    designs into working browser and web application experiences. Collaborates tightly
+    with product designers, UX researchers, and backend engineers to ship cohesive
+    features end-to-end. Advocates for web performance, accessibility standards, and
+    robust client-side state management across the team.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:performance-optimization
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:web-development
+      level: expert
+    - target: specialization:frontend-react
+      level: expert
+    - target: specialization:web-development
+      level: intermediate
+---
+nodeKind: Role
+id: role:fullstack-engineer
+attributes:
+  displayName: "Fullstack Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    Operates across both client and server layers to deliver complete, end-to-end
+    features independently. Comfortable making architectural decisions at every tier
+    of the stack from database schema through REST or GraphQL API to browser UI.
+    Often the primary driver in early-stage products or small teams where full
+    vertical ownership is essential.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:deployment-management
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:software-engineering
+      level: expert
+    - target: domain:web-development
+      level: expert
+    - target: specialization:frontend-react
+      level: intermediate
+    - target: specialization:backend-python-django
+      level: intermediate
+---
+nodeKind: Role
+id: role:devops-engineer
+attributes:
+  displayName: "DevOps Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    Bridges development and operations by building, automating, and maintaining
+    CI/CD pipelines, infrastructure-as-code, and deployment tooling. Works to
+    shorten feedback loops between writing code and shipping it safely to production.
+    Partners with engineering teams to establish release processes, environment
+    parity, and observability baselines that support rapid, reliable delivery.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:deployment-management
+    - responsibility:on-call
+    - responsibility:capacity-planning
+    - responsibility:disaster-recovery
+  requires_skill:
+    - target: domain:devops
+      level: expert
+    - target: specialization:devops-sre-platform
+      level: expert
+    - target: specialization:terraform-iac
+      level: intermediate
+    - target: specialization:k8s-ops
+      level: intermediate
+---
+nodeKind: Role
+id: role:sre
+attributes:
+  displayName: "Site Reliability Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    Applies software engineering principles to operations problems, owning system
+    reliability, scalability, and efficiency at scale. Defines and tracks error
+    budgets, leads incident response, and builds automation to reduce toil. Acts
+    as a bridge between product engineering and operations to ensure reliability
+    is a first-class concern in every architectural decision.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:incident-response
+    - responsibility:on-call
+    - responsibility:sla-management
+    - responsibility:capacity-planning
+    - responsibility:disaster-recovery
+  requires_skill:
+    - target: specialization:sre
+      level: expert
+    - target: domain:observability
+      level: expert
+    - target: domain:cloud-infra
+      level: expert
+    - target: specialization:k8s-ops
+      level: intermediate
+---
+nodeKind: Role
+id: role:platform-engineer
+attributes:
+  displayName: "Platform Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    Builds and maintains the internal developer platform — including self-service
+    tooling, shared infrastructure abstractions, and golden-path templates — that
+    enables product engineers to ship with velocity and confidence. Focuses on
+    reducing cognitive load for consumers by hiding complexity behind well-designed
+    APIs and automation while ensuring the platform meets enterprise reliability
+    and security standards.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:deployment-management
+    - responsibility:capacity-planning
+    - responsibility:knowledge-sharing
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:platform-engineering
+      level: expert
+    - target: specialization:devops-sre-platform
+      level: expert
+    - target: specialization:sdk-platform-development
+      level: intermediate
+    - target: specialization:k8s-ops
+      level: expert
+---
+nodeKind: Role
+id: role:data-engineer
+attributes:
+  displayName: "Data Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    Designs and operates the data infrastructure — pipelines, warehouses, and
+    streaming systems — that move raw data from source systems to analytics and
+    product consumers in a reliable, scalable, and governed way. Partners with data
+    scientists, analysts, and product teams to understand data needs and model
+    datasets appropriately. Owns data quality monitoring and pipeline observability.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:data-quality
+    - responsibility:on-call
+    - responsibility:documentation
+    - responsibility:performance-optimization
+  requires_skill:
+    - target: domain:data-engineering
+      level: expert
+    - target: specialization:data-engineering-analytics
+      level: expert
+    - target: domain:databases
+      level: expert
+    - target: domain:cloud-infra
+      level: intermediate
+---
+nodeKind: Role
+id: role:ml-engineer
+attributes:
+  displayName: "Machine Learning Engineer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Develops, trains, and productionizes machine learning models, bridging the gap
+    between research prototypes and scalable production systems. Works with data
+    scientists to formalize experiments and with platform engineers to deploy models
+    reliably. Responsible for model performance monitoring, feature stores, and
+    ensuring ML systems meet latency and throughput requirements.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:performance-optimization
+    - responsibility:on-call
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:data-science
+      level: expert
+    - target: domain:ml-ops
+      level: expert
+    - target: specialization:gpu-programming
+      level: intermediate
+    - target: domain:cloud-infra
+      level: intermediate
+---
+nodeKind: Role
+id: role:security-engineer
+attributes:
+  displayName: "Security Engineer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Protects the organization's systems and data by embedding security practices
+    throughout the software development lifecycle. Conducts threat modeling, security
+    reviews, and penetration tests; builds security automation into CI/CD pipelines;
+    and responds to security incidents. Educates engineering teams on secure coding
+    practices and drives remediation of identified vulnerabilities.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:security-audit
+    - responsibility:access-control
+    - responsibility:incident-response
+    - responsibility:risk-assessment
+    - responsibility:compliance-monitoring
+  requires_skill:
+    - target: domain:security
+      level: expert
+    - target: domain:cybersecurity
+      level: expert
+    - target: specialization:security-research
+      level: expert
+    - target: specialization:cryptography-blockchain
+      level: intermediate
+---
+nodeKind: Role
+id: role:qa-engineer
+attributes:
+  displayName: "QA Engineer"
+  isAgentic: false
+  automatability: 0.9
+  description: |
+    Designs and executes testing strategies that verify software correctness, reliability,
+    and usability before and after release. Builds and maintains automated test suites
+    covering unit, integration, and end-to-end scenarios, and investigates root causes
+    of defects. Partners with developers and product managers to define acceptance
+    criteria and ensure quality gates are enforced throughout the delivery pipeline.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:test-strategy
+    - responsibility:risk-assessment
+    - responsibility:documentation
+    - responsibility:release-coordination
+  requires_skill:
+    - target: specialization:qa-testing-automation
+      level: expert
+    - target: domain:software-engineering
+      level: intermediate
+    - target: domain:web-development
+      level: intermediate
+---
+nodeKind: Role
+id: role:mobile-engineer
+attributes:
+  displayName: "Mobile Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    Builds native or cross-platform mobile applications for iOS and Android, optimizing
+    for performance, battery life, and offline capability within the constraints of
+    mobile operating systems. Collaborates with designers to implement pixel-perfect
+    UIs and with backend engineers to integrate APIs. Manages app store releases and
+    participates in beta testing and crash monitoring workflows.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:deployment-management
+    - responsibility:performance-optimization
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:mobile
+      level: expert
+    - target: specialization:mobile-development
+      level: expert
+    - target: domain:software-engineering
+      level: intermediate
+---
+nodeKind: Role
+id: role:embedded-engineer
+attributes:
+  displayName: "Embedded Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    Develops firmware and low-level software for constrained hardware platforms such
+    as microcontrollers, FPGAs, and real-time systems. Works at the boundary of
+    hardware and software, requiring deep understanding of memory management, interrupt
+    handling, and hardware communication protocols. Collaborates with electrical
+    engineers on bring-up, driver development, and hardware-in-the-loop testing.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:test-strategy
+    - responsibility:documentation
+    - responsibility:risk-assessment
+  requires_skill:
+    - target: domain:embedded-systems
+      level: expert
+    - target: specialization:embedded-systems
+      level: expert
+    - target: domain:systems-programming
+      level: expert
+    - target: specialization:fpga-programming
+      level: intermediate

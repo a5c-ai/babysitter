@@ -1,0 +1,360 @@
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-contextwindowtokens
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: contextWindowTokens
+  value: '128000'
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current contextWindowTokens is 128000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-costpermtokinput
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: costPerMTokInput
+  value: '0.15'
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current costPerMTokInput is 0.15.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-costpermtokoutput
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: costPerMTokOutput
+  value: '0.6'
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current costPerMTokOutput is 0.6.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-finetuningkind
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: fineTuningKind
+  value: lora
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current fineTuningKind is lora.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-kind
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: kind
+  value: chat
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current kind is chat.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-knowledgecutoffdate
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: knowledgeCutoffDate
+  value: '2023-10-01'
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current knowledgeCutoffDate is 2023-10-01.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-lifecyclestatus
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-modalities
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current modalities is text, image.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-modalitydirections
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current modalityDirections is kind=text;direction=input,
+    kind=image;direction=input, kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-modelcardurl
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: modelCardUrl
+  value: https://openai.com/index/gpt-4o-mini-advancing-cost-efficient-intelligence/
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current modelCardUrl is https://openai.com/index/gpt-4o-mini-advancing-cost-efficient-intelligence/.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-safetytier
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: safetyTier
+  value: openai-preparedness-medium
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current safetyTier is openai-preparedness-medium.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-supportsextendedthinking
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-supportsfinetuning
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: supportsFineTuning
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current supportsFineTuning is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current supportsThinkingBudgetTokens is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-4o-mini-current-versionrange
+attributes:
+  subjectId: model:gpt-4o-mini@current
+  attribute: versionRange
+  value: '>=4.0.0 <5.0.0'
+  subjectKind: ModelVersion
+  statement: model:gpt-4o-mini@current versionRange is >=4.0.0 <5.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-4o-mini@current

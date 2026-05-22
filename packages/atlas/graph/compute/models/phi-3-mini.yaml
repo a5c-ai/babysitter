@@ -1,0 +1,60 @@
+nodeKind: ModelVersion
+id: model:phi-3-mini@current
+attributes:
+  displayName: "Phi-3 Mini"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:phi-3
+  versionRange: '>=3.0.0 <4.0.0'
+  kind: chat
+  contextWindowTokens: 128000
+  modalities:
+  - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2024-04-23'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2024-04-23'
+  knowledgeCutoffDate: '2023-10-01'
+  modelCardUrl: https://huggingface.co/microsoft/Phi-3-mini-128k-instruct
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:phi-3
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:phi-3
+  served_by:
+  - provider:azure-foundry
+  speaks:
+  - model-transport:openai-compat
+  supports:
+  - target: capability:streaming
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-phi-3-mini
+  - target: capability:supports-text-streaming
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-phi-3-mini
+  - target: capability:can-multi-turn
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-phi-3-mini
+  - target: capability:requires-tool-approval
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-phi-3-mini

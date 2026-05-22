@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Sustainability
   skill-id: CE-SK-024
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:mathematical-reasoning, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:computational-scientist]
 ---
 
 # Green Chemistry Metrics Skill

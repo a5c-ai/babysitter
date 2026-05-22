@@ -3,6 +3,7 @@ import { runTaskIntrinsic, TaskIntrinsicContext } from "./intrinsics/task";
 import { runBreakpointIntrinsic } from "./intrinsics/breakpoint";
 import { runSleepIntrinsic } from "./intrinsics/sleep";
 import { runOrchestratorTaskIntrinsic } from "./intrinsics/orchestratorTask";
+import { runSubprocessIntrinsic } from "./intrinsics/subprocess";
 import { runHookIntrinsic } from "./intrinsics/hook";
 import { callHook } from "../hooks/dispatcher";
 import { runParallelAll, runParallelMap } from "./intrinsics/parallel";
@@ -11,6 +12,8 @@ import { MissingProcessContextError } from "./exceptions";
 import { appendRunLog } from "../logging/runLogger";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
+import { emitRuntimeMetric } from "./instrumentation";
+import { serializeUnknownError } from "./errorUtils";
 
 export interface ProcessContextInit extends Omit<TaskIntrinsicContext, "now"> {
   processId: string;
@@ -23,6 +26,8 @@ export interface ProcessContextInit extends Omit<TaskIntrinsicContext, "now"> {
   recordedLogSeqs?: Set<number>;
   /** When true, breakpoints are auto-approved without human interaction. */
   nonInteractive?: boolean;
+  /** Internal-only gate for babysitter-agent owned subprocess orchestration. */
+  subprocessSupport?: "disabled" | "babysitter-agent";
 }
 
 export interface InternalProcessContext extends TaskIntrinsicContext {
@@ -34,6 +39,9 @@ export interface InternalProcessContext extends TaskIntrinsicContext {
   recordedLogSeqs: Set<number>;
   /** When true, breakpoints are auto-approved without human interaction. */
   nonInteractive: boolean;
+  subprocessSupport: "disabled" | "babysitter-agent";
+  cleanupCallbacks: Array<() => void | Promise<void>>;
+  cleanupFlushed: boolean;
 }
 
 const contextStorage = new AsyncLocalStorage<InternalProcessContext>();
@@ -52,6 +60,9 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
     logSeq: 0,
     recordedLogSeqs: init.recordedLogSeqs ?? new Set(),
     nonInteractive: init.nonInteractive ?? false,
+    subprocessSupport: init.subprocessSupport ?? "disabled",
+    cleanupCallbacks: [],
+    cleanupFlushed: false,
   };
 
   const parallelHelpers: ParallelHelpers = {
@@ -59,8 +70,27 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
     map: (items, fn) => runParallelMap(items, fn),
   };
 
+  // Per-run artifacts directory — created up-front so processes can write to
+  // ctx.artifactsDir from the first iteration without ENOENT. mkdir is
+  // idempotent (recursive); fire-and-forget so context construction stays
+  // synchronous in surface, and any race with parallel processes resolves to
+  // the same directory.
+  const artifactsDir = path.join(internal.runDir, "artifacts");
+  void fs.mkdir(artifactsDir, { recursive: true }).catch(() => {
+    // Never let bootstrap break orchestration.
+  });
+
   const processContext: ProcessContext = {
+    runId: internal.runId,
+    runDir: internal.runDir,
+    artifactsDir,
     now: () => internal.now(),
+    onCleanup: (callback) => {
+      if (typeof callback !== "function") {
+        throw new TypeError("ctx.onCleanup(callback) requires a function callback");
+      }
+      internal.cleanupCallbacks.push(callback);
+    },
     task: (task, args, options) =>
       runTaskIntrinsic({
         task,
@@ -71,6 +101,7 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
     breakpoint: (payload, options) => runBreakpointIntrinsic(payload, internal, options),
     sleepUntil: (target, options) => runSleepIntrinsic(target, internal, options),
     orchestratorTask: (payload, options) => runOrchestratorTaskIntrinsic(payload, internal, options),
+    subprocess: (invocation, options) => runSubprocessIntrinsic(invocation, internal, options),
     hook: (hookType, payload, options) => runHookIntrinsic(hookType, payload, internal, options),
     parallel: parallelHelpers,
     // Always provide a callable logger to processes so `ctx.log(...)` never throws.
@@ -144,6 +175,37 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
     context: processContext,
     internalContext: internal,
   };
+}
+
+export async function flushProcessCleanup(
+  internal: InternalProcessContext,
+  phase: string,
+): Promise<void> {
+  if (internal.cleanupFlushed) return;
+  internal.cleanupFlushed = true;
+  const callbacks = internal.cleanupCallbacks.splice(0);
+  if (callbacks.length === 0) return;
+
+  for (let index = callbacks.length - 1; index >= 0; index -= 1) {
+    try {
+      await callbacks[index]();
+    } catch (error) {
+      const serialized = serializeUnknownError(error);
+      emitRuntimeMetric(internal.logger, "process.cleanup", {
+        status: "error",
+        phase,
+        runId: internal.runId,
+        runDir: internal.runDir,
+        processId: internal.processId,
+        callbackIndex: index,
+        message: serialized.message,
+        error: serialized,
+      });
+      console.warn(
+        `[babysitter] Process cleanup callback failed for run ${internal.runId}: ${serialized.message ?? "Unknown cleanup error"}`,
+      );
+    }
+  }
 }
 
 export function withProcessContext<T>(internal: InternalProcessContext, fn: () => Promise<T> | T): Promise<T> {

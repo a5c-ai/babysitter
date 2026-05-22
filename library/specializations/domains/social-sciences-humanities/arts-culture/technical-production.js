@@ -5,6 +5,12 @@
  * @outputs { success: boolean, technicalDesign: object, equipmentList: object, installationPlan: object, artifacts: array }
  * @recommendedSkills SK-AC-005 (production-coordination), SK-AC-004 (exhibition-design)
  * @recommendedAgents AG-AC-005 (production-manager-agent), AG-AC-010 (exhibition-designer-agent)
+ *
+ * @graph
+ *   domains: [domain:arts-culture]
+ *   skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:data-analysis]
+ *   roles: [role:creative-director, role:design-lead]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,179 @@
+import type { CloudConfig, DeploymentPlan, TerraformRenderResult } from "../types.js";
+
+function quote(value: string): string {
+  return JSON.stringify(value);
+}
+
+function sharedTerraformBlocks(config: CloudConfig): string {
+  return [
+    "terraform {",
+    "  required_version = \">= 1.6.0\"",
+    "}",
+    "",
+    "variable \"namespace\" { type = string }",
+    "variable \"release_tag\" { type = string }",
+    "locals {",
+    `  namespace   = var.namespace`,
+    `  release_tag = var.release_tag`,
+    `  ingress_tls = ${config.ingress.tls ? "true" : "false"}`,
+    "}",
+  ].join("\n");
+}
+
+function renderMinikube(config: CloudConfig): string {
+  return [
+    sharedTerraformBlocks(config),
+    "",
+    "resource \"null_resource\" \"minikube_cluster\" {",
+    "  triggers = {",
+    `    profile = ${quote(config.target.type === "minikube" ? (config.target.profile ?? "babysitter") : "babysitter")}`,
+    "  }",
+    "  provisioner \"local-exec\" {",
+    `    command = "minikube start -p ${config.target.type === "minikube" ? (config.target.profile ?? "babysitter") : "babysitter"}"`,
+    "  }",
+    "}",
+    "",
+    "output \"cluster_name\" {",
+    `  value = ${quote(config.target.type === "minikube" ? (config.target.profile ?? "babysitter") : "babysitter")}`,
+    "}",
+  ].join("\n");
+}
+
+function renderExistingCluster(config: CloudConfig): string {
+  const context = config.target.type === "existing" ? config.target.kubeContext : "default";
+  return [
+    sharedTerraformBlocks(config),
+    "",
+    "locals {",
+    `  kube_context = ${quote(context)}`,
+    "}",
+    "",
+    "output \"kube_context\" {",
+    "  value = local.kube_context",
+    "}",
+  ].join("\n");
+}
+
+function renderEks(config: CloudConfig): string {
+  if (config.target.type !== "eks") {
+    return renderExistingCluster(config);
+  }
+  return [
+    sharedTerraformBlocks(config),
+    "",
+    "provider \"aws\" {",
+    `  region = ${quote(config.target.region)}`,
+    "}",
+    "",
+    "module \"eks\" {",
+    "  source  = \"terraform-aws-modules/eks/aws\"",
+    "  version = \"~> 20.0\"",
+    `  cluster_name    = ${quote(config.target.clusterName)}`,
+    `  cluster_version = "1.30"`,
+    "  subnet_ids      = []",
+    "  vpc_id          = \"replace-me\"",
+    "}",
+    "",
+    "output \"cluster_name\" {",
+    "  value = module.eks.cluster_name",
+    "}",
+  ].join("\n");
+}
+
+function renderAks(config: CloudConfig): string {
+  if (config.target.type !== "aks") {
+    return renderExistingCluster(config);
+  }
+  return [
+    sharedTerraformBlocks(config),
+    "",
+    "provider \"azurerm\" {",
+    "  features {}",
+    `  subscription_id = ${quote(config.target.subscriptionId)}`,
+    "}",
+    "",
+    "resource \"azurerm_resource_group\" \"this\" {",
+    `  name     = ${quote(config.target.resourceGroup)}`,
+    `  location = "eastus"`,
+    "}",
+    "",
+    "resource \"azurerm_kubernetes_cluster\" \"this\" {",
+    `  name                = ${quote(config.target.clusterName)}`,
+    "  location            = azurerm_resource_group.this.location",
+    "  resource_group_name = azurerm_resource_group.this.name",
+    "  dns_prefix          = \"babysitter\"",
+    "  default_node_pool {",
+    "    name       = \"default\"",
+    "    node_count = 2",
+    "    vm_size    = \"Standard_D4s_v5\"",
+    "  }",
+    "  identity { type = \"SystemAssigned\" }",
+    "}",
+  ].join("\n");
+}
+
+function renderGke(config: CloudConfig): string {
+  if (config.target.type !== "gke") {
+    return renderExistingCluster(config);
+  }
+  return [
+    sharedTerraformBlocks(config),
+    "",
+    "provider \"google\" {",
+    `  project = ${quote(config.target.projectId)}`,
+    `  region  = ${quote(config.target.region)}`,
+    "}",
+    "",
+    "resource \"google_container_cluster\" \"this\" {",
+    `  name     = ${quote(config.target.clusterName)}`,
+    `  location = ${quote(config.target.region)}`,
+    "  deletion_protection = false",
+    "  initial_node_count  = 1",
+    "}",
+  ].join("\n");
+}
+
+function tfvars(config: CloudConfig, releaseTag: string): string {
+  return JSON.stringify({
+    namespace: config.namespace,
+    release_tag: releaseTag,
+  }, null, 2);
+}
+
+export function renderTerraform(plan: DeploymentPlan): TerraformRenderResult {
+  const config = plan.config;
+  const main = (() => {
+    switch (config.target.type) {
+      case "minikube":
+        return renderMinikube(config);
+      case "existing":
+        return renderExistingCluster(config);
+      case "eks":
+        return renderEks(config);
+      case "aks":
+        return renderAks(config);
+      case "gke":
+        return renderGke(config);
+    }
+  })();
+
+  return {
+    directoryName: "terraform",
+    files: [
+      { path: "main.tf", content: main },
+      { path: "terraform.tfvars.json", content: tfvars(config, plan.releaseTag) },
+      {
+        path: "README.auto.md",
+        content: [
+          "# Generated by @a5c-ai/cloud",
+          "",
+          `Target: ${config.target.type}`,
+          `Namespace: ${config.namespace}`,
+          `Release tag: ${plan.releaseTag}`,
+        ].join("\n"),
+      },
+    ],
+    summary: plan.terraform.summary,
+  };
+}
+

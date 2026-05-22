@@ -3,6 +3,12 @@
  * @description Devin-style workflow: Plan → Code → Debug → Deploy with iterative refinement
  * @inputs { feature: string, targetQuality: number, maxDebugIterations: number }
  * @outputs { success: boolean, deployed: boolean, iterations: number }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:backend-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

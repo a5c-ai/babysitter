@@ -2,6 +2,12 @@
 name: linux-packaging-expert
 description: Expert in Linux packaging formats, desktop integration, and distribution repository setup
 expertise: [linux, deb, rpm, flatpak, snap, appimage]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:cross-platform-desktop, skill-area:deployment-infrastructure-management]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # linux-packaging-expert

@@ -18,119 +18,53 @@ import { execFile } from "node:child_process";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
-import type { HarnessDiscoveryResult, HarnessCapability, CallerHarnessResult } from "./types";
-import { HarnessCapability as Cap } from "./types";
+import {
+  getHooksMuxDetectionRules,
+  type HooksMuxDetectionRule,
+} from "@a5c-ai/agent-catalog";
+import type {
+  CallerHarnessResult,
+  HarnessDiscoveryResult,
+  HarnessSpec,
+  HarnessCapability,
+} from "./types";
+import { getHarnessDiscoverySpec, KNOWN_HARNESSES } from "./registry";
+import { discoverHarnessesViaAmux } from "./install";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+export { KNOWN_HARNESSES } from "./registry";
 
-/** Detection specification for a single known harness. */
-interface HarnessSpec {
-  /** Harness identifier (matches HarnessAdapter.name). */
-  name: string;
-  /** CLI command name used to invoke the harness. */
-  cli: string;
-  /**
-   * Environment variables that indicate we are running **inside** an active
-   * session of this harness (e.g. the harness spawned our process).
-   *
-   * Used exclusively by `detectCallerHarness()`, never by `discoverHarnesses()`.
-   */
-  callerEnvVars: string[];
-  /** Capabilities advertised by this harness. */
-  capabilities: HarnessCapability[];
-}
-
-// ---------------------------------------------------------------------------
-// Known harnesses
-// ---------------------------------------------------------------------------
-
-/** Detection specs for all supported harnesses. */
-export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
-  {
-    name: "claude-code",
-    cli: "claude",
-    callerEnvVars: ["CLAUDE_ENV_FILE"],
-    capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.Mcp, Cap.HeadlessPrompt],
-  },
-  {
-    name: "codex",
-    cli: "codex",
-    callerEnvVars: ["CODEX_THREAD_ID", "CODEX_SESSION_ID", "CODEX_PLUGIN_ROOT"],
-    capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
-  },
-  {
-    name: "cursor",
-    cli: "cursor",
-    // CURSOR_PROJECT_DIR and CURSOR_VERSION are set by Cursor in hook execution
-    // contexts only (not in child processes spawned by hooks).
-    callerEnvVars: ["CURSOR_PROJECT_DIR", "CURSOR_VERSION"],
-    capabilities: [Cap.HeadlessPrompt, Cap.StopHook, Cap.SessionBinding, Cap.Mcp],
-  },
-  {
-    name: "gemini-cli",
-    cli: "gemini",
-    callerEnvVars: ["GEMINI_SESSION_ID", "GEMINI_PROJECT_DIR", "GEMINI_CWD"],
-    capabilities: [Cap.SessionBinding, Cap.HeadlessPrompt, Cap.StopHook],
-  },
-  {
-    name: "github-copilot",
-    cli: "copilot",
-    // Note: official Copilot docs do not confirm these env vars are injected
-    // into hooks. They are used as best-effort discriminators for caller detection.
-    callerEnvVars: ["COPILOT_HOME", "COPILOT_GITHUB_TOKEN"],
-    // No StopHook — Copilot CLI uses in-turn orchestration model
-    capabilities: [Cap.HeadlessPrompt, Cap.SessionBinding, Cap.Mcp],
-  },
-  {
-    name: "opencode",
-    cli: "opencode",
-    callerEnvVars: ["BABYSITTER_SESSION_ID", "OPENCODE_CONFIG"],
-    capabilities: [Cap.HeadlessPrompt],
-  },
-  {
-    name: "oh-my-pi",
-    cli: "omp",
-    callerEnvVars: ["OMP_SESSION_ID", "OMP_PLUGIN_ROOT"],
-    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.HeadlessPrompt, Cap.Mcp],
-  },
-  {
-    name: "pi",
-    cli: "pi",
-    callerEnvVars: ["PI_SESSION_ID", "PI_PLUGIN_ROOT"],
-    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.HeadlessPrompt],
-  },
-  {
-    name: "internal",
-    cli: "internal",
-    callerEnvVars: [],
-    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
-  },
-] as const;
-
-// ---------------------------------------------------------------------------
-// Config path detection
-// ---------------------------------------------------------------------------
-
-/** Map of harness names to config directory names to look for. */
-const CONFIG_PATHS: Record<string, string[]> = {
-  "claude-code": [".claude"],
-  codex: [".codex"],
-  pi: [".pi"],
-  "oh-my-pi": [".omp"],
-  "gemini-cli": [".gemini"],
-  "github-copilot": [".copilot", ".github"],
-  cursor: [".cursor", ".cursorrules"],
-  opencode: [".opencode"],
+const HOOKS_MUX_ADAPTER_TO_HARNESS: Readonly<Record<string, string>> = {
+  claude: "claude-code",
+  codex: "codex",
+  gemini: "gemini-cli",
+  copilot: "github-copilot",
+  cursor: "cursor",
+  pi: "pi",
+  "oh-my-pi": "oh-my-pi",
+  opencode: "opencode",
+  openclaw: "openclaw",
 };
+
+export interface HooksMuxCallerHarnessResult {
+  /** Normalized babysitter harness identifier. */
+  name: string;
+  /** Original hooks-mux adapter identifier. */
+  sourceAdapter: string;
+  /** Environment variable names that matched the hooks-mux rule. */
+  matchedEnvVars: string[];
+  /** Capabilities advertised by the normalized harness. */
+  capabilities: HarnessCapability[];
+  /** Detection confidence from hooks-mux rules. */
+  confidence: "high" | "medium" | "low";
+}
 
 /**
  * Checks whether a harness config directory exists in cwd or home.
  */
 async function detectConfig(harnessName: string): Promise<boolean> {
-  const configDirs = CONFIG_PATHS[harnessName];
-  if (!configDirs || configDirs.length === 0) return false;
+  const spec = getHarnessDiscoverySpec(harnessName);
+  const configDirs = spec?.configPaths ?? [];
+  if (configDirs.length === 0) return false;
   const cwd = process.cwd();
   const home = os.homedir();
   for (const dir of configDirs) {
@@ -207,6 +141,21 @@ export async function checkCliAvailable(
  * @returns An array of discovery results sorted alphabetically by harness name.
  */
 export async function discoverHarnesses(): Promise<HarnessDiscoveryResult[]> {
+  // Try agent-mux first -- it has richer detection and caching.
+  try {
+    return await discoverHarnessesViaAmux();
+  } catch {
+    // Fall back to legacy direct probing.
+  }
+
+  return discoverHarnessesLegacy();
+}
+
+/**
+ * Legacy discovery: probes each known harness CLI via `which`/`where` in
+ * parallel.  Used as fallback when agent-mux is unavailable.
+ */
+async function discoverHarnessesLegacy(): Promise<HarnessDiscoveryResult[]> {
   const settled = await Promise.allSettled(
     KNOWN_HARNESSES.map((spec) => probeHarness(spec)),
   );
@@ -226,12 +175,6 @@ export async function discoverHarnesses(): Promise<HarnessDiscoveryResult[]> {
       platform: process.platform,
     };
   });
-
-  // The 'internal' harness is always available (built into the SDK).
-  const internalIdx = results.findIndex((r) => r.name === "internal");
-  if (internalIdx >= 0) {
-    results[internalIdx].installed = true;
-  }
 
   results.sort((a, b) => a.name.localeCompare(b.name));
   return results;
@@ -266,6 +209,59 @@ export function detectCallerHarness(): CallerHarnessResult | null {
     }
   }
   return null;
+}
+
+/**
+ * Detect the active caller harness using hooks-mux style discovery rules.
+ *
+ * This mirrors hooks-mux environment-based detection, but normalizes the
+ * adapter name back to babysitter's harness identifiers so SDK command
+ * surfaces can reuse the result without depending on hooks-mux packages.
+ */
+export function detectCallerHarnessViaHooksMux(
+  env: Record<string, string | undefined> = process.env,
+): HooksMuxCallerHarnessResult | null {
+  const detectionRules: HooksMuxDetectionRule[] = getHooksMuxDetectionRules();
+  let bestMatch: HooksMuxCallerHarnessResult | null = null;
+
+  for (const rule of detectionRules) {
+    const normalizedName = HOOKS_MUX_ADAPTER_TO_HARNESS[rule.adapter];
+    if (!normalizedName) {
+      continue;
+    }
+
+    if (rule.absentSignals?.some((signal) => env[signal])) {
+      continue;
+    }
+
+    const matchedEnvVars = rule.signals.filter((signal) => {
+      const value = env[signal];
+      return value != null && value !== "";
+    });
+
+    if (matchedEnvVars.length === 0) {
+      continue;
+    }
+
+    const capabilities = getHarnessDiscoverySpec(normalizedName)?.capabilities ?? [];
+    const match: HooksMuxCallerHarnessResult = {
+      name: normalizedName,
+      sourceAdapter: rule.adapter,
+      matchedEnvVars,
+      capabilities,
+      confidence: rule.confidence,
+    };
+
+    if (match.confidence === "high") {
+      return match;
+    }
+
+    if (!bestMatch) {
+      bestMatch = match;
+    }
+  }
+
+  return bestMatch;
 }
 
 // ---------------------------------------------------------------------------

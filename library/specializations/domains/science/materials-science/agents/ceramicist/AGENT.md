@@ -18,6 +18,11 @@ metadata:
   phase: 6
   experience: 14+ years ceramics
   background: Structural ceramics, electronic ceramics, refractories
+graph:
+  domains: [domain:materials-science]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # Ceramicist Agent

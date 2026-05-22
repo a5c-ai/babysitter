@@ -1,0 +1,141 @@
+nodeKind: ProtocolMessage
+id: protocol-message:system-message
+attributes:
+  displayName: "SDKMessage / SystemMessage"
+  messageType: SystemMessage
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: SystemMessage
+    fields: ["session_id","model","tools","mcp_servers","permission_mode"]
+  description: |
+    Initial system message emitted at session start summarizing the active
+    model, tool roster, MCP servers, and permission mode.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:assistant-message
+attributes:
+  displayName: "SDKMessage / AssistantMessage"
+  messageType: AssistantMessage
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: AssistantMessage
+    fields: ["content","model","stop_reason"]
+  description: |
+    Model-emitted assistant turn, possibly containing text / thinking /
+    tool_use content blocks.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:user-message
+attributes:
+  displayName: "SDKMessage / UserMessage"
+  messageType: UserMessage
+  subtype: none
+  direction: user-to-core
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: UserMessage
+    fields: ["content"]
+  description: |
+    User-supplied turn input or tool_result block fed back into the loop.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:stream-event
+attributes:
+  displayName: "SDKMessage / StreamEvent"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["event","data"]
+  description: |
+    Granular streaming delta — text tokens, thinking deltas, tool_use
+    argument deltas — emitted while a turn is being assembled.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:result-message-success
+attributes:
+  displayName: "ResultMessage subtype=success"
+  messageType: ResultMessage
+  subtype: success
+  direction: core-to-user
+  terminal: true
+  errorCategory: none
+  payloadSchema:
+    type: ResultMessage
+    fields: ["subtype","duration_ms","num_turns","result","usage","total_cost_usd"]
+  description: |
+    Loop terminated successfully — model returned final assistant text and
+    `stop_reason: end_turn`.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:result-message-error-max-turns
+attributes:
+  displayName: "ResultMessage subtype=error_max_turns"
+  messageType: ResultMessage
+  subtype: error_max_turns
+  direction: core-to-user
+  terminal: true
+  errorCategory: turns
+  payloadSchema:
+    type: ResultMessage
+    fields: ["subtype","num_turns","usage"]
+  description: |
+    Loop hit the `max_turns` budget without reaching `end_turn`.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:result-message-error-max-budget-usd
+attributes:
+  displayName: "ResultMessage subtype=error_max_budget_usd"
+  messageType: ResultMessage
+  subtype: error_max_budget_usd
+  direction: core-to-user
+  terminal: true
+  errorCategory: budget
+  payloadSchema:
+    type: ResultMessage
+    fields: ["subtype","total_cost_usd","usage"]
+  description: |
+    Loop hit the `max_budget_usd` budget — accumulated cost exceeded the
+    cap before termination.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:result-message-error-during-execution
+attributes:
+  displayName: "ResultMessage subtype=error_during_execution"
+  messageType: ResultMessage
+  subtype: error_during_execution
+  direction: core-to-user
+  terminal: true
+  errorCategory: execution
+  payloadSchema:
+    type: ResultMessage
+    fields: ["subtype","error"]
+  description: |
+    Unrecoverable runtime error during loop execution (transport error,
+    tool harness crash, etc.).
+---
+nodeKind: ProtocolMessage
+id: protocol-message:result-message-error-max-structured-output-retries
+attributes:
+  displayName: "ResultMessage subtype=error_max_structured_output_retries"
+  messageType: ResultMessage
+  subtype: error_max_structured_output_retries
+  direction: core-to-user
+  terminal: true
+  errorCategory: structured-output
+  payloadSchema:
+    type: ResultMessage
+    fields: ["subtype","retries"]
+  description: |
+    Loop exhausted retries while attempting to coerce model output into
+    the requested structured-output schema.

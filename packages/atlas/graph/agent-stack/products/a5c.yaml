@@ -1,0 +1,19 @@
+nodeKind: AgentProduct
+id: agent:a5c
+attributes:
+  displayName: "a5c"
+  vendor: "a5c-ai"
+  homepageUrl: "https://github.com/a5c-ai/babysitter"
+  primarySurface: cli
+  supportTier: catalog-backed
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    a5c.ai's user-facing agent. Combines a TUI panel and CLI on top of
+    agent-mux's transport layer, with a5c-specific plugin / skill /
+    blueprint registry, marketplace integration, and shared babysitter
+    runtime conventions. The actual model loop is delegated through
+    agent-mux to a configurable remote agent (Claude Code, Codex, etc).
+edges:
+  has_version:
+    - agent-version:a5c@current

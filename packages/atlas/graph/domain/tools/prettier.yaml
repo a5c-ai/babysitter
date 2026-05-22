@@ -1,0 +1,19 @@
+nodeKind: Tool
+id: tool:prettier
+attributes:
+  displayName: "Prettier"
+  homepageUrl: "https://prettier.io"
+  kind: formatter
+  language: language:javascript
+  description: |
+    Opinionated code formatter for JavaScript / TypeScript / CSS / Markdown / and more.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:code-quality
+  alternative_to:
+    - target: tool:eslint
+      comparison: "JavaScript linters / formatters"
+    - target: tool:biome
+      comparison: "JavaScript linters / formatters"

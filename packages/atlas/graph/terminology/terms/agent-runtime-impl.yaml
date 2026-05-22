@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:agent-runtime-impl
+attributes:
+  canonicalDefinitionId: definition:agent-runtime-impl.canonical
+  displayName: "AgentRuntimeImpl"
+  kind: concept
+  references:
+    - "NodeKind:AgentRuntimeImpl"
+  description: |
+    Concrete runtime+tools+hook-sockets impl
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

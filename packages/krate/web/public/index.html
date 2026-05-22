@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>a5c.ai Krate MVP</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #0f172a; color: #e2e8f0; }
+      body { margin: 0; padding: 32px; }
+      main { max-width: 1120px; margin: 0 auto; }
+      h1 { font-size: 48px; margin: 0 0 8px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 24px; }
+      .card { background: #111827; border: 1px solid #334155; border-radius: 16px; padding: 20px; box-shadow: 0 16px 40px #0005; }
+      .eyebrow { color: #38bdf8; text-transform: uppercase; letter-spacing: .12em; font-size: 12px; }
+      pre { background: #020617; border-radius: 10px; color: #bfdbfe; padding: 16px; overflow: auto; }
+      li { margin: 8px 0; }
+    </style>
+  </head>
+  <body><main>
+    <p class="eyebrow">a5c.ai Krate · Kubernetes-native forge</p><h1>Krate MVP surface</h1>
+    <p>Krate models repositories, pull requests, CI, policy, webhooks, and GitOps-transparent UI flows as Kubernetes-style resources.</p>
+    <section class="grid">
+      <article class="card"><h2>Control Plane</h2><p>CRDs stay in etcd; high-cardinality PR, issue, CI, review, and webhook records live behind the aggregated API/Postgres boundary.</p></article>
+      <article class="card"><h2>Data Plane</h2><p>Git smart-HTTP/SSH is backed by Gitea with branch/ref policy enforcement.</p></article>
+      <article class="card"><h2>Identity & Policy</h2><p>OIDC users map to Kubernetes users/groups; RBAC and admission own authorization and audit/enforce rollout.</p></article>
+      <article class="card"><h2>Excellent Flows</h2><ul><li>Review PRs</li><li>Debug CI</li><li>Configure runners</li><li>Replay webhooks</li><li>Roll out policy</li><li>Share triage views</li></ul></article>
+    </section><h2>Try it</h2><pre>npm run check</pre>
+  </main></body>
+</html>

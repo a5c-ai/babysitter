@@ -55,6 +55,9 @@
  * - OWASP LLM Top 10: https://owasp.org/www-project-top-10-for-large-language-model-applications/
  * - CWE Top 25: https://cwe.mitre.org/top25/archive/2023/2023_top25_list.html
  * - NIST SP 800-53: https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final
+ * @graph
+ *   domains: [domain:security, role:security-engineer]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

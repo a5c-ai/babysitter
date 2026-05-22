@@ -1,0 +1,35 @@
+nodeKind: Subagent
+id: subagent:claude-code.plan
+attributes:
+  displayName: "Plan (Claude Code)"
+  provenance: built-in
+  dispatchPattern: task-tool
+  subjectId: agentVersion:claude:ge-0-0-0
+  roleId: role:planner
+  systemPrompt: |
+    Plan-only subagent bundled with Claude Code. Emits a numbered plan
+    with success criteria and does not execute. Pairs with the Explore
+    and general-purpose subagents.
+  tools: []
+  triggers: |
+    Auto-invoked when the user enters Plan Mode (Shift+Tab) or selects
+    the Plan subagent from `/agents`.
+  agentType: plan
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  planApprovalRequired: true
+  description: |
+    The bundled `Plan` subagent shipped by Anthropic Claude Code.
+    Documented at
+    https://docs.anthropic.com/en/docs/claude-code/sub-agents.
+edges:
+  roles_played_by:
+    - target: role:planner
+  implements:
+    - target: extension-interface:orchestration
+  dispatched_via_tool:
+    - target: tool-descriptor:agent
+  uses_checkpoint:
+    - target: human-checkpoint:plan-edit

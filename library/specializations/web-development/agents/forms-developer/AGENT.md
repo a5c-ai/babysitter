@@ -9,6 +9,13 @@ expertise:
   - Form UX patterns
   - Accessibility
   - Complex form handling
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:frontend-engineer]
+  skillAreas: [skill-area:form-management, skill-area:react-components]
+  topics: [topic:form-state-management, topic:form-validation]
+
 ---
 
 # Forms Developer Agent

@@ -1,0 +1,101 @@
+---
+nodeKind: StackPart
+id: stack-part:feature-flag-service
+attributes:
+  displayName: "Feature Flag Service"
+  description: |
+    Runtime flag/configuration service used to gate features, run
+    experiments, and ramp rollouts. Examples: LaunchDarkly, Unleash,
+    Flagsmith, PostHog feature flags.
+edges:
+  implemented_by:
+    - target: tool:launchdarkly
+    - target: tool:flagsmith
+    - target: tool:split-io
+    - target: tool:unleash
+    - target: tool:posthog
+  stack_part_used_by:
+    - target: skill-area:canary-rollouts
+    - target: skill-area:strangler-fig-pattern
+---
+nodeKind: StackPart
+id: stack-part:experiment-platform
+attributes:
+  displayName: "Experimentation Platform"
+  description: |
+    Server-side A/B and multivariate experimentation with assignment,
+    metric pipelines, and stats. Examples: Statsig, Split, Optimizely,
+    GrowthBook.
+edges:
+  implemented_by:
+    - target: tool:launchdarkly
+---
+nodeKind: StackPart
+id: stack-part:notification-service
+attributes:
+  displayName: "Notification Service"
+  description: |
+    Outbound multi-channel messaging (email, SMS, push) used by
+    transactional and operational notifications. Examples: Twilio,
+    SendGrid, AWS SNS, Courier.
+edges:
+  implemented_by:
+    - target: tool:twilio
+    - target: tool:sendgrid
+    - target: tool:aws-ses
+  stack_part_used_by:
+    - target: skill-area:push-notifications
+---
+nodeKind: StackPart
+id: stack-part:scheduler
+attributes:
+  displayName: "Job Scheduler / Orchestrator"
+  description: |
+    Time- or event-driven orchestrator for batch and ETL jobs.
+    Examples: Apache Airflow, Prefect, Dagster, Temporal cron schedules.
+edges:
+  implemented_by:
+    - target: tool:airflow
+    - target: tool:temporal
+    - target: tool:dagster
+    - target: tool:prefect
+  stack_part_used_by:
+    - target: skill-area:etl-pipelines
+---
+nodeKind: StackPart
+id: stack-part:workflow-engine
+attributes:
+  displayName: "Workflow Engine"
+  description: |
+    Durable workflow runtime with state, retries, and signals for
+    long-running business or system processes. Examples: Temporal,
+    Netflix Conductor, Apache Cadence, AWS Step Functions.
+edges:
+  implemented_by:
+    - target: tool:temporal
+    - target: tool:airflow
+---
+nodeKind: StackPart
+id: stack-part:rate-limiter
+attributes:
+  displayName: "Rate Limiter"
+  description: |
+    Component enforcing request quotas/throttles per key, route, or
+    tenant. Implementations include Envoy/Kong rate-limit filters,
+    Redis token-bucket libraries, and bespoke leaky-bucket services.
+edges:
+  implemented_by:
+    - target: tool:kong
+---
+nodeKind: StackPart
+id: stack-part:edge-functions
+attributes:
+  displayName: "Edge Functions Runtime"
+  description: |
+    Globally distributed serverless runtime executing close to the
+    user. Examples: Cloudflare Workers, Vercel Edge Functions, Deno
+    Deploy, Netlify Edge.
+edges:
+  implemented_by:
+    - target: platform-service:vercel-edge-network
+    - target: platform-service:netlify-edge-functions

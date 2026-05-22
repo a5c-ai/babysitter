@@ -1,0 +1,24 @@
+nodeKind: PhaseMachine
+id: phase-machine:default-process
+attributes:
+  displayName: "Default process"
+  description: |
+    The standard 5-phase babysitter process flow used as a fallback
+    when a more specialized phase machine isn't bound. Phases:
+    intake -> plan -> execute -> review -> done.
+  phases:
+    - phase:intake
+    - phase:plan
+    - phase:execute
+    - phase:review
+    - phase:done
+  initialPhase: phase:intake
+  terminalPhases:
+    - phase:done
+edges:
+  has_phase:
+    - phase:intake
+    - phase:plan
+    - phase:execute
+    - phase:review
+    - phase:done

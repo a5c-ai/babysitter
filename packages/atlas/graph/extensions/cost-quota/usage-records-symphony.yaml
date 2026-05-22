@@ -1,0 +1,30 @@
+---
+nodeKind: UsageRecord
+id: usage-record:symphony-2026-04-30-run-001
+attributes:
+  recordedAt: "2026-04-30T14:22:11Z"
+  tenantId: tenant:acme
+  providerId: provider:anthropic
+  inputTokens: 12500
+  outputTokens: 3400
+  callCount: 1
+  amount: 0.176
+edges:
+  recorded_against:
+    - target: cost-model:anthropic-claude-3-5-sonnet
+    - target: quota:tenant-acme-monthly-tokens
+---
+nodeKind: UsageRecord
+id: usage-record:symphony-2026-04-30-run-002
+attributes:
+  recordedAt: "2026-04-30T16:08:55Z"
+  tenantId: tenant:acme
+  providerId: provider:anthropic
+  inputTokens: 45000
+  outputTokens: 8200
+  callCount: 1
+  amount: 0.696
+edges:
+  recorded_against:
+    - target: cost-model:anthropic-claude-3-5-sonnet
+    - target: quota:tenant-acme-monthly-tokens

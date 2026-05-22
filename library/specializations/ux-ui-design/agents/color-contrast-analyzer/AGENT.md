@@ -7,6 +7,13 @@ expertise:
   - Color blindness simulation
   - Accessible color alternatives
   - Dark/light mode contrast validation
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:color-theory, skill-area:accessibility-first-design]
+  roles: [role:product-designer, role:qa-engineer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
+  topics: [topic:accessibility]
 ---
 
 # Color Contrast Analyzer Agent

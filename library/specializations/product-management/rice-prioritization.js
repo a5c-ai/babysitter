@@ -22,6 +22,12 @@
  * - RICE Framework by Intercom: https://www.intercom.com/blog/rice-simple-prioritization-for-product-managers/
  * - Product Roadmapping Best Practices: https://www.productplan.com/learn/product-roadmap-best-practices/
  * - Prioritization Frameworks Guide: https://www.mindtheproduct.com/prioritization-frameworks/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:product-management]
+ *   skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:prioritization-frameworks]
+ *   roles: [role:product-manager, role:product-analyst]
+ *   workflows: [workflow:product-discovery, workflow:competitive-analysis]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -66,12 +72,13 @@ export async function process(inputs, ctx) {
       recommendation: 'Add more features to the backlog before prioritization'
     };
   }
+
   // ============================================================================
   // PHASE 2: STRATEGIC ALIGNMENT ASSESSMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Assessing strategic alignment of features');
-  let strategicAlignment = await ctx.task(strategicAlignmentTask, {
+  const strategicAlignment = await ctx.task(strategicAlignmentTask, {
     productName,
     features: featureCollection.features,
     strategicGoals,
@@ -81,18 +88,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategicAlignment.artifacts);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      strategicAlignment = await ctx.task(strategicAlignmentTask, { ...{
-    productName,
-    features: featureCollection.features,
-    strategicGoals,
-    timeframe,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review strategic alignment before scoring
+  await ctx.breakpoint({
     question: `Strategic alignment complete for ${productName}. ${featureCollection.features.length} features assessed against ${strategicGoals.length} strategic goals. Review alignment before RICE scoring?`,
     title: 'Strategic Alignment Review',
     context: {
@@ -110,15 +107,9 @@ export async function process(inputs, ctx) {
         highAlignmentFeatures: strategicAlignment.highAlignmentCount || 0,
         timeframe
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: REACH ESTIMATION
   // ============================================================================
@@ -155,7 +146,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Assessing confidence levels for estimates');
-  let confidenceAssessment = await ctx.task(confidenceAssessmentTask, {
+  const confidenceAssessment = await ctx.task(confidenceAssessmentTask, {
     productName,
     features: featureCollection.features,
     reachEstimation,
@@ -171,19 +162,8 @@ export async function process(inputs, ctx) {
     f => f.confidencePercent < minimumConfidence
   );
 
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        confidenceAssessment = await ctx.task(confidenceAssessmentTask, { ...{
-    productName,
-    features: featureCollection.features,
-    reachEstimation,
-    impactScoring,
-    strategicAlignment,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (lowConfidenceFeatures.length > 0) {
+    await ctx.breakpoint({
       question: `${lowConfidenceFeatures.length} features have confidence below ${minimumConfidence}%. These may need additional research. Continue with prioritization or refine estimates?`,
       title: 'Low Confidence Warning',
       context: {
@@ -195,15 +175,9 @@ export async function process(inputs, ctx) {
           confidence: f.confidencePercent
         })),
         recommendation: 'Consider gathering more data for low-confidence features'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: EFFORT ESTIMATION
@@ -242,7 +216,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Ranking features and analyzing results');
-  let rankingAnalysis = await ctx.task(rankingAnalysisTask, {
+  const rankingAnalysis = await ctx.task(rankingAnalysisTask, {
     productName,
     riceCalculation,
     strategicAlignment,
@@ -252,18 +226,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...rankingAnalysis.artifacts);
 
-    let lastFeedback_phase8Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase8Review) {
-      rankingAnalysis = await ctx.task(rankingAnalysisTask, { ...{
-    productName,
-    riceCalculation,
-    strategicAlignment,
-    timeframe,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-    }
-  const phase8Review = await ctx.breakpoint({
+  // Breakpoint: Review RICE scores and rankings
+  await ctx.breakpoint({
     question: `RICE scoring complete for ${productName}. ${rankingAnalysis.rankedFeatures.length} features ranked. Top priority: ${rankingAnalysis.topFeature.name} (RICE: ${rankingAnalysis.topFeature.riceScore.toFixed(2)}). Review rankings?`,
     title: 'RICE Scores Review',
     context: {
@@ -282,15 +246,9 @@ export async function process(inputs, ctx) {
         averageRiceScore: rankingAnalysis.averageRiceScore,
         timeframe
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase8Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase8Review.approved) break;
-    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 9: STRATEGIC FILTERING
   // ============================================================================
@@ -376,7 +334,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 14: Validating prioritization quality');
-  let qualityValidation = await ctx.task(qualityValidationTask, {
+  const qualityValidation = await ctx.task(qualityValidationTask, {
     productName,
     featureCollection,
     riceCalculation,
@@ -392,21 +350,8 @@ export async function process(inputs, ctx) {
   const prioritizationScore = qualityValidation.overallScore;
   const qualityMet = prioritizationScore >= 80;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      qualityValidation = await ctx.task(qualityValidationTask, { ...{
-    productName,
-    featureCollection,
-    riceCalculation,
-    rankingAnalysis,
-    strategicFiltering,
-    confidenceAssessment,
-    minimumConfidence,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Approve prioritization
+  await ctx.breakpoint({
     question: `RICE Prioritization complete for ${productName}. Quality score: ${prioritizationScore}/100. ${qualityMet ? 'Prioritization meets quality standards!' : 'Prioritization may need refinement.'} Approve and communicate results?`,
     title: 'Final Prioritization Approval',
     context: {
@@ -427,15 +372,9 @@ export async function process(inputs, ctx) {
         stakeholderCount: stakeholders.length,
         duration: ctx.now() - startTime
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -507,7 +446,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -1,0 +1,47 @@
+nodeKind: Claim
+id: claim:extended-agent-version-agent-version-zed-current-clicommand
+attributes:
+  subjectId: agent-version:zed@current
+  attribute: cliCommand
+  value: zed
+  subjectKind: AgentVersion
+  statement: agent-version:zed@current cliCommand is zed.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-stack-extended-products-version-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for extended agent version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-stack-extended-products-version-source-2026-05
+  about_subject:
+  - agent-version:zed@current
+---
+nodeKind: Claim
+id: claim:extended-agent-version-agent-version-zed-current-versionrange
+attributes:
+  subjectId: agent-version:zed@current
+  attribute: versionRange
+  value: '>=0.150.0'
+  subjectKind: AgentVersion
+  statement: agent-version:zed@current versionRange is >=0.150.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-stack-extended-products-version-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for extended agent version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-stack-extended-products-version-source-2026-05
+  about_subject:
+  - agent-version:zed@current

@@ -6,6 +6,13 @@
  * @complexity Medium-High
  * @inputs { projectPath: string, qualityStandards: object, gateTypes: array, enforcementLevel: string, cicdPlatform: string }
  * @outputs { success: boolean, gatesImplemented: array, enforcementMetrics: object, monitoringSetup: object, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:pull-request-lifecycle]
+ *   roles: [role:qa-engineer, role:tech-lead]
+ *   skillAreas: [skill-area:e2e-testing, skill-area:unit-testing]
+ *   topics: [topic:continuous-integration, topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

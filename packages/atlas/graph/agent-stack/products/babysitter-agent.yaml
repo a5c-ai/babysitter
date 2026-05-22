@@ -1,0 +1,17 @@
+nodeKind: AgentProduct
+id: agent:babysitter-agent
+attributes:
+  displayName: "babysitter-agent"
+  vendor: "a5c-ai"
+  homepageUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages/babysitter-agent"
+  primarySurface: cli
+  supportTier: catalog-backed
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    babysitter-agent CLI binary — long-running agent service that wraps
+    @a5c-ai/babysitter-sdk and exposes daemon, observer, and MCP-server
+    surfaces for human operators and other agents.
+edges:
+  has_version:
+    - agentVersion:babysitter-agent:ge-5-0-0

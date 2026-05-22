@@ -9,6 +9,11 @@ expertise:
   - Flow disruption response
   - WIP control
   - Throughput optimization
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:capacity-planning-ops, skill-area:quantitative-modeling, skill-area:data-analytics]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:procurement-manager, role:business-analyst]
 ---
 
 # Production Flow Manager

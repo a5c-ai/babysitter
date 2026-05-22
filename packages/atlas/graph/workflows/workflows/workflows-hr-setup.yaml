@@ -1,0 +1,124 @@
+---
+nodeKind: Workflow
+id: workflow:hris-platform-setup
+attributes:
+  displayName: "HRIS Platform Setup"
+  workflowKind: setup
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Configures the Human Resource Information System from implementation
+    through go-live -- designing the organizational hierarchy and job
+    architecture within the HRIS including job families, levels, and reporting
+    structures, configuring employee lifecycle workflows for hiring,
+    onboarding, transfers, promotions, and terminations, establishing
+    integration connections with payroll, benefits administration,
+    time-tracking, and identity-management systems via APIs and SFTP feeds,
+    building manager and employee self-service portals with appropriate access
+    controls and approval workflows, creating custom fields and reporting
+    dimensions for organization-specific data requirements, configuring
+    automated notifications for compliance deadlines and workflow approvals,
+    and planning data migration from legacy systems with validation and
+    reconciliation procedures. Produces HRIS configuration guide, integration
+    architecture document, and data migration plan. Excludes ongoing HR
+    operations.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:schema-evolution
+    - target: skill-area:identity-security
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:learning-management-system-setup
+attributes:
+  displayName: "Learning Management System Setup"
+  workflowKind: setup
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Implements and configures the learning management system for
+    organizational development -- selecting and deploying the LMS platform with
+    SSO integration and SCORM/xAPI content standard support, designing the
+    course catalog taxonomy aligned to competency frameworks and career
+    ladders, configuring role-based learning paths with prerequisite
+    dependencies and completion tracking, establishing certification programs
+    with expiration tracking and renewal notification workflows, building
+    content authoring guidelines and review processes for internal
+    subject-matter experts, integrating completion data with HRIS for
+    performance review and promotion eligibility workflows, creating learning
+    analytics dashboards showing enrollment rates, completion rates, assessment
+    scores, and time-to-certification by team and role. Produces LMS
+    configuration playbook, content authoring guide, and certification program
+    specifications. Excludes course content creation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:tutorial-design
+    - target: skill-area:docs-as-code
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:onboard-new-engineer
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:employee-recognition-program-design
+attributes:
+  displayName: "Employee Recognition Program Design"
+  workflowKind: setup
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Designs a comprehensive employee recognition program from concept through
+    launch -- defining recognition program tiers including peer-to-peer spot
+    recognition, manager nominations, and organizational excellence awards,
+    establishing recognition criteria aligned to company values and strategic
+    priorities, designing the nomination and selection workflow with evaluation
+    rubrics and approval stages, modeling rewards structures including monetary
+    bonuses, experience rewards, and public acknowledgment formats, specifying
+    the recognition platform requirements with social feed, badge system, and
+    points-based redemption, creating communication plans for program launch
+    including all-hands announcements, manager enablement sessions, and
+    employee onboarding integration, and defining program success metrics such
+    as participation rates, recognition distribution equity, and correlation
+    with engagement scores. Produces recognition program charter, rewards
+    catalog, and platform requirements document. Excludes ongoing program
+    administration.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:product-designer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:retro-facilitation
+    - target: responsibility:onboard-new-engineer
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:operations-team

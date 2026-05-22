@@ -1,0 +1,15 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-extension-mux
+attributes:
+  packageId: "@a5c-ai/extension-mux"
+  packageName: "@a5c-ai/extension-mux"
+  workspacePath: packages/extension-mux
+  moduleType: typescript
+  surfaceKinds:
+    - plugin-consumer
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:amux-hooks-project

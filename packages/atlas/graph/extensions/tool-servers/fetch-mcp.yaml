@@ -1,0 +1,27 @@
+nodeKind: ToolServer
+id: tool-server:fetch-mcp
+attributes:
+  displayName: "Fetch MCP"
+  description: "MCP server providing web content fetching capabilities. Enables AI agents to retrieve and convert web pages to markdown or other formats for processing. Supports stdio transport."
+  protocol: mcp
+  category: file-system
+  repoUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
+  npmPackage: "@modelcontextprotocol/server-fetch"
+  maintainer: Anthropic
+  mcpTransports:
+    - mcp-transport:stdio
+  tools:
+    - tool-descriptor:fetch.fetch
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:fetch.fetch
+  implements:
+    - target: extension-interface:orchestration
+  requires_capability:
+    - target: capability:supports-mcp
+      level: required
+  sourced_from:
+    - target: source-ref:mcp-servers-registry
+  lib_applies_to_domain:
+    - target: domain:web-development

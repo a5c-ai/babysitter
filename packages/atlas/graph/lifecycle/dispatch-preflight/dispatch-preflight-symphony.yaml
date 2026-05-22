@@ -1,0 +1,11 @@
+nodeKind: DispatchPreflight
+id: dispatch-preflight:default
+attributes:
+  displayName: "Default Symphony dispatch preflight gate"
+  validations:
+    - tracker-credentials
+    - project-slug
+    - agent-binary
+    - workspace-root-writable
+  resultStatus: passed
+  blockingErrors: []

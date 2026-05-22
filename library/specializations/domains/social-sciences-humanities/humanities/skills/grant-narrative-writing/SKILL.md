@@ -2,6 +2,12 @@
 name: grant-narrative-writing
 description: Compose compelling research narratives for NEH, ACLS, and foundation funding proposals with clear significance statements
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
+graph:
+  domains: [domain:humanities]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:technical-writing, skill-area:content-strategy, skill-area:deep-web-research]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:technical-writer, role:research-analyst]
 ---
 
 # Grant Narrative Writing

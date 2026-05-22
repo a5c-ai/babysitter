@@ -1,0 +1,86 @@
+---
+nodeKind: Workflow
+id: workflow:finops-practice-setup
+attributes:
+  displayName: "FinOps Practice Setup"
+  workflowKind: onboarding
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Establishes the organizational FinOps practice from scratch including
+    tooling, processes, and culture -- deploying cost visibility tooling with
+    multi-cloud support and configuring cost explorer dashboards for each
+    stakeholder tier, designing and implementing the mandatory resource tagging
+    strategy with enforcement automation, creating cost allocation hierarchies
+    that map cloud resources to business units, products, and environments,
+    establishing showback and chargeback processes with appropriate allocation
+    models for shared services, defining FinOps RACI across engineering,
+    finance, and leadership, building anomaly detection baselines from
+    historical spend patterns, creating training materials and conducting
+    workshops to build cost awareness across engineering teams, and defining the
+    FinOps maturity model with crawl-walk-run milestones. Produces FinOps
+    operating model document, tagging policy, tooling architecture, training
+    curriculum, and maturity assessment framework. Excludes financial system
+    integration.
+edges:
+  involves_role:
+    - target: role:cloud-architect
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:finops
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:finops-team
+    - target: org-unit:engineering
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:cost-anomaly-alerting-setup
+attributes:
+  displayName: "Cost Anomaly Alerting Setup"
+  workflowKind: operational
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Designs and implements the cost anomaly detection and alerting
+    infrastructure -- defining anomaly detection thresholds using statistical
+    baselines (standard deviation bands, percentage-over-forecast) calibrated
+    per service and team to minimize false positives, configuring multi-tier
+    alert routing with severity levels mapped to cost impact magnitude
+    (informational, warning, critical), establishing escalation rules that
+    auto-notify team leads for moderate anomalies and trigger incident response
+    for critical spend spikes, integrating anomaly alerts with communication
+    channels (Slack, PagerDuty, email) with appropriate context including
+    affected resources, estimated daily run-rate, and suggested investigation
+    steps, creating anomaly investigation runbooks with common root-cause
+    patterns, setting up weekly anomaly review meetings to tune thresholds and
+    close resolved alerts, and building an anomaly historical log for pattern
+    recognition. Produces alerting architecture document, threshold
+    configuration, escalation matrix, and investigation runbooks. Excludes
+    anomaly remediation.
+edges:
+  involves_role:
+    - target: role:cloud-architect
+    - target: role:platform-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:finops
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:respond-incidents
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:finops-team
+    - target: org-unit:platform-team

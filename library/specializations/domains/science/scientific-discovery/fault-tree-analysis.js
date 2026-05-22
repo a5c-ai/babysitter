@@ -17,6 +17,13 @@
  * - NASA Fault Tree Handbook (2002)
  * - IEC 61025 (2006). Fault Tree Analysis
  * - Vesely, W.E. et al. (1981). Fault Tree Handbook, NUREG-0492
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

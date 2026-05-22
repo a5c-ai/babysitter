@@ -3,6 +3,12 @@
  * @description Verification Before Completion - Evidence-based completion verification: run tests, check requirements, prove claims
  * @inputs { claims: array, testCommand?: string, requirements?: array, planPath?: string }
  * @outputs { success: boolean, verifications: array, allVerified: boolean, evidenceGaps: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:prioritization-frameworks, skill-area:product-discovery, skill-area:roadmap-planning]
+ *   workflows: [workflow:product-discovery, workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:engineering-manager, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

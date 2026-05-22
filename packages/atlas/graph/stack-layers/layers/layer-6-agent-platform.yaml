@@ -1,0 +1,28 @@
+nodeKind: Layer
+id: layer:6-agent-platform
+attributes:
+  displayName: Agent-Platform
+  position: 6
+  path: compute
+  scope: Extension, distribution, launch, and ecosystem surface around runtimes.
+  summary: |
+    The platform wraps one or more `AgentRuntimeImpl`s with extension,
+    distribution, and operator concerns: installed plugins, installed skills,
+    native extension formats, subagents, tool servers, channel adapters,
+    launch/config registries, identity, marketplace, and update channels.
+    Realized by `AgentPlatformImpl` instances.
+  responsibilities:
+    - Load installed plugins, installed skills, commands, hooks, subagents, and tool servers.
+    - Broker capability profiles, launch profiles, identity, marketplaces, and updates.
+    - Bridge channels such as MCP, HTTP/SSE, A2A, chat, mailbox, and gateway adapters.
+    - Publish the platform-specific extension contract and installation scopes.
+  examples:
+    - Claude plugins/skills, Codex/Gemini/OpenCode extension packages, a5c plugins.
+    - LangGraph Platform, LangSmith deployment, RemoteGraph, hosted graph operations.
+    - Skill directories, plugin registries, marketplace manifests, MCP server configs.
+  fitNotes: |
+    Installed plugins and skills belong explicitly in this layer. Products may
+    expose a platform without owning a model/provider, or may hide platform
+    services inside an IDE or hosted control plane. a5c platform is modeled as
+    a unified same-layer extension host, not a Pi wrapper.
+edges: {}

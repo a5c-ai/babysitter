@@ -2,17 +2,14 @@
 name: continuous-learning
 description: Pattern extraction, confidence-scored evaluation, skill creation, organization, versioning, and cross-project export pipeline.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Continuous Learning
-
-## Overview
-
-Continuous learning pipeline adapted from the Everything Claude Code methodology. Automatically extracts patterns from development sessions, evaluates them with confidence scoring, and converts high-quality patterns into reusable skills.
-
-## Learning Pipeline
-
-### 1. Pattern Extraction
 - Analyze code changes and implementation approaches
 - Identify recurring patterns and conventions
 - Extract architectural decisions with rationale

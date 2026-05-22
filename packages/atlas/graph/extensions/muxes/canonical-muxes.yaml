@@ -1,0 +1,394 @@
+---
+nodeKind: Mux
+id: mux:transport-mux
+attributes:
+  displayName: "transport-mux"
+  protocolType: llm-wire
+  nativeSide:
+    - "Anthropic Messages"
+    - "OpenAI Responses"
+    - "OpenAI ChatCompletions"
+    - "Gemini generateContent"
+    - "Bedrock Invoke"
+    - "Bedrock Converse"
+    - "Custom proprietary"
+  canonicalSide: "Unified inference request/response shape"
+  position: "Between Transport-Client (in Agent-Core) and Provider"
+  bridgingConcerns:
+    - "request shape (messages array vs prompt vs alternating roles)"
+    - "streaming framing (SSE vs JSONL vs custom)"
+    - "tool-use schema differences"
+    - "thinking / reasoning channel mapping (Anthropic thinking_delta ↔ OpenAI reasoning_delta ↔ Gemini equivalents)"
+    - "token usage and cost reporting"
+    - "error-mapping across providers"
+    - "model name aliasing per provider"
+  catalogInputNodeKinds:
+    - ModelTransportProtocol
+    - ModelVersion
+  trustChainParticipation: planned
+  description: |
+    Bridges between concrete LLM wire protocols and one canonical inference
+    request/response shape. Adding a new native impl is a Catalog edit
+    (TransportDescriptor + ModelVersion.speaks) plus a generator pass.
+edges:
+  bridges_protocol_type:
+    - target: layer:3-transport
+  bridges_for:
+    - target: provider:anthropic
+    - target: provider:openai
+    - target: provider:google
+    - target: provider:gcp-vertex
+    - target: provider:aws-bedrock
+---
+nodeKind: Mux
+id: mux:agent-launch-mux
+attributes:
+  displayName: "agent-launch-mux"
+  protocolType: spawn
+  nativeSide:
+    - "claude --print --input-format stream-json"
+    - "codex --model M --reasoning R"
+    - "gh copilot (indirection through gh CLI)"
+    - "cursor"
+    - "gemini-cli"
+    - "opencode, pi, omp, openclaw, hermes, qwen — per-agent CLIs"
+  canonicalSide: "Unified InvocationOptions → SpawnArgs → process lifecycle"
+  position: "Between Agent-Platform (the productized agent) and the calling SDK / orchestrator"
+  bridgingConcerns:
+    - "spawn args per agent (positional prompt vs --prompt, model flag formats, thinking flags)"
+    - "env-var conventions per agent (ANTHROPIC_API_KEY vs OPENAI_API_KEY vs GITHUB_TOKEN)"
+    - "working-directory mapping (especially --add-dir for skill directories)"
+    - "subprocess management (Unix pgroups vs Windows Job Objects)"
+    - "signal propagation (especially across ssh / docker / k8s)"
+    - "retry policy and lifecycle hooks (onSpawnError, onTimeout, onProcessExit, shouldRetry)"
+    - "min-version enforcement (semver gate)"
+    - "execution-mode dispatch (local / docker / ssh / k8s / cloud)"
+  catalogInputNodeKinds:
+    - AgentVersion
+    - LaunchConfig
+    - LaunchContract
+    - Execution
+  trustChainParticipation: planned
+  description: |
+    Spawns and supervises Invocations across all supported agent products.
+    Owns the 9-state Invocation lifecycle (spawned → running → paused →
+    interrupted → aborted | timed-out | completed | crashed | killed).
+    Distinct from the babysitter SDK Process Run — a Run can dispatch one
+    or more Invocations.
+edges:
+  bridges_protocol_type:
+    - target: layer:8-execution
+  bridges_for:
+    - target: agentVersion:claude:ge-0-0-0
+    - target: agentVersion:codex:ge-0-119-0
+    - target: agentVersion:cursor:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:opencode:ge-0-0-0
+    - target: agentVersion:copilot:ge-0-0-0
+    - target: agentVersion:pi:ge-0-0-0
+    - target: agentVersion:omp:ge-0-0-0
+    - target: agentVersion:openclaw:ge-0-0-0
+    - target: agent-version:hermes@current
+    - target: agent-version:qwen@current
+    - target: agent-version:droid@current
+    - target: agent-version:amp@current
+---
+nodeKind: Mux
+id: mux:agent-comm-mux
+attributes:
+  displayName: "agent-comm-mux"
+  protocolType: event-stream
+  nativeSide:
+    - "Claude stream-json"
+    - "Codex JSONL"
+    - "Cursor SQLite events"
+    - "OpenCode SQLite"
+    - "Pi JSONL-tree"
+    - "OMP JSONL-tree"
+    - "Hermes JSONL"
+    - "Copilot plain-text+JSON-meta"
+    - "Gemini JSONL"
+    - "A2A / ACP"
+    - "MCP-as-agent"
+  canonicalSide: "Unified AgentEvent union + unified channel-envelope"
+  position: "Between Agent-Platform and consumers (orchestrators, presentation, observability, other agents)"
+  bridgingConcerns:
+    - "event taxonomies (Anthropic message_start/content_block_start vs OpenAI response.start/response.text.delta)"
+    - "partial-streaming quirks (text streaming, tool-call streaming, thinking streaming)"
+    - "session-resume events (real or synthesized)"
+    - "fork events"
+    - "interactive nuances (Cursor capability-profile switches mid-session, OpenClaw partial-streaming line discipline, Copilot session_id in sidecar JSON line)"
+    - "channel session-brokering (handshake, persistent vs restart-per-turn vs none)"
+    - "agent-to-agent handshakes and capability advertisement"
+  catalogInputNodeKinds:
+    - AgentVersion
+    - Channel
+    - SessionSemantics
+  trustChainParticipation: planned
+  description: |
+    Normalizes per-agent event streams + inter-agent protocols + channel
+    kinds into one canonical event/envelope shape. Channels are absorbed
+    here (vs a separate channels-mux) because the underlying primitive is
+    a structured communication channel between two participants.
+edges:
+  bridges_protocol_type:
+    - target: layer:6-agent-platform
+  bridges_for:
+    - target: agentVersion:claude:ge-0-0-0
+    - target: agentVersion:codex:ge-0-119-0
+    - target: agentVersion:cursor:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:opencode:ge-0-0-0
+    - target: agentVersion:copilot:ge-0-0-0
+    - target: agentVersion:pi:ge-0-0-0
+    - target: agentVersion:omp:ge-0-0-0
+    - target: agentVersion:openclaw:ge-0-0-0
+    - target: agent-version:hermes@current
+---
+nodeKind: Mux
+id: mux:session-storage-mux
+attributes:
+  displayName: "session-storage-mux"
+  protocolType: session-storage
+  nativeSide:
+    - "JSONL"
+    - "SQLite"
+    - "JSON"
+    - "JSONL-tree"
+    - "JSONL+SQLite hybrid (Cursor)"
+  canonicalSide: "Unified session schema + parse / serialize / listSessions / resume / fork operations"
+  position: "Between Agent-Platform's session storage and consumers (replay, fork, audit, cross-agent migration)"
+  bridgingConcerns:
+    - "file format translation (JSONL turn-per-line vs SQLite normalized tables vs hierarchical JSONL-tree)"
+    - "per-agent session directory conventions (~/.claude/projects/<hash>/, ~/.codex/sessions/, ~/.cursor/sessions.db)"
+    - "session ID format (UUID vs path-hash vs SQL primary key)"
+    - "resume vs fork semantics where supported"
+    - "fidelity-loss tracking (some formats lose tool-input bytes vs text)"
+  catalogInputNodeKinds:
+    - SessionSemantics
+    - AgentVersion
+  trustChainParticipation: none
+  description: |
+    Strictly about reading and writing session files at rest. Distinct
+    from agent-launch-mux (which spawns Invocations) and agent-comm-mux
+    (in-flight events). Sessions follow created → active → suspended
+    (resumable) → terminated.
+edges:
+  bridges_protocol_type:
+    - target: layer:6-agent-platform
+  bridges_for:
+    - target: agentVersion:claude:ge-0-0-0
+    - target: agentVersion:codex:ge-0-119-0
+    - target: agentVersion:cursor:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:opencode:ge-0-0-0
+---
+nodeKind: Mux
+id: mux:agent-config-mux
+attributes:
+  displayName: "agent-config-mux"
+  protocolType: admin
+  nativeSide:
+    - "per-agent config files"
+    - "per-agent auth conventions"
+    - "per-agent extension install commands"
+    - "per-agent install methods"
+  canonicalSide: "Unified admin surface — readConfig, writeConfig, detectAuth, getAuthGuidance, installExtension, listExtensions, uninstallExtension, searchExtensions, detectVersion, meetsMinVersion"
+  position: "Between Agent-Platform admin operations and the controlling system"
+  bridgingConcerns:
+    - "config schema per agent (AgentConfigSchema: agent, fields, configFilePaths, projectConfigFilePaths)"
+    - "auth detection per agent (api-key env-var, OAuth 2.0 file, OAuth device flow RFC 8628, browser-login session-token files, gh auth state, OS-keychain-backed credentials, service-account JSON, IAM role)"
+    - "install method translation (npm vs brew vs gh-extension vs curl vs winget vs scoop vs manual vs pip vs nix)"
+    - "extension/plugin install per agent (sometimes a CLI command, sometimes config-file mutation)"
+    - "discovery signal handling (env vars like CLAUDECODE, binary on PATH, registry keys on Windows)"
+  catalogInputNodeKinds:
+    - AgentVersion
+    - InstallMethod
+    - DiscoverySignal
+  trustChainParticipation: none
+  description: |
+    Drives the cross-agent admin surface that wraps each agent\'s
+    idiosyncratic config/auth/install conventions into one set of
+    operations callable from orchestrators and the operator UI.
+edges:
+  bridges_protocol_type:
+    - target: layer:6-agent-platform
+  bridges_for:
+    - target: agentVersion:claude:ge-0-0-0
+    - target: agentVersion:codex:ge-0-119-0
+    - target: agentVersion:cursor:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:opencode:ge-0-0-0
+    - target: agentVersion:copilot:ge-0-0-0
+---
+nodeKind: Mux
+id: mux:hooks-mux
+attributes:
+  displayName: "hooks-mux"
+  protocolType: hook
+  nativeSide:
+    - "claude — PreToolUse, PostToolUse, UserPromptSubmit, Notification, Stop, SubagentStop, SessionStart, SessionEnd, PreCompact, ShellEnv"
+    - "codex — OnToolCall, OnStop"
+    - "gemini — pre_prompt, post_response"
+    - "copilot — preTool, postTool"
+    - "cursor — inherits Claude Code hook schema"
+    - "opencode — on_step, SessionIdle, ShellEnv"
+    - "pi, omp, openclaw, hermes — onEvent (generic)"
+  canonicalSide: "Canonical 14-hook surface set (PreToolUse, PostToolUse, UserPromptSubmit, etc.)"
+  position: "Between Agent-Runtime hook events and subscribed plugins / extension-interface impls"
+  bridgingConcerns:
+    - "name mapping (per-agent → canonical)"
+    - "payload schema normalization (UnifiedHookEvent: version, adapter, phase, rawEventName, supportLevel, execution, payload, env, raw)"
+    - "support level (supported / degraded / unsupported) per (agent, hook)"
+    - "hook family (shell-hook / in-process / observer) — determines delivery mechanism"
+    - "merge policy across multiple subscribers (DECISION_PRECEDENCE deny < ask < allow < continue < noop)"
+  catalogInputNodeKinds:
+    - HookSurface
+    - HookMapping
+    - AgentVersion
+  trustChainParticipation: planned
+  description: |
+    Bridges per-product native hook names to the canonical hook taxonomy
+    + applies per-axis merge policies (persistEnv key-wise, decision
+    most-restrictive-wins, systemMessage concat, toolMutation single-writer).
+    Emits MergeDiagnostics: handlerCount, handlerOrder, conflicts,
+    degradedFields, handlerTimings, unsupportedOutputFields,
+    nativeRenderingLosses, mergedAt.
+edges:
+  bridges_protocol_type:
+    - target: layer:5-agent-runtime
+  bridges_for:
+    - target: agentVersion:claude:ge-0-0-0
+    - target: agentVersion:codex:ge-0-119-0
+    - target: agentVersion:cursor:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:opencode:ge-0-0-0
+    - target: agentVersion:copilot:ge-0-0-0
+    - target: agentVersion:pi:ge-0-0-0
+    - target: agentVersion:omp:ge-0-0-0
+    - target: agentVersion:openclaw:ge-0-0-0
+    - target: agent-version:hermes@current
+---
+nodeKind: Mux
+id: mux:extension-mux
+attributes:
+  displayName: "extension-mux"
+  protocolType: extension-manifest
+  nativeSide:
+    - "Claude Code plugin"
+    - "Codex extension"
+    - "Cursor plugin"
+    - "OpenCode extension"
+    - "Pi plugin"
+    - "OMP plugin"
+    - "per-agent native extension formats"
+  canonicalSide: "Portable Extension manifest format — one source compiles to many agents"
+  position: "Between extension authors and per-agent native extension loaders"
+  bridgingConcerns:
+    - "manifest translation (one source → per-agent native manifest)"
+    - "hook registration translation (per-agent generators emit native hooks.json from canonical declaration)"
+    - "pattern substitution (hookFilePattern: hooks/{{name}}-{{slug}}.sh)"
+    - "content packaging (Skills, Subagents, MCP Servers / Tool Providers carried inside extensions)"
+    - "proxy command resolution (hooks: { Stop: \"proxy\" } → npx @a5c-ai/hooks-mux-cli invocation)"
+  catalogInputNodeKinds:
+    - PluginTarget
+    - PluginArtifact
+  trustChainParticipation: none
+  description: |
+    Compiles one Portable Extension manifest into per-agent native
+    formats via per-target generators (generateClaudeCodeHooksJson,
+    generateCodexHooksJson, generateCursorHooksJson with bash+powershell
+    variants, etc.).
+edges:
+  bridges_protocol_type:
+    - target: layer:6-agent-platform
+  bridges_for:
+    - target: agentVersion:claude:ge-0-0-0
+    - target: agentVersion:codex:ge-0-119-0
+    - target: agentVersion:cursor:ge-0-0-0
+    - target: agentVersion:opencode:ge-0-0-0
+    - target: agentVersion:pi:ge-0-0-0
+    - target: agentVersion:omp:ge-0-0-0
+---
+nodeKind: Mux
+id: mux:tool-mux
+attributes:
+  displayName: "tool-mux"
+  protocolType: tool
+  nativeSide:
+    - "native built-in tools"
+    - "MCP servers"
+    - "A2A tool servers"
+    - "CLI tools wrapped as anycli"
+    - "arbitrary external tool protocols"
+  canonicalSide: "Unified tool-call request/response"
+  position: "Between Agent-Runtime tool dispatch and the actual tool execution boundary"
+  bridgingConcerns:
+    - "argument schema translation (tool-call JSON ↔ CLI flags)"
+    - "streaming tool output (some MCP tools stream, most CLI tools don\\'t)"
+    - "error envelope mapping"
+    - "secret redaction in tool args/output"
+    - "attestation envelope (Trust Chain link for the tool call)"
+    - "tool-call modes — direct (no model intermediation) vs normal (model loop)"
+    - "background tool calls (long-running async with pending status, resolved via follow-up event)"
+    - "per-tool timeouts (separate from Invocation timeout)"
+    - "MCP transport support per agent (stdio universal, SSE Claude+Cursor, streamable-HTTP newer Claude+Codex)"
+  catalogInputNodeKinds:
+    - ToolDescriptor
+    - ToolServer
+    - MCPTransport
+  trustChainParticipation: planned
+  description: |
+    Implementation pattern includes realtime anycli (wrap any CLI as a
+    callable tool), MCP→CLI gateway, CLI→MCP gateway, and tool-level
+    hooks layered on hooks-mux PreToolUse / PostToolUse.
+edges:
+  bridges_protocol_type:
+    - target: layer:5-agent-runtime
+  bridges_for:
+    - target: agentVersion:claude:ge-0-0-0
+    - target: agentVersion:codex:ge-0-119-0
+    - target: agentVersion:cursor:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:opencode:ge-0-0-0
+---
+nodeKind: Mux
+id: mux:tasks-mux
+attributes:
+  displayName: "tasks-mux"
+  protocolType: task
+  nativeSide:
+    - "Claude AskUserQuestion"
+    - "MCP question/answer"
+    - "Kanban (in-repo)"
+    - "CLI prompt"
+    - "GitHub Issues"
+    - "Linear"
+    - "Jira"
+    - "git markers"
+    - "email"
+    - "webhook"
+  canonicalSide: "Unified task lifecycle — open → assigned → in-progress → answered/done → closed"
+  position: "Between consumer code (SDK orchestrators, hooks) and task backends with bidirectional comment sync"
+  bridgingConcerns:
+    - "task kinds (decision — renamed from breakpoint; task — work item with labels; external-task — outside our system)"
+    - "cross-cutting axes (actor: human/agent/system, mode: sync/deferred, backend: pluggable, dependencies: DAG of tasks)"
+    - "live decision schema (BreakpointStrategy, Urgency, InteractionKind, BreakpointContext, BreakpointRouting, ResponderProfile, BreakpointAnswer + BreakpointAnswerRating + DecisionMemory, ProvenBreakpointAnswer)"
+    - "comment sync (bidirectional GitHub/Linear/Jira/Kanban ↔ run journal)"
+    - "auto-approval pattern-matching DSL (glob decision IDs, attribute predicates AND-combined, consecutive-approval escalation)"
+  catalogInputNodeKinds:
+    - HumanCheckpoint
+    - AutomationRule
+    - Issue
+  trustChainParticipation: live
+  description: |
+    The lone live Trust Chain primitive — ProvenBreakpointAnswer signs
+    decision answers with the named Authority of the responder. Bridges
+    every backend (Linear, GitHub, Jira, MCP, Kanban) with bidirectional
+    comment sync and the same pattern-matching auto-approval DSL.
+edges:
+  bridges_protocol_type:
+    - target: layer:6-agent-platform
+  bridges_for:
+    - target: agentVersion:claude:ge-0-0-0
+    - target: agent-version:babysitter@current

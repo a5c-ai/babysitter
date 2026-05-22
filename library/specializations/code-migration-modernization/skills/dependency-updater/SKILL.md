@@ -2,6 +2,13 @@
 name: dependency-updater
 description: Automated dependency update execution with breaking change detection and rollback capability
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:dependency-upgrade-strategies, skill-area:dependency-vulnerability-mgmt]
+  roles: [role:backend-engineer, role:dependency-updater]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Dependency Updater Skill

@@ -1,0 +1,154 @@
+---
+nodeKind: Workflow
+id: workflow:scope3-emissions-tracking
+attributes:
+  displayName: "Scope 3 Emissions Tracking"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Tracks and reports Scope 3 greenhouse-gas emissions across the value
+    chain -- collecting activity data from suppliers, business travel systems,
+    employee commuting surveys, purchased goods lifecycle assessments, and
+    downstream product-use estimates, mapping each source to GHG Protocol
+    categories, applying region-specific emission factors, reconciling
+    bottom-up calculations against spend-based proxies, identifying
+    high-impact reduction levers, and producing Scope 3 inventory disclosures
+    aligned with TCFD and CDP frameworks. Produces Scope 3 emissions
+    inventory report and reduction opportunity matrix. Excludes Scope 1 and 2
+    direct-emissions accounting.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:sustainability-esg
+    - target: domain:operations
+    - target: domain:supply-chain
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:esg-sustainability-team
+    - target: org-unit:operations-team
+    - target: org-unit:procurement-team
+---
+nodeKind: Workflow
+id: workflow:sustainability-supply-chain-audit
+attributes:
+  displayName: "Sustainability Supply Chain Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Audits supply-chain partners against sustainability and
+    responsible-sourcing criteria -- reviewing supplier environmental
+    certifications and labor practice disclosures, validating
+    conflict-mineral and deforestation-free sourcing claims, assessing water
+    and waste management practices at key facilities, evaluating supplier ESG
+    risk scores against procurement thresholds, conducting virtual or on-site
+    sustainability audits for high-risk suppliers, and documenting corrective
+    action plans for non-conformances. Produces supplier sustainability
+    scorecard and audit findings report. Excludes contract re-negotiation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:sustainability-esg
+    - target: domain:supply-chain
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:dependency-audit
+  performed_by_org_unit:
+    - target: org-unit:esg-sustainability-team
+    - target: org-unit:procurement-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:green-it-infrastructure-review
+attributes:
+  displayName: "Green IT Infrastructure Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Reviews IT infrastructure for energy efficiency and carbon footprint
+    reduction opportunities -- benchmarking cloud workload power-usage
+    effectiveness against provider sustainability dashboards, analyzing
+    server utilization to identify right-sizing and consolidation candidates,
+    evaluating hardware lifecycle for e-waste minimization and
+    circular-economy compliance, assessing renewable-energy procurement for
+    data center regions, reviewing cooling and power-distribution efficiency
+    in on-premises facilities, and modeling carbon impact of architecture
+    migration scenarios. Produces green IT assessment report and efficiency
+    improvement roadmap. Excludes procurement execution.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:cloud-architect
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:containerization
+  applies_to_domain:
+    - target: domain:sustainability-esg
+    - target: domain:cloud-infra
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:esg-sustainability-team
+    - target: org-unit:infra-engineering
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:climate-risk-scenario-analysis
+attributes:
+  displayName: "Climate Risk Scenario Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annually"
+  complexity: cross-team
+  description: |
+    Models organizational exposure to physical and transition climate risks
+    under IPCC and NGFS scenarios -- mapping physical-risk exposure for
+    facilities and supply-chain nodes against flood, heat-stress, and
+    wildfire projections, assessing transition-risk impacts from carbon
+    pricing, stranded-asset write-downs, and demand shifts under 1.5C and 2C
+    pathways, stress-testing financial projections against scenario-specific
+    assumptions, evaluating adaptation and resilience investment options, and
+    preparing TCFD-aligned climate scenario disclosures. Produces climate
+    risk scenario report and adaptation investment recommendations. Excludes
+    insurance procurement.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-warehouse-modeling
+  applies_to_domain:
+    - target: domain:sustainability-esg
+    - target: domain:finance
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:esg-sustainability-team
+    - target: org-unit:finance-team
+    - target: org-unit:risk-management-team

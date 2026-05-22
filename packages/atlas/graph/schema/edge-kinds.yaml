@@ -1,0 +1,4261 @@
+# All EdgeKinds (single file; edges span clusters).
+# Loaded by tools/validator/validate.py via the manifest in schema/ontology-schema.yaml.
+
+edgeKinds:
+- id: edge:composed-of
+  name: composed_of
+  origin: universal
+  description: an agent product/version is composed of stack-layer implementations; a stack profile is composed of languages/frameworks/tools (alias of composes for ergonomics)
+  source:
+  - AgentProduct
+  - AgentVersion
+  - StackProfile
+  target:
+  - AgentCoreImpl
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  - AgentGovernanceImpl
+  - AgentUIImpl
+  - KnowledgeFabricImpl
+  - Language
+  - Framework
+  - Tool
+  cardinality: 1:N
+  attributes:
+  - name: role
+    type: enum<core,runtime,platform,ui,knowledge-fabric,governance>
+  inverse: composes
+- id: edge:composes
+  name: composes
+  origin: universal
+  description: inverse of composed_of
+  source:
+  - AgentCoreImpl
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  - AgentGovernanceImpl
+  - AgentUIImpl
+  - KnowledgeFabricImpl
+  - Language
+  - Framework
+  - Tool
+  target:
+  - AgentProduct
+  - AgentVersion
+  - StackProfile
+  cardinality: N:1
+  attributes:
+  - name: role
+    type: enum<core,runtime,platform,ui,knowledge-fabric,governance>
+  inverse: composed_of
+- id: edge:bundled-with
+  name: bundled_with
+  origin: universal
+  description: a product, platform, or UI layer ships bundled with a presentation surface (and vice-versa for the inverse direction observed in examples)
+  source:
+  - AgentProduct
+  - AgentPlatformImpl
+  - AgentUIImpl
+  - Presentation
+  target:
+  - Presentation
+  - AgentPlatformImpl
+  - AgentUIImpl
+  cardinality: N:N
+  attributes:
+  - name: bundleType
+    type: enum<default
+    optional>: null
+  inverse: bundled_into
+- id: edge:supports-interaction-primitive
+  name: supports_interaction_primitive
+  origin: universal
+  description: an AgentUIImpl / AgentPlatformImpl supports a given user-facing interaction primitive (slash command, command palette entry, model picker, deep-link, etc.) (Platform source added catalog pass 85)
+  source:
+  - AgentUIImpl
+  - AgentPlatformImpl
+  target:
+  - InteractionPrimitive
+  cardinality: N:N
+  attributes:
+  - name: mechanism
+    type: enum<tool-call,slash-command,keybinding,ui-control,mcp-tool,native-api,deep-link,voice-command>
+    required: true
+    notes: 'How the agent UI exposes this interaction primitive to the user. `tool-call` means
+
+      the primitive is invoked via a model-emitted tool call (e.g. claude-code''s AskUserQuestion).
+
+      `slash-command` is a `/cmd` typed by user. `keybinding` is a keyboard shortcut.
+
+      `ui-control` is a button/menu/widget. `mcp-tool` means the primitive is exposed via
+
+      an MCP tool. `native-api` is platform-native (e.g. an iOS share-sheet). `deep-link`
+
+      is URL-based invocation. `voice-command` for voice surfaces.
+
+      '
+  - name: toolCallName
+    type: string
+    required: false
+    notes: When mechanism=tool-call or mcp-tool, the canonical name of the tool (e.g. `AskUserQuestion`, `TodoWrite`).
+  - name: invocationToken
+    type: string
+    required: false
+    notes: When mechanism=slash-command|keybinding|deep-link, the literal trigger (e.g. `/clear`, `Ctrl+L`, `cursor://chat/new`).
+  inverse: supported_by_agent_ui
+- id: edge:realizes
+  name: realizes
+  origin: universal
+  description: an implementation node realizes a stack layer
+  source:
+  - AgentCoreImpl
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  - AgentGovernanceImpl
+  - AgentUIImpl
+  - KnowledgeFabricImpl
+  - MemorySystem
+  - AgentVersion
+  - Presentation
+  - Channel
+  - HookSurface
+  - ModelFamily
+  - ModelVersion
+  - Provider
+  - ModelTransportProtocol
+  - MCPTransport
+  - TransportProxy
+  - Workspace
+  - Execution
+  - Sandbox
+  - InteractionPrimitive
+  - OrchestrationPrimitive
+  - Plugin
+  - ToolDescriptor
+  target:
+  - Layer
+  cardinality: N:N
+  inverse: realized_by
+- id: edge:has-version
+  name: has_version
+  origin: universal
+  description: an entity has a versioned instance
+  source:
+  - AgentProduct
+  - ModelFamily
+  - OntologySchema
+  target:
+  - AgentVersion
+  - ModelVersion
+  cardinality: 1:N
+  inverse: version_of
+- id: edge:version-of
+  name: version_of
+  origin: universal
+  description: inverse of has_version
+  source:
+  - AgentVersion
+  - ModelVersion
+  target:
+  - AgentProduct
+  - ModelFamily
+  - OntologySchema
+  cardinality: N:1
+  inverse: has_version
+- id: edge:supports
+  name: supports
+  origin: universal
+  description: a versioned entity supports a capability (with level, version-range, optional notes and evidence)
+  source:
+  - AgentVersion
+  - ModelVersion
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  - AgentGovernanceImpl
+  - AgentCoreImpl
+  - AgentProduct
+  - ToolServer
+  - Plugin
+  - Provider
+  - ProviderVersion
+  - TransportRuntime
+  target:
+  - Capability
+  cardinality: N:N
+  attributes:
+  - name: versionRange
+    type: versionRange
+    required: true
+    notes: Semver range over which the support claim holds.
+  - name: level
+    type: enum<full,partial,experimental,unsupported,degraded,none>
+    required: true
+    notes: Support level. Reified-edge migration (catalog pass 9c) widened the enum to include 'unsupported', 'degraded', and 'none' (legacy synonym for unsupported, retained for parity with pre-existing supports edges).
+  - name: notes
+    type: markdown
+    required: false
+    notes: Caveats, partial-support details, or known degradations.
+  - name: evidenceSourceIds
+    type: list<ref<EvidenceSource>>
+    required: false
+    notes: Direct evidence references (the simple bifurcation path; mint a Claim only when the fact is disputed/time-banded/superseded — see ../schema/evidence-model.md).
+  inverse: supported_by
+- id: edge:supported-by
+  name: supported_by
+  origin: universal
+  description: inverse of supports
+  source:
+  - Capability
+  target:
+  - AgentVersion
+  - ModelVersion
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  - AgentCoreImpl
+  - AgentProduct
+  - ToolServer
+  - Plugin
+  - Provider
+  - ProviderVersion
+  - TransportRuntime
+  cardinality: N:N
+  inverse: supports
+- id: edge:requires-capability
+  name: requires_capability
+  origin: universal
+  description: extension/profile/launch/subagent/tool-server/role requires a host capability (source includes Role because Role records author requiredCapabilities attribute lists in practice)
+  source:
+  - Skill
+  - Plugin
+  - InteractionPrimitive
+  - CapabilityProfile
+  - LaunchConfig
+  - SessionModel
+  - ToolDescriptor
+  - Subagent
+  - ToolServer
+  - Role
+  target:
+  - Capability
+  cardinality: N:N
+  attributes:
+  - name: level
+    type: enum<required
+    recommended>: null
+  inverse: required_by
+- id: edge:applies-to-version
+  name: applies_to_version
+  origin: universal
+  description: a version-scoped behavior spec (capability profile, lifecycle/session semantics) applies to an AgentVersion
+  source:
+  - CapabilityProfile
+  - LifecycleSemantics
+  - SessionSemantics
+  target:
+  - AgentVersion
+  cardinality: N:1
+- id: edge:served-by
+  name: served_by
+  origin: standard
+  description: a model version or model transport protocol is served by a provider
+  source:
+  - ModelVersion
+  - ModelTransportProtocol
+  target:
+  - Provider
+  cardinality: N:N
+  attributes:
+  - name: firstParty
+    type: bool
+  - name: regions
+    type: list<string>
+  inverse: serves
+- id: edge:serves
+  name: serves
+  origin: standard
+  description: inverse of served_by
+  source:
+  - Provider
+  target:
+  - ModelVersion
+  - ModelTransportProtocol
+  cardinality: N:N
+  inverse: served_by
+- id: edge:speaks
+  name: speaks
+  origin: universal
+  description: a model version, agent core, or runtime speaks a transport protocol
+  source:
+  - ModelVersion
+  - AgentCoreImpl
+  - AgentRuntimeImpl
+  target:
+  - ModelTransportProtocol
+  - MCPTransport
+  cardinality: N:N
+  inverse: spoken_by
+- id: edge:spoken-by
+  name: spoken_by
+  origin: universal
+  description: inverse of speaks
+  source:
+  - ModelTransportProtocol
+  - MCPTransport
+  target:
+  - ModelVersion
+  - AgentCoreImpl
+  - AgentRuntimeImpl
+  cardinality: N:N
+  inverse: speaks
+- id: edge:exposes
+  name: exposes
+  origin: universal
+  description: an agent platform/runtime exposes a host transport or hook surface
+  source:
+  - AgentPlatformImpl
+  - AgentRuntimeImpl
+  target:
+  - AgentHostTransport
+  - HookSurface
+  cardinality: N:N
+  inverse: exposed_by_runtime
+- id: edge:exposes-resource
+  name: exposes_resource
+  origin: standard
+  description: a tool server exposes an MCP read-only resource
+  source:
+  - ToolServer
+  target:
+  - MCPResource
+  cardinality: N:N
+  inverse: resource_exposed_by
+- id: edge:exposes-prompt
+  name: exposes_prompt
+  origin: standard
+  description: a tool server exposes an MCP prompt template
+  source:
+  - ToolServer
+  target:
+  - MCPPrompt
+  cardinality: N:N
+  inverse: prompt_exposed_by
+- id: edge:exposes-sampling
+  name: exposes_sampling
+  origin: standard
+  description: a tool server advertises an MCP sampling capability
+  source:
+  - ToolServer
+  target:
+  - MCPSampling
+  cardinality: N:1
+  inverse: sampling_exposed_by
+- id: edge:exposes-root
+  name: exposes_root
+  origin: standard
+  description: a tool server (host) advertises an MCP filesystem root scope
+  source:
+  - ToolServer
+  target:
+  - MCPRoot
+  cardinality: N:N
+  inverse: root_exposed_by
+- id: edge:uses-checkpoint
+  name: uses_checkpoint
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: a Skill / Subagent declares a human-in-the-loop checkpoint
+  source:
+  - Skill
+  - Subagent
+  target:
+  - HumanCheckpoint
+  cardinality: N:N
+  inverse: checkpoint_used_by
+- id: edge:bridges
+  name: bridges
+  origin: standard
+  description: a transport proxy bridges one protocol to another
+  source:
+  - TransportProxy
+  target:
+  - ModelTransportProtocol
+  cardinality: N:N
+  attributes:
+  - name: direction
+    type: enum<src
+    dst>: null
+- id: edge:emits-hook
+  name: emits_hook
+  origin: standard
+  description: a versioned agent, hook mapping, hook surface, or background monitor emits/anchors a hook surface
+  source:
+  - AgentVersion
+  - HookMapping
+  - HookSurface
+  - BackgroundMonitor
+  target:
+  - HookSurface
+  - AgentVersion
+  cardinality: N:N
+  attributes:
+  - name: since
+    type: semver
+  inverse: emitted_by
+- id: edge:transitions-to
+  name: transitions_to
+  origin: universal
+  description: a lifecycle state may transition to another
+  source:
+  - LifecycleState
+  target:
+  - LifecycleState
+  cardinality: N:N
+  attributes:
+  - name: gate
+    type: string
+  - name: event
+    type: string
+  - name: cycle
+    type: enum<explicit>
+- id: edge:belongs-to-machine
+  name: belongs_to_machine
+  origin: universal
+  description: a lifecycle state is part of a state machine
+  source:
+  - LifecycleState
+  target:
+  - StateMachine
+  cardinality: N:1
+  inverse: has_state
+- id: edge:state-machine-for
+  name: state_machine_for
+  origin: universal
+  description: a state machine governs a runtime entity instance
+  source:
+  - StateMachine
+  - SessionModel
+  target:
+  - Effect
+  - Invocation
+  - Run
+  - Session
+  - Workspace
+  cardinality: N:N
+  inverse: governed_by
+- id: edge:governed-by
+  name: governed_by
+  origin: universal
+  description: inverse of state_machine_for; an entity instance is governed by its state machine
+  source:
+  - Effect
+  - Invocation
+  - Run
+  - Session
+  - Workspace
+  target:
+  - StateMachine
+  - SessionModel
+  cardinality: N:N
+  inverse: state_machine_for
+- id: edge:has-phase
+  name: has_phase
+  origin: universal
+  description: inverse of phase_in
+  source:
+  - StateMachine
+  - PhaseMachine
+  target:
+  - Phase
+  cardinality: 1:N
+  inverse: phase_in
+- id: edge:spans
+  name: spans
+  origin: standard
+  description: a Run spans many Invocations
+  source:
+  - Run
+  target:
+  - Invocation
+  cardinality: 1:N
+- id: edge:executes-in
+  name: executes_in
+  origin: universal
+  description: an Invocation executes in a Sandbox
+  source:
+  - Invocation
+  target:
+  - Sandbox
+  cardinality: N:1
+- id: edge:materializes-as
+  name: materializes_as
+  origin: universal
+  description: a workspace materializes as a worktree on disk
+  source:
+  - Workspace
+  target:
+  - Worktree
+  cardinality: 1:N
+  attributes:
+  - name: path
+    type: string
+  inverse: materialization_of
+- id: edge:runs-via
+  name: runs_via
+  origin: universal
+  description: a workspace, invocation, or launch config runs via an execution mode
+  source:
+  - Workspace
+  - Invocation
+  - LaunchConfig
+  target:
+  - Execution
+  cardinality: N:1
+  inverse: runs_for
+- id: edge:sandboxed-by
+  name: sandboxed_by
+  origin: universal
+  description: an execution applies a sandbox profile
+  source:
+  - Execution
+  target:
+  - Sandbox
+  cardinality: N:1
+  inverse: sandboxes
+- id: edge:contains
+  name: contains
+  origin: universal
+  description: Domain contains specializations; specialization contains topics
+  source:
+  - Domain
+  - Specialization
+  target:
+  - Specialization
+  - Topic
+  cardinality: 1:N
+  inverse: contained_in
+- id: edge:belongs-to-language
+  name: belongs_to_language
+  origin: universal
+  description: a framework belongs to a language
+  source:
+  - Framework
+  target:
+  - Language
+  cardinality: N:1
+  inverse: has_framework
+- id: edge:composes-stack
+  name: composes_stack
+  origin: universal
+  description: a stack profile composes languages, frameworks, and tools (alias of composes for stack-profile sense)
+  source:
+  - StackProfile
+  target:
+  - Language
+  - Framework
+  - Tool
+  cardinality: N:N
+  attributes:
+  - name: role
+    type: string
+  inverse: composed_in
+  aliasOf: composes
+- id: edge:applies-to
+  name: applies_to
+  origin: universal
+  description: an extension, blueprint, discovery signal, piece of expertise, or language applies to a domain area or product (source includes Role because Role records author requiredDomains attribute lists in practice; source includes SkillArea because descriptive expertise scope records already author applies_to edges; source includes Methodology because methodologies apply to domains and topics; source includes Language because orphan languages use applies_to to connect to their relevant domains)
+  source:
+  - Skill
+  - SkillArea
+  - Plugin
+  - Subagent
+  - Blueprint
+  - DiscoverySignal
+  - Workflow
+  - Role
+  - Methodology
+  - Language
+  target:
+  - Domain
+  - Specialization
+  - Topic
+  - AgentProduct
+  - AgentVersion
+  cardinality: N:N
+  attributes:
+  - name: confidence
+    type: enum<primary
+    secondary>: null
+  - name: expertiseLevel
+    type: enum<novice
+    intermediate: null
+    expert: null
+    authoritative>: null
+    notes: Optional. Carries the former ExpertiseLevel enum when a Skill/Subagent claims a graded competence in a domain (collapsed into edge attribute, remodel 2026-04-29 Change A.6).
+  inverse: applied_by
+- id: edge:applied-by
+  name: applied_by
+  origin: universal
+  description: inverse of applies_to
+  source:
+  - Domain
+  - Specialization
+  - Topic
+  - AgentProduct
+  - AgentVersion
+  target:
+  - Skill
+  - SkillArea
+  - Plugin
+  - Subagent
+  - Blueprint
+  - DiscoverySignal
+  - Workflow
+  - Role
+  - Methodology
+  - Language
+  cardinality: N:N
+  inverse: applies_to
+- id: edge:addresses
+  name: addresses
+  origin: universal
+  description: a Skill addresses one or more SkillAreas (descriptive layer; parallels applies_to but targets the descriptive expertise scope rather than subject taxonomy)
+  source:
+  - Skill
+  - Subagent
+  - Plugin
+  target:
+  - SkillArea
+  cardinality: N:N
+  inverse: addressed_by
+- id: edge:requires-expertise
+  name: requires_expertise
+  origin: universal
+  description: a role or responsibility requires expertise in a SkillArea (parallels requires_skill but targets the descriptive layer)
+  source:
+  - Role
+  - Responsibility
+  target:
+  - SkillArea
+  cardinality: N:N
+  attributes:
+  - name: level
+    type: enum<novice
+    intermediate: null
+    expert: null
+    authoritative>: null
+  inverse: expertise_required_by
+- id: edge:requires-skill-area
+  name: requires_skill_area
+  origin: universal
+  description: a SkillArea requires a prerequisite SkillArea
+  source:
+  - SkillArea
+  - Workflow
+  target:
+  - SkillArea
+  cardinality: N:N
+  inverse: prerequisite_for
+- id: edge:uses-language
+  name: uses_language
+  origin: universal
+  description: a SkillArea or Framework uses a Language as a typical implementation substrate
+  source:
+  - SkillArea
+  - Framework
+  target:
+  - Language
+  cardinality: N:N
+  inverse: used_by_skill_area
+- id: edge:uses-framework
+  name: uses_framework
+  origin: universal
+  description: a SkillArea (or Framework) uses a Framework
+  source:
+  - SkillArea
+  target:
+  - Framework
+  cardinality: N:N
+  inverse: used_by_skill_area
+- id: edge:uses-library
+  name: uses_library
+  origin: universal
+  description: a SkillArea or Framework uses a Library
+  source:
+  - SkillArea
+  - Framework
+  target:
+  - Library
+  cardinality: N:N
+  inverse: library_used_by
+- id: edge:library-used-by
+  name: library_used_by
+  origin: universal
+  description: 'inverse of uses_library — a Library is used by a SkillArea or Framework (catalog pass 22 split: per-domain inverse, distinct from transport-flavored `used_by`)'
+  source:
+  - Library
+  target:
+  - SkillArea
+  - Framework
+  cardinality: N:N
+  inverse: uses_library
+- id: edge:uses-stack-part
+  name: uses_stack_part
+  origin: universal
+  description: a SkillArea uses a StackPart
+  source:
+  - SkillArea
+  - StackProfile
+  target:
+  - StackPart
+  cardinality: N:N
+  inverse: stack_part_used_by
+- id: edge:stack-part-used-by
+  name: stack_part_used_by
+  origin: universal
+  description: inverse of uses_stack_part (catalog pass 22 split)
+  source:
+  - StackPart
+  target:
+  - SkillArea
+  - StackProfile
+  cardinality: N:N
+  inverse: uses_stack_part
+- id: edge:uses-tool
+  name: uses_tool
+  origin: universal
+  description: a SkillArea uses a Tool
+  source:
+  - SkillArea
+  target:
+  - Tool
+  cardinality: N:N
+  inverse: tool_used_by
+- id: edge:tool-used-by
+  name: tool_used_by
+  origin: universal
+  description: inverse of uses_tool (catalog pass 22 split)
+  source:
+  - Tool
+  target:
+  - SkillArea
+  cardinality: N:N
+  inverse: uses_tool
+- id: edge:used-for
+  name: used_for
+  origin: universal
+  description: a Library or Tool is used for a SkillArea (inverse-style descriptive edge)
+  source:
+  - Library
+  - Tool
+  target:
+  - SkillArea
+  cardinality: N:N
+  inverse: uses
+- id: edge:used-by-skill-area
+  name: used_by_skill_area
+  origin: universal
+  description: inverse of uses_language / uses_framework — a Language or Framework is used by a SkillArea
+  source:
+  - Language
+  - Framework
+  target:
+  - SkillArea
+  cardinality: N:N
+  inverse: uses_language
+- id: edge:implemented-by
+  name: implemented_by
+  description: a StackPart is implemented by a Library, Framework, Tool, or PlatformService
+  source:
+  - StackPart
+  target:
+  - Library
+  - Framework
+  - Tool
+  - PlatformService
+  cardinality: N:N
+  inverse: implements_stack_part
+- id: edge:implements-stack-part
+  name: implements_stack_part
+  origin: universal
+  description: inverse of implemented_by — a Library, Framework, Tool, or PlatformService implements a StackPart
+  source:
+  - Library
+  - Framework
+  - Tool
+  - PlatformService
+  target:
+  - StackPart
+  cardinality: N:N
+  inverse: implemented_by
+- id: edge:holds-responsibility
+  name: holds_responsibility
+  origin: universal
+  description: a role holds a responsibility
+  source:
+  - Role
+  target:
+  - Responsibility
+  cardinality: N:N
+  attributes:
+  - name: weight
+    type: float
+  inverse: held_by
+- id: edge:held-by
+  name: held_by
+  origin: universal
+  description: inverse of holds_responsibility
+  source:
+  - Responsibility
+  target:
+  - Role
+  cardinality: N:N
+  inverse: holds_responsibility
+- id: edge:requires-skill
+  name: requires_skill
+  origin: universal
+  description: a role or responsibility requires a skill or domain expertise
+  source:
+  - Role
+  - Responsibility
+  target:
+  - Skill
+  - Domain
+  - Specialization
+  cardinality: N:N
+  attributes:
+  - name: level
+    type: enum<novice
+    intermediate: null
+    expert: null
+    authoritative>: null
+    notes: Carries the former ExpertiseLevel enum (collapsed into edge attribute, remodel 2026-04-29 Change A.6).
+  inverse: required_for
+- id: edge:delegates-to
+  name: delegates_to
+  origin: universal
+  description: a role delegates work to another role
+  source:
+  - Role
+  target:
+  - Role
+  cardinality: N:N
+  attributes:
+  - name: condition
+    type: markdown
+  inverse: delegated_from
+- id: edge:has-member
+  name: has_member
+  origin: universal
+  description: inverse of member_of
+  source:
+  - OrgUnit
+  target:
+  - Role
+  cardinality: 1:N
+  inverse: member_of
+- id: edge:roles-played-by
+  name: roles_played_by
+  origin: universal
+  description: a subagent fulfills a role
+  source:
+  - Subagent
+  target:
+  - Role
+  cardinality: N:N
+  attributes:
+  - name: partial
+    type: bool
+  inverse: played_by
+- id: edge:targets
+  name: targets
+  origin: universal
+  description: a benchmark targets a catalog entity
+  source:
+  - Benchmark
+  target:
+  - Skill
+  - Plugin
+  - Domain
+  - Specialization
+  - StackProfile
+  - AgentVersion
+  - ModelVersion
+  - Layer
+  - Capability
+  - ExtensionInterface
+  cardinality: N:N
+  inverse: targeted_by
+- id: edge:evaluated-by
+  name: evaluated_by
+  origin: universal
+  description: an eval run was performed against a benchmark
+  source:
+  - EvalRun
+  target:
+  - Benchmark
+  cardinality: N:1
+  attributes:
+  - name: runAt
+    type: iso-timestamp
+  inverse: evaluations
+- id: edge:produced-result
+  name: produced_result
+  origin: universal
+  description: an eval run produced a result record
+  source:
+  - EvalRun
+  target:
+  - EvalResult
+  cardinality: 1:N
+  inverse: produced_by
+- id: edge:scored-against
+  name: scored_against
+  origin: universal
+  description: an eval result is scored against a benchmark
+  source:
+  - EvalResult
+  target:
+  - Benchmark
+  cardinality: N:1
+  attributes:
+  - name: score
+    type: float
+  - name: unit
+    type: string
+  inverse: scores_of
+- id: edge:installs-into
+  name: installs_into
+  origin: universal
+  description: a plugin installs into an agent product
+  source:
+  - Plugin
+  target:
+  - AgentProduct
+  cardinality: N:N
+  attributes:
+  - name: installMethod
+    type: enum<marketplace
+    git: null
+    local>: null
+  inverse: accepts_plugin
+- id: edge:compiles-to
+  name: compiles_to
+  origin: universal
+  description: a Plugin (typically portable or hybrid portability) compiles to a host-specific Plugin (native portability) or a target AgentVersion
+  source:
+  - Plugin
+  target:
+  - Plugin
+  - AgentVersion
+  cardinality: 1:N
+  attributes:
+  - name: host
+    type: id
+  inverse: compiled_from
+- id: edge:contains-skill
+  name: contains_skill
+  origin: universal
+  description: a plugin contains a skill
+  source:
+  - Plugin
+  target:
+  - Skill
+  cardinality: 1:N
+  inverse: skill_contained_in_plugin
+- id: edge:contains-subagent
+  name: contains_subagent
+  origin: universal
+  description: a plugin contains a subagent
+  source:
+  - Plugin
+  target:
+  - Subagent
+  cardinality: 1:N
+  inverse: subagent_contained_in_plugin
+- id: edge:contains-tool-server
+  name: contains_tool_server
+  origin: universal
+  description: a plugin contains a tool server
+  source:
+  - Plugin
+  target:
+  - ToolServer
+  cardinality: 1:N
+  inverse: tool_server_contained_in_plugin
+- id: edge:contains-lsp-server
+  name: contains_lsp_server
+  origin: universal
+  description: a plugin contains an LSP server (Claude Code .lsp.json)
+  source:
+  - Plugin
+  target:
+  - LSPServer
+  cardinality: 1:N
+  inverse: lsp_server_contained_in_plugin
+- id: edge:contains-monitor
+  name: contains_monitor
+  origin: universal
+  description: a plugin contains a background monitor (Claude Code monitors/monitors.json)
+  source:
+  - Plugin
+  target:
+  - BackgroundMonitor
+  cardinality: 1:N
+  inverse: monitor_contained_in_plugin
+- id: edge:contains-bin
+  name: contains_bin
+  origin: universal
+  description: a plugin contains a bin/ directory of executables added to PATH
+  source:
+  - Plugin
+  target:
+  - BinaryProvider
+  cardinality: 1:N
+  inverse: bin_contained_in_plugin
+- id: edge:ships-settings
+  name: ships_settings
+  origin: universal
+  description: a plugin ships a settings.json template merged into host settings on install
+  source:
+  - Plugin
+  target:
+  - SettingsTemplate
+  cardinality: 1:N
+  inverse: settings_contained_in_plugin
+- id: edge:implements
+  name: implements
+  origin: universal
+  description: an extension implements an a5c extension interface
+  source:
+  - Skill
+  - Plugin
+  - Subagent
+  - ToolServer
+  - AgentGovernanceImpl
+  target:
+  - ExtensionInterface
+  cardinality: N:N
+  inverse: implemented_by
+- id: edge:implemented-by
+  name: implemented_by
+  origin: universal
+  description: inverse of implements
+  source:
+  - ExtensionInterface
+  target:
+  - Skill
+  - Plugin
+  - Subagent
+  - ToolServer
+  cardinality: N:N
+  inverse: implements
+- id: edge:defined-in-context-of
+  name: defined_in_context_of
+  origin: universal
+  description: a term/definition is defined in the context of a domain, layer, or node kind
+  source:
+  - Term
+  - Definition
+  target:
+  - Domain
+  - Layer
+  - NodeKind
+  cardinality: N:N
+  inverse: defines_term
+- id: edge:synonym-of
+  name: synonym_of
+  origin: universal
+  description: one term is a synonym of another within a context
+  source:
+  - Term
+  target:
+  - Term
+  cardinality: N:N
+  attributes:
+  - name: inContext
+    type: id
+  symmetric: true
+- id: edge:subsumes
+  name: subsumes
+  origin: universal
+  description: a broader term subsumes a narrower one
+  source:
+  - Term
+  target:
+  - Term
+  cardinality: N:N
+  inverse: subsumed_by
+- id: edge:references
+  name: references
+  origin: universal
+  description: a term anchors to a schema entity
+  source:
+  - Term
+  target:
+  - NodeKind
+  - Capability
+  cardinality: N:N
+  inverse: referenced_by
+- id: edge:expands-to
+  name: expands_to
+  origin: universal
+  description: an acronym expands to a term
+  source:
+  - Acronym
+  target:
+  - Term
+  cardinality: N:1
+- id: edge:defines
+  name: defines
+  origin: universal
+  description: a Definition defines a Term
+  source:
+  - Definition
+  target:
+  - Term
+  cardinality: N:1
+- id: edge:bridges-protocol-type
+  name: bridges_protocol_type
+  origin: a5c
+  description: a Mux bridges a universal protocol-type at a stack Layer position
+  source:
+  - Mux
+  target:
+  - Layer
+  cardinality: N:1
+  inverse: bridged_by_mux
+- id: edge:has-strategy
+  name: has_strategy
+  origin: a5c
+  description: a HumanCheckpoint declares its requested resolution strategy
+  source:
+  - HumanCheckpoint
+  target:
+  - BreakpointStrategy
+  cardinality: N:1
+  inverse: strategy_used_by
+- id: edge:routes-to-responder
+  name: routes_to_responder
+  origin: a5c
+  description: a HumanCheckpoint routes to a ResponderProfile (who is allowed to answer)
+  source:
+  - HumanCheckpoint
+  target:
+  - ResponderProfile
+  cardinality: N:N
+  inverse: responder_for
+- id: edge:has-answer
+  name: has_answer
+  origin: a5c
+  description: a HumanCheckpoint has a recorded BreakpointAnswer
+  source:
+  - HumanCheckpoint
+  target:
+  - BreakpointAnswer
+  cardinality: 1:N
+  inverse: answer_for
+- id: edge:answer-for
+  name: answer_for
+  origin: a5c
+  description: inverse of has_answer
+  source:
+  - BreakpointAnswer
+  target:
+  - HumanCheckpoint
+  cardinality: N:1
+  inverse: has_answer
+- id: edge:records-decision-memory
+  name: records_decision_memory
+  origin: a5c
+  description: a HumanCheckpoint or BreakpointAnswer records a DecisionMemory lesson
+  source:
+  - HumanCheckpoint
+  - BreakpointAnswer
+  target:
+  - DecisionMemory
+  cardinality: N:N
+  inverse: memory_for_decision
+- id: edge:bridges-for
+  name: bridges_for
+  origin: a5c
+  description: a Mux bridges native impls of specific AgentVersion / ModelVersion / Provider records into the canonical surface
+  source:
+  - Mux
+  target:
+  - AgentVersion
+  - ModelVersion
+  - Provider
+  cardinality: N:N
+  inverse: bridged_by
+- id: edge:bridged-by
+  name: bridged_by
+  origin: a5c
+  description: inverse of bridges_for
+  source:
+  - AgentVersion
+  - ModelVersion
+  - Provider
+  target:
+  - Mux
+  cardinality: N:N
+  inverse: bridges_for
+- id: edge:tests-claim
+  name: tests_claim
+  origin: a5c
+  description: a ClaimTest or Experiment validates or invalidates a Claim about external system behavior
+  source:
+  - ClaimTest
+  - Experiment
+  target:
+  - Claim
+  cardinality: N:1
+  inverse: tested_by
+- id: edge:test-run-of
+  name: test_run_of
+  origin: a5c
+  description: inverse of produced_test_run
+  source:
+  - ClaimTestRun
+  target:
+  - ClaimTest
+  cardinality: N:1
+  inverse: produced_test_run
+- id: edge:schedules-claim-test
+  name: schedules_claim_test
+  origin: a5c
+  description: inverse of scheduled_by_ci
+  source:
+  - CIWorkflow
+  target:
+  - ClaimTest
+  cardinality: N:N
+  inverse: scheduled_by_ci
+- id: edge:sourced-from
+  name: sourced_from
+  origin: universal
+  description: an imported entity tracks its upstream source
+  source:
+  - Skill
+  - Plugin
+  - Subagent
+  - ToolServer
+  - Tool
+  - AgentReadinessScore
+  - MCPServer
+  - AgentVersion
+  - Process
+  - BackgroundMonitor
+  - Blueprint
+  - LSPServer
+  - PluginArtifact
+  target:
+  - SourceRef
+  cardinality: N:1
+  attributes:
+  - name: importedAt
+    type: iso-timestamp
+  inverse: source_for
+- id: edge:affects
+  name: affects
+  origin: universal
+  description: a Gap is about (affects) some catalog entity
+  source:
+  - Gap
+  target:
+  - NodeKind
+  - EdgeKind
+  - EvidencePolicy
+  cardinality: N:N
+- id: edge:blocks
+  name: blocks
+  origin: universal
+  description: a Gap blocks phase advancement
+  source:
+  - Gap
+  target:
+  - Phase
+  cardinality: N:N
+- id: edge:raised-question
+  name: raised_question
+  origin: universal
+  description: a Gap raised an OpenQuestion (bridge to existing OpenQuestion entity)
+  source:
+  - Gap
+  target:
+  - OpenQuestion
+  cardinality: N:N
+  inverse: raised_by_gap
+- id: edge:references-path
+  name: references_path
+  origin: universal
+  description: an entity references a runtime filesystem path
+  source:
+  - PackageSurface
+  - PluginArtifact
+  - SessionSemantics
+  - LifecycleSemantics
+  target:
+  - PathDescriptor
+  cardinality: N:N
+  inverse: path_for
+- id: edge:emits-artifact
+  name: emits_artifact
+  origin: universal
+  description: a PluginTarget / AgentVersion emits a PluginArtifact (or a PluginArtifact references its emitting target — observed N:1 in examples)
+  source:
+  - PluginTarget
+  - AgentVersion
+  - PluginArtifact
+  target:
+  - PluginArtifact
+  - PluginTarget
+  cardinality: N:N
+- id: edge:maps-hook
+  name: maps_hook
+  origin: universal
+  description: a HookMapping realizes a canonical HookSurface on a target
+  source:
+  - HookMapping
+  target:
+  - HookSurface
+  cardinality: N:1
+- id: edge:validated-by-ci
+  name: validated_by_ci
+  origin: universal
+  description: a PackageSurface is validated by a CiSurface
+  source:
+  - PackageSurface
+  target:
+  - CiSurface
+  cardinality: N:1
+  inverse: validates_package
+- id: edge:validates-package
+  name: validates_package
+  origin: universal
+  description: a CiSurface validates a PackageSurface
+  source:
+  - CiSurface
+  target:
+  - PackageSurface
+  cardinality: N:1
+  inverse: validated_by_ci
+- id: edge:supersedes
+  name: supersedes
+  origin: universal
+  description: a newer record supersedes an older record over an overlapping version range
+  source:
+  - SessionSemantics
+  - LifecycleSemantics
+  - AgentVersion
+  - ModelVersion
+  target:
+  - SessionSemantics
+  - LifecycleSemantics
+  - AgentVersion
+  - ModelVersion
+  cardinality: N:1
+- id: edge:serves-language
+  name: serves_language
+  origin: universal
+  description: an LSPServer serves a Language (mirrors the languages attribute)
+  source:
+  - LSPServer
+  target:
+  - Language
+  cardinality: N:N
+- id: edge:provides-executable
+  name: provides_executable
+  origin: universal
+  description: a BinaryProvider's bin/ executable is also a callable ToolDescriptor
+  source:
+  - BinaryProvider
+  target:
+  - ToolDescriptor
+  cardinality: N:N
+- id: edge:merges-into
+  name: merges_into
+  origin: universal
+  description: a SettingsTemplate merges into a typed PathDescriptor (a settings file)
+  source:
+  - SettingsTemplate
+  target:
+  - PathDescriptor
+  cardinality: N:1
+- id: edge:bounds-subject
+  name: bounds_subject
+  origin: universal
+  description: a ScopeBoundary anchors to the subject entity it bounds (mirrors the subjectId attribute)
+  source:
+  - ScopeBoundary
+  target:
+  - AgentProduct
+  - AgentVersion
+  - Benchmark
+  - Blueprint
+  - Skill
+  - Subagent
+  - ToolServer
+  - Plugin
+  - Capability
+  cardinality: N:1
+- id: edge:bundles
+  name: bundles
+  origin: universal
+  description: a runtime/platform bundles a presentation, tool, or other artifact (built-ins)
+  source:
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  - AgentGovernanceImpl
+  target:
+  - ToolDescriptor
+  - Presentation
+  cardinality: 1:N
+- id: edge:specializes
+  name: specializes
+  origin: universal
+  description: a Specialization specializes a Domain (inverse-direction declaration of contains for Domain->Specialization)
+  source:
+  - Specialization
+  target:
+  - Domain
+  cardinality: N:1
+  aliasOf: contained_in
+- id: edge:hosted-by
+  name: hosted_by
+  origin: universal
+  description: a PluginTarget is hosted by an agent product/platform
+  source:
+  - PluginTarget
+  target:
+  - AgentProduct
+  - AgentPlatformImpl
+  cardinality: N:1
+- id: edge:connects
+  name: connects
+  origin: universal
+  description: an agent runtime connects to MCP servers via a transport protocol
+  source:
+  - AgentRuntimeImpl
+  target:
+  - MCPTransport
+  cardinality: N:N
+- id: edge:canonicalized-to
+  name: canonicalized_to
+  origin: universal
+  description: a vendor-specific HookSurface canonicalizes to the canonical HookSurface
+  source:
+  - HookSurface
+  target:
+  - HookSurface
+  cardinality: N:1
+- id: edge:has-trust-level
+  name: has_trust_level
+  origin: universal
+  description: an EvidenceSource carries a trust level (alias of at_trust_level for ergonomics)
+  source:
+  - EvidenceSource
+  target:
+  - TrustLevel
+  cardinality: N:1
+  aliasOf: at_trust_level
+- id: edge:merge-policy-orders-decision-verb
+  name: merge_policy_orders_decision_verb
+  origin: a5c
+  originContext: Derived from hooks-mux MergePolicy decisionRule ordering semantics.
+  description: a hook merge policy orders a canonical decision verb in its conflict-resolution lattice
+  source: [MergePolicy]
+  target: [DecisionVerb]
+  cardinality: N:N
+  inverse: ordered_by_merge_policy
+- id: edge:diagnoses-hook-surface
+  name: diagnoses_hook_surface
+  origin: a5c
+  originContext: Derived from HookMergeDiagnostic.hookSurfaceId attributes.
+  description: a hook merge diagnostic describes a merge result or conflict for a hook surface
+  source: [HookMergeDiagnostic]
+  target: [HookSurface]
+  cardinality: N:1
+  inverse: has_hook_merge_diagnostic
+- id: edge:belongs-to-benchmark
+  name: belongs_to_benchmark
+  origin: universal
+  description: a TestSet belongs to a Benchmark (the benchmark it tests against)
+  source:
+  - TestSet
+  target:
+  - Benchmark
+  cardinality: N:1
+- id: edge:belongs-to-eval-run
+  name: belongs_to_eval_run
+  origin: universal
+  description: an EvalResult belongs to the EvalRun that produced it
+  source:
+  - EvalResult
+  target:
+  - EvalRun
+  cardinality: N:1
+  aliasOf: produced_by
+- id: edge:in-state
+  name: in_state
+  origin: universal
+  description: a stateful entity instance is currently in a lifecycle state
+  source:
+  - Effect
+  - Invocation
+  - Run
+  - Session
+  - Workspace
+  target:
+  - LifecycleState
+  cardinality: N:1
+- id: edge:belongs-to-phase-machine
+  name: belongs_to_phase_machine
+  origin: universal
+  description: a Phase belongs to a PhaseMachine (alias of phase_in for PhaseMachine target)
+  source:
+  - Phase
+  target:
+  - PhaseMachine
+  cardinality: N:1
+  aliasOf: phase_in
+- id: edge:evaluates-target
+  name: evaluates_target
+  origin: universal
+  description: an EvalRun evaluates a target entity (agent version, model version, plugin, etc.)
+  source:
+  - EvalRun
+  target:
+  - AgentVersion
+  - ModelVersion
+  - Plugin
+  - Skill
+  - Subagent
+  cardinality: N:N
+- id: edge:uses-test-set
+  name: uses_test_set
+  origin: universal
+  description: an EvalRun uses a TestSet
+  source:
+  - EvalRun
+  target:
+  - TestSet
+  cardinality: N:N
+- id: edge:for-benchmark
+  name: for_benchmark
+  origin: universal
+  description: an EvalRun is for a particular Benchmark (alias of evaluated_by)
+  source:
+  - EvalRun
+  target:
+  - Benchmark
+  cardinality: N:1
+  aliasOf: evaluated_by
+- id: edge:alias-of
+  name: alias_of
+  origin: universal
+  description: an entity is an alias of another (typically same NodeKind)
+  source:
+  - ModelTransportProtocol
+  - Term
+  - MCPTransport
+  - Specialization
+  - Domain
+  target:
+  - ModelTransportProtocol
+  - Term
+  - MCPTransport
+  - Specialization
+  - Domain
+  cardinality: N:1
+- id: edge:about-subject
+  name: about_subject
+  origin: universal
+  description: a Claim is about a particular subject entity (mirrors Claim.subjectId)
+  source:
+  - Claim
+  target:
+  - AgentVersion
+  - ModelVersion
+  - AgentProduct
+  - AgentCoreImpl
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  - Capability
+  cardinality: N:1
+- id: edge:backed-by-evidence
+  name: backed_by_evidence
+  origin: universal
+  description: a Claim is backed by an EvidenceSource (alias of evidenced_by)
+  source:
+  - Claim
+  target:
+  - EvidenceSource
+  cardinality: N:N
+  aliasOf: evidenced_by
+- id: edge:executable-by
+  name: executable_by
+  origin: universal
+  description: a Blueprint is executable by an agent product
+  source:
+  - Blueprint
+  target:
+  - AgentProduct
+  cardinality: N:N
+- id: edge:synonym-a
+  name: synonym_a
+  origin: universal
+  description: the first term in a Synonym pair
+  source:
+  - Synonym
+  target:
+  - Term
+  cardinality: N:1
+- id: edge:synonym-b
+  name: synonym_b
+  origin: universal
+  description: the second term in a Synonym pair
+  source:
+  - Synonym
+  target:
+  - Term
+  cardinality: N:1
+- id: edge:requires-minimum-trust
+  name: requires_minimum_trust
+  origin: universal
+  description: an EvidencePolicy requires a minimum trust level for accepted evidence
+  source:
+  - EvidencePolicy
+  target:
+  - TrustLevel
+  cardinality: N:1
+- id: edge:installs
+  name: installs
+  origin: universal
+  description: an InstallMethod installs an AgentVersion
+  source:
+  - InstallMethod
+  target:
+  - AgentVersion
+  cardinality: N:N
+- id: edge:bridged-by
+  name: bridged_by
+  origin: universal
+  description: a ModelTransportProtocol is bridged by a TransportProxy (inverse direction of bridges)
+  source:
+  - ModelTransportProtocol
+  target:
+  - TransportProxy
+  cardinality: N:N
+  aliasOf: bridges
+- id: edge:bundled-in
+  name: bundled_in
+  origin: universal
+  description: a ToolDescriptor or Presentation is bundled in a runtime/platform (inverse of bundles)
+  source:
+  - ToolDescriptor
+  - Presentation
+  target:
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  cardinality: N:1
+  aliasOf: bundles
+- id: edge:requested-by
+  name: requested_by
+  origin: universal
+  description: an Effect was requested by the Invocation that emitted it
+  source:
+  - Effect
+  target:
+  - Invocation
+  cardinality: N:1
+- id: edge:agent-version
+  name: agent_version
+  origin: universal
+  description: a Session was driven by a particular AgentVersion (mirrors agentVersionId attribute)
+  source:
+  - Session
+  target:
+  - AgentVersion
+  cardinality: N:1
+- id: edge:depends-on
+  name: depends_on
+  description: an entity declares a runtime dependency on another (currently observed for AgentCoreImpl -> SourceRef)
+  source:
+  - AgentCoreImpl
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  - AgentGovernanceImpl
+  - Plugin
+  - Skill
+  - Subagent
+  target:
+  - SourceRef
+  - AgentCoreImpl
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  - Plugin
+  cardinality: N:N
+- id: edge:refines
+  name: refines
+  origin: universal
+  description: a Benchmark refines an earlier benchmark (e.g., swe-bench-verified refines swe-bench)
+  source:
+  - Benchmark
+  target:
+  - Benchmark
+  cardinality: N:1
+- id: edge:split-of
+  name: split_of
+  origin: universal
+  description: a TestSet is a split (validation/test/dev) of a Benchmark
+  source:
+  - TestSet
+  target:
+  - Benchmark
+  cardinality: N:1
+- id: edge:used-by
+  name: used_by
+  origin: universal
+  description: an AgentHostTransport (or comparable surface) is used by an AgentVersion
+  source:
+  - AgentHostTransport
+  - ModelTransportProtocol
+  - MCPTransport
+  target:
+  - AgentVersion
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  cardinality: N:N
+- id: edge:applies-to-language
+  name: applies_to_language
+  origin: universal
+  description: a Framework applies to one or more Languages (mirrors belongs_to_language with N:N semantics)
+  source:
+  - Framework
+  target:
+  - Language
+  cardinality: N:N
+  aliasOf: belongs_to_language
+- id: edge:belongs-to-run
+  name: belongs_to_run
+  origin: universal
+  description: an Invocation belongs to the Run that spans it (inverse of spans)
+  source:
+  - Invocation
+  target:
+  - Run
+  cardinality: N:1
+  aliasOf: spans
+- id: edge:uses-session
+  name: uses_session
+  origin: universal
+  description: an Invocation uses a Session (mirrors sessionId attribute)
+  source:
+  - Invocation
+  target:
+  - Session
+  cardinality: N:1
+- id: edge:ran-agent-version
+  name: ran_agent_version
+  origin: universal
+  description: an Invocation ran a particular AgentVersion (mirrors agentVersionId attribute)
+  source:
+  - Invocation
+  target:
+  - AgentVersion
+  cardinality: N:1
+- id: edge:from-phase
+  name: from_phase
+  origin: universal
+  description: a PhaseTransition originates from a Phase
+  source:
+  - PhaseTransition
+  target:
+  - Phase
+  cardinality: N:1
+- id: edge:to-phase
+  name: to_phase
+  origin: universal
+  description: a PhaseTransition targets a Phase
+  source:
+  - PhaseTransition
+  target:
+  - Phase
+  cardinality: N:1
+- id: edge:spawned-invocation
+  name: spawned_invocation
+  origin: universal
+  description: a Run spawned a particular Invocation (alias of spans for individual references)
+  source:
+  - Run
+  target:
+  - Invocation
+  cardinality: 1:N
+  aliasOf: spans
+- id: edge:forked-from
+  name: forked_from
+  origin: universal
+  description: a Session was forked from another Session
+  source:
+  - Session
+  target:
+  - Session
+  cardinality: N:1
+- id: edge:provided-by
+  name: provided_by
+  origin: universal
+  description: a PlatformService is provided by exactly one Platform
+  source:
+  - PlatformService
+  target:
+  - Platform
+  cardinality: N:1
+  inverse: provides
+- id: edge:provides
+  name: provides
+  description: inverse of provided_by — a Platform provides a PlatformService
+  source:
+  - Platform
+  target:
+  - PlatformService
+  cardinality: 1:N
+  inverse: provided_by
+- id: edge:integrates-with
+  name: integrates_with
+  origin: universal
+  description: documented integration between platform services, or between a tool server and the primary entities it connects to (tools, platforms, providers, issue trackers, VCS hosts, etc.)
+  source:
+  - PlatformService
+  - ToolServer
+  target:
+  - PlatformService
+  - Tool
+  - StackPart
+  - Framework
+  - IssueTracker
+  - VCSHost
+  - Provider
+  - ModelProviderProduct
+  - Platform
+  - Library
+  - SkillArea
+  - Specialization
+  - Channel
+  cardinality: N:N
+  symmetric: false
+  attributes:
+  - name: nature
+    type: enum<native,sdk,api,event>
+    required: false
+    notes: Required for PlatformService↔PlatformService pairs. Optional for ToolServer→* edges (defaults to api).
+  inverse: integrates_with
+  invariants:
+  - for PlatformService↔PlatformService pairs, canonicalized as (min(id), max(id)) — exactly one row per unordered pair (V-platform-2)
+- id: edge:depends-on
+  name: depends_on
+  origin: universal
+  description: a PlatformService requires/recommends another PlatformService at runtime (e.g. EKS depends_on IAM)
+  source:
+  - PlatformService
+  target:
+  - PlatformService
+  cardinality: N:N
+  attributes:
+  - name: kind
+    type: enum<required,optional,recommended>
+    required: true
+  inverse: depended_on_by
+- id: edge:covers
+  name: covers
+  origin: universal
+  description: a Benchmark exercises a SkillArea, optionally weighted by how much of the benchmark targets it
+  source:
+  - Benchmark
+  target:
+  - SkillArea
+  cardinality: N:N
+  attributes:
+  - name: coverage
+    type: enum<full,partial,tangential>
+    required: true
+  - name: weight
+    type: float
+    required: false
+  inverse: covered_by_benchmark
+- id: edge:targets-tracker
+  name: targets_tracker
+  origin: universal
+  description: a WorkflowDefinition targets a specific IssueTracker (front-matter binding)
+  source:
+  - WorkflowDefinition
+  target:
+  - IssueTracker
+  cardinality: N:1
+  inverse: targeted_by_workflow
+- id: edge:invokes-agent
+  name: invokes_agent
+  origin: universal
+  description: a WorkflowDefinition invokes a particular AgentVersion (front-matter agentExecutable binding)
+  source:
+  - WorkflowDefinition
+  target:
+  - AgentVersion
+  cardinality: N:1
+  inverse: invoked_by_workflow
+- id: edge:uses-workspace
+  name: uses_workspace
+  origin: universal
+  description: a RunAttempt uses a Workspace (per-attempt materialization)
+  source:
+  - RunAttempt
+  target:
+  - Workspace
+  cardinality: N:1
+  inverse: used_by_run_attempt
+- id: edge:for-issue
+  name: for_issue
+  origin: universal
+  description: a RunAttempt is bound to a particular Issue (the work-item being addressed)
+  source:
+  - RunAttempt
+  target:
+  - Issue
+  cardinality: N:1
+  inverse: has_run_attempts
+- id: edge:has-live-session
+  name: has_live_session
+  origin: universal
+  description: a RunAttempt drives a LiveSession (in-flight observable)
+  source:
+  - RunAttempt
+  target:
+  - LiveSession
+  cardinality: 1:N
+  inverse: driven_by_run_attempt
+- id: edge:driven-by-run-attempt
+  name: driven_by_run_attempt
+  origin: universal
+  description: inverse of has_live_session
+  source:
+  - LiveSession
+  target:
+  - RunAttempt
+  cardinality: N:1
+  inverse: has_live_session
+- id: edge:exposed-by
+  name: exposed_by
+  origin: universal
+  description: an APIEndpoint is exposed by an HTTPServerExtension or PackageSurface (catalog pass 97b widened target to allow PackageSurface for npm-published HTTP gateway packages such as @a5c-ai/agent-mux-gateway)
+  source:
+  - APIEndpoint
+  target:
+  - HTTPServerExtension
+  - PackageSurface
+  cardinality: N:1
+  inverse: exposes_endpoint
+- id: edge:exposes-endpoint
+  name: exposes_endpoint
+  origin: universal
+  description: inverse of exposed_by — an HTTPServerExtension or PackageSurface exposes 1+ APIEndpoints (catalog pass 97b widened source to PackageSurface)
+  source:
+  - HTTPServerExtension
+  - PackageSurface
+  target:
+  - APIEndpoint
+  cardinality: 1:N
+  inverse: exposed_by
+- id: edge:reads-endpoint
+  name: reads_endpoint
+  origin: universal
+  description: a Dashboard reads runtime data from an APIEndpoint (live/refreshable data binding)
+  source:
+  - Dashboard
+  target:
+  - APIEndpoint
+  cardinality: N:N
+  notes: Distinct semantics from derives_from (which binds to a RuntimeSnapshot for catalog provenance / snapshot shape). reads_endpoint is the runtime data plane; derives_from is the catalog provenance plane.
+  inverse: read_by_dashboard
+- id: edge:derives-from
+  name: derives_from
+  origin: universal
+  description: a Dashboard's catalog provenance — which RuntimeSnapshot the dashboard is shaped against
+  source:
+  - Dashboard
+  target:
+  - RuntimeSnapshot
+  cardinality: N:1
+  notes: Catalog provenance edge (which RuntimeSnapshot was the dashboard designed against). Disambiguated from reads_endpoint per reviewer fix 2026-05-01.
+  inverse: source_of_dashboard
+- id: edge:implements-protocol
+  name: implements_protocol
+  origin: universal
+  description: an IssueTracker implements an IssueTrackerProtocol (the minimal portable surface)
+  source:
+  - IssueTracker
+  target:
+  - IssueTrackerProtocol
+  cardinality: N:1
+  inverse: implemented_by_tracker
+- id: edge:from-tracker
+  name: from_tracker
+  origin: universal
+  description: an Issue originates from a particular IssueTracker
+  source:
+  - Issue
+  target:
+  - IssueTracker
+  cardinality: N:1
+  inverse: produces_issue
+- id: edge:handles-failure
+  name: handles_failure
+  origin: universal
+  description: a RecoveryStrategy handles a FailureClass (action + backoff binding)
+  source:
+  - RecoveryStrategy
+  target:
+  - FailureClass
+  cardinality: N:1
+  inverse: handled_by_strategy
+- id: edge:has-partial-state-recovery
+  name: has_partial_state_recovery
+  origin: a5c
+  originContext: Connects runtime/product restart semantics to the PartialStateRecovery policy record.
+  description: an agent runtime or product declares partial state recovery semantics for restart after in-memory state loss
+  source: [AgentProduct, AgentRuntimeImpl]
+  target: [PartialStateRecovery]
+  cardinality: N:N
+  inverse: partial_state_recovery_for
+- id: edge:categorized-as
+  name: categorized_as
+  origin: universal
+  description: an ErrorCategory is categorized under a FailureClass (taxonomy ladder)
+  source:
+  - ErrorCategory
+  target:
+  - FailureClass
+  cardinality: N:1
+  inverse: categorizes_errors
+- id: edge:fires-operational-trigger
+  name: fires_operational_trigger
+  origin: universal
+  description: an APIEndpoint fires an OperationalTrigger (renamed from generic `triggers` per reviewer fix 2026-05-01 to avoid hook/event-trigger collision)
+  source:
+  - APIEndpoint
+  target:
+  - OperationalTrigger
+  cardinality: N:N
+  inverse: triggered_by_endpoint
+- id: edge:snapshots-state
+  name: snapshots_state
+  origin: universal
+  description: a RuntimeSnapshot snapshots the OrchestratorState at a point in time
+  source:
+  - RuntimeSnapshot
+  target:
+  - OrchestratorState
+  cardinality: N:1
+  inverse: snapshotted_by
+- id: edge:provides-cost-for
+  name: provides_cost_for
+  origin: universal
+  description: a CostModel provides cost data for a Provider, ModelVersion, or AgentVersion (catalog pass 26 widening — added AgentVersion target so per-invocation agent cost specs can attach without a parallel edge)
+  source:
+  - CostModel
+  target:
+  - Provider
+  - ModelVersion
+  - AgentVersion
+  cardinality: N:N
+  inverse: priced_by
+- id: edge:constrains
+  name: constrains
+  origin: universal
+  description: a Quota constrains a Tenant or Role (per-tenant / per-role rate or token limits)
+  source:
+  - Quota
+  target:
+  - Tenant
+  - Role
+  cardinality: N:N
+  inverse: constrained_by
+- id: edge:applies-to-tenant
+  name: applies_to_tenant
+  origin: universal
+  description: a Quota applies to a Tenant scope
+  source:
+  - Quota
+  target:
+  - Tenant
+  cardinality: N:N
+  inverse: tenant_quotas
+- id: edge:recorded-against
+  name: recorded_against
+  origin: universal
+  description: a UsageRecord is recorded against a CostModel / Quota / BudgetPolicy
+  source:
+  - UsageRecord
+  target:
+  - CostModel
+  - Quota
+  - BudgetPolicy
+  cardinality: N:N
+  inverse: usage_recorded
+- id: edge:owns-budget
+  name: owns_budget
+  origin: universal
+  description: a BudgetPolicy is owned by a Tenant or OrgUnit
+  source:
+  - BudgetPolicy
+  target:
+  - Tenant
+  - OrgUnit
+  cardinality: N:N
+  inverse: budget_owned_by
+- id: edge:owned-by
+  name: owned_by
+  origin: universal
+  description: a Tenant is owned by an OrgUnit (multi-tenant subject under an organizational owner). Original plan target Org -> remapped to OrgUnit (no Org NodeKind in v6).
+  source:
+  - Tenant
+  target:
+  - OrgUnit
+  cardinality: N:1
+  inverse: owns_tenant
+- id: edge:represents
+  name: represents
+  origin: universal
+  description: a Customer represents an OrgUnit (commercial counterparty bound to an organizational owner). Original plan target Org -> remapped to OrgUnit.
+  source:
+  - Customer
+  target:
+  - OrgUnit
+  cardinality: N:1
+  inverse: represented_by
+- id: edge:with-organization
+  name: with_organization
+  origin: universal
+  description: a VendorRelationship is held with an OrgUnit. Original plan target Org -> remapped to OrgUnit.
+  source:
+  - VendorRelationship
+  target:
+  - OrgUnit
+  cardinality: N:1
+  inverse: has_vendor_relationship
+- id: edge:emitted-by-span
+  name: emitted_by_span
+  origin: universal
+  description: a Span is emitted by an Effect (as the observable unit of work). Original plan target ToolInvocation -> remapped to Effect.
+  source:
+  - Span
+  target:
+  - Effect
+  cardinality: N:1
+  inverse: emits_span
+- id: edge:exports-to
+  name: exports_to
+  origin: universal
+  description: a Span (or any observability emitter) exports to an ObservabilityBackend (catalog pass 26 widening — sources extended to AgentRuntimeImpl/AgentPlatformImpl/PlatformService for runtime-level telemetry pipes)
+  source:
+  - Span
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  - PlatformService
+  target:
+  - ObservabilityBackend
+  cardinality: N:N
+  inverse: ingests_from
+- id: edge:hosted-on-vcs
+  name: hosted_on_vcs
+  origin: universal
+  description: a PullRequest or CIWorkflow is hosted on a VCSHost
+  source:
+  - PullRequest
+  - CIWorkflow
+  target:
+  - VCSHost
+  cardinality: N:1
+  inverse: hosts
+- id: edge:submitted-by
+  name: submitted_by
+  origin: universal
+  description: a PullRequest or CodeReview is submitted by a Role. Original plan target Identity -> remapped to Role (no Identity NodeKind in v6).
+  source:
+  - PullRequest
+  - CodeReview
+  target:
+  - Role
+  cardinality: N:1
+  inverse: submitted
+- id: edge:reviews
+  name: reviews
+  origin: universal
+  description: a CodeReview reviews a PullRequest
+  source:
+  - CodeReview
+  target:
+  - PullRequest
+  cardinality: N:1
+  inverse: reviewed_by
+- id: edge:validates-pull-request
+  name: validates_pull_request
+  origin: universal
+  description: a CIWorkflow validates a PullRequest (gate / status check)
+  source:
+  - CIWorkflow
+  target:
+  - PullRequest
+  cardinality: N:N
+  inverse: validated_by_workflow
+- id: edge:conforms-to
+  name: conforms_to
+  origin: universal
+  description: a Claim conforms to a ComplianceFramework (used in conjunction with Claim.claimKind=conformance)
+  source:
+  - Claim
+  target:
+  - ComplianceFramework
+  cardinality: N:N
+  inverse: conformance_claimed_by
+- id: edge:regulates
+  name: regulates
+  origin: universal
+  description: a Regulator regulates a ComplianceFramework (publishes / enforces)
+  source:
+  - Regulator
+  target:
+  - ComplianceFramework
+  cardinality: N:N
+  inverse: regulated_by
+- id: edge:regulated-by
+  name: regulated_by
+  origin: universal
+  description: inverse of regulates
+  source:
+  - ComplianceFramework
+  target:
+  - Regulator
+  cardinality: N:N
+  inverse: regulates
+- id: edge:applies-policy
+  name: applies_policy
+  origin: universal
+  description: inverse of policy_applied_by
+  source:
+  - AgentVersion
+  target:
+  - ContentPolicy
+  cardinality: N:N
+  inverse: policy_applied_by
+- id: edge:detects-jailbreak
+  name: detects_jailbreak
+  origin: universal
+  description: a ContentPolicy detects a JailbreakPattern
+  source:
+  - ContentPolicy
+  target:
+  - JailbreakPattern
+  cardinality: N:N
+  inverse: detected_by_policy
+- id: edge:uses-vector-store
+  name: uses_vector_store
+  origin: universal
+  description: an AgentVersion or RetrievalPipeline uses a VectorStore for retrieval
+  source:
+  - AgentVersion
+  - RetrievalPipeline
+  target:
+  - VectorStore
+  cardinality: N:N
+  inverse: vector_store_used_by
+- id: edge:embeds-with
+  name: embeds_with
+  origin: universal
+  description: a ContextBundle embeds with an EmbeddingModelProfile
+  source:
+  - ContextBundle
+  target:
+  - EmbeddingModelProfile
+  cardinality: N:1
+  inverse: embedding_for_bundle
+- id: edge:embeds-into
+  name: embeds_into
+  origin: universal
+  description: an EmbeddingModelProfile embeds into a VectorStore (binds embedding output to storage backend)
+  source:
+  - EmbeddingModelProfile
+  target:
+  - VectorStore
+  cardinality: N:N
+  inverse: embedded_by
+- id: edge:has-memory
+  name: has_memory
+  origin: universal
+  description: an AgentVersion has a MemoryStore attached
+  source:
+  - AgentVersion
+  target:
+  - MemoryStore
+  cardinality: N:N
+  inverse: memory_for
+- id: edge:governs-template
+  name: governs_template
+  origin: universal
+  description: an AgentVersion governs a PromptTemplate (selects / applies as system or scaffold prompt)
+  source:
+  - AgentVersion
+  target:
+  - PromptTemplate
+  cardinality: N:N
+  inverse: governed_by_agent
+- id: edge:bundles-template
+  name: bundles_template
+  origin: universal
+  description: a ContextBundle bundles one or more PromptTemplates
+  source:
+  - ContextBundle
+  target:
+  - PromptTemplate
+  cardinality: N:N
+  inverse: bundled_in_context
+- id: edge:uses-harness
+  name: uses_harness
+  origin: universal
+  description: an EvalRun uses an EvalHarness as its executor
+  source:
+  - EvalRun
+  target:
+  - EvalHarness
+  cardinality: N:1
+  inverse: harness_used_by
+- id: edge:judged-by
+  name: judged_by
+  origin: universal
+  description: an EvalRun is judged by a Judge
+  source:
+  - EvalRun
+  target:
+  - Judge
+  cardinality: N:N
+  inverse: judges
+- id: edge:scored-against-rubric
+  name: scored_against_rubric
+  origin: universal
+  description: an EvalRun is scored against a Rubric (criterion + weights)
+  source:
+  - EvalRun
+  target:
+  - Rubric
+  cardinality: N:N
+  inverse: rubric_for
+- id: edge:uses-async-job
+  name: uses_async_job
+  origin: universal
+  description: a Run uses an AsyncJob primitive (batch API, scheduled job, webhook callback, ...) as the underlying long-running compute representation
+  source:
+  - Run
+  target:
+  - AsyncJob
+  cardinality: N:N
+  inverse: async_job_used_by
+- id: edge:defines-automation-rule
+  name: defines_automation_rule
+  origin: a5c
+  description: an AgentProduct (acting as project/tenant owner) defines an AutomationRule (timer/webhook reactor) that emits canonical kanban issues triggering Runs
+  source:
+  - AgentProduct
+  target:
+  - AutomationRule
+  cardinality: 1:N
+  inverse: automation_rule_defined_by
+- id: edge:has-preflight
+  name: has_preflight
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: a Run is gated by a DispatchPreflight validation pass (tracker creds, agent binary, workspace root, etc.) that runs once before the Run begins
+  source:
+  - Run
+  target:
+  - DispatchPreflight
+  cardinality: N:1
+  inverse: preflight_for
+- id: edge:enforces-invariant
+  name: enforces_invariant
+  origin: standard
+  description: 'An AgentRuntimeImpl (the v6 Harness-analog) enforces a FilesystemSafetyInvariant.
+
+    catalog pass 23 risk-flagged: rationale also identified Sandbox and SafetyPolicy as
+
+    candidate owners; single-source modeling may under-represent enforcement
+
+    responsibility — extend in a future pass if needed.
+
+    '
+  source:
+  - AgentRuntimeImpl
+  target:
+  - FilesystemSafetyInvariant
+  cardinality: N:N
+  inverse: invariant_enforced_by
+- id: edge:installed-via
+  name: installed_via
+  origin: universal
+  description: 'an AgentVersion is installed via one or more InstallMethods (npm, brew,
+
+    gh-extension, ...). catalog pass 23 risk-flagged: dual representation with the
+
+    pre-existing AgentVersion.installMethods attribute (list<ref<InstallMethod>>);
+
+    both representations are retained for now — see REMODEL-NOTES.md.
+
+    '
+  source:
+  - AgentVersion
+  target:
+  - InstallMethod
+  cardinality: N:N
+  inverse: install_method_for
+- id: edge:has-launch-contract
+  name: has_launch_contract
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: an AgentRuntimeImpl (Harness-analog) declares the LaunchContract that codifies its spawn shape (command, cwd, line-size, timeouts, startup handshake)
+  source:
+  - AgentRuntimeImpl
+  target:
+  - LaunchContract
+  cardinality: N:1
+  inverse: launch_contract_for
+- id: edge:uses-merge-policy
+  name: uses_merge_policy
+  origin: a5c
+  description: a HookSurface uses a named MergePolicy when fanning a single hook event across multiple registered handlers (hooks-mux conflict-resolution rule)
+  source:
+  - HookSurface
+  target:
+  - MergePolicy
+  cardinality: N:1
+  inverse: merge_policy_used_by
+- id: edge:exposes-intervention-point
+  name: exposes_intervention_point
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: a Phase exposes one or more OperatorInterventionPoints (operator-actuated levers — edit-workflow, drain-orchestrator, trigger-refresh, ...)
+  source:
+  - Phase
+  target:
+  - OperatorInterventionPoint
+  cardinality: N:N
+  inverse: intervention_point_exposed_by
+- id: edge:has-transition
+  name: has_transition
+  origin: universal
+  description: a Phase declares an outgoing PhaseTransition (gateable transition to another Phase in the same phase machine)
+  source:
+  - Phase
+  target:
+  - PhaseTransition
+  cardinality: 1:N
+  inverse: transition_of
+- id: edge:transition-of
+  name: transition_of
+  origin: universal
+  description: inverse of has_transition
+  source:
+  - PhaseTransition
+  target:
+  - Phase
+  cardinality: N:1
+  inverse: has_transition
+- id: edge:performs-reconciliation
+  name: performs_reconciliation
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: a Run performs a Reconciliation pass (timer/operator/terminal-state/completion trigger), emitting trigger context and outcome counts
+  source:
+  - Run
+  target:
+  - Reconciliation
+  cardinality: 1:N
+  inverse: reconciliation_performed_by
+- id: edge:issues-resume-token
+  name: issues_resume_token
+  origin: universal
+  description: a Run issues a ResumeToken for asynchronous resumption of a paused/interrupted run (D4 async resumption primitive)
+  source:
+  - Run
+  target:
+  - ResumeToken
+  cardinality: 1:N
+  inverse: resume_token_issued_by
+- id: edge:applies-secret-policy
+  name: applies_secret_policy
+  origin: standard
+  description: a WorkflowDefinition (the Workflow-analog) applies a SecretHandlingPolicy that governs how secrets (API keys, credentials) are handled across the workflow / run / harness
+  source:
+  - WorkflowDefinition
+  target:
+  - SecretHandlingPolicy
+  cardinality: N:N
+  inverse: secret_policy_applied_by
+- id: edge:contains-meta-node-kind
+  name: contains_meta_node_kind
+  origin: universal
+  description: a meta-cluster groups one or more MetaNodeKind records
+  source:
+  - MetaCluster
+  target:
+  - MetaNodeKind
+  cardinality: N:N
+  inverse: in_cluster
+- id: edge:contains-meta-edge-kind
+  name: contains_meta_edge_kind
+  origin: universal
+  description: a meta-cluster groups one or more MetaEdgeKind records
+  source:
+  - MetaCluster
+  target:
+  - MetaEdgeKind
+  cardinality: N:N
+  inverse: in_meta_cluster
+- id: edge:in-meta-cluster
+  name: in_meta_cluster
+  origin: universal
+  description: inverse of contains_meta_edge_kind (a MetaEdgeKind belongs to a MetaCluster)
+  source:
+  - MetaEdgeKind
+  target:
+  - MetaCluster
+  cardinality: N:1
+  inverse: contains_meta_edge_kind
+- id: edge:in-cluster
+  name: in_cluster
+  origin: universal
+  description: inverse of contains_meta_node_kind (a MetaNodeKind belongs to a MetaCluster)
+  source:
+  - MetaNodeKind
+  target:
+  - MetaCluster
+  cardinality: N:1
+  inverse: contains_meta_node_kind
+- id: edge:contains-meta-attribute
+  name: contains_meta_attribute
+  origin: universal
+  description: a MetaNodeKind contains a MetaAttribute (one attribute declared on the underlying NodeKind)
+  source:
+  - MetaNodeKind
+  target:
+  - MetaAttribute
+  cardinality: N:N
+  inverse: defined_on
+- id: edge:defined-on
+  name: defined_on
+  origin: universal
+  description: inverse of contains_meta_attribute (a MetaAttribute is defined on a MetaNodeKind)
+  source:
+  - MetaAttribute
+  target:
+  - MetaNodeKind
+  cardinality: N:1
+  inverse: contains_meta_attribute
+- id: edge:source-of-meta-edge
+  name: source_of_meta_edge
+  origin: universal
+  description: inverse of has_outgoing_edge (a MetaEdgeKind has a MetaNodeKind as a source)
+  source:
+  - MetaEdgeKind
+  target:
+  - MetaNodeKind
+  cardinality: N:N
+  inverse: has_outgoing_edge
+- id: edge:target-of-meta-edge
+  name: target_of_meta_edge
+  origin: universal
+  description: inverse of has_incoming_edge (a MetaEdgeKind has a MetaNodeKind as a target)
+  source:
+  - MetaEdgeKind
+  target:
+  - MetaNodeKind
+  cardinality: N:N
+  inverse: has_incoming_edge
+- id: edge:inverse-of
+  name: inverse_of
+  origin: universal
+  description: a MetaEdgeKind names its inverse MetaEdgeKind (symmetric — both endpoints carry inverse_of pointing at each other)
+  source:
+  - MetaEdgeKind
+  target:
+  - MetaEdgeKind
+  cardinality: N:1
+  inverse: inverse_of
+- id: edge:used-on-attribute
+  name: used_on_attribute
+  origin: universal
+  description: a MetaEnum is used as the value-set for one or more MetaAttributes
+  source:
+  - MetaEnum
+  target:
+  - MetaAttribute
+  cardinality: N:N
+  inverse: enum_value_for
+- id: edge:has-example
+  name: has_example
+  origin: universal
+  description: a MetaNodeKind references an existing example file (by id of an example node) demonstrating the underlying NodeKind in use
+  source:
+  - MetaNodeKind
+  target:
+  - MetaNodeKind
+  - MetaEdgeKind
+  - MetaCluster
+  - MetaAttribute
+  - MetaEnum
+  cardinality: N:N
+- id: edge:defines-meta-cluster
+  name: defines_meta_cluster
+  origin: universal
+  description: an OntologySchema defines (registers) a MetaCluster as part of its meta-shape
+  source:
+  - OntologySchema
+  target:
+  - MetaCluster
+  cardinality: 1:N
+- id: edge:emits-signals-to
+  name: emits_signals_to
+  origin: universal
+  description: a runtime/platform implementation or first-party platform service emits telemetry signals (traces / metrics / logs) to an ObservabilityBackend at the integration layer (distinct from Span.exports_to which is the per-span data-plane edge)
+  source:
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  - PlatformService
+  target:
+  - ObservabilityBackend
+  cardinality: N:N
+  inverse: receives_signals_from
+- id: edge:versioned-via
+  name: versioned_via
+  origin: universal
+  description: a definitional artifact (agent version, workspace, workflow definition) is versioned in a VCSHost (definitional anchor — distinct from PullRequest.hosted_on_vcs which is per-change)
+  source:
+  - AgentVersion
+  - Workspace
+  - WorkflowDefinition
+  target:
+  - VCSHost
+  cardinality: N:1
+  inverse: versions
+- id: edge:triggered-by
+  name: triggered_by
+  origin: universal
+  description: a Run is triggered by an external event source (CIWorkflow run, PullRequest open/update, Issue activity). Distinct from triggered_by_endpoint (APIEndpoint -> OperationalTrigger) and from has_preflight (orchestrator gate).
+  source:
+  - Run
+  target:
+  - CIWorkflow
+  - PullRequest
+  - Issue
+  cardinality: N:1
+  inverse: triggers_run
+- id: edge:complies-with
+  name: complies_with
+  origin: universal
+  description: an AgentVersion / Run / Tenant complies with a ComplianceFramework (operational binding — distinct from Claim.conforms_to which is an attestation, and governed_by which targets state machines)
+  source:
+  - AgentVersion
+  - Run
+  - Tenant
+  target:
+  - ComplianceFramework
+  cardinality: N:N
+  inverse: compliance_for
+- id: edge:owns-workspace
+  name: owns_workspace
+  origin: universal
+  description: a Tenant owns a Workspace (multi-tenant ownership of project context — distinct from BudgetPolicy.owns_budget)
+  source:
+  - Tenant
+  target:
+  - Workspace
+  cardinality: 1:N
+  inverse: workspace_owned_by
+- id: edge:records-usage
+  name: records_usage
+  origin: universal
+  description: a Run / RunAttempt / Invocation records a UsageRecord (token / time / call counters bound to the unit of work). UsageRecord.recorded_against retains the secondary edge to CostModel/Quota/BudgetPolicy.
+  source:
+  - Run
+  - RunAttempt
+  - Invocation
+  target:
+  - UsageRecord
+  cardinality: 1:N
+  inverse: usage_recorded_for
+- id: edge:uses-template
+  name: uses_template
+  origin: universal
+  description: a Skill or Subagent uses a PromptTemplate (extension-level templating; distinct from AgentVersion.governs_template which is the runtime-level binding)
+  source:
+  - Skill
+  - Subagent
+  target:
+  - PromptTemplate
+  cardinality: N:N
+  inverse: template_used_by
+- id: edge:uses-context-bundle
+  name: uses_context_bundle
+  origin: universal
+  description: a Run / RunAttempt / AgentVersion uses a ContextBundle to assemble agent context for the unit of work
+  source:
+  - Run
+  - RunAttempt
+  - AgentVersion
+  target:
+  - ContextBundle
+  cardinality: N:N
+  inverse: context_bundle_used_by
+- id: edge:backed-by-memory
+  name: backed_by_memory
+  origin: universal
+  description: a ContextBundle is backed by a MemoryStore (binds the bundle's persistent recall surface)
+  source:
+  - ContextBundle
+  target:
+  - MemoryStore
+  cardinality: N:N
+  inverse: memory_backs_bundle
+- id: edge:assesses-policy
+  name: assesses_policy
+  origin: universal
+  description: a ToolDescriptor assesses a ContentPolicy (security / safety tool that evaluates content against the policy)
+  source:
+  - ToolDescriptor
+  target:
+  - ContentPolicy
+  cardinality: N:N
+  inverse: policy_assessed_by
+- id: edge:evaluates-policy
+  name: evaluates_policy
+  origin: universal
+  description: a Benchmark evaluates a ContentPolicy (safety benchmark targeting a specific policy — distinct from generic Benchmark.targets which targets capability subjects)
+  source:
+  - Benchmark
+  target:
+  - ContentPolicy
+  cardinality: N:N
+  inverse: policy_evaluated_by
+- id: edge:escalates-to
+  name: escalates_to
+  origin: universal
+  description: a HumanCheckpoint escalates to a Role (e.g. on-call-engineer, approver) — names the responsible role, not the channel
+  source:
+  - HumanCheckpoint
+  target:
+  - Role
+  cardinality: N:N
+  inverse: escalation_target_for
+- id: edge:notifies-via
+  name: notifies_via
+  origin: universal
+  description: a HumanCheckpoint notifies via a Channel (Slack / email / SMS / webhook / desktop-notification) — the notification mechanism, distinct from the responsible Role
+  source:
+  - HumanCheckpoint
+  target:
+  - Channel
+  cardinality: N:N
+  inverse: notifies_checkpoint
+- id: edge:scopes-runs
+  name: scopes_runs
+  origin: universal
+  description: inverse of scoped_to_tenant
+  source:
+  - Tenant
+  target:
+  - Run
+  - Session
+  cardinality: 1:N
+  inverse: scoped_to_tenant
+- id: edge:belongs-to-project
+  name: belongs_to_project
+  origin: universal
+  description: an Issue belongs to a Project (graph-traversable replacement for the Issue.projectId FK-by-attribute pattern)
+  source:
+  - Issue
+  target:
+  - Project
+  cardinality: N:1
+  inverse: groups_issue
+- id: edge:groups-workspace
+  name: groups_workspace
+  origin: universal
+  description: a Project groups one or more Workspaces under a single planning unit (a Project may map to multiple Workspaces — primary, mirrors, gateway/ui split)
+  source:
+  - Project
+  target:
+  - Workspace
+  cardinality: 1:N
+  inverse: workspace_in_project
+- id: edge:has-column
+  name: has_column
+  origin: universal
+  description: a BoardSnapshot has one or more BoardColumns (graph-traversable replacement for BoardSnapshot.columnIds FK list)
+  source:
+  - BoardSnapshot
+  target:
+  - BoardColumn
+  cardinality: 1:N
+  inverse: column_of
+- id: edge:column-of
+  name: column_of
+  origin: universal
+  description: inverse of has_column
+  source:
+  - BoardColumn
+  target:
+  - BoardSnapshot
+  cardinality: N:1
+  inverse: has_column
+- id: edge:snapshots-project
+  name: snapshots_project
+  origin: universal
+  description: a BoardSnapshot snapshots a Project's kanban board state at a point in time
+  source:
+  - BoardSnapshot
+  target:
+  - Project
+  cardinality: N:1
+  inverse: has_board_snapshot
+- id: edge:has-board-snapshot
+  name: has_board_snapshot
+  origin: universal
+  description: inverse of snapshots_project — a Project accumulates BoardSnapshots over time
+  source:
+  - Project
+  target:
+  - BoardSnapshot
+  cardinality: 1:N
+  inverse: snapshots_project
+- id: edge:snapshots-project-backlog
+  name: snapshots_project_backlog
+  origin: universal
+  description: a BacklogSnapshot snapshots a Project's backlog state at a point in time
+  source:
+  - BacklogSnapshot
+  target:
+  - Project
+  cardinality: N:1
+  inverse: has_backlog_snapshot
+- id: edge:has-backlog-snapshot
+  name: has_backlog_snapshot
+  origin: universal
+  description: inverse of snapshots_project_backlog — a Project accumulates BacklogSnapshots over time
+  source:
+  - Project
+  target:
+  - BacklogSnapshot
+  cardinality: 1:N
+  inverse: snapshots_project_backlog
+- id: edge:criterion-of-issue
+  name: criterion_of_issue
+  origin: universal
+  description: inverse of has_acceptance_criterion
+  source:
+  - AcceptanceCriterion
+  target:
+  - Issue
+  cardinality: N:1
+  inverse: has_acceptance_criterion
+- id: edge:decomposition-of
+  name: decomposition_of
+  origin: universal
+  description: inverse of decomposes_into — the IssueDecomposition record points back to its parent Issue
+  source:
+  - IssueDecomposition
+  target:
+  - Issue
+  cardinality: 61
+  inverse: decomposes_into
+- id: edge:has-child-issue
+  name: has_child_issue
+  origin: universal
+  description: inverse of child_issue_of_decomposition — an IssueDecomposition fans out to one or more child Issues
+  source:
+  - IssueDecomposition
+  target:
+  - Issue
+  cardinality: 1:N
+  inverse: child_issue_of_decomposition
+- id: edge:projects-session
+  name: projects_session
+  origin: universal
+  description: a SessionFlowProjection projects a Session into agent flow lanes (graph-traversable replacement for SessionFlowProjection.sessionId FK)
+  source:
+  - SessionFlowProjection
+  target:
+  - Session
+  cardinality: N:1
+  inverse: has_flow_projection
+- id: edge:has-flow-projection
+  name: has_flow_projection
+  origin: universal
+  description: inverse of projects_session — a Session may have one or more SessionFlowProjections (regenerated as the transcript grows)
+  source:
+  - Session
+  target:
+  - SessionFlowProjection
+  cardinality: 1:N
+  inverse: projects_session
+- id: edge:recorded-attention
+  name: recorded_attention
+  origin: universal
+  description: a Session recorded a FileAttention entry for a path it read or wrote (graph-traversable replacement for FileAttention.sessionId FK)
+  source:
+  - Session
+  target:
+  - FileAttention
+  cardinality: 1:N
+  inverse: attention_recorded_in
+- id: edge:has-device-pair
+  name: has_device_pair
+  origin: derived
+  originContext: agent-mux webui — inverse of paired_to
+  description: inverse of paired_to — an AgentVersion may have one or more DevicePairs paired to it
+  source:
+  - AgentVersion
+  target:
+  - DevicePair
+  cardinality: 1:N
+  inverse: paired_to
+- id: edge:has-lane
+  name: has_lane
+  origin: universal
+  description: a SessionFlowProjection has one or more AgentFlowLanes (graph-traversable replacement for inline lanes attribute)
+  source:
+  - SessionFlowProjection
+  target:
+  - AgentFlowLane
+  cardinality: 1:N
+  inverse: lane_of_projection
+- id: edge:lane-of-projection
+  name: lane_of_projection
+  origin: universal
+  description: inverse of has_lane — an AgentFlowLane is anchored to its parent SessionFlowProjection
+  source:
+  - AgentFlowLane
+  target:
+  - SessionFlowProjection
+  cardinality: N:1
+  inverse: has_lane
+- id: edge:contains-segment
+  name: contains_segment
+  origin: universal
+  description: an AgentFlowLane contains one or more AgentFlowSegments (graph-traversable replacement for inline segments attribute)
+  source:
+  - AgentFlowLane
+  target:
+  - AgentFlowSegment
+  cardinality: 1:N
+  inverse: segment_in_lane
+- id: edge:segment-in-lane
+  name: segment_in_lane
+  origin: universal
+  description: inverse of contains_segment — an AgentFlowSegment is anchored to its parent AgentFlowLane
+  source:
+  - AgentFlowSegment
+  target:
+  - AgentFlowLane
+  cardinality: N:1
+  inverse: contains_segment
+- id: edge:projected-by-segment
+  name: projected_by_segment
+  origin: universal
+  description: inverse of projects_span — a Span may be projected by one or more AgentFlowSegments in distinct SessionFlowProjections
+  source:
+  - Span
+  target:
+  - AgentFlowSegment
+  cardinality: 1:N
+  inverse: projects_span
+- id: edge:parent-session
+  name: parent_session
+  origin: universal
+  description: a ChildSession's parent runtime Session
+  source:
+  - ChildSession
+  target:
+  - Session
+  cardinality: N:1
+  inverse: has_child_session
+- id: edge:runs-subagent
+  name: runs_subagent
+  origin: universal
+  description: a ChildSession runs the dispatched Subagent (when spawnTrigger=subagent-dispatch)
+  source:
+  - ChildSession
+  target:
+  - Subagent
+  cardinality: N:1
+  inverse: dispatched_to_child_session
+- id: edge:runs-skill
+  name: runs_skill
+  origin: universal
+  description: a ChildSession runs a Skill (procedural workflow loaded by the dispatched Subagent or directly by the runtime)
+  source:
+  - ChildSession
+  target:
+  - Skill
+  cardinality: N:1
+  inverse: executed_in_child_session
+- id: edge:invoking-tool
+  name: invoking_tool
+  origin: universal
+  description: the ToolDescriptor that triggered the spawn of this ChildSession (e.g. claude-code's Task tool)
+  source:
+  - ChildSession
+  target:
+  - ToolDescriptor
+  cardinality: N:1
+  inverse: triggers_child_session
+- id: edge:contains-tool-descriptor
+  name: contains_tool_descriptor
+  origin: universal
+  description: a plugin or tool server contains a tool descriptor (catalog pass 50 consolidation — fills the contains_* gap previously covered by bundles_tool_descriptor; source includes ToolServer, the natural runtime container of ToolDescriptors per the existing `tools:` attribute on ToolServer)
+  source:
+  - Plugin
+  - ToolServer
+  target:
+  - ToolDescriptor
+  cardinality: 1:N
+  inverse: tool_descriptor_contained_in_plugin
+- id: edge:dispatched-via-tool
+  name: dispatched_via_tool
+  origin: universal
+  description: a Subagent is dispatched via a specific named ToolDescriptor (e.g. claude-code's Task tool dispatching general-purpose subagent)
+  source:
+  - Subagent
+  target:
+  - ToolDescriptor
+  cardinality: N:1
+  inverse: dispatches_subagent
+- id: edge:attempt-of
+  name: attempt_of
+  origin: universal
+  description: a RunAttempt is one attempt within its parent Run (replaces FK-by-attribute catalog pass 49)
+  source:
+  - RunAttempt
+  target:
+  - Run
+  cardinality: N:1
+  inverse: has_attempt
+- id: edge:shadows-session
+  name: shadows_session
+  origin: universal
+  description: a LiveSession shadows the durable Session it observes (replaces FK-by-attribute catalog pass 49)
+  source:
+  - LiveSession
+  target:
+  - Session
+  cardinality: N:1
+  inverse: has_live_session_shadow
+- id: edge:tagged-with
+  name: tagged_with
+  origin: universal
+  description: an Issue carries a free-form TaskTag (catalog pass 52)
+  source:
+  - Issue
+  target:
+  - TaskTag
+  cardinality: N:N
+  inverse: tags_issue
+- id: edge:labeled-with
+  name: labeled_with
+  origin: universal
+  description: an Issue carries a Label (color-coded classification, catalog pass 52)
+  source:
+  - Issue
+  target:
+  - Label
+  cardinality: N:N
+  inverse: labels_issue
+- id: edge:scoped-to-team
+  name: scoped_to_team
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: a TaskTag is scoped to a specific OrgUnit (team) — only when scope=team (catalog pass 52)
+  source:
+  - TaskTag
+  target:
+  - OrgUnit
+  cardinality: N:1
+  inverse: scopes_task_tag
+- id: edge:scoped-to-project
+  name: scoped_to_project
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: a TaskTag is scoped to a specific Project (catalog pass 52)
+  source:
+  - TaskTag
+  target:
+  - Project
+  cardinality: N:1
+  inverse: scopes_task_tag_project
+- id: edge:scoped-to-workspace
+  name: scoped_to_workspace
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: a TaskTag is scoped to a specific Workspace (catalog pass 52)
+  source:
+  - TaskTag
+  target:
+  - Workspace
+  cardinality: N:1
+  inverse: scopes_task_tag_workspace
+- id: edge:owned-by-project
+  name: owned_by_project
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: a Label is owned by a Project (catalog pass 52)
+  source:
+  - Label
+  target:
+  - Project
+  cardinality: N:1
+  inverse: owns_label
+- id: edge:activity-for-issue
+  name: activity_for_issue
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: an ActivityEntry records an action against an Issue (catalog pass 52)
+  source:
+  - ActivityEntry
+  target:
+  - Issue
+  cardinality: N:1
+  inverse: has_activity_entry
+- id: edge:activity-for-project
+  name: activity_for_project
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: an ActivityEntry records an action against a Project (catalog pass 52)
+  source:
+  - ActivityEntry
+  target:
+  - Project
+  cardinality: N:1
+  inverse: has_activity_entry
+- id: edge:activity-for-workspace
+  name: activity_for_workspace
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: an ActivityEntry records an action against a Workspace (catalog pass 52)
+  source:
+  - ActivityEntry
+  target:
+  - Workspace
+  cardinality: N:1
+  inverse: has_activity_entry
+- id: edge:activity-for-board-snapshot
+  name: activity_for_board_snapshot
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: an ActivityEntry records an action against a BoardSnapshot (catalog pass 52)
+  source:
+  - ActivityEntry
+  target:
+  - BoardSnapshot
+  cardinality: N:1
+  inverse: has_activity_entry
+- id: edge:dispatch-state-of-issue
+  name: dispatch_state_of_issue
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: an IssueDispatchState attaches to its parent Issue (catalog pass 52)
+  source:
+  - IssueDispatchState
+  target:
+  - Issue
+  cardinality: 61
+  inverse: has_dispatch_state
+- id: edge:dispatched-as-run-attempt
+  name: dispatched_as_run_attempt
+  origin: derived
+  originContext: Derived from current catalog relationship semantics.
+  description: an IssueDispatchState points at the RunAttempt currently dispatched for the Issue (catalog pass 52)
+  source:
+  - IssueDispatchState
+  target:
+  - RunAttempt
+  cardinality: N:1
+  inverse: dispatch_origin
+- id: edge:has-team
+  name: has_team
+  origin: universal
+  description: an AgentVersion / AgentRuntimeImpl / AgentPlatformImpl declares an AgentTeam it can host (catalog pass 82, Platform source added catalog pass 85)
+  source:
+  - AgentVersion
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  target:
+  - AgentTeam
+  cardinality: 1:N
+  inverse: team_of
+- id: edge:team-of
+  name: team_of
+  origin: universal
+  description: inverse of has_team — the team belongs to / runs under an AgentVersion / runtime / platform (catalog pass 82, Platform target added catalog pass 85)
+  source:
+  - AgentTeam
+  target:
+  - AgentVersion
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  cardinality: N:1
+  inverse: has_team
+- id: edge:has-member
+  name: has_member
+  origin: universal
+  description: an AgentTeam includes a Subagent as a teammate (catalog pass 82)
+  source:
+  - AgentTeam
+  target:
+  - Subagent
+  cardinality: 1:N
+  inverse: member_of_team
+- id: edge:catalogs
+  name: catalogs
+  origin: universal
+  description: inverse of cataloged_in — a PluginMarketplace lists a Plugin (catalog pass 82)
+  source:
+  - PluginMarketplace
+  target:
+  - Plugin
+  cardinality: 1:N
+  inverse: cataloged_in
+- id: edge:has-marketplace
+  name: has_marketplace
+  origin: universal
+  description: an AgentVersion / AgentRuntimeImpl / AgentPlatformImpl ships with or trusts a PluginMarketplace (catalog pass 82, inverse fixed catalog pass 83, Platform source added catalog pass 85)
+  source:
+  - AgentVersion
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  target:
+  - PluginMarketplace
+  cardinality: 1:N
+  inverse: marketplace_of
+- id: edge:has-env-var
+  name: has_env_var
+  origin: universal
+  description: an AgentVersion / AgentRuntimeImpl recognizes a specific environment variable (catalog pass 83)
+  source:
+  - AgentVersion
+  - AgentRuntimeImpl
+  target:
+  - EnvVar
+  cardinality: 1:N
+  inverse: affects
+- id: edge:affects
+  name: affects
+  origin: universal
+  description: inverse of has_env_var — an EnvVar affects an AgentVersion / AgentRuntimeImpl behavior (catalog pass 83)
+  source:
+  - EnvVar
+  target:
+  - AgentVersion
+  - AgentRuntimeImpl
+  cardinality: N:1
+  inverse: has_env_var
+# --- catalog pass 86 — modeling-fix EdgeKinds (promotions of catalog pass 85 flat-list attributes) ---
+- id: edge:operates-in-permission-mode
+  name: operates_in_permission_mode
+  origin: universal
+  description: a runtime/version/core operates in a given PermissionMode (catalog pass 86 formalization of an existing in-instance edge name).
+  source:
+  - AgentRuntimeImpl
+  - AgentVersion
+  - AgentCoreImpl
+  target:
+  - PermissionMode
+  cardinality: 1:N
+  inverse: permission_mode_used_by
+- id: edge:fires-hook
+  name: fires_hook
+  origin: universal
+  description: an AgentCoreImpl fires a HookSurface from inside the loop body (catalog pass 86 promotion of `hooksFiredFromCore` flat list).
+  source:
+  - AgentCoreImpl
+  target:
+  - HookSurface
+  cardinality: 1:N
+  inverse: fired_by_core
+- id: edge:uses-mcp-scope
+  name: uses_mcp_scope
+  origin: universal
+  description: an AgentRuntimeImpl resolves MCP server configs from a given MCPConfigScope (catalog pass 86 promotion of `mcpConfigScopes` flat list).
+  source:
+  - AgentRuntimeImpl
+  target:
+  - MCPConfigScope
+  cardinality: 1:N
+  inverse: mcp_scope_used_by
+- id: edge:installs-plugins-in-scope
+  name: installs_plugins_in_scope
+  origin: universal
+  description: an AgentRuntimeImpl installs plugins in a given PluginInstallScope (catalog pass 86 promotion of `pluginInstallScopes` flat list).
+  source:
+  - AgentRuntimeImpl
+  target:
+  - PluginInstallScope
+  cardinality: 1:N
+  inverse: plugin_install_scope_used_by
+- id: edge:discovers-skills-in-scope
+  name: discovers_skills_in_scope
+  origin: universal
+  description: an AgentRuntimeImpl discovers skills in a given SkillDiscoveryScope (catalog pass 86 promotion of `skillDiscoveryScopes` flat list).
+  source:
+  - AgentRuntimeImpl
+  target:
+  - SkillDiscoveryScope
+  cardinality: 1:N
+  inverse: skill_discovery_scope_used_by
+- id: edge:emits-message-type
+  name: emits_message_type
+  origin: universal
+  description: |
+    an AgentCoreImpl emits a given ProtocolMessage variant (catalog pass 86
+    promotion of `messageTypesEmitted` + `resultMessageSubtypes` flat lists).
+    Source union includes `Provider` so that vendors
+    which expose only a wire-protocol surface (no first-party agent harness)
+    can carry their wire-protocol message taxonomy on the graph.
+  source:
+  - AgentCoreImpl
+  - Provider
+  target:
+  - ProtocolMessage
+  cardinality: 1:N
+  inverse: emitted_by_core
+- id: edge:supports-effort-level
+  name: supports_effort_level
+  origin: universal
+  description: an AgentCoreImpl or ModelVersion supports a given EffortLevel (catalog pass 86 promotion of `effortLevelsSupported` flat list).
+  source:
+  - AgentCoreImpl
+  - ModelVersion
+  target:
+  - EffortLevel
+  cardinality: 1:N
+  inverse: effort_level_supported_by
+- id: edge:defines-frontmatter-field
+  name: defines_frontmatter_field
+  origin: universal
+  description: |
+    an AgentPlatformImpl recognizes a given FrontmatterField in skill/subagent
+    files (catalog pass 86 promotion of `skillFrontmatterFieldsSupported` flat
+    list). Catalog pass 95 widens source to include `OperationalTrigger` so
+    composite-GitHub-Action `inputs:` / `outputs:` blocks can be wired
+    from their owning trigger record.
+  source:
+  - AgentPlatformImpl
+  - OperationalTrigger
+  target:
+  - FrontmatterField
+  cardinality: 1:N
+  inverse: frontmatter_field_defined_by
+- id: edge:emits-journal-event
+  name: emits_journal_event
+  origin: universal
+  description: an AgentRuntimeImpl or AgentPlatformImpl emits a given JournalEvent kind onto the run journal (promotion of journal-event protocol message research).
+  source:
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  target:
+  - JournalEvent
+  cardinality: 1:N
+  inverse: journal_event_emitted_by
+- id: edge:journal-event-emitted-by
+  name: journal_event_emitted_by
+  origin: universal
+  description: inverse of emits_journal_event (catalog pass 89).
+  source:
+  - JournalEvent
+  target:
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  cardinality: N:1
+  inverse: emits_journal_event
+- id: edge:executes-step
+  name: executes_step
+  origin: a5c
+  description: |
+    Catalog pass 95 — an OperationalTrigger (composite-action variant) executes a
+    GithubActionStep as part of its `runs.steps[]` list. Cardinality is
+    1:N from trigger to step; per-step ordering is carried by the
+    GithubActionStep `order` attribute (1-based).
+  source:
+  - OperationalTrigger
+  target:
+  - GithubActionStep
+  cardinality: 1:N
+  inverse: executed_by_trigger
+- id: edge:executed-by-trigger
+  name: executed_by_trigger
+  origin: a5c
+  description: inverse of executes_step (catalog pass 95).
+  source:
+  - GithubActionStep
+  target:
+  - OperationalTrigger
+  cardinality: N:1
+  inverse: executes_step
+- id: edge:parsed-by-grammar
+  name: parsed_by_grammar
+  origin: a5c
+  description: |
+    Catalog pass 95 — an OperationalTrigger's query DSL is defined by a Grammar
+    record (productions + tokens + operators). Wires
+    operational-trigger:amux-triggers-* → grammar:amux-triggers-query-dsl.
+  source:
+  - OperationalTrigger
+  target:
+  - Grammar
+  cardinality: N:1
+  inverse: grammar_parses_for
+- id: edge:grammar-parses-for
+  name: grammar_parses_for
+  origin: a5c
+  description: inverse of parsed_by_grammar (catalog pass 95).
+  source:
+  - Grammar
+  target:
+  - OperationalTrigger
+  cardinality: 1:N
+  inverse: parsed_by_grammar
+- id: edge:calls-endpoint
+  name: calls_endpoint
+  origin: a5c
+  description: |
+    Catalog pass 95 — an OperationalTrigger calls an outbound APIEndpoint as
+    part of its enrichment phase (e.g. amux-triggers-github calling
+    `/repos/{owner}/{repo}/pulls/{n}/files` to lift changed files).
+    Distinct from `fires_operational_trigger` (which goes the opposite
+    direction, APIEndpoint → trigger).
+  source:
+  - OperationalTrigger
+  target:
+  - APIEndpoint
+  cardinality: N:N
+  inverse: called_by_trigger
+- id: edge:called-by-trigger
+  name: called_by_trigger
+  origin: a5c
+  description: inverse of calls_endpoint (catalog pass 95).
+  source:
+  - APIEndpoint
+  target:
+  - OperationalTrigger
+  cardinality: N:N
+  inverse: calls_endpoint
+- id: edge:has-payload-schema
+  name: has_payload_schema
+  origin: a5c
+  description: |
+    Catalog pass 95 — an OperationalTrigger emits payloads conforming to a
+    SharedContextSpec record (which carries the full field-level
+    schema). Tightens the legacy `payloadShape` string attribute into
+    a graph edge so the schema can be enumerated.
+    Catalog pass 97b widened source to also accept `PackageSurface` so
+    npm-published packages that define wire-protocol frame shapes (e.g.
+    @a5c-ai/agent-mux-gateway protocol v1 frames) can declare their
+    payload schemas directly.
+  source:
+  - OperationalTrigger
+  - PackageSurface
+  target:
+  - SharedContextSpec
+  cardinality: N:1
+  inverse: payload_schema_for
+- id: edge:exposes-subcommand
+  name: exposes_subcommand
+  origin: a5c
+  description: |
+    Catalog pass 95 — a PackageSurface exposes a CLI subcommand modeled as
+    an InteractionPrimitive[kind=cli-subcommand]. Used to enumerate
+    `amux-triggers enrich|evaluate|help` against
+    `package:a5c-ai-triggers`.
+  source:
+  - PackageSurface
+  target:
+  - InteractionPrimitive
+  cardinality: 1:N
+  inverse: subcommand_exposed_by
+- id: edge:subcommand-exposed-by
+  name: subcommand_exposed_by
+  origin: a5c
+  description: inverse of exposes_subcommand (catalog pass 95).
+  source:
+  - InteractionPrimitive
+  target:
+  - PackageSurface
+  cardinality: N:1
+  inverse: exposes_subcommand
+- id: edge:applies-to-domain
+  name: applies_to_domain
+  origin: universal
+  description: a Workflow applies to a Domain — scopes which knowledge domain the workflow operates in
+  source:
+  - Workflow
+  target:
+  - Domain
+  cardinality: N:N
+  attributes: []
+  inverse: domain_workflows
+- id: edge:involves-role
+  name: involves_role
+  origin: universal
+  description: a Workflow involves a Role as a participant
+  source:
+  - Workflow
+  target:
+  - Role
+  cardinality: N:N
+  attributes: []
+  inverse: involved_in_workflow
+- id: edge:triggers-responsibility
+  name: triggers_responsibility
+  origin: universal
+  description: a Workflow triggers or activates a Responsibility during execution
+  source:
+  - Workflow
+  target:
+  - Responsibility
+  cardinality: N:N
+  attributes: []
+  inverse: triggered_by_workflow
+- id: edge:performed-by-org-unit
+  name: performed_by_org_unit
+  origin: universal
+  description: a Workflow is owned or performed by an OrgUnit
+  source:
+  - Workflow
+  target:
+  - OrgUnit
+  cardinality: N:N
+  attributes: []
+  inverse: performs_workflow
+- id: edge:documents
+  name: documents
+  origin: universal
+  description: a Page article documents or explains a graph node
+  source:
+  - Page
+  target:
+  - NodeKind
+  - Layer
+  - AgentProduct
+  - AgentVersion
+  - AgentCoreImpl
+  - AgentRuntimeImpl
+  - AgentPlatformImpl
+  - AgentUIImpl
+  - AgentHostTransport
+  - Capability
+  - SourceRef
+  - Term
+  cardinality: N:N
+  inverse: documented_by
+- id: edge:contains-page
+  name: contains_page
+  origin: derived
+  originContext: Derived from wiki page slug hierarchy during Atlas index generation.
+  description: a wiki Page contains or navigates to a child Page in the generated article hierarchy
+  source: [Page]
+  target: [Page]
+  cardinality: 1:N
+  inverse: contained_in_page
+- id: edge:has-evidence-source
+  name: has_evidence_source
+  origin: derived
+  originContext: Derived from curated evidenceRefs attributes when the referenced EvidenceSource exists in the Atlas graph.
+  description: a catalog record cites an EvidenceSource as support for its modeled attributes
+  source: [Modality, ModelProviderProduct, ModelProviderVersion]
+  target: [EvidenceSource]
+  cardinality: N:N
+  inverse: evidence_for_record
+- id: edge:model-provider-version-of
+  name: model_provider_version_of
+  origin: derived
+  originContext: Derived from ModelProviderVersion.providerId attributes.
+  description: a model provider version record belongs to a model provider product record
+  source: [ModelProviderVersion]
+  target: [ModelProviderProduct]
+  cardinality: N:1
+  inverse: has_model_provider_version
+- id: edge:belongs-to-tenant
+  name: belongs_to_tenant
+  origin: derived
+  originContext: Derived from EndUser.tenantId attributes.
+  description: an end user belongs to a tenant boundary
+  source: [EndUser]
+  target: [Tenant]
+  cardinality: N:1
+  inverse: has_end_user
+- id: edge:aliases-journal-event
+  name: aliases_journal_event
+  origin: derived
+  originContext: Derived from matching RunJournalEvent.eventName values and promoted JournalEvent display names.
+  description: a catalog-meta run journal event record aliases the promoted JournalEvent record for the same event name
+  source: [RunJournalEvent]
+  target: [JournalEvent]
+  cardinality: 1:1
+  inverse: aliased_by_run_journal_event
+- id: edge:has-out-of-scope-reason
+  name: has_out_of_scope_reason
+  origin: derived
+  originContext: Derived from ScopeBoundary.outOfScopeReasonIds attributes.
+  description: a scope boundary cites an out-of-scope reason for excluded behavior, surfaces, or data
+  source: [ScopeBoundary]
+  target: [OutOfScopeReason]
+  cardinality: N:N
+  inverse: out_of_scope_reason_for
+- id: edge:install-method-requires
+  name: install_method_requires
+  origin: derived
+  originContext: Derived from InstallMethod.kind and prerequisiteCheck fields.
+  description: an install method requires a concrete tool or language/toolchain to execute its command
+  source: [InstallMethod]
+  target: [Tool, Language]
+  cardinality: N:1
+  inverse: required_by_install_method
+- id: edge:owned-by-package-surface
+  name: owned_by_package_surface
+  origin: derived
+  originContext: Derived from ProcessDescriptor.ownerPackage attributes.
+  description: a process descriptor is owned by a package surface
+  source: [ProcessDescriptor]
+  target: [PackageSurface]
+  cardinality: N:1
+  inverse: owns_process_descriptor
+- id: edge:deployment-target-uses-infrastructure
+  name: deployment_target_uses_infrastructure
+  origin: derived
+  originContext: Derived from DeploymentTarget.targetType attributes.
+  description: a deployment target uses a platform service or tool as its backing infrastructure
+  source: [DeploymentTarget]
+  target: [PlatformService, Tool]
+  cardinality: N:1
+  inverse: infrastructure_for_deployment_target
+- id: edge:hardening-guidance-applies-to
+  name: hardening_guidance_applies_to
+  origin: derived
+  originContext: Derived from HarnessHardeningGuidance.appliesTo attributes.
+  description: harness hardening guidance applies to a topic or operational subject area
+  source: [HarnessHardeningGuidance]
+  target: [Topic]
+  cardinality: N:N
+  inverse: has_hardening_guidance
+- id: edge:uses-agent
+  name: uses_agent
+  origin: universal
+  description: a library process uses an agent for task execution
+  source: [LibraryProcess]
+  target: [LibraryAgent]
+  cardinality: N:N
+  inverse: used_by_process
+- id: edge:uses-skill
+  name: uses_skill
+  origin: universal
+  description: a library process uses a skill for task execution
+  source: [LibraryProcess]
+  target: [LibrarySkill]
+  cardinality: N:N
+  inverse: used_by_process_skill
+- id: edge:follows-methodology
+  name: follows_methodology
+  origin: universal
+  description: a library process follows or implements a methodology
+  source: [LibraryProcess]
+  target: [Methodology]
+  cardinality: N:N
+  inverse: methodology_followed_by
+- id: edge:lib-requires-skill-area
+  name: lib_requires_skill_area
+  origin: universal
+  description: a library artifact requires expertise in a skill area
+  source: [LibraryProcess, LibrarySkill, LibraryAgent]
+  target: [SkillArea]
+  cardinality: N:N
+  inverse: lib_skill_area_required_by
+- id: edge:lib-involves-role
+  name: lib_involves_role
+  origin: universal
+  description: a library artifact involves or is used by a role
+  source: [LibraryProcess, LibrarySkill, LibraryAgent]
+  target: [Role]
+  cardinality: N:N
+  inverse: lib_role_involved_in
+- id: edge:lib-belongs-to-specialization
+  name: lib_belongs_to_specialization
+  origin: universal
+  description: a library artifact belongs to a specialization
+  source: [LibraryProcess, LibrarySkill, LibraryAgent]
+  target: [Specialization]
+  cardinality: N:N
+  inverse: lib_specialization_contains
+- id: edge:lib-implements-workflow
+  name: lib_implements_workflow
+  origin: universal
+  description: a library process implements or supports a workflow
+  source: [LibraryProcess]
+  target: [Workflow]
+  cardinality: N:N
+  inverse: lib_workflow_implemented_by
+- id: edge:lib-applies-to-domain
+  name: lib_applies_to_domain
+  origin: universal
+  description: a library artifact or tool server applies to a knowledge domain
+  source: [LibraryProcess, LibrarySkill, LibraryAgent, ToolServer]
+  target: [Domain]
+  cardinality: N:N
+  inverse: lib_domain_applied_by
+- id: edge:lib-covers-topic
+  name: lib_covers_topic
+  origin: universal
+  description: a library artifact covers or relates to a topic
+  source: [LibraryProcess, LibrarySkill, LibraryAgent]
+  target: [Topic]
+  cardinality: N:N
+  inverse: lib_topic_covered_by
+- id: edge:deferred-for
+  name: deferred_for
+  origin: universal
+  description: a deferred node is a placeholder for a concept in a particular domain area
+  source: [DeferredNode]
+  target: [Domain, Specialization, Topic, SkillArea]
+  cardinality: N:N
+  inverse: has_deferred
+- id: edge:feeds-knowledge
+  name: feeds_knowledge
+  origin: universal
+  description: a KnowledgeSource feeds knowledge into a KnowledgeDomain
+  source: [KnowledgeSource]
+  target: [KnowledgeDomain]
+  cardinality: N:N
+  inverse: knowledge_fed_by
+- id: edge:provides-knowledge-to
+  name: provides_knowledge_to
+  origin: universal
+  description: a KnowledgeDomain provides knowledge to a RetrievalPipeline
+  source: [KnowledgeDomain]
+  target: [RetrievalPipeline]
+  cardinality: N:N
+  inverse: knowledge_provided_by
+- id: edge:retrieves-from
+  name: retrieves_from
+  origin: universal
+  description: a RetrievalPipeline retrieves knowledge from a KnowledgeSource
+  source: [RetrievalPipeline]
+  target: [KnowledgeSource]
+  cardinality: N:N
+  inverse: retrieved_by
+- id: edge:supports-orchestration-primitive
+  name: supports_orchestration_primitive
+  origin: universal
+  description: a UI impl or platform impl supports an orchestration primitive
+  source: [AgentUIImpl, AgentPlatformImpl, AgentCoreImpl]
+  target: [OrchestrationPrimitive]
+  cardinality: N:N
+  inverse: orchestration_primitive_supported_by
+- id: edge:orch-applies-to
+  name: orch_applies_to
+  origin: universal
+  description: an orchestration primitive applies to a topic area
+  source: [OrchestrationPrimitive]
+  target: [Topic]
+  cardinality: N:N
+  inverse: orch_applied_by
+- id: edge:orch-requires-skill-area
+  name: orch_requires_skill_area
+  origin: universal
+  description: an orchestration primitive requires expertise in a skill area
+  source: [OrchestrationPrimitive]
+  target: [SkillArea]
+  cardinality: N:N
+  inverse: orch_skill_area_required_by
+- id: edge:orch-triggers
+  name: orch_triggers
+  origin: universal
+  description: one orchestration primitive triggers another in a workflow
+  source: [OrchestrationPrimitive]
+  target: [OrchestrationPrimitive]
+  cardinality: N:N
+  inverse: orch_triggered_by
+- id: edge:orch-implements-workflow
+  name: orch_implements_workflow
+  origin: universal
+  description: an orchestration primitive implements or supports a workflow
+  source: [OrchestrationPrimitive]
+  target: [Workflow]
+  cardinality: N:N
+  inverse: orch_workflow_implemented_by
+- id: edge:asserts-about
+  name: asserts_about
+  origin: universal
+  description: a testable claim asserts something about a domain entity (topic, domain, tool, etc.)
+  source: [TestableClaim]
+  target: [Topic, Domain, Tool, Specialization, SkillArea, Framework, Library]
+  cardinality: N:N
+- id: edge:attempt-of-run
+  name: attempt_of_run
+  origin: universal
+  description: a run attempt belongs to a specific run
+  source: [RunAttempt]
+  target: [Run]
+  cardinality: N:1
+- id: edge:client-targets-provider
+  name: client_targets_provider
+  origin: universal
+  description: a transport client targets a specific model provider for inference requests
+  source: [TransportClient]
+  target: [Provider]
+  cardinality: N:1
+- id: edge:client-uses-retry-policy
+  name: client_uses_retry_policy
+  origin: universal
+  description: a transport client employs a specific retry policy for failed requests
+  source: [TransportClient]
+  target: [RetryPolicy]
+  cardinality: N:1
+- id: edge:client-uses-token-budget
+  name: client_uses_token_budget
+  origin: universal
+  description: a transport client operates within a specific token budget
+  source: [TransportClient]
+  target: [TokenBudget]
+  cardinality: N:N
+- id: edge:has-retry-policy-variant
+  name: has_retry_policy_variant
+  origin: a5c
+  originContext: Derived from Claude Code retry-policy variant decomposition.
+  description: a retry policy has a conditional variant for a narrower source, mode, or unattended execution path
+  source: [RetryPolicy]
+  target: [RetryPolicy]
+  cardinality: N:N
+  inverse: retry_policy_variant_of
+- id: edge:compaction-policy-applied-by
+  name: compaction_policy_applied_by
+  origin: universal
+  description: an agent runtime applies a specific compaction policy for context management
+  source: [AgentRuntimeImpl]
+  target: [CompactionPolicy]
+  cardinality: N:N
+- id: edge:consolidation-guarded-by-lock
+  name: consolidation_guarded_by_lock
+  origin: universal
+  description: a background consolidation process is guarded by a concurrency lock
+  source: [BackgroundConsolidation]
+  target: [ConsolidationLock]
+  cardinality: N:1
+- id: edge:consolidates-memory-system
+  name: consolidates_memory_system
+  origin: universal
+  description: a background consolidation process maintains and reorganizes a specific memory system
+  source: [BackgroundConsolidation]
+  target: [MemorySystem]
+  cardinality: N:N
+- id: edge:contained-in-plugin
+  name: contained_in_plugin
+  origin: universal
+  description: a component (skill, subagent, tool, monitor, etc.) is contained within a plugin package
+  source: [BackgroundMonitor, BinaryProvider, LSPServer, SettingsTemplate, Skill, Subagent, ToolDescriptor]
+  target: [Plugin]
+  cardinality: N:1
+- id: edge:defaults-to-model
+  name: defaults_to_model
+  origin: universal
+  description: an agent version defaults to a specific model version when no explicit model is configured
+  source: [AgentVersion]
+  target: [ModelVersion]
+  cardinality: N:1
+- id: edge:denied-by-reason
+  name: denied_by_reason
+  origin: universal
+  description: a tool descriptor can be denied invocation for a specific reason
+  source: [ToolDescriptor]
+  target: [PermissionDenialReason]
+  cardinality: N:N
+- id: edge:discovered-by
+  name: discovered_by
+  origin: universal
+  description: an agent version is discovered by a specific discovery signal (environment detection)
+  source: [AgentVersion]
+  target: [DiscoverySignal]
+  cardinality: N:N
+- id: edge:dispatch-policy-for-tool
+  name: dispatch_policy_for_tool
+  origin: universal
+  description: a tool dispatch policy governs the dispatch behavior of a specific tool
+  source: [ToolDispatchPolicy]
+  target: [ToolDescriptor]
+  cardinality: N:1
+- id: edge:emits-api-error
+  name: emits_api_error
+  origin: universal
+  description: a transport client can emit a specific class of API error
+  source: [TransportClient]
+  target: [ApiErrorClass]
+  cardinality: N:N
+- id: edge:emits-cascade-signal
+  name: emits_cascade_signal
+  origin: universal
+  description: a transport client emits a capacity cascade signal under specific failure conditions
+  source: [TransportClient]
+  target: [CapacityCascadeSignal]
+  cardinality: N:N
+- id: edge:emitted-mode-change
+  name: emitted_mode_change
+  origin: universal
+  description: a session emitted a mode change event (e.g. entering plan mode)
+  source: [Session]
+  target: [OutputModeChange]
+  cardinality: N:N
+- id: edge:exposes-proactive-surface
+  name: exposes_proactive_surface
+  origin: universal
+  description: an agent runtime or version exposes proactive user-facing surfaces (prompt suggestions, etc.)
+  source: [AgentRuntimeImpl, AgentVersion]
+  target: [ProactiveSurface]
+  cardinality: N:N
+- id: edge:exposes-tool
+  name: exposes_tool
+  origin: universal
+  description: a tool server exposes a specific tool descriptor to clients
+  source: [ToolServer]
+  target: [ToolDescriptor]
+  cardinality: N:N
+- id: edge:has-connection-state
+  name: has_connection_state
+  origin: universal
+  description: a tool server has a specific MCP connection state
+  source: [ToolServer]
+  target: [MCPConnectionState]
+  cardinality: N:N
+- id: edge:has-dispatch-policy
+  name: has_dispatch_policy
+  origin: universal
+  description: an agent runtime has a specific tool dispatch policy
+  source: [AgentRuntimeImpl]
+  target: [ToolDispatchPolicy]
+  cardinality: N:N
+- id: edge:has-output-style
+  name: has_output_style
+  origin: universal
+  description: an agent version has a named output style (learning, bare, etc.)
+  source: [AgentVersion]
+  target: [OutputStyle]
+  cardinality: N:N
+- id: edge:has-worktree-session
+  name: has_worktree_session
+  origin: universal
+  description: a session has an associated git worktree session for isolated feature work
+  source: [Session]
+  target: [WorktreeSession]
+  cardinality: N:N
+- id: edge:in-category
+  name: in_category
+  origin: universal
+  description: an interaction primitive belongs to a specific category
+  source: [InteractionPrimitive]
+  target: [InteractionPrimitiveCategory]
+  cardinality: N:N
+- id: edge:mcp-config-scoped-to
+  name: mcp_config_scoped_to
+  origin: universal
+  description: a tool server's MCP configuration is scoped to a specific level (project, enterprise, etc.)
+  source: [ToolServer]
+  target: [MCPConfigScope]
+  cardinality: N:N
+- id: edge:mode-change-triggered-by-tool
+  name: mode_change_triggered_by_tool
+  origin: universal
+  description: an output mode change was triggered by a specific tool invocation
+  source: [OutputModeChange]
+  target: [ToolDescriptor]
+  cardinality: N:1
+- id: edge:operates-in-control-mode
+  name: operates_in_control_mode
+  origin: universal
+  description: an agent runtime operates in a specific control mode (coordinator, background, etc.)
+  source: [AgentRuntimeImpl]
+  target: [AgentControlMode]
+  cardinality: N:N
+- id: edge:output-guard-applied-by
+  name: output_guard_applied_by
+  origin: universal
+  description: an agent core or runtime applies a specific output guard (content filtering, schema enforcement, etc.)
+  source: [AgentCoreImpl, AgentRuntimeImpl]
+  target: [OutputGuard]
+  cardinality: N:N
+- id: edge:persists-transcript-to
+  name: persists_transcript_to
+  origin: universal
+  description: a session persists its transcript to a specific ingress endpoint
+  source: [Session]
+  target: [TranscriptIngress]
+  cardinality: N:N
+- id: edge:related-topics
+  name: related_topics
+  origin: universal
+  description: a topic is related to other topics (symmetric relationship)
+  source: [Topic]
+  target: [Topic]
+  cardinality: N:N
+- id: edge:relates-to-topic
+  name: relates_to_topic
+  origin: universal
+  description: an entity (retrieval pipeline, tool, etc.) relates to a specific topic
+  source: [RetrievalPipeline, Tool]
+  target: [Topic]
+  cardinality: N:N
+- id: edge:schedules-consolidation
+  name: schedules_consolidation
+  origin: universal
+  description: an agent runtime schedules background consolidation processes
+  source: [AgentRuntimeImpl]
+  target: [BackgroundConsolidation]
+  cardinality: N:N
+- id: edge:supports-modality
+  name: supports_modality
+  origin: universal
+  description: an agent version supports a specific modality (legacy Modality NodeKind reference)
+  source: [AgentVersion]
+  target: [Modality]
+  cardinality: N:N
+- id: edge:surfaces-process
+  name: surfaces_process
+  origin: universal
+  description: a package surface exposes a process descriptor
+  source: [PackageSurface]
+  target: [ProcessDescriptor]
+  cardinality: N:N
+- id: edge:targets-plugin-surface
+  name: targets_plugin_surface
+  origin: universal
+  description: an agent version can target a specific plugin surface
+  source: [AgentVersion, AgentGovernanceImpl]
+  target: [PluginTarget]
+  cardinality: N:N
+- id: edge:uses-memory-hierarchy
+  name: uses_memory_hierarchy
+  origin: universal
+  description: an agent version uses a specific memory hierarchy for context management
+  source: [AgentVersion]
+  target: [MemoryHierarchy]
+  cardinality: N:N
+- id: edge:uses-memory-system
+  name: uses_memory_system
+  origin: universal
+  description: an agent version, knowledge fabric implementation, or memory hierarchy uses a specific memory system for persistence and retrieval
+  source: [AgentVersion, KnowledgeFabricImpl, MemoryHierarchy]
+  target: [MemorySystem]
+  cardinality: N:N
+- id: edge:memory-system-integrates
+  name: memory_system_integrates
+  origin: universal
+  description: a memory system integrates with a tool, vector store, or external service for storage or retrieval
+  source: [MemorySystem]
+  target: [Tool, VectorStore]
+  cardinality: N:N
+- id: edge:uses-transport
+  name: uses_transport
+  origin: universal
+  description: an agent version uses a specific transport protocol or transport runtime
+  source: [AgentVersion]
+  target: [TransportProtocol, ModelTransportProtocol, AgentHostTransport]
+  cardinality: N:N
+- id: edge:uses-transport-client
+  name: uses_transport_client
+  origin: universal
+  description: an agent runtime uses a specific transport client implementation
+  source: [AgentRuntimeImpl]
+  target: [TransportClient]
+  cardinality: N:N
+- id: edge:wraps-graph
+  name: wraps_graph
+  origin: universal
+  description: a package surface wraps (provides access to) a specific graph document
+  source: [PackageSurface]
+  target: [Graph]
+  cardinality: N:N
+- id: edge:defined-by-crd-source
+  name: defined_by_crd_source
+  origin: universal
+  description: a Kubernetes CRD kind is defined by a manifest, source reference, or evidence source
+  source: [KubernetesCrdKind]
+  target: [SourceRef, EvidenceSource]
+  cardinality: N:N
+  attributes:
+  - name: locator
+    type: string
+    required: false
+  inverse: defines_crd_kind
+- id: edge:belongs-to-resource-family
+  name: belongs_to_resource_family
+  origin: universal
+  description: a Kubernetes CRD kind belongs to a product-specific resource family or stack part
+  source: [KubernetesCrdKind]
+  target: [Topic, PlatformService, StackPart]
+  cardinality: N:N
+  attributes:
+  - name: family
+    type: string
+    required: false
+  inverse: contains_resource_kind
+- id: edge:serves-kubernetes-resource
+  name: serves_kubernetes_resource
+  origin: universal
+  description: a platform service or tool server serves a Kubernetes resource API or aggregated API surface
+  source: [PlatformService, ToolServer, AgentPlatformImpl]
+  target: [KubernetesCrdKind]
+  cardinality: N:N
+  attributes:
+  - name: serviceMode
+    type: enum<api-server,aggregated-api,controller-api,proxy,storage,composite>
+    required: false
+  inverse: kubernetes_resource_served_by
+- id: edge:watches-resource
+  name: watches_resource
+  origin: universal
+  description: a Kubernetes controller or service watches a Kubernetes resource kind
+  source: [KubernetesController, PlatformService]
+  target: [KubernetesCrdKind]
+  cardinality: N:N
+  attributes:
+  - name: watchType
+    type: enum<primary,secondary,external,derived>
+    required: false
+  inverse: watched_by_controller
+- id: edge:reconciles-resource
+  name: reconciles_resource
+  origin: universal
+  description: a Kubernetes controller, platform service, or governance implementation reconciles desired and observed state for a Kubernetes resource kind
+  source: [KubernetesController, PlatformService, AgentPlatformImpl, AgentGovernanceImpl, ToolServer]
+  target: [KubernetesCrdKind]
+  cardinality: N:N
+  attributes:
+  - name: mode
+    type: enum<observe,create,update,delete,full,policy-only>
+    required: false
+  - name: evidenceSourceIds
+    type: list<ref<EvidenceSource>>
+    required: false
+  inverse: reconciled_by
+- id: edge:surfaces-resource
+  name: surfaces_resource
+  origin: universal
+  description: a UI, CLI/API tool descriptor, tool server, or platform service surfaces a Kubernetes resource kind to operators or agents
+  source: [Presentation, ToolDescriptor, ToolServer, PlatformService]
+  target: [KubernetesCrdKind]
+  cardinality: N:N
+  attributes:
+  - name: surface
+    type: enum<web,cli,api,kubectl,mcp,controller-api,generated-ui>
+    required: false
+  inverse: resource_surfaced_by
+- id: edge:governs-resource
+  name: governs_resource
+  origin: universal
+  description: a governance implementation, policy, dispatch policy, or platform service governs operations against a Kubernetes resource kind
+  source: [AgentGovernanceImpl, ContentPolicy, ToolDispatchPolicy, PlatformService]
+  target: [KubernetesCrdKind]
+  cardinality: N:N
+  attributes:
+  - name: governanceMode
+    type: enum<admission,rbac,policy-binding,audit,approval,dispatch-control,exception>
+    required: false
+  inverse: governed_by
+- id: edge:maps-to-external-resource
+  name: maps_to_external_resource
+  origin: universal
+  description: a Kubernetes CRD kind maps declarative Kubernetes state to an external provider, VCS host, issue tracker, tool, or platform service
+  source: [KubernetesCrdKind]
+  target: [Provider, VCSHost, IssueTracker, Tool, PlatformService]
+  cardinality: N:N
+  attributes:
+  - name: relationship
+    type: enum<desired-state,mirror,link,event,write-intent,capability-manifest>
+    required: false
+  inverse: external_resource_mapped_by
+- id: edge:emits-resource-status
+  name: emits_resource_status
+  origin: universal
+  description: a Kubernetes controller or service writes status or conditions for a Kubernetes resource kind
+  source: [KubernetesController, PlatformService]
+  target: [KubernetesCrdKind]
+  cardinality: N:N
+  attributes:
+  - name: statusPath
+    type: string
+    required: false
+  inverse: status_emitted_by
+- id: edge:alternative-to
+  name: alternative_to
+  origin: universal
+  description: two tools/frameworks/libraries that serve the same purpose and are commonly compared
+  source: [Tool, Framework, Library]
+  target: [Tool, Framework, Library]
+  cardinality: N:N
+  attributes:
+  - name: comparison
+    type: string
+    required: false
+  inverse: alternative_to
+- id: edge:prerequisite-for-learning
+  name: prerequisite_for_learning
+  origin: universal
+  description: one skill-area should be learned before another
+  source: [SkillArea]
+  target: [SkillArea]
+  cardinality: N:N
+  attributes:
+  - name: strength
+    type: enum<required,recommended,helpful>
+    required: false
+  inverse: has_learning_prerequisite
+- id: edge:scores-agent-readiness-of
+  name: scores_agent_readiness_of
+  origin: ora
+  description: an Ora AgentReadinessScore record scores a product/tool/server entity for agent readiness
+  source: [AgentReadinessScore]
+  target: [Tool, ToolServer, Platform, Provider, VCSHost, IssueTracker, ModelProviderProduct]
+  cardinality: N:1
+  attributes:
+  - name: observedVia
+    type: string
+  inverse: agent_readiness_score_for
+- id: edge:agent-readiness-score-for
+  name: agent_readiness_score_for
+  origin: ora
+  description: inverse of scores_agent_readiness_of
+  source: [Tool, ToolServer, Platform, Provider, VCSHost, IssueTracker, ModelProviderProduct]
+  target: [AgentReadinessScore]
+  cardinality: 1:N
+  inverse: scores_agent_readiness_of
+- id: edge:supports-work
+  name: supports_work
+  origin: universal
+  description: a Tool or ToolServer supports a role, responsibility, or workflow with operational affordances
+  source: [Tool, ToolServer]
+  target: [Role, Responsibility, Workflow]
+  cardinality: N:N
+  attributes:
+  - name: confidence
+    type: enum<low,medium,high>
+  - name: evidence
+    type: markdown
+  inverse: work_supported_by_tool
+- id: edge:work-supported-by-tool
+  name: work_supported_by_tool
+  origin: universal
+  description: inverse of supports_work
+  source: [Role, Responsibility, Workflow]
+  target: [Tool, ToolServer]
+  cardinality: N:N
+  inverse: supports_work

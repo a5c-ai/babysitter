@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:tool-server.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:tool-server
+  text: |
+    external process speaking a tool protocol
+  status: canonical
+edges:
+  defines:
+    - term:tool-server

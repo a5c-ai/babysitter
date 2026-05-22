@@ -1,0 +1,35 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-github-plugin-json
+attributes:
+  artifactId: plugin-artifact:babysitter-github-plugin-json
+  displayName: "babysitter-github plugin.json"
+  targetId: plugin-target:copilot-cli
+  artifactKind: manifest
+  pathPattern: "plugin.json"
+  installerSurface: "plugin.json"
+  scriptVariants:
+    - "shell-hooks"
+    - "markdown-skills"
+  contextFiles:
+    - plugins/babysitter-github/plugin.json
+    - plugins/babysitter-github/AGENTS.md
+edges:
+  emits_artifact:
+    - target: plugin-target:copilot-cli
+---
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-github-hooks-json
+attributes:
+  artifactId: plugin-artifact:babysitter-github-hooks-json
+  displayName: "babysitter-github hooks.json"
+  targetId: plugin-target:copilot-cli
+  artifactKind: settings-fragment
+  pathPattern: "hooks.json"
+  installerSurface: "hooks.json"
+  scriptVariants:
+    - "shell-via-hooks-mux-cli"
+  contextFiles:
+    - plugins/babysitter-github/hooks.json
+edges:
+  emits_artifact:
+    - target: plugin-target:copilot-cli

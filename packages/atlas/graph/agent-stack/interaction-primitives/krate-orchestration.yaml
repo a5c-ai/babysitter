@@ -1,0 +1,140 @@
+# Krate participates in the agentic stack as an orchestration and interaction
+# layer provider — it dispatches, governs, and surfaces agent work without
+# being an agent itself.
+
+# ═══════════════════════════════════════════
+# Orchestration Primitives (Layer 10)
+# Krate's agent dispatch and governance patterns
+# ═══════════════════════════════════════════
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:krate-agent-dispatch
+attributes:
+  displayName: "Krate Agent Dispatch"
+  description: |
+    Dispatch a coding agent to work on a Krate-managed repository.
+    Creates an AgentDispatchRun (appears as a CI Job), assembles a
+    context bundle with repo state and policy, binds to agent-mux
+    for session management, and provisions an isolated Git worktree.
+    Supports manual dispatch from UI/API and auto-dispatch via triggers.
+  kind: dispatch
+  trigger: manual
+edges:
+  realizes:
+    - target: layer:10-interaction
+  orch_triggers:
+    - target: orch-primitive:krate-workspace-provision
+    - target: orch-primitive:krate-context-assembly
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:krate-auto-trigger
+attributes:
+  displayName: "Krate Auto-Trigger Dispatch"
+  description: |
+    Event-driven agent dispatch via AgentTriggerRule resources. Routes
+    events (CI failure, webhook, label addition, schedule) to the
+    appropriate agent stack and dispatches automatically. Evaluates
+    capability requirements against available agent stacks before
+    dispatching.
+  kind: dispatch
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:10-interaction
+  orch_triggers:
+    - target: orch-primitive:krate-agent-dispatch
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:krate-approval-gate
+attributes:
+  displayName: "Krate Approval Gate"
+  description: |
+    Human-in-the-loop approval gate for agent actions. When an agent
+    requests access to secrets, destructive tools, or write-back
+    operations, the dispatch controller pauses and creates an
+    AgentApproval resource requiring human decision. The agent
+    session blocks until approved or denied.
+  kind: approval-gate
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:krate-workspace-provision
+attributes:
+  displayName: "Krate Workspace Provision"
+  description: |
+    Provision an isolated Git worktree for agent work. Creates a
+    dedicated branch, clones the repo state, applies workspace
+    policy (file access, branch naming, cleanup rules), and
+    manages the worktree lifecycle through the dispatch run.
+  kind: workspace-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:krate-context-assembly
+attributes:
+  displayName: "Krate Context Assembly"
+  description: |
+    Assemble the prompt context bundle for an agent dispatch. Gathers
+    repo state (files, branches, PRs), issue context, org policies,
+    memory snapshots from company brain, and applies redaction rules
+    before passing to the agent. Tracks source provenance for every
+    context fragment.
+  kind: multi-agent-coordination
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:krate-permission-review
+attributes:
+  displayName: "Krate Permission Review"
+  description: |
+    Pre-dispatch RBAC audit. Before launching an agent, reviews the
+    agent stack's service account bindings, secret grants, config
+    grants, and tool profile against the org's policy profiles.
+    Blocks dispatch if any required permission is missing or denied.
+  kind: budget-control
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:krate-pr-as-artifact
+attributes:
+  displayName: "Krate PR-as-Artifact"
+  description: |
+    Agent work products surface as pull requests. When an agent
+    completes its dispatch run, the workspace diff is automatically
+    packaged as a PR with CI pipeline, review gates, and branch
+    protection checks — the same workflow as human-authored PRs.
+  kind: task-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+  orch_triggers:
+    - target: orch-primitive:krate-approval-gate
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:krate-memory-consolidation
+attributes:
+  displayName: "Krate Memory Consolidation"
+  description: |
+    Cross-run knowledge persistence via company brain. After a dispatch
+    run completes, extracts salient facts, decisions, and patterns from
+    the agent session transcript and imports them into the org's
+    AgentMemoryRepository. Memory updates go through human review
+    before committing to the knowledge graph.
+  kind: progress-tracking
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction

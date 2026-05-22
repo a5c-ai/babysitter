@@ -1,0 +1,11 @@
+nodeKind: ModelFamily
+id: model-family:gemma-2
+attributes:
+  displayName: "Gemma 2"
+  vendor: "Google"
+  homepageUrl: "https://ai.google.dev/gemma"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:gemma-2-27b@current

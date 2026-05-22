@@ -1,0 +1,15 @@
+nodeKind: EvidencePolicy
+id: policy:default
+attributes:
+  displayName: "Default Evidence Policy"
+  minimumTrustLevel: trust-level:community
+  freshnessWindowDays: 365
+  requiresAttestation: false
+  appliesTo:
+    - "*"
+  description: |
+    Baseline evidence policy. Applies to any attribute not covered by a more
+    specific policy.
+edges:
+  requires_minimum_trust:
+    - trust-level:community

@@ -2,6 +2,11 @@
 name: generics-implementation
 description: Expert skill for implementing parametric polymorphism including type parameter bounds, monomorphization, type erasure, variance, higher-kinded types, and associated types.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:compiler-implementation, skill-area:typescript-generic-programming]
+  roles: [role:backend-engineer]
 ---
 
 # Generics Implementation Skill

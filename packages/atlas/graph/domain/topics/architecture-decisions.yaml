@@ -1,0 +1,10 @@
+nodeKind: Topic
+id: topic:architecture-decisions
+attributes:
+  displayName: "Architecture decisions"
+  description: |
+    Documenting significant architecture decisions (ADRs) — context,
+    options, decision, consequences.
+edges:
+  applies_to:
+    - domain:software-engineering

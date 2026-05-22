@@ -15,6 +15,11 @@
  * @references
  * - Digital Analytics Association: https://www.digitalanalyticsassociation.org/
  * - VoC Best Practices: Qualtrics, Medallia
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+ *   roles: [role:data-analyst, role:business-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

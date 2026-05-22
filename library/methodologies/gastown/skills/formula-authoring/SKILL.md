@@ -2,17 +2,14 @@
 name: formula-authoring
 description: Author TOML-based Formula workflow templates that become Protomolecules and active Molecules in Gas Town's durable workflow system.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Formula Authoring
-
-## Overview
-
-Create and manage TOML-based Formula templates that define repeatable multi-step workflows. Formulas are cooked into Protomolecules (frozen, ready to instantiate) and then activated as Molecules (durable, checkpoint-able workflows).
-
-## When to Use
-
-- Defining repeatable workflow templates
 - Creating multi-step processes with variable binding
 - Building workflows that must survive restarts
 - When NDI (Nondeterministic Idempotence) is needed

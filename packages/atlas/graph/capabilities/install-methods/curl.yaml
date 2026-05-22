@@ -1,0 +1,9 @@
+nodeKind: InstallMethod
+id: install:curl
+attributes:
+  displayName: "curl install script"
+  kind: curl
+  platforms: [darwin, linux]
+  command: "curl -fsSL {{installScriptUrl}} | sh"
+  prerequisiteCheck: "curl --version"
+edges: {}

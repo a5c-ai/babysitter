@@ -4,6 +4,12 @@
  * @category Physics - Data Analysis
  * @inputs {{ context: object, problem: string }}
  * @outputs {{ analysis: object, conclusions: array, recommendations: array }}
+ *
+ * @graph
+ *   domains: [domain:physics]
+ *   skillAreas: [skill-area:statistical-analysis, skill-area:mathematical-reasoning, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -82,13 +88,10 @@ export async function process(inputs, ctx) {
   const result = await ctx.task(analyzeTask, {
     problem: inputs.problem,
     context: inputs.context
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({ question: 'Review statistical analysis pipeline results', expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+  });
+
+  await ctx.breakpoint('Review statistical analysis pipeline results');
+
   return {
     success: true,
     processType: 'Statistical Analysis Pipeline',

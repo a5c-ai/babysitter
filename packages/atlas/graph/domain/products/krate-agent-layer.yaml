@@ -1,0 +1,915 @@
+# Krate Agent Orchestration Layer — deep subgraph
+# Models Krate's 49 agent-related Kubernetes CRDs and aggregated resources
+# as Topic nodes, plus its key controllers as InteractionPrimitives.
+# All referenced IDs verified against index.json.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1: Agent Config Resources (etcd CRDs)
+# ─────────────────────────────────────────────────────────────────────────────
+
+---
+nodeKind: Topic
+id: topic:krate-agent-stack
+attributes:
+  displayName: "Krate Agent Stack"
+  description: |
+    Declares an agent's runtime shape within Krate — the model backing the
+    agent, which tools it may invoke, what skills it has access to, which
+    subagents it can delegate to, and the approval policy governing its
+    autonomy level. The Agent Stack CRD is the root configuration object
+    from which all other agent-config resources hang.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - topic:agent-dispatch
+    - topic:agent-orchestration-products
+  related_to:
+    - target: topic:krate-agent-subagent
+    - target: topic:krate-agent-tool-profile
+    - target: topic:krate-agent-mcp-server
+    - target: topic:krate-agent-skill
+    - target: topic:krate-agent-provider-config
+---
+nodeKind: Topic
+id: topic:krate-agent-subagent
+attributes:
+  displayName: "Krate Agent Subagent"
+  description: |
+    Child agent definition within a Krate Agent Stack. Specifies delegation
+    targets that a parent agent may invoke for scoped subtasks — each
+    subagent carries its own tool profile, model override, and output
+    schema constraints. Subagent composition follows a tree structure
+    rooted at the parent Agent Stack.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:agent-dispatch
+  requires:
+    - target: topic:krate-agent-stack
+  related_to:
+    - target: topic:krate-agent-tool-profile
+---
+nodeKind: Topic
+id: topic:krate-agent-tool-profile
+attributes:
+  displayName: "Krate Agent Tool Profile"
+  description: |
+    Tool permission boundary for a Krate agent. Defines allowlists and
+    denylists of tools the agent may call, per-tool parameter constraints,
+    and rate limits. Tool profiles are composable — a subagent may inherit
+    its parent's profile with additional restrictions layered on top.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:human-in-the-loop
+  requires:
+    - target: topic:krate-agent-stack
+  related_to:
+    - target: topic:krate-agent-subagent
+---
+nodeKind: Topic
+id: topic:krate-agent-mcp-server
+attributes:
+  displayName: "Krate Agent MCP Server"
+  description: |
+    MCP (Model Context Protocol) server endpoint binding for an agent stack.
+    Maps an external MCP server's transport URL, authentication credentials,
+    and tool namespace into the agent's available tool surface. Supports
+    stdio, SSE, and streamable-HTTP transports with automatic health
+    checking and reconnection.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+  requires:
+    - target: topic:krate-agent-stack
+  related_to:
+    - target: topic:krate-agent-transport-binding
+---
+nodeKind: Topic
+id: topic:krate-agent-skill
+attributes:
+  displayName: "Krate Agent Skill"
+  description: |
+    Skill declaration that references the babysitter skill registry. Binds
+    a named skill (SKILL.md content plus trigger metadata) into an agent
+    stack so the agent can invoke it during sessions. Skills carry scope
+    precedence (enterprise > personal > project > plugin) and support
+    dynamic context injection at invoke time.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:agent-dispatch
+  requires:
+    - target: topic:krate-agent-stack
+---
+nodeKind: Topic
+id: topic:krate-agent-trigger-rule
+attributes:
+  displayName: "Krate Agent Trigger Rule"
+  description: |
+    Event-to-dispatch routing rule that determines when an agent should be
+    automatically dispatched. Trigger rules match on CI failure events,
+    incoming webhooks, issue label changes, cron schedules, or repository
+    push events, and map the matched event to a specific Agent Stack
+    with context assembly parameters.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - topic:event-driven-dispatch
+    - topic:scheduled-dispatch
+  requires:
+    - target: topic:krate-agent-stack
+  related_to:
+    - target: topic:krate-agent-trigger-execution
+    - target: topic:krate-agent-capability-requirement
+---
+nodeKind: Topic
+id: topic:krate-agent-context-label
+attributes:
+  displayName: "Krate Agent Context Label"
+  description: |
+    Semantic label for context assembly that governs what information is
+    included in agent prompts. Context labels tag files, directories,
+    documentation sections, and code regions so the context assembler
+    can select relevant material when constructing the agent's initial
+    prompt for a given task or trigger.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+  related_to:
+    - target: topic:krate-agent-context-bundle
+---
+nodeKind: Topic
+id: topic:krate-agent-workspace-policy
+attributes:
+  displayName: "Krate Agent Workspace Policy"
+  description: |
+    Git worktree provisioning rules for agent workspaces. Defines branch
+    naming conventions (e.g. agent/<agent-name>/<issue-id>), cleanup
+    policies for stale worktrees, maximum concurrent workspace count,
+    and whether workspaces persist across dispatch runs or are ephemeral.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - topic:agent-run-lifecycle
+  related_to:
+    - target: topic:krate-agent-workspace
+    - target: topic:krate-agent-workspace-runtime
+---
+nodeKind: Topic
+id: topic:krate-agent-service-account
+attributes:
+  displayName: "Krate Agent Service Account"
+  description: |
+    Kubernetes ServiceAccount binding for agent identity. Each agent
+    stack is associated with a K8s ServiceAccount that governs its
+    identity when making API calls to the Krate control plane, accessing
+    secrets, and interacting with cluster resources. Supports workload
+    identity federation for cloud provider integration.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - skill-area:k8s-rbac
+  related_to:
+    - target: topic:krate-agent-role-binding
+    - target: topic:krate-agent-secret-grant
+---
+nodeKind: Topic
+id: topic:krate-agent-role-binding
+attributes:
+  displayName: "Krate Agent Role Binding"
+  description: |
+    RBAC RoleBinding scoped to agent operations within Krate. Defines
+    which Kubernetes roles an agent assumes, limiting its access to
+    namespaces, resource types, and API verbs. Role bindings enforce
+    least-privilege for agent operations — an agent fixing a CI pipeline
+    gets different permissions than one reviewing code.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - skill-area:k8s-rbac
+  requires:
+    - target: topic:krate-agent-service-account
+---
+nodeKind: Topic
+id: topic:krate-agent-secret-grant
+attributes:
+  displayName: "Krate Agent Secret Grant"
+  description: |
+    Explicit secret access grant for an agent. Rather than giving agents
+    broad secret access via RBAC, Krate requires per-secret grants that
+    name the specific K8s Secret and keys the agent may read. Grants
+    are audited and can be time-bounded, expiring after a configurable
+    TTL.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - skill-area:container-security
+  requires:
+    - target: topic:krate-agent-service-account
+  related_to:
+    - target: topic:krate-agent-config-grant
+---
+nodeKind: Topic
+id: topic:krate-agent-config-grant
+attributes:
+  displayName: "Krate Agent Config Grant"
+  description: |
+    ConfigMap access grant for an agent within Krate. Analogous to
+    SecretGrant but for non-sensitive configuration data. Grants name
+    the specific ConfigMap and optional key filter, allowing agents to
+    read application configuration without broad cluster-level ConfigMap
+    access.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+  requires:
+    - target: topic:krate-agent-service-account
+  related_to:
+    - target: topic:krate-agent-secret-grant
+---
+nodeKind: Topic
+id: topic:krate-agent-adapter
+attributes:
+  displayName: "Krate Agent Adapter"
+  description: |
+    Transport adapter configuration for agent communication within Krate.
+    Defines how the platform communicates with agent runtimes — via the
+    Agent Mux bridge, direct process spawning, or remote API calls.
+    Each adapter type has its own configuration shape for timeouts,
+    retry policies, and protocol negotiation.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:remote-dispatch
+  related_to:
+    - target: topic:krate-agent-transport-binding
+---
+nodeKind: Topic
+id: topic:krate-agent-transport-binding
+attributes:
+  displayName: "Krate Agent Transport Binding"
+  description: |
+    Network endpoint binding for agent communication. Maps a logical
+    agent adapter to a concrete network address — a Unix socket for local
+    agents, an HTTP endpoint for remote agents, or an MCP server URL for
+    tool-server-mediated communication. Includes TLS configuration and
+    authentication token references.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+  requires:
+    - target: topic:krate-agent-adapter
+---
+nodeKind: Topic
+id: topic:krate-agent-provider-config
+attributes:
+  displayName: "Krate Agent Provider Config"
+  description: |
+    LLM provider configuration for Krate agents. Specifies the AI model
+    provider endpoint (Anthropic, OpenAI, local), API key secret
+    references, model identifiers, and per-provider tuning parameters
+    such as max tokens, temperature, and thinking budget. Supports
+    provider fallback chains for high availability.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+  requires:
+    - target: topic:krate-agent-stack
+---
+nodeKind: Topic
+id: topic:krate-agent-project
+attributes:
+  displayName: "Krate Agent Project"
+  description: |
+    Project-level agent settings and defaults within Krate. Establishes
+    the baseline configuration inherited by all agent stacks within a
+    project — default model, default tool profile, workspace policy
+    defaults, and cost budget limits. Individual Agent Stacks override
+    project defaults selectively.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+  related_to:
+    - target: topic:krate-agent-stack
+    - target: topic:krate-agent-workspace-policy
+---
+nodeKind: Topic
+id: topic:krate-agent-gateway-config
+attributes:
+  displayName: "Krate Agent Gateway Config"
+  description: |
+    Gateway routing rules for multi-agent dispatch. Configures how
+    incoming requests are routed across multiple agent stacks based on
+    capability matching, load balancing, and priority queuing. The
+    gateway evaluates trigger rules, matches capability requirements
+    to available agent stacks, and dispatches to the best-fit agent.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - topic:agent-dispatch
+  related_to:
+    - target: topic:krate-agent-trigger-rule
+    - target: topic:krate-agent-capability-requirement
+    - target: topic:krate-agent-dispatch-run
+---
+nodeKind: Topic
+id: topic:krate-agent-memory-repository
+attributes:
+  displayName: "Krate Agent Memory Repository"
+  description: |
+    Company brain memory store configuration. Defines the backing store
+    for organizational knowledge — vector database endpoint, embedding
+    model, index parameters, and retention policies. Memory repositories
+    are shared across agent stacks within a project, enabling agents to
+    access accumulated organizational context.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:company-brain
+    - topic:organizational-memory
+  related_to:
+    - target: topic:krate-agent-memory-source
+    - target: topic:krate-agent-memory-ontology
+    - target: topic:krate-agent-memory-snapshot
+    - target: topic:krate-agent-memory-query
+---
+nodeKind: Topic
+id: topic:krate-agent-memory-source
+attributes:
+  displayName: "Krate Agent Memory Source"
+  description: |
+    Memory ingestion source for the company brain. Configures where
+    knowledge is ingested from — Git repositories, wiki systems,
+    documentation sites, past agent session transcripts, or external
+    knowledge bases. Each source has its own sync schedule, content
+    extraction pipeline, and deduplication strategy.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:company-brain
+    - topic:memory-consolidation
+  requires:
+    - target: topic:krate-agent-memory-repository
+---
+nodeKind: Topic
+id: topic:krate-agent-memory-ontology
+attributes:
+  displayName: "Krate Agent Memory Ontology"
+  description: |
+    Knowledge graph schema for the company brain. Defines entity types,
+    relationship types, and validation rules that structure how ingested
+    knowledge is organized and linked. The ontology enables structured
+    queries over organizational memory — finding all decisions related
+    to a component, or all patterns used in a domain.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:company-brain
+    - topic:unified-agent-memory
+  requires:
+    - target: topic:krate-agent-memory-repository
+  related_to:
+    - target: topic:krate-agent-memory-association
+---
+nodeKind: Topic
+id: topic:krate-agent-memory-association
+attributes:
+  displayName: "Krate Agent Memory Association"
+  description: |
+    Cross-entity memory link within the company brain. Represents a
+    typed relationship between two memory entities — a decision linked
+    to the PR that implemented it, a pattern linked to the codebase
+    regions that use it, or a lesson-learned linked to the incident
+    that produced it. Associations are bidirectional and carry
+    confidence scores.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:company-brain
+    - topic:memory-to-knowledge-bridge
+  requires:
+    - target: topic:krate-agent-memory-ontology
+  related_to:
+    - target: topic:krate-agent-memory-snapshot
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2: Agent Runtime Resources (Postgres aggregated)
+# ─────────────────────────────────────────────────────────────────────────────
+
+---
+nodeKind: Topic
+id: topic:krate-agent-dispatch-run
+attributes:
+  displayName: "Krate Agent Dispatch Run"
+  description: |
+    A single agent execution within Krate, analogous to a CI job. Tracks
+    the full lifecycle from trigger through context assembly, agent session
+    execution, artifact collection, and completion. Dispatch runs are
+    immutable records stored in Postgres with full audit trails including
+    token usage, wall-clock duration, and cost attribution.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - topic:agent-run-lifecycle
+    - topic:agent-dispatch
+  requires:
+    - target: topic:krate-agent-stack
+  related_to:
+    - target: topic:krate-agent-dispatch-attempt
+    - target: topic:krate-agent-session
+    - target: topic:krate-agent-context-bundle
+    - target: topic:krate-agent-workspace
+    - target: topic:krate-agent-approval
+    - target: topic:krate-agent-artifact
+---
+nodeKind: Topic
+id: topic:krate-agent-dispatch-attempt
+attributes:
+  displayName: "Krate Agent Dispatch Attempt"
+  description: |
+    Retry attempt within a dispatch run. When an agent session fails due
+    to transient errors, model rate limits, or timeout, Krate records
+    the failed attempt and may spawn a new one with exponential backoff.
+    Each attempt captures its own session transcript, token usage, and
+    failure reason to enable root-cause analysis.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - topic:agent-run-lifecycle
+  requires:
+    - target: topic:krate-agent-dispatch-run
+---
+nodeKind: Topic
+id: topic:krate-agent-session
+attributes:
+  displayName: "Krate Agent Session"
+  description: |
+    Chat session with a Krate agent. Represents the interactive or
+    headless conversation between the platform and the coding agent,
+    including all message exchanges, tool calls, and thinking blocks.
+    Sessions may be resumed across dispatch attempts and carry their
+    own context window management and compaction history.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:agent-run-lifecycle
+  requires:
+    - target: topic:krate-agent-dispatch-run
+  related_to:
+    - target: topic:krate-agent-session-transcript
+---
+nodeKind: Topic
+id: topic:krate-agent-context-bundle
+attributes:
+  displayName: "Krate Agent Context Bundle"
+  description: |
+    Assembled prompt context with provenance tracking. When a dispatch
+    run begins, Krate's context assembler gathers relevant files, docs,
+    issue descriptions, and memory entries into a context bundle. Each
+    item in the bundle carries its source, selection reason, token cost,
+    and relevance score for post-hoc analysis of context quality.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+  requires:
+    - target: topic:krate-agent-dispatch-run
+  related_to:
+    - target: topic:krate-agent-context-label
+    - target: topic:krate-agent-memory-query
+---
+nodeKind: Topic
+id: topic:krate-agent-artifact
+attributes:
+  displayName: "Krate Agent Artifact"
+  description: |
+    Output artifact produced by an agent dispatch run. Includes code
+    diffs, generated files, PR descriptions, log outputs, and structured
+    reports. Artifacts are content-addressed and immutable, stored
+    alongside the dispatch run record for audit and reproducibility.
+    Each artifact carries MIME type and size metadata.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:agent-run-lifecycle
+  requires:
+    - target: topic:krate-agent-dispatch-run
+---
+nodeKind: Topic
+id: topic:krate-agent-approval
+attributes:
+  displayName: "Krate Agent Approval"
+  description: |
+    Human approval gate for agent actions within Krate. When an agent
+    reaches a decision point that exceeds its autonomy policy (destructive
+    operations, production deployments, large refactors), it raises an
+    approval request. Approvals are routed to designated reviewers via
+    configurable channels (Slack, email, in-platform UI) with timeout
+    and escalation policies.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:human-in-the-loop
+  requires:
+    - target: topic:krate-agent-dispatch-run
+---
+nodeKind: Topic
+id: topic:krate-agent-workspace
+attributes:
+  displayName: "Krate Agent Workspace"
+  description: |
+    Provisioned Git worktree for agent work. Each dispatch run gets an
+    isolated workspace with its own branch, working directory, and
+    environment variables. Workspaces are created according to the
+    Workspace Policy and cleaned up after the run completes or after
+    a configurable retention period.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - topic:agent-run-lifecycle
+  requires:
+    - target: topic:krate-agent-dispatch-run
+  related_to:
+    - target: topic:krate-agent-workspace-policy
+    - target: topic:krate-agent-workspace-runtime
+---
+nodeKind: Topic
+id: topic:krate-agent-trigger-execution
+attributes:
+  displayName: "Krate Agent Trigger Execution"
+  description: |
+    Record of a trigger rule firing within Krate. Captures the incoming
+    event payload, the matched trigger rule, the routing decision, and
+    the resulting dispatch run (if any). Trigger executions form an
+    audit trail showing why agents were dispatched and what events
+    caused them to activate.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - topic:event-driven-dispatch
+  requires:
+    - target: topic:krate-agent-trigger-rule
+  related_to:
+    - target: topic:krate-agent-dispatch-run
+---
+nodeKind: Topic
+id: topic:krate-agent-capability-requirement
+attributes:
+  displayName: "Krate Agent Capability Requirement"
+  description: |
+    Declared capability need for dispatch routing. When a trigger fires
+    or a manual dispatch is requested, the platform evaluates required
+    capabilities (language expertise, framework knowledge, tool access)
+    against available agent stacks to find the best match. Capability
+    requirements enable intelligent agent selection.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:agent-dispatch
+  related_to:
+    - target: topic:krate-agent-gateway-config
+    - target: topic:krate-agent-stack
+---
+nodeKind: Topic
+id: topic:krate-agent-session-transcript
+attributes:
+  displayName: "Krate Agent Session Transcript"
+  description: |
+    Full session transcript storage for a Krate agent session. Persists
+    every message, tool call, tool result, thinking block, and system
+    event in a structured format for post-hoc analysis, debugging,
+    compliance auditing, and memory extraction. Transcripts are
+    immutable and content-addressed.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:agent-run-lifecycle
+  requires:
+    - target: topic:krate-agent-session
+  related_to:
+    - target: topic:krate-agent-memory-snapshot
+---
+nodeKind: Topic
+id: topic:krate-agent-workspace-runtime
+attributes:
+  displayName: "Krate Agent Workspace Runtime"
+  description: |
+    Runtime state of an active agent workspace. Tracks the current Git
+    branch, HEAD commit, dirty file state, running processes, resource
+    consumption (CPU, memory, disk), and liveness status. The workspace
+    runtime is ephemeral state that exists only while a dispatch run
+    is active, complementing the persistent Workspace record.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+    - topic:agent-run-lifecycle
+  requires:
+    - target: topic:krate-agent-workspace
+---
+nodeKind: Topic
+id: topic:krate-agent-memory-snapshot
+attributes:
+  displayName: "Krate Agent Memory Snapshot"
+  description: |
+    Point-in-time snapshot of the company brain memory state. Captures
+    the full set of memory entities, associations, and embeddings at a
+    specific moment for reproducibility and rollback. Snapshots enable
+    comparing memory state across time periods and reverting unwanted
+    memory mutations introduced by agent updates.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:company-brain
+    - topic:memory-consolidation
+  requires:
+    - target: topic:krate-agent-memory-repository
+  related_to:
+    - target: topic:krate-agent-session-transcript
+---
+nodeKind: Topic
+id: topic:krate-agent-memory-query
+attributes:
+  displayName: "Krate Agent Memory Query"
+  description: |
+    Memory retrieval request and response within the company brain.
+    Records the query text, embedding vector, retrieval parameters
+    (top-k, similarity threshold, scope filters), returned results
+    with relevance scores, and the requesting agent session. Enables
+    analysis of memory retrieval quality and coverage gaps.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:company-brain
+    - topic:unified-agent-memory
+  requires:
+    - target: topic:krate-agent-memory-repository
+  related_to:
+    - target: topic:krate-agent-context-bundle
+---
+nodeKind: Topic
+id: topic:krate-agent-memory-update
+attributes:
+  displayName: "Krate Agent Memory Update"
+  description: |
+    Memory mutation with human review within the company brain. When an
+    agent proposes adding, modifying, or deprecating a memory entity, the
+    update is recorded as a pending mutation subject to review policy.
+    Updates carry the proposed change, source evidence, confidence score,
+    and reviewer decision (approve, reject, modify).
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+    - topic:company-brain
+    - topic:memory-security
+  requires:
+    - target: topic:krate-agent-memory-repository
+  related_to:
+    - target: topic:krate-agent-memory-ontology
+    - target: topic:krate-agent-memory-snapshot
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3: Krate Controllers as InteractionPrimitives
+# ─────────────────────────────────────────────────────────────────────────────
+
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:krate-agent-dispatch
+attributes:
+  displayName: "Krate Agent Dispatch"
+  description: |
+    Manual or automated dispatch of an agent from the Krate UI or API.
+    The user or automation selects an Agent Stack, provides optional
+    context overrides, and initiates a Dispatch Run. The dispatch
+    controller assembles context, provisions a workspace, spawns the
+    agent session, and monitors it through completion. Supports both
+    synchronous (wait for result) and fire-and-forget dispatch modes.
+  kind: cli
+  surface: cli
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [headless]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - target: interaction-primitive-category:lifecycle
+  integrates_with:
+    - target: topic:krate-agent-dispatch-run
+    - target: topic:krate-agent-stack
+    - target: topic:agent-dispatch-as-ci
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:krate-agent-trigger-process
+attributes:
+  displayName: "Krate Agent Trigger Process"
+  description: |
+    Event routing and auto-dispatch controller within Krate. Receives
+    incoming events (CI failures, webhook payloads, schedule ticks,
+    label changes), evaluates them against registered Trigger Rules,
+    performs capability matching to select the best Agent Stack, and
+    initiates a Dispatch Run. The trigger process handles deduplication,
+    rate limiting, and concurrent dispatch throttling.
+  kind: automation
+  surface: headless
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [headless]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - target: interaction-primitive-category:lifecycle
+  integrates_with:
+    - target: topic:krate-agent-trigger-rule
+    - target: topic:krate-agent-trigger-execution
+    - target: topic:krate-agent-capability-requirement
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:krate-agent-approval-decide
+attributes:
+  displayName: "Krate Agent Approval Decide"
+  description: |
+    Human approve or deny gate within Krate. When an agent raises an
+    approval request, this controller routes it to the designated
+    reviewer(s), presents the decision context (what the agent wants
+    to do, why, and what artifacts it has produced so far), collects
+    the decision (approve, deny, modify), and resumes or terminates
+    the agent session accordingly.
+  kind: collaborative
+  surface: prompt-ui
+  category: interaction-primitive-category:human-in-loop
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - target: interaction-primitive-category:human-in-loop
+    - target: interaction-primitive-category:approval
+  integrates_with:
+    - target: topic:krate-agent-approval
+    - target: topic:krate-agent-dispatch-run
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:krate-pr-create
+attributes:
+  displayName: "Krate PR Create"
+  description: |
+    Create a pull request with an attached CI pipeline within Krate's
+    Git forge. Agents invoke this primitive to submit their code changes
+    for review. The PR creation controller validates branch protection
+    rules, attaches CI pipeline definitions, generates PR descriptions
+    from agent session context, and optionally requests reviewers based
+    on code ownership rules.
+  kind: cli
+  surface: cli
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [headless]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - target: interaction-primitive-category:lifecycle
+  integrates_with:
+    - target: definition:krate-forge-model
+    - target: topic:krate-agent-artifact
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:krate-pr-merge
+attributes:
+  displayName: "Krate PR Merge"
+  description: |
+    Merge a pull request with branch protection checks in Krate's Git
+    forge. Evaluates all configured merge requirements — CI pipeline
+    pass, required reviewer approvals, status checks, merge conflict
+    absence — and performs the merge using the configured strategy
+    (merge commit, squash, rebase). Agents may trigger this after
+    receiving sufficient approvals.
+  kind: cli
+  surface: cli
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [headless]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - target: interaction-primitive-category:lifecycle
+  integrates_with:
+    - target: definition:krate-forge-model
+    - target: topic:krate-agent-approval
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:krate-pr-review
+attributes:
+  displayName: "Krate PR Review"
+  description: |
+    Add a review to a pull request within Krate's Git forge. Both human
+    reviewers and agent reviewers can submit reviews with approve, request
+    changes, or comment verdicts. Agent reviews carry provenance metadata
+    identifying the reviewing Agent Stack and session, enabling
+    differentiation between human and agent review feedback.
+  kind: collaborative
+  surface: prompt-ui
+  category: interaction-primitive-category:human-in-loop
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - target: interaction-primitive-category:human-in-loop
+    - target: interaction-primitive-category:collaborative
+  integrates_with:
+    - target: definition:krate-forge-model
+    - target: topic:krate-agent-session
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:krate-memory-query
+attributes:
+  displayName: "Krate Memory Query"
+  description: |
+    Query the company brain for relevant organizational knowledge. Agents
+    and humans invoke this primitive with a natural language query or
+    structured filter to retrieve memory entities, associations, and
+    context from the memory repository. Results are ranked by relevance
+    and scoped by the caller's access permissions and project context.
+  kind: cli
+  surface: cli
+  category: interaction-primitive-category:context
+  availableInModes: [chat, headless]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - target: interaction-primitive-category:context
+    - target: interaction-primitive-category:navigation
+  integrates_with:
+    - target: topic:krate-agent-memory-repository
+    - target: topic:krate-agent-memory-query
+    - target: topic:company-brain-memory
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:krate-memory-update
+attributes:
+  displayName: "Krate Memory Update"
+  description: |
+    Update the company brain with new knowledge, subject to review policy.
+    Agents propose memory mutations (add entity, update association,
+    deprecate stale knowledge) through this primitive. The memory update
+    controller validates the proposed change against the memory ontology,
+    routes it through the configured review workflow (auto-approve,
+    human-review, or consensus), and applies approved changes to the
+    memory repository.
+  kind: collaborative
+  surface: prompt-ui
+  category: interaction-primitive-category:human-in-loop
+  availableInModes: [chat, headless]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - target: interaction-primitive-category:human-in-loop
+    - target: interaction-primitive-category:collaborative
+  integrates_with:
+    - target: topic:krate-agent-memory-repository
+    - target: topic:krate-agent-memory-update
+    - target: topic:krate-agent-memory-ontology

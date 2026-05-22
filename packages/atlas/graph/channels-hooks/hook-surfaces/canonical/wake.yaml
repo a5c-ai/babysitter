@@ -1,0 +1,19 @@
+nodeKind: HookSurface
+id: hook-surface:wake
+attributes:
+  eventName: "Wake (a5c canonical)"
+  displayName: "Wake (a5c canonical)"
+  kind: canonical
+  direction: event
+  blocking: false
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [runId]
+    properties:
+      runId: { type: string }
+      cause: { type: string }
+  description: |
+    a5c-emitted: fires when a sleeping run is woken (timer, channel
+    message, manual trigger).
+edges:

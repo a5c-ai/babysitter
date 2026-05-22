@@ -1,0 +1,183 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-kanban-board
+attributes:
+  displayName: "Agent-mux Kanban board"
+  description: |
+    Kanban-style board view of issues / runs / sessions across an
+    agent-mux workspace. Primary high-level navigation surface in the
+    web and mobile clients.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:navigation
+  availableInModes: [chat, plan]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:navigation
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-hook-inbox
+attributes:
+  displayName: "Agent-mux hook inbox"
+  description: |
+    Inbox of pending hook / breakpoint approvals across all sessions
+    bridged through agent-mux. Each entry resolves via approve / reject
+    against the upstream orchestrator (e.g. babysitter task:post).
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:approval
+  availableInModes: [chat, plan]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:approval
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-session-list
+attributes:
+  displayName: "Agent-mux session list"
+  description: |
+    Browse the list of agent sessions (active, paused, archived) within
+    a workspace. Filter by agent, status, and label.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:navigation
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:navigation
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-session-detail
+attributes:
+  displayName: "Agent-mux session detail"
+  description: |
+    Inspect a single session's transcript, tool calls, and projected
+    session-flow timeline. Drill-down view from the session list.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:navigation
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:navigation
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-new-run
+attributes:
+  displayName: "Agent-mux new run"
+  description: |
+    Start a new agent run from web / mobile UI — pick agent, prompt,
+    and workspace context, then submit to gateway.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:lifecycle
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-pair-device
+attributes:
+  displayName: "Agent-mux pair device"
+  description: |
+    Pair a mobile / watch / TV device with the agent-mux gateway so
+    that subsequent UI surfaces can read and approve sessions remotely.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:configuration
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-workspace-detail
+attributes:
+  displayName: "Agent-mux workspace detail"
+  description: |
+    Inspect a workspace and its lifecycle (members, integrations,
+    runtime usage, recent runs, configured agents).
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:navigation
+  availableInModes: [chat, plan]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:navigation
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-breakpoint-approval
+attributes:
+  displayName: "Agent-mux breakpoint approval"
+  description: |
+    Approve / reject a breakpoint from any agent-mux surface — surfaced
+    in the hook inbox, session detail, and as push notifications on
+    paired mobile/watch devices.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:approval
+  availableInModes: [chat, plan]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:approval
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-tool-call-interaction
+attributes:
+  displayName: "Agent-mux tool-call interaction"
+  description: |
+    View and intervene in tool-call execution from the session detail
+    view — accept, reject, or edit tool inputs before the agent
+    proceeds.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:approval
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:approval
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-prompt-history
+attributes:
+  displayName: "Agent-mux prompt history"
+  description: |
+    Browse and replay prompt history across sessions — search past
+    prompts, fork a new run from any prior turn.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:navigation
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:navigation

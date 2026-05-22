@@ -1,0 +1,111 @@
+---
+nodeKind: SkillArea
+id: skill-area:symmetric-encryption
+attributes:
+  displayName: "Symmetric Encryption"
+  description: |
+    AES-GCM, ChaCha20-Poly1305, key sizes, IV/nonce hygiene, and
+    AEAD usage patterns.
+  domains:
+    - specialization:cryptography-blockchain
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:asymmetric-encryption
+attributes:
+  displayName: "Asymmetric Encryption"
+  description: |
+    Public-key cryptography — RSA, ECC (P-256, Curve25519), key
+    encapsulation, and hybrid encryption.
+  domains:
+    - specialization:cryptography-blockchain
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:key-derivation
+attributes:
+  displayName: "Key Derivation"
+  description: |
+    Password and key derivation — Argon2, scrypt, bcrypt, HKDF —
+    parameter tuning and memory-hardness considerations.
+  domains:
+    - specialization:cryptography-blockchain
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:signature-schemes
+attributes:
+  displayName: "Digital Signature Schemes"
+  description: |
+    Ed25519, ECDSA, RSA-PSS — signing, verification, malleability,
+    and protocol bindings.
+  domains:
+    - specialization:cryptography-blockchain
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:smart-contract-security
+attributes:
+  displayName: "Smart Contract Security"
+  description: |
+    Solidity/EVM vulnerability classes — reentrancy, integer issues,
+    access control, oracle manipulation, and audit techniques.
+  domains:
+    - specialization:cryptography-blockchain
+    - specialization:security-research
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:smart-contract-development-testing
+      strength: recommended
+    - target: skill-area:token-nft-management
+      strength: recommended
+    - target: skill-area:dao-governance-implementation
+      strength: recommended
+    - target: skill-area:transaction-fee-optimization
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:consensus-protocols
+attributes:
+  displayName: "Consensus Protocols"
+  description: |
+    PoW, PoS, BFT family (PBFT, Tendermint, HotStuff) — safety, liveness,
+    and tradeoffs across distributed consensus.
+  domains:
+    - specialization:cryptography-blockchain
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:blockchain-node-network-setup
+      strength: recommended
+    - target: skill-area:on-chain-data-oracle-integration
+      strength: recommended
+    - target: skill-area:wallet-integration-key-management
+      strength: recommended
+    - target: skill-area:cross-chain-interoperability
+      strength: recommended
+    - target: skill-area:blockchain-analytics-explorer
+      strength: recommended

@@ -1,0 +1,32 @@
+nodeKind: Role
+id: role:ai-champion
+attributes:
+  displayName: "AI Champion"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:software-engineering
+  description: |
+    Drives AI-agent adoption across the engineering org — evaluates agent
+    tooling, defines usage patterns, champions best practices, and bridges
+    product teams with the AI platform team.
+edges:
+  requires_expertise:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:agentic-loops
+    - target: skill-area:tool-use
+    - target: skill-area:context-management
+    - target: skill-area:eval-driven-development
+    - target: skill-area:retrieval-augmented-generation
+  holds_responsibility:
+    - target: responsibility:ai-agent-adoption-strategy
+    - target: responsibility:ai-agent-usage-review
+    - target: responsibility:ai-tooling-evaluation
+    - target: responsibility:ai-safety-guardrails
+    - target: responsibility:ai-knowledge-sharing
+  delegates_to:
+    - target: role:ml-engineer
+    - target: role:staff-engineer
+  applies_to:
+    - target: domain:software-engineering

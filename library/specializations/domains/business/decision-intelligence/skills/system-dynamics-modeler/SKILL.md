@@ -16,6 +16,10 @@ metadata:
     - pysd
     - BPTK-Py
     - simdynamics
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:quantitative-modeling, skill-area:statistical-analysis, skill-area:strategic-analysis]
+  roles: [role:data-scientist, role:research-scientist, role:strategic-planner]
 ---
 
 # System Dynamics Modeler

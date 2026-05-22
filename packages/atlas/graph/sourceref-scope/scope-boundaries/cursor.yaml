@@ -1,0 +1,18 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:cursor.scope
+attributes:
+  subjectId: agent:cursor
+  inScope: |
+    IDE-centric developer workflow — VS-Code-derived editor with inline
+    completion, chat side-panel, agent tabs, and Cursor-CLI for headless
+    runs. Targets a single developer's workstation.
+  outOfScope: |
+    Production runtime / always-on services, multi-tenant hosting,
+    non-interactive CI without Cursor-CLI setup, terminal-only workflows
+    without an editor, and embedded / mobile development environments.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:cursor

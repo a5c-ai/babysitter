@@ -12,6 +12,11 @@ expertise:
 metadata:
   version: "1.0"
   category: physics
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:dynamic-programming]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:computational-scientist, role:research-engineer]
 ---
 
 # Computational Physicist Agent

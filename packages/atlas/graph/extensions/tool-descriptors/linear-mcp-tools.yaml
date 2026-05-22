@@ -1,0 +1,142 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:linear.list-issues
+attributes:
+  schema: '{}'
+  displayName: "Linear: List Issues"
+  description: List Linear issues, optionally filtered by team/project/state.
+  inputSchema:
+    type: object
+    properties:
+      team: { type: string }
+      project: { type: string }
+      state: { type: string }
+      assignee: { type: string }
+      limit: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      issues: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-linear
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:linear.get-issue
+attributes:
+  schema: '{}'
+  displayName: "Linear: Get Issue"
+  description: Fetch a single issue by ID or identifier.
+  inputSchema:
+    type: object
+    required: [id]
+    properties:
+      id: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      issue: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-linear
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:linear.create-issue
+attributes:
+  schema: '{}'
+  displayName: "Linear: Create Issue"
+  description: Create a new Linear issue.
+  inputSchema:
+    type: object
+    required: [team, title]
+    properties:
+      team: { type: string }
+      title: { type: string }
+      description: { type: string }
+      assignee: { type: string }
+      labels: { type: array, items: { type: string } }
+      priority: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      id: { type: string }
+      identifier: { type: string }
+      url: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-linear
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:linear.update-issue
+attributes:
+  schema: '{}'
+  displayName: "Linear: Update Issue"
+  description: Update fields on an existing Linear issue.
+  inputSchema:
+    type: object
+    required: [id]
+    properties:
+      id: { type: string }
+      title: { type: string }
+      description: { type: string }
+      state: { type: string }
+      assignee: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      issue: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-linear
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:linear.list-projects
+attributes:
+  schema: '{}'
+  displayName: "Linear: List Projects"
+  description: List Linear projects.
+  inputSchema:
+    type: object
+    properties:
+      team: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      projects: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-linear
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:linear.list-teams
+attributes:
+  schema: '{}'
+  displayName: "Linear: List Teams"
+  description: List Linear teams accessible to the user.
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      teams: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-linear

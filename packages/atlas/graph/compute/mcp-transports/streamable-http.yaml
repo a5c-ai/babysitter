@@ -1,0 +1,76 @@
+nodeKind: MCPTransport
+id: mcp-transport:streamable-http
+attributes:
+  displayName: "Streamable HTTP"
+  kind: streamable-http
+  specVersion: "2025-03-26"
+  currentSpecRevision: "2025-11-25"
+  specRevisions:
+    - "2025-03-26"
+    - "2025-06-18"
+    - "2025-11-25"
+  status: live
+  streaming: full
+  specUrl: "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#streamable-http"
+  connectionLifecycle: |
+    Single MCP endpoint, dual-direction over HTTP:
+      1. Client POSTs `initialize` to the MCP endpoint URL.
+      2. Server responds 200 with `initialize` result; if it returns the
+         `Mcp-Session-Id` response header, the client MUST echo it on
+         every subsequent request as `Mcp-Session-Id: <id>`.
+      3. Client POSTs `notifications/initialized`. Session is ready.
+      4. Client may also open a long-lived GET on the same endpoint
+         requesting `Accept: text/event-stream` to receive server-pushed
+         notifications/requests asynchronously (the "listen" channel).
+      5. Shutdown: client may DELETE the endpoint with the session id to
+         explicitly terminate; server may end the session by responding
+         404 to a session-bearing request.
+  capabilityNegotiation: |
+    Identical to stdio: `initialize` request/response carrying
+    `protocolVersion`, `clientInfo`/`serverInfo`, and the `capabilities`
+    object. The protocol version negotiated here MUST match the value
+    sent on subsequent requests via the `MCP-Protocol-Version` header
+    (mandatory from spec revision 2025-06-18).
+  notificationModel: |
+    Two notification paths:
+      - Server-to-client notifications/requests are delivered as SSE
+        `message` events on the long-lived GET stream (or on the SSE body
+        of a POST response while a request is in-flight).
+      - Client-to-server notifications are sent as POST bodies with no
+        `id`; server returns 202 Accepted with empty body.
+    Server SHOULD include an `id:` SSE field on each event to enable
+    `Last-Event-ID`-based resumption.
+  reconnectPolicy: |
+    Session-scoped reconnect via `Mcp-Session-Id`:
+      - On connection loss, client reopens the GET listen channel with
+        the same `Mcp-Session-Id` and `Last-Event-ID: <last>` to resume
+        the SSE stream from the last successfully received event.
+      - If the server responds 404 to the resumed request, the session
+        is gone; the client must redo `initialize`.
+  authentication: |
+    Bearer tokens via the standard `Authorization` header
+    (`Authorization: Bearer <token>`). From spec revision 2025-06-18 the
+    server is classified as an OAuth 2.1 Resource Server; client obtains
+    tokens via OAuth Authorization Code + PKCE against an Authorization
+    Server discovered through `WWW-Authenticate` / RFC 9728 protected-
+    resource metadata, with RFC 8707 Resource Indicators binding tokens
+    to the MCP endpoint URL.
+  streamingFraming: |
+    SSE on response bodies: each event is `event: message\ndata: <json>\n\n`
+    (event name `message` carrying a single JSON-RPC message). Servers
+    SHOULD attach an `id:` field per event for resumption. JSON-RPC
+    message-id discipline is standard. The 2025-06-18 revision removed
+    JSON-RPC batch arrays — every HTTP body carries exactly one JSON-RPC
+    message.
+    Mandatory request header from spec 2025-06-18: `MCP-Protocol-Version: <rev>`.
+edges:
+  spoken_by:
+    - target: agent-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:babysitter-agent.runtime@current
+    - target: agent-runtime-impl:babysitter.runtime@current
+    - target: agent-runtime-impl:babysitter-sdk.runtime@current
+    - target: agent-runtime-impl:claude-agent-sdk.runtime@current
+    - target: agent-runtime-impl:claude-code.runtime@1.x
+    - target: agent-runtime-impl:codex-app-server.runtime@current
+    - target: agent-runtime-impl:codex.runtime@1.x
+    - target: agent-runtime-impl:codex-sdk.runtime@current

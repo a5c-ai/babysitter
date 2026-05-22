@@ -1,6 +1,7 @@
 import * as path from "path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
+import { z } from "zod/v3";
+import { DEFAULTS } from "../../config";
 import {
   readSessionFile,
   sessionFileExists,
@@ -10,6 +11,7 @@ import {
 } from "../../session";
 import type { SessionState } from "../../session";
 import { loadJournal } from "../../storage";
+import { countPendingEffectsFromJournal, deriveObservedRunState } from "../../runtime/runLifecycleState";
 import { toolResult, toolError } from "../util/errors";
 import { resolveRunDir } from "../util/resolve-run-dir";
 
@@ -24,7 +26,7 @@ export function registerSessionTools(server: McpServer): void {
       maxIterations: z
         .number()
         .optional()
-        .describe("Maximum number of iterations (default 256)"),
+        .describe("Maximum number of iterations (default 65000)"),
       runId: z
         .string()
         .optional()
@@ -37,7 +39,7 @@ export function registerSessionTools(server: McpServer): void {
     async (args) => {
       try {
         const stateDir = path.resolve(args.stateDir);
-        const maxIterations = args.maxIterations ?? 256;
+        const maxIterations = args.maxIterations ?? DEFAULTS.maxIterations;
         const runId = args.runId ?? "";
         const prompt = args.prompt ?? "";
 
@@ -68,6 +70,7 @@ export function registerSessionTools(server: McpServer): void {
           iteration: 1,
           maxIterations,
           runId,
+          runIds: [],
           startedAt: now,
           lastIterationAt: now,
           iterationTimes: [],
@@ -144,7 +147,7 @@ export function registerSessionTools(server: McpServer): void {
       maxIterations: z
         .number()
         .optional()
-        .describe("Maximum number of iterations (default 256)"),
+        .describe("Maximum number of iterations (default 65000)"),
       runsDir: z.string().optional().describe("Override runs directory path"),
     },
     async (args) => {
@@ -152,17 +155,13 @@ export function registerSessionTools(server: McpServer): void {
         const stateDir = path.resolve(args.stateDir);
         const runsDir = resolveRunDir(args.runsDir);
         const runDir = path.join(runsDir, args.runId);
-        const maxIterations = args.maxIterations ?? 256;
+        const maxIterations = args.maxIterations ?? DEFAULTS.maxIterations;
 
         // Check run state from journal
         let runState = "unknown";
         try {
           const journal = await loadJournal(runDir);
-          const hasCompleted = journal.some((e) => e.type === "RUN_COMPLETED");
-          const hasFailed = journal.some((e) => e.type === "RUN_FAILED");
-          if (hasCompleted) runState = "completed";
-          else if (hasFailed) runState = "failed";
-          else runState = "waiting";
+          runState = deriveObservedRunState(journal, countPendingEffectsFromJournal(journal));
         } catch {
           return toolError(`Run not found: ${args.runId}`);
         }
@@ -182,6 +181,7 @@ export function registerSessionTools(server: McpServer): void {
           iteration: 1,
           maxIterations,
           runId: args.runId,
+          runIds: [],
           startedAt: now,
           lastIterationAt: now,
           iterationTimes: [],
@@ -234,3 +234,4 @@ export function registerSessionTools(server: McpServer): void {
     }
   );
 }
+

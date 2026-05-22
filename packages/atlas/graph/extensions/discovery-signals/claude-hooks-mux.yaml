@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:claude-hooks-mux
+attributes:
+  signalId: discovery-signal:claude-hooks-mux
+  signalKind: env-any
+  key: claude
+  matchMode: all
+  confidence: high
+  scope: hooks-mux
+  signals:
+    - CLAUDE_PLUGIN_ROOT
+    - CLAUDE_ENV_FILE
+  absentSignals: []
+  argvMatches: []
+  metadataFields: []
+  consumer: hooks-mux-core
+  notes: 'Ordered adapter auto-detection rule used by hooks-mux. Verbatim from legacy packages/agent-catalog/graph/nodes/runtime-semantics/discovery-signals-hooks.yaml :: discovery:claude:hooks-mux:1.'
+edges:
+  applies_to:
+    - target: agent:claude-code

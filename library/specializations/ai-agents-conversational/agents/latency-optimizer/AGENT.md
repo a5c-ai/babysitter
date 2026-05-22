@@ -8,6 +8,13 @@ expertise:
   - Streaming optimization
   - Parallel processing
   - Infrastructure tuning
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:model-serving-operations, skill-area:performance-monitoring-profiling]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:feature-development]
+
 ---
 
 # Latency Optimizer

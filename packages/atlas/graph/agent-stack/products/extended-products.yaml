@@ -1,0 +1,294 @@
+nodeKind: AgentProduct
+id: agent:aider
+attributes:
+  displayName: "Aider"
+  vendor: "Aider (Paul Gauthier / community)"
+  homepageUrl: "https://aider.chat/"
+  primarySurface: cli
+  supportTier: none
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Aider is an open-source AI pair programmer that runs in a terminal.
+    It edits code in a local git repository, supports many model
+    backends (OpenAI, Anthropic, Gemini, local Ollama), and auto-commits
+    each change.
+edges:
+  has_version:
+    - agent-version:aider@current
+---
+nodeKind: AgentProduct
+id: agent:continue
+attributes:
+  displayName: "Continue"
+  vendor: "Continue Dev, Inc."
+  homepageUrl: "https://continue.dev/"
+  primarySurface: ide-extension
+  supportTier: none
+  productKind: ide-extension-agent
+  stackScope: full
+  description: |
+    Continue is an open-source IDE side-panel agent for VS Code and
+    JetBrains. It supports BYO-model configurations, custom slash
+    commands, context providers, and Model Context Protocol tool
+    servers.
+edges:
+  has_version:
+    - agent-version:continue@current
+---
+nodeKind: AgentProduct
+id: agent:cline
+attributes:
+  displayName: "Cline"
+  vendor: "Cline Bot, Inc."
+  homepageUrl: "https://cline.bot/"
+  primarySurface: ide-extension
+  supportTier: none
+  productKind: ide-extension-agent
+  stackScope: full
+  description: |
+    Cline (formerly "Claude Dev") is an autonomous coding agent that
+    runs as a VS Code extension. It can read/write files, run terminal
+    commands with user approval, and use a browser via headless
+    Chromium. Supports multiple model backends.
+edges:
+  has_version:
+    - agent-version:cline@current
+---
+nodeKind: AgentProduct
+id: agent:roo-code
+attributes:
+  displayName: "Roo Code"
+  vendor: "Roo Code (community fork of Cline)"
+  homepageUrl: "https://roocode.com/"
+  primarySurface: ide-extension
+  supportTier: none
+  productKind: ide-extension-agent
+  stackScope: full
+  description: |
+    Roo Code is an open-source fork of Cline distributed as a VS Code
+    extension. It adds multi-mode personas (architect / code / ask /
+    debug), custom modes, and integrated MCP tool support.
+edges:
+  has_version:
+    - agent-version:roo-code@current
+---
+nodeKind: AgentProduct
+id: agent:goose
+attributes:
+  displayName: "Goose"
+  vendor: "Block, Inc."
+  homepageUrl: "https://block.github.io/goose/"
+  primarySurface: cli
+  supportTier: none
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Goose is an open-source on-machine AI agent from Block. It supports
+    multi-provider model backends, MCP tool servers, recipe-based
+    workflows, and runs as either a desktop app or a CLI.
+edges:
+  has_version:
+    - agent-version:goose@current
+---
+nodeKind: AgentProduct
+id: agent:devin
+attributes:
+  displayName: "Devin"
+  vendor: "Cognition AI"
+  homepageUrl: "https://www.cognition.ai/"
+  primarySurface: web
+  supportTier: none
+  productKind: web-agent
+  stackScope: full
+  description: |
+    Devin is a hosted autonomous software engineering agent from
+    Cognition. Users delegate tasks via web UI, Slack, or IDE plug-ins;
+    Devin executes in a sandboxed cloud workspace with a browser and
+    terminal.
+edges:
+  has_version:
+    - agent-version:devin@current
+  integrates_with:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:multi-agent-coordination
+    - target: topic:agent-orchestration-products
+    - target: topic:agent-dispatch
+    - target: topic:parallel-agent-execution
+---
+nodeKind: AgentProduct
+id: agent:zed
+attributes:
+  displayName: "Zed"
+  vendor: "Zed Industries, Inc."
+  homepageUrl: "https://zed.dev/"
+  primarySurface: ide-extension
+  supportTier: none
+  productKind: ide-extension-agent
+  stackScope: full
+  description: |
+    Zed is a high-performance multiplayer code editor from Zed Industries
+    with built-in AI assistant features, inline transformations, and
+    multi-buffer assistant panels supporting multiple model backends.
+edges:
+  has_version:
+    - agent-version:zed@current
+---
+nodeKind: AgentProduct
+id: agent:windsurf
+attributes:
+  displayName: "Windsurf"
+  vendor: "Codeium (Exafunction, Inc.)"
+  homepageUrl: "https://codeium.com/windsurf"
+  primarySurface: ide-extension
+  supportTier: none
+  productKind: ide-extension-agent
+  stackScope: full
+  description: |
+    Windsurf is Codeium's agentic IDE — a VS Code-derived editor with
+    Cascade, an AI flow that reads, edits, and runs code across the
+    workspace. Supports MCP tool servers and multiple model backends.
+edges:
+  has_version:
+    - agent-version:windsurf@current
+---
+nodeKind: AgentProduct
+id: agent:replit-agent
+attributes:
+  displayName: "Replit Agent"
+  vendor: "Replit, Inc."
+  homepageUrl: "https://replit.com/"
+  primarySurface: web
+  supportTier: none
+  productKind: web-agent
+  stackScope: full
+  description: |
+    Replit Agent is a hosted coding agent inside the Replit cloud IDE.
+    It generates and runs full applications from natural-language
+    prompts inside Replit-managed sandboxes with built-in deploy.
+edges:
+  has_version:
+    - agent-version:replit-agent@current
+---
+nodeKind: AgentProduct
+id: agent:bolt
+attributes:
+  displayName: "Bolt"
+  vendor: "StackBlitz, Inc."
+  homepageUrl: "https://bolt.new/"
+  primarySurface: web
+  supportTier: none
+  productKind: web-agent
+  stackScope: full
+  description: |
+    Bolt.new is StackBlitz's in-browser AI app builder. It runs a full
+    Node.js dev environment via WebContainers and uses an LLM to scaffold,
+    edit, and deploy web applications end-to-end from prompts.
+edges:
+  has_version:
+    - agent-version:bolt@current
+  integrates_with:
+    - target: skill-area:ai-agent-development
+    - target: topic:agent-dispatch
+---
+nodeKind: AgentProduct
+id: agent:v0
+attributes:
+  displayName: "v0"
+  vendor: "Vercel, Inc."
+  homepageUrl: "https://v0.dev/"
+  primarySurface: web
+  supportTier: none
+  productKind: web-agent
+  stackScope: full
+  description: |
+    v0 is Vercel's generative UI tool. It produces React/Next.js +
+    Tailwind components and full pages from prompts and screenshots,
+    with one-click deploy to Vercel.
+edges:
+  has_version:
+    - agent-version:v0@current
+---
+nodeKind: AgentProduct
+id: agent:lovable
+attributes:
+  displayName: "Lovable"
+  vendor: "Lovable AB"
+  homepageUrl: "https://lovable.dev/"
+  primarySurface: web
+  supportTier: none
+  productKind: web-agent
+  stackScope: full
+  description: |
+    Lovable is a hosted AI app builder that generates full-stack web
+    apps (React + Supabase) from natural-language prompts and supports
+    iterative chat-driven editing with live preview.
+edges:
+  has_version:
+    - agent-version:lovable@current
+---
+nodeKind: AgentProduct
+id: agent:openhands
+attributes:
+  displayName: "OpenHands"
+  vendor: "All Hands AI (open-source community)"
+  homepageUrl: "https://github.com/All-Hands-AI/OpenHands"
+  primarySurface: web
+  supportTier: none
+  productKind: web-agent
+  stackScope: full
+  description: |
+    OpenHands (formerly OpenDevin) is an open-source autonomous software
+    engineering agent. It runs in a sandboxed Docker runtime with a web
+    UI, supports multiple model backends, and uses MCP tool servers.
+edges:
+  has_version:
+    - agent-version:openhands@current
+---
+nodeKind: AgentProduct
+id: agent:warp
+attributes:
+  displayName: "Warp"
+  vendor: "Warp Terminal Technologies, Inc."
+  homepageUrl: "https://www.warp.dev/"
+  primarySurface: cli
+  supportTier: none
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Warp is an AI-native terminal with Warp AI command suggestions,
+    natural-language to shell translation, an Agent Mode that executes
+    multi-step shell tasks, and shared workflows.
+edges:
+  has_version:
+    - agent-version:warp@current
+---
+nodeKind: AgentProduct
+id: agent:openai-agents-sdk
+attributes:
+  displayName: "OpenAI Agents SDK"
+  vendor: "OpenAI"
+  homepageUrl: "https://openai.github.io/openai-agents-python/"
+  primarySurface: sdk
+  supportTier: catalog-backed
+  productKind: sdk
+  stackScope: core-runtime
+  description: |
+    OpenAI Agents SDK (openai-agents-python) is OpenAI's framework for
+    building agentic applications. It exposes a `Runner` that drives a
+    streaming agent loop over the Responses API, supports
+    handoffs/subagents, tools, and emits a structured streaming-event
+    taxonomy (RawResponsesStreamEvent, RunItemStreamEvent + 11 item
+    subtypes, AgentUpdatedStreamEvent). Features guardrails for input/
+    output validation, tracing for debugging and observability, and
+    MCP tool server integration. The SDK emphasizes minimal abstraction
+    over the Responses API while providing structured multi-agent
+    patterns via handoffs.
+edges:
+  has_version:
+    - agent-version:openai-agents-sdk@current
+  integrates_with:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:multi-agent-coordination
+    - target: skill-area:tool-use
+    - target: skill-area:agentic-loops

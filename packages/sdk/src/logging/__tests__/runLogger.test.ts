@@ -14,6 +14,7 @@ import {
   getDefaultLogDir,
 } from "../runLogger";
 import type { RunLogEntry } from "../runLogger";
+import { BABYSITTER_SDK_VERSION } from "../../sdkVersion";
 
 describe("runLogger", () => {
   let testDir: string;
@@ -42,6 +43,7 @@ describe("runLogger", () => {
       const parsed = JSON.parse(line);
       expect(parsed.ts).toBe("2026-03-31T10:00:00.000Z");
       expect(parsed.level).toBe("info");
+      expect(parsed.sdkVersion).toBe(BABYSITTER_SDK_VERSION);
       expect(parsed.msg).toBe("hello world");
       expect(line.endsWith("\n")).toBe(true);
     });
@@ -182,7 +184,9 @@ describe("runLogger", () => {
 
       expect(logPath).toBe(path.join(testDir, "run-001", "process.log"));
       const content = await fs.readFile(logPath, "utf8");
-      expect(JSON.parse(content.trim()).msg).toBe("test message");
+      const parsed = JSON.parse(content.trim());
+      expect(parsed.msg).toBe("test message");
+      expect(parsed.sdkVersion).toBe(BABYSITTER_SDK_VERSION);
     });
 
     it("writes to hooks.log when type is hook", async () => {

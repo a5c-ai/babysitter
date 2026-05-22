@@ -6,6 +6,13 @@
  * @complexity Medium
  * @inputs { projectPath: string, testSuitePath: string, mutationTool: string, scopePatterns: array, qualityThresholds: object }
  * @outputs { success: boolean, mutationScore: number, survivedMutants: array, testImprovements: array, dashboardUrl: string }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:code-review]
+ *   roles: [role:qa-engineer]
+ *   skillAreas: [skill-area:mutation-testing, skill-area:unit-testing]
+ *   topics: [topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,38 @@
+---
+nodeKind: Benchmark
+id: benchmark:os-world
+attributes:
+  displayName: "OSWorld"
+  homepageUrl: https://os-world.github.io/
+  kind: full-stack
+  targetsKind: AgentVersion
+  description: |
+    OSWorld (Xie et al., 2024) is a scalable real-computer environment
+    benchmark for multimodal agents performing open-ended tasks in
+    Ubuntu, Windows, and macOS with full GUI/keyboard/mouse access;
+    369 real-world tasks across browser, OS, and productivity apps.
+edges:
+  covers:
+    - target: skill-area:desktop-automation
+      attributes:
+        coverage: full
+        weight: 0.2
+---
+nodeKind: Benchmark
+id: benchmark:android-world
+attributes:
+  displayName: "AndroidWorld"
+  homepageUrl: https://google-research.github.io/android_world/
+  kind: full-stack
+  targetsKind: AgentVersion
+  description: |
+    AndroidWorld (Google Research, 2024) is a dynamic Android
+    environment benchmark of 116 tasks across 20 real apps, used to
+    evaluate autonomous mobile-UI agents on natural-language goals
+    with stochastic real-app state.
+edges:
+  covers:
+    - target: skill-area:android-native
+      attributes:
+        coverage: tangential
+        weight: 0.2

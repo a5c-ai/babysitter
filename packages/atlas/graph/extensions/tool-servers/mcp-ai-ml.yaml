@@ -1,0 +1,154 @@
+nodeKind: ToolServer
+id: tool-server:mcp-anthropic
+attributes:
+  displayName: Anthropic MCP Server
+  description: |
+    MCP server providing direct integration with Claude and Anthropic models.
+    Enables AI agents to invoke Claude for sub-tasks, configure system prompts,
+    manage model parameters, and leverage advanced reasoning capabilities.
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/anthropics/anthropic-mcp-server
+  maintainer: Anthropic
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: provider:anthropic
+  lib_applies_to_domain:
+  - target: domain:machine-learning
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-openai
+attributes:
+  displayName: OpenAI MCP Server
+  description: |
+    MCP server providing access to OpenAI APIs.
+    Enables AI agents to invoke GPT models, generate embeddings,
+    create images with DALL-E, and use speech-to-text capabilities.
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/openai/openai-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: provider:openai
+  lib_applies_to_domain:
+  - target: domain:machine-learning
+  - target: domain:data-science
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-huggingface
+attributes:
+  displayName: Hugging Face MCP Server
+  description: |
+    MCP server providing access to the Hugging Face ecosystem.
+    Enables AI agents to search models and datasets, run inference on
+    hosted models, manage Spaces, and access the Hugging Face Hub API.
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/huggingface/mcp-server
+  maintainer: Hugging Face
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:huggingface
+  lib_applies_to_domain:
+  - target: domain:machine-learning
+  - target: domain:data-science
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-ollama
+attributes:
+  displayName: Ollama MCP Server
+  description: |
+    MCP server providing access to locally running Ollama models.
+    Enables AI agents to list available models, invoke local LLM
+    inference, manage model downloads, and run completions on-device.
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/ollama/ollama-mcp
+  maintainer: Ollama
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: provider:ollama
+  lib_applies_to_domain:
+  - target: domain:machine-learning
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-replicate
+attributes:
+  displayName: Replicate MCP Server
+  description: |
+    MCP server providing access to Replicate model hosting.
+    Enables AI agents to run open-source ML models in the cloud,
+    from image generation to speech-to-text, without managing GPUs.
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/replicate/replicate-mcp
+  maintainer: Replicate
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:model-serving
+  - target: provider:replicate
+  lib_applies_to_domain:
+  - target: domain:machine-learning
+  - target: domain:data-science
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-wandb
+attributes:
+  displayName: Weights & Biases MCP Server
+  description: |
+    MCP server providing access to Weights & Biases experiment tracking.
+    Enables AI agents to log runs, query experiment metrics, compare
+    model performance, and manage ML experiment metadata.
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/wandb/mcp-server
+  maintainer: Weights & Biases
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:model-registry
+  lib_applies_to_domain:
+  - target: domain:ml-ops
+  - target: domain:machine-learning
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-mlflow
+attributes:
+  displayName: MLflow MCP Server
+  description: |
+    MCP server providing access to the MLflow ML lifecycle platform.
+    Enables AI agents to log experiments, register models, query run
+    metrics, manage artifacts, and track model lineage.
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/mlflow/mlflow-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:mlflow
+  - target: stack-part:model-registry
+  lib_applies_to_domain:
+  - target: domain:ml-ops
+  - target: domain:machine-learning

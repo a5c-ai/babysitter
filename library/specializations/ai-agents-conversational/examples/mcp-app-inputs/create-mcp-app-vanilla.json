@@ -1,0 +1,16 @@
+{
+  "appName": "code-diff-viewer",
+  "description": "Simple code diff viewer that renders side-by-side or unified diffs with syntax highlighting. Minimal dependencies for fast loading.",
+  "framework": "vanilla",
+  "features": {
+    "sideBySide": true,
+    "unifiedView": true,
+    "syntaxHighlighting": true,
+    "lineNumbers": true
+  },
+  "transport": "stdio",
+  "toolDescription": "Display a code diff with syntax highlighting in a side-by-side or unified view",
+  "hostStyling": true,
+  "fullscreen": false,
+  "compositionPattern": "full-pipeline"
+}

@@ -1,0 +1,69 @@
+nodeKind: ProviderTranslation
+id: provider-translation:gemini:google
+attributes:
+  harness: gemini
+  provider: google
+  proxyRequired: false
+  harnessUsers:
+    - qwen
+  envMapping:
+    - envVar: GOOGLE_API_KEY
+      source: auth.apiKey
+      condition: present
+    - envVar: GEMINI_API_KEY
+      source: auth.apiKey
+      condition: present
+  args: []
+  notes: Native Google AI provider for Gemini CLI - sets both GOOGLE_API_KEY and GEMINI_API_KEY.
+edges:
+  translates_for:
+    - target: agent:gemini-cli
+  uses_provider:
+    - target: provider:google
+---
+nodeKind: ProviderTranslation
+id: provider-translation:gemini:vertex
+attributes:
+  harness: gemini
+  provider: vertex
+  proxyRequired: false
+  harnessUsers:
+    - qwen
+  staticEnv:
+    GOOGLE_GENAI_USE_VERTEXAI: "True"
+  envMapping:
+    - envVar: GOOGLE_CLOUD_PROJECT
+      source: params.project
+      condition: present
+    - envVar: GOOGLE_CLOUD_LOCATION
+      source: params.region
+      condition: present
+      fallback: global
+    - envVar: GOOGLE_API_KEY
+      source: auth.apiKey
+      condition: present
+  args: []
+  notes: Vertex AI support for Gemini CLI with default region 'global'.
+edges:
+  translates_for:
+    - target: agent:gemini-cli
+  uses_provider:
+    - target: provider:vertex
+---
+nodeKind: ProviderTranslation
+id: provider-translation:gemini:default
+attributes:
+  harness: gemini
+  provider: _default
+  proxyRequired: true
+  proxyExposedTransport: google
+  harnessUsers:
+    - qwen
+  envMapping: []
+  args: []
+  notes: >
+    Default fallback for unsupported providers on Gemini CLI.
+    Routes through transport-mux proxy exposing Google transport.
+edges:
+  translates_for:
+    - target: agent:gemini-cli

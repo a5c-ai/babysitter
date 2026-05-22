@@ -6,6 +6,11 @@ backlog-id: AG-002
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:robotics]
+  specializations: [specialization:robotics-simulation]
+  skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion, skill-area:slam]
+  roles: [role:research-engineer]
 ---
 
 # perception-engineer

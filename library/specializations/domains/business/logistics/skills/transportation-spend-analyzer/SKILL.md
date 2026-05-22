@@ -13,6 +13,10 @@ metadata:
   domain: business
   category: analytics
   priority: medium
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:financial-planning, skill-area:data-analytics]
+  roles: [role:supply-chain-analyst, role:procurement-manager, role:financial-analyst]
 ---
 
 # Transportation Spend Analyzer

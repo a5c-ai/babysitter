@@ -1,0 +1,44 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:babysitter-agent.core@current
+attributes:
+  displayName: "babysitter-agent Core (current) — SDK-backed CLI loop"
+  agentVersionId: agentVersion:babysitter-agent:ge-5-0-0
+  packageRef: source-ref:babysitter-github
+  loopIteratorPolicy: process-function-driven
+  loopIteratorNotes: |
+    babysitter-agent wraps @a5c-ai/babysitter-sdk; loop semantics are
+    inherited from the SDK (user-authored async `process(inputs, ctx)`
+    with journaled effects).
+  contextManagementStrategy: user-managed
+  compactionTriggerNotes: |
+    Inherited from the SDK; the wrapped process function owns context.
+  subagentInvokerPolicy: platform-mediated
+  subagentInvokerNotes: |
+    Inherited from the SDK; subagents dispatched via `ctx.task(...)` and
+    spawned as harness subprocesses.
+  resultSynthesisPolicy: process-function-defined
+  resultSynthesisNotes: |
+    Final result is whatever the wrapped process function returns.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: none
+  supportedTransportProtocols: []
+  parallelToolCallHandling: delegated-to-remote
+  streamingFidelity: full
+  thinkingChannelHandling: delegated-to-remote
+  notes: |
+    babysitter-agent is the CLI binary form of the babysitter SDK. The
+    core layer here delegates loop semantics to the SDK; the binary adds
+    daemon / observer / MCP-server entry points around it.
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:babysitter-agent
+      role: core
+  depends_on:
+    - target: source-ref:babysitter-github
+  speaks: []
+  supports_orchestration_primitive:
+    - target: orch-primitive:workflow-policy-load
+    - target: orch-primitive:task-create
+    - target: orch-primitive:context-injection

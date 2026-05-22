@@ -19,6 +19,12 @@
  * - SAE J2464 EV Battery Abuse Testing
  * - ISO 6469 EV Safety Specifications
  * - GB/T 31485 Chinese EV Battery Standards
+ *
+ * @graph
+ *   domains: [domain:automotive-engineering]
+ *   skillAreas: [skill-area:sensor-fusion, skill-area:motion-planning, skill-area:physics-simulation]
+ *   roles: [role:systems-integration-engineer, role:embedded-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -32,7 +38,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Cell Selection and Characterization
-  let cellSelection = await ctx.task(cellSelectionTask, {
+  const cellSelection = await ctx.task(cellSelectionTask, {
     projectName,
     vehicleClass,
     performanceTargets
@@ -47,16 +53,9 @@ export async function process(inputs, ctx) {
       batteryPackDesign: null
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      cellSelection = await ctx.task(cellSelectionTask, { ...{
-    projectName,
-    vehicleClass,
-    performanceTargets
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Cell selection review
+  await ctx.breakpoint({
     question: `Review cell selection for ${projectName}. Selected: ${cellSelection.selectedCell.manufacturer} ${cellSelection.selectedCell.model}. Approve cell selection?`,
     title: 'Cell Selection Review',
     context: {
@@ -68,15 +67,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: cellSelection
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Pack Architecture Design
   const packArchitecture = await ctx.task(packArchitectureTask, {
     projectName,
@@ -102,7 +95,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Safety Analysis
-  let safetyAnalysis = await ctx.task(safetyAnalysisTask, {
+  const safetyAnalysis = await ctx.task(safetyAnalysisTask, {
     projectName,
     packArchitecture,
     bmsDesign,
@@ -111,33 +104,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Safety analysis must pass
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        safetyAnalysis = await ctx.task(safetyAnalysisTask, { ...{
-    projectName,
-    packArchitecture,
-    bmsDesign,
-    thermalDesign,
-    safetyStandards
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (safetyAnalysis.criticalIssues && safetyAnalysis.criticalIssues.length > 0) {
+    await ctx.breakpoint({
       question: `Safety analysis identified ${safetyAnalysis.criticalIssues.length} critical issues. Review and address before proceeding?`,
       title: 'Battery Safety Critical Issues',
       context: {
         runId: ctx.runId,
         criticalIssues: safetyAnalysis.criticalIssues,
         recommendation: 'Address all critical safety issues before validation'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 6: Abuse Testing Validation
   const abuseTestPlan = await ctx.task(abuseTestPlanTask, {
@@ -148,7 +125,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Design Documentation
-  let designDocumentation = await ctx.task(designDocumentationTask, {
+  const designDocumentation = await ctx.task(designDocumentationTask, {
     projectName,
     vehicleClass,
     cellSelection,
@@ -159,21 +136,8 @@ export async function process(inputs, ctx) {
     abuseTestPlan
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      designDocumentation = await ctx.task(designDocumentationTask, { ...{
-    projectName,
-    vehicleClass,
-    cellSelection,
-    packArchitecture,
-    bmsDesign,
-    thermalDesign,
-    safetyAnalysis,
-    abuseTestPlan
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Design approval
+  await ctx.breakpoint({
     question: `Battery System Design complete for ${projectName}. Total capacity: ${packArchitecture.totalCapacity} kWh. Approve design for prototype build?`,
     title: 'Battery System Design Approval',
     context: {
@@ -185,15 +149,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/bms-specification.json`, format: 'json', content: bmsDesign },
         { path: `artifacts/thermal-analysis.json`, format: 'json', content: thermalDesign }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -214,7 +172,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const cellSelectionTask = defineTask('cell-selection', (args, taskCtx) => ({
   kind: 'agent',

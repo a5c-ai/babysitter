@@ -1,0 +1,194 @@
+---
+nodeKind: SkillArea
+id: skill-area:mobile-local-databases
+attributes:
+  displayName: "Local Databases"
+  description: |
+    Persisting mobile data on-device - local relational/object stores,
+    sync boundaries, migrations, and offline-first storage behavior.
+  domains:
+    - specialization:mobile-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+  uses_stack_part:
+    - stack-part:relational-database
+---
+nodeKind: SkillArea
+id: skill-area:mobile-location-services
+attributes:
+  displayName: "Location Services"
+  description: |
+    Integrating device location APIs - permission flows, background
+    updates, geofencing, and power/accuracy tradeoffs.
+  domains:
+    - specialization:mobile-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:mobile-sensor-integration
+attributes:
+  displayName: "Sensor Integration Libraries"
+  description: |
+    Using device sensors and native hardware inputs - permission models,
+    sampling rates, calibration, and event-stream handling.
+  domains:
+    - specialization:mobile-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:mobile-ui-automation
+attributes:
+  displayName: "Mobile UI Automation"
+  description: |
+    Automating mobile UI journeys across platforms - selectors, device labs,
+    flake control, synchronization, and build-pipeline orchestration.
+  domains:
+    - specialization:mobile-development
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:cross-platform-testing
+attributes:
+  displayName: "Cross-platform Testing"
+  description: |
+    Verifying behavior across iOS/Android or other target platforms -
+    runtime differences, platform contracts, and release-matrix coverage.
+  domains:
+    - specialization:mobile-development
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:offline-mode-testing
+attributes:
+  displayName: "Offline Mode Testing"
+  description: |
+    Testing disconnected or degraded-network behavior - local persistence,
+    replay/sync, stale state handling, and recovery once connectivity returns.
+  domains:
+    - specialization:mobile-development
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:mobile-offline-sync
+---
+nodeKind: SkillArea
+id: skill-area:battery-consumption-testing
+attributes:
+  displayName: "Battery Consumption Testing"
+  description: |
+    Measuring energy impact of mobile behavior - background work,
+    network usage, sensor polling, rendering cost, and battery regression triage.
+  domains:
+    - specialization:mobile-development
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:memory-usage-testing
+attributes:
+  displayName: "Memory Usage Testing"
+  description: |
+    Measuring memory footprint and leak behavior on constrained devices -
+    allocation growth, lifecycle retention, and low-memory survival.
+  domains:
+    - specialization:mobile-development
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:mobile-security-testing
+attributes:
+  displayName: "Mobile Security Testing"
+  description: |
+    Testing mobile application security posture - secure storage, auth flows,
+    tamper exposure, transport security, and sensitive-data handling.
+  domains:
+    - specialization:mobile-development
+    - domain:security
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+    - target: domain:security
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:mobile-biometrics
+---
+nodeKind: SkillArea
+id: skill-area:network-condition-testing
+attributes:
+  displayName: "Network Condition Testing"
+  description: |
+    Testing client behavior under variable latency, bandwidth, and packet-loss
+    conditions - retry behavior, UX resilience, and sync stability.
+  domains:
+    - specialization:mobile-development
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:payment-integration
+attributes:
+  displayName: "Payment Integration"
+  description: |
+    Integrating mobile payments and store-backed purchase flows - entitlements,
+    receipt handling, transaction state, and fraud-aware confirmation paths.
+  domains:
+    - specialization:mobile-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+  requires_skill_area:
+    - skill-area:in-app-purchases

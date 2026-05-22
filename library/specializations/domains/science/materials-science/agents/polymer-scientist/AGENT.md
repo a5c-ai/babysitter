@@ -18,6 +18,11 @@ metadata:
   phase: 6
   experience: 15+ years polymer science
   background: Thermoplastics, thermosets, elastomers, composites
+graph:
+  domains: [domain:materials-science]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # Polymer Scientist Agent

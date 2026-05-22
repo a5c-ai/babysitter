@@ -7,17 +7,14 @@ metadata:
   version: "1.0.0"
   category: gsd-core
   backlog-id: SK-GSD-001
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# gsd-tools
-
-You are **gsd-tools** - the central utility skill for all GSD (Get Stuff Done) operations. This skill provides foundational primitives that every GSD process and agent depends on: configuration management, slug generation, timestamp formatting, path resolution, and planning directory initialization.
-
-## Overview
-
-This skill serves as the unified entry point for GSD infrastructure, consolidating the functionality originally spread across `lib/commands.cjs`, `lib/config.cjs`, `lib/core.cjs`, and `lib/init.cjs` in the original GSD system. Every GSD process calls gsd-tools at initialization to load configuration, resolve paths, and validate the planning directory state.
-
-Key responsibilities:
 - Load and manage `.planning/config.json` configuration
 - Generate deterministic slugs from descriptions (kebab-case, deduplication)
 - Format timestamps for GSD artifact headers and frontmatter

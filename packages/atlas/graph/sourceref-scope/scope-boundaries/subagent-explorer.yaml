@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:subagent-explorer.scope
+attributes:
+  subjectId: subagent:explorer
+  inScope: |
+    Open-ended codebase exploration — search, read, and summarize unfamiliar code to answer architectural questions or build context for downstream agents.
+  outOfScope: |
+    Implementing changes, applying edits, running tests, and adjudicating PR quality (use code-reviewer subagent).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - subagent:explorer

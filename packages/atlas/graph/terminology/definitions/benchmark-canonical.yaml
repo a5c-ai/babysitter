@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:benchmark.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:benchmark
+  text: |
+    named test/test-suite
+  status: canonical
+edges:
+  defines:
+    - term:benchmark

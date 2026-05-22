@@ -2,6 +2,12 @@
 name: revenue-integrity-analyst
 description: Optimize revenue cycle performance through coding compliance, denial management, and charge capture improvement while ensuring regulatory compliance
 required-skills: medical-coding-audit, revenue-cycle-analytics, clinical-documentation-query, payer-contract-analysis
+graph:
+  domains: [domain:healthcare]
+  specializations: [specialization:clinical-informatics]
+  skillAreas: [skill-area:data-analysis, skill-area:compliance-automation, skill-area:financial-modeling]
+  workflows: [workflow:experiment-design]
+  roles: [role:financial-analyst, role:audit-analyst]
 ---
 
 # Revenue Integrity Analyst Agent

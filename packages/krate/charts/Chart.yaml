@@ -1,0 +1,31 @@
+apiVersion: v2
+name: krate
+description: Kubernetes-native forge MVP package for local and production-shaped installs.
+type: application
+version: 0.1.0
+appVersion: 0.1.0
+kubeVersion: ">=1.27.0-0"
+home: https://a5c.ai/krate
+maintainers:
+  - name: a5c.ai
+    url: https://a5c.ai
+keywords:
+  - git
+  - forge
+  - kubernetes
+  - ci
+  - rbac
+dependencies:
+  - name: vela-core
+    version: "1.10.x"
+    repository: https://kubevela.github.io/charts
+    condition: kubevela.install
+    alias: kubevela-subchart
+  - name: kyverno
+    version: "3.x"
+    repository: https://kyverno.github.io/kyverno/
+    condition: kyverno.install
+    alias: kyverno-subchart
+annotations:
+  krate.a5c.ai/package-surface: mvp-model
+  krate.a5c.ai/release-gate: npm-run-check

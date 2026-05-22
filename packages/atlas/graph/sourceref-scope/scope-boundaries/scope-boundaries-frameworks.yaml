@@ -1,0 +1,281 @@
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:react.scope
+attributes:
+  subjectId: framework:react
+  inScope: |
+    Component-based UI for web (and via React Native, mobile). The
+    library focus is rendering + state composition; choose meta-frameworks
+    (Next.js, Remix) for routing, data fetching, SSR.
+  outOfScope: |
+    Out-of-the-box routing, server rendering, build pipelines —
+    React intentionally leaves these to the surrounding meta-framework
+    or app shell.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:react
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:nextjs.scope
+attributes:
+  subjectId: framework:nextjs
+  inScope: |
+    Full-stack React meta-framework — file-system routing, server
+    components, server actions, edge runtime, image optimization, and
+    Vercel-aligned deploy story. Strong for SaaS, e-commerce, and
+    content-heavy sites needing SSR/ISR.
+  outOfScope: |
+    Pure SPAs without an SSR boundary (use Vite + React), heavy
+    Node-only backends without a UI, and projects that need to
+    avoid the Vercel-shaped deployment model.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:nextjs
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:vue.scope
+attributes:
+  subjectId: framework:vue
+  inScope: |
+    Progressive UI framework with single-file components, reactive
+    refs, and an excellent learning curve. Strong fit for teams
+    wanting React-like power with template ergonomics.
+  outOfScope: |
+    Ecosystems that demand React-specific libraries, and SSR/full-stack
+    needs without picking up Nuxt.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:vue
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:angular.scope
+attributes:
+  subjectId: framework:angular
+  inScope: |
+    Opinionated full-featured frontend platform — DI, RxJS, forms,
+    router, and CLI all bundled. Strong fit for large enterprise
+    apps where prescription and longevity matter more than minimalism.
+  outOfScope: |
+    Small marketing sites, teams allergic to TypeScript + decorators,
+    and projects that need to ship a tiny JS bundle.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:angular
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:svelte.scope
+attributes:
+  subjectId: framework:svelte
+  inScope: |
+    Compile-time UI framework that ships small bundles with
+    fine-grained reactivity. Sweet spot: marketing sites, dashboards,
+    and apps that benefit from low runtime overhead.
+  outOfScope: |
+    Ecosystems requiring drop-in React/Vue libraries, and full-stack
+    needs without picking up SvelteKit.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:svelte
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:django.scope
+attributes:
+  subjectId: framework:django
+  inScope: |
+    Batteries-included Python web framework — ORM, admin, auth,
+    migrations, templating. Strong fit for content-heavy sites,
+    internal tools, CMS-shaped apps, and rapid CRUD.
+  outOfScope: |
+    Pure async websocket-heavy services (use Channels or pick FastAPI),
+    microservices that need a slim runtime, and non-relational
+    primary stores (Django ORM is tightly relational).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:django
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:flask.scope
+attributes:
+  subjectId: framework:flask
+  inScope: |
+    Minimal Python WSGI microframework — choose your own ORM, auth,
+    forms. Best for small APIs, internal apps, and teams that want
+    full control over the stack.
+  outOfScope: |
+    Highly async / streaming workloads (Flask is sync at heart;
+    use Quart or FastAPI), and apps that would benefit from
+    Django's batteries.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:flask
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:fastapi.scope
+attributes:
+  subjectId: framework:fastapi
+  inScope: |
+    Async Python API framework with Pydantic-driven typing and
+    automatic OpenAPI generation. Strong fit for ML model serving,
+    typed JSON APIs, and async-heavy microservices.
+  outOfScope: |
+    Server-rendered HTML monoliths (use Django), heavy CMS-shaped
+    apps, and codebases unwilling to adopt async/await.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:fastapi
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:rails.scope
+attributes:
+  subjectId: framework:rails
+  inScope: |
+    Convention-over-configuration Ruby web framework — generators,
+    Active Record, Action Cable, Hotwire. Strong fit for SaaS
+    monoliths and rapid product iteration.
+  outOfScope: |
+    Highly concurrent / low-latency services where the GVL hurts,
+    polyglot microservice meshes, and CPU-bound numeric workloads.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:rails
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:fastify.scope
+attributes:
+  subjectId: framework:fastify
+  inScope: |
+    High-throughput Node.js web framework with schema-based validation
+    and a plugin architecture. Strong fit for typed APIs needing
+    Express-like ergonomics with better perf.
+  outOfScope: |
+    Server-rendered React/Vue apps (pair with a meta-framework),
+    and projects deeply tied to Express-only middleware.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:fastify
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:gin.scope
+attributes:
+  subjectId: framework:gin
+  inScope: |
+    Lightweight Go HTTP framework with middleware, routing, and
+    JSON binding. Strong fit for typed REST APIs and gRPC-gateway
+    fronts.
+  outOfScope: |
+    Real-time pub/sub heavy services (consider nats / native
+    handlers), and ecosystems demanding Go's net/http standard
+    pattern.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:gin
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:axum.scope
+attributes:
+  subjectId: framework:axum
+  inScope: |
+    Tokio-native async Rust web framework with tower-based middleware
+    and excellent ergonomics for typed handlers. Strong fit for
+    Rust services that need async + tower ecosystem.
+  outOfScope: |
+    Sync-first Rust codebases, embedded contexts where Tokio is
+    too heavy, and workloads that benefit more from a simpler hyper
+    layer.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - framework:axum
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:flutter.scope
+attributes:
+  subjectId: framework:flutter
+  inScope: |
+    Cross-platform UI from a single Dart codebase — iOS, Android,
+    web, desktop, embedded. Strong fit for branded apps that want
+    pixel-identical rendering across platforms.
+  outOfScope: |
+    Apps needing native platform widgets and feel (Flutter renders
+    its own), heavy JS-ecosystem reuse, and tiny app bundles.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:flutter
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:t3-stack.scope
+attributes:
+  subjectId: framework:t3-stack
+  inScope: |
+    Opinionated TypeScript-first full-stack stack — Next.js + tRPC +
+    Prisma + Tailwind + NextAuth. Strong fit for solo / small team
+    SaaS where end-to-end typing matters.
+  outOfScope: |
+    Polyglot microservice ecosystems, GraphQL-first stacks, and
+    teams that want to pick each layer themselves.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:t3-stack
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:supabase.scope
+attributes:
+  subjectId: framework:supabase
+  inScope: |
+    Open-source Firebase alternative on Postgres — auth, storage,
+    realtime, edge functions, vector DB. Strong fit for SaaS where
+    SQL + RLS is the right primitive.
+  outOfScope: |
+    Apps needing fine-grained custom backend logic only expressible
+    outside Postgres + Edge Functions, and offline-first mobile
+    where Firebase's local cache wins.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:supabase
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:hasura.scope
+attributes:
+  subjectId: framework:hasura
+  inScope: |
+    Instant GraphQL over Postgres / SQL Server / BigQuery / Snowflake
+    with row-level permissions, event triggers, and remote schemas.
+    Strong fit for read-heavy apps needing fast GraphQL without
+    hand-writing resolvers.
+  outOfScope: |
+    Custom mutation logic better expressed in code, REST-only
+    consumers, and teams that don't want a managed control plane.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - framework:hasura

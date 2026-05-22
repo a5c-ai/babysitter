@@ -1,0 +1,55 @@
+{
+  "name": "@a5c-ai/hooks-mux-cli",
+  "version": "5.0.0",
+  "description": "CLI entrypoint for the hooks-mux system",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "a5c-hooks-mux": "dist/cli/main.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/hooks-mux/cli"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/hooks-mux/cli#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@a5c-ai/hooks-mux-adapter-claude": "5.0.0",
+    "@a5c-ai/hooks-mux-adapter-codex": "5.0.0",
+    "@a5c-ai/hooks-mux-adapter-copilot": "5.0.0",
+    "@a5c-ai/hooks-mux-adapter-cursor": "5.0.0",
+    "@a5c-ai/hooks-mux-adapter-gemini": "5.0.0",
+    "@a5c-ai/hooks-mux-adapter-hermes": "5.0.0",
+    "@a5c-ai/hooks-mux-adapter-oh-my-pi": "5.0.0",
+    "@a5c-ai/hooks-mux-adapter-openclaw": "5.0.0",
+    "@a5c-ai/hooks-mux-adapter-opencode": "5.0.0",
+    "@a5c-ai/hooks-mux-adapter-pi": "5.0.0",
+    "@a5c-ai/hooks-mux-core": "5.0.0",
+    "yargs": "^17.0.0"
+  },
+  "devDependencies": {
+    "@types/yargs": "^17.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0",
+    "rimraf": "^6.0.0"
+  }
+}

@@ -2,6 +2,10 @@
 name: donor-relationship-management
 description: Cultivate and steward donor relationships including prospect research, personalized engagement strategies, gift acknowledgment, and impact reporting
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch, WebSearch
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:customer-success, skill-area:community-management, skill-area:data-analysis]
+  roles: [role:customer-success-manager, role:account-executive]
 ---
 
 # Donor Relationship Management

@@ -1,0 +1,11 @@
+nodeKind: Capability
+id: capability:supports-bedrock-guardrails
+attributes:
+  displayName: "Supports Bedrock Guardrails"
+  description: |
+    The provider supports AWS Bedrock Guardrails — a configurable
+    content-filtering / PII-redaction / topic-policy layer applied
+    server-side to inference requests and responses. Bedrock-specific.
+  appliesToNodeKinds: ["Provider"]
+  category: provider-feature
+edges: {}

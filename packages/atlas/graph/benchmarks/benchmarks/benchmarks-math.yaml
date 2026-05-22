@@ -1,0 +1,61 @@
+---
+nodeKind: Benchmark
+id: benchmark:mgsm
+attributes:
+  displayName: "MGSM"
+  homepageUrl: https://github.com/google-research/url-nlp/tree/main/mgsm
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    MGSM (Multilingual Grade School Math) is a translation of 250 GSM8K
+    problems into 10 typologically diverse languages, introduced by
+    Shi et al. (Google) for measuring multilingual chain-of-thought
+    arithmetic reasoning.
+edges: {}
+---
+nodeKind: Benchmark
+id: benchmark:gsm8k
+attributes:
+  displayName: "GSM8K"
+  homepageUrl: https://github.com/openai/grade-school-math
+  kind: math
+  targetsKind: ModelVersion
+  description: |
+    GSM8K (OpenAI) is 8.5K linguistically diverse grade-school math word
+    problems requiring multi-step arithmetic reasoning.
+edges:
+  covers:
+    - target: skill-area:mathematical-reasoning
+      attributes:
+        coverage: full
+        weight: 0.1
+---
+nodeKind: Benchmark
+id: benchmark:math
+attributes:
+  displayName: "MATH"
+  homepageUrl: https://github.com/hendrycks/math
+  kind: math
+  targetsKind: ModelVersion
+  description: |
+    The MATH benchmark (Hendrycks et al., 2021) is 12,500 competition
+    mathematics problems drawn from AMC, AIME, and similar contests,
+    with full step-by-step solutions.
+edges: {}
+---
+nodeKind: Benchmark
+id: benchmark:gsm-symbolic
+attributes:
+  displayName: "GSM-Symbolic"
+  homepageUrl: https://arxiv.org/abs/2410.05229
+  kind: math
+  targetsKind: ModelVersion
+  description: |
+    GSM-Symbolic (Apple, 2024) is a symbolic-template variant of GSM8K
+    that programmatically rewrites problems to probe whether models
+    perform genuine reasoning vs. pattern-matching on memorized text.
+edges:
+  covers:
+    - target: skill-area:mathematical-reasoning
+  applies_to:
+    - target: domain:mathematics

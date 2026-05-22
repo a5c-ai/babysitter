@@ -1,0 +1,386 @@
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-contextwindowtokens
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: contextWindowTokens
+  value: '2000000'
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current contextWindowTokens is 2000000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-costpermtokinput
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: costPerMTokInput
+  value: '1.25'
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current costPerMTokInput is 1.25.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-costpermtokoutput
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: costPerMTokOutput
+  value: '10.0'
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current costPerMTokOutput is 10.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-finetuningkind
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: fineTuningKind
+  value: lora
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current fineTuningKind is lora.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-kind
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: kind
+  value: multimodal
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current kind is multimodal.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-knowledgecutoffdate
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: knowledgeCutoffDate
+  value: '2025-01-01'
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current knowledgeCutoffDate is 2025-01-01.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-lifecyclestatus
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-modalities
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: modalities
+  value: text, image, audio, video
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current modalities is text, image, audio, video.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-modalitydirections
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=audio;direction=input,
+    kind=video;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current modalityDirections is kind=text;direction=input,
+    kind=image;direction=input, kind=audio;direction=input, kind=video;direction=input,
+    kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-modelcardurl
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: modelCardUrl
+  value: https://ai.google.dev/gemini-api/docs/models/gemini
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current modelCardUrl is https://ai.google.dev/gemini-api/docs/models/gemini.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-safetytier
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: safetyTier
+  value: google-deepmind-asl-2
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current safetyTier is google-deepmind-asl-2.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-supportsextendedthinking
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-supportsfinetuning
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: supportsFineTuning
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current supportsFineTuning is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current supportsThinkingBudgetTokens is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-thinkingeffortlevels
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: thinkingEffortLevels
+  value: low, medium, high
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current thinkingEffortLevels is low, medium, high.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-2-5-pro-current-versionrange
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: versionRange
+  value: '>=2.5.0 <2.6.0'
+  subjectKind: ModelVersion
+  statement: model:gemini-2-5-pro@current versionRange is >=2.5.0 <2.6.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-2-5-pro@current

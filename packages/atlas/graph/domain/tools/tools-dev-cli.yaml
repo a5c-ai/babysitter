@@ -1,0 +1,250 @@
+---
+nodeKind: Tool
+id: tool:dotnet-cli
+attributes:
+  displayName: ".NET CLI"
+  homepageUrl: "https://learn.microsoft.com/en-us/dotnet/core/tools/"
+  kind: build
+  description: |
+    Cross-platform command-line interface for the .NET ecosystem.
+    Provides dotnet build, run, test, publish, restore, add, and tool
+    management commands for C#, F#, and Visual Basic projects.
+edges:
+  belongs_to_language:
+    - language:csharp
+  tool_used_by:
+    - target: skill-area:backend-api-design
+  used_for:
+    - target: skill-area:developer-experience
+    - target: skill-area:ci-pipeline-optimization
+---
+nodeKind: Tool
+id: tool:flutter-cli
+attributes:
+  displayName: "Flutter CLI"
+  homepageUrl: "https://flutter.dev"
+  kind: build
+  description: |
+    Command-line interface for the Flutter cross-platform UI SDK.
+    Used to create, build, run, test, and deploy Flutter apps to
+    Android, iOS, web, and desktop from the terminal.
+edges:
+  belongs_to_language:
+    - language:dart
+  tool_used_by:
+    - target: skill-area:android-native
+  used_for:
+    - target: skill-area:developer-experience
+    - target: skill-area:ci-pipeline-optimization
+---
+nodeKind: Tool
+id: tool:xcodebuild
+attributes:
+  displayName: "xcodebuild"
+  homepageUrl: "https://developer.apple.com/xcode/"
+  kind: build
+  description: |
+    Apple command-line build tool for Xcode projects and workspaces.
+    Supports building, testing, archiving, and exporting iOS/macOS/
+    tvOS/watchOS apps from CI pipelines without the Xcode GUI.
+edges:
+  belongs_to_language:
+    - language:swift
+  tool_used_by:
+    - target: skill-area:ios-native
+  used_for:
+    - target: skill-area:ci-pipeline-optimization
+    - target: skill-area:developer-experience
+---
+nodeKind: Tool
+id: tool:android-studio
+attributes:
+  displayName: "Android Studio"
+  homepageUrl: "https://developer.android.com/studio"
+  kind: other
+  description: |
+    Official IDE for Android development based on IntelliJ IDEA.
+    Includes layout editors, APK analyzer, AVD emulator manager,
+    Gradle integration, and Jetpack Compose tooling.
+edges:
+  belongs_to_language:
+    - language:java
+  tool_used_by:
+    - target: skill-area:android-native
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:editor-fluency
+---
+nodeKind: Tool
+id: tool:jq
+attributes:
+  displayName: "jq"
+  homepageUrl: "https://jqlang.github.io/jq/"
+  kind: other
+  description: |
+    Lightweight and flexible command-line JSON processor.
+    Supports complex filters, transformations, and formatting
+    of JSON data; widely used in shell scripts and CI pipelines.
+edges:
+  belongs_to_language:
+    - language:c
+  tool_used_by:
+    - target: skill-area:cli-tooling
+  used_for:
+    - target: skill-area:developer-experience
+    - target: skill-area:json-data-wrangling
+  alternative_to:
+    - target: tool:yq
+      comparison: "CLI data processors — jq is JSON-only; yq handles YAML, JSON, and XML"
+---
+nodeKind: Tool
+id: tool:yq
+attributes:
+  displayName: "yq"
+  homepageUrl: "https://github.com/mikefarah/yq"
+  kind: other
+  description: |
+    YAML, JSON, and XML processor inspired by jq. Reads, writes,
+    and transforms structured data formats from the command line;
+    commonly used in DevOps pipelines and Kubernetes workflows.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:cli-tooling
+  used_for:
+    - target: skill-area:developer-experience
+    - target: skill-area:json-data-wrangling
+  alternative_to:
+    - target: tool:jq
+      comparison: "CLI data processors — yq handles YAML, JSON, and XML; jq is JSON-only"
+---
+nodeKind: Tool
+id: tool:bat
+attributes:
+  displayName: "bat"
+  homepageUrl: "https://github.com/sharkdp/bat"
+  kind: other
+  description: |
+    A cat clone with syntax highlighting and Git integration.
+    Renders file contents with color, line numbers, and diff-aware
+    paging; integrates with fzf for interactive file previews.
+edges:
+  belongs_to_language:
+    - language:rust
+  tool_used_by:
+    - target: skill-area:cli-tooling
+  used_for:
+    - target: skill-area:developer-experience
+  alternative_to:
+    - target: tool:delta
+      comparison: "Terminal display tools — bat shows file contents with syntax highlighting; delta shows diffs"
+---
+nodeKind: Tool
+id: tool:fd
+attributes:
+  displayName: "fd"
+  homepageUrl: "https://github.com/sharkdp/fd"
+  kind: other
+  description: |
+    Fast and user-friendly alternative to the find command.
+    Supports regex patterns, parallel execution, and .gitignore
+    awareness; written in Rust for high performance on large repos.
+edges:
+  belongs_to_language:
+    - language:rust
+  tool_used_by:
+    - target: skill-area:cli-tooling
+  used_for:
+    - target: skill-area:developer-experience
+  alternative_to:
+    - target: tool:ripgrep
+      comparison: "Terminal search tools — fd searches file names; ripgrep searches file contents"
+    - target: tool:fzf
+      comparison: "Terminal search tools — fd is file name search; fzf is interactive fuzzy finding"
+---
+nodeKind: Tool
+id: tool:delta
+attributes:
+  displayName: "delta"
+  homepageUrl: "https://github.com/dandavison/delta"
+  kind: other
+  description: |
+    Syntax-highlighting pager for git, diff, and grep output.
+    Provides side-by-side diffs, line numbers, and theme support;
+    integrates with git as a configurable core.pager replacement.
+edges:
+  belongs_to_language:
+    - language:rust
+  tool_used_by:
+    - target: skill-area:cli-tooling
+  used_for:
+    - target: skill-area:developer-experience
+  alternative_to:
+    - target: tool:bat
+      comparison: "Terminal display tools — delta shows diffs; bat shows file contents with syntax highlighting"
+---
+nodeKind: Tool
+id: tool:lazygit
+attributes:
+  displayName: "lazygit"
+  homepageUrl: "https://github.com/jesseduffield/lazygit"
+  kind: other
+  description: |
+    Terminal-based UI for Git written in Go. Provides interactive
+    staging, rebasing, branch management, and commit history browsing
+    without leaving the terminal; designed for keyboard-driven workflows.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:cli-tooling
+  used_for:
+    - target: skill-area:developer-experience
+  alternative_to:
+    - target: tool:gh-cli
+      comparison: "Git CLI tools — lazygit is a TUI for git operations; gh-cli is GitHub-specific CLI"
+---
+nodeKind: Tool
+id: tool:gh-cli
+attributes:
+  displayName: "GitHub CLI"
+  homepageUrl: "https://cli.github.com"
+  kind: other
+  description: |
+    Official command-line tool for GitHub. Enables creating and
+    reviewing pull requests, managing issues, triggering workflows,
+    and authenticating with GitHub directly from the terminal.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:cli-tooling
+  used_for:
+    - target: skill-area:developer-experience
+    - target: skill-area:ci-cd
+  alternative_to:
+    - target: tool:lazygit
+      comparison: "Git CLI tools — gh-cli is GitHub-specific CLI; lazygit is a TUI for git operations"
+---
+nodeKind: Tool
+id: tool:act
+attributes:
+  displayName: "act"
+  homepageUrl: "https://github.com/nektos/act"
+  kind: ci
+  description: |
+    Local runner for GitHub Actions workflows using Docker containers.
+    Enables developers to test and debug GitHub Actions locally without
+    pushing commits; mirrors the GitHub Actions environment closely.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:ci-cd
+  used_for:
+    - target: skill-area:ci-cd
+    - target: skill-area:developer-experience
+  alternative_to:
+    - target: tool:tekton
+      comparison: "CI tools — act runs GitHub Actions locally; Tekton is Kubernetes-native CI/CD"

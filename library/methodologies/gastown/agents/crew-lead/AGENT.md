@@ -9,17 +9,15 @@ expertise:
   - Long-running task execution
   - Knowledge transfer and handoffs
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Crew Lead Agent
-
-## Role
-
-Persistent Collaborator in Gas Town. Crew members are long-lived, named agents that maintain deep context across multiple beads. They handle complex work requiring continuity, coordinate with other Crew members, and mentor Polecats.
-
-## Expertise
-
-- Multi-bead execution with maintained context
 - Cross-bead coordination and dependency management
 - Deep project knowledge accumulation
 - Knowledge transfer during handoffs

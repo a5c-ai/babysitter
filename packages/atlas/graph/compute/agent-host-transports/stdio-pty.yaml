@@ -1,0 +1,33 @@
+nodeKind: AgentHostTransport
+id: agent-host-transport:stdio-pty
+attributes:
+  displayName: "stdio+pty"
+  kind: stdio-pty
+  description: |
+    Stdio attached to a pseudo-terminal (PTY) instead of anonymous pipes.
+    `isatty()` returns true; ANSI colour codes, prompt redraws, raw-mode
+    keystrokes, and full TUI rendering work. Required by interactive
+    agents whose UX depends on terminal control sequences (Claude Code
+    interactive mode, Cursor agent CLI, most terminal-first agents).
+  inboundMessageFormat: |
+    Raw keystroke bytes via the master side of the PTY. The agent reads
+    via its slave-side stdin which behaves as a terminal — modes (raw vs
+    cooked), local echo, and signal generation (Ctrl-C → SIGINT) are
+    governed by termios.
+  outboundMessageFormat: |
+    Mixed text + ANSI escape sequences on stdout (and stderr). Hosts that
+    need to consume structured output alongside the TUI typically run a
+    second sidecar pipe (e.g. Claude Code `--output-format stream-json`
+    over a separate fd).
+  signalForwarding: |
+    Control characters delivered through the PTY are translated to signals
+    by the kernel (Ctrl-C → SIGINT, Ctrl-Z → SIGTSTP, Ctrl-\\ → SIGQUIT).
+    Hosts can also send signals directly to the child PID.
+  ptySemantics: |
+    Full TTY semantics — termios attributes, window-size (TIOCGWINSZ /
+    TIOCSWINSZ) propagation on resize, line discipline, control
+    characters all behave as on a real terminal.
+edges:
+  used_by:
+    - agentVersion:claude:ge-0-0-0
+    - agentVersion:cursor:ge-0-0-0

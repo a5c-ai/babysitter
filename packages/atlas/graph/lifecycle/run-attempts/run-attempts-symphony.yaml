@@ -1,0 +1,25 @@
+nodeKind: RunAttempt
+id: run-attempt:retrying-example
+attributes:
+  displayName: "Retrying RunAttempt (3/5, exponential backoff)"
+  attemptNumber: 3
+  status: retrying
+  startedAt: "2026-05-01T10:30:00Z"
+  endedAt: "2026-05-01T10:31:12Z"
+  error: error-category:turn-timeout
+  workspacePath: ".a5c/workspaces/issue-ACA-390"
+  issueId: issue:linear-aca-390
+  issueIdentifier: "ACA-390"
+  backoffStrategy: exponential
+  baseDelayMs: 2000
+  capDelayMs: 60000
+  dueAtMs: 1746095000000
+edges:
+  attempt_of:
+    - target: run:01kqex-example-run-001
+  uses_workspace:
+    - target: workspace:local-developer-default
+  for_issue:
+    - target: issue:linear-aca-390
+  has_live_session:
+    - target: live-session:running-example

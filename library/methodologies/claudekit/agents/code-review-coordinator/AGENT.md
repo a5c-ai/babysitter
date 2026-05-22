@@ -9,17 +9,15 @@ expertise:
   - Review recommendation generation
   - Cross-dimension correlation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Code Review Coordinator Agent
-
-## Role
-
-Coordinates the 6-agent parallel code review process. Aggregates results from specialized review agents into a unified, weighted score and actionable recommendation.
-
-## Expertise
-
-- Weighted aggregation: architecture 20%, security 25%, performance 15%, testing 15%, quality 15%, docs 10%
 - Issue deduplication across agents reporting similar findings
 - Cross-dimension correlation (e.g., security issue that also impacts performance)
 - Recommendation generation: APPROVE (>=80, no criticals), REQUEST_CHANGES (>=60 or criticals), REJECT (<60)

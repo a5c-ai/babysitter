@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Reaction Engineering
   agent-id: CE-AG-005
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:lab-technician]
 ---
 
 # Catalysis Specialist Agent

@@ -3,6 +3,12 @@
  * @description Incident Response and Post-Mortem Documentation process with incident analysis, timeline reconstruction, root cause analysis, impact assessment, and action items generation
  * @inputs { incidentId: string, incidentTitle: string, severity: string, startTime: string, endTime: string, outputDir: string, includeTimeline: boolean, includeBlameless: boolean, requireReview: boolean }
  * @outputs { success: boolean, postMortemPath: string, incidentId: string, rootCauses: array, actionItems: array, qualityScore: number, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:technical-documentation]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs]
+ *   roles: [role:technical-writer, role:documentation-engineer]
+ *   workflows: [workflow:incident-response]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

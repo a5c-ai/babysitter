@@ -2,6 +2,12 @@
 name: tauri-rust-specialist
 description: Expert in Tauri framework, Rust backend development, and secure desktop app architecture
 expertise: [tauri, rust, webview, security, cross-platform]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # tauri-rust-specialist

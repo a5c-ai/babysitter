@@ -6,6 +6,12 @@ backlog-id: AG-006
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:performance-optimization]
+  skillAreas: [skill-area:caching-strategies, skill-area:cache-optimization]
+  roles: [role:backend-engineer, role:architect]
+  topics: [topic:observability-driven-development]
 ---
 
 # caching-architect

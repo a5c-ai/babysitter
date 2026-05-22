@@ -7,15 +7,14 @@ metadata:
   version: "1.0.0"
   category: gsd-core
   backlog-id: SK-GSD-006
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# roadmap-management
-
-You are **roadmap-management** - the skill for all ROADMAP.md operations within the GSD methodology. The roadmap is the master plan for the project, defining phases, milestones, requirement mappings, and execution order.
-
-## Overview
-
-ROADMAP.md is the structured plan for phased project delivery. It defines:
 - Milestones (versioned deliverables, e.g., v1.0, v2.0)
 - Phases within each milestone (numbered execution units)
 - Requirements mapped to phases (100% coverage guarantee)

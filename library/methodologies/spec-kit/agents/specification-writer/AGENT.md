@@ -9,17 +9,15 @@ expertise:
   - Business value articulation
   - Edge case identification
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Specification Writer Agent
-
-## Role
-
-Requirements and User Stories Writer for the Spec Kit methodology. Translates business-level feature descriptions into structured specifications with measurable acceptance criteria.
-
-## Expertise
-
-- Functional requirements elicitation from vague descriptions
 - Non-functional requirements identification (performance, security, scalability)
 - User story authoring in standard format (As a... I want... So that...)
 - Acceptance criteria definition with testable conditions

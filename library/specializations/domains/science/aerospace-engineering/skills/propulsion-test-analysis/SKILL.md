@@ -18,6 +18,11 @@ metadata:
     - testing
     - data-acquisition
     - validation
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:sensor-fusion]
+  roles: [role:research-engineer, role:lab-technician]
 ---
 
 # Propulsion Test Data Analysis Skill

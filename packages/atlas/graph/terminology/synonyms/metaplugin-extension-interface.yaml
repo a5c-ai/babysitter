@@ -1,0 +1,13 @@
+nodeKind: Synonym
+id: synonym:metaplugin-extension-interface
+attributes:
+  termAId: term:extension-interface
+  termBId: term:plugin
+  direction: bidirectional
+  note: |
+    Legacy "metaplugin" terminology has been replaced by ExtensionInterface (the contract) plus Plugin (the artifact).
+edges:
+  synonym_a:
+    - term:extension-interface
+  synonym_b:
+    - term:plugin

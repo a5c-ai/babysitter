@@ -1,0 +1,21 @@
+nodeKind: Tool
+id: tool:pip
+attributes:
+  displayName: "pip"
+  homepageUrl: "https://pip.pypa.io"
+  kind: package-manager
+  language: language:python
+  description: |
+    Package installer for Python.
+edges:
+  belongs_to_language:
+    - language:python
+  used_for:
+    - target: skill-area:developer-environment
+  alternative_to:
+    - target: tool:poetry
+      comparison: "Python package managers — pip is minimal; Poetry adds lockfiles and virtualenvs"
+    - target: tool:rye
+      comparison: "Python package managers"
+    - target: tool:uv
+      comparison: "Python package managers — pip is the standard; uv is a fast Rust-based drop-in"

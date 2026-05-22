@@ -1,0 +1,34 @@
+nodeKind: AgentProduct
+id: agent:pi
+attributes:
+  displayName: "Pi"
+  vendor: "Mario Zechner (@mariozechner)"
+  homepageUrl: "https://www.npmjs.com/package/@mariozechner/pi-coding-agent"
+  primarySurface: cli
+  supportTier: adapter-only
+  productKind: full-cli-agent
+  stackScope: full
+  repoUrl: "https://github.com/earendil-works/pi"
+  description: |
+    Pi is a terminal coding agent from earendil-works/pi, integrated into
+    the v6 catalog through the agent-mux adapter. The repo is structured
+    as a multi-package workspace:
+
+    - packages/ai — AI provider abstraction layer supporting Anthropic,
+      OpenAI (responses, completions, codex-responses), Azure OpenAI,
+      Google, Vertex, Bedrock, Cloudflare, Mistral, and GitHub Copilot.
+    - packages/agent — AgentHarness with compaction (branch summarization),
+      session management, skills (formatSkillInvocation), prompt templates,
+      and execution-env abstraction.
+    - packages/coding-agent — The CLI coding agent that composes the agent
+      harness into a full user-facing product with modes, config, migrations,
+      and package-manager integration.
+
+    The coding-agent is the top-level CLI entry point (`pi` command) that
+    layers on the harness from packages/agent.
+edges:
+  has_version:
+    - agentVersion:pi:ge-0-0-0
+  composed_of:
+    - target: language:typescript
+      role: core

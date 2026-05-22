@@ -1,0 +1,63 @@
+---
+nodeKind: Workflow
+id: workflow:visual-regression-testing
+attributes:
+  displayName: "Visual Regression Testing"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: single-team
+  description: |
+    Captures and compares UI screenshots across browsers and viewports to
+    detect unintended visual changes — running headless browsers against
+    Storybook or page routes, generating pixel-diff reports, managing baseline
+    image approval workflows, and tracking flaky visual comparisons. Excludes
+    accessibility and functional testing.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:product-designer
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:visual-regression-testing
+    - target: skill-area:e2e-testing
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:review-prs-merge-decisions
+    - target: responsibility:code-review-coverage
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:frontend-team
+---
+nodeKind: Workflow
+id: workflow:mutation-testing-coverage-review
+attributes:
+  displayName: "Mutation Testing Coverage Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Evaluates test suite effectiveness using mutation testing — injecting code
+    mutations (conditional boundary, return value, void method call), measuring
+    mutation kill rates per module, identifying weakly-tested code paths, and
+    producing a prioritized backlog of test gaps. Excludes writing the missing
+    tests.
+edges:
+  involves_role:
+    - target: role:qa-lead
+    - target: role:test-writer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:mutation-testing
+    - target: skill-area:unit-testing
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:code-review-coverage
+    - target: responsibility:flaky-test-quarantine
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:engineering

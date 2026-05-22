@@ -1,0 +1,44 @@
+nodeKind: Provider
+id: provider:hyperbolic
+attributes:
+  versionRange: ">=2024-01-01"
+  displayName: "Hyperbolic"
+  vendor: "Hyperbolic Labs"
+  authMethods:
+    - api-key
+  authMethodNotes: |
+    Standard `Authorization: Bearer <api-key>`. OpenAI-compatible surface.
+  endpoints:
+    base: "https://api.hyperbolic.xyz/v1"
+    chat_completions: "https://api.hyperbolic.xyz/v1/chat/completions"
+    completions: "https://api.hyperbolic.xyz/v1/completions"
+    models: "https://api.hyperbolic.xyz/v1/models"
+  pricing: |
+    See https://hyperbolic.xyz/pricing — pay-per-token across open-weights
+    models; rates published per model.
+  pricingTiers:
+    - name: serverless
+      rateLimit: "Per-account RPM caps"
+      priceMultiplier: 1.0
+      description: "Pay-per-token serverless inference."
+  rateLimitSignalingProtocol: |
+    OpenAI-compatible. 429 with `retry-after`.
+  dataResidencyOptions:
+    - us
+  vendorFeatures:
+    - capability:streaming
+  slaTier: "hyperbolic-no-public-sla"
+  regions:
+    - global
+edges:
+  realizes:
+    - target: layer:2-provider
+  serves:
+    - model:llama-3-1-405b-instruct@current
+    - model:llama-3-1-70b-instruct@current
+    - model:llama-3-3-70b-instruct@current
+    - model:qwen-2-5-72b-instruct@current
+    - model:qwen-2-5-coder-32b@current
+    - model:qwq-32b-preview@current
+    - model:deepseek-v3@current
+    - model:deepseek-r1@current

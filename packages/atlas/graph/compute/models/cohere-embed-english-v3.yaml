@@ -1,0 +1,35 @@
+nodeKind: ModelVersion
+id: model:cohere-embed-english-v3@current
+attributes:
+  displayName: "Cohere Embed English v3"
+  modelFamilyId: model-family:cohere-embed-english-v3
+  versionRange: ">=3.0.0 <4.0.0"
+  kind: embedding
+  contextWindowTokens: 512
+  costPerMTokInput: 0.10
+  costPerMTokOutput: 0.0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modalities:
+    - text
+    - embedding
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: embedding
+      direction: output
+  releaseDate: "2023-11-02"
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: "2023-11-02"
+  modelCardUrl: "https://docs.cohere.com/docs/cohere-embed"
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:cohere-embed-english-v3
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:cohere-embed-english-v3
+  served_by:
+    - provider:cohere

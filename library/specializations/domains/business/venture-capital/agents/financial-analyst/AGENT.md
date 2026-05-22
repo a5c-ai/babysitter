@@ -8,6 +8,10 @@ expertise:
   - Working capital assessment
   - Unit economics analysis
   - Revenue quality and sustainability
+graph:
+  domains: [domain:venture-capital]
+  skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+  roles: [role:financial-analyst]
 ---
 
 # Financial Analyst

@@ -1,0 +1,14 @@
+nodeKind: EvalResult
+id: eval-result:swe-bench-verified.claude-sonnet-4-5.001
+attributes:
+  evalRunId: eval-run:swe-bench-verified.claude-sonnet-4-5.2025-09
+  metricName: pass_rate
+  score: 0.772
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench-verified.claude-sonnet-4-5.2025-09
+  scored_against:
+    - target: benchmark:swe-bench-verified

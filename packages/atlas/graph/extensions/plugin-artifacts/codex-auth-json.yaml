@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:codex-auth-json
+attributes:
+  artifactId: plugin-artifact:codex-auth-json
+  displayName: "Codex auth.json"
+  targetId: plugin-target:codex
+  artifactKind: settings-fragment
+  pathPattern: "~/.codex/auth.json"
+  installerSurface: "auth-file"
+edges:
+  emits_artifact:
+    - target: plugin-target:codex

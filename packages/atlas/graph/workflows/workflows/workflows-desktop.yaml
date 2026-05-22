@@ -1,0 +1,89 @@
+---
+nodeKind: Workflow
+id: workflow:desktop-app-packaging
+attributes:
+  displayName: "Desktop App Packaging"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Builds, signs, and packages desktop application artifacts for
+    distribution — producing platform-specific installers (MSI, DMG,
+    AppImage), code-signing certificates, notarization, and publishing
+    to distribution channels. Excludes cross-platform build matrix
+    management.
+edges:
+  involves_role:
+    - target: role:implementer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:editor-fluency
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:changelog-maintenance
+  performed_by_org_unit:
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:desktop-auto-update-pipeline
+attributes:
+  displayName: "Desktop Auto-Update Pipeline"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Manages the end-to-end auto-update delivery pipeline for desktop
+    applications — staging update artifacts, configuring rollout
+    percentages, monitoring crash rates post-update, and triggering
+    rollback if regression thresholds are exceeded. Excludes the initial
+    build/packaging step.
+edges:
+  involves_role:
+    - target: role:implementer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:canary-rollouts
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity
+---
+nodeKind: Workflow
+id: workflow:cross-platform-build-matrix
+attributes:
+  displayName: "Cross-Platform Build Matrix"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: single-team
+  description: |
+    Configures and maintains CI build matrices spanning multiple operating
+    systems, architectures, and toolchain versions — ensuring each
+    combination passes tests, managing conditional compilation flags,
+    and triaging platform-specific failures. Excludes final packaging.
+edges:
+  involves_role:
+    - target: role:implementer
+    - target: role:test-writer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:editor-fluency
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:flaky-test-quarantine
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity

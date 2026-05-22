@@ -1,0 +1,18 @@
+nodeKind: Role
+id: role:engineering-manager
+attributes:
+  displayName: "Engineering Manager"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:software-engineering
+  description: |
+    Manages a team of engineers — owns hiring, growth, delivery, and team health.
+edges:
+  requires_expertise:
+    - target: skill-area:adr-writing
+    - target: skill-area:code-review-practice
+    - target: skill-area:semver-discipline
+  applies_to:
+    - target: domain:software-engineering

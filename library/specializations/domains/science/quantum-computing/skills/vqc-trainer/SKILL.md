@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: quantum-ml
   phase: 6
+graph:
+  domains: [domain:quantum-computing]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:machine-learning-frameworks, skill-area:physics-simulation]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:ml-engineer]
 ---
 
 # VQC Trainer

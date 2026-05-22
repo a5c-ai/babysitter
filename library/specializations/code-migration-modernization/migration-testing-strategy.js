@@ -19,6 +19,13 @@
  * - Characterization Testing: https://michaelfeathers.silvrback.com/characterization-testing
  * - Approval Tests: https://approvaltests.com/
  * - Golden Master Testing: https://blog.thecodewhisperer.com/permalink/surviving-legacy-code-with-golden-master-and-sampling
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:code-migration-modernization]
+ *   skillAreas: [skill-area:strangler-fig-pattern, skill-area:parallel-run-migration, skill-area:database-migrations-zero-downtime]
+ *   roles: [role:architect, role:tech-lead]
+ *   workflows: [workflow:technical-debt-reduction]
+ *   topics: [topic:refactoring]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

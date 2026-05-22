@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:scope-boundary.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:scope-boundary
+  text: |
+    inScope/outOfScope declaration with optional evidence
+  status: canonical
+edges:
+  defines:
+    - term:scope-boundary

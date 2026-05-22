@@ -8,6 +8,11 @@ expertise:
   - Transition formula derivation
   - Advanced DP technique application
   - DP debugging and verification
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:dynamic-programming]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # DP Specialist Agent

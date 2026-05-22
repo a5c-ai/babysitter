@@ -7,6 +7,11 @@ metadata:
   version: "1.0.0"
   category: debugging
   backlog-id: SK-010
+graph:
+  domains: [domain:scientific-computing]
+  specializations: [specialization:gpu-programming]
+  skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders, skill-area:profiling-cuda]
+  roles: [role:computational-scientist, role:ml-engineer]
 ---
 
 # cuda-debugging

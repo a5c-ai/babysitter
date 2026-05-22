@@ -1,0 +1,31 @@
+{{- $kyverno := .Values.externalDependencies.kyverno | default dict -}}
+{{- $managed := $kyverno.managed | default dict -}}
+{{- if and .Values.argocd.enabled (eq (default (ternary "auto" (ternary "byo" "disabled" ($kyverno.enabled | default false)) ($kyverno.discoverExisting | default true)) $kyverno.mode) "managed") -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ default "kyverno" $managed.releaseName | quote }}
+  namespace: {{ .Values.argocd.namespace | quote }}
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+    krate.a5c.ai/gitops-engine: argocd
+    krate.a5c.ai/policy-engine: kyverno
+spec:
+  project: {{ .Values.argocd.project | quote }}
+  source:
+    repoURL: {{ default "https://kyverno.github.io/kyverno/" $managed.chartRepoURL | quote }}
+    chart: {{ default "kyverno" $managed.chart | quote }}
+    targetRevision: {{ default "3.x" $managed.targetRevision | quote }}
+    helm:
+      values: |
+{{ toYaml ($managed.values | default dict) | indent 8 }}
+  destination:
+    server: {{ .Values.argocd.destination.server | quote }}
+    namespace: {{ $kyverno.namespace | default "kyverno" | quote }}
+  syncPolicy:
+    automated:
+      prune: {{ .Values.argocd.syncPolicy.prune }}
+      selfHeal: {{ .Values.argocd.syncPolicy.selfHeal }}
+    syncOptions:
+      - "CreateNamespace=true"
+{{- end -}}

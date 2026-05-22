@@ -1,0 +1,153 @@
+nodeKind: Domain
+id: domain:software-engineering
+attributes:
+  displayName: "Software Engineering"
+  description: |
+    General software engineering — coding, design, code review,
+    refactoring, debugging, testing. Used as the catch-all domain
+    when nothing more specific applies.
+edges:
+  contains:
+    - specialization:software-architecture
+    - specialization:qa-testing-automation
+    - specialization:performance-optimization
+    - specialization:technical-documentation
+    - specialization:sdk-platform-development
+    - specialization:cli-mcp-development
+    - specialization:code-migration-modernization
+    - specialization:algorithms-optimization
+    - specialization:ai-agents-conversational
+    - specialization:go-microservices
+    - specialization:rust-systems
+    - topic:adapter-pattern
+    - topic:agent-journal
+    - topic:api-gateway
+    - topic:api-versioning-strategy
+    - topic:auto-discovery
+    - topic:backend-for-frontend
+    - topic:breakpoint-orchestration
+    - topic:builder-pattern
+    - topic:ci-artifacts
+    - topic:ci-observability
+    - topic:ci-pipeline-design
+    - topic:ci-triggers
+    - topic:claude-code-hooks
+    - topic:claude-code-skills
+    - topic:command-pattern
+    - topic:compensating-transaction
+    - topic:context-aware-retrieval
+    - topic:database-per-service
+    - topic:decorator-pattern
+    - topic:deployment-strategies
+    - topic:event-mesh
+    - topic:event-store
+    - topic:evidence-based-graph
+    - topic:experiment-driven-development
+    - topic:factory-pattern
+    - topic:fallback-pattern
+    - topic:feature-flags
+    - topic:finite-state-machine
+    - topic:github-actions-workflows
+    - topic:graph-provenance
+    - topic:graph-query-scoping
+    - topic:harness-integration
+    - topic:hook-driven-automation
+    - topic:information-trust-tiers
+    - topic:inversion-of-control
+    - topic:knowledge-graph-navigation
+    - topic:knowledge-provenance
+    - topic:layered-architecture
+    - topic:lazy-loading
+    - topic:memoization
+    - topic:message-driven-architecture
+    - topic:microservices-architecture
+    - topic:monolithic-architecture
+    - topic:monorepo-ci
+    - topic:multi-source-knowledge-fusion
+    - topic:mvc
+    - topic:mvp
+    - topic:mvvm
+    - topic:observer-pattern
+    - topic:onion-architecture
+    - topic:pair-programming
+    - topic:provider-pattern
+    - topic:publish-subscribe
+    - topic:publisher-subscriber-pattern
+    - topic:rag-pipeline-design
+    - topic:remote-dispatch
+    - topic:repository-pattern
+    - topic:request-reply
+    - topic:saga-pattern
+    - topic:scheduled-dispatch
+    - topic:service-oriented-architecture
+    - topic:shared-database
+    - topic:singleton-pattern
+    - topic:soap
+    - topic:sparse-retrieval
+    - topic:strategy-pattern
+    - topic:throttling
+    - topic:timeout-pattern
+    - topic:unit-of-work
+    - topic:api-design
+    - topic:architecture-decisions
+    - topic:circuit-breakers
+    - topic:cqrs
+    - topic:clean-architecture
+    - topic:retry-pattern
+    - topic:rest
+    - topic:bulkhead-pattern
+    - topic:data-mapper
+    - topic:active-record
+    - topic:observable-pattern
+    - topic:proxy-pattern
+    - topic:dependency-injection
+    - topic:event-driven-architecture
+    - topic:event-sourcing
+    - topic:graphql-schema-design
+    - topic:microservices
+    - topic:monolith-to-microservices
+    - topic:design-patterns
+    - topic:domain-driven-design
+    - topic:twelve-factor-app
+    - topic:service-mesh
+    - topic:refactoring
+    - topic:technical-debt
+    - topic:code-review-best-practices
+    - topic:test-driven-development
+    - topic:developer-experience
+    - topic:trunk-based-development
+    - topic:gitflow
+    - topic:integrations
+    - topic:package-management
+    - topic:documentation
+    - topic:continuous-integration
+    - topic:continuous-deployment
+    - topic:ci-cd
+    - topic:release-management
+---
+nodeKind: Domain
+id: domain:api-development
+attributes:
+  displayName: "API Development"
+  description: |
+    Design, implementation, and documentation of APIs — REST, GraphQL,
+    gRPC, and OpenAPI — including versioning, authentication, and rate limiting.
+edges:
+  contains:
+    - topic:api-gateway
+    - topic:api-key
+    - topic:api-versioning-strategy
+    - topic:request-reply
+    - topic:soap
+---
+nodeKind: Domain
+id: domain:serverless
+attributes:
+  displayName: "Serverless"
+  description: |
+    Serverless computing architectures and functions-as-a-service (FaaS)
+    including AWS Lambda, Cloudflare Workers, and event-driven workflows.
+edges:
+  contains:
+    - topic:event-mesh
+    - topic:publish-subscribe

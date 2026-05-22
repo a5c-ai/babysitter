@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:supports-plugins
+attributes:
+  displayName: "Supports plugins"
+  description: |
+    The entity can load plugins (per-host extension bundles) at start
+    or at runtime.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: extension
+edges: {}

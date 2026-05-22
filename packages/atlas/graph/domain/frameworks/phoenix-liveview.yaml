@@ -1,0 +1,19 @@
+nodeKind: Framework
+id: framework:phoenix-liveview
+attributes:
+  displayName: "Phoenix LiveView"
+  homepageUrl: "https://hexdocs.pm/phoenix_live_view"
+  belongsToLanguageId: language:elixir
+  category: web-fullstack
+  description: |
+    Phoenix LiveView — server-rendered, real-time interactive UIs over
+    WebSockets for the Phoenix framework, eliminating most client-side
+    JavaScript for typical CRUD and form-heavy apps.
+edges:
+  belongs_to_language:
+    - language:elixir
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - target: framework:phoenix
+      comparison: "Elixir web frameworks"

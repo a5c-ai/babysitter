@@ -6,6 +6,14 @@ backlog-id: AG-005
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer, role:security-engineer]
+  skillAreas: [skill-area:security-testing, skill-area:dast]
+  workflows: [workflow:security-audit]
+  topics: [topic:defense-in-depth]
+
 ---
 
 # security-testing-expert

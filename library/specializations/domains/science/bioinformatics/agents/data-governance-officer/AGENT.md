@@ -12,6 +12,12 @@ expertise:
 metadata:
   version: "1.0"
   category: bioinformatics
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:data-governance, skill-area:data-analysis, skill-area:python-data-pipelines]
+  workflows: [workflow:experiment-design]
+  roles: [role:biomedical-engineer, role:compliance-engineer]
 ---
 
 # Data Governance Officer Agent

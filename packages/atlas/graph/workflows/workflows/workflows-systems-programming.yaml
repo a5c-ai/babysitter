@@ -1,0 +1,111 @@
+---
+nodeKind: Workflow
+id: workflow:kernel-module-review
+attributes:
+  displayName: "Kernel Module Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Reviews and tests kernel module and device driver code changes before they
+    reach production — validating adherence to kernel coding style and API
+    conventions, running static analysis with sparse and smatch for common kernel
+    bug patterns (use-after-free, missing locks, uninitialized memory), executing
+    the kernel test suite (KUnit, kselftest) with coverage instrumentation,
+    stress-testing under memory pressure and CPU contention to expose race
+    conditions, verifying module load/unload cycles for resource leak freedom,
+    and checking backward compatibility of exported symbols against stable ABI
+    guarantees. Produces code review reports, static analysis findings, and test
+    execution summaries with regression status. Excludes userspace driver
+    development.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:security-reviewer
+    - target: role:code-reviewer
+  requires_skill_area:
+    - target: skill-area:fuzz-testing
+    - target: skill-area:profiling-memory
+  applies_to_domain:
+    - target: domain:systems-programming
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:code-review-coverage
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:application-security-team
+---
+nodeKind: Workflow
+id: workflow:systems-memory-safety-audit
+attributes:
+  displayName: "Systems Memory Safety Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits systems-level codebases for memory safety vulnerabilities — running
+    AddressSanitizer and MemorySanitizer builds across the full test suite,
+    executing coverage-guided fuzzing campaigns targeting parser and protocol
+    handling code paths, analyzing unsafe block density and justification quality
+    in Rust codebases, reviewing C/C++ code for buffer overflows, double-frees,
+    and integer overflow patterns using Coverity and CodeQL, triaging findings by
+    exploitability and blast radius, and tracking remediation progress against
+    severity-based SLA deadlines. Produces vulnerability findings with CVSS
+    scoring, sanitizer run summaries, and remediation burndown charts. Excludes
+    application-layer security scanning.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:refactor-bot
+    - target: role:principal-engineer
+  requires_skill_area:
+    - target: skill-area:profiling-memory
+    - target: skill-area:sast
+  applies_to_domain:
+    - target: domain:systems-programming
+    - target: domain:cybersecurity
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:application-security-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:abi-compatibility-validation
+attributes:
+  displayName: "ABI Compatibility Validation"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: single-team
+  description: |
+    Validates Application Binary Interface stability across library and runtime
+    releases — diffing exported symbol tables between release candidates and the
+    last stable version, checking struct layout changes for size and alignment
+    regressions using pahole and abidiff, verifying vtable ordering stability
+    for C++ libraries, running ABI compliance checker tools against the declared
+    stable API surface, flagging unintentional breaking changes introduced by
+    compiler upgrades or optimization flag changes, and gating releases on ABI
+    compatibility verdicts. Produces ABI diff reports, symbol compatibility
+    matrices, and release-readiness verdicts. Excludes API design decisions.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:refactor-bot
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:semver-discipline
+    - target: skill-area:breaking-change-management
+  applies_to_domain:
+    - target: domain:systems-programming
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:release-engineering
+    - target: org-unit:engineering

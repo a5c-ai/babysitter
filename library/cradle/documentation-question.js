@@ -14,6 +14,11 @@
  * 5. Compose Issue - Build the GitHub documentation question issue
  * 6. Review Breakpoint - Let user review before submission
  * 7. Submit Issue - Open the issue on a5c-ai/babysitter with documentation label (with breakpoint)
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:bug-fixing-from-issues, skill-area:code-review-practice]
+ *   workflows: [workflow:bug-triage, workflow:feature-development]
+ *   roles: [role:backend-engineer, role:devops-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -287,7 +292,7 @@ export const searchExistingDocsTask = defineTask('search-existing-docs', (args, 
         '  - CLAUDE.md (project instructions)',
         '  - packages/sdk/sdk.md (SDK API reference)',
         '  - README.md files in relevant packages',
-        '  - plugins/babysitter/skills/babysit/SKILL.md (babysit skill docs)',
+        '  - plugins/babysitter-unified/skills/babysit/SKILL.md (babysit skill docs)',
         '  - library/reference/ (advanced patterns)',
         '  - CHANGELOG.md (for recent changes)',
         'Use grep/glob to search for keywords in .md files',

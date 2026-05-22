@@ -1,0 +1,91 @@
+nodeKind: Claim
+id: claim:cursor-platform-defines-rule-frontmatter-fields
+attributes:
+  subjectId: agent-platform-impl:cursor.platform@current
+  subjectKind: AgentPlatformImpl
+  attribute: defines_frontmatter_field
+  value: Cursor platform defines description, globs, and alwaysApply frontmatter fields for .mdc rules.
+  statement: Cursor rule frontmatter support is represented by cursor.platform defines_frontmatter_field edges to the cursor-rule FrontmatterField records.
+  evidenceSourceIds:
+    - evidence:frontmatter-cursor-rules-docs
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - agent-platform-impl:cursor.platform@current
+  backed_by_evidence:
+    - evidence:frontmatter-cursor-rules-docs
+---
+nodeKind: Claim
+id: claim:babysitter-platform-defines-task-schema-fields
+attributes:
+  subjectId: agent-platform-impl:babysitter.platform@current
+  subjectKind: AgentPlatformImpl
+  attribute: defines_frontmatter_field
+  value: Babysitter platform defines task-schema fields for defineTask id/name/kind/title/description/labels/source/inputs/outputs/io/metadata/execution/node/breakpoint/sleep/subprocess.
+  statement: Babysitter task schema support is represented by babysitter.platform defines_frontmatter_field edges to task-schema FrontmatterField records derived from defineTask and task types.
+  evidenceSourceIds:
+    - evidence:frontmatter-babysitter-task-schema-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - agent-platform-impl:babysitter.platform@current
+  backed_by_evidence:
+    - evidence:frontmatter-babysitter-task-schema-source
+---
+nodeKind: Claim
+id: claim:agent-mux-harness-mock-package-surface
+attributes:
+  subjectId: package:a5c-ai-agent-mux-harness-mock
+  subjectKind: PackageSurface
+  attribute: surfaceKinds
+  value: '@a5c-ai/agent-mux-harness-mock is modeled as a test-fixture, bin-entrypoint, and harness-emulator package surface.'
+  statement: The harness-mock package surface is grounded in its package.json package metadata and mock-harness binary entrypoint.
+  evidenceSourceIds:
+    - evidence:agent-mux-harness-mock-package-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-agent-mux-harness-mock
+  backed_by_evidence:
+    - evidence:agent-mux-harness-mock-package-source
+---
+nodeKind: Claim
+id: claim:agent-mux-harness-mock-exposes-scenarios
+attributes:
+  subjectId: package:a5c-ai-agent-mux-harness-mock
+  subjectKind: PackageSurface
+  attribute: exposes_subcommand
+  value: Harness-mock exposes interactive approval, error, and runtime-hook mock scenarios as test-fixture InteractionPrimitive records.
+  statement: Harness-mock scenario primitives are grounded in scenario fixture source files and wired from the package surface with exposes_subcommand edges.
+  evidenceSourceIds:
+    - evidence:agent-mux-harness-mock-scenarios-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-agent-mux-harness-mock
+  backed_by_evidence:
+    - evidence:agent-mux-harness-mock-scenarios-source

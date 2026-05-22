@@ -8,6 +8,10 @@ required-skills:
   - SK-FTV-001 (logline-writing)
   - SK-FTV-002 (treatment-writing)
   - SK-FTV-012 (genre-analysis-film)
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:content-strategy, skill-area:natural-language-processing, skill-area:market-research]
+  roles: [role:content-strategist, role:creative-director]
 ---
 
 # Story Developer Agent

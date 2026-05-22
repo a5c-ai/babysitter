@@ -10,6 +10,14 @@ expertise:
   - Eventual consistency patterns
   - Saga/Process manager patterns
   - Snapshot strategies
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:principal-engineer]
+  skillAreas: [skill-area:cqrs, skill-area:event-sourcing]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:cqrs, topic:event-sourcing, topic:event-driven-architecture]
+
 ---
 
 # CQRS/Event Sourcing Expert Agent

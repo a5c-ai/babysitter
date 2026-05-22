@@ -1,0 +1,588 @@
+# NodeKinds for cluster 9-domain.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:domain
+  name: Domain
+  origin: universal
+  prefix: domain
+  cluster: 9-domain
+  purpose: broad area (web-development, devops, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - applies_to
+  - defined_in_context_of
+  outgoingEdges:
+  - contains
+  invariants:
+  - contains hierarchy is acyclic (V-4.1)
+  examples: []
+- id: node:specialization
+  name: Specialization
+  origin: universal
+  prefix: specialization
+  cluster: 9-domain
+  purpose: sub-domain (frontend-react, backend-python-django, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: aliasOf
+    type: id
+    required: false
+  - name: parentDomain
+    type: id
+    required: false
+  - name: parentDomainId
+    type: id
+    required: false
+  incomingEdges:
+  - contains
+  - applies_to
+  outgoingEdges:
+  - contains
+  invariants: []
+  examples: []
+- id: node:topic
+  name: Topic
+  origin: universal
+  prefix: topic
+  cluster: 9-domain
+  purpose: granular topic (oauth-flows, ssl-certs, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - contains
+  - applies_to
+  - orch_applied_by
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:language
+  name: Language
+  origin: universal
+  prefix: language
+  cluster: 9-domain
+  purpose: programming language
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: paradigm
+    type: list<string>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: paradigms
+    type: list<string>
+    required: false
+  incomingEdges:
+  - belongs_to_language
+  - composes
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:framework
+  name: Framework
+  origin: universal
+  prefix: framework
+  cluster: 9-domain
+  purpose: framework
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: multiLanguage
+    type: bool
+    required: false
+  - name: belongsToLanguageId
+    type: id
+    required: false
+  - name: category
+    type: enum<web-frontend,web-backend,web-framework,web-fullstack,fullstack,mobile,mobile-framework,desktop,agent-orchestration,agent-ui,static-site,presentation,game-engine,testing,other>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: homepageUrl
+    type: url
+    required: false
+  - name: primaryLanguageIds
+    type: list<id>
+    required: false
+  incomingEdges:
+  - composes
+  - integrates_with
+  outgoingEdges:
+  - belongs_to_language
+  invariants:
+  - exactly one belongs_to_language unless multiLanguage=true (V-4.2)
+  examples: []
+- id: node:stack-profile
+  name: StackProfile
+  origin: universal
+  prefix: stack-profile
+  cluster: 9-domain
+  purpose: named composition of language + framework + tooling
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: composes
+    type: list<id>
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - composes
+  invariants:
+  - composes >= 1 Language and >= 1 Framework or Tool (V-4.3)
+  examples: []
+- id: node:skill-area
+  name: SkillArea
+  origin: universal
+  prefix: skill-area
+  cluster: 9-domain
+  purpose: named area of expertise (descriptive layer, distinct from Skill which carries SKILL.md content)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: parentSpecializationId
+    type: ref<Specialization>
+    required: false
+  - name: domains
+    type: list<id>
+    required: false
+    notes: list of refs to Domain | Specialization | Topic that this skill area applies to
+  - name: requiresLanguages
+    type: list<id>
+    required: false
+    notes: typical languages used in this skill area
+  - name: requiresFrameworks
+    type: list<id>
+    required: false
+  - name: requiresLibraries
+    type: list<id>
+    required: false
+  - name: requiresStackParts
+    type: list<id>
+    required: false
+  - name: requiresTools
+    type: list<id>
+    required: false
+    notes: typical tools used in this skill area
+  - name: prerequisiteSkillAreas
+    type: list<id>
+    required: false
+  - name: expertiseLevels
+    type: list<enum<novice
+    intermediate: null
+    expert: null
+    authoritative>>: null
+    required: false
+  - name: relatedSkillAreas
+    type: list<id>
+    required: false
+  incomingEdges:
+  - requires_expertise
+  - addresses
+  - used_for
+  - covered_by_benchmark
+  - orch_skill_area_required_by
+  outgoingEdges:
+  - applies_to
+  - uses_language
+  - uses_framework
+  - uses_library
+  - uses_stack_part
+  - requires_skill_area
+  invariants:
+  - id starts with skill-area: null
+  examples: []
+- id: node:library
+  name: Library
+  origin: universal
+  prefix: library
+  cluster: 9-domain
+  purpose: callable dependency (distinct from Framework which inverts control, and Tool which is dev tooling)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: belongsToLanguageId
+    type: ref<Language>
+    required: false
+  - name: category
+    type: enum<testing,validation,http-client,http-server,orm,logging,metrics,tracing,crypto,auth,parsing,serialization,concurrency,datetime,math,data-structures,file-format,image-processing,other>
+    required: false
+  - name: description
+    type: markdown
+    required: true
+  - name: homepageUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: version
+    type: semver
+    required: false
+  incomingEdges:
+  - implemented_by
+  outgoingEdges:
+  - belongs_to_language
+  - used_for
+  - library_used_by
+  invariants:
+  - id starts with library: null
+  examples: []
+- id: node:tool
+  name: Tool
+  origin: universal
+  prefix: tool
+  cluster: 9-domain
+  purpose: dev/build/infra tool (distinct from ToolDescriptor which is agent-callable, and ToolServer which is an MCP server)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<build-tool,build,package-manager,linter,formatter,transpiler,bundler,container,orchestrator,iac,debugger,profiler,test-runner,ci,secrets-manager,observability,sql-tool,api-tool,config-mgmt,security,llm-proxy,memory-system,ai-dev-tool,workflow-automation,knowledge-platform,agent-skill,other>
+    required: false
+  - name: description
+    type: markdown
+    required: true
+  - name: homepageUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: language
+    type: ref<Language>
+    required: false
+  - name: platforms
+    type: list<enum<darwin
+    linux: null
+    win32: null
+    all>>: null
+    required: false
+  - name: installMethods
+    type: list<id>
+    required: false
+  incomingEdges:
+  - composes
+  - implemented_by
+  - integrates_with
+  - scores_agent_readiness_of
+  - work_supported_by_tool
+  outgoingEdges:
+  - belongs_to_language
+  - used_for
+  - tool_used_by
+  - sourced_from
+  - supports_work
+  - agent_readiness_score_for
+  invariants:
+  - id starts with tool: null
+  examples: []
+- id: node:stack-part
+  name: StackPart
+  origin: universal
+  prefix: stack-part
+  cluster: 9-domain
+  purpose: abstract role a stack component fills (orm, api-gateway, message-queue, vector-database, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: category
+    type: enum<data-store,data-format,api,runtime,infrastructure,security,observability,tooling,compute,messaging,other>
+    required: false
+  - name: commonImplementations
+    type: list<id>
+    required: false
+    notes: refs to Library | Framework | Tool | PlatformService
+  - name: relatedStackParts
+    type: list<id>
+    required: false
+  incomingEdges:
+  - composes
+  - integrates_with
+  outgoingEdges:
+  - implemented_by
+  - stack_part_used_by
+  invariants:
+  - id starts with stack-part: null
+  - implemented_by source list MAY include PlatformService (V-platform-3)
+  examples: []
+- id: node:platform
+  name: Platform
+  origin: universal
+  prefix: platform
+  cluster: 9-domain
+  purpose: a cloud provider, k8s distribution, PaaS, or self-hosted PaaS that hosts PlatformServices
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: kind
+    type: enum<cloud-provider,k8s-distribution,paas,self-hosted-paas>
+    required: true
+  - name: homepageUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: ownerCompany
+    type: string
+    required: false
+  incomingEdges:
+  - provided_by
+  outgoingEdges:
+  - provides
+  invariants:
+  - id starts with platform: null
+  examples: []
+- id: node:platform-service
+  name: PlatformService
+  origin: universal
+  prefix: platform-service
+  cluster: 9-domain
+  purpose: a concrete first-party service offered by a Platform (e.g. AWS Lambda, GCP Pub/Sub) that implements one or more abstract StackParts
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: category
+    type: enum<compute,storage,database,messaging,networking,observability,security,ml,build-deploy,other>
+    required: true
+    notes: PlatformService.category enum diverges from StackPart.category by design (concrete vs abstract). No cross-validation required (V-platform-4).
+  - name: providedByPlatformId
+    type: ref<Platform>
+    required: true
+  - name: implementsStackPartIds
+    type: list<id>
+    required: false
+    notes: MAY be empty when the service has no abstract stack-part counterpart (k8s API objects, vendor-specific services). (V-platform-5)
+  - name: homepageUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: launchedAt
+    type: iso-date
+    required: false
+  incomingEdges:
+  - integrates_with
+  - depended_on_by
+  - receives_signals_from
+  - ingests_from
+  outgoingEdges:
+  - provided_by
+  - integrates_with
+  - depends_on
+  - implements_stack_part
+  - emits_signals_to
+  - exports_to
+  invariants:
+  - id starts with platform-service: null
+  - exactly one provided_by (V-platform-1)
+  - implementsStackPartIds MAY be empty (V-platform-5)
+  examples: []
+- id: node:kubernetes-crd-kind
+  name: KubernetesCrdKind
+  origin: derived
+  originContext: catalog pass 2026-05-14 — Kubernetes CRDs need first-class graph nodes so products such as Krate can model resource kinds, source manifests, external-resource mappings, policy governance, and controller reconciliation without overloading generic Topic or Definition records.
+  prefix: kubernetes-crd-kind
+  cluster: 9-domain
+  purpose: a Kubernetes CustomResourceDefinition kind that extends the Kubernetes API with a namespaced or cluster-scoped custom resource
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: apiGroup
+    type: string
+    required: true
+  - name: version
+    type: string
+    required: true
+    notes: Primary storage version for the CRD kind.
+  - name: servedVersions
+    type: list<string>
+    required: false
+    notes: All served versions from spec.versions.
+  - name: storageVersion
+    type: string
+    required: false
+    notes: Version marked storage=true in spec.versions.
+  - name: kind
+    type: string
+    required: true
+  - name: plural
+    type: string
+    required: true
+  - name: singular
+    type: string
+    required: false
+  - name: scope
+    type: enum<Namespaced,Cluster>
+    required: true
+  - name: sourceFile
+    type: string
+    required: true
+  - name: schemaPath
+    type: string
+    required: false
+  - name: family
+    type: string
+    required: false
+    notes: Product-specific resource family such as agent, aggregated, external-backend, policy, or identity.
+  - name: owningPlatformId
+    type: ref<Platform>
+    required: false
+  - name: platformServiceIds
+    type: list<id>
+    required: false
+    notes: PlatformService records that own, serve, reconcile, or surface this CRD kind.
+  - name: hasStatus
+    type: bool
+    required: false
+  - name: hasConditions
+    type: bool
+    required: false
+  - name: statusFieldPath
+    type: string
+    required: false
+  - name: categories
+    type: list<string>
+    required: false
+  - name: shortNames
+    type: list<string>
+    required: false
+  incomingEdges:
+  - reconciles_resource
+  - watches_resource
+  - surfaces_resource
+  - governs_resource
+  - serves_kubernetes_resource
+  outgoingEdges:
+  - defined_by_crd_source
+  - belongs_to_resource_family
+  - maps_to_external_resource
+  invariants:
+  - id starts with kubernetes-crd-kind: null
+  - kind, apiGroup, plural, servedVersions, storageVersion, and scope reflect the Kubernetes CustomResourceDefinition spec.
+  examples:
+  - graph/domain/products/krate-crd-kinds.yaml
+- id: node:kubernetes-controller
+  name: KubernetesController
+  origin: derived
+  originContext: catalog pass 2026-05-14 — controller reconciliation is a first-class Kubernetes platform relationship and should not be collapsed into generic service dependency edges.
+  prefix: kubernetes-controller
+  cluster: 9-domain
+  purpose: a Kubernetes controller, operator, admission controller, sync controller, or aggregated API component that watches and reconciles Kubernetes resources
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: owningPlatformId
+    type: ref<Platform>
+    required: false
+  - name: controllerKind
+    type: enum<operator,aggregated-api-server,admission-controller,webhook-controller,sync-controller,composite>
+    required: true
+  - name: runtime
+    type: string
+    required: false
+  - name: sourcePath
+    type: string
+    required: false
+  - name: reconciliationScope
+    type: enum<single-namespace,multi-namespace,cluster,mixed>
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - watches_resource
+  - reconciles_resource
+  - emits_resource_status
+  invariants:
+  - id starts with kubernetes-controller: null
+  examples:
+  - graph/domain/products/krate-controllers.yaml

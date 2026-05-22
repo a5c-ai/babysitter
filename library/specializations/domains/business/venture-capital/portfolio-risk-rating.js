@@ -3,6 +3,11 @@
  * @description Standardized risk rating system for portfolio companies including early warning indicators, intervention triggers, and escalation protocols
  * @inputs { fundName: string, portfolioCompanies: array, ratingFramework: object, priorRatings: object }
  * @outputs { success: boolean, riskRatings: object, watchList: array, interventions: array, artifacts: array }
+  * @graph
+ *   domains: [domain:venture-capital]
+ *   skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+ *   roles: [role:financial-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

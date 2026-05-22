@@ -1,0 +1,353 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.create-issue
+attributes:
+  schema: '{}'
+  displayName: "GitHub: Create Issue"
+  description: |
+    Create a new issue in a GitHub repository.
+  inputSchema:
+    type: object
+    required: [owner, repo, title]
+    properties:
+      owner: { type: string }
+      repo: { type: string }
+      title: { type: string }
+      body: { type: string }
+      labels: { type: array, items: { type: string } }
+      assignees: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      number: { type: integer }
+      url: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.list-issues
+attributes:
+  schema: '{}'
+  displayName: "GitHub: List Issues"
+  description: List issues for a repository, with state and label filters.
+  inputSchema:
+    type: object
+    required: [owner, repo]
+    properties:
+      owner: { type: string }
+      repo: { type: string }
+      state: { type: string, enum: [open, closed, all] }
+      labels: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      issues: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.get-issue
+attributes:
+  schema: '{}'
+  displayName: "GitHub: Get Issue"
+  description: Fetch a single issue by number.
+  inputSchema:
+    type: object
+    required: [owner, repo, issue_number]
+    properties:
+      owner: { type: string }
+      repo: { type: string }
+      issue_number: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      issue: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.update-issue
+attributes:
+  schema: '{}'
+  displayName: "GitHub: Update Issue"
+  description: Update title, body, state, labels, or assignees on an issue.
+  inputSchema:
+    type: object
+    required: [owner, repo, issue_number]
+    properties:
+      owner: { type: string }
+      repo: { type: string }
+      issue_number: { type: integer }
+      title: { type: string }
+      body: { type: string }
+      state: { type: string }
+      labels: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      issue: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.add-issue-comment
+attributes:
+  schema: '{}'
+  displayName: "GitHub: Add Issue Comment"
+  description: Add a comment to an issue or pull request.
+  inputSchema:
+    type: object
+    required: [owner, repo, issue_number, body]
+    properties:
+      owner: { type: string }
+      repo: { type: string }
+      issue_number: { type: integer }
+      body: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      id: { type: integer }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.create-pull-request
+attributes:
+  schema: '{}'
+  displayName: "GitHub: Create Pull Request"
+  description: Open a new pull request.
+  inputSchema:
+    type: object
+    required: [owner, repo, title, head, base]
+    properties:
+      owner: { type: string }
+      repo: { type: string }
+      title: { type: string }
+      head: { type: string }
+      base: { type: string }
+      body: { type: string }
+      draft: { type: boolean }
+  outputSchema:
+    type: object
+    properties:
+      number: { type: integer }
+      url: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.list-pull-requests
+attributes:
+  schema: '{}'
+  displayName: "GitHub: List Pull Requests"
+  description: List pull requests for a repository with optional filters.
+  inputSchema:
+    type: object
+    required: [owner, repo]
+    properties:
+      owner: { type: string }
+      repo: { type: string }
+      state: { type: string, enum: [open, closed, all] }
+  outputSchema:
+    type: object
+    properties:
+      pulls: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.search-repositories
+attributes:
+  schema: '{}'
+  displayName: "GitHub: Search Repositories"
+  description: Search GitHub repositories using the search API.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+      page: { type: integer }
+      perPage: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      items: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.search-code
+attributes:
+  schema: '{}'
+  displayName: "GitHub: Search Code"
+  description: Search code across GitHub repositories.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      items: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.search-users
+attributes:
+  schema: '{}'
+  displayName: "GitHub: Search Users"
+  description: Search GitHub users.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      items: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.create-or-update-file
+attributes:
+  schema: '{}'
+  displayName: "GitHub: Create or Update File"
+  description: Create or update a single file in a repository on a branch.
+  inputSchema:
+    type: object
+    required: [owner, repo, path, content, message, branch]
+    properties:
+      owner: { type: string }
+      repo: { type: string }
+      path: { type: string }
+      content: { type: string }
+      message: { type: string }
+      branch: { type: string }
+      sha: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      commit: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.get-file-contents
+attributes:
+  schema: '{}'
+  displayName: "GitHub: Get File Contents"
+  description: Read the contents of a file or list a directory in a repository.
+  inputSchema:
+    type: object
+    required: [owner, repo, path]
+    properties:
+      owner: { type: string }
+      repo: { type: string }
+      path: { type: string }
+      branch: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      content: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.fork-repository
+attributes:
+  schema: '{}'
+  displayName: "GitHub: Fork Repository"
+  description: Fork a repository to the authenticated user or an organization.
+  inputSchema:
+    type: object
+    required: [owner, repo]
+    properties:
+      owner: { type: string }
+      repo: { type: string }
+      organization: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      url: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:github.create-branch
+attributes:
+  schema: '{}'
+  displayName: "GitHub: Create Branch"
+  description: Create a new branch from a given source branch.
+  inputSchema:
+    type: object
+    required: [owner, repo, branch]
+    properties:
+      owner: { type: string }
+      repo: { type: string }
+      branch: { type: string }
+      from_branch: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ref: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-github

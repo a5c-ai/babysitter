@@ -8,27 +8,56 @@ import { RunEntrypointMetadata } from "../storage/types";
 import { nextUlid } from "../storage/ulids";
 import type { CreateRunOptions, CreateRunResult } from "./types";
 import { callRuntimeHook } from "./hooks/runtime";
+import { validateAgainstSchema } from "./schemaValidator";
+import { BabysitterRuntimeError } from "./exceptions";
+import { resolveProjectRootForRun, resolveRunsDir } from "../config";
+import { hashProcessCodeFile } from "./processCodeHash";
 
 export async function createRun(options: CreateRunOptions): Promise<CreateRunResult> {
   const runId = options.runId ?? nextUlid();
   validateRunId(runId);
-  const runsDir = path.resolve(options.runsDir);
+  const runsDir = path.resolve(options.runsDir ?? resolveRunsDir());
   const runDir = getRunDir(runsDir, runId);
-  const normalizedEntrypoint = normalizeEntrypoint(runDir, options.process.importPath, options.process.exportName);
-  const requestId = options.request ?? options.process.processId ?? runId;
+  const normalizedEntrypoint = options.process
+    ? normalizeEntrypoint(runDir, options.process.importPath, options.process.exportName)
+    : { importPath: "bare-run", exportName: undefined };
+  const requestId = options.request ?? options.process?.processId ?? runId;
   const providedProof =
     typeof options.metadata?.completionProof === "string" ? options.metadata.completionProof : undefined;
   const completionProof = providedProof ?? crypto.randomBytes(16).toString("hex");
+  const nestedMetadata = options.nested
+    ? {
+        parentRunId: options.nested.parentRunId,
+        ...(options.nested.parentEffectId ? { parentEffectId: options.nested.parentEffectId } : {}),
+        ...(options.nested.parentInvocationKey ? { parentInvocationKey: options.nested.parentInvocationKey } : {}),
+        ...(options.nested.sessionId ? { sessionId: options.nested.sessionId } : {}),
+        ...(options.nested.shareSession !== undefined ? { shareSession: options.nested.shareSession } : {}),
+      }
+    : undefined;
+  // Validate inputs against inputSchema if both are provided
+  if (options.inputSchema && options.inputs !== undefined) {
+    const validation = validateAgainstSchema(options.inputs, options.inputSchema);
+    if (!validation.valid) {
+      throw new BabysitterRuntimeError(
+        "InputValidationError",
+        `Input validation failed against inputSchema: ${validation.errors.join("; ")}`,
+      );
+    }
+  }
+
   const extraMetadata = {
     ...options.metadata,
+    ...(options.governance ? { governance: options.governance } : {}),
+    ...(options.process ? { processCodeHash: await hashProcessCodeFile(options.process.importPath) } : {}),
     completionProof,
   };
   const { metadata } = await createRunDir({
     runsRoot: runsDir,
     runId,
     request: requestId,
-    processId: options.process.processId,
+    processId: options.process?.processId ?? "bare-run",
     harness: options.harness,
+    nested: nestedMetadata,
     processRevision: options.processRevision,
     layoutVersion: options.layoutVersion,
     inputs: options.inputs,
@@ -36,6 +65,8 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     processPath: normalizedEntrypoint.importPath,
     extraMetadata,
     prompt: options.prompt,
+    inputSchema: options.inputSchema,
+    outputSchema: options.outputSchema,
   });
 
   let lockAcquired = false;
@@ -50,8 +81,14 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     if (metadata.harness) {
       eventPayload.harness = metadata.harness;
     }
+    if (metadata.nested) {
+      eventPayload.nested = metadata.nested;
+    }
     if (metadata.processRevision) {
       eventPayload.processRevision = metadata.processRevision;
+    }
+    if (metadata.processCodeHash) {
+      eventPayload.processCodeHash = metadata.processCodeHash;
     }
     if (options.inputs !== undefined) {
       eventPayload.inputsRef = INPUTS_FILE;
@@ -75,23 +112,22 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     ? `${metadata.entrypoint.importPath}#${metadata.entrypoint.exportName}`
     : metadata.entrypoint.importPath;
 
-  // Call hook from project root (parent of .a5c dir) where plugins/ is located
-  // runDir is like: /path/to/project/.a5c/runs/<runId>
-  // So we need 3 levels up: runs -> .a5c -> project
-  const projectRoot = path.dirname(path.dirname(path.dirname(runDir)));
-  await callRuntimeHook(
-    "on-run-start",
-    {
-      runId,
-      processId: metadata.processId,
-      entry: entryString,
-      inputs: options.inputs,
-    },
-    {
-      cwd: projectRoot,
-      logger: options.logger,
-    }
-  );
+  const projectRoot = resolveProjectRootForRun(runDir, metadata.entrypoint?.importPath);
+  if (!options.nested?.skipRunStartHook) {
+    await callRuntimeHook(
+      "on-run-start",
+      {
+        runId,
+        processId: metadata.processId,
+        entry: entryString,
+        inputs: options.inputs,
+      },
+      {
+        cwd: projectRoot,
+        logger: options.logger,
+      }
+    );
+  }
 
   return {
     runId,
@@ -110,7 +146,7 @@ function normalizeEntrypoint(runDir: string, importPath: string, exportName?: st
   const entryImport = toRunRelativePosix(runDir, importPath);
   return {
     importPath: entryImport,
-    exportName: exportName ?? "process",
+    exportName: exportName,
   };
 }
 

@@ -1,0 +1,295 @@
+{
+  "projectName": "Strategic Healthcare Patient Portal",
+  "domainDescription": "Comprehensive patient portal for a healthcare system that empowers patients to manage their health journey while ensuring regulatory compliance and clinical workflow integration. Built with strategic alignment between business goals, patient needs, and healthcare constraints.",
+  "ontologyScope": "encyclopedic",
+  "graphDepth": "complete",
+  "wikiTarget": "full-reference",
+  "iterationDepth": "thorough",
+  "adversarialMode": "standard",
+
+  "strategicContext": {
+    "businessGoals": {
+      "primary": [
+        {
+          "goal": "Improve Patient Engagement",
+          "metric": "40% increase in portal usage within 6 months",
+          "rationale": "Higher engagement correlates with better health outcomes and reduced readmissions"
+        },
+        {
+          "goal": "Reduce Administrative Burden",
+          "metric": "30% reduction in staff time for appointment scheduling and information requests",
+          "rationale": "Free up clinical staff for patient care rather than administrative tasks"
+        },
+        {
+          "goal": "Enhance Care Coordination",
+          "metric": "90% of care team members have visibility into patient interactions within 24 hours",
+          "rationale": "Better coordination improves patient outcomes and reduces medical errors"
+        },
+        {
+          "goal": "Regulatory Compliance Excellence",
+          "metric": "Zero compliance violations and 100% audit readiness",
+          "rationale": "Maintain accreditation and avoid penalties while building patient trust"
+        }
+      ],
+      "technical": [
+        {
+          "goal": "Enterprise Integration",
+          "metric": "Real-time data sync with EHR systems (< 5 second latency)",
+          "rationale": "Patients need current information to make informed decisions"
+        },
+        {
+          "goal": "Scalability for Growth",
+          "metric": "Support 100K+ concurrent users with 99.9% uptime",
+          "rationale": "Healthcare system is expanding and cannot afford downtime"
+        }
+      ],
+      "userGoals": [
+        {
+          "goal": "Take Control of Health Journey",
+          "userType": "Patients",
+          "description": "Understand my health status, track progress, and make informed decisions"
+        },
+        {
+          "goal": "Seamless Care Experience",
+          "userType": "Patients",
+          "description": "Access care without frustration, confusion, or unnecessary barriers"
+        },
+        {
+          "goal": "Efficient Patient Management",
+          "userType": "Clinicians",
+          "description": "Access patient information quickly to provide quality care"
+        }
+      ]
+    },
+
+    "userNeeds": {
+      "functionalNeeds": {
+        "patients": [
+          {
+            "need": "View Medical Records",
+            "description": "Access lab results, imaging, visit notes, medication lists",
+            "priority": "critical",
+            "linkedGoals": ["Take Control of Health Journey"]
+          },
+          {
+            "need": "Schedule Appointments",
+            "description": "Book, reschedule, cancel appointments with appropriate providers",
+            "priority": "critical",
+            "linkedGoals": ["Seamless Care Experience", "Reduce Administrative Burden"]
+          },
+          {
+            "need": "Secure Messaging",
+            "description": "Communicate with care team about non-urgent questions and updates",
+            "priority": "high",
+            "linkedGoals": ["Enhance Care Coordination", "Seamless Care Experience"]
+          },
+          {
+            "need": "Medication Management",
+            "description": "View prescriptions, request refills, check interactions",
+            "priority": "critical",
+            "linkedGoals": ["Take Control of Health Journey"]
+          },
+          {
+            "need": "Care Plan Tracking",
+            "description": "Monitor treatment progress, upcoming appointments, preventive care",
+            "priority": "high",
+            "linkedGoals": ["Take Control of Health Journey", "Improve Patient Engagement"]
+          }
+        ],
+        "clinicians": [
+          {
+            "need": "Patient Communication Tracking",
+            "description": "See all patient portal interactions and messages",
+            "priority": "high",
+            "linkedGoals": ["Enhance Care Coordination", "Efficient Patient Management"]
+          },
+          {
+            "need": "Urgent Alert System",
+            "description": "Get notified of critical patient communications or health changes",
+            "priority": "critical",
+            "linkedGoals": ["Enhance Care Coordination"]
+          }
+        ]
+      },
+      "nonFunctionalNeeds": {
+        "security": [
+          {
+            "need": "Data Protection",
+            "description": "All patient data must be encrypted and access-controlled",
+            "standard": "HIPAA, SOC 2 Type II",
+            "linkedConstraints": ["Regulatory Compliance"]
+          },
+          {
+            "need": "Identity Verification",
+            "description": "Multi-factor authentication for sensitive operations",
+            "rationale": "Protect patient privacy and prevent unauthorized access"
+          }
+        ],
+        "usability": [
+          {
+            "need": "Accessibility Compliance",
+            "description": "WCAG 2.1 AA compliance for users with disabilities",
+            "linkedConstraints": ["ADA Compliance"],
+            "affectedGoals": ["Seamless Care Experience"]
+          },
+          {
+            "need": "Mobile Optimization",
+            "description": "Full functionality on mobile devices with responsive design",
+            "rationale": "Many patients primarily use mobile devices for digital interactions"
+          }
+        ],
+        "performance": [
+          {
+            "need": "Fast Response Times",
+            "description": "Page loads under 3 seconds, API calls under 1 second",
+            "linkedGoals": ["Seamless Care Experience"],
+            "rationale": "Healthcare decisions are time-sensitive"
+          }
+        ]
+      },
+      "emotionalNeeds": [
+        {
+          "need": "Trust and Confidence",
+          "description": "Patients must feel confident their data is secure and information is accurate",
+          "designImplications": ["Clear security indicators", "Data source transparency", "Error handling with explanations"]
+        },
+        {
+          "need": "Empowerment",
+          "description": "Patients should feel in control of their health journey",
+          "designImplications": ["Clear navigation", "Progress indicators", "Educational content", "Choice in communication preferences"]
+        },
+        {
+          "need": "Reduced Anxiety",
+          "description": "Healthcare interactions can be stressful; interface should be calming and supportive",
+          "designImplications": ["Calm color palette", "Clear language", "Supportive messaging", "Predictable interactions"]
+        }
+      ]
+    },
+
+    "constraints": {
+      "regulatoryConstraints": [
+        {
+          "constraint": "HIPAA Compliance",
+          "description": "All patient health information must comply with HIPAA privacy and security rules",
+          "affectedAreas": ["Data storage", "Transmission", "Access controls", "Audit logging"],
+          "implementation": "End-to-end encryption, role-based access, comprehensive audit trails"
+        },
+        {
+          "constraint": "21st Century Cures Act",
+          "description": "Must support patient access to electronic health information without special effort",
+          "affectedAreas": ["Data export", "API access", "Information blocking prevention"],
+          "implementation": "FHIR APIs, data portability features, no artificial barriers to access"
+        },
+        {
+          "constraint": "ADA Compliance",
+          "description": "Digital accessibility requirements under Americans with Disabilities Act",
+          "affectedAreas": ["UI design", "Content presentation", "Interaction patterns"],
+          "implementation": "WCAG 2.1 AA compliance, screen reader support, keyboard navigation"
+        }
+      ],
+      "technicalConstraints": [
+        {
+          "constraint": "EHR Integration Requirements",
+          "description": "Must integrate with Epic EHR system using approved interfaces",
+          "affectedAreas": ["API design", "Data synchronization", "Authentication"],
+          "limitations": ["Epic's rate limiting", "Specific FHIR resource support", "Authentication flow requirements"],
+          "workarounds": ["Caching strategies", "Batch processing for non-real-time data", "Fallback authentication methods"]
+        },
+        {
+          "constraint": "Healthcare Network Security",
+          "description": "Must operate within hospital's strict network security environment",
+          "affectedAreas": ["Deployment architecture", "External integrations", "Network protocols"],
+          "limitations": ["Firewall restrictions", "VPN requirements", "Limited external API access"],
+          "implementation": "On-premise deployment option, whitelisted external services, secure tunnel requirements"
+        },
+        {
+          "constraint": "Legacy System Support",
+          "description": "Some clinicians still use older browser versions and systems",
+          "affectedAreas": ["Browser compatibility", "JavaScript features", "CSS capabilities"],
+          "requirements": "Support IE11+, graceful degradation, progressive enhancement"
+        }
+      ],
+      "businessConstraints": [
+        {
+          "constraint": "Budget Limitations",
+          "description": "$500K development budget with 18-month timeline",
+          "affectedAreas": ["Feature prioritization", "Technology choices", "Team size"],
+          "implications": ["Phase 1 launch with core features", "Iterative development approach", "Open-source technology preference"]
+        },
+        {
+          "constraint": "Clinical Workflow Integration",
+          "description": "Cannot disrupt existing clinical workflows during implementation",
+          "affectedAreas": ["Deployment strategy", "Training requirements", "Change management"],
+          "requirements": ["Gradual rollout plan", "Extensive training program", "Fallback to existing processes"]
+        },
+        {
+          "constraint": "Staff Training Capacity",
+          "description": "Limited time for training clinical staff on new systems",
+          "affectedAreas": ["User interface complexity", "Feature discoverability", "Documentation requirements"],
+          "implementation": ["Intuitive design requiring minimal training", "In-app guidance", "Role-based feature access"]
+        }
+      ],
+      "designConstraints": [
+        {
+          "constraint": "Healthcare System Branding",
+          "description": "Must align with existing brand guidelines and visual identity",
+          "affectedAreas": ["Color palette", "Typography", "Logo placement", "Visual style"],
+          "requirements": ["Specific color codes", "Approved font families", "Brand compliance review"]
+        },
+        {
+          "constraint": "Clinical Decision Support Integration",
+          "description": "Must support but not replace clinical decision-making processes",
+          "affectedAreas": ["Information presentation", "Alert systems", "Recommendation features"],
+          "requirements": ["Clear data source attribution", "Clinical context preservation", "Provider oversight mechanisms"]
+        }
+      ]
+    }
+  },
+
+  "expectedArtifacts": {
+    "strategicAlignment": {
+      "goalsTracking": "Comprehensive mapping of every feature to specific business and user goals",
+      "needsSatisfaction": "Detailed analysis showing how each user need is addressed in the solution",
+      "constraintCompliance": "Evidence that all regulatory, technical, and business constraints are satisfied",
+      "traceabilityMatrix": "Complete traceability from goals through needs to features and constraints"
+    },
+    "productSpecification": {
+      "goalDrivenFeatures": [
+        "Patient Dashboard (linked to 'Take Control of Health Journey' goal)",
+        "Appointment Scheduling (addresses 'Reduce Administrative Burden' and 'Seamless Care Experience')",
+        "Secure Messaging (supports 'Enhance Care Coordination' and clinical communication needs)",
+        "Medical Records Access (fulfills 'Take Control' goal and regulatory access requirements)"
+      ],
+      "constraintAwareDesign": [
+        "HIPAA-compliant data presentation with audit trails",
+        "ADA-compliant interface with screen reader support",
+        "Mobile-responsive design within legacy browser constraints",
+        "Epic EHR integration respecting rate limits and authentication flows"
+      ]
+    },
+    "uiSpecification": {
+      "emotionalDesign": "Calming healthcare-appropriate visual design addressing patient anxiety",
+      "accessibilityFirst": "WCAG 2.1 AA compliant interface supporting diverse user needs",
+      "trustIndicators": "Clear security and data source indicators building patient confidence",
+      "workflowOptimized": "Clinical staff interfaces optimized for time-pressured healthcare environment"
+    },
+    "encyclopedia": {
+      "strategicPages": [
+        "Healthcare Goals Framework",
+        "Patient Needs Analysis",
+        "Regulatory Constraints in Healthcare IT",
+        "Clinical Workflow Integration Patterns",
+        "Healthcare UX Design Principles",
+        "HIPAA Compliance Architecture"
+      ],
+      "traceabilityPages": [
+        "Goal-to-Feature Mapping",
+        "Needs-to-Solution Analysis",
+        "Constraint-to-Design Decisions",
+        "User Journey with Strategic Context"
+      ]
+    }
+  },
+
+  "notes": "This example demonstrates how the enhanced ontology captures the complete strategic context of healthcare software development, ensuring that every design decision can be traced back to business goals, user needs, and regulatory constraints. The resulting product specifications will include not just WHAT to build, but WHY each feature exists and HOW it addresses specific goals while respecting all constraints."
+}

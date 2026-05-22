@@ -1,0 +1,32 @@
+nodeKind: StateMachine
+id: state-machine:run
+attributes:
+  governsNodeKindId: "node-kind:Run"
+  displayName: "Run"
+  targetNodeKind: Run
+  description: |
+    Lifecycle for a babysitter run from creation through completion or
+    failure.
+  states:
+    - id: run.created
+      displayName: "Run / created"
+      terminal: false
+      description: Run has been created; no effects yet requested.
+    - id: run.waiting
+      displayName: "Run / waiting"
+      terminal: false
+      description: Run is waiting on one or more pending effects.
+    - id: run.completed
+      displayName: "Run / completed"
+      terminal: true
+      description: Run finished successfully; completionProof is set.
+    - id: run.failed
+      displayName: "Run / failed"
+      terminal: true
+      description: Run failed before reaching completed.
+  transitions:
+    - { from: run.created,  to: run.created,   event: PROCESS_ASSIGNED }
+    - { from: run.created,  to: run.waiting,   event: EFFECT_REQUESTED }
+    - { from: run.waiting,  to: run.completed, event: RUN_COMPLETED }
+    - { from: run.waiting,  to: run.failed,    event: RUN_FAILED }
+    - { from: run.created,  to: run.failed,    event: RUN_FAILED }

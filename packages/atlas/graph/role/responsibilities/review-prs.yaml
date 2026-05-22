@@ -1,0 +1,14 @@
+nodeKind: Responsibility
+id: responsibility:review-prs-merge-decisions
+attributes:
+  displayName: "Review PRs and make merge decisions"
+  cadence: continuous
+  requiredSkills:
+    - skill:code-review
+    - skill:security-review
+  description: |
+    Review PRs and make merge decisions.
+edges:
+  requires_skill:
+    - skill:code-review
+    - skill:security-review

@@ -1,0 +1,104 @@
+---
+nodeKind: Workflow
+id: workflow:it-service-catalog-review
+attributes:
+  displayName: "IT Service Catalog Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews the IT service catalog for accuracy, coverage, and alignment
+    with organizational needs -- auditing service descriptions and SLA
+    definitions, validating request-fulfillment workflows and approval
+    chains, analyzing service utilization and ticket volumes, identifying
+    redundant or underused services for consolidation, evaluating
+    self-service adoption rates, and updating pricing and chargeback
+    models. Produces catalog health assessment and service rationalization
+    recommendations. Excludes ITSM tooling changes.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:it-service-management
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:change-advisory-board-review
+attributes:
+  displayName: "Change Advisory Board Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Convenes the Change Advisory Board to evaluate proposed
+    infrastructure and service changes -- reviewing RFC submissions for
+    risk categorization, assessing blast radius and rollback plans,
+    validating change-window scheduling against maintenance calendars and
+    freeze periods, ensuring stakeholder notification compliance, checking
+    dependency conflicts between concurrent changes, and approving,
+    deferring, or rejecting change requests. Produces CAB meeting minutes
+    and approved change schedule. Excludes change execution.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:platform-engineer
+    - target: role:incident-commander
+  requires_skill_area:
+    - target: skill-area:incident-response
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:it-service-management
+    - target: org-unit:infra-engineering
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:it-asset-lifecycle-management
+attributes:
+  displayName: "IT Asset Lifecycle Management"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Manages the full lifecycle of IT assets from procurement through
+    disposal -- auditing hardware and software asset inventories against
+    CMDB records, tracking warranty and license expiration dates,
+    evaluating asset utilization for right-sizing or decommissioning,
+    ensuring secure data-wipe and disposal compliance for end-of-life
+    hardware, reconciling cloud resource tags with financial ownership,
+    and forecasting refresh cycles. Produces asset inventory
+    reconciliation report and refresh budget request. Excludes
+    procurement execution.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:license-auditor
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:terraform-infrastructure
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:dependency-audit
+  performed_by_org_unit:
+    - target: org-unit:it-service-management
+    - target: org-unit:finance-team

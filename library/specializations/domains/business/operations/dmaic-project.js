@@ -18,6 +18,11 @@
  * - Pyzdek, T. & Keller, P. (2018). The Six Sigma Handbook
  * - George, M.L. (2002). Lean Six Sigma
  * - Montgomery, D.C. (2019). Introduction to Statistical Quality Control
+  * @graph
+ *   domains: [domain:operations]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

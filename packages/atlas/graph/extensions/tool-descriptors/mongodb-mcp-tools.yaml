@@ -1,0 +1,165 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:mongo.list-databases
+attributes:
+  schema: '{}'
+  displayName: "MongoDB: List Databases"
+  description: List all databases on the connected MongoDB cluster.
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      databases: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-mongodb
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:mongo.list-collections
+attributes:
+  schema: '{}'
+  displayName: "MongoDB: List Collections"
+  description: List collections in a database.
+  inputSchema:
+    type: object
+    required: [database]
+    properties:
+      database: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      collections: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-mongodb
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:mongo.find
+attributes:
+  schema: '{}'
+  displayName: "MongoDB: Find"
+  description: Run a find() query against a collection.
+  inputSchema:
+    type: object
+    required: [database, collection]
+    properties:
+      database: { type: string }
+      collection: { type: string }
+      filter: { type: object }
+      projection: { type: object }
+      limit: { type: integer }
+      sort: { type: object }
+  outputSchema:
+    type: object
+    properties:
+      documents: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-mongodb
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:mongo.aggregate
+attributes:
+  schema: '{}'
+  displayName: "MongoDB: Aggregate"
+  description: Run an aggregation pipeline against a collection.
+  inputSchema:
+    type: object
+    required: [database, collection, pipeline]
+    properties:
+      database: { type: string }
+      collection: { type: string }
+      pipeline: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      documents: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-mongodb
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:mongo.count
+attributes:
+  schema: '{}'
+  displayName: "MongoDB: Count"
+  description: Count documents in a collection matching a filter.
+  inputSchema:
+    type: object
+    required: [database, collection]
+    properties:
+      database: { type: string }
+      collection: { type: string }
+      filter: { type: object }
+  outputSchema:
+    type: object
+    properties:
+      count: { type: integer }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-mongodb
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:mongo.insert-many
+attributes:
+  schema: '{}'
+  displayName: "MongoDB: Insert Many"
+  description: Insert one or more documents into a collection.
+  inputSchema:
+    type: object
+    required: [database, collection, documents]
+    properties:
+      database: { type: string }
+      collection: { type: string }
+      documents: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      insertedIds: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-mongodb
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:mongo.update-many
+attributes:
+  schema: '{}'
+  displayName: "MongoDB: Update Many"
+  description: Update documents matching a filter in a collection.
+  inputSchema:
+    type: object
+    required: [database, collection, filter, update]
+    properties:
+      database: { type: string }
+      collection: { type: string }
+      filter: { type: object }
+      update: { type: object }
+  outputSchema:
+    type: object
+    properties:
+      modifiedCount: { type: integer }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-mongodb

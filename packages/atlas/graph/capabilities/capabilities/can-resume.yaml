@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:can-resume
+attributes:
+  displayName: "Can resume"
+  description: |
+    A session or run can be resumed from a prior state — the runtime
+    persists enough context to continue an interrupted invocation.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: session
+edges: {}

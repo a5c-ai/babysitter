@@ -1,0 +1,13 @@
+nodeKind: ModelFamily
+id: model-family:deepseek
+attributes:
+  displayName: "DeepSeek"
+  vendor: "DeepSeek"
+  homepageUrl: "https://www.deepseek.com/"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:deepseek-v3@current
+    - model:deepseek-r1@current
+    - model:deepseek-r1-distill-qwen-32b@current

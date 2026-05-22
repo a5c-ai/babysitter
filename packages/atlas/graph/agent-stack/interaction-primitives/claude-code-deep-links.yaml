@@ -1,0 +1,49 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:claude-cli-deep-link-open
+attributes:
+  displayName: "claude-cli://open"
+  description: |
+    URI scheme registered by Claude Code at install time. The only
+    accepted path is `/open`. Query parameters: `q` (URL-encoded prompt,
+    max 5000 chars), `cwd` (absolute local path; UNC/network paths
+    rejected), `repo` (`owner/name` slug — resolved to most-recently-used
+    local clone). Disabled when settings.json has
+    `disableDeepLinkRegistration: "disable"`.
+  kind: deep-link
+  surface: cli
+  urlScheme: "claude-cli://"
+  pathPattern: "open"
+  urlParams:
+  - q
+  - cwd
+  - repo
+  registrationLocation:
+    macOS: "~/Applications/Claude Code URL Handler.app"
+    linux: "$XDG_DATA_HOME/applications/claude-code-url-handler.desktop"
+    windows: "HKEY_CURRENT_USER\\Software\\Classes\\claude-cli"
+  requiresVersionRange: ">=2.1.91"
+  disableSetting: disableDeepLinkRegistration
+edges: {}
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:vscode-claude-code-deep-link-open
+attributes:
+  displayName: "vscode://anthropic.claude-code/open"
+  description: |
+    VS Code variant of the deep-link scheme — opens an editor tab via
+    the official Claude Code VS Code extension. Same `q` / `cwd` / `repo`
+    parameter conventions; activation routed through the extension host
+    rather than the standalone URL handler.
+  kind: deep-link
+  surface: editor-ui
+  urlScheme: "vscode://anthropic.claude-code/"
+  pathPattern: "open"
+  urlParams:
+  - q
+  - cwd
+  - repo
+  registrationLocation:
+    all: "vscode-extension:anthropic.claude-code"
+  requiresVersionRange: ">=2.1.91"
+  disableSetting: disableDeepLinkRegistration
+edges: {}

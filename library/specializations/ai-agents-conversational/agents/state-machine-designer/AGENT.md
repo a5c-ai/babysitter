@@ -8,6 +8,14 @@ expertise:
   - State transitions
   - Context management
   - State persistence
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:context-management]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development, workflow:ml-model-lifecycle]
+  topics: [topic:design-patterns, topic:event-driven-architecture]
+
 ---
 
 # State Machine Designer

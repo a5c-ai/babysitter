@@ -1,0 +1,21 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:hermes-host-env
+attributes:
+  signalId: discovery-signal:hermes-host-env
+  signalKind: env-any
+  key: hermes
+  matchMode: any
+  confidence: medium
+  scope: host-detection
+  signals:
+    - HERMES_SESSION
+    - HERMES_RUN_ID
+  argvMatches:
+    - hermes
+  consumer: agent-mux-core
+  metadataFields:
+    - { key: session_id, envVars: [HERMES_SESSION] }
+    - { key: run_id,     envVars: [HERMES_RUN_ID] }
+edges:
+  applies_to:
+    - target: agent:hermes

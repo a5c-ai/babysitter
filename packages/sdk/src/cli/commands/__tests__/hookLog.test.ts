@@ -12,11 +12,12 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { handleHookLog } from "../hookLog";
-import type { HookLogCommandArgs } from "../hookLog";
+import { handleHookLog } from "../hooks/log";
+import type { HookLogCommandArgs } from "../hooks/log";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
+import { BABYSITTER_SDK_VERSION } from "../../../sdkVersion";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -97,6 +98,7 @@ describe("field extraction per hook type", () => {
     expect(content).toContain("runId=run-001");
     expect(content).toContain("processId=proc-abc");
     expect(content).toContain("entry=main.js");
+    expect(content).toContain(`sdkVersion=${BABYSITTER_SDK_VERSION}`);
   });
 
   it("on-task-complete: extracts runId, effectId, taskId, status, duration", async () => {
@@ -398,7 +400,9 @@ describe("log line format", () => {
     const content = (await fs.readFile(logFile, "utf8")).trim();
     // Pattern: [2026-02-20T...Z] [RUN_START] hook=on-run-start runId=run-fmt ...
     const lineRegex =
-      /^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[RUN_START\] hook=on-run-start runId=run-fmt processId=p entry=e$/;
+      new RegExp(
+        `^\\[\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z\\] \\[RUN_START\\] hook=on-run-start runId=run-fmt processId=p entry=e sdkVersion=${BABYSITTER_SDK_VERSION.replace(/\\./g, "\\\\.")}$`,
+      );
     expect(content).toMatch(lineRegex);
   });
 

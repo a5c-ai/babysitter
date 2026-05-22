@@ -1,0 +1,101 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:gemini-generate-content
+attributes:
+  displayName: "Gemini generateContent"
+  vendor: "Google"
+  specUrl: "https://ai.google.dev/api/generate-content"
+  streamingFraming: sse
+  toolUseSchema: |
+    Tool calls appear as `functionCall` parts within `candidates[].content.parts`,
+    each with `name` and `args`. Tool results are returned as
+    `functionResponse` parts referencing the same `name`.
+  thinkingChannel: part
+  cacheControl: explicit
+  firstSpecVersion: "v1"
+  currentSpecVersion: "v1"
+  status: standard
+  requestBodyShape: |
+    POST /v1beta/models/{model}:generateContent
+    POST /v1beta/models/{model}:streamGenerateContent
+    JSON body (top-level fields):
+      - `contents` (required, array of `{role: "user"|"model", parts: Part[]}`)
+      - `systemInstruction` (optional, `{parts: Part[]}`)
+      - `tools` (optional, array — `{functionDeclarations: [...]}` and/or
+        built-ins like `googleSearch`, `codeExecution`)
+      - `toolConfig` (optional, `{functionCallingConfig: {mode, allowedFunctionNames?}}`)
+      - `safetySettings` (optional)
+      - `generationConfig` (optional, `{temperature, topP, topK, maxOutputTokens,
+        stopSequences, responseMimeType, responseSchema, thinkingConfig?}`)
+      - `cachedContent` (optional, string — name of a server-side cached content resource)
+    A `Part` is one of: `{text}`, `{inlineData: {mimeType, data}}`,
+    `{fileData: {mimeType, fileUri}}`, `{functionCall}`, `{functionResponse}`,
+    `{thought: true, ...}`.
+  responseBodyShape: |
+    Non-streaming response (HTTP 200 application/json):
+      {
+        "candidates": [
+          { "content": { "role": "model", "parts": [ Part, ... ] },
+            "finishReason": "STOP"|"MAX_TOKENS"|"SAFETY"|"RECITATION"|"OTHER",
+            "safetyRatings": [...],
+            "index": 0 }
+        ],
+        "promptFeedback"?: { "blockReason": ..., "safetyRatings": [...] },
+        "usageMetadata": {
+          "promptTokenCount": int,
+          "candidatesTokenCount": int,
+          "totalTokenCount": int,
+          "cachedContentTokenCount"?: int
+        }
+      }
+  streamingEventTypes:
+    - "GenerateContentResponse"
+  toolCallWireFormat: |
+    A `functionCall` part on `candidates[].content.parts[]`:
+      { "functionCall": { "name": "<tool_name>", "args": { ... } } }
+    Note: there is no per-call id field; correlation is by `name` and
+    position within the conversation.
+  toolResultWireFormat: |
+    A `functionResponse` part in a subsequent user-role content turn:
+      { "functionResponse": { "name": "<tool_name>",
+                              "response": { ... } } }
+  errorEnvelope: |
+    Non-2xx response, `application/json` (Google API error envelope):
+      { "error": { "code": int,
+                   "message": string,
+                   "status": "INVALID_ARGUMENT"|"PERMISSION_DENIED"|"RESOURCE_EXHAUSTED"|"INTERNAL"|...,
+                   "details": [ ... ] } }
+  cacheControlWireFormat: |
+    Server-side `cachedContent` resource model.
+      1. Client POSTs to `/v1beta/cachedContents` with `{model, contents,
+         systemInstruction?, tools?, ttl}` and receives `{name: "cachedContents/<id>"}`.
+      2. On subsequent generateContent requests, set top-level
+         `cachedContent: "cachedContents/<id>"` to reference it.
+    Cache hit accounting reported as `usageMetadata.cachedContentTokenCount`.
+  rateLimitSignaling: |
+    HTTP 429 `RESOURCE_EXHAUSTED` on quota exceedance. `retry-after` header
+    is returned with the recommended back-off (seconds). No documented
+    per-tenant remaining-budget headers on the response.
+    whether Vertex variant exposes additional quota headers.
+  reasoningWireFormat: |
+    Reasoning is carried as additional `parts` on the model candidate
+    annotated with `thought: true` (e.g. `{ "text": "...", "thought": true }`).
+    Behavior is gated by `generationConfig.thinkingConfig` (e.g.
+    `{includeThoughts: true, thinkingBudget?}`).
+    field names against current `/v1beta` spec — naming has shifted.
+  authHeaderFormat: |
+    AI Studio (`generativelanguage.googleapis.com`):
+      `x-goog-api-key: <GEMINI_API_KEY>`   (or `?key=...` query param)
+    Vertex AI (`*-aiplatform.googleapis.com`):
+      `Authorization: Bearer <gcloud-oauth-token>`
+  versioningHeader: |
+    Path-versioned: `/v1`, `/v1beta`. No protocol-version header on the
+    request; new features land first under `/v1beta`.
+edges:
+  realizes:
+    - target: layer:3-transport
+  served_by:
+    - provider:google
+  spoken_by:
+    - model:gemini-2-5-pro@current
+    - target: agent-core-impl:cursor.core@current
+    - target: agent-core-impl:opencode.core@1.x

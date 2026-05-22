@@ -1,0 +1,45 @@
+nodeKind: RetryPolicy
+id: retry-policy:claude-code-default
+attributes:
+  displayName: "Claude Code default API retry policy"
+  variant: default
+  maxRetries: 10
+  maxRetriesOnOverload: 3
+  baseDelayMs: 500
+  maxDelayMs: 32000
+  backoffStrategy: exponential-jitter
+  jitterFactor: 0.25
+  honorRetryAfterHeader: true
+  floorOutputTokens: 3000
+  retryableStatusCodes: [408, 409, 429, 500, 502, 503, 504, 529]
+  foregroundOnlyOnOverload: true
+  foregroundSources:
+    - repl_main_thread
+    - sdk
+    - agent:custom
+    - agent:default
+    - agent:builtin
+    - compact
+    - hook_agent
+    - hook_prompt
+    - verification_agent
+    - side_question
+    - auto_mode
+  triggersFallbackModelOn: repeated-overload
+  clearsAuthCacheOn: [401, 403]
+  disablesKeepAliveOn: ["ECONNRESET", "EPIPE"]
+  description: |
+    Default policy for the claude-code withRetry generator. Exponential backoff
+    with ~25% jitter, server Retry-After overrides computed delay. 529 overload
+    retries are gated to user-blocking foreground sources only — background
+    sources bail immediately to avoid capacity-cascade amplification. After
+    MAX_529_RETRIES consecutive 529s on a foreground source, escalate to
+    fallback model via FallbackTriggeredError.
+edges:
+  has_retry_policy_variant:
+    - target: retry-policy:claude-code-background-bail
+      condition: non-foreground 529 overload source
+    - target: retry-policy:claude-code-fast-mode
+      condition: fast-mode 429/529 retry-after handling
+    - target: retry-policy:claude-code-persistent-unattended
+      condition: CLAUDE_CODE_UNATTENDED_RETRY enabled

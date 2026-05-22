@@ -7,6 +7,10 @@ metadata:
   version: "1.0.0"
   category: ergonomics
   backlog-id: SK-IE-023
+graph:
+  domains: [domain:industrial-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:organizational-design, skill-area:data-analysis]
+  roles: [role:operations-analyst, role:research-engineer]
 ---
 
 # workstation-layout-designer

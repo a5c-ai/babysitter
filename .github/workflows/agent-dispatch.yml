@@ -1,0 +1,87 @@
+# Agent Dispatch — trigger babysitter agent from issue/PR comments or manually
+#
+# Usage:
+#   - Comment `/agent <prompt>` on any issue or PR
+#   - Or dispatch manually with branch, issue/PR number, and instructions
+
+name: Agent Dispatch
+
+on:
+  push:
+    branches: [main, staging, develop]
+    paths: ['.github/workflows/agent-dispatch.yml']
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to work on (e.g. staging, feat/my-feature)'
+        required: true
+        type: string
+      issue_number:
+        description: 'Issue or PR number for context and reporting'
+        required: true
+        type: string
+      instructions:
+        description: 'Instructions for the agent'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  agent:
+    if: >-
+      (github.event_name == 'workflow_dispatch') ||
+      startsWith(github.event.comment.body, '/agent ')
+    runs-on: ubuntu-latest-l
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - uses: a5c-ai/babysitter/packages/triggers@staging
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          max-turns: '9999'
+          babysitter-prompt-prefix: '$babysitter:yolo '
+          prompt: |
+            You are an autonomous coding agent.
+            Trigger: ${{ github.event_name == 'workflow_dispatch' && 'manual dispatch' || format('/agent on #{0}', github.event.issue.number) }}
+            Issue/PR: #${{ inputs.issue_number || github.event.issue.number }}
+            Branch: ${{ inputs.branch || github.event.repository.default_branch }}
+
+            CONTEXT — READ THE ISSUE/PR FIRST:
+            Run `gh issue view ${{ inputs.issue_number || github.event.issue.number }} --json title,body,labels,comments` to understand the full context.
+            Read the issue description, all comments, and labels carefully before starting work.
+            If it's a PR, also run `gh pr view ${{ inputs.issue_number || github.event.issue.number }} --json files,title,body,comments` to see the code changes.
+
+            BRANCH INSTRUCTIONS:
+            - If this is a PR, checkout the PR branch and work on it directly.
+            - If this is an issue, check if it has an associated open PR (search for PRs mentioning #${{ inputs.issue_number || github.event.issue.number }}). If found, checkout that PR's branch.
+            - If no associated PR exists, create a new branch `agent/issue-${{ inputs.issue_number || github.event.issue.number }}`, commit and push changes to it, then create a PR linking to the issue.
+
+            PROCESS INSTRUCTIONS:
+            - Determine the right babysitter process from the process library based on the issue labels.
+            - Search .a5c/process-library/ for processes matching the labels or task description.
+            - If no matching process exists, research the library for similar patterns and create one.
+
+            WORK INSTRUCTIONS:
+            - Commit and push changes during work. Use descriptive commit messages.
+            - After completing, post a summary as a comment on #${{ inputs.issue_number || github.event.issue.number }}.
+
+            User request: ${{ inputs.instructions || github.event.comment.body }}
+          trigger-query: ''
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

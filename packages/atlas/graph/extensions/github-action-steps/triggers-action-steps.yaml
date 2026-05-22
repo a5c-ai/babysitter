@@ -1,0 +1,295 @@
+# packages/triggers/action.yml `runs.steps[]` decomposed.
+# Source: packages/triggers/action.yml lines 133-372. 10 steps in order.
+nodeKind: GithubActionStep
+id: github-action-step:triggers-action-setup-node
+attributes:
+  displayName: "amux-triggers action step 1: Setup Node.js"
+  order: 1
+  stepName: "Setup Node.js"
+  shell: none
+  usesRef: "actions/setup-node@v4"
+  envVars: []
+  sourceCitation: "packages/triggers/action.yml:80-83"
+edges:
+  executed_by_trigger:
+    - target: operational-trigger:amux-triggers-action
+---
+nodeKind: GithubActionStep
+id: github-action-step:triggers-action-a5c-token
+attributes:
+  displayName: "amux-triggers action step 2: Generate a5c GitHub App token"
+  order: 2
+  stepName: "Generate a5c GitHub App token"
+  shell: none
+  usesRef: "a5c-ai/generate-token-action@main"
+  conditional: "${{ inputs.use-a5c-token-exchange == 'true' }}"
+  continueOnError: true
+  stepId: "a5c-token"
+  envVars: []
+  sourceCitation: "packages/triggers/action.yml:85-89"
+edges:
+  executed_by_trigger:
+    - target: operational-trigger:amux-triggers-action
+---
+nodeKind: GithubActionStep
+id: github-action-step:triggers-action-build-runtime
+attributes:
+  displayName: "amux-triggers action step 3: Build agent-mux action runtime"
+  order: 3
+  stepName: "Build agent-mux action runtime"
+  shell: bash
+  envVars:
+    - "ACTION_ROOT=${{ github.action_path }}"
+  runScript: |
+    set -euo pipefail
+    REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+    cd "$REPO_ROOT"
+    npm ci
+    npm run build:agent-mux
+    npm run build --workspace=@a5c-ai/triggers
+  sourceCitation: "packages/triggers/action.yml:91-101"
+edges:
+  executed_by_trigger:
+    - target: operational-trigger:amux-triggers-action
+---
+nodeKind: GithubActionStep
+id: github-action-step:triggers-action-install-harness
+attributes:
+  displayName: "amux-triggers action step 4: Install harness"
+  order: 4
+  stepName: "Install harness"
+  shell: bash
+  conditional: "${{ inputs.harness != '' || inputs.adapter != '' }}"
+  envVars:
+    - "ACTION_ROOT=${{ github.action_path }}"
+    - "INPUT_HARNESS=${{ inputs.harness || inputs.adapter }}"
+    - "INPUT_WORKING_DIRECTORY=${{ inputs.working-directory }}"
+  runScript: |
+    set -euo pipefail
+    REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+    cd "$INPUT_WORKING_DIRECTORY"
+    node "$REPO_ROOT/packages/agent-mux/cli/dist/index.js" install "$INPUT_HARNESS" || true
+  sourceCitation: "packages/triggers/action.yml:158-169"
+edges:
+  executed_by_trigger:
+    - target: operational-trigger:amux-triggers-action
+---
+nodeKind: GithubActionStep
+id: github-action-step:triggers-action-install-babysitter-plugin
+attributes:
+  displayName: "amux-triggers action step 5: Install babysitter plugin"
+  order: 5
+  stepName: "Install babysitter plugin"
+  shell: bash
+  conditional: "${{ inputs.babysitter-plugin == 'true' }}"
+  envVars:
+    - "ACTION_ROOT=${{ github.action_path }}"
+    - "INPUT_HARNESS=${{ inputs.harness || inputs.adapter }}"
+    - "INPUT_WORKING_DIRECTORY=${{ inputs.working-directory }}"
+    - "INPUT_PROCESS_FILE=${{ inputs.process-file }}"
+  runScript: |
+    set -euo pipefail
+    REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+    cd "$INPUT_WORKING_DIRECTORY"
+    npm install -g @a5c-ai/babysitter-sdk || npm install -g "$REPO_ROOT/packages/sdk"
+    babysitter harness:install-plugin "$INPUT_HARNESS" --workspace "$INPUT_WORKING_DIRECTORY"
+    if [ -n "$INPUT_PROCESS_FILE" ]; then
+      mkdir -p .a5c/processes
+      cp "$INPUT_PROCESS_FILE" .a5c/processes/
+    fi
+  sourceCitation: "packages/triggers/action.yml:171-199"
+edges:
+  executed_by_trigger:
+    - target: operational-trigger:amux-triggers-action
+---
+nodeKind: GithubActionStep
+id: github-action-step:triggers-action-install-plugins
+attributes:
+  displayName: "amux-triggers action step 6: Install plugins (legacy)"
+  order: 6
+  stepName: "Install plugins (legacy)"
+  shell: bash
+  conditional: "${{ inputs.plugins != '' }}"
+  envVars:
+    - "ACTION_ROOT=${{ github.action_path }}"
+    - "INPUT_ADAPTER=${{ inputs.adapter || inputs.harness }}"
+    - "INPUT_PLUGINS=${{ inputs.plugins }}"
+  runScript: |
+    set -euo pipefail
+    REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+    while IFS= read -r plugin; do
+      [ -z "$plugin" ] && continue
+      node "$REPO_ROOT/packages/agent-mux/cli/dist/index.js" plugin install "$INPUT_ADAPTER" "$plugin"
+    done <<< "$INPUT_PLUGINS"
+  sourceCitation: "packages/triggers/action.yml:201-211"
+edges:
+  executed_by_trigger:
+    - target: operational-trigger:amux-triggers-action
+---
+nodeKind: GithubActionStep
+id: github-action-step:triggers-action-evaluate-trigger
+attributes:
+  displayName: "amux-triggers action step 7: Evaluate trigger"
+  order: 7
+  stepName: "Evaluate trigger"
+  shell: bash
+  stepId: "trigger"
+  envVars:
+    - "ACTION_ROOT=${{ github.action_path }}"
+    - "INPUT_TRIGGER_BACKEND=${{ inputs.trigger-backend }}"
+    - "INPUT_TRIGGER_QUERY=${{ inputs.trigger-query }}"
+    - "INPUT_INCLUDE_DIFF=${{ inputs.include-diff }}"
+    - "EFFECTIVE_GITHUB_TOKEN=${{ steps.a5c-token.outputs.a5c_token || inputs.github-token }}"
+  runScript: |
+    set -euo pipefail
+    REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+    EVENT_FILE="$RUNNER_TEMP/agent-mux-event.json"
+    RESULT_FILE="$RUNNER_TEMP/agent-mux-trigger.json"
+    INCLUDE_DIFF_ARGS=()
+    if [ "$INPUT_INCLUDE_DIFF" = "true" ]; then
+      INCLUDE_DIFF_ARGS+=(--include-diff)
+    fi
+    node "$REPO_ROOT/packages/triggers/dist/cli.js" enrich \
+      --backend "$INPUT_TRIGGER_BACKEND" \
+      --token "$EFFECTIVE_GITHUB_TOKEN" \
+      "${INCLUDE_DIFF_ARGS[@]}" \
+      --output "$EVENT_FILE"
+    if [ -z "$INPUT_TRIGGER_QUERY" ]; then
+      echo '{"matched":true,"reasons":["no trigger query configured"]}' > "$RESULT_FILE"
+    elif node "$REPO_ROOT/packages/triggers/dist/cli.js" evaluate \
+      --backend "$INPUT_TRIGGER_BACKEND" \
+      --query "$INPUT_TRIGGER_QUERY" \
+      --token "$EFFECTIVE_GITHUB_TOKEN" \
+      "${INCLUDE_DIFF_ARGS[@]}" \
+      --output "$RESULT_FILE"; then
+      true
+    else
+      status=$?
+      if [ "$status" -ne 78 ]; then
+        exit "$status"
+      fi
+    fi
+    MATCHED=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')).matched ? 'true' : 'false')" "$RESULT_FILE")
+    echo "matched=$MATCHED" >> "$GITHUB_OUTPUT"
+    echo "event=$EVENT_FILE" >> "$GITHUB_OUTPUT"
+    cat "$RESULT_FILE"
+  sourceCitation: "packages/triggers/action.yml:216-258"
+edges:
+  executed_by_trigger:
+    - target: operational-trigger:amux-triggers-action
+---
+nodeKind: GithubActionStep
+id: github-action-step:triggers-action-pre-run
+attributes:
+  displayName: "amux-triggers action step 8: Pre-run pipeline commands"
+  order: 8
+  stepName: "Pre-run pipeline commands"
+  shell: bash
+  workingDirectory: "${{ inputs.working-directory }}"
+  conditional: "${{ steps.trigger.outputs.matched == 'true' && inputs.pre-run != '' }}"
+  envVars:
+    - "INPUT_PRE_RUN=${{ inputs.pre-run }}"
+    - "AMUX_TRIGGER_EVENT_PATH=${{ steps.trigger.outputs.event }}"
+  runScript: |
+    set -euo pipefail
+    bash -euo pipefail -c "$INPUT_PRE_RUN"
+  sourceCitation: "packages/triggers/action.yml:259-269"
+edges:
+  executed_by_trigger:
+    - target: operational-trigger:amux-triggers-action
+---
+nodeKind: GithubActionStep
+id: github-action-step:triggers-action-run-amux
+attributes:
+  displayName: "amux-triggers action step 9: Run agent-mux"
+  order: 9
+  stepName: "Run agent-mux"
+  shell: bash
+  stepId: "amux"
+  workingDirectory: "${{ inputs.working-directory }}"
+  conditional: "${{ steps.trigger.outputs.matched == 'true' }}"
+  envVars:
+    - "ACTION_ROOT=${{ github.action_path }}"
+    - "INPUT_COMMAND=${{ inputs.command }}"
+    - "INPUT_HARNESS=${{ inputs.harness || inputs.adapter }}"
+    - "INPUT_PROVIDER=${{ inputs.provider }}"
+    - "INPUT_MODEL=${{ inputs.model }}"
+    - "INPUT_PROMPT=${{ inputs.prompt }}"
+    - "INPUT_INTERACTION_MODE=${{ inputs.interaction-mode }}"
+    - "INPUT_MAX_TURNS=${{ inputs.max-turns }}"
+    - "INPUT_WITH_PROXY=${{ inputs.with-proxy }}"
+    - "INPUT_PROXY_LOG_LEVEL=${{ inputs.proxy-log-level }}"
+    - "INPUT_BABYSITTER_PLUGIN=${{ inputs.babysitter-plugin }}"
+    - "INPUT_BABYSITTER_PREFIX=${{ inputs.babysitter-prompt-prefix }}"
+    - "INPUT_ARGS=${{ inputs.args }}"
+    - "INPUT_ARGS_JSON=${{ inputs.args-json }}"
+    - "AMUX_TRIGGER_EVENT_PATH=${{ steps.trigger.outputs.event }}"
+  runScript: |
+    set -euo pipefail
+    REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+    AMUX="node $REPO_ROOT/packages/agent-mux/cli/dist/index.js"
+    ARGS=()
+    if [ "$INPUT_COMMAND" = "launch" ] || [ "$INPUT_COMMAND" = "run" ]; then
+      ARGS+=("$INPUT_COMMAND")
+      [ -n "$INPUT_HARNESS" ] && ARGS+=("$INPUT_HARNESS")
+      [ -n "$INPUT_PROVIDER" ] && ARGS+=("$INPUT_PROVIDER")
+    else
+      ARGS+=("$INPUT_COMMAND")
+    fi
+    [ -n "$INPUT_MODEL" ] && ARGS+=(--model "$INPUT_MODEL")
+    if [ -n "$INPUT_PROMPT" ]; then
+      EFFECTIVE_PROMPT="$INPUT_PROMPT"
+      if [ "$INPUT_BABYSITTER_PLUGIN" = "true" ] && [ -n "$INPUT_BABYSITTER_PREFIX" ]; then
+        EFFECTIVE_PROMPT="$INPUT_BABYSITTER_PREFIX $INPUT_PROMPT"
+      fi
+      ARGS+=(--prompt "$EFFECTIVE_PROMPT")
+    fi
+    case "$INPUT_INTERACTION_MODE" in
+      non-interactive) ARGS+=(--no-interactive) ;;
+      bridged-hooks) ARGS+=(--no-interactive --bridge-hooks) ;;
+      bridged-interactive) ARGS+=(--no-interactive --bridge-interactive) ;;
+    esac
+    [ -n "$INPUT_MAX_TURNS" ] && ARGS+=(--max-turns "$INPUT_MAX_TURNS")
+    if [ "$INPUT_WITH_PROXY" = "true" ]; then
+      ARGS+=(--with-proxy-if-needed)
+      [ -n "$INPUT_PROXY_LOG_LEVEL" ] && ARGS+=(--proxy-log-level "$INPUT_PROXY_LOG_LEVEL")
+    fi
+    ARGS+=(--yolo)
+    if [ -n "$INPUT_ARGS_JSON" ]; then
+      mapfile -t EXTRA_ARGS < <(node -e "const value = JSON.parse(process.env.INPUT_ARGS_JSON || '[]'); if (!Array.isArray(value)) throw new Error('args-json must be a JSON array'); for (const item of value) console.log(String(item));")
+      ARGS+=("${EXTRA_ARGS[@]}")
+    elif [ -n "$INPUT_ARGS" ]; then
+      read -r -a EXTRA_ARGS <<< "$INPUT_ARGS"
+      ARGS+=("${EXTRA_ARGS[@]}")
+    fi
+    if $AMUX "${ARGS[@]}"; then
+      echo "exit-code=0" >> "$GITHUB_OUTPUT"
+    else
+      status=$?
+      echo "exit-code=$status" >> "$GITHUB_OUTPUT"
+      exit "$status"
+    fi
+  sourceCitation: "packages/triggers/action.yml:270-360"
+edges:
+  executed_by_trigger:
+    - target: operational-trigger:amux-triggers-action
+---
+nodeKind: GithubActionStep
+id: github-action-step:triggers-action-post-run
+attributes:
+  displayName: "amux-triggers action step 10: Post-run pipeline commands"
+  order: 10
+  stepName: "Post-run pipeline commands"
+  shell: bash
+  workingDirectory: "${{ inputs.working-directory }}"
+  conditional: "${{ steps.trigger.outputs.matched == 'true' && inputs.post-run != '' }}"
+  envVars:
+    - "INPUT_POST_RUN=${{ inputs.post-run }}"
+    - "AMUX_TRIGGER_EVENT_PATH=${{ steps.trigger.outputs.event }}"
+  runScript: |
+    set -euo pipefail
+    bash -euo pipefail -c "$INPUT_POST_RUN"
+  sourceCitation: "packages/triggers/action.yml:362-372"
+edges:
+  executed_by_trigger:
+    - target: operational-trigger:amux-triggers-action

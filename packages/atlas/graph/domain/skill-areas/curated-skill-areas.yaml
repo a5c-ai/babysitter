@@ -1,0 +1,944 @@
+---
+nodeKind: SkillArea
+id: skill-area:authentication-authorization
+attributes:
+  displayName: "Authentication and Authorization"
+  description: |
+    Designing identity and access control flows - sessions, tokens,
+    role/permission models, delegated auth, and service-to-service trust.
+  domains:
+    - domain:security
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+    - target: specialization:web-development
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:configuration-management
+attributes:
+  displayName: "Configuration Management"
+  description: |
+    Managing runtime and deploy-time configuration - environment separation,
+    typed config surfaces, secret boundaries, and rollout-safe config changes.
+  domains:
+    - domain:devops
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+    - target: specialization:terraform-iac
+      confidence: secondary
+    - target: specialization:common-utilities
+      confidence: secondary
+  uses_stack_part:
+    - stack-part:feature-flag-service
+    - stack-part:secrets-manager
+  prerequisite_for_learning:
+    - target: skill-area:platform-engineering
+      strength: recommended
+    - target: skill-area:ci-cd
+      strength: required
+---
+nodeKind: SkillArea
+id: skill-area:data-validation-sanitization
+attributes:
+  displayName: "Data Validation and Sanitization"
+  description: |
+    Validating and cleaning untrusted input - schema checks, normalization,
+    canonicalization, and injection-resistant handling at boundaries.
+  domains:
+    - domain:software-engineering
+    - domain:security
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:security
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:serialization-deserialization
+attributes:
+  displayName: "Serialization and Deserialization"
+  description: |
+    Encoding and decoding structured payloads - schema evolution, backwards
+    compatibility, binary vs text formats, and validation during decode.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:caching-strategies
+attributes:
+  displayName: "Caching"
+  description: |
+    Applying cache layers and invalidation strategy - read-through,
+    write-through, cache-aside, key design, and stale-data tradeoffs.
+  domains:
+    - specialization:web-development
+    - specialization:performance-optimization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:performance-optimization
+      confidence: secondary
+  uses_stack_part:
+    - stack-part:cache
+---
+nodeKind: SkillArea
+id: skill-area:messaging-queuing
+attributes:
+  displayName: "Messaging and Queuing"
+  description: |
+    Designing asynchronous work and event delivery - producer/consumer flows,
+    delivery guarantees, dead-letter handling, and queue-backed decoupling.
+  domains:
+    - specialization:software-architecture
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:software-architecture
+      confidence: primary
+  uses_stack_part:
+    - stack-part:event-bus
+    - stack-part:workflow-engine
+---
+nodeKind: SkillArea
+id: skill-area:search-indexing
+attributes:
+  displayName: "Search and Indexing"
+  description: |
+    Designing text and document search - indexing pipelines, relevance tuning,
+    faceting, analyzers, and index freshness tradeoffs.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  uses_stack_part:
+    - stack-part:search-index
+  prerequisite_for_learning:
+    - target: skill-area:search-infrastructure
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:background-job-processing
+attributes:
+  displayName: "Background Job Processing"
+  description: |
+    Moving non-interactive work off request paths - retries, idempotency,
+    scheduling, fan-out, and operational visibility for job systems.
+  domains:
+    - domain:software-engineering
+    - domain:devops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:devops
+      confidence: secondary
+  uses_stack_part:
+    - stack-part:scheduler
+    - stack-part:workflow-engine
+  prerequisite_for_learning:
+    - target: skill-area:event-driven-architecture
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:streaming-realtime-processing
+attributes:
+  displayName: "Streaming and Real-time Processing"
+  description: |
+    Building low-latency event and stream flows - push delivery, windowing,
+    backpressure, ordering, and subscriber coordination.
+  domains:
+    - specialization:network-programming
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:network-programming
+      confidence: primary
+    - target: specialization:web-development
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:websocket-design
+  uses_stack_part:
+    - stack-part:event-bus
+---
+nodeKind: SkillArea
+id: skill-area:email-notification-delivery
+attributes:
+  displayName: "Email and Notification Services"
+  description: |
+    Integrating outbound message channels - transactional email, push/SMS
+    delivery, templates, retries, suppression, and event callbacks.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  uses_stack_part:
+    - stack-part:email-delivery
+    - stack-part:notification-service
+  prerequisite_for_learning:
+    - target: skill-area:transactional-email
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:data-fetching-caching
+attributes:
+  displayName: "Data Fetching and Caching"
+  description: |
+    Fetching remote data in UI applications - request lifecycle management,
+    cache invalidation, optimistic updates, and stale-while-revalidate flows.
+  domains:
+    - specialization:web-development
+    - specialization:frontend-react
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:frontend-react
+      confidence: secondary
+  uses_stack_part:
+    - stack-part:cache
+---
+nodeKind: SkillArea
+id: skill-area:application-state-management
+attributes:
+  displayName: "State Management"
+  description: |
+    Managing client and application state - local vs shared state,
+    normalization, derivation, persistence, and update coordination.
+  domains:
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+  requires_skill_area:
+    - skill-area:react-state-management
+---
+nodeKind: SkillArea
+id: skill-area:animation-transitions
+attributes:
+  displayName: "Animation and Transitions"
+  description: |
+    Motion design in product UIs - state transitions, sequencing,
+    performance constraints, and interaction feedback through animation.
+  domains:
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:data-visualization
+attributes:
+  displayName: "Data Visualization"
+  description: |
+    Presenting data as charts and dashboards - encoding choices,
+    interaction patterns, and trustworthy visual communication.
+  domains:
+    - specialization:web-development
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: domain:data-science
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:data-warehouse-modeling
+      strength: helpful
+    - target: skill-area:visualization-testing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:ui-styling
+attributes:
+  displayName: "UI Styling"
+  description: |
+    Styling application interfaces - reusable tokens, component theming,
+    responsive layout systems, and maintainable visual conventions.
+  domains:
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:design-systems
+      strength: recommended
+    - target: skill-area:css-architecture
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:component-testing
+attributes:
+  displayName: "Component Testing"
+  description: |
+    Testing UI components in isolation - render contracts, event handling,
+    state transitions, and DOM assertions close to user behavior.
+  domains:
+    - specialization:web-development
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  uses_tool:
+    - tool:jest
+    - tool:vitest
+  requires_skill_area:
+    - skill-area:unit-testing
+  prerequisite_for_learning:
+    - target: skill-area:e2e-testing
+      strength: recommended
+    - target: skill-area:cross-browser-testing
+      strength: recommended
+    - target: skill-area:api-testing
+      strength: recommended
+    - target: skill-area:integration-testing
+      strength: recommended
+    - target: skill-area:load-testing
+      strength: recommended
+    - target: skill-area:contract-testing
+      strength: recommended
+    - target: skill-area:visual-regression-testing
+      strength: recommended
+    - target: skill-area:accessibility-testing
+      strength: recommended
+    - target: skill-area:security-testing
+      strength: recommended
+    - target: skill-area:mutation-testing
+      strength: recommended
+    - target: skill-area:fuzz-testing
+      strength: recommended
+    - target: skill-area:performance-testing
+      strength: recommended
+    - target: skill-area:unit-testing
+      strength: recommended
+    - target: skill-area:functional-testing
+      strength: recommended
+    - target: skill-area:regression-testing
+      strength: recommended
+    - target: skill-area:smoke-testing
+      strength: recommended
+    - target: skill-area:sanity-testing
+      strength: recommended
+    - target: skill-area:stress-testing
+      strength: recommended
+    - target: skill-area:compatibility-testing
+      strength: recommended
+    - target: skill-area:usability-testing
+      strength: recommended
+    - target: skill-area:acceptance-testing
+      strength: recommended
+    - target: skill-area:ui-testing
+      strength: recommended
+    - target: skill-area:database-testing
+      strength: recommended
+    - target: skill-area:frontend-e2e-testing
+      strength: recommended
+    - target: skill-area:state-management-testing
+      strength: recommended
+    - target: skill-area:frontend-performance-testing
+      strength: recommended
+    - target: skill-area:scalability-testing
+      strength: recommended
+    - target: skill-area:cross-platform-testing
+      strength: recommended
+    - target: skill-area:offline-mode-testing
+      strength: recommended
+    - target: skill-area:battery-consumption-testing
+      strength: recommended
+    - target: skill-area:memory-usage-testing
+      strength: recommended
+    - target: skill-area:mobile-security-testing
+      strength: recommended
+    - target: skill-area:network-condition-testing
+      strength: recommended
+    - target: skill-area:mobile-ui-automation
+      strength: recommended
+    - target: skill-area:service-mocking
+      strength: recommended
+    - target: skill-area:ab-testing-experimentation
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:cross-browser-testing
+attributes:
+  displayName: "Cross-browser Testing"
+  description: |
+    Verifying behavior across browser engines and versions - compatibility
+    baselines, rendering differences, and environment-specific regressions.
+  domains:
+    - specialization:web-development
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  uses_tool:
+    - tool:playwright
+    - tool:cypress
+---
+nodeKind: SkillArea
+id: skill-area:frontend-performance-testing
+attributes:
+  displayName: "Frontend Performance Testing"
+  description: |
+    Measuring browser-facing performance characteristics - page load, user
+    interaction latency, bundle impact, and repeatable lab baselines.
+  domains:
+    - specialization:web-development
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:web-performance
+    - skill-area:performance-testing
+---
+nodeKind: SkillArea
+id: skill-area:natural-language-processing
+attributes:
+  displayName: "Natural Language Processing"
+  description: |
+    Working with text understanding and generation pipelines - tokenization,
+    sequence modeling, information extraction, and language-centric evals.
+  domains:
+    - domain:data-science
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: specialization:ai-agents-conversational
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:retrieval-augmented-generation
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:data-quality-testing
+attributes:
+  displayName: "Data Quality Testing"
+  description: |
+    Checking data assets and pipelines for completeness, validity, drift, and
+    contract conformance before downstream consumers rely on them.
+  domains:
+    - domain:data-science
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:model-serving-operations
+attributes:
+  displayName: "Model Serving"
+  description: |
+    Operating deployed inference endpoints - rollout shape, latency control,
+    scaling, routing, and serving-path reliability for ML systems.
+  domains:
+    - specialization:ml-inference-serving
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ml-inference-serving
+      confidence: primary
+  uses_stack_part:
+    - stack-part:model-serving
+---
+nodeKind: SkillArea
+id: skill-area:encryption-decryption
+attributes:
+  displayName: "Encryption and Decryption"
+  description: |
+    Applying encryption primitives in applications and systems - secret
+    handling, key management boundaries, transport/storage protection, and
+    safe cryptographic usage patterns.
+  domains:
+    - domain:security
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:symmetric-encryption
+      strength: recommended
+    - target: skill-area:asymmetric-encryption
+      strength: recommended
+    - target: skill-area:key-derivation
+      strength: recommended
+    - target: skill-area:signature-schemes
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:file-handling
+attributes:
+  displayName: "File Handling"
+  description: |
+    Working with filesystem-backed data safely and efficiently - uploads,
+    streaming I/O, metadata, temporary files, and storage lifecycle concerns.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:error-handling-exception-management
+attributes:
+  displayName: "Error Handling and Exception Management"
+  description: |
+    Designing failure semantics in code and services - propagation,
+    classification, retries, reporting, and user/operator-visible outcomes.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:performance-monitoring-profiling
+attributes:
+  displayName: "Performance Monitoring and Profiling"
+  description: |
+    Observing live and test-time performance - tracing hot paths, measuring
+    latency/resource use, and turning telemetry into optimization decisions.
+  domains:
+    - specialization:performance-optimization
+    - domain:observability
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:performance-optimization
+      confidence: primary
+    - target: domain:observability
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:observability-pipeline
+  prerequisite_for_learning:
+    - target: skill-area:profiling-cpu
+      strength: recommended
+    - target: skill-area:profiling-memory
+      strength: recommended
+    - target: skill-area:cache-optimization
+      strength: recommended
+    - target: skill-area:branch-prediction
+      strength: recommended
+    - target: skill-area:simd
+      strength: recommended
+    - target: skill-area:lock-free-data-structures
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:code-analysis-linting
+attributes:
+  displayName: "Code Analysis and Linting"
+  description: |
+    Static analysis and style enforcement - lint rules, semantic checks,
+    autofix workflows, and quality gates in local and CI paths.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:deployment-infrastructure-management
+attributes:
+  displayName: "Deployment and Infrastructure Management"
+  description: |
+    Planning and operating application delivery infrastructure - environments,
+    promotion flows, deployment automation, rollback safety, and runtime ops.
+  domains:
+    - domain:devops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+  requires_skill_area:
+    - skill-area:containerization
+---
+nodeKind: SkillArea
+id: skill-area:concurrency-multithreading
+attributes:
+  displayName: "Concurrency and Multithreading"
+  description: |
+    Designing concurrent execution - coordination, synchronization, work
+    partitioning, race avoidance, and throughput/latency tradeoffs.
+  domains:
+    - domain:software-engineering
+    - specialization:performance-optimization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: specialization:performance-optimization
+      confidence: secondary
+    - target: specialization:rust-systems
+      confidence: secondary
+    - target: specialization:go-microservices
+      confidence: secondary
+    - target: specialization:computer-science
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:parsing-data-formats
+attributes:
+  displayName: "Parsing and Data Formats"
+  description: |
+    Reading and producing structured formats - schema discipline, parser
+    robustness, backwards compatibility, and format-specific edge cases.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  requires_skill_area:
+    - skill-area:serialization-deserialization
+---
+nodeKind: SkillArea
+id: skill-area:command-line-interface-tools
+attributes:
+  displayName: "Command Line Interface Tools"
+  description: |
+    Building and automating CLI-driven workflows - command structure,
+    ergonomics, piping, config, exit semantics, and scriptability.
+  domains:
+    - specialization:cli-mcp-development
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cli-mcp-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:backend-security
+attributes:
+  displayName: "Backend Security"
+  description: |
+    Hardening service-side systems - authn/authz enforcement, input trust
+    boundaries, secret handling, and defensive design for backend APIs/jobs.
+  domains:
+    - domain:security
+    - specialization:software-architecture
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+    - target: specialization:software-architecture
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:authentication-authorization
+    - skill-area:data-validation-sanitization
+---
+nodeKind: SkillArea
+id: skill-area:task-scheduling-cron-jobs
+attributes:
+  displayName: "Task Scheduling and Cron Jobs"
+  description: |
+    Running timed and periodic work reliably - schedule semantics,
+    idempotency, drift, failure handling, and orchestration ownership.
+  domains:
+    - domain:devops
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+  uses_stack_part:
+    - stack-part:scheduler
+---
+nodeKind: SkillArea
+id: skill-area:analytics-tracking
+attributes:
+  displayName: "Analytics and Tracking"
+  description: |
+    Instrumenting product and system usage - event taxonomies, attribution,
+    privacy-aware collection, funnel analysis, and experiment telemetry.
+  domains:
+    - specialization:web-development
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: domain:data-science
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:data-preprocessing
+attributes:
+  displayName: "Data Preprocessing"
+  description: |
+    Preparing raw data for analytical or model use - cleaning,
+    transformation, normalization, encoding, and feature-ready shaping.
+  domains:
+    - domain:data-science
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:computer-vision
+attributes:
+  displayName: "Computer Vision"
+  description: |
+    Designing image and video understanding systems - detection,
+    classification, segmentation, OCR-adjacent pipelines, and evaluation.
+  domains:
+    - domain:data-science
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:vision-extraction
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:model-validation-testing
+attributes:
+  displayName: "Model Validation Testing"
+  description: |
+    Validating ML systems before promotion - offline metrics, data-slice
+    checks, failure-case analysis, and pre-release quality gates.
+  domains:
+    - domain:ml-ops
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+    - target: domain:data-science
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:data-quality-testing
+---
+nodeKind: SkillArea
+id: skill-area:object-relational-mapping
+attributes:
+  displayName: "Object-Relational Mapping (ORMs)"
+  description: |
+    Working with ORM layers over relational data - mapping models,
+    query behavior, transactions, eager/lazy loading, and schema coupling.
+  domains:
+    - specialization:software-architecture
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:software-architecture
+      confidence: primary
+  uses_stack_part:
+    - stack-part:relational-database
+---
+nodeKind: SkillArea
+id: skill-area:middleware-design
+attributes:
+  displayName: "Middleware"
+  description: |
+    Designing request/response or event processing middleware - composition
+    order, shared concerns, interception, and side-effect boundaries.
+  domains:
+    - specialization:web-development
+    - specialization:software-architecture
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:software-architecture
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:api-clients-sdks
+attributes:
+  displayName: "API Clients and SDKs"
+  description: |
+    Building or integrating client libraries over external APIs - auth,
+    retries, pagination, type safety, and versioned surface design.
+  domains:
+    - specialization:sdk-platform-development
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:sdk-platform-development
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+  uses_tool:
+    - tool:openapi-generator
+    - tool:postman
+    - tool:insomnia
+---
+nodeKind: SkillArea
+id: skill-area:database-drivers-connectors
+attributes:
+  displayName: "Database Drivers and Connectors"
+  description: |
+    Integrating application code with database client drivers - connection
+    lifecycles, pooling, protocol quirks, and failure behavior.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  uses_stack_part:
+    - stack-part:relational-database
+---
+nodeKind: SkillArea
+id: skill-area:ui-component-libraries
+attributes:
+  displayName: "UI Component Libraries"
+  description: |
+    Building or adopting reusable UI component systems - composition rules,
+    theming, accessibility contracts, and versioned design-system surfaces.
+  domains:
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+  requires_skill_area:
+    - skill-area:react-components
+    - skill-area:ui-styling
+---
+nodeKind: SkillArea
+id: skill-area:database-testing
+attributes:
+  displayName: "Database Testing"
+  description: |
+    Testing persistence behavior against realistic schemas and engines -
+    fixtures, migrations, transactions, and query correctness checks.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+  uses_stack_part:
+    - stack-part:relational-database
+  requires_skill_area:
+    - skill-area:integration-testing
+---
+nodeKind: SkillArea
+id: skill-area:frontend-e2e-testing
+attributes:
+  displayName: "Frontend E2E Testing"
+  description: |
+    Exercising complete browser user journeys - navigation, rendering,
+    interaction timing, network control, and user-visible regressions.
+  domains:
+    - specialization:web-development
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  uses_tool:
+    - tool:playwright
+    - tool:cypress
+  requires_skill_area:
+    - skill-area:e2e-testing
+---
+nodeKind: SkillArea
+id: skill-area:state-management-testing
+attributes:
+  displayName: "State Management Testing"
+  description: |
+    Testing stateful application flows - reducer/store logic, update
+    ordering, persistence boundaries, and regression-prone state transitions.
+  domains:
+    - specialization:web-development
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:application-state-management
+    - skill-area:component-testing

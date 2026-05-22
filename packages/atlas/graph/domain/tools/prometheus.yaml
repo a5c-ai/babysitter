@@ -1,0 +1,21 @@
+nodeKind: Tool
+id: tool:prometheus
+attributes:
+  displayName: "Prometheus"
+  homepageUrl: "https://prometheus.io"
+  kind: observability
+  languageApplicability: neutral
+  description: |
+    Open-source systems monitoring and alerting toolkit with a multi-dimensional time-series model.
+edges:
+  tool_used_by:
+    - target: skill-area:observability-pipeline
+  used_for:
+    - skill-area:observability-instrumentation
+  implements_stack_part:
+    - stack-part:metrics
+  alternative_to:
+    - target: tool:datadog
+      comparison: "Monitoring and observability platforms"
+    - target: tool:grafana
+      comparison: "Monitoring and observability platforms"

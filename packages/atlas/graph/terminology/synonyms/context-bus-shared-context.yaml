@@ -1,0 +1,13 @@
+nodeKind: Synonym
+id: synonym:context-bus-shared-context
+attributes:
+  termAId: term:shared-context-spec
+  termBId: term:channel
+  direction: bidirectional
+  note: |
+    Legacy "context bus" was a colloquial term for the a5c shared-context fabric, now formalized as SharedContextSpec.
+edges:
+  synonym_a:
+    - term:shared-context-spec
+  synonym_b:
+    - term:channel

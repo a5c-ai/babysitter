@@ -3,6 +3,12 @@
  * @description Stakeholder Interview and Alignment process with stakeholder mapping, interview guide creation, expectation alignment, decision-making framework establishment, and communication plan development
  * @inputs { projectName: string, projectDescription: string, initialStakeholders: array, outputDir: string, alignmentGoals: array, decisionScope: string, timeline: object }
  * @outputs { success: boolean, stakeholderMap: object, interviewGuides: array, expectationsDocument: string, decisionFramework: object, communicationPlan: object, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:product-management]
+ *   skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:stakeholder-management]
+ *   roles: [role:product-manager, role:product-analyst]
+ *   workflows: [workflow:product-discovery, workflow:competitive-analysis, workflow:team-formation]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

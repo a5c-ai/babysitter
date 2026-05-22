@@ -2,6 +2,12 @@
 name: cultural-heritage-specialist
 description: Manage heritage documentation and preservation projects including intangible heritage, repatriation, community engagement, digital preservation, and heritage impact assessment
 required-skills: metadata-standards-implementation, tei-text-encoding, gis-mapping-humanities
+graph:
+  domains: [domain:humanities]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:data-governance, skill-area:geospatial-data-analysis, skill-area:document-processing]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-analyst, role:research-scientist]
 ---
 
 # Cultural Heritage Specialist Agent

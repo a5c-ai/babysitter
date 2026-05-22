@@ -5,6 +5,12 @@
  * @outputs { success: boolean, screenplay: object, artifacts: array }
  * @recommendedSkills SK-FTV-003 (scene-writing), SK-FTV-004 (dialogue-crafting), SK-FTV-011 (screenplay-formatting)
  * @recommendedAgents AG-FTV-001 (screenwriter-agent)
+ *
+ * @graph
+ *   domains: [domain:arts-culture]
+ *   skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:data-analysis]
+ *   roles: [role:creative-director, role:design-lead]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

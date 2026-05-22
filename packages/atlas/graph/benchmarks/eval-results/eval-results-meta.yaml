@@ -1,0 +1,120 @@
+---
+nodeKind: EvalResult
+id: eval-result:swe-bench-verified.llama-4-405b.001
+attributes:
+  evalRunId: eval-run:swe-bench-verified.llama-4-405b.2024-07
+  metricName: pass_rate
+  score: 0.10
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-07-23T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench-verified.llama-4-405b.2024-07
+  scored_against:
+    - target: benchmark:swe-bench-verified
+---
+nodeKind: EvalResult
+id: eval-result:human-eval.llama-4-405b.001
+attributes:
+  evalRunId: eval-run:human-eval.llama-4-405b.2024-07
+  metricName: pass_rate
+  score: 0.89
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-07-23T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:human-eval.llama-4-405b.2024-07
+  scored_against:
+    - target: benchmark:human-eval
+---
+nodeKind: EvalResult
+id: eval-result:mmlu.llama-4-405b.001
+attributes:
+  evalRunId: eval-run:mmlu.llama-4-405b.2024-07
+  metricName: accuracy
+  score: 0.886
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-07-23T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mmlu.llama-4-405b.2024-07
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:swe-bench.llama-3-1-405b.001
+attributes:
+  evalRunId: eval-run:swe-bench.llama-3-1-405b.2024-07
+  metricName: resolved_rate
+  score: 0.072
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-07-23T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench.llama-3-1-405b.2024-07
+  scored_against:
+    - target: benchmark:swe-bench-verified
+---
+nodeKind: EvalResult
+id: eval-result:mmlu.llama-3-1-405b.001
+attributes:
+  evalRunId: eval-run:mmlu.llama-3-1-405b.2024-07
+  metricName: accuracy
+  score: 0.886
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-07-23T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mmlu.llama-3-1-405b.2024-07
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:human-eval.llama-3-1-405b.001
+attributes:
+  evalRunId: eval-run:human-eval.llama-3-1-405b.2024-07
+  metricName: pass@1
+  score: 0.890
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-07-23T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:human-eval.llama-3-1-405b.2024-07
+  scored_against:
+    - target: benchmark:human-eval
+---
+nodeKind: EvalResult
+id: eval-result:mmlu.llama-3-3-70b.001
+attributes:
+  evalRunId: eval-run:mmlu.llama-3-3-70b.2024-12
+  metricName: accuracy
+  score: 0.860
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-12-06T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mmlu.llama-3-3-70b.2024-12
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:human-eval.llama-3-3-70b.001
+attributes:
+  evalRunId: eval-run:human-eval.llama-3-3-70b.2024-12
+  metricName: pass@1
+  score: 0.884
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-12-06T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:human-eval.llama-3-3-70b.2024-12
+  scored_against:
+    - target: benchmark:human-eval

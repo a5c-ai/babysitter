@@ -1,0 +1,278 @@
+---
+nodeKind: Specialization
+id: specialization:ai-agents-conversational
+attributes:
+  displayName: "AI Agents & Conversational AI"
+  parentDomainId: domain:software-engineering
+  description: |
+    Specialization for building AI agents, conversational systems, and
+    LLM-driven assistants. Sourced from
+    library/specializations/ai-agents-conversational/.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:algorithms-optimization
+attributes:
+  displayName: "Algorithms & Optimization"
+  parentDomainId: domain:software-engineering
+  description: |
+    Algorithm design, complexity analysis, and optimization techniques.
+    Technical specialization sourced from
+    library/specializations/algorithms-optimization/.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:cli-mcp-development
+attributes:
+  displayName: "CLI & MCP Development"
+  parentDomainId: domain:software-engineering
+  description: |
+    CLI development, Model Context Protocol (MCP) server/client
+    development, terminal applications, shell scripting, and developer
+    tools. Sourced from library/specializations/cli-mcp-development/.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:code-migration-modernization
+attributes:
+  displayName: "Code Migration & Modernization"
+  parentDomainId: domain:software-engineering
+  description: |
+    Legacy code migration, framework upgrades, and modernization
+    workflows. Sourced from
+    library/specializations/code-migration-modernization/.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:cryptography-blockchain
+attributes:
+  displayName: "Cryptography & Blockchain"
+  parentDomainId: domain:security
+  description: |
+    Cryptographic protocol design, blockchain development, and
+    smart-contract engineering. Sourced from
+    library/specializations/cryptography-blockchain/.
+edges:
+  specializes:
+    - domain:security
+---
+nodeKind: Specialization
+id: specialization:data-engineering-analytics
+attributes:
+  displayName: "Data Engineering & Analytics"
+  parentDomainId: domain:data-science
+  description: |
+    ETL/ELT pipelines, warehousing, lakehouses, BI/analytics. Sourced
+    from library/specializations/data-engineering-analytics/.
+edges:
+  specializes:
+    - domain:data-science
+---
+nodeKind: Specialization
+id: specialization:embedded-systems
+attributes:
+  displayName: "Embedded Systems"
+  parentDomainId: domain:embedded-systems
+  description: |
+    Firmware, RTOS, microcontroller, and resource-constrained device
+    development. Sourced from library/specializations/embedded-systems/.
+edges:
+  specializes:
+    - domain:embedded-systems
+---
+nodeKind: Specialization
+id: specialization:fpga-programming
+attributes:
+  displayName: "FPGA Programming"
+  parentDomainId: domain:embedded-systems
+  description: |
+    Hardware description languages, synthesis flows, and FPGA toolchains
+    (Verilog/VHDL/SystemVerilog). Sourced from
+    library/specializations/fpga-programming/.
+edges:
+  specializes:
+    - domain:embedded-systems
+---
+nodeKind: Specialization
+id: specialization:game-development
+attributes:
+  displayName: "Game Development"
+  parentDomainId: domain:gaming
+  description: |
+    Game engines, gameplay systems, graphics, and game tooling. Product
+    & technical specialization sourced from
+    library/specializations/game-development/.
+edges:
+  specializes:
+    - domain:gaming
+---
+nodeKind: Specialization
+id: specialization:gpu-programming
+attributes:
+  displayName: "GPU Programming"
+  parentDomainId: domain:scientific-computing
+  description: |
+    CUDA/ROCm/Metal, compute shaders, and GPU performance engineering.
+    Sourced from library/specializations/gpu-programming/.
+edges:
+  specializes:
+    - domain:scientific-computing
+---
+nodeKind: Specialization
+id: specialization:network-programming
+attributes:
+  displayName: "Network Programming"
+  parentDomainId: domain:networking
+  description: |
+    Protocol implementation, sockets, network security, and distributed
+    systems networking. Sourced from
+    library/specializations/network-programming/.
+edges:
+  specializes:
+    - domain:networking
+---
+nodeKind: Specialization
+id: specialization:performance-optimization
+attributes:
+  displayName: "Performance Optimization"
+  parentDomainId: domain:software-engineering
+  description: |
+    Profiling, benchmarking, memory management, leak detection, CPU and
+    I/O optimization. Sourced from
+    library/specializations/performance-optimization/.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:qa-testing-automation
+attributes:
+  displayName: "QA / Testing Automation"
+  parentDomainId: domain:software-engineering
+  description: |
+    Software quality assurance, test architecture, and test automation
+    across unit/integration/e2e/performance/security testing layers.
+    Sourced from library/specializations/qa-testing-automation/.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:robotics-simulation
+attributes:
+  displayName: "Robotics & Simulation"
+  parentDomainId: domain:robotics
+  description: |
+    Robotics control, motion planning, ROS, and simulation environments.
+    Sourced from library/specializations/robotics-simulation/.
+edges:
+  specializes:
+    - domain:robotics
+---
+nodeKind: Specialization
+id: specialization:sdk-platform-development
+attributes:
+  displayName: "SDK & Platform Development"
+  parentDomainId: domain:software-engineering
+  description: |
+    Authoring SDKs, developer platforms, and library APIs — including
+    versioning, deprecation, and DX surfaces. Sourced from
+    library/specializations/sdk-platform-development/.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:security-research
+attributes:
+  displayName: "Security Research"
+  parentDomainId: domain:security
+  description: |
+    Vulnerability research, exploit development, and offensive security.
+    Sourced from library/specializations/security-research/.
+edges:
+  specializes:
+    - domain:security
+---
+nodeKind: Specialization
+id: specialization:software-architecture
+attributes:
+  displayName: "Software Architecture"
+  parentDomainId: domain:software-engineering
+  description: |
+    System architecture, ADRs, decomposition, and platform-shape
+    decisions. Sourced from library/specializations/software-architecture/.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:technical-documentation
+attributes:
+  displayName: "Technical Documentation"
+  parentDomainId: domain:software-engineering
+  description: |
+    API docs, runbooks, architecture docs, and onboarding guides.
+    Sourced from library/specializations/technical-documentation/.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:ux-ui-design
+attributes:
+  displayName: "UX / UI Design"
+  parentDomainId: domain:web-development
+  description: |
+    User experience and user interface design. Sourced from
+    library/specializations/ux-ui-design/.
+edges:
+  specializes:
+    - domain:web-development
+---
+nodeKind: Specialization
+id: specialization:devops-sre-platform
+attributes:
+  displayName: "DevOps / SRE / Platform Engineering"
+  parentDomainId: domain:devops
+  description: |
+    DevOps practices, Site Reliability Engineering, and Platform
+    Engineering for building, operating, and scaling reliable software
+    systems. Sourced from library/specializations/devops-sre-platform/.
+edges:
+  specializes:
+    - domain:devops
+---
+nodeKind: Specialization
+id: specialization:web-development
+attributes:
+  displayName: "Web Development"
+  parentDomainId: domain:web-development
+  description: |
+    Building modern web applications — frontend frameworks, SSR/SSG,
+    accessibility, performance, and the surrounding browser platform.
+    Sourced from library/specializations/web-development/.
+edges:
+  specializes:
+    - domain:web-development
+---
+nodeKind: Specialization
+id: specialization:mobile-development
+attributes:
+  displayName: "Mobile Development"
+  parentDomainId: domain:mobile
+  description: |
+    Building native and cross-platform mobile applications across
+    iOS, Android, React Native, and Flutter. Sourced from
+    library/specializations/mobile/.
+edges:
+  specializes:
+    - domain:mobile

@@ -1,0 +1,21 @@
+nodeKind: Presentation
+id: presentation:codex-cli-tui
+attributes:
+  displayName: "Codex CLI TUI"
+  kind: tui
+  description: |
+    Terminal UI bundled with the OpenAI Codex CLI. Renders streaming
+    output, sandboxed tool calls, and approval prompts.
+  renderingTechnology: vte
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+  bundleSize: "~30 MB"
+  updateChannel: auto
+  accessibilityShortcuts:
+    - "Ctrl+C: interrupt current task"
+    - "Esc: cancel pending approval"
+edges:
+  bundled_with:
+    - agent-platform-impl:codex.platform@1.x

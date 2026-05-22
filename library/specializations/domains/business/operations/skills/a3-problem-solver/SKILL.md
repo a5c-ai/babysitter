@@ -11,6 +11,11 @@ metadata:
   specialization: operations
   domain: business
   category: continuous-improvement
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:business-analysis, skill-area:change-management, skill-area:statistical-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:business-analyst, role:scrum-master]
 ---
 
 # A3 Problem Solver

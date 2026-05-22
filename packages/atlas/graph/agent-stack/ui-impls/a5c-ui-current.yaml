@@ -1,0 +1,29 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:a5c.ui@current
+attributes:
+  displayName: "a5c UI (current) — tui-and-cli"
+  agentVersionId: agent-version:a5c@current
+  packageRef: source-ref:a5c-cli
+  uiKind: tui-and-cli
+  presentationsBundled:
+    - presentation:a5c-tui
+    - presentation:a5c-cli
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  notes: |
+    a5c ships both a TUI and a CLI presentation; user-facing primitives are
+    slash-style commands. Some flows delegate via agent-mux to upstream agents.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:a5c-blueprint-install
+      attributes: { mechanism: slash-command, invocationToken: "/a5c:install" }
+    - target: interaction-primitive:a5c-blueprint-configure
+      attributes: { mechanism: slash-command, invocationToken: "/a5c:configure" }
+    - target: interaction-primitive:a5c-marketplace-browse
+      attributes: { mechanism: slash-command, invocationToken: "/a5c:plugins" }
+    - target: interaction-primitive:command-palette
+      attributes: { mechanism: keybinding }
+    - target: interaction-primitive:model-picker
+      attributes: { mechanism: slash-command, invocationToken: "/model" }

@@ -2,17 +2,14 @@
 name: cross-artifact-analysis
 description: Perform cross-artifact consistency and coverage analysis across constitution, specification, plan, and task artifacts to detect gaps, conflicts, and misalignments before implementation.
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Cross-Artifact Analysis
-
-## Overview
-
-Analyze all pipeline artifacts (constitution, specification, plan, tasks) for consistency, coverage, and alignment. This is the pre-implementation quality gate that ensures all artifacts are coherent before code is written.
-
-## When to Use
-
-- After task decomposition, before implementation
 - When verifying that all specification requirements have corresponding tasks
 - When checking for contradictions between constitution and plan
 - When assessing readiness for the implementation phase

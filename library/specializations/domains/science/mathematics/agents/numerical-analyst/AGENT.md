@@ -14,6 +14,12 @@ metadata:
   domain: science
   category: applied-mathematics
   phase: 6
+graph:
+  domains: [domain:mathematics]
+  specializations: [specialization:computational-mathematics]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:dynamic-programming, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:computational-scientist, role:research-engineer]
 ---
 
 # Numerical Analyst

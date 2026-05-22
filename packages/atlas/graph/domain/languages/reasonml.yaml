@@ -1,0 +1,13 @@
+nodeKind: Language
+id: language:reasonml
+attributes:
+  displayName: "ReasonML"
+  paradigms:
+    - functional
+  description: |
+    Reason — an OCaml-derived syntax targeting JavaScript via BuckleScript /
+    ReScript, designed for React-friendly frontend development.
+edges:
+  applies_to:
+    - target: domain:frontend
+    - target: domain:web-development

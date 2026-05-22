@@ -1,0 +1,11 @@
+nodeKind: Specialization
+id: specialization:flutter-mobile
+attributes:
+  displayName: "Flutter Mobile"
+  parentDomainId: domain:mobile
+  description: |
+    Cross-platform mobile development with Flutter and Dart — widget
+    composition, state management, and platform channels.
+edges:
+  specializes:
+    - domain:mobile

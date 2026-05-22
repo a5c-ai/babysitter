@@ -1,0 +1,31 @@
+---
+nodeKind: PullRequest
+id: pull-request:acme-app-1234
+attributes:
+  number: 1234
+  title: "Add token-budget guardrail to symphony agent"
+  state: open
+  sourceBranch: "feat/token-budget-guardrail"
+  targetBranch: "main"
+  openedAt: "2026-04-28T09:14:00Z"
+  vcsHostId: vcs-host:github
+  url: "https://github.com/acme/app/pull/1234"
+edges:
+  hosted_on_vcs:
+    - target: vcs-host:github
+---
+nodeKind: PullRequest
+id: pull-request:globex-platform-87
+attributes:
+  number: 87
+  title: "Pin Gemini 1.5 Pro version in router config"
+  state: merged
+  sourceBranch: "fix/gemini-version-pin"
+  targetBranch: "main"
+  openedAt: "2026-04-25T12:00:00Z"
+  mergedAt: "2026-04-26T08:30:00Z"
+  vcsHostId: vcs-host:gitlab
+  url: "https://gitlab.com/globex/platform/-/merge_requests/87"
+edges:
+  hosted_on_vcs:
+    - target: vcs-host:gitlab

@@ -1,0 +1,45 @@
+nodeKind: Subagent
+id: subagent:db-migrator
+attributes:
+  displayName: "DB Migrator"
+  provenance: custom
+  roleId: role:db-migrator
+  systemPrompt: |
+    You author and review database schema migrations. Read existing
+    migration history and ORM models, generate forward + rollback
+    scripts, validate against a shadow database, and surface destructive
+    operations (drops, type narrowing) for explicit approval.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:edit
+    - tool-descriptor:bash
+    - tool-descriptor:grep
+    - tool-descriptor:write
+  disallowedTools:
+    - tool-descriptor:web-fetch
+  triggers: |
+    Invoke when the user adds a model field, renames a column, or asks
+    for a "safe migration" plan against a production database.
+  description: |
+    Database-migration subagent. Lives at `.claude/agents/db-migrator.md`
+    (project scope). Pairs with the db-migrations-safety blueprint.
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:db-migrator
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reliability

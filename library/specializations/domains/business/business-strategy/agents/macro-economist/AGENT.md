@@ -16,6 +16,12 @@ metadata:
   domain: business
   category: Economic Analysis
   agent-id: AG-019
+graph:
+  domains: [domain:strategy]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:economic-analysis, skill-area:strategic-analysis, skill-area:market-research]
+  workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+  roles: [role:strategic-planner, role:research-analyst]
 ---
 
 # Macro-Economist Agent

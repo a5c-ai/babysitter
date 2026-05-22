@@ -1,0 +1,23 @@
+nodeKind: AgentControlMode
+id: agent-control-mode:claude-code-coordinator
+attributes:
+  displayName: "Claude Code coordinator mode"
+  mode: coordinator
+  envVar: "CLAUDE_CODE_COORDINATOR_MODE"
+  featureGate: "COORDINATOR_MODE"
+  persistedOnSession: true
+  workerToolInventory:
+    - Bash
+    - Read
+    - Edit
+    - Glob
+    - Grep
+    - Skill
+  disablesFeatures:
+    - plan-mode
+    - worktree-mode
+  description: |
+    Top-level coordinator posture — system prompt switches to "you orchestrate
+    workers via AgentTool/SendMessage/TaskStop", and worker tool inventory is
+    drawn from ASYNC_AGENT_ALLOWED_TOOLS minus INTERNAL_WORKER_TOOLS.
+    matchSessionMode reconciles env var with session.mode on resume.

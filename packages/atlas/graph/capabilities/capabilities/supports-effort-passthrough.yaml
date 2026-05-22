@@ -1,0 +1,15 @@
+nodeKind: Capability
+id: capability:supports-effort-passthrough
+attributes:
+  displayName: "Supports effort passthrough"
+  description: |
+    The agent forwards effort-level requests to the bridged
+    harness rather than handling effort tiers natively in its own core.
+    Used by orchestration layers (e.g. a5c) that dispatch to multiple
+    harnesses and rely on each harness's native effort taxonomy.
+    Distinct from `capability:supports-thinking` (which is about
+    thinking-block surfacing) and from native `supports_effort_level`
+    edges (which assert per-tier support).
+  appliesToNodeKinds: ["AgentVersion", "AgentCoreImpl"]
+  category: reasoning
+edges: {}

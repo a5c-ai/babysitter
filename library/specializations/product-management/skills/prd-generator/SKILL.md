@@ -2,6 +2,12 @@
 name: prd-generator
 description: Generate comprehensive Product Requirements Documents from structured inputs. Apply company templates, create technical specifications, define success metrics, build launch checklists, and version PRD changes over time.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:product-discovery, skill-area:roadmap-planning]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # PRD Generator Skill

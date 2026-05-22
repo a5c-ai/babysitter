@@ -1,0 +1,40 @@
+{
+  "name": "lunaroute",
+  "version": "1.0.0",
+  "description": "Install and configure LunaRoute - a local proxy server for AI coding assistants that provides complete visibility into LLM interactions, session recording, token tracking, and PII protection. Supports mid-session model routing and works with any AI harness.",
+  "author": "a5c-ai",
+  "license": "MIT",
+  "keywords": [
+    "lunaroute",
+    "proxy",
+    "llm",
+    "monitoring",
+    "debugging",
+    "ai-assistant",
+    "routing",
+    "analytics",
+    "privacy"
+  ],
+  "homepage": "https://github.com/erans/lunaroute",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/erans/lunaroute.git"
+  },
+  "babysitter": {
+    "plugin": {
+      "type": "marketplace",
+      "category": "development-tools",
+      "tags": ["proxy", "llm", "monitoring", "debugging", "ai-assistant"],
+      "compatibility": {
+        "harnesses": ["claude-code", "cursor", "codex", "vs-code", "generic"],
+        "platforms": ["macos", "linux", "windows"]
+      },
+      "requirements": [
+        "Rust toolchain for building from source",
+        "Git for repository cloning",
+        "Available ports 8081 and 8082",
+        "AI harness configuration access"
+      ]
+    }
+  }
+}

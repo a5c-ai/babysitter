@@ -1,0 +1,103 @@
+{
+  "version": "v1",
+  "adapter": "codex",
+  "description": "Codex CLI native hook event payloads for compatibility regression testing",
+  "events": [
+    {
+      "nativeEventName": "SessionStart",
+      "stdin": {
+        "session_id": "codex-sess-abc123",
+        "cwd": "/home/user/project",
+        "model": "o3",
+        "source": "startup"
+      },
+      "env": {
+        "HOME": "/home/user",
+        "PWD": "/home/user/project"
+      },
+      "expected": {
+        "phase": "session.start",
+        "supportLevel": "native",
+        "adapter": "codex",
+        "payloadKeys": ["session_id", "cwd", "model", "source"]
+      }
+    },
+    {
+      "nativeEventName": "SessionEnd",
+      "stdin": {
+        "session_id": "codex-sess-abc123",
+        "reason": "task_complete",
+        "summary": "Session completed successfully"
+      },
+      "env": {},
+      "expected": {
+        "phase": "session.end",
+        "supportLevel": "lossy",
+        "adapter": "codex",
+        "payloadKeys": ["session_id", "reason", "summary"]
+      }
+    },
+    {
+      "nativeEventName": "UserPromptSubmit",
+      "stdin": {
+        "session_id": "codex-sess-abc123",
+        "prompt": "Fix the bug in auth module",
+        "cwd": "/home/user/project"
+      },
+      "env": {},
+      "expected": {
+        "phase": "turn.user_prompt_submitted",
+        "supportLevel": "native",
+        "adapter": "codex",
+        "payloadKeys": ["session_id", "prompt", "cwd"]
+      }
+    },
+    {
+      "nativeEventName": "Stop",
+      "stdin": {
+        "session_id": "codex-sess-abc123",
+        "reason": "task_complete",
+        "stop_hook_active": false
+      },
+      "env": {},
+      "expected": {
+        "phase": "turn.stop",
+        "supportLevel": "native",
+        "adapter": "codex",
+        "payloadKeys": ["session_id", "reason", "stop_hook_active"]
+      }
+    },
+    {
+      "nativeEventName": "PreToolUse",
+      "stdin": {
+        "session_id": "codex-sess-abc123",
+        "tool_name": "bash",
+        "tool_call_id": "tc-001",
+        "tool_input": { "command": "npm test" }
+      },
+      "env": {},
+      "expected": {
+        "phase": "tool.before",
+        "supportLevel": "lossy",
+        "adapter": "codex",
+        "payloadKeys": ["session_id", "tool_name", "tool_call_id", "tool_input"]
+      }
+    },
+    {
+      "nativeEventName": "PostToolUse",
+      "stdin": {
+        "session_id": "codex-sess-abc123",
+        "tool_name": "bash",
+        "tool_call_id": "tc-001",
+        "tool_output": { "exit_code": 0, "stdout": "Tests passed" }
+      },
+      "env": {},
+      "expected": {
+        "phase": "tool.after",
+        "supportLevel": "lossy",
+        "adapter": "codex",
+        "payloadKeys": ["session_id", "tool_name", "tool_call_id", "tool_output"]
+      }
+    }
+  ]
+}

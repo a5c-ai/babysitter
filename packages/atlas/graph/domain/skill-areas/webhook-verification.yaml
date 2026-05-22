@@ -1,0 +1,17 @@
+nodeKind: SkillArea
+id: skill-area:webhook-verification
+attributes:
+  displayName: "Webhook Verification"
+  description: |
+    Verifying inbound webhook authenticity: HMAC-SHA256 signature schemes,
+    timestamp / replay-protection windows, constant-time comparison,
+    raw-body capture before JSON parsing, and provider-specific quirks
+    (Stripe, GitHub, Slack).
+  domains:
+    - topic:webhook-verification
+    - domain:security
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: topic:webhook-verification
+      confidence: primary

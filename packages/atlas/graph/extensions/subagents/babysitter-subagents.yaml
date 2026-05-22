@@ -1,0 +1,91 @@
+nodeKind: Subagent
+id: subagent:babysitter-define-task
+attributes:
+  displayName: "Babysitter defineTask Subagent"
+  provenance: custom
+  dispatchPattern: subprocess-task
+  subjectId: agentVersion:claude:ge-0-0-0
+  systemPrompt: |
+    Generic shape covering any `defineTask(id, impl)` export. Every
+    babysitter process exports defineTask declarations that become
+    dispatchable subagents at run-time. Each invocation spawns a
+    `kind: 'agent'` subtask in its own subprocess — a ChildSession with
+    `lifecyclePolicy: persistent` — and the impl function controls the
+    workspace, tool allowlist, and prompt for that subprocess.
+  tools: []
+  triggers: |
+    Invoked via `ctx.task(taskSpec, args)` from a babysitter process
+    function during run iteration. Spawns a subprocess via the
+    subprocess-task dispatch pattern.
+  description: |
+    Generic shape — every babysitter process exports `defineTask`
+    declarations that become dispatchable subagents at run-time. Each
+    invocation spawns a `kind: 'agent'` subtask in its own subprocess
+    (persistent ChildSession). Concrete user-authored Tasks specialize
+    this shape with a specific impl, prompt, workspace policy, and
+    tool allowlist.
+edges:
+  implements:
+    - target: extension-interface:orchestration
+---
+nodeKind: Subagent
+id: subagent:babysitter-research-task
+attributes:
+  displayName: "Babysitter research Task pattern"
+  provenance: custom
+  dispatchPattern: subprocess-task
+  subjectId: agentVersion:claude:ge-0-0-0
+  systemPrompt: |
+    Pattern for multi-step research / audit subtasks. Spawns a fresh
+    agent subprocess with a workspace + tool allowlist scoped to
+    read-only investigation (Read / Grep / Glob / WebFetch / WebSearch).
+    Aggregates findings and posts a structured result back to the
+    parent run via `task:post`.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:grep
+    - tool-descriptor:glob
+  triggers: |
+    Invoked via `ctx.task(researchTaskSpec, args)` when a babysitter
+    process needs an isolated multi-step research / audit pass.
+  description: |
+    Pattern for multi-step research / audit subtasks. Spawns a fresh
+    agent subprocess with workspace + tools allowlist scoped to
+    investigation; aggregates findings back to the parent run.
+edges:
+  implements:
+    - target: extension-interface:orchestration
+---
+nodeKind: Subagent
+id: subagent:babysitter-implementer-task
+attributes:
+  displayName: "Babysitter implementer Task pattern"
+  provenance: custom
+  dispatchPattern: subprocess-task
+  subjectId: agentVersion:claude:ge-0-0-0
+  roleId: role:implementer
+  systemPrompt: |
+    Pattern for feature-implementation subtasks (TDD / feature
+    implementer). Spawns an agent subprocess with edit / run / test
+    tool access, scoped to a worktree. The impl function drives the
+    TDD loop (failing test -> implementation -> green) and posts a
+    structured result with the diff back to the parent run.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:edit
+    - tool-descriptor:write
+    - tool-descriptor:bash
+    - tool-descriptor:grep
+    - tool-descriptor:glob
+  triggers: |
+    Invoked via `ctx.task(implementerTaskSpec, args)` when a babysitter
+    process needs a feature implemented in an isolated worktree.
+  description: |
+    Pattern for feature-implementation subtasks (TDD-style). Spawns
+    an agent subprocess with edit / run / test tool access in a
+    dedicated worktree.
+edges:
+  roles_played_by:
+    - target: role:implementer
+  implements:
+    - target: extension-interface:orchestration

@@ -1,0 +1,197 @@
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:mcp-transport
+attributes:
+  displayName: MCPTransport (meta)
+  name: MCPTransport
+  cluster: 2-compute-path
+  prefix: mcp-transport
+  origin: standard
+  purpose: an MCP wire transport (stdio, Streamable HTTP, ...)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:mcp-transport--id
+  - target: meta-attribute:mcp-transport--display-name
+  - target: meta-attribute:mcp-transport--kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:mcp-resource
+attributes:
+  displayName: MCPResource (meta)
+  name: MCPResource
+  cluster: 2-compute-path
+  prefix: mcp-resource
+  origin: standard
+  purpose: MCP server-exposed read-only resource (uri + mimeType)
+  exampleCount: 0
+  invariants:
+  - 'id starts with mcp-resource:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:mcp-resource--id
+  - target: meta-attribute:mcp-resource--display-name
+  - target: meta-attribute:mcp-resource--uri
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:mcp-prompt
+attributes:
+  displayName: MCPPrompt (meta)
+  name: MCPPrompt
+  cluster: 2-compute-path
+  prefix: mcp-prompt
+  origin: standard
+  purpose: MCP server-exposed prompt template (name + arguments)
+  exampleCount: 0
+  invariants:
+  - 'id starts with mcp-prompt:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:mcp-prompt--id
+  - target: meta-attribute:mcp-prompt--display-name
+  - target: meta-attribute:mcp-prompt--name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:mcp-sampling
+attributes:
+  displayName: MCPSampling (meta)
+  name: MCPSampling
+  cluster: 2-compute-path
+  prefix: mcp-sampling
+  origin: standard
+  purpose: MCP server-requested model sampling capability (modelPreferences + systemPrompt)
+  exampleCount: 0
+  invariants:
+  - 'id starts with mcp-sampling:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:mcp-sampling--id
+  - target: meta-attribute:mcp-sampling--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:mcp-root
+attributes:
+  displayName: MCPRoot (meta)
+  name: MCPRoot
+  cluster: 2-compute-path
+  prefix: mcp-root
+  origin: standard
+  purpose: MCP filesystem root scope advertised by host (uri-scoped)
+  exampleCount: 0
+  invariants:
+  - 'id starts with mcp-root:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:mcp-root--id
+  - target: meta-attribute:mcp-root--display-name
+  - target: meta-attribute:mcp-root--uri
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:async-job
+attributes:
+  displayName: AsyncJob (meta)
+  name: AsyncJob
+  cluster: 2-compute-path
+  prefix: async-job
+  origin: universal
+  purpose: async / long-running job submission primitive (batch APIs, webhooks, scheduled jobs)
+  exampleCount: 0
+  invariants:
+  - 'id starts with async-job:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:async-job--id
+  - target: meta-attribute:async-job--display-name
+  - target: meta-attribute:async-job--kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:human-checkpoint
+attributes:
+  displayName: HumanCheckpoint (meta)
+  name: HumanCheckpoint
+  cluster: 3-agent-stack
+  prefix: human-checkpoint
+  origin: universal
+  purpose: explicit point at which a human is consulted; reified rather than enum because it carries policy attributes
+  exampleCount: 0
+  invariants:
+  - 'id starts with human-checkpoint:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:human-checkpoint--id
+  - target: meta-attribute:human-checkpoint--display-name
+  - target: meta-attribute:human-checkpoint--kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:resume-token
+attributes:
+  displayName: ResumeToken (meta)
+  name: ResumeToken
+  cluster: 3-agent-stack
+  prefix: resume-token
+  origin: universal
+  purpose: primitive for async resumption of a paused/interrupted run
+  exampleCount: 0
+  invariants:
+  - 'id starts with resume-token:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:resume-token--id
+  - target: meta-attribute:resume-token--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:launch-contract
+attributes:
+  displayName: LaunchContract (meta)
+  name: LaunchContract
+  cluster: 3-agent-stack
+  prefix: launch-contract
+  origin: derived
+  purpose: codifies the spawn shape (command, cwd, line-size, timeouts, startup handshake) for orchestrator->agent-subprocess launches; structurally distinct from AgentRuntimeImpl (which is the runtime descriptor)
+  exampleCount: 0
+  invariants:
+  - 'id starts with launch-contract:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:launch-contract--id
+  - target: meta-attribute:launch-contract--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:run-attempt
+attributes:
+  displayName: RunAttempt (meta)
+  name: RunAttempt
+  cluster: 6-lifecycle
+  prefix: run-attempt
+  origin: derived
+  purpose: a single attempt within a Run, carrying retry-backoff and per-attempt status/identity (replaces ad-hoc Run.status churn)
+  exampleCount: 0
+  invariants:
+  - 'id starts with run-attempt:'
+  - attemptNumber >= 1
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:run-attempt--id
+  - target: meta-attribute:run-attempt--display-name
+  - target: meta-attribute:run-attempt--status

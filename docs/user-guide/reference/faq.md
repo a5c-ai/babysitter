@@ -2,6 +2,7 @@
 
 **Version:** 1.1
 **Last Updated:** 2026-01-26
+Last refreshed: 2026-04-25
 **Category:** Reference
 
 ---
@@ -125,16 +126,22 @@ See: [Installation Guide](../getting-started/installation.md)
 
 ---
 
-### Why do I need two npm packages?
+### Why are there multiple Babysitter npm packages?
 
-Babysitter has two packages with distinct responsibilities:
+Babysitter exposes a few public packages with different roles:
 
-1. **@a5c-ai/babysitter** - Core package
-2. **@a5c-ai/babysitter-sdk** - Orchestration runtime, CLI, and integrated breakpoints UI
+1. **@a5c-ai/babysitter** - Recommended end-user install for the `babysitter` CLI
+2. **@a5c-ai/babysitter-sdk** - SDK/library package and the implementation behind the core CLI
+3. **@a5c-ai/babysitter-agent** - Optional runtime CLI for `call`, `resume`, `plan`, `doctor`, `start-server`, and `tui`
 
-Install both:
+Most users install:
 ```bash
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest
+```
+
+Add the optional runtime CLI only if you need those agent runtime commands:
+```bash
+npm install -g @a5c-ai/babysitter-agent@latest
 ```
 
 ---
@@ -163,7 +170,7 @@ rm -rf .a5c/runs/<old-run-id>
 
 **Update SDK packages:**
 ```bash
-npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk
+npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-agent
 ```
 
 **Update Claude Code plugin:**
@@ -182,7 +189,7 @@ Common causes and solutions:
 
 1. **Plugin not installed:**
    ```bash
-   claude plugin marketplace add a5c-ai/babysitter
+   claude plugin marketplace add a5c-ai/babysitter-claude
    claude plugin install --scope user babysitter@a5c.ai
    ```
 
@@ -801,7 +808,7 @@ Kill the conflicting process or configure a different port in your SDK settings.
    - OS and version
    - Node.js version
    - Claude Code version
-   - Babysitter SDK version
+   - Babysitter CLI version
    - Full error message
    - Relevant journal excerpts
 

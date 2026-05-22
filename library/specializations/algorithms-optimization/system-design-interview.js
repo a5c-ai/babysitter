@@ -8,6 +8,12 @@
  * @references
  * - System Design Primer: https://github.com/donnemartin/system-design-primer
  * - Designing Data-Intensive Applications
+ * @graph
+ *   domains: [domain:computer-science]
+ *   specializations: [specialization:algorithms-optimization]
+ *   skillAreas: [skill-area:dynamic-programming, skill-area:graph-algorithms]
+ *   roles: [role:backend-engineer, role:computational-scientist]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

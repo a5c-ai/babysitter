@@ -1,0 +1,16 @@
+nodeKind: OutputGuard
+id: output-guard:openai-structured-output-strict
+attributes:
+  displayName: "OpenAI Structured Output (strict) guard"
+  appliesTo: tool-result
+  phase: post-call
+  detectorKinds: [format-violation]
+  onTrigger: block
+  severity: block-call
+  description: |
+    OpenAI Responses/Chat Completions support `response_format: { type:
+    "json_schema", json_schema: { ..., strict: true } }`. When strict=true
+    the server enforces JSON Schema constraints on the assistant output
+    and refuses to emit non-conforming results, surfacing a structural
+    error rather than a malformed response. Doc: OpenAI Structured Outputs.
+edges: {}

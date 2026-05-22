@@ -1,0 +1,312 @@
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-contextwindowtokens
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: contextWindowTokens
+  value: '128000'
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current contextWindowTokens is 128000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-costpermtokinput
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: costPerMTokInput
+  value: '2.0'
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current costPerMTokInput is 2.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-costpermtokoutput
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: costPerMTokOutput
+  value: '6.0'
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current costPerMTokOutput is 6.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-finetuningkind
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: fineTuningKind
+  value: full
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current fineTuningKind is full.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-kind
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: kind
+  value: chat
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current kind is chat.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-lifecyclestatus
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-modalities
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: modalities
+  value: text
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current modalities is text.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-modalitydirections
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current modalityDirections is kind=text;direction=input,
+    kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-modelcardurl
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: modelCardUrl
+  value: https://huggingface.co/mistralai/Mistral-Large-Instruct-2407
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current modelCardUrl is https://huggingface.co/mistralai/Mistral-Large-Instruct-2407.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-supportsextendedthinking
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-supportsfinetuning
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: supportsFineTuning
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current supportsFineTuning is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current supportsThinkingBudgetTokens is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-large-2-current-versionrange
+attributes:
+  subjectId: model:mistral-large-2@current
+  attribute: versionRange
+  value: '>=2.0.0 <3.0.0'
+  subjectKind: ModelVersion
+  statement: model:mistral-large-2@current versionRange is >=2.0.0 <3.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-mistral-large-2
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-mistral-large-2
+  about_subject:
+  - model:mistral-large-2@current

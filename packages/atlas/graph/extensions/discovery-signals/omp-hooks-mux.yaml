@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:omp-hooks-mux
+attributes:
+  signalId: discovery-signal:omp-hooks-mux
+  signalKind: env-any
+  key: oh-my-pi
+  matchMode: all
+  confidence: high
+  scope: hooks-mux
+  signals:
+    - OMP_PLUGIN_ROOT
+    - OMP_SESSION_ID
+  absentSignals: []
+  argvMatches: []
+  metadataFields: []
+  consumer: hooks-mux-core
+  notes: 'Ordered adapter auto-detection rule used by hooks-mux (oh-my-pi → omp adapter). Verbatim from legacy discovery:oh-my-pi:hooks-mux:8.'
+edges:
+  applies_to:
+    - target: agent:omp

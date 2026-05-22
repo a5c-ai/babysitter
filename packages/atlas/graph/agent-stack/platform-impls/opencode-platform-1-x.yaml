@@ -1,0 +1,49 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:opencode.platform@1.x
+attributes:
+  displayName: OpenCode Platform (1.x)
+  agentVersionId: agentVersion:opencode:ge-0-0-0
+  subagentDefinitionFormat: none
+  packageRef: source-ref:opencode-github
+  nativeExtensionFormat: none
+  nativeExtensionManifestPath: ''
+  nativeExtensionsDirectoryPath: []
+  skillFormat: agents-md
+  skillsDirectoryPath:
+  - ~/.config/opencode/skills/
+  customSlashCommandsPath: []
+  subagentsDirectoryPath: []
+  hooksDirectoryOrConfigPath:
+  - ~/.config/opencode/hooks.json
+  settingsFiles:
+  - ~/.config/opencode/config.json
+  - ~/.opencode/config.json
+  pluginRegistryPath: ''
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: api-key
+  updateChannelMechanism: npm
+  supportedChannelKinds:
+  - mcp-channel
+  - http-sse-channel
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+  - target: agent:opencode
+    role: platform
+  bundles:
+  - target: presentation:opencode-tui
+  supports:
+  - target: capability:can-resume
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'JSONL sessions support resume and fork.
+
+      '
+  - target: capability:supports-plugins
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'OpenCode supports a plugin format and MCP-server integration.
+
+      '

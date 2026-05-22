@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:settings-template
+attributes:
+  canonicalDefinitionId: definition:settings-template.canonical
+  displayName: "SettingsTemplate"
+  kind: tool
+  references:
+    - "NodeKind:SettingsTemplate"
+  description: |
+    A plugin-shipped settings.json fragment merged into host settings on install
+edges:
+  applies_to:
+    - target: domain:software-engineering

@@ -1,0 +1,22 @@
+nodeKind: HookMapping
+id: hook-mapping:post-tool-use-gemini
+attributes:
+  mappingId: hook-mapping:post-tool-use-gemini
+  hookId: hook-surface:post-tool-use
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: post_response
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: gemini-cli
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: model.after_response
+  blockCapability: false
+  mutationCapability: false
+  scope: model
+edges:
+  maps_hook:
+    - target: hook-surface:post-tool-use
+  emits_hook:
+    - target: agentVersion:gemini:ge-0-0-0

@@ -1,0 +1,406 @@
+---
+nodeKind: ToolServer
+id: tool-server:mcp-fireflies-ai-candidate
+attributes:
+  displayName: "Fireflies.ai MCP candidate"
+  description: |
+    Candidate MCP server for Fireflies.ai meeting recordings, transcripts, summaries, and action-item workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: productivity
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: fireflies.ai
+    score: 69
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:fireflies-ai
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:project-manager
+      confidence: medium
+      evidence: "Meeting transcript access would support follow-up, status review, and retrospective workflows."
+    - target: workflow:retrospective
+      confidence: medium
+      evidence: "Transcript and action-item retrieval would support retrospective evidence gathering."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-otter-ai-candidate
+attributes:
+  displayName: "Otter.ai MCP candidate"
+  description: |
+    Candidate MCP server for Otter.ai transcripts, summaries, and speech-to-text meeting artifacts. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: productivity
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: otter.ai
+    score: 68
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:otter-ai
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:documentation-engineer
+      confidence: medium
+      evidence: "Transcript access would support converting meetings into documentation."
+    - target: workflow:knowledge-base-maintenance
+      confidence: medium
+      evidence: "Meeting summaries can seed durable support and training knowledge."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-nylas-candidate
+attributes:
+  displayName: "Nylas MCP candidate"
+  description: |
+    Candidate MCP server for Nylas email, calendar, contacts, and scheduling APIs. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: communication
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: nylas.com
+    score: 72
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:nylas
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "Email and calendar APIs support reusable workflow integrations."
+    - target: workflow:email-support-workflow
+      confidence: high
+      evidence: "Inbox and email event access would support support workflow automation."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-loops-candidate
+attributes:
+  displayName: "Loops MCP candidate"
+  description: |
+    Candidate MCP server for Loops contacts, transactional messages, campaigns, and email automation. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: marketing
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: loops.so
+    score: 71
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:loops
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:marketing-manager
+      confidence: medium
+      evidence: "Campaign and audience APIs support lifecycle marketing automation."
+    - target: workflow:customer-marketing-campaign
+      confidence: medium
+      evidence: "Email automation data supports customer campaign analysis."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-bigcommerce-candidate
+attributes:
+  displayName: "BigCommerce MCP candidate"
+  description: |
+    Candidate MCP server for BigCommerce products, catalog, orders, inventory, and customer records. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: commerce
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: bigcommerce.com
+    score: 72
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:bigcommerce
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:customer-experience-manager
+      confidence: medium
+      evidence: "Order and customer context supports customer experience review."
+    - target: workflow:end-to-end-customer-journey-audit
+      confidence: high
+      evidence: "Commerce event and order state access would support journey reconstruction."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-medusa-candidate
+attributes:
+  displayName: "Medusa MCP candidate"
+  description: |
+    Candidate MCP server for Medusa headless-commerce products, carts, orders, and inventory APIs. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: commerce
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: medusajs.com
+    score: 68
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:medusa
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "Headless commerce APIs support platform integration work."
+    - target: workflow:technical-support-escalation
+      confidence: medium
+      evidence: "Order and product state helps diagnose storefront escalations."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-saleor-candidate
+attributes:
+  displayName: "Saleor MCP candidate"
+  description: |
+    Candidate MCP server for Saleor GraphQL commerce APIs covering catalog, checkout, order, and inventory state. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: commerce
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: saleor.io
+    score: 68
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:saleor
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "GraphQL commerce access supports platform extension workflows."
+    - target: workflow:customer-journey-optimization
+      confidence: medium
+      evidence: "Checkout and catalog state supports journey optimization."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-onelogin-candidate
+attributes:
+  displayName: "OneLogin MCP candidate"
+  description: |
+    Candidate MCP server for OneLogin users, apps, groups, SSO configuration, and access governance. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: security
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: onelogin.com
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:onelogin
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:security-reviewer
+      confidence: medium
+      evidence: "Identity metadata supports access-review and security review."
+    - target: workflow:access-control-audit
+      confidence: high
+      evidence: "SSO and directory data are direct access-control audit evidence."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-jumpcloud-candidate
+attributes:
+  displayName: "JumpCloud MCP candidate"
+  description: |
+    Candidate MCP server for JumpCloud directory, user, device, SSO, and LDAP workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: security
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: jumpcloud.com
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:jumpcloud
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:head-of-security
+      confidence: medium
+      evidence: "Directory and device metadata supports security governance."
+    - target: workflow:soc2-audit-preparation
+      confidence: medium
+      evidence: "Identity and device controls provide audit evidence."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-fireworks-ai-candidate
+attributes:
+  displayName: "Fireworks AI MCP candidate"
+  description: |
+    Candidate MCP server for Fireworks AI model invocation, inference metrics, and provider comparison workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: ai
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: fireworks.ai
+    score: 75
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:fireworks-ai
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:ml-engineer
+      confidence: medium
+      evidence: "Inference APIs support evaluation and model-serving workflows."
+    - target: workflow:llm-cost-optimization
+      confidence: medium
+      evidence: "Provider and model telemetry supports cost and latency optimization."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-mistral-ai-candidate
+attributes:
+  displayName: "Mistral AI MCP candidate"
+  description: |
+    Candidate MCP server for Mistral AI model invocation, embeddings, and evaluation workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: ai
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: mistral.ai
+    score: 69
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:mistral
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:ml-engineer
+      confidence: medium
+      evidence: "Model APIs support eval and model-selection workflows."
+    - target: workflow:agent-evaluation-cycle
+      confidence: medium
+      evidence: "Model outputs can be benchmarked during agent evaluation."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-deepseek-candidate
+attributes:
+  displayName: "DeepSeek MCP candidate"
+  description: |
+    Candidate MCP server for DeepSeek model invocation and coding-agent evaluation workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: ai
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: deepseek.com
+    score: 62
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:deepseek
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:ml-engineer
+      confidence: medium
+      evidence: "Coding model access supports model-comparison workflows."
+    - target: workflow:agent-evaluation-cycle
+      confidence: medium
+      evidence: "Coding-agent outputs can be measured in evaluation cycles."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-turso-candidate
+attributes:
+  displayName: "Turso MCP candidate"
+  description: |
+    Candidate MCP server for Turso databases, branches, replicas, SQL queries, and operational metadata. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: database
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: turso.tech
+    score: 72
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:turso
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:database-administrator
+      confidence: medium
+      evidence: "Database metadata and SQL access support administration."
+    - target: workflow:query-performance-review
+      confidence: medium
+      evidence: "Query metadata and replica state support performance review."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-neon-candidate
+attributes:
+  displayName: "Neon MCP candidate"
+  description: |
+    Candidate MCP server for Neon Postgres projects, branches, migrations, query metrics, and connection metadata. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: database
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: neon.tech
+    score: 68
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:neon
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:database-administrator
+      confidence: high
+      evidence: "Postgres project and branch metadata supports DBA workflows."
+    - target: workflow:schema-migration
+      confidence: high
+      evidence: "Database branch and migration data are direct migration-review inputs."

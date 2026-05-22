@@ -13,14 +13,22 @@ import { SessionError, SessionErrorCode } from './types';
  */
 export function serializeSessionState(state: SessionState): string {
   const lines: string[] = [];
+  const runId = state.runId ?? '';
 
   lines.push(`active: ${state.active}`);
   lines.push(`iteration: ${state.iteration}`);
   lines.push(`max_iterations: ${state.maxIterations}`);
-  lines.push(`run_id: "${state.runId}"`);
+  lines.push(`run_id: "${runId}"`);
+  if (state.runDir) {
+    lines.push(`run_dir: "${state.runDir}"`);
+  }
+  lines.push(`run_ids: ${state.runIds.join(',')}`);
   lines.push(`started_at: "${state.startedAt}"`);
   lines.push(`last_iteration_at: "${state.lastIterationAt}"`);
   lines.push(`iteration_times: ${state.iterationTimes.join(',')}`);
+  for (const [key, value] of Object.entries(state.metadata ?? {})) {
+    lines.push(`metadata_${key}: "${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`);
+  }
 
   return lines.join('\n');
 }
@@ -107,24 +115,57 @@ export async function updateSessionState(
   return updatedState;
 }
 
+
 /**
- * Delete session state file.
+ * Bind a new run to the session, retiring the previous active run to history.
+ *
+ * Invariant: only one run is active at a time (`runId`).
+ * The previous `runId` (if any) is pushed into `runIds` as audit history.
+ * Idempotent: re-binding the same runId is a no-op.
+ *
+ * Throws if the caller tries to bind a new run while `runId` is still set
+ * and `retirePrevious` is not explicitly true — this forces callers to
+ * acknowledge that the prior run is done.
  */
-export async function deleteSessionFile(filePath: string): Promise<boolean> {
-  try {
-    await fs.unlink(filePath);
-    return true;
-  } catch (error) {
-    const err = error as NodeJS.ErrnoException;
-    if (err.code === 'ENOENT') {
-      return false; // File doesn't exist, consider it deleted
-    }
+export function addRunToSession(
+  state: SessionState,
+  runId: string,
+  options?: { retirePrevious?: boolean },
+): SessionState {
+  // Idempotent: already bound to this run
+  if (state.runId === runId) return state;
+
+  // Guard: refuse to silently overwrite an active run
+  if (state.runId && !options?.retirePrevious) {
     throw new SessionError(
-      `Failed to delete session state file: ${err.message}`,
-      SessionErrorCode.FS_ERROR,
-      { filePath, originalError: err.message }
+      `Session already bound to run ${state.runId}. ` +
+      `Pass { retirePrevious: true } to retire it and bind ${runId}.`,
+      SessionErrorCode.RUN_ALREADY_ASSOCIATED,
+      { currentRunId: state.runId, requestedRunId: runId },
     );
   }
+
+  // Retire the old runId into history (if not already there)
+  const runIds = [...state.runIds];
+  if (state.runId && !runIds.includes(state.runId)) {
+    runIds.push(state.runId);
+  }
+  // Add the new one to the audit trail too
+  if (!runIds.includes(runId)) {
+    runIds.push(runId);
+  }
+
+  return { ...state, runId, runIds };
+}
+
+/**
+ * Get the historical audit trail of all run IDs for this session (GAP-SESSION-001).
+ * Falls back to [runId] when runIds is empty for backward compatibility
+ * with sessions created before the runIds field existed.
+ */
+export function getSessionRuns(state: SessionState): string[] {
+  if (state.runIds.length > 0) return state.runIds;
+  return state.runId ? [state.runId] : [];
 }
 
 /**
@@ -151,7 +192,7 @@ export function isoToEpochSeconds(isoTimestamp: string): number | null {
 
 /**
  * Calculate iteration duration and update times array.
- * Keeps only the last 10 durations for runaway loop detection.
+ * Keeps only the last 10 durations for diagnostics.
  */
 export function updateIterationTimes(
   existingTimes: number[],
@@ -175,16 +216,5 @@ export function updateIterationTimes(
   return newTimes.slice(-10);
 }
 
-/**
- * Check if average iteration time indicates runaway loop.
- * Returns true if at least 10 consecutive iterations averaged <= 15 seconds.
- */
-export function isIterationTooFast(iterationTimes: number[]): boolean {
-  if (iterationTimes.length < 10) {
-    return false;
-  }
 
-  const sum = iterationTimes.reduce((a, b) => a + b, 0);
-  const avg = sum / iterationTimes.length;
-  return avg <= 15;
-}
+

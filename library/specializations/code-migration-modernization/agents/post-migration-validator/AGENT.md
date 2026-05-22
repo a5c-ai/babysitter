@@ -8,6 +8,13 @@ skills:
   - migration-validator
   - data-migration-validator
   - performance-baseline-capturer
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:regression-testing, skill-area:integration-testing]
+  roles: [role:qa-engineer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Post-Migration Validator Agent

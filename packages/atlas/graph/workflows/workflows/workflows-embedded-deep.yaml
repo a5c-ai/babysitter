@@ -1,0 +1,62 @@
+---
+nodeKind: Workflow
+id: workflow:bootloader-verification
+attributes:
+  displayName: "Bootloader Verification"
+  workflowKind: security
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Verifies bootloader integrity and secure boot chain for embedded devices —
+    validating cryptographic signature checks, testing rollback protection,
+    exercising recovery-mode paths, confirming chain-of-trust from ROM through
+    first-stage and second-stage bootloaders, and auditing key provisioning.
+    Excludes bootloader feature development.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:implementer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:bootloader-design
+    - target: skill-area:firmware-development
+  applies_to_domain:
+    - target: domain:embedded-systems
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:power-management-optimization-review
+attributes:
+  displayName: "Power Management Optimization Review"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: single-team
+  description: |
+    Reviews and optimizes power consumption profiles for embedded devices —
+    measuring sleep/wake current draw, profiling peripheral duty cycles,
+    validating low-power state transitions, benchmarking battery life against
+    targets, and identifying firmware paths that prevent deep-sleep entry.
+    Excludes hardware redesign.
+edges:
+  involves_role:
+    - target: role:implementer
+    - target: role:performance-profiler
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:low-power-design
+    - target: skill-area:peripheral-interfacing
+  applies_to_domain:
+    - target: domain:embedded-systems
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:research-engineering

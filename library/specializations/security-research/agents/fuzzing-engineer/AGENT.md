@@ -6,6 +6,12 @@ backlog-id: AG-007
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:fuzz-testing, skill-area:vulnerability-scanning-remediation]
+  roles: [role:security-engineer]
+  workflows: [workflow:penetration-testing-cycle, workflow:vulnerability-management]
 ---
 
 # fuzzing-engineer

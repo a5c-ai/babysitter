@@ -17,6 +17,12 @@
  * - Node.js fs module: https://nodejs.org/api/fs.html
  * - Electron dialog: https://www.electronjs.org/docs/latest/api/dialog
  * - chokidar: https://github.com/paulmillr/chokidar
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:desktop-development]
+ *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop, skill-area:desktop-system-integration]
+ *   roles: [role:desktop-developer, role:fullstack-engineer]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

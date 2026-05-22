@@ -15,6 +15,12 @@
  * @references
  * - Electron macOS: https://www.electronjs.org/docs/latest/tutorial/macos-dock
  * - Apple Human Interface Guidelines: https://developer.apple.com/design/human-interface-guidelines/macos
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:desktop-development]
+ *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+ *   roles: [role:desktop-developer, role:fullstack-engineer]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -62,31 +68,23 @@ export async function process(inputs, ctx) {
   }
 
   if (macosFeatures.includes('native-tabs')) {
-    let nativeTabs = await ctx.task(implementNativeTabsTask, { projectName, framework, outputDir });
+    const nativeTabs = await ctx.task(implementNativeTabsTask, { projectName, framework, outputDir });
     artifacts.push(...nativeTabs.artifacts);
     featureModules.nativeTabs = nativeTabs;
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      nativeTabs = await ctx.task(implementNativeTabsTask, { ...{ projectName, framework, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `macOS features implemented: ${Object.keys(featureModules).join(', ')}. Review implementation?`,
     title: 'macOS Features Review',
-    context: { runId: ctx.runId, features: Object.keys(featureModules) },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, features: Object.keys(featureModules) }
+  });
+
   let appStoreConfig = null;
   if (macosFeatures.includes('app-store')) {
     appStoreConfig = await ctx.task(implementAppStoreTask, { projectName, framework, outputDir });
     artifacts.push(...appStoreConfig.artifacts);
   }
+
   const validation = await ctx.task(validateMacosFeaturesTask, { projectName, framework, macosFeatures, featureModules, outputDir });
   artifacts.push(...validation.artifacts);
 

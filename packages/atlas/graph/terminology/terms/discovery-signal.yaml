@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:discovery-signal
+attributes:
+  canonicalDefinitionId: definition:discovery-signal.canonical
+  displayName: "DiscoverySignal"
+  kind: operation
+  references:
+    - "NodeKind:DiscoverySignal"
+  description: |
+    Host-detection signal — env var, binary on PATH, file presence, registry
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

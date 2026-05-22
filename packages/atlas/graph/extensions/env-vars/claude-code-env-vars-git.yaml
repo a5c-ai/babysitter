@@ -1,0 +1,11 @@
+nodeKind: EnvVar
+id: env-var:claude-code-disable-git-instructions
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS
+  description: Set to 1 to remove built-in commit and PR workflow instructions from the system prompt.
+  name: CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS
+  category: git
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

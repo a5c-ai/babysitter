@@ -1,0 +1,38 @@
+nodeKind: Layer
+id: layer:14-governance
+attributes:
+  displayName: Governance
+  position: 14
+  path: governance
+  scope: Policy, risk, auditability, compliance, approval, accountability, and evidence controls for agentic systems and their plugins/tools.
+  summary: |
+    The governance layer defines and implements the controls that make agentic
+    systems accountable: policy evaluation, risk mapping, compliance alignment,
+    audit evidence, approval rules, plugin governance, tool governance,
+    retention, incident response, and measurable assurance. It maps standards
+    such as NIST AI RMF-style govern/map/measure/manage loops and agentic risk
+    taxonomies such as memory poisoning, tool misuse, goal hijacking, privilege
+    abuse, rogue agents, and cascading failures into concrete implementation
+    components.
+
+    Governance is intentionally separate from runtime safety checks and UI
+    approvals. Runtime, sandbox, orchestration, memory, and platform layers may
+    enforce governance controls, but this layer owns the policies, evidence, and
+    accountable implementation components.
+  responsibilities:
+    - Define and enforce policy, risk, compliance, and audit controls.
+    - Govern plugin installation, plugin-generated hooks, tool dispatch, and permission gates.
+    - Record evidence for approvals, denied actions, effect replay, validation, and completion proof.
+    - Map memory, orchestration, sandbox, and platform behavior to risk mitigations.
+    - Support adversarial review, scoring, incident response, and continuous improvement loops.
+  examples:
+    - NIST AI RMF-style govern/map/measure/manage controls for agentic systems.
+    - OWASP agentic-risk mitigations for goal hijacking, memory poisoning, tool misuse, and cascading failures.
+    - Babysitter plugin governance, hooks-mux merge policies, permission gates, and policy-controlled task effects.
+    - Audit trails, evidence registers, compliance frameworks, secret-handling policies, and review gates.
+  fitNotes: |
+    Use this layer for controls and accountability. The same control can be
+    enforced by runtime, platform, orchestration, or plugin components, but the
+    governance layer records why the control exists, what it mitigates, and how
+    evidence is produced.
+edges: {}

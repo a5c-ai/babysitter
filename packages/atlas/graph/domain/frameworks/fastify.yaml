@@ -1,0 +1,23 @@
+nodeKind: Framework
+id: framework:fastify
+attributes:
+  displayName: "Fastify"
+  homepageUrl: "https://fastify.dev"
+  belongsToLanguageId: language:javascript
+  category: web-backend
+  description: |
+    Fastify — a fast, low-overhead Node.js web framework.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:nestjs
+      comparison: "Node.js backend frameworks"
+    - target: framework:hono
+      comparison: "Node.js backend frameworks"
+    - target: framework:koa
+      comparison: "Node.js backend frameworks"
+    - target: framework:hapi
+      comparison: "Node.js backend frameworks"

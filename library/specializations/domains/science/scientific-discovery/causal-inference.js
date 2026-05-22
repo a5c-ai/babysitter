@@ -18,6 +18,13 @@
  * - Imbens & Rubin (2015). Causal Inference for Statistics, Social, and Biomedical Sciences
  * - Peters, Janzing, Scholkopf (2017). Elements of Causal Inference
  * - Hernan & Robins (2020). Causal Inference: What If
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -48,6 +55,7 @@ export async function process(inputs, ctx) {
       causalModel: null
     };
   }
+
   // Phase 2: Causal Graph Construction
   const causalGraph = await ctx.task(causalGraphConstructionTask, {
     domain,
@@ -57,7 +65,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Identification Analysis
-  let identificationAnalysis = await ctx.task(identificationAnalysisTask, {
+  const identificationAnalysis = await ctx.task(identificationAnalysisTask, {
     causalGraph,
     researchQuestion,
     variables,
@@ -65,32 +73,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Causal effect must be identifiable
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        identificationAnalysis = await ctx.task(identificationAnalysisTask, { ...{
-    causalGraph,
-    researchQuestion,
-    variables,
-    framework: frameworkSelection.selectedFramework
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (!identificationAnalysis.isIdentifiable) {
+    await ctx.breakpoint({
       question: `Causal effect is not identifiable from observational data. Reasons: ${identificationAnalysis.identificationFailures.join(', ')}. Should we proceed with sensitivity analysis or halt?`,
       title: 'Causal Identification Failure',
       context: {
         runId: ctx.runId,
         identificationAnalysis,
         recommendation: 'Consider instrumental variables, regression discontinuity, or natural experiments'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 4: Confounder Identification
   const confounderAnalysis = await ctx.task(confounderIdentificationTask, {
@@ -135,24 +128,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Validation and Robustness Checks
-  let validationResults = await ctx.task(causalValidationTask, {
+  const validationResults = await ctx.task(causalValidationTask, {
     causalEffectEstimation,
     sensitivityAnalysis,
     causalGraph,
     domain
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      validationResults = await ctx.task(causalValidationTask, { ...{
-    causalEffectEstimation,
-    sensitivityAnalysis,
-    causalGraph,
-    domain
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Expert Review
+  await ctx.breakpoint({
     question: `Causal inference analysis complete for: "${researchQuestion}". Review causal model and estimated effects?`,
     title: 'Causal Inference Review',
     context: {
@@ -164,15 +148,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/causal-model.json', format: 'json', content: causalGraph },
         { path: 'artifacts/causal-effects.json', format: 'json', content: causalEffectEstimation }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     domain,
@@ -201,7 +179,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const causalFrameworkSelectionTask = defineTask('causal-framework-selection', (args, taskCtx) => ({
   kind: 'agent',

@@ -1,0 +1,20 @@
+nodeKind: AgentProduct
+id: agent:agent-mux
+attributes:
+  displayName: "agent-mux"
+  vendor: "a5c-ai"
+  homepageUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux"
+  primarySurface: tui
+  supportTier: catalog-backed
+  productKind: multi-surface-suite
+  stackScope: full
+  description: |
+    Multi-surface UI suite for agent sessions. Bridges to remote agents via
+    the agent-mux transport (claude-code, codex, etc.) and presents the
+    sessions through a TUI, CLI, web app, mobile apps (iOS + Android),
+    TV apps, and watch apps. Includes the agent-mux gateway, core, adapters,
+    and SDK as composing pieces. Distinct from `agent:agent-mux-remote`
+    (which is the transport-only adapter).
+edges:
+  has_version:
+    - agent-version:agent-mux@current

@@ -18,6 +18,9 @@
  * - OWASP Code Review Guide: https://owasp.org/www-project-code-review-guide/
  * - Semgrep: https://semgrep.dev/
  * - CodeQL: https://codeql.github.com/
+ * @graph
+ *   domains: [domain:cybersecurity]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

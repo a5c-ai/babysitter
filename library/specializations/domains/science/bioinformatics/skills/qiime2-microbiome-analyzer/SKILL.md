@@ -18,6 +18,12 @@ metadata:
     - microbiome
     - 16s
     - diversity
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:python-data-pipelines]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:biomedical-engineer]
 ---
 
 # QIIME2 Microbiome Analyzer Skill

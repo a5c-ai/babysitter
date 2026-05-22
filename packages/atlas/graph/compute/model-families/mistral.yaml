@@ -1,0 +1,14 @@
+nodeKind: ModelFamily
+id: model-family:mistral
+attributes:
+  displayName: "Mistral"
+  vendor: "Mistral AI"
+  homepageUrl: "https://mistral.ai/"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:mistral-large-2@current
+    - model:mistral-medium-3@current
+    - model:codestral-22b@current
+    - model:codestral-25-01@current

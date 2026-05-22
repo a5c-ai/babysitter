@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:open-question
+attributes:
+  canonicalDefinitionId: definition:open-question.canonical
+  displayName: "OpenQuestion"
+  kind: concept
+  references:
+    - "NodeKind:OpenQuestion"
+  description: |
+    Named TBD with owner
+edges:
+  applies_to:
+    - target: domain:software-engineering

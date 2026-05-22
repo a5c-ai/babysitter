@@ -1,0 +1,24 @@
+nodeKind: HookSurface
+id: hook-surface:codex.on-tool-call
+attributes:
+  eventName: "OnToolCall (Codex)"
+  displayName: "OnToolCall (Codex)"
+  kind: native
+  originVendor: OpenAI
+  direction: pre
+  blocking: true
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [toolName, args]
+    properties:
+      toolName: { type: string }
+      args: { type: object }
+  description: |
+    Codex's pre-tool-call hook. Canonicalizes to pre-tool-use.
+edges:
+  canonicalized_to:
+    - target: hook-surface:pre-tool-use
+  emits_hook:
+    - target: agentVersion:codex:ge-0-119-0
+      attrs: { since: "1.0.0" }

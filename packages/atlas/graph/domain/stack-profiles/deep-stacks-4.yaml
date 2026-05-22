@@ -1,0 +1,1257 @@
+# Deep Stack Profiles — Volume 4
+# 25 richly-connected stack profiles covering industry-specific,
+# emerging/frontier AI, developer experience, data-intensive,
+# and mobile/cross-platform application architectures.
+---
+nodeKind: StackProfile
+id: stack-profile:insurance-claims-processing
+attributes:
+  displayName: "Insurance Claims Processing Stack (Python, FastAPI, PostgreSQL, Kafka, OCR/ML)"
+  description: |
+    An end-to-end claims processing pipeline for insurance carriers combining
+    FastAPI as the orchestration API, PostgreSQL for policy and claims data,
+    and Kafka for event-driven intake of new claims from agents and policyholders.
+    OpenCV and scikit-learn power OCR extraction and fraud-scoring models that
+    classify claim documents, estimate damage, and flag anomalies. Celery handles
+    long-running ML inference jobs asynchronously. Targeted at mid-to-large
+    insurers replacing manual adjudication workflows. The primary tradeoff is
+    regulatory complexity — claim state machines must satisfy jurisdiction-specific
+    rules, and model decisions require explainability for audit compliance.
+  composes:
+    - language:python
+    - framework:fastapi
+    - library:sqlalchemy
+    - library:opencv-python
+    - library:scikit-learn
+    - library:celery
+    - library:pydantic
+edges:
+  composed_of:
+    - language:python
+    - framework:fastapi
+    - library:sqlalchemy
+    - library:opencv-python
+    - library:scikit-learn
+    - library:celery
+    - library:pydantic
+    - tool:docker
+  used_by_role:
+    - role:backend-engineer
+    - role:ml-engineer
+    - role:data-engineer
+  follows_workflow:
+    - workflow:claims-processing-audit
+    - workflow:data-pipeline-deployment
+  applies_to:
+    - domain:insurance
+    - domain:ml-ai
+  requires_skill_area:
+    - skill-area:computer-vision
+    - skill-area:backend-api-design
+    - skill-area:streaming-realtime-processing
+    - skill-area:compliance-automation
+    - skill-area:document-processing
+---
+nodeKind: StackProfile
+id: stack-profile:supply-chain-visibility
+attributes:
+  displayName: "Supply Chain Visibility Stack (Go, Kafka, PostgreSQL, Grafana, React, Redis)"
+  description: |
+    A real-time supply chain visibility platform built on Go microservices that
+    ingest shipment events via Kafka, persist normalized tracking data in
+    PostgreSQL, and cache hot-path lookups in Redis. Grafana dashboards expose
+    KPIs like on-time delivery rate, dwell time, and exception counts to
+    operations teams. A React frontend provides interactive map views and
+    drill-down into individual shipment timelines. Designed for 3PL providers
+    and enterprise shippers who need sub-minute latency on shipment status.
+    The tradeoff is data quality — carrier integrations vary wildly in
+    reliability and schema, requiring robust normalization and fallback logic.
+  composes:
+    - language:go
+    - library:chi
+    - library:pgx
+    - library:ioredis
+    - framework:react
+    - tool:grafana
+    - language:typescript
+edges:
+  composed_of:
+    - language:go
+    - library:chi
+    - library:pgx
+    - library:ioredis
+    - framework:react
+    - tool:grafana
+    - language:typescript
+    - tool:docker
+    - tool:prometheus
+  used_by_role:
+    - role:backend-engineer
+    - role:supply-chain-analyst
+    - role:devops-engineer
+  follows_workflow:
+    - workflow:demand-forecasting-cycle
+    - workflow:data-pipeline-deployment
+  applies_to:
+    - domain:supply-chain
+    - domain:logistics
+  requires_skill_area:
+    - skill-area:streaming-realtime-processing
+    - skill-area:caching-strategies
+    - skill-area:observability-instrumentation
+    - skill-area:backend-api-design
+    - skill-area:data-visualization
+---
+nodeKind: StackProfile
+id: stack-profile:adtech-real-time-bidding
+attributes:
+  displayName: "AdTech Real-Time Bidding Stack (Go, Redis, Kafka, ClickHouse, Prometheus)"
+  description: |
+    A low-latency real-time bidding (RTB) platform where Go services evaluate
+    bid requests within strict 100ms SLA windows, consulting Redis for user
+    segment lookups and campaign budget caps. Kafka streams win notifications
+    and impression events into ClickHouse for columnar analytics on campaign
+    performance, spend pacing, and attribution. Prometheus and Grafana monitor
+    bid latency percentiles and budget burn rates. Built for demand-side
+    platforms and ad exchanges handling millions of bid requests per second.
+    The core tradeoff is operational intensity — sub-millisecond tail latency
+    requires careful memory management, connection pooling, and geographic
+    distribution of bidder instances close to exchange endpoints.
+  composes:
+    - language:go
+    - library:chi
+    - library:ioredis
+    - tool:prometheus
+    - tool:grafana
+    - library:zap
+edges:
+  composed_of:
+    - language:go
+    - library:chi
+    - library:ioredis
+    - tool:prometheus
+    - tool:grafana
+    - library:zap
+    - tool:docker
+  used_by_role:
+    - role:backend-engineer
+    - role:data-engineer
+    - role:sre
+  follows_workflow:
+    - workflow:ad-tech-stack-setup
+    - workflow:performance-profiling-cycle
+  applies_to:
+    - domain:advertising
+    - domain:data-engineering
+  requires_skill_area:
+    - skill-area:streaming-realtime-processing
+    - skill-area:caching-strategies
+    - skill-area:metrics-dashboarding
+    - skill-area:backend-api-design
+    - skill-area:kafka-stream-processing
+---
+nodeKind: StackProfile
+id: stack-profile:legal-document-automation
+attributes:
+  displayName: "Legal Document Automation Stack (Python, NLP, Elasticsearch, FastAPI, React, S3)"
+  description: |
+    A legal document automation platform that ingests contracts, briefs, and
+    regulatory filings, applies NLP models for entity extraction, clause
+    classification, and risk scoring, and indexes processed documents in
+    Elasticsearch for full-text and semantic search. FastAPI serves the
+    extraction and search APIs while React provides a review interface where
+    attorneys can accept, reject, or refine model suggestions. Boto3 manages
+    document storage in S3. Targeted at corporate legal departments and
+    legaltech SaaS companies replacing manual contract review. The tradeoff
+    is model accuracy — legal language is domain-specific, and NLP models
+    require substantial fine-tuning and ongoing human-in-the-loop correction
+    to maintain acceptable precision on clause extraction.
+  composes:
+    - language:python
+    - framework:fastapi
+    - library:hf-transformers
+    - tool:elasticsearch
+    - framework:react
+    - library:boto3
+    - language:typescript
+edges:
+  composed_of:
+    - language:python
+    - framework:fastapi
+    - library:hf-transformers
+    - tool:elasticsearch
+    - framework:react
+    - library:boto3
+    - language:typescript
+    - library:pydantic
+  used_by_role:
+    - role:ml-engineer
+    - role:backend-engineer
+    - role:legal-advisor
+  follows_workflow:
+    - workflow:contract-automation-review
+    - workflow:ml-model-lifecycle
+  applies_to:
+    - domain:legaltech
+    - domain:ml-ai
+  requires_skill_area:
+    - skill-area:natural-language-processing
+    - skill-area:search-indexing
+    - skill-area:document-processing
+    - skill-area:backend-api-design
+    - skill-area:model-evaluation
+---
+nodeKind: StackProfile
+id: stack-profile:hr-people-analytics
+attributes:
+  displayName: "HR / People Analytics Stack (Python, PostgreSQL, dbt, Metabase, FastAPI)"
+  description: |
+    A people analytics platform for HR teams that consolidates headcount,
+    attrition, compensation, and engagement data from HRIS sources into
+    PostgreSQL, transforms it with dbt models into analytics-ready datasets,
+    and exposes interactive dashboards via Metabase. FastAPI provides a
+    programmatic API for custom integrations with recruiting tools and
+    performance review systems. Pandas handles ad-hoc analysis notebooks.
+    Designed for People Analytics teams in companies with 500+ employees
+    who need self-serve workforce metrics without a full data warehouse.
+    The tradeoff is data sensitivity — PII-heavy HR data demands strict
+    access controls, row-level security, and audit logging that add
+    operational overhead beyond a typical analytics stack.
+  composes:
+    - language:python
+    - framework:fastapi
+    - library:sqlalchemy
+    - library:pandas
+    - library:pydantic
+    - tool:docker
+edges:
+  composed_of:
+    - language:python
+    - framework:fastapi
+    - library:sqlalchemy
+    - library:pandas
+    - library:pydantic
+    - tool:docker
+    - language:sql
+  used_by_role:
+    - role:data-analyst
+    - role:people-analytics-specialist
+    - role:hr-manager
+  follows_workflow:
+    - workflow:dashboard-development-cycle
+    - workflow:dbt-model-review
+  applies_to:
+    - domain:human-resources
+    - domain:business-intelligence
+  requires_skill_area:
+    - skill-area:dbt-modeling
+    - skill-area:data-analytics
+    - skill-area:statistical-analysis
+    - skill-area:backend-api-design
+    - skill-area:data-governance
+---
+nodeKind: StackProfile
+id: stack-profile:logistics-fleet-management
+attributes:
+  displayName: "Logistics / Fleet Management Stack (Go, PostGIS, Redis, Kafka, React, Grafana)"
+  description: |
+    A fleet management and logistics optimization platform built on Go
+    microservices that ingest real-time GPS telemetry, store geospatial
+    position data in PostgreSQL with PostGIS extensions, and cache active
+    vehicle states in Redis for sub-second dashboard updates. Kafka handles
+    event streaming for route deviation alerts and delivery confirmation
+    workflows. A React frontend with map components provides dispatchers
+    with live fleet visualization. Grafana monitors fleet health KPIs like
+    utilization rate and idle time. Targeted at logistics companies, delivery
+    services, and field-service organizations managing 100+ vehicles. The
+    tradeoff is telemetry volume — high-frequency GPS pings generate
+    substantial write load, requiring careful partitioning and retention
+    policies on the geospatial data layer.
+  composes:
+    - language:go
+    - library:chi
+    - library:pgx
+    - library:ioredis
+    - framework:react
+    - tool:grafana
+    - language:typescript
+edges:
+  composed_of:
+    - language:go
+    - library:chi
+    - library:pgx
+    - library:ioredis
+    - framework:react
+    - tool:grafana
+    - language:typescript
+    - tool:docker
+    - tool:prometheus
+  used_by_role:
+    - role:backend-engineer
+    - role:operations-analyst
+    - role:devops-engineer
+  follows_workflow:
+    - workflow:fleet-maintenance-scheduling
+    - workflow:route-optimization-review
+  applies_to:
+    - domain:logistics
+    - domain:transportation
+  requires_skill_area:
+    - skill-area:geospatial-data-analysis
+    - skill-area:streaming-realtime-processing
+    - skill-area:caching-strategies
+    - skill-area:data-visualization
+    - skill-area:backend-api-design
+---
+nodeKind: StackProfile
+id: stack-profile:ai-code-review-pipeline
+attributes:
+  displayName: "AI Code Review Pipeline (Python, AST Analysis, LLM, GitHub Actions, FastAPI)"
+  description: |
+    An automated code review pipeline that integrates with GitHub pull
+    requests via GitHub Actions, parses diffs and ASTs using Python's ast
+    module and tree-sitter, feeds structured code context to LLM APIs for
+    review comment generation, and posts actionable feedback directly on PRs.
+    FastAPI serves a configuration and analytics API where teams tune review
+    rules, view false-positive rates, and manage prompt templates. Redis
+    caches recent review results to avoid redundant LLM calls on re-pushes.
+    Targeted at platform engineering teams building internal code quality
+    tooling. The tradeoff is prompt brittleness — LLM review quality varies
+    across languages and codebases, requiring ongoing prompt iteration and
+    human calibration of comment thresholds.
+  composes:
+    - language:python
+    - framework:fastapi
+    - tool:github-actions
+    - library:pydantic
+    - library:redis-py
+    - library:httpx
+edges:
+  composed_of:
+    - language:python
+    - framework:fastapi
+    - tool:github-actions
+    - library:pydantic
+    - library:redis-py
+    - library:httpx
+    - library:pytest
+    - tool:docker
+  used_by_role:
+    - role:platform-engineer
+    - role:ml-engineer
+    - role:tech-lead
+  follows_workflow:
+    - workflow:code-review
+    - workflow:prompt-engineering-iteration
+  applies_to:
+    - domain:software-engineering
+    - domain:ml-ai
+  requires_skill_area:
+    - skill-area:prompt-engineering
+    - skill-area:github-actions-authoring
+    - skill-area:code-quality
+    - skill-area:backend-api-design
+    - skill-area:natural-language-processing
+---
+nodeKind: StackProfile
+id: stack-profile:autonomous-agent-fleet
+attributes:
+  displayName: "Autonomous Agent Fleet (Python, LangGraph, Redis, PostgreSQL, Prometheus, Docker)"
+  description: |
+    A multi-agent orchestration platform where LangGraph defines agent
+    execution graphs with branching, looping, and human-in-the-loop
+    checkpoints. PostgreSQL stores agent state, conversation history, and
+    task results while Redis provides a shared memory layer for inter-agent
+    coordination and tool-call caching. Prometheus tracks agent latency,
+    token consumption, and task completion rates. Docker containers isolate
+    individual agent runtimes for safe tool execution. Designed for teams
+    building production autonomous agent systems — customer support agents,
+    research assistants, and workflow automation bots. The tradeoff is
+    debugging complexity — multi-agent state graphs are inherently harder
+    to trace than linear pipelines, requiring investment in structured
+    logging and replay infrastructure.
+  composes:
+    - language:python
+    - framework:langgraph
+    - library:redis-py
+    - library:sqlalchemy
+    - tool:prometheus
+    - tool:docker
+    - library:pydantic
+edges:
+  composed_of:
+    - language:python
+    - framework:langgraph
+    - library:redis-py
+    - library:sqlalchemy
+    - tool:prometheus
+    - tool:docker
+    - library:pydantic
+    - library:structlog
+  used_by_role:
+    - role:ml-engineer
+    - role:backend-engineer
+    - role:research-engineer
+  follows_workflow:
+    - workflow:agent-evaluation-cycle
+    - workflow:prompt-engineering-iteration
+  applies_to:
+    - domain:ml-ai
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:ai-agent-development
+    - skill-area:multi-agent-coordination
+    - skill-area:agentic-loops
+    - skill-area:prompt-engineering
+    - skill-area:observability-instrumentation
+---
+nodeKind: StackProfile
+id: stack-profile:knowledge-graph-platform
+attributes:
+  displayName: "Knowledge Graph Platform (Neo4j, Python, FastAPI, React, D3, Elasticsearch)"
+  description: |
+    A knowledge graph platform combining Neo4j for graph storage and Cypher
+    queries, Python with FastAPI for the ingestion and query API layer,
+    Elasticsearch for full-text search over entity descriptions and metadata,
+    and React with D3.js for interactive graph visualization in the browser.
+    Pydantic validates incoming entity and relationship schemas. Targeted at
+    enterprises building internal knowledge bases, research organizations
+    mapping citation networks, and platform teams powering recommendation
+    engines. The tradeoff is query performance at scale — deep graph
+    traversals can become expensive without careful indexing, query planning,
+    and denormalization of frequently accessed paths.
+  composes:
+    - tool:neo4j
+    - language:python
+    - framework:fastapi
+    - framework:react
+    - library:d3
+    - tool:elasticsearch
+    - language:typescript
+edges:
+  composed_of:
+    - tool:neo4j
+    - language:python
+    - framework:fastapi
+    - framework:react
+    - library:d3
+    - tool:elasticsearch
+    - language:typescript
+    - library:pydantic
+  used_by_role:
+    - role:data-engineer
+    - role:backend-engineer
+    - role:research-scientist
+  follows_workflow:
+    - workflow:data-pipeline-deployment
+    - workflow:feature-development
+  applies_to:
+    - domain:data-engineering
+    - domain:knowledge-management
+  requires_skill_area:
+    - skill-area:graph-databases
+    - skill-area:knowledge-graph-management
+    - skill-area:search-indexing
+    - skill-area:data-visualization
+    - skill-area:backend-api-design
+---
+nodeKind: StackProfile
+id: stack-profile:prompt-engineering-workbench
+attributes:
+  displayName: "Prompt Engineering Workbench (TypeScript, React, PostgreSQL, LLM APIs, Redis)"
+  description: |
+    A developer-facing prompt engineering workbench that provides a React-based
+    playground for authoring, versioning, and A/B testing prompts against
+    multiple LLM providers. PostgreSQL stores prompt versions, evaluation
+    datasets, and scored results. Redis caches LLM responses for rapid
+    iteration during prompt development. The TypeScript backend (via Hono)
+    proxies LLM API calls with token tracking, cost attribution, and
+    latency measurement. Zod validates prompt templates and evaluation
+    schemas. Designed for AI product teams and prompt engineers who need
+    structured experimentation beyond ad-hoc notebook workflows. The
+    tradeoff is evaluation subjectivity — automated scoring captures
+    surface-level quality but often requires human rating for nuanced
+    prompt quality assessment.
+  composes:
+    - language:typescript
+    - framework:react
+    - library:zod
+    - library:ioredis
+    - framework:hono
+    - library:prisma
+edges:
+  composed_of:
+    - language:typescript
+    - framework:react
+    - library:zod
+    - library:ioredis
+    - framework:hono
+    - library:prisma
+    - library:zustand
+    - library:tailwindcss
+  used_by_role:
+    - role:ml-engineer
+    - role:frontend-engineer
+    - role:research-engineer
+  follows_workflow:
+    - workflow:prompt-engineering-iteration
+    - workflow:agent-evaluation-cycle
+  applies_to:
+    - domain:ml-ai
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:prompt-engineering
+    - skill-area:ai-evaluation
+    - skill-area:frontend-development
+    - skill-area:backend-api-design
+    - skill-area:data-analytics
+---
+nodeKind: StackProfile
+id: stack-profile:synthetic-data-generation
+attributes:
+  displayName: "Synthetic Data Generation Stack (Python, PyTorch, FastAPI, PostgreSQL, S3)"
+  description: |
+    A synthetic data generation platform that uses PyTorch-based generative
+    models (GANs, VAEs, diffusion models) to produce realistic tabular,
+    text, and image datasets that preserve statistical properties of
+    production data without exposing PII. FastAPI exposes generation and
+    validation endpoints while PostgreSQL tracks generation jobs, dataset
+    metadata, and quality metrics. Boto3 manages dataset storage in S3.
+    NumPy and pandas handle data profiling and statistical comparison
+    between real and synthetic distributions. Targeted at ML teams in
+    regulated industries (healthcare, finance, insurance) where production
+    data access is restricted. The tradeoff is fidelity validation —
+    proving that synthetic data adequately represents the real distribution
+    without memorizing individual records requires sophisticated
+    statistical testing and domain expertise.
+  composes:
+    - language:python
+    - library:pytorch
+    - framework:fastapi
+    - library:sqlalchemy
+    - library:boto3
+    - library:numpy
+    - library:pandas
+edges:
+  composed_of:
+    - language:python
+    - library:pytorch
+    - framework:fastapi
+    - library:sqlalchemy
+    - library:boto3
+    - library:numpy
+    - library:pandas
+    - library:pydantic
+  used_by_role:
+    - role:ml-engineer
+    - role:data-scientist
+    - role:data-engineer
+  follows_workflow:
+    - workflow:synthetic-data-generation-pipeline
+    - workflow:model-training-cycle
+  applies_to:
+    - domain:ml-ai
+    - domain:data-science
+  requires_skill_area:
+    - skill-area:deep-learning-libraries
+    - skill-area:data-preprocessing
+    - skill-area:statistical-analysis
+    - skill-area:model-evaluation
+    - skill-area:data-governance
+---
+nodeKind: StackProfile
+id: stack-profile:ai-safety-guardrails
+attributes:
+  displayName: "AI Safety / Guardrails Stack (Python, OPA, FastAPI, Redis, Prometheus)"
+  description: |
+    An AI safety and guardrails platform that sits between LLM applications
+    and model endpoints, enforcing content policies, detecting prompt
+    injection attempts, and applying output filtering. Open Policy Agent
+    (OPA) evaluates declarative safety rules against request and response
+    payloads. FastAPI serves the guardrail proxy with Redis caching
+    previously evaluated inputs for latency reduction. Prometheus tracks
+    block rates, false positive rates, and policy evaluation latency.
+    Pydantic validates safety rule schemas. Targeted at enterprises
+    deploying customer-facing AI features that require content safety
+    compliance. The tradeoff is the tension between safety and usability —
+    aggressive filtering reduces harmful outputs but increases false
+    positives that degrade the user experience, requiring continuous
+    policy calibration.
+  composes:
+    - language:python
+    - tool:opa
+    - framework:fastapi
+    - library:redis-py
+    - tool:prometheus
+    - library:pydantic
+edges:
+  composed_of:
+    - language:python
+    - tool:opa
+    - framework:fastapi
+    - library:redis-py
+    - tool:prometheus
+    - library:pydantic
+    - library:httpx
+    - tool:docker
+  used_by_role:
+    - role:ml-engineer
+    - role:security-engineer
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:ai-safety-guardrail-maintenance
+    - workflow:prompt-engineering-iteration
+  applies_to:
+    - domain:ml-ai
+    - domain:cybersecurity
+  requires_skill_area:
+    - skill-area:safety-redteaming
+    - skill-area:policy-enforcement
+    - skill-area:prompt-engineering
+    - skill-area:backend-api-design
+    - skill-area:observability-instrumentation
+---
+nodeKind: StackProfile
+id: stack-profile:open-source-library
+attributes:
+  displayName: "Open Source Library Stack (TypeScript, Vitest, Changesets, GitHub Actions, npm)"
+  description: |
+    A lean open source library development stack optimized for publishing
+    high-quality TypeScript packages to npm. Vitest provides fast unit and
+    integration testing with native TypeScript support. Changesets manages
+    semantic versioning, changelogs, and coordinated releases across packages.
+    GitHub Actions automates CI (lint, test, build) and CD (publish to npm
+    on merge to main). tsup bundles ESM and CJS outputs with declaration
+    files. Designed for individual maintainers and small teams shipping
+    reusable libraries. The tradeoff is maintenance burden — open source
+    libraries attract issues, PRs, and support requests that scale
+    unpredictably, and the CI/CD pipeline must handle contributor forks
+    with varying environment configurations.
+  composes:
+    - language:typescript
+    - tool:vitest
+    - library:changesets
+    - tool:github-actions
+    - tool:npm
+    - library:tsup
+edges:
+  composed_of:
+    - language:typescript
+    - tool:vitest
+    - library:changesets
+    - tool:github-actions
+    - tool:npm
+    - library:tsup
+    - tool:eslint
+    - tool:prettier
+  used_by_role:
+    - role:software-engineer
+    - role:developer-advocate
+    - role:tech-lead
+  follows_workflow:
+    - workflow:community-release
+    - workflow:pull-request-lifecycle
+  applies_to:
+    - domain:software-engineering
+    - domain:frontend
+  requires_skill_area:
+    - skill-area:semver-discipline
+    - skill-area:unit-testing
+    - skill-area:ci-cd
+    - skill-area:developer-experience
+    - skill-area:technical-documentation
+---
+nodeKind: StackProfile
+id: stack-profile:sdk-developer-kit
+attributes:
+  displayName: "SDK / Developer Kit Stack (TypeScript, tsup, Vitest, Typedoc, npm, GitHub Actions)"
+  description: |
+    A comprehensive SDK development stack for building and publishing
+    developer kits with TypeScript. tsup produces dual ESM/CJS bundles
+    with full type declarations. Vitest powers the test suite with coverage
+    reporting. GitHub Actions runs CI on every PR and auto-publishes to npm
+    on tagged releases. Zod validates configuration schemas exposed to SDK
+    consumers. Designed for platform teams building client libraries,
+    API SDKs, and integration kits that external developers depend on.
+    The tradeoff is backward compatibility pressure — once published,
+    SDK surface area becomes a contract, and breaking changes require
+    careful deprecation cycles, migration guides, and version negotiation
+    with downstream consumers.
+  composes:
+    - language:typescript
+    - library:tsup
+    - tool:vitest
+    - tool:npm
+    - tool:github-actions
+    - library:zod
+edges:
+  composed_of:
+    - language:typescript
+    - library:tsup
+    - tool:vitest
+    - tool:npm
+    - tool:github-actions
+    - library:zod
+    - tool:eslint
+    - tool:prettier
+  used_by_role:
+    - role:backend-engineer
+    - role:developer-advocate
+    - role:tech-lead
+  follows_workflow:
+    - workflow:sdk-release-lifecycle
+    - workflow:sdk-api-design
+  applies_to:
+    - domain:software-engineering
+    - domain:api-development
+  requires_skill_area:
+    - skill-area:api-design
+    - skill-area:breaking-change-management
+    - skill-area:sdk-codegen
+    - skill-area:unit-testing
+    - skill-area:developer-experience
+---
+nodeKind: StackProfile
+id: stack-profile:plugin-extension-system
+attributes:
+  displayName: "Plugin / Extension System Stack (TypeScript, JSON Schema, Vitest, npm, esbuild)"
+  description: |
+    A plugin and extension system architecture for building extensible
+    TypeScript applications. JSON Schema defines plugin manifests and
+    configuration contracts. Zod performs runtime validation of plugin
+    inputs and outputs. esbuild bundles plugins into self-contained
+    modules with minimal dependencies. Vitest tests both the plugin
+    host runtime and individual plugin implementations. npm serves as
+    the distribution registry. Designed for teams building extensible
+    developer tools, CMS platforms, and automation frameworks where
+    third-party code must execute safely within a host process. The
+    tradeoff is the security boundary — plugins running in-process
+    share the host's permissions, requiring careful sandboxing or
+    capability-based access control to prevent malicious extensions.
+  composes:
+    - language:typescript
+    - library:zod
+    - tool:vitest
+    - tool:npm
+    - tool:esbuild
+edges:
+  composed_of:
+    - language:typescript
+    - library:zod
+    - tool:vitest
+    - tool:npm
+    - tool:esbuild
+    - tool:eslint
+    - tool:github-actions
+  used_by_role:
+    - role:software-engineer
+    - role:platform-engineer
+    - role:architect
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:sdk-api-design
+  applies_to:
+    - domain:software-engineering
+    - domain:platform-engineering
+  requires_skill_area:
+    - skill-area:plugin-systems
+    - skill-area:api-design
+    - skill-area:unit-testing
+    - skill-area:developer-experience
+    - skill-area:code-quality
+---
+nodeKind: StackProfile
+id: stack-profile:documentation-site
+attributes:
+  displayName: "Documentation Site Stack (Docusaurus/VitePress, MDX, Algolia, GitHub Actions, Vercel)"
+  description: |
+    A modern documentation site stack combining Docusaurus or VitePress as
+    the static site generator, MDX for rich interactive content mixing
+    Markdown with React components, and Algolia DocSearch for instant
+    full-text search across documentation pages. GitHub Actions automates
+    build and deployment on every merge. The site deploys to edge-capable
+    platforms for global low-latency access. TypeScript provides type safety
+    for custom components and plugins. Designed for open source projects,
+    API documentation portals, and developer education platforms. The
+    tradeoff is content management — as documentation grows, maintaining
+    freshness, cross-linking, and version-specific content branches
+    requires dedicated editorial processes beyond the framework itself.
+  composes:
+    - framework:docusaurus
+    - framework:vitepress
+    - tool:algolia
+    - tool:github-actions
+    - language:typescript
+edges:
+  composed_of:
+    - framework:docusaurus
+    - framework:vitepress
+    - tool:algolia
+    - tool:github-actions
+    - language:typescript
+    - tool:npm
+    - framework:react
+  used_by_role:
+    - role:technical-writer
+    - role:developer-advocate
+    - role:frontend-engineer
+  follows_workflow:
+    - workflow:documentation-sprint
+    - workflow:documentation-publishing
+  applies_to:
+    - domain:software-engineering
+    - domain:content-operations
+  requires_skill_area:
+    - skill-area:technical-documentation
+    - skill-area:frontend-development
+    - skill-area:search-indexing
+    - skill-area:ci-cd
+    - skill-area:developer-experience
+---
+nodeKind: StackProfile
+id: stack-profile:storybook-design-system
+attributes:
+  displayName: "Storybook Design System Stack (React, Storybook, Chromatic, Tailwind, TypeScript)"
+  description: |
+    A component-driven design system stack where React components are
+    developed and documented in Storybook, visually regression-tested with
+    Chromatic, and styled with Tailwind CSS utility classes. TypeScript
+    enforces component prop contracts. Vitest handles unit tests for
+    component logic while Chromatic captures visual snapshots on every PR
+    for automated design review. The system publishes as an npm package
+    consumed by product teams across the organization. Designed for
+    design systems teams in mid-to-large companies standardizing UI
+    across multiple products. The tradeoff is adoption friction —
+    maintaining a shared design system requires governance, versioning
+    discipline, and continuous communication between design and
+    engineering to prevent component proliferation and style drift.
+  composes:
+    - framework:react
+    - tool:storybook
+    - tool:chromatic
+    - library:tailwindcss
+    - language:typescript
+    - tool:vitest
+edges:
+  composed_of:
+    - framework:react
+    - tool:storybook
+    - tool:chromatic
+    - library:tailwindcss
+    - language:typescript
+    - tool:vitest
+    - tool:npm
+    - tool:github-actions
+  used_by_role:
+    - role:frontend-engineer
+    - role:product-designer
+    - role:design-lead
+  follows_workflow:
+    - workflow:design-system-maintenance
+    - workflow:design-review
+  applies_to:
+    - domain:frontend
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:design-systems
+    - skill-area:react-components
+    - skill-area:visual-regression-testing
+    - skill-area:frontend-development
+    - skill-area:ui-styling
+---
+nodeKind: StackProfile
+id: stack-profile:vscode-extension
+attributes:
+  displayName: "VS Code Extension Stack (TypeScript, VS Code API, esbuild, Vitest)"
+  description: |
+    A VS Code extension development stack leveraging the VS Code Extension
+    API with TypeScript for type-safe command, view, and language feature
+    implementations. esbuild bundles the extension into a compact VSIX
+    package with fast cold-start activation. Vitest powers unit tests
+    for extension logic while the VS Code test runner handles integration
+    tests against the editor host. GitHub Actions automates CI builds and
+    marketplace publishing. Designed for developer tools teams building
+    editor integrations, language servers, and productivity extensions.
+    The tradeoff is API surface constraints — VS Code's extension API
+    exposes a curated subset of editor functionality, and extensions
+    that need deeper integration often hit API gaps requiring creative
+    workarounds or unofficial APIs that may break across editor updates.
+  composes:
+    - language:typescript
+    - tool:vscode
+    - tool:esbuild
+    - tool:vitest
+    - tool:github-actions
+edges:
+  composed_of:
+    - language:typescript
+    - tool:vscode
+    - tool:esbuild
+    - tool:vitest
+    - tool:github-actions
+    - library:zod
+    - tool:npm
+  used_by_role:
+    - role:software-engineer
+    - role:developer-advocate
+    - role:frontend-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:cli-release-cycle
+  applies_to:
+    - domain:software-engineering
+    - domain:platform-engineering
+  requires_skill_area:
+    - skill-area:developer-experience
+    - skill-area:plugin-systems
+    - skill-area:unit-testing
+    - skill-area:ci-cd
+    - skill-area:code-quality
+---
+nodeKind: StackProfile
+id: stack-profile:data-warehouse-bi
+attributes:
+  displayName: "Data Warehouse / BI Stack (dbt, BigQuery, Metabase/Looker, Python, Airflow)"
+  description: |
+    A modern data warehouse and business intelligence stack where Airflow
+    orchestrates ELT pipelines that land raw data into BigQuery, dbt
+    transforms it into dimensional models with tested, documented SQL,
+    and Metabase or Looker provides self-serve dashboards and ad-hoc
+    exploration for business stakeholders. Python scripts handle custom
+    data source connectors and quality checks. SQL is the primary
+    modeling language across the stack. Designed for data teams in
+    growth-stage companies building their first production analytics
+    layer. The tradeoff is warehouse cost management — BigQuery's
+    on-demand pricing can spike unpredictably with poorly optimized
+    queries, requiring careful slot reservation planning and query
+    governance as usage scales.
+  composes:
+    - language:sql
+    - language:python
+    - tool:airflow
+    - library:pandas
+    - tool:docker
+edges:
+  composed_of:
+    - language:sql
+    - language:python
+    - tool:airflow
+    - library:pandas
+    - tool:docker
+    - platform-service:gcp-bigquery
+    - library:sqlalchemy
+  used_by_role:
+    - role:analytics-engineer
+    - role:data-engineer
+    - role:bi-developer
+  follows_workflow:
+    - workflow:dbt-model-review
+    - workflow:data-pipeline-deployment
+  applies_to:
+    - domain:business-intelligence
+    - domain:data-engineering
+  requires_skill_area:
+    - skill-area:dbt-modeling
+    - skill-area:data-warehouse-modeling
+    - skill-area:etl-pipelines
+    - skill-area:data-quality
+    - skill-area:data-analytics
+---
+nodeKind: StackProfile
+id: stack-profile:log-analytics-elk
+attributes:
+  displayName: "Log Analytics Platform — ELK Stack (Elasticsearch, Logstash, Kibana, Docker)"
+  description: |
+    A centralized log analytics platform built on the ELK stack where
+    Elasticsearch indexes and searches structured log data, Kibana provides
+    dashboards and ad-hoc exploration, and Fluent Bit collects and forwards
+    logs from application containers. Docker Compose orchestrates the local
+    development stack while Kubernetes Helm charts manage production
+    deployment. Prometheus monitors the ELK cluster health itself.
+    Designed for platform and SRE teams centralizing observability across
+    microservice architectures. The tradeoff is resource intensity —
+    Elasticsearch clusters are memory-hungry and require careful index
+    lifecycle management, shard sizing, and retention policies to prevent
+    storage costs from growing unboundedly with log volume.
+  composes:
+    - tool:elasticsearch
+    - tool:docker
+    - tool:prometheus
+    - tool:fluent-bit
+    - language:yaml
+edges:
+  composed_of:
+    - tool:elasticsearch
+    - tool:docker
+    - tool:prometheus
+    - tool:fluent-bit
+    - language:yaml
+    - tool:helm
+    - tool:docker-compose
+  used_by_role:
+    - role:sre
+    - role:platform-engineer
+    - role:devops-engineer
+  follows_workflow:
+    - workflow:alert-tuning
+    - workflow:log-retention-policy
+  applies_to:
+    - domain:observability
+    - domain:devops
+  requires_skill_area:
+    - skill-area:log-aggregation
+    - skill-area:search-indexing
+    - skill-area:observability-instrumentation
+    - skill-area:containerization
+    - skill-area:metrics-dashboarding
+---
+nodeKind: StackProfile
+id: stack-profile:time-series-analytics
+attributes:
+  displayName: "Time-Series Analytics Stack (InfluxDB, Grafana, Telegraf, Python, Go)"
+  description: |
+    A time-series analytics platform combining purpose-built time-series
+    storage with rich visualization and collection agents. Grafana provides
+    customizable dashboards for operational metrics, IoT sensor data, and
+    financial tick data. Python handles analytical workloads — anomaly
+    detection, forecasting, and statistical aggregation over time-series
+    datasets using pandas and NumPy. Go services provide high-throughput
+    data ingestion endpoints for systems that cannot use standard collection
+    agents. Designed for IoT platforms, infrastructure monitoring, and
+    industrial telemetry use cases. The tradeoff is query expressiveness —
+    time-series databases optimize for temporal range scans but offer
+    limited join and aggregation capabilities compared to general-purpose
+    SQL databases, often requiring a companion RDBMS for metadata.
+  composes:
+    - tool:grafana
+    - language:python
+    - language:go
+    - library:pandas
+    - library:numpy
+edges:
+  composed_of:
+    - tool:grafana
+    - language:python
+    - language:go
+    - library:pandas
+    - library:numpy
+    - tool:docker
+    - tool:prometheus
+  used_by_role:
+    - role:data-engineer
+    - role:sre
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:dashboard-development-cycle
+    - workflow:data-pipeline-deployment
+  applies_to:
+    - domain:observability
+    - domain:iot
+  requires_skill_area:
+    - skill-area:time-series-analysis
+    - skill-area:metrics-dashboarding
+    - skill-area:data-analytics
+    - skill-area:backend-api-design
+    - skill-area:data-pipeline-testing
+---
+nodeKind: StackProfile
+id: stack-profile:data-quality-governance
+attributes:
+  displayName: "Data Quality / Governance Stack (Great Expectations, dbt, Airflow, PostgreSQL, Python)"
+  description: |
+    A data quality and governance platform that embeds validation checkpoints
+    throughout the data pipeline. dbt models define tested transformations
+    with built-in schema and data tests. Airflow orchestrates pipeline DAGs
+    with quality gates that halt downstream processing on validation failure.
+    Python scripts run custom quality rules — completeness checks, referential
+    integrity, distribution drift detection — and publish results to a
+    PostgreSQL-backed quality dashboard. SQLAlchemy provides the data access
+    layer. Designed for data teams in regulated industries where data
+    quality is auditable and pipeline failures must be traceable to specific
+    validation rules. The tradeoff is pipeline velocity — adding quality
+    gates increases end-to-end latency and requires balancing thoroughness
+    against freshness SLAs for downstream consumers.
+  composes:
+    - language:python
+    - language:sql
+    - tool:airflow
+    - library:sqlalchemy
+    - library:pandas
+    - library:pydantic
+edges:
+  composed_of:
+    - language:python
+    - language:sql
+    - tool:airflow
+    - library:sqlalchemy
+    - library:pandas
+    - library:pydantic
+    - library:pytest
+    - tool:docker
+  used_by_role:
+    - role:data-engineer
+    - role:analytics-engineer
+    - role:data-scientist
+  follows_workflow:
+    - workflow:data-quality-monitoring
+    - workflow:dbt-model-review
+  applies_to:
+    - domain:data-engineering
+    - domain:data-science
+  requires_skill_area:
+    - skill-area:data-quality
+    - skill-area:dbt-modeling
+    - skill-area:etl-pipelines
+    - skill-area:data-governance
+    - skill-area:data-lineage
+---
+nodeKind: StackProfile
+id: stack-profile:react-native-enterprise
+attributes:
+  displayName: "React Native Enterprise Stack (React Native, TypeScript, Redux, Jest, Detox, FastAPI)"
+  description: |
+    An enterprise mobile application stack using React Native for
+    cross-platform iOS and Android development with a shared TypeScript
+    codebase. Zustand manages application state with minimal boilerplate.
+    Jest handles unit and component testing while integration flows are
+    tested end-to-end. FastAPI provides the backend API with Pydantic
+    validation. React Navigation handles routing and deep linking.
+    Designed for enterprises shipping internal and customer-facing mobile
+    apps where maintaining separate native codebases is cost-prohibitive.
+    The tradeoff is native performance ceiling — React Native bridges
+    JavaScript to native APIs, and UI-heavy screens with complex
+    animations or custom native modules may require dropping into
+    platform-specific Swift or Kotlin code, adding maintenance overhead.
+  composes:
+    - language:typescript
+    - library:zustand
+    - tool:jest
+    - framework:fastapi
+    - library:pydantic
+    - language:python
+edges:
+  composed_of:
+    - language:typescript
+    - library:zustand
+    - tool:jest
+    - framework:fastapi
+    - library:pydantic
+    - language:python
+    - tool:github-actions
+    - library:zod
+  used_by_role:
+    - role:mobile-engineer
+    - role:frontend-engineer
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:mobile-release-train
+    - workflow:mobile-app-submission
+  applies_to:
+    - domain:mobile
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:react-native-development
+    - skill-area:mobile-state-management
+    - skill-area:push-notifications
+    - skill-area:app-store-deployment
+    - skill-area:backend-api-design
+---
+nodeKind: StackProfile
+id: stack-profile:progressive-web-app
+attributes:
+  displayName: "Progressive Web App Stack (Next.js, Workbox, IndexedDB, Tailwind, TypeScript)"
+  description: |
+    A progressive web app (PWA) stack built on Next.js with service worker
+    caching strategies, offline-first data persistence via client-side
+    storage, and responsive UI powered by Tailwind CSS. TypeScript
+    provides end-to-end type safety across server and client components.
+    Zustand manages client-side application state. The PWA manifest enables
+    home screen installation on mobile devices without app store submission.
+    Designed for content-heavy applications, field-service tools, and
+    consumer apps where native app distribution overhead is undesirable.
+    The tradeoff is platform capability gaps — PWAs lack access to certain
+    native APIs (push notifications on iOS have limitations, no Bluetooth
+    on some platforms), and the offline experience requires careful cache
+    invalidation logic to prevent stale data issues.
+  composes:
+    - framework:nextjs
+    - library:tailwindcss
+    - language:typescript
+    - library:zustand
+    - library:zod
+edges:
+  composed_of:
+    - framework:nextjs
+    - library:tailwindcss
+    - language:typescript
+    - library:zustand
+    - library:zod
+    - tool:vitest
+    - tool:github-actions
+    - library:shadcn
+  used_by_role:
+    - role:frontend-engineer
+    - role:fullstack-engineer
+    - role:mobile-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:performance-profiling-cycle
+  applies_to:
+    - domain:web-development
+    - domain:mobile
+  requires_skill_area:
+    - skill-area:frontend-development
+    - skill-area:server-side-rendering
+    - skill-area:frontend-performance
+    - skill-area:web-accessibility
+    - skill-area:progressive-enhancement
+---
+nodeKind: StackProfile
+id: stack-profile:cross-platform-desktop
+attributes:
+  displayName: "Cross-Platform Desktop Stack (Tauri, React, SQLite, Rust, TypeScript)"
+  description: |
+    A cross-platform desktop application stack using Tauri as the application
+    shell, which bundles a Rust backend with a web-based React frontend into
+    lightweight native binaries for Windows, macOS, and Linux. Rust handles
+    system-level operations — file I/O, IPC, and native API access — while
+    React with TypeScript renders the UI in a webview. SQLite provides
+    embedded local data persistence. Tailwind CSS styles the interface.
+    Designed for teams building local-first productivity tools, developer
+    utilities, and data management apps where Electron's memory footprint
+    is unacceptable. The tradeoff is ecosystem maturity — Tauri's plugin
+    ecosystem is younger than Electron's, and some native integrations
+    (tray menus, system notifications, auto-update) require more manual
+    Rust code than their Electron equivalents.
+  composes:
+    - framework:tauri
+    - framework:react
+    - language:rust
+    - language:typescript
+    - library:tailwindcss
+edges:
+  composed_of:
+    - framework:tauri
+    - framework:react
+    - language:rust
+    - language:typescript
+    - library:tailwindcss
+    - library:zustand
+    - tool:vitest
+    - tool:github-actions
+  used_by_role:
+    - role:desktop-developer
+    - role:fullstack-engineer
+    - role:software-engineer
+  follows_workflow:
+    - workflow:desktop-app-release
+    - workflow:cross-platform-testing
+  applies_to:
+    - domain:software-engineering
+    - domain:frontend
+  requires_skill_area:
+    - skill-area:cross-platform-desktop
+    - skill-area:desktop-ui-frameworks
+    - skill-area:frontend-development
+    - skill-area:backend-api-design
+    - skill-area:rust-async-runtime

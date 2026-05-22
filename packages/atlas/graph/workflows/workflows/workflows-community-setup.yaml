@@ -1,0 +1,126 @@
+---
+nodeKind: Workflow
+id: workflow:community-platform-setup
+attributes:
+  displayName: "Community Platform Setup"
+  workflowKind: onboarding
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Establishes community platform infrastructure and onboarding experience --
+    evaluating and selecting community platforms (forum software, Discord
+    server, Slack workspace, GitHub Discussions) based on target audience
+    preferences and integration requirements, configuring channel structure and
+    category taxonomy aligned with product areas and community interests,
+    designing role hierarchies with graduated permissions for new members,
+    active contributors, moderators, and staff, building automated onboarding
+    flows including welcome messages, orientation content, and
+    first-contribution prompts, integrating community identity with product
+    accounts and SSO where applicable, setting up analytics instrumentation for
+    engagement tracking, configuring notification and digest settings to
+    optimize signal-to-noise ratio, and establishing bot and automation tooling
+    for FAQ responses, thread management, and community health alerts. Produces
+    platform architecture document, channel taxonomy, role permission matrix,
+    and onboarding flow specification. Excludes content creation.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:platform-engineer
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:api-design
+    - target: skill-area:identity-security
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:community-team
+    - target: org-unit:platform-team
+    - target: org-unit:developer-relations-team
+---
+nodeKind: Workflow
+id: workflow:community-guidelines-development
+attributes:
+  displayName: "Community Guidelines Development"
+  workflowKind: governance
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Develops comprehensive community guidelines and moderation policies --
+    researching best practices from established developer communities and
+    open-source governance models, drafting code of conduct covering expected
+    behavior, prohibited conduct, and consequences with clear examples,
+    defining moderation policies with severity tiers, enforcement procedures,
+    and appeal mechanisms, establishing escalation procedures from community
+    moderators to staff to legal for sensitive situations, creating guidelines
+    for intellectual property, self-promotion, and commercial content
+    boundaries, designing transparency reporting frameworks for moderation
+    actions, soliciting community feedback on draft guidelines through
+    structured review periods, and creating moderator training materials with
+    decision flowcharts for common scenarios. Produces code of conduct document,
+    moderation policy handbook, escalation procedures, and moderator training
+    guide. Excludes legal review.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:data-governance
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:runbook-authoring
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:community-team
+    - target: org-unit:developer-relations-team
+---
+nodeKind: Workflow
+id: workflow:community-ambassador-program-setup
+attributes:
+  displayName: "Community Ambassador Program Setup"
+  workflowKind: onboarding
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Designs and launches a community ambassador or champions program -- defining
+    ambassador selection criteria based on contribution history, expertise
+    areas, and community standing, creating tiered program structure with clear
+    expectations, benefits, and advancement paths, designing the application
+    and nomination process with evaluation rubrics, building onboarding
+    curriculum covering product knowledge, community values, and ambassador
+    responsibilities, establishing reward and recognition systems including
+    swag, early access, conference sponsorship, and public acknowledgment,
+    creating communication channels and collaboration spaces for the ambassador
+    cohort, defining activity tracking metrics and minimum participation
+    thresholds, and building reporting dashboards to measure ambassador program
+    impact on community growth and engagement. Produces program charter,
+    selection criteria document, onboarding curriculum, and impact measurement
+    framework. Excludes ambassador recruitment outreach.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:planner
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:onboard-new-engineer
+    - target: responsibility:ai-knowledge-sharing
+  performed_by_org_unit:
+    - target: org-unit:community-team
+    - target: org-unit:developer-relations-team
+    - target: org-unit:devrel

@@ -1,0 +1,89 @@
+---
+nodeKind: Workflow
+id: workflow:mobile-app-store-submission
+attributes:
+  displayName: "Mobile App Store Submission"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Manages the end-to-end submission of mobile apps to Apple App Store
+    and Google Play — build signing, metadata updates, screenshot generation,
+    compliance checks, and staged rollout monitoring. Excludes feature development.
+edges:
+  involves_role:
+    - target: role:tech-lead
+    - target: role:platform-engineer
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:gitops
+    - target: skill-area:blue-green-deployment
+  applies_to_domain:
+    - target: domain:mobile
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:mobile-release-train
+attributes:
+  displayName: "Mobile Release Train"
+  workflowKind: release
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Coordinates the cadenced mobile release cycle — branch cut, feature freeze,
+    regression testing, beta distribution, and go/no-go decision across iOS
+    and Android platforms. Excludes hotfix releases.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:tech-lead
+    - target: role:test-writer
+  requires_skill_area:
+    - target: skill-area:gitops
+    - target: skill-area:canary-rollouts
+  applies_to_domain:
+    - target: domain:mobile
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:changelog-maintenance
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:mobile-device-compatibility-testing
+attributes:
+  displayName: "Mobile Device Compatibility Testing"
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Validates app behavior across a matrix of physical and virtual devices,
+    OS versions, and screen sizes — maintaining the device lab, executing
+    compatibility suites, and triaging device-specific failures. Excludes performance profiling.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:debugger
+  requires_skill_area:
+    - target: skill-area:react-testing
+    - target: skill-area:chaos-engineering
+  applies_to_domain:
+    - target: domain:mobile
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:flaky-test-quarantine
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering

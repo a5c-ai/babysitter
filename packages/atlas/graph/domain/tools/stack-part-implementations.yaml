@@ -1,0 +1,351 @@
+---
+nodeKind: Tool
+id: tool:wordpress
+attributes:
+  displayName: "WordPress"
+  homepageUrl: "https://wordpress.org"
+  kind: other
+  description: |
+    Open-source PHP/MySQL content management system. Powers a large fraction
+    of public websites; rich plugin/theme ecosystem.
+edges:
+  belongs_to_language:
+    - language:php
+  implements_stack_part:
+    - target: stack-part:cms
+  used_for:
+    - target: skill-area:content-strategy
+  alternative_to:
+    - target: tool:strapi
+      comparison: "CMS platforms — WordPress is traditional PHP CMS; Strapi is headless Node.js CMS"
+---
+nodeKind: Tool
+id: tool:strapi
+attributes:
+  displayName: "Strapi"
+  homepageUrl: "https://strapi.io"
+  kind: other
+  description: |
+    Open-source headless CMS (Node.js). REST and GraphQL APIs over a
+    plugin-driven content model.
+edges:
+  belongs_to_language:
+    - language:javascript
+  implements_stack_part:
+    - target: stack-part:cms
+  used_for:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: tool:wordpress
+      comparison: "CMS platforms — Strapi is headless Node.js CMS; WordPress is traditional PHP CMS"
+---
+nodeKind: Tool
+id: tool:neo4j
+attributes:
+  displayName: "Neo4j"
+  homepageUrl: "https://neo4j.com"
+  kind: other
+  description: |
+    Native graph database with a property-graph model and Cypher query
+    language. Available as community OSS and managed Aura.
+edges:
+  belongs_to_language:
+    - language:java
+  implements_stack_part:
+    - target: stack-part:graph-database
+  used_for:
+    - target: skill-area:graph-databases
+---
+nodeKind: Tool
+id: tool:elasticsearch
+attributes:
+  displayName: "Elasticsearch"
+  homepageUrl: "https://www.elastic.co/elasticsearch"
+  kind: other
+  description: |
+    Distributed search and analytics engine built on Apache Lucene. Powers
+    full-text search, log aggregation, and observability use cases.
+edges:
+  belongs_to_language:
+    - language:java
+  implements_stack_part:
+    - target: stack-part:search-index
+  used_for:
+    - target: skill-area:search-infrastructure
+  alternative_to:
+    - target: tool:opensearch
+      comparison: "Search engines — OpenSearch is an open-source fork of Elasticsearch"
+    - target: tool:algolia
+      comparison: "Search — Elasticsearch is self-hosted; Algolia is managed SaaS"
+    - target: tool:typesense
+      comparison: "Search engines — Elasticsearch is full-featured; Typesense prioritises simplicity"
+    - target: tool:meilisearch
+      comparison: "Search engines — Elasticsearch is enterprise-grade; Meilisearch is lightweight"
+---
+nodeKind: Tool
+id: tool:meilisearch
+attributes:
+  displayName: "Meilisearch"
+  homepageUrl: "https://www.meilisearch.com"
+  kind: other
+  description: |
+    Open-source search engine focused on instant, typo-tolerant full-text
+    search with a developer-friendly REST API.
+edges:
+  belongs_to_language:
+    - language:rust
+  implements_stack_part:
+    - target: stack-part:search-index
+  used_for:
+    - target: skill-area:search-infrastructure
+  alternative_to:
+    - target: tool:typesense
+      comparison: "Lightweight search engines"
+    - target: tool:elasticsearch
+      comparison: "Search engines — Meilisearch is lightweight; Elasticsearch is enterprise-grade"
+    - target: tool:algolia
+      comparison: "Search — Meilisearch is self-hosted; Algolia is managed SaaS"
+---
+nodeKind: Tool
+id: tool:launchdarkly
+attributes:
+  displayName: "LaunchDarkly"
+  homepageUrl: "https://launchdarkly.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Feature-flag and A/B testing platform with targeting rules,
+    experimentation, and progressive rollouts.
+edges:
+  implements_stack_part:
+    - target: stack-part:experiment-platform
+  used_for:
+    - target: skill-area:feature-management
+  alternative_to:
+    - target: tool:flagsmith
+      comparison: "Feature flag platforms"
+    - target: tool:unleash
+      comparison: "Feature flag platforms"
+    - target: tool:split-io
+      comparison: "Feature flag platforms"
+---
+nodeKind: Tool
+id: tool:temporal
+attributes:
+  displayName: "Temporal"
+  homepageUrl: "https://temporal.io"
+  kind: orchestrator
+  description: |
+    Durable execution platform — author workflows in code (TypeScript,
+    Go, Java, Python) with deterministic replay and at-most-once activity
+    semantics.
+edges:
+  belongs_to_language:
+    - language:go
+  implements_stack_part:
+    - target: stack-part:workflow-engine
+  used_for:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - target: tool:airflow
+      comparison: "Workflow orchestration — Temporal is durable execution in code; Airflow is data-pipeline DAGs"
+    - target: tool:dagster
+      comparison: "Workflow orchestration platforms"
+    - target: tool:prefect
+      comparison: "Workflow orchestration platforms"
+---
+nodeKind: Tool
+id: tool:airflow
+attributes:
+  displayName: "Apache Airflow"
+  homepageUrl: "https://airflow.apache.org"
+  kind: orchestrator
+  description: |
+    Author, schedule, and monitor data-pipeline DAGs. Python-native;
+    operator ecosystem covers most data sources.
+edges:
+  belongs_to_language:
+    - language:python
+  implements_stack_part:
+    - target: stack-part:workflow-engine
+  used_for:
+    - target: skill-area:event-driven-architecture
+  alternative_to:
+    - target: tool:temporal
+      comparison: "Workflow orchestration — Airflow is data-pipeline DAGs; Temporal is durable execution in code"
+    - target: tool:dagster
+      comparison: "Data orchestration — Airflow uses DAGs; Dagster is asset-centric"
+    - target: tool:prefect
+      comparison: "Data orchestration — Airflow uses DAGs; Prefect is Python-native"
+    - target: tool:apache-beam
+      comparison: "Data pipeline tools"
+---
+nodeKind: Tool
+id: tool:kong
+attributes:
+  displayName: "Kong Gateway"
+  homepageUrl: "https://konghq.com"
+  kind: api-tool
+  description: |
+    Cloud-native API gateway built on nginx/OpenResty with plugin-driven
+    rate limiting, auth, transformations, and observability.
+edges:
+  belongs_to_language:
+    - language:lua
+  implements_stack_part:
+    - target: stack-part:rate-limiter
+    - target: stack-part:api-gateway
+  used_for:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: tool:ngrok
+      comparison: "API/network tools — Kong is an API gateway; ngrok is a tunnel for local services"
+---
+nodeKind: Tool
+id: tool:databricks
+attributes:
+  displayName: "Databricks"
+  homepageUrl: "https://www.databricks.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Unified data-and-AI platform built on Apache Spark + Delta Lake.
+    Handles data lake, warehousing, ML, and notebook workflows.
+edges:
+  supports_work:
+    - target: role:data-engineer
+      confidence: high
+      evidence: "Ora surfaced Databricks as a top match for data engineering orchestration and warehouse workflows."
+    - target: workflow:data-pipeline-monitoring
+      confidence: high
+      evidence: "Jobs, notebooks, and warehouse metadata support pipeline monitoring."
+  implements_stack_part:
+    - target: stack-part:data-lake
+  used_for:
+    - target: skill-area:machine-learning
+  alternative_to:
+    - target: tool:mlflow
+      comparison: "ML platforms — Databricks is a unified data+AI platform; MLflow is ML lifecycle management"
+    - target: tool:bentoml
+      comparison: "ML platforms — Databricks is a unified platform; BentoML is model serving"
+---
+nodeKind: Tool
+id: tool:sendgrid
+attributes:
+  displayName: "SendGrid"
+  homepageUrl: "https://sendgrid.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Transactional and marketing email delivery service (Twilio SendGrid).
+    REST API with templates, suppression lists, and event webhooks.
+edges:
+  implements_stack_part:
+    - target: stack-part:email-delivery
+  used_for:
+    - target: skill-area:transactional-email
+  alternative_to:
+    - target: tool:mailgun
+      comparison: "Email delivery services"
+    - target: tool:postmark
+      comparison: "Email delivery services"
+    - target: tool:resend
+      comparison: "Email delivery services"
+    - target: tool:aws-ses
+      comparison: "Email delivery services"
+    - target: tool:sparkpost
+      comparison: "Email delivery services"
+---
+nodeKind: Tool
+id: tool:twilio
+attributes:
+  displayName: "Twilio"
+  homepageUrl: "https://www.twilio.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Programmable SMS, voice, WhatsApp, and verification APIs. Global
+    routing, regulatory templating, and delivery-status webhooks.
+edges:
+  implements_stack_part:
+    - target: stack-part:sms-delivery
+  used_for:
+    - target: skill-area:communication
+---
+nodeKind: Tool
+id: tool:mlflow
+attributes:
+  displayName: "MLflow"
+  homepageUrl: "https://mlflow.org"
+  kind: other
+  description: |
+    Open-source ML lifecycle platform — experiment tracking, model
+    registry, packaging, and deployment.
+edges:
+  belongs_to_language:
+    - language:python
+  implements_stack_part:
+    - target: stack-part:model-registry
+  used_for:
+    - target: skill-area:model-serving
+  alternative_to:
+    - target: tool:databricks
+      comparison: "ML platforms — MLflow is ML lifecycle management; Databricks is a unified data+AI platform"
+    - target: tool:bentoml
+      comparison: "ML tools — MLflow is experiment tracking and model registry; BentoML is model serving"
+---
+nodeKind: Tool
+id: tool:bentoml
+attributes:
+  displayName: "BentoML"
+  homepageUrl: "https://www.bentoml.com"
+  kind: other
+  description: |
+    Framework for packaging ML models into production-ready microservices
+    with REST/gRPC adapters, batching, and adaptive scaling.
+edges:
+  belongs_to_language:
+    - language:python
+  implements_stack_part:
+    - target: stack-part:model-serving
+  used_for:
+    - target: skill-area:model-serving
+  alternative_to:
+    - target: tool:mlflow
+      comparison: "ML tools — BentoML is model serving; MLflow is experiment tracking and model registry"
+    - target: tool:databricks
+      comparison: "ML platforms — BentoML is model serving; Databricks is a unified platform"
+---
+nodeKind: Tool
+id: tool:feast
+attributes:
+  displayName: "Feast"
+  homepageUrl: "https://feast.dev"
+  kind: other
+  description: |
+    Open-source feature store — defines, manages, and serves ML features
+    for both training and online inference. Integrates with Spark, Snowflake,
+    BigQuery, Redis, DynamoDB.
+edges:
+  belongs_to_language:
+    - language:python
+  implements_stack_part:
+    - target: stack-part:feature-store
+  used_for:
+    - target: skill-area:machine-learning
+---
+nodeKind: Tool
+id: tool:datadome
+attributes:
+  displayName: "DataDome"
+  homepageUrl: "https://datadome.co"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Real-time bot detection and mitigation service. Edge-deployed
+    classifier with API/SDK integration for web, mobile, and APIs.
+edges:
+  implements_stack_part:
+    - target: stack-part:bot-detection
+  used_for:
+    - target: skill-area:application-security

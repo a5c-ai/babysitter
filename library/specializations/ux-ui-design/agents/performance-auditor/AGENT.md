@@ -8,6 +8,12 @@ expertise:
   - Animation performance profiling
   - Asset optimization
   - Performance budget validation
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:web-vitals, skill-area:frontend-performance-testing]
+  roles: [role:frontend-engineer, role:qa-engineer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # Performance Auditor Agent

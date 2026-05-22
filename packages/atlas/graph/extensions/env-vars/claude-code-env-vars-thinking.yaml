@@ -1,0 +1,36 @@
+nodeKind: EnvVar
+id: env-var:claude-code-disable-thinking
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_THINKING
+  description: Set to 1 to force-disable extended thinking regardless of model support or settings.
+  name: CLAUDE_CODE_DISABLE_THINKING
+  category: thinking
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-adaptive-thinking
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING
+  description: Set to 1 to disable adaptive reasoning on Opus 4.6 and Sonnet 4.6 (no effect on Opus 4.7).
+  name: CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING
+  category: thinking
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-effort-level
+attributes:
+  displayName: CLAUDE_CODE_EFFORT_LEVEL
+  description: 'Effort level for supported models: low, medium, high, xhigh, max, or auto.'
+  name: CLAUDE_CODE_EFFORT_LEVEL
+  category: thinking
+  valueType: enum
+  defaultValue: auto
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

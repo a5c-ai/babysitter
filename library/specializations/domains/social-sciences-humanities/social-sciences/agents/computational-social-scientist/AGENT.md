@@ -2,6 +2,11 @@
 name: computational-social-scientist
 description: Apply network analysis and computational methods to social science questions
 required-skills: network-analysis, quantitative-methods
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:machine-learning-frameworks, skill-area:natural-language-processing, skill-area:data-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:data-scientist, role:research-engineer]
 ---
 
 # Computational Social Scientist Agent

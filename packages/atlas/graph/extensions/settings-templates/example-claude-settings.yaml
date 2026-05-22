@@ -1,0 +1,16 @@
+nodeKind: SettingsTemplate
+id: settings-template:example-claude
+attributes:
+  displayName: "Claude Code settings fragment (example)"
+  targetSettingsPath: "~/.claude/settings.json"
+  fragmentPath: "settings/claude-fragment.json"
+  mergeStrategy: deep-merge
+  conflictPolicy: keep-existing
+  scope: user
+  revertOnUninstall: true
+  description: "Plugin-shipped settings.json fragment merged into ~/.claude/settings.json on install."
+edges:
+  contained_in_plugin:
+    - target: plugin:example-portable-extension
+  merges_into:
+    - target: path:claude-user-settings

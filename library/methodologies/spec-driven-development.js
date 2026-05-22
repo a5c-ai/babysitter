@@ -3,6 +3,12 @@
  * @description GitHub Spec-Kit inspired workflow - executable specifications drive implementation
  * @inputs { projectName: string, initialRequirements?: string, developmentPhase?: string }
  * @outputs { success: boolean, constitution: object, specification: object, plan: object, tasks: array, implementation: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:prioritization-frameworks, skill-area:product-discovery, skill-area:roadmap-planning]
+ *   workflows: [workflow:product-discovery, workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:engineering-manager, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -10,6 +10,12 @@ metadata:
   domain: science
   category: Hypothesis Development
   skill-id: SK-SCIDISC-011
+graph:
+  domains: [domain:scientific-discovery]
+  specializations: [specialization:scientific-research-methods]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # TRIZ Contradiction Solver Skill

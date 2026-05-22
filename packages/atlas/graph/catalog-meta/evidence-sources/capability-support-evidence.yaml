@@ -1,0 +1,1283 @@
+# Web evidence sources referenced by capability-support nodes.
+# These correspond to vendor documentation pages used to corroborate
+# capability assertions for each agent harness.
+---
+nodeKind: EvidenceSource
+id: evidence:web-anthropic-claude-code
+attributes:
+  evidenceId: web-anthropic-claude-code
+  displayName: "Anthropic Claude Code product page"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://www.anthropic.com/products/claude-code
+  sourcePathOrUrl: https://www.anthropic.com/products/claude-code
+  locator: "product landing page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-anthropic-claude-code-auto-mode
+attributes:
+  evidenceId: web-anthropic-claude-code-auto-mode
+  displayName: "Claude Code auto-accept mode documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/settings#auto-accept
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/settings#auto-accept
+  locator: "auto-accept / headless usage section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-anthropic-claude-code-sandboxing
+attributes:
+  evidenceId: web-anthropic-claude-code-sandboxing
+  displayName: "Claude Code sandboxing documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/security#sandboxing
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/security#sandboxing
+  locator: "sandboxing section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-hooks
+attributes:
+  evidenceId: web-claude-code-hooks
+  displayName: "Claude Code hooks reference"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/hooks
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/hooks
+  locator: "hooks reference page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-hooks-guide
+attributes:
+  evidenceId: web-claude-code-hooks-guide
+  displayName: "Claude Code hooks guide"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/hooks-guide
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/hooks-guide
+  locator: "hooks usage guide"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-mcp
+attributes:
+  evidenceId: web-claude-code-mcp
+  displayName: "Claude Code MCP integration docs"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/mcp
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/mcp
+  locator: "MCP integration page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-permission-modes
+attributes:
+  evidenceId: web-claude-code-permission-modes
+  displayName: "Claude Code permission modes"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/settings#permissions
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/settings#permissions
+  locator: "permission modes section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-checkpointing
+attributes:
+  evidenceId: web-claude-code-checkpointing
+  displayName: "Claude Code checkpointing / session resume"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/sessions
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/sessions
+  locator: "checkpointing section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-overview
+attributes:
+  evidenceId: web-claude-code-overview
+  displayName: "Claude Code overview documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/overview
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/overview
+  locator: "overview page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-quickstart
+attributes:
+  evidenceId: web-claude-code-quickstart
+  displayName: "Claude Code quickstart"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/quickstart
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/quickstart
+  locator: "quickstart page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-interactive-mode
+attributes:
+  evidenceId: web-claude-code-interactive-mode
+  displayName: "Claude Code interactive mode"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/interactive
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/interactive
+  locator: "interactive mode page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-tools-reference
+attributes:
+  evidenceId: web-claude-code-tools-reference
+  displayName: "Claude Code tools reference"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/tools
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/tools
+  locator: "tools reference page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-features-overview
+attributes:
+  evidenceId: web-claude-code-features-overview
+  displayName: "Claude Code features overview"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/features
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/features
+  locator: "features overview page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-permissions
+attributes:
+  evidenceId: web-claude-code-permissions
+  displayName: "Claude Code permissions documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/permissions
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/permissions
+  locator: "permissions reference"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-skills
+attributes:
+  evidenceId: web-claude-code-skills
+  displayName: "Claude Code skills documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/skills
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/skills
+  locator: "skills page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-subagents
+attributes:
+  evidenceId: web-claude-code-subagents
+  displayName: "Claude Code subagents / agent teams"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/subagents
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/subagents
+  locator: "subagents page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-agent-teams
+attributes:
+  evidenceId: web-claude-code-agent-teams
+  displayName: "Claude Code agent teams"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/agent-teams
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/agent-teams
+  locator: "agent teams reference"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-headless
+attributes:
+  evidenceId: web-claude-code-headless
+  displayName: "Claude Code headless / non-interactive mode"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/headless
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/headless
+  locator: "headless mode section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-commands
+attributes:
+  evidenceId: web-claude-code-commands
+  displayName: "Claude Code slash commands reference"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/commands
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/commands
+  locator: "commands reference page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-cli-reference
+attributes:
+  evidenceId: web-claude-code-cli-reference
+  displayName: "Claude Code CLI reference"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/cli
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/cli
+  locator: "CLI reference page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-code-claude-directory
+attributes:
+  evidenceId: web-claude-code-claude-directory
+  displayName: "Claude Code .claude directory documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/settings#claude-directory
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/claude-code/settings#claude-directory
+  locator: "claude directory section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-claude-platform-vision
+attributes:
+  evidenceId: web-claude-platform-vision
+  displayName: "Claude platform vision / API docs"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.anthropic.com/en/docs/about-claude
+  sourcePathOrUrl: https://docs.anthropic.com/en/docs/about-claude
+  locator: "platform overview"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-codex-cli
+attributes:
+  evidenceId: web-codex-cli
+  displayName: "OpenAI Codex CLI documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/openai/codex
+  sourcePathOrUrl: https://github.com/openai/codex
+  locator: "Codex CLI README"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-codex-cli-features
+attributes:
+  evidenceId: web-codex-cli-features
+  displayName: "Codex CLI features page"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/openai/codex#features
+  sourcePathOrUrl: https://github.com/openai/codex#features
+  locator: "features section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-codex-cli-reference
+attributes:
+  evidenceId: web-codex-cli-reference
+  displayName: "Codex CLI reference"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/openai/codex#usage
+  sourcePathOrUrl: https://github.com/openai/codex#usage
+  locator: "usage / CLI reference"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-codex-hooks
+attributes:
+  evidenceId: web-codex-hooks
+  displayName: "Codex CLI hooks documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/openai/codex#hooks
+  sourcePathOrUrl: https://github.com/openai/codex#hooks
+  locator: "hooks section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-codex-noninteractive
+attributes:
+  evidenceId: web-codex-noninteractive
+  displayName: "Codex CLI non-interactive mode"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/openai/codex#non-interactive
+  sourcePathOrUrl: https://github.com/openai/codex#non-interactive
+  locator: "non-interactive section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-codex-skills
+attributes:
+  evidenceId: web-codex-skills
+  displayName: "Codex CLI skills / agents support"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/openai/codex#agents
+  sourcePathOrUrl: https://github.com/openai/codex#agents
+  locator: "skills/agents section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-openai-codex-skills
+attributes:
+  evidenceId: web-openai-codex-skills
+  displayName: "OpenAI Codex skills documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/openai/codex#skills
+  sourcePathOrUrl: https://github.com/openai/codex#skills
+  locator: "skills reference"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-gemini-cli-index
+attributes:
+  evidenceId: web-gemini-cli-index
+  displayName: "Gemini CLI documentation index"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/google-gemini/gemini-cli
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli
+  locator: "README / index"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-gemini-cli-hooks
+attributes:
+  evidenceId: web-gemini-cli-hooks
+  displayName: "Gemini CLI hooks"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/google-gemini/gemini-cli#hooks
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli#hooks
+  locator: "hooks section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-gemini-hooks
+attributes:
+  evidenceId: web-gemini-hooks
+  displayName: "Gemini hooks reference"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/google-gemini/gemini-cli#hooks-reference
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli#hooks-reference
+  locator: "hooks reference"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-gemini-cli-session-management
+attributes:
+  evidenceId: web-gemini-cli-session-management
+  displayName: "Gemini CLI session management"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/google-gemini/gemini-cli#sessions
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli#sessions
+  locator: "session management section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-gemini-cli-reference
+attributes:
+  evidenceId: web-gemini-cli-reference
+  displayName: "Gemini CLI reference"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/google-gemini/gemini-cli#reference
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli#reference
+  locator: "CLI reference"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-gemini-cli-changelog
+attributes:
+  evidenceId: web-gemini-cli-changelog
+  displayName: "Gemini CLI changelog"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/google-gemini/gemini-cli/blob/main/CHANGELOG.md
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/blob/main/CHANGELOG.md
+  locator: "changelog"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-gemini-cli-checkpointing
+attributes:
+  evidenceId: web-gemini-cli-checkpointing
+  displayName: "Gemini CLI checkpointing"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/google-gemini/gemini-cli#checkpointing
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli#checkpointing
+  locator: "checkpointing section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-gemini-cli-headless
+attributes:
+  evidenceId: web-gemini-cli-headless
+  displayName: "Gemini CLI headless mode"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/google-gemini/gemini-cli#headless
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli#headless
+  locator: "headless mode"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-gemini-cli-skills
+attributes:
+  evidenceId: web-gemini-cli-skills
+  displayName: "Gemini CLI skills"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/google-gemini/gemini-cli#skills
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli#skills
+  locator: "skills section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-github-copilot-cli-overview
+attributes:
+  evidenceId: web-github-copilot-cli-overview
+  displayName: "GitHub Copilot CLI overview"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.github.com/en/copilot/copilot-cli
+  sourcePathOrUrl: https://docs.github.com/en/copilot/copilot-cli
+  locator: "CLI overview"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-github-copilot-cli-hooks
+attributes:
+  evidenceId: web-github-copilot-cli-hooks
+  displayName: "GitHub Copilot CLI hooks"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.github.com/en/copilot/copilot-cli/hooks
+  sourcePathOrUrl: https://docs.github.com/en/copilot/copilot-cli/hooks
+  locator: "hooks page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-github-copilot-cli-mcp
+attributes:
+  evidenceId: web-github-copilot-cli-mcp
+  displayName: "GitHub Copilot CLI MCP integration"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.github.com/en/copilot/copilot-cli/mcp
+  sourcePathOrUrl: https://docs.github.com/en/copilot/copilot-cli/mcp
+  locator: "MCP integration page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-github-copilot-cli-plugins
+attributes:
+  evidenceId: web-github-copilot-cli-plugins
+  displayName: "GitHub Copilot CLI plugins"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.github.com/en/copilot/copilot-cli/plugins
+  sourcePathOrUrl: https://docs.github.com/en/copilot/copilot-cli/plugins
+  locator: "plugins page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-github-copilot-cli-getting-started
+attributes:
+  evidenceId: web-github-copilot-cli-getting-started
+  displayName: "GitHub Copilot CLI getting started"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.github.com/en/copilot/copilot-cli/getting-started
+  sourcePathOrUrl: https://docs.github.com/en/copilot/copilot-cli/getting-started
+  locator: "getting started page"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-github-copilot-cli-config-dir
+attributes:
+  evidenceId: web-github-copilot-cli-config-dir
+  displayName: "GitHub Copilot CLI config directory"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.github.com/en/copilot/copilot-cli/config
+  sourcePathOrUrl: https://docs.github.com/en/copilot/copilot-cli/config
+  locator: "configuration directory reference"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-github-copilot-cli-plugin-reference
+attributes:
+  evidenceId: web-github-copilot-cli-plugin-reference
+  displayName: "GitHub Copilot CLI plugin reference"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.github.com/en/copilot/copilot-cli/plugin-reference
+  sourcePathOrUrl: https://docs.github.com/en/copilot/copilot-cli/plugin-reference
+  locator: "plugin reference"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-github-copilot-agent
+attributes:
+  evidenceId: web-github-copilot-agent
+  displayName: "GitHub Copilot agent mode docs"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.github.com/en/copilot/agent
+  sourcePathOrUrl: https://docs.github.com/en/copilot/agent
+  locator: "agent mode overview"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-github-copilot-hooks-config
+attributes:
+  evidenceId: web-github-copilot-hooks-config
+  displayName: "GitHub Copilot hooks configuration"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.github.com/en/copilot/copilot-cli/hooks-config
+  sourcePathOrUrl: https://docs.github.com/en/copilot/copilot-cli/hooks-config
+  locator: "hooks configuration"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-github-copilot-mcp
+attributes:
+  evidenceId: web-github-copilot-mcp
+  displayName: "GitHub Copilot MCP support"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.github.com/en/copilot/mcp
+  sourcePathOrUrl: https://docs.github.com/en/copilot/mcp
+  locator: "MCP integration"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-github-copilot-sdk-image-input
+attributes:
+  evidenceId: web-github-copilot-sdk-image-input
+  displayName: "GitHub Copilot SDK image input"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.github.com/en/copilot/sdk/image-input
+  sourcePathOrUrl: https://docs.github.com/en/copilot/sdk/image-input
+  locator: "image input reference"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-cursor-hooks
+attributes:
+  evidenceId: web-cursor-hooks
+  displayName: "Cursor hooks documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.cursor.com/hooks
+  sourcePathOrUrl: https://docs.cursor.com/hooks
+  locator: "hooks reference"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-cursor-rules
+attributes:
+  evidenceId: web-cursor-rules
+  displayName: "Cursor rules documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.cursor.com/rules
+  sourcePathOrUrl: https://docs.cursor.com/rules
+  locator: "rules reference"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-cursor-agent-overview
+attributes:
+  evidenceId: web-cursor-agent-overview
+  displayName: "Cursor agent overview"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.cursor.com/agent
+  sourcePathOrUrl: https://docs.cursor.com/agent
+  locator: "agent overview"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-cursor-cli-overview
+attributes:
+  evidenceId: web-cursor-cli-overview
+  displayName: "Cursor CLI overview"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.cursor.com/cli
+  sourcePathOrUrl: https://docs.cursor.com/cli
+  locator: "CLI overview"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-cursor-cli-headless
+attributes:
+  evidenceId: web-cursor-cli-headless
+  displayName: "Cursor CLI headless mode"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.cursor.com/cli/headless
+  sourcePathOrUrl: https://docs.cursor.com/cli/headless
+  locator: "headless mode"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-cursor-cli-shell-mode
+attributes:
+  evidenceId: web-cursor-cli-shell-mode
+  displayName: "Cursor CLI shell mode"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.cursor.com/cli/shell
+  sourcePathOrUrl: https://docs.cursor.com/cli/shell
+  locator: "shell mode section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-cursor-cli-using
+attributes:
+  evidenceId: web-cursor-cli-using
+  displayName: "Cursor CLI usage guide"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.cursor.com/cli/usage
+  sourcePathOrUrl: https://docs.cursor.com/cli/usage
+  locator: "using section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-opencode-plugins
+attributes:
+  evidenceId: web-opencode-plugins
+  displayName: "OpenCode plugins documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/nicepkg/opencode#plugins
+  sourcePathOrUrl: https://github.com/nicepkg/opencode#plugins
+  locator: "plugins section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-opencode-commands
+attributes:
+  evidenceId: web-opencode-commands
+  displayName: "OpenCode commands reference"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/nicepkg/opencode#commands
+  sourcePathOrUrl: https://github.com/nicepkg/opencode#commands
+  locator: "commands reference"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-opencode-providers
+attributes:
+  evidenceId: web-opencode-providers
+  displayName: "OpenCode providers reference"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/nicepkg/opencode#providers
+  sourcePathOrUrl: https://github.com/nicepkg/opencode#providers
+  locator: "providers section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-opencode-tui
+attributes:
+  evidenceId: web-opencode-tui
+  displayName: "OpenCode TUI reference"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/nicepkg/opencode#tui
+  sourcePathOrUrl: https://github.com/nicepkg/opencode#tui
+  locator: "TUI section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-opencode-windows-wsl
+attributes:
+  evidenceId: web-opencode-windows-wsl
+  displayName: "OpenCode Windows / WSL support"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/nicepkg/opencode#windows
+  sourcePathOrUrl: https://github.com/nicepkg/opencode#windows
+  locator: "Windows / WSL section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-omp-readme
+attributes:
+  evidenceId: web-omp-readme
+  displayName: "Oh My Pi README"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/a5c-ai/omp
+  sourcePathOrUrl: https://github.com/a5c-ai/omp
+  locator: "README"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-omp-session-resume
+attributes:
+  evidenceId: web-omp-session-resume
+  displayName: "Oh My Pi session resume documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/a5c-ai/omp#sessions
+  sourcePathOrUrl: https://github.com/a5c-ai/omp#sessions
+  locator: "session resume section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:web-omp-skills
+attributes:
+  evidenceId: web-omp-skills
+  displayName: "Oh My Pi skills"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/a5c-ai/omp#skills
+  sourcePathOrUrl: https://github.com/a5c-ai/omp#skills
+  locator: "skills section"
+  capturedAt: "2026-05-01T00:00:00Z"
+  observedAt: "2026-05-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-01T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc

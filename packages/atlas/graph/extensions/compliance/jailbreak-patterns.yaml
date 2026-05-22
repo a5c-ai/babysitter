@@ -1,0 +1,58 @@
+---
+nodeKind: JailbreakPattern
+id: jailbreak:dan
+attributes:
+  displayName: "DAN (Do Anything Now)"
+  technique: role-play
+  severity: high
+  signature: |
+    Look for "DAN" persona-override, "you are now an AI without rules",
+    "ignore your previous instructions" alongside fictional persona framing.
+  description: |
+    Roleplay-based jailbreak instructing the model to act as an unfiltered
+    persona named DAN.
+  references:
+    - https://en.wikipedia.org/wiki/ChatGPT
+edges: {}
+---
+nodeKind: JailbreakPattern
+id: jailbreak:prompt-injection-indirect
+attributes:
+  displayName: "Indirect prompt injection via retrieved content"
+  technique: indirect-injection
+  severity: critical
+  signature: |
+    Retrieved documents containing imperative instructions targeting the
+    assistant ("Ignore previous instructions and ...").
+  description: |
+    Adversarial instructions hidden in retrieved web pages, PDFs, or emails
+    that the agent ingests as context.
+edges: {}
+---
+nodeKind: JailbreakPattern
+id: jailbreak:many-shot
+attributes:
+  displayName: "Many-shot jailbreak"
+  technique: multi-turn
+  severity: high
+  signature: |
+    Long-context attack with N>>10 fabricated harmful Q/A pairs preceding
+    the real query, intended to override safety training.
+  description: |
+    Long-context attack that floods the prompt with fabricated harmful Q/A
+    pairs to override safety training.
+edges: {}
+---
+nodeKind: JailbreakPattern
+id: jailbreak:base64-obfuscation
+attributes:
+  displayName: "Base64 / encoded-payload obfuscation"
+  technique: encoding
+  severity: medium
+  signature: |
+    Detect base64, ROT13, or zero-width-character payloads embedded in user
+    prompts that decode to a harmful instruction.
+  description: |
+    Encodes harmful instructions in base64, ROT13, or zero-width characters
+    to bypass surface-level filters.
+edges: {}

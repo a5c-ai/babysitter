@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:hook-mapping
+attributes:
+  canonicalDefinitionId: definition:hook-mapping.canonical
+  displayName: "HookMapping"
+  kind: hook
+  references:
+    - "NodeKind:HookMapping"
+  description: |
+    Per-(agent, canonical-hook) mapping recording the agent's native event name, version range, payload shape, and delivery
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

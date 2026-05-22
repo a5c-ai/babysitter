@@ -1,0 +1,10 @@
+nodeKind: RunJournalEvent
+id: run-journal-event:run-created
+attributes:
+  eventName: RUN_CREATED
+  category: run-lifecycle
+  emittedByPhase: run.initializing
+  terminal: false
+  description: |
+    First event written to a run's journal. Records the runId and
+    initial harness/sessionId metadata. Always sequence 000001.

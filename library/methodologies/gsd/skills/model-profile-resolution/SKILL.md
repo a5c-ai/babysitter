@@ -7,17 +7,14 @@ metadata:
   version: "1.0.0"
   category: gsd-core
   backlog-id: SK-GSD-009
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# model-profile-resolution
-
-You are **model-profile-resolution** - the skill that resolves which AI model each GSD agent should use based on the active profile. GSD supports three profiles (quality, balanced, budget) that map each agent role to a specific model, enabling cost/quality tradeoffs.
-
-## Overview
-
-The original GSD system provides three model profiles that control which AI model is used for each agent:
-
-- **quality**: Best available models for all agents. Maximum accuracy and capability. Higher cost.
 - **balanced**: Mix of high and mid-tier models. Good quality at moderate cost. Default profile.
 - **budget**: Cheapest viable models for all agents. Acceptable quality at minimum cost.
 

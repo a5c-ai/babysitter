@@ -16,6 +16,10 @@ metadata:
     - pandas
     - numpy
     - jinja2
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:quantitative-modeling, skill-area:business-analysis, skill-area:strategic-analysis]
+  roles: [role:risk-analyst, role:business-analyst, role:strategic-planner]
 ---
 
 # Risk Register Manager

@@ -2,6 +2,13 @@
 name: trpc
 description: tRPC end-to-end type safety, procedures, routers, middleware, and React integration.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:backend-api-design, skill-area:data-fetching-caching]
+  roles: [role:fullstack-engineer]
+  topics: [topic:api-design]
+
 ---
 
 # tRPC Skill

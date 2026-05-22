@@ -18,6 +18,12 @@
  * - Electron UI: https://www.electronjs.org/docs/latest/tutorial/application-architecture
  * - Fluent UI: https://developer.microsoft.com/en-us/fluentui
  * - Apple Human Interface Guidelines: https://developer.apple.com/design/human-interface-guidelines/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:desktop-development]
+ *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+ *   roles: [role:desktop-developer, role:fullstack-engineer]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -3,6 +3,12 @@
  * @description Design and execute performance tests to validate process performance against design specifications
  * @inputs { processName: string, designSpecifications: object, performanceGuarantees: object, outputDir: string }
  * @outputs { success: boolean, testProtocol: object, testResults: object, performanceCertificate: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:chemical-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

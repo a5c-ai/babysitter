@@ -1,0 +1,27 @@
+---
+nodeKind: EndUser
+id: end-user:acme-jdoe
+attributes:
+  displayName: "Jane Doe (Acme)"
+  userKind: human
+  tenantId: tenant:acme
+  notes: |
+    Power user at Acme; primary point of contact for product feedback.
+---
+nodeKind: EndUser
+id: end-user:globex-msmith
+attributes:
+  displayName: "Markus Schmidt (Globex)"
+  userKind: human
+  tenantId: tenant:globex
+  notes: |
+    Globex developer using the public API.
+---
+nodeKind: EndUser
+id: end-user:acme-ci-bot
+attributes:
+  displayName: "Acme CI service account"
+  userKind: service-account
+  tenantId: tenant:acme
+  notes: |
+    Service account used by Acme's CI pipeline for automated runs.

@@ -1,0 +1,67 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:openclaw.core@current
+attributes:
+  displayName: OpenClaw Core (current)
+  agentVersionId: agentVersion:openclaw:ge-0-0-0
+  packageRef: source-ref:openclaw-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: 'Multi-provider tool-use loop with native parallel-tool dispatch.
+    Loop boundary
+
+    is the provider''s end-of-turn signal; partial streaming means user sees
+
+    chunked text but tool-call args may arrive in a single block at end of turn.
+
+    '
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: 'Compaction is provider-managed; OpenClaw does not expose
+    a threshold knob.
+
+    '
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: 'Sub-tasks are dispatched as tool calls; OpenClaw does not
+    document a dedicated
+
+    subagent primitive separate from tool calls.
+
+    '
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: 'Final answer is rendered to JSON session log on completion;
+    partial streaming
+
+    surfaces incremental text but tool calls may flush at end of turn.
+
+    '
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: openclaw-internal
+  supportedTransportProtocols:
+  - model-transport:anthropic-messages
+  - model-transport:openai-responses
+  parallelToolCallHandling: native
+  streamingFidelity: partial
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:openclaw
+    role: core
+  speaks:
+  - target: model-transport:anthropic-messages
+  - target: model-transport:openai-responses
+  supports:
+  - target: capability:parallel-tool-calls
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'OpenClaw supports parallel tool calls per agent-mux ref.
+
+      '
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:result-validation

@@ -1,0 +1,95 @@
+---
+nodeKind: Topic
+id: topic:agent-dispatch
+attributes:
+  displayName: "Agent Dispatch"
+  description: |
+    Agent Dispatch as a cross-cutting topic - the mechanisms by which an
+    orchestrating agent delegates work to sub-agents, tools, skills, and
+    external systems. Covers task decomposition strategies, effect-based
+    dispatch (agent/skill/shell/breakpoint task kinds), fan-out parallelism,
+    result collection and aggregation, and error propagation across agent
+    boundaries. Central to multi-agent orchestration frameworks such as
+    Babysitter and LangGraph.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:remote-dispatch
+attributes:
+  displayName: "Remote Dispatch"
+  description: |
+    Remote Dispatch as a cross-cutting topic - dispatching agent-driven work
+    to remote execution environments outside the local process. Covers
+    cloud-hosted agent runners, CI/CD-based agent invocation (e.g. triggering
+    a GitHub Actions workflow via repository_dispatch), container-isolated
+    sub-agent execution, MCP-server-mediated remote tool calls, and
+    security boundaries for cross-environment agent communication.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:devops
+---
+nodeKind: Topic
+id: topic:scheduled-dispatch
+attributes:
+  displayName: "Scheduled Dispatch"
+  description: |
+    Scheduled Dispatch as a cross-cutting topic - triggering agent tasks on
+    calendar or cron-based schedules. Covers cron expression authoring,
+    idempotent task design for scheduled re-runs, drift detection between
+    scheduled and actual execution times, sleep-based time gates within
+    agent workflows, and integration with platform schedulers (GitHub Actions
+    schedule, cloud scheduler services, Babysitter sleep/wake effects).
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:devops
+---
+nodeKind: Topic
+id: topic:event-driven-dispatch
+attributes:
+  displayName: "Event-Driven Dispatch"
+  description: |
+    Event-Driven Dispatch as a cross-cutting topic - triggering agent work in
+    response to external events rather than on a fixed schedule. Covers webhook
+    reception and validation (HMAC, JWT), message-queue-based triggers (SQS,
+    Pub/Sub, Kafka), repository events (push, PR, release), observability
+    alert-triggered remediation agents, and idempotent event handling to
+    prevent duplicate agent invocations.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:devops
+---
+nodeKind: Topic
+id: topic:human-in-the-loop
+attributes:
+  displayName: "Human-in-the-Loop"
+  description: |
+    Human-in-the-Loop as a cross-cutting topic - design patterns for
+    incorporating human judgment at critical decision points in automated
+    agent workflows. Covers breakpoint placement strategy, approval gate
+    UI/UX, breakpoint routing to domain experts, retry-on-rejection loops
+    with feedback incorporation, escalation paths for unresolved approvals,
+    and the spectrum from fully-automated (yolo) to maximally-supervised
+    agent execution modes.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:agent-session-management
+attributes:
+  displayName: "Agent Session Management"
+  description: |
+    Agent Session Management as a cross-cutting topic - the lifecycle of a
+    running agent session from creation through completion or termination.
+    Covers session binding between orchestrator and sub-agent, state persistence
+    across context compaction events, session resumption after interruption,
+    multi-session coordination for parallel workstreams, session-scoped
+    credential management, and audit-trail generation for compliance.
+edges:
+  applies_to:
+    - domain:software-engineering

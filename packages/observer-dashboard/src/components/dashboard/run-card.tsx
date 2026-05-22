@@ -94,7 +94,7 @@ export const RunCard = memo(function RunCard({ run, selected }: RunCardProps) {
     <Link href={`/runs/${run.runId}`}>
       <Card className={cn(
         "cursor-pointer p-4 transition-all card-hover-lift",
-        "hover:shadow-glow-primary/30",
+        "hover:shadow-md",
         selected && "ring-1 ring-primary shadow-glow-primary",
         isActive && !isStale && !hasActiveBreakpoint && "border-[var(--border-hover)]",
         hasActiveBreakpoint && "border-warning/40 shadow-glow-warning ring-1 ring-warning/20 animate-breakpoint-glow",
@@ -114,11 +114,11 @@ export const RunCard = memo(function RunCard({ run, selected }: RunCardProps) {
                     run.status === "waiting" ? "bg-warning shadow-[0_0_6px_var(--warning)] animate-pulse-dot" :
                     "bg-pending"
               )} />
-              <span className="text-base font-medium text-foreground truncate">
+              <span className="text-lg font-semibold italic font-serif text-foreground truncate">
                 {friendlyProcessName(run.processId)}
               </span>
               {hasActiveBreakpoint && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 border border-warning/30 px-2 py-0.5 text-xs leading-tight font-bold text-warning uppercase tracking-wider shrink-0 animate-pulse-dot">
+                <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 border border-warning/30 px-2.5 py-1 text-[11px] leading-tight font-bold text-warning uppercase tracking-[0.12em] shrink-0 animate-pulse-dot">
                   <Hand className="h-2.5 w-2.5" />
                   Approval Required
                 </span>

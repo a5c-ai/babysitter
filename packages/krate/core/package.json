@@ -1,0 +1,63 @@
+{
+  "name": "@a5c-ai/krate",
+  "version": "5.0.0",
+  "description": "a5c.ai Krate: Kubernetes-native forge runtime with Argo CD GitOps and Gitea-backed Git hosting.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "bin": {
+    "krate-demo": "./bin/krate-demo.mjs",
+    "krate-server": "./bin/krate-server.mjs"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.js",
+    "validate:docs": "node scripts/validate-doc-coverage.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "check": "npm run build && npm run validate:docs && npm test && npm run e2e && npm run package:check && npm run smoke",
+    "demo": "node bin/krate-demo.mjs",
+    "e2e": "node --test tests/e2e/*.test.js",
+    "package:check": "node scripts/validate-package.mjs",
+    "setup:minikube": "node scripts/setup-minikube.mjs",
+    "serve": "node bin/krate-server.mjs"
+  },
+  "keywords": [
+    "kubernetes",
+    "forge",
+    "git",
+    "ci",
+    "rbac",
+    "webhooks"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {},
+  "author": "a5c.ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/krate/core#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/krate/core"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "bin",
+    "src",
+    "dist",
+    "scripts",
+    "docs",
+    "examples",
+    "tests",
+    "Dockerfile",
+    "README.md"
+  ]
+}

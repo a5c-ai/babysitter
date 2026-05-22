@@ -1,0 +1,71 @@
+---
+nodeKind: Tool
+id: tool:algolia
+attributes:
+  displayName: "Algolia"
+  homepageUrl: "https://www.algolia.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Hosted search and discovery API for building fast, relevant search
+    experiences. Provides typo tolerance, faceting, geo-search, and
+    AI-powered re-ranking with REST API and InstantSearch UI libraries.
+edges:
+  tool_used_by:
+    - target: skill-area:search-infrastructure
+  used_for:
+    - skill-area:search-infrastructure
+  alternative_to:
+    - target: tool:typesense
+      comparison: "Search APIs — Algolia is managed SaaS; Typesense is self-hostable"
+    - target: tool:elasticsearch
+      comparison: "Search — Algolia is managed SaaS; Elasticsearch is self-hosted"
+    - target: tool:opensearch
+      comparison: "Search — Algolia is managed SaaS; OpenSearch is self-hosted"
+---
+nodeKind: Tool
+id: tool:typesense
+attributes:
+  displayName: "Typesense"
+  homepageUrl: "https://typesense.org"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Open-source, typo-tolerant search engine built for speed and simplicity.
+    Designed as a self-hostable Algolia alternative with vector search,
+    faceting, geo-search, and a clean JSON API.
+edges:
+  tool_used_by:
+    - target: skill-area:search-infrastructure
+  used_for:
+    - skill-area:search-infrastructure
+  alternative_to:
+    - target: tool:algolia
+      comparison: "Search — Typesense is self-hostable; Algolia is managed SaaS"
+    - target: tool:elasticsearch
+      comparison: "Search engines — Typesense prioritises simplicity; Elasticsearch is full-featured"
+    - target: tool:meilisearch
+      comparison: "Lightweight search engines"
+---
+nodeKind: Tool
+id: tool:opensearch
+attributes:
+  displayName: "OpenSearch"
+  homepageUrl: "https://opensearch.org"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Apache-licensed fork of Elasticsearch and Kibana maintained by AWS.
+    Provides full-text search, vector search, log analytics, and
+    dashboards with a compatible REST API and managed cloud offering.
+edges:
+  tool_used_by:
+    - target: skill-area:search-infrastructure
+    - target: skill-area:observability-pipeline
+  used_for:
+    - skill-area:search-infrastructure
+  alternative_to:
+    - target: tool:elasticsearch
+      comparison: "Search engines — OpenSearch is the Apache-licensed fork of Elasticsearch"
+    - target: tool:algolia
+      comparison: "Search — OpenSearch is self-hosted; Algolia is managed SaaS"

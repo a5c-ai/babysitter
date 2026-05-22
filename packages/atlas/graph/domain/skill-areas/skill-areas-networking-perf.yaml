@@ -1,0 +1,185 @@
+---
+nodeKind: SkillArea
+id: skill-area:tcp-tuning
+attributes:
+  displayName: "TCP Tuning"
+  description: |
+    TCP knobs and behavior — congestion control (CUBIC, BBR), buffer
+    sizing, Nagle/Cork, keepalives, and fast retransmit.
+  domains:
+    - specialization:network-programming
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:network-programming
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:udp-protocol-design
+attributes:
+  displayName: "UDP Protocol Design"
+  description: |
+    Designing reliable/unreliable UDP protocols — framing, ordering,
+    pacing, NAT traversal, and QUIC fundamentals.
+  domains:
+    - specialization:network-programming
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:network-programming
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:http2-multiplexing
+attributes:
+  displayName: "HTTP/2 & HTTP/3 Multiplexing"
+  description: |
+    Streams, flow control, head-of-line behavior, ALPN, and HTTP/3
+    over QUIC tradeoffs.
+  domains:
+    - specialization:network-programming
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:network-programming
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:websocket-design
+attributes:
+  displayName: "WebSocket Protocol Design"
+  description: |
+    Designing WebSocket APIs — framing, ping/pong, backpressure,
+    auth, and reconnection semantics.
+  domains:
+    - specialization:network-programming
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:network-programming
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:dns-design
+attributes:
+  displayName: "DNS Design"
+  description: |
+    DNS architecture — authoritative vs resolver, TTLs, EDNS,
+    DNSSEC, and split-horizon strategies.
+  domains:
+    - specialization:network-programming
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:network-programming
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:network-buffers
+attributes:
+  displayName: "Network Buffer Management"
+  description: |
+    Socket buffers, zero-copy I/O, io_uring/epoll/kqueue, and
+    backpressure-aware send/receive paths.
+  domains:
+    - specialization:network-programming
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:network-programming
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:profiling-cpu
+attributes:
+  displayName: "CPU Profiling"
+  description: |
+    Sampling and instrumented CPU profiling — perf, flamegraphs,
+    pprof, py-spy — and bottleneck triage.
+  domains:
+    - specialization:performance-optimization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:performance-optimization
+      confidence: primary
+  uses_tool:
+    - tool:perf
+    - tool:flamegraph
+    - tool:py-spy
+---
+nodeKind: SkillArea
+id: skill-area:profiling-memory
+attributes:
+  displayName: "Memory Profiling"
+  description: |
+    Heap profilers, allocation tracking, leak detection, and
+    GC-pressure analysis across runtimes.
+  domains:
+    - specialization:performance-optimization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:performance-optimization
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:cache-optimization
+attributes:
+  displayName: "CPU Cache Optimization"
+  description: |
+    Data layout for cache locality, false-sharing avoidance, and
+    measuring cache misses with hardware counters.
+  domains:
+    - specialization:performance-optimization
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:performance-optimization
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:branch-prediction
+attributes:
+  displayName: "Branch Prediction & Speculation"
+  description: |
+    Reasoning about branch predictors, speculative execution, and
+    branchless coding patterns.
+  domains:
+    - specialization:performance-optimization
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:performance-optimization
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:simd
+attributes:
+  displayName: "SIMD Programming"
+  description: |
+    SSE/AVX/AVX-512/NEON intrinsics, autovectorization patterns,
+    and data-parallel kernel design.
+  domains:
+    - specialization:performance-optimization
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:performance-optimization
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:lock-free-data-structures
+attributes:
+  displayName: "Lock-Free Data Structures"
+  description: |
+    Atomics, memory ordering models, and hand-rolled lock-free
+    queues/stacks with hazard pointers or epoch reclamation.
+  domains:
+    - specialization:performance-optimization
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: specialization:performance-optimization
+      confidence: primary

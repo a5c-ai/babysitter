@@ -1,0 +1,23 @@
+nodeKind: Framework
+id: framework:hono
+attributes:
+  displayName: "Hono"
+  homepageUrl: "https://hono.dev"
+  belongsToLanguageId: language:typescript
+  category: web-backend
+  description: |
+    Hono — a small, fast web framework for Node.js, Deno, Bun, and edge runtimes.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:nestjs
+      comparison: "Node.js backend frameworks"
+    - target: framework:fastify
+      comparison: "Node.js backend frameworks"
+    - target: framework:koa
+      comparison: "Node.js backend frameworks"
+    - target: framework:hapi
+      comparison: "Node.js backend frameworks"

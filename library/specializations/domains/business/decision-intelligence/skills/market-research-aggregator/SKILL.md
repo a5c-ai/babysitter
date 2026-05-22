@@ -16,6 +16,10 @@ metadata:
     - pandas
     - requests
     - custom integrations
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:market-research, skill-area:competitive-intelligence, skill-area:market-sizing]
+  roles: [role:data-analyst, role:strategic-planner, role:marketing-strategist]
 ---
 
 # Market Research Aggregator

@@ -1,0 +1,19 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-a5d79adc09c6
+attributes:
+  displayName: 'Catalog source reference: https://example.invalid/TODO'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://example.invalid/TODO
+  sourcePathOrUrl: https://example.invalid/TODO
+  locator: Source reference for catalog entities in graph/sourceref-scope/source-refs/a5c-and-mcp-stubs.yaml,
+    graph/sourceref-scope/source-refs/anthropic-skills.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web

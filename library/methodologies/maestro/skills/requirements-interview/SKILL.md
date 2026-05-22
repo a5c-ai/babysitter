@@ -2,7 +2,14 @@
 name: requirements-interview
 description: Interactive PM interview with expertise-adaptive questioning for requirements elicitation
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
+
 # Requirements Interview
 
 ## Capabilities

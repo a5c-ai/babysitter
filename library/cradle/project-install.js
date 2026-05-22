@@ -3,6 +3,11 @@
  * @description Set up babysitter for a project - research repo, process mining, interview, build profile, install tools, configure CI/CD, update CLAUDE.md
  * @inputs { projectRoot?: string, isNewProject?: boolean, additionalContext?: string }
  * @outputs { success: boolean, profile: object, toolsInstalled: array, claudeMdUpdated: boolean, gitignoreConfigured: boolean }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:bug-fixing-from-issues, skill-area:code-review-practice]
+ *   workflows: [workflow:bug-triage, workflow:feature-development]
+ *   roles: [role:backend-engineer, role:devops-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

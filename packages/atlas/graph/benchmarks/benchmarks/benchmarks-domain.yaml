@@ -1,0 +1,19 @@
+---
+nodeKind: Benchmark
+id: benchmark:fin-bench
+attributes:
+  displayName: "FinBench"
+  homepageUrl: https://github.com/The-FinAI/PIXIU
+  kind: domain-specific
+  targetsKind: ModelVersion
+  description: |
+    The FinBen / PIXIU financial-NLP benchmark suite (The-FinAI) covers
+    36 financial tasks across sentiment analysis, classification,
+    extraction, QA, summarization, and stock-movement prediction,
+    designed for evaluating financial LLMs.
+edges:
+  covers:
+    - target: skill-area:general-knowledge-reasoning
+  applies_to:
+    - target: domain:finance
+    - target: domain:fintech

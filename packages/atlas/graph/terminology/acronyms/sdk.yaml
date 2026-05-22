@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:sdk
+attributes:
+  acronym: "SDK"
+  expandsToTermId: term:software-development-kit
+  description: |
+    Acronym for SDK.
+edges:
+  expands_to:
+    - term:software-development-kit

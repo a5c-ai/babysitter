@@ -2,6 +2,13 @@
 name: data-migration-validator
 description: Validate data integrity during and after migration with comprehensive verification checks
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:database-migrations-zero-downtime, skill-area:schema-evolution]
+  roles: [role:data-engineer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Data Migration Validator Skill

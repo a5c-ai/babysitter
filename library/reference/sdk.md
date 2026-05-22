@@ -512,6 +512,8 @@ export const codeReviewAgentTask = defineTask<
 export interface ProcessContext {
   now(): Date;                               // uses provided `now` or Date.now
 
+  onCleanup(callback: () => void | Promise<void>): void;
+
   task<TArgs, TResult>(
     taskFn: DefinedTask<TArgs, TResult>,
     args: TArgs,
@@ -539,6 +541,12 @@ export interface ProcessContext {
   log?(...args: any[]): void;
 }
 ```
+
+`ctx.onCleanup(callback)` registers a process-local cleanup callback for
+scratch resources such as `/tmp/<descriptive-name>/` clones. Callbacks are not
+serialized into task definitions or journals. They run once when the process
+execution reaches a terminal completed, failed, or process-error path, and they
+do not run during ordinary waiting iterations.
 
 ### 6.2 Intrinsic behavior details
 
@@ -1037,18 +1045,22 @@ if (result.status === "waiting") {
 
 ### 10.6 Deterministic docs + CLI walkthrough workflow
 
-To keep the documentation and examples in sync with the shipped runtime/CLI, every edit to `sdk.md`, `README.md`, `docs/cli-examples.md`, or `packages/sdk/src/testing/README.md` should be paired with the deterministic harness jobs below (see `part7_test_plan.md` for the full matrix):
+To keep the documentation and examples in sync with the shipped runtime/CLI, every edit to `sdk.md`, `README.md`, `docs/cli-examples.md`, or `packages/sdk/src/testing/README.md` should be paired with the current repo workflow below:
 
-1. **Regenerate CLI walkthroughs**  
-   `pnpm --filter @a5c-ai/babysitter-sdk run smoke:cli -- --runs-dir .a5c/runs/docs-cli --record docs/cli-examples/baselines`  
-   Stores hashed stdout/JSON outputs under `_ci_artifacts/cli/<platform>/<node>/` so reviewers can diff transcripts.
-2. **Compile/execute code fences**  
-   `pnpm --filter @a5c-ai/babysitter-sdk run docs:snippets:extract && pnpm --filter @a5c-ai/babysitter-sdk run docs:snippets:tsc`  
-   Optional `docs:snippets:test` runs snippets (e.g., fake runner how-tos) against the seeded harness fixtures.
-3. **Verify fake-runner docs**  
-   `pnpm --filter @a5c-ai/babysitter-sdk run docs:testing-readme` – executes the examples in `packages/sdk/src/testing/README.md`, ensuring `installFixedClock`, `installDeterministicUlids`, and `runToCompletionWithFakeRunner` behave as documented.
+1. **Build the SDK CLI from a fresh checkout**  
+   `npm ci && npm run build --workspace=@a5c-ai/babysitter-sdk`
+2. **Regenerate generated docs artifacts and the CLI traceability index**  
+   `npm run docs:prepare`  
+   This writes `docs/generated/cli-examples-verification.md`, which maps the published walkthrough to the real repo scripts and artifacts.
+3. **Run the real CLI smoke harness**  
+   `npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk`  
+   The harness implementation lives in `packages/sdk/scripts/smoke-cli.js` and stages deterministic fixtures under `packages/sdk/test-fixtures/cli/runs/smoke/`.
+4. **Validate published docs command surfaces**  
+   `npm run docs:snippets && npm run docs:qa`
+5. **Verify the deterministic harness helpers referenced by the docs**  
+   `npm run test --workspace=@a5c-ai/babysitter-sdk`
 
-All outputs (hashes, logs, manifests) feed CI jobs on Node 18/20 for macOS, Linux, and Windows. The docs map in `README.md` points contributors to the authoritative sections, and `packages/sdk/src/testing/README.md` contains the harness details referenced above.
+This repo currently uses the generated traceability index and the checked-in smoke/docs/test scripts as the review surface rather than separate `docs:testing-readme` or `docs:snippets:*` package-local jobs.
 
 --- 
 
@@ -1137,6 +1149,27 @@ Outputs:
 * human mode prints `[run:create] runId=<id> runDir=<absolute path> entry=<importPath#export>`.
 * `--json` prints the same data as a single JSON object so automation can parse it reliably.
 * initializes `run.json`, `inputs.json`, and `RUN_CREATED` event (metadata includes `processId`, `entrypoint.importPath/exportName`, `layoutVersion`, optional `processRevision`, and `request`).
+
+#### `babysitter run:assign-process <runDir>`
+
+Assign a process to an existing bare run (one created without `--entry`).
+
+```bash
+babysitter run:assign-process .a5c/runs/run-20260125-001 \
+  --entry ./process/build.js#process \
+  --process-id dev/build
+```
+
+Flags:
+
+* `--entry <path#export>` (required): module path plus optional export name.
+* `--process-id <id>` (optional): override the process identifier (defaults to existing value from bare run).
+* `--process-revision <rev>` (optional): pin a process revision.
+* `--force` (optional): allow re-assigning even if a process is already attached.
+* `--dry-run` (optional): preview the assignment without mutating.
+* `--json`: emit `{"runId","runDir","entry","processId","assigned"}`.
+
+Updates `run.json` under the run lock and appends a `PROCESS_ASSIGNED` journal event. Rejects if the run already has a process unless `--force`.
 
 #### `babysitter run:status <runDir>`
 

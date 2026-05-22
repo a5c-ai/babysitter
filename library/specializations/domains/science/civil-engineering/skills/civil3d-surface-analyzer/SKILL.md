@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Site Design
   skill-id: CIV-SK-017
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Civil 3D Surface Analyzer Skill

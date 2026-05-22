@@ -18,6 +18,12 @@ metadata:
     - blast
     - homology
     - database-search
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:graph-algorithms, skill-area:string-matching, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:biomedical-engineer]
 ---
 
 # BLAST Sequence Search Skill

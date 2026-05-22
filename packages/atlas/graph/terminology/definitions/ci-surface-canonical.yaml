@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:ci-surface.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:ci-surface
+  text: |
+    CI/CD spec for a PackageSurface — scripts, publish strategy, release channels, validation, artifact expectations
+  status: canonical
+edges:
+  defines:
+    - term:ci-surface

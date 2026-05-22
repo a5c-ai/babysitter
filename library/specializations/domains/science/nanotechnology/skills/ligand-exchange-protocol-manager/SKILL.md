@@ -16,6 +16,11 @@ metadata:
   tools-libraries:
     - Bioconjugation reaction databases
     - Surface chemistry calculators
+graph:
+  domains: [domain:nanotechnology]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # Ligand Exchange Protocol Manager

@@ -1,0 +1,26 @@
+nodeKind: Layer
+id: layer:9-sandbox
+attributes:
+  displayName: Sandbox
+  position: 9
+  path: surfacing
+  scope: Policy-enforcement perimeter around execution and side effects.
+  summary: |
+    The sandbox layer constrains `Execution`: filesystem allow/deny lists,
+    network allow/deny lists, binary allow/deny lists, environment and secret
+    scope, audit-log policy, and policy evaluation point (pre-call,
+    continuous, or post-call attestation). Coarse posture is captured by
+    filesystemPolicy and networkPolicy enums. Realized by `Sandbox` nodes.
+  responsibilities:
+    - Enforce filesystem, network, binary, secret, and environment policy.
+    - Record audit evidence and policy decisions around side effects.
+    - Define approval, escalation, and attestation boundaries for execution.
+  examples:
+    - Read-only filesystem, workspace-write mode, network-disabled mode.
+    - Binary allow list, secret scope, approval-required command policy.
+    - Container, VM, OS sandbox, or hosted policy engine.
+  fitNotes: |
+    Custom-agent frameworks may leave sandboxing entirely to the embedding
+    host. Production tools should model this layer explicitly even when users
+    only see a simple approval prompt.
+edges: {}

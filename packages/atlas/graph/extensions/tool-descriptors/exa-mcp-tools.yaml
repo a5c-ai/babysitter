@@ -1,0 +1,93 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:exa.web-search
+attributes:
+  schema: '{}'
+  displayName: "Exa: Web Search"
+  description: Run a neural / keyword web search via the Exa API.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+      num_results: { type: integer }
+      type: { type: string, enum: [neural, keyword, auto] }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-exa
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:exa.find-similar
+attributes:
+  schema: '{}'
+  displayName: "Exa: Find Similar"
+  description: Find pages similar to a given URL.
+  inputSchema:
+    type: object
+    required: [url]
+    properties:
+      url: { type: string }
+      num_results: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-exa
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:exa.get-contents
+attributes:
+  schema: '{}'
+  displayName: "Exa: Get Contents"
+  description: Retrieve full page contents (text/highlights) for a list of URLs/IDs.
+  inputSchema:
+    type: object
+    required: [ids]
+    properties:
+      ids: { type: array, items: { type: string } }
+      text: { type: boolean }
+      highlights: { type: object }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-exa
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:exa.research
+attributes:
+  schema: '{}'
+  displayName: "Exa: Research"
+  description: Run an Exa research task that synthesizes an answer over web sources.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      answer: { type: string }
+      citations: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-exa

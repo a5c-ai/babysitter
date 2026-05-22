@@ -1,0 +1,12 @@
+nodeKind: MCPConfigScope
+id: mcp-config-scope:claude-code-local
+attributes:
+  displayName: "Local-scoped MCP config"
+  scope: local
+  priority: 10
+  editableBy: end-user
+  persistsTo: ".claude/settings.local.json"
+  pluginSourced: false
+  description: |
+    Local/working-tree MCP server config — not checked into git. Lowest
+    priority; intended for one-off experimentation in a single checkout.

@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: hardware-integration
   phase: 6
+graph:
+  domains: [domain:quantum-computing]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:compiler-implementation, skill-area:cloud-infrastructure, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Multi-Platform Engineer

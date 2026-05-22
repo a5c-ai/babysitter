@@ -8,6 +8,10 @@ expertise:
   - Carried interest taxation (IRC 1061)
   - Tax allocation methodology
   - State and local tax coordination
+graph:
+  domains: [domain:venture-capital]
+  skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+  roles: [role:financial-analyst]
 ---
 
 # Tax Coordinator

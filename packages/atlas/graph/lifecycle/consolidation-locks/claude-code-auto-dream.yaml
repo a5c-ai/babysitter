@@ -1,0 +1,16 @@
+nodeKind: ConsolidationLock
+id: consolidation-lock:claude-code-auto-dream-default
+attributes:
+  displayName: "Claude Code auto-dream consolidation lock"
+  lockKind: auto-dream
+  lockFilePath: "${memdir}/.dream.lock"
+  minHoursBetweenRuns: 24
+  minSessionsBetweenRuns: 5
+  scanThrottleMs: 600000
+  rollbackOnFailure: true
+  bypassUnderForce: true
+  description: |
+    mtime-based cross-process lock. Time gate (24h) is checked first, then
+    session-count gate (>=5 sessions touched since last consolidation), then
+    lock acquire. Failure rolls back mtime so the next non-force turn
+    re-attempts. /dream force bypasses time/session gates but not the lock.

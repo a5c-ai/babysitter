@@ -1,0 +1,741 @@
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-healthz
+attributes:
+  displayName: "GET /healthz"
+  method: GET
+  path: "/healthz"
+  responseShape: "{ ok: bool, serverTime: string, serverVersion: string, runs: { active: int } }"
+  authRequired: false
+  description: "Liveness/health probe. Source: packages/agent-mux/gateway/src/server.ts:185-194."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-tokens
+attributes:
+  displayName: "GET /api/v1/tokens"
+  method: GET
+  path: "/api/v1/tokens"
+  responseShape: "{ authenticatedAs: string, tokens: list<TokenRecord> }"
+  authRequired: true
+  description: "List bearer tokens registered with the gateway. Source: packages/agent-mux/gateway/src/server.ts:215-224."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-tokens
+attributes:
+  displayName: "POST /api/v1/tokens"
+  method: POST
+  path: "/api/v1/tokens"
+  responseShape: "TokenRecord (status 201)"
+  authRequired: true
+  description: "Mint a new bearer token (body: { name?, ttlMs? }). Source: packages/agent-mux/gateway/src/server.ts:226-238."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-tokens-revoke
+attributes:
+  displayName: "POST /api/v1/tokens/:id/revoke"
+  method: POST
+  path: "/api/v1/tokens/:id/revoke"
+  responseShape: "{ revoked: bool }"
+  authRequired: true
+  description: "Revoke an existing bearer token by id. Source: packages/agent-mux/gateway/src/server.ts:240-247."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-bootstrap-login
+attributes:
+  displayName: "POST /api/v1/bootstrap/login"
+  method: POST
+  path: "/api/v1/bootstrap/login"
+  responseShape: "{ issuedToken: TokenRecord } | { error: 'invalid_bootstrap_credentials' | 'bootstrap_auth_disabled' }"
+  authRequired: false
+  description: "Bootstrap username+password login that mints a bearer token when bootstrap auth is enabled. Source: packages/agent-mux/gateway/src/server.ts:249-266."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-dispatches
+attributes:
+  displayName: "GET /api/v1/dispatches"
+  method: GET
+  path: "/api/v1/dispatches"
+  responseShape: "{ dispatches: list<RunRecord>, runs: list<RunRecord>, pagination: { total, offset, limit, hasMore } }"
+  authRequired: true
+  description: "List active and historical run dispatches (paginated by ?offset=&limit=). Source: packages/agent-mux/gateway/src/server.ts:268-281 (listDispatches handler also bound to /api/v1/runs as alias)."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-runs-v1
+attributes:
+  displayName: "GET /api/v1/runs"
+  method: GET
+  path: "/api/v1/runs"
+  responseShape: "{ dispatches: list<RunRecord>, runs: list<RunRecord>, pagination: { total, offset, limit, hasMore } }"
+  authRequired: true
+  description: "Alias of GET /api/v1/dispatches; uses listDispatches handler. Source: packages/agent-mux/gateway/src/server.ts:282."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-sessions
+attributes:
+  displayName: "GET /api/v1/sessions"
+  method: GET
+  path: "/api/v1/sessions"
+  responseShape: "{ sessions: list<SessionSummary>, pagination }"
+  authRequired: true
+  description: "List sessions with pagination. Source: packages/agent-mux/gateway/src/server.ts:284-291."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-workspaces-v1
+attributes:
+  displayName: "GET /api/v1/workspaces"
+  method: GET
+  path: "/api/v1/workspaces"
+  responseShape: "WorkspaceInventory & { workspaces, pagination }"
+  authRequired: true
+  description: "List workspaces (paginated). Source: packages/agent-mux/gateway/src/server.ts:293-305."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-workspaces-v1
+attributes:
+  displayName: "POST /api/v1/workspaces"
+  method: POST
+  path: "/api/v1/workspaces"
+  responseShape: "{ workspace } | { deleted: string } | { error }"
+  authRequired: true
+  description: "Workspace lifecycle action dispatch (action ∈ create | archive | cleanup | recover | delete). Source: packages/agent-mux/gateway/src/server.ts:307-355."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-session
+attributes:
+  displayName: "GET /api/v1/sessions/:sessionId"
+  method: GET
+  path: "/api/v1/sessions/:sessionId"
+  responseShape: "SessionSummary | { error: 'not_found' }"
+  authRequired: true
+  description: "Fetch a single session summary. Source: packages/agent-mux/gateway/src/server.ts:357-367."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-session-full
+attributes:
+  displayName: "GET /api/v1/sessions/:sessionId/full"
+  method: GET
+  path: "/api/v1/sessions/:sessionId/full"
+  responseShape: "SessionContent | { error: 'not_found' }"
+  authRequired: true
+  description: "Fetch a session including all messages/content. Source: packages/agent-mux/gateway/src/server.ts:369-379."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-sessions
+attributes:
+  displayName: "POST /api/v1/sessions"
+  method: POST
+  path: "/api/v1/sessions"
+  responseShape: "{ run: RunRecord, sourceSessionId: string | null } (201) | { error }"
+  authRequired: true
+  description: "Start a new session (optionally forking forkSessionId). Body fields: agent, model?, prompt, cwd?, workspaceId?, forkSessionId?. Source: packages/agent-mux/gateway/src/server.ts:381-415."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-session-messages
+attributes:
+  displayName: "GET /api/v1/sessions/:sessionId/messages"
+  method: GET
+  path: "/api/v1/sessions/:sessionId/messages"
+  responseShape: "{ sessionId: string, messages: list<Message>, pagination }"
+  authRequired: true
+  description: "List session messages with offset/limit and ?tail=1|true to read the latest window. Source: packages/agent-mux/gateway/src/server.ts:417-442."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-session-messages
+attributes:
+  displayName: "POST /api/v1/sessions/:sessionId/messages"
+  method: POST
+  path: "/api/v1/sessions/:sessionId/messages"
+  responseShape: "{ run: RunRecord, session: SessionSummary } | { error: 'not_found' }"
+  authRequired: true
+  description: "Send a new prompt into an existing session (optionally with attachments, agent override, model, approvalMode). Source: packages/agent-mux/gateway/src/server.ts:444-472."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-agents
+attributes:
+  displayName: "GET /api/v1/agents"
+  method: GET
+  path: "/api/v1/agents"
+  responseShape: "{ agents: list<string>, agentDescriptors: list<AgentDescriptor> }"
+  authRequired: true
+  description: "List runnable adapter agent names + descriptors. Source: packages/agent-mux/gateway/src/server.ts:474-482."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-dispatches
+attributes:
+  displayName: "POST /api/v1/dispatches"
+  method: POST
+  path: "/api/v1/dispatches"
+  responseShape: "RunRecord (201) | { error: 'agent_unavailable', agent }"
+  authRequired: true
+  description: "Create a new run dispatch (createDispatch handler also bound to /api/v1/runs). Source: packages/agent-mux/gateway/src/server.ts:484-505."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-runs-v1
+attributes:
+  displayName: "POST /api/v1/runs"
+  method: POST
+  path: "/api/v1/runs"
+  responseShape: "RunRecord (201) | { error: 'agent_unavailable', agent }"
+  authRequired: true
+  description: "Alias of POST /api/v1/dispatches. Source: packages/agent-mux/gateway/src/server.ts:506."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-dispatch
+attributes:
+  displayName: "GET /api/v1/dispatches/:runId"
+  method: GET
+  path: "/api/v1/dispatches/:runId"
+  responseShape: "RunRecord | { error: 'not_found' }"
+  authRequired: true
+  description: "Fetch a single run by id (getDispatch handler also bound to /api/v1/runs/:runId). Source: packages/agent-mux/gateway/src/server.ts:508-521."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-run-v1
+attributes:
+  displayName: "GET /api/v1/runs/:runId"
+  method: GET
+  path: "/api/v1/runs/:runId"
+  responseShape: "RunRecord | { error: 'not_found' }"
+  authRequired: true
+  description: "Alias of GET /api/v1/dispatches/:runId. Source: packages/agent-mux/gateway/src/server.ts:522."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-dispatch-stop
+attributes:
+  displayName: "POST /api/v1/dispatches/:runId/stop"
+  method: POST
+  path: "/api/v1/dispatches/:runId/stop"
+  responseShape: "{ stopped: bool } (200 if stopped else 404)"
+  authRequired: true
+  description: "Stop a running dispatch (stopDispatch handler also bound to /api/v1/runs/:runId/stop). Source: packages/agent-mux/gateway/src/server.ts:524-534."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-run-v1-stop
+attributes:
+  displayName: "POST /api/v1/runs/:runId/stop"
+  method: POST
+  path: "/api/v1/runs/:runId/stop"
+  responseShape: "{ stopped: bool }"
+  authRequired: true
+  description: "Alias of POST /api/v1/dispatches/:runId/stop. Source: packages/agent-mux/gateway/src/server.ts:535."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-pairing-register
+attributes:
+  displayName: "POST /api/v1/pairing/register"
+  method: POST
+  path: "/api/v1/pairing/register"
+  responseShape: "{ code: string, url: string, expiresAt: number } (201)"
+  authRequired: true
+  description: "Register a short-code pairing record so a remote client can be paired by entering the code. Source: packages/agent-mux/gateway/src/server.ts:537-550."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+  payload_schema_for: []
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-pairing-consume
+attributes:
+  displayName: "POST /api/v1/pairing/consume"
+  method: POST
+  path: "/api/v1/pairing/consume"
+  responseShape: "ShortCodeRecord | { error: 'not_found' }"
+  authRequired: false
+  description: "Consume a short-code pairing record by code; public so an unpaired device can claim it. Source: packages/agent-mux/gateway/src/server.ts:552-560."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-ws-upgrade
+attributes:
+  displayName: "GET / (WebSocket upgrade)"
+  method: GET
+  path: "/"
+  responseShape: "WebSocket protocol-v1 frame stream (decodeFrame discriminated union)"
+  authRequired: true
+  description: "WebSocket upgrade endpoint. Authenticated via initial Authorization header or via a follow-up `auth` frame within unauthenticatedTimeoutMs. After auth the server emits a `hello` frame and the connection accepts protocol-v1 client frames (subscribe/unsubscribe/session.subscribe/session.unsubscribe/session.start/session.message/ping/hook.decision/pairing.register/pairing.consume) and emits server frames (hello/error/pong/run.event/hook.request/hook.resolved/pairing.consumed). Source: packages/agent-mux/gateway/src/server.ts:570-680, 733-825."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-backlog
+attributes:
+  displayName: "GET /api/backlog"
+  method: GET
+  path: "/api/backlog"
+  responseShape: "BacklogOverview"
+  authRequired: false
+  description: "Return full backlog overview (projects, issues, snapshot). Source: packages/agent-mux/gateway/src/kanban/routes.ts:443-450."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-backlog
+attributes:
+  displayName: "POST /api/backlog"
+  method: POST
+  path: "/api/backlog"
+  responseShape: "BacklogOverview | CreatedIssueResponse | { error, code }"
+  authRequired: false
+  description: "Backlog action dispatcher (body.action ∈ move-issue | link-repository | update-repository-settings | create-pull-request | create-issue | update-project-collaboration | update-issue-detail | update-issue-dispatch-context-labels | create-sub-issue | link-child-issue | create-issue-workspace | link-issue-workspace | link-issue-session). Source: packages/agent-mux/gateway/src/kanban/routes.ts:452-833."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-task-tags
+attributes:
+  displayName: "GET /api/task-tags"
+  method: GET
+  path: "/api/task-tags"
+  responseShape: "{ taskTags: list<TaskTag> }"
+  authRequired: false
+  description: "List task tags. Source: packages/agent-mux/gateway/src/kanban/routes.ts:835-842."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-task-tags
+attributes:
+  displayName: "POST /api/task-tags"
+  method: POST
+  path: "/api/task-tags"
+  responseShape: "TaskTag (201)"
+  authRequired: false
+  description: "Create a task tag (body: key, label, content, description?, order?). Source: packages/agent-mux/gateway/src/kanban/routes.ts:844-861."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-patch-task-tag
+attributes:
+  displayName: "PATCH /api/task-tags/:taskTagId"
+  method: PATCH
+  path: "/api/task-tags/:taskTagId"
+  responseShape: "TaskTag"
+  authRequired: false
+  description: "Update an existing task tag (partial fields). Source: packages/agent-mux/gateway/src/kanban/routes.ts:863-879."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-delete-task-tag
+attributes:
+  displayName: "DELETE /api/task-tags/:taskTagId"
+  method: DELETE
+  path: "/api/task-tags/:taskTagId"
+  responseShape: "{ deleted: bool } | TaskTagDeleteResult"
+  authRequired: false
+  description: "Delete a task tag by id. Source: packages/agent-mux/gateway/src/kanban/routes.ts:881-888."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-dispatch-context-labels
+attributes:
+  displayName: "GET /api/dispatch-context-labels"
+  method: GET
+  path: "/api/dispatch-context-labels"
+  responseShape: "{ dispatchContextLabels: list<DispatchContextLabel> }"
+  authRequired: false
+  description: "List dispatch-context labels. Source: packages/agent-mux/gateway/src/kanban/routes.ts:890-899."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-dispatch-context-labels
+attributes:
+  displayName: "POST /api/dispatch-context-labels"
+  method: POST
+  path: "/api/dispatch-context-labels"
+  responseShape: "DispatchContextLabel (201)"
+  authRequired: false
+  description: "Create a dispatch-context label (body: key, label, instruction, description?, order?). Source: packages/agent-mux/gateway/src/kanban/routes.ts:901-918."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-patch-dispatch-context-label
+attributes:
+  displayName: "PATCH /api/dispatch-context-labels/:dispatchContextLabelId"
+  method: PATCH
+  path: "/api/dispatch-context-labels/:dispatchContextLabelId"
+  responseShape: "DispatchContextLabel"
+  authRequired: false
+  description: "Update a dispatch-context label. Source: packages/agent-mux/gateway/src/kanban/routes.ts:920-936."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-delete-dispatch-context-label
+attributes:
+  displayName: "DELETE /api/dispatch-context-labels/:dispatchContextLabelId"
+  method: DELETE
+  path: "/api/dispatch-context-labels/:dispatchContextLabelId"
+  responseShape: "{ deleted: bool } | DispatchContextLabelDeleteResult"
+  authRequired: false
+  description: "Delete a dispatch-context label. Source: packages/agent-mux/gateway/src/kanban/routes.ts:938-947."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-reviews
+attributes:
+  displayName: "GET /api/reviews"
+  method: GET
+  path: "/api/reviews"
+  responseShape: "{ artifacts: list<KanbanReviewArtifact> }"
+  authRequired: false
+  description: "List review artifacts (filter by ?targetType=issue|workspace and ?targetId=). Source: packages/agent-mux/gateway/src/kanban/routes.ts:949-963."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-reviews
+attributes:
+  displayName: "POST /api/reviews"
+  method: POST
+  path: "/api/reviews"
+  responseShape: "ReviewActionResult"
+  authRequired: false
+  description: "Apply a review action (body shape: ReviewActionInput). Source: packages/agent-mux/gateway/src/kanban/routes.ts:965-972."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-automations
+attributes:
+  displayName: "GET /api/automations"
+  method: GET
+  path: "/api/automations"
+  responseShape: "AutomationRuleListResponse"
+  authRequired: false
+  description: "List automation rules (filtered by state[], triggerType[], projectId, boardProjectId, search, includeArchived). Source: packages/agent-mux/gateway/src/kanban/routes.ts:974-981."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-automations
+attributes:
+  displayName: "POST /api/automations"
+  method: POST
+  path: "/api/automations"
+  responseShape: "AutomationRule (201)"
+  authRequired: false
+  description: "Create a new automation rule. Source: packages/agent-mux/gateway/src/kanban/routes.ts:983-990."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-automation
+attributes:
+  displayName: "GET /api/automations/:ruleId"
+  method: GET
+  path: "/api/automations/:ruleId"
+  responseShape: "AutomationRule"
+  authRequired: false
+  description: "Fetch one automation rule. Source: packages/agent-mux/gateway/src/kanban/routes.ts:992-999."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-patch-automation
+attributes:
+  displayName: "PATCH /api/automations/:ruleId"
+  method: PATCH
+  path: "/api/automations/:ruleId"
+  responseShape: "AutomationRule"
+  authRequired: false
+  description: "Update an automation rule. Source: packages/agent-mux/gateway/src/kanban/routes.ts:1001-1010."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-delete-automation
+attributes:
+  displayName: "DELETE /api/automations/:ruleId"
+  method: DELETE
+  path: "/api/automations/:ruleId"
+  responseShape: "{ deleted: bool } | AutomationRuleDeleteResult"
+  authRequired: false
+  description: "Delete an automation rule. Source: packages/agent-mux/gateway/src/kanban/routes.ts:1012-1019."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-automation-lifecycle
+attributes:
+  displayName: "POST /api/automations/:ruleId/lifecycle"
+  method: POST
+  path: "/api/automations/:ruleId/lifecycle"
+  responseShape: "AutomationRule"
+  authRequired: false
+  description: "Transition automation rule lifecycle (action ∈ enable | pause | resume | disable). Source: packages/agent-mux/gateway/src/kanban/routes.ts:1021-1035."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-automation-webhook
+attributes:
+  displayName: "POST /api/automations/webhooks/:ruleId"
+  method: POST
+  path: "/api/automations/webhooks/:ruleId"
+  responseShape: "AutomationWebhookDeliveryResult (status from outcome/code: 201 created, 401 unauthorized, 409 not-active, 400 rejected, else 200)"
+  authRequired: false
+  description: "Webhook ingress endpoint that delivers a payload to a specific automation rule. Source: packages/agent-mux/gateway/src/kanban/routes.ts:1037-1063."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-settings-agent-configuration
+attributes:
+  displayName: "GET /api/settings/agent-configuration"
+  method: GET
+  path: "/api/settings/agent-configuration"
+  responseShape: "{ agents: list<{ agent, displayName, configuredModel, configuredProvider, approvalMode, maxTokens, availableModels, defaultModel }> }"
+  authRequired: false
+  description: "Read agent-configuration settings (configured model/provider/approvalMode/maxTokens per adapter). Source: packages/agent-mux/gateway/src/kanban/routes.ts:1065-1071."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-settings-agent-configuration
+attributes:
+  displayName: "POST /api/settings/agent-configuration"
+  method: POST
+  path: "/api/settings/agent-configuration"
+  responseShape: "AgentConfigurationResponse | { error }"
+  authRequired: false
+  description: "Update agent-configuration for one agent (body: agent, model?, provider?, approvalMode, maxTokens?). Source: packages/agent-mux/gateway/src/kanban/routes.ts:1073-1127."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-settings-mcp-servers
+attributes:
+  displayName: "GET /api/settings/mcp-servers"
+  method: GET
+  path: "/api/settings/mcp-servers"
+  responseShape: "{ agents: list<{ agent, displayName, servers: list<McpServerDraft> }> }"
+  authRequired: false
+  description: "Read MCP-server settings drafts grouped by adapter. Source: packages/agent-mux/gateway/src/kanban/routes.ts:1129-1135."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-settings-mcp-servers
+attributes:
+  displayName: "POST /api/settings/mcp-servers"
+  method: POST
+  path: "/api/settings/mcp-servers"
+  responseShape: "McpServerResponse | { error }"
+  authRequired: false
+  description: "Replace MCP-server list for an agent (body: agent, servers: list<McpServerDraft>). Source: packages/agent-mux/gateway/src/kanban/routes.ts:1137-1179."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-workspaces-kanban
+attributes:
+  displayName: "GET /api/workspaces"
+  method: GET
+  path: "/api/workspaces"
+  responseShape: "WorkspaceLifecycleListResponse"
+  authRequired: false
+  description: "List workspaces with optional ?workspace= focus, joined with reviewByWorkspacePath and linkedIssuesByWorkspacePath. Source: packages/agent-mux/gateway/src/kanban/routes.ts:1181-1195."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-workspaces-kanban
+attributes:
+  displayName: "POST /api/workspaces"
+  method: POST
+  path: "/api/workspaces"
+  responseShape: "WorkspaceLifecycleResult"
+  authRequired: false
+  description: "Workspace lifecycle action (action ∈ provision | pin | unpin | archive | cleanup | recover | notes-save | rebase-start | rebase-auto-resolve | rebase-open-in-editor | rebase-mark-resolved | rebase-abort). Source: packages/agent-mux/gateway/src/kanban/routes.ts:1197-1357."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-digest
+attributes:
+  displayName: "GET /api/digest"
+  method: GET
+  path: "/api/digest"
+  responseShape: "{ runs: list<RunDigest> } | { error: 'INIT_FAILED' }"
+  authRequired: false
+  description: "Discover run dirs and return cached digests sorted by updatedAt desc. Source: packages/agent-mux/gateway/src/kanban/routes.ts:1359-1380."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-runs-kanban
+attributes:
+  displayName: "GET /api/runs"
+  method: GET
+  path: "/api/runs"
+  responseShape: "RunQueryResult (mode=projects | per-project | all-runs depending on query)"
+  authRequired: false
+  description: "List runs across discovered run dirs. Query: ?mode=projects | ?project= | ?limit= ?offset= ?search= ?status= ?sort=. Source: packages/agent-mux/gateway/src/kanban/routes.ts:1382-1404."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-run-kanban
+attributes:
+  displayName: "GET /api/runs/:runId"
+  method: GET
+  path: "/api/runs/:runId"
+  responseShape: "{ run: RunDetail & { totalEvents } } | { error }"
+  authRequired: false
+  description: "Fetch a run by id, optionally limiting embedded events with ?maxEvents=N (default 50). Source: packages/agent-mux/gateway/src/kanban/routes.ts:1406-1430."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-run-events
+attributes:
+  displayName: "GET /api/runs/:runId/events"
+  method: GET
+  path: "/api/runs/:runId/events"
+  responseShape: "{ events: list<JournalEvent>, total: int } | { error, code? }"
+  authRequired: false
+  description: "Read journal events for a run with ?limit= ?offset= pagination. Source: packages/agent-mux/gateway/src/kanban/routes.ts:1432-1457."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-run-task
+attributes:
+  displayName: "GET /api/runs/:runId/tasks/:effectId"
+  method: GET
+  path: "/api/runs/:runId/tasks/:effectId"
+  responseShape: "{ task: TaskDetail } | { content: string } | { error }"
+  authRequired: false
+  description: "Fetch a task detail. With ?file= reads a preview file from the run dir or task cwd (loadPreviewFile). Source: packages/agent-mux/gateway/src/kanban/routes.ts:1459-1488."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-post-run-task-approve
+attributes:
+  displayName: "POST /api/runs/:runId/tasks/:effectId/approve"
+  method: POST
+  path: "/api/runs/:runId/tasks/:effectId/approve"
+  responseShape: "{ success: true } | { error }"
+  authRequired: false
+  description: "Approve a breakpoint effect by writing tasks/<effectId>/result.json and appending an EFFECT_RESOLVED journal entry (body: answer). Source: packages/agent-mux/gateway/src/kanban/routes.ts:1490-1504."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway
+---
+nodeKind: APIEndpoint
+id: api-endpoint:agent-mux-gateway-get-stream
+attributes:
+  displayName: "GET /api/stream"
+  method: GET
+  path: "/api/stream"
+  responseShape: "text/event-stream — events: { type: 'connected'|'update'|'new-run', runIds?, runId?, runDir?, timestamp } and 15s `: ping` keepalives"
+  authRequired: false
+  description: "Server-Sent Events stream of run-changed / new-run events from kanban serverEvents emitter. Source: packages/agent-mux/gateway/src/kanban/routes.ts:1506-1579."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-agent-mux-gateway

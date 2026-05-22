@@ -1,0 +1,223 @@
+---
+nodeKind: Topic
+id: topic:microservices
+attributes:
+  displayName: "Microservices"
+  description: |
+    Microservices as a cross-cutting topic - decomposing applications into small,
+    independently deployable services that own their data and communicate over
+    network boundaries. Enables team autonomy and fine-grained scaling but introduces
+    distributed system complexity around consistency, latency, and operational overhead
+    that must be managed deliberately.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:devops
+---
+nodeKind: Topic
+id: topic:monolith-to-microservices
+attributes:
+  displayName: "Monolith to Microservices"
+  description: |
+    Monolith to Microservices as a cross-cutting topic - the patterns and strategies
+    for incrementally extracting services from a monolithic codebase, including the
+    Strangler Fig pattern, anti-corruption layers, and managing dual-write periods.
+    Balances organizational readiness, data migration risk, and operational maturity
+    throughout the decomposition journey.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:devops
+---
+nodeKind: Topic
+id: topic:database-sharding
+attributes:
+  displayName: "Database Sharding"
+  description: |
+    Database Sharding as a cross-cutting topic - horizontally partitioning a
+    database across multiple nodes by a shard key to distribute load and storage
+    beyond single-instance limits. Requires careful key selection to avoid hot
+    spots, affects query routing, cross-shard joins, and rebalancing complexity
+    throughout the data lifecycle.
+edges:
+  applies_to:
+    - domain:databases
+    - domain:data-engineering
+---
+nodeKind: Topic
+id: topic:blue-green-deployment
+attributes:
+  displayName: "Blue/Green Deployment"
+  description: |
+    Blue/Green Deployment as a cross-cutting topic - maintaining two identical
+    production environments and switching traffic between them for zero-downtime
+    releases and instant rollback capability. Simplifies cutover semantics but
+    doubles infrastructure footprint and requires careful state and database
+    migration handling during transitions.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:cloud-infra
+---
+nodeKind: Topic
+id: topic:feature-flags
+attributes:
+  displayName: "Feature Flags"
+  description: |
+    Feature Flags as a cross-cutting topic - decoupling code deployment from
+    feature activation through runtime configuration, enabling gradual rollouts,
+    kill switches, and targeted experimentation. Reduces deployment risk and
+    supports trunk-based development but requires lifecycle discipline to prevent
+    flag accumulation and test-matrix explosion.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:trunk-based-development
+attributes:
+  displayName: "Trunk-Based Development"
+  description: |
+    Trunk-Based Development as a cross-cutting topic - integrating code into a
+    single shared branch frequently to minimize merge complexity and keep the
+    codebase always releasable. Relies on feature flags, comprehensive automated
+    testing, and developer discipline to sustain velocity without sacrificing
+    code quality or release stability.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:gitflow
+attributes:
+  displayName: "Gitflow"
+  description: |
+    Gitflow as a cross-cutting topic - a branching model that structures work
+    across feature, develop, release, and hotfix branches for teams managing
+    versioned software releases. Provides clear promotion paths and hotfix lanes
+    but can introduce merge overhead and slower integration cycles compared to
+    trunk-based approaches.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:code-review-best-practices
+attributes:
+  displayName: "Code Review Best Practices"
+  description: |
+    Code Review Best Practices as a cross-cutting topic - principles and processes
+    for effective peer review that improve code quality, share knowledge, and
+    maintain team norms without becoming a bottleneck. Covers review scope, feedback
+    framing, automation offloading, and turnaround expectations across software
+    engineering workflows.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:technical-debt
+attributes:
+  displayName: "Technical Debt"
+  description: |
+    Technical Debt as a cross-cutting topic - the accumulated cost of expedient
+    design and implementation decisions that reduce future development speed or
+    reliability. Covers identification, prioritization, communication to non-technical
+    stakeholders, and strategies for systematic repayment without halting feature
+    delivery.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:observability-driven-development
+attributes:
+  displayName: "Observability-Driven Development"
+  description: |
+    Observability-Driven Development as a cross-cutting topic - designing systems
+    with instrumentation as a first-class concern from the start, embedding metrics,
+    traces, and structured logs alongside feature code. Shifts observability left
+    so production behavior is understandable from day one and on-call burden is
+    reduced through better debuggability.
+edges:
+  applies_to:
+    - domain:observability
+    - domain:platform-engineering
+---
+nodeKind: Topic
+id: topic:chaos-engineering
+attributes:
+  displayName: "Chaos Engineering"
+  description: |
+    Chaos Engineering as a cross-cutting topic - proactively injecting controlled
+    failures into systems to discover weaknesses before they cause unplanned outages.
+    Uses hypothesis-driven experiments, steady-state definitions, and blast-radius
+    controls to build confidence in distributed system resilience and validate
+    recovery mechanisms.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:platform-engineering
+---
+nodeKind: Topic
+id: topic:data-mesh
+attributes:
+  displayName: "Data Mesh"
+  description: |
+    Data Mesh as a cross-cutting topic - a decentralized data architecture paradigm
+    where domain teams own and publish data products rather than centralizing all
+    data in a shared warehouse or lake. Introduces federated governance, self-serve
+    data infrastructure, and product thinking applied to data assets across large
+    organizations.
+edges:
+  applies_to:
+    - domain:data-engineering
+    - domain:platform-engineering
+---
+nodeKind: Topic
+id: topic:platform-engineering-practices
+attributes:
+  displayName: "Platform Engineering Practices"
+  description: |
+    Platform Engineering Practices as a cross-cutting topic - building internal
+    developer platforms that abstract infrastructure complexity, standardize golden
+    paths, and reduce cognitive load for application teams. Treats internal tooling
+    as a product with roadmaps, onboarding experiences, and SLAs to improve
+    engineering efficiency at scale.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+---
+nodeKind: Topic
+id: topic:developer-experience
+attributes:
+  displayName: "Developer Experience (DX)"
+  description: |
+    Developer Experience as a cross-cutting topic - the holistic quality of
+    the environment, tools, and workflows that engineers use to build and ship
+    software. Encompasses local setup friction, CI feedback speed, documentation
+    quality, and internal API ergonomics, treating developer productivity as an
+    outcome that can be measured and systematically improved.
+edges:
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:api-versioning-strategy
+attributes:
+  displayName: "API Versioning Strategy"
+  description: |
+    API Versioning Strategy as a cross-cutting topic - approaches for evolving
+    public and internal API surfaces without breaking existing consumers, including
+    URI versioning, header negotiation, additive-only changes, and deprecation
+    timelines. Balances evolution velocity with consumer stability obligations
+    across the API lifecycle.
+edges:
+  applies_to:
+    - domain:web-development
+    - domain:software-engineering

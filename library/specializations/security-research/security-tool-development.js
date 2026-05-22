@@ -15,6 +15,9 @@
  *
  * @references
  * - OWASP Secure Coding: https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/
+ * @graph
+ *   domains: [domain:cybersecurity]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

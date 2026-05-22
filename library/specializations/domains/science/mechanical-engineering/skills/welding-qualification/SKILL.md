@@ -17,6 +17,10 @@ metadata:
     - AWS D1.1
     - ASME Section IX
     - Welding calculators
+graph:
+  domains: [domain:mechanical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Welding Procedure Qualification Skill

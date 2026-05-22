@@ -2,6 +2,11 @@
 name: godot-3d
 description: Godot 3D rendering skill for PBR materials, environment settings, and 3D scene composition.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engines, skill-area:graphics-rendering]
+  roles: [role:game-developer]
 ---
 
 # Godot 3D Skill

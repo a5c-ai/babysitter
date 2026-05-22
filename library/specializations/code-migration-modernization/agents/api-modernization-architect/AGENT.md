@@ -8,6 +8,13 @@ skills:
   - api-inventory-scanner
   - openapi-generator
   - api-compatibility-analyzer
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:breaking-change-management, skill-area:api-design]
+  roles: [role:architect, role:tech-lead]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # API Modernization Architect Agent

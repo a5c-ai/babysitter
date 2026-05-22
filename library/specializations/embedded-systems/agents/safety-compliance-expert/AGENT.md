@@ -11,6 +11,11 @@ expertise:
   - Safety requirements traceability
   - MISRA C compliance
   - Safety case documentation
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+  roles: [role:embedded-engineer]
 ---
 
 # Safety Compliance Expert Agent

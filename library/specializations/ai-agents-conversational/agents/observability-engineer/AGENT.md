@@ -8,6 +8,13 @@ expertise:
   - Metrics design
   - Alerting systems
   - Dashboard creation
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agent-debugging-logging, skill-area:observability-instrumentation]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:feature-development]
+
 ---
 
 # Observability Engineer

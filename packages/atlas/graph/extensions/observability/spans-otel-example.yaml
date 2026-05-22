@@ -1,0 +1,41 @@
+---
+nodeKind: Span
+id: span:symphony-run-001-root
+attributes:
+  traceId: "4bf92f3577b34da6a3ce929d0e0e4736"
+  spanId: "00f067aa0ba902b7"
+  name: "symphony.run"
+  startedAt: "2026-04-30T14:22:11.000Z"
+  endedAt: "2026-04-30T14:22:43.412Z"
+  status: ok
+  kind: server
+  attributes:
+    service.name: "symphony"
+    agent.run.id: "run-001"
+edges:
+  emitted_by_span:
+    - target: effect:agent-run-symphony-001
+  exports_to:
+    - target: obs-backend:honeycomb
+---
+nodeKind: Span
+id: span:symphony-run-001-llm-call-1
+attributes:
+  traceId: "4bf92f3577b34da6a3ce929d0e0e4736"
+  spanId: "1a2b3c4d5e6f7081"
+  parentSpanId: "00f067aa0ba902b7"
+  name: "anthropic.messages.create"
+  startedAt: "2026-04-30T14:22:13.110Z"
+  endedAt: "2026-04-30T14:22:18.880Z"
+  status: ok
+  kind: client
+  attributes:
+    gen_ai.system: "anthropic"
+    gen_ai.request.model: "claude-3-5-sonnet-20240620"
+    gen_ai.usage.input_tokens: 12500
+    gen_ai.usage.output_tokens: 3400
+edges:
+  emitted_by_span:
+    - target: effect:agent-run-symphony-001
+  exports_to:
+    - target: obs-backend:honeycomb

@@ -1,0 +1,28 @@
+nodeKind: Provider
+id: provider:jina-ai
+attributes:
+  displayName: "Jina AI"
+  vendor: "Jina AI GmbH"
+  versionRange: ">=2024-01-01"
+  authMethods:
+    - api-key
+  authMethodNotes: |
+    Standard `Authorization: Bearer <api-key>` for the Jina Embeddings API.
+  endpoints:
+    embed: "https://api.jina.ai/v1/embeddings"
+  pricing: |
+    See https://jina.ai/embeddings/#pricing for current per-model rates.
+  rateLimitSignalingProtocol: |
+    HTTP 429 with `Retry-After` header.
+  dataResidencyOptions:
+    - us
+    - eu
+  vendorFeatures: []
+  slaTier: "jina-ai-standard"
+  regions:
+    - global
+edges:
+  realizes:
+    - target: layer:2-provider
+  serves:
+    - model:jina-embeddings-v3@current

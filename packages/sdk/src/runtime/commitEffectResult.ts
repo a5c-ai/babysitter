@@ -12,6 +12,9 @@ import { toSerializedEffectError } from "./errorUtils";
 import { emitRuntimeMetric } from "./instrumentation";
 import { globalTaskRegistry } from "../tasks/registry";
 import { serializeAndWriteTaskResult } from "../tasks/serializer";
+import { readTaskDefinition } from "../storage/tasks";
+import { rebuildStateCache } from "./replay/stateCache";
+import { checkRunWorkDirLeak } from "./workDirLeak";
 
 export async function commitEffectResult(options: CommitEffectResultOptions): Promise<CommitEffectResultArtifacts> {
   return await withRunLock(options.runDir, "runtime:commitEffectResult", async () => {
@@ -44,6 +47,17 @@ export async function commitEffectResult(options: CommitEffectResultOptions): Pr
     const stderrRef = resultPayload.stderrRef ?? writtenStderrRef;
     const eventError = resultPayload.status === "error" ? resultPayload.error : undefined;
 
+    // Enrich breakpoint EFFECT_RESOLVED events with breakpointId from task metadata
+    let breakpointId: string | undefined;
+    if (record.kind === "breakpoint" || record.taskId === "__sdk.breakpoint") {
+      try {
+        const taskDef = await readTaskDefinition(options.runDir, options.effectId);
+        breakpointId = (taskDef?.metadata as Record<string, unknown> | undefined)?.breakpointId as string | undefined;
+      } catch {
+        // Non-critical: skip enrichment if task.json is unreadable
+      }
+    }
+
     const resolvedEvent = await appendEvent({
       runDir: options.runDir,
       eventType: "EFFECT_RESOLVED",
@@ -56,6 +70,7 @@ export async function commitEffectResult(options: CommitEffectResultOptions): Pr
         stderrRef,
         startedAt: resultPayload.startedAt,
         finishedAt: resultPayload.finishedAt,
+        ...(breakpointId ? { breakpointId } : {}),
       },
     });
     globalTaskRegistry.resolveEffect(options.effectId, {
@@ -65,6 +80,7 @@ export async function commitEffectResult(options: CommitEffectResultOptions): Pr
       stderrRef,
       resolvedAt: resolvedEvent.recordedAt,
     });
+    await rebuildStateCache(options.runDir, { reason: "post_effect_resolution" });
 
     emitRuntimeMetric(options.logger, "commit.effect", {
       effectId: options.effectId,
@@ -74,6 +90,7 @@ export async function commitEffectResult(options: CommitEffectResultOptions): Pr
       hasStdout: Boolean(stdoutRef),
       hasStderr: Boolean(stderrRef),
     });
+    await checkRunWorkDirLeak(options.runDir, options.logger, "effect-resolved");
 
     return {
       resultRef,
@@ -82,6 +99,70 @@ export async function commitEffectResult(options: CommitEffectResultOptions): Pr
       startedAt: resultPayload.startedAt,
       finishedAt: resultPayload.finishedAt,
     };
+  });
+}
+
+export interface CommitEffectCancellationOptions {
+  runDir: string;
+  effectId: string;
+  reason?: string;
+  logger?: import("./types").ProcessLogger;
+}
+
+export async function commitEffectCancellation(
+  options: CommitEffectCancellationOptions,
+): Promise<{ resultRef: string }> {
+  return await withRunLock(options.runDir, "runtime:commitEffectCancellation", async () => {
+    const effectIndex = await buildEffectIndex({ runDir: options.runDir });
+    const record = effectIndex.getByEffectId(options.effectId);
+
+    if (!record) {
+      throw new RunFailedError(`Unknown effectId ${options.effectId}`);
+    }
+
+    if (record.status !== "requested") {
+      throw new RunFailedError(`Effect ${options.effectId} is not requested (status=${record.status})`);
+    }
+
+    const { resultRef } = await serializeAndWriteTaskResult({
+      runDir: options.runDir,
+      effectId: options.effectId,
+      taskId: requireTaskId(record),
+      invocationKey: record.invocationKey,
+      payload: {
+        status: "cancelled",
+        reason: options.reason,
+        error: { name: "EffectCancelledError", message: options.reason ?? "Effect cancelled" },
+        metadata: { cancelled: true, reason: options.reason },
+      },
+    });
+
+    const cancelledEvent = await appendEvent({
+      runDir: options.runDir,
+      eventType: "EFFECT_CANCELLED",
+      event: {
+        effectId: options.effectId,
+        reason: options.reason,
+      },
+    });
+    await rebuildStateCache(options.runDir, { reason: "post_effect_cancellation" });
+
+    globalTaskRegistry.resolveEffect(options.effectId, {
+      status: "cancelled",
+      resultRef,
+      resolvedAt: cancelledEvent.recordedAt,
+    });
+
+    emitRuntimeMetric(options.logger, "commit.effect.cancel", {
+      effectId: options.effectId,
+      invocationKey: record.invocationKey,
+      status: "cancelled",
+      runDir: options.runDir,
+      reason: options.reason,
+    });
+    await checkRunWorkDirLeak(options.runDir, options.logger, "effect-cancelled");
+
+    return { resultRef };
   });
 }
 

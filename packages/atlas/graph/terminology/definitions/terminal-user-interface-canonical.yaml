@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:terminal-user-interface.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:terminal-user-interface
+  text: |
+    Terminal User Interface (TUI): an interactive UI rendered inside a terminal emulator (e.g. via ncurses, Ink, Bubble Tea).
+  status: canonical
+edges:
+  defines:
+    - term:terminal-user-interface

@@ -16,6 +16,11 @@
  * - Crossing the Chasm: https://www.amazon.com/Crossing-Chasm-Geoffrey-Moore/dp/0062292986
  * - Obviously Awesome: https://www.aprildunford.com/obviously-awesome
  * - Traction: https://www.tractionbook.com/
+  * @graph
+ *   domains: [domain:entrepreneurship]
+ *   skillAreas: [skill-area:business-model-design, skill-area:growth-strategy, skill-area:product-strategy]
+ *   workflows: [workflow:product-discovery]
+ *   roles: [role:strategic-planner, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

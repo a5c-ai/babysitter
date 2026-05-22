@@ -1,0 +1,79 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:openai-agents-sdk.core@current
+attributes:
+  displayName: "OpenAI Agents SDK Core (current)"
+  agentVersionId: agent-version:openai-agents-sdk@current
+  packageRef: source-ref:openai-agents-sdk-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    The SDK's `Runner` drives a tool-use loop over OpenAI's Responses API.
+    Each turn the model emits `response.output_*` events (tool calls,
+    text deltas, reasoning); the runner executes tool calls and threads
+    the results into the next turn until a terminal `response.completed`
+    event arrives or a handoff transitions control to another agent.
+  contextManagementStrategy: user-managed
+  compactionTriggerNotes: |
+    The SDK exposes the Responses API directly; compaction is the
+    application's responsibility (e.g. via `previous_response_id` chain
+    truncation or external summarization).
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: |
+    Handoffs are modeled as tool calls whose target is another `Agent`
+    instance; the runner spawns a nested Runner.run loop for the target
+    agent and returns its final output.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    The terminal `RunResultStreaming.final_output` is the last assistant
+    text (or structured output) produced before `response.completed`.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: 'openai (Python)'
+  supportedTransportProtocols:
+    - model-transport:openai-responses
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: passthrough
+  loopBudgetKnobs:
+    - max_turns
+  effortLevelDelegation: native
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:openai-agents-sdk
+      role: core
+  speaks:
+    - target: model-transport:openai-responses
+  supports:
+    - target: capability:streaming
+      versionRange: '>=0.1.0'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=0.1.0'
+      level: full
+    - target: capability:parallel-tool-calls
+      versionRange: '>=0.1.0'
+      level: full
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+    - target: capability:supports-guardrails
+      versionRange: '>=0.1.0'
+      level: full
+      notes: InputGuardrail and OutputGuardrail run in parallel with the agent loop.
+    - target: capability:supports-handoffs
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Handoffs modeled as tool calls transferring control to another Agent.
+    - target: capability:supports-tracing
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Built-in trace spans for LLM calls, tool invocations, and handoffs.
+  supports_effort_level:
+    - target: effort-level:low
+    - target: effort-level:medium
+    - target: effort-level:high
+    - target: effort-level:minimal
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:session-handoff
+    - target: orch-primitive:approval-gate

@@ -3,6 +3,13 @@ name: qt-widget-accessibility-audit
 description: Audit Qt Widget applications for accessibility compliance using QAccessible interface and platform accessibility APIs
 allowed-tools: Read, Grep, Glob, Bash
 tags: [qt, accessibility, wcag, a11y, audit]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:accessibility-testing]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # qt-widget-accessibility-audit

@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:hook
+attributes:
+  canonicalDefinitionId: definition:hook.canonical
+  displayName: "Hook"
+  kind: hook
+  references:
+    - "NodeKind:HookSurface"
+  description: |
+    The hook concept (lifecycle callback). The Hook NodeKind was collapsed into HookSurface in the 2026-04-29 remodel; this term remains as the conceptual umbrella, with HookSurface as the canonical concrete node.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

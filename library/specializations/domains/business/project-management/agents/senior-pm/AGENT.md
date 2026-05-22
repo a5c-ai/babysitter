@@ -15,6 +15,11 @@ metadata:
   domain: business
   category: Project Management
   id: AG-001
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning, skill-area:strategic-planning]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:technical-program-manager, role:strategic-planner]
 ---
 
 # Senior Project Manager Agent

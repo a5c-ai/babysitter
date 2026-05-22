@@ -14,6 +14,11 @@ metadata:
   domain: science
   category: Biomechanics
   agent-id: BME-AG-010
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:sensor-fusion, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # Gait Biomechanist Agent

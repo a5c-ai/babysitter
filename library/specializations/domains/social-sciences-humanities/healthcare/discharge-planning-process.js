@@ -19,6 +19,13 @@
  * - CMS Discharge Planning Requirements (CoP)
  * - Project RED (Re-Engineered Discharge)
  * - Coleman Care Transitions Intervention
+ *
+ * @graph
+ *   domains: [domain:healthcare]
+ *   specializations: [specialization:clinical-informatics]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:data-governance]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -6,6 +6,13 @@
  * @references
  * - Redis Documentation: https://redis.io/documentation
  * - ioredis: https://github.com/redis/ioredis
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:backend-engineer]
+ *   skillAreas: [skill-area:caching-strategies, skill-area:data-fetching-caching]
+ *   topics: [topic:cache-aside-pattern]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

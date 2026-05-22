@@ -2,17 +2,14 @@
 name: orchestrated-execution
 description: Execute work units through the rigorous 4-phase Metaswarm cycle (Implement -> Validate -> Adversarial Review -> Commit) with independent quality gate enforcement.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Orchestrated Execution
-
-## Overview
-
-Execute work units through the Metaswarm 4-phase cycle. Quality gates are blocking state transitions. Adversarial reviews use fresh reviewers with binary PASS/FAIL verdicts.
-
-## When to Use
-
-- Implementing work units from an approved plan
 - Executing tasks requiring rigorous quality enforcement
 - When TDD compliance must be verified independently
 

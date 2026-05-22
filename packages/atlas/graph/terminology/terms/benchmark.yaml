@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:benchmark
+attributes:
+  canonicalDefinitionId: definition:benchmark.canonical
+  displayName: "Benchmark"
+  kind: concept
+  references:
+    - "NodeKind:Benchmark"
+  description: |
+    Named test/test-suite
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science

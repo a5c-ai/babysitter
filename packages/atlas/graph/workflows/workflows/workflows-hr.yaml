@@ -1,0 +1,127 @@
+---
+nodeKind: Workflow
+id: workflow:recruiting-pipeline-review
+attributes:
+  displayName: "Recruiting Pipeline Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Reviews the recruiting pipeline health — analyzing source-of-hire
+    effectiveness, stage conversion rates, time-to-fill trends by role
+    family, interviewer calibration scores, offer acceptance rates, and
+    diversity representation at each funnel stage. Identifies bottlenecks
+    requiring process changes or additional sourcing investment. Produces
+    pipeline health report and action items. Excludes candidate evaluation
+    decisions.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:performance-review-cycle
+attributes:
+  displayName: "Performance Review Cycle"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Manages the structured performance evaluation process — coordinating
+    self-assessments, peer feedback collection, manager calibration sessions,
+    rating finalization, and compensation adjustment recommendations. Ensures
+    consistency of evaluation standards across teams and levels. Produces
+    calibrated ratings and development plan templates. Excludes individual
+    coaching conversations.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:staff-engineer
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:retro-facilitation
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:compensation-benchmarking
+attributes:
+  displayName: "Compensation Benchmarking"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Benchmarks organizational compensation against market data — analyzing
+    salary survey inputs, modeling pay equity across demographics and levels,
+    evaluating total compensation competitiveness including equity and
+    benefits, and identifying roles with significant market misalignment.
+    Produces compensation band recommendations and budget impact analysis.
+    Excludes individual salary negotiations.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:finance-team
+---
+nodeKind: Workflow
+id: workflow:culture-survey-analysis
+attributes:
+  displayName: "Culture Survey Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Analyzes employee culture and engagement survey results — performing
+    statistical breakdowns by team, tenure, and level, identifying sentiment
+    trends, running text analysis on open-ended responses, benchmarking
+    against industry norms, and correlating engagement scores with retention
+    and performance data. Produces insights report and recommended
+    interventions. Excludes intervention implementation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:business-intelligence-team

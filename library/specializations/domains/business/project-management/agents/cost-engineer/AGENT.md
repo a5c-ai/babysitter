@@ -15,6 +15,11 @@ metadata:
   domain: business
   category: Cost Management
   id: AG-003
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:financial-planning, skill-area:financial-modeling, skill-area:roadmap-planning]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:financial-analyst, role:business-analyst]
 ---
 
 # Cost Engineer Agent

@@ -14,6 +14,11 @@
  * @references
  * - Traction (Weinberg & Mares): https://www.tractionbook.com/
  * - Bullseye Framework: https://www.tractionbook.com/bullseye-framework
+  * @graph
+ *   domains: [domain:entrepreneurship]
+ *   skillAreas: [skill-area:business-model-design, skill-area:growth-strategy, skill-area:product-strategy]
+ *   workflows: [workflow:product-discovery]
+ *   roles: [role:strategic-planner, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,17 @@
+nodeKind: AgentProduct
+id: agent:hermes
+attributes:
+  displayName: "Hermes"
+  vendor: "Nous Research"
+  homepageUrl: "https://github.com/NousResearch/hermes-agent"
+  primarySurface: cli
+  supportTier: adapter-only
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Python CLI coding agent distributed via PyPI. Integrated into the v6
+    catalog through the agent-mux adapter; ships a YAML config at
+    `~/.hermes/cli-config.yaml` and a skill directory under `~/.hermes/skills/`.
+edges:
+  has_version:
+    - agent-version:hermes@current

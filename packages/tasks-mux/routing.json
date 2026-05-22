@@ -1,0 +1,47 @@
+{
+  "defaultBackend": "github-issues",
+  "routes": [
+    {
+      "domains": ["backend"],
+      "tags": ["server", "database", "api", "authentication", "express", "postgresql"],
+      "backend": "github-issues",
+      "backendConfig": {
+        "type": "github-issues",
+        "owner": "a5c-ai",
+        "repo": "breakpointsMux",
+        "labels": ["expert-question", "backend"],
+        "assignees": ["tmuskal"],
+        "pollIntervalMs": 10000,
+        "timeoutMs": 3600000
+      }
+    },
+    {
+      "domains": ["frontend"],
+      "tags": ["react", "css", "ui", "component", "accessibility"],
+      "backend": "github-issues",
+      "backendConfig": {
+        "type": "github-issues",
+        "owner": "a5c-ai",
+        "repo": "breakpointsMux",
+        "labels": ["expert-question", "frontend"],
+        "assignees": ["tmuskal"],
+        "pollIntervalMs": 10000,
+        "timeoutMs": 3600000
+      }
+    },
+    {
+      "domains": ["devops"],
+      "tags": ["deployment", "ci-cd", "docker", "kubernetes", "infrastructure", "cloud"],
+      "backend": "github-issues",
+      "backendConfig": {
+        "type": "github-issues",
+        "owner": "a5c-ai",
+        "repo": "breakpointsMux",
+        "labels": ["expert-question", "devops"],
+        "assignees": ["tmuskal"],
+        "pollIntervalMs": 15000,
+        "timeoutMs": 7200000
+      }
+    }
+  ]
+}

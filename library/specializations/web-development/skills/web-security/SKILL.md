@@ -2,6 +2,13 @@
 name: web-security
 description: OWASP Top 10, security headers, CSP, XSS prevention, and vulnerability prevention.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:web-security, skill-area:backend-security]
+  roles: [role:security-engineer, role:fullstack-engineer]
+  topics: [topic:xss-prevention, topic:content-security-policy]
+
 ---
 
 # Web Security Skill

@@ -1,0 +1,15 @@
+nodeKind: Language
+id: language:wasm
+attributes:
+  displayName: "WebAssembly (Wasm)"
+  paradigms:
+    - imperative
+    - low-level
+    - stack-machine
+  description: |
+    WebAssembly — a portable, compact bytecode format and stack machine
+    (Wasm / WAT text format) used as a compile target by Rust, C/C++,
+    Go, and others for browsers and standalone runtimes.
+edges:
+  applies_to:
+    - target: domain:web-development

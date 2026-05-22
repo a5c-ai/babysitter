@@ -1,0 +1,50 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:babysitter-agent.platform@current
+attributes:
+  displayName: "babysitter-agent Platform (current) — defineTask + plugin/skill registry"
+  agentVersionId: agentVersion:babysitter-agent:ge-5-0-0
+  packageRef: source-ref:babysitter-github
+  subagentDefinitionFormat: js-module-export
+  nativeExtensionFormat: babysitter-plugin
+  nativeExtensionManifestPath: plugin.json
+  nativeExtensionsDirectoryPath:
+    - ~/.claude/plugins/
+    - .claude/plugins/
+    - plugins/
+  skillFormat: anthropic-skill-md
+  skillsDirectoryPath:
+    - ~/.claude/skills/
+    - .claude/skills/
+    - skills/
+  customSlashCommandsPath:
+    - commands/
+    - .claude/commands/
+  subagentsDirectoryPath:
+    - agents/
+    - .claude/agents/
+  hooksDirectoryOrConfigPath:
+    - hooks/
+    - .claude/hooks.json
+  settingsFiles:
+    - .claude/settings.json
+    - .claude/settings.local.json
+  marketplaceUrl: https://github.com/a5c-ai/babysitter
+  pluginRegistryPath: ~/.claude/plugins/registry.json
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: delegated-to-harness
+  updateChannelMechanism: npm
+  supportedChannelKinds:
+    - mcp-channel
+  notes: |
+    babysitter-agent platform layer hosts the defineTask registry, the
+    plugin/skill/agent loader, and the breakpoint policy engine, plus
+    the daemon-mode observer surface and MCP-server entry point. Reuses
+    the SDK platform shape but adds CLI-binary-only surfaces.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+    - target: agent:babysitter-agent
+      role: platform
+  bundles: []

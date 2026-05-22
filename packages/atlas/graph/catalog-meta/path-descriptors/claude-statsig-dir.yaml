@@ -1,0 +1,21 @@
+nodeKind: PathDescriptor
+id: path:claude-statsig-dir
+attributes:
+  pathId: path:claude-statsig-dir
+  displayName: "Claude Code Statsig cache directory"
+  path: "~/.claude/statsig/"
+  pathKind: other
+  ownerKind: AgentPlatformImpl
+  ownerId: agent-platform-impl:claude-code.platform@1.x
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+  notes: |
+    Cache directory used by the Statsig client embedded in Claude Code for
+    feature flags and telemetry. pathKind=other because the schema enum has
+    no dedicated cache-dir literal.
+
+edges:
+  owned_by:
+    - target: agent-platform-impl:claude-code.platform@1.x

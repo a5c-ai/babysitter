@@ -1,0 +1,13 @@
+nodeKind: SourceRef
+id: source-ref:hermes-pypi
+attributes:
+  description: "Hermes Agent (PyPI)"
+  displayName: "Hermes Agent (PyPI)"
+  repoUrl: https://pypi.org/project/hermes-agent/
+  homepageUrl: https://pypi.org/project/hermes-agent/
+  ref: main
+  path: "."
+  packageManager: pip
+  packageName: hermes-agent
+  kind: pypi-package
+edges: {}

@@ -1,0 +1,14 @@
+nodeKind: Language
+id: language:assembly-arm
+attributes:
+  displayName: "ARM Assembly"
+  paradigms:
+    - imperative
+    - low-level
+  description: |
+    ARM / AArch64 assembly language for ARM Cortex CPUs (mobile, Apple
+    Silicon, embedded), assembled with GAS or armasm.
+edges:
+  applies_to:
+    - target: domain:embedded-systems
+    - target: domain:systems-programming

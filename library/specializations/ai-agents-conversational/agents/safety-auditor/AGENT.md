@@ -2,6 +2,13 @@
 name: safety-auditor
 description: Reviews AI agents for safety and alignment issues. Audits prompts, outputs, and behaviors for potential risks including bias, toxicity, and harmful content.
 role: Safety and Alignment Specialist
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:safety-redteaming, skill-area:hallucination-mitigation-fact-checking]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:feature-development]
+
 ---
 
 # safety-auditor

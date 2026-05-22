@@ -1,0 +1,22 @@
+nodeKind: Tool
+id: tool:datadog
+attributes:
+  displayName: "Datadog"
+  homepageUrl: "https://www.datadoghq.com"
+  kind: observability
+  languageApplicability: neutral
+  description: |
+    Monitoring and analytics platform for cloud-scale infrastructure and applications.
+edges:
+  tool_used_by:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:metrics-dashboarding
+    - target: skill-area:alerting-oncall
+  used_for:
+    - skill-area:observability-instrumentation
+    - skill-area:error-tracking
+  alternative_to:
+    - target: tool:grafana
+      comparison: "APM/dashboards — Datadog is all-in-one SaaS; Grafana is open-source visualization"
+    - target: tool:prometheus
+      comparison: "Monitoring and observability platforms"

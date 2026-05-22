@@ -1,0 +1,491 @@
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:issue-tracker
+attributes:
+  displayName: IssueTracker (meta)
+  name: IssueTracker
+  cluster: 7-extensions
+  prefix: issue-tracker
+  origin: standard
+  purpose: a vendor-bound issue tracker (Linear, GitHub Issues, Jira, ...) above the ToolServer/ToolDescriptor layer
+  exampleCount: 0
+  invariants:
+  - 'id starts with issue-tracker:'
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:issue-tracker--id
+  - target: meta-attribute:issue-tracker--vendor
+  - target: meta-attribute:issue-tracker--protocol-style
+  - target: meta-attribute:issue-tracker--write-boundary
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:issue-tracker-protocol
+attributes:
+  displayName: IssueTrackerProtocol (meta)
+  name: IssueTrackerProtocol
+  cluster: 7-extensions
+  prefix: issue-tracker-protocol
+  origin: derived
+  purpose: the minimal portable contract a tracker must implement (required ops, query semantics, normalization, pagination)
+  exampleCount: 0
+  invariants:
+  - 'id starts with issue-tracker-protocol:'
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:issue-tracker-protocol--id
+  - target: meta-attribute:issue-tracker-protocol--display-name
+  - target: meta-attribute:issue-tracker-protocol--query-semantics
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:issue
+attributes:
+  displayName: Issue (meta)
+  name: Issue
+  cluster: 7-extensions
+  prefix: issue
+  origin: universal
+  purpose: an issue in an IssueTracker (catalog-shape; the catalog models the entity kind, not concrete PROJ-123 rows)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:issue--id
+  - target: meta-attribute:issue--identifier
+  - target: meta-attribute:issue--state
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:error-category
+attributes:
+  displayName: ErrorCategory (meta)
+  name: ErrorCategory
+  cluster: 6-lifecycle
+  prefix: error-category
+  origin: standard
+  purpose: a normalized error category within a failure layer
+  exampleCount: 0
+  invariants:
+  - 'id starts with error-category:'
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:error-category--id
+  - target: meta-attribute:error-category--layer
+  - target: meta-attribute:error-category--retryable
+  - target: meta-attribute:error-category--severity
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:failure-class
+attributes:
+  displayName: FailureClass (meta)
+  name: FailureClass
+  cluster: 6-lifecycle
+  prefix: failure-class
+  origin: standard
+  purpose: top-level failure layer (workspace, agent-session, tracker, workflow-config, observability)
+  exampleCount: 0
+  invariants:
+  - 'id starts with failure-class:'
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:failure-class--id
+  - target: meta-attribute:failure-class--display-name
+  - target: meta-attribute:failure-class--scope
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:recovery-strategy
+attributes:
+  displayName: RecoveryStrategy (meta)
+  name: RecoveryStrategy
+  cluster: 6-lifecycle
+  prefix: recovery-strategy
+  origin: standard
+  purpose: a recovery action bound to a FailureClass (skip-dispatch, retry-with-backoff, escalate-to-operator, ...)
+  exampleCount: 0
+  invariants:
+  - 'id starts with recovery-strategy:'
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:recovery-strategy--id
+  - target: meta-attribute:recovery-strategy--action
+  - target: meta-attribute:recovery-strategy--backoff-spec-strategy
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:partial-state-recovery
+attributes:
+  displayName: PartialStateRecovery (meta)
+  name: PartialStateRecovery
+  cluster: 6-lifecycle
+  prefix: partial-state-recovery
+  origin: standard
+  purpose: declares restart semantics (which state survives, which is in-memory, recovery steps)
+  exampleCount: 0
+  invariants:
+  - 'id starts with partial-state-recovery:'
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:partial-state-recovery--id
+  - target: meta-attribute:partial-state-recovery--persistent-state-kinds
+---
+nodeKind: MetaAttribute
+id: meta-attribute:domain--id
+attributes:
+  displayName: Domain.id
+  name: id
+  parentNodeKindId: meta-node-kind:domain
+  type: id
+  required: true
+  description: id on Domain.
+edges:
+  defined_on:
+  - target: meta-node-kind:domain
+---
+nodeKind: MetaAttribute
+id: meta-attribute:domain--display-name
+attributes:
+  displayName: Domain.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:domain
+  type: string
+  required: true
+  description: displayName on Domain.
+edges:
+  defined_on:
+  - target: meta-node-kind:domain
+---
+nodeKind: MetaAttribute
+id: meta-attribute:specialization--id
+attributes:
+  displayName: Specialization.id
+  name: id
+  parentNodeKindId: meta-node-kind:specialization
+  type: id
+  required: true
+  description: id on Specialization.
+edges:
+  defined_on:
+  - target: meta-node-kind:specialization
+---
+nodeKind: MetaAttribute
+id: meta-attribute:specialization--display-name
+attributes:
+  displayName: Specialization.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:specialization
+  type: string
+  required: true
+  description: displayName on Specialization.
+edges:
+  defined_on:
+  - target: meta-node-kind:specialization
+---
+nodeKind: MetaAttribute
+id: meta-attribute:specialization--parent-domain
+attributes:
+  displayName: Specialization.parentDomain
+  name: parentDomain
+  parentNodeKindId: meta-node-kind:specialization
+  type: id
+  required: false
+  description: parentDomain on Specialization.
+edges:
+  defined_on:
+  - target: meta-node-kind:specialization
+---
+nodeKind: MetaAttribute
+id: meta-attribute:topic--id
+attributes:
+  displayName: Topic.id
+  name: id
+  parentNodeKindId: meta-node-kind:topic
+  type: id
+  required: true
+  description: id on Topic.
+edges:
+  defined_on:
+  - target: meta-node-kind:topic
+---
+nodeKind: MetaAttribute
+id: meta-attribute:topic--display-name
+attributes:
+  displayName: Topic.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:topic
+  type: string
+  required: true
+  description: displayName on Topic.
+edges:
+  defined_on:
+  - target: meta-node-kind:topic
+---
+nodeKind: MetaAttribute
+id: meta-attribute:language--id
+attributes:
+  displayName: Language.id
+  name: id
+  parentNodeKindId: meta-node-kind:language
+  type: id
+  required: true
+  description: id on Language.
+edges:
+  defined_on:
+  - target: meta-node-kind:language
+---
+nodeKind: MetaAttribute
+id: meta-attribute:language--display-name
+attributes:
+  displayName: Language.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:language
+  type: string
+  required: true
+  description: displayName on Language.
+edges:
+  defined_on:
+  - target: meta-node-kind:language
+---
+nodeKind: MetaAttribute
+id: meta-attribute:language--paradigms
+attributes:
+  displayName: Language.paradigms
+  name: paradigms
+  parentNodeKindId: meta-node-kind:language
+  type: list<string>
+  required: false
+  description: paradigms on Language.
+edges:
+  defined_on:
+  - target: meta-node-kind:language
+---
+nodeKind: MetaAttribute
+id: meta-attribute:framework--id
+attributes:
+  displayName: Framework.id
+  name: id
+  parentNodeKindId: meta-node-kind:framework
+  type: id
+  required: true
+  description: id on Framework.
+edges:
+  defined_on:
+  - target: meta-node-kind:framework
+---
+nodeKind: MetaAttribute
+id: meta-attribute:framework--display-name
+attributes:
+  displayName: Framework.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:framework
+  type: string
+  required: true
+  description: displayName on Framework.
+edges:
+  defined_on:
+  - target: meta-node-kind:framework
+---
+nodeKind: MetaAttribute
+id: meta-attribute:framework--multi-language
+attributes:
+  displayName: Framework.multiLanguage
+  name: multiLanguage
+  parentNodeKindId: meta-node-kind:framework
+  type: bool
+  required: false
+  description: multiLanguage on Framework.
+edges:
+  defined_on:
+  - target: meta-node-kind:framework
+---
+nodeKind: MetaAttribute
+id: meta-attribute:library--id
+attributes:
+  displayName: Library.id
+  name: id
+  parentNodeKindId: meta-node-kind:library
+  type: id
+  required: true
+  description: id on Library.
+edges:
+  defined_on:
+  - target: meta-node-kind:library
+---
+nodeKind: MetaAttribute
+id: meta-attribute:library--display-name
+attributes:
+  displayName: Library.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:library
+  type: string
+  required: true
+  description: displayName on Library.
+edges:
+  defined_on:
+  - target: meta-node-kind:library
+---
+nodeKind: MetaAttribute
+id: meta-attribute:library--category
+attributes:
+  displayName: Library.category
+  name: category
+  parentNodeKindId: meta-node-kind:library
+  type: enum<testing,validation,http-client,http-server,orm,logging,metrics,tracing,crypto,auth,parsing,serialization,concurrency,datetime,math,data-structures,file-format,image-processing,other>
+  required: false
+  description: category on Library.
+edges:
+  defined_on:
+  - target: meta-node-kind:library
+---
+nodeKind: MetaAttribute
+id: meta-attribute:tool--id
+attributes:
+  displayName: Tool.id
+  name: id
+  parentNodeKindId: meta-node-kind:tool
+  type: id
+  required: true
+  description: id on Tool.
+edges:
+  defined_on:
+  - target: meta-node-kind:tool
+---
+nodeKind: MetaAttribute
+id: meta-attribute:tool--display-name
+attributes:
+  displayName: Tool.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:tool
+  type: string
+  required: true
+  description: displayName on Tool.
+edges:
+  defined_on:
+  - target: meta-node-kind:tool
+---
+nodeKind: MetaAttribute
+id: meta-attribute:tool--kind
+attributes:
+  displayName: Tool.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:tool
+  type: enum<build-tool,package-manager,linter,formatter,transpiler,bundler,container,orchestrator,iac,debugger,profiler,test-runner,ci,secrets-manager,observability,sql-tool,api-tool,config-mgmt,other>
+  required: false
+  description: kind on Tool.
+edges:
+  defined_on:
+  - target: meta-node-kind:tool
+---
+nodeKind: MetaAttribute
+id: meta-attribute:stack-part--id
+attributes:
+  displayName: StackPart.id
+  name: id
+  parentNodeKindId: meta-node-kind:stack-part
+  type: id
+  required: true
+  description: id on StackPart.
+edges:
+  defined_on:
+  - target: meta-node-kind:stack-part
+---
+nodeKind: MetaAttribute
+id: meta-attribute:stack-part--display-name
+attributes:
+  displayName: StackPart.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:stack-part
+  type: string
+  required: true
+  description: displayName on StackPart.
+edges:
+  defined_on:
+  - target: meta-node-kind:stack-part
+---
+nodeKind: MetaAttribute
+id: meta-attribute:stack-part--category
+attributes:
+  displayName: StackPart.category
+  name: category
+  parentNodeKindId: meta-node-kind:stack-part
+  type: enum<data-store,data-format,api,runtime,infrastructure,security,observability,tooling,compute,messaging,other>
+  required: false
+  description: category on StackPart.
+edges:
+  defined_on:
+  - target: meta-node-kind:stack-part
+---
+nodeKind: MetaAttribute
+id: meta-attribute:platform--id
+attributes:
+  displayName: Platform.id
+  name: id
+  parentNodeKindId: meta-node-kind:platform
+  type: id
+  required: true
+  description: id on Platform.
+edges:
+  defined_on:
+  - target: meta-node-kind:platform
+---
+nodeKind: MetaAttribute
+id: meta-attribute:platform--display-name
+attributes:
+  displayName: Platform.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:platform
+  type: string
+  required: true
+  description: displayName on Platform.
+edges:
+  defined_on:
+  - target: meta-node-kind:platform
+---
+nodeKind: MetaAttribute
+id: meta-attribute:platform--kind
+attributes:
+  displayName: Platform.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:platform
+  type: enum<cloud-provider,k8s-distribution,paas,self-hosted-paas>
+  required: true
+  description: kind on Platform.
+edges:
+  defined_on:
+  - target: meta-node-kind:platform
+---
+nodeKind: MetaAttribute
+id: meta-attribute:platform-service--id
+attributes:
+  displayName: PlatformService.id
+  name: id
+  parentNodeKindId: meta-node-kind:platform-service
+  type: id
+  required: true
+  description: id on PlatformService.
+edges:
+  defined_on:
+  - target: meta-node-kind:platform-service
+---
+nodeKind: MetaAttribute
+id: meta-attribute:platform-service--display-name
+attributes:
+  displayName: PlatformService.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:platform-service
+  type: string
+  required: true
+  description: displayName on PlatformService.
+edges:
+  defined_on:
+  - target: meta-node-kind:platform-service

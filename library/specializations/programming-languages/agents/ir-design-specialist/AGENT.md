@@ -10,6 +10,11 @@ expertise:
   - Optimization pass design
   - IR verification
   - Phi function placement
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:compiler-implementation, skill-area:language-design]
+  roles: [role:backend-engineer, role:architect]
 ---
 
 # IR Design Specialist Agent

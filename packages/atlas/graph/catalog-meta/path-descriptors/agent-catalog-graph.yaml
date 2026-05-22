@@ -1,0 +1,14 @@
+nodeKind: PathDescriptor
+id: path:agent-catalog-graph
+attributes:
+  pathId: path:agent-catalog-graph
+  displayName: "Agent catalog graph source-of-truth"
+  path: "packages/agent-catalog/graph"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-agent-catalog
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Authoritative YAML graph source for agent-catalog.

@@ -1,0 +1,314 @@
+---
+nodeKind: Workflow
+id: workflow:inside-sales-cadence-optimization
+attributes:
+  displayName: "Inside Sales Cadence Optimization"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Optimizes SDR/BDR outbound sequencing and engagement tactics — designing
+    multi-touch cadence structures with optimal spacing between email, phone,
+    and LinkedIn touchpoints, analyzing call-block scheduling to maximize
+    connect rates by time zone and persona, A/B testing email template subject
+    lines and body copy against reply-rate benchmarks, monitoring sequence step
+    drop-off rates to identify friction points, calibrating daily activity
+    quotas against pipeline generation targets, and reviewing voicemail scripts
+    and objection-handling frameworks. Produces cadence performance dashboards,
+    template effectiveness rankings, and activity-to-pipeline conversion
+    reports. Excludes deal qualification and closing.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-analyst
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:sales-methodology
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:revenue-operations-team
+---
+nodeKind: Workflow
+id: workflow:field-sales-territory-optimization
+attributes:
+  displayName: "Field Sales Territory Optimization"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Optimizes field sales rep geographic coverage and account assignment —
+    performing geo-spatial analysis of account density versus rep locations,
+    modeling travel time and cost optimization across territory clusters,
+    rebalancing account loads based on revenue potential and complexity scoring,
+    aligning territory boundaries with vertical specialization and industry
+    expertise, analyzing white-space opportunities in under-penetrated
+    geographies, coordinating with marketing on regional event coverage, and
+    recommending territory splits or merges based on growth trajectories.
+    Produces territory heat maps, travel optimization reports, and account
+    reassignment recommendations. Excludes quota setting and compensation
+    design.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:sales-methodology
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:revenue-operations-team
+---
+nodeKind: Workflow
+id: workflow:demo-and-trial-conversion-management
+attributes:
+  displayName: "Demo and Trial Conversion Management"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Manages the demo-to-close and trial-to-paid conversion pipeline —
+    scheduling and preparing personalized product demonstrations aligned with
+    prospect use cases, activating trial environments with pre-configured
+    sample data and guided onboarding flows, tracking feature adoption and
+    engagement depth during trial periods, triggering sales outreach at
+    critical engagement milestones or drop-off signals, analyzing
+    demo-attended-to-opportunity conversion rates by persona and use case,
+    coordinating technical resources for complex custom demo environments, and
+    measuring time-to-value metrics for trial users. Produces trial health
+    dashboards, demo effectiveness reports, and conversion funnel analytics.
+    Excludes product development and pricing decisions.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:product-designer
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:sales-methodology
+    - target: skill-area:customer-success
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:customer-success
+---
+nodeKind: Workflow
+id: workflow:sales-proposal-management
+attributes:
+  displayName: "Sales Proposal Management"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-opportunity"
+  complexity: cross-team
+  description: |
+    Manages the end-to-end proposal creation and approval workflow —
+    assembling proposal documents from modular templates matched to deal size
+    and product configuration, routing pricing exceptions through deal desk
+    approval chains with SLA-bound response times, coordinating legal review
+    of custom terms and contract modifications, managing e-signature workflows
+    with tracking and reminder automation, versioning proposals through
+    negotiation rounds with change-tracking, ensuring brand and messaging
+    compliance across all customer-facing materials, and archiving signed
+    agreements with metadata for renewal tracking. Produces proposal cycle-time
+    analytics, approval bottleneck reports, and win/loss correlation with
+    proposal attributes. Excludes pricing strategy and contract template
+    design.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:sales-methodology
+    - target: skill-area:revenue-operations
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:legal-team
+    - target: org-unit:revenue-operations-team
+---
+nodeKind: Workflow
+id: workflow:upsell-cross-sell-motion
+attributes:
+  displayName: "Upsell and Cross-Sell Motion"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Identifies and executes expansion revenue opportunities within the
+    existing customer base — monitoring product usage signals that indicate
+    readiness for tier upgrades or additional modules, analyzing customer
+    health scores and engagement patterns to determine optimal expansion
+    timing, generating personalized product recommendations based on current
+    usage gaps and peer benchmarks, coordinating between customer success and
+    sales on expansion handoff protocols, building ROI narratives using
+    customer-specific value metrics, tracking expansion pipeline separately
+    from new-logo pipeline with dedicated stage definitions, and measuring net
+    revenue retention contribution by expansion motion type. Produces expansion
+    signal dashboards, recommendation engine accuracy reports, and NRR
+    attribution analytics. Excludes new customer acquisition.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-analyst
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:revenue-operations
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:customer-success
+---
+nodeKind: Workflow
+id: workflow:channel-partner-recruitment
+attributes:
+  displayName: "Channel Partner Recruitment"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Manages the identification, outreach, and onboarding pipeline for new
+    channel partners — building ideal partner profiles based on market coverage
+    gaps, technology adjacency, and customer overlap analysis, sourcing
+    potential partners through industry events, referral networks, and
+    competitor channel mapping, executing multi-touch recruitment sequences
+    with tailored value propositions, evaluating partner capabilities through
+    technical assessments and business model alignment reviews, managing the
+    partner agreement negotiation and signing process, orchestrating partner
+    onboarding including enablement training, deal registration setup, and
+    portal access provisioning, and tracking recruitment funnel metrics from
+    initial contact to first co-sold deal. Produces partner recruitment
+    pipeline reports, onboarding completion dashboards, and
+    time-to-first-revenue analytics. Excludes ongoing partner management and
+    joint marketing.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:business-analyst
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:sales-methodology
+    - target: skill-area:revenue-operations
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:business-development
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:bizdev-team
+    - target: org-unit:sales-team
+    - target: org-unit:partnerships-team
+---
+nodeKind: Workflow
+id: workflow:sales-tech-stack-optimization
+attributes:
+  displayName: "Sales Tech Stack Optimization"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits and optimizes the sales technology ecosystem — inventorying all
+    sales tools across CRM, engagement, intelligence, and enablement
+    categories, measuring adoption rates and feature utilization depth per
+    tool, evaluating integration health between tools including data sync
+    latency and field mapping accuracy, identifying redundant capabilities
+    across overlapping tools, benchmarking tool spend against industry norms by
+    company stage, assessing rep satisfaction and workflow friction points
+    through structured surveys, reviewing vendor roadmaps for alignment with
+    evolving sales process needs, and recommending consolidation, replacement,
+    or new tool introduction. Produces tech stack audit reports, integration
+    health dashboards, ROI-per-tool analyses, and consolidation
+    recommendations. Excludes CRM data migration and tool implementation
+    projects.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-analyst
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:revenue-operations
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:revenue-operations-team
+    - target: org-unit:sales-team
+---
+nodeKind: Workflow
+id: workflow:competitive-displacement-playbook
+attributes:
+  displayName: "Competitive Displacement Playbook"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Develops and executes competitive displacement campaigns targeting accounts
+    on competitor platforms — maintaining competitive intelligence on feature
+    gaps, pricing vulnerabilities, and customer dissatisfaction signals,
+    creating battle cards with objection-handling frameworks for each major
+    competitor, designing switch-campaign messaging that addresses migration
+    anxiety and total cost of ownership, coordinating technical migration
+    support including data portability assessments and parallel-run planning,
+    building ROI calculators calibrated to competitive switching scenarios,
+    tracking displacement campaign pipeline separately with competitor-specific
+    win/loss analysis, and feeding field intelligence back into product roadmap
+    prioritization. Produces competitive battle card updates, displacement
+    campaign performance reports, and migration playbook documentation.
+    Excludes product development and pricing changes.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:sales-methodology
+    - target: skill-area:market-research
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:marketing-team

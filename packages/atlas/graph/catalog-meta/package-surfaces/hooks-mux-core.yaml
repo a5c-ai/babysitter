@@ -1,0 +1,24 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-hooks-mux-core
+attributes:
+  packageId: "@a5c-ai/hooks-mux-core"
+  packageName: "@a5c-ai/hooks-mux-core"
+  workspacePath: packages/hooks-mux/core
+  moduleType: typescript
+  surfaceKinds:
+    - discovery-consumer
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:amux-hooks-global
+  has_payload_schema:
+    - target: shared-context-spec:hooks-mux-unified-hook-event
+    - target: shared-context-spec:hooks-mux-unified-execution-context
+    - target: shared-context-spec:hooks-mux-unified-hook-result
+    - target: shared-context-spec:hooks-mux-merged-execution-result
+    - target: shared-context-spec:hooks-mux-phase-mapping
+    - target: shared-context-spec:hooks-mux-session-state
+    - target: shared-context-spec:hooks-mux-detected-harness
+    - target: shared-context-spec:hooks-mux-propagation-options

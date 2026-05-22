@@ -1,0 +1,97 @@
+nodeKind: ModelVersion
+id: model:gpt-5-mini@current
+attributes:
+  displayName: "GPT-5 Mini"
+  supportsExtendedThinking: false
+  modelFamilyId: model-family:gpt-5
+  versionRange: '>=5.0.0 <6.0.0'
+  kind: reasoning
+  contextWindowTokens: 400000
+  costPerMTokInput: 0.25
+  costPerMTokOutput: 2.0
+  supportsThinking: true
+  thinkingEffortLevels:
+  - minimal
+  - low
+  - medium
+  - high
+  supportsThinkingBudgetTokens: false
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-08-07'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-08-07'
+  knowledgeCutoffDate: '2024-10-01'
+  safetyTier: openai-preparedness-medium
+  modelCardUrl: https://openai.com/index/gpt-5-system-card/
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:gpt-5
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:gpt-5
+  served_by:
+  - provider:openai
+  speaks:
+  - model-transport:openai-responses
+  - model-transport:openai-chat-completions
+  supports:
+  - target: capability:supports-batch-api
+    versionRange: '>=5.0.0 <6.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:parallel-tool-calls
+    versionRange: '>=5.0.0 <6.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-prompt-caching
+    versionRange: '>=5.0.0 <6.0.0'
+    level: partial
+    notes: 'OpenAI implicit prompt caching: server-side, automatic; no explicit cache_control
+      surface.
+
+      '
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:streaming
+    versionRange: '>=5.0.0 <6.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-text-streaming
+    versionRange: '>=5.0.0 <6.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-thinking-streaming
+    versionRange: '>=5.0.0 <6.0.0'
+    level: partial
+    notes: 'GPT-5 streams reasoning summary items rather than full chain-of-thought.
+
+      '
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=5.0.0 <6.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  supports_effort_level:
+  - target: effort-level:minimal
+  - target: effort-level:low
+  - target: effort-level:medium
+  - target: effort-level:high

@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:specialization.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:specialization
+  text: |
+    sub-domain (frontend-react, backend-python-django, ...)
+  status: canonical
+edges:
+  defines:
+    - term:specialization

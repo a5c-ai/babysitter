@@ -1,0 +1,155 @@
+{
+  "generatedAt": "2026-05-07",
+  "generatedBy": "scripts/generate-cli-examples-artifacts.cjs",
+  "docsSurface": {
+    "cliExamples": "docs/cli-examples.md",
+    "testingReadme": "packages/sdk/src/testing/README.md",
+    "sdkReference": "library/reference/sdk.md",
+    "generatedIndex": "docs/generated/cli-examples-verification.md"
+  },
+  "rootScripts": [
+    {
+      "name": "build:runtime",
+      "command": "npm run build:runtime:babysitter-agent-deps && npm run build --workspace=@a5c-ai/babysitter-agent"
+    },
+    {
+      "name": "docs:prepare",
+      "command": "node ./scripts/generate-process-library-doc-artifacts.cjs && node ./scripts/generate-cli-examples-artifacts.cjs && node ./scripts/ensure-webpackbar-patch.cjs"
+    },
+    {
+      "name": "docs:examples:generate",
+      "command": "node ./scripts/generate-cli-examples-artifacts.cjs"
+    },
+    {
+      "name": "docs:examples:smoke",
+      "command": "npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk"
+    },
+    {
+      "name": "docs:examples:verify",
+      "command": "npm run build --workspace=@a5c-ai/babysitter-sdk && npm run docs:prepare && npm run docs:examples:smoke && npm run docs:qa"
+    },
+    {
+      "name": "docs:lint",
+      "command": "npm run docs:lint:markdown && npm run docs:lint:style"
+    },
+    {
+      "name": "docs:snippets",
+      "command": "node ./scripts/docs-code-samples-check.cjs"
+    },
+    {
+      "name": "docs:qa",
+      "command": "npm run docs:lint && npm run docs:snippets && npm run docs:links && npm run docs:freshness"
+    }
+  ],
+  "sdkScripts": [
+    {
+      "name": "build",
+      "command": "tsc --build tsconfig.json && node scripts/copy-template-assets.cjs"
+    },
+    {
+      "name": "test",
+      "command": "vitest run"
+    },
+    {
+      "name": "smoke:cli",
+      "command": "node scripts/smoke-cli.js --runs-dir packages/sdk/test-fixtures/cli/runs/smoke"
+    }
+  ],
+  "canonicalWorkflow": [
+    {
+      "step": "Install workspace dependencies from a fresh checkout",
+      "command": "npm ci",
+      "implementation": "package-lock.json",
+      "artifact": "node_modules/"
+    },
+    {
+      "step": "Build the SDK CLI used by the smoke harness",
+      "command": "npm run build --workspace=@a5c-ai/babysitter-sdk",
+      "implementation": "packages/sdk/package.json#scripts.build",
+      "artifact": "packages/sdk/dist/"
+    },
+    {
+      "step": "Generate repo docs artifacts, including this traceability index",
+      "command": "npm run docs:prepare",
+      "implementation": "package.json#scripts.docs:prepare",
+      "artifact": "docs/generated/cli-examples-verification.md"
+    },
+    {
+      "step": "Run the real CLI smoke harness",
+      "command": "npm run docs:examples:smoke",
+      "implementation": "package.json#scripts.docs:examples:smoke",
+      "artifact": "packages/sdk/test-fixtures/cli/runs/smoke/"
+    },
+    {
+      "step": "Validate fenced code samples and command references in staged docs",
+      "command": "npm run docs:snippets",
+      "implementation": "package.json#scripts.docs:snippets",
+      "artifact": "artifacts/docs-qa/docs-code-samples-report.json"
+    },
+    {
+      "step": "Run the full docs quality suite",
+      "command": "npm run docs:qa",
+      "implementation": "package.json#scripts.docs:qa",
+      "artifact": "artifacts/docs-qa/"
+    }
+  ],
+  "verificationMatrix": [
+    {
+      "surface": "CLI walkthrough command flow in docs/cli-examples.md",
+      "command": "npm run docs:examples:smoke",
+      "implementation": "packages/sdk/scripts/smoke-cli.js",
+      "evidence": "packages/sdk/test-fixtures/cli/runs/smoke/"
+    },
+    {
+      "surface": "Repo-published command references and fenced examples",
+      "command": "npm run docs:snippets",
+      "implementation": "scripts/docs-code-samples-check.cjs",
+      "evidence": "artifacts/docs-qa/docs-code-samples-report.json"
+    },
+    {
+      "surface": "Markdown/style validation for published docs",
+      "command": "npm run docs:lint",
+      "implementation": "package.json#scripts.docs:lint",
+      "evidence": "stdout/stderr from markdownlint-cli2 and docs-style-check.cjs"
+    },
+    {
+      "surface": "Deterministic SDK harness APIs referenced from docs",
+      "command": "npm run test --workspace=@a5c-ai/babysitter-sdk",
+      "implementation": "packages/sdk/package.json#scripts.test",
+      "evidence": "packages/sdk/src/testing/__tests__/runHarness.test.ts, packages/sdk/src/testing/__tests__/parallelHarness.test.ts, packages/sdk/src/runtime/__tests__/deterministicHarness.test.ts"
+    },
+    {
+      "surface": "Generated CLI/docs traceability inventory",
+      "command": "npm run docs:examples:generate",
+      "implementation": "scripts/generate-cli-examples-artifacts.cjs",
+      "evidence": "docs/generated/cli-examples-verification.{md,json}"
+    }
+  ],
+  "sourceFiles": [
+    "package.json",
+    "packages/sdk/package.json",
+    "packages/sdk/scripts/smoke-cli.js",
+    "scripts/docs-code-samples-check.cjs",
+    "scripts/docs-style-check.cjs",
+    "scripts/docs-freshness-report.cjs",
+    "docs/cli-examples.md",
+    "packages/sdk/src/testing/README.md",
+    "library/reference/sdk.md"
+  ],
+  "smokeHarness": {
+    "command": "npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk",
+    "implementation": "packages/sdk/scripts/smoke-cli.js",
+    "defaultRunsDir": "packages/sdk/test-fixtures/cli/runs/smoke",
+    "supportedFlags": [
+      "--runs-dir",
+      "--cli",
+      "--keep"
+    ]
+  },
+  "notes": [
+    "The current CLI smoke harness does not publish a --record baseline surface.",
+    "The current repo does not define docs:testing-readme or docs:snippets:* package-local scripts.",
+    "The CLI/example verification path only requires the SDK build; it does not depend on the broader build:runtime umbrella command.",
+    "Use docs:examples:verify for the end-to-end repo workflow that combines docs generation, smoke verification, and docs QA."
+  ]
+}

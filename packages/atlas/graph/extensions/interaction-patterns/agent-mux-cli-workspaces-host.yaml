@@ -1,0 +1,273 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-workspaces-list
+attributes:
+  displayName: "amux workspaces list"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "workspaces list"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:workspaces printed"
+    - "1:general-error:internal error"
+  description: |
+    List managed workspaces (default subcommand). Source:
+    packages/agent-mux/cli/src/commands/workspaces.ts:54-72.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-workspaces-create
+attributes:
+  displayName: "amux workspaces create"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "workspaces create"
+  flags:
+    - "--repo:N:cloned repo path (repeatable, required)"
+    - "--mode:1:worktree|symlink"
+    - "--name:1:workspace name (else first positional)"
+    - "--branch:1:branch prefix for worktree creation"
+    - "--root:1:override workspace root directory"
+  subcommandExitCodes:
+    - "0:success:workspace created"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing name or --repo"
+  description: |
+    Create a new workspace (worktree or symlink) over one or more repos.
+    Source: packages/agent-mux/cli/src/commands/workspaces.ts:73-99.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-workspaces-archive
+attributes:
+  displayName: "amux workspaces archive"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "workspaces archive"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:workspace archived"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing identifier"
+  description: |
+    Archive a workspace by id/name. Source:
+    packages/agent-mux/cli/src/commands/workspaces.ts:100-110.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-workspaces-cleanup
+attributes:
+  displayName: "amux workspaces cleanup"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "workspaces cleanup"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:workspace cleaned"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing identifier"
+  description: |
+    Clean transient files from a workspace. Source:
+    packages/agent-mux/cli/src/commands/workspaces.ts:111-122.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-workspaces-recover
+attributes:
+  displayName: "amux workspaces recover"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "workspaces recover"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:workspace recovered"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing identifier"
+  description: |
+    Recover an archived/broken workspace. Source:
+    packages/agent-mux/cli/src/commands/workspaces.ts:123-134.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-workspaces-delete
+attributes:
+  displayName: "amux workspaces delete"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "workspaces delete"
+  flags:
+    - "--force:0:remove on-disk artefacts before deletion"
+  subcommandExitCodes:
+    - "0:success:workspace deleted"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing identifier"
+  description: |
+    Delete a workspace from the registry (and on-disk if --force).
+    Source: packages/agent-mux/cli/src/commands/workspaces.ts:135-147.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-workspaces-sync-sessions
+attributes:
+  displayName: "amux workspaces sync-sessions"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "workspaces sync-sessions"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:sessions reconciled"
+    - "1:general-error:internal error / JSON parse failure"
+  description: |
+    Reconcile workspace session bindings against a JSON-encoded list of
+    sessions on positional 0. Source:
+    packages/agent-mux/cli/src/commands/workspaces.ts:148-155.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-launch
+attributes:
+  displayName: "amux launch"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "launch"
+  flags:
+    - "--api-key:1:provider API key"
+    - "--api-base:1:provider API endpoint"
+    - "--region:1:cloud region (Bedrock/Vertex)"
+    - "--project:1:cloud project (Vertex/Foundry)"
+    - "--resource-group:1:Azure resource group"
+    - "--endpoint-name:1:cloud endpoint name"
+    - "-t / --transport:1:wire protocol"
+    - "--auth-command:1:command emitting bearer token"
+    - "--with-proxy-if-needed:0:auto-launch proxy when harness lacks native support"
+    - "--with-proxy:0:force proxy"
+    - "--no-proxy:0:disable proxy"
+    - "--proxy-port:1:proxy port (0=auto)"
+    - "--proxy-log-level:1:proxy log level"
+    - "-r / --resume:1:resume session id"
+    - "-s / --session-id:1:explicit new session id"
+    - "-p / --prompt:1:non-interactive prompt"
+    - "--max-turns:1:turn limit"
+    - "--max-budget-usd:1:budget limit"
+    - "--dry-run:0:print plan without executing"
+    - "--provider-arg:N:KEY=VALUE provider param (repeatable)"
+    - "--observe:0:tee stdio to a log file"
+    - "--workspace:1:resolve existing workspace"
+    - "--workspace-create:0:create a workspace before launching"
+    - "--workspace-mode:1:worktree|symlink"
+    - "--workspace-repo:N:repo path (repeatable)"
+    - "--workspace-name:1:workspace name override"
+  subcommandExitCodes:
+    - "0:success:harness exited cleanly (or dry-run printed)"
+    - "1:general-error:SPAWN_ERROR (proxy/ollama/runtime)"
+    - "2:usage-error:VALIDATION_ERROR (missing harness, mutually-exclusive proxy flags)"
+    - "3:agent-not-found:AGENT_NOT_FOUND (unknown harness or not installed)"
+    - "6:capability-error:CAPABILITY_ERROR (resume unsupported)"
+  description: |
+    Resolve a launch plan (provider/transport/proxy), optionally start the
+    transport-mux runtime, then spawn the harness with stdin/stdout
+    passthrough and signal forwarding. Source:
+    packages/agent-mux/cli/src/commands/launch.ts:268-580.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-detect-host
+attributes:
+  displayName: "amux detect-host"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "detect-host"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:detected (or no host) — always succeeds"
+  description: |
+    Detect which agent harness is running this CLI. Source:
+    packages/agent-mux/cli/src/commands/detect-host.ts:13-39.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-doctor
+attributes:
+  displayName: "amux doctor"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "doctor"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:always (report rendered to stdout)"
+  description: |
+    Aggregate Node, per-adapter install/auth/config-file, and hook
+    registry state into a copy/paste-ready bug-report. Source:
+    packages/agent-mux/cli/src/commands/doctor.ts:136-150.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-tui
+attributes:
+  displayName: "amux tui"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "tui"
+  flags:
+    - "--agent:1:default agent for new prompts (default claude-code)"
+    - "--user-plugins-dir:1:override TUI plugin discovery dir"
+    - "--no-user-plugins:0:skip discovering external user plugins"
+  subcommandExitCodes:
+    - "0:success:TUI exited normally"
+    - "1:general-error:@a5c-ai/agent-mux-tui not installed"
+  description: |
+    Launch the Ink-based agent-mux TUI with built-in plus user plugins.
+    Source: packages/agent-mux/cli/src/commands/tui.ts:6-77.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-remote-install
+attributes:
+  displayName: "amux remote install"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "remote install"
+  flags:
+    - "--mode:1:ssh|docker|k8s|local (default ssh)"
+    - "--harness:1:harness to install after amux (default claude)"
+    - "--image:1:docker image (docker mode)"
+    - "--identity-file:1:ssh key path"
+    - "--port:1:ssh port"
+    - "--namespace:1:k8s namespace"
+    - "--context:1:k8s context"
+    - "--force:0:reinstall even if amux already present"
+    - "--dry-run:0:print planned commands without executing"
+  subcommandExitCodes:
+    - "0:success:remote install completed"
+    - "1:general-error:remote command non-zero or spawn failed"
+    - "2:usage-error:VALIDATION_ERROR (bad mode / missing host or image)"
+  description: |
+    Install amux + harness on a remote host via ssh/docker/k8s/local.
+    Probes, installs amux, installs harness, verifies. Source:
+    packages/agent-mux/cli/src/commands/remote.ts:121-234.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-remote-update
+attributes:
+  displayName: "amux remote update"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "remote update"
+  flags:
+    - "--mode:1:ssh|docker|k8s|local (default ssh)"
+    - "--harness:1:harness to update (default claude)"
+    - "--image:1:docker image (docker mode)"
+    - "--identity-file:1:ssh key path"
+    - "--port:1:ssh port"
+    - "--namespace:1:k8s namespace"
+    - "--context:1:k8s context"
+    - "--dry-run:0:print planned commands without executing"
+  subcommandExitCodes:
+    - "0:success:remote update completed"
+    - "1:general-error:remote command non-zero or spawn failed"
+    - "2:usage-error:VALIDATION_ERROR (bad mode / missing host or image)"
+  description: |
+    Update amux + harness on a remote host (npm update -g + amux update).
+    Source: packages/agent-mux/cli/src/commands/remote.ts:121-234.

@@ -18,6 +18,12 @@
  * - ORB-SLAM3: https://github.com/UZ-SLAMLab/ORB_SLAM3
  * - RTAB-Map: https://github.com/introlab/rtabmap_ros
  * - Google Cartographer: https://google-cartographer-ros.readthedocs.io/
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion, skill-area:slam]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:simulation-validation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

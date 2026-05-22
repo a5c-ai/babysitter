@@ -1,0 +1,70 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:symphony.core@current
+attributes:
+  displayName: "Symphony Core (current)"
+  agentVersionId: agent-version:symphony@current
+  packageRef: source-ref:symphony-github
+  loopIteratorPolicy: poll-dispatch-reconcile
+  loopIteratorNotes: |
+    Polls issue tracker (Linear) for actionable issues, creates per-issue
+    workspaces, dispatches coding agent sessions, and reconciles results.
+    Bounded concurrency with exponential backoff retry on failures.
+  contextManagementStrategy: file-driven
+  compactionTriggerNotes: |
+    Loads workflow policy from in-repo WORKFLOW.md. Agent sessions are
+    ephemeral; persistent state is filesystem-driven via workspace dirs.
+  subagentInvokerPolicy: process-spawn
+  subagentInvokerNotes: |
+    Spawns coding agent CLIs (Codex) in isolated per-issue workspaces
+    with WORKFLOW.md-driven instructions.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Agent session output is reconciled back to the issue tracker as
+    PR submissions and status updates.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: symphony-internal
+  supportedTransportProtocols:
+    - model-transport:openai-responses
+  parallelToolCallHandling: native
+  streamingFidelity: partial
+  thinkingChannelHandling: not-supported
+  notes: |
+    Core components:
+    - Workflow Loader: reads WORKFLOW.md for runtime behavior policy
+    - Config Layer: typed getters for environment and repo config
+    - Tracker Integration: polls Linear for issues, posts status updates
+    - Workspace Manager: per-issue directory isolation with git worktrees
+    - Agent Session Runner: spawns and monitors coding agent processes
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:symphony
+      role: core
+  speaks:
+    - target: model-transport:openai-responses
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=0.1.0'
+      level: full
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Dispatches coding agents per-issue in isolated workspaces.
+    - target: capability:supports-parallel-execution
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Bounded concurrency for parallel issue processing.
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:poll-tick
+    - target: orch-primitive:reconciliation
+    - target: orch-primitive:retry-with-backoff
+    - target: orch-primitive:concurrency-control
+    - target: orch-primitive:workflow-policy-load
+    - target: orch-primitive:workspace-create
+    - target: orch-primitive:workspace-cleanup
+    - target: orch-primitive:task-complete

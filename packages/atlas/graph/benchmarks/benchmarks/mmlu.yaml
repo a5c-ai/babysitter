@@ -1,0 +1,15 @@
+nodeKind: Benchmark
+id: benchmark:mmlu
+attributes:
+  displayName: "MMLU"
+  homepageUrl: https://github.com/hendrycks/test
+  kind: knowledge
+  targetsKind: ModelVersion
+  description: |
+    Massive Multitask Language Understanding — 57-subject knowledge benchmark.
+edges:
+  covers:
+    - target: skill-area:general-knowledge-reasoning
+      attributes:
+        coverage: full
+        weight: 0.1

@@ -1,0 +1,54 @@
+nodeKind: HookSurface
+id: hook-surface:cursor.post-tool
+attributes:
+  description: Cursor PostTool hook
+  eventName: "Cursor PostTool hook"
+  displayName: "Cursor PostTool hook"
+  vendor: cursor
+  trigger: post-tool-call
+  family: shell-hook
+  payloadSchema: "Claude Code-compatible PostTool payload"
+---
+nodeKind: HookSurface
+id: hook-surface:cursor.session-end
+attributes:
+  description: Cursor SessionEnd hook
+  eventName: "Cursor SessionEnd hook"
+  displayName: "Cursor SessionEnd hook"
+  vendor: cursor
+  trigger: session-end
+  family: shell-hook
+  payloadSchema: "Claude Code-compatible SessionEnd payload"
+---
+nodeKind: HookSurface
+id: hook-surface:cursor.session-start
+attributes:
+  description: Cursor SessionStart hook
+  eventName: "Cursor SessionStart hook"
+  displayName: "Cursor SessionStart hook"
+  vendor: cursor
+  trigger: session-start
+  family: shell-hook
+  payloadSchema: "Claude Code-compatible SessionStart payload"
+---
+nodeKind: HookSurface
+id: hook-surface:cursor.stop
+attributes:
+  description: Cursor Stop hook
+  eventName: "Cursor Stop hook"
+  displayName: "Cursor Stop hook"
+  vendor: cursor
+  trigger: stop
+  family: shell-hook
+  payloadSchema: "Claude Code-compatible Stop payload"
+---
+nodeKind: HookSurface
+id: hook-surface:cursor.user-prompt-submit
+attributes:
+  description: Cursor UserPromptSubmit hook
+  eventName: "Cursor UserPromptSubmit hook"
+  displayName: "Cursor UserPromptSubmit hook"
+  vendor: cursor
+  trigger: user-prompt-submit
+  family: shell-hook
+  payloadSchema: "Claude Code-compatible UserPromptSubmit payload"

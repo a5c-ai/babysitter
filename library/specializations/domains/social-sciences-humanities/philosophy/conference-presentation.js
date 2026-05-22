@@ -5,6 +5,13 @@
  * @outputs { success: boolean, presentationMaterials: object, abstract: string, talkOutline: object, qaPreparation: object, artifacts: array }
  * @recommendedSkills SK-PHIL-010 (philosophical-writing-argumentation), SK-PHIL-014 (socratic-dialogue-facilitation), SK-PHIL-002 (argument-mapping-reconstruction)
  * @recommendedAgents AG-PHIL-006 (academic-philosophy-writer-agent), AG-PHIL-007 (critical-thinking-educator-agent)
+ *
+ * @graph
+ *   domains: [domain:philosophy]
+ *   specializations: [specialization:applied-ethics]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:docs-as-code, skill-area:data-analysis]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

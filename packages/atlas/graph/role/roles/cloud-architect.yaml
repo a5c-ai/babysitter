@@ -1,0 +1,24 @@
+nodeKind: Role
+id: role:cloud-architect
+attributes:
+  displayName: "Cloud Architect"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:cloud-infra
+  description: |
+    Designs cloud architectures and reference patterns across a multi-account / multi-cloud estate.
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:capacity-planning
+    - responsibility:cost-optimization
+  requires_expertise:
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:dns-design
+    - target: skill-area:containerization
+    - target: skill-area:service-mesh-config
+    - target: skill-area:k8s-rbac
+  applies_to:
+    - target: domain:cloud-infra

@@ -1,0 +1,77 @@
+---
+nodeKind: SkillArea
+id: skill-area:dynamic-programming
+attributes:
+  displayName: "Dynamic Programming"
+  description: |
+    DP problem recognition, top-down memoization vs bottom-up tables,
+    state-space minimization, and classic patterns.
+  domains:
+    - specialization:algorithms-optimization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:algorithms-optimization
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:graph-algorithms
+attributes:
+  displayName: "Graph Algorithms"
+  description: |
+    BFS/DFS, shortest paths, MSTs, max-flow, SCCs, topological sort,
+    and graph-modeling tradeoffs.
+  domains:
+    - specialization:algorithms-optimization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:algorithms-optimization
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:string-matching
+attributes:
+  displayName: "String Matching Algorithms"
+  description: |
+    Exact and approximate string matching — KMP, Aho-Corasick, suffix
+    arrays/automata, and edit-distance variants.
+  domains:
+    - specialization:algorithms-optimization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:algorithms-optimization
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:computational-geometry
+attributes:
+  displayName: "Computational Geometry"
+  description: |
+    Convex hulls, sweep lines, range trees, geometric predicates,
+    and robustness/tolerance handling.
+  domains:
+    - specialization:algorithms-optimization
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:algorithms-optimization
+      confidence: primary
+    - target: specialization:mechanical-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:np-hard-heuristics
+attributes:
+  displayName: "Heuristics for NP-Hard Problems"
+  description: |
+    Approximation algorithms, local search, simulated annealing,
+    branch-and-bound, and metaheuristics for intractable problems.
+  domains:
+    - specialization:algorithms-optimization
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: specialization:algorithms-optimization
+      confidence: primary

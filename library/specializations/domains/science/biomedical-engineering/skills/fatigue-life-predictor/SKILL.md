@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Biomechanics and Structural Analysis
   skill-id: BME-SK-013
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # Fatigue Life Predictor Skill

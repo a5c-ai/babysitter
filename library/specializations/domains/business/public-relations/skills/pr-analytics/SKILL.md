@@ -13,6 +13,10 @@ metadata:
   domain: business
   category: Measurement and Analytics
   skill-id: SK-009
+graph:
+  domains: [domain:public-relations]
+  skillAreas: [skill-area:digital-marketing-analytics, skill-area:brand-positioning, skill-area:market-research]
+  roles: [role:marketing-strategist, role:data-analyst, role:content-strategist]
 ---
 
 # PR Analytics and Reporting Skill

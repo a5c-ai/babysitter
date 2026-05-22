@@ -2,6 +2,12 @@
 name: facilitation-workshop-delivery
 description: Design and facilitate engaging professional development workshops using adult learning principles and active learning strategies
 allowed-tools: Read, Grep, Write, Edit, Glob
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:mentorship, skill-area:stakeholder-management]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:engineering-manager, role:technical-writer]
 ---
 
 # Facilitation and Workshop Delivery

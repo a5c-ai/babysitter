@@ -1,0 +1,24 @@
+nodeKind: Claim
+id: claim:swe-bench-verified-gpt-5-headline-openai-source
+attributes:
+  subjectKind: EvalResult
+  statement: OpenAI's GPT-5 launch page is the source for the 74.9% SWE-bench Verified
+    headline EvalResult for GPT-5.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  subjectId: eval-result:swe-bench-verified.gpt-5.headline.001
+  attribute: score
+  value: 0.749
+  evidenceSourceIds:
+  - evidence:vendor-openai-blog-gpt-5-launch
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: evaluation
+  note: Replaces the removed source comment from graph/benchmarks/eval-results/swe-bench-verified-gpt-5-result-headline.yaml.
+edges:
+  about_subject:
+  - eval-result:swe-bench-verified.gpt-5.headline.001
+  backed_by_evidence:
+  - evidence:vendor-openai-blog-gpt-5-launch

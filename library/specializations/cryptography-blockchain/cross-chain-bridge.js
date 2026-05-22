@@ -16,6 +16,13 @@
  * @references
  * - Multichain: https://docs.multichain.org/
  * - LayerZero: https://layerzero.gitbook.io/docs/
+ * @graph
+ *   domains: [domain:security]
+ *   specializations: [specialization:cryptography-blockchain]
+ *   skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption, skill-area:cross-chain-interoperability]
+ *   roles: [role:security-engineer]
+ *   topics: [topic:hmac-signing, topic:ssl-certs]
+ *   workflows: [workflow:crypto-protocol-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

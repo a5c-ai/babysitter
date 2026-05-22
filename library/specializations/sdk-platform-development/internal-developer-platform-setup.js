@@ -17,6 +17,12 @@
  * - Backstage: https://backstage.io/
  * - Platform Engineering: https://platformengineering.org/
  * - Internal Developer Platform: https://internaldeveloperplatform.org/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:sdk-platform-development]
+ *   skillAreas: [skill-area:sdk-codegen, skill-area:api-clients-sdks]
+ *   roles: [role:platform-engineer]
+ *   topics: [topic:api-design, topic:developer-experience]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,38 @@
+nodeKind: Subagent
+id: subagent:planner
+attributes:
+  displayName: "Planner"
+  provenance: built-in
+  subjectId: agentVersion:claude:ge-0-0-0
+  roleId: role:planner
+  systemPrompt: |
+    You convert a goal into a numbered, verifiable plan. Each step has a
+    success criterion. You do not execute; you only plan.
+  tools: []
+  triggers: |
+    Invoke when the user states a goal that requires multi-step work and
+    asks for a plan, or when an orchestrator needs a structured plan
+    before dispatching implementer subagents.
+  description: |
+    Plan-only subagent that emits a numbered plan with success criteria.
+    Modeled after the `Plan` subagent bundled with Anthropic Claude Code
+    (https://docs.anthropic.com/en/docs/claude-code/sub-agents).
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:planner
+  implements:
+    - target: extension-interface:orchestration
+  sourced_from:
+    - target: source-ref:a5c-plugins-quality

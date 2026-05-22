@@ -1,0 +1,312 @@
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-contextwindowtokens
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: contextWindowTokens
+  value: '128000'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current contextWindowTokens is 128000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-costpermtokinput
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: costPerMTokInput
+  value: '0.27'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current costPerMTokInput is 0.27.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-costpermtokoutput
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: costPerMTokOutput
+  value: '1.1'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current costPerMTokOutput is 1.1.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-finetuningkind
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: fineTuningKind
+  value: full
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current fineTuningKind is full.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-kind
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: kind
+  value: chat
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current kind is chat.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-lifecyclestatus
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-modalities
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: modalities
+  value: text
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current modalities is text.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-modalitydirections
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current modalityDirections is kind=text;direction=input,
+    kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-modelcardurl
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: modelCardUrl
+  value: https://huggingface.co/deepseek-ai/DeepSeek-V3
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current modelCardUrl is https://huggingface.co/deepseek-ai/DeepSeek-V3.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-supportsextendedthinking
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-supportsfinetuning
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: supportsFineTuning
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current supportsFineTuning is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current supportsThinkingBudgetTokens is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-current-versionrange
+attributes:
+  subjectId: model:deepseek-v3@current
+  attribute: versionRange
+  value: '>=3.0.0 <4.0.0'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3@current versionRange is >=3.0.0 <4.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-v3
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-v3
+  about_subject:
+  - model:deepseek-v3@current

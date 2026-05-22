@@ -17,6 +17,11 @@
  * - Ohno, T. (1988). Toyota Production System
  * - Smalley, A. (2004). Creating Level Pull
  * - Anderson, D. (2010). Kanban: Successful Evolutionary Change
+  * @graph
+ *   domains: [domain:operations]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

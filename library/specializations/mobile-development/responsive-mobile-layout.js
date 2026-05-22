@@ -18,6 +18,13 @@
  * - React Native Dimensions: https://reactnative.dev/docs/dimensions
  * - Flutter LayoutBuilder: https://api.flutter.dev/flutter/widgets/LayoutBuilder-class.html
  * - iOS Size Classes: https://developer.apple.com/design/human-interface-guidelines/layout
+ * @graph
+ *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:mobile-app-submission, workflow:release-management]
+ *   topics: [topic:accessibility, topic:responsive-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

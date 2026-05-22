@@ -26,6 +26,11 @@
  *   resources: { budget: 500000, trainingCapacity: 50, systemsAvailable: [...] }
  * }
  * @references Deming's 14 Points, Juran Trilogy, Baldrige Excellence Framework
+  * @graph
+ *   domains: [domain:operations]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

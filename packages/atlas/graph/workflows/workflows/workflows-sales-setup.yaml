@@ -1,0 +1,102 @@
+---
+nodeKind: Workflow
+id: workflow:crm-configuration-and-cleanup
+attributes:
+  displayName: "CRM Configuration and Cleanup"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Improves CRM data hygiene and configuration — auditing field
+    utilization and removing unused custom fields, standardizing picklist
+    values and record types, configuring automation rules for lead routing
+    and stage progression, deduplicating contact and account records,
+    validating integration data flows from marketing and support systems,
+    and documenting field mapping conventions. Produces CRM health report
+    and updated configuration documentation. Excludes CRM platform
+    migration.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:planner
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:revenue-operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:revenue-operations-team
+---
+nodeKind: Workflow
+id: workflow:sales-playbook-development
+attributes:
+  displayName: "Sales Playbook Development"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Builds and refines sales playbooks for target segments — defining
+    ideal customer profiles with firmographic and technographic criteria,
+    documenting discovery question frameworks, creating objection handling
+    scripts grounded in win/loss data, developing competitive positioning
+    matrices, and assembling stage-specific talk tracks with proof points.
+    Produces versioned playbook assets and training curricula. Excludes
+    sales training delivery and CRM configuration.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:product-designer
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:marketing
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:sales-compensation-plan-design
+attributes:
+  displayName: "Sales Compensation Plan Design"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: cross-team
+  description: |
+    Designs and models sales compensation plans — setting quota targets
+    based on territory potential and historical attainment, defining
+    accelerator tiers and decelerators, modeling SPIFF structures for
+    strategic initiatives, calculating on-target-earnings competitiveness
+    against market benchmarks, and stress-testing plan economics across
+    attainment scenarios. Produces compensation plan documents with
+    financial models and payout simulations. Excludes individual quota
+    negotiation and payroll processing.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:finance
+    - target: domain:human-resources
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:finance-team
+    - target: org-unit:revenue-operations-team

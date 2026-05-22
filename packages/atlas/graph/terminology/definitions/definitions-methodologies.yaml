@@ -1,0 +1,94 @@
+---
+nodeKind: Definition
+id: definition:behavior-driven-development.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:behavior-driven-development
+  text: |
+    Behavior-Driven Development (BDD), also known as Specification by
+    Example, is a collaborative approach that captures requirements as
+    concrete examples illustrating how the system should behave in
+    specific scenarios. These examples become executable specifications
+    that serve as both documentation and automated tests. Source:
+    library/methodologies/bdd-specification-by-example/README.md.
+  status: canonical
+edges:
+  defines:
+    - term:behavior-driven-development
+---
+nodeKind: Definition
+id: definition:acceptance-test-driven-development.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:acceptance-test-driven-development
+  text: |
+    Acceptance Test-Driven Development with TDD — a combined approach
+    that uses acceptance tests (ATDD) at the feature level to drive
+    unit-level test-driven development (TDD), ensuring both external
+    quality (building the right thing) and internal quality (building
+    it right). Source: library/methodologies/atdd-tdd/README.md.
+  status: canonical
+edges:
+  defines:
+    - term:acceptance-test-driven-development
+---
+nodeKind: Definition
+id: definition:bmad-method.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:bmad-method
+  text: |
+    AI-Driven Agile Development Framework from BMad Code Org
+    (https://github.com/bmad-code-org/BMAD-METHOD). Models work as a
+    collaboration between specialised AI personas progressing through
+    agile phases. Source: library/methodologies/bmad-method/README.md.
+  status: canonical
+edges:
+  defines:
+    - term:bmad-method
+---
+nodeKind: Definition
+id: definition:ccpm.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:ccpm
+  text: |
+    Spec-driven development methodology adapted from
+    https://github.com/automazeio/ccpm. Enforces "every line of code
+    must trace back to a specification" via five strict phases with
+    zero shortcuts. Source: library/methodologies/ccpm/README.md.
+  status: canonical
+edges:
+  defines:
+    - term:ccpm
+---
+nodeKind: Definition
+id: definition:gsd.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:gsd
+  text: |
+    GSD-Adapted Workflows for Babysitter SDK — port of the Get Shit
+    Done methodology (https://github.com/glittercowboy/get-shit-done)
+    that emphasises cutting ceremony and shipping incrementally.
+    Source: library/methodologies/gsd/README.md.
+  status: canonical
+edges:
+  defines:
+    - term:gsd
+---
+nodeKind: Definition
+id: definition:cc10x.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:cc10x
+  text: |
+    Intelligent workflow orchestration for Claude Code development.
+    Routes all development requests through a single entry point that
+    detects intent and dispatches to specialised workflows with
+    evidence-first validation, TDD enforcement, and persistent session
+    memory. Source: library/methodologies/cc10x/README.md.
+  status: canonical
+edges:
+  defines:
+    - term:cc10x

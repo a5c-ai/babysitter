@@ -1,0 +1,51 @@
+---
+# Community MCP Servers for agent infrastructure tools
+
+nodeKind: ToolServer
+id: tool-server:mcp-mempalace
+attributes:
+  displayName: MemPalace MCP Server
+  description: |
+    MCP server providing 29 tools for read/write access to a MemPalace
+    memory palace. Covers palace reads/writes, knowledge-graph operations,
+    cross-wing navigation, drawer management, and agent diaries. Exposes
+    the memory palace metaphor (wings, rooms, closets, drawers) as
+    LLM-callable tools. Runs 100% locally using ChromaDB and SQLite with
+    zero cloud dependencies. Includes a temporal entity-relationship graph
+    with validity windows backed by local SQLite.
+  protocol: mcp
+  category: knowledge
+  repoUrl: https://github.com/MemPalace/mempalace
+  maintainer: MemPalace (community)
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:mempalace
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-graphify
+attributes:
+  displayName: Graphify MCP Server
+  description: |
+    MCP server that exposes a Graphify knowledge graph as LLM-accessible
+    tools. Builds a queryable graph from code, SQL schemas, docs, papers,
+    and images using Tree-sitter static analysis and LLM-driven semantic
+    extraction. The MCP server allows agents to query the graph, traverse
+    relationships, and understand codebase structure without file-by-file
+    search. Supports incremental updates via code-review-graph for
+    automatic re-parsing on git commits.
+  protocol: mcp
+  category: knowledge
+  repoUrl: https://github.com/safishamsi/graphify
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:graphify
+  lib_applies_to_domain:
+  - target: domain:software-engineering

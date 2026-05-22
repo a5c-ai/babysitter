@@ -1,0 +1,12 @@
+nodeKind: Capability
+id: capability:mcp-oauth-resource-server
+attributes:
+  displayName: "MCP OAuth Resource Server"
+  description: |
+    The entity classifies MCP servers as OAuth 2.1 Resource Servers and
+    requires clients to implement RFC 8707 Resource Indicators. Introduced
+    in MCP spec revision 2025-06-18.
+    See https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization
+  appliesToNodeKinds: ["AgentRuntimeImpl", "ToolServer"]
+  category: agent
+edges: {}

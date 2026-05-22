@@ -1,0 +1,1299 @@
+# Deep Stack Profiles — Volume 5
+# 25 richly-connected stack profiles covering infrastructure & platform,
+# testing & quality, communication & integration, embedded & systems,
+# and niche application domains.
+---
+nodeKind: StackProfile
+id: stack-profile:terraform-landing-zone
+attributes:
+  displayName: "Terraform Landing Zone (Terraform, HCL, Vault, Go, OPA)"
+  description: |
+    An enterprise cloud landing zone provisioned entirely through Terraform,
+    using HCL modules to define account structures, networking, IAM policies,
+    and security guardrails across AWS or GCP. HashiCorp Vault manages secrets
+    and dynamic credentials, while OPA enforces policy-as-code constraints
+    before any plan is applied. Custom Go-based Terraform providers extend
+    the platform for internal services. Deployed via Terraform Cloud for
+    remote state management and team collaboration. The tradeoff is steep
+    learning curve and long plan/apply cycles for large-scale refactors.
+  composes:
+    - tool:terraform
+    - language:hcl
+    - tool:vault
+    - tool:opa
+    - language:go
+    - tool:terraform-cloud
+    - tool:checkov
+    - tool:sops
+edges:
+  composed_of:
+    - tool:terraform
+    - language:hcl
+    - tool:vault
+    - tool:opa
+    - language:go
+    - tool:terraform-cloud
+    - tool:checkov
+    - tool:sops
+  used_by_role:
+    - role:platform-engineer
+    - role:cloud-architect
+    - role:security-engineer
+  follows_workflow:
+    - workflow:terraform-drift-remediation
+    - workflow:iac-security-scanning
+  applies_to:
+    - domain:cloud-infra
+    - domain:infrastructure
+  requires_skill_area:
+    - skill-area:terraform-infrastructure
+    - skill-area:iac-security
+    - skill-area:secrets-rotation
+    - skill-area:policy-enforcement
+    - skill-area:cloud-infrastructure
+---
+nodeKind: StackProfile
+id: stack-profile:gitops-deployment
+attributes:
+  displayName: "GitOps Deployment (ArgoCD, Kubernetes, Helm, GitHub Actions, Kustomize)"
+  description: |
+    A GitOps-driven continuous deployment pipeline where ArgoCD watches Git
+    repositories for declarative Kubernetes manifests and automatically
+    reconciles cluster state. Helm charts provide templated packaging for
+    microservices while Kustomize handles environment-specific overlays.
+    GitHub Actions runs CI builds, image pushes, and manifest generation,
+    with ArgoCD handling the CD half. Prometheus monitors deployment health
+    and triggers rollback alerts. Ideal for platform teams managing dozens
+    of services across multiple clusters. The tradeoff is operational
+    complexity in managing Helm chart versions and Kustomize overlay sprawl.
+  composes:
+    - tool:argocd
+    - tool:kubernetes
+    - tool:helm
+    - tool:github-actions
+    - tool:kustomize
+    - tool:prometheus
+    - tool:docker
+    - language:yaml
+edges:
+  composed_of:
+    - tool:argocd
+    - tool:kubernetes
+    - tool:helm
+    - tool:github-actions
+    - tool:kustomize
+    - tool:prometheus
+    - tool:docker
+    - language:yaml
+  used_by_role:
+    - role:devops-engineer
+    - role:platform-engineer
+    - role:sre
+  follows_workflow:
+    - workflow:helm-chart-promotion
+    - workflow:gitops-config-drift-audit
+  applies_to:
+    - domain:devops
+    - domain:platform-engineering
+  requires_skill_area:
+    - skill-area:gitops
+    - skill-area:deployment-automation
+    - skill-area:containerization
+    - skill-area:ci-cd
+    - skill-area:k8s-rbac
+---
+nodeKind: StackProfile
+id: stack-profile:service-mesh
+attributes:
+  displayName: "Service Mesh (Istio, Kubernetes, Prometheus, Grafana, OpenTelemetry)"
+  description: |
+    A service mesh architecture layered on top of Kubernetes using Istio for
+    traffic management, mutual TLS, circuit breaking, and canary deployments.
+    Prometheus collects mesh telemetry while Grafana renders service topology
+    and latency dashboards. OpenTelemetry provides distributed tracing across
+    all mesh-enrolled services. Linkerd serves as a lighter-weight alternative
+    for teams that need simpler operational overhead. Targeted at platform
+    teams running 20+ microservices that need zero-trust networking and
+    fine-grained traffic control. The tradeoff is significant resource overhead
+    from sidecar proxies and complex debugging of mesh-layer failures.
+  composes:
+    - tool:istio
+    - tool:kubernetes
+    - tool:prometheus
+    - tool:grafana
+    - tool:opentelemetry
+    - tool:linkerd
+    - tool:jaeger
+    - language:yaml
+edges:
+  composed_of:
+    - tool:istio
+    - tool:kubernetes
+    - tool:prometheus
+    - tool:grafana
+    - tool:opentelemetry
+    - tool:linkerd
+    - tool:jaeger
+    - language:yaml
+  used_by_role:
+    - role:platform-engineer
+    - role:sre
+    - role:security-engineer
+  follows_workflow:
+    - workflow:service-mesh-traffic-shift
+    - workflow:canary-deployment
+  applies_to:
+    - domain:platform-engineering
+    - domain:infrastructure
+  requires_skill_area:
+    - skill-area:service-mesh-config
+    - skill-area:observability-instrumentation
+    - skill-area:distributed-tracing
+    - skill-area:network-security
+    - skill-area:containerization
+---
+nodeKind: StackProfile
+id: stack-profile:container-registry-scanning
+attributes:
+  displayName: "Container Registry & Scanning (Docker, Trivy, Kubernetes, Go, Snyk)"
+  description: |
+    A container image lifecycle platform centered on building, scanning, and
+    distributing OCI images. Docker builds multi-stage images while Trivy and
+    Snyk perform vulnerability scanning at both build-time and runtime.
+    Kubernetes admission controllers reject images that fail policy checks
+    before pods are scheduled. Custom Go tooling integrates with CI pipelines
+    to generate SBOMs and enforce base-image freshness policies. Ideal for
+    security-conscious organizations that need full supply-chain visibility
+    from Dockerfile to production pod. The tradeoff is scan latency in CI
+    and the operational burden of maintaining allowlists for known CVEs.
+  composes:
+    - tool:docker
+    - tool:trivy
+    - tool:kubernetes
+    - language:go
+    - tool:snyk
+    - tool:github-actions
+    - tool:opa
+    - tool:checkov
+edges:
+  composed_of:
+    - tool:docker
+    - tool:trivy
+    - tool:kubernetes
+    - language:go
+    - tool:snyk
+    - tool:github-actions
+    - tool:opa
+    - tool:checkov
+  used_by_role:
+    - role:security-engineer
+    - role:devops-engineer
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:container-image-hardening
+    - workflow:supply-chain-attack-simulation
+  applies_to:
+    - domain:cybersecurity
+    - domain:devops
+  requires_skill_area:
+    - skill-area:container-security
+    - skill-area:vulnerability-scanning
+    - skill-area:supply-chain-security
+    - skill-area:containerization
+    - skill-area:ci-security
+---
+nodeKind: StackProfile
+id: stack-profile:disaster-recovery
+attributes:
+  displayName: "Disaster Recovery (Terraform, Kubernetes, Prometheus, PostgreSQL, S3)"
+  description: |
+    A disaster recovery and business continuity stack that uses Terraform to
+    provision standby infrastructure across multiple cloud regions. Kubernetes
+    workloads are backed up via declarative state snapshots stored in S3,
+    with PostgreSQL point-in-time recovery configured for database resilience.
+    Prometheus and Grafana monitor replication lag and failover readiness,
+    while automated runbooks handle DNS cutover and traffic rerouting during
+    actual incidents. Targeted at operations teams responsible for RPO/RTO
+    SLAs on critical production systems. The tradeoff is the cost of
+    maintaining warm standby resources and the complexity of testing failover
+    procedures without impacting production.
+  composes:
+    - tool:terraform
+    - tool:kubernetes
+    - tool:prometheus
+    - tool:grafana
+    - language:hcl
+    - language:yaml
+    - library:boto3
+    - language:python
+edges:
+  composed_of:
+    - tool:terraform
+    - tool:kubernetes
+    - tool:prometheus
+    - tool:grafana
+    - language:hcl
+    - language:yaml
+    - library:boto3
+    - language:python
+  used_by_role:
+    - role:sre
+    - role:platform-engineer
+    - role:cloud-architect
+  follows_workflow:
+    - workflow:disaster-recovery-failover-drill
+    - workflow:backup-recovery-drill
+  applies_to:
+    - domain:cloud-infra
+    - domain:infrastructure
+  requires_skill_area:
+    - skill-area:cloud-infrastructure
+    - skill-area:incident-response
+    - skill-area:capacity-planning-ops
+    - skill-area:runbook-authoring
+    - skill-area:terraform-infrastructure
+---
+nodeKind: StackProfile
+id: stack-profile:secrets-management
+attributes:
+  displayName: "Secrets Management (Vault, Kubernetes, Terraform, Docker, Go)"
+  description: |
+    A centralized secrets management platform built around HashiCorp Vault
+    for dynamic secret generation, encryption-as-a-service, and PKI
+    certificate issuance. Kubernetes workloads consume secrets via the Vault
+    Agent sidecar injector, eliminating plaintext secrets in environment
+    variables or ConfigMaps. Terraform provisions Vault policies, auth
+    backends, and secret engines as code. Custom Go tooling provides CLI
+    wrappers for developer self-service secret rotation. Deployed in Docker
+    containers with HA storage backends. The tradeoff is Vault's operational
+    complexity — unsealing, audit log management, and upgrade procedures
+    require dedicated platform engineering attention.
+  composes:
+    - tool:vault
+    - tool:kubernetes
+    - tool:terraform
+    - tool:docker
+    - language:go
+    - tool:sops
+    - language:hcl
+    - tool:helm
+edges:
+  composed_of:
+    - tool:vault
+    - tool:kubernetes
+    - tool:terraform
+    - tool:docker
+    - language:go
+    - tool:sops
+    - language:hcl
+    - tool:helm
+  used_by_role:
+    - role:security-engineer
+    - role:platform-engineer
+    - role:devops-engineer
+  follows_workflow:
+    - workflow:secret-rotation
+    - workflow:certificate-rotation
+  applies_to:
+    - domain:cybersecurity
+    - domain:platform-engineering
+  requires_skill_area:
+    - skill-area:secrets-rotation
+    - skill-area:identity-security
+    - skill-area:iac-security
+    - skill-area:k8s-rbac
+    - skill-area:policy-enforcement
+---
+nodeKind: StackProfile
+id: stack-profile:e2e-testing-platform
+attributes:
+  displayName: "E2E Testing Platform (Playwright, Vitest, Docker, GitHub Actions, TypeScript)"
+  description: |
+    A comprehensive end-to-end testing platform combining Playwright for
+    browser automation across Chromium, Firefox, and WebKit, with Vitest for
+    fast unit and integration tests. Docker containers provide reproducible
+    test environments with identical browser versions across CI and local
+    development. GitHub Actions orchestrates parallel test shards with
+    automatic retry for flaky tests and artifact collection for failure
+    screenshots. TypeScript provides type-safe page object models and test
+    fixtures. Ideal for QA teams testing complex web applications with
+    multi-step user flows. The tradeoff is test execution time at scale
+    and the maintenance burden of keeping selectors stable across UI changes.
+  composes:
+    - tool:playwright
+    - tool:vitest
+    - tool:docker
+    - tool:github-actions
+    - language:typescript
+    - tool:docker-compose
+    - library:faker
+    - library:msw
+edges:
+  composed_of:
+    - tool:playwright
+    - tool:vitest
+    - tool:docker
+    - tool:github-actions
+    - language:typescript
+    - tool:docker-compose
+    - library:faker
+    - library:msw
+  used_by_role:
+    - role:qa-engineer
+    - role:frontend-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:test-automation-pipeline
+    - workflow:visual-regression-testing
+  applies_to:
+    - domain:qa-testing
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:e2e-testing
+    - skill-area:browser-automation
+    - skill-area:ci-cd
+    - skill-area:containerization
+    - skill-area:service-mocking
+---
+nodeKind: StackProfile
+id: stack-profile:performance-testing
+attributes:
+  displayName: "Performance Testing (k6, Grafana, Prometheus, Docker, TypeScript)"
+  description: |
+    A performance and load testing platform centered on k6 for scripting
+    realistic user scenarios in TypeScript/JavaScript, with Prometheus
+    collecting test metrics and Grafana rendering real-time dashboards of
+    throughput, latency percentiles, and error rates. Docker containers
+    enable distributed load generation from multiple workers. Tests run in
+    CI via GitHub Actions with automatic regression detection against
+    baseline thresholds. Targeted at performance engineers validating SLOs
+    before release. Locust serves as an alternative for Python-native teams.
+    The tradeoff is that k6 lacks built-in browser rendering — teams needing
+    real browser performance metrics must supplement with Playwright or
+    Lighthouse.
+  composes:
+    - tool:k6
+    - tool:grafana
+    - tool:prometheus
+    - tool:docker
+    - language:typescript
+    - tool:github-actions
+    - tool:docker-compose
+    - language:javascript
+edges:
+  composed_of:
+    - tool:k6
+    - tool:grafana
+    - tool:prometheus
+    - tool:docker
+    - language:typescript
+    - tool:github-actions
+    - tool:docker-compose
+    - language:javascript
+  used_by_role:
+    - role:qa-engineer
+    - role:sre
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:load-testing-cycle
+    - workflow:performance-profiling-cycle
+  applies_to:
+    - domain:qa-testing
+    - domain:observability
+  requires_skill_area:
+    - skill-area:load-testing
+    - skill-area:performance-testing
+    - skill-area:metrics-dashboarding
+    - skill-area:ci-cd
+    - skill-area:containerization
+---
+nodeKind: StackProfile
+id: stack-profile:chaos-engineering
+attributes:
+  displayName: "Chaos Engineering (Kubernetes, Prometheus, Grafana, Go, OpenTelemetry)"
+  description: |
+    A chaos engineering practice stack that injects controlled failures into
+    Kubernetes-based production and staging environments to validate system
+    resilience. Experiments target pod termination, network partitions, CPU
+    stress, and DNS failures. Prometheus and Grafana monitor system behavior
+    during experiments while OpenTelemetry traces reveal cascading failure
+    paths. Custom Go tooling orchestrates experiment schedules and
+    automatically aborts when safety conditions are breached. Targeted at
+    SRE teams building confidence in system fault tolerance before peak
+    traffic events. The tradeoff is the risk of uncontrolled blast radius
+    and the cultural challenge of convincing stakeholders to break things
+    intentionally.
+  composes:
+    - tool:kubernetes
+    - tool:prometheus
+    - tool:grafana
+    - language:go
+    - tool:opentelemetry
+    - tool:jaeger
+    - language:yaml
+    - tool:helm
+edges:
+  composed_of:
+    - tool:kubernetes
+    - tool:prometheus
+    - tool:grafana
+    - language:go
+    - tool:opentelemetry
+    - tool:jaeger
+    - language:yaml
+    - tool:helm
+  used_by_role:
+    - role:sre
+    - role:platform-engineer
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:chaos-game-day
+    - workflow:slo-burn-rate-review
+  applies_to:
+    - domain:platform-engineering
+    - domain:observability
+  requires_skill_area:
+    - skill-area:chaos-engineering
+    - skill-area:sli-slo-management
+    - skill-area:incident-response
+    - skill-area:observability-instrumentation
+    - skill-area:distributed-tracing
+---
+nodeKind: StackProfile
+id: stack-profile:contract-testing
+attributes:
+  displayName: "Contract Testing (Pact, Docker, GitHub Actions, TypeScript, Node.js)"
+  description: |
+    A consumer-driven contract testing platform using Pact to verify that
+    API producers and consumers agree on request/response schemas without
+    requiring full integration environments. Contracts are generated by
+    consumer tests, published to a Pact Broker running in Docker, and
+    verified by provider CI pipelines in GitHub Actions. TypeScript provides
+    type-safe contract definitions that mirror production API types. Node.js
+    serves as the runtime for both consumer and provider verification.
+    Ideal for microservice architectures where teams deploy independently
+    but must maintain API compatibility. The tradeoff is the overhead of
+    maintaining the Pact Broker and educating all teams on contract-first
+    development practices.
+  composes:
+    - tool:pact
+    - tool:docker
+    - tool:github-actions
+    - language:typescript
+    - library:supertest
+    - tool:docker-compose
+    - library:jest-dom
+    - tool:jest
+edges:
+  composed_of:
+    - tool:pact
+    - tool:docker
+    - tool:github-actions
+    - language:typescript
+    - library:supertest
+    - tool:docker-compose
+    - library:jest-dom
+    - tool:jest
+  used_by_role:
+    - role:qa-engineer
+    - role:backend-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:api-contract-testing
+    - workflow:api-versioning-deprecation
+  applies_to:
+    - domain:qa-testing
+    - domain:api-development
+  requires_skill_area:
+    - skill-area:contract-testing
+    - skill-area:api-contract-testing
+    - skill-area:integration-testing
+    - skill-area:ci-cd
+    - skill-area:api-design
+---
+nodeKind: StackProfile
+id: stack-profile:visual-regression-testing
+attributes:
+  displayName: "Visual Regression Testing (Chromatic, Storybook, Playwright, React, TypeScript)"
+  description: |
+    A visual regression testing pipeline that uses Storybook to isolate UI
+    components and Chromatic to capture pixel-perfect snapshots across every
+    pull request. Playwright provides supplementary full-page visual
+    comparisons for critical user flows that span multiple components. React
+    and TypeScript power the component library with strict type safety.
+    GitHub Actions triggers visual reviews on every PR, and Chromatic's
+    built-in review workflow lets designers approve or reject visual changes
+    before merge. Targeted at design-system teams that need to prevent
+    accidental UI regressions across hundreds of components. The tradeoff
+    is snapshot storage costs and false positives from sub-pixel rendering
+    differences across browser versions.
+  composes:
+    - tool:chromatic
+    - tool:storybook
+    - tool:playwright
+    - framework:react
+    - language:typescript
+    - tool:github-actions
+    - library:react-testing-library
+    - library:tailwindcss
+edges:
+  composed_of:
+    - tool:chromatic
+    - tool:storybook
+    - tool:playwright
+    - framework:react
+    - language:typescript
+    - tool:github-actions
+    - library:react-testing-library
+    - library:tailwindcss
+  used_by_role:
+    - role:frontend-engineer
+    - role:product-designer
+    - role:qa-engineer
+  follows_workflow:
+    - workflow:visual-regression-testing
+    - workflow:design-system-maintenance
+  applies_to:
+    - domain:frontend
+    - domain:qa-testing
+  requires_skill_area:
+    - skill-area:visual-regression-testing
+    - skill-area:component-testing
+    - skill-area:design-systems
+    - skill-area:frontend-testing
+    - skill-area:ci-cd
+---
+nodeKind: StackProfile
+id: stack-profile:api-mocking-simulation
+attributes:
+  displayName: "API Mocking & Simulation (WireMock, Docker, OpenAPI, TypeScript, Pact)"
+  description: |
+    An API mocking and service simulation platform using WireMock to create
+    realistic stubbed endpoints based on OpenAPI specifications. Docker
+    containers host mock servers that replicate third-party APIs, payment
+    gateways, and upstream services for isolated testing. Pact contracts
+    feed WireMock stubs to ensure mocks stay in sync with real provider
+    behavior. TypeScript test suites validate client code against the mock
+    layer. MSW provides browser-side request interception for frontend
+    integration tests. Ideal for teams with expensive or rate-limited
+    external dependencies. The tradeoff is mock drift — stubs can diverge
+    from real APIs silently unless contract tests enforce synchronization.
+  composes:
+    - tool:wiremock
+    - tool:docker
+    - tool:openapi-generator
+    - language:typescript
+    - tool:pact
+    - library:msw
+    - tool:docker-compose
+    - library:supertest
+edges:
+  composed_of:
+    - tool:wiremock
+    - tool:docker
+    - tool:openapi-generator
+    - language:typescript
+    - tool:pact
+    - library:msw
+    - tool:docker-compose
+    - library:supertest
+  used_by_role:
+    - role:qa-engineer
+    - role:backend-engineer
+    - role:frontend-engineer
+  follows_workflow:
+    - workflow:api-contract-testing
+    - workflow:test-automation-pipeline
+  applies_to:
+    - domain:qa-testing
+    - domain:api-development
+  requires_skill_area:
+    - skill-area:service-mocking
+    - skill-area:api-contract-testing
+    - skill-area:integration-testing
+    - skill-area:containerization
+    - skill-area:api-testing
+---
+nodeKind: StackProfile
+id: stack-profile:notification-service
+attributes:
+  displayName: "Notification Service (Node.js, Redis, BullMQ, SendGrid, Twilio, PostgreSQL)"
+  description: |
+    A multi-channel notification service that delivers email, SMS, push, and
+    in-app notifications through a unified API. BullMQ manages job queues in
+    Redis for reliable delivery with retry logic, rate limiting, and priority
+    scheduling. SendGrid handles transactional and marketing email while
+    Twilio provides SMS and voice channels. PostgreSQL stores notification
+    logs, user preferences, and delivery receipts. TypeScript ensures
+    type-safe message templates and channel routing rules. Designed for
+    product teams that need a centralized notification backbone rather than
+    per-feature ad-hoc delivery. The tradeoff is queue monitoring overhead
+    and the complexity of managing delivery SLAs across multiple providers.
+  composes:
+    - library:bullmq
+    - library:ioredis
+    - tool:sendgrid
+    - tool:twilio
+    - language:typescript
+    - library:express
+    - library:prisma
+    - library:winston
+edges:
+  composed_of:
+    - library:bullmq
+    - library:ioredis
+    - tool:sendgrid
+    - tool:twilio
+    - language:typescript
+    - library:express
+    - library:prisma
+    - library:winston
+  used_by_role:
+    - role:backend-engineer
+    - role:fullstack-engineer
+    - role:product-manager
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:push-notification-delivery-audit
+  applies_to:
+    - domain:backend
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:messaging-queuing
+    - skill-area:email-notification-delivery
+    - skill-area:background-job-processing
+    - skill-area:backend-api-design
+    - skill-area:event-driven-architecture
+---
+nodeKind: StackProfile
+id: stack-profile:webhook-processing
+attributes:
+  displayName: "Webhook Processing (Node.js, BullMQ, Redis, PostgreSQL, Docker, TypeScript)"
+  description: |
+    A webhook ingestion and processing pipeline that receives, validates,
+    deduplicates, and reliably processes incoming webhooks from third-party
+    services like Stripe, GitHub, and Twilio. BullMQ in Redis provides
+    ordered job queues with configurable retry policies, dead-letter queues,
+    and concurrency control. PostgreSQL stores webhook payloads and processing
+    status for audit trails and replayability. HMAC signature verification
+    ensures payload authenticity. Docker containers isolate the ingestion
+    endpoint from processing workers for independent scaling. Targeted at
+    integration teams building robust event-driven architectures. The
+    tradeoff is the complexity of idempotency handling and the operational
+    burden of monitoring queue depths across many webhook sources.
+  composes:
+    - library:bullmq
+    - library:ioredis
+    - language:typescript
+    - library:express
+    - library:prisma
+    - tool:docker
+    - library:zod
+    - library:pino
+edges:
+  composed_of:
+    - library:bullmq
+    - library:ioredis
+    - language:typescript
+    - library:express
+    - library:prisma
+    - tool:docker
+    - library:zod
+    - library:pino
+  used_by_role:
+    - role:backend-engineer
+    - role:fullstack-engineer
+    - role:devops-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:event-driven-architecture-review
+  applies_to:
+    - domain:backend
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:webhook-verification
+    - skill-area:messaging-queuing
+    - skill-area:background-job-processing
+    - skill-area:event-driven-architecture
+    - skill-area:backend-api-design
+---
+nodeKind: StackProfile
+id: stack-profile:email-marketing-platform
+attributes:
+  displayName: "Email Marketing Platform (Node.js, SendGrid, Redis, PostgreSQL, React, S3)"
+  description: |
+    An email marketing and campaign management platform combining React for
+    a drag-and-drop template builder, SendGrid for high-volume email delivery
+    with engagement tracking, and PostgreSQL for subscriber management,
+    segmentation, and campaign analytics. Redis caches subscriber segments
+    and rate-limits send operations to stay within provider quotas. S3 stores
+    email template assets (images, attachments) and campaign archives. BullMQ
+    orchestrates send jobs for campaigns targeting millions of recipients
+    with staggered delivery. Designed for marketing teams that need
+    white-labeled email infrastructure. The tradeoff is deliverability
+    management — IP warming, SPF/DKIM setup, and bounce handling require
+    ongoing attention.
+  composes:
+    - library:express
+    - tool:sendgrid
+    - library:ioredis
+    - library:prisma
+    - framework:react
+    - library:boto3
+    - library:bullmq
+    - language:typescript
+edges:
+  composed_of:
+    - library:express
+    - tool:sendgrid
+    - library:ioredis
+    - library:prisma
+    - framework:react
+    - library:boto3
+    - library:bullmq
+    - language:typescript
+  used_by_role:
+    - role:fullstack-engineer
+    - role:marketing-manager
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:email-marketing-campaign-cycle
+    - workflow:campaign-launch
+  applies_to:
+    - domain:digital-marketing
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:transactional-email
+    - skill-area:email-notification-delivery
+    - skill-area:frontend-development
+    - skill-area:messaging-queuing
+    - skill-area:backend-api-design
+---
+nodeKind: StackProfile
+id: stack-profile:embedded-linux
+attributes:
+  displayName: "Embedded Linux (C, Rust, Python, Bash, Docker, MQTT)"
+  description: |
+    An embedded Linux development stack for building custom Linux-based
+    firmware and applications on ARM or RISC-V hardware. C provides
+    low-level driver and kernel module development while Rust handles
+    safety-critical userspace services with memory safety guarantees.
+    Python scripts automate build processes, test harnesses, and hardware
+    provisioning. Bash scripts manage boot sequences and system
+    configuration. Docker containers provide reproducible cross-compilation
+    environments. MQTT enables lightweight device-to-cloud communication
+    for IoT deployments. Targeted at embedded engineers building connected
+    devices, gateways, and industrial controllers. The tradeoff is long
+    build-test cycles and the difficulty of debugging hardware-specific
+    issues in emulated environments.
+  composes:
+    - language:c
+    - language:rust
+    - language:python
+    - language:bash
+    - tool:docker
+    - tool:mosquitto
+    - tool:make
+    - library:pytest
+edges:
+  composed_of:
+    - language:c
+    - language:rust
+    - language:python
+    - language:bash
+    - tool:docker
+    - tool:mosquitto
+    - tool:make
+    - library:pytest
+  used_by_role:
+    - role:embedded-engineer
+    - role:systems-integration-engineer
+    - role:qa-engineer
+  follows_workflow:
+    - workflow:firmware-release-cycle
+    - workflow:hardware-software-integration
+  applies_to:
+    - domain:embedded-systems
+    - domain:iot
+  requires_skill_area:
+    - skill-area:firmware-development
+    - skill-area:device-drivers
+    - skill-area:communication-protocols
+    - skill-area:real-time-os
+    - skill-area:hardware-abstraction-layer
+---
+nodeKind: StackProfile
+id: stack-profile:fpga-development
+attributes:
+  displayName: "FPGA Development (Python, Docker, Bash, Go, TypeScript)"
+  description: |
+    An FPGA development and verification stack using hardware description
+    languages for RTL design with Python-based testbenches for simulation
+    and verification. Docker containers provide reproducible synthesis and
+    simulation environments across team members. Go tooling automates
+    bitstream generation pipelines and register map code generation. Bash
+    scripts orchestrate multi-step build flows from synthesis through
+    place-and-route to bitstream programming. Python's cocotb-style
+    frameworks enable software engineers to write hardware testbenches in
+    familiar languages. Targeted at hardware teams building custom
+    accelerators, network processors, and signal processing pipelines. The
+    tradeoff is extremely long synthesis times and the steep learning curve
+    for timing closure optimization.
+  composes:
+    - language:python
+    - tool:docker
+    - language:bash
+    - language:go
+    - tool:github-actions
+    - library:pytest
+    - tool:make
+    - language:typescript
+edges:
+  composed_of:
+    - language:python
+    - tool:docker
+    - language:bash
+    - language:go
+    - tool:github-actions
+    - library:pytest
+    - tool:make
+    - language:typescript
+  used_by_role:
+    - role:embedded-engineer
+    - role:research-engineer
+    - role:qa-engineer
+  follows_workflow:
+    - workflow:hardware-design-review
+    - workflow:fpga-bitstream-deployment
+  applies_to:
+    - domain:electrical-engineering
+    - domain:embedded-systems
+  requires_skill_area:
+    - skill-area:hdl-design
+    - skill-area:fpga-synthesis
+    - skill-area:timing-closure
+    - skill-area:hardware-verification-uvm
+    - skill-area:peripheral-interfacing
+---
+nodeKind: StackProfile
+id: stack-profile:robotics-control
+attributes:
+  displayName: "Robotics Control (Python, C++, Docker, MQTT, Go, TypeScript)"
+  description: |
+    A robotics software stack for developing autonomous and teleoperated
+    robot systems. C++ provides real-time control loops and sensor drivers
+    while Python handles high-level behavior planning, computer vision
+    pipelines, and machine learning inference. MQTT enables lightweight
+    pub/sub communication between robot nodes, edge gateways, and cloud
+    services. Docker containers package robot software modules for
+    reproducible deployment across different hardware platforms. Go provides
+    fleet management tooling and TypeScript powers web-based teleoperation
+    dashboards. Targeted at robotics teams building warehouse robots,
+    delivery drones, and industrial automation. The tradeoff is the
+    complexity of real-time constraints and the gap between simulation
+    and real-world behavior.
+  composes:
+    - language:python
+    - language:cpp
+    - tool:docker
+    - tool:mosquitto
+    - language:go
+    - language:typescript
+    - library:opencv-python
+    - library:numpy
+edges:
+  composed_of:
+    - language:python
+    - language:cpp
+    - tool:docker
+    - tool:mosquitto
+    - language:go
+    - language:typescript
+    - library:opencv-python
+    - library:numpy
+  used_by_role:
+    - role:embedded-engineer
+    - role:research-engineer
+    - role:ml-engineer
+  follows_workflow:
+    - workflow:robotics-simulation-validation
+    - workflow:ros2-integration-testing
+  applies_to:
+    - domain:robotics
+    - domain:embedded-systems
+  requires_skill_area:
+    - skill-area:ros-development
+    - skill-area:sensor-fusion
+    - skill-area:motion-planning
+    - skill-area:computer-vision
+    - skill-area:concurrency-multithreading
+---
+nodeKind: StackProfile
+id: stack-profile:podcast-audio-platform
+attributes:
+  displayName: "Podcast / Audio Platform (Python, FastAPI, React, PostgreSQL, S3, Redis)"
+  description: |
+    A podcast hosting and audio distribution platform with FastAPI serving
+    the backend API for episode management, RSS feed generation, and
+    analytics ingestion. React powers the web player and creator dashboard
+    with waveform visualization and episode scheduling. PostgreSQL stores
+    podcast metadata, subscriber data, and listen analytics. S3 provides
+    cost-effective audio file storage with CDN distribution for global
+    playback. Redis caches popular feed responses and manages real-time
+    listener counts. Python handles audio transcoding and metadata
+    extraction. Targeted at media companies building white-labeled podcast
+    infrastructure. The tradeoff is audio transcoding cost at scale and the
+    complexity of generating accurate download/listen analytics that comply
+    with IAB measurement standards.
+  composes:
+    - language:python
+    - framework:fastapi
+    - framework:react
+    - library:prisma
+    - library:boto3
+    - library:ioredis
+    - language:typescript
+    - library:uvicorn
+edges:
+  composed_of:
+    - language:python
+    - framework:fastapi
+    - framework:react
+    - library:prisma
+    - library:boto3
+    - library:ioredis
+    - language:typescript
+    - library:uvicorn
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+    - role:media-engineer
+  follows_workflow:
+    - workflow:podcast-production-cycle
+    - workflow:content-release-pipeline
+  applies_to:
+    - domain:media-entertainment
+    - domain:content-operations
+  requires_skill_area:
+    - skill-area:audio-processing
+    - skill-area:backend-api-design
+    - skill-area:frontend-development
+    - skill-area:streaming-protocols
+    - skill-area:cloud-deployment
+---
+nodeKind: StackProfile
+id: stack-profile:restaurant-pos-system
+attributes:
+  displayName: "Restaurant / POS System (React, Node.js, Stripe, PostgreSQL, WebSocket, Docker)"
+  description: |
+    A restaurant point-of-sale and order management system combining React
+    for touchscreen-optimized terminal interfaces and kitchen display
+    screens. Node.js with Express handles order processing, menu management,
+    and real-time kitchen routing via WebSocket connections. Stripe processes
+    card payments and manages tips. PostgreSQL stores menu items, orders,
+    staff schedules, and sales reports. Docker enables consistent deployment
+    across restaurant locations with offline-capable local servers.
+    Targeted at restaurant technology companies building multi-location POS
+    solutions. The tradeoff is the need for robust offline operation during
+    network outages and PCI compliance requirements for payment handling.
+  composes:
+    - framework:react
+    - library:express
+    - tool:stripe
+    - library:prisma
+    - library:socket-io
+    - tool:docker
+    - language:typescript
+    - library:zod
+edges:
+  composed_of:
+    - framework:react
+    - library:express
+    - tool:stripe
+    - library:prisma
+    - library:socket-io
+    - tool:docker
+    - language:typescript
+    - library:zod
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:pos-system-upgrade
+    - workflow:feature-development
+  applies_to:
+    - domain:retail
+    - domain:food-beverage
+  requires_skill_area:
+    - skill-area:payment-processing
+    - skill-area:frontend-development
+    - skill-area:websocket-design
+    - skill-area:backend-api-design
+    - skill-area:mobile-offline-sync
+---
+nodeKind: StackProfile
+id: stack-profile:booking-scheduling
+attributes:
+  displayName: "Booking / Scheduling (Next.js, Prisma, Stripe, Redis, TypeScript)"
+  description: |
+    A booking and appointment scheduling platform using Next.js for a
+    responsive calendar interface with server-side rendering for SEO-friendly
+    public booking pages. Prisma provides type-safe database access to
+    PostgreSQL for managing availability, bookings, and customer profiles.
+    Stripe handles payment collection, deposits, and cancellation refunds.
+    Redis manages distributed locks for preventing double-bookings during
+    concurrent reservation attempts. Google Calendar API integration enables
+    two-way sync with providers' personal calendars. Designed for SaaS
+    companies building scheduling tools for salons, clinics, consultants,
+    and service businesses. The tradeoff is timezone handling complexity
+    and the challenge of building flexible recurring availability rules.
+  composes:
+    - framework:nextjs
+    - library:prisma
+    - tool:stripe
+    - library:ioredis
+    - language:typescript
+    - library:tailwindcss
+    - library:zod
+    - library:next-auth
+edges:
+  composed_of:
+    - framework:nextjs
+    - library:prisma
+    - tool:stripe
+    - library:ioredis
+    - language:typescript
+    - library:tailwindcss
+    - library:zod
+    - library:next-auth
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:product-manager
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:startup-mvp-validation
+  applies_to:
+    - domain:web-development
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:payment-processing
+    - skill-area:server-side-rendering
+    - skill-area:date-time-manipulation
+    - skill-area:authentication
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:survey-forms-platform
+attributes:
+  displayName: "Survey / Forms Platform (React, FastAPI, PostgreSQL, Redis, S3, TypeScript)"
+  description: |
+    A survey and form-builder platform with a React drag-and-drop form
+    designer supporting conditional logic, file uploads, and multi-page
+    workflows. FastAPI serves the backend API for form schema storage,
+    response collection, and real-time analytics aggregation. PostgreSQL
+    stores form definitions and response data with JSONB columns for
+    flexible schema evolution. Redis caches form schemas for low-latency
+    rendering and manages response rate limiting. S3 stores uploaded file
+    attachments. TypeScript ensures type safety across the form schema
+    definition, rendering engine, and analytics pipeline. Targeted at
+    SaaS companies building Typeform or Google Forms alternatives. The
+    tradeoff is the complexity of supporting arbitrary form logic branching
+    and the challenge of efficient analytics queries over schema-flexible
+    response data.
+  composes:
+    - framework:react
+    - framework:fastapi
+    - library:prisma
+    - library:ioredis
+    - library:boto3
+    - language:typescript
+    - library:tailwindcss
+    - library:zod
+edges:
+  composed_of:
+    - framework:react
+    - framework:fastapi
+    - library:prisma
+    - library:ioredis
+    - library:boto3
+    - language:typescript
+    - library:tailwindcss
+    - library:zod
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:product-manager
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:survey-methodology-review
+  applies_to:
+    - domain:web-development
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:frontend-development
+    - skill-area:backend-api-design
+    - skill-area:data-visualization
+    - skill-area:form-management
+    - skill-area:json-data-wrangling
+---
+nodeKind: StackProfile
+id: stack-profile:digital-signage
+attributes:
+  displayName: "Digital Signage (React, Electron, Node.js, WebSocket, Redis, S3)"
+  description: |
+    A digital signage content management and display platform combining
+    React for the web-based content designer and Electron for the kiosk
+    display application running on embedded PCs or Raspberry Pi devices.
+    WebSocket connections via Socket.IO push real-time content updates,
+    scheduling changes, and emergency overrides to displays without polling.
+    Redis manages display state and pub/sub channels for fleet-wide content
+    synchronization. S3 stores media assets (images, videos, HTML widgets)
+    with local caching on display devices for offline resilience. Node.js
+    orchestrates the content scheduling engine. Designed for digital signage
+    companies managing thousands of screens across retail, hospitality,
+    and corporate environments. The tradeoff is device fleet management
+    complexity and ensuring reliable content playback during network outages.
+  composes:
+    - framework:react
+    - framework:electron
+    - library:express
+    - library:socket-io
+    - library:ioredis
+    - library:boto3
+    - language:typescript
+    - tool:docker
+edges:
+  composed_of:
+    - framework:react
+    - framework:electron
+    - library:express
+    - library:socket-io
+    - library:ioredis
+    - library:boto3
+    - language:typescript
+    - tool:docker
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:desktop-developer
+  follows_workflow:
+    - workflow:desktop-app-release
+    - workflow:content-release-pipeline
+  applies_to:
+    - domain:media-entertainment
+    - domain:retail
+  requires_skill_area:
+    - skill-area:cross-platform-desktop
+    - skill-area:websocket-design
+    - skill-area:frontend-development
+    - skill-area:media-encoding
+    - skill-area:desktop-system-integration
+---
+nodeKind: StackProfile
+id: stack-profile:inventory-management
+attributes:
+  displayName: "Inventory Management (Python, FastAPI, PostgreSQL, Redis, React, Docker)"
+  description: |
+    An inventory and warehouse management system using FastAPI for a
+    high-performance REST API handling stock levels, purchase orders,
+    receiving, and multi-location transfers. PostgreSQL stores product
+    catalogs, inventory transactions, and supplier data with strong
+    consistency guarantees for stock level accuracy. Redis provides
+    distributed locking for concurrent stock operations and caches
+    frequently queried product data. React powers the warehouse dashboard
+    with barcode scanner integration, pick-list generation, and real-time
+    stock alerts. Docker enables consistent deployment across warehouse
+    locations. Designed for logistics companies and e-commerce operations
+    managing thousands of SKUs. The tradeoff is the complexity of
+    maintaining accurate stock counts across distributed locations and
+    handling edge cases like partial shipments and returns.
+  composes:
+    - language:python
+    - framework:fastapi
+    - library:prisma
+    - library:ioredis
+    - framework:react
+    - tool:docker
+    - library:uvicorn
+    - library:pydantic
+edges:
+  composed_of:
+    - language:python
+    - framework:fastapi
+    - library:prisma
+    - library:ioredis
+    - framework:react
+    - tool:docker
+    - library:uvicorn
+    - library:pydantic
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+    - role:operations-analyst
+  follows_workflow:
+    - workflow:inventory-replenishment-cycle
+    - workflow:feature-development
+  applies_to:
+    - domain:logistics
+    - domain:retail
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:frontend-development
+    - skill-area:data-validation-sanitization
+    - skill-area:caching-strategies
+    - skill-area:containerization
+---
+nodeKind: StackProfile
+id: stack-profile:ticketing-event-platform
+attributes:
+  displayName: "Ticketing / Event Platform (Next.js, Stripe, PostgreSQL, Redis, S3, TypeScript)"
+  description: |
+    An event ticketing and management platform using Next.js for
+    SEO-optimized event discovery pages, interactive seat maps, and a
+    checkout flow. Stripe handles ticket purchases, refunds, and organizer
+    payouts via Connect. PostgreSQL stores events, venues, seat inventories,
+    and order histories. Redis manages seat hold locks during checkout to
+    prevent overselling and caches event listing pages for high-traffic
+    on-sale moments. S3 stores event images, PDF tickets, and QR code
+    assets for mobile entry scanning. TypeScript ensures end-to-end type
+    safety from database models to API responses to React components.
+    Targeted at ticketing startups and venue operators. The tradeoff is the
+    extreme concurrency challenge during popular on-sales and the complexity
+    of venue-specific seating configurations.
+  composes:
+    - framework:nextjs
+    - tool:stripe
+    - library:prisma
+    - library:ioredis
+    - library:boto3
+    - language:typescript
+    - library:tailwindcss
+    - library:zod
+edges:
+  composed_of:
+    - framework:nextjs
+    - tool:stripe
+    - library:prisma
+    - library:ioredis
+    - library:boto3
+    - language:typescript
+    - library:tailwindcss
+    - library:zod
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+    - role:product-manager
+  follows_workflow:
+    - workflow:event-operations-planning
+    - workflow:feature-development
+  applies_to:
+    - domain:web-development
+    - domain:media-entertainment
+  requires_skill_area:
+    - skill-area:payment-processing
+    - skill-area:server-side-rendering
+    - skill-area:caching-strategies
+    - skill-area:frontend-development
+    - skill-area:backend-api-design

@@ -38,6 +38,13 @@
  * - Service Mesh Comparison: https://servicemesh.es/
  * - Service Mesh Patterns: https://www.oreilly.com/library/view/the-enterprise-path/9781492041795/
  * - CNCF Service Mesh Landscape: https://landscape.cncf.io/card-mode?category=service-mesh
+ * @graph
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:change-management]
+ *   roles: [role:platform-engineer, role:sre]
+ *   skillAreas: [skill-area:service-mesh-config, skill-area:observability-instrumentation]
+ *   topics: [topic:service-mesh, topic:microservices]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

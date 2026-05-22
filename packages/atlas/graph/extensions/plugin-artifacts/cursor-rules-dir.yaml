@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:cursor-rules-dir
+attributes:
+  artifactId: plugin-artifact:cursor-rules-dir
+  displayName: "Cursor rules directory"
+  targetId: plugin-target:cursor
+  artifactKind: settings-fragment
+  pathPattern: ".cursor/rules/*.md"
+  installerSurface: "fs"
+edges:
+  emits_artifact:
+    - target: plugin-target:cursor

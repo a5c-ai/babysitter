@@ -10,6 +10,9 @@ import { EffectRequestedError, RunFailedError } from "../exceptions";
 import { buildEffectIndex } from "../replay/effectIndex";
 import { globalTaskRegistry } from "../../tasks/registry";
 import { createRunDir } from "../../storage/createRunDir";
+import { readStateCache } from "../replay/stateCache";
+import { readTaskDefinition, readTaskResult } from "../../storage/tasks";
+import { BABYSITTER_SDK_VERSION } from "../../sdkVersion";
 
 let tmpRoot: string;
 
@@ -192,6 +195,128 @@ describe("commitEffectResult", () => {
     });
   });
 
+  test("stamps task definition and task result envelopes with the SDK version", async () => {
+    const effect = await requestSampleEffect();
+    const taskDef = await readTaskDefinition(effect.runDir, effect.effectId);
+    expect(taskDef?.sdkVersion).toBe(BABYSITTER_SDK_VERSION);
+
+    await commitEffectResult({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      result: {
+        status: "ok",
+        value: { doubled: 4 },
+      },
+    });
+
+    const taskResult = await readTaskResult(effect.runDir, effect.effectId);
+    expect(taskResult?.sdkVersion).toBe(BABYSITTER_SDK_VERSION);
+  });
+
+  test("refreshes the state cache after resolving an effect", async () => {
+    const effect = await requestSampleEffect();
+
+    await commitEffectResult({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      result: {
+        status: "ok",
+        value: { doubled: 4 },
+      },
+    });
+
+    const stateCache = await readStateCache(effect.runDir);
+    expect(stateCache).not.toBeNull();
+    expect(stateCache?.sdkVersion).toBe(BABYSITTER_SDK_VERSION);
+    expect(stateCache?.rebuildReason).toBe("post_effect_resolution");
+    expect(stateCache?.journalHead?.seq).toBe(3);
+    expect(stateCache?.effectsByInvocation[effect.invocationKey]).toMatchObject({
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      status: "resolved_ok",
+    });
+    expect(stateCache?.pendingEffectsByKind).toEqual({});
+  });
+
+  test("reports non-empty run work directories after resolving an effect", async () => {
+    const effect = await requestSampleEffect();
+    const workDir = path.join(effect.runDir, "work", "leftover");
+    await fs.mkdir(workDir, { recursive: true });
+    await fs.writeFile(path.join(workDir, "artifact.txt"), "large clone placeholder", "utf8");
+
+    const metrics: Record<string, unknown>[] = [];
+    await commitEffectResult({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      logger: (entry) => metrics.push(entry),
+      result: {
+        status: "ok",
+        value: { doubled: 4 },
+      },
+    });
+
+    expect(metrics).toContainEqual(
+      expect.objectContaining({
+        metric: "run.workdir_leak",
+        runDir: effect.runDir,
+        workDir: path.join(effect.runDir, "work"),
+        entryCount: 1,
+      }),
+    );
+    await expect(fs.stat(workDir)).resolves.toBeDefined();
+  });
+
+  test("does not report absent or empty run work directories after resolving an effect", async () => {
+    const absent = await requestSampleEffect();
+    const absentMetrics: Record<string, unknown>[] = [];
+    await commitEffectResult({
+      runDir: absent.runDir,
+      effectId: absent.effectId,
+      logger: (entry) => absentMetrics.push(entry),
+      result: { status: "ok", value: { doubled: 4 } },
+    });
+    expect(absentMetrics.some((entry) => entry.metric === "run.workdir_leak")).toBe(false);
+
+    const empty = await requestSampleEffect();
+    await fs.mkdir(path.join(empty.runDir, "work"), { recursive: true });
+    const emptyMetrics: Record<string, unknown>[] = [];
+    await commitEffectResult({
+      runDir: empty.runDir,
+      effectId: empty.effectId,
+      logger: (entry) => emptyMetrics.push(entry),
+      result: { status: "ok", value: { doubled: 4 } },
+    });
+    expect(emptyMetrics.some((entry) => entry.metric === "run.workdir_leak")).toBe(false);
+  });
+
+  test("reports non-empty run work directories after cancelling an effect", async () => {
+    const mod = await import("../commitEffectResult");
+    const commitEffectCancellation = (mod as Record<string, unknown>).commitEffectCancellation as (options: {
+      runDir: string;
+      effectId: string;
+      reason?: string;
+      logger?: (...args: any[]) => void;
+    }) => Promise<{ resultRef: string }>;
+    const effect = await requestSampleEffect();
+    await fs.mkdir(path.join(effect.runDir, "work", "leftover"), { recursive: true });
+
+    const metrics: Record<string, unknown>[] = [];
+    await commitEffectCancellation({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      reason: "stale",
+      logger: (entry) => metrics.push(entry),
+    });
+
+    expect(metrics).toContainEqual(
+      expect.objectContaining({
+        metric: "run.workdir_leak",
+        phase: "effect-cancelled",
+        entryCount: 1,
+      }),
+    );
+  });
+
   test("logs rejection metrics when payload validation fails", async () => {
     const effect = await requestSampleEffect();
     const metrics: Record<string, unknown>[] = [];
@@ -217,6 +342,127 @@ describe("commitEffectResult", () => {
       effectId: effect.effectId,
     });
     expect(metrics[0].message).toContain("stderr must be a string");
+  });
+});
+
+describe("commitEffectCancellation", () => {
+  test("commitEffectCancellation function exists as a named export", async () => {
+    const mod = await import("../commitEffectResult");
+    expect((mod as Record<string, unknown>).commitEffectCancellation).toBeDefined();
+    expect(typeof (mod as Record<string, unknown>).commitEffectCancellation).toBe("function");
+  });
+
+  test("appends EFFECT_CANCELLED event", async () => {
+    const mod = await import("../commitEffectResult");
+    const commitEffectCancellation = (mod as Record<string, unknown>).commitEffectCancellation as (options: {
+      runDir: string;
+      effectId: string;
+      reason?: string;
+    }) => Promise<{ resultRef: string }>;
+
+    const effect = await requestSampleEffect();
+
+    await commitEffectCancellation({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      reason: "no longer needed",
+    });
+
+    const { buildEffectIndex: buildIdx } = await import("../replay/effectIndex");
+    const index = await buildIdx({ runDir: effect.runDir });
+    const record = index.getByEffectId(effect.effectId);
+    expect(record?.status).toBe("cancelled");
+  });
+
+  test("writes result.json with cancelled status", async () => {
+    const mod = await import("../commitEffectResult");
+    const commitEffectCancellation = (mod as Record<string, unknown>).commitEffectCancellation as (options: {
+      runDir: string;
+      effectId: string;
+      reason?: string;
+    }) => Promise<{ resultRef: string }>;
+
+    const effect = await requestSampleEffect();
+
+    const result = await commitEffectCancellation({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      reason: "superseded by newer task",
+    });
+
+    expect(result.resultRef).toBeDefined();
+    const { readTaskResult } = await import("../../storage/tasks");
+    const taskResult = await readTaskResult(effect.runDir, effect.effectId);
+    expect(taskResult).toMatchObject({
+      status: "cancelled",
+      reason: "superseded by newer task",
+    });
+  });
+
+  test("refreshes the state cache after cancelling an effect", async () => {
+    const mod = await import("../commitEffectResult");
+    const commitEffectCancellation = (mod as Record<string, unknown>).commitEffectCancellation as (options: {
+      runDir: string;
+      effectId: string;
+      reason?: string;
+    }) => Promise<{ resultRef: string }>;
+
+    const effect = await requestSampleEffect();
+
+    await commitEffectCancellation({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      reason: "superseded",
+    });
+
+    const stateCache = await readStateCache(effect.runDir);
+    expect(stateCache).not.toBeNull();
+    expect(stateCache?.rebuildReason).toBe("post_effect_cancellation");
+    expect(stateCache?.journalHead?.seq).toBe(3);
+    expect(stateCache?.effectsByInvocation[effect.invocationKey]).toMatchObject({
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      status: "cancelled",
+    });
+    expect(stateCache?.pendingEffectsByKind).toEqual({});
+  });
+
+  test("rejects cancellation of non-requested effects", async () => {
+    const mod = await import("../commitEffectResult");
+    const commitEffectCancellation = (mod as Record<string, unknown>).commitEffectCancellation as (options: {
+      runDir: string;
+      effectId: string;
+      reason?: string;
+    }) => Promise<{ resultRef: string }>;
+
+    const { runDir } = await createTestRun(tmpRoot);
+
+    await expect(
+      commitEffectCancellation({
+        runDir,
+        effectId: "non-existent-effect",
+        reason: "nope",
+      })
+    ).rejects.toThrow(RunFailedError);
+  });
+
+  test("accepts optional reason", async () => {
+    const mod = await import("../commitEffectResult");
+    const commitEffectCancellation = (mod as Record<string, unknown>).commitEffectCancellation as (options: {
+      runDir: string;
+      effectId: string;
+      reason?: string;
+    }) => Promise<{ resultRef: string }>;
+
+    const effect = await requestSampleEffect();
+
+    // Should work without a reason
+    await expect(
+      commitEffectCancellation({
+        runDir: effect.runDir,
+        effectId: effect.effectId,
+      })
+    ).resolves.toBeDefined();
   });
 });
 

@@ -1,0 +1,137 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:a5c.core@current
+attributes:
+  displayName: a5c Unified Core (current) — unified agent loop
+  agentVersionId: agent-version:a5c@current
+  packageRef: source-ref:a5c-cli
+  loopIteratorPolicy: custom
+  loopIteratorNotes: |
+    a5c's core is modeled as a native compatibility layer for agent loops, not
+    as a wrapper built on top of Pi or any single backend. It can present the
+    Pi-compatible serialized tool-use loop while also normalizing Claude Code,
+    Codex, Gemini, OpenCode, LangGraph/custom graph, and agent-mux style loop
+    semantics behind the same AgentCoreImpl contract.
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: |
+    a5c owns the compatibility contract for context and compaction metadata at
+    the platform boundary. Individual backends may use provider-managed,
+    rolling-summary, server-managed, or user-managed context; a5c maps those
+    postures into one platform-managed profile so legacy Pi-style definitions
+    and newer graph/custom-agent definitions remain comparable.
+  subagentInvokerPolicy: platform-mediated
+  subagentInvokerNotes: |
+    Subagent dispatch is mediated by the a5c platform contract. Pi-style
+    tool-call handoff, Claude-style subagents, LangGraph subgraphs/supervisors,
+    and skill-as-tool execution all normalize to platform-mediated child work
+    without making a5c depend on any one mechanism.
+  resultSynthesisPolicy: post-processed
+  resultSynthesisNotes: |
+    a5c synthesizes a normalized result envelope from backend-native terminal
+    messages, graph terminal state, streamed text, tool results, and generated
+    artifacts. Pi's model-direct final text is a supported profile, not the
+    base implementation.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: a5c-unified-transport
+  supportedTransportProtocols:
+    - model-transport:anthropic-messages
+    - model-transport:openai-responses
+    - model-transport:openai-chat-completions
+    - model-transport:gemini-generate-content
+    - model-transport:openai-compat
+    - model-transport:openrouter
+    - model-transport:github-copilot
+  parallelToolCallHandling: native
+  programmaticToolCalling: optional
+  programmaticToolCallingNotes: |
+    a5c agent-core can optionally expose `code_executor`, a Code Mode /
+    Programmatic Tool Calling surface inspired by UTCP Code-Mode and Open-PTC.
+    The executor runs a bounded JavaScript tool chain against the configured
+    agent-core tools so a model can batch discovery, schema fetches, filesystem,
+    shell, web, and host tools behind one model-level call.
+  streamingFidelity: full
+  thinkingChannelHandling: model-dependent
+  streamingBlocks:
+    - text
+    - thinking
+    - tool_use
+  effortLevelDelegation: passthrough-to-harness
+  notes: |
+    This node is intentionally the Layer-4 unified contract for a5c. It is
+    capability-compatible with the legacy Pi wrapper's core definition
+    (Anthropic/OpenAI transports, tool-use loop, structured end events,
+    sequential tool handling) while also covering same-layer alternatives that
+    expose parallel tool calls, graph-defined loops, server-managed loops, or
+    provider-specific thinking channels. Pi is a compatibility target, not an implementation base. Compatibility is modeled as a native a5c contract; there is no depends_on edge to Pi.
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:a5c
+      role: core
+  speaks:
+    - target: model-transport:anthropic-messages
+    - target: model-transport:openai-responses
+    - target: model-transport:openai-chat-completions
+    - target: model-transport:gemini-generate-content
+    - target: model-transport:openai-compat
+    - target: model-transport:openrouter
+    - target: model-transport:github-copilot
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: "*"
+      level: full
+      notes: |
+        Covers Pi-compatible serialized tool calls and richer same-layer tool
+        dispatch profiles through the unified a5c core contract.
+    - target: capability:parallel-tool-calls
+      versionRange: "*"
+      level: full
+      notes: |
+        a5c can expose native parallel handling where the selected backend or
+        graph profile supports it, while preserving Pi-compatible sequential
+        dispatch as a constrained compatibility mode.
+    - target: capability:programmatic-tool-calling
+      versionRange: "*"
+      level: optional
+      notes: |
+        Implemented as the opt-in agent-core `code_executor` tool. It presents
+        the existing a5c agent-core tool surface to generated code through
+        `tools.<name>(params)` and `callTool(name, params)` helpers.
+    - target: capability:streaming
+      versionRange: "*"
+      level: full
+      notes: |
+        Normalizes streamed text, tool-call deltas, graph events, and terminal
+        result envelopes across supported same-layer core alternatives.
+    - target: capability:can-multi-turn
+      versionRange: "*"
+      level: full
+      notes: |
+        Multi-turn is the substrate's default; a5c maintains the journal across
+        run iterations and resumes via AGENT_SESSION_ID.
+    - target: capability:supports-thinking
+      versionRange: "*"
+      level: full
+      notes: |
+        Thinking blocks pass through the a5c-unified-transport unchanged when
+        the bridged backend emits them (thinkingChannelHandling=model-dependent).
+  depends_on:
+    - target: source-ref:a5c-cli
+  fires_hook:
+    - target: hook-surface:phase-change
+    - target: hook-surface:phase-change-check
+    - target: hook-surface:wake
+    - target: hook-surface:decision-point
+    - target: hook-surface:start
+    - target: hook-surface:done
+    - target: hook-surface:session-start
+    - target: hook-surface:session-end
+    - target: hook-surface:stop
+    - target: hook-surface:pre-tool-use
+    - target: hook-surface:post-tool-use
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-selection
+    - target: orch-primitive:context-injection
+    - target: orch-primitive:telemetry-collection
+
+

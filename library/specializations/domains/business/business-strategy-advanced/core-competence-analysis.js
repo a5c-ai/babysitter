@@ -3,6 +3,12 @@
  * @description Identification and leverage of core competencies for competitive advantage across business units
  * @inputs { organizationName: string, capabilities: array, businessUnits: array, competitorData: object }
  * @outputs { success: boolean, coreCompetencies: array, competenceMatrix: object, leverageStrategy: object, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:change-management-leadership, skill-area:market-sizing]
+ *   workflows: [workflow:strategic-planning]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

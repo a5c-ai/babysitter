@@ -1,0 +1,19 @@
+nodeKind: Tool
+id: tool:mypy
+attributes:
+  displayName: "mypy"
+  homepageUrl: "https://mypy-lang.org"
+  kind: linter
+  language: language:python
+  description: |
+    Optional static type checker for Python.
+edges:
+  belongs_to_language:
+    - language:python
+  used_for:
+    - target: skill-area:code-quality
+  alternative_to:
+    - target: tool:ruff
+      comparison: "Python code quality — mypy is a type checker; Ruff is a linter/formatter"
+    - target: tool:flake8
+      comparison: "Python code quality — mypy is type checking; Flake8 is style/error linting"

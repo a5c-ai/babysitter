@@ -1,0 +1,105 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:danswer-fabric
+attributes:
+  displayName: "Danswer/Onyx as Deployable Knowledge Fabric"
+  description: |
+    Danswer (rebranded as Onyx) as a self-hostable enterprise knowledge
+    fabric. Multi-connector architecture supporting 25+ data sources including
+    Confluence, Slack, Google Drive, GitHub, Notion, and Jira. Hybrid
+    retrieval (dense + sparse) with cross-encoder re-ranking provides
+    high-quality answers with citations. Document-level access control
+    respects source permissions. Self-hostable with Docker Compose for
+    organizations that cannot use cloud-based knowledge services. As a
+    knowledge fabric, Danswer provides an open-source alternative to Glean
+    for enterprise knowledge unification.
+  knowledgeFileFormats:
+    - multi-connector-index
+  retrievalStrategy: hybrid
+  knowledgePersistence: self-hosted-index
+  knowledgeScopes:
+    - organization
+    - enterprise
+  autoExtractionSupport: false
+  notes: |
+    Danswer's access control model is its key differentiator among open-source
+    RAG apps — it inherits permissions from source systems, so users only see
+    answers grounded in documents they have access to. This makes it suitable
+    for enterprise deployment where information security is non-negotiable.
+    The trade-off versus Glean is operational overhead of self-hosting.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:danswer
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:quivr-fabric
+attributes:
+  displayName: "Quivr as Team Second Brain Fabric"
+  description: |
+    Quivr as a team second brain knowledge fabric. Multi-brain architecture
+    allows creating separate knowledge spaces for different topics, teams,
+    or projects. File upload, web crawl, and API connectors ingest knowledge
+    from multiple sources. Chat and search interfaces provide conversational
+    access to stored knowledge. Built with Python/FastAPI backend and
+    Next.js frontend. As a knowledge fabric, Quivr provides a user-friendly
+    interface for teams to build and query shared knowledge bases without
+    infrastructure expertise.
+  knowledgeFileFormats:
+    - documents
+    - web-crawls
+    - api-imports
+  retrievalStrategy: semantic-search
+  knowledgePersistence: self-hosted-index
+  knowledgeScopes:
+    - team
+    - organization
+  autoExtractionSupport: false
+  notes: |
+    Quivr's multi-brain architecture is well-suited for organizations that
+    need knowledge isolation between teams or projects while maintaining a
+    unified platform. Each brain can have different embedding models,
+    retrieval configurations, and access controls. The trade-off is
+    complexity of managing multiple brains versus a single unified index.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:quivr
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:private-gpt-fabric
+attributes:
+  displayName: "PrivateGPT as Local-Only Knowledge Fabric"
+  description: |
+    PrivateGPT as a fully offline, privacy-first knowledge fabric. Runs
+    entirely on local hardware with no data leaving the machine. Ingests
+    documents (PDF, DOCX, TXT, Markdown), embeds them locally using
+    open-source models, and answers questions using a local LLM. Supports
+    Ollama, llama.cpp, and HuggingFace backends. As a knowledge fabric,
+    PrivateGPT is the choice for air-gapped environments, regulated
+    industries, and sensitive document analysis where cloud APIs are
+    prohibited by policy or regulation.
+  knowledgeFileFormats:
+    - pdf
+    - docx
+    - txt
+    - markdown
+  retrievalStrategy: semantic-search
+  knowledgePersistence: local-index
+  knowledgeScopes:
+    - project
+    - user
+  autoExtractionSupport: false
+  notes: |
+    PrivateGPT's value proposition is absolute data privacy — no API calls,
+    no cloud processing, no data exfiltration risk. This makes it viable for
+    knowledge fabrics containing classified, HIPAA, or legally privileged
+    information. The trade-off is quality — local embedding and generation
+    models lag cloud models in accuracy and capability. For many regulated
+    use cases, this trade-off is acceptable.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:private-gpt

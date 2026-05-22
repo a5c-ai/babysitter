@@ -1,0 +1,88 @@
+nodeKind: EnvVar
+id: env-var:openai-api-key
+attributes:
+  displayName: "OPENAI_API_KEY"
+  name: OPENAI_API_KEY
+  category: auth
+  valueType: string
+  description: |
+    Primary auth secret read by Codex CLI / OpenAI Agents SDK / Codex SDK.
+    Source: platform.openai.com/docs/quickstart.
+---
+nodeKind: EnvVar
+id: env-var:openai-base-url
+attributes:
+  displayName: "OPENAI_BASE_URL"
+  name: OPENAI_BASE_URL
+  category: network-timeout
+  valueType: string
+  description: |
+    Optional override for the OpenAI API base URL — used by Codex CLI to
+    route through a proxy or alt OpenAI-compatible endpoint.
+    Source: platform.openai.com/docs/api-reference/authentication.
+---
+nodeKind: EnvVar
+id: env-var:gemini-api-key
+attributes:
+  displayName: "GEMINI_API_KEY"
+  name: GEMINI_API_KEY
+  category: auth
+  valueType: string
+  description: |
+    Primary auth secret read by Gemini CLI when not using ADC. Source:
+    github.com/google-gemini/gemini-cli docs (authentication).
+---
+nodeKind: EnvVar
+id: env-var:google-api-key
+attributes:
+  displayName: "GOOGLE_API_KEY"
+  name: GOOGLE_API_KEY
+  category: auth
+  valueType: string
+  description: |
+    Alternate Google AI auth env var honoured by Gemini CLI / @google/genai
+    SDK. Source: github.com/google-gemini/gemini-cli docs.
+---
+nodeKind: EnvVar
+id: env-var:gemini-cli-debug
+attributes:
+  displayName: "DEBUG"
+  name: DEBUG
+  category: debug
+  valueType: string
+  description: |
+    Standard Node.js debug channel selector consumed by Gemini CLI's debug
+    namespaces. Source: github.com/google-gemini/gemini-cli docs.
+---
+nodeKind: EnvVar
+id: env-var:cursor-config-dir
+attributes:
+  displayName: "CURSOR_CONFIG_DIR"
+  name: CURSOR_CONFIG_DIR
+  category: ide
+  valueType: string
+  description: |
+    Override location for Cursor's config / rules / MCP files (default
+    `~/.cursor`). Source: docs.cursor.com (configuration).
+---
+nodeKind: EnvVar
+id: env-var:gh-token
+attributes:
+  displayName: "GH_TOKEN"
+  name: GH_TOKEN
+  category: auth
+  valueType: string
+  description: |
+    GitHub auth token used by Copilot CLI (`gh copilot`). Source:
+    docs.github.com/en/copilot/github-copilot-in-the-cli.
+---
+nodeKind: EnvVar
+id: env-var:github-copilot-cli-debug
+attributes:
+  displayName: "GH_DEBUG"
+  name: GH_DEBUG
+  category: debug
+  valueType: string
+  description: |
+    Verbose debug channel for `gh` CLI (and by extension `gh copilot`).
+    Source: cli.github.com docs.

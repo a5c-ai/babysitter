@@ -7,6 +7,13 @@ model: opus
 skills:
   - documentation-generator
   - openapi-generator
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:api-doc-generation, skill-area:docs-as-code]
+  roles: [role:technical-writer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Documentation Migration Agent

@@ -2,6 +2,14 @@
 name: shellcheck-config-generator
 description: Generate .shellcheckrc configuration with appropriate rules, exclusions, and severity settings for shell script linting.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:code-analysis-linting]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # ShellCheck Config Generator

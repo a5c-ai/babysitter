@@ -1,0 +1,35 @@
+nodeKind: ModelVersion
+id: model:jina-embeddings-v3@current
+attributes:
+  displayName: "Jina Embeddings v3"
+  modelFamilyId: model-family:jina-embeddings-v3
+  versionRange: ">=3.0.0 <4.0.0"
+  kind: embedding
+  contextWindowTokens: 8192
+  costPerMTokInput: 0.018
+  costPerMTokOutput: 0.0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modalities:
+    - text
+    - embedding
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: embedding
+      direction: output
+  releaseDate: "2024-09-18"
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: "2024-09-18"
+  modelCardUrl: "https://jina.ai/embeddings/"
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:jina-embeddings-v3
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:jina-embeddings-v3
+  served_by:
+    - provider:jina-ai

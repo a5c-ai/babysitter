@@ -2,6 +2,13 @@
 name: deep-linking
 description: Universal links and deep linking skill for implementing iOS Universal Links, Android App Links, custom URL schemes, and deferred deep linking across mobile platforms.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:deep-linking, skill-area:react-native-development]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Deep Linking Skill

@@ -9,6 +9,13 @@ expertise:
   - CI/CD integration
   - Visual regression
   - Page object patterns
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:qa-engineer, role:frontend-engineer]
+  skillAreas: [skill-area:e2e-testing, skill-area:cross-browser-testing]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
 ---
 
 # E2E Testing Agent

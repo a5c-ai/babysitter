@@ -17,6 +17,9 @@
  * - Kubernetes: https://kubernetes.io/docs/
  * - Modal: https://modal.com/docs
  * - BentoML: https://docs.bentoml.com/
+ * @graph
+ *   domains: [domain:software-engineering, workflow:release-management]
+ *   workflows: [workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

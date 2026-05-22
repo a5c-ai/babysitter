@@ -6,6 +6,10 @@ backlog-id: AG-IE-014
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:industrial-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:organizational-design, skill-area:data-analysis]
+  roles: [role:operations-analyst, role:research-engineer]
 ---
 
 # workstation-designer

@@ -17,6 +17,13 @@
  * - Google Play Console: https://play.google.com/console
  * - Play Store Policies: https://support.google.com/googleplay/android-developer/topic/9858052
  * - Android App Bundle: https://developer.android.com/guide/app-bundle
+ * @graph
+ *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:mobile-app-submission, workflow:release-management]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -58,21 +65,14 @@ export async function process(inputs, ctx) {
       appName, packageName, appVersion, releaseTrack, outputDir
     });
     artifacts.push(...result.artifacts);
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Play Store publishing prepared for ${appName} v${appVersion}. Track: ${releaseTrack}. Ready to publish?`,
     title: 'Publishing Review',
-    context: { runId: ctx.runId, appName, packageName, appVersion, releaseTrack },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, appName, packageName, appVersion, releaseTrack }
+  });
+
   const endTime = ctx.now();
   return {
     success: true,

@@ -19,6 +19,12 @@
  * - SystemVerilog for Verification: https://verificationacademy.com/
  * - Writing Testbenches: https://www.veripool.org/verilator/
  * - VHDL Verification: https://vunit.github.io/
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:hardware-software-integration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

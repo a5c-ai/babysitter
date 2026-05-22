@@ -1,0 +1,23 @@
+---
+nodeKind: StackPart
+id: stack-part:email-delivery
+attributes:
+  displayName: "Transactional Email Delivery"
+  category: messaging
+  description: |
+    Outbound email API (SES, SendGrid, Postmark, Resend). Distinct from
+    generic notification-service.
+edges:
+  implemented_by:
+    - target: tool:sendgrid
+---
+nodeKind: StackPart
+id: stack-part:sms-delivery
+attributes:
+  displayName: "SMS / Voice Delivery"
+  category: messaging
+  description: |
+    SMS/voice messaging API (Twilio, Pinpoint, Vonage).
+edges:
+  implemented_by:
+    - target: tool:twilio

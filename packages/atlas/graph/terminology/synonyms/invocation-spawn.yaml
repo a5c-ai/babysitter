@@ -1,0 +1,13 @@
+nodeKind: Synonym
+id: synonym:invocation-spawn
+attributes:
+  termAId: term:invocation
+  termBId: term:run
+  direction: bidirectional
+  note: |
+    In legacy harness code, "spawn" is sometimes used where the canonical term is Invocation (one process spawn).
+edges:
+  synonym_a:
+    - term:invocation
+  synonym_b:
+    - term:run

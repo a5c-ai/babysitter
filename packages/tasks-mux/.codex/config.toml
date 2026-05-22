@@ -1,0 +1,9 @@
+[mcp_servers.breakpoints-mux-remote]
+url = "https://breakpoints-pro.a5c.ai/mcp"
+
+[mcp_servers.breakpoints-mux]
+command = "npx"
+args = ["-y", "@a5c-ai/breakpoints-mux"]
+
+[mcp_servers.breakpoints-mux.env]
+BPX_SERVER_URL = "https://breakpoints-pro.a5c.ai/api/v1"

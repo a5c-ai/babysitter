@@ -1,0 +1,144 @@
+---
+nodeKind: Workflow
+id: workflow:lead-to-revenue-funnel-analysis
+attributes:
+  displayName: "Lead-to-Revenue Funnel Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Analyzes the full lead-to-revenue funnel across marketing, sales
+    development, and sales — measuring stage conversion rates
+    (MQL-to-SQL, SQL-to-opportunity, opportunity-to-close), identifying
+    bottleneck stages with degrading velocity, segmenting performance by
+    source/channel/segment, and benchmarking against historical cohorts.
+    Produces funnel health report with specific stage-level improvement
+    recommendations. Excludes individual campaign optimization and
+    deal-level interventions.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:revenue-operations
+    - target: domain:marketing
+    - target: domain:sales
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:revenue-operations-team
+    - target: org-unit:marketing-team
+    - target: org-unit:sales-team
+---
+nodeKind: Workflow
+id: workflow:gtm-motion-alignment-review
+attributes:
+  displayName: "GTM Motion Alignment Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews alignment across marketing, sales, and customer success
+    go-to-market motions — auditing lead handoff SLA compliance and
+    response times, evaluating MQL definition consistency with sales
+    acceptance criteria, reviewing inter-team feedback loop health,
+    assessing shared KPI alignment, and identifying process gaps causing
+    lead leakage or customer experience friction. Produces alignment
+    scorecard and process improvement action items. Excludes
+    organizational restructuring.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:data-scientist
+  applies_to_domain:
+    - target: domain:revenue-operations
+    - target: domain:marketing
+    - target: domain:sales
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:revenue-operations-team
+    - target: org-unit:marketing-team
+    - target: org-unit:sales-team
+    - target: org-unit:customer-success
+---
+nodeKind: Workflow
+id: workflow:pricing-strategy-review
+attributes:
+  displayName: "Pricing Strategy Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews and refines pricing strategy — analyzing price sensitivity
+    through win/loss data and discount distribution patterns, benchmarking
+    against competitive pricing intelligence, evaluating packaging and
+    tier structure effectiveness, modeling revenue impact of proposed
+    pricing changes, and reviewing A/B pricing experiment results where
+    applicable. Produces pricing adjustment recommendations with revenue
+    impact projections. Excludes contract-level pricing negotiation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:revenue-operations
+    - target: domain:strategy
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:revenue-operations-team
+    - target: org-unit:strategy-team
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:revenue-forecasting-model-calibration
+attributes:
+  displayName: "Revenue Forecasting Model Calibration"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Calibrates revenue forecasting models for improved accuracy —
+    back-testing predicted vs actual outcomes by segment and time period,
+    adjusting pipeline stage-weighting factors based on recent close-rate
+    trends, validating win-rate assumptions across deal sizes and sales
+    motions, incorporating macroeconomic and seasonality signals, and
+    reconciling bottom-up rep forecasts with top-down model predictions.
+    Produces model accuracy report and updated weighting parameters.
+    Excludes financial planning and budgeting.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:revenue-operations
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:revenue-operations-team
+    - target: org-unit:analytics-team
+    - target: org-unit:finance-team

@@ -8,6 +8,11 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:compliance-automation, skill-area:data-governance, skill-area:data-protection-dlp]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:compliance-officer, role:privacy-engineer]
 ---
 
 # Research Ethics and IRB Skill

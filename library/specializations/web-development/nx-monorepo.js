@@ -4,6 +4,13 @@
  * @inputs { projectName: string, preset?: string }
  * @outputs { success: boolean, nxConfig: object, projects: array, artifacts: array }
  * @references - Nx: https://nx.dev/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:tech-lead, role:frontend-engineer]
+ *   skillAreas: [skill-area:monorepo-extraction]
+ *   topics: [topic:developer-experience, topic:micro-frontend-architecture]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

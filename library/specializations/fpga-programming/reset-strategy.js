@@ -16,6 +16,12 @@
  * @references
  * - Reset Design: http://www.sunburst-design.com/papers/
  * - FPGA Reset Best Practices: https://docs.amd.com/r/en-US/ug949-vivado-design-methodology
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

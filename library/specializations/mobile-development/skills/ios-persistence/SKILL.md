@@ -5,6 +5,13 @@ version: 1.0.0
 category: iOS Data Storage
 slug: ios-persistence
 status: active
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:ios-native, skill-area:mobile-local-databases]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # iOS Persistence Skill

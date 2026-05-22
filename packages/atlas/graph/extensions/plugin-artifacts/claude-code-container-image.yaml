@@ -1,0 +1,16 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:claude-code-container-image
+attributes:
+  artifactId: plugin-artifact:claude-code-container-image
+  displayName: "Claude Code container image"
+  targetId: plugin-target:claude-code
+  artifactKind: container-image
+  pathPattern: "ghcr.io/anthropics/claude-code"
+  installerSurface: "latest"
+  scriptVariants:
+    - preinstalled
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code
+  references_path:
+    - target: path:claude-code-container-image

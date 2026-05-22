@@ -1,0 +1,92 @@
+---
+nodeKind: Workflow
+id: workflow:sdk-release-lifecycle
+attributes:
+  displayName: "SDK Release Lifecycle"
+  workflowKind: release
+  triggerType: scheduled
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Manages the full lifecycle of an SDK release — API surface freeze,
+    backward compatibility verification, documentation generation, sample
+    code validation, package publishing, and developer notification.
+    Excludes SDK feature development.
+edges:
+  involves_role:
+    - target: role:tech-lead
+    - target: role:devrel
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:typescript-generic-programming
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:changelog-maintenance
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:devrel-team
+---
+nodeKind: Workflow
+id: workflow:breaking-change-review
+attributes:
+  displayName: "Breaking Change Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-change"
+  complexity: cross-team
+  description: |
+    Evaluates proposed breaking changes to public APIs or SDKs —
+    assessing consumer impact, planning deprecation timelines, defining
+    migration guides, coordinating with downstream teams, and approving
+    or rejecting the change. Excludes implementation of the migration.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:tech-lead
+    - target: role:devrel
+  requires_skill_area:
+    - target: skill-area:typescript-generic-programming
+    - target: skill-area:adr-writing
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:approve-architecture
+    - target: responsibility:write-rfc-documents
+  performed_by_org_unit:
+    - target: org-unit:architecture-guild
+    - target: org-unit:devrel-team
+---
+nodeKind: Workflow
+id: workflow:developer-portal-update
+attributes:
+  displayName: "Developer Portal Update"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Coordinates updates to the developer portal after API or SDK releases —
+    refreshing API reference documentation, updating code samples, syncing
+    changelog entries, verifying interactive playground endpoints, and
+    validating search index. Excludes portal infrastructure changes.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:devrel
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:editor-fluency
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:changelog-maintenance
+  performed_by_org_unit:
+    - target: org-unit:devrel-team
+    - target: org-unit:engineering

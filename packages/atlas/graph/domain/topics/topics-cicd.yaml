@@ -1,0 +1,147 @@
+---
+nodeKind: Topic
+id: topic:github-actions-workflows
+attributes:
+  displayName: "GitHub Actions Workflows"
+  description: |
+    GitHub Actions Workflows as a cross-cutting topic - designing and maintaining
+    workflow files that orchestrate CI/CD pipelines within GitHub repositories.
+    Covers job matrices for multi-platform testing, reusable workflows shared
+    across repos via workflow_call, composite actions for DRY step composition,
+    environment protection rules, and concurrency controls. Enables event-driven
+    automation tightly integrated with the GitHub pull-request and release lifecycle.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:ci-pipeline-design
+attributes:
+  displayName: "CI Pipeline Design"
+  description: |
+    CI Pipeline Design as a cross-cutting topic - architecting automated build,
+    test, and integration pipelines for rapid feedback and quality enforcement.
+    Covers stage sequencing, parallelism, fan-out/fan-in patterns, intelligent
+    caching strategies (dependency caches, build caches, layer caches), artifact
+    flow between stages, pipeline-as-code principles, and failure-isolation
+    techniques. Addresses trade-offs between pipeline speed and coverage breadth.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:deployment-strategies
+attributes:
+  displayName: "Deployment Strategies"
+  description: |
+    Deployment Strategies as a meta-topic encompassing the full spectrum of
+    release patterns — rolling updates, blue/green environment switches, canary
+    traffic splits, feature-flag-gated dark launches, shadow deployments, and
+    A/B experiments. Each strategy balances risk, rollback speed, infrastructure
+    cost, and observability requirements. Acts as the organizing concept linking
+    topic:blue-green-deployment, topic:feature-flags, workflow:canary-deployment,
+    and related progressive-delivery patterns across the atlas graph.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:cloud-infra
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:ci-triggers
+attributes:
+  displayName: "CI Triggers"
+  description: |
+    CI Triggers as a cross-cutting topic - the event-based mechanisms that
+    initiate pipeline execution. Covers push and pull-request hooks, schedule
+    (cron) expressions, manual workflow_dispatch with typed inputs,
+    repository_dispatch for API-driven invocation, workflow_call for
+    pipeline composition, and external webhook payloads. Understanding trigger
+    semantics is essential for controlling pipeline concurrency, cost, and
+    security (e.g., preventing secret exposure on fork PRs).
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:ci-runners
+attributes:
+  displayName: "CI Runners"
+  description: |
+    CI Runners as a cross-cutting topic - the execution environments that process
+    pipeline jobs. Covers GitHub-hosted ephemeral runners, self-hosted runner
+    registration and lifecycle management, runner groups and routing labels,
+    autoscaling runner pools (Actions Runner Controller, KEDA-based), container-based
+    ephemeral runners for security isolation, ARM/GPU-class runner provisioning,
+    and cost optimization through runner fleet right-sizing.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:cloud-infra
+---
+nodeKind: Topic
+id: topic:ci-artifacts
+attributes:
+  displayName: "CI Artifacts"
+  description: |
+    CI Artifacts as a cross-cutting topic - the immutable build outputs that flow
+    through and beyond a pipeline. Covers artifact upload/download between jobs,
+    retention policies, artifact signing and provenance attestation (SLSA),
+    container image publishing, package registry integration (npm, PyPI, Maven,
+    OCI), test-result and code-coverage report archiving, and artifact promotion
+    across environment tiers. Central to traceability in supply-chain security.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:ci-secrets-management
+attributes:
+  displayName: "CI Secrets Management"
+  description: |
+    CI Secrets Management as a cross-cutting topic - securely injecting credentials
+    and sensitive configuration into pipeline jobs without exposing them in logs
+    or artifacts. Covers GitHub Actions encrypted secrets and environment protection
+    rules, OIDC-based short-lived token federation (AWS, GCP, Azure), HashiCorp
+    Vault dynamic secrets, secret scanning to prevent accidental commits, and
+    the principle of least-privilege for pipeline service accounts.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:cybersecurity
+---
+nodeKind: Topic
+id: topic:monorepo-ci
+attributes:
+  displayName: "Monorepo CI"
+  description: |
+    Monorepo CI as a cross-cutting topic - running efficient continuous integration
+    in repositories that contain multiple packages, services, or applications.
+    Covers affected-graph computation (Nx, Turborepo, Bazel) to run only impacted
+    tests, workspace-aware caching, per-package pipeline definitions, dependency
+    ordering for build fan-out, and change-set-based deployment gating. Addresses
+    the tension between monorepo developer ergonomics and pipeline execution cost.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:ci-observability
+attributes:
+  displayName: "CI Observability"
+  description: |
+    CI Observability as a cross-cutting topic - measuring and improving the health
+    and performance of CI/CD systems themselves. Covers pipeline duration metrics
+    and trend tracking, flaky-test detection and quarantine workflows, failure-rate
+    dashboards, queue-time analysis for runner capacity planning, DORA metrics
+    (deployment frequency, lead time, MTTR, change failure rate), and OpenTelemetry
+    trace export from pipeline steps for distributed tracing of build workflows.
+edges:
+  applies_to:
+    - domain:devops
+    - domain:software-engineering

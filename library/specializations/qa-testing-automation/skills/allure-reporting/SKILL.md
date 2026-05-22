@@ -8,6 +8,13 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:regression-testing, skill-area:metrics-dashboarding]
+  roles: [role:qa-engineer]
+  topics: [topic:test-driven-development]
+
 ---
 
 # Allure Test Reporting Skill

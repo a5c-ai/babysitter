@@ -1,0 +1,21 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:codex-hooks-mux-fallback
+attributes:
+  signalId: discovery-signal:codex-hooks-mux-fallback
+  signalKind: env-any
+  key: codex
+  matchMode: all-present-with-absences
+  confidence: medium
+  scope: hooks-mux
+  signals:
+    - OPENAI_API_KEY
+  absentSignals:
+    - CLAUDE_PLUGIN_ROOT
+    - CLAUDE_ENV_FILE
+  argvMatches: []
+  metadataFields: []
+  consumer: hooks-mux-core
+  notes: 'Ordered adapter auto-detection rule used by hooks-mux — disambiguates codex from claude when only OPENAI_API_KEY is set. Verbatim from legacy discovery:codex:hooks-mux:3.'
+edges:
+  applies_to:
+    - target: agent:codex

@@ -1,0 +1,106 @@
+---
+nodeKind: Tool
+id: tool:fastly
+attributes:
+  displayName: "Fastly"
+  homepageUrl: "https://www.fastly.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Edge cloud platform providing CDN, WAF, DDoS protection, and edge
+    compute (Compute@Edge). Offers real-time log streaming, instant
+    purging, and Varnish-based VCL configuration for fine-grained caching.
+edges:
+  tool_used_by:
+    - target: skill-area:cdn-edge
+  used_for:
+    - skill-area:cdn-edge
+  alternative_to:
+    - target: tool:akamai
+      comparison: "CDN and edge platforms"
+---
+nodeKind: Tool
+id: tool:akamai
+attributes:
+  displayName: "Akamai"
+  homepageUrl: "https://www.akamai.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Global CDN and edge security platform serving over a third of internet
+    traffic. Provides web performance optimization, DDoS mitigation, WAF,
+    bot management, and edge computing capabilities.
+edges:
+  tool_used_by:
+    - target: skill-area:cdn-edge
+  used_for:
+    - skill-area:cdn-edge
+  alternative_to:
+    - target: tool:fastly
+      comparison: "CDN and edge platforms"
+---
+nodeKind: Tool
+id: tool:ngrok
+attributes:
+  displayName: "ngrok"
+  homepageUrl: "https://ngrok.com"
+  kind: other
+  description: |
+    Ingress-as-a-service platform for exposing local servers and services
+    to the internet via secure tunnels. Used for webhook development,
+    demo environments, API gateway, and IoT device connectivity.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:local-development
+  used_for:
+    - skill-area:networking
+  alternative_to:
+    - target: tool:tailscale
+      comparison: "Network tunneling — ngrok exposes local services publicly; Tailscale creates private mesh networks"
+---
+nodeKind: Tool
+id: tool:tailscale
+attributes:
+  displayName: "Tailscale"
+  homepageUrl: "https://tailscale.com"
+  kind: other
+  description: |
+    Zero-config VPN built on WireGuard for connecting devices and services
+    across networks. Provides mesh networking, ACLs, MagicDNS, subnet
+    routing, and exit nodes for secure private network access.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:networking
+  used_for:
+    - skill-area:networking
+  alternative_to:
+    - target: tool:ngrok
+      comparison: "Network tunneling — Tailscale creates private mesh networks; ngrok exposes local services publicly"
+---
+nodeKind: Tool
+id: tool:cloudflare-workers
+attributes:
+  displayName: "Cloudflare Workers"
+  homepageUrl: "https://workers.cloudflare.com"
+  kind: other
+  description: |
+    Serverless JavaScript/WASM edge compute platform running on Cloudflare's
+    global network. Provides Workers KV, Durable Objects, R2 storage, D1
+    SQLite, and Queue for building distributed edge applications.
+edges:
+  belongs_to_language:
+    - language:javascript
+  tool_used_by:
+    - target: skill-area:serverless-compute
+    - target: skill-area:cdn-edge
+  used_for:
+    - skill-area:cdn-edge
+  alternative_to:
+    - target: tool:sst
+      comparison: "Serverless platforms — Cloudflare Workers is edge compute; SST is AWS serverless framework"
+    - target: tool:serverless-framework
+      comparison: "Serverless platforms — Cloudflare Workers is edge-first; Serverless Framework is multi-cloud FaaS"

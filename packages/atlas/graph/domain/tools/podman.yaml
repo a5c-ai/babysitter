@@ -1,0 +1,17 @@
+nodeKind: Tool
+id: tool:podman
+attributes:
+  displayName: "Podman"
+  homepageUrl: "https://podman.io"
+  kind: container
+  releasedAt: "2018"
+  description: |
+    Daemonless container engine for developing, managing, and running OCI containers.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:containerization
+  alternative_to:
+    - target: tool:docker
+      comparison: "container runtimes — Podman is daemonless; Docker uses a daemon"

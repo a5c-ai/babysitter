@@ -1,0 +1,12 @@
+nodeKind: Responsibility
+id: responsibility:review-architecture-changes
+attributes:
+  displayName: "Review architecture changes"
+  cadence: as-needed
+  requiredSkills:
+    - skill:system-design
+  description: |
+    Review architecture changes.
+edges:
+  requires_skill:
+    - skill:system-design

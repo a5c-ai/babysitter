@@ -15,6 +15,11 @@ metadata:
   domain: business
   category: Agile Management
   id: AG-002
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:roadmap-planning, skill-area:change-management, skill-area:team-management]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:scrum-master, role:change-manager]
 ---
 
 # Agile Coach Agent

@@ -4,6 +4,7 @@ import { writeFileAtomic } from "../../storage/atomic";
 import { EffectIndex, buildEffectIndex } from "./effectIndex";
 import { EffectRecord, EffectStatus } from "../types";
 import { getClockIsoString } from "../../storage/clock";
+import { BABYSITTER_SDK_VERSION } from "../../sdkVersion";
 
 export const STATE_CACHE_SCHEMA_VERSION = "2026.01.state-cache";
 
@@ -28,6 +29,7 @@ export interface DerivedEffectSummary {
 export interface StateCacheSnapshot {
   schemaVersion: string;
   savedAt: string;
+  sdkVersion: string;
   journalHead?: StateCacheJournalHead | null;
   stateVersion: number;
   effectsByInvocation: Record<string, DerivedEffectSummary>;
@@ -39,6 +41,7 @@ export interface CreateStateCacheSnapshotOptions {
   journalHead?: StateCacheJournalHead | null;
   savedAt?: string;
   schemaVersion?: string;
+  sdkVersion?: string;
   stateVersion?: number;
   effectsByInvocation?: Record<string, DerivedEffectSummary>;
   pendingEffectsByKind?: Record<string, number>;
@@ -64,7 +67,13 @@ export async function writeStateCache(runDir: string, snapshot: StateCacheSnapsh
   const stateDir = getStateDir(runDir);
   await fs.mkdir(stateDir, { recursive: true });
   const stateFile = getStateFile(runDir);
-  await writeFileAtomic(stateFile, JSON.stringify(snapshot, null, 2) + "\n");
+  const persistedSnapshot = snapshot.sdkVersion
+    ? snapshot
+    : {
+        ...snapshot,
+        sdkVersion: BABYSITTER_SDK_VERSION,
+      };
+  await writeFileAtomic(stateFile, JSON.stringify(persistedSnapshot, null, 2) + "\n");
 }
 
 export function journalHeadsEqual(
@@ -88,6 +97,7 @@ export function createStateCacheSnapshot(
   return {
     schemaVersion: options.schemaVersion ?? STATE_CACHE_SCHEMA_VERSION,
     savedAt: options.savedAt ?? getClockIsoString(),
+    sdkVersion: options.sdkVersion ?? BABYSITTER_SDK_VERSION,
     journalHead: options.journalHead ?? null,
     stateVersion: options.stateVersion ?? 0,
     effectsByInvocation: options.effectsByInvocation ?? {},
@@ -125,16 +135,20 @@ export function normalizeSnapshot(raw: unknown): StateCacheSnapshot {
         : null;
   const stateVersion =
     typeof raw.stateVersion === "number" && Number.isFinite(raw.stateVersion) ? raw.stateVersion : 0;
-  return createStateCacheSnapshot({
+  return {
     schemaVersion:
       typeof raw.schemaVersion === "string" ? raw.schemaVersion : STATE_CACHE_SCHEMA_VERSION,
     savedAt,
+    sdkVersion:
+      typeof raw.sdkVersion === "string" && raw.sdkVersion.trim() !== ""
+        ? raw.sdkVersion
+        : BABYSITTER_SDK_VERSION,
     journalHead,
     stateVersion,
     effectsByInvocation,
     pendingEffectsByKind,
     rebuildReason,
-  });
+  };
 }
 
 export async function rebuildStateCache(
@@ -239,7 +253,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 function isEffectStatus(value: unknown): value is EffectStatus {
-  return value === "requested" || value === "resolved_ok" || value === "resolved_error";
+  return value === "requested" || value === "resolved_ok" || value === "resolved_error" || value === "cancelled";
 }
 
 function isJournalHeadLike(value: unknown): value is StateCacheJournalHead {

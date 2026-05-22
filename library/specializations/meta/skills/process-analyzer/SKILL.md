@@ -7,6 +7,11 @@ metadata:
   version: "1.0.0"
   category: analysis
   backlog-id: SK-META-002
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:ai-agent-development, skill-area:orchestration-loop]
+  topics: [topic:developer-experience, topic:architecture-decisions]
+  roles: [role:platform-engineer, role:tech-lead]
 ---
 
 # process-analyzer

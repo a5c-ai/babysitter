@@ -1,0 +1,232 @@
+---
+nodeKind: Workflow
+id: workflow:annual-strategic-planning
+attributes:
+  displayName: "Annual Strategic Planning"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annually"
+  complexity: cross-team
+  description: |
+    Orchestrates the organization-wide annual strategic planning cycle --
+    facilitating executive strategy sessions to define multi-year vision and
+    annual priorities, cascading OKR drafts from executive themes to
+    department-level objectives, running competitive landscape and
+    market-opportunity analyses, aligning headcount and budget requests to
+    strategic bets, conducting cross-functional dependency mapping and
+    trade-off negotiations, stress-testing plans against scenario-based
+    financial models, and consolidating the final strategic plan for board
+    approval. Produces annual strategic plan document and departmental OKR
+    cascade. Excludes quarterly OKR check-ins.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:principal-engineer
+  requires_skill_area:
+    - target: skill-area:adr-writing
+    - target: skill-area:c4-modeling
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:finance
+    - target: domain:project-management
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:finance-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:board-reporting-cycle
+attributes:
+  displayName: "Board Reporting Cycle"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Prepares and delivers quarterly board-of-directors reporting packages --
+    collecting financial results, operating metrics, and strategic initiative
+    progress from each department, consolidating narrative and data into
+    standardized board-deck format, conducting pre-read review cycles with
+    executive team for accuracy and messaging alignment, preparing management
+    commentary on variances and forward outlook, coordinating logistics for
+    board meeting scheduling and materials distribution, and tracking action
+    items from prior board meetings to closure. Produces board reporting
+    package and meeting minutes with action tracker. Excludes board
+    governance and director recruitment.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:operations
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:operations-team
+    - target: org-unit:investor-relations
+---
+nodeKind: Workflow
+id: workflow:merger-integration-playbook
+attributes:
+  displayName: "Merger Integration Playbook"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-acquisition"
+  complexity: cross-team
+  description: |
+    Manages post-merger integration execution across all functional
+    workstreams -- standing up an integration management office with
+    workstream leads, conducting Day-1 readiness assessments for IT, HR,
+    finance, and operations, executing system-consolidation plans for
+    overlapping tools and platforms, harmonizing compensation and benefits
+    structures, migrating customer accounts and contracts to unified systems,
+    aligning engineering practices and CI/CD pipelines, tracking synergy
+    realization against deal-model targets, and managing cultural integration
+    communication campaigns. Produces integration milestone tracker and
+    synergy realization dashboard. Excludes deal negotiation and due
+    diligence.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:principal-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:strangler-fig-pattern
+    - target: skill-area:schema-evolution
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:human-resources
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:run-architecture-review
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:hr-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:organizational-restructuring
+attributes:
+  displayName: "Organizational Restructuring"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Plans and executes organizational restructuring initiatives -- assessing
+    current organizational design against strategic objectives, modeling
+    reporting-line changes and span-of-control impacts, identifying affected
+    roles and designing transition support programs, coordinating legal and
+    HR review of workforce-adjustment compliance, developing communication
+    plans with sequenced messaging for different stakeholder groups, updating
+    organizational charts and system-of-record hierarchies, managing
+    knowledge transfer between departing and receiving teams, and tracking
+    restructuring completion against timeline commitments. Produces
+    restructuring plan and transition timeline. Excludes individual
+    performance management.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:adr-writing
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:operations
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:operations-team
+    - target: org-unit:legal-team
+---
+nodeKind: Workflow
+id: workflow:employee-exit-process
+attributes:
+  displayName: "Employee Exit Process"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-employee"
+  complexity: cross-team
+  description: |
+    Manages the end-to-end employee offboarding process -- initiating
+    separation workflows in HR systems, scheduling exit interviews and
+    compiling feedback themes, coordinating knowledge-transfer sessions for
+    critical responsibilities, revoking system access and credentials across
+    all platforms within security SLAs, recovering company equipment and
+    processing asset returns, calculating final compensation and benefits
+    continuation, generating compliance documentation for regulatory
+    requirements, and updating organizational charts and distribution lists.
+    Produces exit checklist completion record and aggregated exit-interview
+    insights. Excludes retention intervention.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:security-reviewer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:identity-security
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:security
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:onboard-new-engineer
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:security-team
+    - target: org-unit:it-service-management
+---
+nodeKind: Workflow
+id: workflow:corporate-communications-review
+attributes:
+  displayName: "Corporate Communications Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews and aligns corporate communications strategy across internal and
+    external channels -- auditing messaging consistency across press
+    releases, blog posts, social media, and internal all-hands content,
+    evaluating brand-voice adherence and tone guidelines, reviewing
+    crisis-communication playbook currency, assessing analyst and media
+    relations effectiveness through sentiment tracking, validating executive
+    thought-leadership pipeline and speaking engagements, and benchmarking
+    communication metrics against industry peers. Produces communications
+    effectiveness report and editorial calendar updates. Excludes day-to-day
+    content production.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:tutorial-design
+    - target: skill-area:docs-as-code
+  applies_to_domain:
+    - target: domain:public-relations
+    - target: domain:marketing
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:content-team
+    - target: org-unit:operations-team

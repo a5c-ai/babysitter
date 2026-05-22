@@ -1,0 +1,158 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:puppeteer.navigate
+attributes:
+  schema: '{}'
+  displayName: "Puppeteer: Navigate"
+  description: Navigate the browser to a URL.
+  inputSchema:
+    type: object
+    required: [url]
+    properties:
+      url: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-puppeteer
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:puppeteer.screenshot
+attributes:
+  schema: '{}'
+  displayName: "Puppeteer: Screenshot"
+  description: Capture a PNG screenshot of the page or a CSS-selected element.
+  inputSchema:
+    type: object
+    required: [name]
+    properties:
+      name: { type: string }
+      selector: { type: string }
+      width: { type: integer }
+      height: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      image: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-puppeteer
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:puppeteer.click
+attributes:
+  schema: '{}'
+  displayName: "Puppeteer: Click"
+  description: Click an element matched by a CSS selector.
+  inputSchema:
+    type: object
+    required: [selector]
+    properties:
+      selector: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-puppeteer
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:puppeteer.fill
+attributes:
+  schema: '{}'
+  displayName: "Puppeteer: Fill"
+  description: Type into an input element.
+  inputSchema:
+    type: object
+    required: [selector, value]
+    properties:
+      selector: { type: string }
+      value: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-puppeteer
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:puppeteer.select
+attributes:
+  schema: '{}'
+  displayName: "Puppeteer: Select"
+  description: Select an option in a <select> element by value.
+  inputSchema:
+    type: object
+    required: [selector, value]
+    properties:
+      selector: { type: string }
+      value: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-puppeteer
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:puppeteer.hover
+attributes:
+  schema: '{}'
+  displayName: "Puppeteer: Hover"
+  description: Hover over an element matched by a CSS selector.
+  inputSchema:
+    type: object
+    required: [selector]
+    properties:
+      selector: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-puppeteer
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:puppeteer.evaluate
+attributes:
+  schema: '{}'
+  displayName: "Puppeteer: Evaluate"
+  description: Execute JavaScript in the page context and return the result.
+  inputSchema:
+    type: object
+    required: [script]
+    properties:
+      script: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      result: {}
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-puppeteer

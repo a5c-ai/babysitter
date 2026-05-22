@@ -1,0 +1,44 @@
+nodeKind: Provider
+id: provider:cohere
+attributes:
+  displayName: "Cohere"
+  vendor: "Cohere Inc."
+  versionRange: ">=2024-01-01"
+  authMethods:
+    - api-key
+  authMethodNotes: |
+    Standard `Authorization: Bearer <api-key>` for the Cohere v2 API.
+  endpoints:
+    base: "https://api.cohere.com/v2"
+    chat: "https://api.cohere.com/v2/chat"
+    chat_stream: "https://api.cohere.com/v2/chat"
+    embed: "https://api.cohere.com/v2/embed"
+    rerank: "https://api.cohere.com/v2/rerank"
+    models: "https://api.cohere.com/v1/models"
+  pricing: |
+    See https://cohere.com/pricing for current per-model rates.
+  rateLimitSignalingProtocol: |
+    HTTP 429 with `Retry-After` (seconds). Errors envelope:
+    `{ "id": "...", "message": "..." }`.
+  dataResidencyOptions:
+    - us
+    - eu
+  vendorFeatures: []
+  slaTier: "cohere-enterprise"
+  regions:
+    - global
+edges:
+  realizes:
+    - target: layer:2-provider
+  serves:
+    - model:command-r-plus@current
+    - model:cohere-embed-english-v3@current
+  emits_message_type:
+    - protocol-message:cohere-message-start
+    - protocol-message:cohere-content-start
+    - protocol-message:cohere-content-delta
+    - protocol-message:cohere-content-end
+    - protocol-message:cohere-tool-call-start
+    - protocol-message:cohere-tool-call-delta
+    - protocol-message:cohere-tool-call-end
+    - protocol-message:cohere-message-end

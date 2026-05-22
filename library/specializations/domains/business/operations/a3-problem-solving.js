@@ -26,6 +26,11 @@
  *   documentationRequirements: { format: "standard-A3", audience: [...], approvalProcess: {...} }
  * }
  * @references Toyota A3 Process, Lean Problem Solving, Managing to Learn
+  * @graph
+ *   domains: [domain:operations]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

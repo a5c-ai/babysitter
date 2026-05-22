@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:tool-server-mcp-puppeteer.scope
+attributes:
+  subjectId: tool-server:mcp-puppeteer
+  inScope: |
+    Headless-Chromium browser automation — navigate, click, type, screenshot, evaluate JS in a real browser.
+  outOfScope: |
+    Persistent crawling pipelines, captcha-solving, anti-bot evasion, and headless-shell-only sandboxes.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - tool-server:mcp-puppeteer

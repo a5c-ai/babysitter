@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:test-set
+attributes:
+  canonicalDefinitionId: definition:test-set.canonical
+  displayName: "TestSet"
+  kind: concept
+  references:
+    - "NodeKind:TestSet"
+  description: |
+    Named collection of test cases
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

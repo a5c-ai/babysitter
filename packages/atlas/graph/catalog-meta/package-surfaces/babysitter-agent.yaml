@@ -1,0 +1,25 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-babysitter-agent
+attributes:
+  packageId: "@a5c-ai/babysitter-agent"
+  packageName: "@a5c-ai/babysitter-agent"
+  workspacePath: packages/babysitter-agent
+  moduleType: typescript
+  surfaceKinds:
+    - agent-runtime
+    - bin-entrypoint
+    - cli
+  sourceOfTruthRole: application
+  publishedTo: npm
+  versionPolicy: semver
+  # Source: packages/babysitter-agent/package.json (subpath exports for
+  # ./anycli, ./api, ./cli, ./cost, ./daemon, ./governance, ./harness,
+  # ./interaction, ./observability, ./runtime). Bin: babysitter-harness.
+edges:
+  references_path:
+    - target: path:a5c-runs-dir
+# `babysitter-harness` runtime command set
+  # (HARNESS_RUNTIME_COMMANDS in sdk program.ts) is shared between the
+  # sdk and agent packages; the harness bin lives in babysitter-agent.
+  exposes_subcommand:
+    - target: interaction-primitive:babysitter-sdk-cli-harness-runtime

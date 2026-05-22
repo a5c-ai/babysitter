@@ -17,6 +17,12 @@
  * - ICC Arbitration: https://iccwbo.org/business-solutions/model-contracts-clauses/
  * - AAA Mediation: https://www.adr.org/
  * - JAMS: https://www.jamsadr.com/
+  * @graph
+ *   domains: [domain:legal]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

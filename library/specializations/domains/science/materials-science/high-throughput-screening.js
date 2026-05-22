@@ -18,6 +18,12 @@
  * - AFLOW: https://aflow.org/
  * - atomate: https://atomate.org/
  * - pymatgen: https://pymatgen.org/
+ *
+ * @graph
+ *   domains: [domain:materials-science]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

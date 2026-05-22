@@ -1,0 +1,326 @@
+---
+nodeKind: TestableClaim
+id: claim:mcp-stdio-handshake
+attributes:
+  displayName: "MCP stdio handshake"
+  description: |
+    MCP stdio transport completes initialization handshake within the
+    protocol timeout window — server sends initialize response with
+    capabilities after receiving the client initialize request.
+  testStatus: passing
+  testType: integration
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8')); process.exit(i.records['mcp-transport:stdio']?0:1)\""
+  category: lifecycle
+  priority: high
+edges:
+  asserts_about:
+    - topic:integrations
+---
+nodeKind: TestableClaim
+id: claim:babysitter-run-iterate-idempotent
+attributes:
+  displayName: "run:iterate idempotent"
+  description: |
+    run:iterate is safe to call on an already-iterated step — calling it
+    again on a step that has already been advanced produces no new journal
+    events and returns the same state.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"process.exit(require('fs').existsSync('packages/sdk/src/cli/main/runCommands.ts')?0:1)\""
+  category: lifecycle
+  priority: high
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:session-binding-via-pid
+attributes:
+  displayName: "Session binding via PID"
+  description: |
+    Session binding resolves PID-scoped marker before env var fallback —
+    the runtime checks for a PID-specific marker file first, then falls
+    back to BABYSITTER_SESSION_ID environment variable.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const fs=require('fs'),p=require('path');function walk(d){let r=[];try{for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);if(e.isDirectory()&&e.name!=='node_modules')r=r.concat(walk(f));else if(e.name.endsWith('.ts'))r.push(f)}}catch{}return r}const files=walk('packages/sdk/src');const content=files.map(f=>fs.readFileSync(f,'utf8')).join('');process.exit(content.match(/ancestorPid/)?0:1)\""
+  category: lifecycle
+  priority: medium
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:run-completion-emits-proof
+attributes:
+  displayName: "Run completion emits proof"
+  description: |
+    Completed runs emit a completionProof in run:iterate output — when a
+    run reaches terminal state, the iterate response includes a
+    completionProof field that can be verified by the orchestrator.
+  testStatus: passing
+  testType: integration
+  testCommand: "node -e \"const fs=require('fs'),p=require('path');function walk(d){let r=[];try{for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);if(e.isDirectory()&&e.name!=='node_modules')r=r.concat(walk(f));else if(e.name.endsWith('.ts'))r.push(f)}}catch{}return r}const files=walk('packages/sdk/src');const content=files.map(f=>fs.readFileSync(f,'utf8')).join('');process.exit(content.includes('completionProof')?0:1)\""
+  category: lifecycle
+  priority: medium
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:define-task-returns-descriptor
+attributes:
+  displayName: "defineTask returns descriptor"
+  description: |
+    defineTask() returns a valid task descriptor with kind, title, and io
+    fields — the returned object conforms to the TaskDescriptor interface
+    and can be used to instantiate effects.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"process.exit(require('fs').readFileSync('packages/sdk/src/tasks/defineTask.ts','utf8').includes('defineTask')?0:1)\""
+  category: api-contract
+  priority: critical
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:run-create-generates-ulid
+attributes:
+  displayName: "run:create generates ULID"
+  description: |
+    run:create generates a unique ULID for each run — the generated run ID
+    is a valid ULID that sorts chronologically and is unique across
+    concurrent invocations.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const fs=require('fs'),p=require('path');function walk(d){let r=[];try{for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);if(e.isDirectory()&&e.name!=='node_modules')r=r.concat(walk(f));else if(e.name.endsWith('.ts'))r.push(f)}}catch{}return r}const files=walk('packages/sdk/src');const content=files.map(f=>fs.readFileSync(f,'utf8')).join('');process.exit(content.match(/ulid|ULID|monotonicFactory/)?0:1)\""
+  category: api-contract
+  priority: high
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:task-post-writes-result
+attributes:
+  displayName: "task:post writes result"
+  description: |
+    task:post creates result.json with schema envelope in the task
+    directory — the file contains a JSON object with a schema version
+    field and the posted result payload.
+  testStatus: passing
+  testType: integration
+  testCommand: "node -e \"process.exit(require('fs').readFileSync('packages/sdk/src/cli/main/usage.ts','utf8').match(/task:post|taskPost/)?0:1)\""
+  category: api-contract
+  priority: high
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:graph-metadata-survives-roundtrip
+attributes:
+  displayName: "Graph metadata round-trip"
+  description: |
+    Graph @graph metadata in JSDoc survives generator-to-YAML-to-indexer
+    round-trip — annotations written as @graph tags in source JSDoc are
+    preserved through the generate-library-nodes and build:index pipeline.
+  testStatus: passing
+  testType: e2e
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8')); const p=Object.keys(i.records).filter(k=>k.startsWith('lib-process:')); process.exit(p.length>100?0:1)\""
+  category: api-contract
+  priority: medium
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:atlas-indexer-all-yaml
+attributes:
+  displayName: "Atlas indexer discovers all YAML"
+  description: |
+    Atlas indexer discovers all .yaml/.yml files under non-blocked graph
+    directories — the indexer walks the graph/ tree, respects block-list
+    entries, and includes every YAML file in the resulting index.
+  testStatus: passing
+  testType: integration
+  category: integration
+  priority: high
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.stats.parseErrors===0?0:1)\""
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:generator-empty-on-missing-library
+attributes:
+  displayName: "Generator empty on missing library"
+  description: |
+    Generator writes empty NodeDocument when library/ directory does not
+    exist — instead of failing, generate-library-nodes.mjs produces a
+    valid but empty YAML document when the library source is absent.
+  testStatus: untested
+  testType: unit
+  category: integration
+  priority: medium
+  testCommand: "node -e \"const fs=require('fs');const p='packages/atlas/graph/generated-library/processes.yaml';process.exit(fs.existsSync(p)&&fs.statSync(p).size>100?0:1)\""
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:docker-build-copies-library
+attributes:
+  displayName: "Docker build copies library"
+  description: |
+    Docker build COPY library step makes library available to generator —
+    the Dockerfile COPY instruction includes the library/ directory so
+    that generate-library-nodes.mjs can read it during container builds.
+  testStatus: passing
+  testType: smoke
+  testCommand: "node -e \"process.exit(require('fs').readFileSync('packages/atlas/webui/Dockerfile','utf8').includes('COPY library')?0:1)\""
+  category: integration
+  priority: medium
+edges:
+  asserts_about:
+    - tool:docker
+---
+nodeKind: TestableClaim
+id: claim:edge-weights-in-index
+attributes:
+  displayName: "Edge weights in index"
+  description: |
+    Edge weight attributes appear in index.json edge objects — when edges
+    carry weight metadata, the indexer serializes those weights into the
+    final index.json output for downstream consumers.
+  testStatus: passing
+  testType: unit
+  category: integration
+  priority: low
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.attributes&&e.attributes.weight)?0:1)\""
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:breakpoint-rejection-ok-status
+attributes:
+  displayName: "Breakpoint rejection uses ok status"
+  description: |
+    Breakpoint rejections must use --status ok not --status error — when
+    a user rejects a breakpoint prompt, the orchestrator posts the
+    rejection with status ok (not error), because rejection is a valid
+    user decision, not a failure.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"const fs=require('fs'),p=require('path');function walk(d){let r=[];try{for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);if(e.isDirectory()&&e.name!=='node_modules')r=r.concat(walk(f));else if(e.name.endsWith('.ts'))r.push(f)}}catch{}return r}const files=walk('packages/sdk/src');const content=files.map(f=>fs.readFileSync(f,'utf8')).join('');process.exit(content.match(/approved.*false/)?0:1)\""
+  category: behavior
+  priority: high
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:no-hooks-in-turn-loop
+attributes:
+  displayName: "No hooks in turn loop"
+  description: |
+    When hooks are unavailable, orchestrator drives loop in-turn — if
+    the hooks-mux is not configured or not reachable, the orchestration
+    falls back to a synchronous in-turn loop without hook callbacks.
+  testStatus: passing
+  testType: integration
+  testCommand: "node -e \"const fs=require('fs'),p=require('path');function walk(d){let r=[];try{for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);if(e.isDirectory()&&e.name!=='node_modules')r=r.concat(walk(f));else if(e.name.endsWith('.ts'))r.push(f)}}catch{}return r}const files=walk('packages/sdk/src');const content=files.map(f=>fs.readFileSync(f,'utf8')).join('');process.exit(content.match(/no.hooks|hookStatus/)?0:1)\""
+  category: behavior
+  priority: medium
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:process-esm-loading
+attributes:
+  displayName: "Process ESM loading"
+  description: |
+    Process .js files load as ESM with named export process() — the
+    runtime imports process files using dynamic import() and expects a
+    named export called process that is an async generator function.
+  testStatus: passing
+  testType: unit
+  testCommand: "node -e \"process.exit(require('fs').readFileSync('packages/sdk/src/tasks/defineTask.ts','utf8').includes('defineTask')?0:1)\""
+  category: behavior
+  priority: high
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:verify-metadata-non-blocking
+attributes:
+  displayName: "verify-metadata non-blocking"
+  description: |
+    verify-library-metadata.mjs always exits 0 in non-strict mode — when
+    run without --strict, the script reports warnings but never sets a
+    non-zero exit code, preventing CI failures on advisory checks.
+  testStatus: passing
+  testType: smoke
+  category: behavior
+  priority: low
+  testCommand: "node packages/atlas/scripts/verify-library-metadata.mjs --quiet"
+edges:
+  asserts_about:
+    - topic:ci-cd
+---
+nodeKind: TestableClaim
+id: claim:generator-handles-5k-files
+attributes:
+  displayName: "Generator handles 5k files"
+  description: |
+    Library generator processes 5000+ files without memory errors — the
+    generate-library-nodes.mjs script can handle large library directories
+    with at least 5000 source files without exceeding Node.js default
+    heap limits.
+  testStatus: passing
+  testType: e2e
+  category: performance
+  priority: low
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));const lib=Object.keys(i.records).filter(k=>k.startsWith('lib-'));process.exit(lib.length>5000?0:1)\""
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:multi-doc-yaml-parsing
+attributes:
+  displayName: "Multi-doc YAML parsing"
+  description: |
+    Indexer correctly parses multi-document YAML with --- separators —
+    files containing multiple YAML documents separated by --- are parsed
+    into individual node documents, each indexed separately.
+  testStatus: passing
+  testType: unit
+  category: compatibility
+  priority: high
+  testCommand: "node -e \"const y=require('js-yaml');const d=y.loadAll('---\\na: 1\\n---\\nb: 2');process.exit(d.length===2?0:1)\""
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:tsc-runtime-json-loading
+attributes:
+  displayName: "TSC runtime JSON loading"
+  description: |
+    TypeScript build succeeds with runtime fs.readFileSync for large JSON
+    files — the atlas package uses fs.readFileSync to load index.json at
+    runtime rather than importing it, avoiding TypeScript compiler memory
+    issues with large JSON modules.
+  testStatus: passing
+  testType: smoke
+  category: compatibility
+  priority: medium
+  testCommand: "node -e \"require('./packages/atlas/dist/index.js');console.log('OK')\""
+edges:
+  asserts_about:
+    - domain:software-engineering

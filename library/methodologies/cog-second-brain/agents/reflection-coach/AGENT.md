@@ -2,13 +2,17 @@
 name: reflection-coach
 description: Guides cross-domain pattern analysis, weekly check-ins, and personal/professional strategy evolution
 role: Pattern Analysis & Reflection
----
-
-# Reflection Coach Agent
-
-**Name:** Reflection Coach
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 **Role:** Pattern Analysis & Reflection
 **Source:** [COG Second Brain](https://github.com/huytieu/COG-second-brain)
+
+---
 
 ## Identity
 

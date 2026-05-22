@@ -19,6 +19,12 @@
  * - ASTM E18: Rockwell Hardness Testing
  * - ASTM E23: Notched Bar Impact Testing
  * - ISO 6892-1: Metallic Materials - Tensile Testing
+ *
+ * @graph
+ *   domains: [domain:materials-science]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

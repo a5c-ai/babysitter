@@ -1,0 +1,10 @@
+{
+  "name": "@a5c-ai/agent-mux-tv-appletv-app",
+  "private": true,
+  "type": "module",
+  "description": "Apple TV companion surfaces for agent-mux",
+  "scripts": {
+    "tvos": "echo Open the tvOS target in Xcode to run the simulator"
+  },
+  "version": "5.0.0"
+}

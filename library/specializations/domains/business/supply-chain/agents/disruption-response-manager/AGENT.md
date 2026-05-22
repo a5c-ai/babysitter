@@ -9,6 +9,12 @@ expertise:
   - Crisis communication
   - Recovery coordination
   - Lessons learned
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:incident-management, skill-area:change-management]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:procurement-manager, role:operations-analyst]
 ---
 
 # Disruption Response Manager

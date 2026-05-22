@@ -1,0 +1,12 @@
+nodeKind: Term
+id: term:retrieval-augmented-generation
+attributes:
+  canonicalDefinitionId: definition:retrieval-augmented-generation.canonical
+  displayName: "Retrieval-Augmented Generation"
+  kind: concept
+  description: |
+    A pattern where retrieved documents are spliced into context before generation.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:data-science

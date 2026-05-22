@@ -3,6 +3,13 @@
  * @description Design polynomial-time approximation algorithms for NP-hard problems with guaranteed approximation ratios
  * @inputs { problemDescription: string, hardnessProof: object, targetApproximationRatio: number }
  * @outputs { success: boolean, algorithm: object, approximationRatioProof: object, implementationGuidelines: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:computer-science]
+ *   specializations: [specialization:theoretical-computer-science]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:graph-algorithms]
+ *   workflows: [workflow:research-grant-lifecycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -9,6 +9,11 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:compiler-implementation, skill-area:profiling-cpu]
+  roles: [role:backend-engineer]
 ---
 
 # JIT Compilation Skill

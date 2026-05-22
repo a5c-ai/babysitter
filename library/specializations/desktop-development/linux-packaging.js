@@ -17,6 +17,12 @@
  * - electron-builder Linux targets: https://www.electron.build/configuration/linux
  * - Flatpak documentation: https://docs.flatpak.org/
  * - Snapcraft: https://snapcraft.io/docs
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:desktop-development]
+ *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+ *   roles: [role:desktop-developer, role:fullstack-engineer]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -46,46 +52,41 @@ export async function process(inputs, ctx) {
     artifacts.push(...deb.artifacts);
     packages.push({ format: 'deb', ...deb });
   }
+
   // RPM package
   if (packageFormats.includes('rpm')) {
     const rpm = await ctx.task(createRpmPackageTask, { projectName, framework, distributions, outputDir });
     artifacts.push(...rpm.artifacts);
     packages.push({ format: 'rpm', ...rpm });
   }
+
   // AppImage
   if (packageFormats.includes('appimage')) {
     const appimage = await ctx.task(createAppImageTask, { projectName, framework, outputDir });
     artifacts.push(...appimage.artifacts);
     packages.push({ format: 'appimage', ...appimage });
   }
+
   // Flatpak
   if (packageFormats.includes('flatpak')) {
     const flatpak = await ctx.task(createFlatpakTask, { projectName, framework, outputDir });
     artifacts.push(...flatpak.artifacts);
     packages.push({ format: 'flatpak', ...flatpak });
   }
+
   // Snap
   if (packageFormats.includes('snap')) {
-    let snap = await ctx.task(createSnapTask, { projectName, framework, outputDir });
+    const snap = await ctx.task(createSnapTask, { projectName, framework, outputDir });
     artifacts.push(...snap.artifacts);
     packages.push({ format: 'snap', ...snap });
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      snap = await ctx.task(createSnapTask, { ...{ projectName, framework, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Linux packages created: ${packages.map(p => p.format).join(', ')}. Total: ${packages.length} packages. Review?`,
     title: 'Linux Packaging Review',
-    context: { runId: ctx.runId, packages: packages.map(p => p.format) },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, packages: packages.map(p => p.format) }
+  });
+
   // Desktop entry and icons
   const desktopEntry = await ctx.task(createDesktopEntryTask, { projectName, framework, outputDir });
   artifacts.push(...desktopEntry.artifacts);
@@ -96,6 +97,7 @@ export async function process(inputs, ctx) {
     repositories = await ctx.task(setupLinuxRepositoryTask, { projectName, packageFormats, outputDir });
     artifacts.push(...repositories.artifacts);
   }
+
   const validation = await ctx.task(validateLinuxPackagesTask, { projectName, framework, packageFormats, packages, outputDir });
   artifacts.push(...validation.artifacts);
 

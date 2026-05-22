@@ -1,0 +1,59 @@
+---
+nodeKind: Workflow
+id: workflow:firmware-update-rollout
+attributes:
+  displayName: "Firmware Update Rollout"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Plans and executes firmware updates to deployed embedded devices — binary
+    signing, OTA delivery, staged rollout by device cohort, rollback verification,
+    and post-update health monitoring. Excludes firmware feature development.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:tech-lead
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:blue-green-deployment
+    - target: skill-area:canary-rollouts
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:embedded-systems
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:hardware-in-the-loop-testing
+attributes:
+  displayName: "Hardware-in-the-Loop Testing"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: single-team
+  description: |
+    Runs automated test suites against firmware on physical hardware rigs —
+    managing test bench scheduling, flashing cycles, sensor simulation, and
+    result collection. Excludes simulation-only testing.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:chaos-engineering
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:embedded-systems
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:research-engineering

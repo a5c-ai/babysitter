@@ -1,0 +1,17 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-vendor-doc-vendor-doc-backfill
+attributes:
+  displayName: "Vendor documentation bundle"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.various
+  observedAt: "2026-05-04T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+  locator: catalog-vendor-doc-vendor-doc-backfill
+edges:
+  has_trust_level:
+    - trust-level:official-web
+

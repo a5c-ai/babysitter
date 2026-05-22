@@ -1,0 +1,376 @@
+{
+  "name": "babysitter",
+  "version": "5.0.1-staging.5c9708469",
+  "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+  "author": "a5c.ai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter"
+  },
+  "keywords": [
+    "orchestration",
+    "workflow",
+    "automation",
+    "event-sourced",
+    "hooks",
+    "TDD",
+    "quality-convergence",
+    "agent",
+    "LLM"
+  ],
+  "hooks": {
+    "SessionStart": "hooks/session-start.sh",
+    "Stop": "hooks/stop.sh",
+    "UserPromptSubmit": "hooks/user-prompt-submit.sh",
+    "PreToolUse": "hooks/pre-tool-use.sh",
+    "PostToolUse": "hooks/post-tool-use.sh",
+    "SubagentStop": "hooks/subagent-stop.sh",
+    "Notification": "hooks/notification.sh",
+    "PreCompact": "hooks/pre-compact.sh",
+    "AfterAgent": "hooks/after-agent.sh",
+    "SessionEnd": "hooks/session-end.sh",
+    "SessionIdle": "hooks/session-idle.sh",
+    "ShellEnv": "hooks/shell-env.sh",
+    "BeforePromptBuild": "hooks/before-prompt-build.sh",
+    "BeforeProviderRequest": "hooks/before-provider-request.sh"
+  },
+  "hookFilePattern": "{{name}}-proxied-{{native}}.sh",
+  "commands": "commands",
+  "skills": [
+    {
+      "name": "babysit",
+      "file": "skills/babysit/SKILL.md"
+    }
+  ],
+  "include": [
+    "versions.json",
+    "hooks/"
+  ],
+  "installSurface": "bin/install-shared-sdk.js",
+  "installSurfaceExports": [
+    "getGlobalStateDir",
+    "resolveCliCommand",
+    "runCli",
+    "ensureGlobalProcessLibrary"
+  ],
+  "extraFileSets": {
+    "readme": {
+      "README.md": "file:per-harness/{{targetDir}}/README.md"
+    },
+    "babysit-skill": {
+      "skills/babysit/SKILL.md": "file:per-harness/{{targetDir}}/babysit-SKILL.md"
+    },
+    "agents-file": {
+      "AGENTS.md": "file:per-harness/{{targetDir}}/AGENTS.md"
+    },
+    "pi-extension": {
+      "extensions/index.ts": "file:per-harness/{{targetDir}}/extensions-index.ts",
+      "extensions/i18n.ts": "file:per-harness/{{targetDir}}/extensions-i18n.ts"
+    },
+    "codex-branding": {
+      "assets/icon.svg": "file:per-harness/{{targetDir}}/assets/icon.svg",
+      "assets/logo.png": "file:per-harness/{{targetDir}}/assets/logo.png",
+      "assets/logo.svg": "file:per-harness/{{targetDir}}/assets/logo.svg"
+    },
+    "codex-team-install": {
+      "scripts/team-install.js": "file:per-harness/{{targetDir}}/scripts/team-install.js"
+    },
+    "codex-support-files": {
+      "plugin.lock.json": "file:per-harness/{{targetDir}}/plugin.lock.json"
+    },
+    "gemini-surface": {
+      "GEMINI.md": "file:per-harness/{{targetDir}}/GEMINI.md",
+      "bin/cli.js": "file:per-harness/{{targetDir}}/bin/cli.js",
+      "bin/postinstall.js": "file:per-harness/{{targetDir}}/bin/postinstall.js",
+      "bin/preuninstall.js": "file:per-harness/{{targetDir}}/bin/preuninstall.js"
+    },
+    "github-surface": {
+      "bin/cli.js": "file:per-harness/{{targetDir}}/bin/cli.js",
+      "bin/install.js": "file:per-harness/{{targetDir}}/bin/install.js"
+    },
+    "opencode-surface": {
+      "commands/status.md": "file:per-harness/{{targetDir}}/status-command.md",
+      "skills/accomplish-status/SKILL.md": "file:per-harness/{{targetDir}}/accomplish-status-skill/SKILL.md"
+    },
+    "openclaw-surface": {
+      "commands/babysit.md": "file:per-harness/{{targetDir}}/babysit-command.md"
+    }
+  },
+  "harnessInstallSurfaceExportSets": {
+    "plugin-bundle": [
+      "PLUGIN_BUNDLE_ENTRIES",
+      "copyRecursive",
+      "copyPluginBundle"
+    ],
+    "marketplace-entry": [
+      "DEFAULT_MARKETPLACE",
+      "normalizeMarketplaceSourcePath",
+      "ensureMarketplaceEntry",
+      "removeMarketplaceEntry"
+    ],
+    "marketplace-entry-with-name": [
+      "DEFAULT_MARKETPLACE",
+      "normalizeMarketplaceSourcePath",
+      "normalizeMarketplaceName",
+      "ensureMarketplaceEntry",
+      "removeMarketplaceEntry"
+    ],
+    "managed-skills": [
+      "installManagedSkills"
+    ],
+    "managed-hooks-install": [
+      "mergeManagedHooksConfig",
+      "installManagedHooks",
+      "warnWindowsHooks"
+    ],
+    "managed-hooks-merge": [
+      "mergeManagedHooksConfig",
+      "warnWindowsHooks"
+    ]
+  },
+  "targets": {
+    "claude-code": {
+      "extraFileSets": [
+        "readme"
+      ],
+      "hookConfig": {
+        "matchers": {
+          "PreToolUse": "Bash"
+        }
+      }
+    },
+    "codex": {
+      "npmPackageName": "@a5c-ai/babysitter-codex",
+      "extraFileSets": [
+        "babysit-skill",
+        "codex-branding",
+        "codex-support-files",
+        "readme",
+        "codex-team-install"
+      ],
+      "harnessManifest": {
+        "skills": "./skills/",
+        "hooks": "./hooks.json",
+        "apps": "./.app.json",
+        "interface": {
+          "displayName": "Babysitter",
+          "shortDescription": "Run Babysitter orchestration flows from Codex",
+          "longDescription": "Babysitter adds orchestration entrypoints such as $call, $plan, and $resume, plus Codex lifecycle hooks that keep runs and workspace state in sync.",
+          "developerName": "a5c.ai",
+          "category": "Coding",
+          "capabilities": [
+            "Interactive",
+            "Read",
+            "Write"
+          ],
+          "websiteURL": "https://github.com/a5c-ai/babysitter",
+          "privacyPolicyURL": "https://github.com/a5c-ai/babysitter",
+          "termsOfServiceURL": "https://github.com/a5c-ai/babysitter",
+          "defaultPrompt": [
+            "Use Babysitter to start a new orchestration run",
+            "Plan a Babysitter workflow before executing it",
+            "Resume the latest Babysitter run in this workspace"
+          ],
+          "brandColor": "#0F766E",
+          "composerIcon": "./assets/icon.svg",
+          "logo": "./assets/logo.png"
+        },
+        "author": {
+          "name": "a5c.ai",
+          "email": "support@a5c.ai"
+        },
+        "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-unified/per-harness/codex#readme",
+        "repository": "https://github.com/a5c-ai/babysitter"
+      },
+      "harnessInstallSurface": "per-harness/codex/bin/install-surface.js",
+      "harnessInstallSurfaceExportSets": [
+        "plugin-bundle",
+        "marketplace-entry",
+        "managed-skills",
+        "managed-hooks-install"
+      ],
+      "harnessInstallSurfaceExports": [
+        "LEGACY_MARKETPLACE_PLUGIN_NAMES",
+        "LEGACY_SKILL_NAMES",
+        "LEGACY_PROMPT_NAMES",
+        "LEGACY_HOOK_SCRIPT_NAMES",
+        "MANAGED_HOOK_SCRIPT_NAMES",
+        "getCodexHome",
+        "getHomePluginRoot",
+        "getHomeMarketplacePath",
+        "getWorkspacePluginRoot",
+        "getWorkspaceMarketplacePath",
+        "renderCodexConfigToml",
+        "insertRootKey",
+        "ensureSectionLine",
+        "ensureWritableRoots",
+        "mergeCodexConfig",
+        "mergeCodexConfigFile",
+        "resolveBabysitterCommand",
+        "runBabysitterCli",
+        "ensureGlobalProcessLibrary",
+        "getMarketplaceRootDir",
+        "removeLegacyCodexSurface",
+        "installCodexSurface",
+        "harnessInstall",
+        "harnessTeamInstall"
+      ]
+    },
+    "cursor": {
+      "extraFileSets": [
+        "babysit-skill",
+        "readme"
+      ],
+      "harnessManifest": {
+        "skills": "skills/",
+        "commands": "commands/",
+        "hooks": "hooks/hooks-cursor.json",
+        "author": {
+          "name": "a5c.ai",
+          "email": "support@a5c.ai"
+        },
+        "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-unified/per-harness/cursor#readme",
+        "repository": "https://github.com/a5c-ai/babysitter"
+      },
+      "harnessInstallSurface": "per-harness/cursor/bin/install-surface.js",
+      "harnessInstallSurfaceExportSets": [
+        "plugin-bundle",
+        "marketplace-entry-with-name",
+        "managed-hooks-merge"
+      ],
+      "harnessInstallSurfaceExports": [
+        "HOOK_SCRIPT_NAMES",
+        "MANAGED_HOOKS_CONFIG_PATHS",
+        "getCursorHome",
+        "getHomePluginRoot",
+        "getHomeMarketplacePath",
+        "getManagedHooksConfigPath",
+        "removeManagedHooks",
+        "installCursorSurface"
+      ]
+    },
+    "gemini": {
+      "extraFileSets": [
+        "gemini-surface",
+        "babysit-skill",
+        "readme"
+      ]
+    },
+    "github-copilot": {
+      "npmPackageName": "@a5c-ai/babysitter-github",
+      "templateVars": {
+        "targetDir": "github"
+      },
+      "extraFileSets": [
+        "agents-file",
+        "babysit-skill",
+        "github-surface",
+        "readme"
+      ],
+      "harnessInstallSurface": "per-harness/github/bin/install-surface.js",
+      "harnessInstallSurfaceExportSets": [
+        "plugin-bundle",
+        "marketplace-entry",
+        "managed-skills",
+        "managed-hooks-install"
+      ],
+      "harnessInstallSurfaceExports": [
+        "LEGACY_HOOK_SCRIPT_NAMES",
+        "HOOK_SCRIPT_NAMES",
+        "CLOUD_AGENT_BUNDLE_ENTRIES",
+        "MANAGED_BLOCK_START",
+        "MANAGED_BLOCK_END",
+        "getCopilotHome",
+        "getHomePluginRoot",
+        "getHomeMarketplacePath",
+        "writeJson",
+        "replaceManagedMarkdownBlock",
+        "writeManagedMarkdown",
+        "readSdkVersion",
+        "toLowerHyphenName",
+        "rewriteCloudSkill",
+        "registerCopilotPlugin",
+        "deregisterCopilotPlugin",
+        "removeLegacyHooks",
+        "removeManagedHooks",
+        "installCopilotSurface",
+        "renderCloudAgentAgentsBlock",
+        "renderCloudAgentCopilotInstructionsBlock",
+        "renderCloudAgentSetupWorkflow",
+        "installCloudAgentBundle",
+        "installCloudAgentSkills",
+        "installCloudAgentInstructions",
+        "installCloudAgentSetupSteps",
+        "installCloudAgentSurface",
+        "harnessCliRoute",
+        "harnessInstall"
+      ]
+    },
+    "pi": {
+      "npmPackageName": "@a5c-ai/babysitter-pi",
+      "extraFileSets": [
+        "agents-file",
+        "babysit-skill",
+        "pi-extension",
+        "pi-support-files",
+        "readme"
+      ]
+    },
+    "oh-my-pi": {
+      "npmPackageName": "@a5c-ai/babysitter-omp",
+      "templateVars": {
+        "targetDir": "omp"
+      },
+      "extraFileSets": [
+        "agents-file",
+        "babysit-skill",
+        "pi-extension",
+        "pi-support-files",
+        "readme"
+      ]
+    },
+    "opencode": {
+      "harnessInstallSurface": "per-harness/opencode/bin/install-surface.js",
+      "extraFileSets": [
+        "babysit-skill",
+        "opencode-surface",
+        "readme"
+      ],
+      "harnessInstallSurfaceExportSets": [
+        "plugin-bundle",
+        "marketplace-entry-with-name"
+      ],
+      "harnessInstallSurfaceExports": [
+        "HOOK_SCRIPT_NAMES",
+        "getOpenCodeHome",
+        "getHomePluginRoot",
+        "getHomeMarketplacePath",
+        "writeIndexJs",
+        "mergeHooksConfig",
+        "removeManagedHooks",
+        "getAccomplishDataDir",
+        "isAccomplishInstalled",
+        "getAccomplishOpenCodeHome",
+        "installAccomplishSurface",
+        "installOpenCodeSurface"
+      ]
+    },
+    "openclaw": {
+      "extraFileSets": [
+        "babysit-skill",
+        "openclaw-surface",
+        "pi-extension",
+        "readme"
+      ]
+    }
+  },
+  "sdk": {
+    "package": "@a5c-ai/babysitter-sdk",
+    "cli": "babysitter",
+    "proxyPackage": "@a5c-ai/hooks-mux-cli",
+    "scope": "@a5c-ai",
+    "envPrefix": "BABYSITTER",
+    "stateDir": ".a5c"
+  }
+}

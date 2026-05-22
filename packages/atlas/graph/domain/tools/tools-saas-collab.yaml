@@ -1,0 +1,215 @@
+---
+nodeKind: Tool
+id: tool:confluence
+attributes:
+  displayName: "Confluence"
+  homepageUrl: "https://www.atlassian.com/software/confluence"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Atlassian wiki and knowledge management platform for teams.
+    Provides spaces, pages, and templates for technical documentation,
+    runbooks, project specs, and collaborative decision records.
+edges:
+  tool_used_by:
+    - target: skill-area:technical-documentation
+    - target: skill-area:knowledge-fabric-design
+  used_for:
+    - skill-area:project-planning
+  alternative_to:
+    - target: tool:notion
+      comparison: "Collaboration and knowledge management platforms"
+    - target: tool:trello
+      comparison: "Team collaboration platforms"
+    - target: tool:clickup
+      comparison: "Team collaboration platforms"
+    - target: tool:asana
+      comparison: "Team collaboration platforms"
+    - target: tool:monday
+      comparison: "Team collaboration platforms"
+---
+nodeKind: Tool
+id: tool:trello
+attributes:
+  displayName: "Trello"
+  homepageUrl: "https://trello.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Kanban-style visual project management tool by Atlassian.
+    Organizes work into boards, lists, and cards with checklists,
+    labels, due dates, and power-ups for lightweight task tracking.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+  used_for:
+    - skill-area:project-planning
+  alternative_to:
+    - target: tool:confluence
+      comparison: "Team collaboration platforms"
+    - target: tool:notion
+      comparison: "Team collaboration platforms"
+    - target: tool:clickup
+      comparison: "Team collaboration platforms"
+    - target: tool:asana
+      comparison: "Team collaboration platforms"
+    - target: tool:monday
+      comparison: "Team collaboration platforms"
+---
+nodeKind: Tool
+id: tool:clickup
+attributes:
+  displayName: "ClickUp"
+  homepageUrl: "https://clickup.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    All-in-one project management platform combining tasks, docs,
+    goals, and time tracking in a single workspace. Supports multiple
+    views (list, board, Gantt, calendar) and custom workflows.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+  used_for:
+    - skill-area:project-planning
+  alternative_to:
+    - target: tool:confluence
+      comparison: "Team collaboration platforms"
+    - target: tool:notion
+      comparison: "Team collaboration platforms"
+    - target: tool:trello
+      comparison: "Team collaboration platforms"
+    - target: tool:asana
+      comparison: "Team collaboration platforms"
+    - target: tool:monday
+      comparison: "Team collaboration platforms"
+---
+nodeKind: Tool
+id: tool:shortcut
+attributes:
+  displayName: "Shortcut"
+  homepageUrl: "https://shortcut.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Agile project management tool (formerly Clubhouse) for software teams.
+    Provides stories, epics, iterations, and team-based workflows designed
+    for engineering teams following agile and scrum methodologies.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+  used_for:
+    - skill-area:project-planning
+  alternative_to:
+    - target: tool:asana
+      comparison: "Project management platforms"
+---
+nodeKind: Tool
+id: tool:basecamp
+attributes:
+  displayName: "Basecamp"
+  homepageUrl: "https://basecamp.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    All-in-one project management and team collaboration tool.
+    Combines to-dos, message boards, docs, schedules, and group chat
+    into a single organized workspace per project.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+  used_for:
+    - skill-area:project-planning
+  alternative_to:
+    - target: tool:todoist
+      comparison: "Project tools — Basecamp is all-in-one team collaboration; Todoist is personal task management"
+    - target: tool:airtable
+      comparison: "Project tools — Basecamp is project collaboration; Airtable is a no-code database"
+---
+nodeKind: Tool
+id: tool:asana
+attributes:
+  displayName: "Asana"
+  homepageUrl: "https://asana.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Work management platform for teams to track tasks, projects, and goals.
+    Offers list, board, timeline, and calendar views with automation,
+    rules, and reporting to coordinate cross-functional work.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+  used_for:
+    - skill-area:project-planning
+  alternative_to:
+    - target: tool:confluence
+      comparison: "Team collaboration platforms"
+    - target: tool:notion
+      comparison: "Team collaboration platforms"
+    - target: tool:trello
+      comparison: "Team collaboration platforms"
+    - target: tool:clickup
+      comparison: "Team collaboration platforms"
+    - target: tool:monday
+      comparison: "Team collaboration platforms"
+    - target: tool:shortcut
+      comparison: "Project management platforms"
+---
+nodeKind: Tool
+id: tool:monday
+attributes:
+  displayName: "Monday.com"
+  homepageUrl: "https://monday.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Visual work management platform with highly customizable boards
+    and workflows. Supports CRM, project tracking, and operational
+    use cases through a flexible column-based data model.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+  used_for:
+    - skill-area:project-planning
+  alternative_to:
+    - target: tool:confluence
+      comparison: "Team collaboration platforms"
+    - target: tool:notion
+      comparison: "Team collaboration platforms"
+    - target: tool:trello
+      comparison: "Team collaboration platforms"
+    - target: tool:clickup
+      comparison: "Team collaboration platforms"
+    - target: tool:asana
+      comparison: "Team collaboration platforms"
+---
+nodeKind: Tool
+id: tool:notion
+attributes:
+  displayName: "Notion"
+  homepageUrl: "https://www.notion.so"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    All-in-one workspace for notes, docs, wikis, and databases.
+    Combines a block-based editor with relational databases, templates,
+    and AI writing assistance for knowledge management and project tracking.
+edges:
+  tool_used_by:
+    - target: skill-area:technical-documentation
+    - target: skill-area:project-planning
+    - target: skill-area:knowledge-fabric-design
+  used_for:
+    - skill-area:project-planning
+  alternative_to:
+    - target: tool:confluence
+      comparison: "Collaboration and knowledge management platforms"
+    - target: tool:trello
+      comparison: "Team collaboration platforms"
+    - target: tool:clickup
+      comparison: "Team collaboration platforms"
+    - target: tool:asana
+      comparison: "Team collaboration platforms"
+    - target: tool:monday
+      comparison: "Team collaboration platforms"

@@ -9,17 +9,15 @@ expertise:
   - Maintainability evaluation (naming, docs, coupling, coverage)
   - Confidence-gated reporting (>= 80% threshold)
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Code Reviewer Agent
-
-## Role
-
-Multi-dimensional quality assessment agent for the Everything Claude Code methodology. Reviews code across 4 dimensions: correctness, security, performance, and maintainability. Only reports issues with >= 80% confidence to prevent noise.
-
-## Expertise
-
-- Dimension 1 - Correctness: logic errors, edge cases, type safety, error handling
 - Dimension 2 - Security: injection vectors, authentication gaps, data exposure
 - Dimension 3 - Performance: algorithmic complexity, memory leaks, unnecessary allocations
 - Dimension 4 - Maintainability: naming clarity, documentation, test coverage, coupling

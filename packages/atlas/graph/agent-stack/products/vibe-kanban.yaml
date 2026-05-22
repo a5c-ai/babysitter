@@ -1,0 +1,32 @@
+nodeKind: AgentProduct
+id: agent:vibe-kanban
+attributes:
+  displayName: "Vibe Kanban"
+  vendor: "BloopAI"
+  homepageUrl: "https://github.com/BloopAI/vibe-kanban"
+  primarySurface: web
+  supportTier: none
+  productKind: agent-orchestrator
+  stackScope: orchestration
+  description: |
+    Web-based kanban interface for orchestrating multiple coding agents
+    (Claude Code, Codex, Gemini CLI) in parallel. Visual task board for
+    managing agent work items, tracking progress across parallel branches,
+    and coordinating multi-agent development workflows. Provides a higher-
+    level orchestration layer above individual agent CLIs.
+edges:
+  has_version:
+    - agent-version:vibe-kanban@current
+  composed_of:
+    - target: language:rust
+      role: core
+    - target: language:typescript
+      role: ui
+    - target: framework:react
+      role: ui
+  integrates_with:
+    - target: skill-area:project-planning
+    - target: skill-area:multi-agent-coordination
+    - target: topic:vibe-kanban
+    - target: topic:parallel-agent-execution
+    - target: topic:agent-orchestration-products

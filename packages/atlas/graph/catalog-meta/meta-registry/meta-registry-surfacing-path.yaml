@@ -1,0 +1,660 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:surfacing-path
+attributes:
+  displayName: Surfacing Path (meta)
+  clusterNumber: 4
+  scope: 'Conceptual aggregation of NodeKinds describing how a Workspace materializes (Worktree), where/how it executes (Execution + Sandbox policy primitive), the high-level interaction patterns and concrete primitives users invoke (InteractionPattern, InteractionPrimitive, InteractionPrimitiveCategory), and the concrete app shells that present the agent (Presentation). Cross-cluster: Workspace meta-node-kind is in meta-cluster:lifecycle; Skill / Subagent / Plugin in meta-cluster:agent-stack are also bundled_with Presentation but recorded in their home clusters.'
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:worktree
+  - target: meta-node-kind:execution
+  - target: meta-node-kind:sandbox
+  - target: meta-node-kind:interaction-pattern
+  - target: meta-node-kind:interaction-primitive
+  - target: meta-node-kind:interaction-primitive-category
+  - target: meta-node-kind:presentation
+  - target: meta-node-kind:workspace
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:worktree
+attributes:
+  displayName: Worktree (meta)
+  name: Worktree
+  cluster: 4-surfacing-path
+  prefix: worktree
+  origin: universal
+  purpose: git-worktree per-branch isolation
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:surfacing-path
+  contains_meta_attribute:
+  - target: meta-attribute:worktree--id
+  - target: meta-attribute:worktree--workspace-id
+  - target: meta-attribute:worktree--branch
+  - target: meta-attribute:worktree--path
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:execution
+attributes:
+  displayName: Execution (meta)
+  name: Execution
+  cluster: 4-surfacing-path
+  prefix: execution
+  origin: universal
+  purpose: where/how work runs (local/docker/ssh/k8s/cloud/direct)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:surfacing-path
+  contains_meta_attribute:
+  - target: meta-attribute:execution--id
+  - target: meta-attribute:execution--kind
+  - target: meta-attribute:execution--isolation
+  - target: meta-attribute:execution--sandbox-impl
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:sandbox
+attributes:
+  displayName: Sandbox (meta)
+  name: Sandbox
+  cluster: 4-surfacing-path
+  prefix: sandbox
+  origin: universal
+  purpose: what work is allowed to do (policy primitive — filesystem / network / exec / env / secrets posture)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:surfacing-path
+  contains_meta_attribute:
+  - target: meta-attribute:sandbox--id
+  - target: meta-attribute:sandbox--filesystem-policy
+  - target: meta-attribute:sandbox--network-policy
+  - target: meta-attribute:sandbox--policy-evaluation-point
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:interaction-pattern
+attributes:
+  displayName: InteractionPattern (meta)
+  name: InteractionPattern
+  cluster: 4-surfacing-path
+  prefix: interaction-pattern
+  origin: universal
+  purpose: a high-level interaction pattern (multi-agent, single-agent, human-in-the-loop, broadcast, negotiation, delegation, critique, consensus)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:surfacing-path
+  contains_meta_attribute:
+  - target: meta-attribute:interaction-pattern--id
+  - target: meta-attribute:interaction-pattern--display-name
+  - target: meta-attribute:interaction-pattern--subtype
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:interaction-primitive
+attributes:
+  displayName: InteractionPrimitive (meta)
+  name: InteractionPrimitive
+  cluster: 4-surfacing-path
+  prefix: interaction-primitive
+  origin: universal
+  purpose: a concrete user-facing primitive (slash-command, @-mention, fork, voice, drag-drop, status-line, share-session, ...)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:surfacing-path
+  contains_meta_attribute:
+  - target: meta-attribute:interaction-primitive--id
+  - target: meta-attribute:interaction-primitive--kind
+  - target: meta-attribute:interaction-primitive--surface
+  - target: meta-attribute:interaction-primitive--requires-permission
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:interaction-primitive-category
+attributes:
+  displayName: InteractionPrimitiveCategory (meta)
+  name: InteractionPrimitiveCategory
+  cluster: 4-surfacing-path
+  prefix: interaction-primitive-category
+  origin: universal
+  purpose: editorial grouping for InteractionPrimitives (control, navigation, context, approval, voice, telemetry, multimodal, collaborative)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:surfacing-path
+  contains_meta_attribute:
+  - target: meta-attribute:interaction-primitive-category--id
+  - target: meta-attribute:interaction-primitive-category--value
+  - target: meta-attribute:interaction-primitive-category--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:presentation
+attributes:
+  displayName: Presentation (meta)
+  name: Presentation
+  cluster: 4-surfacing-path
+  prefix: presentation
+  origin: universal
+  purpose: a concrete app shell (TUI, IDE-extension, web, mobile, CI, desktop) that hosts the agent UX
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:surfacing-path
+  contains_meta_attribute:
+  - target: meta-attribute:presentation--id
+  - target: meta-attribute:presentation--kind
+  - target: meta-attribute:presentation--rendering-technology
+  - target: meta-attribute:presentation--platforms
+---
+nodeKind: MetaAttribute
+id: meta-attribute:worktree--id
+attributes:
+  displayName: Worktree.id
+  name: id
+  parentNodeKindId: meta-node-kind:worktree
+  type: id
+  required: true
+  description: id on Worktree.
+edges:
+  defined_on:
+  - target: meta-node-kind:worktree
+---
+nodeKind: MetaAttribute
+id: meta-attribute:worktree--workspace-id
+attributes:
+  displayName: Worktree.workspaceId
+  name: workspaceId
+  parentNodeKindId: meta-node-kind:worktree
+  type: ref<Workspace>
+  required: true
+  description: parent Workspace anchored via materializes_as.
+edges:
+  defined_on:
+  - target: meta-node-kind:worktree
+---
+nodeKind: MetaAttribute
+id: meta-attribute:worktree--branch
+attributes:
+  displayName: Worktree.branch
+  name: branch
+  parentNodeKindId: meta-node-kind:worktree
+  type: string
+  required: true
+  description: branch checked out in this worktree.
+edges:
+  defined_on:
+  - target: meta-node-kind:worktree
+---
+nodeKind: MetaAttribute
+id: meta-attribute:worktree--path
+attributes:
+  displayName: Worktree.path
+  name: path
+  parentNodeKindId: meta-node-kind:worktree
+  type: string
+  required: true
+  description: filesystem path of the worktree.
+edges:
+  defined_on:
+  - target: meta-node-kind:worktree
+---
+nodeKind: MetaAttribute
+id: meta-attribute:execution--id
+attributes:
+  displayName: Execution.id
+  name: id
+  parentNodeKindId: meta-node-kind:execution
+  type: id
+  required: true
+  description: id on Execution.
+edges:
+  defined_on:
+  - target: meta-node-kind:execution
+---
+nodeKind: MetaAttribute
+id: meta-attribute:execution--kind
+attributes:
+  displayName: Execution.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:execution
+  type: enum<local,docker,ssh,kubernetes,cloud,direct>
+  required: true
+  description: top-level execution mode.
+edges:
+  defined_on:
+  - target: meta-node-kind:execution
+---
+nodeKind: MetaAttribute
+id: meta-attribute:execution--isolation
+attributes:
+  displayName: Execution.isolation
+  name: isolation
+  parentNodeKindId: meta-node-kind:execution
+  type: enum<none,namespace,container,vm,wasm-sandbox>
+  required: false
+  description: mechanism that separates this execution from the host.
+edges:
+  defined_on:
+  - target: meta-node-kind:execution
+---
+nodeKind: MetaAttribute
+id: meta-attribute:execution--sandbox-impl
+attributes:
+  displayName: Execution.sandboxImpl
+  name: sandboxImpl
+  parentNodeKindId: meta-node-kind:execution
+  type: enum<agentsh,docker,firecracker,gvisor,kata,wasm-time,qemu,none>
+  required: false
+  description: concrete tool that enforces the sandbox for this execution.
+edges:
+  defined_on:
+  - target: meta-node-kind:execution
+---
+nodeKind: MetaAttribute
+id: meta-attribute:sandbox--id
+attributes:
+  displayName: Sandbox.id
+  name: id
+  parentNodeKindId: meta-node-kind:sandbox
+  type: id
+  required: true
+  description: id on Sandbox.
+edges:
+  defined_on:
+  - target: meta-node-kind:sandbox
+---
+nodeKind: MetaAttribute
+id: meta-attribute:sandbox--filesystem-policy
+attributes:
+  displayName: Sandbox.filesystemPolicy
+  name: filesystemPolicy
+  parentNodeKindId: meta-node-kind:sandbox
+  type: enum<read-only,read-write,sandboxed,confined>
+  required: true
+  description: filesystem-access posture for the sandbox.
+edges:
+  defined_on:
+  - target: meta-node-kind:sandbox
+---
+nodeKind: MetaAttribute
+id: meta-attribute:sandbox--network-policy
+attributes:
+  displayName: Sandbox.networkPolicy
+  name: networkPolicy
+  parentNodeKindId: meta-node-kind:sandbox
+  type: enum<none,egress-only,full,allowlist>
+  required: true
+  description: network-egress posture for the sandbox.
+edges:
+  defined_on:
+  - target: meta-node-kind:sandbox
+---
+nodeKind: MetaAttribute
+id: meta-attribute:sandbox--policy-evaluation-point
+attributes:
+  displayName: Sandbox.policyEvaluationPoint
+  name: policyEvaluationPoint
+  parentNodeKindId: meta-node-kind:sandbox
+  type: enum<pre-call,continuous,post-call-attestation>
+  required: false
+  description: when the policy is evaluated.
+edges:
+  defined_on:
+  - target: meta-node-kind:sandbox
+---
+nodeKind: MetaAttribute
+id: meta-attribute:interaction-pattern--id
+attributes:
+  displayName: InteractionPattern.id
+  name: id
+  parentNodeKindId: meta-node-kind:interaction-pattern
+  type: id
+  required: true
+  description: id on InteractionPattern.
+edges:
+  defined_on:
+  - target: meta-node-kind:interaction-pattern
+---
+nodeKind: MetaAttribute
+id: meta-attribute:interaction-pattern--display-name
+attributes:
+  displayName: InteractionPattern.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:interaction-pattern
+  type: string
+  required: true
+  description: displayName on InteractionPattern.
+edges:
+  defined_on:
+  - target: meta-node-kind:interaction-pattern
+---
+nodeKind: MetaAttribute
+id: meta-attribute:interaction-pattern--subtype
+attributes:
+  displayName: InteractionPattern.subtype
+  name: subtype
+  parentNodeKindId: meta-node-kind:interaction-pattern
+  type: enum<multi-agent,single-agent,human-in-the-loop,broadcast,negotiation,delegation,critique,consensus>
+  required: false
+  description: subtype discriminator (catalog update — collapses former MultiAgentPattern proposal).
+edges:
+  defined_on:
+  - target: meta-node-kind:interaction-pattern
+---
+nodeKind: MetaAttribute
+id: meta-attribute:interaction-primitive--id
+attributes:
+  displayName: InteractionPrimitive.id
+  name: id
+  parentNodeKindId: meta-node-kind:interaction-primitive
+  type: id
+  required: true
+  description: id on InteractionPrimitive.
+edges:
+  defined_on:
+  - target: meta-node-kind:interaction-primitive
+---
+nodeKind: MetaAttribute
+id: meta-attribute:interaction-primitive--kind
+attributes:
+  displayName: InteractionPrimitive.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:interaction-primitive
+  type: enum<slash-command,at-mention,fork,resume,thread,reaction,voice,telemetry,multimodal-input,collaborative,prompt-ui,keybinding,editor-ui,cli>
+  required: false
+  description: canonical primitive kind taxonomy.
+edges:
+  defined_on:
+  - target: meta-node-kind:interaction-primitive
+---
+nodeKind: MetaAttribute
+id: meta-attribute:interaction-primitive--surface
+attributes:
+  displayName: InteractionPrimitive.surface
+  name: surface
+  parentNodeKindId: meta-node-kind:interaction-primitive
+  type: enum<slash-command,prompt-ui,keybinding,editor-ui,cli,voice,status-line,multimodal-input,collaborative>
+  required: false
+  description: concrete UI surface where the primitive is invoked.
+edges:
+  defined_on:
+  - target: meta-node-kind:interaction-primitive
+---
+nodeKind: MetaAttribute
+id: meta-attribute:interaction-primitive--requires-permission
+attributes:
+  displayName: InteractionPrimitive.requiresPermission
+  name: requiresPermission
+  parentNodeKindId: meta-node-kind:interaction-primitive
+  type: bool
+  required: false
+  description: whether invoking the primitive triggers a permission prompt or capability gate.
+edges:
+  defined_on:
+  - target: meta-node-kind:interaction-primitive
+---
+nodeKind: MetaAttribute
+id: meta-attribute:interaction-primitive-category--id
+attributes:
+  displayName: InteractionPrimitiveCategory.id
+  name: id
+  parentNodeKindId: meta-node-kind:interaction-primitive-category
+  type: id
+  required: true
+  description: id on InteractionPrimitiveCategory.
+edges:
+  defined_on:
+  - target: meta-node-kind:interaction-primitive-category
+---
+nodeKind: MetaAttribute
+id: meta-attribute:interaction-primitive-category--value
+attributes:
+  displayName: InteractionPrimitiveCategory.value
+  name: value
+  parentNodeKindId: meta-node-kind:interaction-primitive-category
+  type: enum<control,navigation,context,approval,voice,telemetry,multimodal,collaborative>
+  required: true
+  description: enum value of the editorial category.
+edges:
+  defined_on:
+  - target: meta-node-kind:interaction-primitive-category
+---
+nodeKind: MetaAttribute
+id: meta-attribute:interaction-primitive-category--display-name
+attributes:
+  displayName: InteractionPrimitiveCategory.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:interaction-primitive-category
+  type: string
+  required: true
+  description: displayName on InteractionPrimitiveCategory.
+edges:
+  defined_on:
+  - target: meta-node-kind:interaction-primitive-category
+---
+nodeKind: MetaAttribute
+id: meta-attribute:presentation--id
+attributes:
+  displayName: Presentation.id
+  name: id
+  parentNodeKindId: meta-node-kind:presentation
+  type: id
+  required: true
+  description: id on Presentation.
+edges:
+  defined_on:
+  - target: meta-node-kind:presentation
+---
+nodeKind: MetaAttribute
+id: meta-attribute:presentation--kind
+attributes:
+  displayName: Presentation.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:presentation
+  type: enum<tui,ide-extension,web,mobile,ci,desktop>
+  required: true
+  description: top-level shell kind.
+edges:
+  defined_on:
+  - target: meta-node-kind:presentation
+---
+nodeKind: MetaAttribute
+id: meta-attribute:presentation--rendering-technology
+attributes:
+  displayName: Presentation.renderingTechnology
+  name: renderingTechnology
+  parentNodeKindId: meta-node-kind:presentation
+  type: enum<vt100,vte,terminal-emulator,electron,webview,native-cocoa,native-win32,flutter,react-native,next-js,jetbrains-platform,vs-code-extension>
+  required: false
+  description: concrete rendering substrate.
+edges:
+  defined_on:
+  - target: meta-node-kind:presentation
+---
+nodeKind: MetaAttribute
+id: meta-attribute:presentation--platforms
+attributes:
+  displayName: Presentation.platforms
+  name: platforms
+  parentNodeKindId: meta-node-kind:presentation
+  type: list<enum<darwin,linux,win32,web,ios,android>>
+  required: false
+  description: OS / runtime platforms the presentation ships for.
+edges:
+  defined_on:
+  - target: meta-node-kind:presentation
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:materializes-as
+attributes:
+  displayName: materializes_as (meta)
+  name: materializes_as
+  source:
+  - meta-node-kind:workspace
+  target:
+  - meta-node-kind:worktree
+  cardinality: 1:N
+  origin: universal
+  description: a workspace materializes as a worktree on disk
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:workspace
+  target_of_meta_edge:
+  - target: meta-node-kind:worktree
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:runs-via
+attributes:
+  displayName: runs_via (meta)
+  name: runs_via
+  source:
+  - meta-node-kind:workspace
+  target:
+  - meta-node-kind:execution
+  cardinality: N:1
+  origin: universal
+  description: a workspace (or invocation / launch-config) runs via an execution mode
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:workspace
+  target_of_meta_edge:
+  - target: meta-node-kind:execution
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:sandboxed-by
+attributes:
+  displayName: sandboxed_by (meta)
+  name: sandboxed_by
+  source:
+  - meta-node-kind:execution
+  target:
+  - meta-node-kind:sandbox
+  cardinality: N:1
+  origin: universal
+  description: an execution applies a sandbox profile
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:execution
+  target_of_meta_edge:
+  - target: meta-node-kind:sandbox
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:in-category
+attributes:
+  displayName: in_category (meta)
+  name: in_category
+  source:
+  - meta-node-kind:interaction-primitive
+  target:
+  - meta-node-kind:interaction-primitive-category
+  cardinality: N:1
+  origin: universal
+  description: an interaction-primitive is grouped under an interaction-primitive-category
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:interaction-primitive
+  target_of_meta_edge:
+  - target: meta-node-kind:interaction-primitive-category
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:bundled-with-presentation
+attributes:
+  displayName: bundled_with (meta — presentation flavor)
+  name: bundled_with
+  source:
+  - meta-node-kind:presentation
+  target:
+  - meta-node-kind:presentation
+  cardinality: N:N
+  origin: universal
+  description: 'a runtime/platform bundles a presentation as a built-in shell. Cross-cluster: the source is AgentRuntimeImpl / AgentPlatformImpl in meta-cluster:agent-stack — recorded here from the presentation side.'
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:presentation
+  target_of_meta_edge:
+  - target: meta-node-kind:presentation
+---
+nodeKind: MetaEnum
+id: meta-enum:execution-kind
+attributes:
+  displayName: Execution kind
+  name: kind
+  values:
+  - value: local
+    description: Runs as a local process on the host.
+  - value: docker
+    description: Runs in a docker / OCI container on the host.
+  - value: ssh
+    description: Runs over an SSH connection on a remote host.
+  - value: kubernetes
+    description: Runs as a pod in a Kubernetes cluster.
+  - value: cloud
+    description: Runs in a managed cloud execution service.
+  - value: direct
+    description: Direct in-process invocation, no separate execution boundary.
+  usedOnAttributes:
+  - meta-attribute:execution--kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:execution--kind
+---
+nodeKind: MetaEnum
+id: meta-enum:presentation-kind
+attributes:
+  displayName: Presentation kind
+  name: kind
+  values:
+  - value: tui
+    description: Text-mode terminal UI.
+  - value: ide-extension
+    description: Extension hosted by an IDE (VS Code, JetBrains, ...).
+  - value: web
+    description: Browser-rendered web UI.
+  - value: mobile
+    description: Native mobile app (iOS / Android).
+  - value: ci
+    description: Continuous-integration runner (no interactive shell).
+  - value: desktop
+    description: Native desktop app shell (Electron, Cocoa, win32, ...).
+  usedOnAttributes:
+  - meta-attribute:presentation--kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:presentation--kind
+---
+nodeKind: MetaEnum
+id: meta-enum:interaction-primitive-category-value
+attributes:
+  displayName: InteractionPrimitiveCategory value
+  name: value
+  values:
+  - value: control
+    description: Control primitives (slash-commands, run / stop / cancel).
+  - value: navigation
+    description: Navigation primitives (back, forward, jump-to-session).
+  - value: context
+    description: Context primitives (@-mention, attach-file, drag-drop).
+  - value: approval
+    description: Approval primitives (permission prompts, confirm gates).
+  - value: voice
+    description: Voice input / output primitives.
+  - value: telemetry
+    description: Telemetry / status-line / observation primitives.
+  - value: multimodal
+    description: Multimodal-input primitives (image, audio, video, screen-capture).
+  - value: collaborative
+    description: Collaborative / share-session / follow-agent primitives.
+  usedOnAttributes:
+  - meta-attribute:interaction-primitive-category--value
+edges:
+  used_on_attribute:
+  - target: meta-attribute:interaction-primitive-category--value

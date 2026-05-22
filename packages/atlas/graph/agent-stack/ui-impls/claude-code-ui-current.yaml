@@ -1,0 +1,171 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:claude-code.ui@current
+attributes:
+  displayName: "Claude Code UI (current) — tui-and-cli"
+  agentVersionId: agentVersion:claude:ge-0-0-0
+  packageRef: source-ref:claude-code-github
+  uiKind: tui-and-cli
+  presentationsBundled:
+    - presentation:claude-code-tui
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  notes: |
+    Claude Code ships an interactive TUI (the `claude` command) and a non-interactive
+    CLI (scripted prompt-mode flows); the user-facing slash commands, tool-approval
+    prompts, and thinking toggle live at this UI layer.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:claude-cli-deep-link-open
+      attributes:
+        mechanism: deep-link
+        invocationToken: "claude-cli://open"
+    - target: interaction-primitive:vscode-claude-code-deep-link-open
+      attributes:
+        mechanism: deep-link
+        invocationToken: "vscode://anthropic.claude-code/open"
+    - target: interaction-primitive:ask-user-question
+      attributes:
+        mechanism: tool-call
+        toolCallName: AskUserQuestion
+    - target: interaction-primitive:todo-write
+      attributes:
+        mechanism: tool-call
+        toolCallName: TodoWrite
+    - target: interaction-primitive:slash-init
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/init"
+    - target: interaction-primitive:slash-clear
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/clear"
+    - target: interaction-primitive:slash-fork
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/fork"
+    - target: interaction-primitive:slash-resume
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/resume"
+    - target: interaction-primitive:slash-help
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/help"
+    - target: interaction-primitive:slash-model
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/model"
+    - target: interaction-primitive:slash-config
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/config"
+    - target: interaction-primitive:slash-mode
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/mode"
+    - target: interaction-primitive:transcript-export
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:slash-permissions
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/permissions"
+    - target: interaction-primitive:slash-cost
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/cost"
+    - target: interaction-primitive:slash-compact
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/compact"
+    - target: interaction-primitive:slash-mcp
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/mcp"
+    - target: interaction-primitive:slash-status
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/status"
+    - target: interaction-primitive:plan-review
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:tool-approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:thinking-toggle
+      attributes:
+        mechanism: keybinding
+    - target: interaction-primitive:vim-mode
+      attributes:
+        mechanism: keybinding
+    - target: interaction-primitive:slash-rewind
+      attributes: { mechanism: slash-command, invocationToken: "/rewind" }
+    - target: interaction-primitive:slash-branch
+      attributes: { mechanism: slash-command, invocationToken: "/branch" }
+    - target: interaction-primitive:slash-diff
+      attributes: { mechanism: slash-command, invocationToken: "/diff" }
+    - target: interaction-primitive:slash-review
+      attributes: { mechanism: slash-command, invocationToken: "/review" }
+    - target: interaction-primitive:slash-security-review
+      attributes: { mechanism: slash-command, invocationToken: "/security-review" }
+    - target: interaction-primitive:slash-export
+      attributes: { mechanism: slash-command, invocationToken: "/export" }
+    - target: interaction-primitive:slash-copy
+      attributes: { mechanism: slash-command, invocationToken: "/copy" }
+    - target: interaction-primitive:slash-sandbox
+      attributes: { mechanism: slash-command, invocationToken: "/sandbox" }
+    - target: interaction-primitive:slash-tasks
+      attributes: { mechanism: slash-command, invocationToken: "/tasks" }
+    - target: interaction-primitive:slash-skills
+      attributes: { mechanism: slash-command, invocationToken: "/skills" }
+    - target: interaction-primitive:slash-plugin
+      attributes: { mechanism: slash-command, invocationToken: "/plugin" }
+    - target: interaction-primitive:slash-statusline
+      attributes: { mechanism: slash-command, invocationToken: "/statusline" }
+    - target: interaction-primitive:slash-voice
+      attributes: { mechanism: slash-command, invocationToken: "/voice" }
+    - target: interaction-primitive:slash-recap
+      attributes: { mechanism: slash-command, invocationToken: "/recap" }
+    - target: interaction-primitive:slash-btw
+      attributes: { mechanism: slash-command, invocationToken: "/btw" }
+    - target: interaction-primitive:slash-effort
+      attributes: { mechanism: slash-command, invocationToken: "/effort" }
+    - target: interaction-primitive:slash-context
+      attributes: { mechanism: slash-command, invocationToken: "/context" }
+    - target: interaction-primitive:slash-schedule
+      attributes: { mechanism: slash-command, invocationToken: "/schedule" }
+    - target: interaction-primitive:slash-loop
+      attributes: { mechanism: slash-command, invocationToken: "/loop" }
+    - target: interaction-primitive:slash-teleport
+      attributes: { mechanism: slash-command, invocationToken: "/teleport" }
+    - target: interaction-primitive:slash-remote-control
+      attributes: { mechanism: slash-command, invocationToken: "/remote-control" }
+    - target: interaction-primitive:slash-desktop
+      attributes: { mechanism: slash-command, invocationToken: "/desktop" }
+    - target: interaction-primitive:slash-mobile
+      attributes: { mechanism: slash-command, invocationToken: "/mobile" }
+    - target: interaction-primitive:slash-plan
+      attributes: { mechanism: slash-command, invocationToken: "/plan" }
+    - target: interaction-primitive:slash-doctor
+      attributes: { mechanism: slash-command, invocationToken: "/doctor" }
+    - target: interaction-primitive:slash-add-dir
+      attributes: { mechanism: slash-command, invocationToken: "/add-dir" }
+    - target: interaction-primitive:slash-memory
+      attributes: { mechanism: slash-command, invocationToken: "/memory" }
+    - target: interaction-primitive:slash-rename
+      attributes: { mechanism: slash-command, invocationToken: "/rename" }
+    - target: interaction-primitive:slash-theme
+      attributes: { mechanism: slash-command, invocationToken: "/theme" }
+    - target: interaction-primitive:slash-hooks
+      attributes: { mechanism: slash-command, invocationToken: "/hooks" }
+    - target: interaction-primitive:slash-agents
+      attributes: { mechanism: slash-command, invocationToken: "/agents" }
+    - target: interaction-primitive:slash-login
+      attributes: { mechanism: slash-command, invocationToken: "/login" }
+    - target: interaction-primitive:slash-release-notes
+      attributes: { mechanism: slash-command, invocationToken: "/release-notes" }

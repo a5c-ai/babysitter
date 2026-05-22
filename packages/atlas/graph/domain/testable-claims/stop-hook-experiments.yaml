@@ -1,0 +1,77 @@
+---
+nodeKind: Experiment
+id: experiment:stop-hook-control-interactive
+attributes:
+  displayName: "Stop Hook Control — Interactive Mode"
+  description: |
+    Validates that hooks-mux correctly fires turn.stop hooks for all
+    supported adapters in interactive mode (stdin payload), and that
+    the deny decision propagates for adapters with blockCapability
+    while being degraded for adapters without it.
+
+    Products tested: Claude Code, Codex, Gemini CLI, Cursor, Copilot CLI.
+    Test matrix:
+      - Claude: fires ✓, blocks ✓
+      - Codex: fires ✓, blocks ✓
+      - Gemini: fires ✓, blocks ✗ (degraded)
+      - Cursor: fires ✓, blocks ✓
+      - Copilot: fires ✓, blocks ✗ (degraded)
+  status: in-progress
+  startedAt: "2026-05-11"
+edges:
+  tests_claim:
+    - claim:stop-hook-claude-interactive-fires
+    - claim:stop-hook-claude-interactive-blocks
+    - claim:stop-hook-codex-interactive-fires
+    - claim:stop-hook-codex-interactive-blocks
+    - claim:stop-hook-gemini-interactive-fires
+    - claim:stop-hook-gemini-interactive-degrades
+    - claim:stop-hook-cursor-interactive-fires
+    - claim:stop-hook-cursor-interactive-blocks
+    - claim:stop-hook-copilot-interactive-fires
+    - claim:stop-hook-copilot-interactive-degrades
+---
+nodeKind: Experiment
+id: experiment:stop-hook-control-noninteractive
+attributes:
+  displayName: "Stop Hook Control — Non-Interactive Mode"
+  description: |
+    Validates that hooks-mux can receive stop events in non-interactive
+    mode (--event-json flag, suitable for CI/batch invocation) and still
+    correctly normalizes to turn.stop phase.
+
+    Products tested: Claude Code, Codex, Gemini CLI, Copilot CLI.
+  status: in-progress
+  startedAt: "2026-05-11"
+edges:
+  tests_claim:
+    - claim:stop-hook-codex-noninteractive-fires
+    - claim:stop-hook-claude-noninteractive-fires
+---
+nodeKind: EvidenceSource
+id: evidence:hooks-mux-stop-hook-test-suite
+attributes:
+  displayName: "hooks-mux stop-hook control test suite"
+  description: |
+    Vitest integration test suite that invokes hooks-mux CLI with stop
+    events for each adapter, verifying phase normalization and decision
+    propagation. Located at packages/atlas/tests/claims/stop-hook-control.test.ts.
+  sourceUrl: "packages/atlas/tests/claims/stop-hook-control.test.ts"
+  sourceType: test-suite
+  collectedAt: "2026-05-11"
+edges:
+  backed_by_evidence:
+    - claim:stop-hook-claude-interactive-fires
+    - claim:stop-hook-claude-interactive-blocks
+    - claim:stop-hook-codex-interactive-fires
+    - claim:stop-hook-codex-interactive-blocks
+    - claim:stop-hook-gemini-interactive-fires
+    - claim:stop-hook-gemini-interactive-degrades
+    - claim:stop-hook-cursor-interactive-fires
+    - claim:stop-hook-cursor-interactive-blocks
+    - claim:stop-hook-copilot-interactive-fires
+    - claim:stop-hook-copilot-interactive-degrades
+    - claim:stop-hook-codex-noninteractive-fires
+    - claim:stop-hook-claude-noninteractive-fires
+  has_trust_level:
+    - trust-level:repo

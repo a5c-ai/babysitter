@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:ds1000.scope
+attributes:
+  subjectId: benchmark:ds1000
+  inScope: |
+    Data-science programming benchmark with 1,000 problems across NumPy, Pandas, SciPy, scikit-learn, PyTorch, TensorFlow, and Matplotlib. Scored by per-problem pass-rate.
+  outOfScope: |
+    General code-generation, agentic tool-use, repository-scale tasks, and non-Python languages.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:ds1000

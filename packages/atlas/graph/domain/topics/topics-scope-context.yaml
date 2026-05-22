@@ -1,0 +1,66 @@
+---
+nodeKind: Topic
+id: topic:graph-query-scoping
+attributes:
+  displayName: "Graph Query Scoping"
+  description: |
+    Filtering and scoping knowledge graph traversals by domain, role,
+    project context, or expertise level. Enables focused exploration
+    of large graphs by narrowing the visible subgraph to what's relevant
+    for a specific task or persona.
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:context-aware-retrieval
+attributes:
+  displayName: "Context-Aware Retrieval"
+  description: |
+    Using user context — role, project, expertise level, recent activity —
+    to rank and filter graph query results. Personalizes knowledge graph
+    interactions so different users see different priorities for the same query.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:data-science
+---
+nodeKind: Topic
+id: topic:knowledge-graph-navigation
+attributes:
+  displayName: "Knowledge Graph Navigation"
+  description: |
+    Patterns for traversing and exploring knowledge graphs effectively —
+    breadth-first exploration, neighborhood expansion, path finding between
+    concepts, and cluster-based browsing.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:databases
+---
+nodeKind: Topic
+id: topic:graph-embedding
+attributes:
+  displayName: "Graph Embedding"
+  description: |
+    Vector embeddings of graph nodes and edges for similarity search,
+    recommendations, and link prediction. Techniques like node2vec,
+    TransE, and GNN-based approaches for representing graph structure
+    in continuous vector spaces.
+edges:
+  applies_to:
+    - domain:data-science
+    - domain:databases
+---
+nodeKind: Topic
+id: topic:graph-clustering
+attributes:
+  displayName: "Graph Clustering"
+  description: |
+    Detecting communities, modules, and clusters in knowledge graphs —
+    Louvain, label propagation, spectral clustering. Enables navigating
+    large graphs by identifying natural groupings of related concepts.
+edges:
+  applies_to:
+    - domain:data-science
+    - domain:databases

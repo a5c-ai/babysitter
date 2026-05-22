@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:mcptransport
+attributes:
+  canonicalDefinitionId: definition:mcptransport.canonical
+  displayName: "MCPTransport"
+  kind: protocol
+  references:
+    - "NodeKind:MCPTransport"
+  description: |
+    An MCP wire transport (stdio, Streamable HTTP, ...)
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

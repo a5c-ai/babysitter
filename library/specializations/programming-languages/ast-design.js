@@ -16,6 +16,12 @@
  * - Crafting Interpreters: https://craftinginterpreters.com/representing-code.html
  * - Visitor Pattern: https://en.wikipedia.org/wiki/Visitor_pattern
  * - Tree-sitter AST: https://tree-sitter.github.io/tree-sitter/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:programming-languages]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:graph-algorithms]
+ *   roles: [role:backend-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

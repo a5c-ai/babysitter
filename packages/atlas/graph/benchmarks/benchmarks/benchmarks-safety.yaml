@@ -1,0 +1,58 @@
+---
+nodeKind: Benchmark
+id: benchmark:harmbench
+attributes:
+  displayName: "HarmBench"
+  homepageUrl: https://www.harmbench.org/
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    HarmBench (Mazeika et al., CAIS 2024) is a standardized evaluation
+    framework for automated red-teaming of LLMs across harmful behaviors
+    (cyber, chemical/biological, misinformation, harassment, illegal),
+    pairing attack methods with target models on a fixed test bank.
+edges:
+  covers:
+    - target: skill-area:safety-redteaming
+      attributes:
+        coverage: full
+        weight: 0.3
+  evaluates_policy:
+    - target: content-policy:default-acceptable-use
+    - target: content-policy:eu-ai-act-aligned
+---
+nodeKind: Benchmark
+id: benchmark:jailbreakbench
+attributes:
+  displayName: "JailbreakBench"
+  homepageUrl: https://jailbreakbench.github.io/
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    JailbreakBench (Chao et al., 2024) is an open-source benchmark and
+    leaderboard tracking adversarial jailbreak attacks against aligned
+    LLMs, with a curated set of 100 misuse-aligned behaviors and
+    standardized scoring of attack success rate.
+edges:
+  covers:
+    - target: skill-area:safety-redteaming
+  applies_to:
+    - target: domain:security
+---
+nodeKind: Benchmark
+id: benchmark:advbench
+attributes:
+  displayName: "AdvBench"
+  homepageUrl: https://github.com/llm-attacks/llm-attacks
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    AdvBench (Zou et al., "Universal and Transferable Adversarial
+    Attacks on Aligned Language Models", 2023) is a 520-string harmful-
+    behavior corpus paired with a standard suffix-attack protocol,
+    widely used to measure jailbreak robustness.
+edges:
+  covers:
+    - target: skill-area:safety-redteaming
+  applies_to:
+    - target: domain:security

@@ -9,6 +9,13 @@ skills:
   - containerization-assistant
   - cloud-readiness-assessor
   - cloud-cost-estimator
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:cloud-infrastructure, skill-area:containerization]
+  roles: [role:devops-engineer, role:architect]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Cloud Migration Engineer Agent

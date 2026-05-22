@@ -13,6 +13,11 @@ expertise:
   - Social navigation
   - Intent recognition
   - User study design
+graph:
+  domains: [domain:robotics]
+  specializations: [specialization:robotics-simulation]
+  skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+  roles: [role:research-engineer]
 ---
 
 # HRI Interface Designer Agent

@@ -1,0 +1,17 @@
+nodeKind: Framework
+id: framework:actix-web
+attributes:
+  displayName: "Actix Web"
+  homepageUrl: "https://actix.rs"
+  belongsToLanguageId: language:rust
+  category: web-backend
+  description: |
+    Actix Web — an actor-based web framework for Rust.
+edges:
+  belongs_to_language:
+    - language:rust
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:axum
+      comparison: "Rust web frameworks — Actix Web is actor-based; Axum is Tokio-native"

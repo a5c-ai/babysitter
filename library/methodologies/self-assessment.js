@@ -3,6 +3,13 @@
  * @description Self-Assessment Loop - Execute task, self-evaluate quality, and iteratively improve
  * @inputs { task: string, qualityThreshold: number, maxIterations: number, assessmentCriteria: array }
  * @outputs { success: boolean, iterations: number, finalScore: number, results: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   skillAreas: [skill-area:acceptance-testing, skill-area:integration-testing, skill-area:e2e-testing]
+ *   workflows: [workflow:feature-development, workflow:release-management]
+ *   topics: [topic:test-driven-development]
+ *   roles: [role:qa-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

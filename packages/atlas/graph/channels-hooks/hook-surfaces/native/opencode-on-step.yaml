@@ -1,0 +1,21 @@
+nodeKind: HookSurface
+id: hook-surface:opencode.on-step
+attributes:
+  eventName: "on_step (OpenCode)"
+  displayName: "on_step (OpenCode)"
+  kind: native
+  originVendor: OpenCode
+  direction: post
+  blocking: false
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [step]
+    properties:
+      step: { type: object }
+  description: |
+    OpenCode's per-step hook. Fires once per agent loop iteration.
+    Canonicalizes to post-tool-use for cross-product policies.
+edges:
+  canonicalized_to:
+    - target: hook-surface:post-tool-use

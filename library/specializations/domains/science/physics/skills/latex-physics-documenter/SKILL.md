@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: visualization-documentation
   phase: 6
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:data-visualization, skill-area:statistical-analysis, skill-area:data-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:computational-scientist]
 ---
 
 # LaTeX Physics Documenter

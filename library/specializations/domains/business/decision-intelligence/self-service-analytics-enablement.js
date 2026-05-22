@@ -16,6 +16,10 @@
  * @references
  * - Gartner BI and Analytics: https://www.gartner.com/en/information-technology/glossary/business-intelligence-bi
  * - Data Democratization: https://hbr.org/2020/02/how-to-use-analytics-to-make-better-decisions
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+ *   roles: [role:data-analyst, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

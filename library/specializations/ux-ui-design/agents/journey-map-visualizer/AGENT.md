@@ -8,6 +8,12 @@ expertise:
   - Pain point identification
   - Service blueprint creation
   - Current vs future state mapping
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:user-research, skill-area:prototyping]
+  roles: [role:ux-researcher, role:product-designer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # Journey Map Visualizer Agent

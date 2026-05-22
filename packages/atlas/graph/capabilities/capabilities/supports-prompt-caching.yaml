@@ -1,0 +1,13 @@
+nodeKind: Capability
+id: capability:supports-prompt-caching
+attributes:
+  displayName: "Supports prompt caching"
+  description: |
+    The entity supports an explicit prompt-caching surface where parts of
+    the prompt (system messages, tool definitions, large context blocks)
+    are marked for cache reuse and billed at a reduced rate on cache hits.
+    Anthropic exposes this via `cache_control` blocks on Messages API;
+    OpenAI and Gemini have related but distinct surfaces.
+  appliesToNodeKinds: ["Provider", "ModelVersion"]
+  category: provider-feature
+edges: {}

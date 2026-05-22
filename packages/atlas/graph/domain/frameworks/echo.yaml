@@ -1,0 +1,17 @@
+nodeKind: Framework
+id: framework:echo
+attributes:
+  displayName: "Echo"
+  homepageUrl: "https://echo.labstack.com"
+  belongsToLanguageId: language:go
+  category: web-backend
+  description: |
+    Echo — a high-performance, minimalist Go web framework.
+edges:
+  belongs_to_language:
+    - language:go
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:gin
+      comparison: "Go web frameworks"

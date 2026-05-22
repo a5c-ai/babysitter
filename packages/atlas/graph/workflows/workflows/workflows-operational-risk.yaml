@@ -1,0 +1,152 @@
+---
+nodeKind: Workflow
+id: workflow:operational-risk-event-analysis
+attributes:
+  displayName: "Operational Risk Event Analysis"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Analyzes operational risk loss events across the organization --
+    capturing loss event details including root cause categorization per
+    Basel II taxonomy, quantifying direct and indirect financial impacts,
+    conducting causal analysis to identify process breakdowns and control
+    failures, mapping events to the risk and control self-assessment
+    inventory, determining whether existing controls were absent,
+    inadequate, or circumvented, and recommending remediation actions with
+    risk-owner assignments and target completion dates. Produces loss
+    event report, root-cause analysis, and control gap remediation plan.
+    Excludes control redesign and implementation.
+edges:
+  involves_role:
+    - target: role:operational-risk-analyst
+    - target: role:compliance-officer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:risk-management-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:key-risk-indicator-monitoring
+attributes:
+  displayName: "Key Risk Indicator Monitoring"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Monitors key risk indicators across operational, financial, and
+    compliance risk categories -- maintaining KRI dashboards with
+    real-time threshold tracking, analyzing threshold breaches against
+    amber and red escalation triggers, identifying trend patterns that
+    signal emerging risk concentrations, correlating KRI movements with
+    operational loss events and near-misses, generating automated alerts
+    for risk owners when indicators breach tolerances, and producing
+    monthly KRI trend reports for the risk committee. Delivers KRI
+    dashboard, breach notifications, and trend analysis report. Excludes
+    KRI definition and threshold calibration.
+edges:
+  involves_role:
+    - target: role:operational-risk-analyst
+    - target: role:data-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:risk-management-team
+    - target: org-unit:business-intelligence-team
+---
+nodeKind: Workflow
+id: workflow:control-effectiveness-testing
+attributes:
+  displayName: "Control Effectiveness Testing"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Tests the design and operating effectiveness of internal controls --
+    selecting control samples based on risk-tier prioritization,
+    evaluating whether control design adequately addresses identified
+    risks, testing operating effectiveness through walkthroughs,
+    re-performance, and evidence inspection, assessing automated control
+    configurations and access restrictions, identifying control
+    deficiencies and classifying severity as gap, weakness, or material
+    weakness, and tracking remediation commitments from prior testing
+    cycles. Produces control testing results matrix, deficiency register,
+    and remediation status report. Excludes control design and policy
+    authoring.
+edges:
+  involves_role:
+    - target: role:operational-risk-analyst
+    - target: role:security-reviewer
+    - target: role:compliance-officer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:incident-response
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:cybersecurity-grc
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:risk-management-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:risk-appetite-framework-review
+attributes:
+  displayName: "Risk Appetite Framework Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annually"
+  complexity: cross-team
+  description: |
+    Reviews and realigns the organizational risk appetite framework with
+    strategic objectives -- evaluating whether risk appetite statements
+    remain consistent with current business strategy and market
+    conditions, assessing risk tolerance thresholds and limit structures
+    for adequacy, reviewing risk capacity constraints including capital,
+    liquidity, and reputational buffers, mapping risk appetite cascading
+    from board-level statements to business-unit-level limits, validating
+    that KRIs and escalation triggers align with stated appetite, and
+    benchmarking risk appetite calibration against industry peers.
+    Produces updated risk appetite statement, tolerance threshold
+    recommendations, and board-level risk appetite report. Excludes
+    strategic planning and capital allocation.
+edges:
+  involves_role:
+    - target: role:operational-risk-analyst
+    - target: role:risk-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:strategy
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:risk-management-team
+    - target: org-unit:strategy-team

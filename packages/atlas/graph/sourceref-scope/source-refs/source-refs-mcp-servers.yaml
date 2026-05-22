@@ -1,0 +1,33 @@
+---
+nodeKind: SourceRef
+id: source-ref:context7-mcp
+attributes:
+  description: "Context7 MCP server by Upstash"
+  displayName: "Context7 MCP"
+  repoUrl: https://github.com/upstash/context7
+  ref: main
+  path: "."
+  kind: git
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:tavily-mcp
+attributes:
+  description: "Tavily MCP server (web search MCP)"
+  displayName: "Tavily MCP"
+  repoUrl: https://github.com/tavily-ai/tavily-mcp
+  ref: main
+  path: "."
+  kind: git
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:firecrawl-mcp
+attributes:
+  description: "Firecrawl MCP server by Mendable"
+  displayName: "Firecrawl MCP"
+  repoUrl: https://github.com/mendableai/firecrawl-mcp-server
+  ref: main
+  path: "."
+  kind: git
+edges: {}

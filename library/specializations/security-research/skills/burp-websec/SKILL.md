@@ -9,6 +9,13 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:application-security-testing, skill-area:web-security]
+  roles: [role:security-engineer]
+  workflows: [workflow:penetration-testing-cycle]
+  topics: [topic:zero-trust-architecture]
 ---
 
 # Burp Suite/Web Security Skill

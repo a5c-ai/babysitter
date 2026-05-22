@@ -2,6 +2,12 @@
 name: user-researcher
 description: Agent specialized in qualitative and quantitative user research methodologies. Expert in user interview design, JTBD and switch interviews, usability testing, survey design, research synthesis, and persona development.
 required-skills: user-research-synthesis, survey-design, persona-development
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:user-research, skill-area:product-discovery]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # User Research Expert Agent

@@ -2,6 +2,13 @@
 name: authentication-migrator
 description: Migrate authentication systems with credential migration, OAuth2/OIDC setup, and identity provider integration
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:oauth-flows, skill-area:authentication-authorization]
+  roles: [role:security-engineer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Authentication Migrator Skill

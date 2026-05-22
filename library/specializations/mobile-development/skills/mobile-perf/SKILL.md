@@ -5,6 +5,13 @@ version: 1.0.0
 category: Performance
 slug: mobile-perf
 status: active
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:battery-consumption-testing, skill-area:memory-usage-testing]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Mobile Performance Profiling Skill

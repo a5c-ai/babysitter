@@ -2,6 +2,11 @@
 name: phaser
 description: Phaser.js 2D game development skill for web games, arcade physics, and web deployment.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engines, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Phaser Skill

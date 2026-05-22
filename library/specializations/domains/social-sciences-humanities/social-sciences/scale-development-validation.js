@@ -5,6 +5,12 @@
  * @outputs { success: boolean, validatedScale: object, psychometricProperties: object, qualityScore: number, artifacts: array }
  * @recommendedSkills SK-SS-009 (psychometric-assessment), SK-SS-001 (quantitative-methods)
  * @recommendedAgents AG-SS-007 (measurement-psychometrics-expert), AG-SS-001 (quantitative-research-methodologist)
+ *
+ * @graph
+ *   domains: [domain:social-sciences]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:user-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:data-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

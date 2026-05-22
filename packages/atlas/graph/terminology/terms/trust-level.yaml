@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:trust-level
+attributes:
+  canonicalDefinitionId: definition:trust-level.canonical
+  displayName: "TrustLevel"
+  kind: concept
+  references:
+    - "NodeKind:TrustLevel"
+  description: |
+    Enum — official-web, vendor-doc, community, synthetic, repo
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+    - target: domain:software-engineering

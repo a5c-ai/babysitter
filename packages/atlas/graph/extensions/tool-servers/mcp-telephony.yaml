@@ -1,0 +1,56 @@
+nodeKind: ToolServer
+id: tool-server:mcp-saperly
+attributes:
+  displayName: Saperly Phone MCP Server
+  description: |
+    MCP server that gives AI agents a phone number with telephony
+    capabilities. Enables voice calls, SMS sending and receiving, and
+    phone-based identity verification. Agents can initiate outbound
+    calls, handle inbound call routing, and integrate telephony into
+    multi-step workflows.
+  protocol: mcp
+  category: communication
+  repoUrl: https://github.com/Saperly/saperly-mcp
+  maintainer: Saperly
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:sms-delivery
+  - target: tool:saperly
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:operations
+  supports:
+  - target: capability:supports-telephony
+    level: full
+    notes: Voice calls, SMS, and phone verification via MCP tools.
+  - target: capability:supports-voice-io
+    level: full
+    notes: Agents can initiate/receive voice calls and process audio.
+---
+nodeKind: Tool
+id: tool:saperly
+attributes:
+  languageApplicability: neutral
+  displayName: "Saperly"
+  homepageUrl: "https://saperly.com"
+  kind: other
+  description: |
+    Cloud telephony platform that provides AI agents with phone numbers
+    and telephony capabilities. Offers APIs and an MCP server for
+    programmatic voice calls, SMS messaging, phone verification, and
+    inbound call routing. Designed for integrating telephony into
+    AI agent workflows — enabling agents to make calls, send texts,
+    and handle phone-based interactions as part of automated processes.
+edges:
+  tool_used_by:
+    - target: skill-area:communication
+  used_for:
+    - skill-area:communication
+    - skill-area:operations-automation
+  lib_applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:operations
+  integrates_with:
+    - target: tool-server:mcp-saperly

@@ -1,0 +1,52 @@
+nodeKind: Blueprint
+id: blueprint:a11y
+attributes:
+  displayName: "a11y"
+  description: |
+    Install accessibility feedback loops — lint rules (jsx-a11y/vue-a11y/angular-eslint/htmlhint/djlint),
+    pre-commit hooks, GitHub Actions workflow, and runtime scanning via Axe/Playwright, Lighthouse CI,
+    or pa11y. Per-stack recommendations for React, Vue, Angular, plain HTML, and Python templates.
+  installMd: "@plugins/a5c/marketplace/plugins/a11y/install.md"
+  configureMd: "@plugins/a5c/marketplace/plugins/a11y/configure.md"
+  uninstallMd: "@plugins/a5c/marketplace/plugins/a11y/uninstall.md"
+  latestVersion: "1.0.0"
+  versions: ["1.0.0"]
+  tags: [accessibility, a11y, wcag, lint, ci, quality]
+  author: "a5c-ai"
+  packagePath: "plugins/a11y"
+  marketplaceUrl: https://github.com/a5c-ai/babysitter
+  scope: project
+  domains:
+    - topic:accessibility
+    - specialization:frontend-react
+    - domain:web-development
+  requiresLanguages: []
+  requiresFrameworks: []
+  targetSurface:
+    - filesystem
+    - git-hooks
+    - ci
+    - github-actions
+    - package-json
+    - settings
+  breakpoints:
+    - "Stage 1: Project Analysis (analyze stack, lint setup, existing a11y tooling)"
+    - "Stage 2: A11y Layers (which layers to set up — multi-select)"
+    - "Stage 3: Framework Selection (lint plugin + runtime tool per stack)"
+    - "Stage 4: Strictness & CI Gating (WCAG conformance, severity threshold, blocking)"
+    - "Stage 5: Git Hooks (husky/lint-staged or pre-commit/lefthook)"
+edges:
+  executable_by:
+    - target: agent:claude-code
+    - target: agent:codex
+    - target: agent:cursor
+    - target: agent:gemini-cli
+    - target: agent:opencode
+  applies_to:
+    - target: topic:accessibility
+      confidence: primary
+    - target: domain:web-development
+      confidence: primary
+  sourced_from:
+    - target: source-ref:a5c-marketplace-a11y
+    - target: source-ref:a5c-marketplace

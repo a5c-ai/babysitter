@@ -1,0 +1,136 @@
+---
+nodeKind: Tool
+id: tool:vscode
+attributes:
+  displayName: "Visual Studio Code"
+  homepageUrl: "https://code.visualstudio.com"
+  kind: other
+  description: |
+    Cross-platform extensible code editor by Microsoft with a rich
+    extension marketplace, integrated terminal, and remote-dev support.
+edges:
+  tool_used_by:
+    - target: skill-area:editor-fluency
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:editor-fluency
+  alternative_to:
+    - target: tool:jetbrains-idea
+      comparison: "Code editors / IDEs"
+    - target: tool:neovim
+      comparison: "Code editors / IDEs"
+    - target: tool:cursor
+      comparison: "Code editors / IDEs"
+---
+nodeKind: Tool
+id: tool:jetbrains-idea
+attributes:
+  displayName: "JetBrains IntelliJ IDEA"
+  homepageUrl: "https://www.jetbrains.com/idea/"
+  kind: other
+  description: |
+    JVM-focused IDE with deep refactoring, language plugins, and an
+    ecosystem of language-specific IDEs (PyCharm, GoLand, WebStorm).
+edges:
+  tool_used_by:
+    - target: skill-area:editor-fluency
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:editor-fluency
+  alternative_to:
+    - target: tool:vscode
+      comparison: "Code editors / IDEs"
+    - target: tool:neovim
+      comparison: "Code editors / IDEs"
+    - target: tool:cursor
+      comparison: "Code editors / IDEs"
+---
+nodeKind: Tool
+id: tool:vim
+attributes:
+  displayName: "Vim"
+  homepageUrl: "https://www.vim.org"
+  kind: other
+  description: |
+    Modal terminal editor descended from vi; ubiquitous on Unix
+    systems and configurable via Vimscript.
+edges:
+  tool_used_by:
+    - target: skill-area:editor-fluency
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:editor-fluency
+  alternative_to:
+    - target: tool:emacs
+      comparison: "Terminal editors — Vim is modal; Emacs uses modifier keys"
+    - target: tool:helix
+      comparison: "Modal terminal editors — Vim uses Vimscript; Helix has built-in LSP and tree-sitter"
+    - target: tool:neovim
+      comparison: "Modal editors — Vim uses Vimscript; Neovim adds Lua scripting"
+---
+nodeKind: Tool
+id: tool:neovim
+attributes:
+  displayName: "Neovim"
+  homepageUrl: "https://neovim.io"
+  kind: other
+  description: |
+    Vim fork focused on extensibility and embeddability with native
+    Lua scripting and async plugin host.
+edges:
+  tool_used_by:
+    - target: skill-area:editor-fluency
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:editor-fluency
+  alternative_to:
+    - target: tool:vscode
+      comparison: "Code editors / IDEs"
+    - target: tool:jetbrains-idea
+      comparison: "Code editors / IDEs"
+    - target: tool:cursor
+      comparison: "Code editors / IDEs"
+---
+nodeKind: Tool
+id: tool:emacs
+attributes:
+  displayName: "GNU Emacs"
+  homepageUrl: "https://www.gnu.org/software/emacs/"
+  kind: other
+  description: |
+    Extensible self-documenting editor with Emacs Lisp scripting;
+    common environments include Org mode and Magit.
+edges:
+  tool_used_by:
+    - target: skill-area:editor-fluency
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:editor-fluency
+  alternative_to:
+    - target: tool:vim
+      comparison: "Terminal editors — Emacs uses modifier keys; Vim is modal"
+    - target: tool:helix
+      comparison: "Terminal editors — Emacs uses Emacs Lisp; Helix has built-in LSP"
+---
+nodeKind: Tool
+id: tool:helix
+attributes:
+  displayName: "Helix"
+  homepageUrl: "https://helix-editor.com"
+  kind: other
+  description: |
+    Post-modern modal terminal editor with built-in LSP, tree-sitter
+    syntax, and a multi-selection-first edit model.
+edges:
+  tool_used_by:
+    - target: skill-area:editor-fluency
+  used_for:
+    - target: skill-area:developer-environment
+    - target: skill-area:editor-fluency
+  alternative_to:
+    - target: tool:vim
+      comparison: "Modal terminal editors — Helix has built-in LSP and tree-sitter; Vim uses Vimscript"
+    - target: tool:emacs
+      comparison: "Terminal editors — Helix has built-in LSP; Emacs uses Emacs Lisp"
+    - target: tool:neovim
+      comparison: "Modal terminal editors — Helix has built-in LSP; Neovim requires plugins"

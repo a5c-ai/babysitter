@@ -7,19 +7,14 @@ metadata:
   version: "1.0.0"
   category: pilot-shell-sync
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# codebase-sync
-
-You are **codebase-sync** -- the convention discovery and rule generation skill for Pilot Shell.
-
-## Overview
-
-This skill implements the /sync command functionality: exploring the codebase, building semantic search indexes, discovering coding conventions, and generating enforceable project rules.
-
-## Capabilities
-
-### 1. Project Exploration
 - Scan directory structure for project type identification
 - Detect language, framework, package manager
 - Identify build tools, CI/CD config, test framework

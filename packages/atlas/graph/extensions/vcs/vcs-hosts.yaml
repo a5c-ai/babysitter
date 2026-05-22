@@ -1,0 +1,54 @@
+---
+nodeKind: VCSHost
+id: vcs-host:github
+attributes:
+  displayName: "GitHub"
+  vendor: "GitHub (Microsoft)"
+  hostKind: github
+  baseUrl: https://github.com
+  notes: |
+    The dominant SaaS git host; primary public-OSS forge.
+edges: {}
+---
+nodeKind: VCSHost
+id: vcs-host:gitlab
+attributes:
+  displayName: "GitLab.com"
+  vendor: "GitLab Inc."
+  hostKind: gitlab
+  baseUrl: https://gitlab.com
+  notes: |
+    GitLab SaaS; also self-hostable as GitLab CE/EE.
+edges: {}
+---
+nodeKind: VCSHost
+id: vcs-host:bitbucket-cloud
+attributes:
+  displayName: "Bitbucket Cloud"
+  vendor: "Atlassian"
+  hostKind: bitbucket
+  baseUrl: https://bitbucket.org
+  notes: |
+    Atlassian Bitbucket Cloud.
+edges: {}
+---
+nodeKind: VCSHost
+id: vcs-host:gitea
+attributes:
+  displayName: "Gitea (self-hosted)"
+  vendor: "Gitea"
+  hostKind: gitea
+  notes: |
+    Open-source self-hostable git forge; lightweight GitHub-alike.
+edges: {}
+---
+nodeKind: VCSHost
+id: vcs-host:azure-devops
+attributes:
+  displayName: "Azure DevOps Repos"
+  vendor: "Microsoft"
+  hostKind: azure-devops
+  baseUrl: https://dev.azure.com
+  notes: |
+    Microsoft Azure DevOps Git hosting.
+edges: {}

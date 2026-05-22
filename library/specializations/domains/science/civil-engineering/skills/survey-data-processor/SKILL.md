@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Surveying
   skill-id: CIV-SK-033
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Survey Data Processor Skill

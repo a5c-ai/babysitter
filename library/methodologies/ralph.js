@@ -3,6 +3,12 @@
  * @description Ralph Wiggum Loop - Simple iterative execution until DONE signal
  * @inputs { task: string, maxIterations: number }
  * @outputs { success: boolean, iterations: number, results: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:backend-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

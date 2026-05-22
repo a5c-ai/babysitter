@@ -16,6 +16,9 @@
  * - GoEmotions: https://arxiv.org/abs/2005.00547
  * - EmpatheticDialogues: https://arxiv.org/abs/1811.00207
  * - Emotion Recognition: https://huggingface.co/models?search=emotion
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

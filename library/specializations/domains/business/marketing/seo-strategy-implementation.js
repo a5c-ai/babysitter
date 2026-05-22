@@ -3,6 +3,11 @@
  * @description Conduct keyword research, optimize on-page elements, build technical SEO foundation, develop link building strategy, and track organic search performance.
  * @inputs { website: string, targetKeywords: array, competitors: array, currentMetrics: object, businessGoals: object }
  * @outputs { success: boolean, seoStrategy: object, keywordPlan: object, technicalAudit: object, linkBuildingPlan: object, artifacts: array }
+  * @graph
+ *   domains: [domain:marketing]
+ *   skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+ *   workflows: [workflow:brand-campaign-launch]
+ *   roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

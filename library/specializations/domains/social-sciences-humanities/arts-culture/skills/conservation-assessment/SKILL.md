@@ -2,6 +2,10 @@
 name: conservation-assessment
 description: Assess condition of artworks and cultural objects, develop treatment proposals, and document conservation interventions following AIC ethical guidelines
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:data-analysis, skill-area:document-processing, skill-area:image-processing]
+  roles: [role:research-scientist, role:lab-technician]
 ---
 
 # Conservation Assessment

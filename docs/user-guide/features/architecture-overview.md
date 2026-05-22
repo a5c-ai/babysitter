@@ -62,7 +62,7 @@ Babysitter uses a modular architecture designed for reliability, debuggability, 
 
 ### 1. Babysitter Skill Plugin
 
-**Location:** `plugins/babysitter/skills/babysit/`
+**Location:** `plugins/babysitter-unified/skills/babysit/`
 
 **Responsibilities:**
 - Parses natural language commands into process inputs
@@ -274,7 +274,7 @@ For more details on parallel execution, see [Parallel Execution](./parallel-exec
              |
              +-- Parse intent
              +-- Load/create run
-             +--> CLI: npx -y @a5c-ai/babysitter-sdk@latest run:iterate
+             +--> CLI: npx -y @a5c-ai/babysitter@latest run:iterate
                   |
                   +--> SDK Process Engine
                        |

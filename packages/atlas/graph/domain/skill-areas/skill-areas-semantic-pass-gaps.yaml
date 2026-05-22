@@ -1,0 +1,294 @@
+---
+nodeKind: SkillArea
+id: skill-area:risk-assessment
+attributes:
+  displayName: "Risk Assessment"
+  description: |
+    Risk identification, assessment, and mitigation across operational, financial, and
+    technical domains. Covers qualitative and quantitative risk models, risk registers,
+    and risk-informed decision-making frameworks.
+  domains:
+    - domain:operations
+    - domain:finance
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:operations
+      confidence: primary
+    - target: domain:finance
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:requirements-engineering
+attributes:
+  displayName: "Requirements Engineering"
+  description: |
+    Eliciting, documenting, and managing requirements through the software lifecycle.
+    Covers stakeholder interviews, use-case modelling, acceptance criteria definition,
+    and requirements traceability from inception to delivery.
+  domains:
+    - domain:software-engineering
+    - domain:project-management
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:project-management
+      confidence: secondary
+    - target: specialization:bdd-specification-by-example
+      confidence: secondary
+    - target: specialization:example-mapping
+      confidence: secondary
+    - target: specialization:spec-kit
+      confidence: secondary
+    - target: specialization:hypothesis-driven-development
+      confidence: secondary
+    - target: specialization:business-analysis
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:operational-excellence
+attributes:
+  displayName: "Operational Excellence"
+  description: |
+    Lean and Six Sigma process optimization, continuous improvement practices, and
+    operational maturity frameworks. Covers waste elimination, value stream mapping,
+    KPI-driven operations, and cultural change for sustained excellence.
+  domains:
+    - domain:operations
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:operations
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:information-architect
+attributes:
+  displayName: "Information Architecture"
+  description: |
+    Information architecture, content organization, taxonomy design, and navigation
+    structure for digital products and knowledge systems. Covers card sorting,
+    tree testing, labelling systems, and IA evaluation techniques.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:process-improvement
+attributes:
+  displayName: "Process Improvement"
+  description: |
+    Analyzing and redesigning business processes for efficiency and effectiveness.
+    Covers BPMN modelling, root-cause analysis, gap analysis, and structured
+    approaches such as BPR and continuous improvement cycles.
+  domains:
+    - domain:operations
+    - domain:strategy
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:operations
+      confidence: primary
+    - target: domain:strategy
+      confidence: secondary
+    - target: specialization:meta
+      confidence: secondary
+    - target: specialization:gsd
+      confidence: secondary
+    - target: specialization:ruflo
+      confidence: secondary
+    - target: specialization:gastown
+      confidence: secondary
+    - target: specialization:cc10x
+      confidence: secondary
+    - target: specialization:double-diamond
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:quality-management
+attributes:
+  displayName: "Quality Management"
+  description: |
+    Quality frameworks, metrics, audit processes, and continuous quality improvement
+    practices. Covers ISO 9001, TQM, acceptance testing, defect metrics,
+    and quality gate design across product and service delivery.
+  domains:
+    - domain:operations
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:operations
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:economic-analysis
+attributes:
+  displayName: "Economic Analysis"
+  description: |
+    Economic modelling, cost-benefit analysis, and macroeconomic assessment for
+    business and policy decisions. Covers econometric methods, scenario analysis,
+    market sizing, and translating economic insights into strategic action.
+  domains:
+    - domain:finance
+    - domain:strategy
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:finance
+      confidence: primary
+    - target: domain:strategy
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:geopolitical-analysis
+attributes:
+  displayName: "Geopolitical Analysis"
+  description: |
+    Political risk assessment, country risk evaluation, and geopolitical forecasting
+    for business and investment decisions. Covers scenario planning, early-warning
+    systems, and translating geopolitical dynamics into operational risk postures.
+  domains:
+    - domain:strategy
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:strategy
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:problem-solving
+attributes:
+  displayName: "Problem Solving"
+  description: |
+    Structured problem-solving frameworks including root cause analysis, design
+    thinking, issue-tree decomposition, and hypothesis-driven problem framing.
+    Covers facilitation of cross-functional problem-solving workshops.
+  domains:
+    - domain:operations
+    - domain:strategy
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:operations
+      confidence: primary
+    - target: domain:strategy
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:solution-architecture
+attributes:
+  displayName: "Solution Architecture"
+  description: |
+    Solution design, technology selection, and integration architecture for complex
+    business and technical problems. Covers trade-off analysis, reference architectures,
+    options scoring, and aligning technology choices with business requirements.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: specialization:backend-python-django
+      confidence: secondary
+    - target: specialization:go-microservices
+      confidence: secondary
+    - target: specialization:webapp-fullstack-typescript
+      confidence: secondary
+    - target: specialization:webapp-fullstack-python
+      confidence: secondary
+    - target: specialization:business
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:domain-driven-design
+      strength: recommended
+    - target: skill-area:hexagonal-architecture
+      strength: recommended
+    - target: skill-area:event-sourcing
+      strength: recommended
+    - target: skill-area:cqrs
+      strength: recommended
+    - target: skill-area:monolith-vs-microservices
+      strength: recommended
+    - target: skill-area:c4-modeling
+      strength: recommended
+    - target: skill-area:adr-writing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:executive-communication
+attributes:
+  displayName: "Executive Communication"
+  description: |
+    Executive presentations, board reporting, and stakeholder communication at
+    senior leadership level. Covers pyramid-principle structuring, data storytelling,
+    executive briefing design, and narrative frameworks for strategic influence.
+  domains:
+    - domain:strategy
+    - domain:public-relations
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:strategy
+      confidence: primary
+    - target: domain:public-relations
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:agile-delivery
+attributes:
+  displayName: "Agile Delivery"
+  description: |
+    Agile delivery management, sprint facilitation, and velocity optimization for
+    software development teams. Covers Scrum, Kanban, SAFe, backlog management,
+    retrospectives, and continuous delivery pipeline integration.
+  domains:
+    - domain:software-engineering
+    - domain:project-management
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:project-management
+      confidence: secondary
+    - target: specialization:scrum
+      confidence: secondary
+    - target: specialization:kanban
+      confidence: secondary
+    - target: specialization:extreme-programming
+      confidence: secondary
+    - target: specialization:feature-driven-development
+      confidence: secondary
+    - target: specialization:shape-up
+      confidence: secondary
+    - target: specialization:project-management
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:graph-databases
+attributes:
+  displayName: "Graph Databases"
+  description: |
+    Graph database design, query languages (Cypher, Gremlin, SPARQL), and graph
+    data modelling for connected data use cases. Covers knowledge graphs, network
+    analysis, graph algorithms, and property graph vs RDF modelling choices.
+  domains:
+    - domain:databases
+    - domain:data-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:databases
+      confidence: primary
+    - target: domain:data-engineering
+      confidence: secondary

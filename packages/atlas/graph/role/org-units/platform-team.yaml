@@ -1,0 +1,9 @@
+nodeKind: OrgUnit
+id: org-unit:platform-team
+attributes:
+  kind: team
+  displayName: "Platform Team"
+  description: |
+    The platform engineering team — owns shared infrastructure, CI/CD, and
+    developer experience.
+edges: {}

@@ -1,0 +1,150 @@
+nodeKind: EvidenceSource
+id: evidence:codex-research-openai-cli-doc
+attributes:
+  displayName: Codex CLI OpenAI developer documentation
+  kindLabel: official-doc
+  trustLevel: trust-level:repo
+  sourceUrl: https://developers.openai.com/codex/cli
+  sourcePathOrUrl: https://developers.openai.com/codex/cli
+  locator: codex-cli-overview
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:codex-research-openai-approvals-security-doc
+attributes:
+  displayName: Codex approvals and security OpenAI developer documentation
+  kindLabel: official-doc
+  trustLevel: trust-level:repo
+  sourceUrl: https://developers.openai.com/codex/agent-approvals-security
+  sourcePathOrUrl: https://developers.openai.com/codex/agent-approvals-security
+  locator: codex-agent-approvals-security
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:codex-research-openai-sandbox-doc
+attributes:
+  displayName: Codex sandbox OpenAI developer documentation
+  kindLabel: official-doc
+  trustLevel: trust-level:repo
+  sourceUrl: https://developers.openai.com/codex/concepts/sandboxing
+  sourcePathOrUrl: https://developers.openai.com/codex/concepts/sandboxing
+  locator: codex-sandboxing
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:codex-research-openai-config-doc
+attributes:
+  displayName: Codex config OpenAI developer documentation
+  kindLabel: official-doc
+  trustLevel: trust-level:repo
+  sourceUrl: https://developers.openai.com/codex/config-basic
+  sourcePathOrUrl: https://developers.openai.com/codex/config-basic
+  locator: codex-config-basic
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:codex-research-openai-mcp-doc
+attributes:
+  displayName: Codex MCP OpenAI developer documentation
+  kindLabel: official-doc
+  trustLevel: trust-level:repo
+  sourceUrl: https://developers.openai.com/codex/mcp
+  sourcePathOrUrl: https://developers.openai.com/codex/mcp
+  locator: codex-mcp
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:codex-research-openai-slash-commands-doc
+attributes:
+  displayName: Codex CLI slash commands OpenAI developer documentation
+  kindLabel: official-doc
+  trustLevel: trust-level:repo
+  sourceUrl: https://developers.openai.com/codex/cli/slash-commands
+  sourcePathOrUrl: https://developers.openai.com/codex/cli/slash-commands
+  locator: codex-cli-slash-commands
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:codex-research-openai-agents-sdk-doc
+attributes:
+  displayName: Codex Agents SDK OpenAI developer documentation
+  kindLabel: official-doc
+  trustLevel: trust-level:repo
+  sourceUrl: https://developers.openai.com/codex/guides/agents-sdk
+  sourcePathOrUrl: https://developers.openai.com/codex/guides/agents-sdk
+  locator: codex-agents-sdk-mcp-server
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:codex-research-openai-cli-reference-doc
+attributes:
+  displayName: Codex CLI command line options OpenAI developer documentation
+  kindLabel: official-doc
+  trustLevel: trust-level:repo
+  sourceUrl: https://developers.openai.com/codex/cli/reference
+  sourcePathOrUrl: https://developers.openai.com/codex/cli/reference
+  locator: codex-cli-reference
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:codex-research-mcp-server-schema-probe
+attributes:
+  displayName: Codex MCP server tools/list schema probe
+  kindLabel: local-command
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/openai/codex
+  sourcePathOrUrl: https://github.com/openai/codex
+  locator: command `npx -y @openai/codex@0.120.0 mcp-server`; json-rpc initialize and tools/list on 2026-05-05
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:codex-research-cli-help-0-120-0
+attributes:
+  displayName: Codex CLI 0.120.0 help output
+  kindLabel: local-command
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/openai/codex
+  sourcePathOrUrl: command:npx -y @openai/codex@0.120.0 --help
+  locator: --ask-for-approval option values from CLI help on 2026-05-05
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+edges:
+  has_trust_level:
+    - trust-level:repo
+

@@ -2,6 +2,11 @@
 name: macro-systems
 description: Expert skill for designing and implementing macro systems including hygienic macros, procedural macros, and macro expansion. Supports pattern-based macros, quasi-quotation, and hygiene management.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:compiler-implementation, skill-area:language-design]
+  roles: [role:backend-engineer]
 ---
 
 # Macro Systems Skill

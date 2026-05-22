@@ -1,0 +1,118 @@
+nodeKind: Benchmark
+id: benchmark:browse-comp
+attributes:
+  displayName: "BrowseComp"
+  homepageUrl: https://openai.com/index/browsecomp/
+  kind: web-agent
+  targetsKind: AgentVersion
+  description: |
+    OpenAI benchmark for browsing agents on hard, hard-to-find web
+    research tasks designed to require deep, persistent search rather
+    than surface lookup.
+edges:
+  covers:
+    - target: skill-area:deep-web-research
+      attributes:
+        coverage: full
+        weight: 0.7
+    - target: skill-area:browser-automation
+      attributes:
+        coverage: tangential
+        weight: 0.1
+  applies_to:
+    - target: domain:web-development
+---
+nodeKind: Benchmark
+id: benchmark:mind2web-2
+attributes:
+  displayName: "Mind2Web 2"
+  homepageUrl: https://osu-nlp-group.github.io/Mind2Web2/
+  kind: web-agent
+  targetsKind: AgentVersion
+  description: |
+    Successor of Mind2Web for evaluating generalist web agents across
+    long-horizon, multi-site, real-world tasks with judge-based outcome
+    verification.
+edges:
+  covers:
+    - target: skill-area:web-action-grounding
+      attributes:
+        coverage: full
+        weight: 0.6
+    - target: skill-area:browser-automation
+      attributes:
+        coverage: partial
+        weight: 0.3
+  applies_to:
+    - target: domain:web-development
+---
+nodeKind: Benchmark
+id: benchmark:workarena
+attributes:
+  displayName: "WorkArena"
+  homepageUrl: https://github.com/ServiceNow/WorkArena
+  kind: web-agent
+  targetsKind: AgentVersion
+  description: |
+    ServiceNow Research benchmark for web agents performing realistic
+    enterprise knowledge-worker tasks against a live ServiceNow
+    instance.
+edges:
+  covers:
+    - target: skill-area:web-action-grounding
+      attributes:
+        coverage: partial
+        weight: 0.4
+    - target: skill-area:browser-automation
+      attributes:
+        coverage: full
+        weight: 0.3
+  applies_to:
+    - target: domain:web-development
+---
+nodeKind: Benchmark
+id: benchmark:webvoyager
+attributes:
+  displayName: "WebVoyager"
+  homepageUrl: https://github.com/MinorJerry/WebVoyager
+  kind: web-agent
+  targetsKind: AgentVersion
+  description: |
+    End-to-end web agent benchmark across 15 popular real-world
+    websites using a multimodal browser-driven setup (HKUST 2024).
+edges:
+  covers:
+    - target: skill-area:browser-automation
+      attributes:
+        coverage: full
+        weight: 0.4
+    - target: skill-area:web-action-grounding
+      attributes:
+        coverage: partial
+        weight: 0.3
+  applies_to:
+    - target: domain:web-development
+---
+nodeKind: Benchmark
+id: benchmark:visualwebarena
+attributes:
+  displayName: "VisualWebArena"
+  homepageUrl: https://jykoh.com/vwa
+  kind: web-agent
+  targetsKind: AgentVersion
+  description: |
+    Multimodal extension of WebArena adding visually grounded web tasks
+    (image search, classifieds, shopping with screenshots) to test
+    vision-language web agents.
+edges:
+  covers:
+    - target: skill-area:browser-automation
+      attributes:
+        coverage: partial
+        weight: 0.3
+    - target: skill-area:vision-extraction
+      attributes:
+        coverage: partial
+        weight: 0.3
+  applies_to:
+    - target: domain:web-development

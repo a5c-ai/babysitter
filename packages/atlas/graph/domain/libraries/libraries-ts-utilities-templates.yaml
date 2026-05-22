@@ -1,0 +1,362 @@
+---
+nodeKind: Library
+id: library:swc
+attributes:
+  displayName: "SWC"
+  belongsToLanguageId: language:javascript
+  category: build-tool
+  description: |
+    Rust-based super-fast TypeScript/JavaScript compiler and bundler used
+    by Next.js, Vite, and other toolchains as a drop-in Babel replacement;
+    supports transforms, minification, and module bundling.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization
+---
+nodeKind: Library
+id: library:effect-ts
+attributes:
+  displayName: "Effect"
+  belongsToLanguageId: language:javascript
+  category: functional
+  description: |
+    TypeScript framework for building production-grade applications with
+    first-class effect management, structured concurrency, dependency
+    injection, error tracking, and composable async pipelines.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:backend-async-processing
+  alternative_to:
+    - library:fp-ts
+    - library:neverthrow
+---
+nodeKind: Library
+id: library:fp-ts
+attributes:
+  displayName: "fp-ts"
+  belongsToLanguageId: language:javascript
+  category: functional
+  description: |
+    Functional programming library for TypeScript providing type-safe
+    abstractions — Option, Either, Task, IO, ReaderTaskEither — modelled
+    after Haskell's type class hierarchy.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:code-quality
+---
+nodeKind: Library
+id: library:io-ts
+attributes:
+  displayName: "io-ts"
+  belongsToLanguageId: language:javascript
+  category: functional
+  description: |
+    Runtime type-checking library for TypeScript that doubles as a
+    codec for encoding/decoding data; integrates with fp-ts to return
+    Either values instead of throwing on invalid input.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:data-validation-sanitization
+  alternative_to:
+    - library:zod
+    - library:yup
+    - library:joi
+---
+nodeKind: Library
+id: library:neverthrow
+attributes:
+  displayName: "neverthrow"
+  belongsToLanguageId: language:javascript
+  category: functional
+  description: |
+    Lightweight TypeScript library for type-safe error handling using
+    Result<T, E> and ResultAsync<T, E> instead of thrown exceptions,
+    inspired by Rust's std::result.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:code-quality
+---
+nodeKind: Library
+id: library:zx
+attributes:
+  displayName: "zx"
+  belongsToLanguageId: language:javascript
+  category: shell-process
+  description: |
+    Google's toolkit for writing shell scripts in JavaScript/TypeScript;
+    wraps child_process with async/await sugar, tagged template literals
+    for shell commands, and built-in fetch, chalk, and glob helpers.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:cli-design
+  alternative_to:
+    - library:execa
+    - library:shelljs
+---
+nodeKind: Library
+id: library:execa
+attributes:
+  displayName: "execa"
+  belongsToLanguageId: language:javascript
+  category: shell-process
+  description: |
+    Improved child_process wrapper for Node.js with promise and async
+    iterable support, cross-platform shebang handling, signal forwarding,
+    and helpful error messages with exit codes and stderr.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:cli-design
+---
+nodeKind: Library
+id: library:shelljs
+attributes:
+  displayName: "ShellJS"
+  belongsToLanguageId: language:javascript
+  category: shell-process
+  description: |
+    Portable Unix shell commands (cp, mv, rm, mkdir, exec, etc.) for
+    Node.js scripts without requiring a Unix shell; suitable for
+    cross-platform build scripts and automation.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization
+---
+nodeKind: Library
+id: library:glob
+attributes:
+  displayName: "glob"
+  belongsToLanguageId: language:javascript
+  category: filesystem
+  description: |
+    The original glob pattern matching library for Node.js, used by npm,
+    webpack, and countless build tools to expand shell-style wildcards
+    (*, **, ?) into lists of file paths.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization
+  alternative_to:
+    - library:fast-glob
+---
+nodeKind: Library
+id: library:fast-glob
+attributes:
+  displayName: "fast-glob"
+  belongsToLanguageId: language:javascript
+  category: filesystem
+  description: |
+    High-performance glob implementation for Node.js using micromatch
+    and a concurrent directory walker; significantly faster than glob on
+    large file trees, used by Vite, ESLint, and lint-staged.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization
+---
+nodeKind: Library
+id: library:chokidar
+attributes:
+  displayName: "Chokidar"
+  belongsToLanguageId: language:javascript
+  category: filesystem
+  description: |
+    Efficient cross-platform file system watching library for Node.js
+    built on native fs.watch/FSEvents with debouncing, glob filtering,
+    and reliable atomic-write detection; used by webpack and Vite.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization
+  alternative_to:
+    - library:nodemon
+---
+nodeKind: Library
+id: library:fs-extra
+attributes:
+  displayName: "fs-extra"
+  belongsToLanguageId: language:javascript
+  category: filesystem
+  description: |
+    Drop-in replacement for Node.js's built-in fs module that adds
+    promise support and extra methods — copy, move, ensureDir, emptyDir,
+    outputFile — without the ceremony of native fs APIs.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:cli-design
+  alternative_to:
+    - library:chokidar
+---
+nodeKind: Library
+id: library:cross-env
+attributes:
+  displayName: "cross-env"
+  belongsToLanguageId: language:javascript
+  category: scripts
+  description: |
+    CLI tool that lets you set environment variables in npm scripts
+    using UNIX syntax on Windows, macOS, and Linux, eliminating the need
+    for platform-specific script variants.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization
+  alternative_to:
+    - library:dotenv
+---
+nodeKind: Library
+id: library:concurrently
+attributes:
+  displayName: "concurrently"
+  belongsToLanguageId: language:javascript
+  category: scripts
+  description: |
+    Run multiple npm scripts or shell commands concurrently in a single
+    terminal, with prefixed labelled output, kill-on-failure logic, and
+    configurable success conditions.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization
+  alternative_to:
+    - library:npm-run-all
+---
+nodeKind: Library
+id: library:npm-run-all
+attributes:
+  displayName: "npm-run-all"
+  belongsToLanguageId: language:javascript
+  category: scripts
+  description: |
+    CLI tool to run multiple npm-scripts sequentially or in parallel;
+    provides run-s (sequential) and run-p (parallel) shorthands with
+    glob pattern support for script names.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization
+---
+nodeKind: Library
+id: library:handlebars
+attributes:
+  displayName: "Handlebars"
+  belongsToLanguageId: language:javascript
+  category: templating
+  description: |
+    Logic-less semantic templating language and JavaScript compiler;
+    extends Mustache with helpers, partials, block expressions, and
+    precompiled templates for fast server or client-side rendering.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:technical-documentation
+  alternative_to:
+    - library:ejs
+    - library:mustache
+    - library:pug
+    - library:nunjucks
+    - library:eta
+---
+nodeKind: Library
+id: library:ejs
+attributes:
+  displayName: "EJS"
+  belongsToLanguageId: language:javascript
+  category: templating
+  description: |
+    Embedded JavaScript templating for Node.js that lets you generate
+    HTML markup with plain JS inside <% %> tags; supports includes,
+    layouts, caching, and streaming output.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:technical-documentation
+---
+nodeKind: Library
+id: library:mustache
+attributes:
+  displayName: "Mustache"
+  belongsToLanguageId: language:javascript
+  category: templating
+  description: |
+    Logic-less template syntax available in JavaScript (and many other
+    languages) that uses {{double-stache}} tags for variables, sections,
+    and partials, promoting clean separation of data and presentation.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:technical-documentation
+---
+nodeKind: Library
+id: library:pug
+attributes:
+  displayName: "Pug"
+  belongsToLanguageId: language:javascript
+  category: templating
+  description: |
+    High-performance, whitespace-sensitive HTML template engine for
+    Node.js (formerly Jade) with Python-like indentation, mixins,
+    inheritance, includes, and inline JavaScript expressions.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:technical-documentation
+---
+nodeKind: Library
+id: library:nunjucks
+attributes:
+  displayName: "Nunjucks"
+  belongsToLanguageId: language:javascript
+  category: templating
+  description: |
+    Rich, Jinja2-inspired templating language for JavaScript with
+    template inheritance, macros, async support, and a sandboxed
+    environment; used by Mozilla and many static site generators.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:technical-documentation
+---
+nodeKind: Library
+id: library:eta
+attributes:
+  displayName: "Eta"
+  belongsToLanguageId: language:javascript
+  category: templating
+  description: |
+    Lightweight, fast embedded JS template engine for Node.js and
+    browsers with async/await support, layouts, partials, and a tiny
+    bundle size; designed as a modern alternative to EJS.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:technical-documentation

@@ -1,0 +1,47 @@
+nodeKind: EnvVar
+id: env-var:anthropic-foundry-api-key
+attributes:
+  displayName: ANTHROPIC_FOUNDRY_API_KEY
+  description: API key for Microsoft Foundry authentication.
+  name: ANTHROPIC_FOUNDRY_API_KEY
+  category: foundry
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-foundry-base-url
+attributes:
+  displayName: ANTHROPIC_FOUNDRY_BASE_URL
+  description: Full base URL for the Foundry resource (e.g., https://my-resource.services.ai.azure.com/anthropic).
+  name: ANTHROPIC_FOUNDRY_BASE_URL
+  category: foundry
+  valueType: url
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-foundry-resource
+attributes:
+  displayName: ANTHROPIC_FOUNDRY_RESOURCE
+  description: Foundry resource name (e.g., my-resource); required if ANTHROPIC_FOUNDRY_BASE_URL is not set.
+  name: ANTHROPIC_FOUNDRY_RESOURCE
+  category: foundry
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-skip-foundry-auth
+attributes:
+  displayName: CLAUDE_CODE_SKIP_FOUNDRY_AUTH
+  description: Skip Azure authentication for Microsoft Foundry (e.g., when using an LLM gateway).
+  name: CLAUDE_CODE_SKIP_FOUNDRY_AUTH
+  category: foundry
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

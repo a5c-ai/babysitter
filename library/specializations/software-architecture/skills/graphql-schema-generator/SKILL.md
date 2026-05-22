@@ -6,6 +6,14 @@ allowed-tools:
   - Read
   - Write
   - Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:graphql-schema-design, skill-area:backend-api-design]
+  roles: [role:backend-engineer, role:architect]
+  workflows: [workflow:api-design-review]
+  topics: [topic:graphql-schema-design]
+
 ---
 
 # GraphQL Schema Generator Skill

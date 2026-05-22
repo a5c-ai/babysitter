@@ -1,0 +1,40 @@
+nodeKind: Run
+id: run:01kqex-example-run-001
+attributes:
+  displayName: "Example feature-build run"
+  startedAt: "2026-01-01T00:00:00Z"
+  status: "draft"
+  processId: process:example-feature-build
+  runDir: ".a5c/runs/01KQEX-EXAMPLE-RUN-001"
+  createdAt: "2026-04-28T10:00:00Z"
+  completionProof: null
+  currentStateId: lifecycle-state:run.waiting
+edges:
+  in_state:
+    - lifecycle-state:run.waiting
+  governed_by:
+    - state-machine:run
+  spawned_invocation:
+    - invocation:01kqex-invocation-001
+  uses_async_job:
+    - target: async-job:openai-batch-api
+    - target: async-job:anthropic-message-batches
+    - target: async-job:replicate-prediction
+    - target: async-job:gemini-batch-prediction
+    - target: async-job:openai-streaming-response
+  issues_resume_token:
+    - target: resume-token:default-run-scope
+    - target: resume-token:session-scoped
+  has_preflight:
+    - target: dispatch-preflight:default
+  performs_reconciliation:
+    - target: reconciliation:timer-driven
+  spans:
+    - target: invocation:01kqex-invocation-001
+  triggered_by:
+    - target: issue:linear-aca-390
+    - target: issue:github-1234
+  complies_with:
+    - target: compliance:soc-2
+  records_usage:
+    - target: usage-record:01kqex-run-tokens

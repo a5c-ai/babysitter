@@ -18,6 +18,12 @@ metadata:
     - visualization
     - pymol
     - rendering
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:data-visualization, skill-area:data-analysis, skill-area:python-data-pipelines]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:lab-technician]
 ---
 
 # PyMOL Visualizer Skill

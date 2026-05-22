@@ -1,0 +1,66 @@
+---
+nodeKind: Workflow
+id: workflow:environmental-impact-assessment
+attributes:
+  displayName: "Environmental Impact Assessment"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Assesses environmental impacts of engineering projects -- modeling
+    air/water dispersion using EPA-approved tools, quantifying carbon
+    emissions across Scope 1-3, evaluating habitat disruption through
+    GIS analysis, computing noise contour maps, and assembling the
+    Environmental Impact Statement (EIS) with mitigation measures for
+    regulatory submission. Excludes mitigation implementation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:principal-engineer
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:environmental-engineering
+    - target: domain:civil-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:write-rfc-documents
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:sustainability-metrics-review
+attributes:
+  displayName: "Sustainability Metrics Review"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews organizational sustainability metrics against ESG targets --
+    auditing energy consumption telemetry, validating carbon offset
+    calculations, verifying waste diversion rates, checking water usage
+    against watershed stress indices, confirming GRI/SASB reporting data
+    accuracy, and flagging metric regression for corrective action
+    planning. Excludes sustainability strategy definition.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:engineering-manager
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:environmental-engineering
+    - target: domain:industrial-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:engineering

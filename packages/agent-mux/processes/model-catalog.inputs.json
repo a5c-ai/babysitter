@@ -1,0 +1,9 @@
+{
+  "projectRoot": "C:/work/agent-mux",
+  "specPath": "todos.md",
+  "specStartLine": 85,
+  "specEndLine": 88,
+  "capabilitiesDocPath": "docs/06-capabilities-and-models.md",
+  "cliDocPath": "docs/10-cli-reference.md",
+  "maxAttempts": 2
+}

@@ -1,0 +1,36 @@
+nodeKind: AgentVersion
+id: agent-version:pi-sdk@current
+attributes:
+  agentProductId: agent:pi
+  versionRange: ">=0.1.0"
+  releasedAt: "2025-01-01"
+  cliCommand: "<sdk:pi>"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:pi
+  composed_of:
+    - target: agent-core-impl:pi-sdk.core@current
+      role: core
+    - target: agent-runtime-impl:pi.runtime@current
+      role: runtime
+    - target: agent-platform-impl:pi.platform@current
+      role: platform
+  sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Pi SDK enables multi-turn agent sessions.
+    - target: capability:supports-text-streaming
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Pi SDK streams model output.
+    - target: capability:supports-tool-use
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Pi SDK dispatches tool calls per turn.
+  uses_memory_system:
+    - target: memory-system:pi-memory

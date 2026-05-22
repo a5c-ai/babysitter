@@ -1,0 +1,193 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:terminology
+attributes:
+  displayName: Terminology (meta)
+  clusterNumber: 14
+  scope: 'Conceptual aggregation of NodeKinds describing the catalog vocabulary surface: Term (named concept), Definition (a definition of a term), Synonym (paired equivalence within a context) and Acronym (abbreviation expanding to a term). Term and Definition meta-records live in meta-registry-catalog-provenance.yaml; this file owns Synonym and Acronym. Members live in editorial cluster 14-terminology in ontology-schema.yaml.'
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:synonym
+  - target: meta-node-kind:acronym
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:synonym
+attributes:
+  displayName: Synonym (meta)
+  name: Synonym
+  cluster: 14-terminology
+  prefix: synonym
+  origin: universal
+  purpose: a term that means the same as another in a stated context
+  exampleCount: 0
+  invariants:
+  - termAId != termBId
+  - synonym_of forms valid equivalence class within inContext (V-6.3)
+edges:
+  in_cluster:
+  - target: meta-cluster:terminology
+  contains_meta_attribute:
+  - target: meta-attribute:synonym--id
+  - target: meta-attribute:synonym--term-a-id
+  - target: meta-attribute:synonym--term-b-id
+  - target: meta-attribute:synonym--direction
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:acronym
+attributes:
+  displayName: Acronym (meta)
+  name: Acronym
+  cluster: 14-terminology
+  prefix: acronym
+  origin: universal
+  purpose: abbreviation expanding to a term
+  exampleCount: 0
+  invariants:
+  - expandsToTermId resolves to a Term
+edges:
+  in_cluster:
+  - target: meta-cluster:terminology
+  contains_meta_attribute:
+  - target: meta-attribute:acronym--id
+  - target: meta-attribute:acronym--acronym
+  - target: meta-attribute:acronym--expands-to-term-id
+---
+nodeKind: MetaAttribute
+id: meta-attribute:synonym--id
+attributes:
+  displayName: Synonym.id
+  name: id
+  parentNodeKindId: meta-node-kind:synonym
+  type: id
+  required: true
+  description: id on Synonym.
+edges:
+  defined_on:
+  - target: meta-node-kind:synonym
+---
+nodeKind: MetaAttribute
+id: meta-attribute:synonym--term-a-id
+attributes:
+  displayName: Synonym.termAId
+  name: termAId
+  parentNodeKindId: meta-node-kind:synonym
+  type: ref<Term>
+  required: true
+  description: termAId on Synonym.
+edges:
+  defined_on:
+  - target: meta-node-kind:synonym
+---
+nodeKind: MetaAttribute
+id: meta-attribute:synonym--term-b-id
+attributes:
+  displayName: Synonym.termBId
+  name: termBId
+  parentNodeKindId: meta-node-kind:synonym
+  type: ref<Term>
+  required: true
+  description: termBId on Synonym.
+edges:
+  defined_on:
+  - target: meta-node-kind:synonym
+---
+nodeKind: MetaAttribute
+id: meta-attribute:synonym--direction
+attributes:
+  displayName: Synonym.direction
+  name: direction
+  parentNodeKindId: meta-node-kind:synonym
+  type: enum<bidirectional,a-to-b,b-to-a>
+  required: true
+  description: direction on Synonym.
+edges:
+  defined_on:
+  - target: meta-node-kind:synonym
+---
+nodeKind: MetaAttribute
+id: meta-attribute:acronym--id
+attributes:
+  displayName: Acronym.id
+  name: id
+  parentNodeKindId: meta-node-kind:acronym
+  type: id
+  required: true
+  description: id on Acronym.
+edges:
+  defined_on:
+  - target: meta-node-kind:acronym
+---
+nodeKind: MetaAttribute
+id: meta-attribute:acronym--acronym
+attributes:
+  displayName: Acronym.acronym
+  name: acronym
+  parentNodeKindId: meta-node-kind:acronym
+  type: string
+  required: true
+  description: acronym on Acronym (the short form).
+edges:
+  defined_on:
+  - target: meta-node-kind:acronym
+---
+nodeKind: MetaAttribute
+id: meta-attribute:acronym--expands-to-term-id
+attributes:
+  displayName: Acronym.expandsToTermId
+  name: expandsToTermId
+  parentNodeKindId: meta-node-kind:acronym
+  type: ref<Term>
+  required: true
+  description: expandsToTermId on Acronym.
+edges:
+  defined_on:
+  - target: meta-node-kind:acronym
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:expands-to
+attributes:
+  displayName: expands_to (meta)
+  name: expands_to
+  source:
+  - meta-node-kind:acronym
+  target: []
+  cardinality: N:1
+  origin: universal
+  description: 'an Acronym expands to a Term. Cross-cluster: Term meta-record lives in meta-registry-catalog-provenance.yaml; only the source side is anchored here.'
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:acronym
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:synonym-of
+attributes:
+  displayName: synonym_of (meta)
+  name: synonym_of
+  source:
+  - meta-node-kind:synonym
+  target: []
+  cardinality: N:N
+  origin: universal
+  description: 'one Term is a synonym of another within a context. Symmetric edge. Cross-cluster: Term meta-record lives in meta-registry-catalog-provenance.yaml.'
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:synonym
+---
+nodeKind: MetaEnum
+id: meta-enum:synonym-direction
+attributes:
+  displayName: Synonym direction
+  name: direction
+  values:
+  - value: bidirectional
+    description: A and B are interchangeable in the stated context.
+  - value: a-to-b
+    description: A may be substituted by B but not the reverse.
+  - value: b-to-a
+    description: B may be substituted by A but not the reverse.
+  usedOnAttributes:
+  - meta-attribute:synonym--direction
+edges:
+  used_on_attribute:
+  - target: meta-attribute:synonym--direction

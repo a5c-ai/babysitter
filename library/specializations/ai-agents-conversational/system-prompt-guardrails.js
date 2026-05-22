@@ -17,6 +17,9 @@
  * - Guardrails AI: https://docs.guardrailsai.com/
  * - NeMo Guardrails: https://docs.nvidia.com/nemo/guardrails/
  * - Constitutional AI: https://arxiv.org/abs/2212.08073
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

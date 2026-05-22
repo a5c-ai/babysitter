@@ -16,6 +16,9 @@
  * - Google Conversation Design: https://designguidelines.withgoogle.com/conversation/
  * - Voiceflow: https://www.voiceflow.com/
  * - Conversation Design Institute: https://www.conversationdesigninstitute.com/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

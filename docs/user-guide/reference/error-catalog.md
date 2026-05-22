@@ -30,7 +30,7 @@ This catalog provides comprehensive documentation of Babysitter error messages, 
 Error: Cannot find module '@a5c-ai/babysitter-sdk'
 ```
 
-**Meaning:** The Babysitter SDK package is not installed or not accessible.
+**Meaning:** The Babysitter SDK package is not installed or not accessible to the current project.
 
 **Causes:**
 - SDK not installed globally
@@ -40,13 +40,17 @@ Error: Cannot find module '@a5c-ai/babysitter-sdk'
 **Solutions:**
 1. Install globally:
    ```bash
-   npm install -g @a5c-ai/babysitter-sdk@latest
+   npm install -g @a5c-ai/babysitter@latest
    ```
 2. Use npx:
    ```bash
-   npx -y @a5c-ai/babysitter-sdk@latest --version
+   npx -y @a5c-ai/babysitter@latest --version
    ```
-3. Check PATH includes npm global bin:
+3. If your process code imports the SDK, install it in the project:
+   ```bash
+   npm install @a5c-ai/babysitter-sdk
+   ```
+4. Check PATH includes npm global bin:
    ```bash
    npm bin -g
    # Add to PATH if needed
@@ -77,7 +81,7 @@ npm ERR! EACCES: permission denied, mkdir '/usr/local/lib/node_modules/...'
    ```
 2. Retry installation:
    ```bash
-   npm install -g @a5c-ai/babysitter-sdk@latest
+   npm install -g @a5c-ai/babysitter@latest
    ```
 
 ---
@@ -86,7 +90,7 @@ npm ERR! EACCES: permission denied, mkdir '/usr/local/lib/node_modules/...'
 
 ```
 npm ERR! ERESOLVE unable to resolve dependency tree
-npm ERR! Could not resolve dependency: @a5c-ai/babysitter-sdk@^0.0.120
+npm ERR! Could not resolve dependency: @a5c-ai/babysitter-sdk@^4.0.0
 ```
 
 **Meaning:** Version conflicts between Babysitter packages.
@@ -99,7 +103,7 @@ npm ERR! Could not resolve dependency: @a5c-ai/babysitter-sdk@^0.0.120
 **Solutions:**
 1. Update all packages together:
    ```bash
-   npm install -g @a5c-ai/babysitter-sdk@latest
+   npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-agent@latest
    ```
 2. Clear npm cache if needed:
    ```bash
@@ -127,7 +131,7 @@ Available plugins: [...]
 **Solutions:**
 1. Add marketplace:
    ```bash
-   claude plugin marketplace add a5c-ai/babysitter
+   claude plugin marketplace add a5c-ai/babysitter-claude
    ```
 2. Install plugin:
    ```bash

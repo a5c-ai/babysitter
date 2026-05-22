@@ -1,0 +1,113 @@
+---
+nodeKind: Workflow
+id: workflow:incident-response
+attributes:
+  displayName: "Incident Response"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-incident"
+  complexity: cross-team
+  description: |
+    Covers the full lifecycle of a production incident from detection
+    through resolution and postmortem, excluding long-term remediation tracking.
+edges:
+  involves_role:
+    - target: role:incident-commander
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:observability
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:incident-command
+    - target: responsibility:respond-incidents
+    - target: responsibility:postmortem-writeup
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:platform-team
+    - target: org-unit:incident-response-team
+---
+nodeKind: Workflow
+id: workflow:on-call-rotation-management
+attributes:
+  displayName: "On-Call Rotation Management"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Manages the scheduling, handoff, and escalation policies for
+    on-call rotations across engineering teams.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:on-call-rotation
+    - target: responsibility:on-call-handoff
+  performed_by_org_unit:
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:capacity-planning
+attributes:
+  displayName: "Capacity Planning"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Forecasts infrastructure demand, evaluates current resource utilization,
+    and produces scaling recommendations for the upcoming planning period.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:cloud-architect
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:cloud-infra
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:infrastructure-cost-optimization
+attributes:
+  displayName: "Infrastructure Cost Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews cloud spending, identifies waste, and implements cost-reduction
+    measures while maintaining performance and reliability targets.
+edges:
+  involves_role:
+    - target: role:cloud-architect
+    - target: role:platform-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:cloud-infra
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:terraform-state-mgmt
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:infra-engineering

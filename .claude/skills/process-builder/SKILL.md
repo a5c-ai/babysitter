@@ -82,6 +82,13 @@ Every process file follows this pattern:
  * @inputs { inputName: type, optionalInput?: type }
  * @outputs { success: boolean, outputName: type, artifacts: array }
  *
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:your-skill-area]
+ *   topics: [topic:your-topic]
+ *   roles: [role:your-role]
+ *   workflows: [workflow:your-workflow]
+ *
  * @example
  * const result = await orchestrate('[category]/[process-name]', {
  *   inputName: 'value',
@@ -519,6 +526,7 @@ cat plugins/babysitter/skills/babysit/process/methodologies/backlog.md
 
 Checklist:
 - [ ] JSDoc header with @process, @description, @inputs, @outputs, @example, @references
+- [ ] `@graph` block with relevant atlas node IDs (at minimum one domain)
 - [ ] Import from `@a5c-ai/babysitter-sdk`
 - [ ] Main `export async function process(inputs, ctx)`
 - [ ] Input destructuring with defaults
@@ -577,6 +585,46 @@ export async function process(inputs, ctx) {
   // ... implementation
 }
 ```
+
+---
+
+## Atlas Graph Metadata
+
+Every generated process file MUST include a `@graph` JSDoc block in its file header comment alongside the standard `@process`, `@description`, `@inputs`, and `@outputs` tags.
+
+### Format
+
+```javascript
+/**
+ * @process specializations/my-domain/my-process
+ * @description ...
+ * @inputs { ... }
+ * @outputs { ... }
+ *
+ * @graph
+ *   domains: [domain:software-engineering, domain:devops]
+ *   skillAreas: [skill-area:caching-strategies]
+ *   topics: [topic:microservices, topic:event-sourcing]
+ *   roles: [role:backend-engineer, role:sre]
+ *   workflows: [workflow:code-review]
+ */
+```
+
+### How to choose node IDs
+
+Read the atlas graph domain directory (`packages/atlas/graph/domain/`) to find valid node IDs. The directory contains YAML files grouped by category:
+
+- `domains/` — high-level domain nodes (e.g. `domain:software-engineering`, `domain:devops`, `domain:data-engineering`)
+- `skill-areas/` — specific skill area nodes
+- `topics/` — granular topic nodes
+- `roles/` — role nodes (engineers, practitioners, researchers)
+- `workflows/` — workflow nodes
+
+Pick **2–4 edges** that genuinely relate to the process. Do not guess IDs — read the actual YAML files to find valid ones. At minimum, **every process must reference at least one `domain:` node**.
+
+### Why this matters
+
+This metadata connects the process to the atlas knowledge graph. A pre-build generator script parses the `@graph` block and creates graph nodes and edges for discoverability. Processes without this block will not appear in graph-based search results or recommendations.
 
 ---
 

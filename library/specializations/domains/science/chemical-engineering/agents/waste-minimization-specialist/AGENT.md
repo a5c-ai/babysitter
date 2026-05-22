@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Sustainability
   agent-id: CE-AG-016
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Waste Minimization Specialist Agent

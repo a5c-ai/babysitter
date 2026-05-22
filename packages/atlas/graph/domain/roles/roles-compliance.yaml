@@ -1,0 +1,112 @@
+nodeKind: Role
+id: role:compliance-officer
+attributes:
+  displayName: "Compliance Officer"
+  isAgentic: false
+  automatability: 0.2
+  description: |
+    Owns the organization's regulatory compliance program, ensuring adherence to
+    applicable laws, industry standards, and contractual obligations such as SOC 2,
+    ISO 27001, GDPR, HIPAA, and PCI-DSS. Conducts and oversees internal audits,
+    manages external audit engagements, and tracks remediation of identified control
+    gaps. Develops compliance policies, provides training, and acts as the primary
+    liaison with regulators and certification bodies.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:compliance-monitoring
+    - responsibility:risk-assessment
+    - responsibility:security-audit
+    - responsibility:stakeholder-communication
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:security
+      level: expert
+    - target: domain:cybersecurity
+      level: intermediate
+    - target: specialization:technical-documentation
+      level: intermediate
+---
+nodeKind: Role
+id: role:privacy-engineer
+attributes:
+  displayName: "Privacy Engineer"
+  isAgentic: false
+  automatability: 0.2
+  description: |
+    Embeds privacy principles and legal requirements such as GDPR and CCPA into
+    product and engineering decisions from design through deployment. Conducts data
+    protection impact assessments, defines data retention and deletion policies, and
+    builds privacy-preserving infrastructure such as consent management and data
+    subject request workflows. Partners with legal, security, and product teams
+    to operationalize privacy-by-design across the organization.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:compliance-monitoring
+    - responsibility:access-control
+    - responsibility:documentation
+    - responsibility:risk-assessment
+    - responsibility:security-audit
+  requires_skill:
+    - target: domain:security
+      level: expert
+    - target: domain:software-engineering
+      level: intermediate
+    - target: domain:cybersecurity
+      level: intermediate
+    - target: specialization:security-research
+      level: intermediate
+---
+nodeKind: Role
+id: role:legal-counsel
+attributes:
+  displayName: "Legal Counsel"
+  isAgentic: false
+  automatability: 0.2
+  description: |
+    Provides legal guidance on commercial contracts, intellectual property, regulatory
+    obligations, and corporate governance to protect the organization's interests.
+    Reviews and negotiates agreements with customers, vendors, and partners, and advises
+    on employment, privacy, and data security matters. Engages external counsel for
+    specialized matters and manages relationships with regulators and law enforcement.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:contract-negotiation
+    - responsibility:compliance-monitoring
+    - responsibility:risk-assessment
+    - responsibility:stakeholder-communication
+  requires_skill:
+    - target: domain:security
+      level: novice
+    - target: specialization:technical-documentation
+      level: intermediate
+---
+nodeKind: Role
+id: role:audit-analyst
+attributes:
+  displayName: "Audit Analyst"
+  isAgentic: false
+  automatability: 0.2
+  description: |
+    Executes internal and external audit procedures by collecting evidence, testing
+    controls, and documenting findings against applicable frameworks such as SOC 2,
+    ISO 27001, or internal policy requirements. Prepares audit reports with risk
+    ratings and remediation recommendations, and tracks management responses to
+    ensure timely closure of audit findings. Works closely with compliance officers,
+    IT, and security teams throughout audit cycles.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:security-audit
+    - responsibility:compliance-monitoring
+    - responsibility:documentation
+    - responsibility:risk-assessment
+  requires_skill:
+    - target: domain:security
+      level: intermediate
+    - target: domain:cybersecurity
+      level: novice
+    - target: specialization:technical-documentation
+      level: expert

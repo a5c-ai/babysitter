@@ -1,9 +1,10 @@
 import * as path from "path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { runHealthCheck } from "../../cli/commands/health";
 import { configureShow } from "../../cli/commands/configure";
 import { discoverSkillsInternal } from "../../cli/commands/skill";
+import { getActiveProcessLibraryPath } from "../../processLibrary/active";
 import { toolResult, toolError } from "../util/errors";
 
 export function registerDiscoveryTools(server: McpServer): void {
@@ -14,7 +15,8 @@ export function registerDiscoveryTools(server: McpServer): void {
     {
       pluginRoot: z
         .string()
-        .describe("Plugin root directory to scan for skills"),
+        .optional()
+        .describe("Plugin root directory to scan for skills (resolved from env vars if omitted)"),
       runId: z
         .string()
         .optional()
@@ -31,10 +33,12 @@ export function registerDiscoveryTools(server: McpServer): void {
     },
     async (args) => {
       try {
-        const pluginRoot = path.resolve(args.pluginRoot);
+        const pluginRoot = args.pluginRoot ? path.resolve(args.pluginRoot) : undefined;
+        const libraryPath = await getActiveProcessLibraryPath();
 
         const result = await discoverSkillsInternal({
           pluginRoot,
+          libraryPath: libraryPath || undefined,
           runId: args.runId,
           runsDir: args.runsDir,
           includeRemote: args.includeRemote,

@@ -1,0 +1,9 @@
+nodeKind: InstallMethod
+id: install:pip
+attributes:
+  displayName: "pip"
+  kind: pip
+  platforms: [darwin, linux, win32]
+  command: "pip install {{package}}"
+  prerequisiteCheck: "python --version"
+edges: {}

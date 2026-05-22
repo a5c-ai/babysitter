@@ -1,0 +1,95 @@
+nodeKind: Claim
+id: claim:swe-bench-verified-claude-sonnet-4-5-anthropic-source-default
+attributes:
+  subjectKind: EvalResult
+  statement: Anthropic's Claude Sonnet 4.5 launch announcement is the source for the 77.2% SWE-bench Verified default-compute EvalResult for Claude Sonnet 4.5.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  subjectId: eval-result:swe-bench-verified.claude-sonnet-4-5.001
+  attribute: score
+  value: 0.772
+  evidenceSourceIds:
+  - evidence:vendor-anthropic-blog-claude-4-5-launch
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: evaluation
+  note: Replaces the removed source comment from graph/benchmarks/eval-results/swe-bench-verified-claude-sonnet-4-5-result.yaml.
+edges:
+  about_subject:
+  - eval-result:swe-bench-verified.claude-sonnet-4-5.001
+  backed_by_evidence:
+  - evidence:vendor-anthropic-blog-claude-4-5-launch
+---
+nodeKind: Claim
+id: claim:swe-bench-verified-claude-sonnet-4-5-anthropic-source-high-compute
+attributes:
+  subjectKind: EvalResult
+  statement: Anthropic's Claude Sonnet 4.5 launch announcement is the source for the 82.0% SWE-bench Verified high-compute EvalResult for Claude Sonnet 4.5.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  subjectId: eval-result:swe-bench-verified.claude-sonnet-4-5.high-compute.001
+  attribute: score
+  value: 0.820
+  evidenceSourceIds:
+  - evidence:vendor-anthropic-blog-claude-4-5-launch
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: evaluation
+  note: Replaces the removed source comment from graph/benchmarks/eval-results/swe-bench-verified-claude-sonnet-4-5-result-extended.yaml.
+edges:
+  about_subject:
+  - eval-result:swe-bench-verified.claude-sonnet-4-5.high-compute.001
+  backed_by_evidence:
+  - evidence:vendor-anthropic-blog-claude-4-5-launch
+---
+nodeKind: Claim
+id: claim:swe-bench-verified-gpt-5-openai-source-default
+attributes:
+  subjectKind: EvalResult
+  statement: OpenAI's GPT-5 launch announcement is the source for the 74.9% SWE-bench Verified EvalResult for GPT-5.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  subjectId: eval-result:swe-bench-verified.gpt-5.001
+  attribute: score
+  value: 0.749
+  evidenceSourceIds:
+  - evidence:vendor-openai-blog-gpt-5-launch
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: evaluation
+  note: Replaces the removed source comment from graph/benchmarks/eval-results/swe-bench-verified-gpt-5-result.yaml.
+edges:
+  about_subject:
+  - eval-result:swe-bench-verified.gpt-5.001
+  backed_by_evidence:
+  - evidence:vendor-openai-blog-gpt-5-launch
+---
+nodeKind: Claim
+id: claim:swe-bench-verified-gpt-5-eval-run-openai-source
+attributes:
+  subjectKind: EvalRun
+  statement: OpenAI's GPT-5 launch announcement is the source for the GPT-5 SWE-bench Verified EvalRun date and published evaluation context.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  subjectId: eval-run:swe-bench-verified.gpt-5.2025-08
+  attribute: source
+  value: https://openai.com/index/introducing-gpt-5/
+  evidenceSourceIds:
+  - evidence:vendor-openai-blog-gpt-5-launch
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: evaluation
+  note: Replaces the removed TODO/source comments from graph/benchmarks/eval-runs/swe-bench-verified-gpt-5.yaml.
+edges:
+  about_subject:
+  - eval-run:swe-bench-verified.gpt-5.2025-08
+  backed_by_evidence:
+  - evidence:vendor-openai-blog-gpt-5-launch

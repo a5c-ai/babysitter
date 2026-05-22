@@ -1,0 +1,761 @@
+# Missing hook mappings for adapter phase coverage (CI fix)
+---
+nodeKind: HookMapping
+id: hook-mapping:session-end-codex
+attributes:
+  mappingId: hook-mapping:session-end-codex
+  hookId: hook-surface:session-end
+  targetId: agentVersion:codex:ge-0-119-0
+  nativeName: SessionEnd
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: codex
+  delivery: shell
+  blocking: false
+  supportLevel: lossy
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-end
+---
+nodeKind: HookMapping
+id: hook-mapping:post-tool-use-codex
+attributes:
+  mappingId: hook-mapping:post-tool-use-codex
+  hookId: hook-surface:post-tool-use
+  targetId: agentVersion:codex:ge-0-119-0
+  nativeName: PostToolUse
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: codex
+  delivery: shell
+  blocking: false
+  supportLevel: lossy
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:post-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:user-prompt-submit-cursor
+attributes:
+  mappingId: hook-mapping:user-prompt-submit-cursor
+  hookId: hook-surface:user-prompt-submit
+  targetId: agentVersion:cursor:ge-0-0-0
+  nativeName: userPromptSubmit
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: cursor
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.user_prompt_submitted
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:user-prompt-submit
+---
+nodeKind: HookMapping
+id: hook-mapping:pre-tool-use-cursor
+attributes:
+  mappingId: hook-mapping:pre-tool-use-cursor
+  hookId: hook-surface:pre-tool-use
+  targetId: agentVersion:cursor:ge-0-0-0
+  nativeName: preToolUse
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: cursor
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:pre-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:post-tool-use-cursor
+attributes:
+  mappingId: hook-mapping:post-tool-use-cursor
+  hookId: hook-surface:post-tool-use
+  targetId: agentVersion:cursor:ge-0-0-0
+  nativeName: postToolUse
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: cursor
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:post-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:session-end-gemini
+attributes:
+  mappingId: hook-mapping:session-end-gemini
+  hookId: hook-surface:session-end
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: SessionEnd
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-end
+---
+nodeKind: HookMapping
+id: hook-mapping:user-prompt-submit-gemini
+attributes:
+  mappingId: hook-mapping:user-prompt-submit-gemini
+  hookId: hook-surface:user-prompt-submit
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: UserPromptSubmit
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.user_prompt_submitted
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:user-prompt-submit
+---
+nodeKind: HookMapping
+id: hook-mapping:tool-before-gemini
+attributes:
+  mappingId: hook-mapping:tool-before-gemini
+  hookId: hook-surface:pre-tool-use
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: BeforeTool
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: true
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:pre-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:tool-after-gemini
+attributes:
+  mappingId: hook-mapping:tool-after-gemini
+  hookId: hook-surface:post-tool-use
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: AfterTool
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:post-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:session-idle-gemini
+attributes:
+  mappingId: hook-mapping:session-idle-gemini
+  hookId: hook-surface:session-idle
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: SessionIdle
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.idle
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-idle
+---
+nodeKind: HookMapping
+id: hook-mapping:shell-env-gemini
+attributes:
+  mappingId: hook-mapping:shell-env-gemini
+  hookId: hook-surface:shell-env
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: ShellEnv
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.shell_env
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:shell-env
+---
+nodeKind: HookMapping
+id: hook-mapping:pre-compact-gemini
+attributes:
+  mappingId: hook-mapping:pre-compact-gemini
+  hookId: hook-surface:pre-compact
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: PreCompact
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.compact.before
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:pre-compact
+---
+nodeKind: HookMapping
+id: hook-mapping:tool-before-copilot
+attributes:
+  mappingId: hook-mapping:tool-before-copilot
+  hookId: hook-surface:pre-tool-use
+  targetId: agentVersion:copilot:ge-0-0-0
+  nativeName: preToolUse
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: copilot
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:pre-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:tool-after-copilot
+attributes:
+  mappingId: hook-mapping:tool-after-copilot
+  hookId: hook-surface:post-tool-use
+  targetId: agentVersion:copilot:ge-0-0-0
+  nativeName: postToolUse
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: copilot
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:post-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:compact-before-copilot
+attributes:
+  mappingId: hook-mapping:compact-before-copilot
+  hookId: hook-surface:pre-compact
+  targetId: agentVersion:copilot:ge-0-0-0
+  nativeName: PreCompact
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: copilot
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.compact.before
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:pre-compact
+
+---
+nodeKind: HookMapping
+id: hook-mapping:pre-tool-use-codex-stdin
+attributes:
+  mappingId: hook-mapping:pre-tool-use-codex-stdin
+  hookId: hook-surface:pre-tool-use
+  targetId: agentVersion:codex:ge-0-119-0
+  nativeName: PreToolUse
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: codex
+  delivery: shell
+  blocking: false
+  supportLevel: lossy
+  canonicalPhase: tool.before
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:pre-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:before-tool-selection-gemini
+attributes:
+  mappingId: hook-mapping:before-tool-selection-gemini
+  hookId: hook-surface:before-tool-selection
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: BeforeToolSelection
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: planner.before_tool_selection
+  blockCapability: true
+  mutationCapability: true
+  scope: planner
+edges:
+  maps_hook:
+    - target: hook-surface:before-tool-selection
+---
+nodeKind: HookMapping
+id: hook-mapping:before-model-gemini
+attributes:
+  mappingId: hook-mapping:before-model-gemini
+  hookId: hook-surface:before-model
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: BeforeModel
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: model.before_request
+  blockCapability: true
+  mutationCapability: true
+  scope: model
+edges:
+  maps_hook:
+    - target: hook-surface:before-model
+---
+nodeKind: HookMapping
+id: hook-mapping:after-model-gemini
+attributes:
+  mappingId: hook-mapping:after-model-gemini
+  hookId: hook-surface:after-model
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: AfterModel
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: model.after_response
+  blockCapability: false
+  mutationCapability: false
+  scope: model
+edges:
+  maps_hook:
+    - target: hook-surface:after-model
+---
+nodeKind: HookMapping
+id: hook-mapping:before-agent-gemini
+attributes:
+  mappingId: hook-mapping:before-agent-gemini
+  hookId: hook-surface:before-agent
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: BeforeAgent
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: gemini
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: turn.before_agent
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:before-agent
+---
+nodeKind: HookMapping
+id: hook-mapping:error-copilot
+attributes:
+  mappingId: hook-mapping:error-copilot
+  hookId: hook-surface:error
+  targetId: agentVersion:copilot:ge-0-0-0
+  nativeName: errorOccurred
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: copilot
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.error
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:error
+---
+nodeKind: HookMapping
+id: hook-mapping:session-end-cursor
+attributes:
+  mappingId: hook-mapping:session-end-cursor
+  hookId: hook-surface:session-end
+  targetId: agentVersion:cursor:ge-0-0-0
+  nativeName: sessionEnd
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: cursor
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-end
+---
+# oh-my-pi missing phase mappings
+nodeKind: HookMapping
+id: hook-mapping:session-end-oh-my-pi
+attributes:
+  mappingId: hook-mapping:session-end-oh-my-pi
+  hookId: hook-surface:session-end
+  targetId: agentVersion:omp:ge-0-0-0
+  nativeName: session_end
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-end
+---
+nodeKind: HookMapping
+id: hook-mapping:tool-result-oh-my-pi
+attributes:
+  mappingId: hook-mapping:tool-result-oh-my-pi
+  hookId: hook-surface:post-tool-use
+  targetId: agentVersion:omp:ge-0-0-0
+  nativeName: tool_result
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:post-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:prompt-oh-my-pi
+attributes:
+  mappingId: hook-mapping:prompt-oh-my-pi
+  hookId: hook-surface:user-prompt-submit
+  targetId: agentVersion:omp:ge-0-0-0
+  nativeName: prompt
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.user_prompt_submitted
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:user-prompt-submit
+---
+nodeKind: HookMapping
+id: hook-mapping:error-oh-my-pi
+attributes:
+  mappingId: hook-mapping:error-oh-my-pi
+  hookId: hook-surface:error
+  targetId: agentVersion:omp:ge-0-0-0
+  nativeName: error
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.error
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:error
+---
+# openclaw plugin hook mappings
+nodeKind: HookMapping
+id: hook-mapping:plugin-session-start-openclaw
+attributes:
+  mappingId: hook-mapping:plugin-session-start-openclaw
+  hookId: hook-surface:session-start
+  targetId: agentVersion:openclaw:ge-0-0-0
+  nativeName: plugin.session.start
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-start
+---
+nodeKind: HookMapping
+id: hook-mapping:plugin-session-end-openclaw
+attributes:
+  mappingId: hook-mapping:plugin-session-end-openclaw
+  hookId: hook-surface:session-end
+  targetId: agentVersion:openclaw:ge-0-0-0
+  nativeName: plugin.session.end
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-end
+---
+nodeKind: HookMapping
+id: hook-mapping:plugin-tool-before-openclaw
+attributes:
+  mappingId: hook-mapping:plugin-tool-before-openclaw
+  hookId: hook-surface:pre-tool-use
+  targetId: agentVersion:openclaw:ge-0-0-0
+  nativeName: plugin.tool.before
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: true
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:pre-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:plugin-tool-after-openclaw
+attributes:
+  mappingId: hook-mapping:plugin-tool-after-openclaw
+  hookId: hook-surface:post-tool-use
+  targetId: agentVersion:openclaw:ge-0-0-0
+  nativeName: plugin.tool.after
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:post-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:plugin-turn-stop-openclaw
+attributes:
+  mappingId: hook-mapping:plugin-turn-stop-openclaw
+  hookId: hook-surface:stop
+  targetId: agentVersion:openclaw:ge-0-0-0
+  nativeName: plugin.turn.stop
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: turn.stop
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:stop
+---
+nodeKind: HookMapping
+id: hook-mapping:plugin-prompt-submitted-openclaw
+attributes:
+  mappingId: hook-mapping:plugin-prompt-submitted-openclaw
+  hookId: hook-surface:user-prompt-submit
+  targetId: agentVersion:openclaw:ge-0-0-0
+  nativeName: plugin.prompt.submitted
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.user_prompt_submitted
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:user-prompt-submit
+---
+# openclaw gateway hook mappings
+nodeKind: HookMapping
+id: hook-mapping:gateway-request-received-openclaw
+attributes:
+  mappingId: hook-mapping:gateway-request-received-openclaw
+  hookId: hook-surface:session-start
+  targetId: agentVersion:openclaw:ge-0-0-0
+  nativeName: gateway.request.received
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: lossy
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: gateway
+edges:
+  maps_hook:
+    - target: hook-surface:session-start
+---
+nodeKind: HookMapping
+id: hook-mapping:gateway-request-routed-openclaw
+attributes:
+  mappingId: hook-mapping:gateway-request-routed-openclaw
+  hookId: hook-surface:user-prompt-submit
+  targetId: agentVersion:openclaw:ge-0-0-0
+  nativeName: gateway.request.routed
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: lossy
+  canonicalPhase: turn.before_agent
+  blockCapability: false
+  mutationCapability: false
+  scope: gateway
+edges:
+  maps_hook:
+    - target: hook-surface:user-prompt-submit
+---
+nodeKind: HookMapping
+id: hook-mapping:gateway-request-completed-openclaw
+attributes:
+  mappingId: hook-mapping:gateway-request-completed-openclaw
+  hookId: hook-surface:session-end
+  targetId: agentVersion:openclaw:ge-0-0-0
+  nativeName: gateway.request.completed
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: lossy
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: gateway
+edges:
+  maps_hook:
+    - target: hook-surface:session-end
+---
+nodeKind: HookMapping
+id: hook-mapping:gateway-auth-check-openclaw
+attributes:
+  mappingId: hook-mapping:gateway-auth-check-openclaw
+  hookId: hook-surface:tool-permission-request
+  targetId: agentVersion:openclaw:ge-0-0-0
+  nativeName: gateway.auth.check
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: lossy
+  canonicalPhase: tool.permission_request
+  blockCapability: false
+  mutationCapability: false
+  scope: gateway
+edges:
+  maps_hook:
+    - target: hook-surface:tool-permission-request

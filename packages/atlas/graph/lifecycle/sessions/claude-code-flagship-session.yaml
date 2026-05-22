@@ -1,0 +1,25 @@
+nodeKind: Session
+id: session:claude-code-flagship-example
+attributes:
+  lastActivityAt: "2026-04-30T12:00:00Z"
+  agentVersionId: agentVersion:claude:ge-0-0-0
+  format: jsonl
+  filePath: ".a5c/runs/claude-code-flagship/sessions/01KQEX-FLAGSHIP-001.jsonl"
+  createdAt: "2026-04-30T11:30:00Z"
+  parentSessionId: null
+  forkPoint: null
+  currentStateId: lifecycle-state:session.active
+edges:
+  in_state:
+    - lifecycle-state:session.active
+  governed_by:
+    - state-machine:session
+  agent_version:
+    - agentVersion:claude:ge-0-0-0
+  persists_transcript_to:
+    - target: transcript-ingress:claude-code-claude-ai
+  has_worktree_session:
+    - target: worktree-session:claude-code-feature-auth-jwt
+  emitted_mode_change:
+    - target: output-mode-change:claude-code-enter-plan-mode-example
+    - target: output-mode-change:claude-code-enter-worktree-example

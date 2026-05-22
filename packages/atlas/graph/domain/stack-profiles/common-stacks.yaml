@@ -1,0 +1,112 @@
+---
+nodeKind: StackProfile
+id: stack-profile:ml-pipeline-stack
+attributes:
+  displayName: "ML Pipeline Stack (PyTorch/TensorFlow, MLflow, BentoML, K8s)"
+  description: |
+    A production machine learning pipeline stack: PyTorch or TensorFlow
+    as the training framework, MLflow for experiment tracking, model
+    registry, and reproducibility, BentoML for packaging models into
+    deployable services, Kubernetes for orchestrating training jobs and
+    serving endpoints, and Prometheus for monitoring model performance
+    and infrastructure health.
+
+    The pipeline spans from data preparation through training,
+    evaluation, packaging, deployment, and monitoring. MLflow tracks
+    hyperparameters, metrics, and artifacts across experiments. BentoML
+    wraps trained models into containerized REST/gRPC services with
+    adaptive batching. Kubernetes provides autoscaling for both training
+    (via jobs or operators like KubeFlow) and inference (via
+    Deployments with HPA). Prometheus scrapes model latency, throughput,
+    and data-drift metrics. This stack is common in organizations that
+    have graduated beyond notebook-driven ML and need repeatable,
+    observable, production-grade model lifecycle management.
+  composes:
+    - language:python
+    - library:pytorch
+    - library:tensorflow
+    - tool:mlflow
+    - tool:bentoml
+    - tool:kubernetes
+    - tool:prometheus
+    - tool:docker
+edges:
+  composed_of:
+    - language:python
+    - library:pytorch
+    - library:tensorflow
+    - tool:mlflow
+    - tool:bentoml
+    - tool:kubernetes
+    - tool:prometheus
+    - tool:docker
+---
+nodeKind: StackProfile
+id: stack-profile:real-time-analytics-stack
+attributes:
+  displayName: "Real-Time Analytics Stack (Kafka, ClickHouse, Grafana, dbt)"
+  description: |
+    A real-time analytics architecture: Apache Kafka ingests high-volume
+    event streams from applications and infrastructure, ClickHouse serves
+    as the columnar OLAP database optimized for sub-second analytical
+    queries over billions of rows, Grafana provides dashboarding and
+    alerting, and dbt models transformations within the analytics layer.
+
+    Kafka decouples event producers from consumers, enabling fan-out to
+    multiple downstream systems. ClickHouse's MergeTree engine family
+    provides real-time inserts with immediate query availability --
+    unlike batch-oriented warehouses. Materialized views in ClickHouse
+    pre-aggregate common query patterns. Grafana connects directly to
+    ClickHouse via plugin and renders live dashboards with auto-refresh.
+    dbt manages the transformation layer, turning raw event tables into
+    clean analytical models with tests and documentation. This stack is
+    used for product analytics, operational dashboards, ad-tech bidding
+    analytics, and any workload requiring low-latency queries over
+    streaming data.
+  composes:
+    - language:python
+    - language:sql
+    - tool:grafana
+edges:
+  composed_of:
+    - language:python
+    - language:sql
+    - tool:grafana
+---
+nodeKind: StackProfile
+id: stack-profile:mobile-first-stack
+attributes:
+  displayName: "Mobile-First Stack (React Native/Flutter, Firebase, GraphQL, Expo)"
+  description: |
+    A mobile-first application stack: React Native or Flutter as the
+    cross-platform UI framework, Firebase as the managed backend
+    providing authentication, real-time database, cloud functions, and
+    push notifications, GraphQL as the API query language for flexible
+    client-driven data fetching, and Expo as the development and build
+    toolchain for React Native.
+
+    This stack prioritizes mobile development velocity. React Native
+    and Flutter both enable single-codebase development for iOS and
+    Android. Firebase eliminates the need for a custom backend for
+    common mobile patterns (auth, real-time sync, file storage, crash
+    reporting). GraphQL reduces over-fetching on bandwidth-constrained
+    mobile networks by letting the client specify exactly which fields
+    it needs. Expo provides over-the-air updates, managed builds, and
+    a rich set of native module wrappers. The combination is popular
+    for startups and indie developers shipping consumer mobile apps
+    with small teams.
+  composes:
+    - language:typescript
+    - language:dart
+    - framework:react
+    - framework:flutter
+    - language:graphql
+    - tool:firebase-auth
+edges:
+  composed_of:
+    - language:typescript
+    - language:dart
+    - framework:react
+    - framework:flutter
+    - language:graphql
+    - tool:firebase-auth

@@ -18,6 +18,12 @@
  * - Creating a Board Support Package: https://www.embedded.com/creating-a-board-support-package/
  * - BSP Architecture: https://embeddedartistry.com/blog/2017/02/06/embedded-driver-development-patterns/
  * - HAL Design: https://interrupt.memfault.com/blog/hardware-abstraction-layer
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:firmware-release-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,35 @@
+nodeKind: Dashboard
+id: dashboard:default-html
+attributes:
+  displayName: "Default Symphony HTML dashboard"
+  format: server-rendered-html
+  routePath: "/"
+  refreshCadence: live-sse
+  dataSourceEndpointIds:
+    - api-endpoint:get-state
+  runtimeSnapshotSourceId: runtime-snapshot:example-clean
+  readOnly: true
+  loadBearing: false
+edges:
+  reads_endpoint:
+    - target: api-endpoint:get-state
+  derives_from:
+    - target: runtime-snapshot:example-clean
+---
+nodeKind: Dashboard
+id: dashboard:tui-panel
+attributes:
+  displayName: "TUI panel dashboard for terminal observers"
+  format: tui-panel
+  routePath: null
+  refreshCadence: poll
+  dataSourceEndpointIds:
+    - api-endpoint:get-state
+  runtimeSnapshotSourceId: runtime-snapshot:example-clean
+  readOnly: true
+  loadBearing: false
+edges:
+  reads_endpoint:
+    - target: api-endpoint:get-state
+  derives_from:
+    - target: runtime-snapshot:example-clean

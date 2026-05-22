@@ -1,0 +1,180 @@
+---
+nodeKind: EvalRun
+id: eval-run:swe-bench-verified.claude-haiku-4-5.2025-10
+attributes:
+  target: "model:claude-haiku-4-5@current"
+  benchmarkId: benchmark:swe-bench-verified
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:claude-haiku-4-5@current
+  runAt: "2025-10-15T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-haiku-4-5-swe-bench-verified"
+edges:
+  evaluates_target:
+    - model:claude-haiku-4-5@current
+  uses_test_set:
+    - test-set:swe-bench-verified-2024-12
+  for_benchmark:
+    - benchmark:swe-bench-verified
+---
+nodeKind: EvalRun
+id: eval-run:gpqa.claude-haiku-4-5.2025-10
+attributes:
+  target: "model:claude-haiku-4-5@current"
+  benchmarkId: benchmark:gpqa
+  testSetId: test-set:gpqa-diamond-2024
+  targetId: model:claude-haiku-4-5@current
+  runAt: "2025-10-15T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-haiku-4-5-gpqa"
+edges:
+  evaluates_target:
+    - model:claude-haiku-4-5@current
+  for_benchmark:
+    - benchmark:gpqa
+---
+nodeKind: EvalRun
+id: eval-run:human-eval.claude-sonnet-4-6.2025-11
+attributes:
+  target: "model:claude-sonnet-4-6@current"
+  benchmarkId: benchmark:human-eval
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:claude-sonnet-4-6@current
+  runAt: "2025-11-15T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-sonnet-4-6-human-eval"
+edges:
+  evaluates_target:
+    - model:claude-sonnet-4-6@current
+  for_benchmark:
+    - benchmark:human-eval
+---
+nodeKind: EvalRun
+id: eval-run:mmlu.claude-sonnet-4-6.2025-11
+attributes:
+  target: "model:claude-sonnet-4-6@current"
+  benchmarkId: benchmark:mmlu
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:claude-sonnet-4-6@current
+  runAt: "2025-11-15T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-sonnet-4-6-mmlu"
+edges:
+  evaluates_target:
+    - model:claude-sonnet-4-6@current
+  for_benchmark:
+    - benchmark:mmlu
+---
+nodeKind: EvalRun
+id: eval-run:bfcl.claude-sonnet-4-5.2025-09
+attributes:
+  target: "model:claude-sonnet-4-5@current"
+  benchmarkId: benchmark:berkeley-function-calling
+  testSetId: test-set:bfcl-v3
+  targetId: model:claude-sonnet-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "berkeley-gorilla"
+  configHash: "sha256:placeholder-claude-sonnet-4-5-bfcl-v3"
+edges:
+  evaluates_target:
+    - model:claude-sonnet-4-5@current
+  uses_test_set:
+    - test-set:bfcl-v3
+  for_benchmark:
+    - benchmark:berkeley-function-calling
+---
+nodeKind: EvalRun
+id: eval-run:gpqa-diamond.claude-opus-4-5.2025-09
+attributes:
+  target: "model:claude-opus-4-5@current"
+  benchmarkId: benchmark:gpqa
+  testSetId: test-set:gpqa-diamond-2024
+  targetId: model:claude-opus-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-opus-4-5-gpqa-diamond"
+edges:
+  evaluates_target:
+    - model:claude-opus-4-5@current
+  uses_test_set:
+    - test-set:gpqa-diamond-2024
+  for_benchmark:
+    - benchmark:gpqa
+---
+nodeKind: EvalRun
+id: eval-run:os-world.claude-sonnet-4-5.2025-09
+attributes:
+  target: "model:claude-sonnet-4-5@current"
+  benchmarkId: benchmark:os-world
+  targetId: model:claude-sonnet-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-sonnet-4-5-osworld"
+edges:
+  evaluates_target:
+    - model:claude-sonnet-4-5@current
+  for_benchmark:
+    - benchmark:os-world
+---
+nodeKind: EvalRun
+id: eval-run:truthful-qa.claude-opus-4-5.2025-09
+attributes:
+  target: "model:claude-opus-4-5@current"
+  benchmarkId: benchmark:truthful-qa
+  testSetId: test-set:truthful-qa-mc
+  targetId: model:claude-opus-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-opus-4-5-truthful-qa"
+edges:
+  evaluates_target:
+    - model:claude-opus-4-5@current
+  uses_test_set:
+    - test-set:truthful-qa-mc
+  for_benchmark:
+    - benchmark:truthful-qa
+---
+nodeKind: EvalRun
+id: eval-run:human-eval-plus.claude-sonnet-4-5.2025-09
+attributes:
+  target: "model:claude-sonnet-4-5@current"
+  benchmarkId: benchmark:bigcode-evalplus
+  targetId: model:claude-sonnet-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "evalplus-leaderboard"
+  configHash: "sha256:placeholder-claude-sonnet-4-5-evalplus"
+edges:
+  evaluates_target:
+    - model:claude-sonnet-4-5@current
+  for_benchmark:
+    - benchmark:bigcode-evalplus
+---
+nodeKind: EvalRun
+id: eval-run:harmbench.claude-opus-4-5.2025-09
+attributes:
+  target: "model:claude-opus-4-5@current"
+  benchmarkId: benchmark:harmbench
+  targetId: model:claude-opus-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-opus-4-5-harmbench"
+edges:
+  evaluates_target:
+    - model:claude-opus-4-5@current
+  for_benchmark:
+    - benchmark:harmbench
+---
+nodeKind: EvalRun
+id: eval-run:arc-challenge.claude-sonnet-4-5.2025-09
+attributes:
+  target: "model:claude-sonnet-4-5@current"
+  benchmarkId: benchmark:arc-challenge
+  targetId: model:claude-sonnet-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-sonnet-4-5-arc-challenge"
+edges:
+  evaluates_target:
+    - model:claude-sonnet-4-5@current
+  for_benchmark:
+    - benchmark:arc-challenge

@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:gemini-cli-host-env
+attributes:
+  signalId: discovery-signal:gemini-cli-host-env
+  signalKind: env-any
+  key: gemini
+  matchMode: any
+  confidence: medium
+  scope: host-detection
+  signals:
+    - GEMINI_CLI
+    - GEMINI_SESSION_ID
+  argvMatches:
+    - gemini-cli
+  consumer: agent-mux-core
+  metadataFields:
+    - { key: session_id, envVars: [GEMINI_SESSION_ID] }
+edges:
+  applies_to:
+    - target: agent:gemini-cli

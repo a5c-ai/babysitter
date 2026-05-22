@@ -10,6 +10,14 @@ expertise:
   - Trade-off documentation
   - Sensitivity point analysis
   - Architecture decision validation
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:principal-engineer]
+  skillAreas: [skill-area:adr-writing, skill-area:performance-testing]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:architecture-decisions]
+
 ---
 
 # Architecture Trade-off Analyst Agent

@@ -6,6 +6,13 @@ backlog-id: AG-006
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  roles: [role:sre, role:devops-engineer]
+  skillAreas: [skill-area:observability-instrumentation, skill-area:metrics-dashboarding]
+  topics: [topic:observability-driven-development]
+
 ---
 
 # observability-expert

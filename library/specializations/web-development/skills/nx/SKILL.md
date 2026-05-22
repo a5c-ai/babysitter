@@ -2,6 +2,13 @@
 name: nx
 description: Nx workspace configuration, generators, and affected commands.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:monorepo-extraction]
+  roles: [role:tech-lead, role:frontend-engineer]
+  topics: [topic:developer-experience, topic:micro-frontend-architecture]
+
 ---
 
 # Nx Skill

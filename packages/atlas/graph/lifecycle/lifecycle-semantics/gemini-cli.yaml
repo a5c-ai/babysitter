@@ -1,0 +1,15 @@
+nodeKind: LifecycleSemantics
+id: lifecycle-semantics:gemini-cli
+attributes:
+  lifecycleSemanticsId: lifecycle-semantics:gemini-cli
+  agentId: agent:gemini-cli
+  versionRange: ">=0.0.0"
+  runtimeHookMode: native-hooks-with-extension-manifest
+  stopHookMode: after-agent-hook
+  backgroundTaskMode: unknown
+  checkpointMode: unspecified
+  pluginContextMode: "plugin.json + gemini-extension.json"
+  platformNuances: []
+edges:
+  applies_to_version:
+    - target: agentVersion:gemini:ge-0-0-0

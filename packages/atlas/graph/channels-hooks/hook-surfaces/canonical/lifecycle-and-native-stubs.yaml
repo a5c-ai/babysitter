@@ -1,0 +1,169 @@
+nodeKind: HookSurface
+id: hook-surface:notification
+attributes:
+  eventName: "Notification (canonical)"
+  displayName: "Notification (canonical)"
+  kind: canonical
+  direction: event
+  blocking: false
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [session_id, transcript_path, message]
+    properties:
+      session_id: { type: string }
+      transcript_path: { type: string }
+      cwd: { type: string }
+      message: { type: string, description: "Human-readable notification body shown to the user." }
+  description: |
+    Fires when an agent emits a user-visible notification (Claude
+    Code "Notification" hook and equivalents). Payload mirrors the
+    Claude Code docs.
+edges:
+---
+nodeKind: HookSurface
+id: hook-surface:pre-compact
+attributes:
+  eventName: "PreCompact (canonical)"
+  displayName: "PreCompact (canonical)"
+  kind: canonical
+  direction: pre
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [session_id, transcript_path, trigger]
+    properties:
+      session_id: { type: string }
+      transcript_path: { type: string }
+      trigger:
+        type: string
+        enum: [manual, auto]
+        description: "manual = /compact slash command; auto = context-window pressure."
+      custom_instructions:
+        type: string
+        description: "Free-form user instructions accompanying a manual compaction."
+  description: "Fires before a context-compaction step; can block or alter the compaction. Claude Code 1.0+."
+edges:
+---
+nodeKind: HookSurface
+id: hook-surface:subagent-stop
+attributes:
+  eventName: "SubagentStop (canonical)"
+  displayName: "SubagentStop (canonical)"
+  kind: canonical
+  direction: event
+  blocking: false
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [session_id, transcript_path]
+    properties:
+      session_id: { type: string }
+      transcript_path: { type: string }
+      stop_hook_active:
+        type: boolean
+        description: "True when the parent agent is already inside a Stop hook (used to avoid recursion)."
+  description: "Fires when a sub-agent task terminates."
+edges:
+---
+nodeKind: HookSurface
+id: hook-surface:user-prompt-submit
+attributes:
+  eventName: "UserPromptSubmit (canonical)"
+  displayName: "UserPromptSubmit (canonical)"
+  kind: canonical
+  direction: pre
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [session_id, transcript_path, prompt]
+    properties:
+      session_id: { type: string }
+      transcript_path: { type: string }
+      cwd: { type: string }
+      prompt:
+        type: string
+        description: "The user's submitted prompt text. Handlers may rewrite or block."
+  description: "Fires when a user submits a prompt; can rewrite or block."
+edges:
+---
+nodeKind: HookSurface
+id: hook-surface:copilot.pre-tool
+attributes:
+  eventName: "Copilot pre-tool (native)"
+  displayName: "Copilot pre-tool (native)"
+  kind: native
+  originVendor: GitHub
+  direction: pre
+  blocking: true
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [tool_name, tool_input]
+    properties:
+      tool_name: { type: string }
+      tool_input: { type: object }
+      session_id: { type: string }
+  description: "GitHub Copilot CLI's pre-tool hook."
+edges:
+---
+nodeKind: HookSurface
+id: hook-surface:copilot.post-tool
+attributes:
+  eventName: "Copilot post-tool (native)"
+  displayName: "Copilot post-tool (native)"
+  kind: native
+  originVendor: GitHub
+  direction: post
+  blocking: false
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [tool_name, tool_input, tool_response]
+    properties:
+      tool_name: { type: string }
+      tool_input: { type: object }
+      tool_response: { type: object }
+      session_id: { type: string }
+  description: "GitHub Copilot CLI's post-tool hook."
+edges:
+---
+---
+nodeKind: HookSurface
+id: hook-surface:opencode.session-idle
+attributes:
+  eventName: "OpenCode session-idle (native)"
+  displayName: "OpenCode session-idle (native)"
+  kind: native
+  originVendor: SST
+  direction: event
+  blocking: false
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [session_id]
+    properties:
+      session_id: { type: string }
+      idle_seconds: { type: number, description: "Seconds since last activity." }
+  description: "OpenCode's session-idle hook."
+edges:
+---
+nodeKind: HookSurface
+id: hook-surface:opencode.shell-env
+attributes:
+  eventName: "OpenCode shell-env (native)"
+  displayName: "OpenCode shell-env (native)"
+  kind: native
+  originVendor: SST
+  direction: event
+  blocking: false
+  family: shell-hook
+  payloadSchema:
+    type: object
+    properties:
+      session_id: { type: string }
+      env: { type: object, description: "Map of env vars exposed to shell tools." }
+  description: "OpenCode's shell-env hook."
+edges:

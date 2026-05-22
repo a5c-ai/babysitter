@@ -1,0 +1,30 @@
+nodeKind: Role
+id: role:debugger
+attributes:
+  displayName: "Debugger"
+  isAgentic: true
+  requiredCapabilities:
+    - capability:supports-tool-use
+    - capability:supports-text-streaming
+  requiredDomains:
+    - domain:software-engineering
+  description: |
+    Agent that systematically reproduces, isolates, and proposes minimal
+    fixes for software defects. Inspects logs, query plans, and stack
+    traces; favours small, evidence-based hypotheses over speculative
+    rewrites.
+edges:
+  holds_responsibility:
+    - responsibility:incident-response
+    - responsibility:performance-optimization
+  requires_expertise:
+    - target: skill-area:bug-fixing-from-issues
+    - target: skill-area:tool-use
+    - target: skill-area:profiling-cpu
+    - target: skill-area:profiling-memory
+    - target: skill-area:multi-turn-tool-use
+  requires_capability:
+    - target: capability:supports-tool-use
+    - target: capability:supports-text-streaming
+  applies_to:
+    - target: domain:software-engineering

@@ -13,6 +13,11 @@ expertise:
   - Regression testing
   - Test automation
   - Failure analysis
+graph:
+  domains: [domain:robotics]
+  specializations: [specialization:robotics-simulation]
+  skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+  roles: [role:research-engineer]
 ---
 
 # Integration Test Engineer Agent

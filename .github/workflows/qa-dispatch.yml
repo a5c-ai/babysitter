@@ -1,0 +1,69 @@
+# QA Dispatch — trigger live-stack validation from PR comments or manually
+#
+# Usage:
+#   - Comment `/qa` or `/qa <instructions>` on a PR
+#   - Or dispatch manually with branch, PR number, and instructions
+
+name: QA Dispatch
+
+on:
+  push:
+    branches: [main, staging, develop]
+    paths: ['.github/workflows/qa-dispatch.yml']
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to test (e.g. feat/my-feature)'
+        required: true
+        type: string
+      pr_number:
+        description: 'PR number to report results to (optional)'
+        required: false
+        type: string
+        default: ''
+      instructions:
+        description: 'Custom instructions for the QA agent (optional)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: write
+  issues: write
+
+jobs:
+  qa:
+    if: >-
+      (github.event_name == 'workflow_dispatch') ||
+      (github.event.issue.pull_request && startsWith(github.event.comment.body, '/qa'))
+    runs-on: ubuntu-latest-l
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.event.repository.default_branch }}
+          fetch-depth: 0
+
+
+      - uses: a5c-ai/babysitter/packages/triggers@staging
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          process-file: .a5c/processes/ci-qa-review.mjs
+          babysitter-prompt-prefix: '$babysitter:yolo '
+          max-turns: '9999'
+          prompt: |
+            Execute the predefined QA process at .a5c/processes/ci-qa-review.mjs with these inputs:
+            { "prNumber": ${{ inputs.pr_number || github.event.issue.number || 0 }}, "branch": "${{ inputs.branch || github.head_ref || 'staging' }}", "instructions": "${{ inputs.instructions || github.event.comment.body || 'Run default QA based on changed files' }}" }
+          trigger-query: ''
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

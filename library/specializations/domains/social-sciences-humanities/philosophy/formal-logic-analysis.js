@@ -5,6 +5,13 @@
  * @outputs { success: boolean, formalizedArgument: object, validityAssessment: object, artifacts: array }
  * @recommendedSkills SK-PHIL-001 (formal-logic-analysis), SK-PHIL-002 (argument-mapping-reconstruction)
  * @recommendedAgents AG-PHIL-001 (logic-analyst-agent)
+ *
+ * @graph
+ *   domains: [domain:philosophy]
+ *   specializations: [specialization:applied-ethics]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:docs-as-code, skill-area:data-analysis]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

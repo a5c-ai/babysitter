@@ -1,0 +1,57 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:vibe-kanban.ui@current
+attributes:
+  displayName: "Vibe Kanban UI (current) — web-only"
+  agentVersionId: agent-version:vibe-kanban@current
+  packageRef: source-ref:vibe-kanban-github
+  uiKind: web-only
+  presentationsBundled:
+    - presentation:vibe-kanban-web
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  notes: |
+    Vibe Kanban is a web-only kanban board. The UI layer wraps the
+    presentation and exposes drag-and-drop task management, agent
+    dispatch controls, and parallel progress views.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:prompt-input
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:vibe-kanban-task-card
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:vibe-kanban-agent-picker
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:vibe-kanban-branch-view
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:vibe-kanban-pr-review
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:vibe-kanban-workspace-isolation
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:vibe-kanban-progress-stream
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:vibe-kanban-multi-agent-dispatch
+      attributes:
+        mechanism: ui-control
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:multi-agent-dispatch
+    - target: orch-primitive:task-create
+    - target: orch-primitive:task-assign
+    - target: orch-primitive:task-complete
+    - target: orch-primitive:workspace-create
+    - target: orch-primitive:progress-stream
+    - target: orch-primitive:pr-creation
+    - target: orch-primitive:branch-management
+    - target: orch-primitive:concurrency-control

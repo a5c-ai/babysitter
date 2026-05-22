@@ -1,0 +1,455 @@
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-aws-bedrock-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for aws-bedrock-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/awslabs/mcp
+  sourcePathOrUrl: https://github.com/awslabs/mcp
+  locator: migrated source comment for graph/extensions/tool-descriptors/aws-bedrock-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-aws-s3-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for aws-s3-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/awslabs/mcp
+  sourcePathOrUrl: https://github.com/awslabs/mcp
+  locator: migrated source comment for graph/extensions/tool-descriptors/aws-s3-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-brave-search-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for brave-search-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
+  locator: migrated source comment for graph/extensions/tool-descriptors/brave-search-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-clickhouse-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for clickhouse-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/ClickHouse/mcp-clickhouse
+  sourcePathOrUrl: https://github.com/ClickHouse/mcp-clickhouse
+  locator: migrated source comment for graph/extensions/tool-descriptors/clickhouse-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-cloudflare-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for cloudflare-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/cloudflare/mcp-server-cloudflare
+  sourcePathOrUrl: https://github.com/cloudflare/mcp-server-cloudflare
+  locator: migrated source comment for graph/extensions/tool-descriptors/cloudflare-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-context7-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for context7-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/upstash/context7
+  sourcePathOrUrl: https://github.com/upstash/context7
+  locator: migrated source comment for graph/extensions/tool-descriptors/context7-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-docker-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for docker-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/docker/mcp-servers
+  sourcePathOrUrl: https://github.com/docker/mcp-servers
+  locator: migrated source comment for graph/extensions/tool-descriptors/docker-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-elasticsearch-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for elasticsearch-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/elastic/mcp-server-elasticsearch
+  sourcePathOrUrl: https://github.com/elastic/mcp-server-elasticsearch
+  locator: migrated source comment for graph/extensions/tool-descriptors/elasticsearch-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-everything-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for everything-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/everything
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/everything
+  locator: migrated source comment for graph/extensions/tool-descriptors/everything-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-exa-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for exa-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/exa-labs/exa-mcp-server
+  sourcePathOrUrl: https://github.com/exa-labs/exa-mcp-server
+  locator: migrated source comment for graph/extensions/tool-descriptors/exa-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-fetch-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for fetch-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
+  locator: migrated source comment for graph/extensions/tool-descriptors/fetch-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-figma-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for figma-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/GLips/Figma-Context-MCP
+  sourcePathOrUrl: https://github.com/GLips/Figma-Context-MCP
+  locator: migrated source comment for graph/extensions/tool-descriptors/figma-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-filesystem-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for filesystem-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+  locator: migrated source comment for graph/extensions/tool-descriptors/filesystem-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-firecrawl-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for firecrawl-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/mendableai/firecrawl-mcp-server
+  sourcePathOrUrl: https://github.com/mendableai/firecrawl-mcp-server
+  locator: migrated source comment for graph/extensions/tool-descriptors/firecrawl-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-github-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for github-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/github/github-mcp-server
+  sourcePathOrUrl: https://github.com/github/github-mcp-server
+  locator: migrated source comment for graph/extensions/tool-descriptors/github-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-gitlab-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for gitlab-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab
+  locator: migrated source comment for graph/extensions/tool-descriptors/gitlab-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-google-drive-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for google-drive-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive
+  locator: migrated source comment for graph/extensions/tool-descriptors/google-drive-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-google-maps-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for google-maps-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/google-maps
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/google-maps
+  locator: migrated source comment for graph/extensions/tool-descriptors/google-maps-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-jira-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for jira-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/sooperset/mcp-atlassian
+  sourcePathOrUrl: https://github.com/sooperset/mcp-atlassian
+  locator: migrated source comment for graph/extensions/tool-descriptors/jira-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-kubernetes-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for kubernetes-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/Flux159/mcp-server-kubernetes
+  sourcePathOrUrl: https://github.com/Flux159/mcp-server-kubernetes
+  locator: migrated source comment for graph/extensions/tool-descriptors/kubernetes-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-linear-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for linear-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://linear.app/changelog/2025-05-01-mcp
+  sourcePathOrUrl: https://linear.app/changelog/2025-05-01-mcp
+  locator: migrated source comment for graph/extensions/tool-descriptors/linear-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-memory-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for memory-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/memory
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/memory
+  locator: migrated source comment for graph/extensions/tool-descriptors/memory-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-mongodb-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for mongodb-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/mongodb-js/mongodb-mcp-server
+  sourcePathOrUrl: https://github.com/mongodb-js/mongodb-mcp-server
+  locator: migrated source comment for graph/extensions/tool-descriptors/mongodb-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-extensions-tool-descriptors-notion-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for notion-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/makenotion/notion-mcp-server
+  sourcePathOrUrl: https://github.com/makenotion/notion-mcp-server
+  locator: migrated source comment for graph/extensions/tool-descriptors/notion-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc

@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Simulation
   skill-id: CE-SK-002
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:dynamic-programming]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # HYSYS Dynamic Simulator Skill

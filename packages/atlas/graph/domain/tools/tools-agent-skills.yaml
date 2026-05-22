@@ -1,0 +1,195 @@
+---
+nodeKind: Tool
+id: tool:claude-auto-retry
+attributes:
+  languageApplicability: neutral
+  displayName: "Claude Auto Retry"
+  homepageUrl: "https://github.com/saoudrizwan/claude-auto-retry"
+  kind: other
+  description: |
+    Automatically retries Claude Code sessions when rate limits or
+    transient errors occur. Wraps the Claude Code CLI with exponential
+    backoff, session state preservation, and configurable retry policies.
+    Eliminates the need for manual re-invocation after rate-limit pauses,
+    keeping long-running agent workflows moving without human babysitting.
+edges:
+  tool_used_by:
+    - target: skill-area:operations-automation
+  relates_to_topic:
+    - target: topic:agent-session-management
+    - target: orch-primitive:retry-with-backoff
+---
+nodeKind: Tool
+id: tool:micro-skills
+attributes:
+  languageApplicability: neutral
+  displayName: "Micro Skills"
+  homepageUrl: "https://github.com/anthropics/micro-skills"
+  kind: other
+  description: |
+    Converts agent skills into gated micro-pipelines with hard quality
+    checks at each stage. Breaks down broad skills into discrete,
+    testable steps with pass/fail gates — ensuring each micro-step
+    meets quality criteria before proceeding. Enforces structured
+    execution discipline on otherwise open-ended agent behaviors,
+    reducing hallucination and drift in multi-step workflows.
+edges:
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:code-quality
+  relates_to_topic:
+    - target: topic:agent-plugin-system
+---
+nodeKind: Tool
+id: tool:dev-browser
+attributes:
+  languageApplicability: neutral
+  displayName: "Dev Browser"
+  homepageUrl: "https://github.com/nichochar/dev-browser"
+  kind: other
+  description: |
+    Browser automation skill for AI agents built on Playwright. Provides
+    a high-level API for agents to navigate web pages, fill forms, click
+    elements, extract content, and take screenshots. Designed specifically
+    for agent use cases — includes smart element targeting, automatic
+    waiting, and structured page snapshots that fit within context windows.
+    Useful for web scraping, E2E testing, and browser-based agent tasks.
+edges:
+  tool_used_by:
+    - target: skill-area:browser-automation
+    - target: skill-area:e2e-testing
+  relates_to_topic:
+    - target: topic:agent-tool-use
+    - target: skill-area:web-scraping
+---
+nodeKind: Tool
+id: tool:cctop
+attributes:
+  languageApplicability: neutral
+  displayName: "cctop"
+  homepageUrl: "https://github.com/anthropics/cctop"
+  kind: other
+  description: |
+    htop-like terminal dashboard for monitoring Claude Code sessions in
+    real-time. Displays active sessions, token usage, tool calls, costs,
+    and system resource consumption in a TUI interface. Enables developers
+    running multiple concurrent Claude Code sessions to monitor activity,
+    spot runaway sessions, and track aggregate spend from a single
+    terminal pane.
+edges:
+  tool_used_by:
+    - target: skill-area:observability-instrumentation
+    - target: skill-area:developer-experience
+  relates_to_topic:
+    - target: topic:agent-session-management
+    - target: orch-primitive:progress-stream
+---
+nodeKind: Tool
+id: tool:caveman
+attributes:
+  languageApplicability: neutral
+  displayName: "Caveman"
+  homepageUrl: "https://github.com/anthropics/caveman"
+  kind: other
+  description: |
+    Terminal-based task runner for AI agents. Provides minimal structure
+    for managing agent work items with a simple, keyboard-driven TUI.
+    Favors direct terminal interaction over complex configuration, making
+    it easy to queue, run, and track agent tasks without ceremony.
+edges:
+  tool_used_by:
+    - target: skill-area:developer-experience
+    - target: skill-area:operations-automation
+---
+nodeKind: Tool
+id: tool:auto-research-claw
+attributes:
+  languageApplicability: neutral
+  displayName: "AutoResearchClaw"
+  homepageUrl: "https://github.com/auto-research-claw/auto-research-claw"
+  kind: other
+  description: |
+    23-stage autonomous research pipeline for AI agents. Orchestrates
+    end-to-end research workflows from initial query through web search,
+    source evaluation, content extraction, cross-referencing, and final
+    synthesis. Each stage is a discrete, auditable step enabling reliable
+    autonomous research without human intervention at intermediate steps.
+edges:
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:knowledge-fabric-design
+---
+nodeKind: Tool
+id: tool:skillachi
+attributes:
+  languageApplicability: neutral
+  displayName: "Skillachi"
+  homepageUrl: "https://github.com/anthropics/skillachi"
+  kind: other
+  description: |
+    Benchmark suite for evaluating AI coding skill quality and
+    effectiveness. Provides standardized test harnesses, scoring rubrics,
+    and comparative metrics for measuring how well AI agent skills perform
+    across a range of tasks. Useful for skill authors validating new
+    skills and teams selecting skills for their agent workflows.
+edges:
+  tool_used_by:
+    - target: skill-area:ai-evaluation
+    - target: skill-area:retrieval-evaluation
+---
+nodeKind: Tool
+id: tool:imptokens
+attributes:
+  languageApplicability: neutral
+  displayName: "imptokens"
+  homepageUrl: "https://github.com/anthropics/imptokens"
+  kind: other
+  description: |
+    Compress input tokens to save time and money in AI agent sessions.
+    Detects ghost tokens — invisible or redundant tokens consuming context
+    budget without contributing meaning — and strips or collapses them.
+    Reduces effective prompt size while preserving semantic content,
+    lowering per-request cost and extending available context for long
+    agent runs.
+edges:
+  tool_used_by:
+    - target: skill-area:context-management
+    - target: skill-area:embedding-optimization
+---
+nodeKind: Tool
+id: tool:snyk-agent-scan
+attributes:
+  languageApplicability: neutral
+  displayName: "snyk/agent-scan"
+  homepageUrl: "https://github.com/snyk/agent-scan"
+  kind: other
+  description: |
+    Security scanning skill for AI coding agents powered by Snyk.
+    Integrates Snyk vulnerability detection into agent workflows,
+    enabling agents to surface dependency vulnerabilities, license
+    issues, and code security findings during development. Provides
+    structured scan results that agents can reason about and act on
+    without leaving their coding context.
+edges:
+  tool_used_by:
+    - target: skill-area:vulnerability-scanning
+    - target: skill-area:application-security
+---
+nodeKind: Tool
+id: tool:cisco-skill-scanner
+attributes:
+  languageApplicability: neutral
+  displayName: "cisco-ai-defense/skill-scanner"
+  homepageUrl: "https://github.com/cisco-ai-defense/skill-scanner"
+  kind: other
+  description: |
+    Multi-engine security scanner for AI agent skills and code from
+    Cisco AI Defense. Runs skills and generated code through multiple
+    security analysis engines to detect prompt injection risks,
+    insecure code patterns, supply-chain threats, and compliance
+    violations. Designed to harden AI agent skill pipelines against
+    adversarial inputs and unsafe code generation.
+edges:
+  tool_used_by:
+    - target: skill-area:vulnerability-scanning
+    - target: skill-area:compliance-scanning

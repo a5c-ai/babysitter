@@ -2,17 +2,12 @@
 name: file-guard
 description: PreToolUse protection blocking sensitive file access across 195+ patterns in 12 categories with bash pipeline analysis and multi-tool ignore support.
 allowed-tools: Read, Bash, Grep, Glob
----
-
-# File Guard
-
-## Overview
-
-Real-time file access protection system that blocks sensitive file reads, writes, and indirect access attempts. Covers 195+ file patterns across 12 security categories.
-
-## 12 Categories
-
-### 1. Secrets
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 `.env`, `.env.*`, `.secret`, `secrets.*`, `vault.*`
 
 ### 2. Credentials
@@ -47,6 +42,8 @@ Real-time file access protection system that blocks sensitive file reads, writes
 
 ### 12. Sensitive Configs
 `config/secrets/*`, `.htpasswd`, `shadow`, `gshadow`
+
+---
 
 ## Bash Pipeline Analysis
 

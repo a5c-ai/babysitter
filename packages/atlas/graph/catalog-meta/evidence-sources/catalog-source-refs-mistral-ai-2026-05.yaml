@@ -1,0 +1,39 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-634174989784
+attributes:
+  displayName: 'Catalog source reference: https://mistral.ai/news/codestral-2501/'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://mistral.ai/news/codestral-2501/
+  sourcePathOrUrl: https://mistral.ai/news/codestral-2501/
+  locator: Source reference for catalog entities in graph/benchmarks/eval-results/eval-results-mistral.yaml,
+    graph/benchmarks/eval-runs/eval-runs-mistral.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-7cbdda698b3e
+attributes:
+  displayName: 'Catalog source reference: https://mistral.ai/news/mistral-large-2407/'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://mistral.ai/news/mistral-large-2407/
+  sourcePathOrUrl: https://mistral.ai/news/mistral-large-2407/
+  locator: Source reference for catalog entities in graph/benchmarks/eval-results/eval-results-mistral.yaml,
+    graph/benchmarks/eval-runs/eval-runs-mistral.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web

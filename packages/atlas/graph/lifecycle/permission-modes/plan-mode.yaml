@@ -1,0 +1,15 @@
+nodeKind: PermissionMode
+id: permission-mode:claude-code-plan
+attributes:
+  displayName: "Claude Code plan mode"
+  mode: plan
+  isReadOnly: true
+  requiresUserConsent: true
+  enteredVia: model-initiated
+  prePlanMode: default
+  classifierActive: false
+  description: |
+    Read-only exploration mode entered via the EnterPlanMode tool. Write/edit
+    tools are disabled; the model uses Glob/Grep/Read/AskUserQuestion to design
+    an implementation, then calls ExitPlanMode for user approval. prePlanMode
+    is the mode to restore on exit (typically default or accept-edits).

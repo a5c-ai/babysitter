@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:test-driven-development.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:test-driven-development
+  text: |
+    Test-Driven Development (TDD): a methodology where failing tests are authored before implementation, then code is added until tests pass.
+  status: canonical
+edges:
+  defines:
+    - term:test-driven-development

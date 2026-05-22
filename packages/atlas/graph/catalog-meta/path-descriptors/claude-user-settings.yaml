@@ -1,0 +1,18 @@
+nodeKind: PathDescriptor
+id: path:claude-user-settings
+attributes:
+  pathId: path:claude-user-settings
+  displayName: "Claude Code user settings file"
+  path: "~/.claude/settings.json"
+  pathKind: settings-file
+  ownerKind: AgentPlatformImpl
+  ownerId: agent-platform-impl:claude-code.platform@1.x
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+  notes: |
+    JSON document holding Claude Code user-level settings: model
+    preferences, hook configuration, plugin enablement, OAuth tokens
+    (post browser-login). Settings-template fragments deep-merge into
+    this file (see extensions/settings-templates/example-claude-settings.yaml).

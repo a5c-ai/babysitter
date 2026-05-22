@@ -1,0 +1,33 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:codex.knowledge@current
+attributes:
+  displayName: "Codex Knowledge Fabric — AGENTS.md"
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  description: |
+    Codex CLI's knowledge fabric is centered on AGENTS.md files. At session
+    bootstrap, Codex reads AGENTS.md from the project root and injects its
+    contents as long-term project memory. This provides persistent instructions,
+    conventions, and project-specific context across sessions. The knowledge
+    scope is project-only — Codex does not have user-level or enterprise-level
+    knowledge files. Codex runs in a sandboxed environment, so knowledge
+    retrieval is limited to files within the sandbox boundary.
+  knowledgeFileFormats:
+    - "AGENTS.md"
+  knowledgeScopes:
+    - project
+  autoExtractionSupport: false
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: filesystem
+  notes: |
+    Codex's knowledge fabric is minimal compared to Claude Code or Cursor.
+    AGENTS.md is the sole persistent knowledge file. There is no auto-memory
+    extraction, no user-level knowledge, and no vector-based retrieval.
+    Knowledge is injected at session start and not updated mid-session.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agentVersion:codex:ge-0-119-0
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:codex-agents-md

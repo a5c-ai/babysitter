@@ -17,6 +17,10 @@ metadata:
     - fitter
     - pomegranate
     - distfit
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:quantitative-modeling, skill-area:statistical-analysis, skill-area:financial-risk-modeling]
+  roles: [role:quantitative-analyst, role:risk-analyst, role:data-scientist]
 ---
 
 # Risk Distribution Fitter

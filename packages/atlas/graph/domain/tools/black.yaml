@@ -1,0 +1,17 @@
+nodeKind: Tool
+id: tool:black
+attributes:
+  displayName: "Black"
+  homepageUrl: "https://github.com/psf/black"
+  kind: formatter
+  language: language:python
+  description: |
+    Uncompromising Python code formatter.
+edges:
+  belongs_to_language:
+    - language:python
+  used_for:
+    - target: skill-area:code-quality
+  alternative_to:
+    - target: tool:ruff
+      comparison: "Python formatters — Black is pure Python; Ruff is Rust-based and includes linting"

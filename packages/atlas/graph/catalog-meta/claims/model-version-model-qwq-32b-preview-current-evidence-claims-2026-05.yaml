@@ -1,0 +1,312 @@
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-contextwindowtokens
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: contextWindowTokens
+  value: '32768'
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current contextWindowTokens is 32768.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-costpermtokinput
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: costPerMTokInput
+  value: '0'
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current costPerMTokInput is 0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-costpermtokoutput
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: costPerMTokOutput
+  value: '0'
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current costPerMTokOutput is 0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-finetuningkind
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: fineTuningKind
+  value: full
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current fineTuningKind is full.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-kind
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: kind
+  value: reasoning
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current kind is reasoning.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-lifecyclestatus
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: lifecycleStatus
+  value: preview
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current lifecycleStatus is preview.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-modalities
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: modalities
+  value: text
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current modalities is text.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-modalitydirections
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current modalityDirections is kind=text;direction=input,
+    kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-modelcardurl
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: modelCardUrl
+  value: https://huggingface.co/Qwen/QwQ-32B-Preview
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current modelCardUrl is https://huggingface.co/Qwen/QwQ-32B-Preview.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-supportsextendedthinking
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: supportsExtendedThinking
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current supportsExtendedThinking is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-supportsfinetuning
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: supportsFineTuning
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current supportsFineTuning is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current supportsThinkingBudgetTokens is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwq-32b-preview-current-versionrange
+attributes:
+  subjectId: model:qwq-32b-preview@current
+  attribute: versionRange
+  value: '>=0.1.0 <1.0.0'
+  subjectKind: ModelVersion
+  statement: model:qwq-32b-preview@current versionRange is >=0.1.0 <1.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwq-32b-preview
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwq-32b-preview
+  about_subject:
+  - model:qwq-32b-preview@current

@@ -1,0 +1,12 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:dump-context
+attributes:
+  schema: '{}'
+  displayName: "dump-context"
+  description: |
+    Plugin-shipped helper that dumps the current Claude Code context
+    (session state, working directory, env summary) for debugging and
+    diagnostics. Provided as a `bin/` executable by the example portable
+    extension plugin and surfaced as a callable tool when the plugin
+    installs the binary into PATH.
+edges: {}

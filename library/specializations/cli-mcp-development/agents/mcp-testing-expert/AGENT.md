@@ -8,6 +8,14 @@ expertise:
   - Tool testing
   - Resource testing
   - Integration testing
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:mcp-server-implementation, skill-area:agent-simulation-testing]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # MCP Testing Expert Agent

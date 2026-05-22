@@ -1,0 +1,26 @@
+nodeKind: Layer
+id: layer:3-transport
+attributes:
+  displayName: Transport
+  position: 3
+  path: compute
+  scope: Wire and client path between agent core and provider.
+  summary: |
+    The protocol and client path that carries inference requests from an
+    `AgentCoreImpl` to a `Provider`, plus optional proxies or gateways that
+    interpose between them. This layer is modeled as one top-level layer; wire
+    protocol, client library, and proxy behavior are responsibilities/examples,
+    not nested layer nodes.
+  responsibilities:
+    - Encode request, response, streaming, tool-call, and error payloads.
+    - Run the in-process client or adapter that speaks the provider protocol.
+    - Optionally route through a proxy, gateway, recorder, or policy interposer.
+  examples:
+    - OpenAI Responses, OpenAI Chat Completions, Anthropic Messages, Gemini GenerateContent.
+    - HTTP, SSE, WebSocket, gRPC, OpenAI-compatible gateways.
+    - LangChain chat-model adapters and transport clients.
+  fitNotes: |
+    Custom-agent frameworks often hide transport behind model abstractions.
+    Gateway products may occupy mostly this layer while delegating core/runtime
+    behavior upward.
+edges: {}

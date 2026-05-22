@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:capability-support.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:capability-support
+  text: |
+    n-ary binding of (entity, capability, version-range, support-level)
+  status: canonical
+edges:
+  defines:
+    - term:capability-support

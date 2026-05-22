@@ -19,6 +19,9 @@
  * - LangChain ReAct Agent: https://python.langchain.com/docs/modules/agents/agent_types/react
  * - OpenAI Function Calling: https://platform.openai.com/docs/guides/function-calling
  * - Anthropic Tool Use: https://docs.anthropic.com/claude/docs/tool-use
+ * @graph
+ *   domains: [domain:software-engineering, skill-area:react-state-management]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

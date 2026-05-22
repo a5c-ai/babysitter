@@ -100,8 +100,8 @@ describe("configure_show", () => {
   it("returns current configuration", async () => {
     mockedConfigureShow.mockReturnValue({
       values: {
-        runsDir: ".a5c/runs",
-        maxIterations: 256,
+        runsDir: "~/.a5c/runs",
+        maxIterations: 65_000,
         qualityThreshold: 80,
       },
       timestamp: "2026-03-15T12:00:00Z",
@@ -112,8 +112,8 @@ describe("configure_show", () => {
 
     expect(result.isError).toBeUndefined();
     const data = parseResult(result) as { values: Record<string, unknown>; timestamp: string };
-    expect(data.values.runsDir).toBe(".a5c/runs");
-    expect(data.values.maxIterations).toBe(256);
+    expect(data.values.runsDir).toBe("~/.a5c/runs");
+    expect(data.values.maxIterations).toBe(65_000);
     expect(data.timestamp).toBe("2026-03-15T12:00:00Z");
   });
 
@@ -134,7 +134,7 @@ describe("configure_show", () => {
 describe("skill_discover", () => {
   it("returns discovered skills, agents, and processes", async () => {
     mockedDiscoverSkillsInternal.mockResolvedValue({
-      skills: [{ name: "babysit", path: "/plugins/babysitter/skills/babysit" }],
+      skills: [{ name: "babysit", path: "/plugins/babysitter-unified/skills/babysit" }],
       agents: [{ name: "code-reviewer", path: "/agents/code-reviewer.md" }],
       processes: [{ name: "tdd", path: "/processes/tdd.js" }],
       summary: "Found 1 skill, 1 agent, 1 process",
@@ -172,3 +172,4 @@ describe("skill_discover", () => {
     expect(data.error).toBe("Plugin root not found");
   });
 });
+

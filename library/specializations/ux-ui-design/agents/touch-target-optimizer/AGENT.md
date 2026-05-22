@@ -8,6 +8,12 @@ expertise:
   - Gesture pattern design
   - Thumb zone mapping
   - Mobile-first interaction optimization
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:interaction-design, skill-area:accessibility-first-design]
+  roles: [role:product-designer, role:mobile-engineer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # Touch Target Optimizer Agent

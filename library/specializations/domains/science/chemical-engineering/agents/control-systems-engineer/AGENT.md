@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Control
   agent-id: CE-AG-013
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:sensor-fusion]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # Control Systems Engineer Agent

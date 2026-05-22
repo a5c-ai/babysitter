@@ -1,0 +1,11 @@
+nodeKind: Topic
+id: topic:accessibility
+attributes:
+  displayName: "Accessibility"
+  description: |
+    Web/app accessibility — WCAG conformance, screen-reader support,
+    keyboard navigation, color contrast.
+edges:
+  applies_to:
+    - domain:web-development
+    - domain:software-engineering

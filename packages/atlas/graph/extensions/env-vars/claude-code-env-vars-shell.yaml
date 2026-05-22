@@ -1,0 +1,108 @@
+nodeKind: EnvVar
+id: env-var:bash-max-timeout-ms
+attributes:
+  displayName: BASH_MAX_TIMEOUT_MS
+  description: Maximum timeout the model can set for long-running bash commands.
+  name: BASH_MAX_TIMEOUT_MS
+  category: shell
+  valueType: int
+  defaultValue: "600000"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:bash-max-output-length
+attributes:
+  displayName: BASH_MAX_OUTPUT_LENGTH
+  description: Maximum number of characters in bash outputs before middle-truncation.
+  name: BASH_MAX_OUTPUT_LENGTH
+  category: shell
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claudecode
+attributes:
+  displayName: CLAUDECODE
+  description: Set to 1 in shell environments Claude Code spawns; used to detect running inside Claude Code.
+  name: CLAUDECODE
+  category: shell
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-shell
+attributes:
+  displayName: CLAUDE_CODE_SHELL
+  description: Override automatic shell detection.
+  name: CLAUDE_CODE_SHELL
+  category: shell
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-shell-prefix
+attributes:
+  displayName: CLAUDE_CODE_SHELL_PREFIX
+  description: Command prefix that wraps shell commands Claude Code spawns (Bash, hooks, MCP servers).
+  name: CLAUDE_CODE_SHELL_PREFIX
+  category: shell
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-git-bash-path
+attributes:
+  displayName: CLAUDE_CODE_GIT_BASH_PATH
+  description: '[Windows only] Path to the Git Bash executable (bash.exe) when not in PATH.'
+  name: CLAUDE_CODE_GIT_BASH_PATH
+  category: shell
+  valueType: path
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-bash-maintain-project-working-dir
+attributes:
+  displayName: CLAUDE_CODE_BASH_MAINTAIN_PROJECT_WORKING_DIR
+  description: Return to the original working directory after each Bash or PowerShell command in the main session.
+  name: CLAUDE_CODE_BASH_MAINTAIN_PROJECT_WORKING_DIR
+  category: shell
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-subprocess-env-scrub
+attributes:
+  displayName: CLAUDE_CODE_SUBPROCESS_ENV_SCRUB
+  description: Set to 1 to strip Anthropic and cloud provider credentials from subprocess environments.
+  name: CLAUDE_CODE_SUBPROCESS_ENV_SCRUB
+  category: shell
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-script-caps
+attributes:
+  displayName: CLAUDE_CODE_SCRIPT_CAPS
+  description: JSON object limiting how many times specific scripts may be invoked per session.
+  name: CLAUDE_CODE_SCRIPT_CAPS
+  category: shell
+  valueType: json
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

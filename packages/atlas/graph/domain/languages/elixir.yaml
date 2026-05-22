@@ -1,0 +1,20 @@
+nodeKind: Language
+id: language:elixir
+attributes:
+  displayName: "Elixir"
+  paradigms:
+    - functional
+    - concurrent
+  description: |
+    Elixir is a functional, concurrent, dynamically-typed language built on
+    the Erlang BEAM virtual machine. It inherits BEAM's legendary fault
+    tolerance — lightweight processes, supervisors, and "let it crash"
+    philosophy — while adding a modern syntax, macros, and a rich toolchain.
+
+    The Phoenix framework (including LiveView for server-rendered interactive
+    UIs) is the dominant web framework. Elixir shines in real-time systems,
+    chat, multiplayer games, IoT hubs, and financial messaging where millions
+    of concurrent connections and high uptime are required. OTP patterns —
+    GenServer, Supervisor, Application — are central to structuring Elixir
+    applications.
+edges: {}

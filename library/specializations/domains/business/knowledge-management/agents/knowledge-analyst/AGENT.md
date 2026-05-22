@@ -17,6 +17,10 @@ metadata:
   domain: business
   category: Analytics
   agent-id: AG-010
+graph:
+  domains: [domain:knowledge-management]
+  skillAreas: [skill-area:data-analytics, skill-area:data-governance, skill-area:data-quality]
+  roles: [role:information-architect, role:data-analyst, role:analytics-engineer]
 ---
 
 # Knowledge Analyst Agent

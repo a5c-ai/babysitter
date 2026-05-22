@@ -1,0 +1,95 @@
+---
+nodeKind: KnowledgeDomain
+id: knowledge-domain:product-knowledge
+attributes:
+  displayName: "Product Knowledge"
+  description: |
+    Everything the organization knows about its product — features,
+    capabilities, roadmap, user journeys, pricing, positioning,
+    competitive landscape, and product-market fit signals. Spans
+    both current state and planned future direction.
+  trustLevel: verified
+  staleness: fresh
+edges:
+  provides_knowledge_to:
+    - retrieval-pipeline:semantic-doc-search
+    - retrieval-pipeline:hybrid-knowledge-search
+---
+nodeKind: KnowledgeDomain
+id: knowledge-domain:engineering-knowledge
+attributes:
+  displayName: "Engineering Knowledge"
+  description: |
+    Architecture patterns, code conventions, technical debt inventory,
+    system design decisions, dependency rationale, performance
+    characteristics, and debugging lore. The accumulated technical
+    understanding of how the system works and why it was built that way.
+  trustLevel: authoritative
+  staleness: fresh
+edges:
+  provides_knowledge_to:
+    - retrieval-pipeline:rag-code-search
+    - retrieval-pipeline:decision-graph-query
+    - retrieval-pipeline:hybrid-knowledge-search
+---
+nodeKind: KnowledgeDomain
+id: knowledge-domain:customer-knowledge
+attributes:
+  displayName: "Customer Knowledge"
+  description: |
+    Customer feedback, support history, usage analytics, churn signals,
+    feature requests, satisfaction scores, and behavioral patterns.
+    Aggregated from CRM, support tickets, user interviews, and
+    product analytics.
+  trustLevel: verified
+  staleness: recent
+edges:
+  provides_knowledge_to:
+    - retrieval-pipeline:hybrid-knowledge-search
+---
+nodeKind: KnowledgeDomain
+id: knowledge-domain:operational-knowledge
+attributes:
+  displayName: "Operational Knowledge"
+  description: |
+    Runbooks, incident response procedures, SLAs, deployment processes,
+    monitoring configurations, and operational playbooks. The knowledge
+    needed to keep systems running, respond to incidents, and maintain
+    service reliability.
+  trustLevel: authoritative
+  staleness: fresh
+edges:
+  provides_knowledge_to:
+    - retrieval-pipeline:hybrid-knowledge-search
+    - retrieval-pipeline:semantic-doc-search
+---
+nodeKind: KnowledgeDomain
+id: knowledge-domain:legal-compliance
+attributes:
+  displayName: "Legal & Compliance"
+  description: |
+    Policies, regulatory requirements, contractual obligations,
+    data handling rules, privacy frameworks (GDPR, CCPA, SOC2),
+    and compliance audit trails. Knowledge that governs what the
+    organization can and must do.
+  trustLevel: authoritative
+  staleness: recent
+edges:
+  provides_knowledge_to:
+    - retrieval-pipeline:semantic-doc-search
+---
+nodeKind: KnowledgeDomain
+id: knowledge-domain:organizational-knowledge
+attributes:
+  displayName: "Organizational Knowledge"
+  description: |
+    Team structure, roles and responsibilities, communication norms,
+    decision-making processes, onboarding paths, cultural values,
+    and institutional memory. The meta-knowledge about how the
+    organization itself operates.
+  trustLevel: verified
+  staleness: recent
+edges:
+  provides_knowledge_to:
+    - retrieval-pipeline:hybrid-knowledge-search
+    - retrieval-pipeline:multi-hop-reasoning

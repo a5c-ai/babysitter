@@ -1,0 +1,132 @@
+---
+nodeKind: HookSurface
+id: hook-surface:after-agent
+attributes:
+  eventName: "AfterAgent (canonical)"
+  displayName: "AfterAgent (canonical)"
+  kind: canonical
+  direction: post
+  blocking: false
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [agent_name, agent_input, agent_result, session_id, transcript_path]
+    properties:
+      agent_name: { type: string, description: "Name of the subagent that just ran." }
+      agent_input: { type: object, description: "Input the subagent was launched with." }
+      agent_result: { type: object, description: "Subagent's terminal output / structured result." }
+      session_id: { type: string }
+      transcript_path: { type: string }
+  description: |
+    Fires when a subagent invocation completes. Distinct from SubagentStop
+    (which fires when the subagent process is terminating but before
+    result aggregation). AfterAgent is non-blocking; observers receive the
+    final result envelope for telemetry / logging / accounting.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:session-idle
+attributes:
+  eventName: "SessionIdle (canonical)"
+  displayName: "SessionIdle (canonical)"
+  kind: canonical
+  direction: observer
+  blocking: false
+  family: observer
+  payloadSchema:
+    type: object
+    required: [session_id, idle_since_ms]
+    properties:
+      session_id: { type: string }
+      idle_since_ms:
+        type: integer
+        description: "Milliseconds since the last user input or tool result."
+      last_event_kind:
+        type: string
+        description: "Kind of the last event before idle (e.g. text-deltas-complete, tool-result, user-prompt)."
+  description: |
+    Fires when a session has been quiet for a configured threshold. Used
+    by orchestrators to dispatch keepalives, by reliability impls to
+    detect stalled loops, and by IDE integrations to dim idle agent
+    avatars. Native equivalents: opencode `SessionIdle`, claude-code
+    `Notification` with `idle` qualifier.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:shell-env
+attributes:
+  eventName: "ShellEnv (canonical)"
+  displayName: "ShellEnv (canonical)"
+  kind: canonical
+  direction: pre
+  blocking: true
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [session_id, requested_env]
+    properties:
+      session_id: { type: string }
+      requested_env:
+        type: object
+        description: "Environment variable map the agent intends to expose to the next tool subprocess."
+      cwd: { type: string }
+  description: |
+    Fires before the runtime materializes the environment for a shell tool
+    invocation. Subscribers can inject, redact, or veto env vars. Used to
+    enforce secret-handling policy + capability profiles. Native
+    equivalents: claude-code / opencode `ShellEnv`.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:before-prompt-build
+attributes:
+  eventName: "BeforePromptBuild (canonical)"
+  displayName: "BeforePromptBuild (canonical)"
+  kind: canonical
+  direction: pre
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [session_id, turn_number]
+    properties:
+      session_id: { type: string }
+      turn_number: { type: integer }
+      pending_user_message: { type: string }
+      retrieved_context: { type: array, items: { type: object } }
+      memory_snippets: { type: array, items: { type: object } }
+  description: |
+    Fires after the runtime has gathered the turn\'s inputs (user message,
+    retrieved memory, attached files) but before the system + user prompt
+    is assembled and sent to the model. Subscribers can rewrite or
+    augment the assembly. Heaviest blocking-hook position for context
+    engineering.
+edges: {}
+---
+nodeKind: HookSurface
+id: hook-surface:before-provider-request
+attributes:
+  eventName: "BeforeProviderRequest (canonical)"
+  displayName: "BeforeProviderRequest (canonical)"
+  kind: canonical
+  direction: pre
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [session_id, model_id, request_body]
+    properties:
+      session_id: { type: string }
+      model_id: { type: string }
+      provider_id: { type: string }
+      request_body:
+        type: object
+        description: "Full provider request envelope as it would be sent on the wire."
+  description: |
+    Fires immediately before Transport-Client serializes and sends the
+    request to the provider. The last point at which a subscriber can
+    inspect, redact, or rewrite the actual request bytes. Distinct from
+    BeforePromptBuild (which sits before assembly). Subscribers used for
+    audit redaction, transport-proxy injection, and request-shape
+    instrumentation.
+edges: {}

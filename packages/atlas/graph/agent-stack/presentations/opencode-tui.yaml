@@ -1,0 +1,22 @@
+nodeKind: Presentation
+id: presentation:opencode-tui
+attributes:
+  displayName: "OpenCode TUI"
+  kind: tui
+  description: |
+    Terminal UI bundled with OpenCode. Renders streaming output, tool
+    approvals, and slash commands in a full-screen shell. Also runs
+    headless via `opencode-http` for server mode.
+  renderingTechnology: vte
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: partial
+  platforms: [darwin, linux, win32]
+  bundleSize: "~50 MB"
+  updateChannel: auto
+  accessibilityShortcuts:
+    - "Ctrl+C: cancel"
+    - "Ctrl+L: clear screen"
+edges:
+  bundled_with:
+    - agent-platform-impl:opencode.platform@1.x

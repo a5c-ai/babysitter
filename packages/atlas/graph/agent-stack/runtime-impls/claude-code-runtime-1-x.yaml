@@ -1,0 +1,321 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:claude-code.runtime@1.x
+attributes:
+  displayName: Claude Code Runtime (1.x)
+  agentVersionId: agentVersion:claude:ge-0-0-0
+  subagentDispatchMechanism: task-tool
+  subagentChildSessionPolicy: ephemeral-child-session
+  subagentToolScopePolicy: explicit-allowlist
+  packageRef: source-ref:claude-code-github
+  builtInTools:
+  - tool-descriptor:read
+  - tool-descriptor:write
+  - tool-descriptor:edit
+  - tool-descriptor:bash
+  - tool-descriptor:glob
+  - tool-descriptor:grep
+  - tool-descriptor:web-fetch
+  - tool-descriptor:web-search
+  - tool-descriptor:agent
+  - tool-descriptor:notebook-edit
+  - tool-descriptor:todo-write
+  toolRegistryDiscovery: static-bundled
+  hookSockets:
+  - hook-surface:pre-tool-use
+  - hook-surface:post-tool-use
+  - hook-surface:user-prompt-submit
+  - hook-surface:notification
+  - hook-surface:stop
+  - hook-surface:subagent-stop
+  - hook-surface:session-start
+  - hook-surface:session-end
+  - hook-surface:pre-compact
+  internalSessionStateLocation: ~/.claude/projects/<hash>/
+  sessionFileFormat: jsonl
+  sessionFilePathConvention: ~/.claude/projects/<project-path-hash>/<session-uuid>.jsonl
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: platform-deferred
+  runtimeIdentity: per-instance-keypair
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+  supportsStreaming: true
+  deepLinkSchemesRegistered:
+  - claude-cli://
+  - vscode://anthropic.claude-code
+  pluginDiscoverySource:
+  - marketplaceManifest
+  - localPath
+  - remoteUrl
+  - gitRepo
+  subagentToolInheritance: allowlist
+  skillScopePrecedence:
+  - enterprise
+  - personal
+  - project
+  - plugin
+  - additional-directory
+  liveChangeDetection: true
+  disableSkillShellExecutionSupported: true
+  urlHandlerRegistrationLocations:
+    macOS: "~/Applications/Claude Code URL Handler.app"
+    linux: "$XDG_DATA_HOME/applications/claude-code-url-handler.desktop"
+    windows: "HKEY_CURRENT_USER\\Software\\Classes\\claude-cli"
+  outputGuardMechanism: structured-output-passthrough
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:claude-code
+    role: runtime
+  exposes:
+  - target: hook-surface:pre-tool-use
+  - target: hook-surface:post-tool-use
+  - target: hook-surface:user-prompt-submit
+  - target: hook-surface:notification
+  - target: hook-surface:stop
+  - target: hook-surface:subagent-stop
+  - target: hook-surface:session-start
+  - target: hook-surface:session-end
+  - target: hook-surface:pre-compact
+  - target: hook-surface:claude.pre-tool-use
+  - target: hook-surface:claude.post-tool-use
+  - target: hook-surface:claude.stop
+  - target: hook-surface:claude.subagent-stop
+  - target: hook-surface:claude.notification
+  - target: hook-surface:claude.user-prompt-submit
+  - target: hook-surface:claude.pre-compact
+  - target: hook-surface:claude.session-start
+  - target: hook-surface:claude.session-end
+  - target: agent-host-transport:http
+  - target: agent-host-transport:mcp-mediated
+  - target: agent-host-transport:ws
+  - target: hook-surface:after-agent
+  - target: hook-surface:session-idle
+  - target: hook-surface:shell-env
+  - target: hook-surface:before-prompt-build
+  - target: hook-surface:before-provider-request
+  - target: hook-surface:claude.setup
+  - target: hook-surface:claude.user-prompt-expansion
+  - target: hook-surface:claude.permission-request
+  - target: hook-surface:claude.permission-denied
+  - target: hook-surface:claude.post-tool-use-failure
+  - target: hook-surface:claude.post-tool-batch
+  - target: hook-surface:claude.stop-failure
+  - target: hook-surface:claude.subagent-start
+  - target: hook-surface:claude.task-created
+  - target: hook-surface:claude.task-completed
+  - target: hook-surface:claude.teammate-idle
+  - target: hook-surface:claude.config-change
+  - target: hook-surface:claude.instructions-loaded
+  - target: hook-surface:claude.file-changed
+  - target: hook-surface:claude.cwd-changed
+  - target: hook-surface:claude.worktree-create
+  - target: hook-surface:claude.worktree-remove
+  - target: hook-surface:claude.post-compact
+  - target: hook-surface:claude.elicitation
+  - target: hook-surface:claude.elicitation-result
+  enforces_invariant:
+  - target: fs-safety-invariant:no-writes-outside-workspace
+  - target: fs-safety-invariant:terminal-cleanup
+  - target: fs-safety-invariant:no-overlapping-worktrees
+  bundles:
+  - target: tool-descriptor:read
+  - target: tool-descriptor:write
+  - target: tool-descriptor:edit
+  - target: tool-descriptor:bash
+  - target: tool-descriptor:glob
+  - target: tool-descriptor:grep
+  - target: tool-descriptor:web-fetch
+  - target: tool-descriptor:web-search
+  - target: tool-descriptor:agent
+  - target: tool-descriptor:notebook-edit
+  - target: tool-descriptor:todo-write
+  - target: tool-descriptor:ask-user-question
+  - target: tool-descriptor:cron-create
+  - target: tool-descriptor:cron-delete
+  - target: tool-descriptor:cron-list
+  - target: tool-descriptor:exit-plan-mode
+  - target: tool-descriptor:exit-worktree
+  - target: tool-descriptor:list-mcp-resources-tool
+  - target: tool-descriptor:lsp
+  - target: tool-descriptor:monitor
+  - target: tool-descriptor:powershell
+  - target: tool-descriptor:read-mcp-resource-tool
+  - target: tool-descriptor:send-message
+  - target: tool-descriptor:skill
+  - target: tool-descriptor:task-create
+  - target: tool-descriptor:task-get
+  - target: tool-descriptor:task-list
+  - target: tool-descriptor:task-update
+  - target: tool-descriptor:team-create
+  - target: tool-descriptor:team-delete
+  - target: tool-descriptor:tool-search
+  connects:
+  - target: mcp-transport:stdio
+  - target: mcp-transport:streamable-http
+  supports:
+  - target: capability:mcp-elicitation
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code''s MCP client supports server-initiated elicitation
+      requests (MCP spec 2025-06-18+), surfacing structured prompts to
+      the user mid-tool-call.
+      '
+    evidenceSourceIds:
+    - evidence:claude-code-docs-mcp-2026
+  - target: capability:mcp-no-jsonrpc-batching
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code conforms to the MCP 2025-06-18+ removal of JSON-RPC
+      batching: requests and responses are exchanged one-at-a-time.
+      '
+    evidenceSourceIds:
+    - evidence:claude-code-docs-mcp-2026
+  - target: capability:mcp-oauth-resource-server
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code''s Streamable HTTP MCP client treats remote MCP servers
+      as OAuth 2.1 Resource Servers and sends RFC 8707 Resource
+      Indicators (MCP spec 2025-06-18+).
+      '
+    evidenceSourceIds:
+    - evidence:claude-code-docs-mcp-2026
+  - target: capability:mcp-protocol-version-header
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code sends the `MCP-Protocol-Version` header on Streamable
+      HTTP requests as required by MCP spec 2025-06-18+.
+      '
+    evidenceSourceIds:
+    - evidence:claude-code-docs-mcp-2026
+  - target: capability:mcp-resource-links
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code follows resource-link references returned in tool
+      results (MCP spec 2025-06-18+).
+      '
+    evidenceSourceIds:
+    - evidence:claude-code-docs-mcp-2026
+  - target: capability:mcp-stdio
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code 1.x ships first-class MCP support over stdio with
+      auto-discovery of configured servers.
+      '
+    evidenceSourceIds:
+    - evidence:claude-code-docs-mcp-2026
+  - target: capability:mcp-streamable-http
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code''s runtime supports MCP servers over Streamable HTTP
+      (in addition to stdio). Configured via `.mcp.json` `transport: http`.
+      '
+    evidenceSourceIds:
+    - evidence:claude-code-docs-mcp-2026
+  - target: capability:mcp-structured-tool-output
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code''s MCP client consumes `structuredContent` typed tool
+      output (MCP spec 2025-06-18+), passing schemas through to the model
+      where helpful.
+      '
+    evidenceSourceIds:
+    - evidence:claude-code-docs-mcp-2026
+  - target: capability:supports-mcp
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'The runtime brokers MCP over stdio and streamable-http; tool
+      calls dispatched by the core are routed through the runtime''s
+      MCP transports.
+      '
+    evidenceSourceIds:
+    - evidence:claude-code-docs-mcp-2026
+  - target: capability:supports-subagent-dispatch
+    versionRange: '*'
+    level: full
+    notes: 'Claude Code Task tool dispatches subagents (task-tool mechanism).
+      '
+  - target: capability:can-fork
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code supports forking the active session via `/fork` (and the Fork interaction primitive in the TUI).'
+  - target: capability:supports-text-streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code streams model text deltas to the TUI as they arrive.'
+  - target: capability:supports-thinking-streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code streams the `thinking` content block when extended thinking is enabled.'
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code streams tool_use blocks as they assemble, allowing UI tool-card render-as-you-build.'
+  uses_transport_client:
+  - target: transport-client:claude-code-anthropic-direct
+  - target: transport-client:claude-code-bedrock
+  operates_in_permission_mode:
+  - target: permission-mode:claude-code-default
+  - target: permission-mode:claude-code-plan
+  - target: permission-mode:claude-code-bypass-permissions
+  - target: permission-mode:claude-code-accept-edits
+  - target: permission-mode:claude-code-dont-ask
+  - target: permission-mode:claude-code-auto
+  uses_mcp_scope:
+  - target: mcp-config-scope:claude-code-user
+  - target: mcp-config-scope:claude-code-project
+  - target: mcp-config-scope:claude-code-local
+  - target: mcp-config-scope:claude-code-managed
+  installs_plugins_in_scope:
+  - target: plugin-install-scope:claude-code-user
+  - target: plugin-install-scope:claude-code-project
+  - target: plugin-install-scope:claude-code-local
+  - target: plugin-install-scope:claude-code-managed
+  discovers_skills_in_scope:
+  - target: skill-discovery-scope:claude-code-enterprise
+  - target: skill-discovery-scope:claude-code-personal
+  - target: skill-discovery-scope:claude-code-project
+  - target: skill-discovery-scope:claude-code-plugin
+  - target: skill-discovery-scope:claude-code-additional-directory
+  operates_in_control_mode:
+  - target: agent-control-mode:claude-code-coordinator
+  - target: agent-control-mode:claude-code-bare-simple
+  has_dispatch_policy:
+  - target: tool-dispatch-policy:claude-code-file-read
+  - target: tool-dispatch-policy:claude-code-file-edit
+  - target: tool-dispatch-policy:claude-code-bash
+  compaction_policy_applied_by:
+  - target: compaction-policy:claude-code-auto
+  output_guard_applied_by:
+  - target: output-guard:claude-code-aup-refusal
+  schedules_consolidation:
+  - target: background-consolidation:claude-code-auto-dream
+  - target: background-consolidation:claude-code-extract-memories
+  exposes_proactive_surface:
+  - target: proactive-surface:claude-code-prompt-suggestion
+  - target: proactive-surface:claude-code-magic-docs
+  emits_signals_to:
+  - target: obs-backend:datadog
+  - target: obs-backend:grafana-cloud
+  - target: obs-backend:splunk
+  - target: obs-backend:new-relic
+  - target: obs-backend:prometheus
+  - target: obs-backend:jaeger
+  has_env_var:
+  - target: env-var:anthropic-api-key
+  - target: env-var:claude-code-use-bedrock
+  - target: env-var:claude-code-use-vertex
+  - target: env-var:claude-code-experimental-agent-teams
+  - target: env-var:disable-autoupdater
+  - target: env-var:force-autoupdate-plugins
+  - target: env-var:disable-deep-link-registration
+  - target: env-var:claude-code-max-output-tokens
+  - target: env-var:max-thinking-tokens
+  - target: env-var:bash-default-timeout-ms
+  - target: env-var:mcp-timeout
+  - target: env-var:claude-project-dir
+  - target: env-var:claude-code-disable-nonessential-traffic
+  speaks:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http

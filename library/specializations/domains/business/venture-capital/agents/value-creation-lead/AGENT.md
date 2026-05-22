@@ -8,6 +8,10 @@ expertise:
   - Customer and partner introductions
   - Operational improvement guidance
   - Portfolio company resource coordination
+graph:
+  domains: [domain:venture-capital]
+  skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+  roles: [role:financial-analyst]
 ---
 
 # Value Creation Lead

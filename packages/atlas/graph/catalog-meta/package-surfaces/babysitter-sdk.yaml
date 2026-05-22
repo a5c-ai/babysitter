@@ -1,0 +1,40 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-babysitter-sdk
+attributes:
+  packageId: "@a5c-ai/babysitter-sdk"
+  packageName: "@a5c-ai/babysitter-sdk"
+  workspacePath: packages/sdk
+  moduleType: typescript
+  surfaceKinds:
+    - sdk-consumer
+    - bin-entrypoint
+    - cli
+    - mcp-server
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+  # Source: packages/sdk/package.json bins (babysitter-sdk, babysitter,
+  # babysitter-mcp-server) + main/program.ts CORE_VALID_COMMANDS.
+edges:
+  has_payload_schema:
+    - target: shared-context-spec:default
+    - target: shared-context-spec:run-scoped
+  references_path:
+    - target: path:agent-catalog-graph
+# top-level CLI subcommand groups (run:, task:, session:,
+  # plugin:, skill:, process-library:, profile:, instructions:,
+  # compression:, breakpoint:, hook:) plus the babysitter-harness
+  # runtime command set and the babysitter-mcp-server stdio bin.
+  exposes_subcommand:
+    - target: interaction-primitive:babysitter-sdk-cli-run
+    - target: interaction-primitive:babysitter-sdk-cli-task
+    - target: interaction-primitive:babysitter-sdk-cli-session
+    - target: interaction-primitive:babysitter-sdk-cli-plugin
+    - target: interaction-primitive:babysitter-sdk-cli-skill
+    - target: interaction-primitive:babysitter-sdk-cli-process-library
+    - target: interaction-primitive:babysitter-sdk-cli-profile
+    - target: interaction-primitive:babysitter-sdk-cli-instructions
+    - target: interaction-primitive:babysitter-sdk-cli-compression
+    - target: interaction-primitive:babysitter-sdk-cli-breakpoint
+    - target: interaction-primitive:babysitter-sdk-cli-hook
+    - target: interaction-primitive:babysitter-sdk-cli-mcp-server

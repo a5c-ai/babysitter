@@ -1,0 +1,54 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:a5c-blueprint-install
+attributes:
+  displayName: "a5c blueprint install"
+  description: |
+    Install a blueprint from the a5c marketplace into the current
+    project. Slash command surface: `/a5c:install <blueprint>`.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat, plan]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:configuration
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:a5c-blueprint-configure
+attributes:
+  displayName: "a5c blueprint configure"
+  description: |
+    Configure an installed blueprint — fill in required parameters,
+    set defaults, wire MCP servers. Slash command surface:
+    `/a5c:configure <blueprint>`.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat, plan]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:configuration
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:a5c-marketplace-browse
+attributes:
+  displayName: "a5c marketplace browse"
+  description: |
+    Browse the a5c marketplace for blueprints, plugins, and
+    methodologies. Slash command surface: `/a5c:plugins`.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:navigation
+  availableInModes: [chat, plan]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:navigation

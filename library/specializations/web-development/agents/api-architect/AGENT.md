@@ -9,6 +9,14 @@ expertise:
   - OpenAPI/Swagger specification
   - API security and authentication
   - Rate limiting and throttling
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:backend-engineer, role:tech-lead]
+  skillAreas: [skill-area:backend-api-design, skill-area:graphql-schema-design]
+  workflows: [workflow:api-design-review]
+  topics: [topic:api-design, topic:rest]
+
 ---
 
 # API Architect Agent

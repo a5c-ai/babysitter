@@ -2,6 +2,13 @@
 name: secrets-management
 description: Secrets handling, environment variables, and vault integration.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:backend-security, skill-area:configuration-management]
+  roles: [role:backend-engineer, role:security-engineer]
+  topics: [topic:twelve-factor-app]
+
 ---
 
 # Secrets Management Skill

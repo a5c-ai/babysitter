@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:interaction-pattern
+attributes:
+  canonicalDefinitionId: definition:interaction-pattern.canonical
+  displayName: "InteractionPattern"
+  kind: primitive
+  references:
+    - "NodeKind:InteractionPattern"
+  description: |
+    A high-level interaction pattern
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

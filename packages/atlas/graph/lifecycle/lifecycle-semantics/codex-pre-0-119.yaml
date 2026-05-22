@@ -1,0 +1,16 @@
+nodeKind: LifecycleSemantics
+id: lifecycle-semantics:codex-pre-0-119
+attributes:
+  lifecycleSemanticsId: lifecycle-semantics:codex-pre-0-119
+  agentId: agent:codex
+  versionRange: ">=0.0.0 <0.119.0"
+  runtimeHookMode: native-shell-hooks
+  stopHookMode: blocking-stop-hook
+  backgroundTaskMode: unsupported-documented
+  checkpointMode: unspecified
+  pluginContextMode: "package.json + hooks.json"
+  platformNuances:
+    - "windows-hook-threshold:0.119.0"
+edges:
+  applies_to_version:
+    - target: agentVersion:codex:ge-0-0-0-lt-0-119-0

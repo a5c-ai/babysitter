@@ -11,13 +11,14 @@
  */
 
 import * as path from "node:path";
-import { getGlobalStateDir } from "../config";
+import { normalizeSessionStateDir } from "../config";
 import type {
   HarnessAdapter,
   SessionBindOptions,
   SessionBindResult,
   HookHandlerArgs,
 } from "./types";
+import { resolveSessionIdWithMarker } from "../utils/sessionMarker";
 
 export function createCustomAdapter(): HarnessAdapter {
   return {
@@ -34,15 +35,13 @@ export function createCustomAdapter(): HarnessAdapter {
     },
 
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
-      if (parsed.sessionId) return parsed.sessionId;
-      // Cross-harness standard env var as fallback for custom adapters
-      if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
-      return undefined;
+      return resolveSessionIdWithMarker("custom", parsed);
     },
 
     resolveStateDir(args: { stateDir?: string; pluginRoot?: string }): string | undefined {
-      if (args.stateDir) return path.resolve(args.stateDir);
-      return getGlobalStateDir();
+      return normalizeSessionStateDir(
+        args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+      );
     },
 
     resolvePluginRoot(args: { pluginRoot?: string }): string | undefined {

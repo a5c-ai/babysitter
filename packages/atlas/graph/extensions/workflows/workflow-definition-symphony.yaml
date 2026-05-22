@@ -1,0 +1,58 @@
+nodeKind: WorkflowDefinition
+id: workflow:linear-default
+attributes:
+  displayName: "Default Linear-driven WORKFLOW.md"
+  sourcePath: "WORKFLOW.md"
+  frontMatterTrackerKind: issue-tracker:linear
+  frontMatterPolling:
+    pollIntervalMs: 15000
+    activeStates:
+      - in-progress
+    terminalStates:
+      - done
+      - canceled
+  frontMatterWorkspaceRoot: ".a5c/workspaces"
+  frontMatterAgentExecutable: "codex"
+  frontMatterHooks: []
+  frontMatterCodexConfig:
+    sandboxPolicy: "workspace-write"
+    approvalPolicy: "on-failure"
+  promptTemplate: |
+    You are a Symphony orchestrator runner. Implement the issue described
+    by ${issue.title} (${issue.identifier}).
+  schemaVersion: "1.0.0"
+edges:
+  targets_tracker:
+    - target: issue-tracker:linear
+  invokes_agent:
+    - target: agentVersion:codex:ge-0-119-0
+  applies_secret_policy:
+    - target: secret-handling:no-secrets-in-prompts
+    - target: secret-handling:explicit-injection
+    - target: secret-handling:redact-in-logs
+---
+nodeKind: WorkflowDefinition
+id: workflow:github-issues-triage
+attributes:
+  displayName: "GitHub Issues triage WORKFLOW.md (label-filtered)"
+  sourcePath: "WORKFLOW.md"
+  frontMatterTrackerKind: issue-tracker:github-issues
+  frontMatterPolling:
+    pollIntervalMs: 30000
+    activeStates:
+      - "label:triage"
+    terminalStates:
+      - "state:closed"
+  frontMatterWorkspaceRoot: ".a5c/workspaces"
+  frontMatterAgentExecutable: "claude-code"
+  frontMatterHooks:
+    - "pre-dispatch:label-gate"
+  frontMatterCodexConfig: {}
+  promptTemplate: |
+    Triage GitHub issue ${issue.number} and propose a labeled response.
+  schemaVersion: "1.0.0"
+edges:
+  targets_tracker:
+    - target: issue-tracker:github-issues
+  invokes_agent:
+    - target: agentVersion:claude:ge-0-0-0

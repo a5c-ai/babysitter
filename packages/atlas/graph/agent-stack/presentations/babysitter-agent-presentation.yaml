@@ -1,0 +1,17 @@
+nodeKind: Presentation
+id: presentation:babysitter-agent-cli
+attributes:
+  displayName: "babysitter-agent CLI"
+  kind: cli
+  description: |
+    babysitter-agent CLI binary that wraps the babysitter SDK and creates,
+    runs, resumes, and iterates orchestration runs. Long-running agent
+    service exposing daemon, observer, and MCP-server surfaces for human
+    operators and other agents.
+  themeSupport: none
+  accessibilitySupport: basic
+  offlineMode: partial
+  platforms: [darwin, linux, win32]
+  bundleSize: "~80 MB"
+  updateChannel: auto
+edges: {}

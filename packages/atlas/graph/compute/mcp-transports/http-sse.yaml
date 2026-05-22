@@ -1,0 +1,53 @@
+nodeKind: MCPTransport
+id: mcp-transport:http-sse
+attributes:
+  displayName: "HTTP+SSE (deprecated)"
+  kind: http-sse-deprecated
+  specVersion: "2025-03-26"
+  currentSpecRevision: "2025-11-25"
+  specRevisions:
+    - "2024-11-05"
+    - "2025-03-26"
+  status: deprecated
+  streaming: partial
+  specUrl: "https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#http-sse-deprecated"
+  connectionLifecycle: |
+    Two-endpoint design (legacy):
+      1. Client opens GET on the SSE endpoint; server responds with an
+         `endpoint` SSE event whose `data:` is the URL the client must
+         POST JSON-RPC requests to (typically a per-session URL).
+      2. Client POSTs `initialize` to the announced endpoint; response
+         is delivered asynchronously as an SSE `message` event on the
+         open GET stream.
+      3. Client POSTs `notifications/initialized`. Session is ready.
+      4. Shutdown is by closing the SSE GET; no explicit DELETE.
+  capabilityNegotiation: |
+    Same `initialize` request/response payloads as stdio and Streamable
+    HTTP — only the delivery path differs (POST request, SSE-event response).
+  notificationModel: |
+    Server-to-client notifications/requests/responses all flow on the
+    single SSE GET stream as `message` events. Client-to-server notifications
+    are POSTed to the announced endpoint and acknowledged with 202 Accepted.
+  reconnectPolicy: |
+    No formal session-resumption mechanism in the spec. On stream loss
+    the client is expected to reopen the SSE GET and run `initialize`
+    again; the server will issue a fresh per-session POST endpoint.
+    This lack of resumption is one of the reasons the 2025-03-26
+    revision deprecated this transport in favour of Streamable HTTP.
+  authentication: |
+    Bearer tokens via `Authorization: Bearer <token>` on both the SSE
+    GET and the POST endpoint. The 2025-06-18 OAuth Resource Server
+    formalisation does not apply — this transport was deprecated before
+    that revision was published.
+  streamingFraming: |
+    SSE event stream on the GET, each event `event: message\ndata: <json>\n\n`
+    (or `event: endpoint` for the initial endpoint announcement).
+    Per-message JSON-RPC framing on the POST endpoint (one message per
+    request body). Standard JSON-RPC message-id discipline.
+edges:
+  spoken_by:
+    - target: agent-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:babysitter-agent.runtime@current
+    - target: agent-runtime-impl:babysitter.runtime@current
+    - target: agent-runtime-impl:babysitter-sdk.runtime@current
+    - target: agent-runtime-impl:cursor.runtime@current

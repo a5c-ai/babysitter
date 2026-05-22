@@ -1,0 +1,336 @@
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-contextwindowtokens
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: contextWindowTokens
+  value: '128000'
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current contextWindowTokens is 128000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-costpermtokinput
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: costPerMTokInput
+  value: '0'
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current costPerMTokInput is 0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-costpermtokoutput
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: costPerMTokOutput
+  value: '0'
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current costPerMTokOutput is 0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-finetuningkind
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: fineTuningKind
+  value: full
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current fineTuningKind is full.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-kind
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: kind
+  value: chat
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current kind is chat.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-knowledgecutoffdate
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: knowledgeCutoffDate
+  value: '2023-10-01'
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current knowledgeCutoffDate is 2023-10-01.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-lifecyclestatus
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-modalities
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: modalities
+  value: text
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current modalities is text.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-modalitydirections
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current modalityDirections is kind=text;direction=input,
+    kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-modelcardurl
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: modelCardUrl
+  value: https://huggingface.co/microsoft/Phi-3-medium-128k-instruct
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current modelCardUrl is https://huggingface.co/microsoft/Phi-3-medium-128k-instruct.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-supportsextendedthinking
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-supportsfinetuning
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: supportsFineTuning
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current supportsFineTuning is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current supportsThinkingBudgetTokens is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current
+---
+nodeKind: Claim
+id: claim:model-version-model-phi-3-medium-current-versionrange
+attributes:
+  subjectId: model:phi-3-medium@current
+  attribute: versionRange
+  value: '>=3.0.0 <4.0.0'
+  subjectKind: ModelVersion
+  statement: model:phi-3-medium@current versionRange is >=3.0.0 <4.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-phi-3-medium
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-phi-3-medium
+  about_subject:
+  - model:phi-3-medium@current

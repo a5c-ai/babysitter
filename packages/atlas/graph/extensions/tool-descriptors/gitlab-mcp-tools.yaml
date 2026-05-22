@@ -1,0 +1,196 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:gitlab.search-repositories
+attributes:
+  schema: '{}'
+  displayName: "GitLab: Search Repositories"
+  description: Search GitLab projects (repositories).
+  inputSchema:
+    type: object
+    required: [search]
+    properties:
+      search: { type: string }
+      page: { type: integer }
+      per_page: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      projects: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-gitlab
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:gitlab.get-file-contents
+attributes:
+  schema: '{}'
+  displayName: "GitLab: Get File Contents"
+  description: Read file contents from a GitLab project at a given ref.
+  inputSchema:
+    type: object
+    required: [project_id, file_path]
+    properties:
+      project_id: { type: string }
+      file_path: { type: string }
+      ref: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      content: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-gitlab
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:gitlab.create-or-update-file
+attributes:
+  schema: '{}'
+  displayName: "GitLab: Create or Update File"
+  description: Create or update a file in a GitLab project on a branch.
+  inputSchema:
+    type: object
+    required: [project_id, file_path, content, commit_message, branch]
+    properties:
+      project_id: { type: string }
+      file_path: { type: string }
+      content: { type: string }
+      commit_message: { type: string }
+      branch: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      commit: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-gitlab
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:gitlab.create-issue
+attributes:
+  schema: '{}'
+  displayName: "GitLab: Create Issue"
+  description: Create a new issue in a GitLab project.
+  inputSchema:
+    type: object
+    required: [project_id, title]
+    properties:
+      project_id: { type: string }
+      title: { type: string }
+      description: { type: string }
+      labels: { type: array, items: { type: string } }
+      assignee_ids: { type: array, items: { type: integer } }
+  outputSchema:
+    type: object
+    properties:
+      issue: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-gitlab
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:gitlab.list-issues
+attributes:
+  schema: '{}'
+  displayName: "GitLab: List Issues"
+  description: List issues in a GitLab project with filters.
+  inputSchema:
+    type: object
+    required: [project_id]
+    properties:
+      project_id: { type: string }
+      state: { type: string, enum: [opened, closed, all] }
+      labels: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      issues: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-gitlab
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:gitlab.create-merge-request
+attributes:
+  schema: '{}'
+  displayName: "GitLab: Create Merge Request"
+  description: Open a merge request in a GitLab project.
+  inputSchema:
+    type: object
+    required: [project_id, source_branch, target_branch, title]
+    properties:
+      project_id: { type: string }
+      source_branch: { type: string }
+      target_branch: { type: string }
+      title: { type: string }
+      description: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      merge_request: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-gitlab
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:gitlab.fork-repository
+attributes:
+  schema: '{}'
+  displayName: "GitLab: Fork Repository"
+  description: Fork a GitLab project.
+  inputSchema:
+    type: object
+    required: [project_id]
+    properties:
+      project_id: { type: string }
+      namespace: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      project: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-gitlab
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:gitlab.create-branch
+attributes:
+  schema: '{}'
+  displayName: "GitLab: Create Branch"
+  description: Create a new branch in a GitLab project.
+  inputSchema:
+    type: object
+    required: [project_id, branch, ref]
+    properties:
+      project_id: { type: string }
+      branch: { type: string }
+      ref: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      branch: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-gitlab

@@ -1,0 +1,26 @@
+nodeKind: Tool
+id: tool:kubernetes
+attributes:
+  displayName: "Kubernetes"
+  homepageUrl: "https://kubernetes.io"
+  kind: orchestrator
+  releasedAt: "2014"
+  description: |
+    Open-source container orchestration system for automating deployment, scaling, and management.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:k8s-operator-development
+    - target: skill-area:gitops
+    - target: skill-area:k8s-rbac
+    - target: skill-area:container-security
+  used_for:
+    - target: skill-area:platform-engineering
+    - target: skill-area:configuration-management
+    - target: skill-area:deployment-automation
+  implements_stack_part:
+    - target: stack-part:kubernetes-cluster
+  alternative_to:
+    - target: tool:nomad
+      comparison: "Container orchestration platforms"

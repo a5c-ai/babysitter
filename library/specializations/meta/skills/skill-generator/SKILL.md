@@ -7,6 +7,11 @@ metadata:
   version: "1.0.0"
   category: generation
   backlog-id: SK-META-007
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:ai-agent-development]
+  topics: [topic:developer-experience]
+  roles: [role:platform-engineer]
 ---
 
 # skill-generator

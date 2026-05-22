@@ -1,0 +1,84 @@
+nodeKind: MCPTransport
+id: mcp-transport:stdio
+attributes:
+  displayName: "stdio"
+  kind: stdio
+  specVersion: "2024-11-05"
+  currentSpecRevision: "2025-11-25"
+  specRevisions:
+    - "2024-11-05"
+    - "2025-03-26"
+    - "2025-06-18"
+    - "2025-11-25"
+  status: live
+  streaming: partial
+  specUrl: "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#stdio"
+  connectionLifecycle: |
+    Lifecycle is bound to the child-process lifetime:
+      1. Host spawns the server as a subprocess; stdin/stdout become the
+         JSON-RPC channel (stderr is reserved for human-readable logs).
+      2. Client sends `initialize` (request) with `protocolVersion`,
+         `clientInfo`, and `capabilities`.
+      3. Server responds with its own `protocolVersion`, `serverInfo`,
+         and `capabilities`.
+      4. Client sends `notifications/initialized`. Session is now ready.
+      5. Shutdown is signalled by closing stdin (EOF). Server is expected
+         to exit cleanly; host may follow up with SIGTERM / SIGKILL.
+  capabilityNegotiation: |
+    `initialize` request:
+      { "jsonrpc": "2.0", "id": 1, "method": "initialize",
+        "params": { "protocolVersion": "<spec-rev>",
+                    "clientInfo": { "name": "...", "version": "..." },
+                    "capabilities": { "roots"?: {...}, "sampling"?: {...},
+                                      "elicitation"?: {...} } } }
+    `initialize` response:
+      { "jsonrpc": "2.0", "id": 1,
+        "result": { "protocolVersion": "<spec-rev>",
+                    "serverInfo": { "name": "...", "version": "..." },
+                    "capabilities": { "tools"?: {...}, "resources"?: {...},
+                                      "prompts"?: {...}, "logging"?: {...} },
+                    "instructions"?: "..." } }
+  notificationModel: |
+    Standard JSON-RPC 2.0 notifications (no `id` field). Server pushes
+    notifications inline on stdout interleaved with responses; client
+    demultiplexes by presence-or-absence of `id`. Examples:
+    `notifications/tools/list_changed`, `notifications/resources/updated`,
+    `notifications/progress`, `notifications/message` (logging).
+  reconnectPolicy: |
+    No reconnect — stdio sessions are tied 1:1 to the subprocess. Loss
+    of the child process is terminal; the host must respawn and run a
+    fresh `initialize` handshake. No session-resumption identifier.
+  authentication: |
+    None at the transport layer. The host process inherits the security
+    boundary of the spawning user; any per-server credentials are passed
+    via environment variables / argv / config files outside the JSON-RPC
+    channel itself.
+  streamingFraming: |
+    Newline-delimited JSON (NDJSON): each JSON-RPC message is exactly one
+    line on stdout/stdin terminated by `\n`; no embedded newlines in the
+    payload. Logs and free-form output go on stderr to keep the JSON-RPC
+    channel clean. Message-id discipline is standard JSON-RPC: requests
+    carry a unique `id` (string or integer); responses echo it; notifications
+    omit it. The 2025-06-18 spec revision removed JSON-RPC batch arrays.
+edges:
+  spoken_by:
+    - target: agent-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:amp.runtime@current
+    - target: agent-runtime-impl:babysitter-agent.runtime@current
+    - target: agent-runtime-impl:babysitter.runtime@current
+    - target: agent-runtime-impl:babysitter-sdk.runtime@current
+    - target: agent-runtime-impl:claude-agent-sdk.runtime@current
+    - target: agent-runtime-impl:claude-code.runtime@1.x
+    - target: agent-runtime-impl:codex-app-server.runtime@current
+    - target: agent-runtime-impl:codex.runtime@1.x
+    - target: agent-runtime-impl:codex-sdk.runtime@current
+    - target: agent-runtime-impl:copilot-cli.runtime@current
+    - target: agent-runtime-impl:cursor.runtime@current
+    - target: agent-runtime-impl:droid.runtime@current
+    - target: agent-runtime-impl:gemini-cli.runtime@current
+    - target: agent-runtime-impl:hermes.runtime@current
+    - target: agent-runtime-impl:omp.runtime@current
+    - target: agent-runtime-impl:openclaw.runtime@current
+    - target: agent-runtime-impl:opencode.runtime@1.x
+    - target: agent-runtime-impl:pi.runtime@current
+    - target: agent-runtime-impl:qwen.runtime@current

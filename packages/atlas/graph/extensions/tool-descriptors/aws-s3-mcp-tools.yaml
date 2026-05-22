@@ -1,0 +1,91 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:s3.list-buckets
+attributes:
+  schema: '{}'
+  displayName: "S3: List Buckets"
+  description: List S3 buckets accessible to the configured credentials.
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      buckets: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-aws-s3
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:s3.list-objects
+attributes:
+  schema: '{}'
+  displayName: "S3: List Objects"
+  description: List objects in a bucket, optionally filtered by prefix.
+  inputSchema:
+    type: object
+    required: [bucket]
+    properties:
+      bucket: { type: string }
+      prefix: { type: string }
+      max_keys: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      objects: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-aws-s3
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:s3.get-object
+attributes:
+  schema: '{}'
+  displayName: "S3: Get Object"
+  description: Fetch the contents of an object from S3.
+  inputSchema:
+    type: object
+    required: [bucket, key]
+    properties:
+      bucket: { type: string }
+      key: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      content: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-aws-s3
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:s3.put-object
+attributes:
+  schema: '{}'
+  displayName: "S3: Put Object"
+  description: Upload bytes/text content to an S3 key.
+  inputSchema:
+    type: object
+    required: [bucket, key, body]
+    properties:
+      bucket: { type: string }
+      key: { type: string }
+      body: { type: string }
+      content_type: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      etag: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-aws-s3

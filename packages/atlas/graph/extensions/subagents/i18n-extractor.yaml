@@ -1,0 +1,45 @@
+nodeKind: Subagent
+id: subagent:i18n-extractor
+attributes:
+  displayName: "i18n Extractor"
+  provenance: custom
+  roleId: role:i18n-extractor
+  systemPrompt: |
+    You replace hardcoded user-visible strings with i18n keys. Read
+    components and templates, identify strings, generate stable keys,
+    and update the source-language catalog. Run the project's i18n
+    linter after each pass. Do not translate — only extract.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:edit
+    - tool-descriptor:grep
+    - tool-descriptor:bash
+    - tool-descriptor:glob
+  disallowedTools:
+    - tool-descriptor:web-fetch
+    - tool-descriptor:write
+  triggers: |
+    Invoke when the user asks to "extract strings", "i18n this file",
+    or prepare a codebase for translation.
+  description: |
+    String-extraction subagent for i18n. Lives at
+    `.claude/agents/i18n-extractor.md` (project scope). Pairs with the
+    i18n blueprint.
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:i18n-extractor
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary

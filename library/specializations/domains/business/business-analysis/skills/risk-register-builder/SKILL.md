@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-018
   category: Risk Management
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:risk-assessment, skill-area:business-analysis, skill-area:change-management]
+  workflows: [workflow:market-analysis]
+  roles: [role:risk-analyst, role:business-analyst]
 ---
 
 # Risk Register Builder

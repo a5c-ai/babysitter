@@ -1,0 +1,101 @@
+---
+nodeKind: Workflow
+id: workflow:dependency-graph-audit
+attributes:
+  displayName: "Dependency Graph Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Audits the inter-service and inter-package dependency graph for
+    architectural health -- visualizing dependency topology, identifying circular
+    dependencies, detecting inappropriate coupling across bounded contexts,
+    flagging services with excessive fan-in or fan-out, evaluating the blast
+    radius of critical shared libraries, and producing actionable decoupling
+    recommendations. Excludes dependency version management and security
+    vulnerability scanning.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:monolith-vs-microservices
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:approve-architecture
+  performed_by_org_unit:
+    - target: org-unit:architecture-guild
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:code-complexity-review
+attributes:
+  displayName: "Code Complexity Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Measures and reviews code complexity metrics across the codebase --
+    computing cyclomatic complexity, cognitive complexity, lines of code per
+    function, nesting depth, and coupling metrics; identifying hotspots that
+    correlate with defect density; comparing trends against established
+    thresholds; flagging modules that exceed complexity budgets; and producing
+    prioritized refactoring recommendations. Excludes implementing the
+    refactoring itself.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:tech-lead
+    - target: role:code-reviewer
+  requires_skill_area:
+    - target: skill-area:dead-code-elimination
+    - target: skill-area:code-review-practice
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:code-review-coverage
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity
+---
+nodeKind: Workflow
+id: workflow:cloud-cost-optimization-review
+attributes:
+  displayName: "Cloud Cost Optimization Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Conducts structured reviews of cloud resource utilization and spending
+    patterns -- analyzing reserved instance coverage and savings plan
+    utilization, identifying idle and underprovisioned resources, evaluating spot
+    instance eligibility, reviewing storage tier placement, assessing data
+    transfer costs, modeling rightsizing recommendations, and producing a
+    prioritized cost-reduction backlog with projected savings. Excludes anomaly
+    alerting (covered separately) and long-term financial planning.
+edges:
+  involves_role:
+    - target: role:cloud-architect
+    - target: role:platform-engineer
+    - target: role:cost-tracker
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:cloud-infra
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:infra-engineering

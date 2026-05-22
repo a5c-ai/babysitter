@@ -1,0 +1,81 @@
+nodeKind: AutomationRule
+id: automation-rule:auto-approve-readonly-clarifications
+attributes:
+  displayName: "Auto-approve read-only clarification breakpoints"
+  triggerType: webhook
+  webhookPort: 4187
+  webhookPath: "/automations/webhooks/breakpoint-elicitation"
+  webhookMethod: POST
+  webhookAuthType: bearer
+  sourceEvent: "babysitter:breakpoint.elicitation"
+  lifecycleState: active
+  targetProjectId: "project:babysitter-core"
+  targetBoardProjectId: "board:babysitter-default"
+  taskTemplateTitle: "Auto-approved: {{breakpoint.id}}"
+  taskTemplatePriority: low
+  taskTemplateStatus: backlog
+  routingAction: canonical-issue-create
+  sourceKind: config-file
+  createdAt: "2026-04-28"
+  description: |
+    Mirrors a BreakpointRule with action=auto-approve, pattern matching
+    breakpointIds whose ActionCategory resolves to `read` (per
+    ApprovalPosture in packages/sdk/src/breakpoints/types.ts). When the
+    orchestrator elicits a read-only clarification breakpoint, this rule
+    fires, emits a canonical kanban issue annotated with the auto-approval
+    decision, and records the matched rule id on the audit trail. Source:
+    packages/sdk/src/breakpoints/rules.ts (addRule + readRules).
+---
+nodeKind: AutomationRule
+id: automation-rule:never-auto-approve-destroy
+attributes:
+  displayName: "Never auto-approve destroy-class breakpoints"
+  triggerType: webhook
+  webhookPort: 4187
+  webhookPath: "/automations/webhooks/breakpoint-elicitation"
+  webhookMethod: POST
+  webhookAuthType: bearer
+  sourceEvent: "babysitter:breakpoint.elicitation"
+  lifecycleState: active
+  targetProjectId: "project:babysitter-core"
+  targetBoardProjectId: "board:babysitter-default"
+  taskTemplateTitle: "Awaiting human approval: {{breakpoint.id}}"
+  taskTemplatePriority: high
+  taskTemplateStatus: ready
+  routingAction: canonical-issue-create
+  sourceKind: config-file
+  createdAt: "2026-04-28"
+  description: |
+    Mirrors a BreakpointRule with action=never-auto-approve covering the
+    `destroy` ActionCategory (permanently deletes / overwrites state).
+    The default ApprovalPosture for destroy-class actions sets
+    allowAutoApprove=false and requireExplicitRule=true, so this rule
+    forces every destroy breakpoint into the human-review queue regardless
+    of consecutive-approval streaks. Source:
+    packages/sdk/src/breakpoints/types.ts.
+---
+nodeKind: AutomationRule
+id: automation-rule:never-auto-approve-auth
+attributes:
+  displayName: "Never auto-approve auth-class breakpoints"
+  triggerType: webhook
+  webhookPort: 4187
+  webhookPath: "/automations/webhooks/breakpoint-elicitation"
+  webhookMethod: POST
+  webhookAuthType: bearer
+  sourceEvent: "babysitter:breakpoint.elicitation"
+  lifecycleState: active
+  targetProjectId: "project:babysitter-core"
+  targetBoardProjectId: "board:babysitter-default"
+  taskTemplateTitle: "Awaiting human approval (auth): {{breakpoint.id}}"
+  taskTemplatePriority: critical
+  taskTemplateStatus: ready
+  routingAction: canonical-issue-create
+  sourceKind: config-file
+  createdAt: "2026-04-28"
+  description: |
+    Mirrors a BreakpointRule with action=never-auto-approve covering the
+    `auth` ActionCategory: any breakpoint that would access or modify
+    credentials, tokens, or secrets. Routes to the human-review queue at
+    `critical` priority. Source: packages/sdk/src/breakpoints/types.ts
+    (ActionCategory union; ApprovalPosture).

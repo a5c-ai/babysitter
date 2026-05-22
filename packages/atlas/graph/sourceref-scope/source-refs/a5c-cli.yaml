@@ -1,0 +1,14 @@
+nodeKind: SourceRef
+id: source-ref:a5c-cli
+attributes:
+  description: "@a5c-ai/agent — a5c.ai user-facing CLI/TUI agent"
+  displayName: "a5c CLI"
+  repoUrl: https://github.com/a5c-ai/babysitter
+  ref: main
+  path: packages/babysitter-agent
+  packageManager: npm
+  kind: npm-package
+  notes: |
+    @a5c-ai/agent npm package. The a5c TUI+CLI bridges to remote agents via
+    agent-mux and adds a5c-specific plugin/skill/blueprint plumbing on top.
+edges: {}

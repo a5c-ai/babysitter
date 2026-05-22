@@ -1,0 +1,884 @@
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:agent-dispatch
+attributes:
+  displayName: Agent Dispatch
+  description: |
+    Dispatch work to a coding agent in an isolated workspace. The orchestrator
+    prepares the task prompt, selects the target agent, creates (or reuses) a
+    workspace, and spawns the agent process. The dispatch primitive is the
+    fundamental unit of orchestrated agent work.
+  orchestrationKind: dispatch
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-dispatch
+  orch_requires_skill_area:
+    - target: skill-area:ai-agent-development
+  orch_triggers:
+    - target: orch-primitive:progress-stream
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:multi-agent-dispatch
+attributes:
+  displayName: Multi-Agent Dispatch
+  description: |
+    Dispatch work to multiple agents in parallel, each operating in its own
+    workspace and branch. The orchestrator fans out tasks, enforces concurrency
+    limits, and collects results. Used for parallel issue processing, batch
+    code review, and divide-and-conquer workflows.
+  orchestrationKind: multi-agent-coordination
+  trigger: manual
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:parallel-agent-execution
+    - target: topic:multi-agent-orchestration
+  orch_requires_skill_area:
+    - target: skill-area:multi-agent-coordination
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:task-create
+attributes:
+  displayName: Task Create
+  description: |
+    Create a new task or issue for agent execution. The task may originate from
+    an issue tracker poll, a manual user action, or an upstream orchestration
+    event. The primitive normalizes the task into the orchestrator's internal
+    schema and queues it for assignment.
+  orchestrationKind: task-lifecycle
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-orchestration-products
+  orch_requires_skill_area:
+    - target: skill-area:project-planning
+  orch_triggers:
+    - target: orch-primitive:task-assign
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:task-assign
+attributes:
+  displayName: Task Assign
+  description: |
+    Assign a task to a specific agent with atomic checkout semantics. The
+    assignment is transactional — no two agents can claim the same task. The
+    primitive handles agent selection, capacity checks, and marks the task as
+    checked-out in the orchestrator's state store.
+  orchestrationKind: task-lifecycle
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_requires_skill_area:
+    - target: skill-area:project-planning
+  orch_triggers:
+    - target: orch-primitive:workspace-create
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:task-complete
+attributes:
+  displayName: Task Complete
+  description: |
+    Mark a task as completed and trigger downstream actions such as PR creation,
+    human review requests, or status updates to the issue tracker. The primitive
+    transitions the task to a terminal state and releases any workspace or
+    concurrency slots held by the agent.
+  orchestrationKind: task-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-run-lifecycle
+  orch_triggers:
+    - target: orch-primitive:pr-creation
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:workspace-create
+attributes:
+  displayName: Workspace Create
+  description: |
+    Create an isolated per-task workspace for agent execution. Depending on the
+    orchestrator, this may involve creating a git branch, a worktree directory,
+    a Docker container, or a cloud sandbox. The workspace provides filesystem
+    and version-control isolation so agents do not interfere with each other.
+  orchestrationKind: workspace-lifecycle
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-dispatch
+  orch_requires_skill_area:
+    - target: skill-area:local-development
+  orch_triggers:
+    - target: orch-primitive:agent-dispatch
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:workspace-cleanup
+attributes:
+  displayName: Workspace Cleanup
+  description: |
+    Clean up a completed or abandoned task workspace. The primitive deletes
+    temporary branches, removes worktree directories, stops containers, and
+    releases any resources held by the workspace. Triggered automatically
+    when a task reaches a terminal state or when the orchestrator detects
+    orphaned workspaces during reconciliation.
+  orchestrationKind: workspace-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-run-lifecycle
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:poll-tick
+attributes:
+  displayName: Poll Tick
+  description: |
+    Periodic poll of an issue tracker or task source for new eligible work
+    items. The orchestrator queries the tracker at a configurable interval,
+    filters for actionable issues matching the workflow policy, and feeds
+    them into the task-create pipeline. Poll cadence is typically seconds
+    to minutes depending on the deployment.
+  orchestrationKind: polling
+  trigger: periodic
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:event-driven-dispatch
+  orch_requires_skill_area:
+    - target: skill-area:operations-automation
+  orch_triggers:
+    - target: orch-primitive:task-create
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:reconciliation
+attributes:
+  displayName: Reconciliation
+  description: |
+    Reconcile in-memory orchestrator state with the external source of truth
+    on restart or after a crash. The primitive replays journal entries, checks
+    issue-tracker state for tasks that completed or failed while the
+    orchestrator was down, and brings the in-memory model back into
+    consistency before resuming normal operation.
+  orchestrationKind: reconciliation
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-run-lifecycle
+  orch_requires_skill_area:
+    - target: skill-area:operations-automation
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:retry-with-backoff
+attributes:
+  displayName: Retry with Backoff
+  description: |
+    Retry failed agent work with exponential backoff and a configurable
+    maximum attempt count. The primitive captures the failure reason, waits
+    an increasing delay between attempts, and eventually marks the task as
+    permanently failed if retries are exhausted. Integrates with the
+    journal for auditability of each retry cycle.
+  orchestrationKind: retry
+  trigger: on-failure
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:circuit-breakers
+  orch_requires_skill_area:
+    - target: skill-area:backend-async-processing
+  orch_triggers:
+    - target: orch-primitive:agent-dispatch
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:concurrency-control
+attributes:
+  displayName: Concurrency Control
+  description: |
+    Limit the number of concurrent agent sessions to a configurable maximum.
+    The primitive maintains a semaphore or token-bucket that dispatch must
+    acquire before spawning a new agent. When the limit is reached, new
+    tasks queue until a slot is released by a completing or failing agent.
+  orchestrationKind: multi-agent-coordination
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:parallel-agent-execution
+  orch_requires_skill_area:
+    - target: skill-area:multi-agent-coordination
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:workflow-policy-load
+attributes:
+  displayName: Workflow Policy Load
+  description: |
+    Load a process or workflow definition from a file (WORKFLOW.md, process
+    definition .js/.ts, CLAUDE.md, or equivalent). The primitive parses
+    front-matter configuration, extracts the prompt template, and configures
+    the orchestrator's runtime behavior — polling intervals, active states,
+    agent executable, and hooks.
+  orchestrationKind: workflow-loading
+  trigger: manual
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-process-library
+  orch_requires_skill_area:
+    - target: skill-area:deployment-automation
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:progress-stream
+attributes:
+  displayName: Progress Stream
+  description: |
+    Stream real-time agent output and progress to the orchestration UI or
+    dashboard. The primitive captures stdout, structured events, tool-use
+    logs, and state transitions from the agent subprocess and relays them
+    to connected observers via SSE, WebSocket, or polling endpoints.
+  orchestrationKind: progress-tracking
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:observability-driven-development
+  orch_requires_skill_area:
+    - target: skill-area:observability-instrumentation
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:approval-gate
+attributes:
+  displayName: Approval Gate
+  description: |
+    A gate requiring explicit human approval before orchestrated work
+    proceeds. The primitive pauses the task pipeline, surfaces the pending
+    action to the human operator (via UI, Slack, email, or CLI prompt), and
+    resumes or aborts based on the response. Used for governed actions,
+    production deployments, and high-risk code changes.
+  orchestrationKind: approval-gate
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:human-in-the-loop
+  orch_requires_skill_area:
+    - target: skill-area:project-planning
+  orch_triggers:
+    - target: orch-primitive:agent-dispatch
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:budget-stop
+attributes:
+  displayName: Budget Stop
+  description: |
+    Auto-pause agent execution when a budget or cost threshold is reached.
+    The primitive tracks cumulative token usage, API cost, or wall-clock
+    time per task or per run, and halts the agent when the configured limit
+    is exceeded. The operator can raise the limit and resume, or terminate
+    the task.
+  orchestrationKind: budget-control
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_requires_skill_area:
+    - target: skill-area:budgeting-forecasting
+  orch_triggers:
+    - target: orch-primitive:session-handoff
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:session-handoff
+attributes:
+  displayName: Session Handoff
+  description: |
+    Hand off work between agents (agent-to-agent) or from agent to human.
+    The primitive serializes the current session context — conversation
+    history, workspace state, partial results — and transfers it to the
+    receiving party. Used for escalation, specialization routing, and
+    shift-change patterns in long-running workflows.
+  orchestrationKind: session-lifecycle
+  trigger: manual
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-session-management
+  orch_requires_skill_area:
+    - target: skill-area:multi-agent-coordination
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:pr-creation
+attributes:
+  displayName: PR Creation
+  description: |
+    Create a pull request from an agent's completed work in its isolated
+    workspace. The primitive commits staged changes, pushes the branch,
+    opens the PR against the target branch with a generated title and
+    description, and links back to the originating task or issue for
+    traceability.
+  orchestrationKind: task-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:code-review-best-practices
+  orch_implements_workflow:
+    - target: workflow:pull-request-lifecycle
+  orch_triggers:
+    - target: orch-primitive:workspace-cleanup
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:branch-management
+attributes:
+  displayName: Branch Management
+  description: |
+    Create, switch, and merge git branches for agent work isolation. The
+    primitive handles branch naming conventions, conflict detection, and
+    cleanup of merged or abandoned branches. It integrates with the
+    workspace-create and workspace-cleanup primitives to provide end-to-end
+    version-control isolation for orchestrated agent work.
+  orchestrationKind: workspace-lifecycle
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:trunk-based-development
+  orch_requires_skill_area:
+    - target: skill-area:ci-cd
+---
+# ── New orchestration primitives ────────────────────────────────────────
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:cost-tracking
+attributes:
+  displayName: Cost Tracking
+  description: |
+    Track token consumption, API costs, and compute expenses per agent
+    session and aggregate them by task, run, or project. The primitive
+    records per-turn token counts, model pricing tiers, and elapsed
+    wall-clock time. Feeds budget-stop for threshold enforcement and
+    audit-trail for spend accountability.
+  orchestrationKind: cost-tracking
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_requires_skill_area:
+    - target: skill-area:budgeting-forecasting
+    - target: skill-area:observability-instrumentation
+  orch_triggers:
+    - target: orch-primitive:budget-stop
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:audit-trail
+attributes:
+  displayName: Audit Trail
+  description: |
+    Record all orchestration decisions, dispatches, state changes, and
+    outcomes into an append-only journal for compliance and debugging.
+    Each entry captures timestamp, actor, action, previous state, new
+    state, and metadata. Supports post-mortem analysis, regulatory
+    audit requirements, and run retrospectives.
+  orchestrationKind: audit
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:observability-driven-development
+    - target: topic:agent-run-lifecycle
+  orch_requires_skill_area:
+    - target: skill-area:observability-instrumentation
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:agent-health-check
+attributes:
+  displayName: Agent Health Check
+  description: |
+    Monitor agent process health by checking heartbeat signals, detecting
+    hung or zombie sessions, and auto-restarting failed agents. The
+    primitive runs on a periodic schedule, queries agent process status,
+    and triggers retry-with-backoff or session-handoff when an agent
+    becomes unresponsive.
+  orchestrationKind: health-check
+  trigger: periodic
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-run-lifecycle
+  orch_requires_skill_area:
+    - target: skill-area:operations-automation
+  orch_triggers:
+    - target: orch-primitive:retry-with-backoff
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:dependency-resolution
+attributes:
+  displayName: Dependency Resolution
+  description: |
+    Resolve task dependencies before dispatch. When task B declares a
+    dependency on task A, this primitive holds B in a waiting state until
+    A completes successfully. Supports DAG-shaped dependency graphs,
+    cycle detection, and partial-order scheduling to maximize parallelism
+    while respecting ordering constraints.
+  orchestrationKind: dependency-resolution
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-orchestration-products
+  orch_requires_skill_area:
+    - target: skill-area:project-planning
+  orch_triggers:
+    - target: orch-primitive:task-assign
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:priority-queue
+attributes:
+  displayName: Priority Queue
+  description: |
+    Prioritize tasks by urgency, importance, or custom scoring before
+    dispatch. The primitive maintains a sorted queue of pending tasks
+    and dequeues the highest-priority item when a concurrency slot
+    becomes available. Supports priority inversion detection, aging
+    to prevent starvation, and dynamic re-prioritization.
+  orchestrationKind: priority-queue
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-orchestration-products
+  orch_requires_skill_area:
+    - target: skill-area:project-planning
+  orch_triggers:
+    - target: orch-primitive:task-assign
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:rollback
+attributes:
+  displayName: Rollback
+  description: |
+    Revert agent changes when a task fails, is rejected during review,
+    or triggers a policy violation. The primitive resets the workspace
+    branch, reverts commits, closes any open PRs, and restores the
+    repository to its pre-task state. Integrates with branch-management
+    and workspace-cleanup for clean teardown.
+  orchestrationKind: rollback
+  trigger: on-failure
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-run-lifecycle
+  orch_requires_skill_area:
+    - target: skill-area:ci-cd
+  orch_triggers:
+    - target: orch-primitive:workspace-cleanup
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:notification
+attributes:
+  displayName: Notification
+  description: |
+    Notify humans of task completion, failures, required approvals, or
+    budget warnings through configured channels (Slack, email, webhook,
+    CLI alert, or dashboard toast). The primitive formats the message
+    with task context, links to relevant PRs or logs, and respects
+    notification preferences and quiet hours.
+  orchestrationKind: notification
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:human-in-the-loop
+    - target: topic:observability-driven-development
+  orch_requires_skill_area:
+    - target: skill-area:operations-automation
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:issue-tracker-sync
+attributes:
+  displayName: Issue Tracker Sync
+  description: |
+    Synchronize task state with an external issue tracker (GitHub Issues,
+    Linear, Jira, etc.). The primitive pushes status updates, comments,
+    labels, and assignee changes from the orchestrator's internal state
+    to the tracker, and pulls back human edits such as priority changes
+    or re-assignments. Keeps the tracker as the canonical human-readable
+    record of work in flight.
+  orchestrationKind: task-lifecycle
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-orchestration-products
+    - target: topic:event-driven-dispatch
+  orch_requires_skill_area:
+    - target: skill-area:project-planning
+    - target: skill-area:operations-automation
+  orch_triggers:
+    - target: orch-primitive:task-create
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:agent-selection
+attributes:
+  displayName: Agent Selection
+  description: |
+    Select the most appropriate agent or harness for a given task based on
+    capability matching, cost profile, availability, and workflow policy.
+    The primitive evaluates registered agents against the task's required
+    capabilities (tool-use, thinking, specific model tier) and returns the
+    best-fit agent identifier for the downstream dispatch primitive.
+  orchestrationKind: dispatch
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-dispatch
+    - target: topic:multi-agent-orchestration
+  orch_requires_skill_area:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:multi-agent-coordination
+  orch_triggers:
+    - target: orch-primitive:agent-dispatch
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:context-injection
+attributes:
+  displayName: Context Injection
+  description: |
+    Inject relevant context into an agent's system prompt or initial user
+    message before dispatch. The primitive assembles codebase summaries,
+    prior run transcripts, relevant documentation excerpts, and
+    environment variables, then merges them into the agent's prompt
+    template. Ensures the agent starts with the right information
+    without requiring tool calls for basic orientation.
+  orchestrationKind: dispatch
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-dispatch
+    - target: topic:agent-process-library
+  orch_requires_skill_area:
+    - target: skill-area:ai-agent-development
+  orch_triggers:
+    - target: orch-primitive:agent-dispatch
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:result-validation
+attributes:
+  displayName: Result Validation
+  description: |
+    Validate agent output against expected schemas, quality criteria, or
+    policy rules before marking a task complete. The primitive runs
+    configured validators (lint, tests, structured-output schema checks,
+    security scans) against the agent's artifacts. On validation failure
+    it triggers a retry or escalates to human review rather than
+    propagating bad output downstream.
+  orchestrationKind: task-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-run-lifecycle
+    - target: topic:code-review-best-practices
+  orch_requires_skill_area:
+    - target: skill-area:ci-cd
+    - target: skill-area:observability-instrumentation
+  orch_triggers:
+    - target: orch-primitive:task-complete
+    - target: orch-primitive:retry-with-backoff
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:human-review-gate
+attributes:
+  displayName: Human Review Gate
+  description: |
+    Pause the task pipeline at a designated review checkpoint and surface
+    the agent's diff or output to a human reviewer. The primitive
+    attaches the PR or output artifact to a review request (via Slack,
+    email, GitHub PR review, or dashboard), waits for an explicit
+    approve/request-changes decision, and either continues the workflow
+    or triggers result-validation and retry based on the reviewer's
+    feedback.
+  orchestrationKind: approval-gate
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:human-in-the-loop
+    - target: topic:code-review-best-practices
+  orch_requires_skill_area:
+    - target: skill-area:project-planning
+    - target: skill-area:operations-automation
+  orch_triggers:
+    - target: orch-primitive:auto-merge
+    - target: orch-primitive:result-validation
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:auto-merge
+attributes:
+  displayName: Auto Merge
+  description: |
+    Automatically merge a pull request when all configured merge criteria
+    are satisfied — CI green, required review approvals obtained,
+    branch up to date, and no merge conflicts. The primitive polls or
+    subscribes to status checks, triggers a merge (squash, merge commit,
+    or rebase) according to policy, and then fires workspace-cleanup to
+    retire the task branch.
+  orchestrationKind: task-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:trunk-based-development
+    - target: topic:agent-run-lifecycle
+  orch_requires_skill_area:
+    - target: skill-area:ci-cd
+  orch_triggers:
+    - target: orch-primitive:workspace-cleanup
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:cost-budget-allocation
+attributes:
+  displayName: Cost Budget Allocation
+  description: |
+    Allocate a token or monetary budget to a task or batch of tasks before
+    dispatch. The primitive computes per-task budget ceilings from a
+    global run budget, per-model pricing, estimated task complexity, and
+    historical cost data. Allocated budgets are handed to the budget-stop
+    primitive which enforces them at runtime, and to cost-tracking which
+    accounts actuals against the allocation.
+  orchestrationKind: budget-control
+  trigger: manual
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-orchestration-products
+  orch_requires_skill_area:
+    - target: skill-area:budgeting-forecasting
+  orch_triggers:
+    - target: orch-primitive:budget-stop
+    - target: orch-primitive:cost-tracking
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:agent-failover
+attributes:
+  displayName: Agent Failover
+  description: |
+    Redirect a failing or unavailable agent's workload to a standby agent
+    or alternate harness. When the primary agent is unhealthy, rate-limited,
+    or exhausted after retries, agent-failover transparently re-assigns the
+    task to the next eligible agent from the fallback roster. Preserves
+    workspace state so the standby agent resumes from the last known-good
+    checkpoint rather than restarting from scratch.
+  orchestrationKind: dispatch
+  trigger: on-failure
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:circuit-breakers
+    - target: topic:agent-dispatch
+  orch_requires_skill_area:
+    - target: skill-area:multi-agent-coordination
+    - target: skill-area:operations-automation
+  orch_triggers:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:workspace-snapshot
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:workspace-snapshot
+attributes:
+  displayName: Workspace Snapshot
+  description: |
+    Capture a point-in-time snapshot of an active workspace for recovery,
+    handoff, or archival purposes. The primitive commits all in-progress
+    changes to a snapshot branch (or container image layer), records the
+    snapshot reference in the orchestrator journal, and makes it available
+    for agent-failover, session-handoff, or post-mortem inspection. Snapshots
+    can be taken on demand, on a schedule, or automatically before
+    high-risk operations.
+  orchestrationKind: workspace-lifecycle
+  trigger: manual
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:agent-run-lifecycle
+    - target: topic:trunk-based-development
+  orch_requires_skill_area:
+    - target: skill-area:local-development
+    - target: skill-area:operations-automation
+  orch_triggers:
+    - target: orch-primitive:session-handoff
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:telemetry-collection
+attributes:
+  displayName: Telemetry Collection
+  description: |
+    Collect structured telemetry from agent sessions and the orchestration
+    runtime — turn latencies, tool-call counts, error rates, model response
+    times, and queue depths. The primitive emits spans and metrics to
+    configured backends (OpenTelemetry, Datadog, Prometheus, or a local
+    SQLite store) for real-time dashboards, SLO alerting, and capacity
+    planning. Complements audit-trail (which is append-only per-event)
+    with aggregated time-series observability.
+  orchestrationKind: progress-tracking
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_applies_to:
+    - target: topic:observability-driven-development
+    - target: topic:agent-run-lifecycle
+  orch_requires_skill_area:
+    - target: skill-area:observability-instrumentation
+    - target: skill-area:operations-automation
+  orch_triggers:
+    - target: orch-primitive:audit-trail
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:babysitter-run-create
+attributes:
+  displayName: Babysitter Run Create
+  description: |
+    Create and bind a durable Babysitter run from a process definition,
+    input file, harness, and workspace. This is an orchestration primitive, not
+    merely a slash-command interaction, because it establishes run identity,
+    process entrypoint, journal state, and harness/session binding.
+  orchestrationKind: workflow-loading
+  trigger: manual
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_triggers:
+    - target: orch-primitive:babysitter-run-iterate
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:babysitter-run-iterate
+attributes:
+  displayName: Babysitter Run Iterate
+  description: |
+    Replay a Babysitter process function against the run journal, emit the next
+    pending effect, and transition run state. Iteration is the durable control
+    loop that turns process definitions into executable orchestration steps.
+  orchestrationKind: session-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_triggers:
+    - target: orch-primitive:babysitter-effect-request
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:babysitter-effect-request
+attributes:
+  displayName: Babysitter Effect Request
+  description: |
+    Request a task, breakpoint, sleep, shell, or agent effect with an
+    invocation key, input artifact, output schema, and scheduler hint. The
+    effect request is the control-plane boundary between the deterministic
+    process replay and external execution.
+  orchestrationKind: task-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_triggers:
+    - target: orch-primitive:babysitter-effect-resolution
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:babysitter-effect-resolution
+attributes:
+  displayName: Babysitter Effect Resolution
+  description: |
+    Resolve a pending effect through task:post with status, result artifact,
+    stdout/stderr references, timing metadata, and invocation key evidence.
+    This primitive controls when the run can replay past an external action.
+  orchestrationKind: task-lifecycle
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_triggers:
+    - target: orch-primitive:babysitter-run-iterate
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:babysitter-breakpoint-gate
+attributes:
+  displayName: Babysitter Breakpoint Gate
+  description: |
+    Pause an orchestration run for explicit human input when policy, safety,
+    destructive operations, or ambiguous requirements require it. The visible
+    prompt is an interaction primitive; the gate and resume semantics are
+    orchestration.
+  orchestrationKind: approval-gate
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_triggers:
+    - target: orch-primitive:babysitter-effect-resolution
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:babysitter-completion-proof
+attributes:
+  displayName: Babysitter Completion Proof
+  description: |
+    Emit the final proof artifact for a Babysitter run after all effects,
+    validation gates, adversarial reviews, and scoring loops converge. The proof
+    is the governance handoff from orchestration to audit/evidence consumers.
+  orchestrationKind: audit
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_triggers:
+    - target: orch-primitive:audit-trail
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:babysitter-harness-dispatch
+attributes:
+  displayName: Babysitter Harness Dispatch
+  description: |
+    Dispatch a pending agent or skill task to a concrete harness such as Codex,
+    Claude Code, Cursor, Gemini CLI, or an internal programmatic executor. This
+    includes harness selection, working-directory setup, model hints, timeout
+    budgets, and post-result routing.
+  orchestrationKind: dispatch
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:13-orchestration
+  orch_triggers:
+    - target: orch-primitive:agent-dispatch

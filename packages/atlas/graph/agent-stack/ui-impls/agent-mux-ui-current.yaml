@@ -1,0 +1,266 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:agent-mux.ui@current
+attributes:
+  displayName: "agent-mux UI (current) — multi-surface"
+  agentVersionId: agent-version:agent-mux@current
+  packageRef: source-ref:agent-mux-github
+  uiKind: multi-surface
+  presentationsBundled:
+    - presentation:agent-mux-tui
+    - presentation:agent-mux-cli
+    - presentation:agent-mux-webui
+    - presentation:agent-mux-mobile-ios
+    - presentation:agent-mux-mobile-android
+    - presentation:agent-mux-tv-androidtv
+    - presentation:agent-mux-tv-appletv
+    - presentation:agent-mux-watch-watchos
+    - presentation:agent-mux-watch-wearos
+  themeSupport: full-customizable
+  accessibilitySupport: wcag-aa
+  notes: |
+    agent-mux is a multi-surface UI suite. Each presentation is its own
+    package (tui, cli, webui, mobile-{ios,android}, tv-{androidtv,appletv},
+    watch-{watchos,wearos}). All surfaces share the agent-mux ui package
+    (`@a5c-ai/agent-mux-ui`) for client + protocol + session-flow projection.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  bundled_with:
+    - target: presentation:agent-mux-tui
+    - target: presentation:agent-mux-cli
+    - target: presentation:agent-mux-webui
+    - target: presentation:agent-mux-mobile-ios
+    - target: presentation:agent-mux-mobile-android
+    - target: presentation:agent-mux-tv-androidtv
+    - target: presentation:agent-mux-tv-appletv
+    - target: presentation:agent-mux-watch-watchos
+    - target: presentation:agent-mux-watch-wearos
+  supports_interaction_primitive:
+    - target: interaction-primitive:agent-mux-kanban-board
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:agent-mux-hook-inbox
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:agent-mux-session-list
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:agent-mux-session-detail
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:agent-mux-new-run
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:agent-mux-pair-device
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:agent-mux-workspace-detail
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:agent-mux-breakpoint-approval
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:agent-mux-tool-call-interaction
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:agent-mux-prompt-history
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:command-palette
+      attributes: { mechanism: keybinding, invocationToken: "Cmd+K" }
+    - target: interaction-primitive:model-picker
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:prompt-input
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:agent-mux-cli-auth-check
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-auth-setup
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-plugin-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-plugin-install
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-plugin-enable
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-plugin-disable
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-plugin-marketplace
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-mcp-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-mcp-install
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-mcp-uninstall
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-skill-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-skill-add
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-skill-remove
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-skill-where
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-skill-agents
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-agent-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-agent-add
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-agent-remove
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-agent-where
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-agent-agents
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-run
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-install
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-update
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-detect
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-uninstall
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-adapters-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-adapters-detect
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-adapters-info
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-models-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-models-info
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-models-refresh
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-models-current
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-models-set
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-hooks-discover
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-hooks-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-hooks-add
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-hooks-remove
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-hooks-set
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-hooks-handle
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-gateway-serve
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-gateway-status
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-gateway-tokens-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-gateway-tokens-create
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-gateway-tokens-revoke
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-help
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-version
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-sessions-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-sessions-show
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-sessions-search
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-sessions-export
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-sessions-cost
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-config-get
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-config-set
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-config-schema
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-config-validate
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-config-reload
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-profiles-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-profiles-show
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-profiles-set
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-profiles-delete
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-profiles-apply
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-workspaces-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-workspaces-create
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-workspaces-archive
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-workspaces-cleanup
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-workspaces-recover
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-workspaces-delete
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-workspaces-sync-sessions
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-launch
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-detect-host
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-doctor
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-tui
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-remote-install
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-cli-remote-update
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:agent-mux-harness-mock-error-rate-limit
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:agent-mux-harness-mock-error-auth-required
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:agent-mux-harness-mock-error-crash
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:agent-mux-harness-mock-error-timeout
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:agent-mux-harness-mock-error-oom
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:agent-mux-harness-mock-runtime-hook-allow-bash
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:agent-mux-harness-mock-runtime-hook-deny-write
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:agent-mux-harness-mock-runtime-hook-timeout
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:agent-mux-harness-mock-interactive-yolo
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:agent-mux-harness-mock-interactive-prompt
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:agent-mux-harness-mock-interactive-deny
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:agent-mux-harness-mock-interactive-timeout
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:agent-mux-tui-command-palette
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:agent-mux-tui-prompt-input
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:agent-mux-tui-model-picker
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:transport-mux-amux-proxy
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:amux-triggers-enrich
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:amux-triggers-evaluate
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:amux-triggers-help
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:voice-dictation
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:tts-narration
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:wake-word
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:cost-readout
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:drag-drop-files
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:paste-url
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:share-session
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:follow-agent
+      attributes: { mechanism: ui-control }

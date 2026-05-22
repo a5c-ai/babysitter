@@ -1,0 +1,146 @@
+---
+nodeKind: Workflow
+id: workflow:portfolio-rebalancing-cycle
+attributes:
+  displayName: "Portfolio Rebalancing Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly-to-monthly"
+  complexity: cross-team
+  description: |
+    Executes periodic portfolio rebalancing — measuring portfolio drift
+    against target weights and risk factor exposures, generating optimized
+    trade lists using mean-variance or risk-parity optimization with
+    transaction cost penalties, pre-trade compliance checks against
+    mandate constraints (sector limits, position concentration, ESG
+    screens), coordinating execution timing across markets and time zones,
+    and reconciling post-trade portfolio state against target. Produces
+    rebalancing trade blotters, pre/post compliance reports, and
+    implementation shortfall analysis. Excludes investment thesis
+    formation and benchmark selection.
+edges:
+  involves_role:
+    - target: role:portfolio-manager
+    - target: role:quantitative-analyst
+    - target: role:trading-systems-engineer
+    - target: role:compliance-officer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:portfolio-management
+    - target: domain:trading-operations
+  triggers_responsibility:
+    - target: responsibility:portfolio-rebalancing
+    - target: responsibility:trading-system-reliability
+  performed_by_org_unit:
+    - target: org-unit:portfolio-management-team
+    - target: org-unit:trading-desk
+---
+nodeKind: Workflow
+id: workflow:portfolio-risk-attribution
+attributes:
+  displayName: "Portfolio Risk Attribution"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Decomposes portfolio profit-and-loss into factor, sector, and
+    idiosyncratic contributions — running multi-factor risk model
+    attribution (Barra, Axioma) to isolate systematic versus
+    stock-specific returns, performing sector and geography
+    allocation/selection analysis, calculating marginal contribution to
+    risk for each position, stress-testing portfolio under historical and
+    hypothetical scenarios, and generating risk budget utilization reports
+    against allocated risk capital. Produces daily P&L attribution
+    reports, risk factor exposure summaries, and risk limit utilization
+    dashboards. Excludes trading execution and factor model construction.
+edges:
+  involves_role:
+    - target: role:risk-analyst
+    - target: role:portfolio-manager
+    - target: role:quantitative-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:portfolio-management
+    - target: domain:financial-risk-management
+    - target: domain:quantitative-finance
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:portfolio-rebalancing
+  performed_by_org_unit:
+    - target: org-unit:market-risk-team
+    - target: org-unit:portfolio-management-team
+---
+nodeKind: Workflow
+id: workflow:investment-thesis-review
+attributes:
+  displayName: "Investment Thesis Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Periodically reviews investment theses against realized outcomes —
+    comparing original thesis assumptions (earnings growth, sector
+    rotation, macro regime) against actual market developments, measuring
+    thesis-attributed P&L contribution, evaluating conviction-weighted
+    position sizing against realized Sharpe ratios, reviewing thesis
+    expiration timelines and catalyst calendars, and deciding whether to
+    maintain, modify, or retire active theses. Produces thesis scorecard
+    reports with hit-rate analysis and lessons-learned documentation.
+    Excludes new thesis origination and trade execution.
+edges:
+  involves_role:
+    - target: role:portfolio-manager
+    - target: role:research-analyst
+    - target: role:risk-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:portfolio-management
+    - target: domain:capital-markets
+  triggers_responsibility:
+    - target: responsibility:research-publication
+    - target: responsibility:portfolio-rebalancing
+  performed_by_org_unit:
+    - target: org-unit:portfolio-management-team
+    - target: org-unit:quant-research
+---
+nodeKind: Workflow
+id: workflow:asset-allocation-strategy-review
+attributes:
+  displayName: "Asset Allocation Strategy Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews strategic and tactical asset allocation against policy
+    benchmarks — evaluating long-term capital market assumptions (expected
+    returns, volatilities, correlations) for staleness, comparing realized
+    allocation drift against strategic targets, assessing tactical tilts
+    against macro regime indicators, reviewing benchmark appropriateness
+    and peer-group comparison, and stress-testing allocation under tail
+    scenarios. Produces allocation review memos with recommended
+    adjustments, benchmark comparison tables, and efficient frontier
+    analysis. Excludes individual security selection and execution.
+edges:
+  involves_role:
+    - target: role:portfolio-manager
+    - target: role:risk-analyst
+    - target: role:research-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:portfolio-management
+    - target: domain:financial-risk-management
+    - target: domain:capital-markets
+  triggers_responsibility:
+    - target: responsibility:portfolio-rebalancing
+    - target: responsibility:risk-reporting
+  performed_by_org_unit:
+    - target: org-unit:portfolio-management-team
+    - target: org-unit:market-risk-team

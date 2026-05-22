@@ -2,6 +2,13 @@
 name: optuna-hyperparameter-tuner
 description: Optuna integration skill for automated hyperparameter optimization with advanced search strategies, pruning, multi-objective optimization, and visualization capabilities.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:hyperparameter-tuning-experiment-management, skill-area:data-science-experimentation]
+  roles: [role:ml-engineer, role:data-scientist]
+  workflows: [workflow:ml-model-lifecycle, workflow:experiment-design]
+
 ---
 
 # Optuna Hyperparameter Tuner

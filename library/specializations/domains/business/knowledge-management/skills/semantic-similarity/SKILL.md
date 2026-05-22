@@ -13,6 +13,10 @@ metadata:
   domain: business
   category: Knowledge Organization
   skill-id: SK-020
+graph:
+  domains: [domain:knowledge-management]
+  skillAreas: [skill-area:natural-language-processing, skill-area:retrieval-augmented-generation, skill-area:search-indexing]
+  roles: [role:information-architect, role:data-scientist, role:analytics-engineer]
 ---
 
 # Semantic Similarity Skill

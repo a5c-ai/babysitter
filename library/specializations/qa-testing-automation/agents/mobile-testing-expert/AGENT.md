@@ -10,6 +10,14 @@ expertise:
   - Mobile performance testing
   - Gesture and touch testing
   - Mobile accessibility testing
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer]
+  skillAreas: [skill-area:mobile-ui-automation, skill-area:cross-platform-testing]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
+
 ---
 
 # Mobile Testing Expert Agent

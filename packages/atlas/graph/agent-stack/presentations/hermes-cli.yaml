@@ -1,0 +1,20 @@
+nodeKind: Presentation
+id: presentation:hermes-cli
+attributes:
+  displayName: "Hermes CLI"
+  kind: tui
+  description: |
+    Terminal interface bundled with the Hermes Python CLI agent. Surfaced
+    through the agent-mux adapter for v6.
+  renderingTechnology: terminal-emulator
+  themeSupport: none
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+  bundleSize: "~5 MB"
+  updateChannel: manual
+  accessibilityShortcuts:
+    - "Ctrl+C: interrupt"
+edges:
+  bundled_with:
+    - agent-platform-impl:hermes.platform@current

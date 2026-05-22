@@ -2,6 +2,11 @@
 name: research-ethics-coordinator
 description: Ensure ethical compliance and navigate IRB processes for human subjects research
 required-skills: research-ethics-irb
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:compliance-automation, skill-area:data-governance, skill-area:data-protection-dlp]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:compliance-officer, role:privacy-engineer]
 ---
 
 # Research Ethics Coordinator Agent

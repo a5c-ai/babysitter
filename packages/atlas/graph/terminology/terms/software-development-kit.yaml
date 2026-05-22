@@ -1,0 +1,11 @@
+nodeKind: Term
+id: term:software-development-kit
+attributes:
+  canonicalDefinitionId: definition:software-development-kit.canonical
+  displayName: "Software Development Kit"
+  kind: tool
+  description: |
+    A library and tooling bundle for integrating against a platform.
+edges:
+  applies_to:
+    - target: domain:software-engineering

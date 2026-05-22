@@ -9,6 +9,12 @@ expertise:
   - Cryptographic weaknesses and implementation flaws
   - Race conditions and TOCTOU issues
   - Deserialization vulnerabilities
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:vulnerability-management, skill-area:code-cybersecurity]
+  roles: [role:security-engineer]
+  workflows: [workflow:vulnerability-management, workflow:penetration-testing-cycle]
 ---
 
 # Vulnerability Researcher Agent

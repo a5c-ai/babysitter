@@ -3,6 +3,12 @@
  * @description User Research and Discovery process with research planning, participant recruitment, data collection, synthesis, insight generation, and deliverable creation
  * @inputs { projectName: string, researchObjectives: array, researchMethods: array, participantCriteria: object, timeline: string, budget: object, outputDir: string }
  * @outputs { success: boolean, researchReport: string, insights: array, personas: array, artifacts: array, qualityScore: number }
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:ux-ui-design]
+ *   skillAreas: [skill-area:design-systems, skill-area:interaction-design, skill-area:user-research]
+ *   roles: [role:product-designer, role:ux-researcher]
+ *   workflows: [workflow:user-feedback-loop, workflow:product-discovery]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

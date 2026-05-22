@@ -1,0 +1,44 @@
+nodeKind: PluginTarget
+id: plugin-target:amp
+attributes:
+  displayName: "Amp"
+  hostAgent: agent:amp
+  adapterFamily: shell-hook
+  manifestFormat: "settings.json"
+  commandFormat: markdown-commands
+  hookRegistrationFormat: none
+  skillHandling: unsupported
+  marketplacePath: null
+  adapterName: amp
+  scriptVariants:
+    - bash
+  distribution:
+    - manual
+  distributionModel: workspace-generated
+  npmPublishable: false
+  installLayout:
+    harnessHomeRelative: ".amp"
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ".js"
+    installLifecycle: none
+    activationMessage: restart
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: supported
+  launchBehavior:
+    promptDelivery: stdin
+    promptFlag: null
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: false
+    needsIdleKill: true
+edges:
+  hosted_by:
+    - target: agent:amp
+    - target: agent-platform-impl:amp.platform@current

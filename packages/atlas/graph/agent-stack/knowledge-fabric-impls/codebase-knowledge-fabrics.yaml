@@ -1,0 +1,36 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:codebase-index
+attributes:
+  displayName: "Codebase as Knowledge Fabric — symbol indexing and code intelligence"
+  description: |
+    The codebase itself as a knowledge fabric via symbol indexing, AST
+    analysis, dependency graphs, and semantic code search. Used by Cursor,
+    GitHub Copilot, Sourcegraph, and IDE language servers to provide code-
+    context-aware retrieval. Knowledge is derived from source code rather
+    than authored separately — function signatures, type hierarchies, import
+    graphs, and usage patterns constitute an implicit knowledge graph. Symbol
+    graphs and LSP provide structural retrieval; semantic embeddings provide
+    similarity-based retrieval. The combination enables agents to understand
+    codebases without reading every file.
+  knowledgeFileFormats:
+    - source-code
+    - ast-nodes
+    - symbol-tables
+  retrievalStrategy: hybrid
+  knowledgePersistence: derived-from-source
+  knowledgeScopes:
+    - project
+    - organization
+  autoExtractionSupport: true
+  notes: |
+    Codebase-as-knowledge is unique among knowledge fabrics because the
+    knowledge is derived rather than authored. Symbol indexing (tree-sitter,
+    LSP) provides structural knowledge. Semantic code embeddings provide
+    similarity-based retrieval. Dependency graphs provide relationship
+    knowledge. The knowledge is always current because it is derived from
+    the current source state. The trade-off is that code knowledge lacks
+    the "why" — rationale, context, and design intent require separate
+    knowledge artifacts (ADRs, comments, documentation).
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric

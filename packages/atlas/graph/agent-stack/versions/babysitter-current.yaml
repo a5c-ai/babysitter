@@ -1,0 +1,49 @@
+nodeKind: AgentVersion
+id: agent-version:babysitter@current
+attributes:
+  agentProductId: agent:babysitter
+  versionRange: ">=5.0.0"
+  releasedAt: "2026-01-11"
+  cliCommand: "babysitter"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:babysitter
+  composed_of:
+    - target: agent-core-impl:babysitter.core@current
+      role: core
+    - target: agent-runtime-impl:babysitter.runtime@current
+      role: runtime
+    - target: agent-platform-impl:babysitter.platform@current
+      role: platform
+    - target: agent-ui-impl:babysitter.ui@current
+      role: ui
+    - target: agent-governance-impl:babysitter-plugin.governance@current
+      role: governance
+  sourced_from: []
+  supports:
+    - target: capability:supports-mcp
+      versionRange: ">=5.0.0"
+      level: full
+      notes: babysitter-agent can launch a built-in MCP server and agent-facing MCP integration surfaces.
+    - target: capability:interactive-mode
+      versionRange: ">=5.0.0"
+      level: full
+      notes: babysitter-agent is a terminal-first runtime CLI with interactive create-run, observe, and orchestration flows.
+    - target: capability:stdin-injection
+      versionRange: ">=5.0.0"
+      level: full
+      notes: babysitter-agent accepts prompts, command templates, and harness invocations via CLI input arguments.
+    - target: capability:can-resume
+      versionRange: ">=5.0.0"
+      level: full
+      notes: babysitter-agent resumes runs and sessions through explicit resume-run and session-history command surfaces.
+  uses_memory_system:
+    - target: memory-system:auto-dream-consolidation-pattern
+    - target: memory-system:claude-code-auto-memory
+    - target: memory-system:instruction-file-hierarchy
+  targets_plugin_surface:
+    - target: plugin-target:codex
+    - target: plugin-target:claude-code

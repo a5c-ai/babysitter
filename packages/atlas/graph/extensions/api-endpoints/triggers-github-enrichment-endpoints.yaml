@@ -1,0 +1,28 @@
+# Outbound REST endpoints called by `enrichGithubFromApi`
+# (packages/triggers/src/enrich.ts:61-96). These are GitHub REST API calls
+# made during trigger enrichment to lift `changes[]` for PRs / commits.
+nodeKind: APIEndpoint
+id: api-endpoint:github-pulls-files
+attributes:
+  displayName: "GET /repos/{repo}/pulls/{n}/files (per_page=100)"
+  method: GET
+  path: "/repos/{owner}/{repo}/pulls/{number}/files?per_page=100"
+  responseShape: "list<{ filename: string, status?: string, patch?: string }>"
+  authRequired: true
+edges:
+  called_by_trigger:
+    - target: operational-trigger:amux-triggers-github
+    - target: operational-trigger:amux-triggers-action
+---
+nodeKind: APIEndpoint
+id: api-endpoint:github-commits-by-sha
+attributes:
+  displayName: "GET /repos/{repo}/commits/{sha}"
+  method: GET
+  path: "/repos/{owner}/{repo}/commits/{sha}"
+  responseShape: "{ files: list<{ filename: string, status?: string, patch?: string }> }"
+  authRequired: true
+edges:
+  called_by_trigger:
+    - target: operational-trigger:amux-triggers-github
+    - target: operational-trigger:amux-triggers-action

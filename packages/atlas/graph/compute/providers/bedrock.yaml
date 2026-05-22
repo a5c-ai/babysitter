@@ -1,0 +1,87 @@
+nodeKind: Provider
+id: provider:aws-bedrock
+attributes:
+  displayName: "AWS Bedrock"
+  versionRange: ">=2023-09-28"
+  authMethods:
+    - iam
+    - api-key
+  authMethodNotes: |
+    Bedrock is authorized via AWS IAM. Callers MUST have an IAM principal
+    with `bedrock:InvokeModel` (and `bedrock:InvokeModelWithResponseStream`
+    for streaming) on the requested `modelId`. SigV4-signed requests are
+    standard; Bedrock API keys (long-lived bearer tokens scoped to a
+    Bedrock policy) were introduced in 2024 and authenticate via
+    `Authorization: Bearer <key>`.
+  endpoints:
+    invoke_model: "https://bedrock-runtime.{region}.amazonaws.com/model/{modelId}/invoke"
+    converse: "https://bedrock-runtime.{region}.amazonaws.com/model/{modelId}/converse"
+    converse_stream: "https://bedrock-runtime.{region}.amazonaws.com/model/{modelId}/converse-stream"
+  pricing: |
+    See https://aws.amazon.com/bedrock/pricing/ for region-specific pricing.
+  pricingTiers:
+    - name: on-demand
+      rateLimit: "Per-account quotas (RPM/TPM) per region per model; see Service Quotas"
+      priceMultiplier: 1.0
+      description: "Default per-token on-demand billing."
+    - name: provisioned-throughput
+      rateLimit: "Reserved model units (MUs); price per MU-hour, no token-rate cap"
+      priceMultiplier: 1.0
+      description: "Provisioned Throughput — commit to MU-hours for guaranteed capacity."
+    - name: batch
+      rateLimit: "Bedrock batch inference job; processed within 24h"
+      priceMultiplier: 0.5
+      description: "Bedrock batch inference — discounted async."
+  rateLimitSignalingProtocol: |
+    Throttling surfaces as HTTP 400 with `__type: ThrottlingException`
+    (and 429 in some regions). `x-amzn-RequestId` is always present.
+    `Retry-After` is not consistently emitted; callers SHOULD use AWS
+    SDK's exponential backoff with jitter.
+  dataResidencyOptions:
+    - us-east-1
+    - us-east-2
+    - us-west-2
+    - eu-west-1
+    - eu-west-2
+    - eu-west-3
+    - eu-central-1
+    - eu-north-1
+    - ap-northeast-1
+    - ap-northeast-2
+    - ap-southeast-1
+    - ap-southeast-2
+    - ap-south-1
+    - ca-central-1
+    - sa-east-1
+  vendorFeatures:
+    - capability:supports-bedrock-guardrails
+    - capability:supports-batch-api
+    - capability:supports-prompt-caching
+  slaTier: "aws-bedrock-99.9"
+  regions:
+    - us-east-1
+    - us-east-2
+    - us-west-2
+    - eu-west-1
+    - eu-west-2
+    - eu-west-3
+    - eu-central-1
+    - eu-north-1
+    - ap-northeast-1
+    - ap-northeast-2
+    - ap-northeast-3
+    - ap-southeast-1
+    - ap-southeast-2
+    - ap-south-1
+    - ca-central-1
+    - sa-east-1
+edges:
+  realizes:
+    - target: layer:2-provider
+  supports:
+    - target: capability:supports-bedrock-guardrails
+      versionRange: '>=2024-01-01'
+    - target: capability:model-discovery
+      versionRange: '>=2024-01-01'
+  serves:
+    - model:claude-opus-4-7@current

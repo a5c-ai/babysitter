@@ -1,0 +1,312 @@
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-contextwindowtokens
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current contextWindowTokens is 1000000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-costpermtokinput
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: costPerMTokInput
+  value: '0'
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current costPerMTokInput is 0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-costpermtokoutput
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: costPerMTokOutput
+  value: '0'
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current costPerMTokOutput is 0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-finetuningkind
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: fineTuningKind
+  value: full
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current fineTuningKind is full.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-kind
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: kind
+  value: chat
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current kind is chat.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-lifecyclestatus
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-modalities
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current modalities is text, image.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-modalitydirections
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current modalityDirections is kind=text;direction=input,
+    kind=image;direction=input, kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-modelcardurl
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: modelCardUrl
+  value: https://huggingface.co/meta-llama/Llama-4-Maverick-17B-128E-Instruct
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current modelCardUrl is https://huggingface.co/meta-llama/Llama-4-Maverick-17B-128E-Instruct.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-supportsextendedthinking
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-supportsfinetuning
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: supportsFineTuning
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current supportsFineTuning is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current supportsThinkingBudgetTokens is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-maverick-current-versionrange
+attributes:
+  subjectId: model:llama-4-maverick@current
+  attribute: versionRange
+  value: '>=4.0.0 <5.0.0'
+  subjectKind: ModelVersion
+  statement: model:llama-4-maverick@current versionRange is >=4.0.0 <5.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-maverick
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-maverick
+  about_subject:
+  - model:llama-4-maverick@current

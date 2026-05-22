@@ -18,6 +18,13 @@
  * - Phenomizer: https://compbio.charite.de/phenomizer/
  * - OMIM: https://www.omim.org/
  * - Orphanet: https://www.orpha.net/
+ *
+ * @graph
+ *   domains: [domain:bioinformatics]
+ *   specializations: [specialization:biomedical-informatics]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:python-data-pipelines]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer, role:biomedical-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

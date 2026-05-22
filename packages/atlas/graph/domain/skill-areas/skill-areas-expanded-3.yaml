@@ -1,0 +1,1146 @@
+# =============================================================================
+# Healthcare / Life Sciences SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:clinical-data-management
+attributes:
+  displayName: "Clinical Data Management"
+  description: |
+    Managing clinical trial data throughout its lifecycle — designing case report
+    forms (CRFs), enforcing data entry standards, running edit checks, and
+    ensuring regulatory-grade data quality for FDA/EMA submissions.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:healthcare
+      confidence: primary
+    - target: domain:clinical-trials
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:EHR-integration
+attributes:
+  displayName: "EHR Integration"
+  description: |
+    Connecting electronic health record systems with clinical workflows,
+    third-party applications, and data warehouses using interoperability
+    standards such as HL7v2, FHIR, and CDA.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:healthcare
+      confidence: primary
+    - target: domain:healthtech
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:HL7-FHIR
+attributes:
+  displayName: "HL7 FHIR"
+  description: |
+    Implementing the HL7 FHIR standard for health data exchange — designing
+    FHIR resources, building RESTful FHIR servers and clients, handling
+    capability statements, and mapping legacy HL7v2 messages to FHIR bundles.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:healthcare
+      confidence: primary
+    - target: domain:healthtech
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:DICOM-imaging
+attributes:
+  displayName: "DICOM Imaging"
+  description: |
+    Working with the DICOM standard for medical imaging — ingesting,
+    storing, querying, and retrieving radiology and pathology images using
+    PACS, DICOM-web, and WADO-RS services.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:healthcare
+      confidence: primary
+    - target: domain:biomedical-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:clinical-decision-support
+attributes:
+  displayName: "Clinical Decision Support"
+  description: |
+    Building clinical decision support systems (CDSS) that surface evidence-based
+    recommendations at the point of care — rule engines, alert management,
+    order-set logic, and integration with EHR clinical workflows.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:healthcare
+      confidence: primary
+    - target: domain:healthtech
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:pharmacovigilance
+attributes:
+  displayName: "Pharmacovigilance"
+  description: |
+    Monitoring adverse drug reactions and medication safety signals — intake of
+    individual case safety reports (ICSRs), MedDRA coding, signal detection
+    algorithms, and regulatory reporting to agencies such as FDA FAERS and EMA EudraVigilance.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:pharmaceuticals
+      confidence: primary
+    - target: domain:healthcare
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:genomic-data-analysis
+attributes:
+  displayName: "Genomic Data Analysis"
+  description: |
+    Processing and interpreting high-throughput sequencing data — alignment,
+    variant calling, annotation pipelines, GWAS analysis, and pharmacogenomic
+    profiling using tools like GATK, bcftools, and Nextflow.
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:genomics
+      confidence: primary
+    - target: domain:bioinformatics
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:biostatistics
+attributes:
+  displayName: "Biostatistics"
+  description: |
+    Applying statistical methods to biological and medical research — survival
+    analysis, clinical trial design (sample sizing, randomization), mixed-effects
+    models, and regulatory-standard statistical analysis plans (SAPs).
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:healthcare
+      confidence: primary
+    - target: domain:computational-biology
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:epidemiological-modeling
+attributes:
+  displayName: "Epidemiological Modeling"
+  description: |
+    Building mathematical and computational models of disease spread —
+    compartmental models (SIR/SEIR), agent-based simulations, contact tracing
+    analytics, and population-level risk stratification.
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:healthcare
+      confidence: primary
+    - target: domain:data-science
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:drug-interaction-analysis
+attributes:
+  displayName: "Drug Interaction Analysis"
+  description: |
+    Identifying and evaluating drug-drug, drug-food, and drug-gene interactions —
+    building interaction knowledge bases, implementing clinical alerting rules,
+    and integrating pharmacokinetic data into prescribing workflows.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:pharmaceuticals
+      confidence: primary
+    - target: domain:healthcare
+      confidence: secondary
+# =============================================================================
+# Finance / Trading SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:algorithmic-trading-strategy
+attributes:
+  displayName: "Algorithmic Trading Strategy"
+  description: |
+    Designing and backtesting systematic trading strategies — momentum, mean
+    reversion, statistical arbitrage, and market-making algorithms with
+    walk-forward optimization and transaction cost modeling.
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:algorithmic-trading
+      confidence: primary
+    - target: domain:quantitative-finance
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:order-management-systems
+attributes:
+  displayName: "Order Management Systems"
+  description: |
+    Building and maintaining OMS platforms that route, execute, and track trade
+    orders across venues — FIX protocol handling, smart order routing, position
+    management, and compliance pre-trade checks.
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:trading-operations
+      confidence: primary
+    - target: domain:capital-markets
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:market-microstructure
+attributes:
+  displayName: "Market Microstructure"
+  description: |
+    Analyzing the mechanics of how markets operate — order book dynamics, bid-ask
+    spread decomposition, price impact models, latency arbitrage, and market maker
+    inventory management.
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:quantitative-finance
+      confidence: primary
+    - target: domain:algorithmic-trading
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:risk-metrics-VaR
+attributes:
+  displayName: "Risk Metrics & VaR"
+  description: |
+    Computing and validating value-at-risk (VaR) and related risk measures —
+    parametric, historical simulation, and Monte Carlo VaR, expected shortfall
+    (CVaR), back-testing, and stress scenario construction.
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:financial-risk-management
+      confidence: primary
+    - target: domain:quantitative-finance
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:stress-testing-financial
+attributes:
+  displayName: "Financial Stress Testing"
+  description: |
+    Designing and running regulatory and internal stress tests — CCAR/DFAST
+    scenario design, macroeconomic factor modeling, loss forecasting, and
+    capital adequacy impact analysis.
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:financial-risk-management
+      confidence: primary
+    - target: domain:regulatory-finance
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:regulatory-capital
+attributes:
+  displayName: "Regulatory Capital"
+  description: |
+    Implementing Basel III/IV capital frameworks — risk-weighted asset (RWA)
+    calculations, standardized and internal-models approaches for credit,
+    market, and operational risk, and capital adequacy reporting.
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:regulatory-finance
+      confidence: primary
+    - target: domain:financial-risk-management
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:payment-gateway-integration
+attributes:
+  displayName: "Payment Gateway Integration"
+  description: |
+    Integrating payment processors (Stripe, Adyen, PayPal) into applications —
+    tokenization flows, 3D-Secure authentication, webhook reconciliation,
+    multi-currency settlement, and retry/idempotency patterns.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:fintech
+      confidence: primary
+    - target: domain:e-commerce
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:PCI-DSS-implementation
+attributes:
+  displayName: "PCI DSS Implementation"
+  description: |
+    Implementing PCI Data Security Standard requirements — network segmentation,
+    cardholder data environment (CDE) scoping, encryption at rest and in transit,
+    penetration testing, and SAQ/ROC compliance documentation.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity-grc
+      confidence: primary
+    - target: domain:fintech
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:anti-fraud-modeling
+attributes:
+  displayName: "Anti-Fraud Modeling"
+  description: |
+    Building systems to detect and prevent financial fraud — rule engines,
+    anomaly detection models, network/graph analysis of transaction patterns,
+    real-time scoring pipelines, and false-positive reduction strategies.
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:fraud-detection
+      confidence: primary
+    - target: domain:fintech
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:credit-risk-modeling
+attributes:
+  displayName: "Credit Risk Modeling"
+  description: |
+    Developing models that assess borrower creditworthiness — probability of
+    default (PD), loss given default (LGD), exposure at default (EAD),
+    scorecard development, and model validation under SR 11-7 guidelines.
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:credit-scoring
+      confidence: primary
+    - target: domain:financial-risk-management
+      confidence: secondary
+# =============================================================================
+# Manufacturing / IoT SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:SCADA-systems
+attributes:
+  displayName: "SCADA Systems"
+  description: |
+    Designing and operating Supervisory Control and Data Acquisition systems —
+    HMI development, historian databases, alarm management, remote telemetry
+    units, and securing OT networks against cyber threats.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:industrial-automation
+      confidence: primary
+    - target: domain:iot
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:PLC-programming
+attributes:
+  displayName: "PLC Programming"
+  description: |
+    Programming programmable logic controllers using IEC 61131-3 languages —
+    ladder logic, structured text, function block diagrams, sequential function
+    charts, and integrating PLCs with SCADA and MES layers.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:industrial-automation
+      confidence: primary
+    - target: domain:embedded-systems
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:OPC-UA-protocol
+attributes:
+  displayName: "OPC UA Protocol"
+  description: |
+    Implementing the OPC Unified Architecture standard for industrial
+    interoperability — information modeling, server/client development,
+    pub/sub transport, security profiles, and companion specifications
+    for specific verticals.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:industrial-automation
+      confidence: primary
+    - target: domain:iot
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:predictive-maintenance
+attributes:
+  displayName: "Predictive Maintenance"
+  description: |
+    Building data-driven maintenance systems that predict equipment failures
+    before they occur — vibration analysis, thermal imaging analytics,
+    remaining-useful-life (RUL) models, and condition-based maintenance scheduling.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:industrial-automation
+      confidence: primary
+    - target: domain:iot
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:digital-twin-modeling
+attributes:
+  displayName: "Digital Twin Modeling"
+  description: |
+    Creating virtual replicas of physical assets and processes — real-time
+    sensor data ingestion, physics-based simulation models, what-if scenario
+    analysis, and synchronization between digital and physical states.
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:digital-twins
+      confidence: primary
+    - target: domain:industrial-automation
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:industrial-vision
+attributes:
+  displayName: "Industrial Vision"
+  description: |
+    Deploying machine vision systems in manufacturing environments — camera
+    calibration, defect detection models, dimensional measurement, OCR on
+    production lines, and integration with reject/sort actuators.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:industrial-automation
+      confidence: primary
+    - target: domain:computer-vision
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:quality-control-statistical
+attributes:
+  displayName: "Statistical Quality Control"
+  description: |
+    Applying statistical methods to manufacturing quality — control charts
+    (X-bar, R, p, c), process capability indices (Cp, Cpk), acceptance sampling
+    plans, and measurement system analysis (Gage R&R).
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:industrial-automation
+      confidence: primary
+    - target: domain:industrial-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:lean-manufacturing
+attributes:
+  displayName: "Lean Manufacturing"
+  description: |
+    Implementing lean principles in production environments — value stream
+    mapping, kanban systems, just-in-time inventory, 5S workplace organization,
+    kaizen continuous improvement events, and waste elimination (muda).
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:industrial-engineering
+      confidence: primary
+    - target: domain:operations
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:six-sigma
+attributes:
+  displayName: "Six Sigma"
+  description: |
+    Applying the Six Sigma DMAIC methodology to reduce process variation —
+    defining CTQ characteristics, measurement system validation, root-cause
+    analysis (fishbone, 5-whys), statistical process control, and control
+    plan sustainment.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:industrial-engineering
+      confidence: primary
+    - target: domain:operations
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:process-automation
+attributes:
+  displayName: "Process Automation"
+  description: |
+    Automating business and industrial processes — RPA tool implementation
+    (UiPath, Automation Anywhere), workflow orchestration, process mining
+    for bottleneck discovery, and human-in-the-loop exception handling.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:operations
+      confidence: primary
+    - target: domain:industrial-automation
+      confidence: secondary
+# =============================================================================
+# Legal / Compliance SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:contract-analysis
+attributes:
+  displayName: "Contract Analysis"
+  description: |
+    Extracting and interpreting key provisions from legal contracts — clause
+    identification, obligation tracking, risk flagging, renewal/termination
+    terms, and building structured contract repositories.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:legal
+      confidence: primary
+    - target: domain:legaltech
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:e-discovery
+attributes:
+  displayName: "E-Discovery"
+  description: |
+    Managing electronic discovery workflows for litigation — data collection
+    and preservation, processing and deduplication, technology-assisted review
+    (TAR/predictive coding), privilege logging, and production formatting.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:legal
+      confidence: primary
+    - target: domain:legaltech
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:legal-research-automation
+attributes:
+  displayName: "Legal Research Automation"
+  description: |
+    Automating legal research tasks — case law retrieval, statute analysis,
+    citation network exploration, precedent identification, and building
+    AI-assisted research tools with legal-domain NLP.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:legaltech
+      confidence: primary
+    - target: domain:legal
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:regulatory-change-management
+attributes:
+  displayName: "Regulatory Change Management"
+  description: |
+    Tracking, interpreting, and implementing regulatory changes — monitoring
+    legislative feeds, impact assessment across business lines, gap analysis
+    against current controls, and coordinating remediation plans.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:compliance
+      confidence: primary
+    - target: domain:legal
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:compliance-monitoring
+attributes:
+  displayName: "Compliance Monitoring"
+  description: |
+    Implementing continuous compliance monitoring programs — control testing
+    schedules, automated evidence collection, exception management workflows,
+    regulatory reporting dashboards, and escalation procedures.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:compliance
+      confidence: primary
+    - target: domain:cybersecurity-grc
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:privacy-impact-assessment
+attributes:
+  displayName: "Privacy Impact Assessment"
+  description: |
+    Conducting privacy impact assessments (PIAs) and data protection impact
+    assessments (DPIAs) — identifying personal data flows, evaluating processing
+    lawfulness, assessing risks to data subjects, and documenting mitigation measures
+    under GDPR, CCPA, and similar frameworks.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:compliance
+      confidence: primary
+    - target: domain:cybersecurity-grc
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:data-classification
+attributes:
+  displayName: "Data Classification"
+  description: |
+    Designing and operating data classification programs — defining sensitivity
+    tiers (public, internal, confidential, restricted), automated tagging
+    and labeling, DLP policy integration, and handling reclassification workflows.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity-grc
+      confidence: primary
+    - target: domain:compliance
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:records-management
+attributes:
+  displayName: "Records Management"
+  description: |
+    Managing organizational records through their lifecycle — retention
+    schedules, legal hold implementation, disposition workflows, metadata
+    standards, and compliance with regulations like SEC 17a-4 and HIPAA.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:compliance
+      confidence: primary
+    - target: domain:legal
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:audit-trail-design
+attributes:
+  displayName: "Audit Trail Design"
+  description: |
+    Designing tamper-evident audit logging systems — immutable event stores,
+    cryptographic chaining, who/what/when/where capture, retention policies,
+    and query interfaces for auditors and compliance teams.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:compliance
+      confidence: primary
+    - target: domain:cybersecurity-grc
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:whistleblower-system-design
+attributes:
+  displayName: "Whistleblower System Design"
+  description: |
+    Building secure and anonymous whistleblower reporting systems — end-to-end
+    encrypted channels, anonymous intake portals, case management workflows,
+    and compliance with EU Whistleblower Directive and SOX requirements.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:compliance
+      confidence: primary
+    - target: domain:legal
+      confidence: secondary
+# =============================================================================
+# Marketing / Growth SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:SEO-technical
+attributes:
+  displayName: "Technical SEO"
+  description: |
+    Optimizing website technical foundations for search engines — crawl budget
+    management, structured data (Schema.org), Core Web Vitals optimization,
+    XML sitemaps, hreflang implementation, and JavaScript rendering strategies.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:digital-marketing
+      confidence: primary
+    - target: domain:web-development
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:SEM-campaign-management
+attributes:
+  displayName: "SEM Campaign Management"
+  description: |
+    Managing paid search campaigns across Google Ads, Microsoft Ads, and
+    other platforms — keyword strategy, bid optimization, ad copy testing,
+    quality score management, and ROAS-driven budget allocation.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:digital-marketing
+      confidence: primary
+    - target: domain:advertising
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:marketing-attribution
+attributes:
+  displayName: "Marketing Attribution"
+  description: |
+    Implementing multi-touch attribution models to measure marketing channel
+    effectiveness — last-click, linear, time-decay, data-driven (Markov chain
+    and Shapley value) models, and cross-device identity resolution.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:digital-marketing
+      confidence: primary
+    - target: domain:marketing
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:email-deliverability
+attributes:
+  displayName: "Email Deliverability"
+  description: |
+    Maximizing email inbox placement rates — SPF/DKIM/DMARC authentication,
+    IP warming, list hygiene, engagement-based sending, bounce management,
+    and inbox placement monitoring across major ISPs.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:digital-marketing
+      confidence: primary
+    - target: domain:marketing
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:CRM-integration
+attributes:
+  displayName: "CRM Integration"
+  description: |
+    Integrating CRM platforms (Salesforce, HubSpot, Dynamics) with marketing,
+    sales, and service systems — data synchronization, lead routing, custom
+    object modeling, API-driven automation, and single-customer-view assembly.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:sales
+      confidence: primary
+    - target: domain:marketing
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:customer-data-platform
+attributes:
+  displayName: "Customer Data Platform"
+  description: |
+    Implementing customer data platforms (CDPs) for unified customer profiles —
+    identity resolution across touchpoints, event stream ingestion, audience
+    building, real-time activation to downstream channels, and privacy-compliant
+    data unification.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:marketing
+      confidence: primary
+    - target: domain:customer-experience
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:audience-segmentation
+attributes:
+  displayName: "Audience Segmentation"
+  description: |
+    Dividing customer populations into actionable segments — demographic,
+    behavioral, psychographic, and predictive clustering, RFM analysis,
+    lookalike modeling, and segment-specific messaging strategies.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:marketing
+      confidence: primary
+    - target: domain:advertising
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:programmatic-advertising
+attributes:
+  displayName: "Programmatic Advertising"
+  description: |
+    Managing programmatic ad buying across DSPs and ad exchanges — RTB
+    strategy, deal ID setup, audience targeting, brand safety controls,
+    viewability optimization, and supply path optimization.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:advertising-tech
+      confidence: primary
+    - target: domain:digital-marketing
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:affiliate-tracking
+attributes:
+  displayName: "Affiliate Tracking"
+  description: |
+    Building and managing affiliate marketing programs — tracking pixel and
+    server-to-server postback implementation, commission structures, fraud
+    detection, partner recruitment, and performance reporting dashboards.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:digital-marketing
+      confidence: primary
+    - target: domain:e-commerce
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:social-media-analytics
+attributes:
+  displayName: "Social Media Analytics"
+  description: |
+    Measuring and analyzing social media performance — engagement metrics,
+    sentiment analysis, share-of-voice tracking, influencer identification,
+    competitive benchmarking, and ROI attribution from social channels.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:social-media
+      confidence: primary
+    - target: domain:digital-marketing
+      confidence: secondary
+# =============================================================================
+# Operations / Logistics SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:demand-forecasting
+attributes:
+  displayName: "Demand Forecasting"
+  description: |
+    Predicting future product or service demand — time-series forecasting
+    (ARIMA, Prophet, DeepAR), causal modeling, promotional lift estimation,
+    new product launch forecasting, and forecast accuracy measurement.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:supply-chain
+      confidence: primary
+    - target: domain:retail
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:inventory-optimization
+attributes:
+  displayName: "Inventory Optimization"
+  description: |
+    Optimizing inventory levels across supply chain nodes — safety stock
+    calculation, economic order quantity, multi-echelon inventory optimization,
+    ABC/XYZ classification, and dead stock identification.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:supply-chain
+      confidence: primary
+    - target: domain:logistics
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:route-optimization
+attributes:
+  displayName: "Route Optimization"
+  description: |
+    Solving vehicle routing problems for delivery and logistics networks —
+    TSP and VRP variants, time-window constraints, multi-depot planning,
+    real-time re-routing, and last-mile delivery optimization.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:logistics
+      confidence: primary
+    - target: domain:transportation
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:warehouse-management-systems
+attributes:
+  displayName: "Warehouse Management Systems"
+  description: |
+    Implementing and optimizing WMS platforms — receiving, putaway, picking
+    (wave, batch, zone), packing, slotting optimization, labor management,
+    and integration with conveyor/sortation systems.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:logistics
+      confidence: primary
+    - target: domain:supply-chain
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:order-fulfillment
+attributes:
+  displayName: "Order Fulfillment"
+  description: |
+    Managing end-to-end order fulfillment operations — order orchestration,
+    inventory allocation, split-shipment logic, carrier selection, shipping
+    label generation, and tracking/notification workflows.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:e-commerce
+      confidence: primary
+    - target: domain:logistics
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:reverse-logistics
+attributes:
+  displayName: "Reverse Logistics"
+  description: |
+    Managing product returns, refurbishment, and recycling flows — RMA
+    processing, return disposition rules, restocking workflows, warranty
+    claim management, and circular economy program design.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:logistics
+      confidence: primary
+    - target: domain:supply-chain
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:procurement-optimization
+attributes:
+  displayName: "Procurement Optimization"
+  description: |
+    Optimizing procurement processes and spend management — strategic sourcing,
+    spend analysis, supplier consolidation, e-procurement platform configuration,
+    purchase-to-pay automation, and contract compliance tracking.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:procurement
+      confidence: primary
+    - target: domain:operations
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:supplier-risk-management
+attributes:
+  displayName: "Supplier Risk Management"
+  description: |
+    Assessing and mitigating supply chain risk at the supplier level —
+    financial health monitoring, geopolitical risk scoring, dual-sourcing
+    strategies, supplier scorecards, and business continuity planning.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:supply-chain
+      confidence: primary
+    - target: domain:procurement
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:customs-compliance
+attributes:
+  displayName: "Customs Compliance"
+  description: |
+    Managing international trade compliance — HS tariff classification,
+    country-of-origin determination, free trade agreement qualification,
+    export control screening (ITAR/EAR), and customs broker integration.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:logistics
+      confidence: primary
+    - target: domain:compliance
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:freight-management
+attributes:
+  displayName: "Freight Management"
+  description: |
+    Managing freight transportation operations — carrier rate negotiation,
+    TMS configuration, shipment consolidation, freight audit and payment,
+    multimodal (ocean, air, rail, truck) coordination, and demurrage management.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:logistics
+      confidence: primary
+    - target: domain:transportation
+      confidence: secondary
+# =============================================================================
+# HR / People SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:talent-acquisition-pipeline
+attributes:
+  displayName: "Talent Acquisition Pipeline"
+  description: |
+    Designing and optimizing end-to-end recruiting pipelines — sourcing
+    channels, screening automation, interview process design, offer
+    management workflows, and candidate experience measurement.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+    - target: domain:operations
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:applicant-tracking-systems
+attributes:
+  displayName: "Applicant Tracking Systems"
+  description: |
+    Implementing and configuring ATS platforms (Greenhouse, Lever, Workday
+    Recruiting) — requisition workflows, parsing and matching algorithms,
+    compliance reporting (EEO/OFCCP), and integration with HRIS and
+    background check services.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+    - target: domain:operations
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:compensation-benchmarking
+attributes:
+  displayName: "Compensation Benchmarking"
+  description: |
+    Conducting compensation analysis and benchmarking — market data sourcing
+    (Radford, Mercer, Pave), job leveling frameworks, pay equity analysis,
+    total rewards modeling, and geographic pay differential calculations.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+    - target: domain:finance
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:employee-engagement-analytics
+attributes:
+  displayName: "Employee Engagement Analytics"
+  description: |
+    Measuring and analyzing employee engagement — pulse survey design,
+    eNPS tracking, sentiment analysis of open-text responses, engagement
+    driver modeling, and action planning dashboards for managers.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+    - target: domain:data-science
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:learning-management-systems
+attributes:
+  displayName: "Learning Management Systems"
+  description: |
+    Implementing and administering LMS platforms — course authoring (SCORM/xAPI),
+    learning path design, competency tracking, compliance training management,
+    and integration with talent development workflows.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+    - target: domain:edtech
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:succession-planning-analytics
+attributes:
+  displayName: "Succession Planning Analytics"
+  description: |
+    Building data-driven succession planning programs — leadership pipeline
+    modeling, readiness assessment frameworks, 9-box talent reviews,
+    critical-role identification, and bench-strength analytics.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+    - target: domain:strategy
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:workforce-planning
+attributes:
+  displayName: "Workforce Planning"
+  description: |
+    Strategic workforce planning and headcount modeling — demand/supply gap
+    analysis, skills inventory mapping, attrition forecasting, scenario
+    modeling for organizational changes, and cost-of-vacancy analysis.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+    - target: domain:operations
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:DEI-analytics
+attributes:
+  displayName: "DEI Analytics"
+  description: |
+    Measuring diversity, equity, and inclusion outcomes — representation
+    dashboards, pay equity regression analysis, promotion velocity by
+    demographic, inclusion survey index design, and intersectional analysis.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:dei-inclusion
+      confidence: primary
+    - target: domain:human-resources
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:employee-survey-design
+attributes:
+  displayName: "Employee Survey Design"
+  description: |
+    Designing statistically sound employee surveys — question bank curation,
+    response scale selection, survey fatigue mitigation, anonymity/confidentiality
+    guarantees, and actionable reporting frameworks.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+    - target: domain:social-sciences
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:org-network-analysis
+attributes:
+  displayName: "Organizational Network Analysis"
+  description: |
+    Mapping informal collaboration networks within organizations — communication
+    graph construction from email/Slack/calendar data, centrality and broker
+    analysis, silo detection, and change management insights from network topology.
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+    - target: domain:data-science
+      confidence: secondary

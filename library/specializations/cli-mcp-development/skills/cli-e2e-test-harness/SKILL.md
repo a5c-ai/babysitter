@@ -2,6 +2,14 @@
 name: cli-e2e-test-harness
 description: Set up E2E test harness for CLI applications with process spawning and assertions.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:e2e-testing]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # CLI E2E Test Harness

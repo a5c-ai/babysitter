@@ -1,0 +1,384 @@
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-contextwindowtokens
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: contextWindowTokens
+  value: '200000'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current contextWindowTokens is 200000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-costpermtokinput
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: costPerMTokInput
+  value: '15.0'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current costPerMTokInput is 15.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-costpermtokoutput
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: costPerMTokOutput
+  value: '75.0'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current costPerMTokOutput is 75.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-kind
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: kind
+  value: chat
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current kind is chat.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-knowledgecutoffdate
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: knowledgeCutoffDate
+  value: '2025-03-01'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current knowledgeCutoffDate is 2025-03-01.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-lifecyclestatus
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: lifecycleStatus
+  value: deprecated
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current lifecycleStatus is deprecated.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-modalities
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current modalities is text, image.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-modalitydirections
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current modalityDirections is kind=text;direction=input,
+    kind=image;direction=input, kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-modelcardurl
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: modelCardUrl
+  value: https://www.anthropic.com/claude/opus
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current modelCardUrl is https://www.anthropic.com/claude/opus.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-safetytier
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: safetyTier
+  value: anthropic-asl-3
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current safetyTier is anthropic-asl-3.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-supportsadaptivethinking
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: supportsAdaptiveThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current supportsAdaptiveThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-supportsextendedthinking
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: supportsExtendedThinking
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current supportsExtendedThinking is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-supportsfinetuning
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: supportsFineTuning
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current supportsFineTuning is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current supportsThinkingBudgetTokens is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-thinkingeffortlevels
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: thinkingEffortLevels
+  value: low, medium, high
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current thinkingEffortLevels is low, medium, high.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-5-current-versionrange
+attributes:
+  subjectId: model:claude-opus-4-5@current
+  attribute: versionRange
+  value: '>=4.5.0 <4.6.0'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-5@current versionRange is >=4.5.0 <4.6.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-opus-4-5@current

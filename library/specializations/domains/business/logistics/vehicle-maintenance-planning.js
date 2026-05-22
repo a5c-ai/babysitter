@@ -14,6 +14,11 @@
  * @references
  * - ATA: https://www.trucking.org/
  * - TMC Recommended Practices: https://tmc.trucking.org/
+  * @graph
+ *   domains: [domain:logistics]
+ *   skillAreas: [skill-area:procurement-management, skill-area:organizational-design]
+ *   roles: [role:supply-chain-analyst, role:operations-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -25,7 +30,8 @@ export async function process(inputs, ctx) {
     sensorData = [],
     scheduleConstraints = {},
     outputDir = 'vehicle-maintenance-output'
-  } = inputs;
+  }
+  = inputs;
 
   const startTime = ctx.now();
   const artifacts = [];
@@ -49,7 +55,7 @@ export async function process(inputs, ctx) {
       if (lastFeedback_phase2Review) {
         predictiveAnalysis = await ctx.task(predictiveFailureTask, { ...{ vehicles, sensorData, maintenanceHistory, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
       }
-  const phase2Review = await ctx.breakpoint({
+      const phase2Review = await ctx.breakpoint({
       question: `${predictiveAnalysis.criticalPredictions.length} vehicles with critical failure predictions. Review and prioritize?`,
       title: 'Critical Failure Predictions',
       context: { runId: ctx.runId, criticalPredictions: predictiveAnalysis.criticalPredictions, files: predictiveAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) },
@@ -60,9 +66,8 @@ export async function process(inputs, ctx) {
       });
       if (phase2Review.approved) break;
       lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
-
-  // PHASE 3: PREVENTIVE MAINTENANCE SCHEDULING
+    }
+    // PHASE 3: PREVENTIVE MAINTENANCE SCHEDULING
   ctx.log('info', 'Phase 3: Scheduling preventive maintenance');
   const preventiveScheduling = await ctx.task(preventiveMaintenanceTask, { vehicles, maintenanceHistory, scheduleConstraints, outputDir });
   artifacts.push(...preventiveScheduling.artifacts);
@@ -97,7 +102,7 @@ export async function process(inputs, ctx) {
     if (lastFeedback_finalApproval) {
       maintenanceReport = await ctx.task(maintenanceReportTask, { ...{ healthAssessment, predictiveAnalysis, preventiveScheduling, costForecast, uptimeOptimization, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Maintenance planning complete. ${preventiveScheduling.schedule.length} maintenance events scheduled. Expected uptime: ${uptimeOptimization.expectedUptime}%. Approve schedule?`,
     title: 'Vehicle Maintenance Planning Complete',
     context: {
@@ -125,7 +130,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/vehicle-maintenance-planning', timestamp: startTime, outputDir }
   };
 }
-  // TASK DEFINITIONS
+// TASK DEFINITIONS
 export const vehicleHealthAssessmentTask = defineTask('vehicle-health-assessment', (args, taskCtx) => ({
   kind: 'agent', title: 'Assess vehicle health', agent: { name: 'vehicle-health-specialist', prompt: { role: 'Vehicle Health Assessment Specialist', task: 'Assess current health status of fleet vehicles', context: args, instructions: ['Analyze sensor data', 'Review maintenance history', 'Calculate health scores', 'Identify deterioration', 'Flag critical issues', 'Generate health report'] }, outputSchema: { type: 'object', required: ['healthScores', 'artifacts'], properties: { healthScores: { type: 'array' }, criticalIssues: { type: 'array' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['agent', 'logistics', 'fleet-management', 'health-assessment']
 }));

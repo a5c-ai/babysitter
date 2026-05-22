@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:cline-mcp-config
+attributes:
+  artifactId: plugin-artifact:cline-mcp-config
+  displayName: "Cline cline_mcp_settings.json"
+  targetId: plugin-target:cline
+  artifactKind: mcp-config
+  pathPattern: "cline_mcp_settings.json"
+  installerSurface: "mcp.json"
+edges:
+  emits_artifact:
+    - target: plugin-target:cline

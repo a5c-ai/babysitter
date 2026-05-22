@@ -1,0 +1,15 @@
+nodeKind: ExtensionInterface
+id: extension-interface:reactor
+attributes:
+  interfaceVersion: "1.0.0"
+  description: Reactor
+  displayName: "Reactor"
+  concern: "Event-driven reactions to external triggers (webhooks, schedules, channels)."
+  surface: |
+    `on(eventKind, handler)`, `schedule(cron, handler)`,
+    `emit(event)`. Bridges hook surfaces to agent runs.
+  builtInDefault: |
+    Cron via host-OS scheduler; no in-process event bus.
+  notableImpls:
+    - tool-server:anycli-tool-example
+edges: {}

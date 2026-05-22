@@ -8,6 +8,13 @@ skills:
   - characterization-test-generator
   - static-code-analyzer
   - dependency-scanner
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:regression-testing, skill-area:contract-testing]
+  roles: [role:qa-engineer, role:tech-lead]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Migration Testing Strategist Agent

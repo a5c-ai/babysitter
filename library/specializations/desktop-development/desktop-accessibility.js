@@ -16,6 +16,13 @@
  * @references
  * - WCAG 2.1: https://www.w3.org/WAI/WCAG21/quickref/
  * - Electron Accessibility: https://www.electronjs.org/docs/latest/tutorial/accessibility
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:desktop-development]
+ *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop, skill-area:accessibility-first-design]
+ *   roles: [role:desktop-developer, role:fullstack-engineer]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

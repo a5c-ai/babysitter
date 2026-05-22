@@ -1,0 +1,134 @@
+---
+nodeKind: EvalRun
+id: eval-run:gpqa.gemini-2-5-pro.2025-06
+attributes:
+  target: "model:gemini-2-5-pro@current"
+  benchmarkId: benchmark:gpqa
+  testSetId: test-set:gpqa-diamond-2024
+  targetId: model:gemini-2-5-pro@current
+  runAt: "2025-06-17T00:00:00Z"
+  runBy: "google-deepmind"
+  configHash: "sha256:placeholder-gemini-2-5-pro-gpqa"
+edges:
+  evaluates_target:
+    - model:gemini-2-5-pro@current
+  for_benchmark:
+    - benchmark:gpqa
+---
+nodeKind: EvalRun
+id: eval-run:livecodebench.gemini-2-5-pro.2025-06
+attributes:
+  target: "model:gemini-2-5-pro@current"
+  benchmarkId: benchmark:livecodebench
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:gemini-2-5-pro@current
+  runAt: "2025-06-17T00:00:00Z"
+  runBy: "google-deepmind"
+  configHash: "sha256:placeholder-gemini-2-5-pro-livecodebench"
+edges:
+  evaluates_target:
+    - model:gemini-2-5-pro@current
+  for_benchmark:
+    - benchmark:livecodebench
+---
+nodeKind: EvalRun
+id: eval-run:swe-bench-verified.gemini-2-5-flash.2025-06
+attributes:
+  target: "model:gemini-2-5-flash@current"
+  benchmarkId: benchmark:swe-bench-verified
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:gemini-2-5-flash@current
+  runAt: "2025-06-17T00:00:00Z"
+  runBy: "google-deepmind"
+  configHash: "sha256:placeholder-gemini-2-5-flash-swe-bench-verified"
+edges:
+  evaluates_target:
+    - model:gemini-2-5-flash@current
+  uses_test_set:
+    - test-set:swe-bench-verified-2024-12
+  for_benchmark:
+    - benchmark:swe-bench-verified
+---
+nodeKind: EvalRun
+id: eval-run:gpqa-diamond.gemini-2-5-pro.2025-06
+attributes:
+  target: "model:gemini-2-5-pro@current"
+  benchmarkId: benchmark:gpqa
+  testSetId: test-set:gpqa-diamond-2024
+  targetId: model:gemini-2-5-pro@current
+  runAt: "2025-06-17T00:00:00Z"
+  runBy: "google-deepmind"
+  configHash: "sha256:placeholder-gemini-2-5-pro-gpqa-diamond"
+edges:
+  evaluates_target:
+    - model:gemini-2-5-pro@current
+  uses_test_set:
+    - test-set:gpqa-diamond-2024
+  for_benchmark:
+    - benchmark:gpqa
+---
+nodeKind: EvalRun
+id: eval-run:android-world.gemini-2-5-pro.2025-06
+attributes:
+  target: "model:gemini-2-5-pro@current"
+  benchmarkId: benchmark:android-world
+  targetId: model:gemini-2-5-pro@current
+  runAt: "2025-06-17T00:00:00Z"
+  runBy: "google-deepmind"
+  configHash: "sha256:placeholder-gemini-2-5-pro-android-world"
+edges:
+  evaluates_target:
+    - model:gemini-2-5-pro@current
+  for_benchmark:
+    - benchmark:android-world
+---
+nodeKind: EvalRun
+id: eval-run:mgsm.gemini-2-5-pro.2025-06
+attributes:
+  target: "model:gemini-2-5-pro@current"
+  benchmarkId: benchmark:mgsm
+  targetId: model:gemini-2-5-pro@current
+  runAt: "2025-06-17T00:00:00Z"
+  runBy: "google-deepmind"
+  configHash: "sha256:placeholder-gemini-2-5-pro-mgsm"
+edges:
+  evaluates_target:
+    - model:gemini-2-5-pro@current
+  for_benchmark:
+    - benchmark:mgsm
+---
+nodeKind: EvalRun
+id: eval-run:gpqa-diamond.gemini-3-1-pro.2026-02-19
+attributes:
+  target: "model:gemini-3-1-pro@current"
+  benchmarkId: benchmark:gpqa
+  testSetId: test-set:gpqa-diamond-2024
+  targetId: model:gemini-3-1-pro@current
+  runAt: "2026-02-19T00:00:00Z"
+  runBy: "google-deepmind"
+  configHash: "sha256:google-gemini-3-1-pro-gpqa-diamond-2026-02-19"
+edges:
+  evaluates_target:
+    - model:gemini-3-1-pro@current
+  uses_test_set:
+    - test-set:gpqa-diamond-2024
+  for_benchmark:
+    - benchmark:gpqa
+---
+nodeKind: EvalRun
+id: eval-run:gpqa-diamond.gemini-3-pro.2025-11-18
+attributes:
+  target: "model:gemini-3-pro@current"
+  benchmarkId: benchmark:gpqa
+  testSetId: test-set:gpqa-diamond-2024
+  targetId: model:gemini-3-pro@current
+  runAt: "2025-11-18T00:00:00Z"
+  runBy: "google-deepmind"
+  configHash: "sha256:google-gemini-3-pro-gpqa-diamond-2025-11-18"
+edges:
+  evaluates_target:
+    - model:gemini-3-pro@current
+  uses_test_set:
+    - test-set:gpqa-diamond-2024
+  for_benchmark:
+    - benchmark:gpqa

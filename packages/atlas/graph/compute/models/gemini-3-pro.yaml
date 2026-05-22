@@ -1,0 +1,80 @@
+nodeKind: ModelVersion
+id: model:gemini-3-pro@current
+attributes:
+  displayName: "Gemini 3 Pro"
+  supportsExtendedThinking: false
+  safetyTier: google-deepmind-frontier-safety
+  modelFamilyId: model-family:gemini-3
+  versionRange: '>=3.0.0 <3.1.0'
+  kind: multimodal
+  contextWindowTokens: 1000000
+  costPerMTokInput: 2.0
+  costPerMTokOutput: 12.0
+  supportsThinking: true
+  thinkingEffortLevels:
+  - low
+  - medium
+  - high
+  supportsThinkingBudgetTokens: true
+  modalities:
+  - text
+  - image
+  - audio
+  - video
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: audio
+      direction: input
+    - kind: video
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-11-18'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-11-18'
+  knowledgeCutoffDate: '2025-01-01'
+  modelCardUrl: https://deepmind.google/models/gemini/
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:gemini-3
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:gemini-3
+  served_by:
+  - provider:google
+  - provider:gcp-vertex
+  speaks:
+  - model-transport:gemini-generate-content
+  supports:
+  - target: capability:supports-batch-api
+    versionRange: '>=3.0.0 <3.1.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-models-page
+  - target: capability:parallel-tool-calls
+    versionRange: '>=3.0.0 <3.1.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-models-page
+  - target: capability:supports-prompt-caching
+    versionRange: '>=3.0.0 <3.1.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-models-page
+  - target: capability:streaming
+    versionRange: '>=3.0.0 <3.1.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-models-page
+  - target: capability:supports-tool-use
+    versionRange: '>=3.0.0 <3.1.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-gemini-3-developer-guide

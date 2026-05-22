@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:session.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:session
+  text: |
+    persisted conversational state
+  status: canonical
+edges:
+  defines:
+    - term:session

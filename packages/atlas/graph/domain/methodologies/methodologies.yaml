@@ -1,0 +1,992 @@
+---
+nodeKind: Methodology
+id: methodology:atdd-tdd
+attributes:
+  displayName: "ATDD/TDD"
+  description: |
+    A combined approach that uses acceptance tests (ATDD) at the feature level to
+    drive unit-level test-driven development (TDD). The dual-layer testing strategy
+    ensures both external quality (building the right thing via acceptance criteria)
+    and internal quality (building it right via Red-Green-Refactor). Acceptance tests
+    become living documentation while unit tests drive emergent design.
+  methodologyKind: quality-focused
+  origin: "Dan North, Kent Beck"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:automaker
+attributes:
+  displayName: "AutoMaker"
+  description: |
+    An autonomous AI development studio that transforms software building through
+    a Kanban board interface where AI agents implement features using Claude Agent SDK.
+    Features git worktree isolation for safe parallel development, streaming UI updates,
+    multi-agent task execution, convergence loops for automatic test failure resolution,
+    and integrated test automation with Vitest and Playwright.
+  methodologyKind: ai-assisted
+  origin: "AutoMaker-Org"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:bdd-specification-by-example
+attributes:
+  displayName: "BDD / Specification by Example"
+  description: |
+    Behavior-Driven Development captures requirements as concrete examples
+    illustrating how the system should behave in specific scenarios. These examples
+    become executable specifications serving as both documentation and automated tests.
+    The three-step process (Discovery, Formulation, Automation) builds shared
+    understanding between business and development teams using a ubiquitous language.
+  methodologyKind: quality-focused
+  origin: "Dan North (BDD, 2006), Gojko Adzic (Specification by Example)"
+  yearIntroduced: "2006"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:bmad-method
+attributes:
+  displayName: "BMAD Method"
+  description: |
+    An AI-driven agile development framework with 10 specialized agent personas and
+    4 lifecycle phases (Analysis, Planning, Solutioning, Implementation). Features
+    adaptive scaling based on project complexity, Party Mode for multi-agent
+    collaborative decision-making, Quick Flow for lean solo-developer workflows,
+    and course correction for mid-sprint quality issues.
+  methodologyKind: ai-assisted
+  origin: "BMad Code Org"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:cc10x
+attributes:
+  displayName: "CC10X"
+  description: |
+    Intelligent workflow orchestration for Claude Code development. Routes all
+    development requests through a single entry point that detects intent and
+    dispatches to specialized workflows (BUILD, DEBUG, REVIEW, PLAN) with
+    evidence-first validation, TDD enforcement, confidence gating at 80%+,
+    parallel agent execution, and persistent session memory across three surfaces.
+  methodologyKind: ai-assisted
+  origin: "CC10X"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:ccpm
+attributes:
+  displayName: "CCPM (Claude Code PM)"
+  description: |
+    Spec-driven development methodology enforcing the principle that every line of
+    code must trace back to a specification. Five strict phases: Product Planning
+    (PRD), Implementation Planning (architecture), Task Decomposition (dependency
+    graph), GitHub Sync (issue creation), and Parallel Execution (specialized agents
+    with quality gates). Nine agents coordinate across phases.
+  methodologyKind: plan-driven
+  origin: "automazeio/ccpm"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:claudekit
+attributes:
+  displayName: "ClaudeKit"
+  description: |
+    A coding safety net with real-time error prevention, checkpoint management, and
+    specialized AI subagent orchestration. Features an event-driven hook system for
+    PreToolUse/PostToolUse/UserPromptSubmit/Stop events, File Guard with 195+
+    patterns across 12 categories, 6-agent parallel code review, spec-driven
+    development lifecycle, and git-backed checkpoint management for safe rollback.
+  methodologyKind: ai-assisted
+  origin: "Carl Rannaberg"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:cleanroom
+attributes:
+  displayName: "Cleanroom Software Engineering"
+  description: |
+    A formal methods process intended to produce software with certifiable reliability.
+    Combines mathematically-based methods of software specification, design, and
+    correctness verification with statistical usage testing. Developers verify code
+    formally through inspection rather than unit testing. An independent test team
+    performs statistical usage-based testing from operational profiles with MTTF
+    calculations for reliability certification.
+  methodologyKind: hybrid
+  origin: "Harlan Mills, IBM"
+  yearIntroduced: "1980s"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:cog-second-brain
+attributes:
+  displayName: "COG Second Brain"
+  description: |
+    A self-evolving second brain system combining AI agents with markdown files and
+    Git version control (COG = Cognition + Obsidian + Git). Privacy-first, local-first
+    knowledge management using pure markdown with structured evolution cycles from
+    daily capture through monthly knowledge consolidation, personalized through
+    role packs for different professional contexts.
+  methodologyKind: research
+  origin: "Huy Tieu"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:domain-driven-design
+attributes:
+  displayName: "Domain-Driven Design (DDD)"
+  description: |
+    An approach for building complex software systems that places the business domain
+    at the center of development. Provides strategic patterns (Ubiquitous Language,
+    Bounded Contexts, Context Mapping, Subdomains) for organizing large systems and
+    tactical patterns (Entities, Value Objects, Aggregates, Repositories) for modeling
+    domain logic. Bridges the gap between business experts and developers.
+  methodologyKind: design-thinking
+  origin: "Eric Evans"
+  yearIntroduced: "2003"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:double-diamond
+attributes:
+  displayName: "Double Diamond"
+  description: |
+    A design thinking framework visualizing the design process through four phases:
+    Discover, Define, Develop, and Deliver. Two diamonds represent problem space
+    (Discover to Define) and solution space (Develop to Deliver). Each diamond
+    encompasses divergent thinking (exploring broadly without judgment) followed by
+    convergent thinking (taking focused action toward a clear outcome).
+  methodologyKind: design-thinking
+  origin: "British Design Council"
+  yearIntroduced: "2005"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:event-storming
+attributes:
+  displayName: "Event Storming"
+  description: |
+    A workshop-based method for rapidly exploring complex business domains using
+    sticky notes and a timeline. Collaboratively models domain events, commands,
+    aggregates, and bounded contexts, bringing domain experts and developers together
+    to build shared understanding. Starts chaotic with Big Picture Storming, then
+    organizes incrementally through Process Modeling and Design-Level modeling.
+  methodologyKind: design-thinking
+  origin: "Alberto Brandolini"
+  yearIntroduced: "2013"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:everything-claude-code
+attributes:
+  displayName: "Everything Claude Code"
+  description: |
+    Performance optimization system for AI agent harnesses integrating specialized
+    subagents, continuous learning, and research-first development workflows. Features
+    research-first development, mandatory TDD with 80% coverage, 4-axis code review
+    with confidence gating, AgentShield security scanning with 102 static analysis
+    rules, auto-extraction of patterns into reusable skills, and dynamic context
+    injection with strategic compaction.
+  methodologyKind: ai-assisted
+  origin: "affaan-m"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:example-mapping
+attributes:
+  displayName: "Example Mapping"
+  description: |
+    A simple, collaborative workshop technique for exploring and understanding
+    requirements before development. Uses four colored cards (Blue for Story, Yellow
+    for Rules, Green for Examples, Red for Questions) to break down user stories into
+    testable examples. Bridges the gap between high-level user stories and detailed
+    acceptance criteria, making stories ready for test-driven development and BDD.
+  methodologyKind: design-thinking
+  origin: "Matt Wynne, Cucumber Ltd"
+  yearIntroduced: "2015"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:extreme-programming
+attributes:
+  displayName: "Extreme Programming (XP)"
+  description: |
+    An agile software development methodology advocating frequent releases in short
+    development cycles with 12 core practices taken to extreme levels. Emphasizes
+    Pair Programming, TDD, Continuous Integration, Refactoring, Small Releases,
+    Collective Code Ownership, Simple Design, and Planning Game. Engineering practices
+    are grouped into fine-scale feedback, continuous process, shared understanding,
+    and programmer welfare.
+  methodologyKind: agile
+  origin: "Kent Beck, Ward Cunningham, Ron Jeffries"
+  yearIntroduced: "1996"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:feature-driven-development
+attributes:
+  displayName: "Feature-Driven Development (FDD)"
+  description: |
+    An agile methodology organizing software development around building small,
+    client-valued features in short, predictable cycles. Five-step process: Develop
+    Overall Model, Build Features List, Plan by Feature, Design by Feature, Build by
+    Feature. Particularly suited for large teams (15-500+ developers) and enterprise
+    projects requiring rigorous tracking with high visibility of progress.
+  methodologyKind: agile
+  origin: "Jeff De Luca, Peter Coad"
+  yearIntroduced: "1997"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:gastown
+attributes:
+  displayName: "Gas Town"
+  description: |
+    A multi-agent orchestration framework for AI-driven software development providing
+    infrastructure roles (Mayor, Deacon, Witness, Refinery), worker roles (Crew,
+    Polecats, Dogs), and a git-backed work unit system (Beads, Convoys, Molecules).
+    Governed by GUPP (Gas Town Universal Propulsion Principle), MEOW (Molecular
+    Expression of Work), and NDI (Nondeterministic Idempotence) for coordinating
+    parallel agent execution with persistent attribution.
+  methodologyKind: orchestration
+  origin: "Steve Yegge"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:gsd
+attributes:
+  displayName: "GSD (Get Shit Done)"
+  description: |
+    Systematic planning, research, execution, and verification workflows adapted for
+    AI-assisted development. Core workflows include New Project Initialization with
+    parallel domain research, Phase Discussion for capturing implementation
+    preferences, Phase Planning with agent-based research and quality gates, and
+    Phase Execution with parallel task execution, atomic git commits, and
+    verification loops.
+  methodologyKind: ai-assisted
+  origin: "glittercowboy"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:hypothesis-driven-development
+attributes:
+  displayName: "Hypothesis-Driven Development"
+  description: |
+    A Lean Startup methodology treating product features as scientific experiments.
+    Teams formulate testable hypotheses about outcomes and measure whether features
+    achieve them through rigorous A/B testing and data analysis. Philosophy: build
+    to learn, not to launch. Every feature is an experiment with measurable success
+    criteria; every experiment is a learning opportunity to validate or invalidate
+    assumptions.
+  methodologyKind: research
+  origin: "Eric Ries (The Lean Startup)"
+  yearIntroduced: "2011"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:impact-mapping
+attributes:
+  displayName: "Impact Mapping"
+  description: |
+    A strategic planning technique connecting business goals to deliverable features
+    through a four-level hierarchy: Goal (Why), Actor (Who), Impact (How), and
+    Deliverable (What). Prevents scope creep by ensuring every feature decision
+    traces back to a business objective and the behavioral changes needed to achieve
+    it. Enables better prioritization by focusing teams on outcomes rather than
+    outputs.
+  methodologyKind: design-thinking
+  origin: "Gojko Adzic"
+  yearIntroduced: "2012"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:jobs-to-be-done
+attributes:
+  displayName: "Jobs to Be Done (JTBD)"
+  description: |
+    A framework focusing on understanding the progress customers are trying to make
+    rather than on products, features, or personas. Central insight: people hire
+    products to make progress on jobs. Analyzes switching behavior through four
+    forces: Push (current problems), Pull (new solution appeal), Anxiety (concerns
+    about switching), and Inertia (habit of current solution). Job stories replace
+    traditional user stories.
+  methodologyKind: design-thinking
+  origin: "Clayton Christensen, Alan Klement, Intercom"
+  yearIntroduced: "2016"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:kanban
+attributes:
+  displayName: "Kanban"
+  description: |
+    A visual workflow management method emphasizing continuous flow rather than
+    fixed iterations. Six core practices: visualize workflow, limit work in progress
+    (WIP), manage flow, make process policies explicit, implement feedback loops,
+    and improve collaboratively. Particularly suited for continuous delivery teams,
+    support/maintenance work with unpredictable demand, and operations teams managing
+    incidents and requests.
+  methodologyKind: agile
+  origin: "David J. Anderson (adapted from Toyota Production System)"
+  yearIntroduced: "2007"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - topic:agent-orchestration-products
+---
+nodeKind: Methodology
+id: methodology:maestro
+attributes:
+  displayName: "Maestro App Factory"
+  description: |
+    Multi-agent orchestration mimicking high-performing human dev teams for
+    production-ready applications. Three core agent roles (Product Manager, Architect,
+    Coders) with strict separation of concerns: architects never write code, coders
+    never self-review. Features operating modes (Bootstrap, Development, Hotfix,
+    Maintenance), a knowledge graph for institutional memory, quality gates with
+    DRY/YAGNI enforcement, and parallel coder dispatch.
+  methodologyKind: orchestration
+  origin: "SnapdragonPartners"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:metaswarm
+attributes:
+  displayName: "Metaswarm"
+  description: |
+    Autonomous multi-agent orchestration managing the complete lifecycle from GitHub
+    issue to merged pull request. Coordinates 12 specialized agents through a 7-phase
+    workflow with quality gates as blocking state transitions, adversarial reviews
+    with fresh reviewers (preventing anchoring bias), mandatory TDD with 100%
+    coverage targets, human checkpoints at critical boundaries, and knowledge
+    persistence across sessions.
+  methodologyKind: research
+  origin: "David Sifry"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:ontology-driven-development
+attributes:
+  displayName: "Ontology-Driven Development (ODD)"
+  description: |
+    An enhanced enterprise ontology engineering methodology addressing the practical
+    challenges causing 70-80% of ontology projects to fail. Incorporates modular
+    complexity management, multi-stakeholder alignment framework, enterprise tool
+    integration patterns, advanced quality convergence with business value measurement,
+    and domain-specific adaptation for regulated industries and complex domains.
+  methodologyKind: design-thinking
+  origin: "Enterprise ontology engineering research"
+  yearIntroduced: "2026"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:pilot-shell
+attributes:
+  displayName: "Pilot Shell"
+  description: |
+    A spec-driven development framework with strict TDD, quality hooks, and persistent
+    memory. Enforces spec-driven planning, strict Red-Green-Refactor cycles, automated
+    quality pipelines (lint/format/typecheck), and cross-session persistent memory.
+    Supports feature mode (semantic search to spec to TDD), bugfix mode (analysis to
+    behavior contract to test-before-fix), and codebase sync mode for convention
+    discovery.
+  methodologyKind: ai-assisted
+  origin: "Max Ritter"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:planning-with-files
+attributes:
+  displayName: "Planning with Files"
+  description: |
+    A persistent markdown-based planning methodology inspired by Manus AI's context
+    engineering patterns. Treats the filesystem as extended memory for volatile agent
+    workflows using a three-file pattern (task_plan.md, findings.md, progress.md).
+    Implements 5 Manus Principles: Filesystem as Memory, Attention Manipulation,
+    Error Persistence, Goal Tracking, and Completion Verification, with a 2-action
+    rule for systematic findings capture.
+  methodologyKind: ai-assisted
+  origin: "OthmanAdi"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:process-hardening
+attributes:
+  displayName: "Process Hardening Patterns"
+  description: |
+    Reusable patterns for hardening babysitter processes extracted from process
+    retrospectives. Three composable patterns: safeTask for error recovery with
+    deviation tracking, circuit breaker for runaway implementation loops, and
+    verification-blocks-delivery gate for downstream phase protection. These patterns
+    compose naturally and can be imported into any babysitter process to improve
+    robustness. Demonstrated score improvement from 68.5 to 84.3/100.
+  methodologyKind: hybrid
+  origin: "Babysitter community"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:rpikit
+attributes:
+  displayName: "RPIKit (Research-Plan-Implement)"
+  description: |
+    Implements the Research-Plan-Implement framework for disciplined AI-assisted
+    software development. Enforces the Iron Law: do NOT explore the codebase until
+    the problem is understood. Features stakes-based rigor scaling (low/medium/high),
+    test-first enforcement, verification-before-completion, human approval gates
+    between major phases, and soft-gating reviews that preserve user autonomy.
+  methodologyKind: ai-assisted
+  origin: "Matthew Boston"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:ruflo
+attributes:
+  displayName: "Ruflo"
+  description: |
+    A multi-agent orchestration platform deploying 60+ specialized agents in
+    coordinated swarms with self-learning and self-optimizing architecture. Features
+    Q-Learning-based smart routing (Booster/Medium/Complex paths), hierarchical
+    agent topologies (Queen/Worker), multiple consensus protocols (Raft/Byzantine/
+    Gossip/CRDT), the RuVector intelligence layer for continuous self-improvement,
+    and Agent Booster WASM fast-path for simple transforms at 352x speed.
+  methodologyKind: orchestration
+  origin: "ruvnet"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:rup
+attributes:
+  displayName: "Rational Unified Process (RUP)"
+  description: |
+    A comprehensive iterative software development framework with four phases
+    (Inception, Elaboration, Construction, Transition) and six core workflows
+    (Business Modeling, Requirements, Analysis & Design, Implementation, Testing,
+    Deployment). Emphasizes use-case driven development, architecture-centric design,
+    risk-driven iteration planning, and formal milestones (LCO, LCA, IOC, GA) for
+    phase gate decisions.
+  methodologyKind: plan-driven
+  origin: "Rational Software (Grady Booch, Ivar Jacobson, James Rumbaugh)"
+  yearIntroduced: "1990s"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:scrum
+attributes:
+  displayName: "Scrum"
+  description: |
+    A lightweight agile framework for developing, delivering, and sustaining complex
+    products through iterative progress via sprints. Founded on empirical process
+    control with three pillars: Transparency, Inspection, and Adaptation. Three roles
+    (Product Owner, Scrum Master, Development Team), five events (Sprint, Sprint
+    Planning, Daily Scrum, Sprint Review, Sprint Retrospective), and three artifacts
+    (Product Backlog, Sprint Backlog, Increment).
+  methodologyKind: agile
+  origin: "Ken Schwaber, Jeff Sutherland"
+  yearIntroduced: "1995"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - topic:agent-orchestration-products
+---
+nodeKind: Methodology
+id: methodology:shape-up
+attributes:
+  displayName: "Shape Up"
+  description: |
+    Basecamp's methodology for building products through fixed-time, variable-scope
+    cycles. Emphasizes appetite-driven development (how much time to spend, not how
+    long it will take), thoughtful upfront shaping, strategic betting by senior team,
+    autonomous team execution, and hill charts for visual progress tracking. Features
+    6-week cycles with circuit breaker (no automatic extensions) and no backlogs.
+  methodologyKind: agile
+  origin: "Ryan Singer, Basecamp"
+  yearIntroduced: "2019"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:spec-kit
+attributes:
+  displayName: "Spec Kit"
+  description: |
+    GitHub's spec-driven development methodology where specifications define what
+    before how, with multi-step progressive refinement. Pipeline: constitution
+    (governance) to specification (requirements) to plan (architecture) to tasks
+    (actionable steps) to implementation (code). Supports greenfield, brownfield,
+    and creative exploration modes with quality-gated convergence and human approval
+    gates between phases.
+  methodologyKind: quality-focused
+  origin: "GitHub"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:spiral-model
+attributes:
+  displayName: "Spiral Model"
+  description: |
+    A risk-driven software development process combining iterative development with
+    systematic aspects of waterfall. Development progresses through multiple spirals,
+    each containing four phases: Planning (objectives, alternatives, constraints),
+    Risk Analysis (identify and resolve risks through prototyping), Engineering
+    (develop and verify), and Evaluation (review and plan next spiral). Radial
+    dimension represents cumulative cost, angular dimension represents phase progress.
+  methodologyKind: plan-driven
+  origin: "Barry Boehm"
+  yearIntroduced: "1986"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:superpowers
+attributes:
+  displayName: "Superpowers Extended"
+  description: |
+    A complete agentic software development lifecycle with structured skills,
+    subagent-driven execution, and quality gates at every stage. Enforces disciplined
+    workflows: brainstorm before coding, test before implementing, verify before
+    claiming completion. Includes Socratic brainstorming, bite-sized TDD task
+    planning, batch execution with checkpoints, fresh agent per task with two-stage
+    review, and systematic 4-phase debugging.
+  methodologyKind: ai-assisted
+  origin: "pcvelz (community fork of obra/superpowers)"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:v-model
+attributes:
+  displayName: "V-Model"
+  description: |
+    An SDLC model where execution happens in a sequential V-shape (Verification and
+    Validation model). The left side represents decomposition of requirements and
+    system specifications, while the right side represents integration and validation.
+    Each development phase has a corresponding testing phase: Requirements Analysis
+    maps to Acceptance Testing, System Design to System Testing, Architectural Design
+    to Integration Testing, and Module Design to Unit Testing.
+  methodologyKind: plan-driven
+  origin: "Evolved from waterfall"
+  yearIntroduced: "1980s"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:waterfall
+attributes:
+  displayName: "Waterfall"
+  description: |
+    The linear and sequential approach to software development where progress flows
+    through distinct phases: Requirements, Design, Implementation, Testing, Deployment,
+    and Maintenance. Each phase must be completed and formally approved before the
+    next begins. Document-driven with heavy documentation requirements, phase gates
+    requiring formal approval, and requirements fixed early. Well-suited for stable
+    requirements, regulatory environments, and fixed-price contracts.
+  methodologyKind: plan-driven
+  origin: "Winston W. Royce"
+  yearIntroduced: "1970"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:adversarial-spec-debates
+attributes:
+  displayName: "Adversarial Specification Debates"
+  description: |
+    A quality-focused methodology where two or more agents debate specifications and
+    approaches through structured adversarial collaboration. A proposer agent creates
+    an initial specification, opponent agents challenge assumptions and find flaws,
+    the proposer defends or adapts, and multiple rounds of debate refine the spec.
+    A judge agent evaluates arguments and determines the strongest specification
+    through iterative adversarial refinement.
+  methodologyKind: quality-focused
+  origin: "Babysitter community"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:agile
+attributes:
+  displayName: "Agile (Generic)"
+  description: |
+    A generic agile development loop implementing sprints, iteration cycles, and
+    continuous delivery. Implements agile/scrum methodology with product backlog
+    management, sprint planning (select stories, estimate, commit), sprint execution
+    (develop, test, integrate), sprint review (demo, validate acceptance criteria),
+    sprint retrospective (reflect, improve), incremental releases, and velocity
+    tracking with continuous improvement.
+  methodologyKind: hybrid
+  origin: "Agile Manifesto authors"
+  yearIntroduced: "2001"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:base44
+attributes:
+  displayName: "Base44"
+  description: |
+    Base44-inspired conversational development using natural language prompts to build
+    apps with AI agents. Implements a vibe coding approach where users describe app
+    ideas in natural language, AI agents generate complete applications (frontend and
+    backend), users review and provide conversational feedback, and AI refines through
+    iterative conversational rounds until deployment. Emphasizes zero-friction
+    development from idea to deployed app.
+  methodologyKind: ai-assisted
+  origin: "Base44"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:bottom-up
+attributes:
+  displayName: "Bottom-Up Development"
+  description: |
+    A development approach that builds foundational components first, then composes
+    them upward. Identifies primitive/foundational components, implements and
+    thoroughly tests base components, builds a reusable component library, composes
+    base components into higher-level components, tests composed components, and
+    continues composing upward until the system is complete with final integration.
+  methodologyKind: orchestration
+  origin: "Classic software engineering"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:build-realtime-remediation
+attributes:
+  displayName: "Build Realtime Remediation"
+  description: |
+    A continuous build monitoring and automated remediation methodology. Monitors
+    CI/build state in real-time, detects build/test failures, analyzes failure logs
+    and error messages, determines root causes, applies automated fixes, and re-runs
+    builds to verify fixes. Iterates until build succeeds or maximum remediation
+    attempts are reached, providing autonomous CI failure resolution.
+  methodologyKind: ai-assisted
+  origin: "Babysitter community"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:consensus-and-voting-mechanisms
+attributes:
+  displayName: "Consensus and Voting Mechanisms"
+  description: |
+    A multi-agent democratic decision-making methodology where multiple agents
+    independently solve the same task, each proposes a solution, all agents review
+    and vote on all proposals, and consensus is reached through configurable voting
+    mechanisms (majority, supermajority, ranked choice). If no consensus is reached,
+    the process iterates with refinements until agreement emerges from the collective
+    intelligence of the agent group.
+  methodologyKind: orchestration
+  origin: "Babysitter community"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:deep-research
+attributes:
+  displayName: "Deep Research"
+  description: |
+    A multi-stage investigation methodology with divergent exploration, convergent
+    synthesis, and source verification. Seven stages: Frame (clarify and decompose
+    question), Diverge (enumerate candidate sources), Gather (fetch and summarize
+    evidence), Verify (cross-check claims, flag unsourced assertions), Converge
+    (synthesize findings), Critique (adversarial review for gaps and bias), and
+    Finalize (produce report with inline citations).
+  methodologyKind: research
+  origin: "Babysitter community"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:devin
+attributes:
+  displayName: "Devin-Style Workflow"
+  description: |
+    Inspired by Devin AI, an autonomous software engineering workflow with four
+    phases: Planning (analyze requirements, design architecture), Coding (implement
+    solution), Debugging (iterative fix cycles with quality threshold), and Deployment
+    (ship verified code). Features iterative refinement with configurable quality
+    targets and maximum debug iterations before declaring convergence or failure.
+  methodologyKind: ai-assisted
+  origin: "Cognition AI (Devin)"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:evolutionary
+attributes:
+  displayName: "Evolutionary Algorithm"
+  description: |
+    Applies genetic/evolutionary algorithms to solution search. Initializes a
+    population of candidate solutions, evaluates fitness of each, selects fittest
+    candidates as parents, creates offspring through crossover (combining parent
+    traits), applies random mutations to introduce variation, replaces least fit
+    with offspring, and repeats until convergence or maximum generations. Suited
+    for exploring large solution spaces with multiple competing approaches.
+  methodologyKind: research
+  origin: "Classic evolutionary computing"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:graph-of-thoughts
+attributes:
+  displayName: "Graph of Thoughts"
+  description: |
+    Explores the solution space as a directed graph with branching, merging, and
+    backtracking. Builds a graph of thought nodes, branches at decision points to
+    generate alternative approaches, evaluates each branch independently, prunes
+    low-scoring branches, allows merging when branches converge to similar solutions,
+    supports backtracking to explore alternative paths, and navigates the graph to
+    find the optimal solution path. Extends tree-of-thoughts with merge operations.
+  methodologyKind: orchestration
+  origin: "ETH Zurich research"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:plan-and-execute
+attributes:
+  displayName: "Plan-and-Execute"
+  description: |
+    A structured agent methodology that generates a detailed plan first, then executes
+    each step with optional approval gates between steps. The planning phase produces
+    a comprehensive task breakdown, the execution phase works through steps
+    sequentially with validation, and approval gates provide human oversight at
+    configurable granularity. Simple yet effective for decomposing complex tasks
+    into manageable, verifiable steps.
+  methodologyKind: orchestration
+  origin: "Babysitter community"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:quality-gated-six-phase
+attributes:
+  displayName: "Quality-Gated Six-Phase"
+  description: |
+    A six-phase quality-gated development methodology: design, planning,
+    implementation (subagent-TDD), verification, debugging, and finishing. Every
+    phase task is fronted by a breakpoint gate with a canonical breakpointId so
+    users can auto-approve via rules. Reviewer/fixer loops inside implementation
+    use robust-rejection escalation via nStrikesEscalation. Distilled from
+    joe-habu/superbabysitter with composable individual phases.
+  methodologyKind: quality-focused
+  origin: "joe-habu/superbabysitter"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:ralph
+attributes:
+  displayName: "Ralph Wiggum Loop"
+  description: |
+    A simple, persistent iterative execution loop that keeps trying until it succeeds
+    or reaches maximum iterations. Named after Ralph Wiggum from The Simpsons for its
+    cheerful persistence. Methodology: execute task, check if done, if not iterate
+    again. Provides a minimal orchestration pattern for tasks that benefit from
+    repeated attempts with accumulated context from previous iterations.
+  methodologyKind: ai-assisted
+  origin: "Babysitter community"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:self-assessment
+attributes:
+  displayName: "Self-Assessment Loop"
+  description: |
+    A self-critical iterative improvement methodology where an agent executes a task,
+    critically evaluates its own work against defined criteria, identifies weaknesses
+    and improvement opportunities, and iteratively refines until a quality threshold
+    is met. Configurable assessment criteria and quality thresholds allow tailoring
+    the self-evaluation rigor to the task at hand, enabling autonomous quality
+    convergence.
+  methodologyKind: research
+  origin: "Babysitter community"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:spec-driven-development
+attributes:
+  displayName: "Spec-Driven Development"
+  description: |
+    A GitHub Spec-Kit inspired workflow where executable specifications drive
+    implementation through a five-step development cycle: Constitution (establish
+    governance principles), Specification (define requirements and user stories),
+    Technical Plan (document stack and architecture), Task Breakdown (generate
+    actionable steps), and Implementation (execute according to plan). Supports
+    greenfield, brownfield, and creative exploration modes.
+  methodologyKind: quality-focused
+  origin: "GitHub (Spec-Kit)"
+edges:
+  applies_to:
+    - domain:software-engineering
+    - topic:agent-process-library
+---
+nodeKind: Methodology
+id: methodology:state-machine-orchestration
+attributes:
+  displayName: "State Machine Orchestration"
+  description: |
+    Explicit state management with formal state machine semantics for workflow
+    orchestration. Defines explicit states (INIT, PLANNING, EXECUTING, VALIDATING,
+    COMPLETE, FAILED), conditional transitions with guards, entry/exit actions for
+    each state, state history tracking, and transition validation. Provides
+    deterministic, predictable workflows with clear state transitions and validation
+    at each step for complex multi-phase processes.
+  methodologyKind: orchestration
+  origin: "Babysitter community"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:tdd
+attributes:
+  displayName: "Test-Driven Development (TDD)"
+  description: |
+    The classic Red/Green/Refactor loop per feature unit. For each unit of work:
+    Red (write a failing test expressing the next small requirement), Green (write
+    the minimum code to make it pass), Refactor (clean up with tests still green).
+    An outer loop drives the full feature by sequencing units. Stops early if a unit
+    cannot reach green within maxIterations as a signal to reconsider the design
+    rather than pile on more code.
+  methodologyKind: quality-focused
+  origin: "Kent Beck"
+  yearIntroduced: "1999"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:top-down
+attributes:
+  displayName: "Top-Down Development"
+  description: |
+    A development approach starting with high-level design and decomposing into
+    implementation details. Begins with overall system architecture and requirements,
+    designs high-level components and interfaces, decomposes each into subcomponents,
+    continues until reaching implementable units, implements from top to bottom using
+    stubs/mocks for lower levels, progressively refines stubs with real implementations,
+    and integrates from top to bottom.
+  methodologyKind: orchestration
+  origin: "Classic software engineering"
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:spec-kit-brownfield
+attributes:
+  displayName: "Spec Kit (Brownfield)"
+  description: |
+    Brownfield variant of the Spec Kit methodology — specification-driven
+    development applied to existing codebases with legacy constraints.
+  methodologyKind: quality-focused
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:spec-kit-constitution
+attributes:
+  displayName: "Spec Kit (Constitution)"
+  description: |
+    Constitution variant of the Spec Kit methodology — establishes the
+    foundational specification contract for a project before implementation.
+  methodologyKind: quality-focused
+edges:
+  applies_to:
+    - domain:software-engineering
+---
+nodeKind: Methodology
+id: methodology:spec-kit-quality-checklist
+attributes:
+  displayName: "Spec Kit (Quality Checklist)"
+  description: |
+    Quality checklist variant of the Spec Kit methodology — verification-focused
+    specification gates ensuring implementation meets acceptance criteria.
+  methodologyKind: quality-focused
+edges:
+  applies_to:
+    - domain:software-engineering

@@ -1,0 +1,135 @@
+---
+nodeKind: EvalResult
+id: eval-result:gpqa.gpt-5.001
+attributes:
+  evalRunId: eval-run:gpqa.gpt-5.2025-08
+  metricName: accuracy
+  score: 0.879
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-08-07T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gpqa.gpt-5.2025-08
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:human-eval.gpt-5.001
+attributes:
+  evalRunId: eval-run:human-eval.gpt-5.2025-08
+  metricName: pass_rate
+  score: 0.96
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-08-07T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:human-eval.gpt-5.2025-08
+  scored_against:
+    - target: benchmark:human-eval
+---
+nodeKind: EvalResult
+id: eval-result:mmlu.o1.001
+attributes:
+  evalRunId: eval-run:mmlu.o1.2024-12
+  metricName: accuracy
+  score: 0.92
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-12-05T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mmlu.o1.2024-12
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:math.o3.001
+attributes:
+  evalRunId: eval-run:math.o3.2025-04
+  metricName: accuracy
+  score: 0.965
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-04-16T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:math.o3.2025-04
+  scored_against:
+    - target: benchmark:math
+---
+nodeKind: EvalResult
+id: eval-result:bfcl.gpt-5.001
+attributes:
+  evalRunId: eval-run:bfcl.gpt-5.2025-08
+  metricName: accuracy
+  score: 0.74
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-08-07T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:bfcl.gpt-5.2025-08
+  scored_against:
+    - target: benchmark:berkeley-function-calling
+---
+nodeKind: EvalResult
+id: eval-result:gpqa-diamond.gpt-5.001
+attributes:
+  evalRunId: eval-run:gpqa-diamond.gpt-5.2025-08
+  metricName: accuracy
+  score: 0.889
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-08-07T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gpqa-diamond.gpt-5.2025-08
+  scored_against:
+    - target: benchmark:gpqa
+---
+nodeKind: EvalResult
+id: eval-result:human-eval-plus.gpt-5.001
+attributes:
+  evalRunId: eval-run:human-eval-plus.gpt-5.2025-08
+  metricName: pass@1
+  score: 0.92
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-08-07T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:human-eval-plus.gpt-5.2025-08
+  scored_against:
+    - target: benchmark:bigcode-evalplus
+---
+nodeKind: EvalResult
+id: eval-result:gpqa-diamond.gpt-5-4.2026-03-17.accuracy
+attributes:
+  evalRunId: eval-run:gpqa-diamond.gpt-5-4.2026-03-17
+  metricName: accuracy
+  score: 0.93
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2026-03-17T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gpqa-diamond.gpt-5-4.2026-03-17
+  scored_against:
+    - target: benchmark:gpqa
+---
+nodeKind: EvalResult
+id: eval-result:gpqa-diamond.gpt-5-4-mini.2026-03-17.accuracy
+attributes:
+  evalRunId: eval-run:gpqa-diamond.gpt-5-4-mini.2026-03-17
+  metricName: accuracy
+  score: 0.88
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2026-03-17T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gpqa-diamond.gpt-5-4-mini.2026-03-17
+  scored_against:
+    - target: benchmark:gpqa

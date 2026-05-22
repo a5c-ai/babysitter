@@ -1,0 +1,17 @@
+nodeKind: Tool
+id: tool:clippy
+attributes:
+  displayName: "Clippy"
+  homepageUrl: "https://github.com/rust-lang/rust-clippy"
+  kind: linter
+  language: language:rust
+  description: |
+    Lint collection for catching common mistakes and improving Rust code.
+edges:
+  belongs_to_language:
+    - language:rust
+  used_for:
+    - target: skill-area:code-quality
+  alternative_to:
+    - target: tool:rustfmt
+      comparison: "Rust code quality — Clippy is a linter; rustfmt is a formatter"

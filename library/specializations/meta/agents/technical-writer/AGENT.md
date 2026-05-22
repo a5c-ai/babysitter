@@ -11,6 +11,11 @@ expertise:
   - API documentation
   - Style guide adherence
   - Clear communication
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:technical-writing]
+  topics: [topic:developer-experience, topic:documentation]
+  roles: [role:tech-lead, role:platform-engineer]
 ---
 
 # Technical Writer Agent

@@ -1,0 +1,17 @@
+nodeKind: SkillArea
+id: skill-area:graphql-schema-design
+attributes:
+  displayName: "GraphQL Schema Design"
+  description: |
+    Designing GraphQL schemas: type modeling, query/mutation/subscription
+    boundaries, Relay-style pagination, federation across subgraphs
+    (Apollo Federation v2), persisted queries, and N+1 mitigation via
+    DataLoader patterns.
+  domains:
+    - domain:web-development
+    - topic:api-design
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary

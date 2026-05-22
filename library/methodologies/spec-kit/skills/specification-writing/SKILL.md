@@ -2,17 +2,14 @@
 name: specification-writing
 description: Write feature specifications as requirements and user stories with acceptance criteria, focusing on business value and testable conditions.
 allowed-tools: Read, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Specification Writing
-
-## Overview
-
-Write comprehensive feature specifications from business-level descriptions. Produces requirements, user stories, acceptance criteria, and scope boundaries that define WHAT to build without prescribing HOW.
-
-## When to Use
-
-- Defining a new feature before planning or implementation
 - Formalizing vague feature requests into structured requirements
 - Clarifying scope boundaries for a feature area
 - Establishing acceptance criteria for user stories

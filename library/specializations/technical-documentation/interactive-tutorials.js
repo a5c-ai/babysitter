@@ -3,6 +3,12 @@
  * @description Complete interactive tutorial and learning content creation process with code playgrounds, executable notebooks, and step-by-step walkthroughs for learning-oriented documentation
  * @inputs { topic: string, targetAudience: string, learningObjectives: array, prerequisites: array, technologies: array, tutorialFormat: string, outputDir: string }
  * @outputs { success: boolean, tutorialFiles: array, playgroundLinks: array, notebookFiles: array, qualityScore: number, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:technical-documentation]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:tutorial-design]
+ *   roles: [role:technical-writer, role:documentation-engineer]
+ *   workflows: [workflow:documentation-sprint]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

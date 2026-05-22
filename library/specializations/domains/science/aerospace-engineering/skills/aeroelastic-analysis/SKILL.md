@@ -18,6 +18,11 @@ metadata:
     - aeroelasticity
     - flutter
     - dynamics
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:sensor-fusion]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Aeroelastic Analysis Skill

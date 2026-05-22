@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: algorithm-development
   phase: 6
+graph:
+  domains: [domain:quantum-computing]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:np-hard-heuristics, skill-area:machine-learning-frameworks]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:computational-scientist]
 ---
 
 # Variational Algorithm Specialist

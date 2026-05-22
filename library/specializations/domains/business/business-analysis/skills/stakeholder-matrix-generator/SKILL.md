@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-004
   category: Stakeholder Analysis
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:stakeholder-management, skill-area:business-analysis, skill-area:change-management]
+  workflows: [workflow:market-analysis]
+  roles: [role:business-analyst, role:organizational-development-specialist]
 ---
 
 # Stakeholder Matrix Generator

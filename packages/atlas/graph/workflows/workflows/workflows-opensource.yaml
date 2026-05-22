@@ -1,0 +1,87 @@
+---
+nodeKind: Workflow
+id: workflow:oss-contribution-review
+attributes:
+  displayName: "Open Source Contribution Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-contribution"
+  complexity: single-team
+  description: |
+    Reviews employee contributions to external open-source projects — IP
+    clearance, license compatibility check, sensitive code scanning, and
+    approval workflow. Excludes internal open-source project management.
+edges:
+  involves_role:
+    - target: role:license-auditor
+    - target: role:security-reviewer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:gitops
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:dependency-audit
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:open-source-program-office
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:license-compliance-audit
+attributes:
+  displayName: "License Compliance Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Scans all third-party dependencies and transitive licenses for compliance
+    with corporate license policy — generating SBOM reports, flagging copyleft
+    contamination risks, and tracking exception approvals. Excludes contract negotiation.
+edges:
+  involves_role:
+    - target: role:license-auditor
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:gitops
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:dependency-audit
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:open-source-program-office
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:community-release
+attributes:
+  displayName: "Community Open Source Release"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Publishes internal projects as open-source — repository preparation,
+    license header insertion, sensitive content scrubbing, documentation
+    generation, and community engagement setup. Excludes ongoing community management.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:tech-lead
+    - target: role:license-auditor
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:gitops
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:generate-changelogs
+  performed_by_org_unit:
+    - target: org-unit:open-source-program-office
+    - target: org-unit:devrel-team
+    - target: org-unit:engineering

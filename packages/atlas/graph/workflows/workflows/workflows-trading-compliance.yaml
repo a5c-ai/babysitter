@@ -1,0 +1,116 @@
+---
+nodeKind: Workflow
+id: workflow:best-execution-review
+attributes:
+  displayName: "Best Execution Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Analyzes execution quality against MiFID II and Reg NMS
+    best-execution benchmarks — measuring implementation shortfall versus
+    arrival price, VWAP, and TWAP benchmarks, evaluating venue selection
+    and smart order routing effectiveness, analyzing broker algorithm
+    performance with per-broker scorecards, reviewing execution costs
+    across explicit (commissions, exchange fees) and implicit (spread,
+    market impact) components, assessing order handling and routing
+    practices for conflicts of interest, and preparing best-execution
+    policy compliance documentation. Produces best-execution review
+    reports, broker ranking tables, and regulatory compliance
+    attestations. Excludes execution algorithm development and order
+    routing infrastructure changes.
+edges:
+  involves_role:
+    - target: role:compliance-officer
+    - target: role:trading-systems-engineer
+    - target: role:quantitative-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:regulatory-finance
+    - target: domain:trading-operations
+    - target: domain:capital-markets
+  triggers_responsibility:
+    - target: responsibility:regulatory-reporting
+  performed_by_org_unit:
+    - target: org-unit:trading-compliance
+    - target: org-unit:trading-desk
+---
+nodeKind: Workflow
+id: workflow:transaction-reporting-cycle
+attributes:
+  displayName: "Transaction Reporting Cycle"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Manages T+1 regulatory transaction reporting to financial
+    authorities — extracting reportable trades from order management
+    systems with proper instrument classification (ISIN, CFI codes),
+    enriching transaction records with counterparty LEI identifiers and
+    trader identification, validating report fields against EMIR, MiFIR,
+    and CAT schema requirements, submitting reports to trade repositories
+    and regulatory filing systems within mandated deadlines, processing
+    rejection feedback and resubmitting corrected reports, and
+    maintaining audit trails for regulatory examination readiness.
+    Produces submission confirmation reports, rejection rate dashboards,
+    and regulatory deadline compliance metrics. Excludes trade execution
+    and regulatory policy interpretation.
+edges:
+  involves_role:
+    - target: role:compliance-officer
+    - target: role:trading-systems-engineer
+    - target: role:operational-risk-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:kafka-stream-processing
+  applies_to_domain:
+    - target: domain:regulatory-finance
+    - target: domain:trading-operations
+  triggers_responsibility:
+    - target: responsibility:regulatory-reporting
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:trading-compliance
+    - target: org-unit:trading-desk
+---
+nodeKind: Workflow
+id: workflow:trading-surveillance-review
+attributes:
+  displayName: "Trading Surveillance Review"
+  workflowKind: governance
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Monitors trading activity for market abuse and regulatory
+    violations — running surveillance algorithms to detect insider trading
+    patterns (trading ahead of material non-public information),
+    identifying potential market manipulation (layering, spoofing, wash
+    trades, marking the close), monitoring for front-running of client
+    orders, reviewing cross-market alert correlations, investigating
+    flagged alerts with trade reconstruction and communication review, and
+    escalating confirmed suspicious activity to compliance leadership for
+    SAR filing. Produces surveillance alert dashboards, investigation case
+    files, and regulatory examination-ready audit logs. Excludes
+    regulatory policy creation and enforcement action proceedings.
+edges:
+  involves_role:
+    - target: role:compliance-officer
+    - target: role:risk-analyst
+    - target: role:security-risk-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:regulatory-finance
+    - target: domain:capital-markets
+    - target: domain:trading-operations
+  triggers_responsibility:
+    - target: responsibility:regulatory-reporting
+    - target: responsibility:risk-reporting
+  performed_by_org_unit:
+    - target: org-unit:trading-compliance
+    - target: org-unit:market-risk-team

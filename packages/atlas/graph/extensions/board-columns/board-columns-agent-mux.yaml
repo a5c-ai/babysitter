@@ -1,0 +1,45 @@
+nodeKind: BoardColumn
+id: board-column:agent-mux-backlog
+attributes:
+  displayName: "Backlog"
+  order: 1
+  workflowState: "backlog"
+  terminalForCompleted: false
+edges:
+  column_of:
+    - target: board-snapshot:agent-mux-2026-05-02
+---
+nodeKind: BoardColumn
+id: board-column:agent-mux-in-progress
+attributes:
+  displayName: "In Progress"
+  order: 2
+  workflowState: "in-progress"
+  wipLimit: 5
+  terminalForCompleted: false
+edges:
+  column_of:
+    - target: board-snapshot:agent-mux-2026-05-02
+---
+nodeKind: BoardColumn
+id: board-column:agent-mux-in-review
+attributes:
+  displayName: "In Review"
+  order: 3
+  workflowState: "review"
+  wipLimit: 3
+  terminalForCompleted: false
+edges:
+  column_of:
+    - target: board-snapshot:agent-mux-2026-05-02
+---
+nodeKind: BoardColumn
+id: board-column:agent-mux-done
+attributes:
+  displayName: "Done"
+  order: 4
+  workflowState: "done"
+  terminalForCompleted: true
+edges:
+  column_of:
+    - target: board-snapshot:agent-mux-2026-05-02

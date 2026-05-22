@@ -1,0 +1,651 @@
+# ============================================================================
+# Krate Connectivity — Inbound edges and isolated-entity wiring
+#
+# This file adds edges FROM existing graph entities TO krate entities,
+# and connects the 13 krate entities that previously had zero external
+# connections (presentations, claims, platform-services).
+#
+# Every referenced ID has been verified against index.json.
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# 1. ROLES that work with Krate (uses integrates_with → platform:krate)
+# ---------------------------------------------------------------------------
+---
+nodeKind: Role
+id: role:platform-engineer
+attributes:
+  displayName: "Platform Engineer"
+  description: |
+    Engineers internal platforms, paved roads, and self-service workflows that
+    help product teams ship and operate software reliably.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Platform engineers build and operate Krate as their primary forge"
+---
+nodeKind: Role
+id: role:site-reliability-engineer
+attributes:
+  displayName: "Site Reliability Engineer"
+  description: |
+    Owns service reliability practices including availability targets, incident
+    response, observability, and production risk reduction.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "SREs ensure Krate availability, latency, and error budgets"
+---
+nodeKind: Role
+id: role:sre
+attributes:
+  displayName: "SRE"
+  description: |
+    Site reliability role responsible for production health, operational
+    automation, error-budget discipline, and incident learning loops.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "SREs monitor and maintain Krate platform health"
+---
+nodeKind: Role
+id: role:devops-engineer
+attributes:
+  displayName: "DevOps Engineer"
+  description: |
+    Builds and maintains delivery automation, infrastructure pipelines,
+    deployment workflows, and developer-operability practices.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "DevOps engineers configure CI pipelines and GitOps on Krate"
+---
+nodeKind: Role
+id: role:infrastructure-engineer
+attributes:
+  displayName: "Infrastructure Engineer"
+  description: |
+    Designs and operates compute, networking, storage, cluster, and runtime
+    infrastructure used by application platforms.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Infrastructure engineers manage the K8s clusters running Krate"
+---
+nodeKind: Role
+id: role:release-engineer
+attributes:
+  displayName: "Release Engineer"
+  description: |
+    Coordinates release trains, version promotion, rollout safety, rollback
+    readiness, and release process automation.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Release engineers use Krate pipelines for release management"
+---
+nodeKind: Role
+id: role:build-engineer
+attributes:
+  displayName: "Build Engineer"
+  description: |
+    Maintains build systems, dependency resolution, artifact generation, caching,
+    and repeatable compilation/test pipelines.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Build engineers maintain Krate CI pipeline definitions"
+---
+nodeKind: Role
+id: role:security-architect
+attributes:
+  displayName: "Security Architect"
+  description: |
+    Designs security controls, identity boundaries, policy models, threat
+    mitigations, and secure platform architecture.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Security architects design Krate RBAC and policy profiles"
+---
+nodeKind: Role
+id: role:DevSecOps-engineer
+attributes:
+  displayName: "DevSecOps Engineer"
+  description: |
+    Integrates security checks, policy enforcement, vulnerability remediation,
+    and compliance evidence into delivery pipelines.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "DevSecOps engineers integrate security scanning into Krate pipelines"
+---
+nodeKind: Role
+id: role:cloud-architect
+attributes:
+  displayName: "Cloud Architect"
+  description: |
+    Designs cloud infrastructure, service topology, networking, resilience, cost,
+    and governance patterns for platform deployments.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Cloud architects design multi-cluster Krate deployments"
+---
+nodeKind: Role
+id: role:head-of-platform
+attributes:
+  displayName: "Head of Platform"
+  description: |
+    Leads platform strategy, operating model, adoption roadmap, service
+    ownership, and investment priorities across platform teams.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Heads of platform own Krate adoption strategy and roadmap"
+---
+nodeKind: Role
+id: role:platform-product-manager
+attributes:
+  displayName: "Platform Product Manager"
+  description: |
+    Defines platform user needs, product roadmap, adoption metrics, and workflow
+    priorities for internal developer platforms.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Platform PMs define Krate feature priorities and user workflows"
+---
+nodeKind: Role
+id: role:developer-experience-engineer
+attributes:
+  displayName: "Developer Experience Engineer"
+  description: |
+    Improves developer workflows, tooling usability, documentation, onboarding,
+    feedback loops, and day-to-day engineering ergonomics.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "DX engineers optimize Krate developer workflows and CLI UX"
+---
+nodeKind: Role
+id: role:internal-tools-engineer
+attributes:
+  displayName: "Internal Tools Engineer"
+  description: |
+    Builds internal applications, automations, integrations, and operational
+    tools tailored to organization-specific engineering workflows.
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Internal tools engineers build custom integrations on Krate APIs"
+
+# ---------------------------------------------------------------------------
+# 2. WORKFLOWS that run on Krate
+# ---------------------------------------------------------------------------
+---
+nodeKind: Workflow
+id: workflow:feature-development
+attributes:
+  displayName: "Feature Development"
+  description: |
+    End-to-end workflow for designing, implementing, reviewing, testing, and
+    merging product or platform feature changes.
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Feature development uses Krate repos, branches, and PRs"
+---
+nodeKind: Workflow
+id: workflow:code-review
+attributes:
+  displayName: "Code Review Workflow"
+  description: |
+    Collaborative workflow for reviewing code changes, discussing design
+    tradeoffs, enforcing standards, and approving safe merges.
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Code review happens through Krate pull request reviews"
+---
+nodeKind: Workflow
+id: workflow:release-management
+attributes:
+  displayName: "Release Management Workflow"
+  description: |
+    Workflow for preparing, approving, publishing, monitoring, and rolling back
+    software releases across environments.
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Releases are cut via Krate pipelines and release resources"
+---
+nodeKind: Workflow
+id: workflow:pull-request-lifecycle
+attributes:
+  displayName: "Pull Request Lifecycle"
+  description: |
+    Workflow spanning branch creation, pull request authoring, checks, review,
+    approval, merge, and post-merge follow-up.
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate natively models the full PR lifecycle as K8s resources"
+---
+nodeKind: Workflow
+id: workflow:incident-response
+attributes:
+  displayName: "Incident Response Workflow"
+  description: |
+    Operational workflow for detecting, triaging, mitigating, communicating,
+    resolving, and learning from production incidents.
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Incident response uses Krate hotfix PRs and agent dispatch"
+---
+nodeKind: Workflow
+id: workflow:dependency-update
+attributes:
+  displayName: "Dependency Update"
+  description: |
+    Workflow for detecting dependency changes, assessing risk, applying updates,
+    running checks, and merging safe upgrades.
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Dependency updates dispatch agents on Krate to create update PRs"
+---
+nodeKind: Workflow
+id: workflow:hotfix-deployment
+attributes:
+  displayName: "Hotfix Deployment"
+  description: |
+    Expedited workflow for safely patching urgent production defects while
+    preserving auditability and rollback readiness.
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Hotfixes use Krate fast-track pipelines with reduced approval gates"
+---
+nodeKind: Workflow
+id: workflow:vulnerability-management
+attributes:
+  displayName: "Vulnerability Management Workflow"
+  description: |
+    Workflow for identifying, prioritizing, remediating, verifying, and reporting
+    security vulnerabilities across software assets.
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Vulnerability remediation dispatches agents to patch repos on Krate"
+---
+nodeKind: Workflow
+id: workflow:security-audit
+attributes:
+  displayName: "Security Audit"
+  description: |
+    Workflow for reviewing controls, configurations, code, dependencies, and
+    evidence against security requirements or standards.
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Security audits leverage Krate code search and pipeline scanning"
+---
+nodeKind: Workflow
+id: workflow:change-management
+attributes:
+  displayName: "Change Management Workflow"
+  description: |
+    Governance workflow for evaluating, approving, scheduling, communicating, and
+    tracking operational or production changes.
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Change management uses Krate approval gates and policy enforcement"
+---
+nodeKind: Workflow
+id: workflow:bug-triage
+attributes:
+  displayName: "Bug Triage"
+  description: |
+    Workflow for classifying defects, reproducing impact, assigning ownership,
+    prioritizing fixes, and tracking resolution.
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Bug triage uses Krate issues and agent dispatch for investigation"
+---
+nodeKind: Workflow
+id: workflow:canary-deployment
+attributes:
+  displayName: "Canary Deployment"
+  description: |
+    Progressive delivery workflow that exposes a change to a small population
+    before broader rollout and rollback decisions.
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Canary deployments orchestrated through Krate GitOps pipelines"
+
+# ---------------------------------------------------------------------------
+# 3. SKILL AREAS relevant to Krate
+# ---------------------------------------------------------------------------
+---
+nodeKind: SkillArea
+id: skill-area:gitops
+attributes:
+  displayName: "GitOps Skill Area"
+  description: |
+    Operating model that uses Git as the declarative source of truth for
+    infrastructure, application state, and reconciled delivery.
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: secondary
+      notes: "GitOps principles underpin Krate's design philosophy"
+---
+nodeKind: SkillArea
+id: skill-area:ci-cd
+attributes:
+  displayName: "CI/CD Skill Area"
+  description: |
+    Practices for continuously integrating, testing, packaging, releasing, and
+    deploying software through automated pipelines.
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: primary
+      notes: "Krate includes a full CI/CD pipeline engine as a core service"
+---
+nodeKind: SkillArea
+id: skill-area:platform-engineering
+attributes:
+  displayName: "Platform Engineering Skill Area"
+  description: |
+    Discipline for building internal platforms, golden paths, self-service
+    capabilities, and reusable operational abstractions.
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: primary
+      notes: "Krate is a platform engineering product — the primary use case"
+---
+nodeKind: SkillArea
+id: skill-area:k8s-rbac
+attributes:
+  displayName: "Kubernetes RBAC"
+  description: |
+    Kubernetes role-based access control design for subjects, roles, bindings,
+    least privilege, and namespace or cluster permissions.
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: secondary
+      notes: "K8s RBAC foundations are used by Krate identity model"
+---
+nodeKind: SkillArea
+id: skill-area:k8s-operator-development
+attributes:
+  displayName: "Kubernetes Operator Development Skill Area"
+  description: |
+    Building Kubernetes controllers and operators that reconcile custom resources
+    into desired runtime state.
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: secondary
+      notes: "Krate controllers follow operator development patterns"
+---
+nodeKind: SkillArea
+id: skill-area:container-security
+attributes:
+  displayName: "Container Security"
+  description: |
+    Securing container images, runtimes, registries, workloads, isolation
+    boundaries, and supply-chain metadata.
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: secondary
+      notes: "Agent workspaces run as containers with security boundaries"
+---
+nodeKind: SkillArea
+id: skill-area:containerization
+attributes:
+  displayName: "Containerization"
+  description: |
+    Packaging applications and services into containers with reproducible images,
+    runtime configuration, and deployment metadata.
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: secondary
+      notes: "All Krate components and agent jobs run as containers"
+---
+nodeKind: SkillArea
+id: skill-area:policy-as-code
+attributes:
+  displayName: "Policy as Code"
+  description: |
+    Encoding governance, compliance, and security requirements as executable
+    policies checked or enforced by automation.
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: primary
+      notes: "Krate policy engine uses Kyverno for policy-as-code enforcement"
+---
+nodeKind: SkillArea
+id: skill-area:authentication-authorization
+attributes:
+  displayName: "Authentication and Authorization"
+  description: |
+    Designing identity verification, session handling, access control,
+    permissions, tokens, and authorization boundaries.
+edges:
+  applies_to:
+    - target: platform:krate
+      confidence: secondary
+      notes: "Krate supports OIDC, x509, PAT, and SSH key authentication"
+
+# ---------------------------------------------------------------------------
+# 4. STACK PROFILES that use Krate
+# ---------------------------------------------------------------------------
+---
+nodeKind: StackProfile
+id: stack-profile:kubernetes-platform-engineering
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate is a K8s-native platform engineering product"
+---
+nodeKind: StackProfile
+id: stack-profile:gitops-deployment
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate uses and enables GitOps deployment patterns"
+---
+nodeKind: StackProfile
+id: stack-profile:cicd-platform
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate includes a native CI/CD pipeline engine"
+---
+nodeKind: StackProfile
+id: stack-profile:coding-agent-platform
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate dispatches coding agents as platform-managed jobs"
+---
+nodeKind: StackProfile
+id: stack-profile:multi-agent-orchestration
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate orchestrates multiple agent stacks across repositories"
+---
+nodeKind: StackProfile
+id: stack-profile:autonomous-agent-fleet
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "Krate governs fleets of autonomous coding agents with approval gates"
+---
+nodeKind: StackProfile
+id: stack-profile:ai-code-review-pipeline
+edges:
+  integrates_with:
+    - target: platform:krate
+      notes: "AI code review agents dispatch through Krate PR workflows"
+
+# ---------------------------------------------------------------------------
+# 5. ADDITIONAL HOSTS — Agent products that Krate can dispatch
+# ---------------------------------------------------------------------------
+---
+nodeKind: Domain
+id: domain:platform-engineering
+edges:
+  contains:
+    - target: topic:kubernetes-native-forge
+      notes: "Core architectural pattern for K8s-native Git forges"
+    - target: topic:aggregated-api-server
+      notes: "K8s API extension pattern used by platform engineering"
+    - target: topic:org-scoped-tenancy
+      notes: "Multi-tenancy model for platform engineering"
+    - target: topic:declarative-ui-state
+      notes: "Modeling UI state as K8s resources"
+    - target: topic:company-brain-memory
+      notes: "Cross-run agent knowledge persistence"
+---
+nodeKind: Domain
+id: domain:devops
+edges:
+  contains:
+    - target: topic:agent-dispatch-as-ci
+      notes: "Agent dispatch runs as CI/CD pipeline jobs"
+    - target: topic:gitops-transparency
+      notes: "Every UI action has a kubectl equivalent"
+---
+nodeKind: Domain
+id: domain:software-engineering
+edges:
+  contains:
+    - target: topic:company-brain-memory
+      notes: "Organizational memory improves agent-assisted development"
+
+# ---------------------------------------------------------------------------
+# 7. CONNECT ISOLATED PRESENTATIONS to external entities
+# ---------------------------------------------------------------------------
+---
+nodeKind: Methodology
+id: methodology:trunk-based-development
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Krate branch protection and fast-forward merge support trunk-based development"
+---
+nodeKind: Methodology
+id: methodology:GitFlow
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Krate branch protection supports GitFlow branching models"
+---
+nodeKind: Methodology
+id: methodology:Google-SRE-methodology
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Krate implements SRE principles: error budgets, SLIs on platform resources"
+---
+nodeKind: Methodology
+id: methodology:chaos-engineering-methodology
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Krate's K8s-native design enables chaos testing of forge components"
+
+# ---------------------------------------------------------------------------
+# 11. RESPONSIBILITIES that apply to Krate
+# ---------------------------------------------------------------------------
+---
+nodeKind: Responsibility
+id: responsibility:deployment-management
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Deployment management uses Krate's GitOps and pipeline infrastructure"
+---
+nodeKind: Responsibility
+id: responsibility:release-coordination
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Release coordination uses Krate pipelines and release resources"
+---
+nodeKind: Responsibility
+id: responsibility:security-audit
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Security audits cover Krate RBAC, policy profiles, and agent permissions"
+---
+nodeKind: Responsibility
+id: responsibility:access-control
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Access control is managed through Krate's org-scoped RBAC model"
+---
+nodeKind: Responsibility
+id: responsibility:incident-response
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Incident response dispatches agents for emergency fixes on Krate"
+---
+nodeKind: Responsibility
+id: responsibility:disaster-recovery
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Disaster recovery plans cover Krate etcd, Postgres, and Git data"
+---
+nodeKind: Responsibility
+id: responsibility:ai-agent-adoption-strategy
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "AI agent adoption strategy is implemented through Krate agent stacks"
+---
+nodeKind: Responsibility
+id: responsibility:ai-safety-guardrails
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "AI safety guardrails are enforced via Krate permission sets and policies"
+---
+nodeKind: Responsibility
+id: responsibility:ai-agent-usage-review
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Agent usage review uses Krate session transcripts and cost tracking"
+---
+nodeKind: Responsibility
+id: responsibility:cost-optimization
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "Cost optimization uses Krate quota profiles and agent compute budgets"
+---
+nodeKind: Responsibility
+id: responsibility:dx-tooling-maintenance
+edges:
+  applies_to:
+    - target: platform:krate
+      notes: "DX tooling maintenance covers Krate CLI, web UI, and SDK updates"

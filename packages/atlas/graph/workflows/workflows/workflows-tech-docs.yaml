@@ -1,0 +1,88 @@
+---
+nodeKind: Workflow
+id: workflow:docs-localization
+attributes:
+  displayName: "Documentation Localization"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Manages the localization pipeline for technical documentation — extracting
+    translatable strings, coordinating with translators, reviewing translated
+    content for technical accuracy, integrating locale-specific builds, and
+    validating link integrity across locales. Excludes original content
+    authoring.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:i18n-extractor
+    - target: role:devrel
+  requires_skill_area:
+    - target: skill-area:editor-fluency
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:devrel-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:api-changelog-review
+attributes:
+  displayName: "API Changelog Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Reviews API changelog entries before publication — verifying accuracy
+    against actual code changes, ensuring consistent formatting, checking
+    deprecation notices, validating migration guidance, and approving final
+    changelog for developer consumption. Excludes changelog generation tooling.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:tech-lead
+    - target: role:devrel
+  requires_skill_area:
+    - target: skill-area:adr-writing
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:changelog-maintenance
+    - target: responsibility:generate-changelogs
+  performed_by_org_unit:
+    - target: org-unit:devrel-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:knowledge-base-maintenance
+attributes:
+  displayName: "Knowledge Base Maintenance"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Reviews and curates the internal knowledge base — identifying stale
+    articles, verifying technical accuracy of runbooks, merging duplicate
+    content, updating search metadata, and tracking article coverage against
+    supported products. Excludes original content creation.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:doc-generator
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:editor-fluency
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:devrel-team

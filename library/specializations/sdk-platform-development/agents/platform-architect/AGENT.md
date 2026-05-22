@@ -7,6 +7,12 @@ expertise:
   - Scalable infrastructure patterns
   - Multi-region deployments
   - High availability design
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:api-design, skill-area:hexagonal-architecture]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # Platform Architect Agent

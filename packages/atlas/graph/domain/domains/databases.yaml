@@ -1,0 +1,26 @@
+nodeKind: Domain
+id: domain:databases
+attributes:
+  displayName: "Databases"
+  description: |
+    Databases domain — relational, document, key-value, time-series,
+    graph, and analytical databases; storage engines, query planning,
+    replication, and operations.
+edges:
+  contains:
+    - specialization:postgres-tuning
+    - specialization:redis-ops
+    - topic:compensating-transaction
+    - topic:data-at-rest-encryption
+    - topic:database-per-service
+    - topic:event-store
+    - topic:graph-clustering
+    - topic:graph-embedding
+    - topic:knowledge-graph-navigation
+    - topic:partitioning
+    - topic:repository-pattern
+    - topic:saga-pattern
+    - topic:sharding
+    - topic:shared-database
+    - topic:unit-of-work
+    - topic:database-sharding

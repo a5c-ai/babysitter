@@ -1,0 +1,71 @@
+nodeKind: Term
+id: term:hybrid-agentic-system
+attributes:
+  displayName: "Hybrid Agentic System"
+  kind: concept
+  description: |
+    A system architecture combining a symbolic, code-defined orchestrator
+    (process engine) with one or more LLM-powered agent harnesses, plus a
+    shared layer of symbolic capabilities callable from either side. The
+    orchestrator owns ground-truth state, invariants, budgets, gates, and
+    journaling; the harness solves fuzzy work adaptively. Coined in
+    docs/articles/Hybrid Agentic Systems_ Two-loops Control Plane Guide.md.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:two-loops-control-plane
+attributes:
+  displayName: "Two-loops control plane"
+  kind: concept
+  description: |
+    A control-plane design pattern where a Symbolic Orchestration Loop
+    (replay-from-journal, enforce invariants, decide next stage) and an
+    Agentic Loop (LLM harness solving fuzzy work with tools) interleave
+    by stack-depth. The orchestration loop is responsible for control,
+    safety, repeatability, and traceability; the agentic loop is
+    responsible for solving the task under uncertainty.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:symbolic-orchestrator
+attributes:
+  displayName: "Symbolic Orchestrator"
+  kind: concept
+  description: |
+    The code-defined process component of a Hybrid Agentic System: a
+    deterministic process engine that maintains ground-truth state,
+    enforces invariants and budgets, evaluates quality gates, journals
+    events, and supports time-travel and forking of runs. Distinguished
+    from the LLM harness, which performs adaptive (non-deterministic)
+    work.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:symbolic-logic-surface
+attributes:
+  displayName: "Symbolic logic surface"
+  kind: concept
+  description: |
+    A deterministic, code-defined capability that can be invoked from
+    inside the orchestrator (as a stage transition, invariant, gate, or
+    budget check), as a symbolic tool callable by the harness (policy
+    check, scope rule, deterministic transform), or as a symbolic task
+    callable by orchestration (validator, analyzer, scheduler, reducer,
+    diff scanner). The symbolic-vs-agentic split is about *who is
+    responsible for correctness* and *how results are proven*, not about
+    where the surface lives.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+
+

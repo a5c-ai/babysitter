@@ -1,0 +1,141 @@
+nodeKind: AgentVersion
+id: agent-version:hermes@current
+attributes:
+  agentId: "hermes"
+  agentProductId: agent:hermes
+  displayName: "Hermes"
+  summary: "NousResearch agentic CLI"
+  sourcePackage: "hermes-agent"
+  versionRange: ">=0.14.0"
+  releasedAt: "2025-01-01"
+  cliCommand: "hermes"
+  installMethods:
+    - install:pip
+    - install:curl
+  minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    installCommands:
+      - type: pip
+        command: "pip install hermes-agent"
+      - type: curl
+        command: "curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash"
+    authMethods:
+      - type: api_key
+        name: "OpenRouter API Key"
+        envVars: [OPENROUTER_API_KEY]
+      - type: api_key
+        name: "Anthropic API Key"
+        envVars: [ANTHROPIC_API_KEY]
+      - type: api_key
+        name: "OpenAI API Key"
+        envVars: [OPENAI_API_KEY]
+      - type: api_key
+        name: "Nous API Key"
+        envVars: [NOUS_API_KEY]
+      - type: github_token
+        name: "GitHub Token"
+        envVars: [GITHUB_TOKEN]
+      - type: api_key
+        name: "Google API Key"
+        envVars: [GOOGLE_API_KEY]
+    authFiles:
+      - "~/.hermes/cli-config.yaml"
+    hostEnvSignals:
+      - HERMES_SESSION
+      - HERMES_RUN_ID
+    sessionDir: "~/.hermes/sessions"
+    sessionPersistence: sqlite
+    approvalModes:
+      - yolo
+      - prompt
+    capabilityFlags:
+      canResume: true
+      canFork: false
+      supportsMultiTurn: true
+      sessionPersistence: sqlite
+      supportsTextStreaming: true
+      supportsToolCallStreaming: true
+      supportsThinkingStreaming: false
+      supportsNativeTools: true
+      supportsMCP: true
+      supportsParallelToolCalls: true
+      requiresToolApproval: true
+      supportsThinking: false
+      supportsJsonMode: false
+      supportsStructuredOutput: false
+      structuredSessionTransport: none
+      sessionControlPlane: self-managed
+      supportsSkills: false
+      supportsAgentsMd: false
+      skillsFormat: none
+      supportsSubagentDispatch: false
+      supportsParallelExecution: false
+      maxParallelTasks: 1
+      supportsInteractiveMode: true
+      supportsStdinInjection: true
+      supportsImageInput: false
+      supportsImageOutput: false
+      supportsFileAttachments: false
+      supportsPlugins: false
+      supportedPlatforms: [darwin, linux, win32]
+      requiresGitRepo: false
+      requiresPty: false
+    runtimeHooks:
+      preToolUse: nonblocking
+      postToolUse: nonblocking
+      sessionStart: nonblocking
+      sessionEnd: nonblocking
+      stop: nonblocking
+      userPromptSubmit: nonblocking
+    configSchema:
+      configFormat: yaml
+      configFilePaths:
+        - "~/.hermes/cli-config.yaml"
+    displayName: "Hermes"
+    defaultModelId: "hermes-3-llama-3.1-405b"
+  hookSupport:
+    interactive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+    nonInteractive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: false
+    sessionResume: false
+    positionalPrompt: false
+edges:
+  version_of:
+    - agent:hermes
+  composed_of:
+    - target: agent-core-impl:hermes.core@current
+      role: core
+    - target: agent-runtime-impl:hermes.runtime@current
+      role: runtime
+    - target: agent-platform-impl:hermes.platform@current
+      role: platform
+    - target: agent-ui-impl:hermes.ui@current
+      role: ui
+  sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Hermes runs multi-turn agent conversations.
+    - target: capability:supports-text-streaming
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Hermes streams output in real time.
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Hermes dispatches tool calls per turn.
+  uses_memory_system:
+    - target: memory-system:agentmemory-service
+    - target: memory-system:file-based-markdown-pattern

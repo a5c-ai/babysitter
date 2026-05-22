@@ -1,0 +1,71 @@
+---
+nodeKind: Workflow
+id: workflow:fleet-maintenance-scheduling
+attributes:
+  displayName: "Fleet Maintenance Scheduling"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Schedules preventive and predictive maintenance for vehicle fleets --
+    ingesting telematics data (engine hours, mileage, diagnostic trouble
+    codes), running remaining-useful-life models for critical components,
+    optimizing maintenance windows against route schedules and depot
+    capacity, generating work orders with parts-availability verification,
+    and tracking regulatory inspection due dates for DOT/DVSA compliance.
+    Produces maintenance schedules, parts procurement lists, and compliance
+    inspection calendars. Excludes vehicle acquisition decisions.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:planner
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:kafka-stream-processing
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:transportation
+    - target: domain:logistics
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:it-service-management
+---
+nodeKind: Workflow
+id: workflow:route-optimization-review
+attributes:
+  displayName: "Route Optimization Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Reviews and refines vehicle routing and dispatching decisions --
+    analyzing planned versus actual route adherence, evaluating
+    fuel-consumption efficiency against optimization model predictions,
+    identifying recurring congestion patterns and time-window violations,
+    benchmarking routing algorithm performance across service regions, and
+    incorporating driver feedback on road-condition or access-restriction
+    changes. Produces route efficiency scorecards, model accuracy reports,
+    and constraint-update recommendations. Excludes routing algorithm
+    development.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:performance-profiler
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:transportation
+    - target: domain:logistics
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:analytics-team

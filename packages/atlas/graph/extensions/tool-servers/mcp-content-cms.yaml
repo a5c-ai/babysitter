@@ -1,0 +1,135 @@
+nodeKind: ToolServer
+id: tool-server:mcp-wordpress
+attributes:
+  displayName: WordPress MCP Server
+  description: |
+    MCP server providing access to WordPress sites via the REST API.
+    Enables AI agents to create and edit posts, manage pages, handle
+    media uploads, and configure site settings.
+  protocol: mcp
+  category: cms
+  repoUrl: https://github.com/developer-jeong/wordpress-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:wordpress
+  - target: stack-part:cms
+  lib_applies_to_domain:
+  - target: domain:web-development
+  - target: domain:content-operations
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-contentful
+attributes:
+  displayName: Contentful MCP Server
+  description: |
+    MCP server providing access to the Contentful headless CMS.
+    Enables AI agents to manage content types, create and update
+    entries, query assets, and publish content across spaces.
+  protocol: mcp
+  category: cms
+  repoUrl: https://github.com/contentful/mcp-server
+  maintainer: Contentful
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:cms
+  lib_applies_to_domain:
+  - target: domain:web-development
+  - target: domain:content-operations
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-sanity
+attributes:
+  displayName: Sanity MCP Server
+  description: |
+    MCP server providing governed access to Sanity CMS projects.
+    Offers 40+ tools for document operations, schema management,
+    content releases, and AI-powered media generation through the
+    Sanity Agent Context gateway.
+  protocol: mcp
+  category: cms
+  repoUrl: https://github.com/sanity-io/sanity-mcp-server
+  maintainer: Sanity
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: stack-part:cms
+  lib_applies_to_domain:
+  - target: domain:web-development
+  - target: domain:content-operations
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-shopify
+attributes:
+  displayName: Shopify MCP Server
+  description: |
+    MCP server providing access to the Shopify e-commerce platform.
+    Enables AI agents to manage products, orders, customers, inventory,
+    and storefront configurations through the Shopify Admin API.
+  protocol: mcp
+  category: other
+  repoUrl: https://github.com/Shopify/shopify-mcp
+  maintainer: Shopify
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:shopify
+  lib_applies_to_domain:
+  - target: domain:retail
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-webflow
+attributes:
+  displayName: Webflow MCP Server
+  description: |
+    MCP server providing access to the Webflow visual web platform.
+    Enables AI agents to manage sites, collections, items, and
+    CMS content through the Webflow Data API.
+  protocol: mcp
+  category: cms
+  repoUrl: https://github.com/webflow/mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:cms
+  lib_applies_to_domain:
+  - target: domain:web-development
+  - target: domain:frontend
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-strapi
+attributes:
+  displayName: Strapi MCP Server
+  description: |
+    MCP server providing access to Strapi headless CMS.
+    Enables AI agents to manage content types, create and query
+    entries, handle media, and configure API endpoints.
+  protocol: mcp
+  category: cms
+  repoUrl: https://github.com/strapi-community/strapi-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:strapi
+  - target: framework:strapi
+  - target: stack-part:cms
+  lib_applies_to_domain:
+  - target: domain:web-development
+  - target: domain:content-operations

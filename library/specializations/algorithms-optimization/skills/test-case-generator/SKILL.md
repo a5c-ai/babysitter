@@ -8,6 +8,11 @@ metadata:
   category: algorithms-optimization
   skill-id: SK-ALGO-008
   priority: high
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:dynamic-programming, skill-area:graph-algorithms, skill-area:fuzz-testing]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # test-case-generator

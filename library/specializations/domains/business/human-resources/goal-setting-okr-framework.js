@@ -17,6 +17,12 @@
  * - Measure What Matters by John Doerr: https://www.whatmatters.com/
  * - BetterWorks OKR Best Practices: https://www.betterworks.com/okr-best-practices/
  * - Google Re:Work Goal Setting: https://rework.withgoogle.com/guides/set-goals-with-okrs/
+  * @graph
+ *   domains: [domain:human-resources]
+ *   specializations: [specialization:talent-management]
+ *   skillAreas: [skill-area:talent-acquisition-strategy, skill-area:performance-management, skill-area:organizational-design, skill-area:learning-development]
+ *   workflows: [workflow:talent-acquisition-pipeline]
+ *   roles: [role:hr-manager, role:talent-recruiter]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

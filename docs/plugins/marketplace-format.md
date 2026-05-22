@@ -44,7 +44,7 @@ Each key in the `plugins` object is the plugin name (e.g., `"babysitter@a5c.ai"`
       "description": "Core babysitter plugin for AI-assisted development workflows",
       "latestVersion": "0.0.176",
       "versions": ["0.0.176", "0.0.175", "0.0.174"],
-      "packagePath": "plugins/babysitter",
+      "packagePath": "plugins/babysitter-unified",
       "tags": ["core", "development", "ai"],
       "author": "a5c-ai"
     },
@@ -69,7 +69,7 @@ A marketplace repository should follow this layout:
 babysitter-marketplace/
   marketplace.json            # Manifest (required)
   plugins/
-    babysitter/               # Plugin package directory
+    babysitter-unified/       # Plugin package directory
       install.md
       uninstall.md
       configure.md
@@ -86,7 +86,7 @@ babysitter-marketplace/
         1.1.0_to_1.2.0.md
 ```
 
-The `packagePath` field in each plugin entry points to the relative path within this repository (e.g., `"plugins/babysitter"`).
+The `packagePath` field in each plugin entry points to the relative path within the repository or marketplace checkout (for example, `"plugins/babysitter-unified"` in this repo).
 
 ## Local Clone Structure
 

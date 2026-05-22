@@ -1,0 +1,320 @@
+---
+nodeKind: TestSet
+id: test-set:swe-bench-original
+attributes:
+  displayName: "SWE-bench original test set"
+  benchmarkId: benchmark:swe-bench
+  caseCount: 2294
+  releasedAt: "2023-10-10"
+  composition: |
+    Original SWE-bench issue/PR task collection from 12 popular Python
+    repositories. Each task asks an agent to patch a real repository at
+    a base commit so fail-to-pass tests succeed.
+  homepageUrl: "https://www.swebench.com/original.html"
+  description: |
+    Source-backed canonical SWE-bench artifact for full real-world
+    GitHub issue resolution evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:swe-bench
+---
+nodeKind: TestSet
+id: test-set:webarena-v1
+attributes:
+  displayName: "WebArena v1 task suite"
+  benchmarkId: benchmark:webarena
+  caseCount: 812
+  releasedAt: "2023-07-26"
+  composition: |
+    WebArena's original long-horizon web task suite over realistic
+    self-hosted sites for shopping, forum, GitLab-style collaboration,
+    and content management workflows.
+  homepageUrl: "https://webarena.dev/static/paper.pdf"
+  description: |
+    Canonical WebArena task artifact for autonomous web-agent evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:webarena
+---
+nodeKind: TestSet
+id: test-set:tau-bench-airline-retail
+attributes:
+  displayName: "tau-bench airline and retail domains"
+  benchmarkId: benchmark:tau-bench
+  releasedAt: "2024-06-17"
+  composition: |
+    Original tau-bench customer-service domains for tool-agent-user
+    interactions in airline and retail settings, with simulated users,
+    policy constraints, and domain APIs.
+  homepageUrl: "https://openreview.net/forum?id=roNSXZpUDN"
+  description: |
+    Source-backed tau-bench domain artifact for multi-turn tool-use and
+    policy-following evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:tau-bench
+---
+nodeKind: TestSet
+id: test-set:bigcodebench-full
+attributes:
+  displayName: "BigCodeBench full set"
+  benchmarkId: benchmark:bigcodebench
+  caseCount: 1140
+  releasedAt: "2024-06-17"
+  composition: |
+    Full BigCodeBench practical Python code-generation set covering
+    diverse function calls across 139 libraries and seven domains.
+  homepageUrl: "https://arxiv.org/abs/2406.15877"
+  description: |
+    Canonical full-set artifact for BigCodeBench code-generation evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:bigcodebench
+---
+nodeKind: TestSet
+id: test-set:ds1000-full
+attributes:
+  displayName: "DS-1000 full set"
+  benchmarkId: benchmark:ds1000
+  caseCount: 1000
+  releasedAt: "2022-11-21"
+  composition: |
+    DS-1000's full data-science code-generation suite spanning seven
+    Python data-science libraries with realistic perturbations and
+    functional correctness checks.
+  homepageUrl: "https://ds1000-code-gen.github.io/"
+  description: |
+    Canonical DS-1000 artifact for data-science code-generation evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:ds1000
+---
+nodeKind: TestSet
+id: test-set:mle-bench-competitions
+attributes:
+  displayName: "MLE-bench Kaggle competition set"
+  benchmarkId: benchmark:mle-bench
+  caseCount: 75
+  releasedAt: "2024-10-09"
+  composition: |
+    Curated set of 75 ML engineering competitions from Kaggle, with
+    preparation scripts for train/test splits and competition-style
+    submission grading.
+  homepageUrl: "https://openai.com/index/mle-bench/"
+  description: |
+    Canonical MLE-bench artifact for end-to-end machine-learning
+    engineering agent evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:mle-bench
+---
+nodeKind: TestSet
+id: test-set:humaneval-original
+attributes:
+  displayName: "HumanEval original problem set"
+  benchmarkId: benchmark:human-eval
+  caseCount: 164
+  releasedAt: "2021-07-07"
+  composition: |
+    Hand-written Python function-completion problems for evaluating
+    functional correctness of generated code from signatures and docstrings.
+  homepageUrl: "https://github.com/openai/human-eval"
+  description: |
+    Canonical HumanEval artifact for Python code-generation evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:human-eval
+---
+nodeKind: TestSet
+id: test-set:mbpp-full
+attributes:
+  displayName: "MBPP full problem set"
+  benchmarkId: benchmark:mbpp
+  caseCount: 974
+  releasedAt: "2021-08-17"
+  composition: |
+    Mostly Basic Python Problems crowd-sourced programming set, with
+    natural-language task descriptions, reference solutions, and automated
+    tests for entry-level Python synthesis.
+  homepageUrl: "https://github.com/google-research/google-research/tree/master/mbpp"
+  description: |
+    Canonical MBPP artifact for basic Python program-synthesis evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:mbpp
+---
+nodeKind: TestSet
+id: test-set:agentbench-environments
+attributes:
+  displayName: "AgentBench multi-environment suite"
+  benchmarkId: benchmark:agentbench
+  environmentCount: 8
+  releasedAt: "2023-08-07"
+  composition: |
+    Multi-environment LLM-as-agent benchmark covering eight interactive
+    environments for reasoning, decision-making, tool use, and instruction
+    following.
+  homepageUrl: "https://github.com/THUDM/AgentBench"
+  description: |
+    Canonical AgentBench artifact for broad LLM-as-agent evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:agentbench
+---
+nodeKind: TestSet
+id: test-set:toolbench-tooleval
+attributes:
+  displayName: "ToolBench ToolEval suite"
+  benchmarkId: benchmark:toolbench
+  releasedAt: "2023-07-31"
+  composition: |
+    ToolBench/ToolEval artifact for evaluating LLM tool-use trajectories
+    over real-world API instructions, with pass-rate and win-rate scoring.
+  homepageUrl: "https://github.com/OpenBMB/ToolBench"
+  description: |
+    Canonical ToolBench evaluation artifact for API tool-use benchmarks.
+edges:
+  belongs_to_benchmark:
+    - benchmark:toolbench
+---
+nodeKind: TestSet
+id: test-set:osworld-369-computer-tasks
+attributes:
+  displayName: "OSWorld 369 real-computer tasks"
+  benchmarkId: benchmark:os-world
+  caseCount: 369
+  composition: |
+    Source-backed OSWorld task suite of real-world desktop and web
+    computer-use tasks with reproducible setup and execution-based
+    evaluation across operating-system and productivity workflows.
+  homepageUrl: "https://os-world.github.io/"
+  description: |
+    Canonical OSWorld artifact for multimodal desktop-computer control
+    agent evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:os-world
+---
+nodeKind: TestSet
+id: test-set:androidworld-programmatic-tasks
+attributes:
+  displayName: "AndroidWorld programmatic task suite"
+  benchmarkId: benchmark:android-world
+  caseCount: 116
+  composition: |
+    AndroidWorld's reproducible mobile-agent task suite covers real
+    Android apps with programmatic rewards and dynamically-instantiated
+    natural-language tasks.
+  homepageUrl: "https://google-research.github.io/android_world/"
+  description: |
+    Canonical AndroidWorld artifact for autonomous Android UI-control
+    evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:android-world
+---
+nodeKind: TestSet
+id: test-set:appworld-750-cross-app-tasks
+attributes:
+  displayName: "AppWorld 750 cross-app tasks"
+  benchmarkId: benchmark:appworld
+  caseCount: 750
+  composition: |
+    AppWorld's benchmark task suite exercises natural, diverse, and
+    challenging autonomous-agent tasks across a simulated world of
+    day-to-day apps, APIs, and user data.
+  homepageUrl: "https://appworld.dev/"
+  description: |
+    Canonical AppWorld artifact for rich interactive code-generation
+    and multi-app tool-use evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:appworld
+---
+nodeKind: TestSet
+id: test-set:assistantbench-214-web-tasks
+attributes:
+  displayName: "AssistantBench 214 web tasks"
+  benchmarkId: benchmark:assistant-bench
+  caseCount: 214
+  composition: |
+    AssistantBench's realistic web-agent tasks cover time-consuming
+    information-seeking and assistant workflows across many websites
+    and domains, with automatic evaluation.
+  homepageUrl: "https://assistantbench.github.io/"
+  description: |
+    Canonical AssistantBench artifact for web-research and web-agent
+    task completion evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:assistant-bench
+---
+nodeKind: TestSet
+id: test-set:re-bench-ai-rd-tasks
+attributes:
+  displayName: "RE-Bench AI R&D task suite"
+  benchmarkId: benchmark:re-bench
+  caseCount: 7
+  composition: |
+    RE-Bench's staged task suite measures autonomous AI research and
+    development work against human-expert baselines using realistic
+    machine-learning research-engineering tasks.
+  homepageUrl: "https://github.com/METR/RE-Bench"
+  description: |
+    Canonical RE-Bench artifact for frontier AI R&D agent evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:re-bench
+---
+nodeKind: TestSet
+id: test-set:travelplanner-planning-intents
+attributes:
+  displayName: "TravelPlanner planning intents"
+  benchmarkId: benchmark:travelplanner
+  caseCount: 1225
+  composition: |
+    TravelPlanner's benchmark suite provides curated travel-planning
+    intents and reference plans over a rich sandbox of transportation,
+    dining, attraction, and lodging data.
+  homepageUrl: "https://osu-nlp-group.github.io/TravelPlanner/"
+  description: |
+    Canonical TravelPlanner artifact for constrained real-world planning
+    and tool-use evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:travelplanner
+---
+nodeKind: TestSet
+id: test-set:the-agent-company-workplace-tasks
+attributes:
+  displayName: "TheAgentCompany workplace task suite"
+  benchmarkId: benchmark:the-agent-company
+  composition: |
+    TheAgentCompany's extensible workplace benchmark task suite asks
+    agents to browse, code, run programs, communicate with coworkers,
+    and complete professional digital-worker tasks in a simulated
+    software-company environment.
+  homepageUrl: "https://the-agent-company.com/"
+  description: |
+    Canonical TheAgentCompany artifact for workplace software-agent
+    task completion evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:the-agent-company
+---
+nodeKind: TestSet
+id: test-set:agentclinic-clinical-cases
+attributes:
+  displayName: "AgentClinic clinical case suite"
+  benchmarkId: benchmark:agentclinic
+  composition: |
+    AgentClinic's simulated clinical case suite evaluates agents through
+    patient interactions, multimodal data collection, incomplete
+    information, and tool use across medical specialties and languages.
+  homepageUrl: "https://agentclinic.github.io/"
+  description: |
+    Canonical AgentClinic artifact for multimodal clinical-agent
+    diagnostic reasoning evaluation.
+edges:
+  belongs_to_benchmark:
+    - benchmark:agentclinic

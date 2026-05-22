@@ -9,6 +9,13 @@ expertise:
   - MITRE ATT&CK mapping
   - Containment recommendations
   - Incident prioritization
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:incident-response, skill-area:security-monitoring-siem]
+  roles: [role:security-engineer, role:incident-commander]
+  workflows: [workflow:vulnerability-management]
+
 ---
 
 # Incident Triage Agent

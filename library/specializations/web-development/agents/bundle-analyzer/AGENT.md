@@ -9,6 +9,13 @@ expertise:
   - Code splitting
   - Import cost analysis
   - Optimization strategies
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:frontend-engineer]
+  skillAreas: [skill-area:web-performance, skill-area:asset-pipeline]
+  topics: [topic:tree-shaking, topic:code-splitting]
+
 ---
 
 # Bundle Analyzer Agent

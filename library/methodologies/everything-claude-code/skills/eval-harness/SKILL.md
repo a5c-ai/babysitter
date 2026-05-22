@@ -2,17 +2,14 @@
 name: eval-harness
 description: Evaluation harness for testing agent and skill quality through structured benchmarks, regression tests, and quality scoring.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Eval Harness
-
-## Overview
-
-Evaluation harness methodology adapted from the Everything Claude Code project. Provides structured frameworks for benchmarking agent performance, testing skill quality, and running regression suites.
-
-## Evaluation Types
-
-### 1. Agent Performance Benchmark
 - Define test cases with known-correct outputs
 - Run agent against each test case
 - Score: accuracy, completeness, relevance

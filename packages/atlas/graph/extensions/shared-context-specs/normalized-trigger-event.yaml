@@ -1,0 +1,50 @@
+# NormalizedTriggerEvent payload schema.
+# Source: packages/triggers/src/types.ts:11-28 (NormalizedTriggerEvent),
+# packages/triggers/src/types.ts:3-9 (TriggerChange).
+nodeKind: SharedContextSpec
+id: shared-context-spec:normalized-trigger-event
+attributes:
+  displayName: "NormalizedTriggerEvent payload schema"
+  contextKind: "trigger-event-envelope"
+  typescriptInterface: "NormalizedTriggerEvent"
+  producerIface: "@a5c-ai/triggers backend normalizers (github|gitlab|bitbucket|generic-webhook)"
+  consumerIfaces:
+    - "@a5c-ai/triggers evaluateTrigger (packages/triggers/src/query.ts:102)"
+    - "amux run pipeline (downstream pre-run, agent-mux, post-run via AMUX_TRIGGER_EVENT_PATH)"
+  fieldSchema:
+    - "backend:enum<github|gitlab|bitbucket|generic-webhook>:required:Trigger backend the payload was normalized from"
+    - "eventName:string:required:Backend-native event name (e.g. 'issue_comment','pull_request','push','merge_request','pullrequest:created','webhook')"
+    - "action:string:optional:Backend-native action verb (e.g. 'opened','created','synchronize'); for bitbucket derived from suffix after ':'"
+    - "actor:string:optional:Acting user login / username / nickname"
+    - "repository:string:optional:Repository slug (e.g. 'owner/name' or 'group/path')"
+    - "ref:string:optional:Git ref (refs/heads/<branch> or tag) when emitted by the backend"
+    - "sha:string:optional:Commit SHA: prefers event.after, falls back to head_commit.id, then pull_request.head.sha"
+    - "title:string:optional:Issue/PR title or commit-message first line"
+    - "body:string:optional:Issue/PR body, comment body, or commit message"
+    - "url:string:optional:Canonical HTML URL for the event subject"
+    - "sourceBranch:string:optional:PR/MR source branch"
+    - "targetBranch:string:optional:PR/MR target branch"
+    - "labels:list<string>:required:Issue/PR labels (empty list when absent); bitbucket always emits []"
+    - "text:string:required:Concatenated searchable text (eventName + action + title + body + repository + actor + per-change status/path/patch); used by `text:` and `contains:` query keys"
+    - "changes:list<TriggerChange>:required:Per-file changes — see TriggerChange field schema; deduped by path and sorted alphabetically by enrichEvent (packages/triggers/src/enrich.ts:21-28)"
+    - "raw:unknown:required:Verbatim original webhook/workflow event payload, preserved for backend-specific consumers"
+  sourceCitation: "packages/triggers/src/types.ts:11-28 (NormalizedTriggerEvent), packages/triggers/src/types.ts:3-9 (TriggerChange)"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:trigger-change
+attributes:
+  displayName: "TriggerChange payload field schema"
+  contextKind: "trigger-event-change-entry"
+  typescriptInterface: "TriggerChange"
+  producerIface: "@a5c-ai/triggers backend normalizers + enrichGithubFromApi + enrichWithLocalGit + enrichDiffsWithLocalGit"
+  consumerIfaces:
+    - "evaluateTrigger path/files/diff query keys"
+  fieldSchema:
+    - "path:string:required:Repository-relative file path"
+    - "status:string:optional:Change status — github 'added|modified|removed|renamed', gitlab/local-git equivalents, or bitbucket file 'type'"
+    - "additions:int:optional:Lines added (only populated when REST/local-git provides; reserved field per types.ts:5)"
+    - "deletions:int:optional:Lines deleted (reserved field per types.ts:6)"
+    - "patch:string:optional:Unified diff hunk for this file; only populated when --include-diff or REST API returns it"
+  sourceCitation: "packages/triggers/src/types.ts:3-9"
+edges: {}

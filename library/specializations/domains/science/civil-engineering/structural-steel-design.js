@@ -3,6 +3,12 @@
  * @description Design of structural steel members and connections per AISC 360 including beams, columns, bracing, and moment frames
  * @inputs { projectId: string, loadAnalysis: object, structuralLayout: object, steelGrade: string }
  * @outputs { success: boolean, memberDesigns: object, connectionDesigns: array, steelDetailings: array, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:civil-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

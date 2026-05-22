@@ -1,0 +1,104 @@
+---
+nodeKind: SkillArea
+id: skill-area:technical-leadership
+attributes:
+  displayName: "Technical Leadership"
+  description: |
+    Setting technical direction for teams and systems - architecture ownership,
+    standard-setting, cross-team design review, and translating engineering concerns
+    into language business stakeholders can act on. Combines deep technical judgment
+    with the communication and influence skills needed to align teams around
+    coherent long-term approaches.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:organizational-design
+      strength: recommended
+    - target: skill-area:learning-development
+      strength: recommended
+    - target: skill-area:team-management
+      strength: recommended
+    - target: skill-area:hiring-interviewing
+      strength: recommended
+    - target: skill-area:mentorship
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:team-management
+attributes:
+  displayName: "Team Management"
+  description: |
+    Leading engineering teams through goal-setting, performance feedback, career
+    development, and day-to-day operational support. Involves creating psychological
+    safety, sustaining delivery velocity, managing workload, and maintaining clarity
+    about roles and expectations so individuals can do their best work within a
+    healthy team environment.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:hiring-interviewing
+attributes:
+  displayName: "Hiring and Interviewing"
+  description: |
+    Designing and running effective engineering hiring processes - job definition,
+    structured interview loops, rubric calibration, and inclusive sourcing practices.
+    Balances speed, signal quality, and candidate experience while reducing bias
+    to build diverse teams capable of executing on the organization's technical
+    and cultural goals.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:mentorship
+attributes:
+  displayName: "Mentorship"
+  description: |
+    Supporting the growth of engineers and technical contributors through deliberate
+    guidance, skill-building feedback, and career conversation. Creates compounding
+    organizational capability by transferring tacit knowledge, accelerating onboarding,
+    and helping individuals navigate growth opportunities that formal processes alone
+    do not surface.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:cross-team-coordination
+attributes:
+  displayName: "Cross-Team Coordination"
+  description: |
+    Managing dependencies, communication, and alignment between multiple engineering
+    teams or platform consumers - dependency tracking, RFC and RFC-adjacent processes,
+    shared on-call coverage, and resolving conflicting priorities across group
+    boundaries. Essential for platform organizations where many teams share
+    infrastructure and must release or deprecate safely.
+  domains:
+    - domain:software-engineering
+    - domain:platform-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:platform-engineering
+      confidence: secondary

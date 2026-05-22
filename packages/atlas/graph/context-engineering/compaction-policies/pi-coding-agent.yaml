@@ -1,0 +1,16 @@
+nodeKind: CompactionPolicy
+id: compaction-policy:pi-coding-agent
+attributes:
+  displayName: "pi-mono coding-agent branch + cumulative summarization"
+  strategy: branch-summarization
+  trigger: token-threshold
+  preserveRecentTurns: 4
+  preserveFileOperations: true
+  description: |
+    pi-mono compacts long sessions by extracting file operations from messages
+    and previous compaction entries (CompactionDetails.readFiles /
+    modifiedFiles) so subsequent turns retain awareness of which files were
+    read and modified. Branch summaries (createBranchSummaryMessage) preserve
+    forked context paths separately from the cumulative compaction summary
+    (createCompactionSummaryMessage). Drives a smaller summarizer model via
+    SUMMARIZATION_SYSTEM_PROMPT in completeSimple().

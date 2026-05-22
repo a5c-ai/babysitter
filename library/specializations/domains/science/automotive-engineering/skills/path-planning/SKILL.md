@@ -18,6 +18,10 @@ metadata:
     - autonomous-driving
     - path-planning
     - motion-control
+graph:
+  domains: [domain:automotive-engineering]
+  skillAreas: [skill-area:sensor-fusion, skill-area:motion-planning, skill-area:physics-simulation]
+  roles: [role:systems-integration-engineer, role:embedded-engineer]
 ---
 
 # Path Planning Algorithm Skill

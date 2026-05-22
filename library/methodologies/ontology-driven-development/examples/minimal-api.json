@@ -1,0 +1,105 @@
+{
+  "projectName": "Weather Data API",
+  "domainDescription": "Simple REST API that aggregates weather data from multiple sources and provides cleaned, standardized endpoints for weather information queries.",
+  "ontologyScope": "minimal",
+  "graphDepth": "basic",
+  "wikiTarget": "basic-docs",
+  "iterationDepth": "surface",
+  "adversarialMode": "light",
+
+  "domainContext": {
+    "industry": "Weather Services",
+    "targetUsers": [
+      "Web Developers",
+      "Mobile App Developers",
+      "Data Scientists"
+    ],
+    "keyDomains": [
+      "Weather Data Aggregation",
+      "API Design",
+      "Data Transformation",
+      "Caching Strategy"
+    ],
+    "externalSystems": [
+      "OpenWeatherMap API",
+      "WeatherAPI",
+      "National Weather Service",
+      "Redis Cache"
+    ]
+  },
+
+  "businessRequirements": {
+    "coreCapabilities": [
+      "Current weather data retrieval",
+      "5-day weather forecast",
+      "Location-based queries (lat/long, city name, zip)",
+      "Historical weather data access",
+      "Weather alerts and warnings"
+    ],
+    "integrationRequirements": [
+      "Multiple weather service integration",
+      "Rate limiting and caching",
+      "API key management",
+      "Response format standardization"
+    ],
+    "userExperience": [
+      "Simple REST API endpoints",
+      "JSON response format",
+      "Clear error handling",
+      "API documentation"
+    ]
+  },
+
+  "technicalConstraints": {
+    "performance": [
+      "Sub-200ms response times",
+      "99% uptime availability",
+      "Efficient caching strategy",
+      "Rate limit handling"
+    ],
+    "security": [
+      "API key authentication",
+      "Request validation",
+      "CORS configuration",
+      "Input sanitization"
+    ],
+    "scalability": [
+      "Horizontal scaling capability",
+      "Database connection pooling",
+      "CDN integration",
+      "Load balancing"
+    ]
+  },
+
+  "expectedArtifacts": {
+    "encyclopedia": {
+      "conceptPages": [
+        "Weather Data Sources",
+        "API Design Principles",
+        "Data Standardization",
+        "Caching Strategies"
+      ],
+      "processPages": [
+        "Data Aggregation Process",
+        "Cache Update Workflow",
+        "Error Handling Process"
+      ],
+      "patternPages": [
+        "API Gateway Pattern",
+        "Cache-Aside Pattern",
+        "Circuit Breaker Pattern"
+      ]
+    },
+    "interfaces": {
+      "api": "Express.js REST API",
+      "cli": "Simple admin CLI for cache management"
+    },
+    "testing": {
+      "coverage": "80%+ code coverage",
+      "api": "Supertest for API testing",
+      "integration": "Jest for integration tests"
+    }
+  },
+
+  "notes": "Minimal example showing how ODD can be applied to simple projects with reduced scope while still maintaining systematic approach."
+}

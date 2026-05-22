@@ -1,0 +1,92 @@
+nodeKind: ModelVersion
+id: model:o1@current
+attributes:
+  displayName: "o1"
+  supportsExtendedThinking: false
+  modelFamilyId: model-family:o-reasoning-series
+  versionRange: '>=1.0.0 <2.0.0'
+  kind: reasoning
+  contextWindowTokens: 200000
+  costPerMTokInput: 15.0
+  costPerMTokOutput: 60.0
+  supportsThinking: true
+  thinkingEffortLevels:
+  - low
+  - medium
+  - high
+  supportsThinkingBudgetTokens: false
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2024-12-05'
+  lifecycleStatus: deprecated
+  lifecycleStatusChangedAt: '2025-04-16'
+  knowledgeCutoffDate: '2023-10-01'
+  safetyTier: openai-preparedness-medium
+  modelCardUrl: https://openai.com/index/openai-o1-system-card/
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:o-reasoning-series
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:o-reasoning-series
+  served_by:
+  - provider:openai
+  speaks:
+  - model-transport:openai-responses
+  - model-transport:openai-chat-completions
+  supports:
+  - target: capability:supports-batch-api
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:parallel-tool-calls
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-prompt-caching
+    versionRange: '>=1.0.0 <2.0.0'
+    level: partial
+    notes: 'OpenAI implicit prompt caching: server-side, automatic; no explicit cache_control
+      surface.
+
+      '
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-text-streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-thinking-streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  supports_effort_level:
+  - target: effort-level:low
+  - target: effort-level:medium
+  - target: effort-level:high

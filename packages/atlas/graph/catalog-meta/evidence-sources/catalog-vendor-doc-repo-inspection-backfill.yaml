@@ -1,0 +1,15 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-vendor-doc-repo-inspection-backfill
+attributes:
+  displayName: "Babysitter monorepo inspection bundle"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages"
+  trustLevel: trust-level:repo
+  filePath: packages/
+  observedAt: "2026-05-04T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  locator: catalog-vendor-doc-repo-inspection-backfill
+edges:
+  has_trust_level:
+    - trust-level:repo
+

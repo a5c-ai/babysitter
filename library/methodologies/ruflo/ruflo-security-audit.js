@@ -3,6 +3,13 @@
  * @description Ruflo Security Audit Pipeline - AIDefence layer: prompt injection check -> input validation -> sandboxed execution -> output sanitization
  * @inputs { target: string, targetType?: string, projectRoot?: string, securityLevel?: string, scanScope?: string }
  * @outputs { success: boolean, auditResult: object, vulnerabilities: array, mitigations: array, complianceReport: object, summary: object }
+   * @graph
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   skillAreas: [skill-area:gitops, skill-area:containerization, skill-area:configuration-management]
+ *   workflows: [workflow:release-management]
+ *   topics: [topic:continuous-integration, topic:continuous-deployment]
+ *   roles: [role:devops-engineer, role:platform-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

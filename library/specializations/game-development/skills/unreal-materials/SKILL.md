@@ -2,6 +2,11 @@
 name: unreal-materials
 description: Unreal Engine Material Editor skill for PBR workflows, material instances, shader complexity, and material functions.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:shader-programming, skill-area:graphics-rendering]
+  roles: [role:game-developer]
 ---
 
 # Unreal Materials Skill

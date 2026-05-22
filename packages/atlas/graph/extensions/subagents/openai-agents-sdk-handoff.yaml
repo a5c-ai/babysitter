@@ -1,0 +1,27 @@
+nodeKind: Subagent
+id: subagent:openai-agents-sdk.handoff-target
+attributes:
+  displayName: "Handoff Target (OpenAI Agents SDK)"
+  provenance: built-in
+  subjectId: agentVersion:codex:ge-0-119-0
+  roleId: role:implementer
+  systemPrompt: |
+    Generic handoff-receiving agent in OpenAI's Agents SDK. The SDK
+    documents handoffs (one agent transferring control to another)
+    rather than named built-in subagents. Each handoff target is a
+    user-defined `Agent` configured with its own instructions and
+    tools.
+  tools: []
+  triggers: |
+    Invoked via the SDK's `handoffs=[other_agent]` declaration on a
+    parent Agent.
+  description: |
+    Canonical handoff pattern documented in the OpenAI Agents SDK
+    (https://openai.github.io/openai-agents-python/handoffs/).
+    Not a named built-in subagent — represents the role-shape of any
+    declared handoff target.
+edges:
+  roles_played_by:
+    - target: role:implementer
+  implements:
+    - target: extension-interface:orchestration

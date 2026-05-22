@@ -7,6 +7,12 @@ metadata:
   version: "1.0.0"
   category: runtime-profiling
   backlog-id: SK-018
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:performance-optimization]
+  skillAreas: [skill-area:profiling-cpu, skill-area:profiling-memory]
+  roles: [role:backend-engineer]
+  topics: [topic:observability-driven-development]
 ---
 
 # nodejs-profiling

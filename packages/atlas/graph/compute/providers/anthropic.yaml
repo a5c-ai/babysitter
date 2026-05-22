@@ -1,0 +1,96 @@
+nodeKind: Provider
+id: provider:anthropic
+attributes:
+  displayName: Anthropic
+  versionRange: '>=2023-06-01'
+  authMethods:
+  - api-key
+  - oauth
+  authMethodNotes: 'API-key auth uses an `x-api-key` header. OAuth is used by first-party
+
+    products (Claude Code, claude.ai web/desktop) for end-user identity.
+
+    '
+  endpoints:
+    messages: https://api.anthropic.com/v1/messages
+    models: https://api.anthropic.com/v1/models
+    message_batches: https://api.anthropic.com/v1/messages/batches
+    files: https://api.anthropic.com/v1/files
+  pricing: 'See https://www.anthropic.com/pricing for current per-model rates.
+
+    '
+  pricingTiers:
+  - name: standard
+    rateLimit: per-org tier (Tier 1..4) with RPM/TPM caps; see Anthropic console
+    priceMultiplier: 1.0
+    description: Default per-token billing for Messages API.
+  - name: batch
+    rateLimit: Up to 100k requests / 256MB per batch; processed within 24h SLA
+    priceMultiplier: 0.5
+    description: Anthropic Message Batches API — 50% discount vs. standard.
+  - name: priority
+    rateLimit: Reserved capacity by contract
+    priceMultiplier: 1.0
+    description: Priority Tier — reserved throughput for enterprise customers.
+  rateLimitSignalingProtocol: 'Responses include `anthropic-ratelimit-requests-remaining`,
+
+    `anthropic-ratelimit-tokens-remaining`,
+
+    `anthropic-ratelimit-requests-reset`, and
+
+    `anthropic-ratelimit-tokens-reset` headers. 429 responses carry a
+
+    `retry-after` header (seconds). Errors envelope: `{ "type":
+
+    "error", "error": { "type": "rate_limit_error", "message": ... } }`.
+
+    '
+  dataResidencyOptions:
+  - us
+  vendorFeatures:
+  - capability:supports-prompt-caching
+  - capability:supports-batch-api
+  - capability:supports-files-api
+  slaTier: anthropic-no-public-sla
+  regions:
+  - global
+  - us-east1
+  - us-west2
+edges:
+  realizes:
+  - target: layer:2-provider
+  supports:
+  - target: capability:supports-batch-api
+    versionRange: '>=2024-01-01'
+  - target: capability:supports-files-api
+    versionRange: '>=2024-01-01'
+  - target: capability:supports-prompt-caching
+    versionRange: '>=2024-01-01'
+  - target: capability:model-discovery
+    versionRange: '>=2024-01-01'
+  - target: capability:token-counting
+    versionRange: '>=2024-01-01'
+  - target: capability:supports-structured-output
+    versionRange: '>=2024-06-01'
+    level: full
+    notes: Anthropic supports tool-use schema-constrained output; native response_format json_schema is partial (via tool-use
+      idiom).
+  serves:
+  - model:claude-opus-4-7@current
+  - model:claude-opus-4-6@current
+  - model:claude-opus-4-5@current
+  - model:claude-opus-3@current
+  - model:claude-sonnet-4-6@current
+  - model:claude-sonnet-4-5@current
+  - model:claude-sonnet-3-5@current
+  - model:claude-haiku-4-5@current
+  emits_message_type:
+  - protocol-message:system-message
+  - protocol-message:assistant-message
+  - protocol-message:user-message
+  - protocol-message:stream-event
+  - protocol-message:result-message-success
+  - protocol-message:result-message-error-max-turns
+  - protocol-message:result-message-error-max-budget-usd
+  - protocol-message:result-message-error-during-execution
+  - protocol-message:result-message-error-max-structured-output-retries

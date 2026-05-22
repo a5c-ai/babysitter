@@ -18,6 +18,12 @@ metadata:
     - phenotype
     - hpo
     - prioritization
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:graph-algorithms, skill-area:data-analysis, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:biomedical-engineer, role:research-scientist]
 ---
 
 # HPO Phenotype Matcher Skill

@@ -18,6 +18,10 @@ metadata:
     - MatWeb
     - Total Materia
     - MMPDS
+graph:
+  domains: [domain:mechanical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Material Selection Skill

@@ -1,0 +1,17 @@
+nodeKind: PathDescriptor
+id: path:cursor-mcp-config-project
+attributes:
+  pathId: path:cursor-mcp-config-project
+  displayName: "Cursor project-scope MCP config"
+  path: ".cursor/mcp.json"
+  pathKind: mcp-config
+  ownerKind: AgentPlatformImpl
+  ownerId: agent-platform-impl:cursor.platform@current
+  platform: cross-platform
+  scope: project
+  evaluationContext: project
+  expansion: literal
+
+edges:
+  owned_by:
+    - target: agent-platform-impl:cursor.platform@current

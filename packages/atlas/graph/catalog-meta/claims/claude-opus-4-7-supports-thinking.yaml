@@ -1,0 +1,21 @@
+nodeKind: Claim
+id: claim:claude-opus-4-7-supports-thinking
+attributes:
+  subjectKind: "ModelVersion"
+  statement: "Claude Opus 4.7 supports extended thinking (interleaved chain-of-thought)."
+  confidence: "medium"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "adequate"
+  status: "open"
+  subjectId: model:claude-opus-4-7@current
+  attribute: supportsThinking
+  value: true
+  evidenceSourceIds:
+    - evidence:anthropic-models-doc
+  claimedAt: "2026-04-28T10:00:00Z"
+  claimedBy: a5c-ai-team
+edges:
+  about_subject:
+    - model:claude-opus-4-7@current
+  backed_by_evidence:
+    - evidence:anthropic-models-doc

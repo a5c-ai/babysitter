@@ -1,0 +1,13 @@
+nodeKind: Effect
+id: effect:agent-run-symphony-001
+attributes:
+  kind: agent_run
+  status: completed
+  runId: run:01kqex-example-run-001
+  requestedAt: "2026-04-30T14:22:11.000Z"
+  resolvedAt: "2026-04-30T14:22:43.412Z"
+  request:
+    description: "Example agent run referenced by OpenTelemetry span examples"
+  result:
+    summary: "Run completed successfully; spans exported to obs-backend:honeycomb"
+edges: {}

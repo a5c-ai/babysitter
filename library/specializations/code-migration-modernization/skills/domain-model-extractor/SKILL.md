@@ -2,6 +2,13 @@
 name: domain-model-extractor
 description: Extract domain models from monolithic codebases using DDD principles for microservices decomposition
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:domain-driven-design, skill-area:hexagonal-architecture]
+  roles: [role:architect, role:tech-lead]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring, topic:monolith-to-microservices]
 ---
 
 # Domain Model Extractor Skill

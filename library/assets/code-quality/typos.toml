@@ -1,0 +1,15 @@
+[default]
+extend-ignore-identifiers-re = [
+  "a5c",
+  "github",
+  "ghas",
+]
+
+[files]
+extend-exclude = [
+  "dist/**",
+  "node_modules/**",
+  ".git/**",
+  "**/dev/**",
+  "**/validation/**",
+]

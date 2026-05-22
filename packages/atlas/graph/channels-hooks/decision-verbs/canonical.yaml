@@ -1,0 +1,35 @@
+---
+nodeKind: DecisionVerb
+id: decision-verb:deny
+attributes:
+  verb: deny
+  rank: 1
+  block: true
+---
+nodeKind: DecisionVerb
+id: decision-verb:ask
+attributes:
+  verb: ask
+  rank: 2
+  block: true
+---
+nodeKind: DecisionVerb
+id: decision-verb:allow
+attributes:
+  verb: allow
+  rank: 3
+  block: false
+---
+nodeKind: DecisionVerb
+id: decision-verb:continue
+attributes:
+  verb: continue
+  rank: 4
+  block: false
+---
+nodeKind: DecisionVerb
+id: decision-verb:noop
+attributes:
+  verb: noop
+  rank: 5
+  block: false

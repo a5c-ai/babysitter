@@ -1,0 +1,341 @@
+---
+nodeKind: PlatformService
+id: platform-service:aws-s3
+attributes:
+  displayName: "Amazon S3"
+  description: |
+    Object storage with 11-9s durability and broad ecosystem integration.
+  category: storage
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:object-storage
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:object-storage
+    - target: stack-part:object-storage
+  integrates_with:
+    - target: platform-service:aws-lambda
+      attributes: { nature: native }
+    - target: platform-service:aws-cloudfront
+      attributes: { nature: native }
+    - target: platform-service:aws-eventbridge
+      attributes: { nature: native }
+  depends_on:
+    - target: platform-service:aws-iam
+      attributes: { kind: required }
+---
+nodeKind: PlatformService
+id: platform-service:aws-lambda
+attributes:
+  displayName: "AWS Lambda"
+  description: |
+    Function-as-a-service that runs code in response to events without managing servers.
+  category: compute
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:serverless-runtime
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:serverless-runtime
+    - target: stack-part:serverless-runtime
+  integrates_with:
+    - target: platform-service:aws-s3
+      attributes: { nature: native }
+    - target: platform-service:aws-sqs
+      attributes: { nature: native }
+    - target: platform-service:aws-eventbridge
+      attributes: { nature: native }
+    - target: platform-service:aws-api-gateway
+      attributes: { nature: native }
+    - target: platform-service:aws-dynamodb
+      attributes: { nature: native }
+  depends_on:
+    - target: platform-service:aws-iam
+      attributes: { kind: required }
+    - target: platform-service:aws-cloudwatch
+      attributes: { kind: required }
+---
+nodeKind: PlatformService
+id: platform-service:aws-rds
+attributes:
+  displayName: "Amazon RDS"
+  description: |
+    Managed relational database service supporting Postgres, MySQL, MariaDB, Oracle, SQL Server.
+  category: database
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:relational-database
+    - stack-part:managed-postgres
+    - stack-part:managed-mysql
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:relational-database
+    - stack-part:managed-postgres
+    - stack-part:managed-mysql
+    - target: stack-part:relational-database
+    - target: stack-part:managed-postgres
+    - target: stack-part:managed-mysql
+  integrates_with:
+    - target: platform-service:aws-iam
+      attributes: { nature: native }
+  depends_on:
+    - target: platform-service:aws-vpc
+      attributes: { kind: required }
+---
+nodeKind: PlatformService
+id: platform-service:aws-dynamodb
+attributes:
+  displayName: "Amazon DynamoDB"
+  description: |
+    Serverless key-value and document NoSQL database with single-digit-millisecond latency.
+  category: database
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:nosql-database
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:nosql-database
+    - target: stack-part:nosql-database
+  integrates_with:
+    - target: platform-service:aws-lambda
+      attributes: { nature: native }
+    - target: platform-service:aws-eventbridge
+      attributes: { nature: native }
+  depends_on:
+    - target: platform-service:aws-iam
+      attributes: { kind: required }
+---
+nodeKind: PlatformService
+id: platform-service:aws-cloudfront
+attributes:
+  displayName: "Amazon CloudFront"
+  description: |
+    Global CDN with edge compute via Lambda@Edge and CloudFront Functions.
+  category: networking
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:cdn
+    - stack-part:edge-functions
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:cdn
+    - stack-part:edge-functions
+    - target: stack-part:cdn
+    - target: stack-part:edge-functions
+  integrates_with:
+    - target: platform-service:aws-s3
+      attributes: { nature: native }
+    - target: platform-service:aws-lambda
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:aws-sqs
+attributes:
+  displayName: "Amazon SQS"
+  description: |
+    Managed message queue (standard and FIFO).
+  category: messaging
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:message-queue
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:message-queue
+    - target: stack-part:message-queue
+  integrates_with:
+    - target: platform-service:aws-lambda
+      attributes: { nature: native }
+    - target: platform-service:aws-eventbridge
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:aws-eventbridge
+attributes:
+  displayName: "Amazon EventBridge"
+  description: |
+    Serverless event bus with rules, schemas, and SaaS event sources.
+  category: messaging
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:event-bus
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:event-bus
+    - target: stack-part:event-bus
+  integrates_with:
+    - target: platform-service:aws-lambda
+      attributes: { nature: native }
+    - target: platform-service:aws-sqs
+      attributes: { nature: native }
+    - target: platform-service:aws-s3
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:aws-cloudwatch
+attributes:
+  displayName: "Amazon CloudWatch"
+  description: |
+    Logs, metrics, alarms, and dashboards across AWS resources.
+  category: observability
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:logging
+    - stack-part:metrics
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:logging
+    - stack-part:metrics
+    - target: stack-part:logging
+    - target: stack-part:metrics
+  integrates_with:
+    - target: platform-service:aws-lambda
+      attributes: { nature: native }
+    - target: platform-service:aws-eks
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:aws-iam
+attributes:
+  displayName: "AWS IAM"
+  description: |
+    Identity & access management for AWS principals and resources (users, roles, policies).
+  category: security
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:identity-provider
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:identity-provider
+    - target: stack-part:identity-provider
+---
+nodeKind: PlatformService
+id: platform-service:aws-eks
+attributes:
+  displayName: "Amazon EKS"
+  description: |
+    Managed Kubernetes control plane.
+  category: compute
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:kubernetes-cluster
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:kubernetes-cluster
+    - target: stack-part:kubernetes-cluster
+  integrates_with:
+    - target: platform-service:aws-ecr
+      attributes: { nature: native }
+    - target: platform-service:aws-cloudwatch
+      attributes: { nature: native }
+  depends_on:
+    - target: platform-service:aws-iam
+      attributes: { kind: required }
+    - target: platform-service:aws-vpc
+      attributes: { kind: required }
+---
+nodeKind: PlatformService
+id: platform-service:aws-ecr
+attributes:
+  displayName: "Amazon ECR"
+  description: |
+    Managed OCI/Docker container registry.
+  category: build-deploy
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:container-registry
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:container-registry
+    - target: stack-part:container-registry
+  integrates_with:
+    - target: platform-service:aws-eks
+      attributes: { nature: native }
+    - target: platform-service:aws-lambda
+      attributes: { nature: native }
+  depends_on:
+    - target: platform-service:aws-iam
+      attributes: { kind: required }
+---
+nodeKind: PlatformService
+id: platform-service:aws-api-gateway
+attributes:
+  displayName: "Amazon API Gateway"
+  description: |
+    Managed REST/HTTP/WebSocket API gateway.
+  category: networking
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:api-gateway
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:api-gateway
+    - target: stack-part:api-gateway
+  integrates_with:
+    - target: platform-service:aws-lambda
+      attributes: { nature: native }
+    - target: platform-service:aws-cognito
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:aws-cognito
+attributes:
+  displayName: "Amazon Cognito"
+  description: |
+    User directories and federated auth for web/mobile apps.
+  category: security
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:auth-broker
+    - stack-part:identity-provider
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:auth-broker
+    - stack-part:identity-provider
+    - target: stack-part:auth-broker
+    - target: stack-part:identity-provider
+  integrates_with:
+    - target: platform-service:aws-api-gateway
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:aws-vpc
+attributes:
+  displayName: "Amazon VPC"
+  description: |
+    Tenant-isolated virtual private network with subnets, route tables, and gateways.
+  category: networking
+  providedByPlatformId: platform:aws
+  implementsStackPartIds:
+    - stack-part:virtual-private-network
+edges:
+  provided_by:
+    - platform:aws
+  implements_stack_part:
+    - stack-part:virtual-private-network
+    - target: stack-part:virtual-private-network

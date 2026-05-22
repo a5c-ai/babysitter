@@ -1,0 +1,12 @@
+nodeKind: Responsibility
+id: responsibility:approve-deploys
+attributes:
+  displayName: "Approve production deploys"
+  cadence: continuous
+  requiredSkills:
+    - skill:code-review
+  description: |
+    Approve production deploys.
+edges:
+  requires_skill:
+    - skill:code-review

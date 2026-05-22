@@ -1,0 +1,16 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-observer-dashboard
+attributes:
+  packageId: "@a5c-ai/observer-dashboard"
+  packageName: "@a5c-ai/observer-dashboard"
+  workspacePath: packages/observer-dashboard
+  moduleType: nextjs
+  surfaceKinds:
+    - ui-consumer
+    - observability-surface
+  sourceOfTruthRole: application
+  publishedTo: none
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:catalog-api

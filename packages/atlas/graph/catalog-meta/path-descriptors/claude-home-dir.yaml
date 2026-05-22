@@ -1,0 +1,24 @@
+nodeKind: PathDescriptor
+id: path:claude-home-projects
+attributes:
+  pathId: path:claude-home-projects
+  displayName: "Claude Code per-project session state directory"
+  path: "~/.claude/projects/<hash>/"
+  pathKind: session-state-dir
+  ownerKind: AgentRuntimeImpl
+  ownerId: agent-runtime-impl:claude-code.runtime@1.x
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+  notes: |
+    Per-project session directory. Path is `~/.claude/projects/<encoded-cwd>/`
+    where `<encoded-cwd>` is the absolute project working directory with
+    path separators ('/') and dots ('.') replaced by '-' (e.g.
+    `/Users/alice/repo` → `-Users-alice-repo`). It is *not* a cryptographic
+    hash; renaming or moving the project directory invalidates resume.
+    Backed by JSONL session files (see SessionModel format).
+
+edges:
+  owned_by:
+    - target: agent-runtime-impl:claude-code.runtime@1.x

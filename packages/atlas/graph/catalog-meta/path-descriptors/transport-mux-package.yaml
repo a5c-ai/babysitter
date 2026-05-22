@@ -1,0 +1,18 @@
+nodeKind: PathDescriptor
+id: path:transport-mux
+attributes:
+  pathId: path:transport-mux
+  displayName: "transport-mux protocol/provider ontology source"
+  path: "packages/transport-mux"
+  pathKind: ontology-source
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-transport-mux
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Protocol/provider ontology reference package.
+
+edges:
+  owned_by:
+    - target: package:a5c-ai-transport-mux

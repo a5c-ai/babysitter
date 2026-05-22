@@ -1,0 +1,11 @@
+nodeKind: Phase
+id: phase:done
+attributes:
+  order: 5
+  displayName: "Done"
+  phaseMachineId: phase-machine:default-process
+  description: |
+    The done phase of the default process phase machine.
+edges:
+  belongs_to_phase_machine:
+    - phase-machine:default-process

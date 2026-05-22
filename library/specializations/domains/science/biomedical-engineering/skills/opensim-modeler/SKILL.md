@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Biomechanics and Structural Analysis
   skill-id: BME-SK-015
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:sensor-fusion, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # OpenSim Modeler Skill

@@ -11,6 +11,11 @@ expertise:
   - CDC constraint development
   - Multi-clock architecture
   - Metastability theory
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+  roles: [role:embedded-engineer]
 ---
 
 # CDC Expert Agent

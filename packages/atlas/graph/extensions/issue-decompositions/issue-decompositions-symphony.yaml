@@ -1,0 +1,27 @@
+nodeKind: IssueDecomposition
+id: issue-decomposition:aca-390-into-3
+attributes:
+  displayName: "ACA-390 decomposed into 3 phased subtasks"
+  strategy: phased
+  rationale: "Auth runtime, browser-session runtime, and tarball-smoke must land in order to keep CI green between commits."
+  generatedBy: human
+edges:
+  decomposition_of:
+    - target: issue:linear-aca-390
+  has_child_issue:
+    - target: issue:linear-aca-390-1
+    - target: issue:linear-aca-390-2
+    - target: issue:linear-aca-390-3
+---
+nodeKind: IssueDecomposition
+id: issue-decomposition:gh-1234-into-2
+attributes:
+  displayName: "GH#1234 split into reconciliation timer + state-cache test"
+  strategy: parallel
+  generatedBy: agent
+edges:
+  decomposition_of:
+    - target: issue:github-1234
+  has_child_issue:
+    - target: issue:github-1234-1
+    - target: issue:github-1234-2

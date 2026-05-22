@@ -1,0 +1,108 @@
+---
+nodeKind: Term
+id: term:mobile-ui-components
+attributes:
+  displayName: "Mobile UI Components"
+  kind: concept
+  references:
+    - skill-area:flutter-development
+    - skill-area:react-native-development
+  description: |
+    Taxonomy task alias for reusable mobile UI construction in Atlas mobile stacks.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:authentication-libraries-tools-services-agents
+attributes:
+  displayName: "Authentication Libraries/Tools/Services/Agents"
+  kind: concept
+  references:
+    - skill-area:authentication-authorization
+    - skill-area:mobile-biometrics
+  description: |
+    Taxonomy mobile auth bucket mapped to Atlas authentication and biometrics.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:device-compatibility-testing
+attributes:
+  displayName: "Device Compatibility Testing"
+  kind: concept
+  references:
+    - workflow:mobile-device-compatibility-testing
+  description: |
+    Taxonomy task alias mapped to Atlas mobile device compatibility workflow.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:push-notifications-task
+attributes:
+  displayName: "Push Notifications"
+  kind: concept
+  references:
+    - skill-area:push-notifications
+  description: |
+    Taxonomy task alias for Atlas push notifications skill area.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:offline-mode-testing-task
+attributes:
+  displayName: "Offline Mode Testing"
+  kind: concept
+  references:
+    - skill-area:offline-mode-testing
+  description: |
+    Taxonomy task alias for Atlas offline mode testing skill area.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:app-store-deployment-task
+attributes:
+  displayName: "App Store Deployment"
+  kind: concept
+  references:
+    - skill-area:app-store-deployment
+    - workflow:mobile-app-store-submission
+  description: |
+    Taxonomy task alias for Atlas app-store deployment and submission surfaces.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:in-app-purchases-task
+attributes:
+  displayName: "Payment Integration"
+  kind: concept
+  references:
+    - skill-area:payment-integration
+    - skill-area:in-app-purchases
+  description: |
+    Taxonomy payment integration bucket mapped to Atlas in-app purchase/payment work.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:mobile-offline-sync-task
+attributes:
+  displayName: "Offline Sync"
+  kind: concept
+  references:
+    - skill-area:mobile-offline-sync
+  description: |
+    Mobile offline sync alias for Atlas offline sync skill area.
+edges:
+  applies_to:
+    - target: domain:mobile

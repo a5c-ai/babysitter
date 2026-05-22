@@ -1,0 +1,159 @@
+---
+nodeKind: Benchmark
+id: benchmark:m-mmlu
+attributes:
+  displayName: "Multilingual MMLU (mMMLU)"
+  homepageUrl: https://huggingface.co/datasets/openai/MMMLU
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    A multilingual translation of MMLU (Massive Multitask Language
+    Understanding) covering 14 languages, used for evaluating cross-
+    lingual knowledge and reasoning. Released by OpenAI as MMMLU.
+edges:
+  covers:
+    - target: skill-area:general-knowledge-reasoning
+  applies_to:
+    - target: domain:education
+---
+nodeKind: Benchmark
+id: benchmark:flores-200
+attributes:
+  displayName: "FLORES-200"
+  homepageUrl: https://github.com/facebookresearch/flores
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    FLORES-200 (Meta/FAIR) is a many-to-many machine translation
+    benchmark covering 200 languages with high-quality professionally
+    translated dev/devtest sets, used for low-resource MT evaluation.
+edges:
+  covers:
+    - target: skill-area:general-knowledge-reasoning
+  uses_test_set:
+    - target: test-set:flores-200-devtest
+  applies_to:
+    - target: domain:humanities
+---
+nodeKind: Benchmark
+id: benchmark:xnli
+attributes:
+  displayName: "XNLI"
+  homepageUrl: https://github.com/facebookresearch/XNLI
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    XNLI (Cross-lingual Natural Language Inference) extends the MultiNLI
+    development and test sets to 15 languages, providing a standard
+    cross-lingual sentence-pair entailment benchmark.
+edges:
+  covers:
+    - target: skill-area:general-knowledge-reasoning
+  applies_to:
+    - target: domain:humanities
+---
+nodeKind: Benchmark
+id: benchmark:gpqa
+attributes:
+  displayName: "GPQA"
+  homepageUrl: https://github.com/idavidrein/gpqa
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    GPQA (Graduate-Level Google-Proof Q&A) by Rein et al. (2023) is a
+    448-question multiple-choice benchmark in biology, chemistry, and
+    physics written and validated by domain-expert PhDs. Designed to be
+    "Google-proof" — non-experts with web access score ~34%, in-domain
+    PhDs score ~65%. The Diamond subset (198 questions) is the hardest
+    tier and is the standard reported number in vendor announcements.
+edges:
+  uses_test_set:
+    - target: test-set:gpqa-diamond
+  targets:
+    - target: model:claude-opus-4-7@current
+    - target: model:claude-opus-4-6@current
+---
+nodeKind: Benchmark
+id: benchmark:arc-challenge
+attributes:
+  displayName: "ARC-Challenge"
+  homepageUrl: https://allenai.org/data/arc
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    The AI2 Reasoning Challenge (ARC) — Challenge set — is a collection
+    of 2,590 grade-school-level multiple-choice science questions
+    selected to be unanswerable by simple retrieval or word-correlation
+    baselines, introduced by Clark et al. (Allen AI, 2018).
+edges: {}
+---
+nodeKind: Benchmark
+id: benchmark:olympiad-bench
+attributes:
+  displayName: "OlympiadBench"
+  homepageUrl: https://github.com/OpenBMB/OlympiadBench
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    OlympiadBench (OpenBMB) is a bilingual (English/Chinese) multimodal
+    benchmark of 8,476 olympiad-level math and physics problems, with
+    expert-annotated step-by-step solutions, used to probe the limits
+    of frontier-model reasoning.
+edges:
+  covers:
+    - target: skill-area:mathematical-reasoning
+  applies_to:
+    - target: domain:mathematics
+    - target: domain:physics
+---
+nodeKind: Benchmark
+id: benchmark:promptbench
+attributes:
+  displayName: "PromptBench"
+  homepageUrl: https://github.com/microsoft/promptbench
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    PromptBench (Microsoft) measures the robustness of LLMs to prompt-
+    level adversarial perturbations (character-, word-, sentence-, and
+    semantic-level attacks) across classification, QA, reasoning, and
+    translation tasks.
+edges:
+  covers:
+    - target: skill-area:prompt-engineering
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:security
+---
+nodeKind: Benchmark
+id: benchmark:bias-bench
+attributes:
+  displayName: "BBQ (Bias Benchmark for QA)"
+  homepageUrl: https://github.com/nyu-mll/BBQ
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    BBQ (Parrish et al., NYU 2022) is a bias benchmark for question
+    answering covering nine social dimensions (age, disability, gender,
+    nationality, physical appearance, race/ethnicity, religion,
+    socioeconomic status, sexual orientation), measuring stereotype
+    bias under both ambiguous and disambiguated contexts.
+edges:
+  covers:
+    - target: skill-area:safety-redteaming
+  applies_to:
+    - target: domain:social-sciences
+---
+nodeKind: Benchmark
+id: benchmark:truthful-qa
+attributes:
+  displayName: "TruthfulQA"
+  homepageUrl: https://github.com/sylinrl/TruthfulQA
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    TruthfulQA (Lin et al., 2021) is an 817-question benchmark
+    measuring whether a language model produces truthful answers
+    when humans tend to hold false beliefs (misconceptions, urban
+    legends). Reports both truthfulness and informativeness scores.
+edges: {}

@@ -4,6 +4,11 @@ description: Governance Systems Expert specializing in on-chain governance desig
 role: Governance Systems Architect
 experience: 4+ years DAO governance
 background: MakerDAO, Compound, ENS governance design and operation
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:dao-governance-implementation, skill-area:smart-contract-development-testing, skill-area:authentication-authorization]
+  roles: [role:architect, role:backend-engineer]
 ---
 
 # Governance Systems Expert Agent

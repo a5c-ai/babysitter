@@ -2,6 +2,12 @@
 name: vitest
 description: Vitest configuration, mocking, coverage, snapshot testing, and performance.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:react-testing, skill-area:unit-testing]
+  roles: [role:frontend-engineer, role:qa-engineer]
+  topics: [topic:test-driven-development]
 ---
 
 # Vitest Skill

@@ -1,0 +1,22 @@
+nodeKind: Definition
+id: definition:subagent.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:subagent
+  text: |
+    A specialized worker / persona that an agent runtime can dispatch alongside
+    its primary loop. Canonical term follows Anthropic Claude Code ("subagent",
+    one word; docs.anthropic.com/en/docs/claude-code/sub-agents). The same
+    NodeKind covers two provenance variants — vendor-shipped built-ins (Claude
+    Code's general-purpose / Explore / Plan; OpenAI built-in handoff patterns)
+    and user-installable custom definitions (Claude Code `.claude/agents/<name>.md`,
+    parallel to a Skill's SKILL.md). Distinguished via the `provenance`
+    attribute. The dispatch *mechanism* a runtime uses to invoke a subagent is
+    recorded on `AgentRuntimeImpl.subagentDispatchMechanism` (task-tool /
+    handoff / sub_agents-array / agent-as-tool / none); the *definition format*
+    a platform loads custom subagents from is recorded on
+    `AgentPlatformImpl.subagentDefinitionFormat`.
+  status: canonical
+edges:
+  defines:
+    - term:subagent

@@ -1,0 +1,93 @@
+nodeKind: ProtocolMessage
+id: protocol-message:mistral-system-message
+attributes:
+  displayName: "Mistral chat / SystemMessage"
+  messageType: SystemMessage
+  subtype: none
+  direction: user-to-core
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: SystemMessage
+    fields: ["role=system", "content"]
+  description: |
+    System-role message carrying instructions for the assistant.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:mistral-user-message
+attributes:
+  displayName: "Mistral chat / UserMessage"
+  messageType: UserMessage
+  subtype: none
+  direction: user-to-core
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: UserMessage
+    fields: ["role=user", "content"]
+  description: |
+    User-role turn input.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:mistral-assistant-message
+attributes:
+  displayName: "Mistral chat / AssistantMessage"
+  messageType: AssistantMessage
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: AssistantMessage
+    fields: ["role=assistant", "content", "tool_calls[]?"]
+  description: |
+    Assistant-role turn carrying text and/or `tool_calls` (function-call
+    objects).
+---
+nodeKind: ProtocolMessage
+id: protocol-message:mistral-tool-message
+attributes:
+  displayName: "Mistral chat / ToolMessage"
+  messageType: UserMessage
+  subtype: none
+  direction: user-to-core
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: UserMessage
+    fields: ["role=tool", "tool_call_id", "name", "content"]
+  description: |
+    Tool-execution result fed back into the next chat turn. Modeled here
+    against the catalog's UserMessage messageType (closest existing
+    direction match) — vendor wire role is `tool`.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:mistral-stream-chunk
+attributes:
+  displayName: "Mistral chat / stream chunk"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["id", "object=chat.completion.chunk", "choices[](delta(content?, tool_calls?), index, finish_reason?)"]
+  description: |
+    SSE `data: {...}` chunk on the streaming chat completions endpoint.
+    Carries delta text and/or tool-call argument deltas.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:mistral-stream-done
+attributes:
+  displayName: "Mistral chat / stream [DONE] sentinel"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["data=[DONE]"]
+  description: |
+    Final SSE sentinel `data: [DONE]` closing the stream.

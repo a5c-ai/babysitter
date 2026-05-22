@@ -2,6 +2,13 @@
 name: pinia
 description: Pinia state management for Vue 3 including store creation, actions, getters, plugins, and DevTools integration.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:application-state-management, skill-area:vue-components]
+  roles: [role:frontend-engineer]
+  topics: [topic:flux-pattern]
+
 ---
 
 # Pinia Skill

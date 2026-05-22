@@ -1,0 +1,10 @@
+nodeKind: StackPart
+id: stack-part:message-queue
+attributes:
+  displayName: "Message Queue"
+  category: infrastructure
+  description: |
+    Asynchronous messaging backbone with durable queues and consumer groups. Examples: Apache Kafka, RabbitMQ, AWS SQS, Redis Streams.
+edges:
+  stack_part_used_by:
+    - target: skill-area:kafka-stream-processing

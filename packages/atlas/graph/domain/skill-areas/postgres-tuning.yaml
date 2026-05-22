@@ -1,0 +1,24 @@
+nodeKind: SkillArea
+id: skill-area:postgres-tuning
+attributes:
+  displayName: "Postgres Performance Tuning"
+  description: |
+    PostgreSQL performance work: reading EXPLAIN (ANALYZE, BUFFERS) plans,
+    btree / GIN / GiST / BRIN index selection, partial and expression
+    indexes, table partitioning, vacuum/autovacuum, statistics targets,
+    work_mem and shared_buffers tuning, and query rewriting.
+  domains:
+    - domain:data-engineering
+  requiresStackParts:
+    - stack-part:relational-database
+  expertiseLevels: [intermediate, expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:data-engineering
+      confidence: primary
+    - target: domain:databases
+      confidence: secondary
+    - target: specialization:postgres-tuning
+      confidence: primary
+  uses_stack_part:
+    - stack-part:relational-database

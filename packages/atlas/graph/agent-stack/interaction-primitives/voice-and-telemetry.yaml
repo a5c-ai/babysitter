@@ -1,0 +1,257 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:voice-dictation
+attributes:
+  displayName: "/voice (dictation)"
+  description: |
+    Push-to-talk dictation primitive. Captures microphone audio, transcribes
+    it (typically via Whisper or platform speech APIs), and inserts the
+    transcribed text at the input caret. Surfaced as `/voice` in Claude
+    Code TUI and via the system keybinding in IDE shells.
+  kind: voice
+  surface: voice
+  category: interaction-primitive-category:voice
+  availableInModes: [chat, composer]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:voice
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:status-line
+attributes:
+  displayName: "Status line"
+  description: |
+    Persistent footer / status line that surfaces real-time agent state:
+    current phase, model, token usage, cost, sandbox mode, queued tasks.
+    Implemented by Claude Code, OpenCode, Codex CLI, and most TUI shells
+    via a bottom-of-screen render zone.
+  kind: telemetry
+  surface: status-line
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:telemetry
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:cost-readout
+attributes:
+  displayName: "Cost readout"
+  description: |
+    On-demand cost / token-usage display (Claude Code `/cost`, Codex
+    `/usage`, OpenCode footer counters). Presents cumulative input /
+    output / cache tokens and dollar estimates for the current session.
+  kind: telemetry
+  surface: status-line
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:telemetry
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:drag-drop-files
+attributes:
+  displayName: "Drag-drop files"
+  description: |
+    User drags one or more files (or directories) from the host file manager
+    onto the agent surface. The surface materializes them as @-mention
+    references or attaches them as context. Supported in IDE shells (Cursor,
+    JetBrains-AI) and most native desktop hosts; degrades to path-paste in
+    pure TUIs.
+  kind: multimodal-input
+  surface: multimodal-input
+  category: interaction-primitive-category:content-input
+  availableInModes: [chat, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:content-input
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:paste-image
+attributes:
+  displayName: "Paste image"
+  description: |
+    Pasting an image from the OS clipboard into the agent input. The surface
+    encodes the bytes as a vision-modal content block bound to a multimodal
+    `ModelVersion`. Supported in Claude Code, Cursor, and any presentation
+    whose `renderingTechnology` exposes clipboard image MIME types.
+  kind: multimodal-input
+  surface: multimodal-input
+  category: interaction-primitive-category:content-input
+  availableInModes: [chat, composer]
+  requiresPermission: true
+  keyboardShortcut: "Cmd+V / Ctrl+V"
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:content-input
+  requires_capability:
+    - capability:vision-input
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:paste-url
+attributes:
+  displayName: "Paste URL (auto-fetch)"
+  description: |
+    Pasting a URL into the agent input triggers an opportunistic fetch of
+    the URL's content (HTML→text, PDF→text, image→vision block). The
+    surface either inlines a preview or queues a WebFetch tool call.
+  kind: multimodal-input
+  surface: multimodal-input
+  category: interaction-primitive-category:multimodal
+  availableInModes: [chat, composer]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:multimodal
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:share-session
+attributes:
+  displayName: "Share session"
+  description: |
+    Generate a shareable URL or invite that exposes the live or recorded
+    session to another participant (read-only or read-write). Surfaced
+    by OpenCode (`opencode share`), Cursor (Cursor Sync), and a subset
+    of cloud-hosted agent shells.
+  kind: collaborative
+  surface: collaborative
+  category: interaction-primitive-category:collaborative
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:collaborative
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:follow-agent
+attributes:
+  displayName: "Follow agent"
+  description: |
+    Live-tail another participant's agent session — see their turns,
+    tool calls, and file edits as they happen. Read-only by default;
+    becomes a true collaborative primitive when paired with
+    share-session in read-write mode. Distinct from passive replay.
+  kind: collaborative
+  surface: collaborative
+  category: interaction-primitive-category:collaborative
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:collaborative
+---
+nodeKind: InteractionPrimitiveCategory
+id: interaction-primitive-category:control
+attributes:
+  value: control
+  displayName: "Control"
+  description: "Primitives that drive the run/turn state machine — start, stop, fork, resume, compact."
+edges: {}
+---
+nodeKind: InteractionPrimitiveCategory
+id: interaction-primitive-category:navigation
+attributes:
+  value: navigation
+  displayName: "Navigation"
+  description: "Primitives that move the user through history, threads, and surfaces — thread-jump, search, scrollback."
+edges: {}
+---
+nodeKind: InteractionPrimitiveCategory
+id: interaction-primitive-category:context
+attributes:
+  value: context
+  displayName: "Context"
+  description: "Primitives that attach or alter context — @-mention, file-attach, model switch."
+edges: {}
+---
+nodeKind: InteractionPrimitiveCategory
+id: interaction-primitive-category:approval
+attributes:
+  value: approval
+  displayName: "Approval"
+  description: "Primitives that gate tool execution — tool-approval prompt, permission rules, sandbox-mode toggle."
+edges: {}
+---
+nodeKind: InteractionPrimitiveCategory
+id: interaction-primitive-category:voice
+attributes:
+  value: voice
+  displayName: "Voice"
+  description: "Microphone-driven primitives — push-to-talk dictation, voice activation."
+edges: {}
+---
+nodeKind: InteractionPrimitiveCategory
+id: interaction-primitive-category:telemetry
+attributes:
+  value: telemetry
+  displayName: "Telemetry"
+  description: "Observability surfaces — status line, cost readout, token meter, phase indicator."
+edges: {}
+---
+nodeKind: InteractionPrimitiveCategory
+id: interaction-primitive-category:multimodal
+attributes:
+  value: multimodal
+  displayName: "Multimodal"
+  description: "Non-text input primitives — drag-drop, paste-image, paste-url, file-attach."
+edges: {}
+---
+nodeKind: InteractionPrimitiveCategory
+id: interaction-primitive-category:collaborative
+attributes:
+  value: collaborative
+  displayName: "Collaborative"
+  description: "Multi-user primitives — share-session, follow-agent, co-edit."
+edges: {}
+---
+nodeKind: InteractionPrimitiveCategory
+id: interaction-primitive-category:configuration
+attributes:
+  value: configuration
+  displayName: "Configuration"
+  description: "Primitives that change agent settings — model picker, mode switch, permissions, MCP server toggle."
+edges: {}
+---
+nodeKind: InteractionPrimitiveCategory
+id: interaction-primitive-category:content-input
+attributes:
+  value: content-input
+  displayName: "Content input"
+  description: "Primary content authoring primitives — prompt input, file attachment, paste-image, drag-drop-files."
+edges: {}
+---
+nodeKind: InteractionPrimitiveCategory
+id: interaction-primitive-category:human-in-loop
+attributes:
+  value: human-in-loop
+  displayName: "Human-in-loop"
+  description: "Primitives via which the agent asks the user a question and awaits a response — ask-user-question, structured choice prompts."
+edges: {}
+---
+nodeKind: InteractionPrimitiveCategory
+id: interaction-primitive-category:lifecycle
+attributes:
+  value: lifecycle
+  displayName: "Lifecycle"
+  description: "Session/run lifecycle primitives — start, resume, fork, archive, end."
+edges: {}

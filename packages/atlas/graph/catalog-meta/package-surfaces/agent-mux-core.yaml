@@ -1,0 +1,16 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-mux-core
+attributes:
+  packageId: "@a5c-ai/agent-mux-core"
+  packageName: "@a5c-ai/agent-mux-core"
+  workspacePath: packages/agent-mux/core
+  moduleType: typescript
+  surfaceKinds:
+    - host-detection-consumer
+    - invocation-consumer
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:amux-hooks-global

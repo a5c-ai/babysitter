@@ -20,6 +20,12 @@ import {
   validateConfig,
   type BabysitterConfig,
 } from "../../config/defaults";
+import {
+  outputPathsResult,
+  outputShowTable,
+  outputValidateResult,
+  supportsColors,
+} from "./configure/output";
 
 // ============================================================================
 // Types
@@ -104,40 +110,6 @@ export interface ConfigurePathsResult {
 }
 
 // ============================================================================
-// Color Utilities
-// ============================================================================
-
-/**
- * ANSI color codes for terminal output
- */
-const COLORS = {
-  reset: "\x1b[0m",
-  green: "\x1b[32m",
-  red: "\x1b[31m",
-  yellow: "\x1b[33m",
-  cyan: "\x1b[36m",
-  dim: "\x1b[2m",
-  bold: "\x1b[1m",
-  blue: "\x1b[34m",
-} as const;
-
-/**
- * Checks if stdout supports colors
- */
-function supportsColors(): boolean {
-  if (process.env.NO_COLOR !== undefined) {
-    return false;
-  }
-  if (process.env.FORCE_COLOR !== undefined) {
-    return true;
-  }
-  if (process.stdout && typeof process.stdout.isTTY === "boolean") {
-    return process.stdout.isTTY;
-  }
-  return false;
-}
-
-// ============================================================================
 // Documentation Links
 // ============================================================================
 
@@ -214,53 +186,6 @@ function getValueSource(key: keyof BabysitterConfig): "default" | "env" {
     return "env";
   }
   return "default";
-}
-
-/**
- * Format a value for display
- */
-function formatValue(value: unknown): string {
-  if (typeof value === "string") {
-    return `"${value}"`;
-  }
-  if (typeof value === "boolean") {
-    return value ? "true" : "false";
-  }
-  if (typeof value === "number") {
-    return value.toLocaleString();
-  }
-  return String(value);
-}
-
-/**
- * Calculate column widths for table display
- */
-function calculateColumnWidths(rows: string[][]): number[] {
-  if (rows.length === 0) return [];
-  const numCols = rows[0].length;
-  const widths: number[] = new Array<number>(numCols).fill(0);
-  // eslint-disable-next-line no-control-regex
-  const ansiRegex = /\x1b\[[0-9;]*m/g;
-
-  for (const row of rows) {
-    for (let i = 0; i < row.length; i++) {
-      // Strip ANSI codes for width calculation
-      const stripped = row[i].replace(ansiRegex, "");
-      widths[i] = Math.max(widths[i], stripped.length);
-    }
-  }
-
-  return widths;
-}
-
-/**
- * Pad a string to a specific width, accounting for ANSI codes
- */
-function padString(str: string, width: number): string {
-  // eslint-disable-next-line no-control-regex
-  const stripped = str.replace(/\x1b\[[0-9;]*m/g, "");
-  const padding = width - stripped.length;
-  return str + " ".repeat(Math.max(0, padding));
 }
 
 // ============================================================================
@@ -357,171 +282,6 @@ export async function configurePaths(options: ConfigureOptions): Promise<Configu
   return { paths, timestamp };
 }
 
-// ============================================================================
-// Output Formatting
-// ============================================================================
-
-/**
- * Output configuration values as a formatted table
- */
-function outputShowTable(result: ConfigureShowResult, useColors: boolean): void {
-  console.log("");
-  const header = useColors
-    ? `${COLORS.bold}${COLORS.cyan}Babysitter SDK Configuration${COLORS.reset}`
-    : "Babysitter SDK Configuration";
-  console.log(header);
-  console.log("");
-
-  // Prepare table rows
-  const headers = ["Setting", "Value", "Source"];
-  const rows: string[][] = [headers];
-
-  for (const item of result.values) {
-    const valueStr = formatValue(item.value);
-    const sourceStr =
-      item.source === "env"
-        ? useColors
-          ? `${COLORS.green}env${COLORS.reset}`
-          : "env"
-        : useColors
-          ? `${COLORS.dim}default${COLORS.reset}`
-          : "default";
-
-    rows.push([item.key, valueStr, sourceStr]);
-  }
-
-  // Calculate column widths
-  const widths = calculateColumnWidths(rows);
-
-  // Print header
-  const headerRow = headers.map((h, i) => padString(useColors ? `${COLORS.bold}${h}${COLORS.reset}` : h, widths[i]));
-  console.log("  " + headerRow.join("  "));
-
-  // Print separator
-  const separator = widths.map((w) => "-".repeat(w)).join("  ");
-  console.log("  " + (useColors ? `${COLORS.dim}${separator}${COLORS.reset}` : separator));
-
-  // Print data rows
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i].map((cell, j) => padString(cell, widths[j]));
-    console.log("  " + row.join("  "));
-  }
-
-  console.log("");
-
-  // Print environment variable hints
-  const envOverridden = result.values.filter((v) => v.source === "env");
-  if (envOverridden.length > 0) {
-    const envHeader = useColors
-      ? `${COLORS.cyan}Environment Overrides:${COLORS.reset}`
-      : "Environment Overrides:";
-    console.log(envHeader);
-    for (const item of envOverridden) {
-      console.log(`  ${item.envVar} = ${formatValue(item.value)}`);
-    }
-    console.log("");
-  }
-
-  // Print doc link hint
-  const docHint = useColors
-    ? `${COLORS.dim}Documentation: ${DOC_BASE_URL}${COLORS.reset}`
-    : `Documentation: ${DOC_BASE_URL}`;
-  console.log(docHint);
-  console.log("");
-}
-
-/**
- * Output validation results
- */
-function outputValidateResult(result: ConfigureValidateResult, useColors: boolean): void {
-  console.log("");
-
-  const statusIcon = result.valid
-    ? useColors
-      ? `${COLORS.green}\u2713${COLORS.reset}`
-      : "[PASS]"
-    : useColors
-      ? `${COLORS.red}\u2717${COLORS.reset}`
-      : "[FAIL]";
-
-  const statusText = result.valid ? "Configuration is valid" : "Configuration has errors";
-  const header = useColors
-    ? `${COLORS.bold}${statusIcon} ${statusText}${COLORS.reset}`
-    : `${statusIcon} ${statusText}`;
-  console.log(header);
-  console.log("");
-
-  if (result.errors.length > 0) {
-    const errHeader = useColors
-      ? `${COLORS.red}${COLORS.bold}Errors:${COLORS.reset}`
-      : "Errors:";
-    console.log(errHeader);
-    for (const err of result.errors) {
-      const bullet = useColors ? `${COLORS.red}\u2022${COLORS.reset}` : "-";
-      console.log(`  ${bullet} ${err}`);
-    }
-    console.log("");
-  }
-
-  if (result.warnings.length > 0) {
-    const warnHeader = useColors
-      ? `${COLORS.yellow}${COLORS.bold}Warnings:${COLORS.reset}`
-      : "Warnings:";
-    console.log(warnHeader);
-    for (const warn of result.warnings) {
-      const bullet = useColors ? `${COLORS.yellow}\u2022${COLORS.reset}` : "-";
-      console.log(`  ${bullet} ${warn}`);
-    }
-    console.log("");
-  }
-
-  if (result.valid && result.warnings.length === 0) {
-    const msg = useColors
-      ? `${COLORS.dim}All configuration values are within valid ranges.${COLORS.reset}`
-      : "All configuration values are within valid ranges.";
-    console.log(msg);
-    console.log("");
-  }
-}
-
-/**
- * Output path information
- */
-function outputPathsResult(result: ConfigurePathsResult, useColors: boolean): void {
-  console.log("");
-  const header = useColors
-    ? `${COLORS.bold}${COLORS.cyan}Babysitter SDK Paths${COLORS.reset}`
-    : "Babysitter SDK Paths";
-  console.log(header);
-  console.log("");
-
-  for (const pathInfo of result.paths) {
-    const existsIcon = pathInfo.exists
-      ? useColors
-        ? `${COLORS.green}\u2713${COLORS.reset}`
-        : "[EXISTS]"
-      : useColors
-        ? `${COLORS.yellow}\u2717${COLORS.reset}`
-        : "[MISSING]";
-
-    const nameStr = useColors
-      ? `${COLORS.bold}${pathInfo.name}${COLORS.reset}`
-      : pathInfo.name;
-
-    console.log(`  ${existsIcon} ${nameStr}`);
-    console.log(`      Path: ${pathInfo.path}`);
-    const descStr = useColors
-      ? `${COLORS.dim}${pathInfo.description}${COLORS.reset}`
-      : pathInfo.description;
-    console.log(`      ${descStr}`);
-    console.log("");
-  }
-}
-
-// ============================================================================
-// Main Command Handler
-// ============================================================================
-
 /**
  * CLI entry point for the configure command
  *
@@ -561,7 +321,7 @@ export async function handleConfigureCommand(
         if (options.json) {
           console.log(JSON.stringify(result, null, 2));
         } else {
-          outputShowTable(result, useColors);
+          outputShowTable(result, useColors, DOC_BASE_URL);
         }
         return 0;
       }
@@ -591,7 +351,7 @@ export async function handleConfigureCommand(
         if (options.json) {
           console.log(JSON.stringify({ error: errorMsg }, null, 2));
         } else {
-          console.error(useColors ? `${COLORS.red}Error:${COLORS.reset} ${errorMsg}` : `Error: ${errorMsg}`);
+          console.error(`Error: ${errorMsg}`);
           console.error("");
           console.error("Available subcommands:");
           console.error("  show      Display current effective configuration");
@@ -610,7 +370,7 @@ export async function handleConfigureCommand(
     if (options.json) {
       console.log(JSON.stringify({ error: errorMsg }, null, 2));
     } else {
-      console.error(useColors ? `${COLORS.red}Error:${COLORS.reset} ${errorMsg}` : `Error: ${errorMsg}`);
+      console.error(`Error: ${errorMsg}`);
     }
     return 1;
   }

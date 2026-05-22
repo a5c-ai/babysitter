@@ -9,6 +9,14 @@ expertise:
   - C4 model documentation
   - API contracts
   - Onboarding docs
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:tech-lead, role:frontend-engineer]
+  skillAreas: [skill-area:api-doc-generation]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:design-patterns]
+
 ---
 
 # Architecture Documentation Agent

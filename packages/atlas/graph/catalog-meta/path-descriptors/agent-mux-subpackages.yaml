@@ -1,0 +1,135 @@
+---
+nodeKind: PathDescriptor
+id: path:agent-mux-cli
+attributes:
+  pathId: path:agent-mux-cli
+  displayName: "agent-mux CLI workspace"
+  path: "packages/agent-mux/cli"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-agent-mux-cli
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: amux CLI bin entrypoint package.
+---
+nodeKind: PathDescriptor
+id: path:agent-mux-gateway
+attributes:
+  pathId: path:agent-mux-gateway
+  displayName: "agent-mux gateway workspace"
+  path: "packages/agent-mux/gateway"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-agent-mux-gateway
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: HTTP gateway / fanout server.
+---
+nodeKind: PathDescriptor
+id: path:agent-mux-tui
+attributes:
+  pathId: path:agent-mux-tui
+  displayName: "agent-mux TUI workspace"
+  path: "packages/agent-mux/tui"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-agent-mux-tui
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Ink-based amux-tui bin entrypoint.
+---
+nodeKind: PathDescriptor
+id: path:agent-mux-ui
+attributes:
+  pathId: path:agent-mux-ui
+  displayName: "agent-mux UI shared workspace"
+  path: "packages/agent-mux/ui"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-agent-mux-ui
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Cross-platform UI components and session-flow.
+---
+nodeKind: PathDescriptor
+id: path:agent-mux-webui
+attributes:
+  pathId: path:agent-mux-webui
+  displayName: "agent-mux Web UI workspace"
+  path: "packages/agent-mux/webui"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-agent-mux-webui
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Browser-based agent-mux web UI.
+---
+nodeKind: PathDescriptor
+id: path:agent-mux-harness-mock
+attributes:
+  pathId: path:agent-mux-harness-mock
+  displayName: "agent-mux harness mock workspace"
+  path: "packages/agent-mux/harness-mock"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-agent-mux-harness-mock
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Mock harness emulator for adapter tests.
+---
+nodeKind: PathDescriptor
+id: path:agent-mux-observability
+attributes:
+  pathId: path:agent-mux-observability
+  displayName: "agent-mux observability workspace"
+  path: "packages/agent-mux/observability"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-agent-mux-observability
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Logger and telemetry library.
+---
+nodeKind: PathDescriptor
+id: path:agent-mux-sdk
+attributes:
+  pathId: path:agent-mux-sdk
+  displayName: "agent-mux umbrella SDK workspace"
+  path: "packages/agent-mux/sdk"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-agent-mux
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Umbrella @a5c-ai/agent-mux re-export with amux bin.
+---
+nodeKind: PathDescriptor
+id: path:agent-mux-adapters
+attributes:
+  pathId: path:agent-mux-adapters
+  displayName: "agent-mux adapters workspace"
+  path: "packages/agent-mux/adapters"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-agent-mux-adapters
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Per-harness AgentAdapter implementations bundle.

@@ -1,0 +1,21 @@
+nodeKind: StackPart
+id: stack-part:cache
+attributes:
+  displayName: "Cache"
+  category: data-store
+  description: |
+    In-memory key/value store providing sub-millisecond reads for frequently
+    accessed data, reducing load on the primary database and improving
+    response latency. Caching strategies include cache-aside, read-through,
+    write-through, and write-behind patterns.
+
+    Redis (the dominant choice) supports rich data structures (hashes, sorted
+    sets, streams), pub/sub, Lua scripting, and optional persistence via RDB
+    and AOF. Memcached is simpler but faster for pure caching. Varnish
+    operates at the HTTP layer for full-page or fragment caching. Key
+    operational concerns include cache invalidation strategies, TTL tuning,
+    eviction policies (LRU, LFU), and hot-key management in clustered setups.
+edges:
+  stack_part_used_by:
+    - target: skill-area:caching-strategies
+    - target: skill-area:cache-optimization

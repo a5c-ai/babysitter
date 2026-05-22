@@ -1,0 +1,12 @@
+nodeKind: SourceRef
+id: source-ref:gemini-cli
+attributes:
+  description: "Gemini CLI"
+  displayName: "Gemini CLI"
+  repoUrl: https://github.com/google-gemini/gemini-cli
+  ref: main
+  path: "."
+  packageManager: npm
+  packageName: "@google/gemini-cli"
+  kind: npm-package
+edges: {}

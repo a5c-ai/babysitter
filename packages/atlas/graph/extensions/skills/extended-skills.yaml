@@ -1,0 +1,549 @@
+nodeKind: Skill
+id: skill:pdf-handling
+attributes:
+  displayName: "PDF Handling"
+  description: |
+    Read, extract, merge, split, rotate, watermark, fill forms, encrypt,
+    OCR, and create PDF documents. Wraps pypdf / pdfplumber / pdfminer
+    / reportlab; includes form-field heuristics and OCR fallback.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  requiresLanguages:
+    - language:python
+  sourceRef: source-ref:anthropic-skills-pdf
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-skills-pdf
+  addresses:
+    - target: skill-area:document-processing
+---
+nodeKind: Skill
+id: skill:docx-handling
+attributes:
+  displayName: "DOCX Handling"
+  description: |
+    Create, read, edit, and manipulate Word .docx files: tables of
+    contents, headings, page numbers, letterheads, find-and-replace,
+    image insertion, and tracked-changes/comment workflows.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  requiresLanguages:
+    - language:python
+  sourceRef: source-ref:anthropic-skills-docx
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-skills-docx
+  addresses:
+    - target: skill-area:document-processing
+---
+nodeKind: Skill
+id: skill:xlsx-handling
+attributes:
+  displayName: "XLSX Handling"
+  description: |
+    Open, read, edit, and create .xlsx / .xlsm / .csv / .tsv spreadsheets:
+    add columns, compute formulas, apply formatting and charts, and
+    convert between tabular formats.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:data-science
+  requiresLanguages:
+    - language:python
+  sourceRef: source-ref:anthropic-skills-xlsx
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-skills-xlsx
+  addresses:
+    - target: skill-area:document-processing
+    - target: skill-area:python-data-pipelines
+---
+nodeKind: Skill
+id: skill:pptx-handling
+attributes:
+  displayName: "PPTX Handling"
+  description: |
+    Create slide decks, parse and extract text from .pptx files, edit
+    layouts, work with templates, speaker notes, and comments.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  requiresLanguages:
+    - language:python
+  sourceRef: source-ref:anthropic-skills-pptx
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-skills-pptx
+  addresses:
+    - target: skill-area:document-processing
+---
+nodeKind: Skill
+id: skill:create-pdf-from-md
+attributes:
+  displayName: "Create PDF from Markdown"
+  description: |
+    Render Markdown source to a polished PDF (via pandoc / weasyprint /
+    chromium-headless). Handles tables of contents, code blocks with
+    syntax highlighting, and embedded images.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  requiresLanguages:
+    - language:python
+  sourceRef: source-ref:anthropic-skills-pdf
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-skills-pdf
+  addresses:
+    - target: skill-area:document-processing
+    - target: skill-area:tutorial-design
+---
+nodeKind: Skill
+id: skill:python-data-analysis
+attributes:
+  displayName: "Python Data Analysis"
+  description: |
+    Profile, clean, and analyze tabular data with pandas/numpy/seaborn.
+    Picks chart types, runs descriptive stats, and turns DataFrames into
+    publication-quality figures.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:data-science
+  requiresLanguages:
+    - language:python
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:bioinformatics
+      confidence: secondary
+  implements:
+    - target: extension-interface:reflection
+    - target: extension-interface:memory
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+---
+nodeKind: Skill
+id: skill:web-scraping
+attributes:
+  displayName: "Web Scraping"
+  description: |
+    Headless-browser scraping using Playwright/Selenium with pagination,
+    login flows, anti-bot heuristics, and structured-output extraction.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:web-development
+  requiresLanguages:
+    - language:python
+    - language:typescript
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:web-scraping
+---
+nodeKind: Skill
+id: skill:api-testing
+attributes:
+  displayName: "API Testing"
+  description: |
+    Probe HTTP/REST APIs with curl/httpie/Postman collections. Generates
+    request fixtures, asserts schemas, and runs contract checks.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:api-contract-testing
+    - target: skill-area:contract-testing
+---
+nodeKind: Skill
+id: skill:graphql-query
+attributes:
+  displayName: "GraphQL Query"
+  description: |
+    Build, validate, and execute GraphQL queries and mutations. Reads
+    schemas (introspection or .graphql files), generates typed
+    operations, and exercises endpoints.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:web-development
+  requiresLanguages:
+    - language:typescript
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:graphql-schema-design
+    - target: skill-area:api-design
+---
+nodeKind: Skill
+id: skill:terraform-iac
+attributes:
+  displayName: "Terraform IaC"
+  description: |
+    Author, plan, and review HashiCorp Terraform infrastructure-as-code:
+    module structure, state hygiene, drift detection, and policy guards.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:devops
+    - domain:cloud-infra
+  requiresLanguages:
+    - language:hcl
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:infrastructure
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+    - target: extension-interface:identity
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:gitops
+---
+nodeKind: Skill
+id: skill:pdf-form-filling
+attributes:
+  displayName: "PDF Form Filling"
+  description: |
+    Programmatically fill AcroForm and XFA PDF forms — read field maps,
+    apply values, flatten or keep editable, and digitally sign output.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  requiresLanguages:
+    - language:python
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:document-processing
+---
+nodeKind: Skill
+id: skill:csv-analysis
+attributes:
+  displayName: "CSV Analysis"
+  description: |
+    Inspect, clean, and analyze CSV/TSV files with pandas: profile
+    columns, detect delimiters and encodings, handle dirty headers,
+    and emit summary statistics or pivoted reports.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:data-science
+  requiresLanguages:
+    - language:python
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+---
+nodeKind: Skill
+id: skill:json-transformation
+attributes:
+  displayName: "JSON Transformation"
+  description: |
+    Reshape, filter, and validate JSON with jq and JSON Schema. Generate
+    transformations from before/after examples and verify against
+    schemas.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:json-data-wrangling
+---
+nodeKind: Skill
+id: skill:image-analysis
+attributes:
+  displayName: "Image Analysis"
+  description: |
+    Use a vision-capable model to describe, classify, and extract
+    structured data from images — OCR, chart parsing, UI screenshot
+    understanding, and visual diff.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  requiresLanguages:
+    - language:python
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:vision-extraction
+---
+nodeKind: Skill
+id: skill:react-component-generation
+attributes:
+  displayName: "React Component Generation"
+  description: |
+    Scaffold typed React components with Tailwind / shadcn-style styling,
+    Storybook stories, and unit tests. Adheres to project lint and
+    accessibility conventions.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:web-development
+  requiresLanguages:
+    - language:typescript
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:react-components
+    - target: skill-area:design-systems
+---
+nodeKind: Skill
+id: skill:database-migrations
+attributes:
+  displayName: "Database Migrations"
+  description: |
+    Author and review schema migrations with Alembic, Flyway, Liquibase,
+    Diesel, or Prisma — including up/down pairs, safe online ops, and
+    backfill strategies.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:database-migrations-zero-downtime
+    - target: skill-area:schema-evolution
+---
+nodeKind: Skill
+id: skill:dockerization
+attributes:
+  displayName: "Dockerization"
+  description: |
+    Containerize an application: write a minimal multi-stage Dockerfile,
+    a .dockerignore, a docker-compose for local dev, and verify the
+    image builds and the entrypoint comes up cleanly.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:devops
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:containerization
+    - target: skill-area:container-security
+---
+nodeKind: Skill
+id: skill:cicd-pipeline-design
+attributes:
+  displayName: "CI/CD Pipeline Design"
+  description: |
+    Author CI/CD pipelines for GitHub Actions, GitLab CI, or CircleCI:
+    matrix builds, caching, secret handling, environment promotion, and
+    release gating.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:devops
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:observability
+      confidence: secondary
+  implements:
+    - target: extension-interface:reflection
+    - target: extension-interface:telemetry
+    - target: extension-interface:sleep-cycle
+    - target: extension-interface:compression
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:gitops
+    - target: skill-area:blue-green-deployment
+---
+nodeKind: Skill
+id: skill:translation-localization
+attributes:
+  displayName: "Translation & Localization"
+  description: |
+    Extract user-facing strings, drive i18n message catalogs (gettext,
+    ICU MessageFormat, Fluent), and generate or review translations
+    with consistency and pluralization checks.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:internationalization
+---
+nodeKind: Skill
+id: skill:accessibility-audit
+attributes:
+  displayName: "Accessibility Audit"
+  description: |
+    Audit web UIs for WCAG 2.x conformance using axe-core / pa11y /
+    Lighthouse. Reports violations by severity, suggests remediations,
+    and verifies fixes.
+  kind: claude-code-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  domains:
+    - domain:web-development
+  requiresLanguages:
+    - language:javascript
+    - language:typescript
+  sourceRef: source-ref:anthropic-extra-skills
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:anthropic-extra-skills
+  addresses:
+    - target: skill-area:accessibility-testing
+    - target: skill-area:web-accessibility
+    - target: skill-area:accessibility-first-design

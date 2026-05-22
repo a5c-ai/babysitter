@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:agent-recipe.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:agent-recipe
+  text: |
+    Alternative name for Blueprint. Some communities call the markdown bundle agents read to install/configure projects an "agent recipe"; canonical is Blueprint.
+  status: canonical
+edges:
+  defines:
+    - term:agent-recipe

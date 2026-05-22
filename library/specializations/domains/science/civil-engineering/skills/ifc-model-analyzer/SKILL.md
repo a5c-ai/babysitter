@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: BIM Coordination
   skill-id: CIV-SK-015
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # IFC Model Analyzer Skill

@@ -1,0 +1,312 @@
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-contextwindowtokens
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: contextWindowTokens
+  value: '256000'
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current contextWindowTokens is 256000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-costpermtokinput
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: costPerMTokInput
+  value: '0'
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current costPerMTokInput is 0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-costpermtokoutput
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: costPerMTokOutput
+  value: '0'
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current costPerMTokOutput is 0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-finetuningkind
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: fineTuningKind
+  value: full
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current fineTuningKind is full.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-kind
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: kind
+  value: chat
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current kind is chat.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-lifecyclestatus
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-modalities
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current modalities is text, image.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-modalitydirections
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current modalityDirections is kind=text;direction=input,
+    kind=image;direction=input, kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-modelcardurl
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: modelCardUrl
+  value: https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current modelCardUrl is https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-supportsextendedthinking
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-supportsfinetuning
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: supportsFineTuning
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current supportsFineTuning is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current supportsThinkingBudgetTokens is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-llama-4-405b-instruct-current-versionrange
+attributes:
+  subjectId: model:llama-4-405b-instruct@current
+  attribute: versionRange
+  value: '>=4.0.0 <5.0.0'
+  subjectKind: ModelVersion
+  statement: model:llama-4-405b-instruct@current versionRange is >=4.0.0 <5.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-llama-4-405b-instruct
+  about_subject:
+  - model:llama-4-405b-instruct@current

@@ -5,6 +5,11 @@
  * @category Expertise Location and Mapping
  * @inputs { matchingRequest: object, expertPool: array, matchingCriteria: object, outputDir: string }
  * @outputs { success: boolean, matchingSystem: object, matchResults: array, connectionProtocol: object, qualityScore: number, artifacts: array }
+  * @graph
+ *   domains: [domain:knowledge-management]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:data-governance]
+ *   roles: [role:information-architect, role:technical-writer]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

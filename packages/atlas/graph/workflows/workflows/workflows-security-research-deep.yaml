@@ -1,0 +1,104 @@
+---
+nodeKind: Workflow
+id: workflow:fuzzing-campaign
+attributes:
+  displayName: "Fuzzing Campaign"
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Plans and executes automated fuzz testing campaigns against critical code
+    paths -- selecting fuzzing engines (AFL++, libFuzzer, Jazzer), writing
+    harnesses for target functions, seeding initial corpora, running continuous
+    fuzzing for a defined window, triaging unique crashes by exploitability,
+    reporting confirmed vulnerabilities with reproducer inputs, and tracking
+    regression via corpus integration into CI. Excludes fix implementation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:test-writer
+    - target: role:debugger
+  requires_skill_area:
+    - target: skill-area:fuzz-testing
+    - target: skill-area:sast
+  applies_to_domain:
+    - target: domain:cybersecurity
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:supply-chain-attack-simulation
+attributes:
+  displayName: "Supply Chain Attack Simulation"
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "semi-annual"
+  complexity: cross-team
+  description: |
+    Simulates software supply chain attack scenarios -- injecting typosquatted
+    packages in internal registries, testing dependency confusion defenses,
+    validating SLSA provenance verification, testing code-signing bypass
+    detection, evaluating CI pipeline compromise scenarios, and measuring
+    time-to-detection and response effectiveness. Produces a findings report
+    with remediation priorities. Excludes ongoing dependency scanning.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:supply-chain-security
+    - target: skill-area:dependency-vulnerability-mgmt
+  applies_to_domain:
+    - target: domain:cybersecurity
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:threat-modeling
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:application-security-team
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:cve-response-coordination
+attributes:
+  displayName: "CVE Response Coordination"
+  workflowKind: security
+  triggerType: event-driven
+  typicalCadence: "per-cve"
+  complexity: cross-team
+  description: |
+    Coordinates the organization's response to newly disclosed CVEs affecting
+    its software stack -- monitoring advisory feeds (NVD, GitHub Security
+    Advisories, vendor bulletins), triaging by CVSS score and exploitability,
+    mapping affected CVEs to internal services via SBOM, prioritizing patching
+    by blast radius, coordinating emergency patch deployments, communicating
+    status to stakeholders, and tracking remediation to closure within SLA.
+    Excludes long-term vulnerability management strategy.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:vulnerability-scanner
+    - target: role:platform-engineer
+    - target: role:incident-commander
+  requires_skill_area:
+    - target: skill-area:dependency-vulnerability-mgmt
+    - target: skill-area:incident-response
+  applies_to_domain:
+    - target: domain:cybersecurity
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:respond-incidents
+    - target: responsibility:upgrade-dependencies-weekly
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:application-security-team
+    - target: org-unit:engineering

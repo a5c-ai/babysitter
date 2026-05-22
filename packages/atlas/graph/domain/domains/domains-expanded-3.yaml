@@ -1,0 +1,642 @@
+---
+nodeKind: Domain
+id: domain:public-safety
+attributes:
+  displayName: "Public Safety"
+  description: |
+    Systems and operations that protect citizens from threats — law enforcement
+    technology, emergency dispatch, crime analytics, and community policing
+    platforms. Encompasses both preventive measures and incident response.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:emergency-management
+attributes:
+  displayName: "Emergency Management"
+  description: |
+    Planning, coordinating, and executing responses to natural disasters,
+    pandemics, and large-scale emergencies. Covers preparedness drills,
+    resource staging, evacuation logistics, and post-disaster recovery
+    coordination across agencies.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:urban-planning
+attributes:
+  displayName: "Urban Planning"
+  description: |
+    Designing and managing the built environment — zoning, land use,
+    transportation networks, housing policy, and community development.
+    Integrates GIS, demographic modeling, and public participation
+    tools for sustainable city growth.
+edges:
+  contains:
+    - specialization:civil-engineering
+---
+nodeKind: Domain
+id: domain:public-health
+attributes:
+  displayName: "Public Health"
+  description: |
+    Population-level health surveillance, disease prevention, and health
+    promotion programs. Includes epidemiological modeling, vaccination
+    campaigns, contact tracing, and health equity analysis across
+    communities and demographics.
+edges:
+  contains:
+    - specialization:clinical-informatics-expanded
+---
+nodeKind: Domain
+id: domain:social-welfare
+attributes:
+  displayName: "Social Welfare"
+  description: |
+    Government programs that provide social safety nets — benefits
+    administration, case management, eligibility determination, and
+    program impact evaluation. Covers unemployment, disability,
+    housing assistance, and nutrition programs.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:election-technology
+attributes:
+  displayName: "Election Technology"
+  description: |
+    Technology systems that support democratic elections — voter registration
+    databases, electronic voting machines, ballot tabulation, audit trails,
+    and election security. Emphasizes transparency, accessibility, and
+    tamper resistance.
+edges:
+  contains:
+    - specialization:security-compliance
+---
+nodeKind: Domain
+id: domain:census-data
+attributes:
+  displayName: "Census & Demographic Data"
+  description: |
+    Large-scale population data collection, processing, and dissemination.
+    Covers survey methodology, statistical disclosure control, geographic
+    coding, and public data portals that inform policy, redistricting,
+    and resource allocation.
+edges:
+  contains:
+    - specialization:data-science-ml
+---
+nodeKind: Domain
+id: domain:national-defense
+attributes:
+  displayName: "National Defense"
+  description: |
+    Military and defense technology systems — command-and-control platforms,
+    logistics, cybersecurity operations, and defense procurement. Includes
+    secure communications, battlefield awareness, and defense-grade
+    supply chain management.
+edges:
+  contains:
+    - specialization:security-compliance
+---
+nodeKind: Domain
+id: domain:intelligence-analysis
+attributes:
+  displayName: "Intelligence Analysis"
+  description: |
+    Collecting, processing, and analyzing information for national security
+    and strategic decision-making. Encompasses signals intelligence, open-source
+    intelligence (OSINT), geospatial analysis, and threat assessment
+    methodologies.
+edges:
+  contains:
+    - specialization:data-science-ml
+---
+nodeKind: Domain
+id: domain:diplomacy
+attributes:
+  displayName: "Diplomacy & International Relations"
+  description: |
+    Technology and processes supporting diplomatic operations — treaty
+    management, consular services, multilateral negotiation support,
+    and international cooperation platforms. Includes protocol management
+    and secure diplomatic communications.
+edges:
+  contains:
+    - specialization:communication
+---
+nodeKind: Domain
+id: domain:immigration-services
+attributes:
+  displayName: "Immigration Services"
+  description: |
+    Systems for processing immigration applications, visa management,
+    border control technology, and refugee resettlement coordination.
+    Covers identity verification, case tracking, and compliance with
+    international migration law.
+edges:
+  contains:
+    - specialization:operations
+    - specialization:identity-management
+---
+nodeKind: Domain
+id: domain:tax-administration
+attributes:
+  displayName: "Tax Administration"
+  description: |
+    Government tax collection and administration systems — filing platforms,
+    audit selection algorithms, refund processing, and taxpayer services.
+    Includes compliance analytics, fraud detection, and international
+    tax treaty management.
+edges:
+  contains:
+    - specialization:finance-accounting
+    - specialization:regulatory-compliance
+---
+nodeKind: Domain
+id: domain:public-transportation
+attributes:
+  displayName: "Public Transportation"
+  description: |
+    Mass transit systems — route planning, scheduling, real-time tracking,
+    fare collection, and ridership analytics. Covers buses, rail, ferries,
+    and multimodal integration with accessibility and equity considerations.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:water-management
+attributes:
+  displayName: "Water Management"
+  description: |
+    Systems for water treatment, distribution, wastewater processing, and
+    water resource conservation. Includes SCADA systems for pipeline
+    monitoring, water quality analytics, and drought management
+    planning.
+edges:
+  contains:
+    - specialization:civil-engineering
+---
+nodeKind: Domain
+id: domain:power-grid
+attributes:
+  displayName: "Power Grid & Energy Distribution"
+  description: |
+    Electrical grid operations — generation dispatch, transmission management,
+    distribution automation, and demand response. Covers grid modernization,
+    smart meter infrastructure, renewable integration, and outage
+    management systems.
+edges:
+  contains:
+    - specialization:real-time-systems
+---
+nodeKind: Domain
+id: domain:food-delivery
+attributes:
+  displayName: "Food Delivery"
+  description: |
+    On-demand food delivery platforms — restaurant aggregation, real-time
+    order routing, driver dispatch optimization, and delivery logistics.
+    Includes demand forecasting, dynamic pricing, and last-mile
+    delivery efficiency.
+edges:
+  contains:
+    - specialization:logistics
+---
+nodeKind: Domain
+id: domain:grocery-tech
+attributes:
+  displayName: "Grocery Technology"
+  description: |
+    Technology for grocery retail — online ordering, inventory management,
+    shelf optimization, fresh item lifecycle tracking, and automated
+    fulfillment centers. Covers both brick-and-mortar digitization
+    and pure-play online grocery.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:personal-finance
+attributes:
+  displayName: "Personal Finance"
+  description: |
+    Consumer financial management tools — budgeting apps, expense tracking,
+    investment portfolio management, credit monitoring, and financial
+    planning. Includes open banking integrations and financial literacy
+    platforms.
+edges:
+  contains:
+    - specialization:finance-accounting
+---
+nodeKind: Domain
+id: domain:dating-apps
+attributes:
+  displayName: "Dating & Social Matching"
+  description: |
+    Platforms for romantic and social matching — recommendation algorithms,
+    user safety systems, profile verification, and conversation facilitation.
+    Covers matching algorithms, trust and safety operations, and
+    community moderation.
+edges:
+  contains:
+    - specialization:recommendation-infrastructure
+---
+nodeKind: Domain
+id: domain:fitness-tech
+attributes:
+  displayName: "Fitness Technology"
+  description: |
+    Digital fitness platforms and wearable integration — workout tracking,
+    exercise prescription algorithms, biometric data analysis, and
+    virtual coaching. Includes connected equipment, social fitness
+    features, and health outcome tracking.
+edges:
+  contains:
+    - specialization:data-science-ml
+---
+nodeKind: Domain
+id: domain:pet-care
+attributes:
+  displayName: "Pet Care Technology"
+  description: |
+    Technology platforms for pet care — veterinary telehealth, pet health
+    monitoring wearables, pet-sitting marketplaces, and pet food
+    subscription services. Includes breed-specific health analytics
+    and pet insurance technology.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:home-automation
+attributes:
+  displayName: "Home Automation"
+  description: |
+    Automated control of residential systems — lighting, HVAC, security,
+    and appliance orchestration through programmable rules and AI-driven
+    routines. Covers protocol integration (Zigbee, Z-Wave, Matter) and
+    energy optimization.
+edges:
+  contains:
+    - specialization:embedded-firmware
+---
+nodeKind: Domain
+id: domain:smart-home
+attributes:
+  displayName: "Smart Home"
+  description: |
+    Connected home ecosystems — voice assistants, smart displays, IoT
+    device management, and cross-platform interoperability. Encompasses
+    user experience design for ambient interfaces, privacy controls,
+    and household activity recognition.
+edges:
+  contains:
+    - specialization:embedded-firmware
+---
+nodeKind: Domain
+id: domain:consumer-electronics
+attributes:
+  displayName: "Consumer Electronics"
+  description: |
+    Design and engineering of consumer electronic products — smartphones,
+    tablets, wearables, audio devices, and home entertainment systems.
+    Covers hardware-software co-design, manufacturing processes, and
+    product lifecycle management.
+edges:
+  contains:
+    - specialization:embedded-firmware
+    - specialization:mechanical-engineering
+---
+nodeKind: Domain
+id: domain:fashion-tech
+attributes:
+  displayName: "Fashion Technology"
+  description: |
+    Technology applications in the fashion industry — virtual try-on,
+    size recommendation AI, trend forecasting, supply chain traceability,
+    and sustainable fashion analytics. Bridges creative design with
+    data-driven merchandising.
+edges:
+  contains:
+    - specialization:data-science-ml
+---
+nodeKind: Domain
+id: domain:beauty-tech
+attributes:
+  displayName: "Beauty Technology"
+  description: |
+    Technology in the beauty and cosmetics industry — skin analysis AI,
+    virtual makeup try-on, personalized product recommendations, and
+    ingredient safety databases. Covers AR-based beauty applications
+    and formulation optimization.
+edges:
+  contains:
+    - specialization:data-science-ml
+---
+nodeKind: Domain
+id: domain:home-services
+attributes:
+  displayName: "Home Services"
+  description: |
+    On-demand home service platforms — cleaning, plumbing, electrical,
+    and handyman marketplace technology. Covers provider matching,
+    scheduling optimization, quality assurance, and service pricing
+    algorithms.
+edges:
+  contains:
+    - specialization:logistics
+---
+nodeKind: Domain
+id: domain:childcare-tech
+attributes:
+  displayName: "Childcare Technology"
+  description: |
+    Technology for childcare management — daycare administration platforms,
+    parent communication apps, child development tracking, and caregiver
+    matching services. Includes safety monitoring, attendance tracking,
+    and regulatory compliance tools.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:elder-care-tech
+attributes:
+  displayName: "Elder Care Technology"
+  description: |
+    Technology supporting elderly care — remote health monitoring, fall
+    detection systems, medication management, social engagement platforms,
+    and caregiver coordination tools. Covers assisted living facility
+    management and aging-in-place solutions.
+edges:
+  contains:
+    - specialization:clinical-informatics-expanded
+---
+nodeKind: Domain
+id: domain:consulting
+attributes:
+  displayName: "Consulting"
+  description: |
+    Professional advisory services across strategy, operations, technology,
+    and organizational transformation. Covers engagement lifecycle
+    management, knowledge management, proposal development, and
+    consultant utilization optimization.
+edges:
+  contains:
+    - specialization:strategic-consulting
+---
+nodeKind: Domain
+id: domain:accounting
+attributes:
+  displayName: "Accounting"
+  description: |
+    Financial accounting practices and technology — general ledger
+    management, financial statement preparation, revenue recognition,
+    and accounting standards compliance (GAAP, IFRS). Includes
+    audit preparation and accounting automation platforms.
+edges:
+  contains:
+    - specialization:finance-accounting
+---
+nodeKind: Domain
+id: domain:audit
+attributes:
+  displayName: "Audit"
+  description: |
+    Internal and external audit processes — risk-based audit planning,
+    controls testing, evidence collection, and findings reporting.
+    Covers financial audit, IT audit, compliance audit, and continuous
+    auditing technology platforms.
+edges:
+  contains:
+    - specialization:finance-accounting
+    - specialization:regulatory-compliance
+---
+nodeKind: Domain
+id: domain:legal-services-ops
+attributes:
+  displayName: "Legal Services Operations"
+  description: |
+    Operational management of legal service delivery — matter management,
+    legal project management, outside counsel management, and legal
+    operations analytics. Covers legal spend optimization, process
+    improvement, and legal technology adoption.
+edges:
+  contains:
+    - specialization:legal-compliance
+---
+nodeKind: Domain
+id: domain:recruitment
+attributes:
+  displayName: "Recruitment"
+  description: |
+    Talent acquisition technology and processes — applicant tracking
+    systems, sourcing automation, candidate assessment platforms, and
+    recruitment marketing. Covers employer branding, interview scheduling,
+    and hiring analytics.
+edges:
+  contains:
+    - specialization:talent-management
+---
+nodeKind: Domain
+id: domain:staffing
+attributes:
+  displayName: "Staffing"
+  description: |
+    Temporary and contract workforce management — staffing agency platforms,
+    contingent worker matching, timesheet management, and workforce
+    planning. Includes compliance with labor regulations and vendor
+    management systems.
+edges:
+  contains:
+    - specialization:talent-management
+---
+nodeKind: Domain
+id: domain:market-research
+attributes:
+  displayName: "Market Research"
+  description: |
+    Systematic collection and analysis of market data — survey design,
+    consumer behavior studies, competitive intelligence, and market
+    sizing. Covers qualitative and quantitative research methodologies,
+    panel management, and insight synthesis.
+edges:
+  contains:
+    - specialization:data-science-ml
+    - specialization:marketing
+---
+nodeKind: Domain
+id: domain:management-consulting
+attributes:
+  displayName: "Management Consulting"
+  description: |
+    Advisory services focused on organizational strategy and operations —
+    business transformation, operating model design, change management,
+    and performance improvement. Covers frameworks for problem-solving,
+    stakeholder alignment, and implementation planning.
+edges:
+  contains:
+    - specialization:strategic-consulting
+---
+nodeKind: Domain
+id: domain:IT-consulting
+attributes:
+  displayName: "IT Consulting"
+  description: |
+    Technology advisory and implementation services — IT strategy,
+    systems integration, cloud migration advisory, and digital
+    transformation programs. Covers vendor selection, architecture
+    assessment, and technology roadmap development.
+edges:
+  contains:
+    - specialization:strategic-consulting
+---
+nodeKind: Domain
+id: domain:executive-search
+attributes:
+  displayName: "Executive Search"
+  description: |
+    Specialized recruitment for senior leadership positions — candidate
+    identification, assessment, and placement for C-suite and board-level
+    roles. Covers market mapping, compensation benchmarking, and
+    succession planning advisory.
+edges:
+  contains:
+    - specialization:talent-management
+---
+nodeKind: Domain
+id: domain:metaverse
+attributes:
+  displayName: "Metaverse"
+  description: |
+    Persistent, shared virtual worlds that blend physical and digital
+    experiences — avatar systems, virtual economies, social interaction
+    in 3D spaces, and cross-platform interoperability. Encompasses
+    both consumer entertainment and enterprise collaboration use cases.
+edges:
+  contains:
+    - specialization:computer-graphics
+    - specialization:game-engine-dev
+---
+nodeKind: Domain
+id: domain:web3
+attributes:
+  displayName: "Web3"
+  description: |
+    Decentralized internet architecture built on blockchain technology —
+    decentralized applications (dApps), token-based economies, self-sovereign
+    identity, and decentralized governance. Covers developer tooling,
+    wallet infrastructure, and protocol design.
+edges:
+  contains:
+    - specialization:distributed-systems
+---
+nodeKind: Domain
+id: domain:decentralized-finance
+attributes:
+  displayName: "Decentralized Finance (DeFi)"
+  description: |
+    Financial services built on decentralized protocols — lending,
+    borrowing, decentralized exchanges, yield farming, and liquidity
+    provision. Covers smart contract security, protocol governance,
+    and economic mechanism design.
+edges:
+  contains:
+    - specialization:distributed-systems
+    - specialization:finance-accounting
+---
+nodeKind: Domain
+id: domain:tokenization
+attributes:
+  displayName: "Tokenization"
+  description: |
+    Converting real-world assets into blockchain tokens — real estate
+    tokenization, securities tokenization, intellectual property rights,
+    and fractional ownership platforms. Covers regulatory compliance,
+    custody solutions, and secondary market infrastructure.
+edges:
+  contains:
+    - specialization:regulatory-compliance
+---
+nodeKind: Domain
+id: domain:NFT-technology
+attributes:
+  displayName: "NFT Technology"
+  description: |
+    Non-fungible token platforms and ecosystems — digital art marketplaces,
+    collectibles, gaming assets, and proof-of-ownership systems. Covers
+    minting infrastructure, royalty mechanisms, and metadata standards
+    for unique digital assets.
+edges:
+  contains:
+    - specialization:distributed-systems
+---
+nodeKind: Domain
+id: domain:spatial-computing
+attributes:
+  displayName: "Spatial Computing"
+  description: |
+    Computing that blends digital content with the physical world —
+    augmented reality, mixed reality, spatial mapping, and gesture-based
+    interaction. Covers SLAM algorithms, depth sensing, spatial anchors,
+    and multi-user shared experiences.
+edges:
+  contains:
+    - specialization:computer-graphics
+---
+nodeKind: Domain
+id: domain:ambient-computing
+attributes:
+  displayName: "Ambient Computing"
+  description: |
+    Computing that recedes into the environment — context-aware systems,
+    passive sensing, proactive assistance, and seamless multi-device
+    handoff. Focuses on invisible interfaces, environmental intelligence,
+    and anticipatory computing paradigms.
+edges:
+  contains:
+    - specialization:embedded-firmware
+---
+nodeKind: Domain
+id: domain:affective-computing
+attributes:
+  displayName: "Affective Computing"
+  description: |
+    Systems that recognize, interpret, and respond to human emotions —
+    facial expression analysis, voice sentiment detection, physiological
+    signal processing, and empathetic AI design. Covers ethical
+    considerations of emotion-aware technology.
+edges:
+  contains:
+    - specialization:data-science-ml
+---
+nodeKind: Domain
+id: domain:neuromorphic-computing
+attributes:
+  displayName: "Neuromorphic Computing"
+  description: |
+    Computing architectures inspired by biological neural systems —
+    spiking neural networks, event-driven processing, and brain-inspired
+    chip design. Offers ultra-low power consumption and real-time
+    pattern recognition for edge AI applications.
+edges:
+  contains:
+    - specialization:embedded-firmware
+---
+nodeKind: Domain
+id: domain:quantum-networking
+attributes:
+  displayName: "Quantum Networking"
+  description: |
+    Networking infrastructure based on quantum mechanics — quantum key
+    distribution, quantum repeaters, entanglement distribution, and
+    quantum internet protocols. Enables fundamentally secure communication
+    channels and distributed quantum computing.
+edges:
+  contains:
+    - specialization:network-engineering

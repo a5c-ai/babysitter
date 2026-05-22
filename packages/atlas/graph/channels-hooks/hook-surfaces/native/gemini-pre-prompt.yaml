@@ -1,0 +1,22 @@
+nodeKind: HookSurface
+id: hook-surface:gemini.pre-prompt
+attributes:
+  eventName: "pre_prompt (Gemini)"
+  displayName: "pre_prompt (Gemini)"
+  kind: native
+  originVendor: Google
+  direction: pre
+  blocking: true
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [prompt]
+    properties:
+      prompt: { type: string }
+  description: |
+    Gemini's pre-prompt hook. Fired before the prompt is sent to the
+    model. Canonicalizes to before-prompt-build (or pre-tool-use for
+    cross-product policies).
+edges:
+  canonicalized_to:
+    - target: hook-surface:pre-tool-use

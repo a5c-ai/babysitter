@@ -8,6 +8,11 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:machine-learning-frameworks]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:data-scientist, role:research-scientist]
 ---
 
 # Causal Inference Methods Skill

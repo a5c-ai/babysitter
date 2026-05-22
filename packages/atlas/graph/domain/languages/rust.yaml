@@ -1,0 +1,22 @@
+nodeKind: Language
+id: language:rust
+attributes:
+  displayName: "Rust"
+  paradigms:
+    - imperative
+    - functional
+  description: |
+    Rust is a statically-typed, compiled systems programming language that
+    guarantees memory safety and thread safety at compile time through its
+    ownership and borrow checker system — without a garbage collector.
+
+    Rust excels in performance-critical contexts: operating system kernels,
+    WebAssembly modules, game engines, network services, and CLI tooling.
+    The async ecosystem (tokio, async-std) enables high-throughput I/O.
+    Cargo is the build system and package manager; crates.io hosts the
+    package registry. Rust is increasingly used in Linux kernel modules,
+    Windows internals, and as a safe replacement for C/C++ in security-
+    sensitive code. The borrow checker makes data races a compile-time error.
+edges:
+  used_by_skill_area:
+    - target: skill-area:rust-async-runtime

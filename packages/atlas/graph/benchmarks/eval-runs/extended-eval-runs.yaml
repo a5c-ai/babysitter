@@ -1,0 +1,183 @@
+nodeKind: EvalRun
+id: eval-run:swe-bench-verified.claude-opus-4-5.2025-09
+attributes:
+  target: "model:claude-opus-4-5@current"
+  benchmarkId: benchmark:swe-bench-verified
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:claude-opus-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-opus-4-5-swe-bench-verified"
+edges:
+  evaluates_target:
+    - model:claude-opus-4-5@current
+  uses_test_set:
+    - test-set:swe-bench-verified-2024-12
+  for_benchmark:
+    - benchmark:swe-bench-verified
+---
+nodeKind: EvalRun
+id: eval-run:swe-bench-verified.claude-opus-4-7.2026-01
+attributes:
+  target: "model:claude-opus-4-7@current"
+  benchmarkId: benchmark:swe-bench-verified
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:claude-opus-4-7@current
+  runAt: "2026-01-15T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-opus-4-7-swe-bench-verified"
+edges:
+  evaluates_target:
+    - model:claude-opus-4-7@current
+  uses_test_set:
+    - test-set:swe-bench-verified-2024-12
+  for_benchmark:
+    - benchmark:swe-bench-verified
+---
+nodeKind: EvalRun
+id: eval-run:gpqa.claude-sonnet-4-5.2025-09
+attributes:
+  target: "model:claude-sonnet-4-5@current"
+  benchmarkId: benchmark:gpqa
+  testSetId: test-set:gpqa-diamond-2024
+  targetId: model:claude-sonnet-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-sonnet-4-5-gpqa"
+edges:
+  evaluates_target:
+    - model:claude-sonnet-4-5@current
+  for_benchmark:
+    - benchmark:gpqa
+---
+nodeKind: EvalRun
+id: eval-run:livecodebench.gpt-5.2025-08
+attributes:
+  target: "model:gpt-5@current"
+  benchmarkId: benchmark:livecodebench
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:gpt-5@current
+  runAt: "2025-08-07T00:00:00Z"
+  runBy: "openai"
+  configHash: "sha256:placeholder-gpt-5-livecodebench"
+edges:
+  evaluates_target:
+    - model:gpt-5@current
+  for_benchmark:
+    - benchmark:livecodebench
+---
+nodeKind: EvalRun
+id: eval-run:swe-bench-verified.o3.2025-04
+attributes:
+  target: "model:o3@current"
+  benchmarkId: benchmark:swe-bench-verified
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:o3@current
+  runAt: "2025-04-16T00:00:00Z"
+  runBy: "openai"
+  configHash: "sha256:placeholder-o3-swe-bench-verified"
+edges:
+  evaluates_target:
+    - model:o3@current
+  uses_test_set:
+    - test-set:swe-bench-verified-2024-12
+  for_benchmark:
+    - benchmark:swe-bench-verified
+---
+nodeKind: EvalRun
+id: eval-run:swe-bench-verified.gemini-2-5-pro.2025-06
+attributes:
+  target: "model:gemini-2-5-pro@current"
+  benchmarkId: benchmark:swe-bench-verified
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:gemini-2-5-pro@current
+  runAt: "2025-06-17T00:00:00Z"
+  runBy: "google-deepmind"
+  configHash: "sha256:placeholder-gemini-2-5-pro-swe-bench-verified"
+edges:
+  evaluates_target:
+    - model:gemini-2-5-pro@current
+  uses_test_set:
+    - test-set:swe-bench-verified-2024-12
+  for_benchmark:
+    - benchmark:swe-bench-verified
+---
+nodeKind: EvalRun
+id: eval-run:gsm8k.claude-sonnet-4-5.2025-09
+attributes:
+  target: "model:claude-sonnet-4-5@current"
+  benchmarkId: benchmark:gsm8k
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:claude-sonnet-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-sonnet-4-5-gsm8k"
+edges:
+  evaluates_target:
+    - model:claude-sonnet-4-5@current
+  for_benchmark:
+    - benchmark:gsm8k
+---
+nodeKind: EvalRun
+id: eval-run:hellaswag.claude-opus-4-5.2025-09
+attributes:
+  target: "model:claude-opus-4-5@current"
+  benchmarkId: benchmark:hellaswag
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:claude-opus-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-opus-4-5-hellaswag"
+edges:
+  evaluates_target:
+    - model:claude-opus-4-5@current
+  for_benchmark:
+    - benchmark:hellaswag
+---
+nodeKind: EvalRun
+id: eval-run:math.gpt-5.2025-08
+attributes:
+  target: "model:gpt-5@current"
+  benchmarkId: benchmark:math
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:gpt-5@current
+  runAt: "2025-08-07T00:00:00Z"
+  runBy: "openai"
+  configHash: "sha256:placeholder-gpt-5-math"
+edges:
+  evaluates_target:
+    - model:gpt-5@current
+  for_benchmark:
+    - benchmark:math
+---
+nodeKind: EvalRun
+id: eval-run:evalplus.gpt-5.2025-08
+attributes:
+  target: "model:gpt-5@current"
+  benchmarkId: benchmark:bigcode-evalplus
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:gpt-5@current
+  runAt: "2025-08-07T00:00:00Z"
+  runBy: "evalplus-leaderboard"
+  configHash: "sha256:placeholder-gpt-5-evalplus"
+edges:
+  evaluates_target:
+    - model:gpt-5@current
+  for_benchmark:
+    - benchmark:bigcode-evalplus
+---
+nodeKind: EvalRun
+id: eval-run:terminal-bench.claude-sonnet-4-5.2025-09
+attributes:
+  target: "model:claude-sonnet-4-5@current"
+  benchmarkId: benchmark:terminal-bench
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:claude-sonnet-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-sonnet-4-5-terminal-bench"
+edges:
+  evaluates_target:
+    - model:claude-sonnet-4-5@current
+  for_benchmark:
+    - benchmark:terminal-bench

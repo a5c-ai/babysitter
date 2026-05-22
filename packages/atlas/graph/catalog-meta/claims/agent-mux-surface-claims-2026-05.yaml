@@ -1,0 +1,229 @@
+nodeKind: Claim
+id: claim:agent-mux-tui-package-surface
+attributes:
+  subjectId: package:a5c-ai-agent-mux-tui
+  subjectKind: PackageSurface
+  attribute: surfaceKinds
+  value: '@a5c-ai/agent-mux-tui is modeled as a TUI and bin-entrypoint package surface.'
+  statement: The agent-mux TUI package surface is grounded in its package metadata and amux-tui binary entrypoint.
+  evidenceSourceIds:
+    - evidence:agent-mux-tui-package-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-agent-mux-tui
+  backed_by_evidence:
+    - evidence:agent-mux-tui-package-source
+---
+nodeKind: Claim
+id: claim:agent-mux-tui-exposes-interactive-primitives
+attributes:
+  subjectId: package:a5c-ai-agent-mux-tui
+  subjectKind: PackageSurface
+  attribute: exposes_subcommand
+  value: agent-mux TUI exposes command palette, prompt input, and model picker as tui-command InteractionPrimitive records.
+  statement: The agent-mux TUI exposes interactive command primitives backed by command-palette, prompt-input, and model-picker source files.
+  evidenceSourceIds:
+    - evidence:agent-mux-tui-primitives-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-agent-mux-tui
+  backed_by_evidence:
+    - evidence:agent-mux-tui-primitives-source
+---
+nodeKind: Claim
+id: claim:agent-mux-cli-package-surface
+attributes:
+  subjectId: package:a5c-ai-agent-mux-cli
+  subjectKind: PackageSurface
+  attribute: surfaceKinds
+  value: '@a5c-ai/agent-mux-cli is modeled as a CLI and bin-entrypoint package surface.'
+  statement: The agent-mux CLI package surface is grounded in its package metadata and amux binary entrypoint.
+  evidenceSourceIds:
+    - evidence:agent-mux-cli-package-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-agent-mux-cli
+  backed_by_evidence:
+    - evidence:agent-mux-cli-package-source
+---
+nodeKind: Claim
+id: claim:agent-mux-cli-exposes-subcommands
+attributes:
+  subjectId: package:a5c-ai-agent-mux-cli
+  subjectKind: PackageSurface
+  attribute: exposes_subcommand
+  value: agent-mux CLI exposes amux leaf subcommands as cli-subcommand InteractionPrimitive records with exit-code metadata.
+  statement: The agent-mux CLI subcommand surface is grounded in command handler source files and the shared exit-code mapping.
+  evidenceSourceIds:
+    - evidence:agent-mux-cli-command-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-agent-mux-cli
+  backed_by_evidence:
+    - evidence:agent-mux-cli-command-source
+---
+nodeKind: Claim
+id: claim:hooks-mux-core-package-surface
+attributes:
+  subjectId: package:a5c-ai-hooks-mux-core
+  subjectKind: PackageSurface
+  attribute: surfaceKinds
+  value: '@a5c-ai/hooks-mux-core is modeled as the package surface exposing normalized hook payload schemas.'
+  statement: The hooks-mux core package surface is grounded in package metadata and core package source files.
+  evidenceSourceIds:
+    - evidence:hooks-mux-core-package-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-hooks-mux-core
+  backed_by_evidence:
+    - evidence:hooks-mux-core-package-source
+---
+nodeKind: Claim
+id: claim:hooks-mux-core-shared-context-specs
+attributes:
+  subjectId: package:a5c-ai-hooks-mux-core
+  subjectKind: PackageSurface
+  attribute: has_payload_schema
+  value: hooks-mux core exposes shared context specs for unified hook events, execution context, hook results, merge results, phase mapping, session state, harness detection, and propagation options.
+  statement: The hooks-mux shared payload schema records are grounded in the public core type, merge, discovery, and propagation source files.
+  evidenceSourceIds:
+    - evidence:hooks-mux-core-shared-types-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-hooks-mux-core
+  backed_by_evidence:
+    - evidence:hooks-mux-core-shared-types-source
+---
+nodeKind: Claim
+id: claim:agent-mux-gateway-package-surface
+attributes:
+  subjectId: package:a5c-ai-agent-mux-gateway
+  subjectKind: PackageSurface
+  attribute: surfaceKinds
+  value: '@a5c-ai/agent-mux-gateway is modeled as the package surface exposing gateway HTTP, WebSocket, and Kanban APIs.'
+  statement: The agent-mux gateway package surface is grounded in package metadata and gateway source files.
+  evidenceSourceIds:
+    - evidence:agent-mux-gateway-package-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-agent-mux-gateway
+  backed_by_evidence:
+    - evidence:agent-mux-gateway-package-source
+---
+nodeKind: Claim
+id: claim:agent-mux-gateway-exposes-endpoints
+attributes:
+  subjectId: package:a5c-ai-agent-mux-gateway
+  subjectKind: PackageSurface
+  attribute: exposes_endpoint
+  value: agent-mux gateway exposes health, token, run, session, workspace, dispatch, WebSocket, and Kanban HTTP endpoints as APIEndpoint records.
+  statement: The agent-mux gateway endpoint records are grounded in server route source files and bearer-auth middleware.
+  evidenceSourceIds:
+    - evidence:agent-mux-gateway-endpoint-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-agent-mux-gateway
+  backed_by_evidence:
+    - evidence:agent-mux-gateway-endpoint-source
+---
+nodeKind: Claim
+id: claim:tasks-mux-package-surface
+attributes:
+  subjectId: package:a5c-ai-tasks-mux
+  subjectKind: PackageSurface
+  attribute: surfaceKinds
+  value: '@a5c-ai/tasks-mux is modeled as a breakpoint-runtime package surface.'
+  statement: The tasks-mux package surface is grounded in package metadata and runtime source files.
+  evidenceSourceIds:
+    - evidence:tasks-mux-package-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-tasks-mux
+  backed_by_evidence:
+    - evidence:tasks-mux-package-source
+---
+nodeKind: Claim
+id: claim:tasks-mux-server-client-endpoints
+attributes:
+  subjectId: package:a5c-ai-tasks-mux
+  subjectKind: PackageSurface
+  attribute: exposes_endpoint
+  value: tasks-mux server backend client methods are modeled as authenticated outbound-client APIEndpoint records for question create/get/cancel/list/answer/claim and expert listing.
+  statement: The tasks-mux server-client endpoint records are grounded in ServerBreakpointBackend source methods.
+  evidenceSourceIds:
+    - evidence:tasks-mux-server-client-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-tasks-mux
+  backed_by_evidence:
+    - evidence:tasks-mux-server-client-source

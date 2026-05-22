@@ -14,6 +14,13 @@
  *   insights: array,
  *   mappingAnalysis: object
  * }
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -32,7 +39,7 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Analyze and Elaborate the Metaphor
   ctx.log('info', 'Analyzing and elaborating the metaphor');
-  let metaphorAnalysis = await ctx.task(analyzeMetaphorTask, {
+  const metaphorAnalysis = await ctx.task(analyzeMetaphorTask, {
     targetPhenomenon,
     metaphor,
     domain
@@ -46,16 +53,9 @@ export async function process(inputs, ctx) {
     metaphorAnalysis,
     simulationDepth,
     domain
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      metaphorAnalysis = await ctx.task(analyzeMetaphorTask, { ...{
-    targetPhenomenon,
-    metaphor,
-    domain
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: 'Toy universe constructed. Review before simulation?',
     title: 'Metaphoric World - Universe Construction Complete',
     context: {
@@ -64,15 +64,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/metaphor-analysis.json', format: 'json' },
         { path: 'artifacts/toy-universe.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Run Simulations
   ctx.log('info', 'Running simulations in toy universe');
   for (let i = 0; i < iterations; i++) {
@@ -90,6 +84,7 @@ export async function process(inputs, ctx) {
       timestamp: ctx.now()
     });
   }
+
   // Phase 4: Analyze Emergent Behaviors
   ctx.log('info', 'Analyzing emergent behaviors from simulations');
   const emergentBehaviors = await ctx.task(analyzeEmergentBehaviorsTask, {

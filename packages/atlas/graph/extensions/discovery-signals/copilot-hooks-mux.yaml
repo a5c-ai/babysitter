@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:copilot-hooks-mux
+attributes:
+  signalId: discovery-signal:copilot-hooks-mux
+  signalKind: env-any
+  key: copilot
+  matchMode: all
+  confidence: high
+  scope: hooks-mux
+  signals:
+    - COPILOT_HOME
+    - COPILOT_GITHUB_TOKEN
+  absentSignals: []
+  argvMatches: []
+  metadataFields: []
+  consumer: hooks-mux-core
+  notes: 'Ordered adapter auto-detection rule used by hooks-mux. Verbatim from legacy discovery:copilot:hooks-mux:5.'
+edges:
+  applies_to:
+    - target: agent:copilot-cli

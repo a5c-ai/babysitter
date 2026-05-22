@@ -1,0 +1,10 @@
+nodeKind: Benchmark
+id: benchmark:livecodebench
+attributes:
+  displayName: "LiveCodeBench"
+  homepageUrl: https://livecodebench.github.io/
+  kind: code-generation
+  targetsKind: ModelVersion
+  description: |
+    Live, contamination-free coding benchmark sourced from recent competitive programming problems.
+edges: {}

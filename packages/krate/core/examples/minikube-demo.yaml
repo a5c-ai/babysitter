@@ -1,0 +1,190 @@
+apiVersion: krate.a5c.ai/v1alpha1
+kind: Organization
+metadata:
+  name: krate
+  namespace: krate-system
+spec:
+  displayName: Krate
+  description: Krate-managed default organization
+  owners:
+  - platform
+  slug: krate
+  namespaceName: krate-org-krate
+---
+apiVersion: krate.a5c.ai/v1alpha1
+kind: SSHKey
+metadata:
+  name: platform-deploy
+  namespace: krate-org-krate
+  labels:
+    krate.a5c.ai/org: krate
+    krate.a5c.ai/namespace: krate-org-krate
+spec:
+  scope: deploy
+  owner: krate
+  repository: krate-demo
+  title: platform deploy key
+  key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKrateDemoKey platform@example.test
+  readOnly: true
+  organizationRef: krate
+---
+apiVersion: krate.a5c.ai/v1alpha1
+kind: RepositoryPermission
+metadata:
+  name: krate-demo-maintainers
+  namespace: krate-org-krate
+  labels:
+    krate.a5c.ai/org: krate
+    krate.a5c.ai/namespace: krate-org-krate
+spec:
+  repository: krate-demo
+  subjectKind: team
+  subject: maintainers
+  permission: admin
+  organizationRef: krate
+---
+apiVersion: krate.a5c.ai/v1alpha1
+kind: Repository
+metadata:
+  name: krate-demo
+  namespace: krate-org-krate
+  labels:
+    krate.a5c.ai/org: krate
+    krate.a5c.ai/namespace: krate-org-krate
+spec:
+  visibility: internal
+  defaultBranch: main
+  organizationRef: krate
+---
+apiVersion: krate.a5c.ai/v1alpha1
+kind: BranchProtection
+metadata:
+  name: main-protection
+  namespace: krate-org-krate
+  labels:
+    krate.a5c.ai/org: krate
+    krate.a5c.ai/namespace: krate-org-krate
+spec:
+  refs:
+  - refs/heads/main
+  requirePullRequest: true
+  organizationRef: krate
+---
+apiVersion: krate.a5c.ai/v1alpha1
+kind: RefPolicy
+metadata:
+  name: deny-internal-refs
+  namespace: krate-org-krate
+  labels:
+    krate.a5c.ai/org: krate
+    krate.a5c.ai/namespace: krate-org-krate
+spec:
+  deny:
+  - refs/internal/
+  organizationRef: krate
+---
+apiVersion: krate.a5c.ai/v1alpha1
+kind: RunnerPool
+metadata:
+  name: trusted-linux
+  namespace: krate-org-krate
+  labels:
+    krate.a5c.ai/org: krate
+    krate.a5c.ai/namespace: krate-org-krate
+spec:
+  warmReplicas: 1
+  maxReplicas: 4
+  organizationRef: krate
+---
+apiVersion: krate.a5c.ai/v1alpha1
+kind: WebhookSubscription
+metadata:
+  name: chatops
+  namespace: krate-org-krate
+  labels:
+    krate.a5c.ai/org: krate
+    krate.a5c.ai/namespace: krate-org-krate
+spec:
+  url: https://hooks.example.test/krate
+  events:
+  - pullrequest.created
+  organizationRef: krate
+---
+apiVersion: krate.a5c.ai/v1alpha1
+kind: Pipeline
+metadata:
+  name: demo-pr-checks
+  labels:
+    repository: krate-demo
+    workflow: pull-request
+    krate.a5c.ai/org: krate
+    krate.a5c.ai/namespace: krate-org-krate
+  namespace: krate-org-krate
+spec:
+  repository: krate-demo
+  ref: refs/pull/1/head
+  runnerPool: trusted-linux
+  trustTier: trusted
+  steps:
+  - checkout
+  - test
+  - publish
+  organizationRef: krate
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: krate-demo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://gitea-http.krate-system.svc.cluster.local/krate/platform-config.git
+    targetRevision: main
+    path: charts/krate
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: krate-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+---
+apiVersion: krate.a5c.ai/v1alpha1
+kind: Issue
+metadata:
+  name: issue-1
+  namespace: krate-org-krate
+  labels:
+    krate.a5c.ai/org: krate
+    krate.a5c.ai/namespace: krate-org-krate
+spec:
+  repository: krate-demo
+  title: Wire Krate-managed permissions
+  labels:
+  - forge
+  - access
+  organizationRef: krate
+status:
+  phase: triage
+---
+apiVersion: krate.a5c.ai/v1alpha1
+kind: PullRequest
+metadata:
+  name: pr-1
+  namespace: krate-org-krate
+  labels:
+    krate.a5c.ai/org: krate
+    krate.a5c.ai/namespace: krate-org-krate
+spec:
+  repository: krate-demo
+  title: Improve forge UI
+  head: feature/forge-ui
+  base: main
+  organizationRef: krate
+status:
+  phase: Open
+  changedFiles:
+  - apps/web/app/ui-shell.jsx

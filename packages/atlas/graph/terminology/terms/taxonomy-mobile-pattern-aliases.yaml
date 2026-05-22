@@ -1,0 +1,343 @@
+---
+nodeKind: Term
+id: term:hydration
+attributes:
+  displayName: "Hydration"
+  kind: concept
+  references:
+    - skill-area:hydration
+  description: |
+    Taxonomy alias term for Atlas hydration practice.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:bloc-architecture
+attributes:
+  displayName: "BLoC Architecture"
+  kind: concept
+  references:
+    - skill-area:flutter-development
+    - skill-area:mobile-state-management
+  description: |
+    Taxonomy alias term for BLoC-style state architecture in mobile apps.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:bloc-pattern
+attributes:
+  displayName: "BLoC Pattern"
+  kind: concept
+  references:
+    - skill-area:flutter-development
+    - skill-area:mobile-state-management
+  description: |
+    Taxonomy alias term for BLoC-style mobile state management.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:sqlite-database
+attributes:
+  displayName: "SQLite Database"
+  kind: concept
+  references:
+    - skill-area:mobile-local-databases
+  description: |
+    Taxonomy alias term for on-device relational storage practice.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:realm-database
+attributes:
+  displayName: "Realm Database"
+  kind: concept
+  references:
+    - skill-area:mobile-local-databases
+  description: |
+    Taxonomy alias term for local mobile database persistence patterns.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:core-data
+attributes:
+  displayName: "Core Data"
+  kind: concept
+  references:
+    - skill-area:mobile-local-databases
+  description: |
+    Taxonomy alias term for iOS-local persistence patterns in Atlas.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:key-value-storage
+attributes:
+  displayName: "Key-Value Storage"
+  kind: concept
+  references:
+    - skill-area:mobile-local-databases
+  description: |
+    Taxonomy alias term for lightweight local key-value persistence.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:file-system-storage
+attributes:
+  displayName: "File System Storage"
+  kind: concept
+  references:
+    - skill-area:file-handling
+  description: |
+    Taxonomy alias term for file-backed storage management.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:encrypted-storage
+attributes:
+  displayName: "Encrypted Storage"
+  kind: concept
+  references:
+    - topic:secure-storage-pattern
+    - skill-area:mobile-security-testing
+  description: |
+    Taxonomy alias term for secure persisted-state storage patterns.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:cache-storage
+attributes:
+  displayName: "Cache Storage"
+  kind: concept
+  references:
+    - skill-area:caching-strategies
+  description: |
+    Taxonomy alias term for local or edge cache storage behavior.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:cache-synchronization
+attributes:
+  displayName: "Cache Synchronization"
+  kind: concept
+  references:
+    - skill-area:mobile-offline-sync
+  description: |
+    Taxonomy alias term for sync behavior between cached and remote state.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:queue-based-updates
+attributes:
+  displayName: "Queue-Based Updates"
+  kind: concept
+  references:
+    - skill-area:mobile-offline-sync
+    - skill-area:background-job-processing
+  description: |
+    Taxonomy alias term for queued offline or deferred state updates.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:conflict-resolution
+attributes:
+  displayName: "Conflict Resolution"
+  kind: concept
+  references:
+    - skill-area:mobile-offline-sync
+  description: |
+    Taxonomy alias term for merge and reconciliation in offline sync flows.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:optimistic-ui-updates
+attributes:
+  displayName: "Optimistic UI Updates"
+  kind: concept
+  references:
+    - skill-area:application-state-management
+  description: |
+    Taxonomy alias term for optimistic client-side state updates.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:background-synchronization
+attributes:
+  displayName: "Background Synchronization"
+  kind: concept
+  references:
+    - skill-area:mobile-offline-sync
+    - skill-area:background-job-processing
+  description: |
+    Taxonomy alias term for synchronization work scheduled off the foreground path.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:image-caching
+attributes:
+  displayName: "Image Caching"
+  kind: concept
+  references:
+    - skill-area:caching-strategies
+  description: |
+    Taxonomy alias term for caching media assets in mobile experiences.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:background-processing
+attributes:
+  displayName: "Background Processing"
+  kind: concept
+  references:
+    - skill-area:background-job-processing
+  description: |
+    Taxonomy alias term for background execution outside immediate request or UI flow.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:biometric-authentication
+attributes:
+  displayName: "Biometric Authentication"
+  kind: concept
+  references:
+    - skill-area:mobile-biometrics
+  description: |
+    Taxonomy alias term for biometric identity and device-auth flows.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:secure-storage
+attributes:
+  displayName: "Secure Storage"
+  kind: concept
+  references:
+    - topic:secure-storage-pattern
+  description: |
+    Taxonomy alias term for secure storage patterns already modeled in Atlas.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:certificate-pinning
+attributes:
+  displayName: "Certificate Pinning"
+  kind: concept
+  references:
+    - skill-area:mobile-security-testing
+  description: |
+    Taxonomy alias term for transport-trust hardening in mobile applications.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:app-signing
+attributes:
+  displayName: "App Signing"
+  kind: concept
+  references:
+    - skill-area:app-store-deployment
+  description: |
+    Taxonomy alias term for mobile signing and release packaging workflows.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:code-obfuscation
+attributes:
+  displayName: "Code Obfuscation"
+  kind: concept
+  references:
+    - skill-area:mobile-security-testing
+  description: |
+    Taxonomy alias term for code-hardening and tamper-resistance techniques.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:data-encryption
+attributes:
+  displayName: "Data Encryption"
+  kind: concept
+  references:
+    - skill-area:encryption-decryption
+  description: |
+    Taxonomy alias term for applied data-encryption practice.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:deep-linking
+attributes:
+  displayName: "Deep Linking"
+  kind: concept
+  references:
+    - skill-area:deep-linking
+  description: |
+    Taxonomy alias term for mobile deep-link routing and app-link setup.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:widget-testing
+attributes:
+  displayName: "Widget Testing"
+  kind: concept
+  references:
+    - skill-area:component-testing
+  description: |
+    Taxonomy alias term for component- and widget-level UI tests.
+edges:
+  applies_to:
+    - target: domain:mobile
+---
+nodeKind: Term
+id: term:ui-automation-testing
+attributes:
+  displayName: "UI Automation Testing"
+  kind: concept
+  references:
+    - skill-area:mobile-ui-automation
+  description: |
+    Taxonomy alias term for scripted mobile UI automation flows.
+edges:
+  applies_to:
+    - target: domain:mobile

@@ -1,0 +1,286 @@
+nodeKind: Tool
+id: tool:homebrew
+attributes:
+  displayName: "Homebrew"
+  homepageUrl: "https://brew.sh"
+  kind: package-manager
+  description: |
+    The missing package manager for macOS (and Linux), installable via a single shell script.
+    Manages thousands of open-source formulae and casks, handling dependencies, upgrades,
+    and linking so developers can install CLI tools and desktop apps with a single command.
+edges:
+  belongs_to_language:
+    - language:ruby
+  tool_used_by:
+    - target: skill-area:developer-environment
+  used_for:
+    - skill-area:developer-environment
+  alternative_to:
+    - target: tool:nix
+      comparison: "System package managers — Homebrew is macOS-first simple; Nix is reproducible and declarative"
+    - target: tool:apt
+      comparison: "System package managers — Homebrew is macOS/Linux; apt is Debian/Ubuntu"
+    - target: tool:chocolatey
+      comparison: "System package managers — Homebrew is macOS; Chocolatey is Windows"
+    - target: tool:scoop
+      comparison: "System package managers — Homebrew is macOS; Scoop is Windows"
+    - target: tool:winget
+      comparison: "System package managers — Homebrew is macOS; winget is Windows"
+---
+nodeKind: Tool
+id: tool:chocolatey
+attributes:
+  displayName: "Chocolatey"
+  homepageUrl: "https://chocolatey.org"
+  kind: package-manager
+  description: |
+    Windows package manager that automates software installation, upgrade, and removal
+    through a central repository of over 9,000 community-maintained packages.
+    Supports silent installs, version pinning, and enterprise deployment via PowerShell.
+edges:
+  belongs_to_language:
+    - language:csharp
+  tool_used_by:
+    - target: skill-area:developer-environment
+  used_for:
+    - skill-area:developer-environment
+  alternative_to:
+    - target: tool:scoop
+      comparison: "Windows package managers — Chocolatey needs admin; Scoop installs to user home"
+    - target: tool:winget
+      comparison: "Windows package managers — Chocolatey is community-driven; winget is Microsoft official"
+    - target: tool:homebrew
+      comparison: "System package managers — Chocolatey is Windows; Homebrew is macOS"
+---
+nodeKind: Tool
+id: tool:scoop
+attributes:
+  displayName: "Scoop"
+  homepageUrl: "https://scoop.sh"
+  kind: package-manager
+  description: |
+    Command-line installer for Windows that installs programs to the user's home folder,
+    eliminating UAC permission prompts and keeping the PATH clean.
+    Organizes packages into buckets and handles shims, making it ideal for developer tools.
+edges:
+  belongs_to_language:
+    - language:powershell
+  tool_used_by:
+    - target: skill-area:developer-environment
+  used_for:
+    - skill-area:developer-environment
+  alternative_to:
+    - target: tool:chocolatey
+      comparison: "Windows package managers — Scoop installs to user home; Chocolatey needs admin"
+    - target: tool:winget
+      comparison: "Windows package managers — Scoop is developer-focused; winget is Microsoft official"
+    - target: tool:homebrew
+      comparison: "System package managers — Scoop is Windows; Homebrew is macOS"
+---
+nodeKind: Tool
+id: tool:winget
+attributes:
+  displayName: "winget"
+  homepageUrl: "https://github.com/microsoft/winget-cli"
+  kind: package-manager
+  languageApplicability: neutral
+  description: |
+    Microsoft's official Windows Package Manager CLI, built into Windows 10/11 and backed
+    by the Windows Package Manager Community Repository with thousands of verified packages.
+    Supports install, upgrade, uninstall, and export/import of package lists for reproducible setups.
+edges:
+  tool_used_by:
+    - target: skill-area:developer-environment
+  used_for:
+    - skill-area:developer-environment
+  alternative_to:
+    - target: tool:chocolatey
+      comparison: "Windows package managers — winget is Microsoft official; Chocolatey is community-driven"
+    - target: tool:scoop
+      comparison: "Windows package managers — winget is Microsoft official; Scoop is developer-focused"
+    - target: tool:homebrew
+      comparison: "System package managers — winget is Windows; Homebrew is macOS"
+---
+nodeKind: Tool
+id: tool:nix
+attributes:
+  displayName: "Nix"
+  homepageUrl: "https://nixos.org"
+  kind: package-manager
+  description: |
+    Purely functional cross-platform package manager that provides reproducible, declarative,
+    and atomic package management across Linux and macOS.
+    Each package lives in an isolated store path ensuring no dependency conflicts and enabling
+    reliable rollbacks, development shells, and system-level configuration via NixOS.
+edges:
+  belongs_to_language:
+    - language:cpp
+  tool_used_by:
+    - target: skill-area:developer-environment
+  used_for:
+    - skill-area:developer-environment
+  alternative_to:
+    - target: tool:homebrew
+      comparison: "System package managers — Nix is reproducible and declarative; Homebrew is simple"
+    - target: tool:apt
+      comparison: "System package managers — Nix is cross-platform declarative; apt is Debian/Ubuntu"
+---
+nodeKind: Tool
+id: tool:apt
+attributes:
+  displayName: "apt"
+  homepageUrl: "https://wiki.debian.org/Apt"
+  kind: package-manager
+  languageApplicability: neutral
+  description: |
+    Advanced Package Tool — the primary package manager for Debian-based Linux distributions
+    including Ubuntu, handling dependency resolution, installs, upgrades, and removals.
+    Wraps dpkg with a high-level interface and integrates with software repositories
+    via signed sources.list entries for secure, authenticated package delivery.
+edges:
+  tool_used_by:
+    - target: skill-area:developer-environment
+  used_for:
+    - skill-area:developer-environment
+  alternative_to:
+    - target: tool:homebrew
+      comparison: "System package managers — apt is Debian/Ubuntu; Homebrew is macOS/Linux"
+    - target: tool:nix
+      comparison: "System package managers — apt is Debian/Ubuntu; Nix is cross-platform declarative"
+---
+nodeKind: Tool
+id: tool:hoppscotch
+attributes:
+  displayName: "Hoppscotch"
+  homepageUrl: "https://hoppscotch.io"
+  kind: api-tool
+  description: |
+    Open-source, lightweight API development suite available as a web app and self-hosted
+    platform for testing REST, GraphQL, WebSocket, SSE, and Socket.IO endpoints.
+    Provides realtime collaboration, collections, environments, and a PWA for offline use
+    — positioned as a privacy-friendly alternative to Postman.
+edges:
+  belongs_to_language:
+    - language:typescript
+  tool_used_by:
+    - target: skill-area:api-design
+  used_for:
+    - skill-area:api-testing
+    - skill-area:backend-api-design
+  alternative_to:
+    - target: tool:postman
+      comparison: "API testing clients"
+    - target: tool:insomnia
+      comparison: "API testing clients"
+    - target: tool:bruno
+      comparison: "API testing clients"
+    - target: tool:httpie
+      comparison: "API testing clients"
+---
+nodeKind: Tool
+id: tool:httpie
+attributes:
+  displayName: "HTTPie"
+  homepageUrl: "https://httpie.io"
+  kind: api-tool
+  description: |
+    Modern command-line HTTP client designed for human-readable interaction with APIs,
+    offering intuitive syntax, JSON highlighting, session persistence, and plugin support.
+    Also ships HTTPie Desktop, a cross-platform GUI client for exploring and debugging
+    REST, GraphQL, and other HTTP-based APIs without leaving the terminal workflow.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:api-design
+  used_for:
+    - skill-area:api-testing
+    - skill-area:backend-api-design
+  alternative_to:
+    - target: tool:postman
+      comparison: "API testing clients"
+    - target: tool:insomnia
+      comparison: "API testing clients"
+    - target: tool:hoppscotch
+      comparison: "API testing clients"
+    - target: tool:bruno
+      comparison: "API testing clients"
+---
+nodeKind: Tool
+id: tool:bruno
+attributes:
+  displayName: "Bruno"
+  homepageUrl: "https://www.usebruno.com"
+  kind: api-tool
+  description: |
+    Fast, git-friendly, offline-first open-source API client that stores collections
+    directly on the filesystem in a plain-text Bru format — no cloud sync required.
+    Supports REST, GraphQL, and scripting with JavaScript, making collections version-
+    controllable alongside the code they test.
+edges:
+  belongs_to_language:
+    - language:javascript
+  tool_used_by:
+    - target: skill-area:api-design
+  used_for:
+    - skill-area:api-testing
+    - skill-area:backend-api-design
+  alternative_to:
+    - target: tool:postman
+      comparison: "API testing clients"
+    - target: tool:insomnia
+      comparison: "API testing clients"
+    - target: tool:hoppscotch
+      comparison: "API testing clients"
+    - target: tool:httpie
+      comparison: "API testing clients"
+---
+nodeKind: Tool
+id: tool:rapidapi
+attributes:
+  displayName: "RapidAPI"
+  homepageUrl: "https://rapidapi.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    World's largest API hub and marketplace where developers discover, test, and connect
+    to thousands of public and private APIs through a unified interface.
+    Provides a browser-based API client, usage analytics, rate-limit management,
+    and monetization tooling for API publishers.
+edges:
+  tool_used_by:
+    - target: skill-area:api-design
+  used_for:
+    - skill-area:api-testing
+    - skill-area:backend-api-design
+  alternative_to:
+    - target: tool:swagger-editor
+      comparison: "API tools — RapidAPI is an API marketplace; Swagger Editor is a spec editor"
+    - target: tool:openapi-generator
+      comparison: "API tools — RapidAPI is an API marketplace; OpenAPI Generator produces code from specs"
+---
+nodeKind: Tool
+id: tool:swagger-editor
+attributes:
+  displayName: "Swagger Editor"
+  homepageUrl: "https://swagger.io/tools/swagger-editor/"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Browser-based and desktop editor for designing, writing, and validating OpenAPI
+    (Swagger) and AsyncAPI specifications with live preview and instant validation feedback.
+    Part of the open-source Swagger toolset maintained by SmartBear, integrating with
+    Swagger UI and Swagger Codegen to generate documentation and client/server stubs.
+edges:
+  tool_used_by:
+    - target: skill-area:api-design
+  used_for:
+    - skill-area:api-testing
+    - skill-area:backend-api-design
+  alternative_to:
+    - target: tool:openapi-generator
+      comparison: "OpenAPI tools — Swagger Editor designs specs; OpenAPI Generator produces code from specs"
+    - target: tool:rapidapi
+      comparison: "API tools — Swagger Editor is a spec editor; RapidAPI is an API marketplace"
+    - target: tool:graphql-codegen
+      comparison: "API codegen — Swagger Editor is for REST/OpenAPI; GraphQL Codegen is for GraphQL"

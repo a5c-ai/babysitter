@@ -1,0 +1,18 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:human-eval.scope
+attributes:
+  subjectId: benchmark:human-eval
+  inScope: |
+    Self-contained Python function-completion tasks scored by
+    pass-at-k against unit tests. 164 hand-crafted problems with
+    docstring + signature input.
+  outOfScope: |
+    Multi-file projects, languages other than Python (use MultiPL-E /
+    HumanEvalX for cross-language), repository-scale tasks (use SWE-bench),
+    multi-turn / agentic tasks, and natural-language reasoning benchmarks.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:human-eval

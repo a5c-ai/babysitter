@@ -1,0 +1,22 @@
+nodeKind: SessionSemantics
+id: session-semantics:pi
+attributes:
+  sessionSemanticsId: session-semantics:pi
+  agentId: agent:pi
+  versionRange: ">=0.0.0"
+  sessionDirStrategy: ".a5c/runs"
+  sessionIdSources:
+    - PI_SESSION_ID
+    - PI_RUN_ID
+  resumeSemantics: Pi sessions are keyed by explicit run/session identifiers.
+  stateFilePatterns:
+    - ".a5c/runs/**"
+  pidMarkerPolicy: env-or-run-dir
+  metadataFields:
+    - { key: session_id, envVars: [PI_SESSION_ID] }
+    - { key: run_id,     envVars: [PI_RUN_ID] }
+edges:
+  applies_to_version:
+    - target: agentVersion:pi:ge-0-0-0
+  references_path:
+    - target: path:a5c-runs-dir

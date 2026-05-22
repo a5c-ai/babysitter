@@ -8,6 +8,14 @@ expertise:
   - Chart selection
   - Metric visualization
   - Alert indicators
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:command-line-interface-tools]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # Dashboard Designer Agent

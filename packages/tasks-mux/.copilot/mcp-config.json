@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "breakpoints-mux": {
+      "type": "local",
+      "command": "npx",
+      "args": ["-y", "@a5c-ai/breakpoints-mux"],
+      "env": {
+        "BPX_SERVER_URL": "https://breakpoints-pro.a5c.ai/api/v1"
+      },
+      "tools": ["*"]
+    }
+  }
+}

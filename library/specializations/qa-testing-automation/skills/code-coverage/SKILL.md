@@ -8,6 +8,14 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:unit-testing, skill-area:component-testing]
+  roles: [role:qa-engineer, role:backend-engineer]
+  workflows: [workflow:code-review]
+  topics: [topic:test-driven-development, topic:code-review-best-practices]
+
 ---
 
 # Code Coverage Analysis Skill

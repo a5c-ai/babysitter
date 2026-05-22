@@ -3,6 +3,11 @@
  * @description Build email nurture sequences, lifecycle campaigns, triggered communications, and personalization rules using marketing automation platforms.
  * @inputs { customerJourney: object, segments: array, existingEmails: array, automationPlatform: string, businessGoals: object }
  * @outputs { success: boolean, nurtureSequences: array, lifecycleCampaigns: array, automationRules: object, personalizationStrategy: object, artifacts: array }
+  * @graph
+ *   domains: [domain:marketing]
+ *   skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+ *   workflows: [workflow:brand-campaign-launch]
+ *   roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

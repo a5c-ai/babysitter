@@ -15,9 +15,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { handleHookRun } from "../../cli/commands/hookRun";
-import type { HookRunCommandArgs } from "../../cli/commands/hookRun";
-import { createGeminiCliAdapter } from "../geminiCli";
+import { handleHookRun } from "../../cli/commands/hooks/run";
+import type { HookRunCommandArgs } from "../../cli/commands/hooks/run";
+import { createGeminiCliAdapter } from "../adapters/gemini-cli";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -81,6 +81,14 @@ beforeEach(async () => {
   tmpDir = await makeTmpDir();
   stateDir = path.join(tmpDir, "state");
   await fs.mkdir(stateDir, { recursive: true });
+  process.env.BABYSITTER_GLOBAL_STATE_DIR = tmpDir;
+  delete process.env.AGENT_SESSION_ID;
+  delete process.env.AGENT_SESSION_ID;
+  delete process.env.AGENT_TRUST_ENV_SESSION;
+  delete process.env.BABYSITTER_TRUST_ENV_SESSION;
+  delete process.env.AGENT_ENABLE_SESSION_PID_MARKERS;
+  delete process.env.BABYSITTER_ENABLE_SESSION_PID_MARKERS;
+  delete process.env.GEMINI_CLI;
 
   stdoutChunks = [];
   stderrChunks = [];
@@ -111,11 +119,18 @@ afterEach(async () => {
   delete process.env.GEMINI_SESSION_ID;
   delete process.env.GEMINI_PROJECT_DIR;
   delete process.env.GEMINI_CWD;
+  delete process.env.GEMINI_CLI;
   delete process.env.GEMINI_EXTENSION_PATH;
   delete process.env.BABYSITTER_EXTENSION_PATH;
   delete process.env.BABYSITTER_LOG_DIR;
   delete process.env.BABYSITTER_STATE_DIR;
   delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
+  delete process.env.AGENT_SESSION_ID;
+  delete process.env.AGENT_SESSION_ID;
+  delete process.env.AGENT_TRUST_ENV_SESSION;
+  delete process.env.BABYSITTER_TRUST_ENV_SESSION;
+  delete process.env.AGENT_ENABLE_SESSION_PID_MARKERS;
+  delete process.env.BABYSITTER_ENABLE_SESSION_PID_MARKERS;
   try {
     await fs.rm(tmpDir, { recursive: true, force: true });
   } catch {
@@ -236,6 +251,7 @@ describe("Gemini CLI AfterAgent hook (stop)", () => {
       iteration: 50,
       maxIterations: 50,
       runId: "run-abc",
+      runIds: [],
       startedAt: now,
       lastIterationAt: now,
       iterationTimes: [],
@@ -258,8 +274,9 @@ describe("Gemini CLI AfterAgent hook (stop)", () => {
     const state: SessionState = {
       active: true,
       iteration: 1,
-      maxIterations: 256,
+      maxIterations: 65_000,
       runId: "",
+      runIds: [],
       startedAt: now,
       lastIterationAt: now,
       iterationTimes: [],
@@ -317,6 +334,7 @@ describe("Gemini CLI AfterAgent hook (stop)", () => {
       iteration: 3,
       maxIterations: 100,
       runId,
+      runIds: [],
       startedAt: now,
       lastIterationAt: now,
       iterationTimes: [],
@@ -378,6 +396,15 @@ describe("Gemini CLI SessionStart hook", () => {
     );
     expect(code).toBe(0);
     expect(getStdout().trim()).toBe("{}");
+    
+    // Debug logging
+    console.log("STDERR:", stderrChunks.join(""));
+    const logPath = path.join(tmpDir, "logs", "babysitter-session-start-hook.log");
+    try {
+      console.log("LOG:", await fs.readFile(logPath, "utf8"));
+    } catch(e) {
+      console.log("NO LOG");
+    }
 
     // Verify state file was created
     const filePath = getSessionFilePath(stateDir, sessionId);
@@ -401,8 +428,9 @@ describe("Gemini CLI SessionStart hook", () => {
     const existingState: SessionState = {
       active: true,
       iteration: 7,
-      maxIterations: 256,
+      maxIterations: 65_000,
       runId: "existing-run-xyz",
+      runIds: [],
       startedAt: now,
       lastIterationAt: now,
       iterationTimes: [],
@@ -450,9 +478,12 @@ describe("Gemini CLI bindSession", () => {
     const result = await adapter.bindSession({
       sessionId,
       runId: "new-run-abc",
+      runDir: path.join(tmpDir, "runs", "new-run-abc"),
       maxIterations: 50,
       prompt: "Build a REST API",
       stateDir,
+      verbose: false,
+      json: false,
     });
 
     expect(result.harness).toBe("gemini-cli");
@@ -476,8 +507,9 @@ describe("Gemini CLI bindSession", () => {
     const state: SessionState = {
       active: true,
       iteration: 1,
-      maxIterations: 256,
+      maxIterations: 65_000,
       runId: "",
+      runIds: [],
       startedAt: now,
       lastIterationAt: now,
       iterationTimes: [],
@@ -487,7 +519,11 @@ describe("Gemini CLI bindSession", () => {
     const result = await adapter.bindSession({
       sessionId,
       runId: "updated-run-xyz",
+      runDir: path.join(tmpDir, "runs", "updated-run-xyz"),
       stateDir,
+      prompt: "",
+      verbose: false,
+      json: false,
     });
 
     expect(result.error).toBeUndefined();
@@ -505,8 +541,9 @@ describe("Gemini CLI bindSession", () => {
     const state: SessionState = {
       active: true,
       iteration: 3,
-      maxIterations: 256,
+      maxIterations: 65_000,
       runId: "existing-run-999",
+      runIds: [],
       startedAt: now,
       lastIterationAt: now,
       iterationTimes: [],
@@ -516,7 +553,11 @@ describe("Gemini CLI bindSession", () => {
     const result = await adapter.bindSession({
       sessionId,
       runId: "new-conflicting-run",
+      runDir: path.join(tmpDir, "runs", "new-conflicting-run"),
       stateDir,
+      prompt: "",
+      verbose: false,
+      json: false,
     });
 
     expect(result.error).toContain("existing-run-999");
@@ -534,7 +575,8 @@ describe("Gemini CLI resolveStateDir", () => {
     expect(result).toBe(path.resolve("/custom/state"));
   });
 
-  it("defaults to ~/.a5c/state/ when nothing is set", () => {
+  it("resolveStateDir() defaults to ~/.a5c/state/ when nothing is set", () => {
+    delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
     const adapter = createGeminiCliAdapter();
     const result = adapter.resolveStateDir!({});
     expect(result).toBe(path.join(os.homedir(), ".a5c", "state"));
@@ -647,7 +689,7 @@ describe("Gemini CLI getPromptContext", () => {
   it("returns context with sessionEnvVars listing Gemini env vars", () => {
     const adapter = createGeminiCliAdapter();
     const ctx = adapter.getPromptContext!();
-    expect(ctx.sessionEnvVars).toContain("BABYSITTER_SESSION_ID");
+    expect(ctx.sessionEnvVars).toContain("AGENT_SESSION_ID");
     expect(ctx.sessionEnvVars).toContain("GEMINI_SESSION_ID");
   });
 
@@ -700,7 +742,7 @@ describe("Gemini CLI findHookDispatcherPath", () => {
     expect(result).toBeNull();
   });
 
-  it("returns after-agent.sh path when it exists under GEMINI_EXTENSION_PATH", async () => {
+  it("returns null even when GEMINI_EXTENSION_PATH is set (hooks-mux handles dispatch)", async () => {
     const hookDir = path.join(tmpDir, "hooks");
     await fs.mkdir(hookDir, { recursive: true });
     await fs.writeFile(path.join(hookDir, "after-agent.sh"), "#!/bin/bash\n");
@@ -708,10 +750,10 @@ describe("Gemini CLI findHookDispatcherPath", () => {
 
     const adapter = createGeminiCliAdapter();
     const result = adapter.findHookDispatcherPath!("/some/cwd");
-    expect(result).toBe(path.join(path.resolve(tmpDir), "hooks", "after-agent.sh"));
+    expect(result).toBeNull();
   });
 
-  it("checks BABYSITTER_EXTENSION_PATH when GEMINI_EXTENSION_PATH is not set", async () => {
+  it("returns null when BABYSITTER_EXTENSION_PATH is set (hooks-mux handles dispatch)", async () => {
     const hookDir = path.join(tmpDir, "hooks");
     await fs.mkdir(hookDir, { recursive: true });
     await fs.writeFile(path.join(hookDir, "after-agent.sh"), "#!/bin/bash\n");
@@ -719,6 +761,7 @@ describe("Gemini CLI findHookDispatcherPath", () => {
 
     const adapter = createGeminiCliAdapter();
     const result = adapter.findHookDispatcherPath!("/some/cwd");
-    expect(result).toBe(path.join(path.resolve(tmpDir), "hooks", "after-agent.sh"));
+    expect(result).toBeNull();
   });
 });
+

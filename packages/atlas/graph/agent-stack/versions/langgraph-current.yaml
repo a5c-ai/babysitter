@@ -1,0 +1,53 @@
+nodeKind: AgentVersion
+id: agent-version:langgraph@current
+attributes:
+  agentProductId: agent:langgraph
+  versionRange: ">=0.0.0"
+  releasedAt: "2024-01-01"
+  cliCommand: "<sdk:langgraph>"
+  installMethods:
+    - install:pip
+    - install:npm
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:langgraph
+  composed_of:
+    - target: agent-core-impl:langgraph.core@current
+      role: core
+    - target: agent-runtime-impl:langgraph.runtime@current
+      role: runtime
+    - target: agent-platform-impl:langgraph.platform@current
+      role: platform
+  sourced_from:
+    - source-ref:langgraph-docs
+    - source-ref:langchain-agents-docs
+    - source-ref:langsmith-langgraph-platform-docs
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: ">=0.0.0"
+      level: full
+      notes: |
+        LangChain/LangGraph custom agents bind model-callable tools through
+        graph nodes, create_agent-style wrappers, or custom graph state steps.
+    - target: capability:streaming
+      versionRange: ">=0.0.0"
+      level: full
+      notes: |
+        Graph execution can stream intermediate events and final outputs through
+        local SDK runtimes or deployed RemoteGraph-style invocation.
+    - target: capability:can-resume
+      versionRange: ">=0.0.0"
+      level: full
+      notes: |
+        Checkpointing and thread-level persistence are first-class modeling
+        concerns for durable graph execution and deployed graph calls.
+    - target: capability:supports-subagent-dispatch
+      versionRange: ">=0.0.0"
+      level: partial
+      notes: |
+        Multi-agent and subgraph patterns can be encoded as graphs, supervisors,
+        handoffs, or Deep Agents-style subagent harnesses.
+  uses_memory_system:
+    - target: memory-system:memori-labs
+    - target: memory-system:vector-backed-recall-pattern

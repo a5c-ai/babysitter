@@ -2,6 +2,12 @@
 name: archival-research-specialist
 description: Guide archival investigation methodology and source analysis including archive navigation, paleography, diplomatic analysis, source criticism, and document authentication
 required-skills: primary-source-evaluation, archival-finding-aid-interpretation, citation-scholarly-apparatus
+graph:
+  domains: [domain:humanities]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:deep-web-research, skill-area:document-processing, skill-area:data-analysis]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-analyst, role:research-scientist]
 ---
 
 # Archival Research Specialist Agent

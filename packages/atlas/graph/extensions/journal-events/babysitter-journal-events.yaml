@@ -1,0 +1,243 @@
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-run-created
+attributes:
+  displayName: "RUN_CREATED"
+  eventName: RUN_CREATED
+  kind: state-change
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Emitted when a new run directory is created and the journal initialized."
+  payloadSchema:
+    runId: string
+    createdAt: iso-timestamp
+  sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:94 + packages/sdk/src/cli/main/runCreate.ts"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:a5c.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-run-completed
+attributes:
+  displayName: "RUN_COMPLETED"
+  eventName: RUN_COMPLETED
+  kind: completion
+  direction: runtime-to-platform
+  terminal: true
+  triggerCondition: "Emitted when the run finishes successfully; closes the journal."
+  payloadSchema:
+    runId: string
+    completedAt: iso-timestamp
+  sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:13,95 + packages/sdk/src/harness/__tests__/harness.test.ts:474"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:a5c.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-run-failed
+attributes:
+  displayName: "RUN_FAILED"
+  eventName: RUN_FAILED
+  kind: error
+  direction: runtime-to-platform
+  terminal: true
+  triggerCondition: "Emitted when the run terminates with an unrecoverable error."
+  payloadSchema:
+    runId: string
+    error: object
+  sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:13,96 + packages/sdk/src/runtime/exceptions.ts (RunFailedError)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:a5c.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-effect-requested
+attributes:
+  displayName: "EFFECT_REQUESTED"
+  eventName: EFFECT_REQUESTED
+  kind: request
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Emitted when the runtime requests an effect (task invocation, tool call) be executed by the harness."
+  payloadSchema:
+    effectId: string
+    invocationKey: string
+    invocationHash: string
+    stepId: string
+    taskId: string
+    kind: string
+    label: string
+    labels: list<string>
+    taskDefRef: string
+    inputsRef: string
+  sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:15-26,98 (EffectRequestedPayload)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:a5c.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-effect-resolved
+attributes:
+  displayName: "EFFECT_RESOLVED"
+  eventName: EFFECT_RESOLVED
+  kind: response
+  direction: platform-to-runtime
+  terminal: false
+  triggerCondition: "Emitted when an effect completes (status=ok or error) and its result has been recorded."
+  payloadSchema:
+    effectId: string
+    status: enum<ok,error>
+    resultRef: string
+    error: object
+    stdoutRef: string
+    stderrRef: string
+  sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:28-35,101 (EffectResolvedPayload)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-platform-impl:a5c.platform@current
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-effect-cancelled
+attributes:
+  displayName: "EFFECT_CANCELLED"
+  eventName: EFFECT_CANCELLED
+  kind: state-change
+  direction: platform-to-runtime
+  terminal: false
+  triggerCondition: "Emitted when an in-flight effect is cancelled (operator interrupt, timeout, or supersession)."
+  payloadSchema:
+    effectId: string
+    reason: string
+  sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:37-40,104 (EffectCancelledPayload)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-platform-impl:a5c.platform@current
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-effect-progress
+attributes:
+  displayName: "EFFECT_PROGRESS"
+  eventName: EFFECT_PROGRESS
+  kind: state-change
+  direction: platform-to-runtime
+  terminal: false
+  triggerCondition: "Emitted as a long-running effect reports incremental progress."
+  payloadSchema:
+    effectId: string
+    progressPercent: number
+    progressLabel: string
+    currentStep: string
+    progressEta: string
+  sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:53-59,107 (EffectProgressPayload)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-platform-impl:a5c.platform@current
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-cost-tracked
+attributes:
+  displayName: "COST_TRACKED"
+  eventName: COST_TRACKED
+  kind: state-change
+  direction: platform-to-runtime
+  terminal: false
+  triggerCondition: "Emitted when a model call's token-usage and cost figures are recorded against an effect."
+  payloadSchema:
+    effectId: string
+    inputTokens: int
+    outputTokens: int
+    cacheCreationInputTokens: int
+    cacheReadInputTokens: int
+    costUsd: number
+    model: string
+    taskKind: string
+  sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:42-51,110 (CostTrackedPayload)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-platform-impl:a5c.platform@current
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-stop-hook-invoked
+attributes:
+  displayName: "STOP_HOOK_INVOKED"
+  eventName: STOP_HOOK_INVOKED
+  kind: state-change
+  direction: platform-to-runtime
+  terminal: false
+  triggerCondition: "Emitted when a Stop / SubagentStop harness hook fires (informational; does not affect the effect index)."
+  payloadSchema:
+    eventType: string
+    reason: string
+  sourceCitation: "packages/sdk/src/harness/hooks/utils.ts:128 + packages/sdk/src/runtime/__tests__/effectIndex.test.ts:106"
+edges:
+  journal_event_emitted_by:
+    - target: agent-platform-impl:a5c.platform@current
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-compression-applied
+attributes:
+  displayName: "COMPRESSION_APPLIED"
+  eventName: COMPRESSION_APPLIED
+  kind: state-change
+  direction: platform-to-runtime
+  terminal: false
+  triggerCondition: "Emitted when context compression is applied during an iteration; recorded for token-stats reporting."
+  payloadSchema:
+    inputTokens: int
+    outputTokens: int
+    cacheReadInputTokens: int
+  sourceCitation: "packages/sdk/src/cli/commands/tokensStats.ts:42,121"
+edges:
+  journal_event_emitted_by:
+    - target: agent-platform-impl:a5c.platform@current
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-task-start
+attributes:
+  displayName: "TASK_START"
+  eventName: TASK_START
+  kind: state-change
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Emitted by the on-task-start hook when a task subagent begins execution (recorded by the harness hook logger)."
+  payloadSchema:
+    taskId: string
+    runId: string
+  sourceCitation: "packages/sdk/src/cli/commands/hooks/log.ts:33"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:a5c.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-task-complete
+attributes:
+  displayName: "TASK_COMPLETE"
+  eventName: TASK_COMPLETE
+  kind: completion
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Emitted by the on-task-complete hook when a task subagent finishes (per-task completion; not a run-level terminal)."
+  payloadSchema:
+    taskId: string
+    status: enum<ok,error,cancelled>
+  sourceCitation: "packages/sdk/src/cli/commands/hooks/log.ts:34"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:a5c.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:babysitter-step-dispatch
+attributes:
+  displayName: "STEP_DISPATCH"
+  eventName: STEP_DISPATCH
+  kind: state-change
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Emitted by the on-step-dispatch hook when a step within a task is dispatched to a child effect."
+  payloadSchema:
+    stepId: string
+    taskId: string
+  sourceCitation: "packages/sdk/src/cli/commands/hooks/log.ts:35"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:a5c.runtime@current

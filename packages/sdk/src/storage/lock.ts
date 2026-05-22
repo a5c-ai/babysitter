@@ -2,6 +2,7 @@ import { promises as fs } from "fs";
 import { RunLockInfo } from "./types";
 import { getLockPath } from "./paths";
 import { getClockIsoString } from "./clock";
+import { isProcessAlive } from "../utils/processLiveness";
 
 export async function acquireRunLock(runDir: string, owner: string): Promise<RunLockInfo> {
   const lockPath = getLockPath(runDir);
@@ -13,15 +14,10 @@ export async function acquireRunLock(runDir: string, owner: string): Promise<Run
     const err = error as NodeJS.ErrnoException;
     if (err.code === "EEXIST") {
       const existing = JSON.parse(await fs.readFile(lockPath, "utf8")) as RunLockInfo;
-      try {
-        process.kill(existing.pid, 0);
-      } catch (killError) {
-        const killErr = killError as NodeJS.ErrnoException;
-        if (killErr.code === "ESRCH") {
-          console.warn(`Stale lock detected: PID ${existing.pid} is no longer running. Cleaning up.`);
-          await fs.unlink(lockPath);
-          return acquireRunLock(runDir, owner);
-        }
+      if (!isProcessAlive(existing.pid)) {
+        console.warn(`Stale lock detected: PID ${existing.pid} is no longer running. Cleaning up.`);
+        await fs.unlink(lockPath);
+        return acquireRunLock(runDir, owner);
       }
       throw new Error(`run.lock already held by pid ${existing.pid} (${existing.owner})`);
     }

@@ -346,13 +346,82 @@ describe('parser', () => {
       expect(run.failedTasks).toBe(0);
     });
 
-    it('computes duration from created to completed event', async () => {
+    it('computes run duration from task execution windows', async () => {
       setupCompleteRun();
 
       const run = await parseRunDir('/runs/run-123');
 
-      // 2024-01-15T10:00:00Z to 2024-01-15T10:00:06Z = 6000ms
-      expect(run.duration).toBe(6000);
+      // EFFECT_RESOLVED carries startedAt 10:00:01Z and finishedAt 10:00:05Z
+      expect(run.duration).toBe(4000);
+    });
+
+    it('excludes idle gaps from run duration', async () => {
+      mockAccess.mockImplementation(async (p: any) => {
+        if (p.toString().includes('journal')) return undefined;
+        throw new Error('ENOENT');
+      });
+
+      mockReaddir.mockImplementation(async (dir: any) => {
+        if (dir.toString().includes('journal')) {
+          return [
+            '000001.A.json',
+            '000002.B.json',
+            '000003.C.json',
+            '000004.D.json',
+            '000005.E.json',
+            '000006.F.json',
+          ] as any;
+        }
+        return [];
+      });
+
+      mockReadFile.mockImplementation(async (filePath: any) => {
+        const p = filePath.toString();
+        if (p.endsWith('run.json')) return JSON.stringify({ processId: 'proc' });
+        if (p.includes('000001')) {
+          return JSON.stringify(makeRunCreatedRaw('run-gap', 'proc', '2024-01-15T10:00:00Z'));
+        }
+        if (p.includes('000002')) {
+          return JSON.stringify(
+            makeEffectRequestedRaw('eff-1', 'agent', 'phase-1', '2024-01-15T10:00:01Z'),
+          );
+        }
+        if (p.includes('000003')) {
+          return JSON.stringify(
+            makeEffectResolvedRaw('eff-1', 'ok', '2024-01-15T10:00:10Z', {
+              startedAt: '2024-01-15T10:00:02Z',
+              finishedAt: '2024-01-15T10:00:04Z',
+            }),
+          );
+        }
+        if (p.includes('000004')) {
+          return JSON.stringify(
+            makeEffectRequestedRaw('eff-2', 'agent', 'phase-2', '2024-01-15T10:01:00Z'),
+          );
+        }
+        if (p.includes('000005')) {
+          return JSON.stringify(
+            makeEffectResolvedRaw('eff-2', 'ok', '2024-01-15T10:01:20Z', {
+              startedAt: '2024-01-15T10:01:05Z',
+              finishedAt: '2024-01-15T10:01:08Z',
+            }),
+          );
+        }
+        if (p.includes('000006')) {
+          return JSON.stringify(makeRunCompletedRaw('2024-01-15T10:01:25Z'));
+        }
+        if (p.includes(path.join('tasks', 'eff-1', 'task.json'))) {
+          return JSON.stringify({ title: 'Phase 1', kind: 'agent' });
+        }
+        if (p.includes(path.join('tasks', 'eff-2', 'task.json'))) {
+          return JSON.stringify({ title: 'Phase 2', kind: 'agent' });
+        }
+        throw new Error('ENOENT');
+      });
+
+      const run = await parseRunDir('/runs/run-gap');
+
+      expect(run.duration).toBe(5000);
     });
 
     it('sets status to failed when RUN_FAILED event exists', async () => {
@@ -919,7 +988,7 @@ describe('parser', () => {
       expect(detail!.input).toEqual({ key: 'value' });
     });
 
-    it('falls back to journal wall-clock for duration when result timestamps are equal', async () => {
+    it('keeps zero execution duration when result timestamps are equal', async () => {
       mockAccess.mockResolvedValue(undefined);
 
       mockReaddir.mockImplementation(async (dir: any) => {
@@ -963,8 +1032,54 @@ describe('parser', () => {
       const detail = await parseTaskDetail('/run', 'eff-dur');
 
       expect(detail).not.toBeNull();
-      // Since startedAt == finishedAt (0ms), it should fall back to journal timestamps
-      // requestedAt: 10:00:01, resolvedAt: 10:00:05 => 4000ms
+      expect(detail!.duration).toBe(0);
+    });
+
+    it('falls back to request/resolve timing when execution timestamps are absent', async () => {
+      mockAccess.mockResolvedValue(undefined);
+
+      mockReaddir.mockImplementation(async (dir: any) => {
+        if (dir.toString().includes('journal')) {
+          return ['000001.A.json', '000002.B.json', '000003.C.json'] as any;
+        }
+        return [];
+      });
+
+      mockReadFile.mockImplementation(async (filePath: any) => {
+        const p = filePath.toString();
+        if (p.includes('task.json')) {
+          return JSON.stringify({ title: 'Task', kind: 'node' });
+        }
+        if (p.includes('input.json')) throw new Error('ENOENT');
+        if (p.includes('result.json')) {
+          return JSON.stringify({
+            status: 'ok',
+          });
+        }
+        if (p.includes('stdout.log')) throw new Error('ENOENT');
+        if (p.includes('stderr.log')) throw new Error('ENOENT');
+        if (p.includes('000001')) {
+          return JSON.stringify(makeRunCreatedRaw('r', 'p', '2024-01-15T10:00:00Z'));
+        }
+        if (p.includes('000002')) {
+          return JSON.stringify(
+            makeEffectRequestedRaw('eff-wall', 'node', 'step', '2024-01-15T10:00:01Z'),
+          );
+        }
+        if (p.includes('000003')) {
+          return JSON.stringify(
+            makeEffectResolvedRaw('eff-wall', 'ok', '2024-01-15T10:00:05Z', {
+              startedAt: undefined,
+              finishedAt: undefined,
+            }),
+          );
+        }
+        throw new Error('ENOENT');
+      });
+
+      const detail = await parseTaskDetail('/run', 'eff-wall');
+
+      expect(detail).not.toBeNull();
       expect(detail!.duration).toBe(4000);
     });
   });

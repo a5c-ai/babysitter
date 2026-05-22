@@ -1,0 +1,127 @@
+---
+nodeKind: Workflow
+id: workflow:legacy-codebase-assessment
+attributes:
+  displayName: "Legacy Codebase Assessment"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Systematic evaluation of a legacy codebase to assess technical debt,
+    identify modernization candidates, map dependency graphs, and produce
+    a scored migration readiness report. Excludes the actual migration
+    execution.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:strangler-fig-pattern
+    - target: skill-area:domain-driven-design
+    - target: skill-area:c4-modeling
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:adr-curation
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:strangler-fig-migration
+attributes:
+  displayName: "Strangler Fig Migration"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-module"
+  complexity: cross-team
+  description: |
+    Incrementally replaces legacy system modules with modern implementations
+    using the strangler fig pattern — routing traffic to new services,
+    verifying parity, and decommissioning old paths. Excludes initial
+    assessment.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:implementer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:strangler-fig-pattern
+    - target: skill-area:monorepo-extraction
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:approve-architecture
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:database-migration-cutover
+attributes:
+  displayName: "Database Migration Cutover"
+  workflowKind: operational
+  triggerType: on-demand
+  typicalCadence: "per-migration"
+  complexity: cross-team
+  description: |
+    Coordinates the high-risk cutover phase of a database migration —
+    setting up dual-write, verifying data consistency, executing the
+    switchover, monitoring for regressions, and finalizing decommission
+    of the old database. Excludes schema design and long-running data sync.
+edges:
+  involves_role:
+    - target: role:database-administrator
+    - target: role:db-migrator
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:database-migrations-zero-downtime
+    - target: skill-area:postgres-tuning
+  applies_to_domain:
+    - target: domain:databases
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:runbook-authoring
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:database-team
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:api-gateway-migration
+attributes:
+  displayName: "API Gateway Migration"
+  workflowKind: operational
+  triggerType: on-demand
+  typicalCadence: "per-migration"
+  complexity: cross-team
+  description: |
+    Plans and executes the migration of API traffic from one gateway
+    platform to another — mapping routes, configuring authentication
+    policies, running shadow traffic, performing incremental cutover,
+    and validating client compatibility. Excludes API redesign.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:rate-limiting
+    - target: skill-area:oauth-flows
+    - target: skill-area:service-mesh-config
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:cloud-infra
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:engineering

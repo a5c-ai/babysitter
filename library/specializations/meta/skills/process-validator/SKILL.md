@@ -7,6 +7,11 @@ metadata:
   version: "1.0.0"
   category: validation
   backlog-id: SK-META-012
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:ai-agent-development, skill-area:orchestration-loop]
+  topics: [topic:quality-assurance, topic:developer-experience]
+  roles: [role:platform-engineer, role:tech-lead]
 ---
 
 # process-validator

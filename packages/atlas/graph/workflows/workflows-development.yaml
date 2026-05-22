@@ -1,0 +1,108 @@
+---
+nodeKind: Workflow
+id: workflow:code-review
+attributes:
+  displayName: "Code Review"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: single-team
+  description: |
+    Structured peer review of code changes, covering correctness,
+    style, security, and test coverage before merge.
+edges:
+  involves_role:
+    - target: role:code-reviewer
+    - target: role:implementer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:typescript-generic-programming
+    - target: skill-area:react-testing
+  applies_to_domain:
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:review-prs-merge-decisions
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:frontend-team
+---
+nodeKind: Workflow
+id: workflow:architecture-decision
+attributes:
+  displayName: "Architecture Decision"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-decision"
+  complexity: cross-team
+  description: |
+    Guides proposals through RFC authoring, stakeholder review, and
+    formal approval to produce binding architecture decision records.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:graphql-schema-design
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:write-rfc-documents
+    - target: responsibility:approve-architecture
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:dependency-upgrade
+attributes:
+  displayName: "Dependency Upgrade"
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Automated and manual upgrading of third-party dependencies,
+    including compatibility verification, security patch review, and rollout.
+edges:
+  involves_role:
+    - target: role:dependency-updater
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:typescript-generic-programming
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:upgrade-dependencies-weekly
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:flaky-test-management
+attributes:
+  displayName: "Flaky Test Management"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-occurrence"
+  complexity: single-team
+  description: |
+    Detects, quarantines, and tracks resolution of flaky tests to
+    maintain CI reliability and developer confidence.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:debugger
+  requires_skill_area:
+    - target: skill-area:react-testing
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering

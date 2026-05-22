@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: combinatorics
   phase: 6
+graph:
+  domains: [domain:mathematics]
+  specializations: [specialization:computational-mathematics]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:graph-algorithms]
+  workflows: [workflow:experiment-design]
+  roles: [role:computational-scientist, role:research-scientist]
 ---
 
 # Combinatorial Enumeration

@@ -14,6 +14,11 @@
  *
  * @references
  * - Business Intelligence and Data Science: https://www.pearson.com/us/higher-education/program/Sharda-Business-Intelligence-Analytics-and-Data-Science-A-Managerial-Perspective-4th-Edition/PGM1683656.html
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+ *   roles: [role:data-analyst, role:business-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

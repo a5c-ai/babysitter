@@ -1,0 +1,60 @@
+nodeKind: EnvVar
+id: env-var:claude-code-mcp-allowlist-env
+attributes:
+  displayName: CLAUDE_CODE_MCP_ALLOWLIST_ENV
+  description: Set to 1 to spawn stdio MCP servers with only a safe baseline environment plus the configured env.
+  name: CLAUDE_CODE_MCP_ALLOWLIST_ENV
+  category: other
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-policy-skills
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_POLICY_SKILLS
+  description: Set to 1 to skip loading skills from the system-wide managed skills directory.
+  name: CLAUDE_CODE_DISABLE_POLICY_SKILLS
+  category: other
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-fast-mode
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_FAST_MODE
+  description: Set to 1 to disable fast mode.
+  name: CLAUDE_CODE_DISABLE_FAST_MODE
+  category: other
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-sessionend-hooks-timeout-ms
+attributes:
+  displayName: CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS
+  description: Override the time budget in milliseconds for SessionEnd hooks.
+  name: CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS
+  category: other
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-max-tool-use-concurrency
+attributes:
+  displayName: CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY
+  description: Maximum number of read-only tools and subagents that can execute in parallel.
+  name: CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY
+  category: other
+  valueType: int
+  defaultValue: "10"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

@@ -8,17 +8,15 @@ expertise:
   - Security architecture review
   - Attack surface analysis
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Security Design Agent
-
-## Role
-
-Conducts threat modeling and OWASP Top 10 analysis at the design phase. One of 6 mandatory design review gate approvers.
-
-## Expertise
-
-- STRIDE threat modeling
 - OWASP Top 10 vulnerability analysis
 - Attack surface enumeration
 - Security architecture patterns

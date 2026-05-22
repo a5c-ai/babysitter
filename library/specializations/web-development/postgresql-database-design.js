@@ -8,6 +8,13 @@
  * @references
  * - PostgreSQL Documentation: https://www.postgresql.org/docs/
  * - Prisma: https://www.prisma.io/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:backend-engineer]
+ *   skillAreas: [skill-area:backend-data-persistence, skill-area:database-migrations-zero-downtime]
+ *   topics: [topic:database-sharding]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

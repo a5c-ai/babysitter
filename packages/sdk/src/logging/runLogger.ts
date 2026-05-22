@@ -16,7 +16,8 @@
 
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
-import * as os from "node:os";
+import { getGlobalLogDir } from "../config";
+import { BABYSITTER_SDK_VERSION } from "../sdkVersion";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -58,7 +59,7 @@ export interface RunLoggerOptions {
 const LOG_DIR_ENV = "BABYSITTER_LOG_DIR";
 
 export function getDefaultLogDir(): string {
-  return process.env[LOG_DIR_ENV] || path.join(os.homedir(), ".a5c", "logs");
+  return process.env[LOG_DIR_ENV] || getGlobalLogDir();
 }
 
 /** Log file names by type. */
@@ -100,6 +101,7 @@ export function formatLogLine(entry: RunLogEntry): string {
   const record: Record<string, unknown> = {
     ts: entry.timestamp,
     level: entry.level,
+    sdkVersion: BABYSITTER_SDK_VERSION,
   };
   if (entry.type) record.type = entry.type;
   if (entry.label) record.label = entry.label;

@@ -20,6 +20,13 @@
  * - IHI (2003). Optimizing Patient Flow
  * - Litvak, E. (2010). Managing Patient Flow in Hospitals
  * - Womack, J. & Jones, D. (2003). Lean Thinking
+ *
+ * @graph
+ *   domains: [domain:healthcare]
+ *   specializations: [specialization:clinical-informatics]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:data-governance]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

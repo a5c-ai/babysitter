@@ -1,0 +1,19 @@
+nodeKind: TestSet
+id: test-set:bigcode-evalplus
+attributes:
+  displayName: "BigCode EvalPlus"
+  benchmarkId: benchmark:bigcode-evalplus
+  caseCount: 164
+  releasedAt: "2023-05-08"
+  composition: |
+    EvalPlus extends HumanEval and MBPP with ~80x more test cases
+    generated via type-aware mutation, exposing functional bugs that
+    pass the original tests but fail under stricter scrutiny. This
+    entry represents the HumanEval+ portion.
+  homepageUrl: "https://github.com/evalplus/evalplus"
+  description: |
+    Canonical EvalPlus HumanEval+ release used in many post-2023
+    code-LLM evaluations.
+edges:
+  belongs_to_benchmark:
+    - benchmark:bigcode-evalplus

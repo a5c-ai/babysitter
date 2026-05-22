@@ -1,0 +1,158 @@
+import type { TObject } from "@sinclair/typebox";
+import type { BackgroundProcessRegistry } from "./backgroundProcessRegistry";
+import type { DeferredToolRegistry } from "./deferredToolRegistry";
+
+export interface AgentCorePromptResult {
+  output: string;
+  duration: number;
+  success: boolean;
+  exitCode: number;
+}
+
+export interface AgentCoreSessionEvent {
+  type: string;
+  [key: string]: unknown;
+}
+
+export interface AgentCoreSessionOptions {
+  /** Working directory forwarded to agent-mux as `cwd`. */
+  workspace?: string;
+  /** Model identifier forwarded to agent-mux as `model`. */
+  model?: string;
+  /** Prompt timeout in milliseconds forwarded to agent-mux as `timeout`. */
+  timeout?: number;
+  /** Translated to agent-mux `thinkingEffort`. */
+  thinkingLevel?: "minimal" | "low" | "medium" | "high" | "xhigh";
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Use agent-mux-specific configuration, or the PI wrapper in
+   * `@a5c-ai/babysitter-agent`, if you still need tool-surface control.
+   */
+  toolsMode?: "default" | "coding" | "readonly";
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Use `createAgentCoreToolDefinitions()` in the host integration or the PI
+   * wrapper in `@a5c-ai/babysitter-agent` for custom tool injection.
+   */
+  customTools?: unknown[];
+  /** Enables interactive approval mode when a host UI context is present. */
+  uiContext?: unknown;
+  /** Base system prompt text forwarded to agent-mux. */
+  systemPrompt?: string;
+  /** Additional system prompt segments appended before dispatch. */
+  appendSystemPrompt?: string[];
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Use the PI wrapper in `@a5c-ai/babysitter-agent` if you still need
+   * extension and skills isolation controls.
+   */
+  isolated?: boolean;
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Session persistence is controlled by the selected agent-mux backend.
+   */
+  ephemeral?: boolean;
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Sandbox behavior now belongs to the selected agent-mux backend.
+   */
+  bashSandbox?: "auto" | "secure" | "local";
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Compaction behavior now belongs to the selected agent-mux backend.
+   */
+  enableCompaction?: boolean;
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Use the target backend's native configuration if you need a custom agents
+   * directory.
+   */
+  agentDir?: string;
+  /** Agent-mux adapter/backend name forwarded as `agent`. */
+  backend?: string;
+}
+
+export interface ToolResult {
+  content: Array<{ type: "text"; text: string }>;
+}
+
+export interface CustomToolDefinition {
+  name: string;
+  label: string;
+  description: string;
+  promptSnippet?: string;
+  parameters: TObject;
+  /**
+   * Agent-core does not provide a shared AbortSignal to custom tool
+   * implementations. Long-running tools should own their cancellation behavior
+   * through explicit tool parameters, internal timeouts, or background handles.
+   */
+  execute: (
+    toolCallId: string,
+    params: Record<string, unknown>,
+    onUpdate?: unknown,
+    toolContext?: unknown,
+  ) => Promise<ToolResult> | ToolResult;
+}
+
+export interface AgentCoreToolOptions {
+  workspace: string;
+  /**
+   * Enables host interaction on the tool surface. When `false`,
+   * `AskUserQuestion` returns an unavailable error and never invokes the
+   * injected handler.
+   */
+  interactive: boolean;
+  /** Only consulted when `interactive` is `true`. */
+  askUserQuestionHandler?: (...args: unknown[]) => Promise<unknown>;
+  taskHandler?: (...args: unknown[]) => Promise<unknown>;
+  skillHandler?: (...args: unknown[]) => Promise<unknown>;
+  onToolUse?: (toolName: string, params: unknown) => void;
+  onBackgroundComplete?: (event: unknown) => void;
+  maxBackgroundProcesses?: number;
+  /** Optional externally managed registry. When provided, the caller owns disposal. */
+  backgroundRegistry?: BackgroundProcessRegistry;
+  deferredToolRegistry?: DeferredToolRegistry;
+  /**
+   * Opt-in Programmatic Tool Calling / Code Mode surface. When enabled,
+   * agent-core exposes a single `code_executor` tool that can execute a
+   * JavaScript tool chain against the already configured agent-core tools.
+   */
+  programmaticToolCalling?: boolean | ProgrammaticToolCallingOptions;
+}
+
+export interface ProgrammaticToolCallingOptions {
+  /** Maximum wall-clock time for one code_executor invocation. Default: 120000. */
+  timeout?: number;
+  /** Maximum nested tool calls allowed from one code_executor invocation. Default: 25. */
+  maxToolCalls?: number;
+}
+
+export const AGENT_CORE_TOOL_NAMES: string[] = [
+  "read",
+  "write",
+  "edit",
+  "grep",
+  "find",
+  "bash",
+  "python",
+  "ssh",
+  "browser",
+  "fetch",
+  "AskUserQuestion",
+  "task",
+  "skill",
+  "calc",
+  "ast_grep",
+  "ast_edit",
+  "render_mermaid",
+  "notebook",
+  "config",
+  "background_status",
+  "background_list",
+  "tool_search",
+  "tool_fetch",
+  "code_executor",
+  "web_search",
+  "fetch_process",
+];

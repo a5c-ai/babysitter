@@ -1,0 +1,59 @@
+nodeKind: AdapterModel
+id: adapter-model:codex:o4-mini
+attributes:
+  harness: codex
+  modelId: o4-mini
+  displayName: o4-mini
+  deprecated: false
+  contextWindow: 200000
+  maxOutputTokens: 100000
+  supportsThinking: true
+  thinkingEffortLevels:
+    - low
+    - medium
+    - high
+  supportsToolCalling: true
+  supportsParallelToolCalls: true
+  supportsToolCallStreaming: true
+  supportsJsonMode: true
+  supportsStructuredOutput: true
+  supportsTextStreaming: true
+  supportsThinkingStreaming: false
+  supportsImageInput: false
+  supportsImageOutput: false
+  supportsFileInput: false
+  cliArgKey: "--model"
+  cliArgValue: o4-mini
+  lastUpdated: "2025-04-01"
+  source: bundled
+edges:
+  model_for:
+    - target: agent:codex
+---
+nodeKind: AdapterModel
+id: adapter-model:codex:codex-mini-latest
+attributes:
+  harness: codex
+  modelId: codex-mini-latest
+  displayName: Codex Mini
+  deprecated: false
+  contextWindow: 200000
+  maxOutputTokens: 100000
+  supportsThinking: false
+  supportsToolCalling: true
+  supportsParallelToolCalls: true
+  supportsToolCallStreaming: true
+  supportsJsonMode: true
+  supportsStructuredOutput: true
+  supportsTextStreaming: true
+  supportsThinkingStreaming: false
+  supportsImageInput: false
+  supportsImageOutput: false
+  supportsFileInput: false
+  cliArgKey: "--model"
+  cliArgValue: codex-mini-latest
+  lastUpdated: "2025-04-01"
+  source: bundled
+edges:
+  model_for:
+    - target: agent:codex

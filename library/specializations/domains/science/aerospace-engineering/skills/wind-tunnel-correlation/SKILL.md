@@ -18,6 +18,11 @@ metadata:
     - wind-tunnel
     - correlation
     - validation
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:sensor-fusion]
+  roles: [role:research-engineer, role:research-scientist]
 ---
 
 # Wind Tunnel Data Correlation Skill

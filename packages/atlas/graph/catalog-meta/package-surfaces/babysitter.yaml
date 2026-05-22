@@ -1,0 +1,16 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-babysitter
+attributes:
+  packageId: "@a5c-ai/babysitter"
+  packageName: "@a5c-ai/babysitter"
+  workspacePath: packages/babysitter
+  moduleType: typescript
+  surfaceKinds:
+    - cli
+    - orchestration-runtime
+  sourceOfTruthRole: application
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:a5c-runs-dir

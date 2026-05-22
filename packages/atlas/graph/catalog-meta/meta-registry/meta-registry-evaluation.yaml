@@ -1,0 +1,580 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:evaluation
+attributes:
+  displayName: Evaluation (meta)
+  clusterNumber: 11
+  scope: 'Conceptual aggregation of NodeKinds covering benchmark / evaluation machinery: Benchmark and TestSet (the test scaffold), EvalRun (one execution against a target), EvalHarness (the runnable harness side), Judge (LLM / human / programmatic grader), Rubric (scoring criteria), and SkillArea (the named expertise area benchmarks are commonly bound against). Members live mainly in editorial cluster 11-benchmarks, with SkillArea in 9-domain; each MetaNodeKind records the truthful editorial slug.'
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:benchmark
+  - target: meta-node-kind:test-set
+  - target: meta-node-kind:eval-run
+  - target: meta-node-kind:eval-harness
+  - target: meta-node-kind:judge
+  - target: meta-node-kind:rubric
+  - target: meta-node-kind:skill-area
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:benchmark
+attributes:
+  displayName: Benchmark (meta)
+  name: Benchmark
+  cluster: 11-benchmarks
+  prefix: benchmark
+  origin: universal
+  purpose: named test/test-suite
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:evaluation
+  contains_meta_attribute:
+  - target: meta-attribute:benchmark--id
+  - target: meta-attribute:benchmark--display-name
+  - target: meta-attribute:benchmark--kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:test-set
+attributes:
+  displayName: TestSet (meta)
+  name: TestSet
+  cluster: 11-benchmarks
+  prefix: test-set
+  origin: universal
+  purpose: named collection of test cases
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:evaluation
+  contains_meta_attribute:
+  - target: meta-attribute:test-set--id
+  - target: meta-attribute:test-set--display-name
+  - target: meta-attribute:test-set--benchmark-id
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:eval-run
+attributes:
+  displayName: EvalRun (meta)
+  name: EvalRun
+  cluster: 11-benchmarks
+  prefix: eval-run
+  origin: universal
+  purpose: one execution of a benchmark against a target
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:evaluation
+  contains_meta_attribute:
+  - target: meta-attribute:eval-run--id
+  - target: meta-attribute:eval-run--benchmark-id
+  - target: meta-attribute:eval-run--eval-kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:eval-harness
+attributes:
+  displayName: EvalHarness (meta)
+  name: EvalHarness
+  cluster: 11-benchmarks
+  prefix: eval-harness
+  origin: standard
+  purpose: a runnable harness that drives a benchmark (lm-eval-harness, helm, custom)
+  exampleCount: 0
+  invariants:
+  - 'id starts with eval-harness:'
+edges:
+  in_cluster:
+  - target: meta-cluster:evaluation
+  contains_meta_attribute:
+  - target: meta-attribute:eval-harness--id
+  - target: meta-attribute:eval-harness--display-name
+  - target: meta-attribute:eval-harness--harness-kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:judge
+attributes:
+  displayName: Judge (meta)
+  name: Judge
+  cluster: 11-benchmarks
+  prefix: judge
+  origin: standard
+  purpose: a model or human acting as a judge in an eval
+  exampleCount: 0
+  invariants:
+  - 'id starts with judge:'
+edges:
+  in_cluster:
+  - target: meta-cluster:evaluation
+  contains_meta_attribute:
+  - target: meta-attribute:judge--id
+  - target: meta-attribute:judge--display-name
+  - target: meta-attribute:judge--judge-kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:rubric
+attributes:
+  displayName: Rubric (meta)
+  name: Rubric
+  cluster: 11-benchmarks
+  prefix: rubric
+  origin: standard
+  purpose: a scoring rubric used by an EvalRun or Judge (criteria, scales, weights)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:evaluation
+  contains_meta_attribute:
+  - target: meta-attribute:rubric--id
+  - target: meta-attribute:rubric--display-name
+  - target: meta-attribute:rubric--scale-kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:skill-area
+attributes:
+  displayName: SkillArea (meta)
+  name: SkillArea
+  cluster: 9-domain
+  prefix: skill-area
+  origin: universal
+  purpose: named area of expertise (descriptive layer, distinct from Skill which carries SKILL.md content)
+  exampleCount: 0
+  invariants:
+  - 'id starts with skill-area:'
+edges:
+  in_cluster:
+  - target: meta-cluster:evaluation
+  contains_meta_attribute:
+  - target: meta-attribute:skill-area--id
+  - target: meta-attribute:skill-area--display-name
+  - target: meta-attribute:skill-area--expertise-levels
+---
+nodeKind: MetaAttribute
+id: meta-attribute:benchmark--id
+attributes:
+  displayName: Benchmark.id
+  name: id
+  parentNodeKindId: meta-node-kind:benchmark
+  type: id
+  required: true
+  description: id on Benchmark.
+edges:
+  defined_on:
+  - target: meta-node-kind:benchmark
+---
+nodeKind: MetaAttribute
+id: meta-attribute:benchmark--display-name
+attributes:
+  displayName: Benchmark.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:benchmark
+  type: string
+  required: true
+  description: displayName on Benchmark.
+edges:
+  defined_on:
+  - target: meta-node-kind:benchmark
+---
+nodeKind: MetaAttribute
+id: meta-attribute:benchmark--kind
+attributes:
+  displayName: Benchmark.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:benchmark
+  type: string
+  required: false
+  description: kind on Benchmark (free-form coarse benchmark kind).
+edges:
+  defined_on:
+  - target: meta-node-kind:benchmark
+---
+nodeKind: MetaAttribute
+id: meta-attribute:test-set--id
+attributes:
+  displayName: TestSet.id
+  name: id
+  parentNodeKindId: meta-node-kind:test-set
+  type: id
+  required: true
+  description: id on TestSet.
+edges:
+  defined_on:
+  - target: meta-node-kind:test-set
+---
+nodeKind: MetaAttribute
+id: meta-attribute:test-set--display-name
+attributes:
+  displayName: TestSet.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:test-set
+  type: string
+  required: true
+  description: displayName on TestSet.
+edges:
+  defined_on:
+  - target: meta-node-kind:test-set
+---
+nodeKind: MetaAttribute
+id: meta-attribute:test-set--benchmark-id
+attributes:
+  displayName: TestSet.benchmarkId
+  name: benchmarkId
+  parentNodeKindId: meta-node-kind:test-set
+  type: id
+  required: false
+  description: benchmarkId on TestSet.
+edges:
+  defined_on:
+  - target: meta-node-kind:test-set
+---
+nodeKind: MetaAttribute
+id: meta-attribute:eval-run--id
+attributes:
+  displayName: EvalRun.id
+  name: id
+  parentNodeKindId: meta-node-kind:eval-run
+  type: id
+  required: true
+  description: id on EvalRun.
+edges:
+  defined_on:
+  - target: meta-node-kind:eval-run
+---
+nodeKind: MetaAttribute
+id: meta-attribute:eval-run--benchmark-id
+attributes:
+  displayName: EvalRun.benchmarkId
+  name: benchmarkId
+  parentNodeKindId: meta-node-kind:eval-run
+  type: ref<Benchmark>
+  required: true
+  description: benchmarkId on EvalRun.
+edges:
+  defined_on:
+  - target: meta-node-kind:eval-run
+---
+nodeKind: MetaAttribute
+id: meta-attribute:eval-run--eval-kind
+attributes:
+  displayName: EvalRun.evalKind
+  name: evalKind
+  parentNodeKindId: meta-node-kind:eval-run
+  type: enum<capability,safety,robustness,alignment,regression>
+  required: false
+  description: evalKind on EvalRun.
+edges:
+  defined_on:
+  - target: meta-node-kind:eval-run
+---
+nodeKind: MetaAttribute
+id: meta-attribute:eval-harness--id
+attributes:
+  displayName: EvalHarness.id
+  name: id
+  parentNodeKindId: meta-node-kind:eval-harness
+  type: id
+  required: true
+  description: id on EvalHarness.
+edges:
+  defined_on:
+  - target: meta-node-kind:eval-harness
+---
+nodeKind: MetaAttribute
+id: meta-attribute:eval-harness--display-name
+attributes:
+  displayName: EvalHarness.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:eval-harness
+  type: string
+  required: true
+  description: displayName on EvalHarness.
+edges:
+  defined_on:
+  - target: meta-node-kind:eval-harness
+---
+nodeKind: MetaAttribute
+id: meta-attribute:eval-harness--harness-kind
+attributes:
+  displayName: EvalHarness.harnessKind
+  name: harnessKind
+  parentNodeKindId: meta-node-kind:eval-harness
+  type: enum<lm-eval-harness,helm,inspect-ai,openai-evals,bigcode-bench,custom>
+  required: false
+  description: harnessKind on EvalHarness.
+edges:
+  defined_on:
+  - target: meta-node-kind:eval-harness
+---
+nodeKind: MetaAttribute
+id: meta-attribute:judge--id
+attributes:
+  displayName: Judge.id
+  name: id
+  parentNodeKindId: meta-node-kind:judge
+  type: id
+  required: true
+  description: id on Judge.
+edges:
+  defined_on:
+  - target: meta-node-kind:judge
+---
+nodeKind: MetaAttribute
+id: meta-attribute:judge--display-name
+attributes:
+  displayName: Judge.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:judge
+  type: string
+  required: true
+  description: displayName on Judge.
+edges:
+  defined_on:
+  - target: meta-node-kind:judge
+---
+nodeKind: MetaAttribute
+id: meta-attribute:judge--judge-kind
+attributes:
+  displayName: Judge.judgeKind
+  name: judgeKind
+  parentNodeKindId: meta-node-kind:judge
+  type: enum<llm,human,programmatic,hybrid,llm-as-judge>
+  required: false
+  description: judgeKind on Judge.
+edges:
+  defined_on:
+  - target: meta-node-kind:judge
+---
+nodeKind: MetaAttribute
+id: meta-attribute:rubric--id
+attributes:
+  displayName: Rubric.id
+  name: id
+  parentNodeKindId: meta-node-kind:rubric
+  type: id
+  required: true
+  description: id on Rubric.
+edges:
+  defined_on:
+  - target: meta-node-kind:rubric
+---
+nodeKind: MetaAttribute
+id: meta-attribute:rubric--display-name
+attributes:
+  displayName: Rubric.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:rubric
+  type: string
+  required: true
+  description: displayName on Rubric.
+edges:
+  defined_on:
+  - target: meta-node-kind:rubric
+---
+nodeKind: MetaAttribute
+id: meta-attribute:rubric--scale-kind
+attributes:
+  displayName: Rubric.scaleKind
+  name: scaleKind
+  parentNodeKindId: meta-node-kind:rubric
+  type: enum<binary,likert,numeric,categorical>
+  required: false
+  description: scaleKind on Rubric.
+edges:
+  defined_on:
+  - target: meta-node-kind:rubric
+---
+nodeKind: MetaAttribute
+id: meta-attribute:skill-area--id
+attributes:
+  displayName: SkillArea.id
+  name: id
+  parentNodeKindId: meta-node-kind:skill-area
+  type: id
+  required: true
+  description: id on SkillArea.
+edges:
+  defined_on:
+  - target: meta-node-kind:skill-area
+---
+nodeKind: MetaAttribute
+id: meta-attribute:skill-area--display-name
+attributes:
+  displayName: SkillArea.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:skill-area
+  type: string
+  required: true
+  description: displayName on SkillArea.
+edges:
+  defined_on:
+  - target: meta-node-kind:skill-area
+---
+nodeKind: MetaAttribute
+id: meta-attribute:skill-area--expertise-levels
+attributes:
+  displayName: SkillArea.expertiseLevels
+  name: expertiseLevels
+  parentNodeKindId: meta-node-kind:skill-area
+  type: list<enum<novice,intermediate,expert,authoritative>>
+  required: false
+  description: expertiseLevels on SkillArea.
+edges:
+  defined_on:
+  - target: meta-node-kind:skill-area
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:tests-in-scope
+attributes:
+  displayName: tests_in_scope (meta)
+  name: tests_in_scope
+  source:
+  - meta-node-kind:test-set
+  target:
+  - meta-node-kind:benchmark
+  cardinality: N:1
+  origin: universal
+  description: a test-set tests cases in scope of a benchmark
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:test-set
+  target_of_meta_edge:
+  - target: meta-node-kind:benchmark
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:evaluated-by
+attributes:
+  displayName: evaluated_by (meta)
+  name: evaluated_by
+  source:
+  - meta-node-kind:eval-run
+  target:
+  - meta-node-kind:benchmark
+  cardinality: N:1
+  origin: universal
+  description: an eval-run is bound to (evaluated by) a benchmark
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:eval-run
+  target_of_meta_edge:
+  - target: meta-node-kind:benchmark
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:uses-harness
+attributes:
+  displayName: uses_harness (meta)
+  name: uses_harness
+  source:
+  - meta-node-kind:eval-run
+  target:
+  - meta-node-kind:eval-harness
+  cardinality: N:1
+  origin: standard
+  description: an eval-run drives the benchmark via an eval-harness
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:eval-run
+  target_of_meta_edge:
+  - target: meta-node-kind:eval-harness
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:judged-by
+attributes:
+  displayName: judged_by (meta)
+  name: judged_by
+  source:
+  - meta-node-kind:eval-run
+  target:
+  - meta-node-kind:judge
+  cardinality: N:N
+  origin: standard
+  description: an eval-run is judged by one or more judges
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:eval-run
+  target_of_meta_edge:
+  - target: meta-node-kind:judge
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:scored-against-rubric
+attributes:
+  displayName: scored_against_rubric (meta)
+  name: scored_against_rubric
+  source:
+  - meta-node-kind:eval-run
+  target:
+  - meta-node-kind:rubric
+  cardinality: N:1
+  origin: standard
+  description: an eval-run is scored against a rubric
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:eval-run
+  target_of_meta_edge:
+  - target: meta-node-kind:rubric
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:covered-by-benchmark
+attributes:
+  displayName: covered_by_benchmark (meta)
+  name: covered_by_benchmark
+  source:
+  - meta-node-kind:skill-area
+  target:
+  - meta-node-kind:benchmark
+  cardinality: N:N
+  origin: universal
+  description: a skill-area is covered by one or more benchmarks
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:skill-area
+  target_of_meta_edge:
+  - target: meta-node-kind:benchmark
+---
+nodeKind: MetaEnum
+id: meta-enum:eval-kind
+attributes:
+  displayName: EvalRun kind
+  name: evalKind
+  values:
+  - value: capability
+    description: Pure capability evaluation (does the model do X correctly).
+  - value: safety
+    description: Safety evaluation (refusals, harmful-content, jailbreak resistance).
+  - value: robustness
+    description: Robustness eval (perturbed inputs, distribution shift).
+  - value: alignment
+    description: Alignment eval (instruction-following, honesty, helpfulness).
+  - value: regression
+    description: Regression eval (catch performance regressions across versions).
+  usedOnAttributes:
+  - meta-attribute:eval-run--eval-kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:eval-run--eval-kind
+---
+nodeKind: MetaEnum
+id: meta-enum:harness-kind
+attributes:
+  displayName: EvalHarness kind
+  name: harnessKind
+  values:
+  - value: lm-eval-harness
+    description: EleutherAI lm-evaluation-harness.
+  - value: helm
+    description: Stanford HELM.
+  - value: inspect-ai
+    description: Anthropic / UK-AISI Inspect AI.
+  - value: openai-evals
+    description: OpenAI evals.
+  - value: bigcode-bench
+    description: BigCode benchmark harness.
+  - value: custom
+    description: Custom / in-house harness.
+  usedOnAttributes:
+  - meta-attribute:eval-harness--harness-kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:eval-harness--harness-kind

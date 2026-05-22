@@ -12,6 +12,11 @@ metadata:
   domain: business
   category: Service Management
   id: SK-015
+graph:
+  domains: [domain:customer-experience]
+  skillAreas: [skill-area:customer-success, skill-area:business-analysis, skill-area:statistical-analysis]
+  workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+  roles: [role:customer-success-manager, role:operations-analyst, role:business-analyst]
 ---
 
 # Root Cause Analysis Skill

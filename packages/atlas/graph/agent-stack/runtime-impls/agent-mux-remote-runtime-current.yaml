@@ -1,0 +1,32 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:agent-mux-remote.runtime@current
+attributes:
+  displayName: agent-mux-remote Runtime (current) — transport-only delegator
+  agentVersionId: agent-version:agent-mux-remote@current
+  subagentDispatchMechanism: none
+  subagentChildSessionPolicy: none
+  subagentToolScopePolicy: none
+  packageRef: source-ref:agent-mux-github
+  builtInTools: []
+  toolRegistryDiscovery: not-applicable
+  hookSockets: []
+  internalSessionStateLocation: "delegated-to-remote"
+  sessionFileFormat: delegated-to-remote
+  sessionFilePathConvention: "delegated-to-remote"
+  approvalGatingPrimitive: delegated-to-remote
+  subprocessSandboxStrategy: invocation-mode
+  runtimeIdentity: delegated-to-remote
+  supportedMCPTransports: []
+  supportsStreaming: true
+  notes: |
+    Special case: the runtime is a thin proxy. Tools, hooks, sessions, and MCP all
+    live on the remote agent. The only thing this layer "owns" is the invocation
+    mode (local | ssh | docker | k8s).
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:agent-mux-remote
+      role: runtime
+  bundles: []
+  connects: []

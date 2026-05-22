@@ -9,6 +9,13 @@ expertise:
   - Deployment strategies (canary, blue-green)
   - Test automation integration
   - Artifact management
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  roles: [role:devops-engineer, role:release-manager]
+  skillAreas: [skill-area:deployment-infrastructure-management]
+  workflows: [workflow:release-management, workflow:pull-request-lifecycle]
+  topics: [topic:continuous-integration, topic:continuous-deployment]
 ---
 
 # CI/CD Specialist Agent

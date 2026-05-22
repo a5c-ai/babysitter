@@ -1,0 +1,12 @@
+nodeKind: MCPConfigScope
+id: mcp-config-scope:claude-code-user
+attributes:
+  displayName: "User-scoped MCP config"
+  scope: user
+  priority: 20
+  editableBy: end-user
+  persistsTo: "~/.claude/mcp.json"
+  pluginSourced: false
+  description: |
+    User-level MCP server config — applies across all projects for this user
+    account. Lower priority than project/managed but higher than local.

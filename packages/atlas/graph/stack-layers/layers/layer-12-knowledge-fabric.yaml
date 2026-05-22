@@ -1,0 +1,44 @@
+nodeKind: Layer
+id: layer:12-knowledge-fabric
+attributes:
+  displayName: Knowledge Fabric
+  position: 12
+  path: knowledge
+  scope: Durable organizational knowledge, memory systems, retrieval, indexing, provenance, and semantic/graph access paths shared by humans and agents.
+  summary: |
+    The knowledge fabric is the shared organizational brain for humans and
+    agents. It includes durable learned memory, source-of-truth corpora,
+    semantic facts, project conventions, user and team preferences, decision
+    logs, incident histories, code indexes, knowledge graphs, vector indexes,
+    retrieval pipelines, provenance, confidence, temporal invalidation, and
+    privacy-aware recall.
+
+    This layer intentionally uses the knowledge-fabric name rather than a
+    separate company-brain layer. Memory systems belong here when they extract,
+    consolidate, retain, invalidate, and retrieve learned organizational state.
+    Source corpora and retrieval pipelines also belong here when they ground or
+    verify that state. Per-turn context windows and compaction remain runtime
+    concerns, not durable knowledge-fabric concerns.
+  responsibilities:
+    - Extract, store, consolidate, deduplicate, and retrieve durable memories and organizational facts.
+    - Index and embed documents, code, decisions, conversations, incidents, and data sources.
+    - Provide semantic search, graph traversal, hybrid retrieval, and context-aware grounding.
+    - Maintain provenance, confidence, staleness, temporal invalidation, retention, and evidence metadata.
+    - Filter secrets and privacy-sensitive data before durable storage or recall.
+    - Scope knowledge and memory at session, project, user, team, organization, and cross-agent levels.
+  examples:
+    - Temporal graph memory services such as Zep-style context graphs.
+    - Agent memory services such as Mem0-style memory stores.
+    - File-based memories such as AGENTS.md, CLAUDE.md, MEMORY.md, and memory-bank folders.
+    - Vector databases (Pinecone, Weaviate, Chroma, Qdrant, Milvus).
+    - Knowledge management platforms and source corpora (Notion, Confluence, docs, ADRs).
+    - RAG and graph retrieval pipelines (LangChain, LlamaIndex, GraphRAG-style flows).
+    - Enterprise knowledge graphs combining conversations, business facts, decisions, and run outcomes.
+  fitNotes: |
+    Use this layer for durable organizational knowledge and learned memory.
+    Memory extraction, consolidation, retention, temporal fact invalidation,
+    privacy filtering, cross-agent recall, source indexing, and grounded
+    retrieval all fit here. Use runtime layers for ephemeral context windows and
+    use governance for policy, auditability, and accountability controls over
+    memory and knowledge usage.
+edges: {}

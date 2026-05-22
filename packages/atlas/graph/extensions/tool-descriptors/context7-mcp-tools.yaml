@@ -1,0 +1,46 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:context7.resolve-library-id
+attributes:
+  schema: '{}'
+  displayName: "Context7: Resolve Library ID"
+  description: Resolve a library/package name into a Context7-compatible library ID for use by get-library-docs.
+  inputSchema:
+    type: object
+    required: [libraryName]
+    properties:
+      libraryName: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      libraryId: { type: string }
+      candidates: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-context7
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:context7.get-library-docs
+attributes:
+  schema: '{}'
+  displayName: "Context7: Get Library Docs"
+  description: Fetch up-to-date documentation snippets for a Context7-compatible library ID.
+  inputSchema:
+    type: object
+    required: [context7CompatibleLibraryID]
+    properties:
+      context7CompatibleLibraryID: { type: string }
+      topic: { type: string }
+      tokens: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      docs: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-context7

@@ -1,0 +1,168 @@
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:code-repository
+attributes:
+  displayName: "Code Repository"
+  description: |
+    Source code repositories as a knowledge source — captures architecture
+    decisions embedded in code, naming conventions, dependency choices,
+    test patterns, and implicit team knowledge expressed through
+    implementation. Indexed via AST parsing, symbol extraction, and
+    embedding-based code search.
+  sourceKind: code-repository
+  updateFrequency: real-time
+  indexingMethod: hybrid
+edges:
+  feeds_knowledge:
+    - knowledge-domain:engineering-knowledge
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:documentation-wiki
+attributes:
+  displayName: "Documentation Wiki"
+  description: |
+    Internal wikis and documentation systems (Confluence, Notion, GitBook,
+    internal docs sites) as a knowledge source. Contains process documentation,
+    onboarding guides, architectural decision records, team runbooks, and
+    product specifications. Typically full-text indexed with periodic refresh.
+  sourceKind: wiki
+  updateFrequency: daily
+  indexingMethod: full-text
+edges:
+  feeds_knowledge:
+    - knowledge-domain:engineering-knowledge
+    - knowledge-domain:product-knowledge
+    - knowledge-domain:organizational-knowledge
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:conversation-history
+attributes:
+  displayName: "Conversation History"
+  description: |
+    Archived agent-human and human-human conversations as a knowledge source.
+    Captures problem-solving patterns, debugging sessions, design discussions,
+    and tacit knowledge exchanged during collaboration. Embedded via vector
+    representations for semantic retrieval of past interactions.
+  sourceKind: conversation-archive
+  updateFrequency: real-time
+  indexingMethod: vector-embedding
+edges:
+  feeds_knowledge:
+    - knowledge-domain:engineering-knowledge
+    - knowledge-domain:product-knowledge
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:decision-log
+attributes:
+  displayName: "Decision Log"
+  description: |
+    Architectural decision records (ADRs), RFC documents, design proposals,
+    and recorded technical decisions as a knowledge source. Captures the
+    reasoning, trade-offs, and context behind key choices. Graph-linked
+    indexing preserves decision chains and supersession relationships.
+  sourceKind: decision-log
+  updateFrequency: weekly
+  indexingMethod: graph-linked
+edges:
+  feeds_knowledge:
+    - knowledge-domain:engineering-knowledge
+    - knowledge-domain:product-knowledge
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:incident-history
+attributes:
+  displayName: "Incident History"
+  description: |
+    Post-incident reviews, incident timelines, root cause analyses, and
+    on-call logs as a knowledge source. Captures failure modes, resolution
+    patterns, and system behavior under stress. Indexed via structured
+    queries over severity, affected services, and resolution time.
+  sourceKind: incident-history
+  updateFrequency: daily
+  indexingMethod: structured-query
+edges:
+  feeds_knowledge:
+    - knowledge-domain:operational-knowledge
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:crm-data
+attributes:
+  displayName: "CRM Data"
+  description: |
+    Customer relationship management systems as a knowledge source. Captures
+    customer profiles, interaction history, deal context, support tickets,
+    and account health signals. Indexed via structured queries over customer
+    attributes and relationship metadata.
+  sourceKind: crm
+  updateFrequency: hourly
+  indexingMethod: structured-query
+edges:
+  feeds_knowledge:
+    - knowledge-domain:customer-knowledge
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:design-artifacts
+attributes:
+  displayName: "Design Artifacts"
+  description: |
+    Design system documentation, component libraries, Figma exports, style
+    guides, and UX research findings as a knowledge source. Embedded via
+    multimodal vector representations that capture both visual and textual
+    design knowledge.
+  sourceKind: design-system
+  updateFrequency: weekly
+  indexingMethod: vector-embedding
+edges:
+  feeds_knowledge:
+    - knowledge-domain:product-knowledge
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:meeting-transcripts
+attributes:
+  displayName: "Meeting Transcripts"
+  description: |
+    Transcribed meeting recordings, standup notes, and retrospective
+    summaries as a knowledge source. Captures decisions made in meetings,
+    action items, and verbal agreements that may not appear in formal
+    documentation. Embedded for semantic search over spoken knowledge.
+  sourceKind: meeting-notes
+  updateFrequency: daily
+  indexingMethod: vector-embedding
+edges:
+  feeds_knowledge:
+    - knowledge-domain:organizational-knowledge
+    - knowledge-domain:product-knowledge
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:slack-threads
+attributes:
+  displayName: "Slack Threads"
+  description: |
+    Slack messages, threads, and channel archives as a knowledge source.
+    Captures real-time team communication, informal decisions, quick
+    troubleshooting, and institutional knowledge shared in chat. Hybrid
+    indexing combines keyword search with semantic embedding for retrieval.
+  sourceKind: slack-archive
+  updateFrequency: real-time
+  indexingMethod: hybrid
+edges:
+  feeds_knowledge:
+    - knowledge-domain:engineering-knowledge
+    - knowledge-domain:organizational-knowledge
+---
+nodeKind: KnowledgeSource
+id: knowledge-source:api-documentation
+attributes:
+  displayName: "API Documentation"
+  description: |
+    API specifications (OpenAPI, GraphQL schemas), SDK documentation,
+    integration guides, and changelog entries as a knowledge source.
+    Full-text indexed for precise endpoint and parameter lookup with
+    versioned retrieval support.
+  sourceKind: api-docs
+  updateFrequency: weekly
+  indexingMethod: full-text
+edges:
+  feeds_knowledge:
+    - knowledge-domain:engineering-knowledge
+    - knowledge-domain:product-knowledge

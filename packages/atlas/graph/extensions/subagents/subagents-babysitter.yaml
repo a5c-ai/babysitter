@@ -1,0 +1,49 @@
+---
+nodeKind: Subagent
+id: subagent:babysitter.code-reviewer
+attributes:
+  displayName: "Babysitter — Code Reviewer"
+  provenance: custom
+  subjectId: agentVersion:claude:ge-0-0-0
+  roleId: role:code-reviewer
+  systemPrompt: |
+    Review code changes for quality and consistency across the
+    babysitter monorepo. Checklist covers TypeScript quality (no `any`
+    leaks, proper async/await, typed errors), monorepo patterns, and
+    test coverage.
+  tools: []
+  triggers: |
+    Invoked when reviewing TypeScript code changes for consistency,
+    type safety, and monorepo patterns across babysitter packages.
+  description: |
+    Sourced from .claude/agents/code-reviewer.md in the
+    a5c-ai/babysitter monorepo.
+edges:
+  roles_played_by:
+    - target: role:code-reviewer
+  implements:
+    - target: extension-interface:reflection
+---
+nodeKind: Subagent
+id: subagent:babysitter.sdk-api-documenter
+attributes:
+  displayName: "Babysitter — SDK API Documenter"
+  provenance: custom
+  subjectId: agentVersion:claude:ge-0-0-0
+  roleId: role:doc-generator
+  systemPrompt: |
+    Ensure @a5c-ai/babysitter-sdk has complete, accurate documentation
+    for all public interfaces — CLI commands under packages/sdk/src/cli/
+    plus exported runtime/SDK APIs.
+  tools: []
+  triggers: |
+    Invoked to generate and validate documentation for
+    @a5c-ai/babysitter-sdk CLI commands and exported APIs.
+  description: |
+    Sourced from .claude/agents/sdk-api-documenter.md in the
+    a5c-ai/babysitter monorepo.
+edges:
+  roles_played_by:
+    - target: role:doc-generator
+  implements:
+    - target: extension-interface:reflection

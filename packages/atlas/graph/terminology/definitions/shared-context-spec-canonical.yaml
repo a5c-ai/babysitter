@@ -1,0 +1,14 @@
+nodeKind: Definition
+id: definition:shared-context-spec.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:shared-context-spec
+  text: |
+    Stub. The shape of an a5c shared-context fabric record, attached as a
+    structured `Claim` on the reliability-interface. Recorded as a
+    NodeKind so the schema mapping referenced from coverage-checklist row
+    "Shared Context fabric" resolves.
+  status: canonical
+edges:
+  defines:
+    - term:shared-context-spec

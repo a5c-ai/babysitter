@@ -17,6 +17,9 @@
  * - PTES: https://www.pentest-standard.org/
  * - Nmap: https://nmap.org/
  * - Metasploit: https://www.metasploit.com/
+ * @graph
+ *   domains: [domain:cybersecurity]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,17 @@
+nodeKind: AgentProduct
+id: agent:copilot-cli
+attributes:
+  displayName: "GitHub Copilot CLI"
+  vendor: "GitHub"
+  homepageUrl: "https://docs.github.com/en/copilot/github-copilot-in-the-cli"
+  primarySurface: cli
+  supportTier: adapter-only
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    GitHub's command-line companion to Copilot. Provides natural-language
+    shell-command suggestions and explanations, with the option to drive
+    coding-agent workflows through GitHub-hosted infrastructure.
+edges:
+  has_version:
+    - agentVersion:copilot:ge-0-0-0

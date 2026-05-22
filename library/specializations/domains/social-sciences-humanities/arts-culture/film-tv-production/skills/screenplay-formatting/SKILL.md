@@ -4,6 +4,10 @@ id: SK-FTV-011
 version: 1.0.0
 description: Format screenplays to industry standard using Fountain markup for professional presentation
 specialization: film-tv-production
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:document-processing, skill-area:technical-writing, skill-area:parsing-data-formats]
+  roles: [role:technical-writer, role:ux-writer]
 ---
 
 # Screenplay Formatting Skill

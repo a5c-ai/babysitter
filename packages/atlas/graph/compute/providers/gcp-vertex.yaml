@@ -1,0 +1,100 @@
+nodeKind: Provider
+id: provider:gcp-vertex
+attributes:
+  displayName: "Google Cloud Vertex AI"
+  vendor: "Google Cloud"
+  versionRange: ">=v1"
+  authMethods:
+    - service-account
+    - oauth
+    - workload-identity
+    - gcp-adc
+  authMethodNotes: |
+    Vertex requires GCP IAM. Local dev uses Application Default
+    Credentials (`gcloud auth application-default login`); production
+    workloads use Workload Identity (GKE / Cloud Run) or service-account
+    JSON. Caller MUST have `aiplatform.endpoints.predict` (and
+    `aiplatform.endpoints.streamRawPredict` for streaming). The publisher
+    model (e.g. `publishers/anthropic/models/claude-opus-4-7`) MUST be
+    enabled for the GCP project.
+  endpoints:
+    base: "https://{region}-aiplatform.googleapis.com/v1"
+    publishers_anthropic_messages: "https://{region}-aiplatform.googleapis.com/v1/projects/{project}/locations/{region}/publishers/anthropic/models/{model}:rawPredict"
+    publishers_google_generate_content: "https://{region}-aiplatform.googleapis.com/v1/projects/{project}/locations/{region}/publishers/google/models/{model}:generateContent"
+  pricing: |
+    See https://cloud.google.com/vertex-ai/generative-ai/pricing for
+    Vertex-published model pricing. Vertex passes through model
+    pricing for Anthropic and Google models with a multi-region surcharge.
+  pricingTiers:
+    - name: on-demand
+      rateLimit: "Per-project online prediction quotas (RPM) per region per publisher model"
+      priceMultiplier: 1.0
+      description: "Default per-token billing via :rawPredict / :generateContent."
+    - name: provisioned-throughput
+      rateLimit: "Reserved GSU (Generative AI Scale Units) per region per model"
+      priceMultiplier: 1.0
+      description: "Vertex Provisioned Throughput — committed capacity in GSU."
+    - name: batch
+      rateLimit: "Async batch prediction jobs; backed by Cloud Storage / BigQuery"
+      priceMultiplier: 0.5
+      description: "Vertex Batch Prediction — discounted async."
+  rateLimitSignalingProtocol: |
+    Quota errors return HTTP 429 with gRPC `code: 8 (RESOURCE_EXHAUSTED)`
+    in the standard Google error envelope `{ "error": { "code": 429,
+    "status": "RESOURCE_EXHAUSTED", "message": ..., "details": [...] } }`.
+    `x-goog-request-id` always present. Use Cloud Quotas API to inspect
+    current limits.
+  dataResidencyOptions:
+    - us-central1
+    - us-east1
+    - us-east4
+    - us-east5
+    - us-west1
+    - us-west4
+    - europe-west1
+    - europe-west2
+    - europe-west4
+    - europe-west9
+    - asia-southeast1
+    - asia-northeast1
+    - region:us
+    - region:eu
+  vendorFeatures:
+    - capability:supports-vertex-reasoning-engine
+    - capability:supports-batch-api
+    - capability:supports-prompt-caching
+  slaTier: "gcp-vertex-99.9"
+  regions:
+    - us-central1
+    - us-east1
+    - us-east4
+    - us-east5
+    - us-west1
+    - us-west4
+    - europe-west1
+    - europe-west2
+    - europe-west4
+    - europe-west9
+    - asia-southeast1
+    - asia-northeast1
+edges:
+  realizes:
+    - target: layer:2-provider
+  supports:
+    - target: capability:supports-vertex-reasoning-engine
+      versionRange: '>=2024-01-01'
+    - target: capability:model-discovery
+      versionRange: '>=2024-01-01'
+  serves:
+    - model:claude-opus-4-7@current
+    - model:claude-opus-4-6@current
+    - model:claude-opus-4-5@current
+    - model:claude-opus-3@current
+    - model:claude-sonnet-4-6@current
+    - model:claude-sonnet-4-5@current
+    - model:claude-sonnet-3-5@current
+    - model:claude-haiku-4-5@current
+    - model:gemini-3-1-pro@current
+    - model:gemini-2-5-pro@current
+    - model:gemini-2-5-flash@current
+    - model:gemini-2-0-flash@current

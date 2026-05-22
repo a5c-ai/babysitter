@@ -1,0 +1,24 @@
+nodeKind: AgentProduct
+id: agent:codex
+attributes:
+  displayName: "Codex CLI"
+  vendor: "OpenAI"
+  homepageUrl: "https://github.com/openai/codex"
+  primarySurface: cli
+  supportTier: catalog-backed
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    OpenAI's open-source command-line coding agent. Built in Rust, drives
+    OpenAI models over the Responses API, runs locally in the user's
+    terminal, and integrates with the workspace through file edits and shell
+    tool use.
+edges:
+  has_version:
+    - agentVersion:codex:ge-0-0-0-lt-0-119-0
+    - agentVersion:codex:ge-0-119-0
+  composed_of:
+    - target: language:rust
+      role: core
+    - target: language:typescript
+      role: runtime

@@ -1,0 +1,98 @@
+nodeKind: Provider
+id: provider:github
+attributes:
+  displayName: "GitHub"
+  versionRange: ">=2024-01-01"
+  authMethods:
+    - oauth
+    - api-key
+  authMethodNotes: |
+    GitHub Copilot accepts a `GITHUB_TOKEN` (PAT or installation token)
+    or a `COPILOT_GITHUB_TOKEN` for first-party Copilot CLI flows.
+    Token is sent in the `Authorization: Bearer <token>` header.
+  endpoints:
+    chat: "https://api.githubcopilot.com/chat/completions"
+    models: "https://api.githubcopilot.com/models"
+  pricing: |
+    Bundled with GitHub Copilot Pro / Business / Enterprise seats.
+    See https://github.com/features/copilot for current pricing.
+  pricingTiers:
+    - name: copilot-pro
+      rateLimit: "Per-seat usage; chat & completions limits per docs"
+      priceMultiplier: 1.0
+      description: "Individual Copilot Pro seat."
+    - name: copilot-business
+      rateLimit: "Per-seat usage; org-level admin"
+      priceMultiplier: 1.0
+      description: "Copilot Business — org-managed seats."
+    - name: copilot-enterprise
+      rateLimit: "Per-seat usage with enterprise controls"
+      priceMultiplier: 1.0
+      description: "Copilot Enterprise — fine-grained policy + audit."
+  rateLimitSignalingProtocol: |
+    Copilot APIs follow GitHub's standard rate-limit headers:
+    `x-ratelimit-limit`, `x-ratelimit-remaining`, `x-ratelimit-reset`.
+    429 responses include `retry-after`.
+  dataResidencyOptions:
+    - us
+  vendorFeatures:
+    - capability:supports-tool-use
+    - capability:supports-mcp
+  slaTier: "github-no-public-sla"
+  regions:
+    - global
+edges:
+  realizes:
+    - target: layer:2-provider
+  serves:
+---
+nodeKind: Provider
+id: provider:azure-foundry
+attributes:
+  displayName: "Azure AI Foundry"
+  versionRange: ">=2024-05-01"
+  authMethods:
+    - api-key
+    - oauth
+  authMethodNotes: |
+    Azure AI Foundry deployments authenticate with an Azure API key
+    in the `api-key` header or a Microsoft Entra ID bearer token in
+    `Authorization: Bearer <token>`. Per-deployment endpoints are of
+    the form `https://<resource>.services.ai.azure.com/models`.
+  endpoints:
+    chat_completions: "https://<resource>.services.ai.azure.com/models/chat/completions"
+    models: "https://<resource>.services.ai.azure.com/models"
+  pricing: |
+    Per-model pay-as-you-go rates published in Azure Pricing
+    Calculator; reserved-capacity (PTU) pricing also available.
+  pricingTiers:
+    - name: pay-as-you-go
+      rateLimit: "Per-deployment TPM/RPM quotas"
+      priceMultiplier: 1.0
+      description: "Default per-token billing."
+    - name: provisioned-throughput
+      rateLimit: "Reserved PTUs (provisioned throughput units)"
+      priceMultiplier: 1.0
+      description: "Reserved-capacity throughput at fixed monthly cost."
+  rateLimitSignalingProtocol: |
+    Azure returns `x-ratelimit-remaining-requests`,
+    `x-ratelimit-remaining-tokens`, and 429 with `retry-after`.
+  dataResidencyOptions:
+    - us
+    - eu
+    - asia
+  vendorFeatures:
+    - capability:supports-tool-use
+  slaTier: "azure-99.9"
+  regions:
+    - eastus
+    - westus
+    - westeurope
+    - swedencentral
+    - japaneast
+edges:
+  realizes:
+    - target: layer:2-provider
+  serves:
+    - model:phi-3-medium@current
+    - model:phi-3-mini@current

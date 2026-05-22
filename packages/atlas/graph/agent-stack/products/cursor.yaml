@@ -1,0 +1,20 @@
+nodeKind: AgentProduct
+id: agent:cursor
+attributes:
+  displayName: "Cursor"
+  vendor: "Cursor"
+  homepageUrl: "https://docs.cursor.com/"
+  primarySurface: ide-extension
+  supportTier: catalog-backed
+  productKind: ide-extension-agent
+  stackScope: full
+  description: |
+    Cursor is an AI-first IDE (a VS Code fork) that ships an integrated
+    coding agent. The agent runs inside the editor with deep workspace
+    awareness and supports multiple model backends.
+edges:
+  has_version:
+    - agentVersion:cursor:ge-0-0-0
+  composed_of:
+    - target: language:typescript
+      role: core

@@ -1,0 +1,29 @@
+nodeKind: Presentation
+id: presentation:vibe-kanban-web
+attributes:
+  displayName: "Vibe Kanban Web UI"
+  kind: web
+  description: |
+    Browser-based kanban board presentation for orchestrating coding agents.
+    Issues map to kanban columns (todo, in-progress, review, done), each
+    card spawns an isolated workspace with a dedicated git worktree,
+    terminal, and dev server. Supports 10+ coding agents with per-agent
+    worktree isolation, inline code review gates at column transitions,
+    and parallel agent dispatch for concurrent task execution.
+  renderingTechnology: next-js
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [web]
+  bundleSize: "~5 MB"
+  updateChannel: auto
+edges:
+  bundled_with:
+    - agent-version:vibe-kanban@current
+  integrates_with:
+    - target: topic:vibe-kanban
+  applies_to:
+    - target: domain:software-engineering
+  used_for:
+    - target: skill-area:project-planning
+    - target: skill-area:multi-agent-coordination

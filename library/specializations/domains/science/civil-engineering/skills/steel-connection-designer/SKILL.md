@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Structural Design
   skill-id: CIV-SK-005
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Steel Connection Designer Skill

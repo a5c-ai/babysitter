@@ -13,14 +13,20 @@ export interface SessionState {
   iteration: number;
   /** Maximum allowed iterations (0 = unlimited) */
   maxIterations: number;
-  /** Associated run ID (empty string if not yet associated) */
+  /** The single currently-active run bound to this session (empty string if unbound) */
   runId: string;
+  /** Absolute run directory for the active run, when known */
+  runDir?: string;
+  /** Historical audit trail of all run IDs ever bound to this session, chronological (GAP-SESSION-001) */
+  runIds: string[];
   /** ISO timestamp when session started */
   startedAt: string;
   /** ISO timestamp of last iteration */
   lastIterationAt: string;
   /** Array of recent iteration durations in seconds (last 3) */
   iterationTimes: number[];
+  /** Optional key-value metadata (e.g. external correlation IDs) */
+  metadata?: Record<string, string>;
 }
 
 /**
@@ -41,7 +47,7 @@ export interface SessionFile {
 export interface SessionInitOptions {
   /** Claude session ID */
   sessionId: string;
-  /** Maximum iterations (default: 256) */
+  /** Maximum iterations (default: 65000) */
   maxIterations?: number;
   /** Optional run ID if already known */
   runId?: string;
@@ -71,11 +77,11 @@ export interface SessionResumeOptions {
   sessionId: string;
   /** Run ID to resume */
   runId: string;
-  /** Maximum iterations (default: 256) */
+  /** Maximum iterations (default: 65000) */
   maxIterations?: number;
   /** Directory to store state files */
   stateDir: string;
-  /** Runs directory (default: .a5c/runs) */
+  /** Runs directory (default: ~/.a5c/runs, or <repo>/.a5c/runs when BABYSITTER_RUNS_SCOPE=repo) */
   runsDir?: string;
 }
 
@@ -103,8 +109,6 @@ export interface SessionUpdateOptions {
   lastIterationAt?: string;
   /** New iteration times array */
   iterationTimes?: number[];
-  /** Delete the state file */
-  delete?: boolean;
 }
 
 /**
@@ -165,10 +169,8 @@ export interface SessionStateResult {
 export interface SessionUpdateResult {
   /** Whether update was successful */
   success: boolean;
-  /** Updated state (if not deleted) */
+  /** Updated state */
   state?: SessionState;
-  /** Whether file was deleted */
-  deleted?: boolean;
   /** Path to state file */
   stateFile: string;
 }
@@ -210,3 +212,4 @@ export enum SessionErrorCode {
   /** File system error */
   FS_ERROR = 'FS_ERROR',
 }
+

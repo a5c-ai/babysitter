@@ -1,0 +1,47 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:copilot-cli.platform@current
+attributes:
+  displayName: GitHub Copilot CLI Platform (current)
+  agentVersionId: agentVersion:copilot:ge-0-0-0
+  subagentDefinitionFormat: none
+  packageRef: source-ref:gh-copilot-github
+  nativeExtensionFormat: gh-copilot-plugin
+  nativeExtensionManifestPath: ~/.config/github-copilot/plugins/<name>/plugin.json
+  nativeExtensionsDirectoryPath:
+  - ~/.config/github-copilot/plugins/
+  skillFormat: none
+  skillsDirectoryPath: []
+  customSlashCommandsPath: []
+  subagentsDirectoryPath: []
+  hooksDirectoryOrConfigPath:
+  - ~/.config/github-copilot/hooks.json
+  settingsFiles:
+  - ~/.config/github-copilot/settings.json
+  pluginRegistryPath: ''
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: github-oauth
+  updateChannelMechanism: gh-extension
+  supportedChannelKinds:
+  - mcp-channel
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+  - target: agent:copilot-cli
+    role: platform
+  bundles:
+  - target: presentation:copilot-cli
+  supports:
+  - target: capability:can-resume
+    versionRange: '>=1.0.0'
+    level: partial
+    notes: 'Stateless per-invocation server-side; partial resume noted in wiki/legacy/03-products.
+
+      '
+  - target: capability:supports-plugins
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'GitHub Copilot CLI plugin marketplace (agents/skills/hooks/MCP).
+
+      '

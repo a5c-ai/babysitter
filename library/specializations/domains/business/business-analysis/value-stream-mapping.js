@@ -3,6 +3,12 @@
  * @description Apply Lean value stream mapping techniques to analyze material and information flow, identify waste (muda), and design optimized future-state value streams for process improvement.
  * @inputs { projectName: string, valueStreamName: string, productFamily: string, stakeholders: array, currentMetrics: object }
  * @outputs { success: boolean, currentStateMap: object, futureStateMap: object, wasteAnalysis: object, improvementRoadmap: object, artifacts: array }
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:competitive-intelligence]
+ *   workflows: [workflow:market-analysis]
+ *   roles: [role:business-analyst, role:strategic-planner]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

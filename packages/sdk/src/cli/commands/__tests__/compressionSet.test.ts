@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { handleCompressionSet } from "../compressionSet";
+import { handleCompressionSet } from "../compression/set";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";

@@ -19,6 +19,12 @@
  * - FMVSS 127 Low-Speed Alert
  * - ISO 15622 ACC Systems
  * - ISO 11270 Lane Keeping Systems
+ *
+ * @graph
+ *   domains: [domain:automotive-engineering]
+ *   skillAreas: [skill-area:sensor-fusion, skill-area:motion-planning, skill-area:physics-simulation]
+ *   roles: [role:systems-integration-engineer, role:embedded-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -48,25 +54,17 @@ export async function process(inputs, ctx) {
       featureSpecifications: null
     };
   }
+
   // Phase 2: Use Case Development
-  let useCases = await ctx.task(useCaseDevelopmentTask, {
+  const useCases = await ctx.task(useCaseDevelopmentTask, {
     projectName,
     featureType,
     featureRequirements,
     targetRatings
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      useCases = await ctx.task(useCaseDevelopmentTask, { ...{
-    projectName,
-    featureType,
-    featureRequirements,
-    targetRatings
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Use cases review
+  await ctx.breakpoint({
     question: `Review use cases for ${projectName} ${featureType}. ${useCases.useCases?.length || 0} use cases defined. Approve use cases?`,
     title: 'ADAS Use Cases Review',
     context: {
@@ -78,15 +76,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: useCases
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Algorithm Development
   const algorithmDevelopment = await ctx.task(algorithmDevelopmentTask, {
     projectName,
@@ -111,7 +103,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: NCAP and Regulatory Testing
-  let regulatoryTesting = await ctx.task(regulatoryTestingTask, {
+  const regulatoryTesting = await ctx.task(regulatoryTestingTask, {
     projectName,
     featureType,
     algorithmDevelopment,
@@ -120,33 +112,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Regulatory compliance
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        regulatoryTesting = await ctx.task(regulatoryTestingTask, { ...{
-    projectName,
-    featureType,
-    algorithmDevelopment,
-    targetRatings,
-    regulatoryRequirements
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (regulatoryTesting.complianceGaps && regulatoryTesting.complianceGaps.length > 0) {
+    await ctx.breakpoint({
       question: `Regulatory testing identified ${regulatoryTesting.complianceGaps.length} compliance gaps. Review and approve mitigation plan?`,
       title: 'Regulatory Compliance Warning',
       context: {
         runId: ctx.runId,
         regulatoryTesting,
         recommendation: 'Address compliance gaps before production release'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 7: Feature Validation
   const featureValidation = await ctx.task(featureValidationTask, {
@@ -159,7 +135,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Release Documentation
-  let featureRelease = await ctx.task(featureReleaseTask, {
+  const featureRelease = await ctx.task(featureReleaseTask, {
     projectName,
     featureType,
     featureRequirements,
@@ -171,22 +147,8 @@ export async function process(inputs, ctx) {
     featureValidation
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      featureRelease = await ctx.task(featureReleaseTask, { ...{
-    projectName,
-    featureType,
-    featureRequirements,
-    useCases,
-    algorithmDevelopment,
-    actuatorIntegration,
-    hmiDevelopment,
-    regulatoryTesting,
-    featureValidation
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Feature approval
+  await ctx.breakpoint({
     question: `ADAS Feature Development complete for ${projectName} ${featureType}. NCAP score: ${regulatoryTesting.ncapScore}. Approve for production?`,
     title: 'ADAS Feature Approval',
     context: {
@@ -197,15 +159,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/feature-specifications.json`, format: 'json', content: featureRelease },
         { path: `artifacts/test-reports.json`, format: 'json', content: regulatoryTesting }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -225,7 +181,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const featureRequirementsTask = defineTask('feature-requirements', (args, taskCtx) => ({
   kind: 'agent',

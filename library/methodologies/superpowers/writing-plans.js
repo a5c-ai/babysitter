@@ -3,6 +3,12 @@
  * @description Writing Plans - Create detailed implementation plans with bite-sized TDD tasks, dependency tracking, and task persistence
  * @inputs { task: string, designDocPath?: string, techStack?: object, qualityThreshold?: number }
  * @outputs { success: boolean, planPath: string, tasks: array, dependencies: object, totalTasks: number, tasksJsonPath: string }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:unit-testing, skill-area:integration-testing, skill-area:acceptance-testing]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:test-driven-development]
+ *   roles: [role:backend-engineer, role:qa-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

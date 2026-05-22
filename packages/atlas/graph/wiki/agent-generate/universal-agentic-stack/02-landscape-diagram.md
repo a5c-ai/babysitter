@@ -1,0 +1,191 @@
+---
+id: page:agent-generate-universal-agentic-stack-landscape-diagram
+nodeKind: Page
+title: "Universal Agentic Stack Landscape Diagram"
+slug: "agent-generate/universal-agentic-stack/02-landscape-diagram"
+articlePath: "wiki/agent-generate/universal-agentic-stack/02-landscape-diagram.md"
+documents:
+  - "layer:1-model"
+  - "layer:2-provider"
+  - "layer:3-transport"
+  - "layer:4-agent-core"
+  - "layer:5-agent-runtime"
+  - "layer:6-agent-platform"
+  - "layer:7-workspace"
+  - "layer:8-execution"
+  - "layer:9-sandbox"
+  - "layer:10-interaction"
+  - "layer:11-presentation"
+---
+# Universal Agentic Stack Landscape Diagram
+
+This is the full map in one place. Use it when you want the shape of the whole stack before you read the detailed layer reference.
+
+## Legend
+
+- Purple bands are the human-facing surface.
+- Blue bands are the model-to-agent compute path.
+- Green bands are the operating and policy boundary around execution.
+- White internal boxes are generated from layer attributes, not modeled nested layers.
+
+## Diagram
+
+```mermaid
+flowchart TB
+  classDef interface fill:#f3e8ff,stroke:#7e22ce,stroke-width:1px,color:#1f1235;
+  classDef lifecycle fill:#dcfce7,stroke:#15803d,stroke-width:1px,color:#052e16;
+  classDef compute fill:#dbeafe,stroke:#1d4ed8,stroke-width:1px,color:#0f172a;
+  classDef internal fill:#f8fafc,stroke:#64748b,stroke-width:1px,color:#0f172a;
+  classDef band fill:#ffffff,stroke:#334155,stroke-width:2px,color:#0f172a;
+
+  subgraph stack["Universal Agentic Stack Landscape Map"]
+    direction TB
+    subgraph layer_11_presentation_band["Layer 11: Presentation"]
+      direction LR
+      layer_11_presentation["Presentation"]
+      layer_11_presentation_scope["Scope<br/><small>Outermost rendering surface for humans or downstream systems.</small>"]
+      layer_11_presentation_resp["Responsibilities<br/><small>- Render prompts, transcripts, plans, tool calls, approvals, and results.<br/>- Provide human-readable and machine-readable output modes.<br/>- Own layout, accessibility, theme, streaming display, and navigation affordances.</small>"]
+      layer_11_presentation_examples["Examples<br/><small>- TUI, CLI, web app, IDE side panel, notebook/chat surface.<br/>- REST/WebSocket API, JSON stream, structured event log, dashboard.<br/>- LangGraph app UI, LangSmith trace view, custom workflow console.</small>"]
+      layer_11_presentation_fit["Fit note<br/><small>Products can be headless and still fit the stack through an API or event stream presentation. Presentation can be supplied by a host IDE/web app rath...</small>"]
+      layer_11_presentation --- layer_11_presentation_scope --- layer_11_presentation_resp --- layer_11_presentation_examples --- layer_11_presentation_fit
+    end
+    subgraph layer_10_interaction_band["Layer 10: Interaction"]
+      direction LR
+      layer_10_interaction["Interaction"]
+      layer_10_interaction_scope["Scope<br/><small>Atomic user-agent and agent-system actions exposed by a surface.</small>"]
+      layer_10_interaction_resp["Responsibilities<br/><small>- Expose commands, controls, triggers, approvals, and resumable interrupts.<br/>- Translate human/system gestures into runtime or platform actions.<br/>- Surface task state, telemetry, collaboration, and handoff controls.</small>"]
+      layer_10_interaction_examples["Examples<br/><small>- Slash commands, keybindings, prompt controls, approve/reject interrupt.<br/>- GitHub Action trigger, webhook trigger, editor widget, dashboard button.<br/>- LangGraph human-in-the-loop review, edit, approve, resume controls.</small>"]
+      layer_10_interaction_fit["Fit note<br/><small>Interaction primitives are not presentation widgets by themselves; they are the action vocabulary that a TUI, CLI, web UI, IDE, API, or automation ho...</small>"]
+      layer_10_interaction --- layer_10_interaction_scope --- layer_10_interaction_resp --- layer_10_interaction_examples --- layer_10_interaction_fit
+    end
+    subgraph layer_9_sandbox_band["Layer 9: Sandbox"]
+      direction LR
+      layer_9_sandbox["Sandbox"]
+      layer_9_sandbox_scope["Scope<br/><small>Policy-enforcement perimeter around execution and side effects.</small>"]
+      layer_9_sandbox_resp["Responsibilities<br/><small>- Enforce filesystem, network, binary, secret, and environment policy.<br/>- Record audit evidence and policy decisions around side effects.<br/>- Define approval, escalation, and attestation boundaries for execution.</small>"]
+      layer_9_sandbox_examples["Examples<br/><small>- Read-only filesystem, workspace-write mode, network-disabled mode.<br/>- Binary allow list, secret scope, approval-required command policy.<br/>- Container, VM, OS sandbox, or hosted policy engine.</small>"]
+      layer_9_sandbox_fit["Fit note<br/><small>Custom-agent frameworks may leave sandboxing entirely to the embedding host. Production tools should model this layer explicitly even when users only...</small>"]
+      layer_9_sandbox --- layer_9_sandbox_scope --- layer_9_sandbox_resp --- layer_9_sandbox_examples --- layer_9_sandbox_fit
+    end
+    subgraph layer_8_execution_band["Layer 8: Execution"]
+      direction LR
+      layer_8_execution["Execution"]
+      layer_8_execution_scope["Scope<br/><small>Invocation environment for agent-driven tools, commands, and side effects.</small>"]
+      layer_8_execution_resp["Responsibilities<br/><small>- Start, stream, interrupt, and stop tool/shell/process execution.<br/>- Own process lifecycle, resource limits, environment variables, and mounts.<br/>- Route side effects to local, remote, container, or hosted executors.</small>"]
+      layer_8_execution_examples["Examples<br/><small>- Local shell, Docker, SSH remote, Kubernetes pod, GitHub Actions runner.<br/>- Browser automation worker, notebook/kernel executor, cloud function.<br/>- LangGraph tool node executing inside a host application runtime.</small>"]
+      layer_8_execution_fit["Fit note<br/><small>Frameworks often delegate execution to user-defined tools. Hosted agent products may make this layer invisible but still need it for auditing and pol...</small>"]
+      layer_8_execution --- layer_8_execution_scope --- layer_8_execution_resp --- layer_8_execution_examples --- layer_8_execution_fit
+    end
+    subgraph layer_7_workspace_band["Layer 7: Workspace"]
+      direction LR
+      layer_7_workspace["Workspace"]
+      layer_7_workspace_scope["Scope<br/><small>Materialized working context the agent reads, writes, indexes, and reasons over.</small>"]
+      layer_7_workspace_resp["Responsibilities<br/><small>- Materialize project files, indexes, artifacts, and session-visible state.<br/>- Define git/worktree, mounting, overlay, and persistence behavior.<br/>- Bound what files, generated outputs, and caches belong to the agent task.</small>"]
+      layer_7_workspace_examples["Examples<br/><small>- Local repository, remote clone, IDE project, container-mounted workspace.<br/>- Git worktree, generated artifact directory, vector/code index, cache scope.<br/>- LangGraph app state when backed by project files or persisted stores.</small>"]
+      layer_7_workspace_fit["Fit note<br/><small>Some products are read-only and omit this layer. Others delegate workspace ownership to an IDE, CI runner, hosted environment, or user shell.</small>"]
+      layer_7_workspace --- layer_7_workspace_scope --- layer_7_workspace_resp --- layer_7_workspace_examples --- layer_7_workspace_fit
+    end
+    subgraph layer_6_agent_platform_band["Layer 6: Agent-Platform"]
+      direction LR
+      layer_6_agent_platform["Agent-Platform"]
+      layer_6_agent_platform_scope["Scope<br/><small>Extension, distribution, launch, and ecosystem surface around runtimes.</small>"]
+      layer_6_agent_platform_resp["Responsibilities<br/><small>- Load installed plugins, installed skills, commands, hooks, subagents, and tool servers.<br/>- Broker capability profiles, launch profiles, identity, marketplaces, and updates.<br/>- Bridge channels such as MCP, HTTP/SSE, A2A, chat, mailbox, and gateway adapters.<br/>- Publish the platform-specific extension contract and installation scopes.</small>"]
+      layer_6_agent_platform_examples["Examples<br/><small>- Claude plugins/skills, Codex/Gemini/OpenCode extension packages, a5c plugins.<br/>- LangGraph Platform, LangSmith deployment, RemoteGraph, hosted graph operations.<br/>- Skill directories, plugin registries, marketplace manifests, MCP server configs.</small>"]
+      layer_6_agent_platform_fit["Fit note<br/><small>Installed plugins and skills belong explicitly in this layer. Products may expose a platform without owning a model/provider, or may hide platform se...</small>"]
+      layer_6_agent_platform --- layer_6_agent_platform_scope --- layer_6_agent_platform_resp --- layer_6_agent_platform_examples --- layer_6_agent_platform_fit
+    end
+    subgraph layer_5_agent_runtime_band["Layer 5: Agent-Runtime"]
+      direction LR
+      layer_5_agent_runtime["Agent-Runtime"]
+      layer_5_agent_runtime_scope["Scope<br/><small>Host process and operational runtime for an agent core.</small>"]
+      layer_5_agent_runtime_resp["Responsibilities<br/><small>- Maintain internal session and transcript state.<br/>- Provide built-in tools, dynamic tool discovery, hooks, and approvals.<br/>- Manage subprocess/tool execution posture and streaming events.<br/>- Enforce runtime output, resume, and journal/event contracts.</small>"]
+      layer_5_agent_runtime_examples["Examples<br/><small>- LangGraph checkpointer/store, thread state, interrupts, streaming runtime.<br/>- Claude Code/Codex/Gemini CLI process runtimes.<br/>- a5c unified runtime, Pi-compatible session profiles, agent-mux remote runtime.<br/>- Built-in file/shell/search tools, approval gates, session files.</small>"]
+      layer_5_agent_runtime_fit["Fit note<br/><small>Frameworks can leave runtime to the host app; CLI products often combine core and runtime in one binary. a5c runtime is modeled as a unified same-lay...</small>"]
+      layer_5_agent_runtime --- layer_5_agent_runtime_scope --- layer_5_agent_runtime_resp --- layer_5_agent_runtime_examples --- layer_5_agent_runtime_fit
+    end
+    subgraph layer_4_agent_core_band["Layer 4: Agent-Core"]
+      direction LR
+      layer_4_agent_core["Agent-Core"]
+      layer_4_agent_core_scope["Scope<br/><small>Inner loop and graph/turn semantics for one agent brain.</small>"]
+      layer_4_agent_core_resp["Responsibilities<br/><small>- Define loop, graph, or state-machine iteration semantics.<br/>- Assemble prompt/context and normalize message/state materialization.<br/>- Dispatch tools/subagents and synthesize terminal results.<br/>- Detect stops, interrupts, graph terminal states, and budget exits.</small>"]
+      layer_4_agent_core_examples["Examples<br/><small>- LangGraph StateGraph, graph nodes/edges/state, create_agent routing.<br/>- Claude Code/Codex/Gemini CLI loop cores.<br/>- a5c unified core and Pi-compatible tool-use loop profiles.<br/>- Tool dispatch, stop detection, context-window handling, result envelopes.</small>"]
+      layer_4_agent_core_fit["Fit note<br/><small>This is where custom agent builders fit first. A product may expose only a core library without owning runtime, platform, workspace, or presentation....</small>"]
+      layer_4_agent_core --- layer_4_agent_core_scope --- layer_4_agent_core_resp --- layer_4_agent_core_examples --- layer_4_agent_core_fit
+    end
+    subgraph layer_3_transport_band["Layer 3: Transport"]
+      direction LR
+      layer_3_transport["Transport"]
+      layer_3_transport_scope["Scope<br/><small>Wire and client path between agent core and provider.</small>"]
+      layer_3_transport_resp["Responsibilities<br/><small>- Encode request, response, streaming, tool-call, and error payloads.<br/>- Run the in-process client or adapter that speaks the provider protocol.<br/>- Optionally route through a proxy, gateway, recorder, or policy interposer.</small>"]
+      layer_3_transport_examples["Examples<br/><small>- OpenAI Responses, OpenAI Chat Completions, Anthropic Messages, Gemini GenerateContent.<br/>- HTTP, SSE, WebSocket, gRPC, OpenAI-compatible gateways.<br/>- LangChain chat-model adapters and transport clients.</small>"]
+      layer_3_transport_fit["Fit note<br/><small>Custom-agent frameworks often hide transport behind model abstractions. Gateway products may occupy mostly this layer while delegating core/runtime b...</small>"]
+      layer_3_transport --- layer_3_transport_scope --- layer_3_transport_resp --- layer_3_transport_examples --- layer_3_transport_fit
+    end
+    subgraph layer_2_provider_band["Layer 2: Provider"]
+      direction LR
+      layer_2_provider["Provider"]
+      layer_2_provider_scope["Scope<br/><small>Hosted or self-hosted serving boundary.</small>"]
+      layer_2_provider_resp["Responsibilities<br/><small>- Serve model versions through authenticated endpoints.<br/>- Own availability, regions, quotas, rate limits, billing, and deployment posture.<br/>- Publish provider-specific model and endpoint capabilities.</small>"]
+      layer_2_provider_examples["Examples<br/><small>- Anthropic, OpenAI, Google, Azure OpenAI, AWS Bedrock, OpenRouter.<br/>- Self-hosted vLLM, Ollama, llama.cpp, or custom inference gateway.<br/>- Auth scheme, region, quota, rate-limit, and SLA records.</small>"]
+      layer_2_provider_fit["Fit note<br/><small>LangChain/LangGraph apps usually choose providers through model adapters rather than owning this layer. Gateways may specialize here while leaving hi...</small>"]
+      layer_2_provider --- layer_2_provider_scope --- layer_2_provider_resp --- layer_2_provider_examples --- layer_2_provider_fit
+    end
+    subgraph layer_1_model_band["Layer 1: Model"]
+      direction LR
+      layer_1_model["Model"]
+      layer_1_model_scope["Scope<br/><small>Trained artifact and declared capability surface.</small>"]
+      layer_1_model_resp["Responsibilities<br/><small>- Preserve model family/version identity.<br/>- Declare token, modality, reasoning, tool, and output-shape capabilities.<br/>- Separate model-native behavior from provider/runtime behavior.</small>"]
+      layer_1_model_examples["Examples<br/><small>- Model family and version records.<br/>- Context window and output token limits.<br/>- Native tool-use, reasoning, vision, audio, and embedding support.</small>"]
+      layer_1_model_fit["Fit note<br/><small>Custom-agent apps may expose model choice directly or hide it behind a provider/model configuration. Local inference collapses Model and Provider ope...</small>"]
+      layer_1_model --- layer_1_model_scope --- layer_1_model_resp --- layer_1_model_examples --- layer_1_model_fit
+    end
+  end
+  layer_11_presentation --> layer_10_interaction
+  layer_10_interaction --> layer_9_sandbox
+  layer_9_sandbox --> layer_8_execution
+  layer_8_execution --> layer_7_workspace
+  layer_7_workspace --> layer_6_agent_platform
+  layer_6_agent_platform --> layer_5_agent_runtime
+  layer_5_agent_runtime --> layer_4_agent_core
+  layer_4_agent_core --> layer_3_transport
+  layer_3_transport --> layer_2_provider
+  layer_2_provider --> layer_1_model
+  class layer_11_presentation interface;
+  class layer_11_presentation_band band;
+  class layer_11_presentation_scope,layer_11_presentation_resp,layer_11_presentation_examples,layer_11_presentation_fit internal;
+  class layer_10_interaction interface;
+  class layer_10_interaction_band band;
+  class layer_10_interaction_scope,layer_10_interaction_resp,layer_10_interaction_examples,layer_10_interaction_fit internal;
+  class layer_9_sandbox lifecycle;
+  class layer_9_sandbox_band band;
+  class layer_9_sandbox_scope,layer_9_sandbox_resp,layer_9_sandbox_examples,layer_9_sandbox_fit internal;
+  class layer_8_execution lifecycle;
+  class layer_8_execution_band band;
+  class layer_8_execution_scope,layer_8_execution_resp,layer_8_execution_examples,layer_8_execution_fit internal;
+  class layer_7_workspace lifecycle;
+  class layer_7_workspace_band band;
+  class layer_7_workspace_scope,layer_7_workspace_resp,layer_7_workspace_examples,layer_7_workspace_fit internal;
+  class layer_6_agent_platform compute;
+  class layer_6_agent_platform_band band;
+  class layer_6_agent_platform_scope,layer_6_agent_platform_resp,layer_6_agent_platform_examples,layer_6_agent_platform_fit internal;
+  class layer_5_agent_runtime compute;
+  class layer_5_agent_runtime_band band;
+  class layer_5_agent_runtime_scope,layer_5_agent_runtime_resp,layer_5_agent_runtime_examples,layer_5_agent_runtime_fit internal;
+  class layer_4_agent_core compute;
+  class layer_4_agent_core_band band;
+  class layer_4_agent_core_scope,layer_4_agent_core_resp,layer_4_agent_core_examples,layer_4_agent_core_fit internal;
+  class layer_3_transport compute;
+  class layer_3_transport_band band;
+  class layer_3_transport_scope,layer_3_transport_resp,layer_3_transport_examples,layer_3_transport_fit internal;
+  class layer_2_provider compute;
+  class layer_2_provider_band band;
+  class layer_2_provider_scope,layer_2_provider_resp,layer_2_provider_examples,layer_2_provider_fit internal;
+  class layer_1_model compute;
+  class layer_1_model_band band;
+  class layer_1_model_scope,layer_1_model_resp,layer_1_model_examples,layer_1_model_fit internal;
+```
+
+## Next pages
+
+- Open [`layers.md`](./layers.md) for the text form of each layer.
+- Open [`03-placement-checklist.md`](./03-placement-checklist.md) when you want to classify a real product against this map.

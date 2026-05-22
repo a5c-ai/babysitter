@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-007
   category: Requirements Management
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:requirements-engineering, skill-area:business-analysis, skill-area:quality-management]
+  workflows: [workflow:market-analysis]
+  roles: [role:business-analyst, role:quality-analyst]
 ---
 
 # Traceability Matrix Builder

@@ -3,6 +3,13 @@
  * @description BMAD Analysis Phase - Deep research and product brief creation with Mary (Analyst)
  * @inputs { projectName: string, projectDescription: string, researchDepth?: string, domainContext?: string }
  * @outputs { success: boolean, research: object, productBrief: object, recommendations: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:research]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:data-analysis, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:research-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

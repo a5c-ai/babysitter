@@ -3,6 +3,12 @@
  * @description Create comprehensive Business Requirements Documents that capture business needs, objectives, scope, constraints, and success criteria. Ensures alignment between stakeholder expectations and solution delivery.
  * @inputs { projectName: string, businessContext: object, stakeholders: array, requirements: array, constraints: object }
  * @outputs { success: boolean, brdDocument: string, traceabilityMatrix: object, approvalWorkflow: object, artifacts: array }
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:competitive-intelligence]
+ *   workflows: [workflow:market-analysis]
+ *   roles: [role:business-analyst, role:strategic-planner]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

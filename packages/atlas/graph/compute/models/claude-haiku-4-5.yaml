@@ -1,0 +1,85 @@
+nodeKind: ModelVersion
+id: model:claude-haiku-4-5@current
+attributes:
+  displayName: "Claude 4.5 Haiku"
+  modelFamilyId: model-family:claude-haiku-4
+  versionRange: '>=4.5.0 <4.6.0'
+  kind: chat
+  contextWindowTokens: 200000
+  costPerMTokInput: 1.0
+  costPerMTokOutput: 5.0
+  supportsExtendedThinking: false
+  supportsAdaptiveThinking: false
+  supportsThinkingBudgetTokens: false
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-10-20'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-10-20'
+  knowledgeCutoffDate: '2025-02-01'
+  safetyTier: anthropic-asl-2
+  modelCardUrl: https://www.anthropic.com/claude/haiku
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:claude-haiku-4
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:claude-haiku-4
+  served_by:
+  - provider:anthropic
+  - provider:aws-bedrock
+  - provider:gcp-vertex
+  speaks:
+  - model-transport:anthropic-messages
+  supports:
+  - target: capability:supports-batch-api
+    versionRange: '>=4.5.0 <4.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:parallel-tool-calls
+    versionRange: '>=4.5.0 <4.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-prompt-caching
+    versionRange: '>=4.5.0 <4.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:streaming
+    versionRange: '>=4.5.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-doc
+  - target: capability:supports-text-streaming
+    versionRange: '>=4.5.0 <4.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=4.5.0 <4.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-tool-use
+    versionRange: '>=4.5.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-tool-use-2026
+  supports_effort_level:
+  - target: effort-level:low
+  - target: effort-level:medium
+  - target: effort-level:high

@@ -8,6 +8,13 @@ expertise:
   - Memory indexing
   - Relevance optimization
   - Memory consolidation
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:retrieval-augmented-generation, skill-area:context-management]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development, workflow:ml-model-lifecycle]
+
 ---
 
 # Semantic Memory Curator

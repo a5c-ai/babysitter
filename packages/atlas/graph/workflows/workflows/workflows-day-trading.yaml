@@ -1,0 +1,105 @@
+---
+nodeKind: Workflow
+id: workflow:day-trading-journal-review
+attributes:
+  displayName: "Day Trading Journal Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: simple
+  description: |
+    Reviews discretionary trading journal entries for performance
+    improvement — analyzing trade entries and exits against documented
+    setup criteria, evaluating position sizing discipline relative to
+    account risk rules, reviewing psychological state annotations (FOMO,
+    revenge trading, overconfidence) against outcome data, comparing
+    planned versus actual risk-reward ratios, and identifying recurring
+    pattern violations or setup-type performance divergences. Produces
+    weekly review summaries with pattern recognition insights, rule
+    violation counts, and setup-specific win-rate statistics. Excludes
+    strategy development and market analysis.
+edges:
+  involves_role:
+    - target: role:quantitative-analyst
+    - target: role:portfolio-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:capital-markets
+    - target: domain:algorithmic-trading
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+  performed_by_org_unit:
+    - target: org-unit:trading-desk
+---
+nodeKind: Workflow
+id: workflow:pre-market-preparation-routine
+attributes:
+  displayName: "Pre-Market Preparation Routine"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: simple
+  description: |
+    Executes systematic pre-market preparation before each trading
+    session — scanning the trading universe for overnight earnings, M&A
+    announcements, and macro data releases, reviewing pre-market price
+    action and volume for gap analysis, checking economic calendar events
+    and central bank communications, setting key support/resistance levels
+    and price alerts on watchlist instruments, reviewing overnight
+    developments in correlated markets (Asia/Europe session), and
+    confirming system readiness (connectivity, buying power, margin).
+    Produces daily preparation checklists, watchlist with annotated
+    levels, and risk exposure summaries. Excludes trade execution and
+    position management.
+edges:
+  involves_role:
+    - target: role:portfolio-manager
+    - target: role:research-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:capital-markets
+    - target: domain:market-data
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+  performed_by_org_unit:
+    - target: org-unit:trading-desk
+---
+nodeKind: Workflow
+id: workflow:trading-performance-attribution
+attributes:
+  displayName: "Trading Performance Attribution"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: moderate
+  description: |
+    Analyzes trading performance across multiple dimensions — calculating
+    win-rate, profit factor, and average risk-reward ratios by strategy
+    type, decomposing returns into timing, selection, and sizing
+    components, computing max drawdown duration and recovery statistics,
+    measuring risk-adjusted returns (Sharpe, Sortino, Calmar) across
+    rolling windows, comparing realized performance against benchmark
+    indices and peer strategies, and identifying performance clustering by
+    market regime, time-of-day, and instrument type. Produces performance
+    attribution reports, equity curve analysis, and strategy comparison
+    matrices. Excludes strategy modification and trade execution.
+edges:
+  involves_role:
+    - target: role:quantitative-analyst
+    - target: role:portfolio-manager
+    - target: role:risk-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:capital-markets
+    - target: domain:quantitative-finance
+    - target: domain:portfolio-management
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:portfolio-rebalancing
+  performed_by_org_unit:
+    - target: org-unit:portfolio-management-team
+    - target: org-unit:trading-desk

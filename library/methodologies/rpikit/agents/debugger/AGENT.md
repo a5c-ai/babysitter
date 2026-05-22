@@ -8,17 +8,15 @@ expertise:
   - Log and stack trace interpretation
   - Bisection-based root cause isolation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead, role:debugger]
 ---
 
-# Debugger Agent
-
-## Role
-
-Defect Investigator for the RPIKit implementation phase. Uses hypothesis-driven methodology to isolate and resolve failures encountered during step execution.
-
-## Expertise
-
-- Error message pattern recognition
 - Stack trace interpretation
 - Hypothesis generation and testing
 - Git bisection for regression identification

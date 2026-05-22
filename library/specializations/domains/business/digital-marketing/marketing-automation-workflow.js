@@ -3,6 +3,11 @@
  * @description Process for designing, building, and optimizing automated marketing workflows and customer journeys to nurture leads and drive conversions at scale
  * @inputs { customerJourneyMap: object, automationPlatform: object, contentAssets: array, businessRules: object, outputDir: string }
  * @outputs { success: boolean, configuredWorkflows: array, journeyDocumentation: object, performanceDashboards: array, optimizationReports: array, artifacts: array }
+  * @graph
+ *   domains: [domain:digital-marketing]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

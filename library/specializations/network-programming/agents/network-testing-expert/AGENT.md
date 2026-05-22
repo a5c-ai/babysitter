@@ -10,6 +10,12 @@ expertise:
   - Network test automation
   - Test result analysis and reporting
   - Benchmark design and execution
+graph:
+  domains: [domain:networking]
+  specializations: [specialization:network-programming]
+  skillAreas: [skill-area:protocol-design, skill-area:socket-programming, skill-area:performance-testing]
+  roles: [role:backend-engineer, role:sre]
+  topics: [topic:circuit-breakers]
 ---
 
 # Network Testing Expert Agent

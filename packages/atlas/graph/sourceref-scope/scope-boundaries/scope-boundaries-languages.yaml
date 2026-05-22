@@ -1,0 +1,319 @@
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:typescript.scope
+attributes:
+  subjectId: language:typescript
+  inScope: |
+    Strongly-typed JavaScript superset for medium-to-large web, Node.js, and
+    library codebases where compile-time safety, IDE refactor support, and
+    structural typing pay back the build-step cost. Sweet spot: SaaS
+    front-ends, full-stack apps (Next.js, Remix), CLIs, and SDK packages.
+  outOfScope: |
+    Tiny scripts where the build step exceeds the script's value, very
+    dynamic plugin systems where types fight the design, and runtimes
+    that need ahead-of-time native compilation without a JS host.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - language:typescript
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:python.scope
+attributes:
+  subjectId: language:python
+  inScope: |
+    Data science, ML/AI (PyTorch, JAX, scikit-learn), scripting, automation,
+    backend web (Django, FastAPI), scientific computing, and glue code.
+    Strongest fit when ecosystem (pandas, numpy, transformers) outweighs
+    raw runtime speed.
+  outOfScope: |
+    Latency-critical hot paths without C extensions, mobile/embedded
+    deployment, and large pure-Python concurrent systems where the GIL
+    becomes the bottleneck (use Rust/Go/Java instead).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - language:python
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:rust.scope
+attributes:
+  subjectId: language:rust
+  inScope: |
+    Systems software, performance-critical services, CLIs, embedded
+    firmware, WASM modules, and any code where memory safety without a
+    GC plus C-class throughput matter. Strong for compilers, databases,
+    network stacks, and crypto.
+  outOfScope: |
+    Throwaway prototypes where compile times and borrow-checker friction
+    outweigh runtime value, GUI-heavy apps without mature toolkits, and
+    teams without bandwidth for ownership-model ramp-up.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - language:rust
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:go.scope
+attributes:
+  subjectId: language:go
+  inScope: |
+    Cloud-native backends, network services, CLIs, and devops tooling
+    (Kubernetes, Docker, Terraform are all Go). Sweet spot: small static
+    binaries, fast compile, simple concurrency via goroutines.
+  outOfScope: |
+    Heavy generic-programming or DSL workloads, GUI apps, ML training,
+    and domains that need sum types / pattern matching idiomatically.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - language:go
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:java.scope
+attributes:
+  subjectId: language:java
+  inScope: |
+    Enterprise backends, Android (with Kotlin), big-data (Spark, Flink,
+    Kafka), and long-running JVM services. Strong static typing, mature
+    tooling, and a vast library ecosystem.
+  outOfScope: |
+    Tiny CLIs (slow startup until GraalVM native-image), systems
+    programming below the JVM, and casual scripting.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - language:java
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:kotlin.scope
+attributes:
+  subjectId: language:kotlin
+  inScope: |
+    Modern Android development (Google's preferred language since 2019),
+    server-side JVM apps (Ktor, Spring), and Kotlin Multiplatform for
+    sharing logic across iOS/Android/web/desktop.
+  outOfScope: |
+    Pure systems work, embedded firmware, and contexts where a JVM (or
+    Kotlin/Native) runtime is unacceptable.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - language:kotlin
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:swift.scope
+attributes:
+  subjectId: language:swift
+  inScope: |
+    Apple-platform apps (iOS, macOS, iPadOS, watchOS, visionOS) and
+    increasingly server-side Swift (Vapor, Hummingbird) and on-device
+    ML. ARC + value semantics give predictable performance.
+  outOfScope: |
+    Cross-platform mobile (use Flutter / React Native if you can't
+    afford a Swift+Kotlin pair), Windows-first desktop, and anywhere
+    Apple's toolchain is a non-starter.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - language:swift
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:c.scope
+attributes:
+  subjectId: language:c
+  inScope: |
+    Operating systems, kernels, embedded firmware, performance-critical
+    libraries (codecs, crypto), interpreter cores, and any environment
+    that needs a thin portable abstraction over hardware.
+  outOfScope: |
+    Application-level code where memory-safety bugs cost more than the
+    perf wins (use Rust or Go), and projects with junior teams without
+    secure-coding discipline.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - language:c
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:cpp.scope
+attributes:
+  subjectId: language:cpp
+  inScope: |
+    Game engines (Unreal), high-frequency trading, browsers (Chromium),
+    AAA simulation, and HPC where zero-overhead abstractions and
+    deterministic destruction matter.
+  outOfScope: |
+    Scripting, web backends, and teams without a strong build-system /
+    static-analysis culture — the footgun surface is large.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - language:cpp
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:csharp.scope
+attributes:
+  subjectId: language:csharp
+  inScope: |
+    Windows desktop (WPF, WinUI, MAUI), enterprise backends (ASP.NET
+    Core), Unity game development, and cross-platform .NET services.
+    Strong static typing with productive tooling (Rider, Visual Studio).
+  outOfScope: |
+    Embedded firmware below microcontrollers that ship .NET nanoFramework,
+    and ecosystems that disallow Microsoft runtimes.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - language:csharp
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:ruby.scope
+attributes:
+  subjectId: language:ruby
+  inScope: |
+    Web backends with Rails, infrastructure DSLs (Chef, Puppet, Vagrant),
+    scripting, and developer tooling where expressiveness wins over
+    raw throughput.
+  outOfScope: |
+    CPU-bound numerical work, latency-critical services without YJIT
+    tuning, and resource-constrained embedded targets.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - language:ruby
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:php.scope
+attributes:
+  subjectId: language:php
+  inScope: |
+    Web backends — WordPress, Laravel, Symfony — and any context where
+    the LAMP / shared-hosting deployment model is the operational
+    reality. PHP 8+ with JIT is competitive on perf.
+  outOfScope: |
+    Long-running daemons (use Roadrunner / Swoole or another runtime),
+    systems work, and ML/data-science.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - language:php
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:elixir.scope
+attributes:
+  subjectId: language:elixir
+  inScope: |
+    Soft-real-time distributed systems on the BEAM — chat, telephony,
+    IoT fan-in, LiveView web apps, and anything that benefits from
+    OTP supervision trees and millions of cheap processes.
+  outOfScope: |
+    CPU-bound numeric work (NIFs needed), GUI desktop apps, and teams
+    without functional-programming bandwidth.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - language:elixir
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:haskell.scope
+attributes:
+  subjectId: language:haskell
+  inScope: |
+    Compilers, theorem-adjacent tooling, financial DSLs, and any domain
+    where strong purity + type-driven design pays back the investment.
+    Production users include Standard Chartered, Hasura, and GitHub
+    (Semantic).
+  outOfScope: |
+    Teams without typeclass / monad fluency, perf domains where strict
+    evaluation matters more than equational reasoning, and ecosystems
+    that demand a standard runtime.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - language:haskell
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:scala.scope
+attributes:
+  subjectId: language:scala
+  inScope: |
+    JVM-based functional + OO programming, big-data with Spark, Akka /
+    Pekko actor systems, and type-rich backends. Scala 3 simplified the
+    metaprogramming story.
+  outOfScope: |
+    Quick scripts (slow JVM start), small teams without Scala fluency,
+    and Java-only enterprises that can't accept the toolchain.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - language:scala
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:lua.scope
+attributes:
+  subjectId: language:lua
+  inScope: |
+    Embedded scripting inside larger C/C++ hosts (Neovim, Redis, Nginx
+    via OpenResty, Roblox, World of Warcraft), small DSLs, and game
+    modding. Tiny interpreter, easy to embed.
+  outOfScope: |
+    Standalone large applications, ML/data, and contexts that need a
+    rich standard library.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - language:lua
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:zig.scope
+attributes:
+  subjectId: language:zig
+  inScope: |
+    Systems programming with explicit memory management, no hidden
+    control flow, comptime metaprogramming, and easy C interop. Strong
+    fit for compilers, allocators, and rewriting C with safer ergonomics.
+  outOfScope: |
+    Pre-1.0 stability sensitivity (language is still evolving),
+    high-level application code, and any domain expecting a mature
+    package ecosystem.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - language:zig
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:wasm.scope
+attributes:
+  subjectId: language:wasm
+  inScope: |
+    Sandboxed portable bytecode target — compile from Rust / C / C++ /
+    Go / AssemblyScript / Zig and run in browsers, edge runtimes
+    (Cloudflare Workers, Fastly), and plugin systems (Envoy, Istio,
+    Wasmer). Strong for capability-secure plugin models.
+  outOfScope: |
+    Direct system-call workloads without WASI, GUI rendering without
+    a host, and code that needs threads + shared memory in browsers
+    that disable SAB.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - language:wasm

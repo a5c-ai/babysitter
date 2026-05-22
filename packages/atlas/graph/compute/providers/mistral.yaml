@@ -1,0 +1,43 @@
+nodeKind: Provider
+id: provider:mistral
+attributes:
+  displayName: "Mistral AI"
+  vendor: "Mistral AI"
+  versionRange: ">=2024-01-01"
+  authMethods:
+    - api-key
+  authMethodNotes: |
+    Standard `Authorization: Bearer <api-key>` for La Plateforme. Codestral
+    has a separate API key surface.
+  endpoints:
+    base: "https://api.mistral.ai/v1"
+    chat_completions: "https://api.mistral.ai/v1/chat/completions"
+    fim_completions: "https://api.mistral.ai/v1/fim/completions"
+    embeddings: "https://api.mistral.ai/v1/embeddings"
+    models: "https://api.mistral.ai/v1/models"
+  pricing: |
+    See https://mistral.ai/technology/#pricing for current per-model rates.
+  rateLimitSignalingProtocol: |
+    HTTP 429 with `Retry-After`. OpenAI-shaped error envelope:
+    `{ "object": "error", "message": "...", "type": "...", "code": "..." }`.
+  dataResidencyOptions:
+    - eu
+  vendorFeatures: []
+  slaTier: "mistral-no-public-sla"
+  regions:
+    - global
+edges:
+  realizes:
+    - target: layer:2-provider
+  serves:
+    - model:mistral-large-2@current
+    - model:mistral-medium-3@current
+    - model:codestral-25-01@current
+    - model:codestral-22b@current
+  emits_message_type:
+    - protocol-message:mistral-system-message
+    - protocol-message:mistral-user-message
+    - protocol-message:mistral-assistant-message
+    - protocol-message:mistral-tool-message
+    - protocol-message:mistral-stream-chunk
+    - protocol-message:mistral-stream-done

@@ -1,0 +1,29 @@
+nodeKind: AgentProduct
+id: agent:openclaw
+attributes:
+  displayName: "OpenClaw"
+  vendor: "openclaw community"
+  homepageUrl: "https://github.com/openclaw/openclaw"
+  primarySurface: cli
+  supportTier: adapter-only
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Open-source CLI coding agent integrated into the v6 catalog through
+    the agent-mux adapter. Features a plugin system for extensibility,
+    an auto-approve interaction primitive for unattended operation,
+    streaming tool-use output, and MCP server support. The full stack
+    is modeled across core (tool-use loop), runtime (session persistence),
+    platform (plugin discovery and loading), and UI (TUI presentation)
+    layers. One of the most comprehensively cataloged community agents
+    with deep adapter integration for orchestrated workflows.
+edges:
+  has_version:
+    - agentVersion:openclaw:ge-0-0-0
+  composed_of:
+    - target: language:typescript
+      role: core
+    - target: language:rust
+      role: runtime
+  integrates_with:
+    - target: skill-area:ai-agent-development

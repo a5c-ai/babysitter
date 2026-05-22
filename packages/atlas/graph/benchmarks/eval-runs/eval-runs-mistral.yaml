@@ -1,0 +1,60 @@
+---
+nodeKind: EvalRun
+id: eval-run:mmlu.mistral-large-2.2024-07
+attributes:
+  target: "model:mistral-large-2@current"
+  benchmarkId: benchmark:mmlu
+  targetId: model:mistral-large-2@current
+  runAt: "2024-07-24T00:00:00Z"
+  runBy: "mistral"
+  configHash: "sha256:placeholder-mistral-large-2-mmlu"
+edges:
+  evaluates_target:
+    - model:mistral-large-2@current
+  for_benchmark:
+    - benchmark:mmlu
+---
+nodeKind: EvalRun
+id: eval-run:human-eval.mistral-large-2.2024-07
+attributes:
+  target: "model:mistral-large-2@current"
+  benchmarkId: benchmark:human-eval
+  targetId: model:mistral-large-2@current
+  runAt: "2024-07-24T00:00:00Z"
+  runBy: "mistral"
+  configHash: "sha256:placeholder-mistral-large-2-humaneval"
+edges:
+  evaluates_target:
+    - model:mistral-large-2@current
+  for_benchmark:
+    - benchmark:human-eval
+---
+nodeKind: EvalRun
+id: eval-run:human-eval.codestral-25-01.2025-01
+attributes:
+  target: "model:codestral-25-01@current"
+  benchmarkId: benchmark:human-eval
+  targetId: model:codestral-25-01@current
+  runAt: "2025-01-13T00:00:00Z"
+  runBy: "mistral"
+  configHash: "sha256:placeholder-codestral-25-01-humaneval"
+edges:
+  evaluates_target:
+    - model:codestral-25-01@current
+  for_benchmark:
+    - benchmark:human-eval
+---
+nodeKind: EvalRun
+id: eval-run:multipl-e.codestral-25-01.2025-01
+attributes:
+  target: "model:codestral-25-01@current"
+  benchmarkId: benchmark:multipl-e
+  targetId: model:codestral-25-01@current
+  runAt: "2025-01-13T00:00:00Z"
+  runBy: "mistral"
+  configHash: "sha256:placeholder-codestral-25-01-multipl-e"
+edges:
+  evaluates_target:
+    - model:codestral-25-01@current
+  for_benchmark:
+    - benchmark:multipl-e

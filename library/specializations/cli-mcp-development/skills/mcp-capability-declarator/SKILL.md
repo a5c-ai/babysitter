@@ -2,6 +2,14 @@
 name: mcp-capability-declarator
 description: Generate MCP capability declarations from tool and resource inventory with proper versioning and feature flags.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:mcp-server-implementation, skill-area:mcp-tool-design]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # MCP Capability Declarator

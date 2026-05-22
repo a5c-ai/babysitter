@@ -1,0 +1,23 @@
+nodeKind: HarnessHardeningGuidance
+id: harness-hardening:subprocess-sandbox
+attributes:
+  displayName: "Subprocess sandbox policy guidance"
+  guidance: "Run agent subprocesses with workspace-write sandbox policy; deny network egress except to advertised tool servers."
+  appliesTo: agent-session
+  severity: recommended
+---
+nodeKind: HarnessHardeningGuidance
+id: harness-hardening:approval-gating
+attributes:
+  displayName: "Approval gating for destructive operations"
+  guidance: "Configure on-failure approval policy so destructive shell operations require operator confirmation when sandbox blocks them."
+  appliesTo: agent-session
+  severity: recommended
+---
+nodeKind: HarnessHardeningGuidance
+id: harness-hardening:non-interactive-orchestrator
+attributes:
+  displayName: "Non-interactive orchestrator"
+  guidance: "Orchestrator must run with userInputRequiredPolicy=fail-fast; turn_input_required must terminate the run, never block."
+  appliesTo: agent-session
+  severity: required

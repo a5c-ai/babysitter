@@ -16,6 +16,10 @@ metadata:
     - custom workflows
     - markdown
     - collaboration tools
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:strategic-analysis, skill-area:change-management, skill-area:business-analysis]
+  roles: [role:strategic-planner, role:business-analyst, role:data-analyst]
 ---
 
 # Pre-mortem Facilitator

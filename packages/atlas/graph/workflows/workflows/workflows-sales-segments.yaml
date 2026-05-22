@@ -1,0 +1,164 @@
+---
+nodeKind: Workflow
+id: workflow:smb-self-serve-funnel
+attributes:
+  displayName: "SMB Self-Serve Funnel"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Manages the product-led growth funnel for SMB customers — optimizing
+    free-to-paid conversion through in-product upgrade prompts triggered by
+    usage limits and feature gates, designing automated onboarding sequences
+    that guide users to activation milestones without human touch, monitoring
+    cohort-based conversion rates from signup through first paid month,
+    implementing behavioral scoring to identify high-intent free users for
+    light-touch sales outreach, A/B testing pricing page layouts and plan
+    packaging, managing self-serve billing flows including plan upgrades,
+    downgrades, and cancellation deflection, and analyzing churn patterns in
+    the first 90 days to identify friction points. Produces PLG funnel
+    dashboards, cohort conversion analyses, and automated touchpoint
+    effectiveness reports. Excludes enterprise sales motions and custom
+    pricing.
+edges:
+  involves_role:
+    - target: role:data-analyst
+    - target: role:product-designer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:revenue-operations
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:growth-team
+    - target: org-unit:revenue-operations-team
+---
+nodeKind: Workflow
+id: workflow:mid-market-sales-cycle
+attributes:
+  displayName: "Mid-Market Sales Cycle"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-opportunity"
+  complexity: cross-team
+  description: |
+    Orchestrates the multi-stakeholder mid-market sales process — mapping
+    buying committees with champion, economic buyer, and technical evaluator
+    roles identified, managing proof-of-concept engagements with defined
+    success criteria and timelines, building quantified ROI business cases
+    using customer-specific data and industry benchmarks, coordinating
+    discovery calls across multiple departments to identify cross-functional
+    requirements, navigating budget approval cycles that span multiple cost
+    centers, tracking multi-threaded deal engagement to ensure no single point
+    of failure, managing competitive evaluations with structured bake-off
+    criteria, and timing close activities around budget cycles and fiscal year
+    boundaries. Produces deal strategy playbooks, POC success scorecards, and
+    stage-by-stage cycle time analytics. Excludes strategic account planning
+    and enterprise procurement.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:business-analyst
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:sales-methodology
+    - target: skill-area:customer-success
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:customer-success
+---
+nodeKind: Workflow
+id: workflow:enterprise-procurement-navigation
+attributes:
+  displayName: "Enterprise Procurement Navigation"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-opportunity"
+  complexity: cross-team
+  description: |
+    Navigates enterprise procurement processes from vendor approval through
+    purchase order — mapping customer procurement workflows to identify all
+    required approvals, stakeholders, and timeline dependencies, preparing and
+    managing security questionnaire responses with pre-built answer libraries,
+    coordinating penetration test and SOC 2 evidence requests with internal
+    security teams, managing legal redline cycles with tracked changes and
+    compromise position documentation, navigating vendor onboarding portals
+    and compliance documentation requirements, preparing data processing
+    agreements and subprocessor lists, tracking procurement milestone
+    progression against deal close date targets, and escalating stalled
+    procurement stages through executive sponsor relationships. Produces
+    procurement tracker dashboards, security review response archives, and
+    cycle time benchmarks by customer size and industry. Excludes initial deal
+    qualification and pricing negotiation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:business-analyst
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:sales-methodology
+    - target: skill-area:revenue-operations
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:legal-team
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:strategic-account-expansion
+attributes:
+  displayName: "Strategic Account Expansion"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Plans and executes multi-year expansion strategies for top-tier strategic
+    accounts — conducting comprehensive account mapping to identify all
+    business units, subsidiaries, and potential buying centers, building
+    executive alignment through QBR cadences and executive sponsor pairing,
+    developing value engineering frameworks that quantify realized ROI and
+    project forward expansion value, identifying new use cases and departments
+    for land-and-expand through usage analytics and organizational change
+    signals, coordinating multi-product roadmap presentations aligned to
+    account strategic initiatives, managing white-space analysis to track
+    penetration percentage versus total addressable spend, and planning joint
+    innovation partnerships that create switching cost depth. Produces
+    strategic account plans, executive engagement trackers, and multi-year
+    revenue projection models. Excludes initial deal closing and tactical
+    support.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:revenue-operations
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:customer-success
+    - target: org-unit:revenue-operations-team

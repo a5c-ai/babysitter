@@ -3,6 +3,12 @@
  * @description Double Diamond - Design thinking framework with divergent and convergent phases
  * @inputs { projectName: string, context?: string, initialResearch?: string, phase?: string }
  * @outputs { success: boolean, discovery: object, definition: object, development: object, delivery: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:prioritization-frameworks, skill-area:product-discovery, skill-area:roadmap-planning]
+ *   workflows: [workflow:product-discovery, workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:engineering-manager, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -40,7 +46,8 @@ export async function process(inputs, ctx) {
     initialResearch = '',
     phase = 'full',
     existingDiscovery = null
-  } = inputs;
+  }
+  = inputs;
 
   const results = {
     projectName,
@@ -80,7 +87,6 @@ export async function process(inputs, ctx) {
       }
     });
   }
-
   // ============================================================================
   // DIAMOND 1, PHASE 2: DEFINE (CONVERGE ON PROBLEM)
   // ============================================================================
@@ -93,9 +99,8 @@ export async function process(inputs, ctx) {
       });
       results.discovery = loadedDiscovery;
     }
-
     // Step 1.2: Define - Convergent synthesis to problem statement
-    const definitionResult = await ctx.task(defineTask, {
+    const definitionResult = await ctx.task(definePhaseTask, {
       projectName,
       context,
       discovery: results.discovery
@@ -117,7 +122,6 @@ export async function process(inputs, ctx) {
       }
     });
   }
-
   // ============================================================================
   // DIAMOND 2, PHASE 3: DEVELOP (DIVERGE ON SOLUTIONS)
   // ============================================================================
@@ -131,7 +135,6 @@ export async function process(inputs, ctx) {
       results.discovery = loadedData.discovery;
       results.definition = loadedData.definition;
     }
-
     // Step 2.1: Develop - Divergent ideation and prototyping
     const developmentResult = await ctx.task(developTask, {
       projectName,
@@ -156,7 +159,6 @@ export async function process(inputs, ctx) {
       }
     });
   }
-
   // ============================================================================
   // DIAMOND 2, PHASE 4: DELIVER (CONVERGE ON SOLUTION)
   // ============================================================================
@@ -171,7 +173,6 @@ export async function process(inputs, ctx) {
       results.definition = loadedData.definition;
       results.development = loadedData.development;
     }
-
     // Step 2.2: Deliver - Convergent selection and implementation
     const deliveryResult = await ctx.task(deliverTask, {
       projectName,
@@ -196,7 +197,6 @@ export async function process(inputs, ctx) {
       }
     });
   }
-
   // ============================================================================
   // ITERATION DECISION
   // ============================================================================
@@ -227,7 +227,6 @@ export async function process(inputs, ctx) {
       });
     }
   }
-
   // ============================================================================
   // FINAL VALIDATION
   // ============================================================================
@@ -286,7 +285,6 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
 // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
@@ -433,7 +431,7 @@ export const discoverTask = defineTask('discover', (args, taskCtx) => ({
  * Task: Define (Converge on Problem)
  * Synthesize research to create focused problem statement
  */
-export const defineTask = defineTask('define', (args, taskCtx) => ({
+export const definePhaseTask = defineTask('define', (args, taskCtx) => ({
   kind: 'agent',
   title: `Define problem statement: ${args.projectName}`,
   description: 'Convergent synthesis of research into focused problem statement',

@@ -1,0 +1,35 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:gemini-cli.ui@current
+attributes:
+  displayName: "Gemini CLI UI (current) — tui-and-cli"
+  agentVersionId: agentVersion:gemini:ge-0-0-0
+  packageRef: source-ref:gemini-cli-github
+  uiKind: tui-and-cli
+  presentationsBundled:
+    - presentation:gemini-cli-tui
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  notes: |
+    Google Gemini CLI ships an interactive TUI and a scripted CLI; YOLO and tool
+    approval primitives are exposed at the UI layer.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:slash-help
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/help"
+    - target: interaction-primitive:tool-approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:gemini-yolo
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/yolo"
+    - target: interaction-primitive:thinking-toggle
+      attributes:
+        mechanism: keybinding
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control

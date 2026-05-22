@@ -7,6 +7,14 @@ metadata:
   version: "1.0.0"
   category: documentation
   backlog-id: SK-SA-003
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:adr-writing]
+  roles: [role:architect, role:tech-lead]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:architecture-decisions]
+
 ---
 
 # adr-generator

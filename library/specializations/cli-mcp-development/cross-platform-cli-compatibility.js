@@ -17,6 +17,13 @@
  * - Node.js path: https://nodejs.org/api/path.html
  * - cross-env: https://github.com/kentcdodds/cross-env
  * - execa: https://github.com/sindresorhus/execa
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:cli-mcp-development]
+ *   skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation, skill-area:cross-platform-desktop]
+ *   roles: [role:backend-engineer, role:platform-engineer]
+ *   workflows: [workflow:sdk-api-design]
+ *   topics: [topic:developer-experience]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

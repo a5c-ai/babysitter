@@ -1,0 +1,29 @@
+nodeKind: CiSurface
+id: ci:a5c-ai-agent-catalog
+attributes:
+  ciId: "@a5c-ai/agent-catalog"
+  packageId: package:a5c-ai-agent-catalog
+  scripts:
+    - build
+    - test
+    - "validate:evidence:freshness"
+    - "ci:evidence"
+    - "policy:check"
+    - "ci:test"
+    - "version:check"
+  publishStrategy: internal-workspace
+  releaseChannels:
+    - ci
+  validationCommands:
+    - "npm run ci:test --workspace=@a5c-ai/agent-catalog"
+    - "npm run version:check --workspace=@a5c-ai/agent-catalog"
+  artifactExpectations:
+    - "dist/**"
+    - "graph/**"
+    - "evidence/**"
+  triggerEvents:
+    - push
+    - pr
+edges:
+  validates_package:
+    - target: package:a5c-ai-agent-catalog

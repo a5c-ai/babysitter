@@ -1,0 +1,23 @@
+nodeKind: HookSurface
+id: hook-surface:stop
+attributes:
+  eventName: "Stop (canonical)"
+  displayName: "Stop (canonical)"
+  kind: canonical
+  direction: event
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [session_id, transcript_path]
+    properties:
+      session_id: { type: string }
+      transcript_path: { type: string }
+      stop_hook_active:
+        type: boolean
+        description: "True when the parent agent is already inside a Stop hook (avoid recursion)."
+      reason: { type: string }
+  description: |
+    Fires when the agent is about to stop the current turn. Blocking;
+    handlers can request continuation.
+edges:

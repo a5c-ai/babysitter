@@ -2,6 +2,10 @@
 name: collection-documentation
 description: Create and maintain comprehensive collection records including cataloging, photography, condition documentation, and database management following AAM/ICOM standards
 allowed-tools: Read, Grep, Write, Edit, Glob, Bash
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:document-processing, skill-area:data-governance, skill-area:data-quality]
+  roles: [role:data-analyst, role:information-architect]
 ---
 
 # Collection Documentation

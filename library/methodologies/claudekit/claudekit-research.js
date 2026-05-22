@@ -3,6 +3,13 @@
  * @description ClaudeKit Research - Parallel research agent orchestration dispatching 5-10 specialized agents for comprehensive multi-source research, achieving up to 90% faster results through concurrent execution
  * @inputs { query: string, projectRoot?: string, agentCount?: number, sources?: array, codebaseMap?: object, depth?: string }
  * @outputs { success: boolean, findings: array, synthesis: object, sources: array, agentResults: array, confidenceScore: number, summary: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:research]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:data-analysis, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:research-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

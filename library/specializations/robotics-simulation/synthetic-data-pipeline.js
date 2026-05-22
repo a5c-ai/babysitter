@@ -18,6 +18,12 @@
  * - Domain Randomization: https://arxiv.org/abs/1703.06907
  * - Synthetic Data for Vision: https://arxiv.org/abs/1804.06516
  * - NVIDIA Isaac Sim: https://developer.nvidia.com/isaac-sim
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:data-pipeline-deployment]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

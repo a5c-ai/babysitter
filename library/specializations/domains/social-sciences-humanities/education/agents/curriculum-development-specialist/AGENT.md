@@ -2,6 +2,12 @@
 name: curriculum-development-specialist
 description: Design and align K-12 or higher education curricula with educational standards and learning progressions
 required-skills: learning-objectives-writing, standards-alignment-mapping, curriculum-gap-analysis
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:tutorial-design, skill-area:stakeholder-management]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:product-manager, role:technical-writer]
 ---
 
 # Curriculum Development Specialist Agent

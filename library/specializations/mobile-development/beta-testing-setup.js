@@ -17,6 +17,13 @@
  * - TestFlight: https://developer.apple.com/testflight/
  * - Google Play Testing: https://support.google.com/googleplay/android-developer/answer/9845334
  * - Firebase App Distribution: https://firebase.google.com/docs/app-distribution
+ * @graph
+ *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:mobile-app-submission, workflow:release-management, workflow:mobile-beta-testing]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -57,21 +64,14 @@ export async function process(inputs, ctx) {
       appName, platforms, testerGroups, feedbackChannels, outputDir
     });
     artifacts.push(...result.artifacts);
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Beta testing infrastructure ready for ${appName}. Ready to start beta program?`,
     title: 'Beta Testing Review',
-    context: { runId: ctx.runId, appName, platforms, testerGroups },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, appName, platforms, testerGroups }
+  });
+
   const endTime = ctx.now();
   return {
     success: true,

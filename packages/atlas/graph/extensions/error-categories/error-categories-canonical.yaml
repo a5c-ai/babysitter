@@ -1,0 +1,117 @@
+nodeKind: ErrorCategory
+id: error-category:codex-not-found
+attributes:
+  displayName: "codex-not-found"
+  layer: agent-runner
+  retryable: false
+  severity: configuration
+  exampleExitCode: 127
+  description: "Configured codex executable could not be located on PATH."
+  mappedFailureClassId: failure-class:agent-session
+edges:
+  categorized_as:
+    - target: failure-class:agent-session
+---
+nodeKind: ErrorCategory
+id: error-category:invalid-workspace-cwd
+attributes:
+  displayName: "invalid-workspace-cwd"
+  layer: workspace
+  retryable: false
+  severity: configuration
+  description: "Resolved cwd does not exist or is not writable."
+  mappedFailureClassId: failure-class:workspace
+edges:
+  categorized_as:
+    - target: failure-class:workspace
+---
+nodeKind: ErrorCategory
+id: error-category:response-timeout
+attributes:
+  displayName: "response-timeout"
+  layer: agent-runner
+  retryable: true
+  severity: transient
+  description: "No response line received within readTimeoutMs."
+  mappedFailureClassId: failure-class:agent-session
+edges:
+  categorized_as:
+    - target: failure-class:agent-session
+---
+nodeKind: ErrorCategory
+id: error-category:turn-timeout
+attributes:
+  displayName: "turn-timeout"
+  layer: agent-runner
+  retryable: true
+  severity: transient
+  description: "Turn exceeded turnTimeoutMs without completion."
+  mappedFailureClassId: failure-class:agent-session
+edges:
+  categorized_as:
+    - target: failure-class:agent-session
+---
+nodeKind: ErrorCategory
+id: error-category:port-exit
+attributes:
+  displayName: "port-exit"
+  layer: agent-runner
+  retryable: true
+  severity: transient
+  description: "Agent subprocess closed its port unexpectedly."
+  mappedFailureClassId: failure-class:agent-session
+edges:
+  categorized_as:
+    - target: failure-class:agent-session
+---
+nodeKind: ErrorCategory
+id: error-category:response-error
+attributes:
+  displayName: "response-error"
+  layer: agent-runner
+  retryable: true
+  severity: transient
+  description: "Agent emitted a structured error response."
+  mappedFailureClassId: failure-class:agent-session
+edges:
+  categorized_as:
+    - target: failure-class:agent-session
+---
+nodeKind: ErrorCategory
+id: error-category:turn-failed
+attributes:
+  displayName: "turn-failed"
+  layer: agent-runner
+  retryable: true
+  severity: transient
+  description: "Turn ended in a failed status from the agent."
+  mappedFailureClassId: failure-class:agent-session
+edges:
+  categorized_as:
+    - target: failure-class:agent-session
+---
+nodeKind: ErrorCategory
+id: error-category:turn-cancelled
+attributes:
+  displayName: "turn-cancelled"
+  layer: agent-runner
+  retryable: false
+  severity: permanent
+  description: "Turn was cancelled by orchestrator or operator."
+  mappedFailureClassId: failure-class:agent-session
+edges:
+  categorized_as:
+    - target: failure-class:agent-session
+---
+nodeKind: ErrorCategory
+id: error-category:turn-input-required
+attributes:
+  displayName: "turn-input-required"
+  layer: agent-runner
+  retryable: false
+  severity: permanent
+  description: "Agent paused awaiting user input; non-interactive orchestrator fails fast."
+  mappedFailureClassId: failure-class:agent-session
+edges:
+  categorized_as:
+    - target: failure-class:agent-session

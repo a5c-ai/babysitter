@@ -2,6 +2,10 @@
 name: cultural-policy-analysis
 description: Analyze cultural policies, assess community cultural needs, and develop evidence-based recommendations for arts funding and cultural development
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch, WebSearch
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:data-analysis, skill-area:strategic-analysis, skill-area:market-research]
+  roles: [role:strategic-planner, role:business-analyst]
 ---
 
 # Cultural Policy Analysis

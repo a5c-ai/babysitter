@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: Operations
   agent-id: AG-010
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:strategic-planning, skill-area:change-management-leadership, skill-area:organizational-design]
+  workflows: [workflow:product-discovery]
+  roles: [role:strategic-planner, role:operations-analyst, role:hr-manager]
 ---
 
 # Operations and Scaling Expert Agent

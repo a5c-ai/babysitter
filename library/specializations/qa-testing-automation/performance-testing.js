@@ -27,6 +27,13 @@
  * - Apache JMeter: https://jmeter.apache.org/
  * - Gatling Documentation: https://gatling.io/docs/
  * - Performance Engineering: https://www.infoq.com/articles/performance-engineering/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer, role:sre]
+ *   skillAreas: [skill-area:performance-testing, skill-area:load-testing]
+ *   topics: [topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -69,7 +76,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing performance requirements and SLAs');
 
-  let requirementsAnalysis = await ctx.task(performanceRequirementsTask, {
+  const requirementsAnalysis = await ctx.task(performanceRequirementsTask, {
     projectName,
     applicationUrl,
     performanceGoals,
@@ -82,20 +89,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...requirementsAnalysis.artifacts);
 
   // Quality Gate: Requirements completeness
-      let lastFeedback_phase1Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase1Review) {
-        requirementsAnalysis = await ctx.task(performanceRequirementsTask, { ...{
-    projectName,
-    applicationUrl,
-    performanceGoals,
-    expectedLoad,
-    testScenarios,
-    environmentType,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-      }
-  const phase1Review = await ctx.breakpoint({
+  if (!requirementsAnalysis.requirementsComplete) {
+    await ctx.breakpoint({
       question: `Performance requirements analysis incomplete. Missing: ${requirementsAnalysis.missingRequirements.join(', ')}. Review and provide missing requirements?`,
       title: 'Performance Requirements Review',
       context: {
@@ -104,15 +99,9 @@ export async function process(inputs, ctx) {
         definedGoals: requirementsAnalysis.definedGoals,
         recommendation: 'Complete all performance SLAs and acceptance criteria before proceeding',
         files: requirementsAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase1Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase1Review.approved) break;
-      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: WORKLOAD MODELING AND USER BEHAVIOR ANALYSIS
@@ -120,7 +109,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Modeling workload patterns and user behavior');
 
-  let workloadModeling = await ctx.task(workloadModelingTask, {
+  const workloadModeling = await ctx.task(workloadModelingTask, {
     projectName,
     testScenarios,
     expectedLoad,
@@ -131,18 +120,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...workloadModeling.artifacts);
 
   // Quality Gate: Workload model validation
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        workloadModeling = await ctx.task(workloadModelingTask, { ...{
-    projectName,
-    testScenarios,
-    expectedLoad,
-    requirementsAnalysis,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (workloadModeling.scenariosCovered < testScenarios.length * 0.8) {
+    await ctx.breakpoint({
       question: `Workload model covers ${workloadModeling.scenariosCovered}/${testScenarios.length} scenarios (${((workloadModeling.scenariosCovered / testScenarios.length) * 100).toFixed(0)}%). Review coverage and approve?`,
       title: 'Workload Model Coverage',
       context: {
@@ -151,15 +130,9 @@ export async function process(inputs, ctx) {
         totalScenarios: testScenarios.length,
         uncoveredScenarios: workloadModeling.uncoveredScenarios,
         files: workloadModeling.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: TEST ENVIRONMENT SETUP AND VALIDATION
@@ -167,7 +140,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Setting up and validating test environment');
 
-  let environmentSetup = await ctx.task(environmentSetupTask, {
+  const environmentSetup = await ctx.task(environmentSetupTask, {
     projectName,
     applicationUrl,
     environmentType,
@@ -179,19 +152,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...environmentSetup.artifacts);
 
   // Quality Gate: Environment readiness
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        environmentSetup = await ctx.task(environmentSetupTask, { ...{
-    projectName,
-    applicationUrl,
-    environmentType,
-    testingTool,
-    monitoringEnabled,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (!environmentSetup.environmentReady) {
+    await ctx.breakpoint({
       question: `Test environment not ready. Issues: ${environmentSetup.issues.join(', ')}. Resolve issues and continue?`,
       title: 'Environment Readiness Check',
       context: {
@@ -200,15 +162,9 @@ export async function process(inputs, ctx) {
         monitoringStatus: environmentSetup.monitoringStatus,
         recommendation: 'Ensure environment is stable and monitoring is configured',
         files: environmentSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: BASELINE PERFORMANCE MEASUREMENT (if needed)
@@ -231,13 +187,14 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Baseline established - P95: ${baselineResults.metrics.p95}ms, RPS: ${baselineResults.metrics.rps}`);
   }
+
   // ============================================================================
   // PHASE 5: PERFORMANCE TEST SCRIPT DEVELOPMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Developing performance test scripts');
 
-  let testScriptDevelopment = await ctx.task(testScriptDevelopmentTask, {
+  const testScriptDevelopment = await ctx.task(testScriptDevelopmentTask, {
     projectName,
     applicationUrl,
     workloadModeling,
@@ -249,19 +206,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...testScriptDevelopment.artifacts);
 
   // Quality Gate: Script validation
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        testScriptDevelopment = await ctx.task(testScriptDevelopmentTask, { ...{
-    projectName,
-    applicationUrl,
-    workloadModeling,
-    requirementsAnalysis,
-    testingTool,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (testScriptDevelopment.scriptErrors.length > 0) {
+    await ctx.breakpoint({
       question: `${testScriptDevelopment.scriptErrors.length} script validation errors found. Review errors and fix?`,
       title: 'Test Script Validation',
       context: {
@@ -269,15 +215,9 @@ export async function process(inputs, ctx) {
         scriptErrors: testScriptDevelopment.scriptErrors,
         scriptsCreated: testScriptDevelopment.scriptsCreated,
         files: testScriptDevelopment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: PARALLEL PERFORMANCE TEST EXECUTION
@@ -334,19 +274,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Spike Test - Recovery Time: ${spikeTestResults.recoveryTime}s, Pass: ${spikeTestResults.passed}`);
 
   // Quality Gate: Load test performance
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        testScriptDevelopment = await ctx.task(testScriptDevelopmentTask, { ...{
-    projectName,
-    applicationUrl,
-    workloadModeling,
-    requirementsAnalysis,
-    testingTool,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (!loadTestResults.passed) {
+    await ctx.breakpoint({
       question: `Load test failed to meet performance goals. P95: ${loadTestResults.metrics.p95}ms (target: ${performanceGoals.responseTime.p95}ms). Review results and decide action?`,
       title: 'Load Test Performance Gate',
       context: {
@@ -356,15 +285,9 @@ export async function process(inputs, ctx) {
         failedChecks: loadTestResults.failedChecks,
         recommendation: 'Analyze bottlenecks and optimize before proceeding',
         files: loadTestResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: SOAK TEST (ENDURANCE TESTING)
@@ -372,7 +295,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Running soak test for memory leaks and stability');
 
-  let soakTestResults = await ctx.task(soakTestTask, {
+  const soakTestResults = await ctx.task(soakTestTask, {
     projectName,
     applicationUrl,
     workloadModeling,
@@ -386,21 +309,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...soakTestResults.artifacts);
 
   // Quality Gate: Soak test stability
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        soakTestResults = await ctx.task(soakTestTask, { ...{
-    projectName,
-    applicationUrl,
-    workloadModeling,
-    performanceGoals,
-    testScriptDevelopment,
-    testingTool,
-    testDuration: testDuration.soak,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (soakTestResults.memoryLeakDetected || soakTestResults.performanceDegradation) {
+    await ctx.breakpoint({
       question: `Soak test detected issues - Memory Leak: ${soakTestResults.memoryLeakDetected}, Performance Degradation: ${soakTestResults.performanceDegradation}. Review and address?`,
       title: 'Soak Test Stability Issues',
       context: {
@@ -409,15 +319,9 @@ export async function process(inputs, ctx) {
         performanceTrend: soakTestResults.performanceTrend,
         issues: soakTestResults.detectedIssues,
         files: soakTestResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: BOTTLENECK IDENTIFICATION AND ANALYSIS
@@ -425,7 +329,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Identifying performance bottlenecks');
 
-  let bottleneckAnalysis = await ctx.task(bottleneckAnalysisTask, {
+  const bottleneckAnalysis = await ctx.task(bottleneckAnalysisTask, {
     projectName,
     loadTestResults,
     stressTestResults,
@@ -441,21 +345,8 @@ export async function process(inputs, ctx) {
   const criticalBottlenecks = bottleneckAnalysis.bottlenecks.filter(b => b.severity === 'critical');
 
   // Quality Gate: Critical bottlenecks
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        bottleneckAnalysis = await ctx.task(bottleneckAnalysisTask, { ...{
-    projectName,
-    loadTestResults,
-    stressTestResults,
-    spikeTestResults,
-    soakTestResults,
-    environmentSetup,
-    monitoringEnabled,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (criticalBottlenecks.length > 0) {
+    await ctx.breakpoint({
       question: `${criticalBottlenecks.length} critical performance bottlenecks identified. Review bottlenecks and optimization recommendations?`,
       title: 'Critical Bottleneck Review',
       context: {
@@ -467,15 +358,9 @@ export async function process(inputs, ctx) {
         })),
         allBottlenecks: bottleneckAnalysis.bottlenecks.length,
         files: bottleneckAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: SCALABILITY TESTING
@@ -501,7 +386,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating optimization recommendations');
 
-  let optimizationRecommendations = await ctx.task(optimizationRecommendationsTask, {
+  const optimizationRecommendations = await ctx.task(optimizationRecommendationsTask, {
     projectName,
     requirementsAnalysis,
     loadTestResults,
@@ -534,22 +419,8 @@ export async function process(inputs, ctx) {
     artifacts.push(...comparativeAnalysis.artifacts);
 
     // Quality Gate: Performance regression
-        let lastFeedback_phase11Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase11Review) {
-          optimizationRecommendations = await ctx.task(optimizationRecommendationsTask, { ...{
-    projectName,
-    requirementsAnalysis,
-    loadTestResults,
-    stressTestResults,
-    spikeTestResults,
-    soakTestResults,
-    scalabilityTest,
-    bottleneckAnalysis,
-    outputDir
-  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
-        }
-  const phase11Review = await ctx.breakpoint({
+    if (comparativeAnalysis.regressionDetected) {
+      await ctx.breakpoint({
         question: `Performance regression detected: ${comparativeAnalysis.regressionPercentage}% slower than baseline. Review regression details?`,
         title: 'Performance Regression Detected',
         context: {
@@ -558,16 +429,11 @@ export async function process(inputs, ctx) {
           regressionDetails: comparativeAnalysis.regressionDetails,
           recommendation: 'Investigate changes causing performance degradation',
           files: comparativeAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase11Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase11Review.approved) break;
-        lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 12: COMPREHENSIVE PERFORMANCE REPORT
   // ============================================================================
@@ -599,7 +465,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Computing performance score and final assessment');
 
-  let finalAssessment = await ctx.task(performanceAssessmentTask, {
+  const finalAssessment = await ctx.task(performanceAssessmentTask, {
     projectName,
     performanceGoals,
     loadTestResults,
@@ -620,23 +486,8 @@ export async function process(inputs, ctx) {
   // Quality Gate: Overall performance score
   const performanceAcceptable = performanceScore >= 70;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalAssessment = await ctx.task(performanceAssessmentTask, { ...{
-    projectName,
-    performanceGoals,
-    loadTestResults,
-    stressTestResults,
-    spikeTestResults,
-    soakTestResults,
-    scalabilityTest,
-    bottleneckAnalysis,
-    optimizationRecommendations,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Performance Testing Review
+  await ctx.breakpoint({
     question: `Performance Testing Complete for ${projectName}. Performance Score: ${performanceScore}/100. ${performanceAcceptable ? 'Performance meets acceptable standards!' : 'Performance needs improvement.'} Approve results?`,
     title: 'Final Performance Testing Review',
     context: {
@@ -661,15 +512,9 @@ export async function process(inputs, ctx) {
         { path: bottleneckAnalysis.analysisPath, format: 'markdown', label: 'Bottleneck Analysis' },
         { path: optimizationRecommendations.recommendationsPath, format: 'markdown', label: 'Optimization Recommendations' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 14: CI/CD INTEGRATION SETUP (if needed)
   // ============================================================================
@@ -688,6 +533,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...cicdIntegration.artifacts);
   }
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -769,7 +615,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

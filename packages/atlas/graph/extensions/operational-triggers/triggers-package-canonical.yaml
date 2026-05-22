@@ -1,0 +1,308 @@
+nodeKind: OperationalTrigger
+id: operational-trigger:amux-triggers-github
+attributes:
+  displayName: amux-triggers — GitHub backend
+  triggerKind: webhook-event
+  effect: 'Normalizes a GitHub Actions event payload (issue / pull_request /
+
+    issue_comment / push) into NormalizedTriggerEvent, enriches changed
+
+    files via `pulls/:n/files` or `commits/:sha`, optionally pulls
+
+    unified diffs via `git show`, then evaluates a TriggerQuery and
+
+    exits 0 (matched) / 78 (skip) / non-zero (error).
+
+    '
+  idempotent: true
+  invokerSurface: webhook
+  backend: github
+  eventTaxonomy:
+  - issue_comment
+  - issues
+  - pull_request
+  - pull_request_review
+  - pull_request_review_comment
+  - push
+  - workflow_dispatch
+  dispatchModel: normalize-and-evaluate
+  payloadShape: NormalizedTriggerEvent
+  queryDsl: key-colon-value
+  cliEntrypoint: amux-triggers
+  enrichmentSources:
+  - workflow-event-payload
+  - github-rest-api
+  - local-git-show
+  - git-diff-unified
+  sideEffects:
+  - Sets GITHUB_OUTPUT matched=true|false (action.yml:170)
+  - Writes enriched event JSON to RUNNER_TEMP/agent-mux-event.json
+  - Writes evaluation result JSON to RUNNER_TEMP/agent-mux-trigger.json
+  - On match runs pre-run, then `amux <command>`, then post-run (action.yml:174-232)
+  sourceCitation: 'packages/triggers/src/backends/github.ts:4 (normalizeGithub),
+
+    packages/triggers/src/enrich.ts:61 (enrichGithubFromApi),
+
+    packages/triggers/action.yml:131-172 (Evaluate trigger step).
+
+    '
+  exitCodeSemantics:
+  - "0:matched:trigger query matched, downstream pipeline runs (cli.ts:65)"
+  - "78:skip:trigger query did not match; action.yml:165 treats 78 as soft-skip"
+  - "1:error:invalid args / unhandled exception"
+edges:
+  implemented_by:
+  - target: package:a5c-ai-triggers
+  has_payload_schema:
+  - target: shared-context-spec:normalized-trigger-event
+  calls_endpoint:
+  - target: api-endpoint:github-pulls-files
+  - target: api-endpoint:github-commits-by-sha
+  parsed_by_grammar:
+  - target: grammar:amux-triggers-query-dsl
+---
+nodeKind: OperationalTrigger
+id: operational-trigger:amux-triggers-gitlab
+attributes:
+  displayName: amux-triggers — GitLab backend
+  triggerKind: webhook-event
+  effect: 'Normalizes a GitLab webhook payload (merge_request / push / note)
+
+    using object_kind / object_attributes shape, into the same
+
+    NormalizedTriggerEvent envelope. No GitLab REST enrichment;
+
+    relies on workflow-event-payload + local-git fallback.
+
+    '
+  idempotent: true
+  invokerSurface: webhook
+  backend: gitlab
+  eventTaxonomy:
+  - merge_request
+  - push
+  - note
+  - issue
+  dispatchModel: normalize-and-evaluate
+  payloadShape: NormalizedTriggerEvent
+  queryDsl: key-colon-value
+  cliEntrypoint: amux-triggers
+  enrichmentSources:
+  - workflow-event-payload
+  - local-git-show
+  - git-diff-unified
+  sourceCitation: 'packages/triggers/src/backends/gitlab.ts:4 (normalizeGitlab),
+
+    packages/triggers/src/enrich.ts:99 (enrichEvent — non-github branch
+
+    skips API enrichment).
+
+    '
+  exitCodeSemantics:
+  - "0:matched:trigger query matched"
+  - "78:skip:trigger query did not match (cli.ts:65)"
+  - "1:error:unhandled exception"
+edges:
+  implemented_by:
+  - target: package:a5c-ai-triggers
+  has_payload_schema:
+  - target: shared-context-spec:normalized-trigger-event
+  parsed_by_grammar:
+  - target: grammar:amux-triggers-query-dsl
+---
+nodeKind: OperationalTrigger
+id: operational-trigger:amux-triggers-bitbucket
+attributes:
+  displayName: amux-triggers — Bitbucket backend
+  triggerKind: webhook-event
+  effect: 'Normalizes a Bitbucket Cloud webhook payload (pullrequest:created /
+
+    repo:push) into NormalizedTriggerEvent. Action is derived from the
+
+    event-name suffix after the colon (e.g. pullrequest:created →
+
+    action=created).
+
+    '
+  idempotent: true
+  invokerSurface: webhook
+  backend: bitbucket
+  eventTaxonomy:
+  - pullrequest:created
+  - pullrequest:updated
+  - pullrequest:fulfilled
+  - pullrequest:rejected
+  - repo:push
+  dispatchModel: normalize-and-evaluate
+  payloadShape: NormalizedTriggerEvent
+  queryDsl: key-colon-value
+  cliEntrypoint: amux-triggers
+  enrichmentSources:
+  - workflow-event-payload
+  - local-git-show
+  - git-diff-unified
+  sourceCitation: 'packages/triggers/src/backends/bitbucket.ts:4 (normalizeBitbucket).
+
+    '
+  exitCodeSemantics:
+  - "0:matched:trigger query matched"
+  - "78:skip:trigger query did not match"
+  - "1:error:unhandled exception"
+edges:
+  implemented_by:
+  - target: package:a5c-ai-triggers
+  has_payload_schema:
+  - target: shared-context-spec:normalized-trigger-event
+  parsed_by_grammar:
+  - target: grammar:amux-triggers-query-dsl
+---
+nodeKind: OperationalTrigger
+id: operational-trigger:amux-triggers-generic-webhook
+attributes:
+  displayName: amux-triggers — generic webhook backend
+  triggerKind: webhook-event
+  effect: 'Fallback normalizer for generic JSON webhook payloads. Accepts
+
+    flexible top-level shape with `event`/`action`/`actor`/`repository`/
+
+    `ref`/`sha`/`title`/`body`/`labels`/`changes[]` fields and lifts
+
+    them into NormalizedTriggerEvent. Used when no VCS-specific backend
+
+    is configured.
+
+    '
+  idempotent: true
+  invokerSurface: webhook
+  backend: generic-webhook
+  eventTaxonomy:
+  - webhook
+  dispatchModel: normalize-and-evaluate
+  payloadShape: NormalizedTriggerEvent
+  queryDsl: key-colon-value
+  cliEntrypoint: amux-triggers
+  enrichmentSources:
+  - workflow-event-payload
+  - local-git-show
+  - git-diff-unified
+  sourceCitation: 'packages/triggers/src/backends/generic-webhook.ts:4
+
+    (normalizeGeneric); packages/triggers/src/enrich.ts:9
+
+    (detectBackend default ''github'' fallback path).
+
+    '
+  exitCodeSemantics:
+  - "0:matched:trigger query matched"
+  - "78:skip:trigger query did not match"
+  - "1:error:unhandled exception"
+edges:
+  implemented_by:
+  - target: package:a5c-ai-triggers
+  has_payload_schema:
+  - target: shared-context-spec:normalized-trigger-event
+  parsed_by_grammar:
+  - target: grammar:amux-triggers-query-dsl
+---
+nodeKind: OperationalTrigger
+id: operational-trigger:amux-triggers-action
+attributes:
+  displayName: Agent Mux — reusable GitHub Action composite
+  triggerKind: vcs-event
+  effect: 'Composite action at packages/triggers/action.yml. Supports all harnesses
+
+    (claude, codex, pi, gemini, copilot, cursor, opencode, hermes) with providers
+
+    (foundry, google, anthropic, bedrock, openai). Steps: setup-node →
+
+    optional a5c GitHub App token exchange → npm ci + build agent-mux +
+
+    build @a5c-ai/triggers → optional `amux install <harness>` →
+
+    optional babysitter plugin install → optional legacy plugin install → enrich →
+
+    evaluate (exit-code 78 means skip) → if matched: pre-run, amux launch
+
+    <harness> [<provider>] [--model M] [--prompt P] [--max-turns N]
+
+    [--with-proxy-if-needed] [--yolo] [args-json|args], post-run.
+
+    Outputs: matched, event, exit-code.
+
+    '
+  idempotent: false
+  invokerSurface: vcs-event
+  dispatchModel: reusable-action
+  payloadShape: NormalizedTriggerEvent
+  queryDsl: key-colon-value
+  cliEntrypoint: 'uses: ./packages/triggers'
+  enrichmentSources:
+  - workflow-event-payload
+  - github-rest-api
+  - local-git-show
+  - git-diff-unified
+  sideEffects:
+  - Outputs matched=true|false on the step (action.yml:67)
+  - Outputs event=<path-to-enriched-json> (action.yml:70)
+  - Outputs exit-code=<amux exit code> (action.yml:73)
+  - May install agent-mux harness + plugins side-effectfully before evaluation (action.yml:103-129)
+  - Sets AMUX_TRIGGER_EVENT_PATH env var for pre-run, amux, post-run steps
+  sourceCitation: 'packages/triggers/action.yml (full composite action; inputs
+
+    1-65, outputs 66-75, steps 77-232).
+
+    '
+  exitCodeSemantics:
+  - "0:matched-and-amux-success:trigger matched and amux exited 0 (action.yml:215)"
+  - "78:skip:trigger query did not match (action.yml:165 swallows 78 from evaluate)"
+  - "non-zero:amux-failure:propagated from amux exit (action.yml:217-220)"
+edges:
+  implemented_by:
+  - target: package:a5c-ai-triggers
+  has_payload_schema:
+  - target: shared-context-spec:normalized-trigger-event
+  calls_endpoint:
+  - target: api-endpoint:github-pulls-files
+  - target: api-endpoint:github-commits-by-sha
+  parsed_by_grammar:
+  - target: grammar:amux-triggers-query-dsl
+  executes_step:
+  - target: github-action-step:triggers-action-setup-node
+  - target: github-action-step:triggers-action-a5c-token
+  - target: github-action-step:triggers-action-build-runtime
+  - target: github-action-step:triggers-action-install-harness
+  - target: github-action-step:triggers-action-install-babysitter-plugin
+  - target: github-action-step:triggers-action-install-plugins
+  - target: github-action-step:triggers-action-evaluate-trigger
+  - target: github-action-step:triggers-action-pre-run
+  - target: github-action-step:triggers-action-run-amux
+  - target: github-action-step:triggers-action-post-run
+  defines_frontmatter_field:
+  - target: frontmatter-field:triggers-action-input-command
+  - target: frontmatter-field:triggers-action-input-harness
+  - target: frontmatter-field:triggers-action-input-provider
+  - target: frontmatter-field:triggers-action-input-model
+  - target: frontmatter-field:triggers-action-input-prompt
+  - target: frontmatter-field:triggers-action-input-interaction-mode
+  - target: frontmatter-field:triggers-action-input-max-turns
+  - target: frontmatter-field:triggers-action-input-with-proxy
+  - target: frontmatter-field:triggers-action-input-proxy-log-level
+  - target: frontmatter-field:triggers-action-input-babysitter-plugin
+  - target: frontmatter-field:triggers-action-input-process-file
+  - target: frontmatter-field:triggers-action-input-babysitter-prompt-prefix
+  - target: frontmatter-field:triggers-action-input-args
+  - target: frontmatter-field:triggers-action-input-args-json
+  - target: frontmatter-field:triggers-action-input-adapter
+  - target: frontmatter-field:triggers-action-input-plugins
+  - target: frontmatter-field:triggers-action-input-trigger-backend
+  - target: frontmatter-field:triggers-action-input-trigger-query
+  - target: frontmatter-field:triggers-action-input-include-diff
+  - target: frontmatter-field:triggers-action-input-use-a5c-token-exchange
+  - target: frontmatter-field:triggers-action-input-github-token
+  - target: frontmatter-field:triggers-action-input-node-version
+  - target: frontmatter-field:triggers-action-input-working-directory
+  - target: frontmatter-field:triggers-action-input-pre-run
+  - target: frontmatter-field:triggers-action-input-post-run
+  - target: frontmatter-field:triggers-action-output-matched
+  - target: frontmatter-field:triggers-action-output-event
+  - target: frontmatter-field:triggers-action-output-exit-code

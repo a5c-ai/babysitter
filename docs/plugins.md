@@ -1,3 +1,10 @@
+---
+title: Babysitter Plugins
+description: Understand the Babysitter plugin system, marketplace model, and how plugin installs reshape projects and workflows.
+last_updated: 2026-04-26
+category: landing
+---
+
 # Babysitter Plugins
 
 ## What Makes This Plugin System Different
@@ -33,6 +40,39 @@ Everything else -- the actual installation, configuration, project modification 
 ### The Two Scopes
 
 Plugins can be stored globally (`~/.a5c/`) or per-project (`<project>/.a5c/`). But even globally-installed plugins often create project-level artifacts. The themes plugin, for example, writes to `.a5c/themes/`, `.claude/settings.json`, and `CLAUDE.md` -- all project-level. The scope mostly determines where the registry and marketplace clones live.
+
+---
+
+<!-- supported-harness-plugins:start -->
+## Supported harness plugin packages
+
+`plugins/babysitter-unified/` is the only maintained source tree in this repo.
+Harness-specific bundles are generated from it and published as npm packages or
+external plugin repos; they are not maintained as checked-in directories here.
+
+Use this table when you need the canonical entrypoint for a specific Babysitter harness/plugin package rather than the broader plugin-system explanation.
+
+| Surface | Canonical docs home | Status note |
+| --- | --- | --- |
+| `plugins/babysitter-unified` | [plugins/babysitter-unified/per-harness/claude-code/README.md](../plugins/babysitter-unified/per-harness/claude-code/README.md) | Canonical authoring source plus Claude Code surface. |
+| `@a5c-ai/babysitter-codex` | [plugins/babysitter-unified/per-harness/codex/README.md](../plugins/babysitter-unified/per-harness/codex/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-cursor` | [plugins/babysitter-unified/per-harness/cursor/README.md](../plugins/babysitter-unified/per-harness/cursor/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `babysitter-gemini` | [plugins/babysitter-unified/per-harness/gemini/README.md](../plugins/babysitter-unified/per-harness/gemini/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `babysitter-github` | [plugins/babysitter-unified/per-harness/github/README.md](../plugins/babysitter-unified/per-harness/github/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-omp` | [plugins/babysitter-unified/per-harness/omp/README.md](../plugins/babysitter-unified/per-harness/omp/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-openclaw` | [plugins/babysitter-unified/per-harness/openclaw/README.md](../plugins/babysitter-unified/per-harness/openclaw/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-opencode` | [plugins/babysitter-unified/per-harness/opencode/README.md](../plugins/babysitter-unified/per-harness/opencode/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-pi` | [plugins/babysitter-unified/per-harness/pi/README.md](../plugins/babysitter-unified/per-harness/pi/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+<!-- supported-harness-plugins:end -->
+
+## Bridge Flags for amux Launch
+
+When launching agents through `amux launch`, two bridge flags control how babysitter hooks and interactive orchestration integrate with the harness:
+
+- **`--bridge-interactive`** enables an interactive bridge layer that proxies stdin/stdout through an intermediary capable of injecting babysitter hook responses and orchestration signals while preserving the harness's native TUI.
+- **`--bridge-hooks`** enables hook bridging: the bridge intercepts hook lifecycle events (SessionStart, Stop, PreToolUse, etc.) and forwards them to the babysitter session-start hook. This is how the session-start hook writes a bare run ID into session state, enabling `instructions:babysit-skill` to discover and assign a process to the run.
+
+The `hookSupport` and `bridgeCapabilities` attributes in the atlas graph agent version nodes describe which harnesses support these flags natively. See the [amux CLI reference](agent-mux/reference/10-cli-reference.md) for the full flag table.
 
 ---
 
@@ -154,10 +194,10 @@ babysitter plugin:add-marketplace \
 babysitter plugin:list-plugins --marketplace-name babysitter --global
 
 # Install a plugin (starts the AI-driven interview)
-babysitter plugin:install testing-suite --marketplace-name babysitter --global
+babysitter plugin:install testing-suite --global
 
 # Reconfigure later
-babysitter plugin:configure testing-suite --marketplace-name babysitter --project
+babysitter plugin:configure testing-suite --project
 
 # Remove it
 babysitter plugin:uninstall testing-suite --global
@@ -178,11 +218,13 @@ babysitter plugin:list-plugins --marketplace-name <name> --global
 **Plugin lifecycle:**
 
 ```bash
-babysitter plugin:install <name> --marketplace-name <mp> --global
-babysitter plugin:update <name> --marketplace-name <mp> --global
-babysitter plugin:configure <name> --marketplace-name <mp> --global
+babysitter plugin:install <name> [--marketplace-name <mp>] --global
+babysitter plugin:update <name> [--marketplace-name <mp>] --global
+babysitter plugin:configure <name> [--marketplace-name <mp>] --global
 babysitter plugin:uninstall <name> --global
 ```
+
+For `plugin:install`, `plugin:update`, and `plugin:configure`, `--marketplace-name` is optional when the selected scope has a single configured marketplace and the CLI can auto-resolve it.
 
 **Registry management:**
 
@@ -228,7 +270,7 @@ This is the core of your plugin. It's a markdown document that an AI agent will 
 
 3. **Be stack-aware.** Provide different instructions for different stacks. The basic-security plugin has separate ESLint rule blocks for React, Express, Python (ruff), and Go (gosec).
 
-4. **Copy from the babysitter library.** Plugins typically copy processes, skills, and agents from `plugins/babysitter/skills/babysit/process/specializations/` into the project's `.a5c/` directories. This seeds the project with domain-specific babysitter capabilities.
+4. **Copy from the babysitter library.** Plugins typically copy processes, skills, and agents from the built-in `library/` tree, such as `library/specializations/` or `library/methodologies/gsd/`, into the project's `.a5c/` directories. This seeds the project with project-local overrides and domain-specific Babysitter capabilities.
 
 5. **Modify project config files.** Plugins routinely edit `.eslintrc`, `tsconfig.json`, `package.json`, `.gitignore`, `CLAUDE.md`, `.claude/settings.json`, and CI/CD pipelines. Use merge semantics (append, don't overwrite) and check for existing content.
 

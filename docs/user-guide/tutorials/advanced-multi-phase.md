@@ -2,6 +2,7 @@
 
 **Version:** 1.0
 **Date:** 2026-01-25
+Last refreshed: 2026-04-25
 **Category:** Tutorial
 **Level:** Advanced
 **Estimated Time:** 90-120 minutes
@@ -36,8 +37,8 @@ Before starting this tutorial, you should have:
 ### Verify Environment
 
 ```bash
-# Verify Babysitter SDK
-npx @a5c-ai/babysitter-sdk@latest --version
+# Verify Babysitter CLI
+babysitter --version
 ```
 
 ### About Breakpoints

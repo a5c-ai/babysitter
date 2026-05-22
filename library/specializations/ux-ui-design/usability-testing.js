@@ -21,6 +21,12 @@
  * - Think-Aloud Protocol: https://www.nngroup.com/articles/thinking-aloud-the-1-usability-tool/
  * - System Usability Scale (SUS): https://www.usability.gov/how-to-and-tools/methods/system-usability-scale.html
  * - Task Success Rate: https://measuringu.com/task-completion/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:ux-ui-design]
+ *   skillAreas: [skill-area:design-systems, skill-area:interaction-design, skill-area:usability-testing]
+ *   roles: [role:product-designer, role:ux-researcher]
+ *   workflows: [workflow:user-feedback-loop, workflow:product-discovery, workflow:usability-testing-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -76,6 +82,7 @@ export async function process(inputs, ctx) {
       }
     };
   }
+
   // ============================================================================
   // PHASE 2: PARTICIPANT RECRUITMENT AND SCREENING
   // ============================================================================
@@ -131,7 +138,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Conducting pilot test to validate test setup');
-  let pilotTest = await ctx.task(pilotTestingTask, {
+  const pilotTest = await ctx.task(pilotTestingTask, {
     projectName,
     testProtocol,
     taskScenarios: taskScenarios.scenarios,
@@ -141,18 +148,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...pilotTest.artifacts);
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      pilotTest = await ctx.task(pilotTestingTask, { ...{
-    projectName,
-    testProtocol,
-    taskScenarios: taskScenarios.scenarios,
-    testingType,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Breakpoint: Review pilot test results
+  await ctx.breakpoint({
     question: `Pilot test complete. ${pilotTest.issuesFound} issues identified. Review pilot findings and approve test protocol?`,
     title: 'Pilot Test Review',
     context: {
@@ -171,15 +168,9 @@ export async function process(inputs, ctx) {
         pilotIssues: pilotTest.issuesFound,
         adjustmentsMade: pilotTest.adjustmentsMade
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: MODERATED USABILITY TESTING SESSIONS
   // ============================================================================
@@ -215,6 +206,7 @@ export async function process(inputs, ctx) {
       artifacts.push(...(result.artifacts || []));
     });
   }
+
   // ============================================================================
   // PHASE 7: UNMODERATED USABILITY TESTING
   // ============================================================================
@@ -234,6 +226,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...unmoderatedResults.artifacts);
   }
+
   // ============================================================================
   // PHASE 8: OBSERVATION DATA SYNTHESIS
   // ============================================================================
@@ -352,12 +345,13 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...accessibilityFindings.artifacts);
   }
+
   // ============================================================================
   // PHASE 15: USABILITY TEST REPORT GENERATION
   // ============================================================================
 
   ctx.log('info', 'Phase 15: Generating comprehensive usability test report');
-  let testReport = await ctx.task(testReportGenerationTask, {
+  const testReport = await ctx.task(testReportGenerationTask, {
     projectName,
     testPlan,
     participantRecruitment,
@@ -376,27 +370,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testReport.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      testReport = await ctx.task(testReportGenerationTask, { ...{
-    projectName,
-    testPlan,
-    participantRecruitment,
-    taskScenarios,
-    moderatedResults,
-    unmoderatedResults,
-    observationSynthesis,
-    metricsAnalysis,
-    issueIdentification,
-    findingsSynthesis,
-    usabilityScoring,
-    recommendations,
-    accessibilityFindings,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Test Results Review
+  await ctx.breakpoint({
     question: `Usability Testing complete for ${projectName}. SUS Score: ${usabilityScore}/100 (${usabilityGrade}). ${issueIdentification.criticalIssues.length} critical issues found. Review results and approve report?`,
     title: 'Usability Test Results Review',
     context: {
@@ -418,15 +393,9 @@ export async function process(inputs, ctx) {
         totalIssues: issueIdentification.totalIssues,
         topRecommendations: recommendations.prioritizedRecommendations.slice(0, 3)
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -506,7 +475,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 
@@ -877,7 +847,7 @@ export const testProtocolPreparationTask = defineTask('test-protocol-preparation
           type: 'object',
           properties: {
             welcome: { type: 'string' },
-            introductionTalking Points: { type: 'array', items: { type: 'string' } },
+            introductionTalkingPoints: { type: 'array', items: { type: 'string' } },
             backgroundQuestions: { type: 'array', items: { type: 'string' } },
             thinkAloudTraining: { type: 'string' },
             taskIntroTemplate: { type: 'string' },

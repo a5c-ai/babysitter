@@ -17,6 +17,12 @@
  * - IEEE 1149.1 JTAG: https://standards.ieee.org/standard/1149_1-2013.html
  * - IEEE 1500 Embedded Core Test: https://standards.ieee.org/standard/1500-2005.html
  * - FPGA BIST Techniques: https://docs.amd.com/r/en-US/ug908-vivado-programming-debugging
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

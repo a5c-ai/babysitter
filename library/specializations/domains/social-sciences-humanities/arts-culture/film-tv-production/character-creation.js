@@ -5,6 +5,12 @@
  * @outputs { success: boolean, characters: array, artifacts: array }
  * @recommendedSkills SK-FTV-007 (character-development), SK-FTV-004 (dialogue-crafting), SK-FTV-012 (genre-analysis-film)
  * @recommendedAgents AG-FTV-003 (character-designer-agent)
+ *
+ * @graph
+ *   domains: [domain:arts-culture]
+ *   skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:data-analysis]
+ *   roles: [role:creative-director, role:design-lead]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

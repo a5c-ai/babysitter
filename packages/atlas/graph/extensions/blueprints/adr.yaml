@@ -1,0 +1,43 @@
+nodeKind: Blueprint
+id: blueprint:adr
+attributes:
+  displayName: "adr"
+  description: |
+    Scaffold Architecture Decision Records — docs/adr/ tree, Michael Nygard (or MADR / Y-statement)
+    template, adr-tools or log4brains installation, and a PR nudge bot that suggests creating an ADR
+    when architecture-touching paths change (nudge only, never blocking).
+  installMd: "@plugins/a5c/marketplace/plugins/adr/install.md"
+  configureMd: "@plugins/a5c/marketplace/plugins/adr/configure.md"
+  uninstallMd: "@plugins/a5c/marketplace/plugins/adr/uninstall.md"
+  latestVersion: "1.0.0"
+  versions: ["1.0.0"]
+  tags: [adr, architecture, documentation, decisions, log4brains, adr-tools]
+  author: "a5c-ai"
+  packagePath: "plugins/adr"
+  marketplaceUrl: https://github.com/a5c-ai/babysitter
+  scope: project
+  domains:
+    - topic:architecture-decisions
+    - domain:software-engineering
+  requiresLanguages: []
+  requiresFrameworks: []
+  targetSurface:
+    - filesystem
+    - github-actions
+    - readme
+  breakpoints:
+    - "Stage 1: Project Analysis (existing ADRs, ADR tooling, architecture-touching paths, docs site)"
+    - "Stage 2: Tool Choice (adr-tools / adr-tools-python / log4brains / MADR-only)"
+    - "Stage 3: Template (Nygard / MADR / Y-statement)"
+edges:
+  executable_by:
+    - target: agent:claude-code
+    - target: agent:codex
+    - target: agent:cursor
+    - target: agent:gemini-cli
+  applies_to:
+    - target: topic:architecture-decisions
+      confidence: primary
+  sourced_from:
+    - target: source-ref:a5c-marketplace-adr
+    - target: source-ref:a5c-marketplace

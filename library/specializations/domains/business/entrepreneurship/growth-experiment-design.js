@@ -14,6 +14,11 @@
  * @references
  * - Hacking Growth (Sean Ellis): https://www.amazon.com/Hacking-Growth-Morgan-Brown/dp/045149721X
  * - Trustworthy Online Controlled Experiments: https://www.amazon.com/Trustworthy-Online-Controlled-Experiments-Practical/dp/1108724264
+  * @graph
+ *   domains: [domain:entrepreneurship]
+ *   skillAreas: [skill-area:business-model-design, skill-area:growth-strategy, skill-area:product-strategy]
+ *   workflows: [workflow:product-discovery]
+ *   roles: [role:strategic-planner, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

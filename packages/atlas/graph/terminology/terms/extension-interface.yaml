@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:extension-interface
+attributes:
+  canonicalDefinitionId: definition:extension-interface.canonical
+  displayName: "ExtensionInterface"
+  kind: extension-shape
+  references:
+    - "NodeKind:ExtensionInterface"
+  description: |
+    A contract an extension fulfills
+edges:
+  applies_to:
+    - target: domain:software-engineering

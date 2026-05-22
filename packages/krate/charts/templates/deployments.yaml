@@ -1,0 +1,448 @@
+{{- $kubevela := .Values.kubevela | default dict -}}
+{{- $kubevelaNamespace := $kubevela.namespace | default "vela-system" -}}
+{{- $kyverno := .Values.externalDependencies.kyverno | default dict -}}
+{{- $kyvernoReporter := $kyverno.policyReporter | default dict -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "krate.fullname" . }}-api
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: api
+    spec:
+      serviceAccountName: {{ include "krate.fullname" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: api
+          image: {{ include "krate.controllerImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["node", "bin/krate-server.mjs"]
+          args: ["--port=3080"]
+          env:
+            - name: PORT
+              value: "3080"
+            - name: KRATE_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: KRATE_ADMIN_ORG
+              value: {{ .Values.admin.org | quote }}
+            - name: KRATE_ADMIN_USERNAME
+              value: {{ .Values.admin.username | quote }}
+            - name: KRATE_KUBEVELA_NAMESPACE
+              value: {{ $kubevelaNamespace | quote }}
+            - name: KRATE_KYVERNO_MODE
+              value: {{ default (ternary "auto" (ternary "byo" "disabled" ($kyverno.enabled | default false)) ($kyverno.discoverExisting | default true)) $kyverno.mode | quote }}
+            - name: KRATE_KYVERNO_NAMESPACE
+              value: {{ $kyverno.namespace | default "kyverno" | quote }}
+            - name: KRATE_KYVERNO_POLICY_NAMESPACE
+              value: {{ $kyverno.policyNamespace | default .Release.Namespace | quote }}
+            - name: KRATE_KYVERNO_REQUIRE_FOR_ENFORCE_MODE
+              value: {{ $kyverno.requireForEnforceMode | default true | quote }}
+            - name: KRATE_KYVERNO_POLICY_REPORTER_ENABLED
+              value: {{ $kyvernoReporter.enabled | default false | quote }}
+            - name: KRATE_KYVERNO_DISCOVER_EXISTING
+              value: {{ $kyverno.discoverExisting | default true | quote }}
+            - name: KRATE_GITEA_HTTP_URL
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/krate" (include "krate.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+            - name: KRATE_AUTH_COOKIE_NAME
+              value: {{ .Values.auth.session.cookieName | quote }}
+            - name: KRATE_AUTH_DELEGATED_IDENTITY_ENABLED
+              value: {{ .Values.auth.delegatedIdentity.enabled | quote }}
+            - name: KRATE_AUTH_DELEGATED_USER_HEADER
+              value: {{ .Values.auth.delegatedIdentity.userHeader | quote }}
+            - name: KRATE_AUTH_DELEGATED_GROUPS_HEADER
+              value: {{ .Values.auth.delegatedIdentity.groupsHeader | quote }}
+            - name: KRATE_AUTH_DELEGATED_EMAIL_HEADER
+              value: {{ .Values.auth.delegatedIdentity.emailHeader | quote }}
+            - name: KRATE_AUTH_DELEGATED_LOCAL_DEVELOPMENT
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.enabled | quote }}
+            - name: KRATE_AUTH_DELEGATED_LOCAL_USER
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.user | quote }}
+            - name: KRATE_AUTH_DELEGATED_LOCAL_EMAIL
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.email | quote }}
+            - name: KRATE_AUTH_DELEGATED_LOCAL_GROUPS
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.groups | quote }}
+            - name: KRATE_AUTH_GITHUB_ENABLED
+              value: {{ .Values.auth.github.enabled | quote }}
+            - name: KRATE_AUTH_GITHUB_AUTHORIZATION_URL
+              value: {{ .Values.auth.github.authorizationUrl | quote }}
+            - name: KRATE_AUTH_GITHUB_TOKEN_URL
+              value: {{ .Values.auth.github.tokenUrl | quote }}
+            - name: KRATE_AUTH_GITHUB_USERINFO_URL
+              value: {{ .Values.auth.github.userInfoUrl | quote }}
+            - name: KRATE_AUTH_GITHUB_SCOPES
+              value: {{ .Values.auth.github.scopes | quote }}
+            - name: KRATE_AUTH_GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "krate.fullname" .)) .Values.auth.github.existingSecret | quote }}
+                  key: github-client-id
+                  optional: true
+            - name: KRATE_AUTH_GITHUB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "krate.fullname" .)) .Values.auth.github.existingSecret | quote }}
+                  key: github-client-secret
+                  optional: true
+            - name: KRATE_AUTH_SSO_ENABLED
+              value: {{ .Values.auth.sso.enabled | quote }}
+            - name: KRATE_AUTH_SSO_PROVIDER_NAME
+              value: {{ .Values.auth.sso.providerName | quote }}
+            - name: KRATE_AUTH_SSO_ISSUER_URL
+              value: {{ .Values.auth.sso.issuerUrl | quote }}
+            - name: KRATE_AUTH_SSO_AUTHORIZATION_URL
+              value: {{ .Values.auth.sso.authorizationUrl | quote }}
+            - name: KRATE_AUTH_SSO_TOKEN_URL
+              value: {{ .Values.auth.sso.tokenUrl | quote }}
+            - name: KRATE_AUTH_SSO_USERINFO_URL
+              value: {{ .Values.auth.sso.userInfoUrl | quote }}
+            - name: KRATE_AUTH_SSO_SCOPES
+              value: {{ .Values.auth.sso.scopes | quote }}
+            - name: KRATE_AUTH_SSO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "krate.fullname" .)) .Values.auth.sso.existingSecret | quote }}
+                  key: sso-client-id
+                  optional: true
+            - name: KRATE_AUTH_SSO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "krate.fullname" .)) .Values.auth.sso.existingSecret | quote }}
+                  key: sso-client-secret
+                  optional: true
+          ports:
+            - name: http
+              containerPort: 3080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "krate.fullname" . }}-controllers
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controllers
+spec:
+  replicas: {{ .Values.controllers.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: controllers
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: controllers
+    spec:
+      serviceAccountName: {{ include "krate.fullname" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: controllers
+          image: {{ include "krate.controllerImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["node", "bin/krate-server.mjs"]
+          args: ["--port=3080"]
+          env:
+            - name: PORT
+              value: "3080"
+            - name: KRATE_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: KRATE_ADMIN_ORG
+              value: {{ .Values.admin.org | quote }}
+            - name: KRATE_ADMIN_USERNAME
+              value: {{ .Values.admin.username | quote }}
+            - name: KRATE_KUBEVELA_NAMESPACE
+              value: {{ $kubevelaNamespace | quote }}
+            - name: KRATE_KYVERNO_MODE
+              value: {{ default (ternary "auto" (ternary "byo" "disabled" ($kyverno.enabled | default false)) ($kyverno.discoverExisting | default true)) $kyverno.mode | quote }}
+            - name: KRATE_KYVERNO_NAMESPACE
+              value: {{ $kyverno.namespace | default "kyverno" | quote }}
+            - name: KRATE_KYVERNO_POLICY_NAMESPACE
+              value: {{ $kyverno.policyNamespace | default .Release.Namespace | quote }}
+            - name: KRATE_KYVERNO_REQUIRE_FOR_ENFORCE_MODE
+              value: {{ $kyverno.requireForEnforceMode | default true | quote }}
+            - name: KRATE_KYVERNO_POLICY_REPORTER_ENABLED
+              value: {{ $kyvernoReporter.enabled | default false | quote }}
+            - name: KRATE_KYVERNO_DISCOVER_EXISTING
+              value: {{ $kyverno.discoverExisting | default true | quote }}
+            - name: KRATE_GITEA_HTTP_URL
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/krate" (include "krate.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+            - name: KRATE_AUTH_COOKIE_NAME
+              value: {{ .Values.auth.session.cookieName | quote }}
+            - name: KRATE_AUTH_DELEGATED_IDENTITY_ENABLED
+              value: {{ .Values.auth.delegatedIdentity.enabled | quote }}
+            - name: KRATE_AUTH_DELEGATED_USER_HEADER
+              value: {{ .Values.auth.delegatedIdentity.userHeader | quote }}
+            - name: KRATE_AUTH_DELEGATED_GROUPS_HEADER
+              value: {{ .Values.auth.delegatedIdentity.groupsHeader | quote }}
+            - name: KRATE_AUTH_DELEGATED_EMAIL_HEADER
+              value: {{ .Values.auth.delegatedIdentity.emailHeader | quote }}
+            - name: KRATE_AUTH_DELEGATED_LOCAL_DEVELOPMENT
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.enabled | quote }}
+            - name: KRATE_AUTH_DELEGATED_LOCAL_USER
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.user | quote }}
+            - name: KRATE_AUTH_DELEGATED_LOCAL_EMAIL
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.email | quote }}
+            - name: KRATE_AUTH_DELEGATED_LOCAL_GROUPS
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.groups | quote }}
+            - name: KRATE_AUTH_GITHUB_ENABLED
+              value: {{ .Values.auth.github.enabled | quote }}
+            - name: KRATE_AUTH_GITHUB_AUTHORIZATION_URL
+              value: {{ .Values.auth.github.authorizationUrl | quote }}
+            - name: KRATE_AUTH_GITHUB_TOKEN_URL
+              value: {{ .Values.auth.github.tokenUrl | quote }}
+            - name: KRATE_AUTH_GITHUB_USERINFO_URL
+              value: {{ .Values.auth.github.userInfoUrl | quote }}
+            - name: KRATE_AUTH_GITHUB_SCOPES
+              value: {{ .Values.auth.github.scopes | quote }}
+            - name: KRATE_AUTH_GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "krate.fullname" .)) .Values.auth.github.existingSecret | quote }}
+                  key: github-client-id
+                  optional: true
+            - name: KRATE_AUTH_GITHUB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "krate.fullname" .)) .Values.auth.github.existingSecret | quote }}
+                  key: github-client-secret
+                  optional: true
+            - name: KRATE_AUTH_SSO_ENABLED
+              value: {{ .Values.auth.sso.enabled | quote }}
+            - name: KRATE_AUTH_SSO_PROVIDER_NAME
+              value: {{ .Values.auth.sso.providerName | quote }}
+            - name: KRATE_AUTH_SSO_ISSUER_URL
+              value: {{ .Values.auth.sso.issuerUrl | quote }}
+            - name: KRATE_AUTH_SSO_AUTHORIZATION_URL
+              value: {{ .Values.auth.sso.authorizationUrl | quote }}
+            - name: KRATE_AUTH_SSO_TOKEN_URL
+              value: {{ .Values.auth.sso.tokenUrl | quote }}
+            - name: KRATE_AUTH_SSO_USERINFO_URL
+              value: {{ .Values.auth.sso.userInfoUrl | quote }}
+            - name: KRATE_AUTH_SSO_SCOPES
+              value: {{ .Values.auth.sso.scopes | quote }}
+            - name: KRATE_AUTH_SSO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "krate.fullname" .)) .Values.auth.sso.existingSecret | quote }}
+                  key: sso-client-id
+                  optional: true
+            - name: KRATE_AUTH_SSO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "krate.fullname" .)) .Values.auth.sso.existingSecret | quote }}
+                  key: sso-client-secret
+                  optional: true
+          ports:
+            - name: http
+              containerPort: 3080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "krate.fullname" . }}-web
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web
+spec:
+  replicas: {{ .Values.web.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: web
+    spec:
+      serviceAccountName: {{ include "krate.fullname" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: web
+          image: {{ include "krate.webImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: PORT
+              value: "3000"
+            - name: HOSTNAME
+              value: "0.0.0.0"
+            - name: KRATE_ADMIN_ORG
+              value: {{ .Values.admin.org | quote }}
+            - name: KRATE_ADMIN_USERNAME
+              value: {{ .Values.admin.username | quote }}
+            - name: KRATE_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: KRATE_KUBEVELA_NAMESPACE
+              value: {{ $kubevelaNamespace | quote }}
+            - name: KRATE_KYVERNO_MODE
+              value: {{ default (ternary "auto" (ternary "byo" "disabled" ($kyverno.enabled | default false)) ($kyverno.discoverExisting | default true)) $kyverno.mode | quote }}
+            - name: KRATE_KYVERNO_NAMESPACE
+              value: {{ $kyverno.namespace | default "kyverno" | quote }}
+            - name: KRATE_KYVERNO_POLICY_NAMESPACE
+              value: {{ $kyverno.policyNamespace | default .Release.Namespace | quote }}
+            - name: KRATE_KYVERNO_REQUIRE_FOR_ENFORCE_MODE
+              value: {{ $kyverno.requireForEnforceMode | default true | quote }}
+            - name: KRATE_KYVERNO_POLICY_REPORTER_ENABLED
+              value: {{ $kyvernoReporter.enabled | default false | quote }}
+            - name: KRATE_KYVERNO_DISCOVER_EXISTING
+              value: {{ $kyverno.discoverExisting | default true | quote }}
+            - name: KRATE_CONTROLLER_URL
+              value: {{ printf "http://%s-api.%s.svc.cluster.local:%v" (include "krate.fullname" .) .Release.Namespace (.Values.api.service.port | int) | quote }}
+            - name: KRATE_GITEA_HTTP_URL
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/krate" (include "krate.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+            - name: KRATE_AUTH_COOKIE_NAME
+              value: {{ .Values.auth.session.cookieName | quote }}
+            - name: KRATE_AUTH_DELEGATED_IDENTITY_ENABLED
+              value: {{ .Values.auth.delegatedIdentity.enabled | quote }}
+            - name: KRATE_AUTH_DELEGATED_USER_HEADER
+              value: {{ .Values.auth.delegatedIdentity.userHeader | quote }}
+            - name: KRATE_AUTH_DELEGATED_GROUPS_HEADER
+              value: {{ .Values.auth.delegatedIdentity.groupsHeader | quote }}
+            - name: KRATE_AUTH_DELEGATED_EMAIL_HEADER
+              value: {{ .Values.auth.delegatedIdentity.emailHeader | quote }}
+            - name: KRATE_AUTH_DELEGATED_LOCAL_DEVELOPMENT
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.enabled | quote }}
+            - name: KRATE_AUTH_DELEGATED_LOCAL_USER
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.user | quote }}
+            - name: KRATE_AUTH_DELEGATED_LOCAL_EMAIL
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.email | quote }}
+            - name: KRATE_AUTH_DELEGATED_LOCAL_GROUPS
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.groups | quote }}
+            - name: KRATE_AUTH_GITHUB_ENABLED
+              value: {{ .Values.auth.github.enabled | quote }}
+            - name: KRATE_AUTH_GITHUB_AUTHORIZATION_URL
+              value: {{ .Values.auth.github.authorizationUrl | quote }}
+            - name: KRATE_AUTH_GITHUB_TOKEN_URL
+              value: {{ .Values.auth.github.tokenUrl | quote }}
+            - name: KRATE_AUTH_GITHUB_USERINFO_URL
+              value: {{ .Values.auth.github.userInfoUrl | quote }}
+            - name: KRATE_AUTH_GITHUB_SCOPES
+              value: {{ .Values.auth.github.scopes | quote }}
+            - name: KRATE_AUTH_GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "krate.fullname" .)) .Values.auth.github.existingSecret | quote }}
+                  key: github-client-id
+                  optional: true
+            - name: KRATE_AUTH_GITHUB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "krate.fullname" .)) .Values.auth.github.existingSecret | quote }}
+                  key: github-client-secret
+                  optional: true
+            - name: KRATE_AUTH_SSO_ENABLED
+              value: {{ .Values.auth.sso.enabled | quote }}
+            - name: KRATE_AUTH_SSO_PROVIDER_NAME
+              value: {{ .Values.auth.sso.providerName | quote }}
+            - name: KRATE_AUTH_SSO_ISSUER_URL
+              value: {{ .Values.auth.sso.issuerUrl | quote }}
+            - name: KRATE_AUTH_SSO_AUTHORIZATION_URL
+              value: {{ .Values.auth.sso.authorizationUrl | quote }}
+            - name: KRATE_AUTH_SSO_TOKEN_URL
+              value: {{ .Values.auth.sso.tokenUrl | quote }}
+            - name: KRATE_AUTH_SSO_USERINFO_URL
+              value: {{ .Values.auth.sso.userInfoUrl | quote }}
+            - name: KRATE_AUTH_SSO_SCOPES
+              value: {{ .Values.auth.sso.scopes | quote }}
+            - name: KRATE_AUTH_SSO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "krate.fullname" .)) .Values.auth.sso.existingSecret | quote }}
+                  key: sso-client-id
+                  optional: true
+            - name: KRATE_AUTH_SSO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "krate.fullname" .)) .Values.auth.sso.existingSecret | quote }}
+                  key: sso-client-secret
+                  optional: true
+          ports:
+            - name: http
+              containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "krate.fullname" . }}-webhook-worker
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+    app.kubernetes.io/component: webhook-worker
+spec:
+  replicas: {{ .Values.webhookWorker.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: webhook-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: webhook-worker
+    spec:
+      serviceAccountName: {{ include "krate.fullname" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: webhook-worker
+          image: {{ include "krate.controllerImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["node", "bin/krate-server.mjs"]
+          args: ["--mode=webhook-worker"]
+          env:
+            - name: KRATE_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: KRATE_GITEA_HTTP_URL
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/krate" (include "krate.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+            - name: KRATE_AUTH_COOKIE_NAME
+              value: {{ .Values.auth.session.cookieName | quote }}
+          {{- with .Values.webhookWorker.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3080
+            initialDelaySeconds: 3
+            periodSeconds: 5

@@ -1,0 +1,73 @@
+---
+nodeKind: Workflow
+id: workflow:e-discovery-workflow
+attributes:
+  displayName: "E-Discovery Workflow"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-matter"
+  complexity: cross-team
+  description: |
+    Manages the electronic discovery lifecycle for litigation and
+    investigations -- issuing legal hold notices and tracking custodian
+    acknowledgments, collecting data from email archives, collaboration
+    platforms, and cloud storage with forensic chain-of-custody, processing
+    and deduplicating document collections, applying technology-assisted
+    review (TAR/CAL) for relevance classification, managing privilege review
+    workflows with clawback protocols, and producing documents in
+    EDRM-compliant formats. Produces collection reports, review progress
+    dashboards, and production logs. Excludes legal strategy and case
+    assessment.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:security-reviewer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:retrieval-augmented-generation
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:legaltech
+    - target: domain:compliance
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:legal-team
+    - target: org-unit:it-service-management
+---
+nodeKind: Workflow
+id: workflow:contract-automation-review
+attributes:
+  displayName: "Contract Automation Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews contract automation system performance and accuracy --
+    evaluating clause extraction model precision and recall against manually
+    reviewed baselines, auditing template library completeness and version
+    currency, validating risk-scoring algorithms against negotiation outcome
+    data, measuring turnaround time improvements versus manual drafting
+    benchmarks, and reviewing AI-suggested redline accuracy for high-risk
+    clause categories (indemnification, limitation of liability, IP
+    assignment). Produces model accuracy reports, template gap analyses, and
+    automation ROI assessments. Excludes legal advice on contract terms.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:retrieval-augmented-generation
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:legaltech
+    - target: domain:machine-learning
+  triggers_responsibility:
+    - target: responsibility:ai-safety-guardrails
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:legal-team
+    - target: org-unit:ml-platform-team

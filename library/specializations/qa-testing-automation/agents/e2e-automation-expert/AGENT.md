@@ -10,6 +10,14 @@ expertise:
   - Mobile testing automation
   - CI/CD integration patterns
   - Test data management
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer]
+  skillAreas: [skill-area:e2e-testing, skill-area:cross-browser-testing]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
+
 ---
 
 # E2E Automation Expert Agent

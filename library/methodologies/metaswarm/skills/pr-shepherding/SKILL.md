@@ -2,17 +2,14 @@
 name: pr-shepherding
 description: Monitor PR lifecycle from creation through merge including CI monitoring, review comment handling, thread resolution, and merge readiness verification.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# PR Shepherding
-
-## Overview
-
-Monitor and manage a PR from creation through merge. Handle CI failures, respond to review comments, resolve threads, and verify merge readiness.
-
-## When to Use
-
-- After PR creation from completed work
 - When a PR needs CI monitoring
 - When review comments need automated handling
 

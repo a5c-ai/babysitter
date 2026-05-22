@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:software-development-kit.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:software-development-kit
+  text: |
+    Software Development Kit (SDK): a library and tooling bundle that exposes a platforms primitives to developers.
+  status: canonical
+edges:
+  defines:
+    - term:software-development-kit

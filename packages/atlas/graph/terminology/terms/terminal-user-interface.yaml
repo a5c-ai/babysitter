@@ -1,0 +1,11 @@
+nodeKind: Term
+id: term:terminal-user-interface
+attributes:
+  canonicalDefinitionId: definition:terminal-user-interface.canonical
+  displayName: "Terminal User Interface"
+  kind: tool
+  description: |
+    An interactive UI rendered inside a terminal emulator.
+edges:
+  applies_to:
+    - target: domain:software-engineering

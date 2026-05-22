@@ -1,0 +1,79 @@
+{
+  "issueNumber": 138,
+  "baseBranch": "staging",
+  "targetBranch": "fix/issue-138-session-resume-state-dir-normalization",
+  "title": "session:resume writes state file to wrong path (missing state/ subdir)",
+  "labels": [
+    "bug",
+    "sdk",
+    "priority:high",
+    "effort:small",
+    "ready-for-dev"
+  ],
+  "summary": "The session:resume CLI path can write the resumed session state file to <state-dir>/<sessionId>.md when passed a root-style --state-dir such as .a5c or ~/.a5c, while hooks normalize and read <root>/state/<sessionId>.md. The fix should make the writer and hook reader share canonical session state directory semantics.",
+  "targetFiles": [
+    "packages/sdk/src/cli/commands/session/resume.ts",
+    "packages/sdk/src/cli/commands/session/common.ts",
+    "packages/sdk/src/config/defaults.ts",
+    "packages/sdk/src/session/parse.ts",
+    "packages/sdk/src/session/write.ts",
+    "packages/sdk/src/cli/commands/session/__tests__/resume.test.ts",
+    "packages/sdk/src/cli/commands/session/__tests__/lifecycle.test.ts",
+    "packages/sdk/src/harness/BaseAdapter.ts",
+    "packages/sdk/src/harness/customAdapter.ts",
+    "packages/sdk/src/harness/unified/adapter.ts",
+    "packages/sdk/src/harness/hooks/stopHookHandler.ts",
+    "packages/sdk/src/harness/hooks/sessionBinding.ts",
+    "packages/sdk/src/harness/__tests__/harness.test.ts",
+    "packages/sdk/src/harness/__tests__/customAdapter.test.ts",
+    "packages/sdk/src/harness/unified/__tests__/adapter.test.ts",
+    "plugins/babysitter-github/skills/babysit/SKILL.md",
+    ".codex/skills/babysit/SKILL.md",
+    "docs/agent-reference/command-surfaces.md"
+  ],
+  "relatedIssues": [
+    139,
+    166
+  ],
+  "processLibraryReferences": [
+    "cradle/bugfix.js",
+    "babysitter/tdd-quality-convergence.js",
+    "specializations/sdk-platform-development/cli-tool-development.js",
+    "specializations/sdk-platform-development/references.md"
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/cli/commands/session/__tests__/resume.test.ts packages/sdk/src/cli/commands/session/__tests__/lifecycle.test.ts packages/sdk/src/harness/__tests__/harness.test.ts",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata"
+  ],
+  "acceptanceFocus": [
+    "session:resume with explicit --state-dir equal to the configured global root writes <root>/state/<sessionId>.md, not <root>/<sessionId>.md.",
+    "session:resume with documented relative --state-dir .a5c writes the same canonical path the stop hook reads when .a5c is the configured/global state root.",
+    "The JSON stateFile and human output show the actual canonical file path written.",
+    "The state file contains active: true and the requested run_id so the Stop hook can resume blocking/iteration decisions.",
+    "Intentionally custom leaf session state directories continue to work, unless maintainer guidance explicitly changes that contract.",
+    "Hook/adapters and session CLI commands agree on root-style state-dir normalization."
+  ],
+  "qualityGates": [
+    "Regression tests fail before implementation and pass after implementation.",
+    "Targeted session resume and lifecycle tests pass.",
+    "Relevant harness normalization tests pass.",
+    "SDK build passes.",
+    "SDK test suite passes or any pre-existing unrelated failures are documented with evidence.",
+    "Metadata verification passes.",
+    "Reviewer approves path normalization semantics and compatibility with existing custom state directory behavior."
+  ],
+  "nonGoals": [
+    "Do not change hooks-mux package behavior; the issue is in SDK session state-dir resolution.",
+    "Do not change run directory resolution or journal replay semantics.",
+    "Do not implement broad recovery for missing session files; issue #166 tracks that related but separate problem.",
+    "Do not add shell-oriented subtasks to this repository process."
+  ],
+  "knownContext": {
+    "issueObservation": "Current session:resume uses args.stateDir directly before getSessionFilePath, while hooks/adapters use normalizeSessionStateDir(args.stateDir ?? BABYSITTER_STATE_DIR).",
+    "canonicalPath": "<global-root>/state/<sessionId>.md",
+    "buggyPath": "<global-root>/<sessionId>.md",
+    "compatibilityBoundary": "Root-style stateDir values should normalize to <root>/state; already-canonical or intentionally custom leaf directories should remain direct session state directories."
+  }
+}

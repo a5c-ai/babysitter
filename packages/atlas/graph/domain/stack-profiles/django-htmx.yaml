@@ -1,0 +1,25 @@
+nodeKind: StackProfile
+id: stack-profile:django-htmx
+attributes:
+  displayName: "Django + HTMX + Alpine"
+  description: |
+    Server-rendered Django pages enhanced with HTMX for partial-page swaps
+    (replacing React/Vue for interactivity) and Alpine.js for small,
+    declarative client-side interactions without a build step.
+
+    Django's ORM (typically with PostgreSQL), class-based views, template
+    system, and the Django admin panel remain central. Django REST Framework
+    or Ninja can coexist for API endpoints. Celery with Redis handles
+    background tasks. This stack appeals to Python-native teams building
+    internal tools, content platforms, and B2B applications that want
+    rich interactivity without the complexity of a full JS frontend framework.
+  composes:
+    - language:python
+    - framework:django
+edges:
+  composed_of:
+    - language:python
+    - framework:django
+  composes_stack:
+    - target: language:python
+    - target: framework:django

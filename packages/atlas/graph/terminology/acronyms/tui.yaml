@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:tui
+attributes:
+  acronym: "TUI"
+  expandsToTermId: term:terminal-user-interface
+  description: |
+    Acronym for TUI.
+edges:
+  expands_to:
+    - term:terminal-user-interface

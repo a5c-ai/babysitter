@@ -14,6 +14,13 @@
  *
  * @references
  * - WebSocket RFC 6455: https://www.rfc-editor.org/rfc/rfc6455
+ * @graph
+ *   domains: [domain:networking]
+ *   specializations: [specialization:network-programming]
+ *   skillAreas: [skill-area:protocol-design, skill-area:socket-programming, skill-area:websocket-design]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:circuit-breakers]
+ *   workflows: [workflow:protocol-implementation-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

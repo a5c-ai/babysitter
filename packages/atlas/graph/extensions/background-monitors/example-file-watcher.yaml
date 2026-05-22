@@ -1,0 +1,18 @@
+nodeKind: BackgroundMonitor
+id: background-monitor:example-file-watcher
+attributes:
+  displayName: "Project file watcher (example)"
+  manifestPath: "monitors/monitors.json"
+  command: "node"
+  args: ["monitors/file-watcher.js"]
+  triggers: [session-start, file-change]
+  lifecycle: per-session
+  outputs: [hook-event, notification]
+  description: "Watches project files and emits hook events on relevant changes; bundled in a Claude Code plugin via monitors/monitors.json."
+edges:
+  contained_in_plugin:
+    - target: plugin:example-portable-extension
+  emits_hook:
+    - target: hook-surface:notification
+  sourced_from:
+    - target: source-ref:example-skill-source

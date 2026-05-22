@@ -7,6 +7,13 @@ metadata:
   version: "1.0.0"
   category: security-testing
   backlog-id: SK-SEC-003
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:dast, skill-area:application-security-testing]
+  roles: [role:security-engineer, role:backend-engineer]
+  workflows: [workflow:vulnerability-management, workflow:security-audit]
+
 ---
 
 # dast-scanner

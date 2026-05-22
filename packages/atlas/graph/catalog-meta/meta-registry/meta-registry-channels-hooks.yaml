@@ -1,0 +1,627 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:channels-hooks
+attributes:
+  displayName: Channels & Hooks (meta)
+  clusterNumber: 5
+  scope: 'Conceptual aggregation of NodeKinds describing the brokered communication surfaces (Channel — also dual-tagged 3-agent-stack in editorial source) and the hook fan-out / merge machinery: HookSurface (canonical event names), HookMapping (per-(agent, hook) realization), MergePolicy (named conflict-resolution rule), HookMergeDiagnostic (record produced when multiple sources collide), and DecisionVerb (ordered deny<ask<allow<continue<noop verb enum). Editorial homes: Channel + HookSurface + MergePolicy in 5-communication; HookMapping in 5-communication-primitives; HookMergeDiagnostic in 7-extensions; DecisionVerb in 13-catalog-meta.'
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:channel
+  - target: meta-node-kind:hook-surface
+  - target: meta-node-kind:merge-policy
+  - target: meta-node-kind:hook-mapping
+  - target: meta-node-kind:hook-merge-diagnostic
+  - target: meta-node-kind:decision-verb
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:channel
+attributes:
+  displayName: Channel (meta)
+  name: Channel
+  cluster: 5-communication
+  prefix: channel
+  origin: universal
+  purpose: brokered communication surface (mcp-channel, a2a-channel, chat-channel, mailbox-channel, http-sse-channel, plus notification kinds — webhook / email / sms / push / slack / desktop-notification / system-tray)
+  exampleCount: 0
+  invariants:
+  - kind value within enum (V-7.1)
+edges:
+  in_cluster:
+  - target: meta-cluster:channels-hooks
+  contains_meta_attribute:
+  - target: meta-attribute:channel--id
+  - target: meta-attribute:channel--kind
+  - target: meta-attribute:channel--persistent
+  - target: meta-attribute:channel--endpoint
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:hook-surface
+attributes:
+  displayName: HookSurface (meta)
+  name: HookSurface
+  cluster: 5-communication
+  prefix: hook-surface
+  origin: universal
+  purpose: a concrete hook event name (PreToolUse, PhaseChange, ...) — the canonical surface dispatched by hooks-mux
+  exampleCount: 0
+  invariants:
+  - family value within enum (V-7.3)
+edges:
+  in_cluster:
+  - target: meta-cluster:channels-hooks
+  contains_meta_attribute:
+  - target: meta-attribute:hook-surface--id
+  - target: meta-attribute:hook-surface--event-name
+  - target: meta-attribute:hook-surface--family
+  - target: meta-attribute:hook-surface--blocking
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:merge-policy
+attributes:
+  displayName: MergePolicy (meta)
+  name: MergePolicy
+  cluster: 5-communication
+  prefix: merge-policy
+  origin: a5c
+  purpose: named conflict-resolution policy applied by hooks-mux when fanning a single hook event across multiple registered handlers
+  exampleCount: 0
+  invariants:
+  - 'id starts with merge-policy:'
+  - envMergeRule = protected-prefixes implies protectedPrefixes is non-empty
+  - envMergeRule = namespace-required implies namespaceRequired = true
+edges:
+  in_cluster:
+  - target: meta-cluster:channels-hooks
+  contains_meta_attribute:
+  - target: meta-attribute:merge-policy--id
+  - target: meta-attribute:merge-policy--decision-rule
+  - target: meta-attribute:merge-policy--env-merge-rule
+  - target: meta-attribute:merge-policy--system-message-strategy
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:hook-mapping
+attributes:
+  displayName: HookMapping (meta)
+  name: HookMapping
+  cluster: 5-communication-primitives
+  prefix: hook-mapping
+  origin: universal
+  purpose: per-(agent, canonical-hook) mapping recording the agent's native event name, version range, payload shape, and delivery
+  exampleCount: 0
+  invariants:
+  - hookId resolves to a canonical HookSurface
+  - targetId resolves
+edges:
+  in_cluster:
+  - target: meta-cluster:channels-hooks
+  contains_meta_attribute:
+  - target: meta-attribute:hook-mapping--id
+  - target: meta-attribute:hook-mapping--native-name
+  - target: meta-attribute:hook-mapping--delivery
+  - target: meta-attribute:hook-mapping--support-level
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:hook-merge-diagnostic
+attributes:
+  displayName: HookMergeDiagnostic (meta)
+  name: HookMergeDiagnostic
+  cluster: 7-extensions
+  prefix: hook-merge-diagnostic
+  origin: a5c
+  purpose: a record produced by hooks-mux when merging hook surfaces from multiple sources (plugins, settings, profiles)
+  exampleCount: 0
+  invariants:
+  - sources list is non-empty
+  - outcome=conflict requires severity in {warning,error}
+edges:
+  in_cluster:
+  - target: meta-cluster:channels-hooks
+  contains_meta_attribute:
+  - target: meta-attribute:hook-merge-diagnostic--id
+  - target: meta-attribute:hook-merge-diagnostic--outcome
+  - target: meta-attribute:hook-merge-diagnostic--precedence-rule
+  - target: meta-attribute:hook-merge-diagnostic--severity
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:decision-verb
+attributes:
+  displayName: DecisionVerb (meta)
+  name: DecisionVerb
+  cluster: 13-catalog-meta
+  prefix: decision-verb
+  origin: universal
+  purpose: ordered enum of hook decision verbs (deny < ask < allow < continue < noop) with rank attribute and orthogonal block flag
+  exampleCount: 0
+  invariants:
+  - 'STUB: deferred to Phase 2 (channels-hooks/hook-merge track).'
+edges:
+  in_cluster:
+  - target: meta-cluster:channels-hooks
+  contains_meta_attribute:
+  - target: meta-attribute:decision-verb--id
+  - target: meta-attribute:decision-verb--verb
+  - target: meta-attribute:decision-verb--rank
+  - target: meta-attribute:decision-verb--block
+---
+nodeKind: MetaAttribute
+id: meta-attribute:channel--id
+attributes:
+  displayName: Channel.id
+  name: id
+  parentNodeKindId: meta-node-kind:channel
+  type: id
+  required: true
+  description: id on Channel.
+edges:
+  defined_on:
+  - target: meta-node-kind:channel
+---
+nodeKind: MetaAttribute
+id: meta-attribute:channel--kind
+attributes:
+  displayName: Channel.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:channel
+  type: enum<mcp-channel,a2a-channel,chat-channel,mailbox-channel,http-sse-channel,webhook,email,sms,push,slack,desktop-notification,system-tray>
+  required: true
+  description: kind discriminator (collapses former ChannelKind NodeKind and the NotificationChannel proposal).
+edges:
+  defined_on:
+  - target: meta-node-kind:channel
+---
+nodeKind: MetaAttribute
+id: meta-attribute:channel--persistent
+attributes:
+  displayName: Channel.persistent
+  name: persistent
+  parentNodeKindId: meta-node-kind:channel
+  type: bool
+  required: false
+  description: whether the channel persists messages durably.
+edges:
+  defined_on:
+  - target: meta-node-kind:channel
+---
+nodeKind: MetaAttribute
+id: meta-attribute:channel--endpoint
+attributes:
+  displayName: Channel.endpoint
+  name: endpoint
+  parentNodeKindId: meta-node-kind:channel
+  type: string
+  required: false
+  description: endpoint URL / address for the channel (when applicable).
+edges:
+  defined_on:
+  - target: meta-node-kind:channel
+---
+nodeKind: MetaAttribute
+id: meta-attribute:hook-surface--id
+attributes:
+  displayName: HookSurface.id
+  name: id
+  parentNodeKindId: meta-node-kind:hook-surface
+  type: id
+  required: true
+  description: id on HookSurface.
+edges:
+  defined_on:
+  - target: meta-node-kind:hook-surface
+---
+nodeKind: MetaAttribute
+id: meta-attribute:hook-surface--event-name
+attributes:
+  displayName: HookSurface.eventName
+  name: eventName
+  parentNodeKindId: meta-node-kind:hook-surface
+  type: string
+  required: true
+  description: canonical hook event name (e.g. PreToolUse, PhaseChange).
+edges:
+  defined_on:
+  - target: meta-node-kind:hook-surface
+---
+nodeKind: MetaAttribute
+id: meta-attribute:hook-surface--family
+attributes:
+  displayName: HookSurface.family
+  name: family
+  parentNodeKindId: meta-node-kind:hook-surface
+  type: enum<shell-hook,in-process,observer>
+  required: true
+  description: family discriminator (collapsed from former HookFamily NodeKind).
+edges:
+  defined_on:
+  - target: meta-node-kind:hook-surface
+---
+nodeKind: MetaAttribute
+id: meta-attribute:hook-surface--blocking
+attributes:
+  displayName: HookSurface.blocking
+  name: blocking
+  parentNodeKindId: meta-node-kind:hook-surface
+  type: bool
+  required: false
+  description: whether the hook blocks the originating action while handlers run.
+edges:
+  defined_on:
+  - target: meta-node-kind:hook-surface
+---
+nodeKind: MetaAttribute
+id: meta-attribute:merge-policy--id
+attributes:
+  displayName: MergePolicy.id
+  name: id
+  parentNodeKindId: meta-node-kind:merge-policy
+  type: id
+  required: true
+  description: id on MergePolicy.
+edges:
+  defined_on:
+  - target: meta-node-kind:merge-policy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:merge-policy--decision-rule
+attributes:
+  displayName: MergePolicy.decisionRule
+  name: decisionRule
+  parentNodeKindId: meta-node-kind:merge-policy
+  type: enum<most-restrictive-wins,last-writer-wins>
+  required: true
+  description: how the decision verb (deny<ask<allow<continue<noop) is collapsed across handlers.
+edges:
+  defined_on:
+  - target: meta-node-kind:merge-policy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:merge-policy--env-merge-rule
+attributes:
+  displayName: MergePolicy.envMergeRule
+  name: envMergeRule
+  parentNodeKindId: meta-node-kind:merge-policy
+  type: enum<deep-merge,last-writer-wins,fail-on-conflict,protected-prefixes,namespace-required>
+  required: true
+  description: collapse rule for persistEnv / contextVars maps.
+edges:
+  defined_on:
+  - target: meta-node-kind:merge-policy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:merge-policy--system-message-strategy
+attributes:
+  displayName: MergePolicy.systemMessageStrategy
+  name: systemMessageStrategy
+  parentNodeKindId: meta-node-kind:merge-policy
+  type: enum<concatenate,keep-first>
+  required: true
+  description: how systemMessage strings from multiple handlers are combined.
+edges:
+  defined_on:
+  - target: meta-node-kind:merge-policy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:hook-mapping--id
+attributes:
+  displayName: HookMapping.id
+  name: id
+  parentNodeKindId: meta-node-kind:hook-mapping
+  type: id
+  required: true
+  description: id on HookMapping.
+edges:
+  defined_on:
+  - target: meta-node-kind:hook-mapping
+---
+nodeKind: MetaAttribute
+id: meta-attribute:hook-mapping--native-name
+attributes:
+  displayName: HookMapping.nativeName
+  name: nativeName
+  parentNodeKindId: meta-node-kind:hook-mapping
+  type: string
+  required: true
+  description: agent's native event name for the canonical hook.
+edges:
+  defined_on:
+  - target: meta-node-kind:hook-mapping
+---
+nodeKind: MetaAttribute
+id: meta-attribute:hook-mapping--delivery
+attributes:
+  displayName: HookMapping.delivery
+  name: delivery
+  parentNodeKindId: meta-node-kind:hook-mapping
+  type: enum<shell,in-process,observer>
+  required: false
+  description: delivery model the agent uses for this hook.
+edges:
+  defined_on:
+  - target: meta-node-kind:hook-mapping
+---
+nodeKind: MetaAttribute
+id: meta-attribute:hook-mapping--support-level
+attributes:
+  displayName: HookMapping.supportLevel
+  name: supportLevel
+  parentNodeKindId: meta-node-kind:hook-mapping
+  type: enum<supported,degraded,unsupported>
+  required: false
+  description: how well the canonical hook is realized on this target.
+edges:
+  defined_on:
+  - target: meta-node-kind:hook-mapping
+---
+nodeKind: MetaAttribute
+id: meta-attribute:hook-merge-diagnostic--id
+attributes:
+  displayName: HookMergeDiagnostic.id
+  name: id
+  parentNodeKindId: meta-node-kind:hook-merge-diagnostic
+  type: id
+  required: true
+  description: id on HookMergeDiagnostic.
+edges:
+  defined_on:
+  - target: meta-node-kind:hook-merge-diagnostic
+---
+nodeKind: MetaAttribute
+id: meta-attribute:hook-merge-diagnostic--outcome
+attributes:
+  displayName: HookMergeDiagnostic.outcome
+  name: outcome
+  parentNodeKindId: meta-node-kind:hook-merge-diagnostic
+  type: enum<accepted,merged,conflict,dropped>
+  required: true
+  description: merge outcome at this hook surface.
+edges:
+  defined_on:
+  - target: meta-node-kind:hook-merge-diagnostic
+---
+nodeKind: MetaAttribute
+id: meta-attribute:hook-merge-diagnostic--precedence-rule
+attributes:
+  displayName: HookMergeDiagnostic.precedenceRule
+  name: precedenceRule
+  parentNodeKindId: meta-node-kind:hook-merge-diagnostic
+  type: string
+  required: true
+  description: precedence rule applied to resolve the merge.
+edges:
+  defined_on:
+  - target: meta-node-kind:hook-merge-diagnostic
+---
+nodeKind: MetaAttribute
+id: meta-attribute:hook-merge-diagnostic--severity
+attributes:
+  displayName: HookMergeDiagnostic.severity
+  name: severity
+  parentNodeKindId: meta-node-kind:hook-merge-diagnostic
+  type: enum<info,warning,error>
+  required: true
+  description: severity of the diagnostic.
+edges:
+  defined_on:
+  - target: meta-node-kind:hook-merge-diagnostic
+---
+nodeKind: MetaAttribute
+id: meta-attribute:decision-verb--id
+attributes:
+  displayName: DecisionVerb.id
+  name: id
+  parentNodeKindId: meta-node-kind:decision-verb
+  type: id
+  required: true
+  description: id on DecisionVerb.
+edges:
+  defined_on:
+  - target: meta-node-kind:decision-verb
+---
+nodeKind: MetaAttribute
+id: meta-attribute:decision-verb--verb
+attributes:
+  displayName: DecisionVerb.verb
+  name: verb
+  parentNodeKindId: meta-node-kind:decision-verb
+  type: enum<deny,ask,allow,continue,noop>
+  required: true
+  description: the canonical decision verb.
+edges:
+  defined_on:
+  - target: meta-node-kind:decision-verb
+---
+nodeKind: MetaAttribute
+id: meta-attribute:decision-verb--rank
+attributes:
+  displayName: DecisionVerb.rank
+  name: rank
+  parentNodeKindId: meta-node-kind:decision-verb
+  type: int
+  required: true
+  description: ordinal rank used by most-restrictive-wins (lower rank = more restrictive).
+edges:
+  defined_on:
+  - target: meta-node-kind:decision-verb
+---
+nodeKind: MetaAttribute
+id: meta-attribute:decision-verb--block
+attributes:
+  displayName: DecisionVerb.block
+  name: block
+  parentNodeKindId: meta-node-kind:decision-verb
+  type: bool
+  required: false
+  description: orthogonal block flag — when set, the verb halts the originating action regardless of rank.
+edges:
+  defined_on:
+  - target: meta-node-kind:decision-verb
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:emits-hook
+attributes:
+  displayName: emits_hook (meta)
+  name: emits_hook
+  source:
+  - meta-node-kind:hook-mapping
+  - meta-node-kind:hook-surface
+  target:
+  - meta-node-kind:hook-surface
+  cardinality: N:N
+  origin: standard
+  description: 'a HookMapping (or AgentVersion / BackgroundMonitor — cross-cluster) emits/anchors a HookSurface'
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:hook-mapping
+  - target: meta-node-kind:hook-surface
+  target_of_meta_edge:
+  - target: meta-node-kind:hook-surface
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:maps-hook
+attributes:
+  displayName: maps_hook (meta)
+  name: maps_hook
+  source:
+  - meta-node-kind:hook-mapping
+  target:
+  - meta-node-kind:hook-surface
+  cardinality: N:1
+  origin: universal
+  description: a HookMapping realizes a canonical HookSurface on a target
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:hook-mapping
+  target_of_meta_edge:
+  - target: meta-node-kind:hook-surface
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:uses-merge-policy
+attributes:
+  displayName: uses_merge_policy (meta)
+  name: uses_merge_policy
+  source:
+  - meta-node-kind:hook-surface
+  target:
+  - meta-node-kind:merge-policy
+  cardinality: N:1
+  origin: a5c
+  description: a HookSurface uses a named MergePolicy when fanning a single hook event across multiple registered handlers (hooks-mux conflict-resolution rule)
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:hook-surface
+  target_of_meta_edge:
+  - target: meta-node-kind:merge-policy
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:notifies-via
+attributes:
+  displayName: notifies_via (meta)
+  name: notifies_via
+  source:
+  - meta-node-kind:channel
+  target:
+  - meta-node-kind:channel
+  cardinality: N:N
+  origin: universal
+  description: 'a HumanCheckpoint notifies via a Channel — cross-cluster: source is HumanCheckpoint in meta-cluster:agent-stack, target is Channel here. Recorded from the channel side.'
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:channel
+  target_of_meta_edge:
+  - target: meta-node-kind:channel
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:hook-merge-diagnostic-references-hook-surface
+attributes:
+  displayName: HookMergeDiagnostic.hookSurfaceId (meta — attribute-anchored)
+  name: hook_surface_referenced_by_diagnostic
+  source:
+  - meta-node-kind:hook-merge-diagnostic
+  target:
+  - meta-node-kind:hook-surface
+  cardinality: N:1
+  origin: a5c
+  description: a HookMergeDiagnostic references the HookSurface whose merge it records (anchored via the hookSurfaceId attribute, not a formal edge in ontology — recorded here for cluster-internal connectivity).
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:hook-merge-diagnostic
+  target_of_meta_edge:
+  - target: meta-node-kind:hook-surface
+---
+nodeKind: MetaEnum
+id: meta-enum:channel-kind
+attributes:
+  displayName: Channel kind
+  name: kind
+  values:
+  - value: mcp-channel
+    description: Channel carrying MCP traffic.
+  - value: a2a-channel
+    description: Agent-to-agent channel.
+  - value: chat-channel
+    description: Chat-style channel (user-facing conversation).
+  - value: mailbox-channel
+    description: Asynchronous mailbox / inbox channel.
+  - value: http-sse-channel
+    description: HTTP Server-Sent-Events channel.
+  - value: webhook
+    description: Outbound webhook delivery.
+  - value: email
+    description: Email notification channel.
+  - value: sms
+    description: SMS notification channel.
+  - value: push
+    description: Mobile push notification channel.
+  - value: slack
+    description: Slack notification channel.
+  - value: desktop-notification
+    description: Native desktop notification channel.
+  - value: system-tray
+    description: System-tray / menu-bar notification channel.
+  usedOnAttributes:
+  - meta-attribute:channel--kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:channel--kind
+---
+nodeKind: MetaEnum
+id: meta-enum:hook-family
+attributes:
+  displayName: Hook family
+  name: family
+  values:
+  - value: shell-hook
+    description: Shell-invoked hook (handler runs in a subprocess).
+  - value: in-process
+    description: In-process hook (handler runs in the agent's process).
+  - value: observer
+    description: Observer-only hook (read-only, non-blocking).
+  usedOnAttributes:
+  - meta-attribute:hook-surface--family
+  - meta-attribute:hook-mapping--delivery
+edges:
+  used_on_attribute:
+  - target: meta-attribute:hook-surface--family
+---
+nodeKind: MetaEnum
+id: meta-enum:decision-verb-value
+attributes:
+  displayName: Decision verb value
+  name: verb
+  values:
+  - value: deny
+    description: Block the action; lowest rank (most restrictive).
+  - value: ask
+    description: Prompt the user for explicit approval.
+  - value: allow
+    description: Permit the action.
+  - value: continue
+    description: Continue without modifying the decision.
+  - value: noop
+    description: No-op; highest rank (least restrictive).
+  usedOnAttributes:
+  - meta-attribute:decision-verb--verb
+edges:
+  used_on_attribute:
+  - target: meta-attribute:decision-verb--verb

@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:plugin-artifact
+attributes:
+  canonicalDefinitionId: definition:plugin-artifact.canonical
+  displayName: "PluginArtifact"
+  kind: tool
+  references:
+    - "NodeKind:PluginArtifact"
+  description: |
+    A single deliverable file (manifest, command, hook script, MCP config, container image) emitted by a PluginTarget / AgentVersion
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

@@ -5,6 +5,11 @@
  * @category Internal Communications
  * @inputs { organization: object, employeeBase: object, contentStrategy: object, platformOptions: object[] }
  * @outputs { success: boolean, advocacyProgram: object, contentLibrary: object, trainingPlan: object, quality: number }
+  * @graph
+ *   domains: [domain:public-relations]
+ *   skillAreas: [skill-area:brand-positioning, skill-area:content-marketing, skill-area:brand-strategy]
+ *   roles: [role:marketing-strategist, role:content-strategist]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

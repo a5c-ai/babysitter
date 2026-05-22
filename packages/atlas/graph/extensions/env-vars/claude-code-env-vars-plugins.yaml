@@ -1,0 +1,84 @@
+nodeKind: EnvVar
+id: env-var:claude-code-plugin-cache-dir
+attributes:
+  displayName: CLAUDE_CODE_PLUGIN_CACHE_DIR
+  description: Override the plugins root directory.
+  name: CLAUDE_CODE_PLUGIN_CACHE_DIR
+  category: plugins
+  valueType: path
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-plugin-git-timeout-ms
+attributes:
+  displayName: CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS
+  description: Timeout for git operations when installing or updating plugins.
+  name: CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS
+  category: plugins
+  valueType: int
+  defaultValue: "120000"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-plugin-keep-marketplace-on-failure
+attributes:
+  displayName: CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE
+  description: Set to 1 to keep the existing marketplace cache when git pull fails.
+  name: CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE
+  category: plugins
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-plugin-seed-dir
+attributes:
+  displayName: CLAUDE_CODE_PLUGIN_SEED_DIR
+  description: 'Path to read-only plugin seed directories (separator: colon on Unix, semicolon on Windows).'
+  name: CLAUDE_CODE_PLUGIN_SEED_DIR
+  category: plugins
+  valueType: path
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-sync-plugin-install
+attributes:
+  displayName: CLAUDE_CODE_SYNC_PLUGIN_INSTALL
+  description: Set to 1 in non-interactive mode to wait for plugin installation to complete before the first query.
+  name: CLAUDE_CODE_SYNC_PLUGIN_INSTALL
+  category: plugins
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-sync-plugin-install-timeout-ms
+attributes:
+  displayName: CLAUDE_CODE_SYNC_PLUGIN_INSTALL_TIMEOUT_MS
+  description: Timeout in milliseconds for synchronous plugin installation.
+  name: CLAUDE_CODE_SYNC_PLUGIN_INSTALL_TIMEOUT_MS
+  category: plugins
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-official-marketplace-autoinstall
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL
+  description: Set to 1 to skip automatic addition of the official plugin marketplace on first run.
+  name: CLAUDE_CODE_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL
+  category: plugins
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

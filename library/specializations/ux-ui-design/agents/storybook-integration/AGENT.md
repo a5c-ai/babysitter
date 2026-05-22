@@ -8,6 +8,12 @@ expertise:
   - Visual regression testing
   - Addon configuration
   - Component playground creation
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:ui-component-libraries, skill-area:visual-regression-testing]
+  roles: [role:frontend-engineer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # Storybook Integration Agent

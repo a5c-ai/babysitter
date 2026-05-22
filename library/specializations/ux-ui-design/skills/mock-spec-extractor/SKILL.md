@@ -6,6 +6,12 @@ metadata:
   author: babysitter-sdk
   version: "1.0.0"
   category: design-analysis
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:design-systems, skill-area:visual-design]
+  roles: [role:product-designer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # mock-spec-extractor

@@ -7,6 +7,12 @@ expertise:
   - Extension point design
   - Backward compatibility for extensions
   - Middleware and hook systems
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:plugin-systems, skill-area:api-design]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # Extensibility Architect Agent

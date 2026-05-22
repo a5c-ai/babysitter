@@ -1,0 +1,67 @@
+---
+nodeKind: Workflow
+id: workflow:material-characterization-pipeline
+attributes:
+  displayName: "Material Characterization Pipeline"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-sample-batch"
+  complexity: single-team
+  description: |
+    Processes material characterization data through automated pipelines
+    -- ingesting XRD, SEM/TEM, DSC/TGA, and tensile test outputs,
+    applying peak-fitting and phase identification algorithms,
+    cross-referencing against ICDD/PDF databases, computing derived
+    properties (Young's modulus, glass transition), and generating
+    standardized material property cards for the materials database.
+    Excludes sample preparation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:ml-engineer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  applies_to_domain:
+    - target: domain:materials-science
+    - target: domain:scientific-computing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:data-team
+---
+nodeKind: Workflow
+id: workflow:composite-failure-analysis
+attributes:
+  displayName: "Composite Failure Analysis"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-incident"
+  complexity: cross-team
+  description: |
+    Analyzes composite material failures using multi-scale modeling --
+    correlating fractographic evidence with FEA stress predictions,
+    running progressive damage models (Hashin/Puck criteria), validating
+    against acoustic emission data from structural health monitoring,
+    determining root cause (manufacturing defect, design inadequacy, or
+    overload), and recommending design margin or process changes.
+    Excludes repair implementation.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:data-scientist
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:computational-geometry
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:materials-science
+    - target: domain:aerospace-engineering
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:engineering

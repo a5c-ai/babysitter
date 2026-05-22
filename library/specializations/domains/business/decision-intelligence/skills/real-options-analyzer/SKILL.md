@@ -16,6 +16,10 @@ metadata:
     - numpy
     - scipy
     - custom implementations
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:financial-modeling, skill-area:quantitative-modeling, skill-area:investment-analysis]
+  roles: [role:financial-analyst, role:quantitative-analyst, role:strategic-planner]
 ---
 
 # Real Options Analyzer

@@ -1,0 +1,27 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-mux-observability
+attributes:
+  packageId: "@a5c-ai/agent-mux-observability"
+  packageName: "@a5c-ai/agent-mux-observability"
+  workspacePath: packages/agent-mux/observability
+  moduleType: typescript
+  surfaceKinds:
+    - observability-library
+    - logger
+    - telemetry
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+  # Source: packages/agent-mux/observability/package.json (name, version 0.4.9)
+edges:
+  references_path:
+    - target: path:agent-mux-observability
+  # Public LogLevel / CostInfo / LogContext / Logger / Telemetry types
+  # modeled as SharedContextSpec records.
+  # Source: packages/agent-mux/observability/src/types.ts.
+  has_payload_schema:
+    - target: shared-context-spec:agent-mux-observability-log-level
+    - target: shared-context-spec:agent-mux-observability-cost-info
+    - target: shared-context-spec:agent-mux-observability-log-context
+    - target: shared-context-spec:agent-mux-observability-logger-iface
+    - target: shared-context-spec:agent-mux-observability-telemetry-iface

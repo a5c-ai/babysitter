@@ -16,6 +16,11 @@
  * @references
  * - Academy of Competitive Intelligence: https://www.academyci.com/books/
  * - Business War Gaming: Mark Chussil
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+ *   roles: [role:data-analyst, role:business-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

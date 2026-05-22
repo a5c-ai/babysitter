@@ -2,6 +2,13 @@
 name: caching
 description: HTTP caching, service workers, cache invalidation, and CDN configuration.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:data-fetching-caching, skill-area:caching-strategies]
+  roles: [role:frontend-engineer, role:backend-engineer]
+  topics: [topic:cache-aside-pattern]
+
 ---
 
 # Caching Skill

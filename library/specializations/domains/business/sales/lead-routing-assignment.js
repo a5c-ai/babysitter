@@ -14,6 +14,11 @@
  * @references
  * - LeanData Lead Routing: https://www.leandata.com/
  * - Chili Piper Routing: https://www.chilipiper.com/
+  * @graph
+ *   domains: [domain:sales]
+ *   skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+ *   workflows: [workflow:customer-journey-optimization]
+ *   roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

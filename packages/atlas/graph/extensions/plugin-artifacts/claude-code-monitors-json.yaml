@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:claude-code-monitors-json
+attributes:
+  artifactId: plugin-artifact:claude-code-monitors-json
+  displayName: "Claude Code monitors.json"
+  targetId: plugin-target:claude-code
+  artifactKind: settings-fragment
+  pathPattern: "monitors/monitors.json"
+  installerSurface: "monitors.json"
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code

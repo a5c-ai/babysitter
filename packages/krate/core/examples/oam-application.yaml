@@ -1,0 +1,23 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: krate-demo-app
+  namespace: krate-system
+  labels:
+    krate.a5c.ai/repository: krate-demo
+spec:
+  components:
+    - name: krate-demo
+      type: webservice
+      properties:
+        image: krate/mvp-model:0.1.0
+      traits:
+        - type: scaler
+          properties:
+            replicas: 1
+      scopes:
+        healthscopes.core.oam.dev: krate-demo-health
+  workflow:
+    steps:
+      - name: deploy
+        type: deploy

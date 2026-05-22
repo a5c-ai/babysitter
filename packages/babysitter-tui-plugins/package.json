@@ -1,0 +1,41 @@
+{
+  "name": "@a5c-ai/babysitter-tui-plugins",
+  "version": "5.0.0",
+  "description": "Babysitter TUI plugins for agent-mux",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rimraf dist",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@a5c-ai/agent-mux-tui": "5.0.0"
+  },
+  "dependencies": {
+    "@a5c-ai/babysitter-sdk": "5.0.0"
+  },
+  "devDependencies": {
+    "@a5c-ai/agent-mux-tui": "5.0.0",
+    "@a5c-ai/agent-mux": "5.0.0",
+    "@types/react": "^19.2.14",
+    "ink": "^5.0.1",
+    "react": "^18.3.1",
+    "typescript": "^5.6.0",
+    "vitest": "^3.1.0"
+  }
+}

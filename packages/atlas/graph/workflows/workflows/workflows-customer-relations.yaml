@@ -1,0 +1,102 @@
+---
+nodeKind: Workflow
+id: workflow:account-plan-review
+attributes:
+  displayName: "Account Plan Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews strategic account plans — evaluating account health scores,
+    validating stakeholder relationship maps, assessing expansion
+    opportunity pipelines, reviewing executive sponsor engagement cadence,
+    analyzing product adoption depth against account potential, and
+    identifying cross-sell motions based on usage patterns. Produces
+    updated account scorecards and strategic action plans. Excludes
+    day-to-day account management and support ticket resolution.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:data-scientist
+  applies_to_domain:
+    - target: domain:customer-relations
+    - target: domain:sales
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:customer-success
+---
+nodeKind: Workflow
+id: workflow:customer-advocacy-program
+attributes:
+  displayName: "Customer Advocacy Program"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Manages the customer advocacy pipeline — identifying high-NPS
+    customers for reference participation, coordinating case study
+    development with writing and design teams, recruiting community
+    champions and user-group speakers, maintaining a reference database
+    by industry and use case, tracking advocacy participation rates and
+    pipeline influence, and recognizing top advocates. Produces advocacy
+    asset inventory updates and reference request fulfillment metrics.
+    Excludes customer success operations and support.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:devrel
+  applies_to_domain:
+    - target: domain:customer-relations
+    - target: domain:marketing
+    - target: domain:community
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:customer-success
+    - target: org-unit:content-team
+---
+nodeKind: Workflow
+id: workflow:customer-win-loss-analysis
+attributes:
+  displayName: "Customer Win/Loss Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Analyzes closed-won and closed-lost deals to extract actionable
+    intelligence — conducting structured interviews with buyers,
+    categorizing win/loss reasons by theme (product, pricing, competition,
+    timing, relationship), identifying competitive patterns and emerging
+    threats, correlating outcomes with deal attributes like size, segment,
+    and sales motion, and feeding insights back to product, marketing,
+    and sales enablement. Produces win/loss trend reports and competitive
+    intelligence briefs. Excludes individual deal retrospectives and CRM
+    data entry.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:explorer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:customer-relations
+    - target: domain:sales
+    - target: domain:strategy
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:marketing-team
+    - target: org-unit:strategy-team

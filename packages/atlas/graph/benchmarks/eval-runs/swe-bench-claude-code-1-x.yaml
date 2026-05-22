@@ -1,0 +1,17 @@
+nodeKind: EvalRun
+id: eval-run:swe-bench.claude-code@1.x.2025-04-29
+attributes:
+  benchmarkId: benchmark:swe-bench-verified
+  testSetId: test-set:swe-bench-verified-2024-12
+  target: agentVersion:claude:ge-0-0-0
+  targetId: agentVersion:claude:ge-0-0-0
+  runAt: "2025-04-29T08:00:00Z"
+  runBy: "@a5c-ai/team"
+  configHash: "sha256:placeholder-config-hash"
+edges:
+  evaluates_target:
+    - agentVersion:claude:ge-0-0-0
+  uses_test_set:
+    - test-set:swe-bench-verified-2024-12
+  for_benchmark:
+    - benchmark:swe-bench-verified

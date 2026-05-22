@@ -11,6 +11,10 @@ expertise:
   - Statistical analysis
   - Decision recommendation
   - Documentation
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:ab-testing-experimentation]
+  roles: [role:data-scientist, role:data-analyst, role:analytics-engineer]
 ---
 
 # Experimentation Manager

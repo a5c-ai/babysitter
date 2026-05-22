@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: Support Operations
   id: AG-010
+graph:
+  domains: [domain:customer-experience]
+  skillAreas: [skill-area:customer-success, skill-area:incident-management, skill-area:stakeholder-management]
+  workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+  roles: [role:customer-success-manager, role:incident-commander, role:support-engineer]
 ---
 
 # Support Escalation Coordinator Agent

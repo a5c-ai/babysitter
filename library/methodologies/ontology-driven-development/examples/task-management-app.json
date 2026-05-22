@@ -1,0 +1,123 @@
+{
+  "projectName": "Smart Task Management System",
+  "domainDescription": "Intelligent task management application that uses AI to prioritize tasks, suggest optimal schedules, and provide productivity insights. Features collaborative workspaces, deadline tracking, and integration with calendar and communication tools.",
+  "ontologyScope": "comprehensive",
+  "graphDepth": "detailed",
+  "wikiTarget": "comprehensive-wiki",
+  "iterationDepth": "moderate",
+  "adversarialMode": "standard",
+
+  "domainContext": {
+    "industry": "Productivity Software",
+    "targetUsers": [
+      "Individual Knowledge Workers",
+      "Small Teams (3-10 people)",
+      "Project Managers",
+      "Freelancers"
+    ],
+    "keyDomains": [
+      "Task Management",
+      "AI-Powered Prioritization",
+      "Team Collaboration",
+      "Calendar Integration",
+      "Productivity Analytics"
+    ],
+    "externalSystems": [
+      "Google Calendar",
+      "Outlook Calendar",
+      "Slack",
+      "Microsoft Teams",
+      "Notion",
+      "Zapier"
+    ]
+  },
+
+  "businessRequirements": {
+    "coreCapabilities": [
+      "Intelligent task creation and categorization",
+      "AI-powered priority scoring based on deadlines and importance",
+      "Smart scheduling suggestions with calendar integration",
+      "Collaborative workspaces with real-time updates",
+      "Progress tracking with visual indicators",
+      "Productivity insights and time tracking"
+    ],
+    "integrationRequirements": [
+      "Bidirectional calendar sync (Google, Outlook)",
+      "Slack/Teams notifications and bot commands",
+      "Import/export from popular task managers",
+      "Zapier integration for workflow automation",
+      "Email-to-task conversion"
+    ],
+    "userExperience": [
+      "Clean, intuitive task list interface",
+      "Drag-and-drop task organization",
+      "Quick-add with natural language processing",
+      "Mobile app with offline capability",
+      "Customizable dashboard and views"
+    ]
+  },
+
+  "technicalConstraints": {
+    "performance": [
+      "Sub-500ms response times for task operations",
+      "Support for 10,000+ tasks per user",
+      "Real-time collaboration updates",
+      "Mobile app performance on older devices"
+    ],
+    "security": [
+      "OAuth2 for third-party integrations",
+      "End-to-end encryption for sensitive tasks",
+      "GDPR compliance for EU users",
+      "Secure API with rate limiting"
+    ],
+    "scalability": [
+      "SaaS architecture supporting 100K+ users",
+      "Serverless backend for cost-effective scaling",
+      "CDN distribution for global performance",
+      "Database optimization for task queries"
+    ]
+  },
+
+  "expectedArtifacts": {
+    "encyclopedia": {
+      "conceptPages": [
+        "Task Management Principles",
+        "AI Prioritization Algorithms",
+        "Collaborative Features",
+        "Calendar Integration",
+        "Productivity Metrics",
+        "User Experience Design"
+      ],
+      "processPages": [
+        "Task Creation Workflow",
+        "AI Scoring Process",
+        "Team Collaboration Workflow",
+        "Data Synchronization",
+        "User Onboarding Process"
+      ],
+      "patternPages": [
+        "Real-time Collaboration Patterns",
+        "Offline-First Mobile Patterns",
+        "Calendar Sync Patterns",
+        "AI/ML Integration Patterns",
+        "Progressive Web App Patterns"
+      ]
+    },
+    "interfaces": {
+      "web": "React SPA with Progressive Web App features",
+      "mobile": "React Native app with offline sync",
+      "api": "REST API with GraphQL for complex queries",
+      "cli": "Node.js CLI for power users and automation",
+      "mcp": "Claude integration for task assistance"
+    },
+    "testing": {
+      "coverage": "85%+ code coverage",
+      "e2e": "Cypress end-to-end tests",
+      "performance": "Lighthouse CI for web performance",
+      "mobile": "Detox for React Native testing",
+      "api": "Jest for API testing"
+    }
+  },
+
+  "notes": "This example shows how ontology-driven development scales down to smaller projects while still maintaining comprehensive domain modeling and systematic artifact generation."
+}

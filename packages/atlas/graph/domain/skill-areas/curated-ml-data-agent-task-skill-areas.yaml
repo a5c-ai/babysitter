@@ -1,0 +1,298 @@
+---
+nodeKind: SkillArea
+id: skill-area:machine-learning-frameworks
+attributes:
+  displayName: "Machine Learning Frameworks"
+  description: |
+    Working with ML training and inference frameworks - model APIs,
+    training loops, tensor operations, evaluation hooks, and ecosystem fit.
+  domains:
+    - domain:data-science
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:deep-learning-libraries
+attributes:
+  displayName: "Deep Learning Libraries and Services"
+  description: |
+    Building with deep-learning stacks - architectures, training routines,
+    accelerator usage, model checkpoints, and production-facing packaging.
+  domains:
+    - domain:data-science
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:machine-learning-frameworks
+---
+nodeKind: SkillArea
+id: skill-area:audio-processing
+attributes:
+  displayName: "Audio Processing Libraries and Services"
+  description: |
+    Working with audio-domain pipelines - waveform handling, feature
+    extraction, segmentation, streaming analysis, and model-ready transforms.
+  domains:
+    - domain:data-science
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:video-processing
+      strength: recommended
+    - target: skill-area:media-encoding
+      strength: recommended
+    - target: skill-area:streaming-protocols
+      strength: recommended
+    - target: skill-area:image-processing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:video-processing
+attributes:
+  displayName: "Video Processing Libraries and Services"
+  description: |
+    Building with video-oriented processing chains - frame extraction,
+    temporal segmentation, encoding tradeoffs, and model-serving integration.
+  domains:
+    - domain:data-science
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:time-series-analysis
+attributes:
+  displayName: "Time Series Analysis"
+  description: |
+    Analyzing temporally ordered data - seasonality, trends, forecasting,
+    anomaly detection, windowing, and temporal validation design.
+  domains:
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+  requires_skill_area:
+    - skill-area:data-analysis
+---
+nodeKind: SkillArea
+id: skill-area:big-data-tools
+attributes:
+  displayName: "Big Data Tools"
+  description: |
+    Working with large-scale data platforms - distributed processing,
+    storage formats, cluster-aware execution, and throughput-oriented tooling.
+  domains:
+    - specialization:data-engineering-analytics
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-engineering-analytics
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:visualization-testing
+attributes:
+  displayName: "Visualization Testing"
+  description: |
+    Testing charts and analytical visualizations - render correctness,
+    interaction behavior, data-binding fidelity, and perceptual regressions.
+  domains:
+    - domain:data-science
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:data-visualization
+---
+nodeKind: SkillArea
+id: skill-area:scalability-testing
+attributes:
+  displayName: "Scalability Testing"
+  description: |
+    Testing how systems behave as data size or traffic grows - scaling
+    curves, saturation points, bottlenecks, and step-change thresholds.
+  domains:
+    - specialization:qa-testing-automation
+    - specialization:performance-optimization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+    - target: specialization:performance-optimization
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:load-testing
+---
+nodeKind: SkillArea
+id: skill-area:model-serving-deployment
+attributes:
+  displayName: "Model Serving and Deployment"
+  description: |
+    Deploying trained models into serving environments - endpoint rollout,
+    packaging, runtime contracts, and promotion into live traffic.
+  domains:
+    - domain:ml-ops
+    - specialization:ml-inference-serving
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+    - target: specialization:ml-inference-serving
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:model-serving-operations
+---
+nodeKind: SkillArea
+id: skill-area:bias-fairness-analysis
+attributes:
+  displayName: "Bias and Fairness Analysis"
+  description: |
+    Analyzing model behavior for uneven outcomes - fairness metrics,
+    subgroup behavior, harm framing, and mitigation review.
+  domains:
+    - domain:data-science
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:bias-fairness-testing
+---
+nodeKind: SkillArea
+id: skill-area:explainability-interpretation
+attributes:
+  displayName: "Explainability and Interpretation"
+  description: |
+    Interpreting model decisions and behaviors - explanation methods,
+    attribution reading, stakeholder communication, and auditability needs.
+  domains:
+    - domain:data-science
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:model-explainability-testing
+---
+nodeKind: SkillArea
+id: skill-area:tool-service-integration-agents
+attributes:
+  displayName: "Tool and Service Integration for Agents"
+  description: |
+    Integrating agents with external tools and services - schemas,
+    capability boundaries, auth, retries, and execution governance.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  requires_skill_area:
+    - skill-area:tool-use
+---
+nodeKind: SkillArea
+id: skill-area:chain-of-thought-multistep-orchestration
+attributes:
+  displayName: "Chain-of-Thought and Multi-step Orchestration"
+  description: |
+    Structuring multi-step agent workflows - decomposition, intermediate
+    reasoning traces, planning control, and completion criteria.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  requires_skill_area:
+    - skill-area:agent-planning-reasoning
+---
+nodeKind: SkillArea
+id: skill-area:reinforcement-learning-agents
+attributes:
+  displayName: "Reinforcement Learning-based Agents"
+  description: |
+    Building agents optimized through reward-driven interaction - policy
+    improvement, environment feedback, simulation, and evaluation loops.
+  domains:
+    - specialization:ai-agents-conversational
+    - domain:ml-ops
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: domain:ml-ops
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:prompt-instruction-tuning-agents
+attributes:
+  displayName: "Prompt and Instruction Tuning for Agents"
+  description: |
+    Iterating agent behavior through prompt and instruction changes - role
+    definitions, system constraints, format steering, and eval-backed tuning.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: specialization:claudekit
+      confidence: secondary
+    - target: specialization:everything-claude-code
+      confidence: secondary
+    - target: specialization:superpowers
+      confidence: secondary
+    - target: specialization:cog-second-brain
+      confidence: secondary
+    - target: specialization:pilot-shell
+      confidence: secondary
+    - target: specialization:planning-with-files
+      confidence: secondary
+    - target: specialization:automaker
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:prompt-engineering

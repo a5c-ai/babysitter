@@ -1,0 +1,23 @@
+nodeKind: Framework
+id: framework:hasura
+attributes:
+  displayName: "Hasura"
+  homepageUrl: "https://hasura.io"
+  belongsToLanguageId: language:graphql
+  category: web-backend
+  description: |
+    Hasura — an instant GraphQL (and REST) API engine over Postgres and
+    other databases, with declarative permissions, event triggers, and
+    remote-schema federation.
+edges:
+  belongs_to_language:
+    - language:graphql
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:strapi
+      comparison: "Headless CMS/API — Hasura is data-access-focused; Strapi is content-focused"
+    - target: framework:directus
+      comparison: "Data platforms — Hasura is GraphQL-engine-first; Directus has an admin UI"
+    - target: framework:supabase
+      comparison: "CMS / BaaS platforms"

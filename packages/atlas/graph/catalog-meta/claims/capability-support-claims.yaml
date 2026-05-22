@@ -1,0 +1,99 @@
+# Claims linked to capability-support nodes.
+# These record the provenance and evidence strength for each capability assertion.
+---
+nodeKind: Claim
+id: claim:repo-sdk-fallback
+attributes:
+  claimId: repo-sdk-fallback
+  statement: "The babysitter-sdk amuxFallbackMetadata module provides fallback metadata for all known CLI harnesses."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: high
+  status: current
+  provenanceKind: repo-observation
+  evidenceStrength: corroborated
+  evidenceIds:
+    - repo-sdk-fallback
+    - repo-target-codex
+  unresolvedGaps: []
+edges:
+  sourced_from:
+    - evidence:repo-sdk-fallback
+  supported_by_claim: []
+---
+nodeKind: Claim
+id: claim:web-codex-hooks
+attributes:
+  claimId: web-codex-hooks
+  statement: "Codex CLI supports runtime hooks for tool-use interception and custom lifecycle events."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: medium
+  status: current
+  provenanceKind: vendor-documentation
+  evidenceStrength: partial
+  evidenceIds:
+    - web-codex-hooks
+  unresolvedGaps:
+    - "Only one vendor documentation source confirms hook support for Codex CLI."
+edges:
+  sourced_from:
+    - evidence:web-codex-hooks
+---
+nodeKind: Claim
+id: claim:web-codex-session-resume
+attributes:
+  claimId: web-codex-session-resume
+  statement: "Codex CLI supports session resume through its conversation history and checkpoint mechanisms."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: high
+  status: current
+  provenanceKind: vendor-documentation
+  evidenceStrength: corroborated
+  evidenceIds:
+    - web-codex-cli
+    - web-codex-cli-features
+  unresolvedGaps: []
+edges:
+  sourced_from:
+    - evidence:web-codex-cli
+    - evidence:web-codex-cli-features
+---
+nodeKind: Claim
+id: claim:web-codex-image-input
+attributes:
+  claimId: web-codex-image-input
+  statement: "Codex CLI may support image input through its multi-modal pipeline, but no explicit documentation confirms the feature."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: low
+  status: current
+  provenanceKind: vendor-inference
+  evidenceStrength: inferred
+  evidenceIds:
+    - web-codex-cli-features
+  unresolvedGaps:
+    - "No vendor documentation explicitly confirms image input support for Codex CLI."
+edges:
+  sourced_from:
+    - evidence:web-codex-cli-features
+---
+nodeKind: Claim
+id: claim:repo-transport-mux-readme
+attributes:
+  claimId: repo-transport-mux-readme
+  statement: "The transport-mux package README documents the transport abstraction layer for multi-runtime agent communication."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: high
+  status: current
+  provenanceKind: repo-observation
+  evidenceStrength: corroborated
+  evidenceIds:
+    - repo-transport-mux-readme
+    - repo-transport-mux-architecture
+  unresolvedGaps: []
+edges:
+  sourced_from:
+    - evidence:repo-transport-mux-readme

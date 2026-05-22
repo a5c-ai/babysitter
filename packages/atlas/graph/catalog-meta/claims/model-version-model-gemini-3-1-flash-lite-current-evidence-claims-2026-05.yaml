@@ -1,0 +1,340 @@
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-contextwindowtokens
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current contextWindowTokens is 1000000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-costpermtokinput
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: costPerMTokInput
+  value: '0.25'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current costPerMTokInput is 0.25.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-costpermtokoutput
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: costPerMTokOutput
+  value: '1.5'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current costPerMTokOutput is 1.5.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-kind
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: kind
+  value: multimodal
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current kind is multimodal.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-knowledgecutoffdate
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: knowledgeCutoffDate
+  value: '2025-01-01'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current knowledgeCutoffDate is 2025-01-01.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-lifecyclestatus
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: lifecycleStatus
+  value: preview
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current lifecycleStatus is preview.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-modalities
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: modalities
+  value: text, image, audio, video
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current modalities is text, image, audio,
+    video.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-modalitydirections
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=audio;direction=input,
+    kind=video;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current modalityDirections is kind=text;direction=input,
+    kind=image;direction=input, kind=audio;direction=input, kind=video;direction=input,
+    kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-safetytier
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: safetyTier
+  value: google-deepmind-frontier-safety
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current safetyTier is google-deepmind-frontier-safety.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-supportsextendedthinking
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-supportsfinetuning
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: supportsFineTuning
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current supportsFineTuning is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current supportsThinkingBudgetTokens is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-thinkingeffortlevels
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: thinkingEffortLevels
+  value: low, medium, high
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current thinkingEffortLevels is low, medium,
+    high.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-flash-lite-current-versionrange
+attributes:
+  subjectId: model:gemini-3-1-flash-lite@current
+  attribute: versionRange
+  value: '>=3.1.0 <3.2.0'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-flash-lite@current versionRange is >=3.1.0 <3.2.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-flash-lite@current

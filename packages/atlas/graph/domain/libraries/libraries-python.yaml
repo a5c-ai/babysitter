@@ -1,0 +1,247 @@
+---
+nodeKind: Library
+id: library:starlette
+attributes:
+  displayName: "Starlette"
+  belongsToLanguageId: language:python
+  description: |
+    Lightweight ASGI framework/toolkit underpinning FastAPI; provides
+    routing, middleware, sessions, websockets, and background tasks.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:fastapi-lib
+---
+nodeKind: Library
+id: library:pytest
+attributes:
+  displayName: "pytest"
+  belongsToLanguageId: language:python
+  description: |
+    Mature Python testing framework with fixtures, parametrization,
+    and a rich plugin ecosystem (pytest-asyncio, pytest-cov, etc.).
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:hypothesis
+---
+nodeKind: Library
+id: library:hypothesis
+attributes:
+  displayName: "Hypothesis"
+  belongsToLanguageId: language:python
+  description: |
+    Property-based testing library for Python — generates examples
+    that try to falsify properties and shrinks failing cases.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:component-testing
+---
+nodeKind: Library
+id: library:scrapy
+attributes:
+  displayName: "Scrapy"
+  belongsToLanguageId: language:python
+  description: |
+    High-level web crawling and scraping framework for Python with
+    built-in concurrency, pipelines, and spider abstractions.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:web-scraping
+---
+nodeKind: Library
+id: library:hf-transformers
+attributes:
+  displayName: "Hugging Face Transformers"
+  belongsToLanguageId: language:python
+  description: |
+    Library providing pretrained models (LLMs, vision, audio) and
+    pipelines for inference and fine-tuning across PyTorch / TF / JAX.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:machine-learning
+  alternative_to:
+    - library:pytorch
+---
+nodeKind: Library
+id: library:scikit-learn
+attributes:
+  displayName: "scikit-learn"
+  belongsToLanguageId: language:python
+  description: |
+    Classical ML library — preprocessing, model selection, supervised
+    and unsupervised algorithms with a consistent estimator API.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:machine-learning
+  alternative_to:
+    - library:pytorch
+---
+nodeKind: Library
+id: library:matplotlib
+attributes:
+  displayName: "Matplotlib"
+  belongsToLanguageId: language:python
+  description: |
+    Foundational Python plotting library; pyplot interface and
+    object-oriented Figure/Axes API for static charts.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:data-analysis
+  alternative_to:
+    - library:seaborn
+---
+nodeKind: Library
+id: library:seaborn
+attributes:
+  displayName: "Seaborn"
+  belongsToLanguageId: language:python
+  description: |
+    Statistical data visualization built on Matplotlib with high-level
+    chart types and themed defaults.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:data-analysis
+---
+nodeKind: Library
+id: library:pytorch
+attributes:
+  displayName: "PyTorch"
+  belongsToLanguageId: language:python
+  description: |
+    Deep-learning framework with eager-mode autograd, TorchScript,
+    and a broad ecosystem (torchvision, torchaudio, Lightning).
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:machine-learning
+  alternative_to:
+    - library:tensorflow
+    - library:jax
+---
+nodeKind: Library
+id: library:tensorflow
+attributes:
+  displayName: "TensorFlow"
+  belongsToLanguageId: language:python
+  description: |
+    End-to-end ML platform with Keras high-level API, TF Serving,
+    TF Lite, and SavedModel export.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:machine-learning
+---
+nodeKind: Library
+id: library:jax
+attributes:
+  displayName: "JAX"
+  belongsToLanguageId: language:python
+  description: |
+    NumPy-compatible array library with grad/jit/vmap/pmap; backbone of
+    Flax and many high-performance ML research codebases.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:machine-learning
+---
+nodeKind: Library
+id: library:langchain
+attributes:
+  displayName: "LangChain"
+  belongsToLanguageId: language:python
+  description: |
+    Framework for composing LLM applications: prompts, chains, agents,
+    tool use, retrieval, and memory abstractions (Python and JS).
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:retrieval-augmented-generation
+    - target: skill-area:rag-pipeline-engineering
+  alternative_to:
+    - library:llama-index
+---
+nodeKind: Library
+id: library:llama-index
+attributes:
+  displayName: "LlamaIndex"
+  belongsToLanguageId: language:python
+  description: |
+    Data framework for RAG: ingestion, indexing, query engines, and
+    integrations with vector DBs and LLM providers.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:retrieval-augmented-generation
+    - target: skill-area:rag-pipeline-engineering
+    - target: skill-area:document-indexing
+---
+nodeKind: Library
+id: library:chromadb
+attributes:
+  displayName: "Chroma"
+  belongsToLanguageId: language:python
+  description: |
+    Open-source embedding database with a Python client; commonly
+    used for RAG prototypes and local vector search.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:retrieval-augmented-generation
+  alternative_to:
+    - library:qdrant-client
+---
+nodeKind: Library
+id: library:qdrant-client
+attributes:
+  displayName: "Qdrant Client"
+  belongsToLanguageId: language:python
+  description: |
+    Official client for the Qdrant vector database — collections,
+    points, payload filters, and hybrid search.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:retrieval-augmented-generation
+---
+nodeKind: Library
+id: library:fastapi-lib
+attributes:
+  displayName: "FastAPI (library form)"
+  belongsToLanguageId: language:python
+  description: |
+    Python ASGI web framework built on Starlette and Pydantic; this
+    Library node complements framework:fastapi for catalog dependency
+    references that target the package itself.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:starlette

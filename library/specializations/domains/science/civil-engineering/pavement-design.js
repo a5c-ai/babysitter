@@ -3,6 +3,12 @@
  * @description Design of flexible and rigid pavement structures including traffic analysis, material selection, and thickness determination
  * @inputs { projectId: string, pavementType: string, trafficData: object, subgradeProperties: object, designLife: number }
  * @outputs { success: boolean, pavementDesign: object, typicalSections: array, materialSpecs: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:civil-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

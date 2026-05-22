@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:cicd
+attributes:
+  acronym: "CI/CD"
+  expandsToTermId: term:cicd
+  description: |
+    Acronym for CI/CD.
+edges:
+  expands_to:
+    - term:cicd

@@ -1,0 +1,51 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-harness-mock-interactive-yolo
+attributes:
+  displayName: "harness-mock interactive:yolo"
+  kind: mock-scenario
+  surface: prompt-ui
+  description: |
+    Mock claude-code session that prompts "Do you want to allow this tool
+    call? (y/n)" on stderr and auto-replies "y" on stdin (`onAllow` →
+    exitCode 0 with claudeResult). Drives "yolo"-style approval tests.
+    Source: packages/agent-mux/harness-mock/src/scenarios/interactive.ts:20-66
+    (mode='yolo'; INTERACTION_SCENARIOS.yolo).
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-harness-mock-interactive-prompt
+attributes:
+  displayName: "harness-mock interactive:prompt"
+  kind: mock-scenario
+  surface: prompt-ui
+  description: |
+    Mock claude-code session that emits the same approval prompt but sends
+    no auto-reply, leaving the test driver to exercise the human-in-loop
+    path (consumer must inject stdin to advance).
+    Source: packages/agent-mux/harness-mock/src/scenarios/interactive.ts:20-73
+    (mode='prompt'; INTERACTION_SCENARIOS.prompt).
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-harness-mock-interactive-deny
+attributes:
+  displayName: "harness-mock interactive:deny"
+  kind: mock-scenario
+  surface: prompt-ui
+  description: |
+    Mock claude-code session that auto-replies "n" on the approval prompt
+    so the `onDeny` branch fires (assistant text "Tool call denied.";
+    exitCode 0). Drives deny-path tests.
+    Source: packages/agent-mux/harness-mock/src/scenarios/interactive.ts:20-66
+    (mode='deny'; INTERACTION_SCENARIOS.deny).
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-harness-mock-interactive-timeout
+attributes:
+  displayName: "harness-mock interactive:timeout"
+  kind: mock-scenario
+  surface: prompt-ui
+  description: |
+    Mock claude-code session that emits the approval prompt and never
+    replies; the StdinInteraction has timeoutMs=80 and `onTimeout` fires
+    (stderr "Approval timed out.", exitCode 1). Drives timeout-path tests.
+    Source: packages/agent-mux/harness-mock/src/scenarios/interactive.ts:20-73
+    (mode='timeout'; INTERACTION_SCENARIOS.timeout).

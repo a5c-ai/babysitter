@@ -8,6 +8,14 @@ expertise:
   - Path traversal prevention
   - Command injection prevention
   - Resource access control
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:mcp-server-implementation, skill-area:application-security-testing]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # MCP Security Auditor Agent

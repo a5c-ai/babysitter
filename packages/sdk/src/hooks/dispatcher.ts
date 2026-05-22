@@ -4,7 +4,8 @@
  */
 
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, promises as fsp } from "node:fs";
+import * as os from "node:os";
 import * as path from "node:path";
 import type {
   HookDispatcherOptions,
@@ -14,8 +15,164 @@ import type {
 import { DEFAULTS } from "../config/defaults";
 import { getAdapter } from "../harness";
 
+const HOOK_SCRIPT_EXTENSIONS = new Set([".sh", ".js", ".ts", ".py", ".bash"]);
+
+export interface DiscoveredHook {
+  path: string;
+  name: string;
+  location: "per-repo" | "per-user" | "plugin";
+}
+
+function findPluginHookPath(startCwd: string, hookType: string): string | null {
+  const candidateNames = Array.from(HOOK_SCRIPT_EXTENSIONS, (ext) => `${hookType}${ext}`);
+  const adapterPluginRoot = getAdapter().resolvePluginRoot({});
+  if (adapterPluginRoot) {
+    for (const candidateName of candidateNames) {
+      const candidate = path.join(adapterPluginRoot, "hooks", candidateName);
+      if (existsSync(candidate)) return candidate;
+    }
+  }
+
+  let current = path.resolve(startCwd);
+  for (let i = 0; i < 50; i++) {
+    const hookRoots = [
+      path.join(current, "plugins", "babysitter-unified", "hooks"),
+      path.join(current, "plugins", "babysitter", "hooks"),
+    ];
+    for (const hookRoot of hookRoots) {
+      for (const candidateName of candidateNames) {
+        const candidate = path.join(hookRoot, candidateName);
+        if (existsSync(candidate)) return candidate;
+      }
+    }
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+
+  return null;
+}
+
 /**
- * Find `plugins/babysitter/hooks/hook-dispatcher.sh` by walking up from cwd.
+ * Discover hook scripts for a given hook type from project and user directories.
+ */
+export async function discoverHooks(
+  hookType: string,
+  cwd: string,
+  homeDir: string = os.homedir()
+): Promise<DiscoveredHook[]> {
+  const projectHookDir = path.join(cwd, ".a5c", "hooks", hookType);
+  const userHookDir = path.join(homeDir, ".a5c", "hooks", hookType);
+
+  async function readHooksFromDir(
+    dir: string,
+    location: "per-repo" | "per-user"
+  ): Promise<DiscoveredHook[]> {
+    try {
+      const entries = await fsp.readdir(dir, { withFileTypes: true });
+      return entries
+        .filter((entry) => {
+          if (!entry.isFile()) return false;
+          const ext = path.extname(entry.name);
+          return HOOK_SCRIPT_EXTENSIONS.has(ext);
+        })
+        .map((entry) => ({
+          path: path.join(dir, entry.name),
+          name: entry.name,
+          location,
+        }));
+    } catch (err: unknown) {
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+        return [];
+      }
+      throw err;
+    }
+  }
+
+  const [projectHooks, userHooks] = await Promise.all([
+    readHooksFromDir(projectHookDir, "per-repo"),
+    readHooksFromDir(userHookDir, "per-user"),
+  ]);
+
+  const hooks: DiscoveredHook[] = [...projectHooks, ...userHooks];
+  const pluginHookPath = findPluginHookPath(cwd, hookType);
+  if (pluginHookPath) {
+    hooks.push({
+      path: pluginHookPath,
+      name: path.basename(pluginHookPath),
+      location: "plugin",
+    });
+  }
+
+  return hooks;
+}
+
+/**
+ * Execute discovered hook scripts sequentially, passing payload as stdin JSON.
+ * @internal
+ */
+async function executeDiscoveredHooks(
+  hooks: DiscoveredHook[],
+  payload: unknown,
+  hookType: string,
+  cwd: string,
+  timeout: number
+): Promise<HookResult> {
+  const payloadJson = JSON.stringify(payload);
+  const executedHooks: HookExecutionResult[] = [];
+
+  for (const hook of hooks) {
+    const result = await new Promise<{ success: boolean; exitCode: number | null }>((resolve) => {
+      const child = spawn("bash", [hook.path], {
+        cwd,
+        stdio: ["pipe", "pipe", "pipe"],
+        timeout,
+      });
+
+      child.stdin.write(payloadJson);
+      child.stdin.end();
+
+      let timedOut = false;
+      const timeoutHandle = setTimeout(() => {
+        timedOut = true;
+        child.kill("SIGTERM");
+      }, timeout);
+
+      child.on("error", () => {
+        clearTimeout(timeoutHandle);
+        resolve({ success: false, exitCode: null });
+      });
+
+      child.on("close", (exitCode) => {
+        clearTimeout(timeoutHandle);
+        if (timedOut) {
+          resolve({ success: false, exitCode: null });
+        } else {
+          resolve({ success: exitCode === 0, exitCode });
+        }
+      });
+    });
+
+    executedHooks.push({
+      hookPath: hook.path,
+      hookName: hook.name,
+      hookLocation: hook.location,
+      status: result.success ? "success" : "failed",
+      exitCode: result.exitCode ?? undefined,
+    });
+  }
+
+  const allSucceeded = executedHooks.every((h) => h.status === "success");
+  return {
+    hookType,
+    success: allSucceeded,
+    error: allSucceeded ? undefined : `One or more discovered hooks failed for ${hookType}`,
+    executedHooks,
+  };
+}
+
+/**
+ * Find `plugins/babysitter-unified/hooks/hook-dispatcher.sh` by walking up from cwd.
  * This allows running from nested projects/fixtures inside a mono-repo.
  *
  * First checks the active harness adapter for a harness-specific path
@@ -31,8 +188,13 @@ export function findHookDispatcherPath(startCwd: string): string | null {
   let current = path.resolve(startCwd);
   // Guard against infinite loops: stop once we stop making progress.
   for (let i = 0; i < 50; i++) {
-    const candidate = path.join(current, "plugins", "babysitter", "hooks", "hook-dispatcher.sh");
-    if (existsSync(candidate)) return candidate;
+    const candidates = [
+      path.join(current, "plugins", "babysitter-unified", "hooks", "hook-dispatcher.sh"),
+      path.join(current, "plugins", "babysitter", "hooks", "hook-dispatcher.sh"),
+    ];
+    for (const candidate of candidates) {
+      if (existsSync(candidate)) return candidate;
+    }
     const parent = path.dirname(current);
     if (parent === current) break;
     current = parent;
@@ -56,14 +218,15 @@ export async function callHook(
 
   const dispatcherPath = findHookDispatcherPath(cwd);
   if (!dispatcherPath) {
-    return {
-      hookType,
-      success: false,
-      error:
-        `Hook dispatcher not found. Expected plugins/babysitter/hooks/hook-dispatcher.sh ` +
-        `in ${cwd} or any parent directory.`,
-      executedHooks: [],
-    };
+    const discoveredHooks = await discoverHooks(hookType, cwd);
+    if (discoveredHooks.length === 0) {
+      return {
+        hookType,
+        success: true,
+        executedHooks: [],
+      };
+    }
+    return executeDiscoveredHooks(discoveredHooks, payload, hookType, cwd, timeout);
   }
 
   const payloadJson = JSON.stringify(payload);

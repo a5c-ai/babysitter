@@ -1,0 +1,13 @@
+nodeKind: ModelFamily
+id: model-family:claude-opus-4
+attributes:
+  displayName: "Claude Opus 4"
+  vendor: "Anthropic"
+  homepageUrl: "https://docs.anthropic.com/en/docs/about-claude/models"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:claude-opus-4-5@current
+    - model:claude-opus-4-6@current
+    - model:claude-opus-4-7@current

@@ -9,6 +9,12 @@ expertise:
   - Rough-cut capacity planning
   - Capacity investment analysis
   - Production scheduling support
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:capacity-planning-ops, skill-area:quantitative-modeling]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:procurement-manager, role:operations-analyst]
 ---
 
 # Capacity Planner

@@ -10,6 +10,12 @@ expertise:
   - Network forensics and incident analysis
   - Performance bottleneck identification
   - Wireshark and tcpdump mastery
+graph:
+  domains: [domain:networking]
+  specializations: [specialization:network-programming]
+  skillAreas: [skill-area:protocol-design, skill-area:socket-programming]
+  roles: [role:backend-engineer, role:sre]
+  topics: [topic:circuit-breakers]
 ---
 
 # Network Analysis Expert Agent

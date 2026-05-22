@@ -1,0 +1,91 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-mux-cli
+attributes:
+  packageId: "@a5c-ai/agent-mux-cli"
+  packageName: "@a5c-ai/agent-mux-cli"
+  workspacePath: packages/agent-mux/cli
+  moduleType: typescript
+  surfaceKinds:
+    - cli
+    - bin-entrypoint
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:agent-mux-cli
+  exposes_subcommand:
+    - target: interaction-primitive:agent-mux-cli-run
+    - target: interaction-primitive:agent-mux-cli-install
+    - target: interaction-primitive:agent-mux-cli-update
+    - target: interaction-primitive:agent-mux-cli-detect
+    - target: interaction-primitive:agent-mux-cli-uninstall
+    - target: interaction-primitive:agent-mux-cli-adapters-list
+    - target: interaction-primitive:agent-mux-cli-adapters-detect
+    - target: interaction-primitive:agent-mux-cli-adapters-info
+    - target: interaction-primitive:agent-mux-cli-models-list
+    - target: interaction-primitive:agent-mux-cli-models-info
+    - target: interaction-primitive:agent-mux-cli-models-refresh
+    - target: interaction-primitive:agent-mux-cli-models-current
+    - target: interaction-primitive:agent-mux-cli-models-set
+    - target: interaction-primitive:agent-mux-cli-sessions-list
+    - target: interaction-primitive:agent-mux-cli-sessions-show
+    - target: interaction-primitive:agent-mux-cli-sessions-search
+    - target: interaction-primitive:agent-mux-cli-sessions-export
+    - target: interaction-primitive:agent-mux-cli-sessions-cost
+    - target: interaction-primitive:agent-mux-cli-config-get
+    - target: interaction-primitive:agent-mux-cli-config-set
+    - target: interaction-primitive:agent-mux-cli-config-schema
+    - target: interaction-primitive:agent-mux-cli-config-validate
+    - target: interaction-primitive:agent-mux-cli-config-reload
+    - target: interaction-primitive:agent-mux-cli-profiles-list
+    - target: interaction-primitive:agent-mux-cli-profiles-show
+    - target: interaction-primitive:agent-mux-cli-profiles-set
+    - target: interaction-primitive:agent-mux-cli-profiles-delete
+    - target: interaction-primitive:agent-mux-cli-profiles-apply
+    - target: interaction-primitive:agent-mux-cli-auth-check
+    - target: interaction-primitive:agent-mux-cli-auth-setup
+    - target: interaction-primitive:agent-mux-cli-plugin-list
+    - target: interaction-primitive:agent-mux-cli-plugin-install
+    - target: interaction-primitive:agent-mux-cli-plugin-enable
+    - target: interaction-primitive:agent-mux-cli-plugin-disable
+    - target: interaction-primitive:agent-mux-cli-plugin-marketplace
+    - target: interaction-primitive:agent-mux-cli-mcp-list
+    - target: interaction-primitive:agent-mux-cli-mcp-install
+    - target: interaction-primitive:agent-mux-cli-mcp-uninstall
+    - target: interaction-primitive:agent-mux-cli-skill-list
+    - target: interaction-primitive:agent-mux-cli-skill-add
+    - target: interaction-primitive:agent-mux-cli-skill-remove
+    - target: interaction-primitive:agent-mux-cli-skill-where
+    - target: interaction-primitive:agent-mux-cli-skill-agents
+    - target: interaction-primitive:agent-mux-cli-agent-list
+    - target: interaction-primitive:agent-mux-cli-agent-add
+    - target: interaction-primitive:agent-mux-cli-agent-remove
+    - target: interaction-primitive:agent-mux-cli-agent-where
+    - target: interaction-primitive:agent-mux-cli-agent-agents
+    - target: interaction-primitive:agent-mux-cli-workspaces-list
+    - target: interaction-primitive:agent-mux-cli-workspaces-create
+    - target: interaction-primitive:agent-mux-cli-workspaces-archive
+    - target: interaction-primitive:agent-mux-cli-workspaces-cleanup
+    - target: interaction-primitive:agent-mux-cli-workspaces-recover
+    - target: interaction-primitive:agent-mux-cli-workspaces-delete
+    - target: interaction-primitive:agent-mux-cli-workspaces-sync-sessions
+    - target: interaction-primitive:agent-mux-cli-launch
+    - target: interaction-primitive:agent-mux-cli-detect-host
+    - target: interaction-primitive:agent-mux-cli-doctor
+    - target: interaction-primitive:agent-mux-cli-tui
+    - target: interaction-primitive:agent-mux-cli-remote-install
+    - target: interaction-primitive:agent-mux-cli-remote-update
+    - target: interaction-primitive:agent-mux-cli-hooks-discover
+    - target: interaction-primitive:agent-mux-cli-hooks-list
+    - target: interaction-primitive:agent-mux-cli-hooks-add
+    - target: interaction-primitive:agent-mux-cli-hooks-remove
+    - target: interaction-primitive:agent-mux-cli-hooks-set
+    - target: interaction-primitive:agent-mux-cli-hooks-handle
+    - target: interaction-primitive:agent-mux-cli-gateway-serve
+    - target: interaction-primitive:agent-mux-cli-gateway-status
+    - target: interaction-primitive:agent-mux-cli-gateway-tokens-list
+    - target: interaction-primitive:agent-mux-cli-gateway-tokens-create
+    - target: interaction-primitive:agent-mux-cli-gateway-tokens-revoke
+    - target: interaction-primitive:agent-mux-cli-help
+    - target: interaction-primitive:agent-mux-cli-version

@@ -1,0 +1,14 @@
+nodeKind: OpenQuestion
+id: open-question:benchmark-run-primitive
+attributes:
+  displayName: "Should EvalRun be merged with Run?"
+  description: |
+    Whether benchmark eval runs share enough lifecycle semantics with
+    runtime Runs to unify them into a single primitive in v2.
+  owner: "@a5c-ai/catalog-stewards"
+  affectedEntities:
+    - eval-run:swe-bench.claude-code@1.x.2025-04-29
+    - run:01kqex-example-run-001
+  status: open
+  raisedAt: "2026-04-28T00:00:00Z"
+edges: {}

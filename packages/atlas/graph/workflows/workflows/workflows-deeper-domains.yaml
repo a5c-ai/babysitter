@@ -1,0 +1,510 @@
+---
+nodeKind: Workflow
+id: workflow:api-rate-limiting-tuning
+attributes:
+  displayName: "API Rate Limiting Tuning"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Tunes API rate-limiting configurations to balance abuse prevention with
+    legitimate traffic needs -- analyzing request-rate distributions across
+    API consumers to identify percentile thresholds, reviewing 429-response
+    incidence and correlating with customer-impact tickets, evaluating
+    burst-allowance and sliding-window parameters against traffic-spike
+    patterns, load-testing proposed rate-limit changes in staging with
+    synthetic client profiles, configuring per-endpoint and per-tier
+    differentiated limits, updating rate-limit response headers and developer
+    documentation, and monitoring post-deployment metrics for false-positive
+    throttling. Produces rate-limit configuration change record and impact
+    analysis. Excludes API architecture redesign.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:rate-limiting
+    - target: skill-area:web-performance
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:database-index-optimization
+attributes:
+  displayName: "Database Index Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Optimizes database index configurations to improve query performance and
+    reduce storage overhead -- analyzing slow-query logs and execution plans
+    to identify missing index opportunities, evaluating existing indexes for
+    usage frequency and identifying unused or redundant indexes for removal,
+    assessing index-bloat levels and scheduling reindex operations, modeling
+    composite-index column ordering against query selectivity statistics,
+    testing index changes against production-representative workloads in
+    staging, validating lock-free index creation strategies for
+    zero-downtime deployment, and benchmarking query-latency improvements
+    post-optimization. Produces index optimization report and migration
+    scripts. Excludes schema redesign.
+edges:
+  involves_role:
+    - target: role:database-administrator
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:postgres-tuning
+    - target: skill-area:database-migrations-zero-downtime
+  applies_to_domain:
+    - target: domain:databases
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:database-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:ci-cd-pipeline-migration
+attributes:
+  displayName: "CI/CD Pipeline Migration"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Migrates CI/CD pipelines between platforms or architectures -- auditing
+    current pipeline configurations, build scripts, and artifact registries
+    to produce a complete migration inventory, mapping source-platform
+    primitives to target-platform equivalents, redesigning pipeline stages to
+    leverage target-platform native capabilities, implementing parallel-run
+    validation where both old and new pipelines execute simultaneously,
+    migrating secrets and environment variables with rotation, validating
+    artifact-signing and provenance chains in the new system, conducting team
+    training on the target platform, and executing a phased cutover with
+    rollback readiness. Produces migration plan, parallel-run validation
+    report, and cutover runbook. Excludes pipeline feature development.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:gitops
+    - target: skill-area:containerization
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:run-architecture-review
+  performed_by_org_unit:
+    - target: org-unit:infra-engineering
+    - target: org-unit:engineering-productivity
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:mobile-app-privacy-review
+attributes:
+  displayName: "Mobile App Privacy Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Reviews mobile application privacy practices before release -- auditing
+    runtime permission requests against actual feature usage to eliminate
+    over-permissioning, analyzing network traffic for undisclosed data
+    collection by third-party SDKs, validating app-store
+    privacy-nutrition-label accuracy against actual data-handling practices,
+    reviewing App Tracking Transparency and GDPR consent-flow
+    implementations, assessing data-retention policies for locally stored
+    user data, verifying data-deletion API compliance with right-to-erasure
+    requirements, and testing privacy controls across device types and OS
+    versions. Produces privacy review report and app-store privacy-label
+    update. Excludes general functional QA.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:staff-engineer
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:ios-native
+    - target: skill-area:android-native
+  applies_to_domain:
+    - target: domain:mobile
+    - target: domain:security
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:threat-modeling
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:frontend-team
+    - target: org-unit:legal-team
+---
+nodeKind: Workflow
+id: workflow:game-localization-pipeline
+attributes:
+  displayName: "Game Localization Pipeline"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Manages the end-to-end game localization pipeline for multi-language
+    releases -- extracting translatable strings from game scripts, UI
+    elements, and in-game item databases, routing content to translation
+    teams with context screenshots and character-limit annotations, managing
+    localization-kit handoffs for voice-over recording sessions, integrating
+    translated assets back into the build pipeline with automated
+    string-length and encoding validation, conducting linguistic QA
+    playthroughs in each target locale, verifying text-rendering for CJK and
+    RTL scripts, and coordinating localization-complete milestones with
+    release scheduling. Produces localized build artifacts and linguistic QA
+    sign-off reports. Excludes culturalization and market-specific content
+    adaptation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:implementer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:internationalization
+    - target: skill-area:asset-pipeline
+  applies_to_domain:
+    - target: domain:gaming
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:embedded-ota-rollback-testing
+attributes:
+  displayName: "Embedded OTA Rollback Testing"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Tests over-the-air firmware update and rollback mechanisms for embedded
+    devices -- validating OTA package signing and integrity verification on
+    target hardware, simulating network interruptions at each download stage
+    to confirm resume-capability, testing atomic update application with
+    automatic rollback on boot-failure detection, verifying A/B partition
+    switching under power-loss scenarios, measuring update-time budgets
+    against field-deployment constraints, validating rollback preserves user
+    configuration and calibration data, testing fleet-wide staged-rollout
+    gating with canary device cohorts, and confirming telemetry reporting of
+    update success and failure states. Produces OTA rollback test report and
+    firmware-update certification record. Excludes OTA server infrastructure
+    design.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:firmware-development
+    - target: skill-area:bootloader-design
+  applies_to_domain:
+    - target: domain:embedded-systems
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:network-topology-review
+attributes:
+  displayName: "Network Topology Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews network topology design and configuration for performance,
+    resilience, and security alignment -- auditing VLAN segmentation and
+    subnet allocation against zero-trust architecture principles, evaluating
+    BGP peering and route-propagation configurations for redundancy,
+    analyzing traffic-flow patterns against link-capacity utilization
+    thresholds, reviewing firewall rule-sets for overly permissive entries
+    and stale rules, validating DNS architecture and failover configurations,
+    assessing load-balancer health-check accuracy and failover timing, and
+    modeling topology changes needed for planned capacity growth. Produces
+    network topology assessment report and configuration remediation list.
+    Excludes hardware procurement.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:cloud-architect
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:network-security
+    - target: skill-area:service-mesh-config
+  applies_to_domain:
+    - target: domain:networking
+    - target: domain:infrastructure
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:infra-engineering
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:data-warehouse-cost-optimization
+attributes:
+  displayName: "Data Warehouse Cost Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Optimizes data warehouse costs while maintaining query performance and
+    SLA adherence -- analyzing query-cost attribution by team, dashboard, and
+    ad-hoc usage patterns, identifying expensive scans caused by missing
+    partitioning or clustering, evaluating storage-tier placement for hot,
+    warm, and cold data based on access frequency, reviewing
+    materialized-view cost-benefit against the queries they accelerate,
+    assessing slot or compute-reservation sizing against peak-demand
+    profiles, modeling cost impact of migrating workloads between on-demand
+    and flat-rate pricing, and implementing query-governance policies for
+    runaway queries. Produces cost optimization report and implementation
+    runbook. Excludes data-model redesign.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:platform-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-warehouse-modeling
+    - target: skill-area:columnar-storage
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:data-engineering
+    - target: domain:cloud-infra
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:data-platform-team
+    - target: org-unit:analytics-team
+    - target: org-unit:infra-engineering
+---
+nodeKind: Workflow
+id: workflow:ml-model-versioning-governance
+attributes:
+  displayName: "ML Model Versioning Governance"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Governs ML model versioning, lineage tracking, and promotion workflows
+    -- auditing model-registry completeness for metadata including
+    training-data snapshots, hyperparameters, and evaluation metrics,
+    validating model-card documentation against organizational standards,
+    reviewing model-promotion gates from experimental through staging to
+    production, enforcing reproducibility requirements by verifying
+    training-pipeline determinism, assessing model-drift monitoring alerts
+    and retraining trigger thresholds, auditing access controls on model
+    artifacts and serving endpoints, and reconciling deployed model versions
+    against the approved model inventory. Produces model governance
+    compliance report and registry hygiene scorecard. Excludes model
+    architecture research.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:ml-platform-team
+    - target: org-unit:ml-team
+    - target: org-unit:data-platform-team
+---
+nodeKind: Workflow
+id: workflow:open-source-security-disclosure
+attributes:
+  displayName: "Open Source Security Disclosure"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-vulnerability"
+  complexity: cross-team
+  description: |
+    Manages responsible security-vulnerability disclosure for open-source
+    projects the organization maintains -- receiving and triaging inbound
+    vulnerability reports through the security-contact channel, reproducing
+    and severity-scoring reported vulnerabilities using CVSS, developing
+    patches in private forks with minimal information leakage, coordinating
+    disclosure timelines with reporters and downstream distributors,
+    preparing security advisories with CVE-ID assignment, releasing patched
+    versions with coordinated announcement across mailing lists and GitHub
+    advisories, and conducting retrospective analysis to identify systemic
+    vulnerability patterns. Produces security advisory, patched release, and
+    vulnerability retrospective. Excludes ongoing security scanning.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:staff-engineer
+    - target: role:devrel
+  requires_skill_area:
+    - target: skill-area:dependency-vulnerability-mgmt
+    - target: skill-area:supply-chain-security
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:open-source-program-office
+    - target: org-unit:application-security-team
+---
+nodeKind: Workflow
+id: workflow:kubernetes-cost-optimization
+attributes:
+  displayName: "Kubernetes Cost Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Optimizes Kubernetes cluster costs while maintaining workload performance
+    guarantees -- analyzing pod resource-request vs actual-usage ratios to
+    identify over-provisioned deployments, evaluating node-pool sizing and
+    instance-type selection against workload profiles, assessing spot and
+    preemptible instance suitability for fault-tolerant workloads, reviewing
+    namespace resource-quota utilization and adjusting limits, modeling
+    cluster-autoscaler configuration tuning for scale-down aggressiveness,
+    evaluating multi-tenancy bin-packing efficiency, and benchmarking
+    per-namespace cost attribution against team budgets. Produces K8s cost
+    optimization report with resource-adjustment recommendations. Excludes
+    cluster architecture migration.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:cloud-architect
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:k8s-operator-development
+    - target: skill-area:containerization
+  applies_to_domain:
+    - target: domain:cloud-infra
+    - target: domain:infrastructure
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:infra-engineering
+    - target: org-unit:platform-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:documentation-freshness-audit
+attributes:
+  displayName: "Documentation Freshness Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits documentation freshness and accuracy across all
+    knowledge-management surfaces -- scanning document repositories for pages
+    not updated within staleness thresholds, cross-referencing API
+    documentation against current endpoint schemas for drift detection,
+    validating runbook accuracy by comparing documented procedures against
+    actual system configurations, reviewing onboarding documentation
+    completeness against current toolchain and process, assessing
+    code-comment accuracy in frequently changed modules, measuring
+    documentation coverage ratios for public APIs and internal services, and
+    triaging stale content for update, archive, or deletion. Produces
+    documentation freshness scorecard and remediation backlog. Excludes
+    documentation authoring.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:doc-generator
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:docs-as-code
+    - target: skill-area:api-doc-generation
+  applies_to_domain:
+    - target: domain:knowledge-management
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:changelog-maintenance
+  performed_by_org_unit:
+    - target: org-unit:devrel-team
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity
+---
+nodeKind: Workflow
+id: workflow:customer-churn-analysis
+attributes:
+  displayName: "Customer Churn Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Analyzes customer churn patterns and develops predictive intervention
+    strategies -- extracting churn cohort data segmented by acquisition
+    channel, plan tier, usage intensity, and lifecycle stage, building and
+    calibrating churn-prediction models using behavioral signals such as
+    login frequency decline, support-ticket escalation patterns, and
+    feature-adoption stalls, conducting win-back campaign A/B testing and
+    measuring reactivation rates, performing root-cause analysis on churned
+    accounts through exit-survey correlation and product-usage forensics,
+    identifying at-risk account segments for proactive customer-success
+    outreach, and quantifying churn revenue impact by segment. Produces
+    churn analysis report with prediction model scorecard and intervention
+    playbook. Excludes individual account management.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:business-intelligence
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:customer-success
+    - target: org-unit:growth-team

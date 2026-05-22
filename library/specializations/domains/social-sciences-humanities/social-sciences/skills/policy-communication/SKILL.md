@@ -8,6 +8,11 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:technical-writing, skill-area:content-strategy, skill-area:stakeholder-management]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:technical-writer, role:strategic-planner]
 ---
 
 # Policy Communication Skill

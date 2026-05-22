@@ -11,6 +11,11 @@ expertise:
   - Power management in drivers
   - Driver testing with mocks
   - Cross-platform driver portability
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development, skill-area:device-drivers]
+  roles: [role:embedded-engineer]
 ---
 
 # Device Driver Expert Agent

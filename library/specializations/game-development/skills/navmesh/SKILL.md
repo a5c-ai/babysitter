@@ -2,6 +2,11 @@
 name: navmesh
 description: Navigation mesh generation and pathfinding skill for game AI. Enables creation and configuration of navigation meshes, pathfinding queries, dynamic obstacles, and navigation agent setup across Unity, Unreal, and Godot engines.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-ai-pathfinding, skill-area:graph-algorithms]
+  roles: [role:game-developer]
 ---
 
 # Navigation Mesh Skill

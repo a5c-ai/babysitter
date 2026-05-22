@@ -1,0 +1,17 @@
+nodeKind: Framework
+id: framework:axum
+attributes:
+  displayName: "Axum"
+  homepageUrl: "https://github.com/tokio-rs/axum"
+  belongsToLanguageId: language:rust
+  category: web-backend
+  description: |
+    Axum — a Tokio-based web framework for Rust.
+edges:
+  belongs_to_language:
+    - language:rust
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:actix-web
+      comparison: "Rust web frameworks — Axum is Tokio-native; Actix Web is actor-based"

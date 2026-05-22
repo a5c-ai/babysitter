@@ -15,6 +15,11 @@ metadata:
   domain: business
   category: Portfolio Management
   id: AG-006
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:roadmap-planning, skill-area:financial-planning, skill-area:strategic-planning]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:strategic-planner, role:financial-analyst]
 ---
 
 # Portfolio Manager Agent

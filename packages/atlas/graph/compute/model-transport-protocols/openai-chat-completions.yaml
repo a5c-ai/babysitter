@@ -1,0 +1,95 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:openai-chat-completions
+attributes:
+  displayName: "OpenAI Chat Completions"
+  vendor: "OpenAI"
+  specUrl: "https://platform.openai.com/docs/api-reference/chat"
+  streamingFraming: sse
+  toolUseSchema: |
+    Tool calls appear in the assistant message's `tool_calls` array with
+    `id`, `type: "function"`, and `function: { name, arguments }`. Tool
+    results are submitted as messages with `role: "tool"` and
+    `tool_call_id` referencing the original call.
+  thinkingChannel: none
+  cacheControl: implicit
+  firstSpecVersion: "2023-06-13"
+  currentSpecVersion: "2024-10-01"
+  status: standard
+  requestBodyShape: |
+    POST /v1/chat/completions
+    JSON body (top-level fields):
+      - `model` (required, string)
+      - `messages` (required, array of `{role: "system"|"user"|"assistant"|"tool", content, name?, tool_call_id?, tool_calls?}`)
+      - `tools` (optional, array of `{type: "function", function: {name, description, parameters}}`)
+      - `tool_choice` (optional, "auto"|"none"|"required"|`{type:"function", function:{name}}`)
+      - `temperature`, `top_p`, `n`, `stop`, `max_tokens`, `max_completion_tokens` (optional)
+      - `stream` (optional, bool)
+      - `stream_options` (optional, `{include_usage: bool}`)
+      - `response_format` (optional, json_schema / json_object / text)
+      - `prompt_cache_key` (optional, string)
+      - `user` (optional, string — abuse-monitoring tag)
+  responseBodyShape: |
+    Non-streaming response (HTTP 200 application/json):
+      {
+        "id": "chatcmpl-...",
+        "object": "chat.completion",
+        "created": int,
+        "model": "...",
+        "choices": [
+          { "index": 0,
+            "message": { "role": "assistant", "content": string|null,
+                         "tool_calls"?: [...], "refusal"?: string|null },
+            "finish_reason": "stop"|"length"|"tool_calls"|"content_filter" }
+        ],
+        "usage": {
+          "prompt_tokens": int, "completion_tokens": int, "total_tokens": int,
+          "prompt_tokens_details": { "cached_tokens": int },
+          "completion_tokens_details": { "reasoning_tokens"?: int }
+        }
+      }
+  streamingEventTypes:
+    - "chat.completion.chunk"
+    - "[DONE]"
+  toolCallWireFormat: |
+    On the assistant message:
+      "tool_calls": [
+        { "id": "call_...",
+          "type": "function",
+          "function": { "name": "<tool_name>", "arguments": "<JSON-encoded string>" } }
+      ]
+  toolResultWireFormat: |
+    A subsequent message with role=tool:
+      { "role": "tool",
+        "tool_call_id": "call_...",
+        "content": "<string>" }
+  errorEnvelope: |
+    Non-2xx response, `application/json`:
+      { "error": { "type": string, "code": string|null, "message": string,
+                   "param": string|null } }
+    Same envelope as the Responses API.
+  cacheControlWireFormat: |
+    Implicit automatic prompt caching for prompts >= 1024 tokens; cache
+    state reported in `usage.prompt_tokens_details.cached_tokens`.
+    Optional explicit scoping via top-level `prompt_cache_key`.
+  rateLimitSignaling: |
+    Same as OpenAI Responses: `x-ratelimit-{limit,remaining,reset}-{requests,tokens}`
+    headers on every response; `retry-after` on HTTP 429.
+  reasoningWireFormat: |
+    No first-class reasoning channel on Chat Completions. For reasoning
+    models served via this surface, internal reasoning tokens are
+    surfaced only as a count in `usage.completion_tokens_details.reasoning_tokens`;
+    the reasoning text itself is not returned. Use the Responses API for
+    reasoning summaries / encrypted reasoning state.
+  authHeaderFormat: |
+    `Authorization: Bearer <OPENAI_API_KEY>`
+    Optional: `OpenAI-Organization`, `OpenAI-Project`.
+  versioningHeader: |
+    No general API version header; surface version is implied by the
+    `/v1/chat/completions` path.
+edges:
+  realizes:
+    - target: layer:3-transport
+  served_by:
+    - provider:openai
+  spoken_by:
+    - model:gpt-5@current

@@ -10,6 +10,14 @@ expertise:
   - Data governance
   - Data warehousing
   - Data lake architecture
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:data-engineer]
+  skillAreas: [skill-area:data-warehouse-modeling, skill-area:backend-data-persistence]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:domain-driven-design, topic:database-sharding]
+
 ---
 
 # Data Architect Agent

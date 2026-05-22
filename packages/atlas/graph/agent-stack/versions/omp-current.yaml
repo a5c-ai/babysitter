@@ -1,0 +1,134 @@
+nodeKind: AgentVersion
+id: agentVersion:omp:ge-0-0-0
+attributes:
+  agentId: "omp"
+  aliases:
+    - "oh-my-pi"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  displayName: "OMP (oh-my-pi)"
+  summary: "Oh-My-Pi terminal coding agent"
+  sourcePackage: "omp"
+  osSupport:
+    - "linux"
+    - "macos"
+    - "windows"
+  agentProductId: agent:omp
+  versionRange: ">=0.0.0"
+  releasedAt: "2025-01-01"
+  cliCommand: "omp"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "Provider API Key"
+        envVars: [ANTHROPIC_API_KEY, OPENAI_API_KEY]
+    authFiles:
+      - "~/.omp/agent/settings.json"
+    hostEnvSignals:
+      - OMP_RUN_ID
+      - OMP_SESSION_ID
+    sessionDir: "~/.omp/agent/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
+    capabilityFlags:
+      canResume: false
+      canFork: false
+      supportsMultiTurn: true
+      sessionPersistence: file
+      supportsTextStreaming: true
+      supportsToolCallStreaming: true
+      supportsThinkingStreaming: false
+      supportsNativeTools: true
+      supportsMCP: false
+      supportsParallelToolCalls: false
+      requiresToolApproval: true
+      supportsThinking: false
+      supportsJsonMode: false
+      supportsStructuredOutput: false
+      structuredSessionTransport: none
+      sessionControlPlane: self-managed
+      supportsSkills: false
+      supportsAgentsMd: false
+      skillsFormat: none
+      supportsSubagentDispatch: false
+      supportsParallelExecution: false
+      maxParallelTasks: 1
+      supportsInteractiveMode: true
+      supportsStdinInjection: true
+      supportsImageInput: false
+      supportsImageOutput: false
+      supportsFileAttachments: false
+      supportsPlugins: false
+      supportedPlatforms: [darwin, linux, win32]
+      requiresGitRepo: false
+      requiresPty: false
+    runtimeHooks:
+      preToolUse: nonblocking
+      postToolUse: nonblocking
+      sessionStart: nonblocking
+      sessionEnd: nonblocking
+      stop: nonblocking
+      userPromptSubmit: nonblocking
+    configSchema:
+      configFormat: json
+      configFilePaths:
+        - "~/.omp/agent/settings.json"
+    displayName: "OMP"
+    defaultModelId: "default"
+  hookSupport:
+    interactive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+    nonInteractive: {}
+  bridgeCapabilities:
+    interactiveBridge: false
+    sessionResume: true
+    positionalPrompt: false
+edges:
+  version_of:
+    - agent:omp
+  composed_of:
+    - target: agent-core-impl:omp.core@current
+      role: core
+    - target: agent-runtime-impl:omp.runtime@current
+      role: runtime
+    - target: agent-platform-impl:omp.platform@current
+      role: platform
+    - target: agent-ui-impl:omp.ui@current
+      role: ui
+  sourced_from: []
+  supports:
+    - target: capability:skills
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Oh-My-Pi documents file-backed skills explicitly.
+    - target: capability:supports-thinking
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Oh-My-Pi publicly described as a terminal coding agent with broad tool surface.
+    - target: capability:interactive-mode
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Interactive terminal behavior grounded in upstream product README.
+    - target: capability:stdin-injection
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Public operator docs are thin; local fallback metadata remains primary source of truth.
+    - target: capability:vision-input
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Public README advertises image support; technical detail is thinner.
+    - target: capability:can-resume
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Oh-My-Pi documents resume, continue, fork, and session switching as first-class session operations.
+  uses_memory_system:
+    - target: memory-system:pi-memory

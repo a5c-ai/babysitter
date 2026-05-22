@@ -1,0 +1,24 @@
+nodeKind: StackPart
+id: stack-part:logging
+attributes:
+  displayName: "Logging"
+  category: observability
+  description: |
+    Centralized log aggregation, indexing, and search for structured and
+    unstructured log streams emitted by applications, infrastructure, and
+    platform components. Core concerns include log shipping (Fluentd,
+    Fluent Bit, Vector), retention policies, cardinality, and cost.
+
+    Popular implementations: the ELK/EFK stack (Elasticsearch/OpenSearch +
+    Logstash/Fluentd + Kibana), Grafana Loki (label-based log aggregation
+    paired with Grafana dashboards), Splunk (enterprise), and managed
+    offerings (AWS CloudWatch Logs, Datadog Logs, Papertrail). Structured
+    JSON logging is preferred over plain text for machine-readable queries.
+    Closely integrated with the Metrics and Tracing stack parts.
+edges:
+  implemented_by:
+    - target: tool:elasticsearch
+    - target: platform-service:aws-cloudwatch
+  stack_part_used_by:
+    - target: skill-area:log-aggregation
+    - target: skill-area:observability-pipeline

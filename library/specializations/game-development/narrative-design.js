@@ -18,6 +18,13 @@
  * - The Hero with a Thousand Faces by Joseph Campbell
  * - Procedural Storytelling in Game Design
  * - Story by Robert McKee
+ * @graph
+ *   domains: [domain:gaming]
+ *   specializations: [specialization:game-development]
+ *   skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+ *   roles: [role:game-developer]
+ *   topics: [topic:ssl-certs]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,19 @@
+nodeKind: StackPart
+id: stack-part:load-balancer
+attributes:
+  displayName: "Load Balancer"
+  category: infrastructure
+  description: |
+    Distributes incoming network connections or HTTP requests across a pool
+    of backend instances to maximize throughput, minimize latency, and ensure
+    availability. Operates at Layer 4 (TCP/UDP) or Layer 7 (HTTP/HTTPS).
+
+    L7 load balancers (AWS ALB, GCP HTTPS LB) support path-based and header-
+    based routing, SSL termination, sticky sessions, health checks, and
+    WebSocket upgrades. L4 load balancers (AWS NLB) offer lower latency for
+    TCP-based protocols. Cloud-native load balancers integrate with
+    auto-scaling groups to drain connections gracefully during deployments.
+    Often co-located with a WAF or DDoS protection layer.
+edges:
+  stack_part_used_by:
+    - target: skill-area:capacity-planning-ops

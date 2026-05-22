@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:cline.scope
+attributes:
+  subjectId: agent:cline
+  inScope: |
+    Autonomous coding agent that runs as a VS Code extension; reads/writes files, runs terminal commands with user approval, and drives a headless Chromium browser.
+  outOfScope: |
+    Standalone CLI usage outside VS Code, JetBrains IDE support, and managed hosted execution.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - agent:cline

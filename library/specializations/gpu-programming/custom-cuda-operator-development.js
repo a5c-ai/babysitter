@@ -17,6 +17,12 @@
  * - PyTorch CUDA Extensions: https://pytorch.org/tutorials/advanced/cpp_extension.html
  * - TensorFlow Custom Ops: https://www.tensorflow.org/guide/create_op
  * - Custom Operator Best Practices: https://pytorch.org/docs/stable/notes/extending.html
+ * @graph
+ *   domains: [domain:scientific-computing]
+ *   specializations: [specialization:gpu-programming]
+ *   skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders, skill-area:profiling-cuda]
+ *   roles: [role:computational-scientist, role:ml-engineer]
+ *   workflows: [workflow:performance-profiling-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

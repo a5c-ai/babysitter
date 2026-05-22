@@ -3,6 +3,12 @@
  * @description End-to-end process for planning and executing influencer marketing campaigns, from strategy development through influencer selection, content creation, and performance measurement
  * @inputs { campaignBrief: object, budget: number, brandGuidelines: object, targetAudienceDefinition: object, outputDir: string }
  * @outputs { success: boolean, influencerShortlist: array, contracts: array, creativeBriefs: array, contentApprovals: array, campaignPerformanceReport: object, artifacts: array }
+  * @graph
+ *   domains: [domain:digital-marketing]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
+ *   workflows: [workflow:brand-campaign-launch]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

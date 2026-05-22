@@ -1,0 +1,55 @@
+nodeKind: Skill
+id: skill:code-review
+attributes:
+  displayName: "Code Review"
+  description: |
+    Review a pull request or diff for correctness, security, performance,
+    style, and tests. Produces structured review comments.
+  keyword: code-review
+  entrypoint: SKILL.md
+  domains:
+    - engineering
+    - quality
+  requiresLanguages: []
+edges:
+  addresses:
+    - target: skill-area:code-review-practice
+    - target: skill-area:sast
+---
+nodeKind: Skill
+id: skill:system-design
+attributes:
+  displayName: "System Design"
+  description: |
+    Design or evaluate a system architecture — components, data flows,
+    failure modes, and tradeoffs. Produces an ADR or design doc.
+  keyword: system-design
+  entrypoint: SKILL.md
+  domains:
+    - engineering
+    - architecture
+  requiresLanguages: []
+edges:
+  addresses:
+    - target: skill-area:c4-modeling
+    - target: skill-area:adr-writing
+    - target: skill-area:api-design
+---
+nodeKind: Skill
+id: skill:technical-writing
+attributes:
+  displayName: "Technical Writing"
+  description: |
+    Write clear technical documentation — READMEs, runbooks, API docs,
+    architecture overviews — for engineering audiences.
+  keyword: technical-writing
+  entrypoint: SKILL.md
+  domains:
+    - documentation
+    - engineering
+  requiresLanguages: []
+edges:
+  addresses:
+    - target: skill-area:runbook-writing
+    - target: skill-area:reference-docs
+    - target: skill-area:docs-as-code

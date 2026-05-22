@@ -4,6 +4,13 @@
  * certification basis, and means of compliance documentation.
  * @inputs { projectName: string, productType: string, regulatoryAuthority: string, certificationScope?: object }
  * @outputs { success: boolean, certificationBasis: object, complianceMatrix: object, certificationPlan: object }
+ *
+ * @graph
+ *   domains: [domain:aerospace-engineering]
+ *   specializations: [specialization:aerospace-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:sensor-fusion]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -17,7 +24,7 @@ export async function process(inputs, ctx) {
     if (lastFeedback_analysisApproval) {
       regulatoryAnalysis = await ctx.task(regulatoryAnalysisTask, { ...{ projectName, productType, regulatoryAuthority }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
     }
-  const analysisApproval = await ctx.breakpoint({
+    const analysisApproval = await ctx.breakpoint({
     question: `Certification basis established for ${projectName}: ${certificationBasis.regulations.length} regulations. Proceed with MOC development?`,
     title: 'Certification Basis Review',
     context: { runId: ctx.runId, certificationBasis },
@@ -38,7 +45,7 @@ export async function process(inputs, ctx) {
       if (lastFeedback_reviewApproval) {
         testPlan = await ctx.task(certificationTestPlanTask, { ...{ projectName, complianceMatrix, mocDefinition }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
       }
-  const reviewApproval = await ctx.breakpoint({
+      const reviewApproval = await ctx.breakpoint({
       question: `${complianceMatrix.gaps.length} compliance gaps identified. Review and resolve?`,
       title: 'Compliance Gap Warning',
       context: { runId: ctx.runId, gaps: complianceMatrix.gaps },
@@ -49,16 +56,15 @@ export async function process(inputs, ctx) {
       });
       if (reviewApproval.approved) break;
       lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-    } }
-
-  const scheduleRisk = await ctx.task(certificationScheduleTask, { projectName, complianceMatrix, testPlan });
+    }
+    const scheduleRisk = await ctx.task(certificationScheduleTask, { projectName, complianceMatrix, testPlan });
   let certificationPlan = await ctx.task(certificationPlanTask, { projectName, certificationBasis, complianceMatrix, testPlan, scheduleRisk });
     let lastFeedback_finalApproval = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (lastFeedback_finalApproval) {
       certificationPlan = await ctx.task(certificationPlanTask, { ...{ projectName, certificationBasis, complianceMatrix, testPlan, scheduleRisk }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Certification plan complete for ${projectName}. ${complianceMatrix.compliantCount}/${complianceMatrix.totalRequirements} requirements addressed. Approve?`,
     title: 'Certification Plan Approval',
     context: { runId: ctx.runId, summary: { authority: regulatoryAuthority, totalRequirements: complianceMatrix.totalRequirements, compliant: complianceMatrix.compliantCount } },
@@ -72,7 +78,6 @@ export async function process(inputs, ctx) {
   }
   return { success: true, projectName, certificationBasis, complianceMatrix, certificationPlan, report, metadata: { processId: 'certification-planning', timestamp: ctx.now() } };
 }
-
 export const regulatoryAnalysisTask = defineTask('regulatory-analysis', (args, taskCtx) => ({
   kind: 'agent', title: `Regulatory Analysis - ${args.projectName}`,
   agent: { name: 'general-purpose', prompt: { role: 'Certification Engineer', task: 'Analyze regulatory requirements', context: args,

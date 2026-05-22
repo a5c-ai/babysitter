@@ -5,6 +5,13 @@
  * @outputs { success: boolean, rubric: object, anchorExamples: array, scorerGuide: object, artifacts: array }
  * @recommendedSkills SK-EDU-004 (rubric-development), SK-EDU-002 (learning-objectives-writing)
  * @recommendedAgents AG-EDU-003 (assessment-specialist)
+ *
+ * @graph
+ *   domains: [domain:education]
+ *   specializations: [specialization:instructional-design]
+ *   skillAreas: [skill-area:tutorial-design, skill-area:docs-as-code, skill-area:learning-development]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:technical-writer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

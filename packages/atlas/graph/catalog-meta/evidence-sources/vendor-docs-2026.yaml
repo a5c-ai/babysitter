@@ -1,0 +1,97 @@
+nodeKind: EvidenceSource
+id: evidence:claude-code-docs-mcp-2026
+attributes:
+  displayName: "Claude Code docs — MCP integration (2026)"
+  kindLabel: web
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/mcp
+  trustLevel: trust-level:official-web
+  observedAt: "2026-02-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-api-thinking-2026-01
+attributes:
+  displayName: "Anthropic API — extended thinking (2026-01)"
+  kindLabel: web
+  sourceUrl: https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking
+  trustLevel: trust-level:official-web
+  observedAt: "2026-01-15T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-claude-code-thinking-2026-01
+attributes:
+  displayName: "Claude Code docs — thinking surface (2026-01)"
+  kindLabel: web
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/overview
+  trustLevel: trust-level:official-web
+  observedAt: "2026-01-15T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-tool-use-2026
+attributes:
+  displayName: "Anthropic API — tool use (2026)"
+  kindLabel: web
+  sourceUrl: https://docs.anthropic.com/en/docs/build-with-claude/tool-use
+  trustLevel: trust-level:official-web
+  observedAt: "2026-02-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-docs-plugins-2026
+attributes:
+  displayName: "Claude Code docs — plugins (2026)"
+  kindLabel: web
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/plugins
+  trustLevel: trust-level:official-web
+  observedAt: "2026-02-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-docs-resume-2026
+attributes:
+  displayName: "Claude Code docs — resume/sessions (2026)"
+  kindLabel: web
+  sourceUrl: https://docs.anthropic.com/en/docs/claude-code/overview
+  trustLevel: trust-level:official-web
+  observedAt: "2026-02-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:openai-docs-streaming-2026
+attributes:
+  displayName: "OpenAI docs — streaming (2026)"
+  kindLabel: web
+  sourceUrl: https://platform.openai.com/docs/api-reference/streaming
+  trustLevel: trust-level:official-web
+  observedAt: "2026-02-01T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges: {}

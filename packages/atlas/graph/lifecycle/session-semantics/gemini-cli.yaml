@@ -1,0 +1,22 @@
+nodeKind: SessionSemantics
+id: session-semantics:gemini-cli
+attributes:
+  sessionSemanticsId: session-semantics:gemini-cli
+  agentId: agent:gemini-cli
+  versionRange: ">=0.0.0"
+  sessionDirStrategy: ".a5c/runs"
+  sessionIdSources:
+    - GEMINI_SESSION_ID
+    - GEMINI_CWD
+    - GEMINI_PROJECT_DIR
+  resumeSemantics: Gemini sessions are detected from CLI extension/runtime environment variables.
+  stateFilePatterns:
+    - ".a5c/runs/**"
+  pidMarkerPolicy: env-or-run-dir
+  metadataFields:
+    - { key: session_id, envVars: [GEMINI_SESSION_ID] }
+edges:
+  applies_to_version:
+    - target: agentVersion:gemini:ge-0-0-0
+  references_path:
+    - target: path:a5c-runs-dir

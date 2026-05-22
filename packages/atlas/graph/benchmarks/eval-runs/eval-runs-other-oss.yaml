@@ -1,0 +1,60 @@
+---
+nodeKind: EvalRun
+id: eval-run:mmlu.phi-3-medium.2024-05
+attributes:
+  target: "model:phi-3-medium@current"
+  benchmarkId: benchmark:mmlu
+  targetId: model:phi-3-medium@current
+  runAt: "2024-05-21T00:00:00Z"
+  runBy: "microsoft"
+  configHash: "sha256:placeholder-phi-3-medium-mmlu"
+edges:
+  evaluates_target:
+    - model:phi-3-medium@current
+  for_benchmark:
+    - benchmark:mmlu
+---
+nodeKind: EvalRun
+id: eval-run:mmlu.gemma-2-27b.2024-06
+attributes:
+  target: "model:gemma-2-27b@current"
+  benchmarkId: benchmark:mmlu
+  targetId: model:gemma-2-27b@current
+  runAt: "2024-06-27T00:00:00Z"
+  runBy: "google"
+  configHash: "sha256:placeholder-gemma-2-27b-mmlu"
+edges:
+  evaluates_target:
+    - model:gemma-2-27b@current
+  for_benchmark:
+    - benchmark:mmlu
+---
+nodeKind: EvalRun
+id: eval-run:gsm8k.gemma-2-27b.2024-06
+attributes:
+  target: "model:gemma-2-27b@current"
+  benchmarkId: benchmark:gsm8k
+  targetId: model:gemma-2-27b@current
+  runAt: "2024-06-27T00:00:00Z"
+  runBy: "google"
+  configHash: "sha256:placeholder-gemma-2-27b-gsm8k"
+edges:
+  evaluates_target:
+    - model:gemma-2-27b@current
+  for_benchmark:
+    - benchmark:gsm8k
+---
+nodeKind: EvalRun
+id: eval-run:mmlu.command-r-plus.2024-08
+attributes:
+  target: "model:command-r-plus@current"
+  benchmarkId: benchmark:mmlu
+  targetId: model:command-r-plus@current
+  runAt: "2024-08-30T00:00:00Z"
+  runBy: "cohere"
+  configHash: "sha256:placeholder-command-r-plus-mmlu"
+edges:
+  evaluates_target:
+    - model:command-r-plus@current
+  for_benchmark:
+    - benchmark:mmlu

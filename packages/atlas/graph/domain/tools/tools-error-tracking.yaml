@@ -1,0 +1,98 @@
+---
+nodeKind: Tool
+id: tool:bugsnag
+attributes:
+  displayName: "Bugsnag"
+  homepageUrl: "https://www.bugsnag.com"
+  kind: observability
+  languageApplicability: neutral
+  description: |
+    Error monitoring and crash reporting platform for web and mobile apps.
+    Captures unhandled exceptions with rich diagnostics including breadcrumbs,
+    app/device metadata, and affected user counts for prioritization.
+edges:
+  tool_used_by:
+    - target: skill-area:error-tracking
+  used_for:
+    - skill-area:error-tracking
+  alternative_to:
+    - target: tool:rollbar
+      comparison: "Error tracking platforms"
+    - target: tool:airbrake
+      comparison: "Error tracking platforms"
+    - target: tool:logrocket
+      comparison: "Error tracking platforms"
+---
+nodeKind: Tool
+id: tool:rollbar
+attributes:
+  displayName: "Rollbar"
+  homepageUrl: "https://rollbar.com"
+  kind: observability
+  languageApplicability: neutral
+  description: |
+    Real-time error tracking and debugging platform with AI-assisted
+    grouping and root-cause analysis. Supports 40+ languages/frameworks
+    with deploy tracking and person-level error impact attribution.
+edges:
+  tool_used_by:
+    - target: skill-area:error-tracking
+  used_for:
+    - skill-area:error-tracking
+  alternative_to:
+    - target: tool:bugsnag
+      comparison: "Error tracking platforms"
+    - target: tool:airbrake
+      comparison: "Error tracking platforms"
+    - target: tool:logrocket
+      comparison: "Error tracking platforms"
+---
+nodeKind: Tool
+id: tool:airbrake
+attributes:
+  displayName: "Airbrake"
+  homepageUrl: "https://airbrake.io"
+  kind: observability
+  languageApplicability: neutral
+  description: |
+    Error and performance monitoring platform integrating exception
+    tracking with transaction tracing. Provides error grouping, user
+    impact analysis, deploy tracking, and alert routing.
+edges:
+  tool_used_by:
+    - target: skill-area:error-tracking
+  used_for:
+    - skill-area:error-tracking
+  alternative_to:
+    - target: tool:bugsnag
+      comparison: "Error tracking platforms"
+    - target: tool:rollbar
+      comparison: "Error tracking platforms"
+    - target: tool:logrocket
+      comparison: "Error tracking platforms"
+---
+nodeKind: Tool
+id: tool:logrocket
+attributes:
+  displayName: "LogRocket"
+  homepageUrl: "https://logrocket.com"
+  kind: observability
+  languageApplicability: neutral
+  description: |
+    Frontend monitoring platform combining session replay, logging,
+    and performance monitoring. Records user sessions for debugging,
+    measures frontend performance, and surfaces user-impacting issues.
+edges:
+  tool_used_by:
+    - target: skill-area:error-tracking
+    - target: skill-area:frontend-performance
+  used_for:
+    - skill-area:error-tracking
+    - skill-area:frontend-performance
+  alternative_to:
+    - target: tool:bugsnag
+      comparison: "Error tracking platforms"
+    - target: tool:rollbar
+      comparison: "Error tracking platforms"
+    - target: tool:airbrake
+      comparison: "Error tracking platforms"

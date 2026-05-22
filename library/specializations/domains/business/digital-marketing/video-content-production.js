@@ -3,6 +3,12 @@
  * @description Process for planning, producing, and distributing video content across platforms including YouTube, social media, and website, from concept through post-production and publishing
  * @inputs { videoBrief: object, script: string, productionResources: object, distributionPlan: object, outputDir: string }
  * @outputs { success: boolean, finalVideoAssets: array, thumbnails: array, metadata: object, publishingDocumentation: object, performanceReports: array, artifacts: array }
+  * @graph
+ *   domains: [domain:digital-marketing]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
+ *   workflows: [workflow:brand-campaign-launch]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

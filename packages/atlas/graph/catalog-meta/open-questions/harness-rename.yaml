@@ -1,0 +1,12 @@
+nodeKind: OpenQuestion
+id: open-question:harness-rename
+attributes:
+  displayName: 'Rename "harness" to "agent"?'
+  description: |
+    Whether to fully deprecate the term "harness" in favor of "agent"
+    in v2 of the catalog vocabulary.
+  owner: "@a5c-ai/catalog-stewards"
+  affectedEntities: []
+  status: open
+  raisedAt: "2026-04-28T00:00:00Z"
+edges: {}

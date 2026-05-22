@@ -2,6 +2,11 @@
 name: vehicle-physics
 description: Vehicle simulation skill for wheel colliders, suspension, and aerodynamics.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:physics-simulation, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Vehicle Physics Skill

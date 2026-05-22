@@ -1,0 +1,14 @@
+nodeKind: Responsibility
+id: responsibility:upgrade-dependencies-weekly
+attributes:
+  displayName: "Upgrade dependencies weekly"
+  cadence: weekly
+  requiredSkills: []
+  description: |
+    Upgrade dependencies weekly.
+edges:
+  held_by:
+    - target: role:dependency-updater
+    - target: role:dependency-updater-bot
+  requires_expertise:
+    - target: skill-area:dependency-upgrade-strategies

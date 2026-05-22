@@ -17,6 +17,12 @@
  * - CCL 360 Feedback: https://www.ccl.org/articles/leading-effectively-articles/360-degree-feedback/
  * - SHRM 360 Feedback: https://www.shrm.org/resourcesandtools/hr-topics/employee-relations/pages/360degreefeedback.aspx
  * - Harvard Business Review: https://hbr.org/2019/03/getting-360-degree-reviews-right
+  * @graph
+ *   domains: [domain:human-resources]
+ *   specializations: [specialization:talent-management]
+ *   skillAreas: [skill-area:talent-acquisition-strategy, skill-area:performance-management, skill-area:organizational-design, skill-area:learning-development]
+ *   workflows: [workflow:talent-acquisition-pipeline]
+ *   roles: [role:hr-manager, role:talent-recruiter]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

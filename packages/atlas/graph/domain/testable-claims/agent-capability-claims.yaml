@@ -1,0 +1,255 @@
+# Claims about agent product capabilities — referenced by experiments in experiments.yaml
+---
+nodeKind: TestableClaim
+id: claim:atlas-build-under-60s
+attributes:
+  displayName: "Atlas build completes under 60s"
+  description: |
+    The full atlas build pipeline (generate + index + tsc + copy) completes
+    within 60 seconds on standard development hardware.
+  testStatus: passing
+  testType: e2e
+  category: performance
+  priority: medium
+edges:
+  asserts_about:
+    - domain:software-engineering
+---
+nodeKind: TestableClaim
+id: claim:codex-cli-lacks-thinking-flag
+attributes:
+  displayName: "Codex CLI lacks thinking-level flag"
+  description: |
+    Codex CLI does not expose a --thinking-level or --reasoning-effort flag,
+    meaning users cannot control the model's extended thinking budget from
+    the command line.
+  testStatus: passing
+  testType: manual
+  category: capability-gap
+  priority: medium
+edges:
+  asserts_about:
+    - agent:codex
+---
+nodeKind: TestableClaim
+id: claim:codex-lacks-auto-memory
+attributes:
+  displayName: "Codex lacks auto memory extraction"
+  description: |
+    Codex's memory system (AGENTS.md) does not automatically extract and
+    consolidate learned facts from conversations. Memory updates require
+    manual edits to the AGENTS.md file.
+  testStatus: passing
+  testType: manual
+  category: capability-gap
+  priority: medium
+edges:
+  asserts_about:
+    - agent:codex
+---
+nodeKind: TestableClaim
+id: claim:codex-lacks-mcp-client
+attributes:
+  displayName: "Codex lacks built-in MCP client"
+  description: |
+    Codex CLI does not ship a built-in MCP client at the agent-version level.
+    MCP support is only available at the runtime implementation level.
+  testStatus: passing
+  testType: manual
+  category: capability-gap
+  priority: medium
+edges:
+  asserts_about:
+    - agent:codex
+---
+nodeKind: TestableClaim
+id: claim:codex-sandbox-only
+attributes:
+  displayName: "Codex defaults to sandbox-only execution"
+  description: |
+    Codex CLI defaults to running all tool calls inside a native sandbox,
+    preventing direct file system and network access without explicit
+    user approval.
+  testStatus: passing
+  testType: manual
+  category: security
+  priority: high
+edges:
+  asserts_about:
+    - agent:codex
+---
+nodeKind: TestableClaim
+id: claim:codex-has-sandbox
+attributes:
+  displayName: "Codex has native sandboxing"
+  description: |
+    Codex CLI includes a native subprocess sandboxing strategy that isolates
+    tool execution in a controlled environment.
+  testStatus: passing
+  testType: manual
+  category: security
+  priority: high
+edges:
+  asserts_about:
+    - agent:codex
+---
+nodeKind: TestableClaim
+id: claim:cursor-lacks-cli-mode
+attributes:
+  displayName: "Cursor lacks standalone CLI mode"
+  description: |
+    Cursor does not offer a standalone headless CLI mode. The cursor command
+    launches the IDE; there is no --print or headless execution mode for
+    terminal-only workflows.
+  testStatus: passing
+  testType: manual
+  category: capability-gap
+  priority: medium
+edges:
+  asserts_about:
+    - agent:cursor
+---
+nodeKind: TestableClaim
+id: claim:cursor-lacks-subagent-dispatch
+attributes:
+  displayName: "Cursor lacks subagent dispatch"
+  description: |
+    Cursor does not support dispatching subagents. There is no mechanism
+    to fork parallel agent threads or delegate tasks to child agents
+    within the Cursor IDE.
+  testStatus: passing
+  testType: manual
+  category: capability-gap
+  priority: medium
+edges:
+  asserts_about:
+    - agent:cursor
+---
+nodeKind: TestableClaim
+id: claim:cursor-has-codebase-index
+attributes:
+  displayName: "Cursor has whole-codebase vector index"
+  description: |
+    Cursor builds and maintains a whole-codebase vector store index for
+    retrieval-augmented generation, enabling @-mention context pinning
+    and semantic code search across the entire project.
+  testStatus: passing
+  testType: manual
+  category: capability
+  priority: medium
+edges:
+  asserts_about:
+    - agent:cursor
+---
+nodeKind: TestableClaim
+id: claim:claude-code-has-auto-dream
+attributes:
+  displayName: "Claude Code has auto-dream memory consolidation"
+  description: |
+    Claude Code's memory system supports automatic extraction and
+    auto-dream consolidation, where learned facts from conversations
+    are periodically merged into the persistent memory file.
+  testStatus: passing
+  testType: manual
+  category: capability
+  priority: high
+edges:
+  asserts_about:
+    - agent:claude-code
+---
+nodeKind: TestableClaim
+id: claim:claude-code-has-hooks
+attributes:
+  displayName: "Claude Code has comprehensive hook surface"
+  description: |
+    Claude Code fires hooks across 7+ surfaces including pre-tool-use,
+    post-tool-use, stop, user-prompt-submit, subagent-start,
+    subagent-stop, and pre-compact, enabling deep customization.
+  testStatus: passing
+  testType: manual
+  category: capability
+  priority: high
+edges:
+  asserts_about:
+    - agent:claude-code
+---
+nodeKind: TestableClaim
+id: claim:gemini-lacks-plugins
+attributes:
+  displayName: "Gemini CLI lacks plugin marketplace"
+  description: |
+    Gemini CLI does not support a plugin marketplace or plugin
+    installation system. Extension is limited to MCP tool servers
+    and GEMINI.md configuration.
+  testStatus: passing
+  testType: manual
+  category: capability-gap
+  priority: medium
+edges:
+  asserts_about:
+    - agent:gemini-cli
+---
+nodeKind: TestableClaim
+id: claim:gemini-has-1m-context
+attributes:
+  displayName: "Gemini CLI has 1M token context window"
+  description: |
+    Gemini CLI leverages Google's 1M-token native context window,
+    eliminating the need for in-CLI compaction or context management
+    on most codebases.
+  testStatus: passing
+  testType: manual
+  category: capability
+  priority: medium
+edges:
+  asserts_about:
+    - agent:gemini-cli
+---
+nodeKind: TestableClaim
+id: claim:windsurf-learns-codebase
+attributes:
+  displayName: "Windsurf automatically learns codebase patterns"
+  description: |
+    Windsurf's memory system (Windsurf Memories) automatically extracts
+    codebase patterns with periodic consolidation and user-scoped
+    persistence, operating as a proprietary learned-context layer.
+  testStatus: passing
+  testType: manual
+  category: capability
+  priority: medium
+edges:
+  asserts_about:
+    - agent:windsurf
+---
+nodeKind: TestableClaim
+id: claim:openclaw-has-soul-md
+attributes:
+  displayName: "OpenClaw uses SOUL.md + MEMORY.md dual-file pattern"
+  description: |
+    OpenClaw employs a unique dual-file memory pattern: SOUL.md defines
+    agent identity, personality, and behavior rules, while MEMORY.md
+    stores learned facts and observations. No other primary CLI agent
+    separates identity from knowledge this way.
+  testStatus: passing
+  testType: manual
+  category: capability
+  priority: medium
+edges:
+  asserts_about:
+    - agent:openclaw
+---
+nodeKind: TestableClaim
+id: claim:amp-has-code-intelligence
+attributes:
+  displayName: "Amp integrates Sourcegraph code intelligence"
+  description: |
+    Sourcegraph Amp integrates Sourcegraph's code intelligence backend
+    for cross-repository context and specialized subagents (Oracle,
+    Librarian), a unique capability among CLI agents.
+  testStatus: passing
+  testType: manual
+  category: capability
+  priority: medium
+edges:
+  asserts_about:
+    - agent:amp

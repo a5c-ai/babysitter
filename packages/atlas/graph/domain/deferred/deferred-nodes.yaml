@@ -1,0 +1,225 @@
+---
+nodeKind: DeferredNode
+id: deferred:vibe-kanban-modeling
+attributes:
+  displayName: "Vibe-Kanban Modeling"
+  description: |
+    Agent orchestration sublayer (vibe-kanban etc) not modeled in the graph.
+  targetNodeKind: Topic
+  priority: medium
+  reason: "agent orchestration sublayer (vibe-kanban etc) not modeled"
+  suggestedBy: todo.md
+  createdAt: "2026-05-08"
+  resolvedTo: "topic:vibe-kanban"
+  resolvedAt: "2026-05-08"
+edges:
+  deferred_for:
+    - domain:software-engineering
+---
+nodeKind: DeferredNode
+id: deferred:cc-revex-features
+attributes:
+  displayName: "CC-RevEx Product Features"
+  description: |
+    cc-revex product features not cataloged in graph.
+    Research note (2026-05-08): No cc-revex documentation, adapter, or
+    product definition found in the codebase. The name appears only in
+    todo.md and this deferred node. vibe-kanban references "CCR" as a
+    supported agent but that maps to Claude Code Remote, not cc-revex.
+    Remains deferred pending external research or vendor docs.
+    Note (2026-05-10): Permanently deferred — cc-revex does not exist in
+    the codebase. CCR refers to Claude Code Remote, not a separate product.
+    No further research needed unless vendor documentation surfaces.
+  targetNodeKind: Feature
+  priority: low
+  reason: "cc-revex product features not cataloged in graph"
+  suggestedBy: todo.md
+  createdAt: "2026-05-08"
+edges:
+  deferred_for:
+    - domain:software-engineering
+---
+nodeKind: DeferredNode
+id: deferred:oh-my-pi-features
+attributes:
+  displayName: "Oh-My-Pi Features"
+  description: |
+    oh-my-pi capabilities not fully documented in the graph.
+    Partially resolved: harness integration topic covers OMP adapter
+    features (JSONL event parsing, thinking normalization, session
+    resume/fork, plugin support via npm-package and skill-file formats).
+    Individual feature nodes not created — adapter docs already comprehensive.
+  targetNodeKind: Feature
+  priority: medium
+  reason: "oh-my-pi capabilities not fully documented"
+  suggestedBy: todo.md
+  createdAt: "2026-05-08"
+  resolvedTo: "topic:harness-integration"
+  resolvedAt: "2026-05-08"
+edges:
+  deferred_for:
+    - domain:software-engineering
+---
+nodeKind: DeferredNode
+id: deferred:testable-claims-schema
+attributes:
+  displayName: "Testable Claims Schema"
+  description: |
+    Testable claims pattern for ecosystem assertions not designed.
+  targetNodeKind: NodeKind
+  priority: high
+  reason: "testable claims pattern for ecosystem assertions not designed"
+  suggestedBy: todo.md
+  createdAt: "2026-05-08"
+  resolvedTo: "node:testable-claim"
+  resolvedAt: "2026-05-08"
+edges:
+  deferred_for:
+    - domain:qa-testing
+---
+nodeKind: DeferredNode
+id: deferred:trust-tiers
+attributes:
+  displayName: "Trust Tiers"
+  description: |
+    Information trust/confidence tiers not modeled in the graph.
+  targetNodeKind: NodeKind
+  priority: medium
+  reason: "information trust/confidence tiers not modeled"
+  suggestedBy: todo.md
+  createdAt: "2026-05-08"
+  resolvedTo: "topic:information-trust-tiers"
+  resolvedAt: "2026-05-08"
+edges:
+  deferred_for:
+    - domain:cybersecurity
+---
+nodeKind: DeferredNode
+id: deferred:evidence-experiments
+attributes:
+  displayName: "Evidence & Experiments"
+  description: |
+    Evidence and experiment tracking not modeled in the graph.
+  targetNodeKind: NodeKind
+  priority: medium
+  reason: "evidence and experiment tracking not modeled"
+  suggestedBy: todo.md
+  createdAt: "2026-05-08"
+  resolvedTo: "topic:evidence-based-graph"
+  resolvedAt: "2026-05-08"
+edges:
+  deferred_for:
+    - domain:data-science
+---
+nodeKind: DeferredNode
+id: deferred:guide-generator
+attributes:
+  displayName: "Guide Generator"
+  description: |
+    Agentic guide generator from graph content not built.
+    Note (2026-05-10): Keep as low priority future feature — an agent-driven
+    process that traverses the knowledge graph and generates structured guides
+    (e.g., onboarding docs, best-practice guides) from connected node content.
+    No current priority; revisit when graph coverage is sufficiently broad to
+    make generated guides useful.
+  targetNodeKind: LibraryProcess
+  priority: low
+  reason: "agentic guide generator from graph content not built"
+  suggestedBy: todo.md
+  createdAt: "2026-05-08"
+edges:
+  deferred_for:
+    - domain:software-engineering
+---
+nodeKind: DeferredNode
+id: deferred:course-generator
+attributes:
+  displayName: "Course Generator"
+  description: |
+    Course/kit/hub generator not built.
+    Note (2026-05-10): Keep as low priority future feature — an agent-driven
+    process that assembles course content, learning kits, and knowledge hubs
+    from graph nodes organized by domain and cluster. Depends on sufficient
+    graph coverage and a guide-generator foundation. No current priority;
+    revisit after guide-generator is scoped and implemented.
+  targetNodeKind: LibraryProcess
+  priority: low
+  reason: "course/kit/hub generator not built"
+  suggestedBy: todo.md
+  createdAt: "2026-05-08"
+edges:
+  deferred_for:
+    - domain:education
+---
+nodeKind: DeferredNode
+id: deferred:scope-context-model
+attributes:
+  displayName: "Scope & Context Model"
+  description: |
+    Scope and context modeling for graph queries not designed.
+  targetNodeKind: NodeKind
+  priority: medium
+  reason: "scope and context modeling for graph queries not designed"
+  suggestedBy: todo.md
+  createdAt: "2026-05-08"
+  resolvedTo: "topic:graph-query-scoping"
+  resolvedAt: "2026-05-08"
+edges:
+  deferred_for:
+    - domain:software-engineering
+---
+nodeKind: DeferredNode
+id: deferred:canonicalized-to-unification
+attributes:
+  displayName: "Canonicalized-To Unification"
+  description: |
+    canonicalized_to edges need unification to compact the graph.
+    Audit (2026-05-08): 21 canonicalized_to edges exist, all mapping
+    vendor-specific hook-surface aliases to 7 canonical hook surfaces
+    (pre-tool-use, post-tool-use, stop, subagent-stop, notification,
+    user-prompt-submit, pre-compact). These are clean, intentional
+    mappings — no merging or compaction needed.
+  targetNodeKind: Edge
+  priority: medium
+  reason: "canonicalized_to edges need unification to compact the graph"
+  suggestedBy: todo.md
+  createdAt: "2026-05-08"
+  resolvedTo: "edge:canonicalized-to-hook-surfaces"
+  resolvedAt: "2026-05-08"
+edges:
+  deferred_for:
+    - domain:software-engineering
+---
+nodeKind: DeferredNode
+id: deferred:cicd-testable-claims-process
+attributes:
+  displayName: "CI/CD Testable Claims Process"
+  description: |
+    Process to run testable claim tests on schedule.
+  targetNodeKind: LibraryProcess
+  priority: high
+  reason: "process to run testable claim tests on schedule"
+  suggestedBy: todo.md
+  createdAt: "2026-05-08"
+  resolvedTo: "script:run-testable-claims"
+  resolvedAt: "2026-05-08"
+edges:
+  deferred_for:
+    - domain:qa-testing
+---
+nodeKind: DeferredNode
+id: deferred:untested-claims-finder
+attributes:
+  displayName: "Untested Claims Finder"
+  description: |
+    Process to find untested assumptions and create testable claims.
+  targetNodeKind: LibraryProcess
+  priority: medium
+  reason: "process to find untested assumptions and create testable claims"
+  suggestedBy: todo.md
+  createdAt: "2026-05-08"
+  resolvedTo: "script:find-untested-claims"
+  resolvedAt: "2026-05-08"
+edges:
+  deferred_for:
+    - domain:qa-testing

@@ -1,0 +1,14 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:notebook-edit
+attributes:
+  schema: '{}'
+  displayName: "NotebookEdit"
+  description: |
+    Built-in Claude Code tool for editing Jupyter notebook cells in
+    `.ipynb` files. Operations: replace cell source, insert new cell,
+    delete cell. Bundled with the Claude Code 1.x runtime.
+  category: filesystem
+  vendor: anthropic
+edges:
+  bundled_in:
+    - target: agent-runtime-impl:claude-code.runtime@1.x

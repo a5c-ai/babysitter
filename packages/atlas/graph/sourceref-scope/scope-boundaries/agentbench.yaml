@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:agentbench.scope
+attributes:
+  subjectId: benchmark:agentbench
+  inScope: |
+    Holistic agent benchmark spanning OS, DB, web shopping, web browsing, knowledge graph, card game, lateral-thinking, and house-holding tasks.
+  outOfScope: |
+    Single-turn language-only evaluation, repository-scale software-engineering tasks (use SWE-bench), and pure code-generation suites.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:agentbench

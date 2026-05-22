@@ -1,0 +1,75 @@
+nodeKind: Benchmark
+id: benchmark:swe-lancer
+attributes:
+  displayName: "SWE-Lancer"
+  homepageUrl: https://github.com/openai/SWELancer-Benchmark
+  kind: full-stack
+  targetsKind: AgentVersion
+  description: |
+    OpenAI benchmark of >1,400 paid freelance software-engineering tasks
+    scraped from Upwork, with associated bounties. Measures end-to-end
+    agent ability to deliver shippable freelance work.
+edges:
+  covers:
+    - target: skill-area:autonomous-coding-engagement
+      attributes:
+        coverage: full
+        weight: 0.7
+    - target: skill-area:bug-fixing-from-issues
+      attributes:
+        coverage: partial
+        weight: 0.2
+  applies_to:
+    - target: domain:software-engineering
+---
+nodeKind: Benchmark
+id: benchmark:aider-polyglot
+attributes:
+  displayName: "Aider Polyglot"
+  homepageUrl: https://aider.chat/docs/leaderboards/
+  kind: code-editing
+  targetsKind: AgentVersion
+  description: |
+    Aider's coding benchmark across multiple programming languages
+    (Python, JS, Go, Rust, C++, Java, etc.) measuring agent ability to
+    edit existing code via LLM-driven diff edits.
+edges:
+  covers:
+    - target: skill-area:python-implementation
+      attributes:
+        coverage: partial
+        weight: 0.2
+    - target: skill-area:bug-fixing-from-issues
+      attributes:
+        coverage: partial
+        weight: 0.2
+  applies_to:
+    - target: domain:software-engineering
+---
+nodeKind: Benchmark
+id: benchmark:repobench
+attributes:
+  displayName: "RepoBench"
+  homepageUrl: https://github.com/Leolty/repobench
+  kind: code-completion
+  targetsKind: ModelVersion
+  description: |
+    RepoBench evaluates repository-level code auto-completion across
+    Python and Java. Sub-tasks measure retrieval, prediction, and
+    end-to-end completion in real-world multi-file repositories.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+---
+nodeKind: Benchmark
+id: benchmark:bigcode-evalplus
+attributes:
+  displayName: "EvalPlus"
+  homepageUrl: https://evalplus.github.io/
+  kind: code-functional-correctness
+  targetsKind: ModelVersion
+  description: |
+    EvalPlus extends HumanEval and MBPP with 80x more high-quality
+    tests per task to expose flaky correctness in LLM-generated code,
+    yielding HumanEval+ and MBPP+ leaderboards.
+edges: {}

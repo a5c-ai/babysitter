@@ -1,0 +1,40 @@
+nodeKind: MCPTransport
+id: mcp-transport:websocket
+attributes:
+  displayName: "WebSocket (non-standard)"
+  kind: websocket-non-standard
+  specVersion: "2025-11-25"
+  currentSpecRevision: "2025-11-25"
+  specRevisions: []
+  status: community
+  streaming: full
+  specUrl: "https://modelcontextprotocol.io/specification/"
+  connectionLifecycle: |
+    Community-defined; not in the canonical spec. Typical shape:
+      1. Client opens a WebSocket to the server URL (often with
+         `Sec-WebSocket-Protocol: mcp` or a vendor sub-protocol).
+      2. Once the WS handshake completes, JSON-RPC `initialize` is sent
+         as a text frame; server responds with a text frame.
+      3. Client sends `notifications/initialized`. Session is ready.
+      4. Shutdown via WS close frame.
+  capabilityNegotiation: |
+    Same `initialize` request/response payloads as the canonical
+    transports; carried as JSON-RPC messages over WS text frames.
+  notificationModel: |
+    Bidirectional text frames; either side may send notifications and
+    requests at any time. Standard JSON-RPC framing — no SSE event names.
+  reconnectPolicy: |
+    Implementation-defined. No spec-mandated session-resumption
+    identifier. Most implementations require a fresh `initialize` on
+    reconnect.
+  authentication: |
+    Implementation-defined. Common patterns: bearer token in the
+    `Authorization` header on the WS upgrade request, or a token query
+    parameter. Auth is not standardised by the MCP spec for WebSocket;
+    each implementation chooses.
+  streamingFraming: |
+    One JSON-RPC message per WebSocket text frame; binary frames are
+    not used. Standard JSON-RPC message-id discipline.
+edges:
+  realizes:
+    - target: layer:3-transport

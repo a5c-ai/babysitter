@@ -2,6 +2,11 @@
 name: unreal-control-rig
 description: Unreal Engine Control Rig skill for procedural animation, IK chains, and runtime rig modifications.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:animation-transitions, skill-area:game-engines]
+  roles: [role:game-developer]
 ---
 
 # Unreal Control Rig Skill

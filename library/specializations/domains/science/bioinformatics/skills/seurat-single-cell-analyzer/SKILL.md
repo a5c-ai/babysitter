@@ -18,6 +18,12 @@ metadata:
     - single-cell
     - clustering
     - scrnaseq
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:machine-learning-frameworks, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:biomedical-engineer]
 ---
 
 # Seurat Single-Cell Analyzer Skill

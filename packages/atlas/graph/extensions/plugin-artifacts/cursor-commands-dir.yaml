@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:cursor-commands-dir
+attributes:
+  artifactId: plugin-artifact:cursor-commands-dir
+  displayName: "Cursor commands directory"
+  targetId: plugin-target:cursor
+  artifactKind: command
+  pathPattern: ".cursor/commands/*.md"
+  installerSurface: "fs"
+  scriptVariants:
+    - markdown-commands
+edges:
+  emits_artifact:
+    - target: plugin-target:cursor

@@ -1,0 +1,18 @@
+nodeKind: AgentProduct
+id: agent:codex-app-server
+attributes:
+  displayName: "Codex App-Server"
+  vendor: "OpenAI"
+  homepageUrl: "https://developers.openai.com/codex/app-server/"
+  primarySurface: cli
+  supportTier: catalog-backed
+  productKind: app-server
+  stackScope: core-runtime-platform
+  description: |
+    OpenAI Codex's app-server protocol. A long-lived subprocess that exposes
+    Codex's agentic loop + tool/MCP plumbing as a JSON-RPC service over
+    stdio, SSE, or WebSocket. Consumed by external clients (Symphony,
+    custom hosts). No bundled UI — clients build their own surface.
+edges:
+  has_version:
+    - agent-version:codex-app-server@current

@@ -1,0 +1,118 @@
+---
+nodeKind: Workflow
+id: workflow:local-dev-environment-setup
+attributes:
+  displayName: "Local Dev Environment Setup"
+  workflowKind: onboarding
+  triggerType: event-driven
+  typicalCadence: "per-hire"
+  complexity: single-team
+  description: |
+    Maintains and operates the automated local development environment
+    provisioning — dev container definitions, dependency bootstrapping,
+    seed data loading, and first-run validation. Excludes production environment management.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:editor-fluency
+    - target: skill-area:gitops
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:onboard-new-engineer
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:engineering-productivity
+    - target: org-unit:internal-tools
+---
+nodeKind: Workflow
+id: workflow:monorepo-toolchain-update
+attributes:
+  displayName: "Monorepo Toolchain Update"
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Upgrades and maintains the monorepo build toolchain — package manager
+    updates, build system configuration, workspace dependency resolution,
+    and CI pipeline compatibility. Excludes application-level dependency upgrades.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:typescript-generic-programming
+    - target: skill-area:gitops
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:dx-tooling-maintenance
+    - target: responsibility:upgrade-dependencies-weekly
+  performed_by_org_unit:
+    - target: org-unit:engineering-productivity
+    - target: org-unit:internal-tools
+---
+nodeKind: Workflow
+id: workflow:developer-feedback-cycle
+attributes:
+  displayName: "Developer Feedback Cycle"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Runs developer satisfaction surveys, analyzes tooling pain points,
+    prioritizes DX improvements, and tracks resolution of top complaints —
+    producing a quarterly DX health scorecard. Excludes individual tooling fixes.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:platform-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:dx-tooling-maintenance
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:engineering-productivity
+    - target: org-unit:internal-tools
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:internal-hackathon
+attributes:
+  displayName: "Internal Hackathon"
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Organizes company-wide hackathon events — theme selection, team formation,
+    infrastructure provisioning, judging criteria, demo day coordination,
+    and post-event incubation of winning projects. Excludes regular sprint work.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:tech-lead
+    - target: role:ai-champion
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:agentic-loops
+    - target: skill-area:prompt-engineering
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:ai-knowledge-sharing
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:ai-enablement
+    - target: org-unit:internal-tools

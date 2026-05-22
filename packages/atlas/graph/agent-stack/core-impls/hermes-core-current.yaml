@@ -1,0 +1,74 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:hermes.core@current
+attributes:
+  displayName: Hermes Core (current)
+  agentVersionId: agent-version:hermes@current
+  packageRef: source-ref:hermes-agent-pypi
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: 'Python tool-use loop using `litellm` to normalize Anthropic
+    / OpenAI / OpenRouter
+
+    wire formats. Each turn the model emits tool calls (parallel-capable); the loop
+
+    executes them via the local Python tool registry and feeds back tool results
+
+    until a unified end-of-turn signal fires.
+
+    '
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: 'Hermes delegates compaction to the active provider; no
+    Hermes-side threshold.
+
+    SQLite session index allows arbitrary-range replay rather than rolling summary.
+
+    '
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: 'Hermes models sub-tasks as nested Hermes runs spawned via
+    a `delegate` tool;
+
+    the parent loop waits for the child run''s session to terminate before resuming.
+
+    '
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: 'Final assistant text is streamed; on end-of-turn the JSONL
+    session is flushed
+
+    to disk and the SQLite index is updated with the new turn''s offsets.
+
+    '
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: hermes-internal
+  supportedTransportProtocols:
+  - model-transport:anthropic-messages
+  - model-transport:openai-responses
+  - model-transport:openrouter
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:hermes
+    role: core
+  speaks:
+    - target: model-transport:openrouter
+    - target: model-transport:anthropic-messages
+    - target: model-transport:openai-responses
+  supports:
+  - target: capability:parallel-tool-calls
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'Hermes supports parallel tool calls per agent-mux ref.
+
+      '
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:session-handoff
+    - target: orch-primitive:audit-trail

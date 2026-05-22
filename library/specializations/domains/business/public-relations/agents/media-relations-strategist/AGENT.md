@@ -16,6 +16,10 @@ metadata:
   domain: business
   category: Media Relations
   agent-id: AG-001
+graph:
+  domains: [domain:public-relations]
+  skillAreas: [skill-area:brand-positioning, skill-area:market-research, skill-area:community-management]
+  roles: [role:marketing-strategist, role:content-strategist, role:marketing-manager]
 ---
 
 # Media Relations Strategist Agent

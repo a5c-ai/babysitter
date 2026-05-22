@@ -1,0 +1,164 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:claude-code.platform@1.x
+attributes:
+  displayName: Claude Code Platform (1.x)
+  agentVersionId: agentVersion:claude:ge-0-0-0
+  subagentDefinitionFormat: claude-code-md
+  packageRef: source-ref:claude-code-github
+  nativeExtensionFormat: claude-plugin
+  nativeExtensionManifestPath: .claude-plugin/plugin.json
+  nativeExtensionsDirectoryPath:
+  - ~/.claude/plugins/
+  - .claude/plugins/
+  skillFormat: anthropic-skill-md
+  skillsDirectoryPath:
+  - ~/.claude/skills/
+  - .claude/skills/
+  customSlashCommandsPath:
+  - ~/.claude/commands/
+  - .claude/commands/
+  subagentsDirectoryPath:
+  - ~/.claude/agents/
+  - .claude/agents/
+  hooksDirectoryOrConfigPath:
+  - .claude/settings.json (hooks block)
+  - .claude/hooks.json
+  settingsFiles:
+  - ~/.claude/settings.json
+  - .claude/settings.json
+  - .claude/settings.local.json
+  marketplaceUrl: https://docs.anthropic.com/en/docs/claude-code/plugin-marketplaces
+  pluginRegistryPath: ~/.claude/plugins/registry.json
+  capabilityProfileRegistry: true
+  launchConfigRegistry: true
+  platformIdentityStrategy: oauth-keychain
+  updateChannelMechanism: npm
+  supportedChannelKinds:
+  - mcp-channel
+  skillStringSubstitutions:
+  - $ARGUMENTS
+  - $ARGUMENTS[N]
+  - $N
+  - $<name>
+  - ${CLAUDE_SESSION_ID}
+  - ${CLAUDE_EFFORT}
+  - ${CLAUDE_SKILL_DIR}
+  skillDynamicContextInjection: true
+  pluginManifestPath: .claude-plugin/marketplace.json
+  marketplaceCommands:
+  - add
+  - list
+  - update
+  - remove
+  pluginCommands:
+  - install
+  - disable
+  - enable
+  - uninstall
+  - reload-plugins
+  agentTeamSupport:
+    experimental: true
+    flagEnvVar: CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS
+    requiresVersion: '>=2.1.32'
+    displayModes:
+    - in-process
+    - tmux
+    - auto
+    setting: teammateMode
+    storageLocations:
+      teamConfig: ~/.claude/teams/<team>.json
+      taskList: ~/.claude/teams/<team>/tasks.jsonl
+  subagentStorageLocations:
+  - ~/.claude/agents/
+  - .claude/agents/
+  - <plugin>/agents/
+  skillStorageLocations:
+  - ~/.claude/skills/
+  - .claude/skills/
+  - <plugin>/skills/
+  extraKnownMarketplacesSupport: true
+  pluginAutoUpdateControl:
+    disableEnvVar: DISABLE_AUTOUPDATER
+    forceEnvVar: FORCE_AUTOUPDATE_PLUGINS
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+  - target: agent:claude-code
+    role: platform
+  bundles:
+  - target: presentation:claude-code-tui
+  supports:
+  - target: capability:requires-tool-approval
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+  - target: capability:supports-custom-subagents
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+  - target: capability:supports-plugins
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+  - target: capability:can-resume
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: '`claude --resume` reattaches to the most recent session;
+
+      transcripts persist on disk (runtime-side jsonl in
+
+      ~/.claude/projects/<hash>/).
+
+      '
+    evidenceSourceIds:
+    - evidence:claude-code-docs-resume-2026
+  - target: capability:supports-plugins
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code 1.x loads claude-plugin-format extensions from
+
+      ~/.claude/plugins/ and .claude/plugins/, with a registry index
+
+      at ~/.claude/plugins/registry.json.
+
+      '
+    evidenceSourceIds:
+    - evidence:claude-code-docs-plugins-2026
+  - target: capability:supports-custom-subagents
+    versionRange: '*'
+    level: full
+    notes: 'Loads custom subagents from .claude/agents/<name>.md.
+
+      '
+  has_team:
+  - target: agent-team:research
+  - target: agent-team:parallel-review
+  - target: agent-team:doc-pipeline
+  has_marketplace:
+  - target: plugin-marketplace:claude-plugins-official
+  - target: plugin-marketplace:claude-code-plugins-demo
+  - target: plugin-marketplace:team-internal-example
+  supports_interaction_primitive:
+  - target: interaction-primitive:claude-cli-deep-link-open
+    mechanism: deep-link
+  - target: interaction-primitive:vscode-claude-code-deep-link-open
+    mechanism: deep-link
+  defines_frontmatter_field:
+  - target: frontmatter-field:skill-name
+  - target: frontmatter-field:skill-description
+  - target: frontmatter-field:skill-when-to-use
+  - target: frontmatter-field:skill-argument-hint
+  - target: frontmatter-field:skill-arguments
+  - target: frontmatter-field:skill-disable-model-invocation
+  - target: frontmatter-field:skill-user-invocable
+  - target: frontmatter-field:skill-allowed-tools
+  - target: frontmatter-field:skill-model
+  - target: frontmatter-field:skill-effort
+  - target: frontmatter-field:skill-context
+  - target: frontmatter-field:skill-agent
+  - target: frontmatter-field:skill-hooks
+  - target: frontmatter-field:skill-paths
+  - target: frontmatter-field:skill-shell
+  - target: frontmatter-field:subagent-name
+  - target: frontmatter-field:subagent-description
+  - target: frontmatter-field:subagent-tools
+  - target: frontmatter-field:subagent-model
+  - target: frontmatter-field:subagent-color

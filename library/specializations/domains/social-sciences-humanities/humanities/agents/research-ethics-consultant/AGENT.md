@@ -2,6 +2,12 @@
 name: research-ethics-consultant
 description: Navigate IRB processes and community-based research ethics including human subjects protocols, informed consent, indigenous methodologies, sensitive materials, and data protection
 required-skills: research-ethics-irb-navigation, oral-history-interview-technique, grant-narrative-writing
+graph:
+  domains: [domain:humanities]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:compliance-automation, skill-area:data-governance, skill-area:deep-web-research]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:compliance-officer, role:research-scientist]
 ---
 
 # Research Ethics Consultant Agent

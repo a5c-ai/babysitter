@@ -1,0 +1,71 @@
+nodeKind: EnvVar
+id: env-var:anthropic-bedrock-base-url
+attributes:
+  displayName: ANTHROPIC_BEDROCK_BASE_URL
+  description: Override the Bedrock endpoint URL for custom endpoints or LLM gateways.
+  name: ANTHROPIC_BEDROCK_BASE_URL
+  category: bedrock
+  valueType: url
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-bedrock-mantle-base-url
+attributes:
+  displayName: ANTHROPIC_BEDROCK_MANTLE_BASE_URL
+  description: Override the Bedrock Mantle endpoint URL.
+  name: ANTHROPIC_BEDROCK_MANTLE_BASE_URL
+  category: bedrock
+  valueType: url
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-bedrock-service-tier
+attributes:
+  displayName: ANTHROPIC_BEDROCK_SERVICE_TIER
+  description: Bedrock service tier (default, flex, or priority); sent as the X-Amzn-Bedrock-Service-Tier header.
+  name: ANTHROPIC_BEDROCK_SERVICE_TIER
+  category: bedrock
+  valueType: enum
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:aws-bearer-token-bedrock
+attributes:
+  displayName: AWS_BEARER_TOKEN_BEDROCK
+  description: Bedrock API key for authentication.
+  name: AWS_BEARER_TOKEN_BEDROCK
+  category: bedrock
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-skip-bedrock-auth
+attributes:
+  displayName: CLAUDE_CODE_SKIP_BEDROCK_AUTH
+  description: Skip AWS authentication for Bedrock (e.g., when using an LLM gateway).
+  name: CLAUDE_CODE_SKIP_BEDROCK_AUTH
+  category: bedrock
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-small-fast-model-aws-region
+attributes:
+  displayName: ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION
+  description: Override AWS region for the Haiku-class model when using Bedrock or Bedrock Mantle.
+  name: ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION
+  category: bedrock
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

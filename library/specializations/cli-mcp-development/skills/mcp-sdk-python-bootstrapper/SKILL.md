@@ -2,6 +2,14 @@
 name: mcp-sdk-python-bootstrapper
 description: Bootstrap MCP server with Python SDK, transport configuration, tool/resource handlers, and proper project structure.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:mcp-server-implementation, skill-area:mcp-stdio-transport]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # MCP SDK Python Bootstrapper

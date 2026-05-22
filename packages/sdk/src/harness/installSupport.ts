@@ -69,6 +69,10 @@ export async function runPackageBinaryViaNpx(args: {
     return {
       harness: args.harness,
       dryRun: true,
+      success: true,
+      status: "planned",
+      installer: "npx",
+      scope: args.options.workspace ? "workspace" : "global",
       summary: args.summary,
       command: renderCommand(displayCommand, commandArgs),
       location: args.location,
@@ -96,10 +100,15 @@ export async function runPackageBinaryViaNpx(args: {
 
   return {
     harness: args.harness,
+    success: true,
+    status: "installed",
+    installer: "npx",
+    scope: args.options.workspace ? "workspace" : "global",
     summary: args.summary,
     command: renderCommand(displayCommand, commandArgs),
     location: args.location,
     output: [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n"),
+    exitCode: result.exitCode,
   };
 }
 
@@ -110,23 +119,29 @@ export async function installCliViaNpm(args: {
   summary: string;
   options: HarnessInstallOptions;
 }): Promise<HarnessInstallResult> {
-  const cliInfo = await checkCliAvailable(args.cliCommand);
-  if (cliInfo.available) {
-    return {
-      harness: args.harness,
-      warning: `${args.harness} is already installed; nothing to do.`,
-      location: cliInfo.path,
-    };
-  }
-
   const command = getNpmCommand();
   const commandArgs = ["install", "-g", args.packageName];
   if (args.options.dryRun) {
     return {
       harness: args.harness,
       dryRun: true,
+      success: true,
+      status: "planned",
+      installer: "npm",
       summary: args.summary,
       command: renderCommand("npm", commandArgs),
+    };
+  }
+
+  const cliInfo = await checkCliAvailable(args.cliCommand);
+  if (cliInfo.available) {
+    return {
+      harness: args.harness,
+      success: true,
+      status: "skipped",
+      installer: "npm",
+      warning: `${args.harness} is already installed; nothing to do.`,
+      location: cliInfo.path,
     };
   }
 
@@ -148,9 +163,13 @@ export async function installCliViaNpm(args: {
 
   return {
     harness: args.harness,
+    success: true,
+    status: "installed",
+    installer: "npm",
     summary: args.summary,
     command: renderCommand(command, commandArgs),
     output: [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n"),
+    exitCode: result.exitCode,
   };
 }
 

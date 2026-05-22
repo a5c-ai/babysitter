@@ -1,0 +1,11 @@
+nodeKind: PermissionDenialReason
+id: permission-denial-reason:claude-code-background-no-ui
+attributes:
+  displayName: "Background agent: no UI for prompt"
+  kind: background-no-ui
+  ruleSource: session
+  behavior: auto-deny
+  triggeredBy: canUseTool
+  interpretedMessage: |
+    This is a background agent without an interactive surface — permission
+    prompts auto-deny. Run the tool from the main thread instead.

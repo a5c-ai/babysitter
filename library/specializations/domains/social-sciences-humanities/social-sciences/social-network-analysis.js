@@ -5,6 +5,12 @@
  * @outputs { success: boolean, networkMetrics: object, communityStructure: object, visualizations: array, qualityScore: number, artifacts: array }
  * @recommendedSkills SK-SS-007 (network-analysis), SK-SS-001 (quantitative-methods)
  * @recommendedAgents AG-SS-009 (computational-social-scientist), AG-SS-001 (quantitative-research-methodologist)
+ *
+ * @graph
+ *   domains: [domain:social-sciences]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:user-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:data-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -9,6 +9,13 @@ expertise:
   - Abuse case development
   - Requirements validation
   - Implementation tracking
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:compliance-automation, skill-area:application-security-testing]
+  roles: [role:security-engineer, role:compliance-engineer]
+  workflows: [workflow:security-audit, workflow:compliance-audit]
+
 ---
 
 # Security Requirements Agent

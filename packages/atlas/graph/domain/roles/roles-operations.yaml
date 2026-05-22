@@ -1,0 +1,168 @@
+nodeKind: Role
+id: role:it-ops-engineer
+attributes:
+  displayName: "IT Operations Engineer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Maintains the internal IT infrastructure that keeps the organization running,
+    including endpoint management, network configuration, identity services, and
+    collaboration tooling. Responds to helpdesk escalations, manages hardware
+    lifecycle, and enforces security baseline configurations across corporate
+    systems. Supports onboarding and offboarding workflows for employees and
+    contractors in coordination with HR and security teams.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:access-control
+    - responsibility:on-call
+    - responsibility:documentation
+    - responsibility:compliance-monitoring
+  requires_skill:
+    - target: domain:networking
+      level: expert
+    - target: domain:cloud-infra
+      level: intermediate
+    - target: domain:security
+      level: intermediate
+---
+nodeKind: Role
+id: role:release-manager
+attributes:
+  displayName: "Release Manager"
+  isAgentic: false
+  automatability: 0.9
+  description: |
+    Coordinates the end-to-end release process across engineering, QA, and operations
+    teams to ensure software is delivered to production safely and on schedule. Manages
+    release calendars, enforces go/no-go gates, and communicates release status to all
+    stakeholders. Owns the release process documentation and drives continuous
+    improvements to reduce release friction and lead times.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:release-coordination
+    - responsibility:deployment-management
+    - responsibility:stakeholder-communication
+    - responsibility:change-approval
+    - responsibility:risk-assessment
+  requires_skill:
+    - target: domain:devops
+      level: intermediate
+    - target: specialization:devops-sre-platform
+      level: intermediate
+    - target: specialization:technical-documentation
+      level: intermediate
+---
+nodeKind: Role
+id: role:change-manager
+attributes:
+  displayName: "Change Manager"
+  isAgentic: false
+  automatability: 0.1
+  description: |
+    Governs the change management process for production systems, evaluating proposed
+    changes against risk criteria, facilitating change advisory board reviews, and
+    ensuring all changes have adequate rollback plans and test evidence. Tracks
+    change success rates and failed change patterns to drive process improvement.
+    Partners with IT ops, security, and engineering to balance agility with control.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:change-approval
+    - responsibility:risk-assessment
+    - responsibility:compliance-monitoring
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:devops
+      level: intermediate
+    - target: domain:security
+      level: novice
+    - target: specialization:technical-documentation
+      level: intermediate
+---
+nodeKind: Role
+id: role:incident-commander
+attributes:
+  displayName: "Incident Commander"
+  isAgentic: false
+  automatability: 0.1
+  description: |
+    Takes command during active high-severity incidents, coordinating all responders,
+    driving toward resolution, and serving as the single decision-making authority
+    to avoid chaos during outages. Manages stakeholder communications, escalations,
+    and external notifications throughout the incident lifecycle. Leads post-incident
+    reviews and ensures action items are owned and tracked to completion.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:incident-response
+    - responsibility:stakeholder-communication
+    - responsibility:on-call
+    - responsibility:sla-management
+    - responsibility:disaster-recovery
+  requires_skill:
+    - target: specialization:sre
+      level: expert
+    - target: domain:observability
+      level: expert
+    - target: domain:cloud-infra
+      level: intermediate
+---
+nodeKind: Role
+id: role:support-engineer
+attributes:
+  displayName: "Support Engineer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Provides technical assistance to customers encountering product issues, diagnosing
+    problems through log analysis, reproduction, and collaboration with engineering
+    teams. Manages a queue of support tickets, meets response and resolution SLAs,
+    and escalates complex issues with full investigation context. Contributes to
+    knowledge base articles and feedback loops that reduce recurring issue volume.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:customer-escalation
+    - responsibility:sla-management
+    - responsibility:documentation
+    - responsibility:on-call
+  requires_skill:
+    - target: domain:software-engineering
+      level: intermediate
+    - target: domain:networking
+      level: novice
+    - target: specialization:technical-documentation
+      level: intermediate
+---
+nodeKind: Role
+id: role:solutions-architect
+attributes:
+  displayName: "Solutions Architect"
+  isAgentic: false
+  automatability: 0.5
+  description: |
+    Designs and validates end-to-end technical solutions for customer or internal
+    use cases, bridging business requirements with implementable architectures that
+    leverage the organization's product capabilities. Produces reference architectures,
+    integration guides, and proof-of-concept implementations that guide customers
+    or internal teams through complex deployments. Acts as a trusted technical advisor
+    throughout the pre-sale and post-sale journey.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:stakeholder-communication
+    - responsibility:documentation
+    - responsibility:risk-assessment
+    - responsibility:knowledge-sharing
+  requires_skill:
+    - target: specialization:software-architecture
+      level: expert
+    - target: domain:cloud-infra
+      level: expert
+    - target: domain:software-engineering
+      level: expert
+    - target: domain:networking
+      level: intermediate

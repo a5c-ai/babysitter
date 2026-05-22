@@ -1,0 +1,550 @@
+---
+nodeKind: OrgUnit
+id: org-unit:data-platform-team
+attributes:
+  displayName: "Data Platform Team"
+  kind: team
+  description: |
+    Owns the warehouse, ETL/ELT, and data quality tooling shared across
+    product teams.
+edges:
+  has_member:
+    - target: role:data-engineer
+    - target: role:platform-engineer
+---
+nodeKind: OrgUnit
+id: org-unit:ml-platform-team
+attributes:
+  displayName: "ML Platform Team"
+  kind: team
+  description: |
+    Owns shared ML infrastructure: training, eval, prompt/RAG tooling, and
+    GPU fleet.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:application-security-team
+attributes:
+  displayName: "Application Security Team"
+  kind: team
+  description: |
+    AppSec function: threat modeling, security review, scanner ops, and
+    remediation drive.
+edges:
+  has_member:
+    - target: role:security-engineer
+    - target: role:security-reviewer
+---
+nodeKind: OrgUnit
+id: org-unit:devrel-team
+attributes:
+  displayName: "Developer Relations"
+  kind: team
+  description: |
+    External developer engagement: docs, samples, conferences, and community.
+edges:
+  has_member:
+    - target: role:devrel
+    - target: role:technical-writer
+---
+nodeKind: OrgUnit
+id: org-unit:infra-engineering
+attributes:
+  displayName: "Infrastructure Engineering"
+  kind: department
+  description: |
+    Owns cloud, k8s, CI/CD, and platform reliability.
+edges:
+  has_member:
+    - target: role:devops-engineer
+    - target: role:platform-engineer
+    - target: role:sre-lead
+---
+nodeKind: OrgUnit
+id: org-unit:engineering-productivity
+attributes:
+  displayName: "Engineering Productivity"
+  kind: team
+  description: |
+    Build/test infrastructure, developer experience, and shared tooling.
+edges:
+  has_member:
+    - target: role:devops-engineer
+    - target: role:staff-engineer
+---
+nodeKind: OrgUnit
+id: org-unit:internal-tools
+attributes:
+  displayName: "Internal Tools"
+  kind: team
+  description: |
+    Internal-facing apps and back-office automation.
+edges:
+  has_member:
+    - target: role:fullstack-engineer
+    - target: role:devops-engineer
+---
+nodeKind: OrgUnit
+id: org-unit:open-source-program-office
+attributes:
+  displayName: "Open Source Program Office"
+  kind: guild
+  description: |
+    Stewardship of OSS contributions, licensing, and community process.
+edges:
+  has_member:
+    - target: role:devrel
+    - target: role:license-auditor
+---
+nodeKind: OrgUnit
+id: org-unit:research-engineering
+attributes:
+  displayName: "Research Engineering"
+  kind: team
+  description: |
+    Bridges research prototypes into production-grade systems.
+edges:
+  has_member:
+    - target: role:ml-engineer
+    - target: role:staff-engineer
+---
+nodeKind: OrgUnit
+id: org-unit:incident-response-team
+attributes:
+  displayName: "Incident Response Team"
+  kind: guild
+  description: |
+    Cross-functional team that handles security and reliability incidents
+    end-to-end.
+edges:
+  has_member:
+    - target: role:incident-commander
+    - target: role:sre-lead
+    - target: role:sre-runbook-author
+---
+nodeKind: OrgUnit
+id: org-unit:ai-enablement
+attributes:
+  displayName: "AI Enablement"
+  kind: team
+  description: |
+    Drives AI-agent adoption, tooling evaluation, safety guardrails,
+    and knowledge-sharing across the engineering org.
+edges:
+  has_member:
+    - target: role:ai-champion
+    - target: role:ml-engineer
+    - target: role:staff-engineer
+---
+nodeKind: OrgUnit
+id: org-unit:quality-engineering
+attributes:
+  displayName: "Quality Engineering"
+  kind: team
+  description: |
+    Owns test strategy, automation frameworks, CI reliability,
+    and release-quality gates.
+edges:
+  has_member:
+    - target: role:test-writer
+    - target: role:performance-profiler
+---
+nodeKind: OrgUnit
+id: org-unit:architecture-guild
+attributes:
+  displayName: "Architecture Guild"
+  kind: guild
+  description: |
+    Cross-team forum for architecture decisions, ADR stewardship,
+    and tech-radar curation.
+edges:
+  has_member:
+    - target: role:staff-engineer
+    - target: role:principal-engineer
+    - target: role:tech-lead
+    - target: role:cloud-architect
+---
+nodeKind: OrgUnit
+id: org-unit:frontend-team
+attributes:
+  displayName: "Frontend Team"
+  kind: team
+  description: |
+    Owns web and mobile UI development, design-system, and
+    client-side performance.
+edges:
+  has_member:
+    - target: role:product-designer
+    - target: role:implementer
+---
+nodeKind: OrgUnit
+id: org-unit:database-team
+attributes:
+  displayName: "Database Team"
+  kind: team
+  description: |
+    Owns database operations, migrations, performance tuning,
+    and schema governance.
+edges:
+  has_member:
+    - target: role:database-administrator
+    - target: role:db-migrator
+---
+nodeKind: OrgUnit
+id: org-unit:marketing-team
+attributes:
+  displayName: "Marketing Team"
+  kind: team
+  description: |
+    Brand, campaigns, content, and marketing analytics.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:sales-team
+attributes:
+  displayName: "Sales Team"
+  kind: team
+  description: |
+    Sales pipeline, account management, and revenue operations.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:customer-success
+attributes:
+  displayName: "Customer Success"
+  kind: team
+  description: |
+    Customer onboarding, health scoring, and renewal management.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:support-team
+attributes:
+  displayName: "Support Team"
+  kind: team
+  description: |
+    Technical support, ticketing, and escalation management.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:community-team
+attributes:
+  displayName: "Community Team"
+  kind: team
+  description: |
+    Community building, forums, events, and developer advocacy.
+edges:
+  has_member:
+    - target: role:devrel
+---
+nodeKind: OrgUnit
+id: org-unit:hr-team
+attributes:
+  displayName: "HR Team"
+  kind: department
+  description: |
+    Recruiting, people ops, L&D, and compensation.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:legal-team
+attributes:
+  displayName: "Legal Team"
+  kind: team
+  description: |
+    Contracts, IP, compliance, and regulatory affairs.
+edges:
+  has_member:
+    - target: role:license-auditor
+---
+nodeKind: OrgUnit
+id: org-unit:finance-team
+attributes:
+  displayName: "Finance Team"
+  kind: department
+  description: |
+    FP&A, accounting, procurement, and audit.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:operations-team
+attributes:
+  displayName: "Operations Team"
+  kind: department
+  description: |
+    Business operations, process optimization, and vendor management.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:business-intelligence-team
+attributes:
+  displayName: "Business Intelligence Team"
+  kind: team
+  description: |
+    BI, reporting, dashboards, and analytics engineering.
+edges:
+  has_member:
+    - target: role:data-engineer
+---
+nodeKind: OrgUnit
+id: org-unit:growth-team
+attributes:
+  displayName: "Growth Team"
+  kind: team
+  description: |
+    Growth experiments, acquisition funnels, and conversion optimization.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:procurement-team
+attributes:
+  displayName: "Procurement Team"
+  kind: team
+  description: |
+    Procurement, vendor management, and contract negotiation.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:it-service-management
+attributes:
+  displayName: "IT Service Management"
+  kind: team
+  description: |
+    ITSM, helpdesk, asset management, and service catalog.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:compliance-team
+attributes:
+  displayName: "Compliance Team"
+  kind: team
+  description: |
+    Regulatory compliance, audit coordination, and policy enforcement.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:data-governance-team
+attributes:
+  displayName: "Data Governance Team"
+  kind: team
+  description: |
+    Data stewardship, classification, lineage, and access policies.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:developer-relations-team
+attributes:
+  displayName: "Developer Relations Team"
+  kind: team
+  description: |
+    External developer advocacy, SDK support, and ecosystem growth.
+edges:
+  has_member:
+    - target: role:devrel
+    - target: role:technical-writer
+---
+nodeKind: OrgUnit
+id: org-unit:release-engineering
+attributes:
+  displayName: "Release Engineering"
+  kind: team
+  description: |
+    Release pipelines, artifact management, and deployment automation.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:design-team
+attributes:
+  displayName: "Design Team"
+  kind: team
+  description: |
+    UX/UI design, research, and design systems.
+edges:
+  has_member:
+    - target: role:product-designer
+---
+nodeKind: OrgUnit
+id: org-unit:content-team
+attributes:
+  displayName: "Content Team"
+  kind: team
+  description: |
+    Content strategy, copywriting, and editorial operations.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:analytics-team
+attributes:
+  displayName: "Analytics Team"
+  kind: team
+  description: |
+    Product analytics, experimentation, and data insights.
+edges:
+  has_member:
+    - target: role:data-scientist
+---
+nodeKind: OrgUnit
+id: org-unit:esg-sustainability-team
+attributes:
+  displayName: "ESG & Sustainability Team"
+  kind: team
+  description: |
+    ESG reporting, sustainability metrics, and climate risk management.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:dei-team
+attributes:
+  displayName: "DEI Team"
+  kind: team
+  description: |
+    Diversity, equity, and inclusion programs and bias auditing.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:facilities-team
+attributes:
+  displayName: "Facilities Team"
+  kind: team
+  description: |
+    Workplace facilities, space planning, and building management.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:partnerships-team
+attributes:
+  displayName: "Partnerships Team"
+  kind: team
+  description: |
+    Strategic partnerships, alliances, and ecosystem development.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:investor-relations
+attributes:
+  displayName: "Investor Relations"
+  kind: team
+  description: |
+    Investor communications, earnings, and shareholder reporting.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:risk-management-team
+attributes:
+  displayName: "Risk Management Team"
+  kind: team
+  description: |
+    Enterprise risk assessment, mitigation, and insurance coordination.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:training-team
+attributes:
+  displayName: "Training Team"
+  kind: team
+  description: |
+    Employee training, certifications, and learning development.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:advertising-team
+attributes:
+  displayName: "Advertising Team"
+  kind: team
+  description: |
+    Ad campaigns, media buying, creative production, and performance marketing.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:finops-team
+attributes:
+  displayName: "FinOps Team"
+  kind: team
+  description: |
+    Cloud cost management, budget allocation, and FinOps practices.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:bizdev-team
+attributes:
+  displayName: "BizDev Team"
+  kind: team
+  description: |
+    Business development, strategic partnerships, and channel sales.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:strategy-team
+attributes:
+  displayName: "Strategy Team"
+  kind: team
+  description: |
+    Corporate strategy, market research, and competitive intelligence.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:revenue-operations-team
+attributes:
+  displayName: "Revenue Operations Team"
+  kind: team
+  description: |
+    RevOps — GTM alignment, pipeline ops, and forecasting.
+edges: {}
+---
+nodeKind: OrgUnit
+id: org-unit:trading-desk
+attributes:
+  displayName: "Trading Desk"
+  kind: team
+  description: |
+    Algorithmic and discretionary trading operations.
+edges:
+  has_member:
+    - target: role:trading-systems-engineer
+    - target: role:quantitative-analyst
+---
+nodeKind: OrgUnit
+id: org-unit:quant-research
+attributes:
+  displayName: "Quant Research"
+  kind: team
+  description: |
+    Quantitative research, alpha generation, and model development.
+edges:
+  has_member:
+    - target: role:quantitative-analyst
+    - target: role:research-analyst
+---
+nodeKind: OrgUnit
+id: org-unit:portfolio-management-team
+attributes:
+  displayName: "Portfolio Management Team"
+  kind: team
+  description: |
+    Portfolio construction, allocation, and performance.
+edges:
+  has_member:
+    - target: role:portfolio-manager
+    - target: role:risk-analyst
+---
+nodeKind: OrgUnit
+id: org-unit:market-risk-team
+attributes:
+  displayName: "Market Risk Team"
+  kind: team
+  description: |
+    Market risk, credit risk, and counterparty risk monitoring.
+edges:
+  has_member:
+    - target: role:risk-analyst
+---
+nodeKind: OrgUnit
+id: org-unit:trading-compliance
+attributes:
+  displayName: "Trading Compliance"
+  kind: team
+  description: |
+    Trading surveillance, regulatory reporting, and compliance.
+edges:
+  has_member:
+    - target: role:compliance-officer

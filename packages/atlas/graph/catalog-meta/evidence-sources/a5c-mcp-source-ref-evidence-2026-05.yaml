@@ -1,0 +1,14 @@
+nodeKind: EvidenceSource
+id: evidence:a5c-mcp-source-ref-catalog-source-2026-05
+attributes:
+  displayName: a5c-mcp-source-ref catalog source-ref coverage
+  kindLabel: repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/atlas/graph/sourceref-scope/source-refs/a5c-and-mcp-stubs.yaml
+  filePath: graph/sourceref-scope/source-refs/a5c-and-mcp-stubs.yaml
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: a5c-mcp-source-ref
+edges:
+  has_trust_level:
+  - trust-level:repo

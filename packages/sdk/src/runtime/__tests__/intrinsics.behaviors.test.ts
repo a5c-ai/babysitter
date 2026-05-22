@@ -5,7 +5,8 @@ import { promises as fs } from "fs";
 import { runSleepIntrinsic } from "../intrinsics/sleep";
 import { runBreakpointIntrinsic } from "../intrinsics/breakpoint";
 import { runOrchestratorTaskIntrinsic } from "../intrinsics/orchestratorTask";
-import { EffectPendingError, EffectRequestedError } from "../exceptions";
+import { runSubprocessIntrinsic } from "../intrinsics/subprocess";
+import { EffectPendingError, EffectRequestedError, RunFailedError } from "../exceptions";
 import { buildTaskContext, createTestRun } from "./testHelpers";
 import { writeTaskResult } from "../../storage/tasks";
 import { appendEvent } from "../../storage/journal";
@@ -87,6 +88,73 @@ describe("sleep intrinsic", () => {
       expect(action.kind).toBe("sleep");
       expect(action.taskDef.metadata?.targetEpochMs).toBe(target.getTime());
       expect(action.schedulerHints?.sleepUntilEpochMs).toBe(target.getTime());
+      return true;
+    });
+  });
+});
+
+describe("subprocess intrinsic", () => {
+  test("fails fast unless babysitter-agent explicitly enables subprocess support", async () => {
+    const { runDir, runId } = await createTestRun(tmpRoot);
+    const context = await buildTaskContext(runDir, runId);
+
+    expect(() =>
+      runSubprocessIntrinsic(
+        {
+          processPath: "./processes/subtask.mjs",
+          processId: "subtask",
+        },
+        context,
+      )
+    ).toThrowError(RunFailedError);
+    expect(() =>
+      runSubprocessIntrinsic(
+        {
+          processPath: "./processes/subtask.mjs",
+          processId: "subtask",
+        },
+        context,
+      )
+    ).toThrowError("only supported when the run is iterated by babysitter-agent");
+  });
+
+  test("requests a subprocess effect with typed child-run metadata", async () => {
+    const { runDir, runId } = await createTestRun(tmpRoot);
+    const context = await buildTaskContext(runDir, runId, {
+      subprocessSupport: "babysitter-agent",
+    });
+
+    await expect(
+      runSubprocessIntrinsic(
+        {
+          processPath: "./processes/subtask.mjs",
+          exportName: "process",
+          processId: "subtask",
+          prompt: "Implement the nested task",
+          inputs: { prompt: "Implement the nested task" },
+          harness: "codex",
+          model: "gpt-5.4",
+          maxIterations: 12,
+        },
+        context,
+        { label: "nested-subprocess" },
+      ),
+    ).rejects.toSatisfy((error) => {
+      expect(error).toBeInstanceOf(EffectRequestedError);
+      const action = (error as EffectRequestedError).action;
+      expect(action.kind).toBe("subprocess");
+      expect(action.label).toBe("nested-subprocess");
+      expect(action.taskDef.subprocess).toMatchObject({
+        processPath: "./processes/subtask.mjs",
+        exportName: "process",
+        processId: "subtask",
+        prompt: "Implement the nested task",
+        inputs: { prompt: "Implement the nested task" },
+        harness: "codex",
+        model: "gpt-5.4",
+        maxIterations: 12,
+        shareSession: true,
+      });
       return true;
     });
   });

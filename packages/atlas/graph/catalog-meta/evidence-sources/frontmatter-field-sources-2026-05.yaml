@@ -1,0 +1,78 @@
+nodeKind: EvidenceSource
+id: evidence:frontmatter-cursor-rules-docs
+attributes:
+  displayName: Cursor rules documentation
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://cursor.com/docs/context/rules
+  sourcePathOrUrl: https://cursor.com/docs/context/rules
+  locator: Rule files and MDC frontmatter fields
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:frontmatter-babysitter-task-schema-source
+attributes:
+  displayName: Babysitter defineTask task schema source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/sdk/src/tasks/defineTask.ts
+  filePath: packages/sdk/src/tasks/defineTask.ts
+  sourcePathOrUrl: packages/sdk/src/tasks/defineTask.ts; packages/sdk/src/tasks/types.ts
+  locator: DefineTaskOptions, DefineTaskObjectSpec, TaskDef, TaskIOHints, EffectExecutionHints, task kind option types
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:agent-mux-harness-mock-package-source
+attributes:
+  displayName: agent-mux harness-mock package source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/agent-mux/harness-mock/package.json
+  filePath: packages/agent-mux/harness-mock/package.json
+  sourcePathOrUrl: packages/agent-mux/harness-mock/package.json
+  locator: package name, version, mock-harness bin, and workspace package surface
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:agent-mux-harness-mock-scenarios-source
+attributes:
+  displayName: agent-mux harness-mock scenario source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/agent-mux/harness-mock/src/scenarios/interactive.ts
+  filePath: packages/agent-mux/harness-mock/src/scenarios/interactive.ts
+  sourcePathOrUrl: packages/agent-mux/harness-mock/src/scenarios/interactive.ts; packages/agent-mux/harness-mock/src/scenarios/errors.ts; packages/agent-mux/harness-mock/src/scenarios/hooks.ts
+  locator: INTERACTION_SCENARIOS plus error and runtime-hook scenario fixtures
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo

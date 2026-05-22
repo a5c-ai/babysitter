@@ -2,6 +2,13 @@
 name: compliance-validator
 description: Validate compliance during migration with rule checking, audit trails, and security control validation
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:compliance-automation, skill-area:security-testing]
+  roles: [role:compliance-engineer, role:security-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Compliance Validator Skill

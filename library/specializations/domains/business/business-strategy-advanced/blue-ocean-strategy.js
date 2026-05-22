@@ -3,6 +3,12 @@
  * @description Create uncontested market space using Blue Ocean Strategy frameworks including value innovation and Four Actions Framework
  * @inputs { organizationName: string, currentIndustry: object, competitorData: array, customerData: object }
  * @outputs { success: boolean, strategyCanvas: object, fourActionsAnalysis: object, valueInnovation: object, blueOceanRoadmap: object, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:change-management-leadership, skill-area:market-sizing]
+ *   workflows: [workflow:strategic-planning]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

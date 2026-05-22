@@ -1,0 +1,182 @@
+nodeKind: SourceRef
+id: source-ref:claude-code-github
+attributes:
+  description: "Claude Code (GitHub)"
+  displayName: "Claude Code (GitHub)"
+  repoUrl: https://github.com/anthropics/claude-code
+  ref: main
+  path: "."
+  kind: github-repo
+  notes: |
+    Public mirror of the Claude Code CLI; primary distribution is the
+    npm package `@anthropic-ai/claude-code`.
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:codex-github
+attributes:
+  description: "Codex CLI (GitHub)"
+  displayName: "Codex CLI (GitHub)"
+  repoUrl: https://github.com/openai/codex
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:cursor-binary
+attributes:
+  description: |
+    Cursor IDE binary distribution. Cursor is closed-source; the
+    canonical "source" pointer is the vendor download endpoint, not a
+    public repo. Per-OS installers are served via a redirector at
+    https://www.cursor.com/download.
+  repoUrl: https://www.cursor.com/
+  ref: "stable"
+  path: "/download"
+  displayName: "Cursor (binary distribution)"
+  homepageUrl: https://www.cursor.com/
+  downloadUrl: https://www.cursor.com/download
+  kind: vendor-binary
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:gemini-cli-github
+attributes:
+  description: "Gemini CLI (GitHub)"
+  displayName: "Gemini CLI (GitHub)"
+  repoUrl: https://github.com/google-gemini/gemini-cli
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:gh-copilot-github
+attributes:
+  description: "GitHub Copilot CLI (GitHub)"
+  displayName: "GitHub Copilot CLI (GitHub)"
+  repoUrl: https://github.com/github/gh-copilot
+  ref: main
+  path: "."
+  kind: github-repo
+  notes: |
+    `github/gh-copilot` is the canonical home for the `gh copilot`
+    extension surface used by `gh-copilot-cli`.
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:hermes-agent-pypi
+attributes:
+  description: |
+    Hermes agent — PyPI distribution. No canonical public source repo
+    is published; the PyPI listing is treated as the source-of-truth
+    pointer.
+  repoUrl: https://pypi.org/project/hermes-agent/
+  ref: "latest"
+  path: "."
+  displayName: "Hermes agent (PyPI)"
+  packageManager: pypi
+  packageName: hermes-agent
+  homepageUrl: https://pypi.org/project/hermes-agent/
+  kind: pypi-package
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:omp-github
+attributes:
+  description: "OMP (GitHub)"
+  displayName: "OMP (GitHub)"
+  repoUrl: https://github.com/oh-my-pi/omp
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:openclaw-github
+attributes:
+  description: "Openclaw (GitHub)"
+  displayName: "Openclaw (GitHub)"
+  repoUrl: https://github.com/openclaw/openclaw
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:opencode-github
+attributes:
+  description: "OpenCode (GitHub)"
+  displayName: "OpenCode (GitHub)"
+  repoUrl: https://github.com/sst/opencode
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:pi-github
+attributes:
+  description: "Pi agent (GitHub)"
+  displayName: "Pi agent (GitHub)"
+  repoUrl: https://github.com/pi-labs/pi
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:agent-mux-github
+attributes:
+  description: "Agent Mux (GitHub)"
+  displayName: "Agent Mux (GitHub)"
+  repoUrl: https://github.com/a5c-ai/agent-mux
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:psclaudecode-github
+attributes:
+  description: "PSClaudeCode (GitHub)"
+  displayName: "PSClaudeCode (GitHub)"
+  repoUrl: https://github.com/dfinke/PSClaudeCode
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:cyclop-one-github
+attributes:
+  description: "Cyclop One (GitHub)"
+  displayName: "Cyclop One (GitHub)"
+  repoUrl: https://github.com/cyclopone/cyclopone
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:cli-anything-github
+attributes:
+  description: "CLI Anything (GitHub)"
+  displayName: "CLI Anything (GitHub)"
+  repoUrl: https://github.com/ATheoLogical/cli-anything
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:nanny-github
+attributes:
+  description: "Nanny (GitHub)"
+  displayName: "Nanny (GitHub)"
+  repoUrl: https://github.com/nannycodes/nanny
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}

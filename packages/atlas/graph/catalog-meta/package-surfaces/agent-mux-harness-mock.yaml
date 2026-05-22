@@ -1,0 +1,36 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-mux-harness-mock
+attributes:
+  packageId: "@a5c-ai/agent-mux-harness-mock"
+  packageName: "@a5c-ai/agent-mux-harness-mock"
+  workspacePath: packages/agent-mux/harness-mock
+  moduleType: typescript
+  surfaceKinds:
+    - test-fixture
+    - bin-entrypoint
+    - harness-emulator
+  sourceOfTruthRole: application
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:agent-mux-harness-mock
+  exposes_subcommand:
+    - target: interaction-primitive:agent-mux-harness-mock-interactive-yolo
+    - target: interaction-primitive:agent-mux-harness-mock-interactive-prompt
+    - target: interaction-primitive:agent-mux-harness-mock-interactive-deny
+    - target: interaction-primitive:agent-mux-harness-mock-interactive-timeout
+    - target: interaction-primitive:agent-mux-harness-mock-error-rate-limit
+    - target: interaction-primitive:agent-mux-harness-mock-error-auth-required
+    - target: interaction-primitive:agent-mux-harness-mock-error-crash
+    - target: interaction-primitive:agent-mux-harness-mock-error-timeout
+    - target: interaction-primitive:agent-mux-harness-mock-error-oom
+    - target: interaction-primitive:agent-mux-harness-mock-runtime-hook-allow-bash
+    - target: interaction-primitive:agent-mux-harness-mock-runtime-hook-deny-write
+    - target: interaction-primitive:agent-mux-harness-mock-runtime-hook-timeout
+  has_payload_schema:
+    - target: shared-context-spec:agent-mux-harness-mock-harness-scenario
+    - target: shared-context-spec:agent-mux-harness-mock-stdin-interaction
+    - target: shared-context-spec:agent-mux-harness-mock-http-server-config
+    - target: shared-context-spec:agent-mux-harness-mock-websocket-config
+    - target: shared-context-spec:agent-mux-harness-mock-mock-event

@@ -1,0 +1,34 @@
+---
+nodeKind: ContextBundle
+id: context-bundle:symphony-default
+attributes:
+  displayName: "Symphony default context bundle"
+  domain: "agent-orchestration"
+  description: |
+    Default per-turn context assembly for symphony: system prompt + tool
+    catalog + retrieved memories + last-N conversation turns.
+edges:
+  bundles_template:
+    - target: prompt-template:symphony-system
+  embeds_with:
+    - target: embedding-profile:openai-text-embedding-3-large
+    - target: embedding-profile:voyage-3
+    - target: embedding-profile:jina-embeddings-v3
+    - target: embedding-profile:cohere-embed-english-v3
+  backed_by_memory:
+    - target: memory-store:symphony-vector-pinecone
+    - target: memory-store:symphony-conversation-buffer
+---
+nodeKind: ContextBundle
+id: context-bundle:symphony-rag
+attributes:
+  displayName: "Symphony RAG context bundle"
+  domain: "retrieval-augmented-generation"
+  description: |
+    RAG-mode bundle: replaces freeform memory retrieval with citation-bound
+    sources from the knowledge graph + vector store.
+edges:
+  bundles_template:
+    - target: prompt-template:rag-answer
+  embeds_with:
+    - target: embedding-profile:openai-text-embedding-3-large

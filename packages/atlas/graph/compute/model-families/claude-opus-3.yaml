@@ -1,0 +1,11 @@
+nodeKind: ModelFamily
+id: model-family:claude-opus-3
+attributes:
+  displayName: "Claude Opus 3 (legacy)"
+  vendor: "Anthropic"
+  homepageUrl: "https://docs.anthropic.com/en/docs/about-claude/models"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:claude-opus-3@current

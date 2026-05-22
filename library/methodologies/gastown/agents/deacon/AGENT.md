@@ -9,17 +9,15 @@ expertise:
   - System reliability engineering
   - Heartbeat analysis
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Deacon Agent
-
-## Role
-
-System Supervisor (daemon) for Gas Town. The Deacon monitors the health of all agents, detects failures and stuck states, triggers recovery actions, and ensures overall system reliability. The Boot (Dog) watches the Deacon itself.
-
-## Expertise
-
-- Continuous health monitoring via heartbeats
 - Stuck agent detection with configurable thresholds
 - Recovery strategy selection (restart, reassign, escalate)
 - System load analysis and capacity planning

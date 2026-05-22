@@ -529,15 +529,14 @@ Organizations configure an MCP registry URL in their Copilot enterprise/organiza
 
 ### Plugin Packages (npm)
 
-Copilot plugins are distributed as npm packages containing all components:
+Babysitter's Copilot plugin is distributed as an npm package and is normally installed through the SDK helper:
 
 ```bash
-npm install -g @a5c-ai/babysitter-github
-# or install locally
-npm install @a5c-ai/babysitter-github
+babysitter harness:install-plugin github-copilot
+babysitter harness:install-plugin github-copilot --workspace /path/to/repo
 ```
 
-The npm package includes `postinstall`/`preuninstall` scripts that handle plugin registration, and a `team:install` script for organizational deployment.
+The helper resolves to the published package installer (`npx --yes @a5c-ai/babysitter-github install ...`) so automation uses the same command shape as the SDK installer tests.
 
 ### Community Resources
 

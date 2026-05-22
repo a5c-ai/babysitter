@@ -1,0 +1,10 @@
+nodeKind: Domain
+id: domain:robotics
+attributes:
+  displayName: "Robotics"
+  description: |
+    Robotics domain — perception, planning, control, ROS-based stacks,
+    and integration of sensors and actuators in autonomous systems.
+edges:
+  contains:
+    - specialization:robotics-simulation

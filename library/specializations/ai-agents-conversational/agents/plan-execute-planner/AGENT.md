@@ -8,6 +8,14 @@ expertise:
   - Replanning strategies
   - Goal tracking
   - Plan validation
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agent-planning-reasoning, skill-area:chain-of-thought-multistep-orchestration]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development, workflow:ml-model-lifecycle]
+  topics: [topic:design-patterns]
+
 ---
 
 # Plan-Execute Planner

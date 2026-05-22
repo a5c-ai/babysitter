@@ -11,6 +11,11 @@ expertise:
   - Production test strategies
   - Lab bring-up
   - Issue isolation techniques
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+  roles: [role:embedded-engineer]
 ---
 
 # FPGA Debug Expert Agent

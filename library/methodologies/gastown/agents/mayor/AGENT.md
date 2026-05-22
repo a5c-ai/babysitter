@@ -9,17 +9,15 @@ expertise:
   - Agent assignment and load balancing
   - Escalation handling
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Mayor Agent
-
-## Role
-
-Global Coordinator for the Gas Town multi-agent system. The Mayor initiates Convoys, coordinates work distribution across Crew and Polecat agents, monitors execution, and handles escalations.
-
-## Expertise
-
-- MEOW decomposition (Molecular Expressions of Work)
 - Convoy creation and lifecycle management
 - Agent assignment based on skills and availability
 - Load balancing across rigs

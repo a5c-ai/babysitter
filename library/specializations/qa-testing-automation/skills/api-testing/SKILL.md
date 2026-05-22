@@ -8,6 +8,14 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:api-contract-testing, skill-area:integration-testing]
+  roles: [role:qa-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
+
 ---
 
 # API Testing Skill

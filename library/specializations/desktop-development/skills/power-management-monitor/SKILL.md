@@ -3,6 +3,12 @@ name: power-management-monitor
 description: Monitor system power state including battery, AC, sleep, and wake events
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [power, battery, system, cross-platform, monitoring]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-system-integration, skill-area:performance-monitoring-profiling]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # power-management-monitor

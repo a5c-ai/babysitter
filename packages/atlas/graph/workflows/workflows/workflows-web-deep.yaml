@@ -1,0 +1,98 @@
+---
+nodeKind: Workflow
+id: workflow:web-caching-strategy-review
+attributes:
+  displayName: "Web Caching Strategy Review"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews the multi-layer web caching architecture — auditing Cache-Control
+    and CDN header configurations by content type, validating cache-busting
+    strategies for hashed assets, measuring cache-hit ratios at browser and edge
+    layers, profiling stale-while-revalidate effectiveness, and verifying
+    invalidation procedures post-deployment. Excludes CDN vendor selection and
+    infrastructure provisioning.
+edges:
+  involves_role:
+    - target: role:performance-profiler
+    - target: role:platform-engineer
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:serverless-cold-start-optimization
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:frontend-team
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:csp-header-audit
+attributes:
+  displayName: "CSP Header Audit"
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits Content Security Policy headers across all web properties — scanning
+    for unsafe-inline and unsafe-eval directives, validating nonce/hash
+    integrity, analyzing CSP violation reports for false positives and real
+    threats, testing report-only policies before enforcement, and verifying
+    third-party script allowlists against the current vendor inventory. Excludes
+    general web application penetration testing.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:implementer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:webhook-verification
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:application-security-team
+    - target: org-unit:frontend-team
+---
+nodeKind: Workflow
+id: workflow:seo-technical-audit
+attributes:
+  displayName: "SEO Technical Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Conducts a systematic technical SEO audit across web properties — crawling
+    for broken links and redirect chains, validating structured data markup,
+    auditing Core Web Vitals against search ranking thresholds, checking
+    canonical tag correctness, verifying sitemap completeness, and ensuring
+    server-side rendering hydration produces crawlable content. Excludes content
+    strategy and keyword research.
+edges:
+  involves_role:
+    - target: role:implementer
+    - target: role:performance-profiler
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:react-state-management
+    - target: skill-area:serverless-cold-start-optimization
+  applies_to_domain:
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:frontend-team
+    - target: org-unit:engineering

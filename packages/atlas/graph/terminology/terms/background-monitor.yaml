@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:background-monitor
+attributes:
+  canonicalDefinitionId: definition:background-monitor.canonical
+  displayName: "BackgroundMonitor"
+  kind: tool
+  references:
+    - "NodeKind:BackgroundMonitor"
+  description: |
+    Long-running monitor process bundled in a plugin (Claude Code monitors/monitors.json)
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

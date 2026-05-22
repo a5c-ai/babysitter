@@ -1,0 +1,24 @@
+nodeKind: DeploymentTarget
+id: deployment-target:eks-prod-us-east-1
+attributes:
+  displayName: "Production EKS cluster (us-east-1)"
+  targetType: eks
+  environment: prod
+  cloudRegion: us-east-1
+  clusterName: babysitter-prod
+  namespace: babysitter
+  ingressHostnames:
+    - kanban.babysitter.example.com
+    - gateway.babysitter.example.com
+  ingressTls: true
+  ingressClassName: alb
+  authMode: bootstrap-admin
+  storageClassName: gp3
+  autoApplyTerraform: false
+  autoApplyKubernetes: false
+  description: |
+    Production EKS cluster in us-east-1. autoApply* flags are false in
+    production so terraform plans and kubernetes manifests must be
+    reviewed by a human before apply. authMode = bootstrap-admin
+    requires `adminPasswordSecretRef` to be set on the AuthConfig at
+    apply-time.

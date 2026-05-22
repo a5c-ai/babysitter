@@ -1,0 +1,54 @@
+---
+nodeKind: ContentPolicy
+id: content-policy:default-acceptable-use
+attributes:
+  displayName: "Default acceptable-use policy"
+  policyKind: deny-list
+  severity: blocking
+  rules: |
+    Block any output that:
+      - depicts CSAM (zero tolerance);
+      - provides operational uplift for weapons of mass destruction;
+      - constitutes targeted harassment of an identifiable person.
+  notes: |
+    Platform-wide content rules applied to every agent run.
+edges:
+  applied_by:
+    - target: agentVersion:claude:ge-0-0-0
+  detects_jailbreak:
+    - target: jailbreak:dan
+    - target: jailbreak:prompt-injection-indirect
+    - target: jailbreak:many-shot
+    - target: jailbreak:base64-obfuscation
+---
+nodeKind: ContentPolicy
+id: content-policy:enterprise-pii
+attributes:
+  displayName: "Enterprise PII handling policy"
+  policyKind: output-filter
+  severity: redact
+  rules: |
+    Redact emitted PII (SSNs, credit cards, government IDs, full street
+    addresses) from agent outputs. Required for enterprise tenants.
+  notes: |
+    Restrictions on emitting personally identifiable information; required
+    for enterprise tenants.
+edges:
+  applied_by:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: ContentPolicy
+id: content-policy:eu-ai-act-aligned
+attributes:
+  displayName: "EU AI Act-aligned content policy"
+  policyKind: classifier
+  severity: blocking
+  rules: |
+    Classify and block requests targeting EU AI Act prohibited practices:
+    social scoring, biometric categorization, and manipulation of vulnerable
+    groups. Flag high-risk law-enforcement / critical-infrastructure use.
+  notes: |
+    Content rules derived from EU AI Act prohibited and high-risk categories.
+edges:
+  applied_by:
+    - target: agentVersion:claude:ge-0-0-0

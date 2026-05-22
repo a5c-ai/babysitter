@@ -1,0 +1,27 @@
+nodeKind: BacklogSnapshot
+id: backlog-snapshot:agent-mux-2026-05-02
+attributes:
+  displayName: "agent-mux backlog — 2026-05-02"
+  generatedAt: "2026-05-02T00:00:00Z"
+  issueCount: 27
+  priorityScheme: int
+  hasDependencyData: true
+  hasDecompositionData: true
+  hasAcceptanceCriteriaData: true
+edges:
+  snapshots_project_backlog:
+    - target: project:agent-mux
+---
+nodeKind: BacklogSnapshot
+id: backlog-snapshot:babysitter-2026-05-02
+attributes:
+  displayName: "babysitter backlog — 2026-05-02"
+  generatedAt: "2026-05-02T00:00:00Z"
+  issueCount: 14
+  priorityScheme: bucket
+  hasDependencyData: false
+  hasDecompositionData: false
+  hasAcceptanceCriteriaData: true
+edges:
+  snapshots_project_backlog:
+    - target: project:babysitter

@@ -6,6 +6,14 @@ allowed-tools:
   - Read
   - Write
   - Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:performance-monitoring-profiling]
+  roles: [role:principal-engineer, role:sre]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:design-patterns]
+
 ---
 
 # Performance Profiler Skill

@@ -1,0 +1,34 @@
+nodeKind: AgentVersion
+id: agent-version:codex-sdk@current
+attributes:
+  agentProductId: agent:codex-sdk
+  versionRange: ">=0.1.0"
+  releasedAt: "2025-01-01"
+  cliCommand: "<sdk:openai>"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:codex-sdk
+  composed_of:
+    - target: agent-core-impl:codex-sdk.core@current
+      role: core
+    - target: agent-runtime-impl:codex-sdk.runtime@current
+      role: runtime
+  sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Codex SDK provides a programmatic multi-turn agent loop.
+    - target: capability:supports-text-streaming
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Codex SDK streams model output.
+    - target: capability:programmatic-tool-calling
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Codex SDK exposes tool-calling APIs for developers.
+  uses_memory_system:
+    - target: memory-system:codex-agents-md

@@ -1,0 +1,156 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: krateinferenceservices.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: krateinferenceservices
+    singular: krateinferenceservice
+    kind: KrateInferenceService
+    shortNames:
+    - kis
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Format
+      type: string
+      jsonPath: .spec.modelFormat
+    - name: Protocol
+      type: string
+      jsonPath: .spec.inferenceProtocol
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - modelFormat
+            - storageUri
+            properties:
+              organizationRef:
+                type: string
+              modelFormat:
+                type: string
+                enum:
+                - sklearn
+                - xgboost
+                - lightgbm
+                - tensorflow
+                - pytorch
+                - onnx
+                - triton
+                - huggingface
+                - custom
+              modelVersion:
+                type: string
+              storageUri:
+                type: string
+              runtime:
+                type: string
+              inferenceProtocol:
+                type: string
+                enum:
+                - v1
+                - v2
+              resources:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              transformer:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              explainer:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              modelCatalog:
+                type: array
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+              featureFlags:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              rateLimits:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: krateservingruntimes.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: krateservingruntimes
+    singular: krateservingruntime
+    kind: KrateServingRuntime
+    shortNames:
+    - ksr
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - supportedModelFormats
+            - containers
+            properties:
+              organizationRef:
+                type: string
+              supportedModelFormats:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    version:
+                      type: string
+              containers:
+                type: array
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+              resourceLimits:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              schedulingPolicy:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true

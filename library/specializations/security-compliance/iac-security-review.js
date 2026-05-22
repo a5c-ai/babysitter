@@ -27,6 +27,9 @@
  * - AWS Security Best Practices: https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html
  * - Open Policy Agent: https://www.openpolicyagent.org/
  * - Checkov: https://www.checkov.io/
+ * @graph
+ *   domains: [domain:security, role:security-engineer]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

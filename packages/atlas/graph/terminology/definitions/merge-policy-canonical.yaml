@@ -1,0 +1,19 @@
+nodeKind: Definition
+id: definition:merge-policy.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:merge-policy
+  text: |
+    A named conflict-resolution policy applied by hooks-mux when fanning out
+    a single hook event across multiple registered handlers (plugins,
+    settings layers, capability profiles). MergePolicy reifies the rules
+    that produce a `HookMergeDiagnostic`: which decision verb wins, how
+    `persistEnv` / `unsetEnv` / `contextVars` / `additionalContext` /
+    `systemMessage` collapse across handlers, and what to do on protected-
+    prefix or namespace conflicts. Sourced from
+    packages/hooks-mux/core/src/merge-engine/merge.ts (MergeOptions,
+    MergedExecutionResult).
+  status: canonical
+edges:
+  defines:
+    - term:merge-policy

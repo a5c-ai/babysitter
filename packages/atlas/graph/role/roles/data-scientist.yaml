@@ -1,0 +1,19 @@
+nodeKind: Role
+id: role:data-scientist
+attributes:
+  displayName: "Data Scientist"
+  isAgentic: false
+  seniority: mid
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:data-science
+  description: |
+    Designs and runs analyses and experiments; builds models from production data.
+edges:
+  requires_expertise:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:dbt-modeling
+    - target: skill-area:eval-driven-development
+    - target: skill-area:mathematical-reasoning
+  applies_to:
+    - target: domain:data-science

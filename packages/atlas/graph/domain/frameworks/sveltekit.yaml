@@ -1,0 +1,29 @@
+nodeKind: Framework
+id: framework:sveltekit
+attributes:
+  displayName: "SvelteKit"
+  homepageUrl: "https://svelte.dev/docs/kit"
+  belongsToLanguageId: language:typescript
+  category: web-fullstack
+  description: |
+    SvelteKit — the application framework for Svelte: file-based routing,
+    server-side rendering, server endpoints, and adapters for Node /
+    Vercel / Cloudflare.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:server-side-rendering
+    - target: skill-area:frontend-development
+    - target: skill-area:frontend-performance
+  alternative_to:
+    - target: framework:nextjs
+      comparison: "meta-frameworks — SvelteKit for Svelte; Next.js for React"
+    - target: framework:nuxt
+      comparison: "meta-frameworks — SvelteKit for Svelte; Nuxt for Vue"
+    - target: framework:remix
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:astro
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:gatsby
+      comparison: "JavaScript meta-frameworks"

@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: particle-physics
   phase: 6
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:graph-algorithms]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-engineer, role:research-scientist]
 ---
 
 # Event Reconstructor

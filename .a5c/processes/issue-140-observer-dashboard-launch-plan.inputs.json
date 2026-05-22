@@ -1,0 +1,78 @@
+{
+  "issueNumber": 140,
+  "baseBranch": "staging",
+  "targetBranch": "fix/issue-140-observer-dashboard-launch",
+  "title": "[Plugins] babysitter:observe skill broken: observer dashboard package cannot launch and no core babysitter observe fallback exists",
+  "packageName": "@a5c-ai/babysitter-observer-dashboard",
+  "summary": "Plan a focused brownfield bugfix for the observe skill launch path. The current triage shows the original npm 404 is stale because the package now resolves, but the published package is still not executable: package.json declares bin.babysitter-observer-dashboard = ./dist/cli.js while the published tarball lacks dist/cli.js. The plan must fix the package build/publish path, add a tarball/bin smoke guard, and align observe skill/docs with the verified command surface.",
+  "targetFiles": [
+    "packages/observer-dashboard/package.json",
+    "packages/observer-dashboard/src/cli.ts",
+    "packages/observer-dashboard/README.md",
+    "packages/observer-dashboard/vitest.config.ts",
+    "packages/observer-dashboard/scripts/",
+    ".github/workflows/ci.yml",
+    ".github/workflows/publish.yml",
+    ".github/workflows/publish-packages-from-tag.yml",
+    "scripts/publish-package-from-tag.mjs",
+    ".codex/skills/observe/SKILL.md",
+    ".agents/plugins/babysitter/skills/observe/SKILL.md",
+    ".codex/skills/help/SKILL.md",
+    ".agents/plugins/babysitter/skills/help/SKILL.md",
+    "plugins/babysitter-unified/commands/observe.md",
+    "docs/user-guide/reference/slash-commands.md",
+    "docs/release-pipeline.md",
+    "docs/testing/current-test-command-inventory.md",
+    "package.json"
+  ],
+  "processLibraryReferences": [
+    "cradle/bugfix.js",
+    "processes/shared/tdd-triplet.js",
+    "specializations/sdk-platform-development/package-distribution.js",
+    "specializations/sdk-platform-development/sdk-versioning-release-management.js",
+    "specializations/qa-testing-automation/quality-gates.js",
+    "specializations/collaboration/github/pr-policies.js",
+    "processes/shared/ci/idempotency-and-safe-abort.js"
+  ],
+  "runtimeCallPathFocus": [
+    "/babysitter:observe skill instructions -> npx -y @a5c-ai/babysitter-observer-dashboard@latest --watch-dir <dir> -> package bin babysitter-observer-dashboard -> packages/observer-dashboard/dist/cli.js -> next start",
+    "packages/observer-dashboard package build -> files allowlist -> npm pack/npm publish -> installed package bin target",
+    "staging publish workflow matrix -> npm run build:observer -> npm publish --workspace=@a5c-ai/babysitter-observer-dashboard",
+    "tag publish workflow -> build publish packages once -> scripts/publish-package-from-tag.mjs --skip-build -> npm publish --ignore-scripts",
+    "optional babysitter-agent observe command surface documented in packages/sdk/src/cli/main/usage.ts, distinct from the core babysitter CLI"
+  ],
+  "acceptanceFocus": [
+    "The declared npm bin for @a5c-ai/babysitter-observer-dashboard exists after the package build used by publish workflows.",
+    "The packed tarball includes dist/cli.js or an equivalent declared executable bin target.",
+    "The built CLI can respond to --help or --version from the package artifact without starting a long-running dashboard server.",
+    "/babysitter:observe and related skill/help/docs surfaces point to a real verified command path and do not claim that core babysitter observe exists.",
+    "A deterministic no-model release guard fails if a future publish artifact omits the bin file.",
+    "Existing observer dashboard tests, package build, and metadata checks still pass."
+  ],
+  "verificationCommands": [
+    "npm run build:observer",
+    "test -x packages/observer-dashboard/dist/cli.js || test -f packages/observer-dashboard/dist/cli.js",
+    "node packages/observer-dashboard/dist/cli.js --help >/tmp/observer-dashboard-help.txt",
+    "npm run test:observer",
+    "npm pack --workspace=@a5c-ai/babysitter-observer-dashboard --pack-destination /tmp",
+    "TARBALL=$(ls -t /tmp/a5c-ai-babysitter-observer-dashboard-*.tgz | head -1); tar -tzf \"$TARBALL\" | grep -E '^package/dist/cli\\.js$'",
+    "npm run verify:metadata",
+    "npm run check:plugin-commands"
+  ],
+  "qualityGates": [
+    "Regression/release guard fails before implementation or is explicitly proven to cover the missing-bin package category.",
+    "Observer package build produces the CLI bin along the same path used by publish workflows.",
+    "Packed tarball inspection proves the declared bin target is included.",
+    "Built CLI help/version smoke check passes without requiring a live dashboard server.",
+    "Observer package tests pass.",
+    "Metadata and generated plugin command checks pass.",
+    "Reviewer approves command-surface wording and release guard coverage."
+  ],
+  "nonGoals": [
+    "Do not redesign the observer dashboard UI.",
+    "Do not add a new core babysitter observe subcommand unless maintainers choose that as the implementation path during execution.",
+    "Do not replace the standalone observer package with an unrelated package name.",
+    "Do not weaken publish workflows or skip npm artifact verification.",
+    "Do not fix unrelated observer runtime metrics or subagent observability backlog items."
+  ]
+}

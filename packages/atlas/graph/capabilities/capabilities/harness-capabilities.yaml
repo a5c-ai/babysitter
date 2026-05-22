@@ -1,0 +1,40 @@
+---
+nodeKind: Capability
+id: capability:supports-compaction
+attributes:
+  displayName: "Supports context compaction"
+  description: |
+    The agent implements client-side context compaction — when context
+    window usage exceeds a threshold, the harness summarizes or truncates
+    older conversation turns to free space. Distinct from provider-side
+    context management. Strategies include branch summarization, sliding
+    window, and selective pruning.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl", "AgentPlatformImpl"]
+  category: session
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-prompt-templates
+attributes:
+  displayName: "Supports prompt templates"
+  description: |
+    The agent harness includes a parameterized prompt-template system
+    for composing system prompts, tool descriptions, and injected
+    context. Templates are resolved at session start and may be
+    customized per mode or configuration.
+  appliesToNodeKinds: ["AgentVersion", "AgentPlatformImpl"]
+  category: skills
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-session-management
+attributes:
+  displayName: "Supports session management"
+  description: |
+    The agent provides structured session lifecycle management beyond
+    basic resume — including session persistence, fork, branch, and
+    state inspection. The harness tracks conversation structure and
+    provides APIs for session manipulation.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: session
+edges: {}

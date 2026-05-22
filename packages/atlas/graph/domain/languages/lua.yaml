@@ -1,0 +1,21 @@
+nodeKind: Language
+id: language:lua
+attributes:
+  displayName: "Lua"
+  paradigms:
+    - imperative
+    - scripting
+  description: |
+    Lua is a lightweight, dynamically-typed, embeddable scripting language
+    designed for integration into host applications. Its small footprint
+    (the interpreter fits in ~200KB), simple C API, and fast LuaJIT JIT
+    compiler make it the go-to embedding language for performance-sensitive
+    contexts.
+
+    Lua is used extensively in game development (Roblox, Love2D, World of
+    Warcraft addons), configuration of tools (Neovim plugins, OpenResty/nginx
+    scripting via lua-nginx-module), network equipment (Cisco, Wireshark
+    dissectors), and embedded device scripting (NodeMCU for ESP8266/ESP32).
+    Coroutines provide cooperative multitasking. Tables are the only data
+    structure and serve as arrays, dictionaries, objects, and modules.
+edges: {}

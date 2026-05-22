@@ -1,0 +1,31 @@
+nodeKind: Provider
+id: provider:deepseek
+attributes:
+  displayName: "DeepSeek"
+  vendor: "DeepSeek"
+  versionRange: ">=2024-01-01"
+  authMethods:
+    - api-key
+  authMethodNotes: |
+    Standard `Authorization: Bearer <api-key>` for the DeepSeek API.
+  endpoints:
+    base: "https://api.deepseek.com"
+    chat_completions: "https://api.deepseek.com/chat/completions"
+  pricing: |
+    See https://platform.deepseek.com/api-docs/pricing for current per-model rates.
+  rateLimitSignalingProtocol: |
+    HTTP 429 with `Retry-After`. OpenAI-shaped error envelope.
+  dataResidencyOptions:
+    - cn
+  vendorFeatures: []
+  slaTier: "deepseek-standard"
+  regions:
+    - global
+    - cn
+edges:
+  realizes:
+    - target: layer:2-provider
+  serves:
+    - model:deepseek-v3@current
+    - model:deepseek-r1@current
+    - model:deepseek-r1-distill-qwen-32b@current

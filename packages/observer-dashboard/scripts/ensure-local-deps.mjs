@@ -61,8 +61,10 @@ if (existsSync(tanstackDir)) {
   }
 }
 
-// Other React-dependent packages
+// React runtime packages and other React-dependent packages
 for (const pkg of [
+  "react",
+  "react-dom",
   "react-remove-scroll",
   "react-remove-scroll-bar",
   "react-style-singleton",

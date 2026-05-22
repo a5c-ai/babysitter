@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:tool-server-mcp-time.scope
+attributes:
+  subjectId: tool-server:mcp-time
+  inScope: |
+    Time / timezone utilities — returns current time, performs timezone conversion, formats dates.
+  outOfScope: |
+    Persistent scheduling, calendar events, alarms, and time-series data storage (use a calendar or DB MCP).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - tool-server:mcp-time

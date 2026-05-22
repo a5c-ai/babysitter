@@ -6,14 +6,25 @@
 
 import { PromptContext } from './types';
 import * as parts from './parts';
+import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
+
+/**
+ * Resolve the orchestration step count from catalog metadata.
+ * Harnesses that consolidate steps (e.g. claude-code) report a lower count.
+ */
+function resolveStepCount(ctx: PromptContext): string {
+  const target = listPluginTargetDescriptors().find(t => t.targetId === ctx.harness);
+  if (target?.defaultStepCount) return String(target.defaultStepCount);
+  return '8';
+}
 
 /**
  * Full babysit skill prompt -- equivalent to the current SKILL.md content.
  * Used to generate SKILL.md files for each harness plugin.
  */
 export function composeBabysitSkillPrompt(ctx: PromptContext): string {
-  // Determine step count based on harness
-  const stepCount = ctx.harness === 'claude-code' ? '4' : '8';
+  // Determine step count from catalog-derived context or fallback
+  const stepCount = resolveStepCount(ctx);
 
   // Determine loop step description
   const loopStepDesc = ctx.loopControlTerm === 'stop-hook'
@@ -27,7 +38,7 @@ export function composeBabysitSkillPrompt(ctx: PromptContext): string {
   const header = [
     '# babysit',
     '',
-    'Orchestrate `.a5c/runs/<runId>/` through iterative execution.',
+    'Orchestrate the resolved run directory (`~/.a5c/runs/<runId>/` by default, with repo-local fallback compatibility) through iterative execution.',
     'Use the SDK CLI to drive the orchestration loop.',
   ].join('\n');
 
@@ -70,9 +81,11 @@ export function composeBabysitSkillPrompt(ctx: PromptContext): string {
     parts.renderUserProfile(ctx),
     parts.renderProcessCreation(ctx),
     parts.renderIntentFidelityChecks(ctx),
+    parts.renderRunOverlapDetection(ctx),
     parts.renderRunCreation(ctx),
     parts.renderIteration(ctx),
     parts.renderEffects(ctx),
+    parts.renderParallelDispatch(ctx),
     parts.renderBreakpointHandling(ctx),
     parts.renderResultsPosting(ctx),
     parts.renderLoopControl(ctx),
@@ -83,7 +96,14 @@ export function composeBabysitSkillPrompt(ctx: PromptContext): string {
     parts.renderRecovery(ctx),
     parts.renderProcessGuidelines(ctx),
     parts.renderCriticalRules(ctx),
+    parts.renderPriorityLadder(ctx),
+    parts.renderCodingPhilosophy(ctx),
+    parts.renderRootCauseGuardrail(ctx),
+    parts.renderToolPreferences(ctx),
+    parts.renderOutputEfficiency(ctx),
+    parts.renderGitSafety(ctx),
     parts.renderSeeAlso(ctx),
+    parts.renderProjectInstructions(ctx),
   ]);
 }
 
@@ -97,8 +117,15 @@ export function composeProcessCreatePrompt(ctx: PromptContext): string {
     parts.renderProcessCreation(ctx),
     parts.renderIntentFidelityChecks(ctx),
     parts.renderProcessGuidelines(ctx),
+    parts.renderParallelPhaseDetection(ctx),
     parts.renderTaskKinds(ctx),
     parts.renderTaskExamples(ctx),
+    parts.renderPriorityLadder(ctx),
+    parts.renderCodingPhilosophy(ctx),
+    parts.renderRootCauseGuardrail(ctx),
+    parts.renderToolPreferences(ctx),
+    parts.renderGitSafety(ctx),
+    parts.renderProjectInstructions(ctx),
   ]);
 }
 
@@ -107,9 +134,11 @@ export function composeProcessCreatePrompt(ctx: PromptContext): string {
  */
 export function composeOrchestrationPrompt(ctx: PromptContext): string {
   return joinNonEmpty([
+    parts.renderRunOverlapDetection(ctx),
     parts.renderRunCreation(ctx),
     parts.renderIteration(ctx),
     parts.renderEffects(ctx),
+    parts.renderParallelDispatch(ctx),
     parts.renderBreakpointHandling(ctx),
     parts.renderResultsPosting(ctx),
     parts.renderLoopControl(ctx),
@@ -117,6 +146,9 @@ export function composeOrchestrationPrompt(ctx: PromptContext): string {
     parts.renderQuickReference(ctx),
     parts.renderRecovery(ctx),
     parts.renderCriticalRules(ctx),
+    parts.renderPriorityLadder(ctx),
+    parts.renderRootCauseGuardrail(ctx),
+    parts.renderOutputEfficiency(ctx),
   ]);
 }
 

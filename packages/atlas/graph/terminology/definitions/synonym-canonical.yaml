@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:synonym.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:synonym
+  text: |
+    a term that means the same as another in a stated context
+  status: canonical
+edges:
+  defines:
+    - term:synonym

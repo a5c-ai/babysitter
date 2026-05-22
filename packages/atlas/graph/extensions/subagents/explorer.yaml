@@ -1,0 +1,40 @@
+nodeKind: Subagent
+id: subagent:explorer
+attributes:
+  displayName: "Explorer"
+  provenance: built-in
+  subjectId: agentVersion:claude:ge-0-0-0
+  roleId: role:explorer
+  systemPrompt: |
+    You explore unfamiliar codebases. Use search and read tools only.
+    Produce a concise map: entry points, key modules, important data
+    flows. Do not modify files.
+  tools:
+    - tool-descriptor:github.create-issue
+  disallowedTools: []
+  triggers: |
+    Invoke when the user wants a high-level survey of an unknown
+    codebase or wants to locate where a feature lives.
+  description: |
+    Read-only explorer subagent restricted to search/read tools.
+    Modeled after the `Explore` subagent bundled with Anthropic Claude Code
+    (https://docs.anthropic.com/en/docs/claude-code/sub-agents).
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:explorer
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:a5c-plugins-quality

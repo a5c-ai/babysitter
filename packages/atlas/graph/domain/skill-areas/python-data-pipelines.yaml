@@ -1,0 +1,28 @@
+nodeKind: SkillArea
+id: skill-area:python-data-pipelines
+attributes:
+  displayName: "Python Data Pipelines"
+  description: |
+    Building Python data pipelines: pandas / polars dataframes, Airflow
+    or Dagster orchestration, parquet/arrow IO, idempotent task design,
+    and incremental backfills.
+  domains:
+    - domain:data-engineering
+  requiresLanguages:
+    - language:python
+  requiresLibraries:
+    - library:pandas
+    - library:polars
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-engineering
+      confidence: primary
+    - target: specialization:biomedical-engineering
+      confidence: secondary
+  uses_language:
+    - language:python
+    - target: language:python
+  uses_library:
+    - library:pandas
+    - library:polars

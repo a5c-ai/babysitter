@@ -1,0 +1,9 @@
+nodeKind: TrustLevel
+id: trust-level:vendor-doc
+attributes:
+  displayName: "Vendor Doc"
+  level: vendor-doc
+  freshnessWindowDaysDefault: 90
+  description: |
+    Vendor-authored doc - PDF, internal mirror, signed release notes.
+edges: {}

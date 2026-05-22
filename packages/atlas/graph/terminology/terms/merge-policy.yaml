@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:merge-policy
+attributes:
+  canonicalDefinitionId: definition:merge-policy.canonical
+  displayName: "MergePolicy"
+  kind: operation
+  references:
+    - "NodeKind:MergePolicy"
+  description: |
+    A named conflict-resolution policy applied by hooks-mux when fanning out
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

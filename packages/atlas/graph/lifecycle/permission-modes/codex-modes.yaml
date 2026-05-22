@@ -1,0 +1,47 @@
+nodeKind: PermissionMode
+id: permission-mode:codex-untrusted
+attributes:
+  displayName: "Codex untrusted approval policy"
+  mode: untrusted
+  isReadOnly: false
+  requiresUserConsent: true
+  enteredVia: cli-flag
+  classifierActive: false
+  description: |
+    Codex CLI approval policy `untrusted`: trusted commands can run without asking, while commands outside the trusted set escalate to the user for approval.
+---
+nodeKind: PermissionMode
+id: permission-mode:codex-on-failure
+attributes:
+  displayName: "Codex on-failure approval policy"
+  mode: on-failure
+  isReadOnly: false
+  requiresUserConsent: false
+  enteredVia: cli-flag
+  classifierActive: false
+  description: |
+    Deprecated Codex CLI approval policy `on-failure`: commands run without asking first, but a failed command can escalate for unsandboxed execution. Codex CLI help recommends `on-request` for interactive runs and `never` for non-interactive runs.
+---
+nodeKind: PermissionMode
+id: permission-mode:codex-on-request
+attributes:
+  displayName: "Codex on-request approval policy"
+  mode: on-request
+  isReadOnly: false
+  requiresUserConsent: true
+  enteredVia: cli-flag
+  classifierActive: false
+  description: |
+    Codex CLI approval policy `on-request`: the model decides when to ask the user for approval before running a command.
+---
+nodeKind: PermissionMode
+id: permission-mode:codex-never
+attributes:
+  displayName: "Codex never approval policy"
+  mode: never
+  isReadOnly: false
+  requiresUserConsent: false
+  enteredVia: cli-flag
+  classifierActive: false
+  description: |
+    Codex CLI approval policy `never`: Codex never asks for user approval, and execution failures are returned directly to the model.

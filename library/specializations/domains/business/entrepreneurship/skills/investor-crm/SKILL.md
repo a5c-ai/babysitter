@@ -11,6 +11,11 @@ metadata:
   domain: business
   category: Fundraising
   skill-id: SK-014
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:financial-planning, skill-area:investment-analysis, skill-area:community-management]
+  workflows: [workflow:product-discovery]
+  roles: [role:financial-analyst, role:strategic-planner, role:partnerships-manager]
 ---
 
 # Investor CRM Manager Skill

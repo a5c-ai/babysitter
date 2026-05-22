@@ -1,0 +1,35 @@
+nodeKind: ModelVersion
+id: model:voyageai-voyage-3@current
+attributes:
+  displayName: "Voyage AI Voyage 3"
+  modelFamilyId: model-family:voyageai-voyage-3
+  versionRange: ">=3.0.0 <4.0.0"
+  kind: embedding
+  contextWindowTokens: 32000
+  costPerMTokInput: 0.06
+  costPerMTokOutput: 0.0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modalities:
+    - text
+    - embedding
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: embedding
+      direction: output
+  releaseDate: "2024-09-18"
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: "2024-09-18"
+  modelCardUrl: "https://docs.voyageai.com/docs/embeddings"
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:voyageai-voyage-3
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:voyageai-voyage-3
+  served_by:
+    - provider:voyageai

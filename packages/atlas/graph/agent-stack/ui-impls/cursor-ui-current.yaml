@@ -1,0 +1,45 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:cursor.ui@current
+attributes:
+  displayName: "Cursor UI (current) — ide-extension"
+  agentVersionId: agentVersion:cursor:ge-0-0-0
+  packageRef: source-ref:cursor-binary
+  uiKind: ide-extension
+  presentationsBundled:
+    - presentation:cursor-ide
+  themeSupport: full-customizable
+  accessibilitySupport: basic
+  notes: |
+    Cursor is an IDE-extension/editor surface (VS Code fork); Cmd-K, Cmd-L, the
+    AI pane, and at-mention live on this UI layer.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:cursor-cmd-k
+      attributes:
+        mechanism: keybinding
+        invocationToken: "Cmd+K / Ctrl+K"
+    - target: interaction-primitive:cursor-cmd-l
+      attributes:
+        mechanism: keybinding
+        invocationToken: "Cmd+L / Ctrl+L"
+    - target: interaction-primitive:cursor-at-mention
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:cursor-inline-edit
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:tool-approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:command-palette
+      attributes:
+        mechanism: keybinding
+        invocationToken: "Cmd+Shift+P / Ctrl+Shift+P"
+    - target: interaction-primitive:file-attachment
+      attributes:
+        mechanism: ui-control

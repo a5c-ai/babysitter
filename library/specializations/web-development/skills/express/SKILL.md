@@ -2,6 +2,13 @@
 name: express
 description: Express.js middleware patterns, routing, error handling, security, and production best practices.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:backend-api-design, skill-area:middleware-design]
+  roles: [role:backend-engineer, role:fullstack-engineer]
+  topics: [topic:rest, topic:api-design]
+
 ---
 
 # Express Skill

@@ -1,0 +1,49 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:openclaw.runtime@current
+attributes:
+  displayName: OpenClaw Runtime (current)
+  agentVersionId: agentVersion:openclaw:ge-0-0-0
+  subagentDispatchMechanism: none
+  packageRef: source-ref:openclaw-github
+  builtInTools:
+  - tool-descriptor:read
+  - tool-descriptor:write
+  - tool-descriptor:edit
+  - tool-descriptor:bash
+  toolRegistryDiscovery: static-bundled
+  hookSockets: []
+  internalSessionStateLocation: ~/.openclaw/sessions/
+  sessionFileFormat: json
+  sessionFilePathConvention: ~/.openclaw/sessions/<session-id>.json
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: none
+  runtimeIdentity: api-key
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  supportsStreaming: true
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:openclaw
+    role: runtime
+  exposes:
+  - target: hook-surface:openclaw.on-event
+  - target: hook-surface:error
+  - target: hook-surface:tool-permission-request
+  bundles:
+  - target: tool-descriptor:read
+  - target: tool-descriptor:write
+  - target: tool-descriptor:edit
+  - target: tool-descriptor:bash
+  connects:
+  - target: mcp-transport:stdio
+  supports:
+  - target: capability:supports-mcp
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'MCP via stdio.
+
+      '
+  speaks:
+    - target: mcp-transport:stdio

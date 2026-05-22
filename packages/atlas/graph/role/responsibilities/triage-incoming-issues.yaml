@@ -1,0 +1,12 @@
+nodeKind: Responsibility
+id: responsibility:triage-incoming-issues
+attributes:
+  displayName: "Triage incoming issues"
+  cadence: daily
+  requiredSkills:
+    - skill:code-review
+  description: |
+    Triage incoming issues.
+edges:
+  requires_skill:
+    - skill:code-review

@@ -1,0 +1,25 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:claude-code-host-env
+attributes:
+  signalId: discovery-signal:claude-code-host-env
+  signalKind: env-any
+  key: claude
+  matchMode: any
+  confidence: medium
+  scope: host-detection
+  signals:
+    - CLAUDECODE
+    - CLAUDE_CODE_SESSION_ID
+    - CLAUDE_CODE
+    - CLAUDE_PROJECT_DIR
+  argvMatches:
+    - claude-code
+  consumer: agent-mux-core
+  metadataFields:
+    - { key: session_id, envVars: [CLAUDE_CODE_SESSION_ID] }
+    - { key: env_file,   envVars: [CLAUDE_ENV_FILE] }
+    - { key: project_dir, envVars: [CLAUDE_PROJECT_DIR] }
+  notes: Host harness detection signals used by agent-mux.
+edges:
+  applies_to:
+    - target: agent:claude-code

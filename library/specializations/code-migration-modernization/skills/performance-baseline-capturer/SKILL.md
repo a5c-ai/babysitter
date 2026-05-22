@@ -2,6 +2,13 @@
 name: performance-baseline-capturer
 description: Capture performance baselines before migration for regression comparison and SLA verification
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:performance-testing, skill-area:performance-monitoring-profiling]
+  roles: [role:backend-engineer, role:sre]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Performance Baseline Capturer Skill

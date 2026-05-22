@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: quantum-mechanics
   phase: 6
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:mathematical-reasoning, skill-area:data-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:computational-scientist]
 ---
 
 # Quimb Tensor Network

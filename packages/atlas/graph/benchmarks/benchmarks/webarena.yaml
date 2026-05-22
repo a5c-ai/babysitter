@@ -1,0 +1,17 @@
+nodeKind: Benchmark
+id: benchmark:webarena
+attributes:
+  displayName: "WebArena"
+  homepageUrl: https://webarena.dev/
+  kind: web-agent
+  targetsKind: AgentVersion
+  description: |
+    Realistic web environment benchmark for autonomous agents — e-commerce, gitlab, reddit, and CMS sites.
+edges:
+  covers:
+    - target: skill-area:browser-automation
+      attributes:
+        coverage: full
+        weight: 0.4
+  applies_to:
+    - target: domain:web-development

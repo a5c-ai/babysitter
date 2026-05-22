@@ -10,6 +10,11 @@ expertise:
   - Runtime profiling and optimization
   - Thread and concurrency support
   - FFI and native code interop
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:compiler-implementation, skill-area:language-design]
+  roles: [role:backend-engineer, role:architect]
 ---
 
 # Runtime Systems Engineer Agent

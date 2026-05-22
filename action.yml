@@ -1,0 +1,251 @@
+name: 'Babysitter'
+description: 'Run babysitter-orchestrated AI workflows via babysitter-agent yolo. Harness-agnostic: supports pi, claude-code, codex, gemini-cli, and more.'
+author: 'a5c-ai'
+
+branding:
+  icon: 'cpu'
+  color: 'purple'
+
+inputs:
+  prompt:
+    description: >
+      Task prompt for babysitter. GitHub context environment variables are available
+      for shell expansion ($GITHUB_REPOSITORY, $GITHUB_EVENT_NAME, $GITHUB_SHA, etc.).
+      If omitted, babysitter derives the task from the triggering event context.
+    required: false
+  harness:
+    description: >
+      AI harness to use for worker tasks. Options: internal (default, programmatic pi agent),
+      pi, claude-code, codex, gemini-cli, opencode, github-copilot, cursor.
+    required: false
+    default: 'internal'
+  model:
+    description: >
+      Model identifier in provider:modelId format (e.g. anthropic:claude-sonnet-4-20250514,
+      openai:gpt-4.1, azure-openai-responses:gpt-4.1) or bare modelId (e.g. claude-sonnet-4-20250514).
+      Provider is resolved from the model string; only the matching API key is required.
+    required: false
+  process-path:
+    description: >
+      Path to an existing babysitter process definition file (JS). When provided,
+      Phase 1 (interview/process creation) is skipped and the process is used directly.
+    required: false
+  workspace:
+    description: 'Working directory for the harness. Defaults to the repository checkout path.'
+    required: false
+    default: '${{ github.workspace }}'
+  max-iterations:
+    description: 'Maximum orchestration iterations before the run terminates.'
+    required: false
+    default: '256'
+  runs-dir:
+    description: 'Directory for babysitter run state (journals, tasks, blobs).'
+    required: false
+    default: '.a5c/runs'
+  timeout-minutes:
+    description: >
+      Timeout guidance in minutes. Note: composite action steps cannot use dynamic timeout-minutes.
+      Set timeout-minutes on your workflow job instead (e.g., jobs.<id>.timeout-minutes: 30).
+      This input is provided for documentation purposes and can be read by custom wrapper workflows.
+    required: false
+    default: '30'
+  verbose:
+    description: 'Enable verbose debug output.'
+    required: false
+    default: 'false'
+  # Provider credentials — pass the one(s) matching your model/harness
+  anthropic-api-key:
+    description: 'Anthropic API key. Required for claude-code harness or Anthropic models via internal harness.'
+    required: false
+  openai-api-key:
+    description: 'OpenAI API key. Required for codex harness or OpenAI models via internal harness.'
+    required: false
+  gemini-api-key:
+    description: 'Google Gemini API key. Required for gemini-cli harness or Gemini models via internal harness.'
+    required: false
+  azure-openai-api-key:
+    description: 'Azure OpenAI API key. Required for Azure-hosted models.'
+    required: false
+  azure-openai-project-name:
+    description: 'Azure OpenAI resource/project name (maps to AZURE_OPENAI_PROJECT_NAME).'
+    required: false
+  azure-openai-deployment:
+    description: 'Azure OpenAI deployment name (maps to AZURE_OPENAI_DEPLOYMENT).'
+    required: false
+  azure-openai-base-url:
+    description: 'Azure OpenAI base URL override (maps to AZURE_OPENAI_BASE_URL).'
+    required: false
+  github-token:
+    description: 'GitHub token for API access. Defaults to the automatic GITHUB_TOKEN.'
+    required: false
+    default: '${{ github.token }}'
+
+outputs:
+  run-id:
+    description: 'The babysitter run ID.'
+    value: ${{ steps.babysitter.outputs.run-id }}
+  run-dir:
+    description: 'Path to the babysitter run directory.'
+    value: ${{ steps.babysitter.outputs.run-dir }}
+  status:
+    description: 'Final run status: completed, failed, or timeout.'
+    value: ${{ steps.babysitter.outputs.status }}
+  iterations:
+    description: 'Number of orchestration iterations executed.'
+    value: ${{ steps.babysitter.outputs.iterations }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Build Babysitter Agent Runtime
+      shell: bash
+      env:
+        ACTION_ROOT: ${{ github.action_path }}
+      run: |
+        set -euo pipefail
+        cd "$ACTION_ROOT"
+        npm ci
+        # Workaround: npm ci may miss linux optional deps needed by bundled builds.
+        npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+        npm run build:sdk
+        npm run build:agent-mux
+        npm run build --workspace=@a5c-ai/agent-core
+        npm run build --workspace=@a5c-ai/babysitter-agent
+
+    - name: Run Babysitter
+      id: babysitter
+      shell: bash
+      env:
+        ACTION_ROOT: ${{ github.action_path }}
+        # Action inputs as env vars (for safe shell access without eval)
+        INPUT_PROMPT: ${{ inputs.prompt }}
+        INPUT_HARNESS: ${{ inputs.harness }}
+        INPUT_MODEL: ${{ inputs.model }}
+        INPUT_WORKSPACE: ${{ inputs.workspace }}
+        INPUT_PROCESS_PATH: ${{ inputs.process-path }}
+        INPUT_MAX_ITERATIONS: ${{ inputs.max-iterations }}
+        INPUT_RUNS_DIR: ${{ inputs.runs-dir }}
+        INPUT_VERBOSE: ${{ inputs.verbose }}
+        # Provider credentials
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        OPENAI_API_KEY: ${{ inputs.openai-api-key }}
+        GEMINI_API_KEY: ${{ inputs.gemini-api-key }}
+        AZURE_OPENAI_API_KEY: ${{ inputs.azure-openai-api-key }}
+        AZURE_OPENAI_PROJECT_NAME: ${{ inputs.azure-openai-project-name }}
+        AZURE_OPENAI_DEPLOYMENT: ${{ inputs.azure-openai-deployment }}
+        AZURE_OPENAI_BASE_URL: ${{ inputs.azure-openai-base-url }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        # Babysitter configuration
+        BABYSITTER_RUNS_DIR: ${{ inputs.runs-dir }}
+        BABYSITTER_MAX_ITERATIONS: ${{ inputs.max-iterations }}
+      run: |
+        set -euo pipefail
+
+        # Build command args array (safe, no eval)
+        ARGS=()
+
+        # Prompt -- passed directly, no shell eval needed
+        # GitHub Actions expressions (${{ }}) are already resolved before the shell runs
+        if [ -n "${INPUT_PROMPT:-}" ]; then
+          ARGS+=(--prompt "$INPUT_PROMPT")
+        fi
+
+        # Harness
+        if [ -n "${INPUT_HARNESS:-}" ]; then
+          ARGS+=(--harness "$INPUT_HARNESS")
+        fi
+
+        # Model
+        if [ -n "${INPUT_MODEL:-}" ]; then
+          ARGS+=(--model "$INPUT_MODEL")
+        fi
+
+        # Workspace
+        if [ -n "${INPUT_WORKSPACE:-}" ]; then
+          ARGS+=(--workspace "$INPUT_WORKSPACE")
+        fi
+
+        # Process path (skip Phase 1)
+        if [ -n "${INPUT_PROCESS_PATH:-}" ]; then
+          ARGS+=(--process "$INPUT_PROCESS_PATH")
+        fi
+
+        # Max iterations
+        ARGS+=(--max-iterations "${INPUT_MAX_ITERATIONS:-256}")
+
+        # Runs directory
+        ARGS+=(--runs-dir "${INPUT_RUNS_DIR:-.a5c/runs}")
+
+        # Verbose
+        if [ "${INPUT_VERBOSE:-false}" = "true" ]; then
+          ARGS+=(--verbose)
+        fi
+
+        # Always use JSON output for CI parsing
+        ARGS+=(--json)
+        CLI=(node "$ACTION_ROOT/packages/babysitter-agent/dist/cli/main.js" yolo)
+
+        echo "::group::Babysitter Command"
+        echo "${CLI[*]} ${ARGS[*]}"
+        echo "::endgroup::"
+
+        # Execute and capture output
+        OUTPUT_FILE=$(mktemp)
+        if "${CLI[@]}" "${ARGS[@]}" 2>&1 | tee "$OUTPUT_FILE"; then
+          COMMAND_EXIT=0
+        else
+          COMMAND_EXIT=$?
+        fi
+
+        # The agent emits a stream of JSON documents in --json mode. Slurp the
+        # full stream so outputs remain stable even when fields appear in later
+        # progress events.
+        RUN_ID=$(jq -rs 'map(select(type == "object" and .runId? != null) | .runId) | first // ""' "$OUTPUT_FILE")
+        RUN_DIR=$(jq -rs 'map(select(type == "object" and .runDir? != null) | .runDir) | first // ""' "$OUTPUT_FILE")
+        STATUS=$(jq -rs '
+          [ .[]
+            | select(type == "object" and .phase? == "2" and .status? != null)
+            | .status
+          ] as $statuses
+          | if ($statuses | index("failed")) then "failed"
+            elif ($statuses | index("completed")) then "completed"
+            else "unknown"
+            end
+        ' "$OUTPUT_FILE")
+        ITERATIONS=$(jq -rs '
+          [ .[]
+            | select(type == "object" and .phase? == "2" and .iteration? != null)
+            | .iteration
+          ] | max // 0
+        ' "$OUTPUT_FILE")
+
+        echo "run-id=$RUN_ID" >> "$GITHUB_OUTPUT"
+        echo "run-dir=$RUN_DIR" >> "$GITHUB_OUTPUT"
+        echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+        echo "iterations=$ITERATIONS" >> "$GITHUB_OUTPUT"
+
+        rm -f "$OUTPUT_FILE"
+
+        # Fail the step if the run failed
+        if [ "$STATUS" = "failed" ]; then
+          echo "::error::Babysitter run failed"
+          exit 1
+        fi
+        if [ "$COMMAND_EXIT" -ne 0 ]; then
+          echo "::error::babysitter-agent exited with code $COMMAND_EXIT"
+          exit "$COMMAND_EXIT"
+        fi
+
+    - name: Upload Run Artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: babysitter-runs
+        path: ${{ inputs.runs-dir }}
+        retention-days: 7
+        if-no-files-found: ignore

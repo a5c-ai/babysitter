@@ -1,0 +1,71 @@
+nodeKind: AgentTeam
+id: agent-team:research
+attributes:
+  displayName: "Research Team"
+  description: |
+    A team-lead session orchestrates 2 teammate Claude Code instances
+    (an Explorer and a Planner) over a shared task list. Lead delegates
+    research subtasks; teammates report back via mailbox + SendMessage.
+  displayMode: in-process
+  experimental: true
+  storageLocation: "~/.claude/teams/research/config.json"
+  requiresVersion: ">=2.1.32"
+  members:
+  - subagent:claude-code.explore
+  - subagent:claude-code.plan
+edges:
+  team_of:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+  has_member:
+  - target: subagent:claude-code.explore
+  - target: subagent:claude-code.plan
+  requires_capability:
+  - target: capability:supports-agent-teams
+---
+nodeKind: AgentTeam
+id: agent-team:parallel-review
+attributes:
+  displayName: "Parallel Review Team"
+  description: |
+    Lead spawns code-reviewer + vulnerability-scanner teammates in tmux
+    split panes; each runs against the same diff in parallel. Plan-approval
+    gate enforced for risky teammate actions.
+  displayMode: tmux
+  experimental: true
+  storageLocation: "~/.claude/teams/parallel-review/config.json"
+  requiresVersion: ">=2.1.32"
+  members:
+  - subagent:code-reviewer
+  - subagent:vulnerability-scanner
+edges:
+  team_of:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+  has_member:
+  - target: subagent:code-reviewer
+  - target: subagent:vulnerability-scanner
+  requires_capability:
+  - target: capability:supports-agent-teams
+---
+nodeKind: AgentTeam
+id: agent-team:doc-pipeline
+attributes:
+  displayName: "Doc Pipeline Team"
+  description: |
+    Doc-generator teammate produces drafts; typo-fixer teammate cleans
+    them. Lead consolidates and commits. Display mode `auto` lets the
+    runtime pick in-process vs. tmux based on environment.
+  displayMode: auto
+  experimental: true
+  storageLocation: "~/.claude/teams/doc-pipeline/config.json"
+  requiresVersion: ">=2.1.32"
+  members:
+  - subagent:doc-generator
+  - subagent:typo-fixer
+edges:
+  team_of:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+  has_member:
+  - target: subagent:doc-generator
+  - target: subagent:typo-fixer
+  requires_capability:
+  - target: capability:supports-agent-teams

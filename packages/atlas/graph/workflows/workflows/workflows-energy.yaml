@@ -1,0 +1,73 @@
+---
+nodeKind: Workflow
+id: workflow:grid-stability-monitoring
+attributes:
+  displayName: "Grid Stability Monitoring"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "real-time"
+  complexity: cross-team
+  description: |
+    Monitors electrical grid stability parameters in real time -- ingesting
+    SCADA telemetry for frequency deviation, voltage sag, and power-factor
+    metrics, running contingency-analysis simulations against N-1 criteria,
+    correlating weather forecast data with renewable intermittency
+    predictions, triggering load-shedding or generation-dispatch advisories
+    when stability margins narrow, and archiving event sequences for
+    post-incident regulatory reporting. Produces stability dashboards,
+    contingency violation alerts, and regulatory compliance logs. Excludes
+    grid infrastructure design and physical maintenance.
+edges:
+  involves_role:
+    - target: role:incident-commander
+    - target: role:platform-engineer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:kafka-stream-processing
+  applies_to_domain:
+    - target: domain:energy
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:renewable-energy-forecasting
+attributes:
+  displayName: "Renewable Energy Forecasting"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Generates day-ahead and intra-day renewable energy production forecasts
+    -- ingesting meteorological model outputs (irradiance, wind speed, cloud
+    cover), running site-specific power-curve and panel-degradation models,
+    calibrating forecasts against historical actuals to reduce
+    mean-absolute error, feeding dispatch optimization systems with
+    probabilistic generation bands, and producing curtailment-risk
+    advisories when forecast exceeds grid absorption capacity. Produces
+    forecast accuracy reports, generation schedules, and curtailment
+    probability dashboards. Excludes turbine and panel hardware
+    maintenance.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:ml-engineer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  applies_to_domain:
+    - target: domain:energy
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:analytics-team

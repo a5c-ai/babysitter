@@ -1,0 +1,494 @@
+# NodeKinds for cluster 20-context-engineering.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:vector-store
+  name: VectorStore
+  origin: standard
+  prefix: vector-store
+  cluster: 20-context-engineering
+  purpose: a vector database / index used for retrieval (Pinecone, Weaviate, pgvector, Qdrant, in-process FAISS, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: storeKind
+    type: enum<pinecone,weaviate,qdrant,pgvector,faiss,chroma,milvus,redis,other>
+    required: false
+  - name: dimensionality
+    type: int
+    required: false
+  - name: distanceMetric
+    type: enum<cosine,euclidean,dot-product,manhattan>
+    required: false
+  - name: indexKind
+    type: enum<flat,hnsw,ivf,scann,annoy>
+    required: false
+  - name: indexKinds
+    type: list<string>
+    required: false
+  - name: metricKinds
+    type: list<string>
+    required: false
+  - name: hosting
+    type: string
+    required: false
+  - name: homepageUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - uses_vector_store
+  - embeds_into
+  outgoingEdges: []
+  invariants:
+  - id starts with vector-store: null
+  examples: []
+- id: node:embedding-model-profile
+  name: EmbeddingModelProfile
+  origin: standard
+  prefix: embedding-profile
+  cluster: 20-context-engineering
+  purpose: a profile binding an embedding ModelVersion to a usage configuration (dimension, normalization, pooling)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: modelVersionId
+    type: ref<ModelVersion>
+    required: false
+  - name: modelRef
+    type: id
+    required: false
+    notes: Free-form model id (legacy).
+  - name: dimensionality
+    type: int
+    required: false
+  - name: dimensions
+    type: int
+    required: false
+    notes: Alias for dimensionality (legacy).
+  - name: maxInputTokens
+    type: int
+    required: false
+  - name: pricePerMTokens
+    type: float
+    required: false
+  - name: currency
+    type: string
+    required: false
+  - name: normalization
+    type: enum<l2,none,unit-norm>
+    required: false
+  - name: pooling
+    type: enum<mean,cls,max,last-token>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - embeds_with
+  outgoingEdges:
+  - embeds_into
+  invariants:
+  - id starts with embedding-profile: null
+  examples: []
+- id: node:memory-store
+  name: MemoryStore
+  origin: standard
+  prefix: memory-store
+  cluster: 20-context-engineering
+  purpose: a persistent memory surface used by an AgentVersion. Collapses KnowledgeGraphRef into the `kind` discriminator.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<vector,document,knowledge-graph,prompt-cache,conversation-buffer,summarized-history>
+    required: false
+  - name: scope
+    type: enum<session,user,tenant,global>
+    required: false
+  - name: ttl
+    type: string
+    required: false
+  - name: ttlSeconds
+    type: int
+    required: false
+  - name: windowTurns
+    type: int
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - has_memory
+  - backed_by_memory
+  outgoingEdges:
+  - memory_backs_bundle
+  invariants:
+  - id starts with memory-store: null
+  examples: []
+- id: node:prompt-template
+  name: PromptTemplate
+  origin: standard
+  prefix: prompt-template
+  cluster: 20-context-engineering
+  purpose: a versioned prompt template (system / user / few-shot scaffold). Collapses FewShotExampleSet into the `examples` attribute.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: templateKind
+    type: enum<system,user,assistant,few-shot,scaffold>
+    required: false
+  - name: body
+    type: markdown
+    required: false
+  - name: variables
+    type: list<string>
+    required: false
+  - name: examples
+    type: list<map>
+    required: false
+    notes: 'Few-shot examples. Each entry: { input, output, notes? }. Replaces the proposed FewShotExampleSet NodeKind (collapsed per reviewer).'
+  - name: version
+    type: semver
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - governs_template
+  - bundles_template
+  - uses_template
+  outgoingEdges:
+  - template_used_by
+  invariants:
+  - id starts with prompt-template: null
+  examples: []
+- id: node:context-bundle
+  name: ContextBundle
+  origin: standard
+  prefix: context-bundle
+  cluster: 20-context-engineering
+  purpose: a packaged bundle of prompt templates, retrieval surfaces, and memory bindings used to assemble agent context for a given task / domain
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: domain
+    type: string
+    required: false
+  - name: ordering
+    type: any
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - uses_context_bundle
+  - memory_backs_bundle
+  outgoingEdges:
+  - bundles_template
+  - embeds_with
+  - backed_by_memory
+  - context_bundle_used_by
+  invariants:
+  - id starts with context-bundle: null
+  examples: []
+- id: node:compaction-policy
+  name: CompactionPolicy
+  origin: derived
+  originContext: catalog pass 53 / claude-code query/compaction + pi-mono packages/coding-agent/src/core/compaction/compaction.ts (branch-summarization, file-operation tracking, SUMMARIZATION_SYSTEM_PROMPT, CompactionEntry/SessionEntry). Currently agent-stack.AgentRuntimeImpl carries `contextManagementStrategy` + `compactionTriggerThresholdTokens` inline; promoting to a shared NodeKind lets multiple runtimes/runs reference one policy and lets policies be cited by RunJournalEvents. Distinct from PromptTemplate (the summarization prompt is a child) and ContextBundle (the produced compacted context).
+  prefix: compaction-policy
+  cluster: 20-context-engineering
+  purpose: a context-compaction policy — when to compact (token threshold, turn threshold, hook-driven), how to summarize (branch / cumulative / hierarchical), what to preserve (file-operation tracking, recent turns)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: strategy
+    type: enum<rolling-summary,branch-summarization,hierarchical,cumulative-summary,truncate,none,platform-managed,user-managed>
+    required: true
+    notes: Mirrors AgentRuntimeImpl.contextManagementStrategy with extra branch-summarization (pi-mono) value.
+  - name: trigger
+    type: enum<token-threshold,turn-count,explicit-tool,pre-compact-hook,context-overflow,manual,hybrid>
+    required: true
+  - name: triggerThresholdTokens
+    type: int
+    required: false
+    notes: Token fill threshold that fires compaction (e.g. claude-code auto-compact at ~70% of context window).
+  - name: triggerThresholdFraction
+    type: float
+    required: false
+    notes: Fractional threshold (0..1) of context window — alternative to triggerThresholdTokens.
+  - name: preserveRecentTurns
+    type: int
+    required: false
+    notes: Tail of raw turns kept verbatim past the summary boundary.
+  - name: preserveFileOperations
+    type: bool
+    required: false
+    notes: Track read/modified files across compactions (pi-mono CompactionDetails.readFiles/modifiedFiles).
+  - name: summarizationPromptTemplateId
+    type: ref<PromptTemplate>
+    required: false
+    notes: PromptTemplate driving the summarization model call (pi-mono SUMMARIZATION_SYSTEM_PROMPT).
+  - name: summarizerModelVersionId
+    type: ref<ModelVersion>
+    required: false
+    notes: Model used to produce summaries (often a smaller/faster model than the main loop).
+  - name: hookSurfaceId
+    type: ref<HookSurface>
+    required: false
+    notes: Hook that fires when compaction is invoked (e.g. PreCompact in Claude Code).
+  - name: stripsImagesOnRetry
+    type: bool
+    required: false
+    notes: claude-code reactive-compact retry strips images on media-size errors before re-summarizing.
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - applies_compaction_policy
+  outgoingEdges:
+  - compacts_into_bundle
+  invariants:
+  - id starts with compaction-policy: null
+  examples: []
+- id: node:memory-hierarchy
+  name: MemoryHierarchy
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code memdir/paths.ts (isAutoMemoryEnabled,
+    getMemoryBaseDir, getAutoMemPath, AUTO_MEM_DIRNAME=memory,
+    AUTO_MEM_ENTRYPOINT_NAME=MEMORY.md) + memdir/memdir.ts +
+    teamMemPaths.ts. Resolution order: CLAUDE_CODE_REMOTE_MEMORY_DIR env
+    var > ~/.claude default. Project-level CLAUDE.md is layered on top.
+    Distinct from MemoryStore (a single store) — MemoryHierarchy is the
+    declared resolution + override chain across scopes (project / user /
+    auto-mem / team-mem / remote).
+  prefix: memory-hierarchy
+  cluster: 20-context-engineering
+  purpose: |
+    A declared multi-scope memory resolution chain — project CLAUDE.md +
+    user ~/.claude/memory + auto-memory dir + team-memory dir + remote
+    memory dir — with priority order, env-var overrides, and
+    enable/disable gating (CLAUDE_CODE_DISABLE_AUTO_MEMORY,
+    CLAUDE_CODE_SIMPLE, CLAUDE_CODE_REMOTE).
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: scopes
+    type: list<enum<project-claude-md,user-memory,auto-memory,team-memory,remote-memory,nested-memory>>
+    required: true
+    notes: Ordered scopes (highest priority first).
+  - name: baseDirEnvVar
+    type: string
+    required: false
+    notes: claude-code CLAUDE_CODE_REMOTE_MEMORY_DIR overrides default.
+  - name: defaultBaseDir
+    type: string
+    required: false
+    notes: claude-code getClaudeConfigHomeDir — typically ~/.claude.
+  - name: entrypointFilename
+    type: string
+    required: false
+    notes: claude-code AUTO_MEM_ENTRYPOINT_NAME=MEMORY.md.
+  - name: autoMemDirname
+    type: string
+    required: false
+    notes: claude-code AUTO_MEM_DIRNAME=memory.
+  - name: enableGate
+    type: enum<settings-only,settings-with-env-override,env-var-only>
+    required: false
+  - name: disableEnvVars
+    type: list<string>
+    required: false
+    notes: claude-code CLAUDE_CODE_DISABLE_AUTO_MEMORY, CLAUDE_CODE_SIMPLE.
+  - name: securityValidation
+    type: list<enum<absolute-required,min-length-3,reject-windows-drive-root,reject-unc,reject-null-byte,tilde-expansion-settings-only>>
+    required: false
+    notes: claude-code validateMemoryPath rejects relative paths, root/near-root, drive-roots, UNC paths, null bytes.
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - uses_memory_hierarchy
+  outgoingEdges:
+  - hierarchy_includes_store
+  invariants:
+  - id starts with memory-hierarchy:
+  - scopes non-empty
+  examples:
+  - graph/context-engineering/memory-hierarchies/claude-code-default.yaml
+  - graph/context-engineering/memory-hierarchies/claude-code-remote-ccr.yaml
+- id: node:background-consolidation
+  name: BackgroundConsolidation
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code services/autoDream/autoDream.ts +
+    services/extractMemories/extractMemories.ts. Background-fork agents that
+    consolidate memory (autoDream) or extract per-turn memories
+    (extractMemories) using a forked subagent with restricted tool surface
+    (read-only Bash, scoped writes via createAutoMemCanUseTool).
+  prefix: background-consolidation
+  cluster: 20-context-engineering
+  purpose: |
+    A background-fork consolidation/extraction process driven by a
+    PromptTemplate (consolidationPrompt / extractMemoriesPrompt) that runs as
+    a forked subagent with a constrained tool inventory and aborts via a
+    user-controllable AbortController. Captures gate cadence (time/sessions),
+    fork posture (cache-safe params, skipTranscript), and tool restrictions.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<auto-dream,extract-memories,team-sync,manual-dream>
+    required: true
+  - name: forkLabel
+    type: string
+    required: false
+    notes: claude-code runForkedAgent forkLabel — auto_dream, extract_memories.
+  - name: querySource
+    type: string
+    required: false
+    notes: claude-code QuerySource — analytics tracking + foreground-vs-background retry decision.
+  - name: skipTranscript
+    type: bool
+    required: false
+    notes: claude-code skipTranscript=true — fork output stays out of the main transcript.
+  - name: cacheSafeFork
+    type: bool
+    required: false
+    notes: claude-code createCacheSafeParams — fork shares parent prompt cache by freezing system prompt at fork time.
+  - name: toolRestrictions
+    type: list<string>
+    required: false
+    notes: e.g. Bash limited to read-only commands (ls, find, grep, cat, stat, wc, head, tail).
+  - name: canUseToolFactory
+    type: string
+    required: false
+    notes: claude-code createAutoMemCanUseTool — gates writes to memory root only.
+  - name: lockId
+    type: ref<ConsolidationLock>
+    required: false
+  - name: emitsTelemetryEvents
+    type: list<string>
+    required: false
+    notes: claude-code tengu_auto_dream_fired, tengu_auto_dream_completed, tengu_auto_dream_failed.
+  - name: featureGate
+    type: string
+    required: false
+    notes: claude-code tengu_onyx_plover (autoDream), tengu_passport_quail (extractMemories).
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - schedules_consolidation
+  outgoingEdges:
+  - consolidation_uses_template
+  - consolidation_guarded_by_lock
+  invariants:
+  - id starts with background-consolidation:
+  examples:
+  - graph/context-engineering/background-consolidations/claude-code-auto-dream.yaml
+  - graph/context-engineering/background-consolidations/claude-code-extract-memories.yaml
+- id: node:proactive-surface
+  name: ProactiveSurface
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code proactive/index.ts + services/AgentSummary/agentSummary.ts +
+    services/MagicDocs/magicDocs.ts + services/SessionMemory/sessionMemory.ts +
+    services/PromptSuggestion/promptSuggestion.ts. Proactive surfaces are
+    runtime-triggered context refreshers (agent summary, prompt suggestion,
+    session memory recall, magic-docs hint) that compose responses outside
+    the main turn and surface them via system messages.
+  prefix: proactive-surface
+  cluster: 20-context-engineering
+  purpose: |
+    A proactive/refresh surface that fires outside the main turn loop —
+    AgentSummary (summarize prior conversation), PromptSuggestion (suggest a
+    next prompt), SessionMemoryRecall, MagicDocs (auto-attach docs).
+    Captures trigger, prompt template, output channel, and cost ceiling.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: surfaceKind
+    type: enum<agent-summary,prompt-suggestion,session-memory-recall,magic-docs,proactive-recall,find-relevant-memories>
+    required: true
+  - name: trigger
+    type: enum<turn-end,session-start,context-overflow,user-idle,explicit-tool-call,btw-command>
+    required: true
+  - name: promptTemplateId
+    type: ref<PromptTemplate>
+    required: false
+  - name: outputChannel
+    type: enum<system-message,attachment,sidebar,sdk-event,no-surface>
+    required: false
+  - name: costCeilingTokens
+    type: int
+    required: false
+  - name: featureGate
+    type: string
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - exposes_proactive_surface
+  outgoingEdges:
+  - proactive_uses_template
+  invariants:
+  - id starts with proactive-surface:
+  examples:
+  - graph/context-engineering/proactive-surfaces/claude-code-prompt-suggestion.yaml
+  - graph/context-engineering/proactive-surfaces/claude-code-magic-docs.yaml
+

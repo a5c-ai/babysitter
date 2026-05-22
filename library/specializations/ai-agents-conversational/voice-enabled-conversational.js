@@ -17,6 +17,9 @@
  * - ElevenLabs: https://docs.elevenlabs.io/
  * - OpenAI Whisper: https://platform.openai.com/docs/guides/speech-to-text
  * - LiveKit: https://docs.livekit.io/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

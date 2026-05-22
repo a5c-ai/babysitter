@@ -1,0 +1,75 @@
+nodeKind: ModelVersion
+id: model:gpt-5.4-mini@current
+attributes:
+  displayName: "GPT-5.4 Mini"
+  supportsExtendedThinking: false
+  modelFamilyId: model-family:gpt-5
+  versionRange: '>=5.4.0 <5.5.0'
+  kind: reasoning
+  contextWindowTokens: 400000
+  costPerMTokInput: 0.75
+  costPerMTokOutput: 4.5
+  supportsThinking: true
+  thinkingEffortLevels:
+  - low
+  - medium
+  - high
+  - xhigh
+  supportsThinkingBudgetTokens: false
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-04-19'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-04-19'
+  knowledgeCutoffDate: '2025-08-31'
+  safetyTier: openai-preparedness-high
+  modelCardUrl: https://developers.openai.com/api/docs/models/gpt-5.4-mini
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:gpt-5
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:gpt-5
+  served_by:
+  - provider:openai
+  speaks:
+  - model-transport:openai-responses
+  - model-transport:openai-chat-completions
+  supports:
+  - target: capability:supports-batch-api
+    versionRange: '>=5.4.0 <5.5.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-api-pricing-2026-05
+  - target: capability:parallel-tool-calls
+    versionRange: '>=5.4.0 <5.5.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-prompt-caching
+    versionRange: '>=5.4.0 <5.5.0'
+    level: partial
+    evidenceSourceIds:
+    - evidence:openai-api-pricing-2026-05
+  - target: capability:streaming
+    versionRange: '>=5.4.0 <5.5.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-responses-api
+  - target: capability:supports-tool-use
+    versionRange: '>=5.4.0 <5.5.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-responses-api

@@ -16,6 +16,12 @@
  * - Kroemer et al., Fitting the Human
  * - Sanders & McCormick, Human Factors in Engineering and Design
  * - Pheasant, Bodyspace: Anthropometry, Ergonomics and Design
+ *
+ * @graph
+ *   domains: [domain:industrial-engineering]
+ *   skillAreas: [skill-area:statistical-analysis, skill-area:organizational-design, skill-area:data-analysis]
+ *   roles: [role:operations-analyst, role:research-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

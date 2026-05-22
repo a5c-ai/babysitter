@@ -2,13 +2,17 @@
 name: team-synthesizer
 description: Cross-references GitHub, Linear, Slack, and PostHog data with bidirectional sync for team intelligence
 role: Cross-Platform Integration & Team Intelligence
----
-
-# Team Synthesizer Agent
-
-**Name:** Team Synthesizer
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead, role:engineering-manager-convergent]
 **Role:** Cross-Platform Integration & Team Intelligence
 **Source:** [COG Second Brain](https://github.com/huytieu/COG-second-brain)
+
+---
 
 ## Identity
 

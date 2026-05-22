@@ -1,0 +1,12 @@
+nodeKind: Capability
+id: capability:vision-input
+attributes:
+  displayName: "Vision input"
+  description: |
+    Ability to accept image inputs (screenshots, photos, pasted clipboard
+    images) as part of a user/agent turn. Required by interaction primitives
+    that paste or attach visual content. Distinct from `text-streaming` or
+    other text-only input modalities.
+  appliesToNodeKinds: ["ModelVersion", "AgentRuntimeImpl"]
+  category: modality
+edges: {}

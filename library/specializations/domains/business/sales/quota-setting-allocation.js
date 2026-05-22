@@ -14,6 +14,11 @@
  * @references
  * - Sales Management Association: https://salesmanagement.org/certification/
  * - Xactly Quota Management: https://www.xactlycorp.com/
+  * @graph
+ *   domains: [domain:sales]
+ *   skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+ *   workflows: [workflow:customer-journey-optimization]
+ *   roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

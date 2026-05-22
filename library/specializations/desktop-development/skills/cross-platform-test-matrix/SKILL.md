@@ -3,6 +3,12 @@ name: cross-platform-test-matrix
 description: Generate CI test matrix for Windows, macOS, and Linux combinations
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [testing, ci-cd, cross-platform, matrix, github-actions]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:cross-platform-testing, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # cross-platform-test-matrix

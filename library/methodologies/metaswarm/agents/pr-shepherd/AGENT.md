@@ -8,17 +8,15 @@ expertise:
   - Review comment handling
   - Merge readiness verification
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# PR Shepherd Agent
-
-## Role
-
-Manages the PR from creation through merge. Monitors CI, handles review comments, resolves threads, and verifies merge readiness via the `gtg` check.
-
-## Expertise
-
-- PR lifecycle management
 - CI pipeline status monitoring and failure triage
 - Review comment response and thread resolution
 - Merge readiness verification (approvals, CI green, threads resolved, coverage met)

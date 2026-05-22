@@ -1,0 +1,42 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:opencode-http.core@current
+attributes:
+  displayName: OpenCode HTTP Core (current)
+  agentVersionId: agent-version:opencode-http@current
+  packageRef: source-ref:opencode-github
+  loopIteratorPolicy: delegated-to-remote
+  loopIteratorNotes: |
+    `opencode serve` exposes a REST API + Server-Sent Events stream.
+    The chat loop runs in the OpenCode server process; the HTTP
+    client (host program) consumes SSE chunks and posts new turns
+    via REST.
+  contextManagementStrategy: server-managed
+  compactionTriggerNotes: |
+    Server-side; not exposed to the HTTP client.
+  subagentInvokerPolicy: platform-mediated
+  subagentInvokerNotes: |
+    Subagent dispatch is brokered by the OpenCode server.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    SSE chunks deliver streaming text and structured events; the
+    client emits the final response when the stream closes.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: opencode-internal
+  supportedTransportProtocols: []
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:opencode
+    role: core
+  speaks: []
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full

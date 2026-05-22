@@ -1,0 +1,179 @@
+nodeKind: EvalResult
+id: eval-result:swe-bench-verified.claude-opus-4-5.001
+attributes:
+  evalRunId: eval-run:swe-bench-verified.claude-opus-4-5.2025-09
+  metricName: pass_rate
+  score: 0.722
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench-verified.claude-opus-4-5.2025-09
+  scored_against:
+    - target: benchmark:swe-bench-verified
+---
+nodeKind: EvalResult
+id: eval-result:swe-bench-verified.claude-opus-4-7.001
+attributes:
+  evalRunId: eval-run:swe-bench-verified.claude-opus-4-7.2026-01
+  metricName: pass_rate
+  score: 0.80
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2026-01-15T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench-verified.claude-opus-4-7.2026-01
+  scored_against:
+    - target: benchmark:swe-bench-verified
+---
+nodeKind: EvalResult
+id: eval-result:gpqa.claude-sonnet-4-5.001
+attributes:
+  evalRunId: eval-run:gpqa.claude-sonnet-4-5.2025-09
+  metricName: accuracy
+  score: 0.837
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gpqa.claude-sonnet-4-5.2025-09
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:swe-bench-verified.gpt-5.headline
+attributes:
+  evalRunId: eval-run:swe-bench-verified.gpt-5.2025-08
+  metricName: pass_rate
+  score: 0.749
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-08-07T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench-verified.gpt-5.2025-08
+  scored_against:
+    - target: benchmark:swe-bench-verified
+---
+nodeKind: EvalResult
+id: eval-result:livecodebench.gpt-5.001
+attributes:
+  evalRunId: eval-run:livecodebench.gpt-5.2025-08
+  metricName: pass_rate
+  score: 0.85
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-08-07T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:livecodebench.gpt-5.2025-08
+  scored_against:
+    - target: benchmark:livecodebench
+---
+nodeKind: EvalResult
+id: eval-result:swe-bench-verified.o3.001
+attributes:
+  evalRunId: eval-run:swe-bench-verified.o3.2025-04
+  metricName: pass_rate
+  score: 0.692
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-04-16T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench-verified.o3.2025-04
+  scored_against:
+    - target: benchmark:swe-bench-verified
+---
+nodeKind: EvalResult
+id: eval-result:swe-bench-verified.gemini-2-5-pro.001
+attributes:
+  evalRunId: eval-run:swe-bench-verified.gemini-2-5-pro.2025-06
+  metricName: pass_rate
+  score: 0.638
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-06-17T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench-verified.gemini-2-5-pro.2025-06
+  scored_against:
+    - target: benchmark:swe-bench-verified
+---
+nodeKind: EvalResult
+id: eval-result:gsm8k.claude-sonnet-4-5.001
+attributes:
+  evalRunId: eval-run:gsm8k.claude-sonnet-4-5.2025-09
+  metricName: accuracy
+  score: 0.971
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gsm8k.claude-sonnet-4-5.2025-09
+  scored_against:
+    - target: benchmark:gsm8k
+---
+nodeKind: EvalResult
+id: eval-result:hellaswag.claude-opus-4-5.001
+attributes:
+  evalRunId: eval-run:hellaswag.claude-opus-4-5.2025-09
+  metricName: accuracy
+  score: 0.95
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:hellaswag.claude-opus-4-5.2025-09
+  scored_against:
+    - target: benchmark:hellaswag
+---
+nodeKind: EvalResult
+id: eval-result:math.gpt-5.001
+attributes:
+  evalRunId: eval-run:math.gpt-5.2025-08
+  metricName: accuracy
+  score: 0.96
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-08-07T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:math.gpt-5.2025-08
+  scored_against:
+    - target: benchmark:math
+---
+nodeKind: EvalResult
+id: eval-result:evalplus.gpt-5.001
+attributes:
+  evalRunId: eval-run:evalplus.gpt-5.2025-08
+  metricName: pass_rate
+  score: 0.93
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-08-07T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:evalplus.gpt-5.2025-08
+  scored_against:
+    - target: benchmark:bigcode-evalplus
+---
+nodeKind: EvalResult
+id: eval-result:terminal-bench.claude-sonnet-4-5.001
+attributes:
+  evalRunId: eval-run:terminal-bench.claude-sonnet-4-5.2025-09
+  metricName: pass_rate
+  score: 0.50
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-09-29T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:terminal-bench.claude-sonnet-4-5.2025-09
+  scored_against:
+    - target: benchmark:terminal-bench

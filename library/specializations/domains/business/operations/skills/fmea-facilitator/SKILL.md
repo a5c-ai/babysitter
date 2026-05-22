@@ -11,6 +11,11 @@ metadata:
   specialization: operations
   domain: business
   category: quality-management
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:statistical-analysis, skill-area:change-management, skill-area:business-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:business-analyst, role:audit-analyst]
 ---
 
 # FMEA Facilitator

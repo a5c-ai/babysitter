@@ -1,0 +1,85 @@
+---
+nodeKind: Workflow
+id: workflow:release-coordination
+attributes:
+  displayName: "Release Coordination"
+  workflowKind: release
+  triggerType: scheduled
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Orchestrates the end-to-end release process including freeze windows,
+    changelog generation, approval gates, and production rollout.
+edges:
+  involves_role:
+    - target: role:tech-lead
+    - target: role:engineering-manager
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:gitops
+    - target: skill-area:blue-green-deployment
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:generate-changelogs
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:platform-team
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:canary-deployment
+attributes:
+  displayName: "Canary Deployment"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Gradually shifts traffic to a new release, monitors error rates
+    and latency, and automatically rolls back on SLO violation.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:canary-rollouts
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:kubernetes-cluster-upgrade
+attributes:
+  displayName: "Kubernetes Cluster Upgrade"
+  workflowKind: release
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Plans and executes Kubernetes version upgrades across clusters,
+    including compatibility testing, node drains, and validation.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:cloud-architect
+  requires_skill_area:
+    - target: skill-area:k8s-rbac
+    - target: skill-area:k8s-operator-development
+    - target: skill-area:chaos-engineering
+  applies_to_domain:
+    - target: domain:cloud-infra
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:k8s-cluster-upgrade
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:platform-team

@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:presentation
+attributes:
+  canonicalDefinitionId: definition:presentation.canonical
+  displayName: "Presentation"
+  kind: primitive
+  references:
+    - "NodeKind:Presentation"
+  description: |
+    A concrete app shell (TUI, IDE, web, mobile, CI)
+edges:
+  applies_to:
+    - target: domain:software-engineering

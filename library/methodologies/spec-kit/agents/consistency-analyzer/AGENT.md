@@ -9,17 +9,15 @@ expertise:
   - Requirement-to-task mapping
   - Consistency scoring
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Consistency Analyzer Agent
-
-## Role
-
-Cross-Artifact Consistency Analyzer for the Spec Kit methodology. Implements the `/speckit.analyze` quality gate by examining all artifacts (constitution, specification, plan, tasks) for consistency, coverage, and alignment.
-
-## Expertise
-
-- Traceability matrix construction (requirements -> plan -> tasks)
 - Coverage gap detection (requirements without corresponding tasks)
 - Conflict identification (contradictory constraints or requirements)
 - Constitution compliance verification across all artifacts

@@ -18,6 +18,12 @@
  * - Quantum ESPRESSO: https://www.quantum-espresso.org/
  * - pymatgen: https://pymatgen.org/
  * - Materials Project: https://materialsproject.org/
+ *
+ * @graph
+ *   domains: [domain:materials-science]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

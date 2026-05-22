@@ -1,0 +1,205 @@
+# NodeKinds for cluster 18-vcs-ci.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:vcs-host
+  name: VCSHost
+  origin: standard
+  prefix: vcs-host
+  cluster: 18-vcs-ci
+  purpose: a version-control hosting platform (GitHub, GitLab, Bitbucket, Azure DevOps, self-hosted Gitea)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: vendor
+    type: string
+    required: false
+  - name: hostKind
+    type: enum<github,gitlab,bitbucket,azure-devops,gitea,gerrit,saas,self-hosted,other>
+    required: false
+  - name: baseUrl
+    type: url
+    required: false
+  - name: homepageUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: protocols
+    type: list<string>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - hosted_on_vcs
+  - versioned_via
+  outgoingEdges:
+  - hosts
+  - versions
+  invariants:
+  - id starts with vcs-host: null
+  examples: []
+- id: node:pull-request
+  name: PullRequest
+  origin: universal
+  prefix: pull-request
+  cluster: 18-vcs-ci
+  purpose: a code-change proposal (PR/MR) on a VCS host
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: number
+    type: int
+    required: false
+  - name: title
+    type: string
+    required: false
+  - name: state
+    type: string
+    required: false
+    notes: open|merged|closed|draft
+  - name: sourceBranch
+    type: string
+    required: false
+  - name: targetBranch
+    type: string
+    required: false
+  - name: branchHead
+    type: string
+    required: false
+  - name: branchBase
+    type: string
+    required: false
+  - name: openedAt
+    type: iso-timestamp
+    required: false
+  - name: createdAt
+    type: iso-timestamp
+    required: false
+  - name: mergedAt
+    type: iso-timestamp
+    required: false
+  - name: closedAt
+    type: iso-timestamp
+    required: false
+  - name: vcsHostId
+    type: ref<VCSHost>
+    required: false
+  - name: authorRef
+    type: id
+    required: false
+  - name: url
+    type: url
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - submitted_by
+  - reviews
+  - triggered_by
+  outgoingEdges:
+  - hosted_on_vcs
+  - triggers_run
+  invariants:
+  - id starts with pull-request: null
+  examples: []
+- id: node:code-review
+  name: CodeReview
+  origin: standard
+  prefix: code-review
+  cluster: 18-vcs-ci
+  purpose: a review event on a PullRequest (approval / changes-requested / comment)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: pullRequestId
+    type: ref<PullRequest>
+    required: false
+  - name: verdict
+    type: string
+    required: false
+    notes: approved|changes-requested|commented|dismissed
+  - name: reviewKind
+    type: string
+    required: false
+  - name: state
+    type: string
+    required: false
+  - name: reviewedAt
+    type: iso-timestamp
+    required: false
+  - name: submittedAt
+    type: iso-timestamp
+    required: false
+  - name: body
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - reviews
+  - submitted_by
+  invariants:
+  - id starts with code-review: null
+  examples: []
+- id: node:ci-workflow
+  name: CIWorkflow
+  origin: standard
+  prefix: ci-workflow
+  cluster: 18-vcs-ci
+  purpose: a CI/CD pipeline definition (GitHub Actions workflow, GitLab CI, Buildkite pipeline, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: workflowKind
+    type: enum<github-actions,gitlab-ci,circleci,buildkite,jenkins,azure-pipelines,other>
+    required: false
+  - name: platform
+    type: string
+    required: false
+    notes: Alias for workflowKind in legacy examples.
+  - name: filePath
+    type: string
+    required: false
+  - name: triggers
+    type: list<string>
+    required: false
+  - name: vcsHostId
+    type: ref<VCSHost>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - triggered_by
+  outgoingEdges:
+  - validates_pull_request
+  - hosted_on_vcs
+  - triggers_run
+  invariants:
+  - id starts with ci-workflow: null
+  examples: []
+

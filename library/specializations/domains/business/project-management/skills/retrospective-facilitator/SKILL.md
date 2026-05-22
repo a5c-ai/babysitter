@@ -12,6 +12,11 @@ metadata:
   domain: business
   category: Agile Management
   id: SK-015
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:change-management, skill-area:stakeholder-management, skill-area:team-management]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:scrum-master, role:change-manager]
 ---
 
 # Retrospective Facilitator

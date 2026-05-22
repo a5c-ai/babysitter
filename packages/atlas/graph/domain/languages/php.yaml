@@ -1,0 +1,21 @@
+nodeKind: Language
+id: language:php
+attributes:
+  displayName: "PHP"
+  paradigms:
+    - imperative
+    - object-oriented
+    - scripting
+  description: |
+    PHP is a server-side, dynamically-typed scripting language designed
+    primarily for web development. It powers over 75% of the web (WordPress,
+    Drupal, Magento) and major platforms including Facebook (via Hack, a PHP
+    dialect) and Wikipedia (via MediaWiki).
+
+    Modern PHP (8.x) has evolved significantly with named arguments, union
+    and intersection types, enums, fibers (lightweight coroutines), and
+    readonly properties. The Composer package manager and Packagist repository
+    enable modern dependency management. Major frameworks include Laravel
+    (the most popular), Symfony, and Slim. PHP-FPM with nginx/Apache is the
+    canonical deployment model; Laravel Octane enables long-running processes.
+edges: {}

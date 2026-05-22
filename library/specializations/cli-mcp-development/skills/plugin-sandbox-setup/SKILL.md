@@ -2,6 +2,14 @@
 name: plugin-sandbox-setup
 description: Configure plugin sandboxing with vm2 or isolated-vm for secure plugin execution.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:plugin-systems]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # Plugin Sandbox Setup

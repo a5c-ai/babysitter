@@ -1,0 +1,124 @@
+---
+nodeKind: SkillArea
+id: skill-area:quantitative-modeling
+attributes:
+  displayName: "Quantitative Modeling"
+  description: |
+    Stochastic calculus, derivatives pricing, Monte Carlo simulation,
+    and factor models.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:quantitative-finance
+      confidence: primary
+    - target: specialization:nanotechnology
+      confidence: secondary
+    - target: specialization:chemical-engineering
+      confidence: secondary
+    - target: specialization:industrial-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:algorithmic-trading
+attributes:
+  displayName: "Algorithmic Trading"
+  description: |
+    Strategy development, backtesting, execution algorithms,
+    market microstructure, and latency optimization.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:algorithmic-trading
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:portfolio-construction
+attributes:
+  displayName: "Portfolio Construction"
+  description: |
+    Asset allocation, risk budgeting, factor exposure management,
+    and portfolio optimization.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:portfolio-management
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:financial-risk-modeling
+attributes:
+  displayName: "Financial Risk Modeling"
+  description: |
+    VaR/CVaR, stress testing, credit scoring, counterparty risk,
+    and regulatory capital.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:financial-risk-management
+      confidence: primary
+    - target: specialization:corporate-finance
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:market-data-engineering
+attributes:
+  displayName: "Market Data Engineering"
+  description: |
+    Tick data processing, alternative data integration, real-time feeds,
+    and time-series databases.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:market-data
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:trade-lifecycle
+attributes:
+  displayName: "Trade Lifecycle"
+  description: |
+    Order management, settlement, reconciliation, corporate actions,
+    and post-trade reporting.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:trading-operations
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:financial-regulation
+attributes:
+  displayName: "Financial Regulation"
+  description: |
+    MiFID II, Dodd-Frank, Basel III/IV, transaction reporting,
+    and best execution requirements.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:regulatory-finance
+      confidence: primary
+    - target: specialization:legal
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:technical-analysis
+attributes:
+  displayName: "Technical Analysis"
+  description: |
+    Chart patterns, indicators, price action, volume analysis,
+    and systematic signal generation.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:algorithmic-trading
+      confidence: primary
+    - target: domain:capital-markets
+      confidence: secondary

@@ -1,0 +1,205 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:supabase.list-projects
+attributes:
+  schema: '{}'
+  displayName: "Supabase: List Projects"
+  description: List all Supabase projects accessible to the management API key.
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      projects: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-supabase
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:supabase.get-project
+attributes:
+  schema: '{}'
+  displayName: "Supabase: Get Project"
+  description: Get details for a Supabase project by ref.
+  inputSchema:
+    type: object
+    required: [project_id]
+    properties:
+      project_id: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      project: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-supabase
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:supabase.create-project
+attributes:
+  schema: '{}'
+  displayName: "Supabase: Create Project"
+  description: Create a new Supabase project in an organization.
+  inputSchema:
+    type: object
+    required: [name, organization_id, region]
+    properties:
+      name: { type: string }
+      organization_id: { type: string }
+      region: { type: string }
+      db_pass: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      project: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-supabase
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:supabase.execute-sql
+attributes:
+  schema: '{}'
+  displayName: "Supabase: Execute SQL"
+  description: Run an SQL query against the project's Postgres database.
+  inputSchema:
+    type: object
+    required: [project_id, query]
+    properties:
+      project_id: { type: string }
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      rows: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-supabase
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:supabase.apply-migration
+attributes:
+  schema: '{}'
+  displayName: "Supabase: Apply Migration"
+  description: Apply a named SQL migration to the project's database.
+  inputSchema:
+    type: object
+    required: [project_id, name, query]
+    properties:
+      project_id: { type: string }
+      name: { type: string }
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      success: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-supabase
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:supabase.list-tables
+attributes:
+  schema: '{}'
+  displayName: "Supabase: List Tables"
+  description: List tables in a schema for the project's database.
+  inputSchema:
+    type: object
+    required: [project_id]
+    properties:
+      project_id: { type: string }
+      schemas: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      tables: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-supabase
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:supabase.get-project-api-keys
+attributes:
+  schema: '{}'
+  displayName: "Supabase: Get Project API Keys"
+  description: Return anon and service-role API keys for a project.
+  inputSchema:
+    type: object
+    required: [project_id]
+    properties:
+      project_id: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      keys: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-supabase
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:supabase.deploy-edge-function
+attributes:
+  schema: '{}'
+  displayName: "Supabase: Deploy Edge Function"
+  description: Deploy a Supabase Edge Function (Deno) to a project.
+  inputSchema:
+    type: object
+    required: [project_id, name, files]
+    properties:
+      project_id: { type: string }
+      name: { type: string }
+      files: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      function: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-supabase
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:supabase.get-logs
+attributes:
+  schema: '{}'
+  displayName: "Supabase: Get Logs"
+  description: Fetch logs for a Supabase project service (db, api, edge-functions, auth, storage, realtime).
+  inputSchema:
+    type: object
+    required: [project_id, service]
+    properties:
+      project_id: { type: string }
+      service: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      logs: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-supabase

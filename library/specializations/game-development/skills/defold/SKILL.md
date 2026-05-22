@@ -2,6 +2,11 @@
 name: defold
 description: Defold engine skill for Lua scripting and cross-platform mobile development.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engines, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Defold Skill

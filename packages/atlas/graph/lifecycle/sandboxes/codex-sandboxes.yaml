@@ -1,0 +1,72 @@
+nodeKind: Sandbox
+id: sandbox:codex-read-only
+attributes:
+  displayName: "Codex read-only sandbox"
+  filesystemPolicy: read-only
+  networkPolicy: none
+  description: |
+    Codex CLI sandbox mode `read-only`: shell commands run with filesystem writes blocked. This is the most restrictive documented Codex sandbox mode.
+  fsAllowList:
+    - "<workspace>/**"
+  fsDenyList:
+    - "<workspace>/**:write"
+  netAllowList: []
+  netDenyList:
+    - "*"
+  execAllowedBinaries: []
+  execDeniedBinaries: []
+  envVarScope: inherit-allowlist
+  secretAccessScope: none
+  auditLogPolicy: structured-jsonl
+  policyEvaluationPoint: continuous
+edges:
+  realizes:
+    - target: layer:9-sandbox
+---
+nodeKind: Sandbox
+id: sandbox:codex-workspace-write
+attributes:
+  displayName: "Codex workspace-write sandbox"
+  filesystemPolicy: sandboxed
+  networkPolicy: none
+  description: |
+    Codex CLI sandbox mode `workspace-write`: shell commands can write inside the workspace while access outside the configured workspace/additional writable roots remains restricted.
+  fsAllowList:
+    - "<workspace>/**"
+    - "<add-dir>/**"
+  fsDenyList:
+    - "<outside-workspace>/**:write"
+  netAllowList: []
+  netDenyList:
+    - "*"
+  execAllowedBinaries: []
+  execDeniedBinaries: []
+  envVarScope: inherit-allowlist
+  secretAccessScope: named
+  auditLogPolicy: structured-jsonl
+  policyEvaluationPoint: continuous
+edges:
+  realizes:
+    - target: layer:9-sandbox
+---
+nodeKind: Sandbox
+id: sandbox:codex-danger-full-access
+attributes:
+  displayName: "Codex danger-full-access sandbox"
+  filesystemPolicy: read-write
+  networkPolicy: full
+  description: |
+    Codex CLI sandbox mode `danger-full-access`: commands run without Codex filesystem or network sandbox restrictions and should be used only where the surrounding environment supplies the required isolation.
+  fsAllowList: []
+  fsDenyList: []
+  netAllowList: []
+  netDenyList: []
+  execAllowedBinaries: []
+  execDeniedBinaries: []
+  envVarScope: inherit-all
+  secretAccessScope: all
+  auditLogPolicy: structured-jsonl
+  policyEvaluationPoint: post-call-attestation
+edges:
+  realizes:
+    - target: layer:9-sandbox

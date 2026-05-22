@@ -1,0 +1,43 @@
+nodeKind: IssueTracker
+id: issue-tracker:linear
+attributes:
+  displayName: "Linear"
+  vendor: "linear"
+  protocolStyle: graphql
+  writeBoundary: agent-writes
+edges:
+  implements_protocol:
+    - target: issue-tracker-protocol:linear
+---
+nodeKind: IssueTracker
+id: issue-tracker:github-issues
+attributes:
+  displayName: "GitHub Issues"
+  vendor: "github-issues"
+  protocolStyle: rest
+  writeBoundary: agent-writes
+edges:
+  implements_protocol:
+    - target: issue-tracker-protocol:github
+---
+nodeKind: IssueTracker
+id: issue-tracker:jira
+attributes:
+  displayName: "Jira"
+  vendor: "jira"
+  protocolStyle: rest
+  writeBoundary: agent-writes
+edges:
+  implements_protocol:
+    - target: issue-tracker-protocol:jira
+---
+nodeKind: IssueTracker
+id: issue-tracker:asana
+attributes:
+  displayName: "Asana"
+  vendor: "asana"
+  protocolStyle: rest
+  writeBoundary: agent-writes
+edges:
+  implements_protocol:
+    - target: issue-tracker-protocol:minimal

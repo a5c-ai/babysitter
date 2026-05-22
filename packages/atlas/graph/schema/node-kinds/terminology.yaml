@@ -1,0 +1,150 @@
+# NodeKinds for cluster 14-terminology.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:term
+  name: Term
+  origin: universal
+  prefix: term
+  cluster: 14-terminology
+  purpose: a named term in the ontology
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<concept,role,layer,primitive,mux,extension-shape,hook,capability,lifecycle-state,protocol,format,tool,operation>
+    required: true
+    notes: Collapsed from former TermKind NodeKind (remodel 2026-04-29). Values are bare enum strings, not refs.
+  - name: canonicalDefinitionId
+    type: ref<Definition>
+    required: true
+  - name: usageContexts
+    type: list<ref<NodeKind>>
+    required: false
+  - name: firstUseEvidenceId
+    type: ref<EvidenceSource>
+    required: false
+  - name: references
+    type: list<ref<NodeKind>>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - defines_term
+  - subsumed_by
+  - referenced_by
+  outgoingEdges:
+  - defined_in_context_of
+  - synonym_of
+  - subsumes
+  - references
+  invariants:
+  - has at least one Definition (V-6.1)
+  - canonicalDefinitionId resolves (V-6.2)
+  - references resolve in current schema version (V-6.4)
+  examples: []
+- id: node:definition
+  name: Definition
+  origin: universal
+  prefix: definition
+  cluster: 14-terminology
+  purpose: a definition of a term
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: termId
+    type: ref<Term>
+    required: true
+  - name: text
+    type: markdown
+    required: true
+  - name: inContext
+    type: ref<NodeKind>
+    required: false
+  - name: evidenceSourceIds
+    type: list<ref<EvidenceSource>>
+    required: false
+  - name: authoredAt
+    type: iso-timestamp
+    required: true
+  - name: status
+    type: string
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - defines
+  - defined_in_context_of
+  invariants:
+  - termId resolves
+  - no two Definitions for same termId share inContext
+  examples: []
+- id: node:synonym
+  name: Synonym
+  origin: universal
+  prefix: synonym
+  cluster: 14-terminology
+  purpose: a term that means the same as another in a stated context
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: termAId
+    type: ref<Term>
+    required: true
+  - name: termBId
+    type: ref<Term>
+    required: true
+  - name: inContext
+    type: ref<NodeKind>
+    required: false
+  - name: direction
+    type: enum<bidirectional
+    a-to-b: null
+    b-to-a>: null
+    required: true
+  - name: note
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - synonym_of
+  invariants:
+  - termAId != termBId
+  - synonym_of forms valid equivalence class within inContext (V-6.3)
+  examples: []
+- id: node:acronym
+  name: Acronym
+  origin: universal
+  prefix: acronym
+  cluster: 14-terminology
+  purpose: abbreviation expanding to a term
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: acronym
+    type: string
+    required: true
+  - name: expandsToTermId
+    type: ref<Term>
+    required: true
+  - name: inContext
+    type: ref<NodeKind>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - expands_to
+  invariants:
+  - expandsToTermId resolves to a Term
+  examples: []
+

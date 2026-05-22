@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:capability-profile.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:capability-profile
+  text: |
+    a swappable capability bundle
+  status: canonical
+edges:
+  defines:
+    - term:capability-profile

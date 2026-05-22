@@ -3,6 +3,13 @@ name: playwright-electron-config
 description: Configure Playwright for comprehensive Electron application testing including E2E tests, visual regression, accessibility audits, and cross-platform test matrices
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [electron, testing, playwright, e2e, automation]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:e2e-testing, skill-area:desktop-ui-frameworks]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # playwright-electron-config

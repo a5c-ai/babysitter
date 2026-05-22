@@ -1,0 +1,87 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:claude-agent-sdk.core@current
+attributes:
+  displayName: Claude Agent SDK Core (current)
+  agentVersionId: agent-version:claude-agent-sdk@current
+  packageRef: source-ref:claude-code-github
+  loopIteratorPolicy: process-function-driven
+  loopIteratorNotes: |
+    Host program imports `@anthropic-ai/claude-agent-sdk` and consumes
+    the `query()` async iterator. Each iteration yields SDKMessage
+    events; the host decides when to feed back permission/elicitation
+    results. There is no embedded chat-loop binary — the loop body
+    IS the host's code.
+  contextManagementStrategy: server-managed
+  compactionTriggerNotes: |
+    Compaction is handled by the Claude server-side; the SDK does not
+    expose a token-threshold trigger.
+  subagentInvokerPolicy: platform-mediated
+  subagentInvokerNotes: |
+    Subagents (when enabled) are dispatched by the SDK via the same
+    Task-tool primitive as Claude Code; the host program mediates
+    permission gating.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Final result events arrive as SDKMessage values on the iterator;
+    the host program emits the final response.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: '@anthropic-ai/claude-agent-sdk'
+  supportedTransportProtocols:
+  - model-transport:anthropic-messages
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: passthrough
+  loopBudgetKnobs:
+  - max_turns
+  - max_budget_usd
+  compactionTrigger: auto-on-budget
+  streamingBlocks:
+  - text
+  - thinking
+  - tool_use
+  effortLevelDelegation: native
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:claude-agent-sdk
+    role: core
+  speaks:
+  - target: model-transport:anthropic-messages
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+  - target: capability:supports-thinking
+    versionRange: '*'
+    level: full
+  fires_hook:
+  - target: hook-surface:pre-tool-use
+  - target: hook-surface:post-tool-use
+  - target: hook-surface:user-prompt-submit
+  - target: hook-surface:stop
+  - target: hook-surface:subagent-stop
+  - target: hook-surface:pre-compact
+  emits_message_type:
+  - target: protocol-message:system-message
+  - target: protocol-message:assistant-message
+  - target: protocol-message:user-message
+  - target: protocol-message:stream-event
+  - target: protocol-message:result-message-success
+  - target: protocol-message:result-message-error-max-turns
+  - target: protocol-message:result-message-error-max-budget-usd
+  - target: protocol-message:result-message-error-during-execution
+  - target: protocol-message:result-message-error-max-structured-output-retries
+  supports_effort_level:
+  - target: effort-level:low
+  - target: effort-level:medium
+  - target: effort-level:high
+  - target: effort-level:xhigh
+  - target: effort-level:max
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:budget-stop
+    - target: orch-primitive:cost-tracking

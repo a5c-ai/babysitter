@@ -1,0 +1,1086 @@
+# NodeKinds for cluster 3-agent-stack.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:agent-product
+  name: AgentProduct
+  origin: derived
+  originContext: catalog pass 3/catalog pass 22 — synthesized from observations across multiple agent products (Claude Code, Codex, Cursor, Gemini-CLI). Tier model is a5c-coined but the underlying concept is cross-vendor.
+  prefix: agent
+  cluster: 3-agent-stack
+  purpose: productized agent (Claude Code, Codex, ...) — the umbrella
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: vendor
+    type: string
+    required: true
+  - name: homepageUrl
+    type: url
+    required: true
+    evidence: vendor-doc-or-better
+  - name: primarySurface
+    type: enum<cli,ide-extension,web,sdk,tui>
+    required: true
+  - name: supportTier
+    type: enum<catalog-backed,adapter-only,none>
+    required: true
+  - name: productKind
+    type: enum<full-cli-agent,ide-extension-agent,web-agent,sdk,app-server,headless-runtime,transport-bridge,multi-surface-suite>
+    required: true
+    notes: |
+      What kind of product this is. Distinct from `primarySurface` (which says
+      where users primarily interact). `full-cli-agent` = chat-loop CLI/TUI agent
+      with full 4-layer stack (core/runtime/platform/ui). `sdk` = programmatic
+      library exposing core+runtime, consumer provides platform/UI. `app-server` =
+      server providing core+runtime+platform (no UI; consumer is another client
+      like Symphony). `transport-bridge` = headless adapter relaying to a remote
+      agent (e.g. agent-mux-remote). `headless-runtime` = process orchestrator
+      without chat-loop (e.g. babysitter).
+  - name: stackScope
+    type: enum<full,core-runtime-platform,core-runtime,core-only>
+    required: true
+    notes: |
+      Which agent-stack layers are included in this product. Drives the expected
+      `composed_of` arity on AgentVersions of this product:
+        `full` = core + runtime + platform + ui (4 entries)
+        `core-runtime-platform` = core + runtime + platform (3 entries; no UI)
+        `core-runtime` = core + runtime (2 entries; SDK products)
+        `core-only` = core (1 entry; rare)
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - composes
+  - accepts_plugin
+  - bundled_into
+  outgoingEdges:
+  - has_version
+  - composed_of
+  - bundled_with
+  - defines_automation_rule
+  invariants:
+  - id starts with agent: null
+  - has_version count >= 1
+  - composed_of must include at least one core, runtime, platform role
+  examples: []
+- id: node:agent-version
+  name: AgentVersion
+  origin: universal
+  prefix: agent-version
+  cluster: 3-agent-stack
+  purpose: a version of an AgentProduct
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: agentProductId
+    type: ref<AgentProduct>
+    required: true
+  - name: versionRange
+    type: versionRange
+    required: true
+    evidence: vendor-doc-or-better
+  - name: releasedAt
+    type: iso-date
+    required: true
+  - name: eolAt
+    type: iso-date
+    required: false
+  - name: cliCommand
+    type: string
+    required: true
+    evidence: vendor-doc-or-better
+  - name: installMethods
+    type: list<ref<InstallMethod>>
+    required: true
+  - name: minSchemaVersion
+    type: semver
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  - name: packageName
+    type: string
+    required: false
+  - name: status
+    type: string
+    required: false
+  - name: supportedOutputFormats
+    type: list<enum<json-mode,strict-json-schema,grammar-constrained,regex-constrained,structured-call,xml,free-text,code-fence>>
+    required: false
+    notes: Structured-output / format-coercion mechanisms supported by this AgentVersion (D3 demoted from NodeKind to enum-extension, planner 2026-05-01; matches A.3 Modality / A.5 Hook collapse precedent).
+  incomingEdges:
+  - supported_by
+  - version_of
+  - invoked_by_workflow
+  - applied_by
+  - governs_template
+  - has_memory
+  - uses_vector_store
+  - provides_cost_for
+  - compliance_for
+  - context_bundle_used_by
+  - paired_to
+  outgoingEdges:
+  - version_of
+  - supports
+  - emits_hook
+  - realizes
+  - sourced_from
+  - installed_via
+  - versioned_via
+  - complies_with
+  - uses_context_bundle
+  - priced_by
+  - has_device_pair
+  invariants:
+  - agentProductId resolves
+  - eolAt >= releasedAt (when present)
+  - installMethods non-empty
+  examples: []
+- id: node:agent-core-impl
+  name: AgentCoreImpl
+  origin: derived
+  originContext: catalog pass 3/catalog pass 22 — synthesized from observations across multiple agent products (Claude Code, Codex, Cursor, Gemini-CLI). Tier model is a5c-coined but the underlying concept is cross-vendor.
+  prefix: agent-core-impl
+  cluster: 3-agent-stack
+  purpose: concrete loop+transport-client impl
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: agentVersionId
+    type: ref<AgentVersion>
+    required: true
+  - name: packageRef
+    type: ref<SourceRef|ProcessDescriptor>
+    required: true
+  - name: loopIteratorPolicy
+    type: enum<react-style,plan-execute,tool-use-loop,custom,delegated-to-remote,server-managed,process-function-driven>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: loopIteratorNotes
+    type: markdown
+    required: false
+  - name: contextManagementStrategy
+    type: enum<rolling-summary,hierarchical,none,platform-managed,delegated-to-remote,server-managed,user-managed>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: compactionTriggerThresholdTokens
+    type: int
+    required: false
+  - name: compactionTriggerNotes
+    type: markdown
+    required: false
+  - name: subagentInvokerPolicy
+    type: enum<nested-loop,tool-call-handoff,platform-mediated,delegated-to-remote,not-applicable,process-task-driven>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: subagentInvokerNotes
+    type: markdown
+    required: false
+  - name: resultSynthesisPolicy
+    type: enum<model-direct,post-processed,delegated-to-remote,server-managed,process-function-defined>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: resultSynthesisNotes
+    type: markdown
+    required: false
+  - name: stopDetectionStrategy
+    type: enum<model-stop-token,structured-end-event,platform-mediated,delegated-to-remote,process-function-completion>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: transportClientLibrary
+    type: string
+    required: true
+  - name: supportedTransportProtocols
+    type: list<ref<ModelTransportProtocol>>
+    required: true
+  - name: parallelToolCallHandling
+    type: enum<native,sequentialized,unsupported,delegated-to-remote,not-supported>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: streamingFidelity
+    type: enum<text-only,text-and-tool-args,full,partial>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: thinkingChannelHandling
+    type: enum<passthrough,summarized,dropped,model-dependent,delegated-to-remote,not-supported>
+    required: true
+    evidence: vendor-doc-or-better
+  # catalog pass 86 — `messageTypesEmitted` and `resultMessageSubtypes` promoted to
+  # `ProtocolMessage` NodeKind via `emits_message_type` edge.
+  # catalog pass 86 — `effortLevelsSupported` promoted to `EffortLevel` NodeKind via
+  # `supports_effort_level` edge.
+  # catalog pass 86 — `permissionModes` removed from AgentCoreImpl (the runtime
+  # operates in modes, not the core).
+  # catalog pass 86 — `hooksFiredFromCore` promoted to `fires_hook` edge.
+  - name: loopBudgetKnobs
+    type: list<enum<max_turns,max_budget_usd>>
+    required: false
+    notes: catalog pass 85 — Per-run budget knobs the core honors before forcing termination (Claude Code agent-loop doc). Kept flat per catalog pass 86 Fix 8.
+  - name: compactionTrigger
+    type: enum<auto-on-budget,manual,both>
+    required: false
+    notes: catalog pass 85 — How compaction is triggered relative to the loop (Claude Code agent-loop doc).
+  - name: streamingBlocks
+    type: list<enum<text,thinking,tool_use>>
+    required: false
+    notes: catalog pass 85 — Streaming content-block kinds the core forwards while assembling a turn (Claude Code agent-loop doc).
+  - name: effortLevelDelegation
+    type: enum<native,passthrough-to-harness,none>
+    required: false
+    notes: catalog pass 89 — How a core expresses effort-level support. `native` = core natively understands effort tiers (Claude Code, Claude Agent SDK). `passthrough-to-harness` = core dispatches to a bridged harness that owns effort (a5c). `none` = no effort dimension exposed.
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - composed_of
+  outgoingEdges:
+  - composes
+  - realizes
+  - depends_on
+  - speaks
+  invariants:
+  - composes carries role=core
+  - supportedTransportProtocols non-empty
+  examples: []
+- id: node:agent-runtime-impl
+  name: AgentRuntimeImpl
+  origin: derived
+  originContext: catalog pass 3/catalog pass 22 — synthesized from observations across multiple agent products (Claude Code, Codex, Cursor, Gemini-CLI). Tier model is a5c-coined but the underlying concept is cross-vendor.
+  prefix: agent-runtime-impl
+  cluster: 3-agent-stack
+  purpose: concrete runtime+tools+hook-sockets impl
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: agentVersionId
+    type: ref<AgentVersion>
+    required: true
+  - name: packageRef
+    type: ref<SourceRef|ProcessDescriptor>
+    required: true
+  - name: builtInTools
+    type: list<ref<ToolDescriptor>>
+    required: true
+  - name: toolRegistryDiscovery
+    type: enum<static-bundled,dynamic-config,dynamic-extension-loaded,not-applicable>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: hookSockets
+    type: list<ref<HookSurface>>
+    required: true
+  - name: internalSessionStateLocation
+    type: string
+    required: true
+    evidence: vendor-doc-or-better
+  - name: sessionFileFormat
+    type: enum<jsonl,sqlite,json,jsonl-tree,delegated-to-remote,jsonl-with-sqlite-index,event-sourced-jsonl>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: sessionFilePathConvention
+    type: string
+    required: true
+    evidence: vendor-doc-or-better
+  - name: approvalGatingPrimitive
+    type: enum<per-call,per-tool-class,session-default,none,delegated-to-remote,server-managed,policy-engine>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: subprocessSandboxStrategy
+    type: enum<none,wrapped-shell,container,sandboxed-syscall,platform-deferred,invocation-mode,native-sandbox,process-isolation>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: runtimeIdentity
+    type: enum<per-instance-keypair,platform-attested,none,delegated-to-remote,api-key,github-token,host-process>
+    required: true
+  - name: supportedMCPTransports
+    type: list<ref<MCPTransport>>
+    required: true
+  - name: supportsStreaming
+    type: bool
+    required: true
+    evidence: vendor-doc-or-better
+  - name: supportedAgentControlVerbs
+    type: list<enum<interrupt,abort,cancel,pause,resume,yield,checkpoint>>
+    required: false
+    notes: Agent-control verbs supported by this runtime (D2, planner 2026-05-01). Enum extension rather than NodeKind — uniform shape across instances.
+  - name: ioSurfaceKinds
+    type: list<enum<filesystem,clipboard,browser-dom,desktop-a11y-tree,mobile-a11y-tree,terminal-shell,voice,camera,microphone>>
+    required: false
+    notes: Protocol-level I/O surfaces the runtime can drive (D6 demoted from NodeKind to enum-extension, planner 2026-05-01). Distinct from Presentation which captures the shell experience.
+  - name: agentMemoryKinds
+    type: list<enum<conversation-buffer,summarized-history,vector-recall,knowledge-graph,prompt-cache,tool-state>>
+    required: false
+    notes: Memory mechanisms the runtime supports (D9 demoted from NodeKind to enum-extension, planner 2026-05-01; mirrors A.3 Modality collapse precedent).
+  - name: subagentDispatchMechanism
+    type: enum<task-tool,handoff,sub_agents-array,agent-as-tool,none,subprocess-task>
+    required: false
+    notes: 'How this runtime dispatches subagents. `task-tool` = Anthropic Claude Code Task tool (docs.anthropic.com/en/docs/claude-code/sub-agents). `handoff` = OpenAI Agents SDK handoff primitive (openai.github.io/openai-agents-python). `sub_agents-array` = Google ADK `sub_agents=[...]` declarative composition (google.github.io/adk-docs). `agent-as-tool` = OpenAI `agent.as_tool()` pattern (peer agent invoked as a tool). `none` = runtime has no subagent dispatch primitive. `subprocess-task` = OS-level subprocess with its own workdir + journal (e.g. babysitter ctx.task). (Optional during introduction; Phase-2 backfill flips to required + evidence: vendor-doc-or-better.)'
+  - name: subagentChildSessionPolicy
+    type: enum<none,ephemeral-child-session,persistent-child-session,inline-no-child-session>
+    required: false
+    notes: |
+      How subagent dispatch handles child sessions. `none` = runtime has no
+      subagent dispatch. `inline-no-child-session` = subagent runs inline in
+      parent's session (e.g. tool-call style). `ephemeral-child-session` =
+      subagent gets a fresh child session that ends when subagent returns
+      (e.g. claude-code's Task tool). `persistent-child-session` = child
+      session survives across multiple subagent invocations (e.g. babysitter
+      running long-lived agent subprocesses).
+  - name: subagentToolScopePolicy
+    type: enum<inherit-parent,explicit-allowlist,fresh-defaults,none>
+    required: false
+    notes: |
+      Whether subagents inherit the parent's tool permissions (`inherit-parent`),
+      require an explicit allowlist (`explicit-allowlist`), get fresh defaults
+      independent of parent (`fresh-defaults`), or n/a (`none`).
+  - name: userInputRequiredPolicy
+    type: enum<fail-run,surface-to-operator,satisfy-via-operator,auto-resolve,satisfy-via-channel,breakpoint-mediated>
+    required: false
+    notes: catalog pass 18 / Symphony §10.5 — UserInputRequiredPolicy enum. Distinct from approvalGatingPrimitive (which is approval-time policy).
+  - name: secretHandlingPolicy
+    type: enum<env-passthrough,env-allowlist,secret-broker,no-secrets,explicit-injection>
+    required: false
+    notes: catalog pass 18 / SecretHandlingPolicy enum. Informational only — NOT Trust Chain. Aligns with Sandbox.secretAccessScope but operates at the runtime layer, not the sandbox layer.
+  - name: tokenAccountingSemantics
+    type: enum<absolute,delta,mixed-prefer-absolute>
+    required: false
+    notes: catalog pass 18 / Symphony §13.5 — TokenAccountingSemantics enum (prevents double-counting across token totals).
+  # catalog pass 86 — `permissionModesAvailable` promoted to PermissionMode NodeKind
+  # via `operates_in_permission_mode` edge.
+  - name: deepLinkSchemesRegistered
+    type: list<string>
+    required: false
+    notes: catalog pass 85 — URL schemes the runtime registers OS-level handlers for (Claude Code deep-links doc).
+  - name: pluginDiscoverySource
+    type: list<enum<marketplaceManifest,localPath,remoteUrl,gitRepo>>
+    required: false
+    notes: catalog pass 85 — Sources the runtime can discover plugins from (Claude Code discover-plugins doc).
+  # catalog pass 86 — `pluginInstallScopes` promoted to PluginInstallScope NodeKind
+  # via `installs_plugins_in_scope` edge.
+  - name: subagentToolInheritance
+    type: enum<inherit-all,allowlist,denylist>
+    required: false
+    notes: catalog pass 85 — How subagent tool inheritance is expressed by the runtime (Claude Code sub-agents doc).
+  # catalog pass 86 — `skillDiscoveryScopes` promoted to SkillDiscoveryScope NodeKind
+  # via `discovers_skills_in_scope` edge.
+  - name: skillScopePrecedence
+    type: list<enum<enterprise,personal,project,plugin,additional-directory>>
+    required: false
+    notes: catalog pass 85 — Ordered precedence for resolving skill name collisions across scopes (Claude Code skills doc).
+  - name: liveChangeDetection
+    type: bool
+    required: false
+    notes: catalog pass 85 — Whether the runtime hot-reloads skill/subagent/plugin changes mid-session (Claude Code skills/sub-agents doc).
+  - name: disableSkillShellExecutionSupported
+    type: bool
+    required: false
+    notes: catalog pass 85 — Whether the runtime honors a kill-switch disabling skill shell execution (Claude Code skills doc).
+  # catalog pass 86 — `mcpConfigScopes` promoted to MCPConfigScope NodeKind via
+  # `uses_mcp_scope` edge.
+  - name: urlHandlerRegistrationLocations
+    type: map<string,string>
+    required: false
+    notes: catalog pass 85 — Per-platform (mac/linux/windows) registration paths for URL-scheme handlers (Claude Code deep-links doc).
+  - name: outputGuardMechanism
+    type: enum<task-output-schema,structured-output-passthrough,none>
+    required: false
+    notes: catalog pass 89 — How this runtime enforces output-schema constraints. `task-output-schema` = per-task SDK-enforced outputSchema (babysitter SDK defineTask). `structured-output-passthrough` = delegates to provider's structured-output capability (Claude Code). `none` = no output-shape enforcement.
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - composed_of
+  - receives_signals_from
+  - ingests_from
+  outgoingEdges:
+  - composes
+  - realizes
+  - exposes
+  - bundles
+  - connects
+  - speaks
+  - enforces_invariant
+  - has_launch_contract
+  - emits_signals_to
+  - exports_to
+  - emits_journal_event
+  invariants:
+  - composes carries role=runtime
+  examples: []
+- id: node:agent-platform-impl
+  name: AgentPlatformImpl
+  origin: derived
+  originContext: catalog pass 3/catalog pass 22 — synthesized from observations across multiple agent products (Claude Code, Codex, Cursor, Gemini-CLI). Tier model is a5c-coined but the underlying concept is cross-vendor.
+  prefix: agent-platform-impl
+  cluster: 3-agent-stack
+  purpose: concrete platform impl
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: agentVersionId
+    type: ref<AgentVersion>
+    required: true
+  - name: packageRef
+    type: ref<SourceRef|ProcessDescriptor>
+    required: true
+  - name: nativeExtensionFormat
+    type: enum<claude-plugin,cursor-extension,codex-extension,gemini-extension,opencode-acp,none,gh-copilot-plugin,omp-plugin,openclaw-plugin,pi-plugin,a5c-plugin,babysitter-plugin>
+    required: true
+  - name: nativeExtensionManifestPath
+    type: string
+    required: false
+  - name: nativeExtensionsDirectoryPath
+    type: list<string>
+    required: false
+  - name: skillFormat
+    type: enum<anthropic-skill-md,cursor-rule,continue-prompt,none,agents-md>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: skillsDirectoryPath
+    type: list<string>
+    required: false
+  - name: customSlashCommandsPath
+    type: list<string>
+    required: false
+  - name: subagentsDirectoryPath
+    type: list<string>
+    required: false
+  - name: subagentDefinitionFormat
+    type: enum<claude-code-md,none,js-module-export>
+    required: false
+    notes: 'Format the platform loads user-defined (custom) subagent definitions from. `claude-code-md` = Anthropic Claude Code `.claude/agents/<name>.md` Markdown-with-YAML-frontmatter format (docs.anthropic.com/en/docs/claude-code/sub-agents); also accepted at `~/.claude/agents/`. `none` = platform has no custom-subagent loader (e.g. OpenAI Agents SDK and Google ADK express subagent composition in code, not via on-disk definition files). `js-module-export` = subagents defined as JS/TS module exports (e.g. babysitter defineTask). (Optional during introduction; Phase-2 backfill flips to required + evidence: vendor-doc-or-better.)'
+  - name: hooksDirectoryOrConfigPath
+    type: list<string>
+    required: false
+  - name: settingsFiles
+    type: list<string>
+    required: true
+  - name: marketplaceUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: pluginRegistryPath
+    type: string
+    required: false
+  - name: capabilityProfileRegistry
+    type: bool
+    required: true
+  - name: launchConfigRegistry
+    type: bool
+    required: true
+  - name: platformIdentityStrategy
+    type: enum<oauth-keychain,api-key,service-account,github-token,none,delegated-to-invocation-mode,github-oauth,delegated-to-harness>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: updateChannelMechanism
+    type: enum<npm,binary-download,extension-store,none,gh-extension,in-app-updater,pip>
+    required: true
+  - name: supportedChannelKinds
+    type: list<enum<mcp-channel,a2a-channel,chat-channel,mailbox-channel,http-sse-channel>>
+    required: true
+    notes: Collapsed from list<ref<ChannelKind>> to bare enum strings (remodel 2026-04-29).
+  # catalog pass 86 — `skillFrontmatterFieldsSupported` promoted to FrontmatterField
+  # NodeKind via `defines_frontmatter_field` edge.
+  - name: skillStringSubstitutions
+    type: list<string>
+    required: false
+    notes: catalog pass 85 — Substitution tokens the skill loader resolves at invoke time (Claude Code skills doc).
+  - name: skillDynamicContextInjection
+    type: bool
+    required: false
+    notes: catalog pass 85 — Whether the platform injects dynamic context (e.g. shell output) into skill bodies before sending to the model (Claude Code skills doc).
+  - name: pluginManifestPath
+    type: string
+    required: false
+    notes: catalog pass 85 — Path of the marketplace manifest the platform reads (Claude Code discover-plugins doc).
+  - name: marketplaceCommands
+    type: list<enum<add,list,update,remove>>
+    required: false
+    notes: catalog pass 85 — Marketplace-management subcommands exposed by the platform's CLI (Claude Code discover-plugins doc).
+  - name: pluginCommands
+    type: list<enum<install,disable,enable,uninstall,reload-plugins>>
+    required: false
+    notes: catalog pass 85 — Plugin-management subcommands exposed by the platform's CLI (Claude Code discover-plugins doc).
+  - name: agentTeamSupport
+    type: object
+    required: false
+    notes: catalog pass 85 — Agent-teams support metadata (experimental flag, env var, version range, display modes, settings, storage). Source — Claude Code agent-teams doc.
+  - name: subagentStorageLocations
+    type: list<string>
+    required: false
+    notes: catalog pass 85 — Filesystem locations the platform loads subagent definitions from (Claude Code sub-agents doc).
+  - name: skillStorageLocations
+    type: list<string>
+    required: false
+    notes: catalog pass 85 — Filesystem locations the platform loads skills from (Claude Code skills doc).
+  - name: extraKnownMarketplacesSupport
+    type: bool
+    required: false
+    notes: catalog pass 85 — Whether the platform honors an "extraKnownMarketplaces" setting for ambient marketplace registration (Claude Code discover-plugins doc).
+  - name: pluginAutoUpdateControl
+    type: object
+    required: false
+    notes: catalog pass 85 — Env-var-based controls (DISABLE_AUTOUPDATER / FORCE_AUTOUPDATE_PLUGINS) for plugin auto-update (Claude Code discover-plugins / env-vars doc).
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - composed_of
+  - receives_signals_from
+  - ingests_from
+  outgoingEdges:
+  - composes
+  - realizes
+  - exposes
+  - loads
+  - bundles
+  - emits_signals_to
+  - exports_to
+  - has_team
+  - has_marketplace
+  - supports_interaction_primitive
+  - emits_journal_event
+  invariants:
+  - composes carries role=platform
+  examples: []
+- id: node:agent-ui-impl
+  name: AgentUIImpl
+  origin: derived
+  originContext: catalog pass 3/catalog pass 22 — synthesized from observations across multiple agent products (Claude Code, Codex, Cursor, Gemini-CLI). Tier model is a5c-coined but the underlying concept is cross-vendor.
+  prefix: agent-ui-impl
+  cluster: 3-agent-stack
+  purpose: |
+    User-facing UI layer of an agent product (TUI, CLI, web shell, IDE extension).
+    Owns presentations bundled with the product and the interaction primitives
+    the user has access to (slash commands, command palette, model picker, prompt
+    input, etc.). Distinct from AgentPlatformImpl (extensibility surfaces) and
+    AgentRuntimeImpl (runtime environment).
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: agentVersionId
+    type: ref<AgentVersion>
+    required: true
+  - name: packageRef
+    type: ref<SourceRef|ProcessDescriptor>
+    required: true
+  - name: uiKind
+    type: enum<tui-only,cli-only,tui-and-cli,web,ide-extension,mobile-app,multi-surface,headless>
+    required: true
+    notes: |
+      High-level shape of the UI layer. `headless` = no UI (e.g. SDK/library or pure
+      process orchestrator like babysitter); the agent is consumed programmatically
+      only.
+  - name: presentationsBundled
+    type: list<ref<Presentation>>
+    required: false
+  - name: keybindingsConfigPath
+    type: list<string>
+    required: false
+  - name: themeSupport
+    type: enum<none,light-dark,full-customizable>
+    required: false
+    notes: Theme support at the UI layer (mirrors Presentation.themeSupport for the bundled UI).
+  - name: accessibilitySupport
+    type: enum<none,basic,wcag-aa,wcag-aaa>
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - composed_of
+  outgoingEdges:
+  - bundled_with
+  - supports_interaction_primitive
+  invariants:
+  - 'id starts with agent-ui-impl:'
+  - if uiKind != headless then presentationsBundled non-empty
+  examples: []
+- id: node:capability-profile
+  name: CapabilityProfile
+  origin: universal
+  prefix: capability-profile
+  cluster: 3-agent-stack
+  purpose: a swappable capability bundle
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: agentVersionId
+    type: ref<AgentVersion>
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: default
+    type: bool
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: overrides
+    type: map<ref<Capability>
+    object>: null
+    required: true
+  - name: mode
+    type: enum<auto,plan,composer,manual,custom>
+    required: false
+  - name: parentProfile
+    type: ref<CapabilityProfile>
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - applies_to_version
+  - requires_capability
+  invariants:
+  - exactly one CapabilityProfile per AgentVersion has default=true
+  examples: []
+- id: node:human-checkpoint
+  name: HumanCheckpoint
+  origin: universal
+  originContext: D4 / planner 2026-05-01 — explicit human-consult point with policy
+  prefix: human-checkpoint
+  cluster: 3-agent-stack
+  purpose: explicit point at which a human is consulted; reified rather than enum because it carries policy attributes
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<approval,review,escalation,edit>
+    required: true
+  - name: blockingPolicy
+    type: enum<hard,soft,advisory>
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: urgency
+    type: enum<low,normal,high,critical>
+    required: false
+    notes: catalog pass 78 — Urgency axis from wiki/legacy/a5c/02-muxes.md §9 live decision schema.
+  - name: interactionKind
+    type: enum<sync,deferred,notify-only>
+    required: false
+    notes: catalog pass 78 — InteractionKind axis from wiki/legacy/a5c/02-muxes.md §9. sync = caller waits; deferred = caller continues, decision is fielded asynchronously; notify-only = no answer required.
+  incomingEdges:
+  - uses_checkpoint
+  outgoingEdges:
+  - escalates_to
+  - notifies_via
+  - has_strategy
+  - routes_to_responder
+  - has_answer
+  - records_decision_memory
+  invariants:
+  - id starts with human-checkpoint: null
+  examples: []
+- id: node:breakpoint-strategy
+  name: BreakpointStrategy
+  origin: a5c
+  originContext: catalog pass 78 — wiki/legacy/a5c/02-muxes.md §9 live decision schema
+  prefix: breakpoint-strategy
+  cluster: 3-agent-stack
+  purpose: the resolution strategy a HumanCheckpoint requests (single-question, multiple-choice, free-form edit, multi-step decision, etc.)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: strategyKind
+    type: enum<single-question,multiple-choice,free-form-edit,multi-step-decision,binary-approval,rating-only>
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: defaultTimeoutSec
+    type: int
+    required: false
+  incomingEdges:
+  - has_strategy
+  outgoingEdges: []
+  invariants:
+  - id starts with breakpoint-strategy: null
+  examples: []
+- id: node:responder-profile
+  name: ResponderProfile
+  origin: a5c
+  originContext: catalog pass 78 — wiki/legacy/a5c/02-muxes.md §9 live decision schema; defines who is allowed to answer a HumanCheckpoint
+  prefix: responder-profile
+  cluster: 3-agent-stack
+  purpose: profile describing who is allowed to respond to a HumanCheckpoint — by Role, Capability, principal, or backend identity
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: allowedRoleIds
+    type: list<ref<Role>>
+    required: false
+  - name: requiredCapabilityIds
+    type: list<ref<Capability>>
+    required: false
+  - name: backend
+    type: enum<linear,github,jira,kanban,mcp,slack,email,cli,web>
+    required: false
+    notes: Backend through which the responder is reachable.
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - routes_to_responder
+  outgoingEdges: []
+  invariants:
+  - id starts with responder-profile: null
+  examples: []
+- id: node:breakpoint-answer
+  name: BreakpointAnswer
+  origin: a5c
+  originContext: catalog pass 78 — wiki/legacy/a5c/02-muxes.md §9 live decision schema
+  prefix: breakpoint-answer
+  cluster: 3-agent-stack
+  purpose: a recorded answer to a HumanCheckpoint, with optional rating and lessons-learned link
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: checkpointId
+    type: ref<HumanCheckpoint>
+    required: true
+  - name: content
+    type: markdown
+    required: true
+  - name: answeredBy
+    type: string
+    required: true
+    notes: Opaque principal identifier (e.g. role:tech-lead, an org-unit handle, a backend-issued id).
+  - name: answeredAt
+    type: iso-timestamp
+    required: true
+  - name: rating
+    type: enum<thumbs-up,thumbs-down,neutral,scored>
+    required: false
+  - name: ratingNumeric
+    type: float
+    required: false
+    notes: Optional 0..1 numeric score paired with rating=scored.
+  - name: ratingNotes
+    type: markdown
+    required: false
+  incomingEdges:
+  - has_answer
+  outgoingEdges:
+  - records_decision_memory
+  invariants:
+  - id starts with breakpoint-answer: null
+  - checkpointId resolves to a real HumanCheckpoint
+  examples: []
+- id: node:decision-memory
+  name: DecisionMemory
+  origin: a5c
+  originContext: catalog pass 78 — wiki/legacy/a5c/02-muxes.md §9 live decision schema; lessons-learned attached to a decision
+  prefix: decision-memory
+  cluster: 3-agent-stack
+  purpose: a lesson-learned attached to a HumanCheckpoint or BreakpointAnswer for retrieval on similar future decisions
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: lesson
+    type: markdown
+    required: true
+  - name: applicabilityTags
+    type: list<string>
+    required: false
+    notes: Tags that match similar future decisions (e.g. ["plan-approval", "destructive-write"]).
+  - name: recordedAt
+    type: iso-timestamp
+    required: true
+  - name: recordedBy
+    type: string
+    required: true
+  incomingEdges:
+  - records_decision_memory
+  outgoingEdges: []
+  invariants:
+  - id starts with decision-memory: null
+  examples: []
+- id: node:resume-token
+  name: ResumeToken
+  origin: universal
+  originContext: D4 / planner 2026-05-01 — async resumption primitive for paused runs
+  prefix: resume-token
+  cluster: 3-agent-stack
+  purpose: primitive for async resumption of a paused/interrupted run
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: ttl
+    type: duration
+    required: false
+    notes: Time-to-live before the resume token expires.
+  - name: scope
+    type: enum<run,session,workspace>
+    required: false
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - resume_token_issued_by
+  outgoingEdges: []
+  invariants:
+  - id starts with resume-token: null
+  examples: []
+- id: node:launch-config
+  name: LaunchConfig
+  origin: universal
+  prefix: launch-config
+  cluster: 3-agent-stack
+  purpose: named spawn recipe
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: agentVersionId
+    type: ref<AgentVersion>
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: model
+    type: ref<ModelVersion>
+    required: false
+  - name: env
+    type: map<string
+    string>: null
+    required: true
+  - name: transportProxyId
+    type: ref<TransportProxy>
+    required: false
+  - name: profileId
+    type: ref<CapabilityProfile>
+    required: false
+  - name: commArgs
+    type: list<string>
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges: []
+  outgoingEdges:
+  - runs_via
+  - requires_capability
+  invariants:
+  - profileId (when set) belongs to same agentVersionId
+  examples: []
+- id: node:session-model
+  name: SessionModel
+  origin: universal
+  prefix: session-model
+  cluster: 3-agent-stack
+  purpose: persistence/control-plane/structured-transport triple
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: agentVersionId
+    type: ref<AgentVersion>
+    required: true
+  - name: persistence
+    type: enum<none
+    file: null
+    sqlite: null
+    in-memory>: null
+    required: true
+  - name: controlPlane
+    type: enum<self-managed
+    external-host: null
+    mcp-mediated>: null
+    required: true
+  - name: structuredTransport
+    type: enum<none
+    restart-per-turn: null
+    persistent>: null
+    required: true
+  - name: sessionDir
+    type: string
+    required: false
+    evidence: vendor-doc-or-better
+  - name: canResume
+    type: bool
+    required: true
+    evidence: vendor-doc-or-better
+  - name: canFork
+    type: bool
+    required: true
+    evidence: vendor-doc-or-better
+  - name: format
+    type: enum<jsonl
+    sqlite: null
+    json: null
+    jsonl-tree: null
+    delegated-to-remote: null
+    jsonl-with-sqlite-index>: null
+    required: true
+  incomingEdges: []
+  outgoingEdges:
+  - state_machine_for
+  - requires_capability
+  invariants:
+  - persistence=none implies canResume=false and canFork=false
+  - format consistent with persistence
+  examples: []
+- id: node:launch-contract
+  name: LaunchContract
+  origin: derived
+  originContext: catalog pass 18 / Symphony §10.1+§10.2 — orchestrator->runner subprocess spawn contract (combines Symphony LaunchContract + SessionStartupContract + TurnTimeouts)
+  prefix: launch-contract
+  cluster: 3-agent-stack
+  purpose: codifies the spawn shape (command, cwd, line-size, timeouts, startup handshake) for orchestrator->agent-subprocess launches; structurally distinct from AgentRuntimeImpl (which is the runtime descriptor)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: command
+    type: string
+    required: true
+  - name: invocationShell
+    type: enum<none,bash,sh>
+    required: false
+  - name: cwdRule
+    type: enum<workspace-absolute,workspace-relative>
+    required: false
+  - name: transportRef
+    type: ref<AgentHostTransport>
+    required: false
+  - name: maxLineSizeBytes
+    type: int
+    required: false
+  - name: readTimeoutMs
+    type: int
+    required: false
+  - name: turnTimeoutMs
+    type: int
+    required: false
+  - name: stallTimeoutMs
+    type: int
+    required: false
+  - name: threadCreationMode
+    type: enum<create,resume,fork>
+    required: false
+  - name: initialPromptSource
+    type: enum<workflow-template,inline>
+    required: false
+  - name: advertisedToolNames
+    type: list<string>
+    required: false
+  - name: userInputRequiredPolicy
+    type: enum<fail-run,surface-to-operator,satisfy-via-operator,auto-resolve,satisfy-via-channel>
+    required: false
+    notes: UserInputRequiredPolicy enum (Symphony §10.5).
+  - name: secretHandlingPolicy
+    type: enum<env-passthrough,env-allowlist,secret-broker,no-secrets,explicit-injection>
+    required: false
+    notes: SecretHandlingPolicy enum — informational; not Trust Chain.
+  incomingEdges:
+  - launch_contract_for
+  outgoingEdges: []
+  invariants:
+  - id starts with launch-contract: null
+  examples: []
+
+
+- id: node:agent-governance-impl
+  name: AgentGovernanceImpl
+  origin: derived
+  originContext: catalog pass 2026-05-14 — governance promoted to a first-class universal agentic stack layer for policy, risk, audit evidence, plugin governance, and tool governance implementation components.
+  prefix: agent-governance-impl
+  cluster: 3-agent-stack
+  purpose: concrete governance implementation for an agent product, SDK, plugin host, or platform tool surface
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: agentVersionId
+    type: ref<AgentVersion>
+    required: true
+  - name: packageRef
+    type: ref<SourceRef|ProcessDescriptor>
+    required: true
+  - name: componentKind
+    type: enum<policy-engine,plugin-governance,tool-governance,audit-evidence,risk-control,composite>
+    required: true
+  - name: governedSurfaces
+    type: list<string>
+    required: false
+    notes: Surfaces governed by this component, such as plugin manifests, hook fanout, task effects, tool dispatch, run journals, approval gates, or generated platform plugins.
+  - name: riskControls
+    type: list<string>
+    required: false
+    notes: Named risks or control families mitigated by this governance implementation.
+  - name: evidenceProduced
+    type: list<string>
+    required: false
+    notes: Evidence artifacts produced for audit or review, such as journal events, completion proof, hook merge diagnostics, task result schemas, or plugin manifests.
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - composed_of
+  outgoingEdges:
+  - realizes
+  - composes
+  - implements
+  - targets_plugin_surface
+  - depends_on
+  - bundles
+  - supports
+  invariants:
+  - id starts with agent-governance-impl: null
+  - composes carries role=governance
+  examples:
+  - graph/agent-stack/governance-impls/babysitter-plugin-governance-current.yaml
+  - graph/agent-stack/governance-impls/babysitter-sdk-tool-governance-current.yaml

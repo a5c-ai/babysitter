@@ -2,6 +2,13 @@
 name: query-translator
 description: Translate SQL queries between different database dialects with function mapping and optimization
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:database-migrations-zero-downtime, skill-area:schema-evolution]
+  roles: [role:data-engineer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Query Translator Skill

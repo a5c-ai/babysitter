@@ -3,6 +3,12 @@
  * @description Design membrane-based separation systems including reverse osmosis, ultrafiltration, and pervaporation
  * @inputs { processName: string, feedSpecification: object, separationType: string, productRequirements: object, outputDir: string }
  * @outputs { success: boolean, membraneSystem: object, operatingProcedures: object, maintenancePlan: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:chemical-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

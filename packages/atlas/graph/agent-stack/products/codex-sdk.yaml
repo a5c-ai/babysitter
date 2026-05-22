@@ -1,0 +1,18 @@
+nodeKind: AgentProduct
+id: agent:codex-sdk
+attributes:
+  displayName: "Codex SDK"
+  vendor: "OpenAI"
+  homepageUrl: "https://www.npmjs.com/package/openai"
+  primarySurface: sdk
+  supportTier: catalog-backed
+  productKind: sdk
+  stackScope: core-runtime
+  description: |
+    Programmatic SDK for OpenAI Codex / Responses API consumers. Distinct from
+    Codex (the CLI). Bypasses the Codex Rust runtime and lets the host program
+    drive a Codex-style loop directly via the `openai` npm package or the
+    Python SDK.
+edges:
+  has_version:
+    - agent-version:codex-sdk@current

@@ -13,6 +13,10 @@ required-skills:
   - network-optimization-modeler
   - omnichannel-fulfillment-allocator
   - carbon-footprint-calculator
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:quantitative-modeling, skill-area:strategic-analysis]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:strategic-planner]
 ---
 
 # Network Planning Analyst

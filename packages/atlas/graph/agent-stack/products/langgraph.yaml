@@ -1,0 +1,25 @@
+nodeKind: AgentProduct
+id: agent:langgraph
+attributes:
+  displayName: "LangGraph ecosystem"
+  vendor: "LangChain"
+  homepageUrl: "https://docs.langchain.com/oss/python/langgraph/overview"
+  primarySurface: sdk
+  supportTier: catalog-backed
+  productKind: sdk
+  stackScope: core-runtime-platform
+  description: |
+    LangGraph ecosystem for custom agent building. The open-source graph SDK
+    supplies graph/state/checkpoint orchestration for controllable agents;
+    LangChain agents and Deep Agents provide higher-level custom-agent harnesses;
+    LangSmith / LangGraph Platform covers deployed graph invocation, hosted
+    runtime concerns, and thread-persistent production operation. This product
+    intentionally maps a framework ecosystem rather than a single CLI/TUI.
+edges:
+  has_version:
+    - agent-version:langgraph@current
+  sourced_from:
+    - source-ref:langgraph-docs
+    - source-ref:langchain-agents-docs
+    - source-ref:langsmith-langgraph-platform-docs
+    - source-ref:deepagents-github

@@ -72,11 +72,19 @@ specified:
   - In case of a new project, plan the architecture, stack, parts, milestones
   - In case of an existing project, analyze the architecture, stack, relevant
     parts, milestones, and plan the changes
+  - In case of modifying existing code (brownfield), trace the runtime call path
+    from user-facing entry points through to final output before planning changes;
+    record traced paths as `runtimeCallPaths` in the planning output; only modify
+    files that are actually on the live execution path (see ADVANCED_PATTERNS.md
+    Pattern 9 for the full pattern)
   - Integrate/link the main pages (or entry points) with functionality created
     for every phase of the development process
   - Quality gated iterative and convergent development/refinement loops
-  - Test driven -- where quality gates can use executable tools, scripts, and
-    tests to verify accuracy and completeness
+  - Test driven -- where quality gates use `kind: 'shell'` tasks with
+    `expectedExitCode` for deterministic verification (compilation, linting,
+    test suites, grep checks, dependency availability, runtime smoke tests).
+    Reserve `kind: 'agent'` for subjective assessment only (code review,
+    architecture evaluation, UX quality)
   - Integration phases for each new functionality in every milestone
   - Where relevant -- beautiful and polished UX with pixel-perfect verification
   - Accurate and complete implementation of the user request
@@ -86,3 +94,13 @@ specified:
     - `.a5c/processes/` (project level processes)
     - `specializations/` under the active process-library root
     - `methodologies/` under the active process-library root
+  - **Drift-resistant prompt composition** (issue #129). In multi-phase
+    processes, never paraphrase spec text into agent-task prompt literals.
+    Read specs at run time via `kind: 'shell'` `cat` tasks and interpolate
+    stdout verbatim into downstream prompts -- this keeps spec bytes out of
+    the authoring compose pass where proximity bias rewrites criteria to
+    match recently-built implementation. Order test-authoring phases *before*
+    implementation phases so the tests become frozen inputs rather than a
+    post-hoc rationalization of what got built. See the "Drift-resistant
+    prompt composition" section of the process creation guidance for the
+    full pattern and examples.

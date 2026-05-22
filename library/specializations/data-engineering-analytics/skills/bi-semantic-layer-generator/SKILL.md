@@ -11,6 +11,12 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+graph:
+  domains: [domain:data-engineering]
+  specializations: [specialization:data-engineering-analytics]
+  skillAreas: [skill-area:data-analytics, skill-area:data-warehouse-modeling]
+  roles: [role:analytics-engineer, role:data-analyst]
+  workflows: [workflow:data-pipeline-deployment]
 ---
 
 # BI Semantic Layer Generator

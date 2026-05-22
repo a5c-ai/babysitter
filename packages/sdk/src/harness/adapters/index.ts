@@ -1,0 +1,11 @@
+export { createClaudeCodeAdapter } from "./claude-code";
+export type { SessionResolutionDetails } from "./claude-code";
+export { resolveSessionIdDetailed, __resolveCurrentSessionIdFromEnvForTests, setBabysitterSessionIdInEnvFile } from "./claude-code";
+export { createCodexAdapter } from "./codex";
+export { createCursorAdapter } from "./cursor";
+export { createGeminiCliAdapter } from "./gemini-cli";
+export { createGithubCopilotAdapter, setBabysitterSessionIdInCopilotEnvFile } from "./github-copilot";
+export { createOpenCodeAdapter } from "./opencode";
+export { createOpenClawAdapter } from "./openclaw";
+export { createOhMyPiAdapter } from "./oh-my-pi";
+export { createPiAdapter } from "./pi";

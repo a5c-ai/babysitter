@@ -8,6 +8,14 @@ expertise:
   - Tool orchestration
   - Error recovery strategies
   - Agent loop optimization
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:tool-use]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development, workflow:ml-model-lifecycle]
+  topics: [topic:design-patterns]
+
 ---
 
 # ReAct Agent Architect

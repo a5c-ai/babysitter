@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-012
   category: Testing
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:quality-management, skill-area:requirements-engineering, skill-area:business-analysis]
+  workflows: [workflow:market-analysis]
+  roles: [role:quality-analyst, role:business-analyst]
 ---
 
 # UAT Test Case Generator

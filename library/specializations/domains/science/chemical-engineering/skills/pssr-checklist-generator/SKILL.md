@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Commissioning
   skill-id: CE-SK-027
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:data-analysis, skill-area:compliance-automation, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # PSSR Checklist Generator Skill

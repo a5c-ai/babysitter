@@ -2,6 +2,13 @@
 name: dependency-scanner
 description: Comprehensive dependency scanning, inventory generation, and SBOM creation for migration readiness assessment
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:dependency-vulnerability-mgmt, skill-area:supply-chain-security]
+  roles: [role:security-engineer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Dependency Scanner Skill

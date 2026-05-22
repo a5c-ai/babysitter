@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Reaction Engineering
   skill-id: CE-SK-008
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:physics-simulation, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:lab-technician]
 ---
 
 # Catalyst Analyzer Skill

@@ -1,0 +1,15 @@
+nodeKind: ExtensionInterface
+id: extension-interface:sleep-cycle
+attributes:
+  interfaceVersion: "1.0.0"
+  description: Sleep Cycle
+  displayName: "Sleep Cycle"
+  concern: "Pause and resume long-running agent work across wall-clock gaps."
+  surface: |
+    `sleep(duration)`, `wakeAt(timestamp)`, `onWake(handler)`.
+    Persists context across the gap.
+  builtInDefault: |
+    Process exits and restarts on the next invocation; no persistence
+    beyond the journal.
+  notableImpls: []
+edges: {}

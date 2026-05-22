@@ -1,0 +1,21 @@
+nodeKind: Language
+id: language:kotlin
+attributes:
+  displayName: "Kotlin"
+  paradigms:
+    - object-oriented
+    - functional
+  description: |
+    Kotlin is a concise, statically-typed, multi-paradigm language that runs
+    on the JVM, in the browser (Kotlin/JS), and as native binaries
+    (Kotlin/Native). Developed by JetBrains, it became the preferred
+    language for Android development in 2019.
+
+    Key features include null safety, coroutines for async programming,
+    extension functions, data classes, sealed classes, and a powerful
+    standard library. Kotlin Multiplatform (KMP) allows sharing business
+    logic across Android, iOS, and the web. On the server side, Spring Boot
+    and Ktor are common frameworks. It is fully interoperable with Java.
+edges:
+  used_by_skill_area:
+    - target: skill-area:android-native

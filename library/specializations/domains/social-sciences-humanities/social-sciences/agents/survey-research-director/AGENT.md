@@ -2,6 +2,11 @@
 name: survey-research-director
 description: Oversee survey design, sampling, administration, and quality control for population-based studies
 required-skills: survey-design-administration, psychometric-assessment
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:statistical-analysis, skill-area:user-research, skill-area:data-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:data-analyst, role:research-scientist]
 ---
 
 # Survey Research Director Agent

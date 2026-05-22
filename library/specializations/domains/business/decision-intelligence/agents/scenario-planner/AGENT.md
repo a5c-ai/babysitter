@@ -11,6 +11,10 @@ expertise:
   - Implication analysis
   - Strategic option identification
   - Early warning system design
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:strategic-analysis, skill-area:competitive-intelligence, skill-area:strategic-planning]
+  roles: [role:strategic-planner, role:business-analyst, role:data-analyst]
 ---
 
 # Scenario Planner

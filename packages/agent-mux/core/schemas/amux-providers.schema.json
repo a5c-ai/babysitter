@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5c.ai/schemas/amux-providers.json",
+  "title": "amux providers configuration",
+  "type": "object",
+  "properties": {
+    "version": { "type": "number", "const": 1 },
+    "defaults": {
+      "type": "object",
+      "properties": {
+        "provider": { "type": "string" },
+        "model": { "type": "string" }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "provider": { "type": "string" },
+          "model": { "type": "string" },
+          "transport": { "type": "string" },
+          "auth": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "apiKey": { "type": "string" },
+              "command": { "type": "string" },
+              "awsProfile": { "type": "string" }
+            }
+          },
+          "params": { "type": "object" }
+        }
+      }
+    }
+  }
+}

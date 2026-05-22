@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:effect.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:effect
+  text: |
+    unit of external work in a Run (a5c-flavored)
+  status: canonical
+edges:
+  defines:
+    - term:effect

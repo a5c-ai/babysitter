@@ -14,6 +14,10 @@ required-skills:
   - slotting-optimization-engine
   - labor-productivity-optimizer
   - warehouse-simulation-modeler
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:data-analytics, skill-area:change-management-ops]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:procurement-manager]
 ---
 
 # Warehouse Operations Manager

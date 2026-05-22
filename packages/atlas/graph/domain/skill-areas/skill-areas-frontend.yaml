@@ -1,0 +1,254 @@
+---
+nodeKind: SkillArea
+id: skill-area:react-components
+attributes:
+  displayName: "React Component Design"
+  description: |
+    Designing reusable React components: composition vs inheritance,
+    hooks discipline, accessibility, controlled/uncontrolled patterns,
+    and performance via memo/useMemo/useCallback.
+  domains:
+    - specialization:web-development
+  requiresFrameworks:
+    - framework:react
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+  uses_framework:
+    - framework:react
+    - target: framework:react
+  prerequisite_for_learning:
+    - target: skill-area:react-state-management
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:vue-components
+attributes:
+  displayName: "Vue Component Design"
+  description: |
+    Designing Vue 3 components with the Composition API: reactivity,
+    refs vs reactive, composables, slots, and SFC patterns.
+  domains:
+    - specialization:web-development
+  requiresFrameworks:
+    - framework:vue
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+  uses_framework:
+    - framework:vue
+    - target: framework:vue
+---
+nodeKind: SkillArea
+id: skill-area:server-side-rendering
+attributes:
+  displayName: "Server-Side Rendering"
+  description: |
+    Server-side rendering of web apps — render-then-hydrate, streaming
+    SSR, edge SSR, data loading patterns, and cache headers.
+  domains:
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+  uses_framework:
+    - framework:nextjs
+    - framework:nuxt
+    - framework:sveltekit
+    - framework:remix
+  prerequisite_for_learning:
+    - target: skill-area:hydration
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:hydration
+attributes:
+  displayName: "Hydration Strategies"
+  description: |
+    Hydration tradeoffs in SSR/SSG apps — full hydration, progressive
+    hydration, islands, resumability, and selective hydration boundaries.
+  domains:
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+  uses_framework:
+    - framework:astro
+    - framework:qwik
+    - framework:nextjs
+  requires_skill_area:
+    - skill-area:server-side-rendering
+---
+nodeKind: SkillArea
+id: skill-area:web-vitals
+attributes:
+  displayName: "Web Vitals & Field Performance"
+  description: |
+    Optimizing Core Web Vitals (LCP, INP, CLS) — measuring with
+    PerformanceObserver/CrUX, layout-shift discipline, and prioritizing
+    above-the-fold work.
+  domains:
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:css-architecture
+attributes:
+  displayName: "CSS Architecture"
+  description: |
+    Scaling CSS — utility-first vs BEM vs CSS Modules, design tokens,
+    cascade layers, container queries, and theming strategies.
+  domains:
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:ui-styling
+      strength: required
+---
+nodeKind: SkillArea
+id: skill-area:web-accessibility
+attributes:
+  displayName: "Web Accessibility (a11y)"
+  description: |
+    Building accessible web UIs — semantic HTML, ARIA usage,
+    keyboard navigation, focus management, and WCAG conformance.
+  domains:
+    - specialization:web-development
+    - topic:accessibility
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:web-security
+attributes:
+  displayName: "Web Application Security"
+  description: |
+    Web app security: XSS, CSRF, CORS, CSP, secure cookies, click-
+    jacking, and input validation. Threat-model alignment with
+    OWASP Top 10.
+  domains:
+    - specialization:web-development
+    - specialization:security-research
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:security-research
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:web-security-testing
+      strength: recommended
+    - target: skill-area:document-processing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:web-performance
+attributes:
+  displayName: "Web Performance Engineering"
+  description: |
+    End-to-end performance work for web apps — bundle splitting,
+    code-splitting, prefetch/preload, image optimization, and
+    server-timing analysis.
+  domains:
+    - specialization:web-development
+    - specialization:performance-optimization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:performance-optimization
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:web-vitals
+  prerequisite_for_learning:
+    - target: skill-area:web-vitals
+      strength: recommended
+    - target: skill-area:hydration
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:browser-compatibility
+attributes:
+  displayName: "Browser Compatibility"
+  description: |
+    Targeting browser baselines, feature detection, polyfills,
+    differential serving, and managing evolving web APIs.
+  domains:
+    - specialization:web-development
+  expertiseLevels: [novice, intermediate]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:progressive-enhancement
+attributes:
+  displayName: "Progressive Enhancement"
+  description: |
+    Building experiences that function with HTML/CSS first and layer
+    on JS — resilient forms, graceful degradation, no-JS fallbacks.
+  domains:
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:frontend-routing
+attributes:
+  displayName: "Frontend Routing"
+  description: |
+    Client and app-shell routing design - nested routes, guards, data loading,
+    URL state, and navigation behavior across SPA and hybrid-rendered apps.
+  domains:
+    - specialization:web-development
+    - specialization:frontend-react
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:frontend-react
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:form-management
+attributes:
+  displayName: "Form Management"
+  description: |
+    Building robust form flows - validation, dirty-state tracking,
+    async submission, optimistic UX, multi-step flows, and error recovery.
+  domains:
+    - specialization:web-development
+    - specialization:frontend-react
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+    - target: specialization:frontend-react
+      confidence: secondary

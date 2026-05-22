@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:gemini-extension-json
+attributes:
+  artifactId: plugin-artifact:gemini-extension-json
+  displayName: "Gemini CLI gemini-extension.json"
+  targetId: plugin-target:gemini-cli
+  artifactKind: manifest
+  pathPattern: "gemini-extension.json"
+  installerSurface: "extension-manifest"
+edges:
+  emits_artifact:
+    - target: plugin-target:gemini-cli

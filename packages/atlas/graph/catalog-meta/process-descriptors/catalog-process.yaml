@@ -1,0 +1,31 @@
+# Path descriptors for the catalog app process
+---
+nodeKind: PathDescriptor
+id: path:catalog-app-src-app
+attributes:
+  pathId: "path:catalog-app-src-app"
+  path: "packages/catalog/src/app"
+  pathKind: "source-directory"
+  ownerKind: "ProcessDescriptor"
+  ownerId: "process:packages/catalog/process-library-catalog"
+  platform: "repo"
+---
+nodeKind: PathDescriptor
+id: path:catalog-app-src-lib
+attributes:
+  pathId: "path:catalog-app-src-lib"
+  path: "packages/catalog/src/lib"
+  pathKind: "source-directory"
+  ownerKind: "ProcessDescriptor"
+  ownerId: "process:packages/catalog/process-library-catalog"
+  platform: "repo"
+---
+nodeKind: PathDescriptor
+id: path:catalog-process-entry
+attributes:
+  pathId: "path:catalog-process-entry"
+  path: "packages/catalog/process-library-catalog.js"
+  pathKind: "entry-point"
+  ownerKind: "ProcessDescriptor"
+  ownerId: "process:packages/catalog/process-library-catalog"
+  platform: "repo"

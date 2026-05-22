@@ -1,0 +1,600 @@
+---
+nodeKind: Role
+id: role:epidemiologist
+attributes:
+  displayName: "Epidemiologist"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Studies the distribution and determinants of diseases in populations —
+    designs surveillance systems, conducts outbreak investigations, builds
+    transmission models, and advises on public health interventions.
+edges:
+  holds_responsibility:
+    - responsibility:clinical-data-integrity
+    - responsibility:patient-safety-compliance
+  applies_to:
+    - target: domain:public-health
+    - target: domain:healthcare
+---
+nodeKind: Role
+id: role:clinical-data-scientist
+attributes:
+  displayName: "Clinical Data Scientist"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Applies statistical and machine learning methods to clinical datasets —
+    electronic health records, clinical trial data, and patient registries.
+    Builds predictive models for patient outcomes, treatment effectiveness,
+    and adverse event detection.
+edges:
+  holds_responsibility:
+    - responsibility:clinical-data-integrity
+    - responsibility:patient-safety-compliance
+    - responsibility:drug-safety-monitoring
+  applies_to:
+    - target: domain:healthcare
+    - target: domain:clinical-trials
+---
+nodeKind: Role
+id: role:bioinformatician
+attributes:
+  displayName: "Bioinformatician"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Develops computational methods for analyzing biological data —
+    genomic sequence analysis, protein structure prediction, pathway
+    analysis, and multi-omics data integration. Builds and maintains
+    bioinformatics pipelines and databases.
+edges:
+  holds_responsibility:
+    - responsibility:clinical-data-integrity
+    - responsibility:data-quality
+  applies_to:
+    - target: domain:bioinformatics
+    - target: domain:genomics
+---
+nodeKind: Role
+id: role:quant-developer
+attributes:
+  displayName: "Quantitative Developer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Implements quantitative models and trading strategies in production
+    systems — pricing engines, risk calculators, and execution algorithms.
+    Bridges the gap between quantitative research and high-performance
+    trading infrastructure.
+edges:
+  holds_responsibility:
+    - responsibility:financial-model-accuracy
+    - responsibility:risk-model-validation
+    - responsibility:trading-system-reliability
+  applies_to:
+    - target: domain:quantitative-finance
+    - target: domain:algorithmic-trading
+---
+nodeKind: Role
+id: role:actuary
+attributes:
+  displayName: "Actuary"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Applies mathematical and statistical methods to assess financial risk —
+    insurance pricing, reserve estimation, pension fund valuation, and
+    catastrophe modeling. Combines probability theory with domain expertise
+    in insurance and finance.
+edges:
+  holds_responsibility:
+    - responsibility:financial-model-accuracy
+    - responsibility:risk-model-validation
+    - responsibility:regulatory-reporting
+  applies_to:
+    - target: domain:insurance
+    - target: domain:finance
+---
+nodeKind: Role
+id: role:supply-chain-planner
+attributes:
+  displayName: "Supply Chain Planner"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Plans and optimizes supply chain operations — demand forecasting,
+    inventory positioning, production scheduling, and distribution
+    planning. Balances service levels, costs, and capacity constraints
+    across the end-to-end supply network.
+edges:
+  holds_responsibility:
+    - responsibility:supply-chain-optimization
+    - responsibility:cost-optimization
+  applies_to:
+    - target: domain:supply-chain
+    - target: domain:logistics
+---
+nodeKind: Role
+id: role:logistics-coordinator
+attributes:
+  displayName: "Logistics Coordinator"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Coordinates the movement of goods — shipment scheduling, carrier
+    management, customs documentation, and last-mile delivery tracking.
+    Ensures on-time delivery while optimizing transportation costs
+    and managing exceptions.
+edges:
+  holds_responsibility:
+    - responsibility:supply-chain-optimization
+    - responsibility:vendor-management
+  applies_to:
+    - target: domain:logistics
+    - target: domain:transportation
+---
+nodeKind: Role
+id: role:manufacturing-engineer
+attributes:
+  displayName: "Manufacturing Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs and improves manufacturing processes — production line layout,
+    process automation, quality control systems, and lean manufacturing
+    implementation. Bridges product design intent with production
+    capability and efficiency.
+edges:
+  holds_responsibility:
+    - responsibility:workplace-safety
+    - responsibility:cost-optimization
+    - responsibility:environmental-impact-assessment
+  applies_to:
+    - target: domain:industrial-automation
+---
+nodeKind: Role
+id: role:quality-assurance-engineer-industrial
+attributes:
+  displayName: "Quality Assurance Engineer (Industrial)"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Ensures product quality in manufacturing and industrial settings —
+    statistical process control, inspection protocols, defect root cause
+    analysis, and quality management system (ISO 9001) maintenance.
+    Distinct from software QA in focusing on physical products.
+edges:
+  holds_responsibility:
+    - responsibility:workplace-safety
+    - responsibility:regulatory-compliance
+  applies_to:
+    - target: domain:industrial-automation
+---
+nodeKind: Role
+id: role:environmental-scientist
+attributes:
+  displayName: "Environmental Scientist"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Studies environmental systems and human impact — air and water quality
+    monitoring, ecological assessment, contamination remediation, and
+    environmental impact analysis. Applies scientific methods to inform
+    policy and regulatory compliance.
+edges:
+  holds_responsibility:
+    - responsibility:environmental-impact-assessment
+    - responsibility:carbon-footprint-tracking
+  applies_to:
+    - target: domain:climate-science
+    - target: domain:sustainability-esg
+---
+nodeKind: Role
+id: role:urban-planner
+attributes:
+  displayName: "Urban Planner"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Plans the development and use of urban land — zoning regulations,
+    transportation network design, housing policy, and community
+    engagement. Uses GIS, demographic data, and simulation tools
+    to create sustainable and equitable urban environments.
+edges:
+  holds_responsibility:
+    - responsibility:environmental-impact-assessment
+    - responsibility:stakeholder-communication
+  applies_to:
+    - target: domain:urban-planning
+    - target: domain:smart-cities
+---
+nodeKind: Role
+id: role:transportation-planner
+attributes:
+  displayName: "Transportation Planner"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Plans transportation systems and infrastructure — traffic modeling,
+    transit route optimization, multimodal integration, and transportation
+    demand management. Evaluates the environmental, economic, and social
+    impacts of transportation investments.
+edges:
+  holds_responsibility:
+    - responsibility:environmental-impact-assessment
+    - responsibility:stakeholder-communication
+  applies_to:
+    - target: domain:public-transportation
+    - target: domain:transportation
+---
+nodeKind: Role
+id: role:game-designer
+attributes:
+  displayName: "Game Designer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs game mechanics, systems, and player experiences — rule sets,
+    progression systems, economy balancing, and difficulty curves.
+    Creates design documents, prototypes gameplay loops, and iterates
+    based on playtesting feedback.
+edges:
+  holds_responsibility:
+    - responsibility:user-research
+    - responsibility:metric-definition
+  applies_to:
+    - target: domain:game-design
+    - target: domain:gaming
+---
+nodeKind: Role
+id: role:level-designer
+attributes:
+  displayName: "Level Designer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Creates game levels, maps, and spatial experiences — layout design,
+    pacing, encounter placement, and environmental storytelling. Uses
+    level editors and scripting tools to build playable spaces that
+    support the game's design goals.
+edges:
+  holds_responsibility:
+    - responsibility:user-research
+    - responsibility:content-creation
+  applies_to:
+    - target: domain:game-design
+    - target: domain:gaming
+---
+nodeKind: Role
+id: role:narrative-designer
+attributes:
+  displayName: "Narrative Designer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Crafts interactive stories and dialogue systems — branching narratives,
+    character arcs, world-building, and dialogue trees. Integrates
+    narrative into gameplay mechanics and ensures story coherence
+    across player-driven choices.
+edges:
+  holds_responsibility:
+    - responsibility:content-creation
+    - responsibility:user-research
+  applies_to:
+    - target: domain:game-design
+    - target: domain:gaming
+---
+nodeKind: Role
+id: role:VFX-artist
+attributes:
+  displayName: "VFX Artist"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Creates visual effects for games, film, and interactive media —
+    particle systems, fluid simulations, explosions, environmental
+    effects, and post-processing pipelines. Balances visual fidelity
+    with performance constraints.
+edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:content-creation
+  applies_to:
+    - target: domain:film-production
+    - target: domain:gaming
+---
+nodeKind: Role
+id: role:sound-designer
+attributes:
+  displayName: "Sound Designer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Creates and implements audio for interactive and linear media —
+    sound effects, ambient soundscapes, UI audio, and adaptive music
+    systems. Works with audio middleware (Wwise, FMOD) and spatial
+    audio technologies.
+edges:
+  holds_responsibility:
+    - responsibility:content-creation
+    - responsibility:performance-optimization
+  applies_to:
+    - target: domain:gaming
+    - target: domain:film-production
+---
+nodeKind: Role
+id: role:music-technologist
+attributes:
+  displayName: "Music Technologist"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Bridges music and technology — develops music production tools,
+    audio processing algorithms, generative music systems, and music
+    information retrieval pipelines. Works at the intersection of
+    signal processing, machine learning, and creative expression.
+edges:
+  holds_responsibility:
+    - responsibility:content-creation
+    - responsibility:performance-optimization
+  applies_to:
+    - target: domain:music-production
+---
+nodeKind: Role
+id: role:video-editor
+attributes:
+  displayName: "Video Editor"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Assembles and refines video content — editing footage, color grading,
+    audio synchronization, motion graphics integration, and final output
+    encoding. Works across narrative, commercial, and social media
+    formats with professional editing tools.
+edges:
+  holds_responsibility:
+    - responsibility:content-creation
+    - responsibility:brand-consistency
+  applies_to:
+    - target: domain:film-production
+    - target: domain:media-entertainment
+---
+nodeKind: Role
+id: role:broadcast-engineer
+attributes:
+  displayName: "Broadcast Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Manages broadcast infrastructure — live production systems, signal
+    routing, encoding pipelines, satellite uplinks, and streaming
+    delivery. Ensures broadcast reliability, signal quality, and
+    compliance with broadcast standards.
+edges:
+  holds_responsibility:
+    - responsibility:uptime-sla
+    - responsibility:incident-response
+  applies_to:
+    - target: domain:media-entertainment
+    - target: domain:live-events-production
+---
+nodeKind: Role
+id: role:DevSecOps-engineer
+attributes:
+  displayName: "DevSecOps Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Integrates security practices into the DevOps pipeline — automated
+    security scanning in CI/CD, container image hardening, infrastructure-
+    as-code security policies, and shift-left vulnerability management.
+    Bridges development velocity with security requirements.
+edges:
+  holds_responsibility:
+    - responsibility:security-audit
+    - responsibility:dependency-security
+    - responsibility:deployment-management
+  applies_to:
+    - target: domain:cybersecurity
+    - target: domain:devops
+---
+nodeKind: Role
+id: role:platform-product-manager
+attributes:
+  displayName: "Platform Product Manager"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Manages internal platform products that serve other engineering teams —
+    developer portals, shared infrastructure, and internal APIs. Balances
+    platform capabilities with developer experience, adoption metrics,
+    and organizational leverage.
+edges:
+  holds_responsibility:
+    - responsibility:stakeholder-communication
+    - responsibility:metric-definition
+    - responsibility:developer-onboarding
+  applies_to:
+    - target: domain:platform-engineering
+    - target: domain:developer-experience
+---
+nodeKind: Role
+id: role:developer-experience-engineer
+attributes:
+  displayName: "Developer Experience Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Improves the productivity and satisfaction of internal and external
+    developers — toolchain optimization, documentation systems, developer
+    portal development, and feedback collection. Reduces friction in
+    development workflows and onboarding.
+edges:
+  holds_responsibility:
+    - responsibility:developer-onboarding
+    - responsibility:dx-tooling-maintenance
+  applies_to:
+    - target: domain:developer-experience
+---
+nodeKind: Role
+id: role:internal-tools-engineer
+attributes:
+  displayName: "Internal Tools Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds custom internal tools that improve operational efficiency —
+    admin dashboards, workflow automation, data exploration tools, and
+    internal CLIs. Prioritizes rapid iteration and high leverage over
+    production-grade polish.
+edges:
+  holds_responsibility:
+    - responsibility:dx-tooling-maintenance
+    - responsibility:stakeholder-communication
+  applies_to:
+    - target: domain:developer-experience
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:documentation-manager
+attributes:
+  displayName: "Documentation Manager"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Leads documentation strategy and operations — information architecture,
+    content standards, documentation toolchain management, and team
+    coordination. Ensures documentation coverage, accuracy, and
+    discoverability across products and APIs.
+edges:
+  holds_responsibility:
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+  applies_to:
+    - target: domain:developer-experience
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:community-manager
+attributes:
+  displayName: "Community Manager"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds and nurtures developer and user communities — forum moderation,
+    event planning, content programs, and community health monitoring.
+    Drives engagement, facilitates peer support, and channels community
+    feedback into product decisions.
+edges:
+  holds_responsibility:
+    - responsibility:community-guidelines-enforcement
+    - responsibility:stakeholder-communication
+  applies_to:
+    - target: domain:community
+---
+nodeKind: Role
+id: role:trust-safety-engineer
+attributes:
+  displayName: "Trust & Safety Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds systems to protect platform users — content classification
+    models, abuse detection pipelines, account security measures, and
+    policy enforcement automation. Balances user safety with free
+    expression and privacy considerations.
+edges:
+  holds_responsibility:
+    - responsibility:content-policy-enforcement
+    - responsibility:trust-score-maintenance
+    - responsibility:content-safety
+  applies_to:
+    - target: domain:social-media
+    - target: domain:content-moderation
+---
+nodeKind: Role
+id: role:fraud-analyst
+attributes:
+  displayName: "Fraud Analyst"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Investigates and prevents fraudulent activity — transaction pattern
+    analysis, rule tuning, case investigation, and fraud ring detection.
+    Works with machine learning models and manual review queues to
+    minimize false positives while catching genuine fraud.
+edges:
+  holds_responsibility:
+    - responsibility:fraud-rule-tuning
+    - responsibility:transaction-monitoring
+  applies_to:
+    - target: domain:fraud-detection
+    - target: domain:fintech
+---
+nodeKind: Role
+id: role:content-moderator
+attributes:
+  displayName: "Content Moderator"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Reviews user-generated content for policy compliance — applies
+    community guidelines, handles appeals, escalates edge cases, and
+    provides feedback on automated moderation systems. Maintains
+    platform safety and content quality at scale.
+edges:
+  holds_responsibility:
+    - responsibility:content-policy-enforcement
+    - responsibility:community-guidelines-enforcement
+  applies_to:
+    - target: domain:content-moderation
+    - target: domain:social-media
+---
+nodeKind: Role
+id: role:localization-coordinator
+attributes:
+  displayName: "Localization Coordinator"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Manages the localization of products and content across languages
+    and regions — translation vendor management, glossary maintenance,
+    linguistic quality assurance, and cultural adaptation. Coordinates
+    between product teams and localization providers.
+edges:
+  holds_responsibility:
+    - responsibility:localization-management
+    - responsibility:vendor-management
+  applies_to:
+    - target: domain:content-operations

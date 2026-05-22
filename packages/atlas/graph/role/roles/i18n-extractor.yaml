@@ -1,0 +1,21 @@
+nodeKind: Role
+id: role:i18n-extractor
+attributes:
+  displayName: "i18n Extractor"
+  isAgentic: true
+  requiredCapabilities:
+    - capability:supports-tool-use
+    - capability:supports-text-streaming
+  requiredDomains:
+    - domain:web-development
+  description: |
+    Agent that extracts user-facing strings into localization files.
+edges:
+  holds_responsibility:
+    - responsibility:documentation
+    - responsibility:code-review
+  requires_capability:
+    - target: capability:supports-tool-use
+    - target: capability:supports-text-streaming
+  applies_to:
+    - target: domain:web-development

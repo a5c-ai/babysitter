@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:droid.scope
+attributes:
+  subjectId: agent:droid
+  inScope: |
+    Hosted autonomous engineering agent platform from Factory AI; runs in a cloud workspace and integrates with GitHub, Linear, Slack, and Jira to plan and execute multi-step engineering tasks.
+  outOfScope: |
+    Self-hosted on-machine deployments, BYO-model configuration, and IDE side-panel UX.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:droid

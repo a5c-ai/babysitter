@@ -4,6 +4,10 @@ id: SK-FTV-001
 version: 1.0.0
 description: Craft compelling one-sentence story hooks that capture protagonist, conflict, stakes, and unique appeal for film/TV pitches
 specialization: film-tv-production
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:content-strategy, skill-area:natural-language-processing, skill-area:brand-positioning]
+  roles: [role:content-strategist, role:creative-director]
 ---
 
 # Logline Writing Skill

@@ -1,0 +1,15 @@
+nodeKind: LifecycleSemantics
+id: lifecycle-semantics:copilot-cli
+attributes:
+  lifecycleSemanticsId: lifecycle-semantics:copilot-cli
+  agentId: agent:copilot-cli
+  versionRange: ">=0.0.0"
+  runtimeHookMode: native-shell-hooks
+  stopHookMode: session-end-hook
+  backgroundTaskMode: unknown
+  checkpointMode: unspecified
+  pluginContextMode: "plugin.json"
+  platformNuances: []
+edges:
+  applies_to_version:
+    - target: agentVersion:copilot:ge-0-0-0

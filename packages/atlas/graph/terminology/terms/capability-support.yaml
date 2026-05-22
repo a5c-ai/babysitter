@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:capability-support
+attributes:
+  canonicalDefinitionId: definition:capability-support.canonical
+  displayName: "CapabilitySupport"
+  kind: capability
+  references: []
+  description: |
+    N-ary binding of (entity, capability, version-range, support-level)
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

@@ -1,0 +1,19 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:system-design.scope
+attributes:
+  subjectId: skill:system-design
+  inScope: |
+    Designing or evaluating system architecture — component decomposition,
+    data flows, API boundaries, failure modes, and tradeoff documentation.
+    Produces an ADR or design doc. Covers backend services, data pipelines,
+    and inter-service contracts.
+  outOfScope: |
+    Detailed code-level design (delegated to code-review), UX / frontend
+    design, low-level network/hardware design, capacity planning beyond
+    rough order-of-magnitude, and vendor procurement decisions.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - skill:system-design

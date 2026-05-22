@@ -1,0 +1,46 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:omp.platform@current
+attributes:
+  displayName: OMP Platform (current)
+  agentVersionId: agentVersion:omp:ge-0-0-0
+  subagentDefinitionFormat: none
+  packageRef: source-ref:omp-github
+  nativeExtensionFormat: omp-plugin
+  nativeExtensionManifestPath: ~/.omp/agent/plugins/<name>/plugin.json
+  nativeExtensionsDirectoryPath:
+  - ~/.omp/agent/plugins/
+  skillFormat: none
+  skillsDirectoryPath: []
+  customSlashCommandsPath: []
+  subagentsDirectoryPath: []
+  hooksDirectoryOrConfigPath: []
+  settingsFiles:
+  - ~/.omp/agent/settings.json
+  pluginRegistryPath: ''
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: api-key
+  updateChannelMechanism: npm
+  supportedChannelKinds:
+  - mcp-channel
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+  - target: agent:omp
+    role: platform
+  bundles:
+  - target: presentation:omp-tui
+  supports:
+  - target: capability:can-resume
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'JSONL-tree sessions; resume + fork.
+
+      '
+  - target: capability:supports-plugins
+    versionRange: '>=1.0.0'
+    level: none
+    notes: 'MCP-only extensibility per agent-mux ref.
+
+      '

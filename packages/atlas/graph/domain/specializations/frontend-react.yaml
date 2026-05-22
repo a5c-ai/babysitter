@@ -1,0 +1,20 @@
+nodeKind: Specialization
+id: specialization:frontend-react
+attributes:
+  displayName: "Frontend (React)"
+  parentDomainId: domain:web-development
+  description: |
+    Frontend React specialization focuses on building rich, interactive
+    browser UIs using the React library and its surrounding ecosystem.
+
+    Core skills include component architecture, React hooks, state
+    management (Zustand, Redux Toolkit, Jotai), styling approaches
+    (Tailwind CSS, CSS Modules, styled-components), and testing with
+    React Testing Library and Vitest. The specialization extends into
+    meta-frameworks (Next.js, Remix, Vite-based SPAs), performance
+    optimization (memoization, code-splitting, virtualization), and
+    accessibility. It is closely adjacent to the Full-stack TypeScript
+    specialization when a backend is co-located.
+edges:
+  specializes:
+    - domain:web-development

@@ -14,6 +14,11 @@ metadata:
   priority: P0
   integration-points:
     - Gong API
+graph:
+  domains: [domain:sales]
+  skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+  workflows: [workflow:customer-journey-optimization]
+  roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
 ---
 
 # Gong Conversation Intelligence

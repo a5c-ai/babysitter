@@ -19,6 +19,12 @@
  * - How to Prototype a Game in Under 7 Days (GDC)
  * - Juice it or Lose it (GDC)
  * - Game Feel by Steve Swink
+ * @graph
+ *   domains: [domain:gaming]
+ *   specializations: [specialization:game-development]
+ *   skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:prototyping]
+ *   roles: [role:game-developer]
+ *   workflows: [workflow:game-prototype-iteration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

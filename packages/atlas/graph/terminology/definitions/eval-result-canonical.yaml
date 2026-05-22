@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:eval-result.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:eval-result
+  text: |
+    scored result of an EvalRun
+  status: canonical
+edges:
+  defines:
+    - term:eval-result

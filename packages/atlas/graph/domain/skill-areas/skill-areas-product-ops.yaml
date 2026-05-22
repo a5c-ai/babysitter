@@ -1,0 +1,145 @@
+---
+nodeKind: SkillArea
+id: skill-area:product-strategy
+attributes:
+  displayName: "Product Strategy"
+  description: |
+    Defining and communicating the direction of a product over time - vision framing,
+    opportunity sizing, competitive positioning, and alignment of roadmap to business
+    outcomes. Combines market insight, customer understanding, and technical feasibility
+    to set priorities that a cross-functional team can execute against.
+  domains:
+    - domain:software-engineering
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: specialization:web-development
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:roadmap-planning
+      strength: required
+    - target: skill-area:prioritization-frameworks
+      strength: recommended
+    - target: skill-area:roadmap-management
+      strength: recommended
+    - target: skill-area:project-planning
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:user-research
+attributes:
+  displayName: "User Research"
+  description: |
+    Systematically gathering and interpreting evidence about user needs, behaviors,
+    and pain points through interviews, surveys, usability studies, and contextual
+    inquiry. Translates qualitative and quantitative findings into actionable product
+    insights that reduce the risk of building the wrong thing and improve experience
+    quality over time.
+  domains:
+    - domain:software-engineering
+    - specialization:ux-ui-design
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: secondary
+    - target: specialization:ux-ui-design
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:a-b-testing
+      strength: recommended
+    - target: skill-area:product-discovery
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:a-b-testing
+attributes:
+  displayName: "A/B Testing"
+  description: |
+    Designing and analyzing controlled experiments to validate product or UX hypotheses
+    with real user traffic - variant assignment, statistical power, guardrail metrics,
+    and decision frameworks for shipping or reverting changes. Bridges data science
+    rigor with rapid product iteration cycles.
+  domains:
+    - domain:software-engineering
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: secondary
+    - target: domain:data-science
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:product-analytics
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:product-analytics
+attributes:
+  displayName: "Product Analytics"
+  description: |
+    Measuring and understanding how users interact with a product through event
+    instrumentation, funnel analysis, retention cohorts, and behavioral segmentation.
+    Provides the quantitative foundation for product decisions, OKR tracking, and
+    identifying growth or quality opportunities within the data engineering ecosystem.
+  domains:
+    - domain:data-science
+    - specialization:data-engineering-analytics
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:data-science
+      confidence: primary
+    - target: specialization:data-engineering-analytics
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:roadmap-planning
+attributes:
+  displayName: "Roadmap Planning"
+  description: |
+    Organizing and sequencing product work across time horizons - balancing
+    new capabilities, technical debt, discovery work, and operational health.
+    Involves stakeholder communication, dependency mapping, capacity-aware scheduling,
+    and maintaining a shared understanding of what is committed versus exploratory.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: specialization:humanities
+      confidence: secondary
+    - target: specialization:social-sciences
+      confidence: secondary
+    - target: specialization:applied-ethics
+      confidence: secondary
+    - target: specialization:philosophy
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:stakeholder-management
+attributes:
+  displayName: "Stakeholder Management"
+  description: |
+    Building alignment and trust across diverse organizational stakeholders - executives,
+    customers, engineering, design, and operations - through structured communication,
+    expectation setting, and conflict resolution. Ensures product and engineering work
+    remains coordinated with business goals and that decisions are made transparently.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:cross-team-coordination
+      strength: helpful
+    - target: skill-area:communication
+      strength: recommended

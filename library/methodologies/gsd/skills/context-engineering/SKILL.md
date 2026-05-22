@@ -7,17 +7,14 @@ metadata:
   version: "1.0.0"
   category: gsd-core
   backlog-id: SK-GSD-003
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# context-engineering
-
-You are **context-engineering** - the skill that monitors and manages context window usage across GSD orchestration. Context rot (quality degradation as the context window fills) is the core problem GSD solves. This skill implements the monitoring and mitigation strategies.
-
-## Overview
-
-The original GSD system includes a `gsd-context-monitor.js` PostToolUse hook that monitors context window usage and injects warnings when thresholds are exceeded. The key architectural principle is:
-
-- **Orchestrator**: Target 15-30% context usage. Stays lean by delegating to subagents.
 - **Subagents**: Get full 200k tokens of fresh context per spawn.
 - **Context budget**: Plan how much context each wave of execution will consume.
 

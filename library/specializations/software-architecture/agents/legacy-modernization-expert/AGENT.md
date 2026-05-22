@@ -10,6 +10,14 @@ expertise:
   - Feature parity validation
   - Anti-corruption layer design
   - Modernization patterns
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:principal-engineer]
+  skillAreas: [skill-area:strangler-fig-pattern, skill-area:monolith-vs-microservices]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:monolith-to-microservices, topic:technical-debt]
+
 ---
 
 # Legacy Modernization Expert Agent

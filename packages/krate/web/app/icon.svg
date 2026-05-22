@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Krate">
+  <defs>
+    <radialGradient id="krate-bg" cx="34%" cy="26%" r="84%">
+      <stop offset="0" stop-color="#f2c88f"/>
+      <stop offset="1" stop-color="#5b3a16"/>
+    </radialGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="12" fill="#2a1607" stroke="url(#krate-bg)" stroke-width="4"/>
+  <circle cx="32" cy="32" r="19" fill="none" stroke="#f2c88f" stroke-width="3.5" opacity=".88"/>
+  <text x="32" y="43" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="40" font-weight="700" fill="#f07561">K</text>
+</svg>

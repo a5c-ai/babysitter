@@ -9,6 +9,13 @@ expertise:
   - Infrastructure requirements
   - Scalability planning
   - Technical debt assessment
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:machine-learning-frameworks, skill-area:ci-cd-ml-pipelines]
+  roles: [role:ml-engineer, role:data-scientist, role:ml-engineer-convergent]
+  workflows: [workflow:ml-model-lifecycle]
+
 ---
 
 # ml-architect

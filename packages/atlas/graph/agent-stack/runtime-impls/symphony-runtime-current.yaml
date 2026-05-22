@@ -1,0 +1,46 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:symphony.runtime@current
+attributes:
+  displayName: "Symphony Runtime (current)"
+  agentVersionId: agent-version:symphony@current
+  packageRef: source-ref:symphony-github
+  builtInTools: []
+  toolRegistryDiscovery: static-config
+  hookSockets: []
+  internalSessionStateLocation: "filesystem"
+  sessionFileFormat: json
+  sessionFilePathConvention: "workspace-per-issue"
+  approvalGatingPrimitive: none
+  subprocessSandboxStrategy: directory-isolation
+  subagentDispatchMechanism: process-spawn
+  runtimeIdentity: host-process
+  supportedMCPTransports: []
+  supportsStreaming: true
+  notes: |
+    Runtime manages the poll-dispatch-reconcile loop. Creates isolated
+    per-issue workspaces with git worktrees, spawns coding agent
+    sessions with bounded concurrency, monitors for completion, and
+    posts results back to the issue tracker. Filesystem-driven restart
+    recovery via workspace state directories. Exponential backoff
+    retry on transient failures.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:symphony
+      role: runtime
+  has_partial_state_recovery:
+    - target: partial-state-recovery:in-memory-only
+      notes: Runtime notes specify filesystem-driven restart recovery while running sessions, retry timers, and claimed sets remain in memory.
+  supports:
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Per-issue coding agent dispatch with workspace isolation.
+    - target: capability:supports-parallel-execution
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Bounded concurrency for multiple issue workspaces.
+    - target: capability:streaming
+      versionRange: '>=0.1.0'
+      level: partial

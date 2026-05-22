@@ -2,6 +2,13 @@
 name: build-system-migrator
 description: Migrate build systems to modern alternatives with build file conversion and CI/CD integration
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:dependency-upgrade-strategies, skill-area:deployment-infrastructure-management]
+  roles: [role:devops-engineer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Build System Migrator Skill

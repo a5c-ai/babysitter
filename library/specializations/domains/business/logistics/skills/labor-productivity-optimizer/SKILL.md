@@ -13,6 +13,10 @@ metadata:
   domain: business
   category: warehouse
   priority: medium
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:talent-acquisition-strategy, skill-area:data-analytics]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:hr-manager]
 ---
 
 # Labor Productivity Optimizer

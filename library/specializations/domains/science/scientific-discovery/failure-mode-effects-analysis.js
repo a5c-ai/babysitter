@@ -17,6 +17,13 @@
  * - SAE J1739 (2009). Potential Failure Mode and Effects Analysis
  * - AIAG & VDA FMEA Handbook (2019)
  * - Stamatis, D.H. (2003). Failure Mode and Effect Analysis: FMEA from Theory to Execution
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

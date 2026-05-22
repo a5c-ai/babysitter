@@ -516,7 +516,7 @@ All error codes follow the format: `BSIT-XXXX`
 - Case sensitivity issues
 
 **Recovery Steps:**
-1. Check hook exists: `ls -la plugins/babysitter/hooks/<hook-type>/`
+1. Check hook exists: `ls -la plugins/babysitter-unified/hooks/<hook-type>.sh`
 2. Verify hook path in configuration
 3. Create hook directory: `mkdir -p hooks/<hook-type>`
 4. Reinstall plugin if hooks missing

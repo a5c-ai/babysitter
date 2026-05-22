@@ -1,0 +1,85 @@
+{
+  "issueNumber": 191,
+  "duplicateOfIssue": 120,
+  "baseBranch": "staging",
+  "targetBranch": "fix/issue-191-journal-sequence-collision",
+  "title": "Journal sequence collision when non-interactive breakpoints auto-approve back-to-back",
+  "labels": [
+    "duplicate"
+  ],
+  "summary": "Fix the SDK journal append path so rapid or concurrent PROCESS_LOG writes, especially from consecutive non-interactive breakpoint auto-approvals, cannot allocate duplicate numeric journal sequence numbers and cannot cause a phantom RUN_FAILED after RUN_COMPLETED.",
+  "targetFiles": [
+    "packages/sdk/src/storage/journal.ts",
+    "packages/sdk/src/storage/lock.ts",
+    "packages/sdk/src/storage/__tests__/storage.test.ts",
+    "packages/sdk/src/runtime/intrinsics/breakpoint.ts",
+    "packages/sdk/src/runtime/intrinsics/__tests__/breakpointSkip.test.ts",
+    "packages/sdk/src/runtime/processContext.ts",
+    "packages/sdk/src/runtime/replay/createReplayEngine.ts",
+    "packages/sdk/src/runtime/replay/effectIndex.ts",
+    "packages/sdk/src/runtime/__tests__/effectIndex.test.ts",
+    "packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts",
+    "packages/sdk/src/cli/main/runCreate.ts",
+    "packages/sdk/src/cli/main/runInspection.ts"
+  ],
+  "relatedIssues": [
+    120,
+    191
+  ],
+  "processLibraryReferences": [
+    "docs/agent-reference/process-authoring.md",
+    "library/methodologies/atdd-tdd/atdd-tdd.js",
+    "library/specializations/sdk-platform-development/sdk-testing-strategy.js",
+    "library/specializations/sdk-platform-development/error-handling-debugging-support.js",
+    "library/specializations/sdk-platform-development/compatibility-testing.js",
+    "library/specializations/qa-testing-automation/quality-gates.js"
+  ],
+  "implementationFocus": [
+    "Read issue #191 and duplicate tracker #120 before changing code.",
+    "Trace the current branch for existing partial fixes around PROCESS_LOG logSeq and non-interactive breakpoint auto-approval.",
+    "Treat appendEvent sequence allocation as the primary race boundary: reading existing sequence numbers, selecting max+1, and writing the journal file must be serialized per run directory.",
+    "Prefer a localized per-run in-memory mutex or promise queue around appendEvent unless the trace proves cross-process writes are in scope for this issue.",
+    "Preserve journal filename format, checksums, SDK version stamping, harness/session stamping, loadJournal ordering, and EffectIndex strict sequence validation.",
+    "Do not use duplicate-sequence forgiveness in replay as the main fix unless a maintainer explicitly approves that semantic change.",
+    "Preserve existing non-interactive breakpoint logSeq behavior if it is already present; adjust only if needed to satisfy #120/#191 together."
+  ],
+  "acceptanceFocus": [
+    "Concurrent appendEvent calls for the same run directory produce contiguous unique sequence numbers.",
+    "A minimal process with two consecutive ctx.breakpoint calls in --non-interactive mode completes successfully.",
+    "A subsequent run:status or run:iterate after completion does not append a phantom RUN_FAILED after RUN_COMPLETED.",
+    "PROCESS_LOG events from auto-approved breakpoints retain distinct replay-deduplication metadata where applicable.",
+    "EffectIndex continues to reject genuinely corrupt journals with skipped, duplicate, regressing, or out-of-order sequences.",
+    "The fix does not introduce arbitrary sleeps or timing-sensitive tests.",
+    "The fix remains local to SDK journal/runtime behavior and does not convert the process to shell subtasks."
+  ],
+  "qualityGates": [
+    "Regression tests are written before implementation and fail against the un-serialized append allocator or document an existing partial fix that already covers the symptom.",
+    "Targeted storage tests cover concurrent appendEvent calls and verify unique contiguous sequence numbers.",
+    "Targeted breakpoint/runtime tests cover back-to-back non-interactive breakpoint auto-approvals and PROCESS_LOG metadata.",
+    "Replay/status verification confirms completed runs remain completed and no spurious RUN_FAILED is appended.",
+    "EffectIndex corruption tests still pass and strict validation is not weakened.",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/storage/__tests__/storage.test.ts packages/sdk/src/runtime/intrinsics/__tests__/breakpointSkip.test.ts passes.",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/runtime/__tests__/effectIndex.test.ts packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts passes.",
+    "npm run build:sdk passes.",
+    "npm run test:sdk passes or unrelated pre-existing failures are documented with evidence.",
+    "Compatibility review approves journal append serialization, replay determinism, and run-lock interaction."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/storage/__tests__/storage.test.ts packages/sdk/src/runtime/intrinsics/__tests__/breakpointSkip.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/runtime/__tests__/effectIndex.test.ts packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts",
+    "npm run build:sdk",
+    "npm run test:sdk"
+  ],
+  "nonGoals": [
+    "Do not implement broad replay-time renumbering as a substitute for preventing duplicate sequence allocation.",
+    "Do not weaken EffectIndex sequence validation to hide journal corruption.",
+    "Do not redesign the journal format or replace numeric sequence prefixes with ULID-only ordering in this fix.",
+    "Do not add shell subtasks to this Babysitter process.",
+    "Do not modify source files during planning; implementation belongs to the execution of this process."
+  ],
+  "notes": [
+    ".a5c/process-library/ was not present while authoring; matching methodologies and specializations were researched under library/ and repo-specific policy under docs/agent-reference/process-authoring.md.",
+    "The current branch already shows PROCESS_LOG logSeq-related code in packages/sdk/src/runtime/intrinsics/breakpoint.ts and tests in packages/sdk/src/runtime/intrinsics/__tests__/breakpointSkip.test.ts; the execution process must verify whether that is sufficient for duplicate tracker #120 before changing it.",
+    "The current appendEvent implementation in packages/sdk/src/storage/journal.ts computes max(existing seq)+1 before writeFileAtomic without an append-level critical section; this is the central race to investigate."
+  ]
+}

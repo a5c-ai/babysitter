@@ -2,6 +2,12 @@
 name: learning-evaluation-analyst
 description: Measure and evaluate learning program effectiveness using Kirkpatrick model and learning analytics
 required-skills: learning-needs-analysis, learning-analytics-interpretation, quality-assurance-review
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:data-analysis, skill-area:statistical-analysis]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:data-analyst, role:research-scientist]
 ---
 
 # Learning Evaluation Analyst Agent

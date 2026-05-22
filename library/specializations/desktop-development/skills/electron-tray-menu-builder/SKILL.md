@@ -3,6 +3,12 @@ name: electron-tray-menu-builder
 description: Generate system tray and context menu configurations with platform-specific icons, menu templates, and event handling
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [electron, tray, menu, system-tray, desktop]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # electron-tray-menu-builder

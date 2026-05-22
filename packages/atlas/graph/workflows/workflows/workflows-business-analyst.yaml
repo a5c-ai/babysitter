@@ -1,0 +1,154 @@
+---
+nodeKind: Workflow
+id: workflow:requirements-elicitation-workshop
+attributes:
+  displayName: "Requirements Elicitation Workshop"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-feature"
+  complexity: cross-team
+  description: |
+    Conducts structured requirements discovery sessions for product
+    features and system capabilities -- facilitating stakeholder
+    interviews with domain experts and end-users, running structured
+    elicitation techniques including context diagrams, use-case mapping,
+    and event storming, capturing functional and non-functional
+    requirements with traceability to business objectives, identifying
+    requirement conflicts and ambiguities for resolution, prioritizing
+    requirements using MoSCoW or weighted-scoring methods, and producing
+    requirements specification documents with acceptance criteria.
+    Delivers requirements document, stakeholder sign-off matrix, and
+    requirements traceability matrix. Excludes design and implementation.
+edges:
+  involves_role:
+    - target: role:business-analyst
+    - target: role:product-designer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:api-design
+  applies_to_domain:
+    - target: domain:project-management
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:write-rfc-documents
+    - target: responsibility:run-architecture-review
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:process-mapping-and-improvement
+attributes:
+  displayName: "Process Mapping and Improvement"
+  workflowKind: operational
+  triggerType: on-demand
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Maps and improves business processes end-to-end -- documenting
+    current-state process flows with swim lanes, decision points, and
+    system touchpoints, measuring cycle time, throughput, and error rates
+    at each process step, identifying bottlenecks, handoff delays, and
+    redundant approvals through value-stream analysis, designing
+    future-state process flows that eliminate waste and improve
+    throughput, quantifying improvement opportunity in time savings,
+    error reduction, and cost avoidance, and defining implementation
+    milestones with measurable success criteria. Produces current-state
+    and future-state process maps, bottleneck analysis, and improvement
+    roadmap. Excludes technology implementation and organizational
+    restructuring.
+edges:
+  involves_role:
+    - target: role:business-analyst
+    - target: role:operational-risk-analyst
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:c4-modeling
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:project-management
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:business-case-development
+attributes:
+  displayName: "Business Case Development"
+  workflowKind: governance
+  triggerType: on-demand
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Develops business cases for strategic initiatives and investment
+    decisions -- conducting market sizing and competitive landscape
+    analysis, building cost-benefit models with sensitivity analysis
+    across optimistic, base, and pessimistic scenarios, calculating ROI,
+    NPV, IRR, and payback period for proposed investments, identifying
+    and quantifying risks with probability-weighted impact adjustments,
+    gathering stakeholder input on strategic alignment and organizational
+    readiness, and preparing executive-ready pitch decks with
+    recommendation and alternatives analysis. Produces business case
+    document, financial model, and stakeholder presentation. Excludes
+    execution planning and budget allocation.
+edges:
+  involves_role:
+    - target: role:business-analyst
+    - target: role:data-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:strategy
+    - target: domain:finance
+    - target: domain:project-management
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:write-rfc-documents
+  performed_by_org_unit:
+    - target: org-unit:strategy-team
+    - target: org-unit:finance-team
+---
+nodeKind: Workflow
+id: workflow:user-story-refinement-session
+attributes:
+  displayName: "User Story Refinement Session"
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Refines backlog items into implementation-ready user stories --
+    reviewing upcoming stories for clarity and completeness with the
+    development team, defining acceptance criteria using Given-When-Then
+    or equivalent structured formats, decomposing epics into
+    appropriately sized stories that can be completed within a sprint,
+    identifying technical dependencies, integration points, and
+    prerequisite work, conducting estimation using story points or
+    t-shirt sizing with the team, and flagging stories that require
+    design spikes, architecture decisions, or stakeholder clarification.
+    Produces refined user stories with acceptance criteria, estimates, and
+    dependency map. Excludes sprint planning and task assignment.
+edges:
+  involves_role:
+    - target: role:business-analyst
+    - target: role:tech-lead
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:code-review-practice
+  applies_to_domain:
+    - target: domain:project-management
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:write-rfc-documents
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:engineering

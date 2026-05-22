@@ -1,0 +1,90 @@
+---
+nodeKind: SkillArea
+id: skill-area:talent-acquisition-strategy
+attributes:
+  displayName: "Talent Acquisition Strategy"
+  description: |
+    Designing end-to-end recruiting systems that attract and select high-quality
+    candidates at scale — sourcing strategy, employer brand development, structured
+    interview design, and offer calibration. Covers ATS configuration, pipeline
+    analytics, diversity sourcing practices, and recruiter capacity planning.
+    Balances speed-to-hire with signal quality and candidate experience to build
+    teams that deliver on organizational goals.
+  domains:
+    - domain:human-resources
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:performance-management
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:performance-management
+attributes:
+  displayName: "Performance Management"
+  description: |
+    Designing and operating systems for goal-setting, continuous feedback, formal
+    reviews, and performance calibration across the organization. Covers OKR and
+    MBO frameworks, rating scale design, calibration session facilitation, and
+    linking performance outcomes to compensation and development decisions. Creates
+    shared standards of excellence while preserving manager judgment and avoiding
+    the perverse incentives of poorly designed review processes.
+  domains:
+    - domain:human-resources
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:organizational-design
+attributes:
+  displayName: "Organizational Design"
+  description: |
+    Structuring organizations to execute strategy effectively — defining reporting
+    relationships, spans of control, team topologies, and decision rights. Applies
+    principles from Team Topologies, Galbraith's Star Model, and org design
+    research to diagnose misalignments between structure and goals. Supports
+    leadership through reorganizations, rapid scaling, and post-merger integration
+    to minimize coordination costs and maximize team autonomy.
+  domains:
+    - domain:human-resources
+    - domain:strategy
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+    - target: domain:strategy
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:learning-development
+attributes:
+  displayName: "Learning and Development"
+  description: |
+    Designing and operating learning programs that build organizational capability
+    — training needs analysis, curriculum design, career pathing frameworks, and
+    L&D measurement using Kirkpatrick and similar models. Covers LMS administration,
+    cohort-based learning, on-the-job learning architecture, and the linkage between
+    development investment and retention, engagement, and performance outcomes.
+  domains:
+    - domain:human-resources
+    - domain:knowledge-management
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+    - target: domain:knowledge-management
+      confidence: secondary
+    - target: specialization:education
+      confidence: secondary
+    - target: specialization:instructional-design
+      confidence: secondary
+    - target: specialization:knowledge-management
+      confidence: secondary

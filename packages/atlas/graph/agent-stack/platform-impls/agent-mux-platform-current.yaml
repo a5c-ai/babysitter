@@ -1,0 +1,44 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:agent-mux.platform@current
+attributes:
+  displayName: "agent-mux Platform (current) — surface registry"
+  agentVersionId: agent-version:agent-mux@current
+  packageRef: source-ref:agent-mux-github
+  subagentDefinitionFormat: none
+  nativeExtensionFormat: none
+  nativeExtensionManifestPath: ''
+  nativeExtensionsDirectoryPath: []
+  skillFormat: none
+  skillsDirectoryPath: []
+  customSlashCommandsPath: []
+  subagentsDirectoryPath: []
+  hooksDirectoryOrConfigPath: []
+  settingsFiles: []
+  pluginRegistryPath: ''
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: delegated-to-invocation-mode
+  updateChannelMechanism: npm
+  supportedChannelKinds:
+    - mcp-channel
+  notes: |
+    agent-mux platform layer registers the bundled multi-surface
+    presentations (TUI, CLI, webui, mobile-{ios,android}, tv-*, watch-*)
+    and brokers MCP through to the bridged remote agent. Plugins,
+    skills, slash commands, and subagents live with the remote target.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+    - target: agent:agent-mux
+      role: platform
+  bundles: []
+  supports:
+    - target: capability:supports-mcp
+      versionRange: ">=0.4.9"
+      level: full
+      notes: Brokers MCP through to the bridged remote agent.
+    - target: capability:streaming
+      versionRange: "*"
+      level: full
+      notes: Forwards streaming events from the bridged remote agent into the multi-surface presentations.

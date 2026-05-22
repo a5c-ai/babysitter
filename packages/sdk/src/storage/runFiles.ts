@@ -12,6 +12,11 @@ export async function readRunMetadata(runDir: string): Promise<RunMetadata> {
   return JSON.parse(raw) as RunMetadata;
 }
 
+export async function writeRunMetadata(runDir: string, metadata: RunMetadata): Promise<void> {
+  const metadataPath = path.join(runDir, RUN_METADATA_FILE);
+  await writeFileAtomic(metadataPath, JSON.stringify(metadata, null, 2) + "\n");
+}
+
 export async function readRunInputs(runDir: string): Promise<unknown> {
   const inputsPath = path.join(runDir, INPUTS_FILE);
   try {

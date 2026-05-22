@@ -16,6 +16,12 @@
  * @references
  * - IAPP CIPP Certification: https://iapp.org/certify/cipp/
  * - GDPR DSR Requirements: https://gdpr.eu/right-of-access/
+  * @graph
+ *   domains: [domain:legal]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -27,7 +33,8 @@ export async function process(inputs, ctx) {
     dataSubject = null,
     action = 'process', // 'intake', 'process', 'complete', 'report'
     outputDir = 'dsr-management-output'
-  } = inputs;
+  }
+  = inputs;
 
   const startTime = ctx.now();
   const artifacts = [];
@@ -60,7 +67,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
       }
-  const phase2Review = await ctx.breakpoint({
+      const phase2Review = await ctx.breakpoint({
       question: `Identity verification for ${requestId} requires additional information. Request additional verification from data subject?`,
       title: 'DSR Identity Verification',
       context: {
@@ -76,9 +83,8 @@ export async function process(inputs, ctx) {
       });
       if (phase2Review.approved) break;
       lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
-
-  // Phase 3: Data Location
+    }
+    // Phase 3: Data Location
   const dataLocation = await ctx.task(dataLocationTask, {
     requestId,
     dataSubject: intake.dataSubject,
@@ -128,7 +134,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `DSR ${requestId} (${requestType}) ready for response. Completed within ${compliance.daysToComplete} days. Approve and send response?`,
     title: 'DSR Response Review',
     context: {
@@ -170,7 +176,6 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/legal/data-subject-rights-management', timestamp: startTime }
   };
 }
-
 export const dsrIntakeTask = defineTask('dsr-intake', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Intake DSR',

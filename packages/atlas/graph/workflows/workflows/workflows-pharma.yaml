@@ -1,0 +1,73 @@
+---
+nodeKind: Workflow
+id: workflow:drug-trial-protocol-review
+attributes:
+  displayName: "Drug Trial Protocol Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-trial-phase"
+  complexity: cross-team
+  description: |
+    Reviews clinical trial protocol design and amendments -- evaluating
+    primary and secondary endpoint definitions for statistical power,
+    validating inclusion/exclusion criteria against target patient
+    population feasibility, assessing randomization and blinding
+    methodology, reviewing informed consent documents for regulatory
+    completeness, verifying protocol alignment with ICH-GCP guidelines and
+    IRB requirements, and analyzing site selection criteria against
+    enrollment projections. Produces protocol review reports, feasibility
+    assessments, and amendment impact analyses. Excludes patient enrollment
+    execution.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:security-reviewer
+    - target: role:principal-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:pharmaceuticals
+    - target: domain:compliance
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:regulatory-filing
+  performed_by_org_unit:
+    - target: org-unit:compliance-team
+    - target: org-unit:research-engineering
+---
+nodeKind: Workflow
+id: workflow:pharmacovigilance-signal-detection
+attributes:
+  displayName: "Pharmacovigilance Signal Detection"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Detects and evaluates safety signals from post-market drug surveillance
+    -- ingesting adverse event reports from FAERS, EudraVigilance, and
+    spontaneous reporting systems, running disproportionality analysis (PRR,
+    ROR, BCPNN) to identify statistically elevated drug-event combinations,
+    triaging signals by clinical seriousness and novelty, correlating
+    findings with published literature and clinical trial safety databases,
+    and escalating confirmed signals to safety evaluation boards. Produces
+    signal detection reports, cumulative review summaries, and PADER/PSUR
+    contributions. Excludes benefit-risk assessment decisions.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:incident-commander
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:pharmaceuticals
+    - target: domain:data-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:compliance-team
+    - target: org-unit:data-team

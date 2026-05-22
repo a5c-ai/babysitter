@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: Legal
   agent-id: AG-009
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:financial-planning, skill-area:business-analysis, skill-area:investment-analysis]
+  workflows: [workflow:product-discovery]
+  roles: [role:financial-analyst, role:strategic-planner, role:compliance-officer]
 ---
 
 # Startup Legal Advisor Agent

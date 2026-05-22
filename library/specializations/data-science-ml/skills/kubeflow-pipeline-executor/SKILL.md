@@ -7,6 +7,13 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:ci-cd-ml-pipelines, skill-area:machine-learning-frameworks]
+  roles: [role:ml-ops-engineer, role:ml-engineer]
+  workflows: [workflow:ml-model-lifecycle]
+
 ---
 
 # kubeflow-pipeline-executor

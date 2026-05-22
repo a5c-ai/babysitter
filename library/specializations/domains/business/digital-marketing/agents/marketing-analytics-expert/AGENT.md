@@ -16,6 +16,11 @@ metadata:
   domain: business
   category: Analytics and Measurement
   agent-id: AG-004
+graph:
+  domains: [domain:digital-marketing]
+  specializations: [specialization:digital-marketing-strategy]
+  skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+  roles: [role:marketing-strategist, role:marketing-manager]
 ---
 
 # Marketing Analytics Expert Agent

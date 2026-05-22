@@ -1,0 +1,22 @@
+nodeKind: Tool
+id: tool:npm
+attributes:
+  displayName: "npm"
+  homepageUrl: "https://www.npmjs.com"
+  kind: package-manager
+  language: language:javascript
+  releasedAt: "2010"
+  description: |
+    Node package manager - default JavaScript package registry and CLI.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - target: skill-area:developer-environment
+  alternative_to:
+    - target: tool:pnpm
+      comparison: "JavaScript package managers"
+    - target: tool:yarn
+      comparison: "JavaScript package managers"
+    - target: tool:bun
+      comparison: "JavaScript package managers / runtimes"

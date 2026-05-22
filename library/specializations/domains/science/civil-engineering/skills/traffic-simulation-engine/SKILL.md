@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Transportation Analysis
   skill-id: CIV-SK-019
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Traffic Simulation Engine Skill

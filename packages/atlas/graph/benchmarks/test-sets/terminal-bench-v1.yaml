@@ -1,0 +1,19 @@
+nodeKind: TestSet
+id: test-set:terminal-bench-v1
+attributes:
+  displayName: "Terminal-Bench v1"
+  benchmarkId: benchmark:terminal-bench
+  caseCount: 80
+  releasedAt: "2024-10-01"
+  composition: |
+    The v1 release of Terminal-Bench from Stanford NLP / Princeton.
+    Each task is a multi-step shell scenario evaluated end-to-end in a
+    Docker sandbox; success requires the agent to reach a target file
+    state via real shell commands.
+  homepageUrl: "https://www.tbench.ai/"
+  description: |
+    Canonical Terminal-Bench v1 set referenced in the original paper
+    and the public leaderboard.
+edges:
+  belongs_to_benchmark:
+    - benchmark:terminal-bench

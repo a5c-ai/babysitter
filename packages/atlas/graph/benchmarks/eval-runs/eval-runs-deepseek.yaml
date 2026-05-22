@@ -1,0 +1,96 @@
+---
+nodeKind: EvalRun
+id: eval-run:mmlu.deepseek-v3.2024-12
+attributes:
+  target: "model:deepseek-v3@current"
+  benchmarkId: benchmark:mmlu
+  targetId: model:deepseek-v3@current
+  runAt: "2024-12-26T00:00:00Z"
+  runBy: "deepseek"
+  configHash: "sha256:placeholder-deepseek-v3-mmlu"
+edges:
+  evaluates_target:
+    - model:deepseek-v3@current
+  for_benchmark:
+    - benchmark:mmlu
+---
+nodeKind: EvalRun
+id: eval-run:human-eval.deepseek-v3.2024-12
+attributes:
+  target: "model:deepseek-v3@current"
+  benchmarkId: benchmark:human-eval
+  targetId: model:deepseek-v3@current
+  runAt: "2024-12-26T00:00:00Z"
+  runBy: "deepseek"
+  configHash: "sha256:placeholder-deepseek-v3-humaneval"
+edges:
+  evaluates_target:
+    - model:deepseek-v3@current
+  for_benchmark:
+    - benchmark:human-eval
+---
+nodeKind: EvalRun
+id: eval-run:swe-bench.deepseek-v3.2024-12
+attributes:
+  target: "model:deepseek-v3@current"
+  benchmarkId: benchmark:swe-bench-verified
+  testSetId: test-set:swe-bench-verified-2024-12
+  targetId: model:deepseek-v3@current
+  runAt: "2024-12-26T00:00:00Z"
+  runBy: "deepseek"
+  configHash: "sha256:placeholder-deepseek-v3-swebench"
+edges:
+  evaluates_target:
+    - model:deepseek-v3@current
+  uses_test_set:
+    - test-set:swe-bench-verified-2024-12
+  for_benchmark:
+    - benchmark:swe-bench-verified
+---
+nodeKind: EvalRun
+id: eval-run:mmlu.deepseek-r1.2025-01
+attributes:
+  target: "model:deepseek-r1@current"
+  benchmarkId: benchmark:mmlu
+  targetId: model:deepseek-r1@current
+  runAt: "2025-01-20T00:00:00Z"
+  runBy: "deepseek"
+  configHash: "sha256:placeholder-deepseek-r1-mmlu"
+edges:
+  evaluates_target:
+    - model:deepseek-r1@current
+  for_benchmark:
+    - benchmark:mmlu
+---
+nodeKind: EvalRun
+id: eval-run:math.deepseek-r1.2025-01
+attributes:
+  target: "model:deepseek-r1@current"
+  benchmarkId: benchmark:math
+  targetId: model:deepseek-r1@current
+  runAt: "2025-01-20T00:00:00Z"
+  runBy: "deepseek"
+  configHash: "sha256:placeholder-deepseek-r1-math"
+edges:
+  evaluates_target:
+    - model:deepseek-r1@current
+  for_benchmark:
+    - benchmark:math
+---
+nodeKind: EvalRun
+id: eval-run:gpqa.deepseek-r1.2025-01
+attributes:
+  target: "model:deepseek-r1@current"
+  benchmarkId: benchmark:gpqa
+  testSetId: test-set:gpqa-diamond-2024
+  targetId: model:deepseek-r1@current
+  runAt: "2025-01-20T00:00:00Z"
+  runBy: "deepseek"
+  configHash: "sha256:placeholder-deepseek-r1-gpqa"
+edges:
+  evaluates_target:
+    - model:deepseek-r1@current
+  uses_test_set:
+    - test-set:gpqa-diamond-2024
+  for_benchmark:
+    - benchmark:gpqa

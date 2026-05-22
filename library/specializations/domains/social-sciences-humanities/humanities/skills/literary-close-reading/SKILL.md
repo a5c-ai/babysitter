@@ -2,6 +2,12 @@
 name: literary-close-reading
 description: Perform systematic textual analysis identifying patterns in language, imagery, narrative structure, and rhetorical devices
 allowed-tools: Read, Grep, Write, Edit, Glob
+graph:
+  domains: [domain:humanities]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:natural-language-processing, skill-area:deep-web-research, skill-area:data-analysis]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-analyst, role:research-scientist]
 ---
 
 # Literary Close Reading

@@ -2,6 +2,11 @@
 name: evm-analysis
 description: Deep EVM bytecode analysis and decompilation capabilities for smart contract security, gas optimization, and reverse engineering. Provides tools for analyzing opcodes, storage layouts, proxy patterns, and bytecode verification.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:smart-contract-security, skill-area:smart-contract-development-testing, skill-area:vulnerability-scanning-remediation]
+  roles: [role:security-engineer]
 ---
 
 # EVM/Bytecode Analysis Skill

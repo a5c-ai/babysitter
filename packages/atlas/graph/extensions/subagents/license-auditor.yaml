@@ -1,0 +1,47 @@
+nodeKind: Subagent
+id: subagent:license-auditor
+attributes:
+  displayName: "License Auditor"
+  provenance: custom
+  roleId: role:license-auditor
+  systemPrompt: |
+    You audit dependency licenses for compatibility with the project's
+    declared license. Read package manifests and lockfiles, classify
+    licenses (permissive, weak-copyleft, strong-copyleft, proprietary),
+    and flag conflicts. Produce an SBOM-style report. Do not modify
+    dependencies.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:bash
+    - tool-descriptor:grep
+    - tool-descriptor:web-fetch
+    - tool-descriptor:glob
+  disallowedTools:
+    - tool-descriptor:edit
+    - tool-descriptor:write
+  triggers: |
+    Invoke when the user asks for a license audit, OSS compliance
+    check, or pre-release legal review.
+  description: |
+    Read-only license-audit subagent. Lives at
+    `.claude/agents/license-auditor.md` (project scope).
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:license-auditor
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:governance

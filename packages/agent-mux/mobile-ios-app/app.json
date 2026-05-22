@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "AgentMux iOS",
+    "slug": "agent-mux-ios",
+    "scheme": "agentmux",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#08111f"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "bundleIdentifier": "ai.a5c.agentmux.ios",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "AgentMux uses the camera to scan pairing QR codes.",
+        "UIBackgroundModes": ["remote-notification"]
+      }
+    },
+    "plugins": [
+      "expo-notifications",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "AgentMux uses the camera to scan pairing QR codes."
+        }
+      ]
+    ]
+  }
+}

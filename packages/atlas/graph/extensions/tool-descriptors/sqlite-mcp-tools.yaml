@@ -1,0 +1,129 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:sqlite.read-query
+attributes:
+  schema: '{}'
+  displayName: "SQLite: Read Query"
+  description: Execute a SELECT query.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      rows: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:sqlite-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:sqlite.write-query
+attributes:
+  schema: '{}'
+  displayName: "SQLite: Write Query"
+  description: Execute an INSERT/UPDATE/DELETE statement.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      rowcount: { type: integer }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:sqlite-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:sqlite.create-table
+attributes:
+  schema: '{}'
+  displayName: "SQLite: Create Table"
+  description: Execute a CREATE TABLE statement.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:sqlite-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:sqlite.list-tables
+attributes:
+  schema: '{}'
+  displayName: "SQLite: List Tables"
+  description: List all tables in the database.
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      tables: { type: array, items: { type: string } }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:sqlite-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:sqlite.describe-table
+attributes:
+  schema: '{}'
+  displayName: "SQLite: Describe Table"
+  description: Return the schema of a table.
+  inputSchema:
+    type: object
+    required: [table_name]
+    properties:
+      table_name: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      columns: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:sqlite-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:sqlite.append-insight
+attributes:
+  schema: '{}'
+  displayName: "SQLite: Append Insight"
+  description: Append a business-insight memo to the server's insight memo resource.
+  inputSchema:
+    type: object
+    required: [insight]
+    properties:
+      insight: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:sqlite-mcp

@@ -1,0 +1,116 @@
+---
+nodeKind: Responsibility
+id: responsibility:postmortem-writeup
+attributes:
+  displayName: "Postmortem writeup"
+  cadence: event-triggered
+  description: |
+    Author blameless postmortems for SEV-1/SEV-2 incidents, including
+    timeline, root causes, and action items.
+edges:
+  held_by:
+    - target: role:incident-commander
+    - target: role:sre-runbook-author
+  requires_expertise:
+    - target: skill-area:runbook-writing
+---
+nodeKind: Responsibility
+id: responsibility:on-call-handoff
+attributes:
+  displayName: "On-call handoff"
+  cadence: scheduled
+  description: |
+    Run weekly on-call handoff meetings and ensure outstanding pages have
+    owners.
+edges:
+  held_by:
+    - target: role:sre-lead
+    - target: role:devops-engineer
+---
+nodeKind: Responsibility
+id: responsibility:capacity-planning
+attributes:
+  displayName: "Capacity planning"
+  cadence: scheduled
+  description: |
+    Forecast traffic/usage growth and plan compute, storage, and team
+    capacity to meet it.
+edges:
+  held_by:
+    - target: role:sre-lead
+    - target: role:platform-engineer
+  requires_expertise:
+    - target: skill-area:sli-slo-management
+---
+nodeKind: Responsibility
+id: responsibility:k8s-cluster-upgrade
+attributes:
+  displayName: "Kubernetes cluster upgrade"
+  cadence: scheduled
+  description: |
+    Plan and execute control-plane and node upgrades with no production
+    impact.
+edges:
+  held_by:
+    - target: role:platform-engineer
+    - target: role:devops-engineer
+  requires_expertise:
+    - target: skill-area:k8s-operator-development
+---
+nodeKind: Responsibility
+id: responsibility:terraform-state-mgmt
+attributes:
+  displayName: "Terraform state management"
+  cadence: continuous
+  description: |
+    Own Terraform state backends, locking, drift detection, and remediation.
+edges:
+  held_by:
+    - target: role:devops-engineer
+    - target: role:platform-engineer
+  requires_expertise:
+    - target: skill-area:terraform-infrastructure
+---
+nodeKind: Responsibility
+id: responsibility:slo-definition
+attributes:
+  displayName: "SLO definition"
+  cadence: on-demand
+  description: |
+    Define and review SLOs/error budgets per service and align stakeholders
+    on them.
+edges:
+  held_by:
+    - target: role:sre-lead
+    - target: role:staff-engineer
+  requires_expertise:
+    - target: skill-area:sli-slo-management
+---
+nodeKind: Responsibility
+id: responsibility:incident-command
+attributes:
+  displayName: "Incident command"
+  cadence: event-triggered
+  description: |
+    Run incident response: declare, assign roles, drive resolution,
+    communicate status.
+edges:
+  held_by:
+    - target: role:incident-commander
+  requires_expertise:
+    - target: skill-area:incident-response
+---
+nodeKind: Responsibility
+id: responsibility:runbook-authoring
+attributes:
+  displayName: "Runbook authoring"
+  cadence: on-demand
+  description: |
+    Author and maintain runbooks covering on-call alerts and operational
+    procedures.
+edges:
+  held_by:
+    - target: role:sre-runbook-author
+    - target: role:technical-writer
+  requires_expertise:
+    - target: skill-area:runbook-writing

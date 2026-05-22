@@ -1,0 +1,15 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-codex-versions-json
+attributes:
+  artifactId: plugin-artifact:babysitter-codex-versions-json
+  displayName: "babysitter-codex versions.json"
+  targetId: plugin-target:codex
+  artifactKind: settings-fragment
+  pathPattern: "versions.json"
+  installerSurface: "versions.json"
+  contextFiles:
+    - plugins/babysitter-codex/versions.json
+    - plugins/babysitter-codex/plugin.lock.json
+edges:
+  emits_artifact:
+    - target: plugin-target:codex

@@ -1,0 +1,14 @@
+nodeKind: Synonym
+id: synonym:agent-mux-run-to-invocation
+attributes:
+  termAId: term:agent-mux-run
+  termBId: term:invocation
+  direction: a-to-b
+  note: |
+    The term "run" in the deprecated agent-mux codebase corresponds to
+    "Invocation" in the current catalog vocabulary.
+edges:
+  synonym_a:
+    - term:agent-mux-run
+  synonym_b:
+    - term:invocation

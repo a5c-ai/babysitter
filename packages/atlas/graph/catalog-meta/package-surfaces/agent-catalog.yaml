@@ -1,0 +1,23 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-catalog
+attributes:
+  packageId: "@a5c-ai/agent-catalog"
+  packageName: "@a5c-ai/agent-catalog"
+  workspacePath: packages/agent-catalog
+  moduleType: commonjs
+  surfaceKinds:
+    - graph-source
+    - sdk
+    - cli
+    - ui
+    - internal-workspace-package
+  sourceOfTruthRole: graph-source-of-truth
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:agent-catalog-graph
+  wraps_graph:
+    - target: graph:agent-catalog
+  validated_by_ci:
+    - target: ci:a5c-ai-agent-catalog

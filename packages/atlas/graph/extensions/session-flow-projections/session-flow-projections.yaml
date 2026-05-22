@@ -1,0 +1,164 @@
+nodeKind: SessionFlowProjection
+id: session-flow:claude-example
+attributes:
+  displayName: "Session-flow projection for an example Claude Code session"
+  generatedAt: "2026-05-02T00:00:00Z"
+  laneCount: 3
+  segmentKinds:
+    - user
+    - assistant
+    - thinking
+    - tool
+    - lifecycle
+  hasFileAttention: true
+  hasCostBreakdown: true
+edges:
+  has_lane:
+    - target: agent-flow-lane:claude-example--human-turn
+    - target: agent-flow-lane:claude-example--agent-action
+    - target: agent-flow-lane:claude-example--tool-call
+---
+nodeKind: AgentFlowLane
+id: agent-flow-lane:claude-example--human-turn
+attributes:
+  displayName: "Human turn lane"
+  laneKind: human-turn
+  description: "User-authored messages and replies in the example Claude Code session."
+edges:
+  lane_of_projection:
+    - target: session-flow:claude-example
+  contains_segment:
+    - target: agent-flow-segment:claude-example--user-1
+---
+nodeKind: AgentFlowLane
+id: agent-flow-lane:claude-example--agent-action
+attributes:
+  displayName: "Agent-action lane (Claude Code)"
+  laneKind: agent-action
+  agentVersionId: agentVersion:claude:ge-0-0-0
+  description: "Assistant messages and thinking blocks emitted by Claude Code."
+edges:
+  lane_of_projection:
+    - target: session-flow:claude-example
+  contains_segment:
+    - target: agent-flow-segment:claude-example--assistant-1
+    - target: agent-flow-segment:claude-example--thinking-1
+---
+nodeKind: AgentFlowLane
+id: agent-flow-lane:claude-example--tool-call
+attributes:
+  displayName: "Tool-call lane"
+  laneKind: tool-call
+  description: "Tool invocations and their results during the example session."
+edges:
+  lane_of_projection:
+    - target: session-flow:claude-example
+  contains_segment:
+    - target: agent-flow-segment:claude-example--tool-1
+---
+nodeKind: AgentFlowSegment
+id: agent-flow-segment:claude-example--user-1
+attributes:
+  displayName: "User opening message"
+  laneId: agent-flow-lane:claude-example--human-turn
+  startedAt: "2026-05-02T00:00:00Z"
+  endedAt: "2026-05-02T00:00:01Z"
+  kind: message
+edges:
+  segment_in_lane:
+    - target: agent-flow-lane:claude-example--human-turn
+---
+nodeKind: AgentFlowSegment
+id: agent-flow-segment:claude-example--assistant-1
+attributes:
+  displayName: "Assistant first response"
+  laneId: agent-flow-lane:claude-example--agent-action
+  startedAt: "2026-05-02T00:00:02Z"
+  endedAt: "2026-05-02T00:00:05Z"
+  kind: message
+edges:
+  segment_in_lane:
+    - target: agent-flow-lane:claude-example--agent-action
+---
+nodeKind: AgentFlowSegment
+id: agent-flow-segment:claude-example--thinking-1
+attributes:
+  displayName: "Assistant interleaved thinking"
+  laneId: agent-flow-lane:claude-example--agent-action
+  kind: thinking
+edges:
+  segment_in_lane:
+    - target: agent-flow-lane:claude-example--agent-action
+---
+nodeKind: AgentFlowSegment
+id: agent-flow-segment:claude-example--tool-1
+attributes:
+  displayName: "Read tool invocation"
+  laneId: agent-flow-lane:claude-example--tool-call
+  startedAt: "2026-05-02T00:00:03Z"
+  endedAt: "2026-05-02T00:00:04Z"
+  kind: tool-call
+edges:
+  segment_in_lane:
+    - target: agent-flow-lane:claude-example--tool-call
+---
+nodeKind: SessionFlowProjection
+id: session-flow:codex-example
+attributes:
+  displayName: "Session-flow projection for an example Codex session"
+  generatedAt: "2026-05-02T00:00:00Z"
+  laneCount: 2
+  segmentKinds:
+    - user
+    - assistant
+    - tool
+    - error
+  hasFileAttention: false
+  hasCostBreakdown: true
+edges:
+  has_lane:
+    - target: agent-flow-lane:codex-example--agent-action
+    - target: agent-flow-lane:codex-example--error
+---
+nodeKind: AgentFlowLane
+id: agent-flow-lane:codex-example--agent-action
+attributes:
+  displayName: "Agent-action lane (Codex)"
+  laneKind: agent-action
+  agentVersionId: agentVersion:codex:ge-0-119-0
+edges:
+  lane_of_projection:
+    - target: session-flow:codex-example
+  contains_segment:
+    - target: agent-flow-segment:codex-example--assistant-1
+---
+nodeKind: AgentFlowLane
+id: agent-flow-lane:codex-example--error
+attributes:
+  displayName: "Error lane"
+  laneKind: error
+edges:
+  lane_of_projection:
+    - target: session-flow:codex-example
+  contains_segment:
+    - target: agent-flow-segment:codex-example--error-1
+---
+nodeKind: AgentFlowSegment
+id: agent-flow-segment:codex-example--assistant-1
+attributes:
+  displayName: "Codex assistant turn"
+  laneId: agent-flow-lane:codex-example--agent-action
+  kind: message
+edges:
+  segment_in_lane:
+    - target: agent-flow-lane:codex-example--agent-action
+---
+nodeKind: AgentFlowSegment
+id: agent-flow-segment:codex-example--error-1
+attributes:
+  displayName: "Codex error event"
+  laneId: agent-flow-lane:codex-example--error
+  kind: error
+edges:
+  segment_in_lane:
+    - target: agent-flow-lane:codex-example--error

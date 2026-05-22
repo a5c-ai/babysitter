@@ -48,7 +48,7 @@ Babysitter is an **event-sourced orchestration framework** for Claude Code that 
 
 1. **Babysitter SDK** (`@a5c-ai/babysitter-sdk`) - Core orchestration runtime, CLI
 2. **Babysitter Plugin** (`babysitter@a5c.ai`) - Claude Code integration
-3. **Process Library** - Built-in methodologies (TDD, Spec-Kit, GSD, etc.)
+3. **Process Library** - SDK-managed built-in library of methodologies, shared processes, and domain specializations
 
 ### 1.4 Architecture Summary
 
@@ -147,13 +147,13 @@ User Request --> Claude Code --> Babysitter Skill --> SDK CLI
 
 **Step 1: Install SDK and Packages**
 ```bash
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest
 ```
 
 **Step 2: Install Claude Code Plugin**
 ```bash
 # Add the plugin repository
-claude plugin marketplace add a5c-ai/babysitter
+claude plugin marketplace add a5c-ai/babysitter-claude
 
 # Install the plugin
 claude plugin install --scope user babysitter@a5c.ai
@@ -166,7 +166,7 @@ claude plugin enable --scope user babysitter@a5c.ai
 
 **Step 4: Verify Installation**
 ```bash
-# Check SDK version
+# Check core CLI version
 babysitter --version
 
 # In Claude Code, verify skill is available
@@ -182,8 +182,8 @@ babysitter --version
 ### 4.3 Keeping Updated
 
 ```bash
-# Update SDK packages
-npm update -g @a5c-ai/babysitter-sdk@latest
+# Update CLI packages
+npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-agent
 
 # Update Claude Code plugin
 claude plugin marketplace update a5c.ai
@@ -425,7 +425,7 @@ Level 5: Expert Use (Ongoing)
 | `Run encountered an error` | Journal or state corruption | Analyze journal, recover from last good state |
 | `Breakpoint not resolving` | Service unreachable or timeout | Check service status, verify network |
 | `ENOENT: no such file or directory` | Missing file in task | Verify paths, check dependencies installed |
-| `Cannot find module '@a5c-ai/babysitter-sdk'` | SDK not installed | Run `npm install -g @a5c-ai/babysitter-sdk` |
+| `Cannot find module '@a5c-ai/babysitter-sdk'` | SDK dependency missing in your project | Run `npm install @a5c-ai/babysitter-sdk` |
 | `Plugin not found: babysitter@a5c.ai` | Plugin not installed in Claude Code | Follow plugin installation steps |
 
 ### 8.5 Performance Pain Points
@@ -556,12 +556,12 @@ Based on analysis of existing documentation:
 | Document | Path | Key Insights |
 |----------|------|--------------|
 | Main README | `/README.md` | Value proposition, installation, examples |
-| Plugin Specification | `/plugins/babysitter/BABYSITTER_PLUGIN_SPECIFICATION.md` | Technical architecture, hooks |
-| Skill Documentation | `/plugins/babysitter/skills/babysit/SKILL.md` | Orchestration workflow |
+| Plugin Specification | `/plugins/babysitter-unified/plugin.json` | Canonical plugin metadata and target profiles |
+| Skill Documentation | `/plugins/babysitter-unified/skills/babysit/SKILL.md` | Orchestration workflow |
 | CLI Spec | `/notes/babysitter_cli_surface_spec.md` | CLI commands and behavior |
 | CLI Examples | `/docs/cli-examples.md` | Usage patterns |
 | Breakpoints README | `/packages/breakpoints/README.md` | Human approval system |
-| Process README | `/plugins/babysitter/skills/babysit/process/README.md` | Methodologies overview |
+| Process Library README | `/library/README.md` | Built-in library overview |
 | SDK Package.json | `/packages/sdk/package.json` | Version, dependencies |
 
 ## Appendix B: Key Metrics for Documentation Success

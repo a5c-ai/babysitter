@@ -1,0 +1,151 @@
+nodeKind: AgentVersion
+id: agentVersion:copilot:ge-0-0-0
+attributes:
+  agentId: "copilot"
+  aliases:
+    - "github-copilot"
+    - "copilot-cli"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  displayName: "GitHub Copilot CLI"
+  summary: "GitHub's CLI coding agent"
+  sourcePackage: "@github/copilot-cli"
+  osSupport:
+    - "linux"
+    - "macos"
+    - "windows"
+  agentProductId: agent:copilot-cli
+  versionRange: ">=0.0.0"
+  releasedAt: "2024-09-01"
+  cliCommand: "gh copilot"
+  installMethods:
+    - install:gh-extension
+  minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    installCommands:
+      - type: gh-extension
+        command: "gh extension install github/gh-copilot"
+    authMethods:
+      - type: github_token
+        name: "GitHub Token"
+        envVars: [GITHUB_TOKEN]
+      - type: oauth_device
+        name: "OAuth Device Flow"
+    authFiles:
+      - "~/.config/github-copilot/settings.json"
+    hostEnvSignals:
+      - COPILOT_CLI_SESSION
+      - GH_COPILOT_SESSION
+    sessionDir: "~/.config/github-copilot/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - prompt
+    capabilityFlags:
+      canResume: false
+      canFork: false
+      supportsMultiTurn: false
+      sessionPersistence: file
+      supportsTextStreaming: true
+      supportsToolCallStreaming: false
+      supportsThinkingStreaming: false
+      supportsNativeTools: false
+      supportsMCP: false
+      supportsParallelToolCalls: false
+      requiresToolApproval: false
+      supportsThinking: false
+      supportsJsonMode: false
+      supportsStructuredOutput: false
+      structuredSessionTransport: none
+      sessionControlPlane: self-managed
+      supportsSkills: false
+      supportsAgentsMd: false
+      skillsFormat: none
+      supportsSubagentDispatch: false
+      supportsParallelExecution: false
+      maxParallelTasks: 1
+      supportsInteractiveMode: true
+      supportsStdinInjection: false
+      supportsImageInput: false
+      supportsImageOutput: false
+      supportsFileAttachments: false
+      supportsPlugins: false
+      supportedPlatforms: [darwin, linux, win32]
+      requiresGitRepo: false
+      requiresPty: false
+    runtimeHooks:
+      preToolUse: nonblocking
+      postToolUse: nonblocking
+      sessionStart: nonblocking
+      sessionEnd: nonblocking
+      stop: nonblocking
+      userPromptSubmit: nonblocking
+    configSchema:
+      configFormat: json
+      configFilePaths:
+        - "~/.config/github-copilot/settings.json"
+    displayName: "GitHub Copilot"
+    defaultModelId: "gpt-4o"
+  hookSupport:
+    interactive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+    nonInteractive: {}
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: false
+    positionalPrompt: false
+edges:
+  version_of:
+    - agent:copilot-cli
+  composed_of:
+    - target: agent-core-impl:copilot-cli.core@current
+      role: core
+    - target: agent-runtime-impl:copilot-cli.runtime@current
+      role: runtime
+    - target: agent-platform-impl:copilot-cli.platform@current
+      role: platform
+    - target: agent-ui-impl:copilot-cli.ui@current
+      role: ui
+  sourced_from: []
+  supports:
+    - target: capability:skills
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Copilot CLI plugins explicitly bundle reusable agents, skills, hooks, and integrations.
+    - target: capability:supports-thinking
+      versionRange: ">=0.0.0"
+      level: full
+      notes: GitHub documents Copilot CLI and Copilot coding-agent workflows as interactive agentic coding surfaces.
+    - target: capability:interactive-mode
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Interactive Copilot CLI usage is documented directly.
+    - target: capability:stdin-injection
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Public Copilot CLI docs cover command-line prompting flows.
+    - target: capability:vision-input
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Public image-input evidence is strongest in the Copilot SDK rather than CLI docs.
+    - target: capability:runtime-hooks
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Copilot CLI exposes hooks directly; the local target profile refines canonical hook-name mapping.
+    - target: capability:stop-hook
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Normalized stop-hook capability derived from documented lifecycle hooks + local hook-name mapping.
+    - target: capability:supports-mcp
+      versionRange: ">=0.0.0"
+      level: full
+      notes: GitHub documents MCP for Copilot CLI and the Copilot cloud agent.
+    - target: capability:can-resume
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Public session persistence evidence comes from Copilot CLI config-directory documentation.
+  uses_memory_system:
+    - target: memory-system:instruction-file-hierarchy

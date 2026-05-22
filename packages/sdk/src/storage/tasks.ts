@@ -3,6 +3,7 @@ import path from "path";
 import { getTasksDir } from "./paths";
 import { JsonRecord, StoredTaskResult } from "./types";
 import { writeFileAtomic } from "./atomic";
+import { withSdkVersion } from "../sdkVersion";
 
 function resolveTaskPath(runDir: string, effectId: string, relative: string) {
   return path.join(getTasksDir(runDir), effectId, relative);
@@ -12,7 +13,7 @@ export async function writeTaskDefinition(runDir: string, effectId: string, task
   const taskDir = path.join(getTasksDir(runDir), effectId);
   await fs.mkdir(taskDir, { recursive: true });
   const taskPath = path.join(taskDir, "task.json");
-  await writeFileAtomic(taskPath, JSON.stringify(taskDef, null, 2) + "\n");
+  await writeFileAtomic(taskPath, JSON.stringify(withSdkVersion(taskDef), null, 2) + "\n");
   return path.relative(runDir, taskPath).replace(/\\/g, "/");
 }
 
@@ -76,7 +77,7 @@ export async function writeTaskResult(options: WriteTaskResultOptions) {
     options.result.stderrRef = stderrRef;
   }
 
-  await writeFileAtomic(resultPath, JSON.stringify(options.result, null, 2) + "\n");
+  await writeFileAtomic(resultPath, JSON.stringify(withSdkVersion(options.result), null, 2) + "\n");
 
   return {
     resultRef: relativeResultPath,

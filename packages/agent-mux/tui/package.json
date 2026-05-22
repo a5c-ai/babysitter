@@ -1,0 +1,77 @@
+{
+  "name": "@a5c-ai/agent-mux-tui",
+  "version": "5.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Extensible Ink-based TUI for agent-mux, with a plugin-first architecture",
+  "author": "a5c-ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux/tui#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/agent-mux/tui"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "agent-mux",
+    "tui",
+    "ink",
+    "react",
+    "plugins"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "bin": {
+    "amux-tui": "./dist/bin/amux-tui.js"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./plugin": {
+      "import": {
+        "types": "./dist/plugin.d.ts",
+        "default": "./dist/plugin.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "specs",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "cd ../../.. && node scripts/agent-mux-build.cjs build packages/agent-mux/tui",
+    "build:local": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "start": "node ./dist/bin/amux-tui.js",
+    "dev": "npm run build && npm start",
+    "test": "cd ../../.. && node scripts/agent-mux-build.cjs test packages/agent-mux/tui",
+    "verify:release": "node ./scripts/verify-release.mjs",
+    "prepublishOnly": "npm run build && npm run verify:release"
+  },
+  "dependencies": {
+    "@a5c-ai/agent-mux": "5.0.0",
+    "@a5c-ai/agent-mux-cli": "5.0.0",
+    "@a5c-ai/agent-mux-core": "5.0.0",
+    "@a5c-ai/agent-mux-observability": "5.0.0",
+    "ink": "^5.0.1",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "ink-testing-library": "^4.0.0"
+  }
+}

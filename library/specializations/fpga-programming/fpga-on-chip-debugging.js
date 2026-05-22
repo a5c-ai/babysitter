@@ -17,6 +17,12 @@
  * - Vivado Debug: https://docs.amd.com/r/en-US/ug908-vivado-programming-debugging
  * - Signal Tap: https://www.intel.com/content/www/us/en/programmable/documentation/mwh1410471376527.html
  * - ChipScope: https://docs.amd.com/r/en-US/ug936-vivado-tutorial-programming-debugging
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:bug-triage]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

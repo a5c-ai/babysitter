@@ -1,0 +1,12 @@
+nodeKind: Responsibility
+id: responsibility:run-security-scans
+attributes:
+  displayName: "Run security scans"
+  cadence: weekly
+  requiredSkills:
+    - skill:security-review
+  description: |
+    Run security scans.
+edges:
+  requires_skill:
+    - skill:security-review

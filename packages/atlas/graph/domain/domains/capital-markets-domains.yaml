@@ -1,0 +1,89 @@
+---
+nodeKind: Domain
+id: domain:capital-markets
+attributes:
+  displayName: "Capital Markets"
+  description: |
+    Capital markets infrastructure, trading systems, market microstructure,
+    and exchange connectivity.
+edges:
+  contains:
+    - specialization:corporate-finance
+---
+nodeKind: Domain
+id: domain:quantitative-finance
+attributes:
+  displayName: "Quantitative Finance"
+  description: |
+    Quantitative modeling, derivatives pricing, stochastic calculus, and
+    financial engineering.
+edges:
+  contains:
+    - specialization:computational-mathematics
+    - specialization:statistical-methods
+---
+nodeKind: Domain
+id: domain:algorithmic-trading
+attributes:
+  displayName: "Algorithmic Trading"
+  description: |
+    Algorithmic and systematic trading strategies, execution algorithms,
+    and high-frequency infrastructure.
+edges:
+  contains:
+    - specialization:algorithms-optimization
+---
+nodeKind: Domain
+id: domain:portfolio-management
+attributes:
+  displayName: "Portfolio Management"
+  description: |
+    Portfolio construction, asset allocation, rebalancing, and performance
+    attribution.
+edges:
+  contains:
+    - specialization:statistical-methods
+---
+nodeKind: Domain
+id: domain:financial-risk-management
+attributes:
+  displayName: "Financial Risk Management"
+  description: |
+    Market risk, credit risk, liquidity risk, counterparty risk, and
+    VaR/CVaR modeling.
+edges:
+  contains:
+    - specialization:statistical-methods
+    - specialization:computational-mathematics
+---
+nodeKind: Domain
+id: domain:trading-operations
+attributes:
+  displayName: "Trading Operations"
+  description: |
+    Trade lifecycle, settlement, reconciliation, and post-trade processing.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:market-data
+attributes:
+  displayName: "Market Data"
+  description: |
+    Market data feeds, tick data management, alternative data, and data
+    vendor integration.
+edges:
+  contains:
+    - specialization:data-engineering-analytics
+---
+nodeKind: Domain
+id: domain:regulatory-finance
+attributes:
+  displayName: "Regulatory Finance"
+  description: |
+    Financial regulatory compliance — MiFID II, Dodd-Frank, Basel III/IV,
+    and reporting obligations.
+edges:
+  contains:
+    - specialization:legal-compliance

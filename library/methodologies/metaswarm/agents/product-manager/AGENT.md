@@ -8,17 +8,15 @@ expertise:
   - Scope alignment verification
   - Requirements traceability
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Product Manager Agent
-
-## Role
-
-Validates that the implementation plan addresses real use cases, delivers user benefits, and stays aligned with the stated scope. One of 6 mandatory design review gate approvers.
-
-## Expertise
-
-- Use case identification and validation
 - User benefit quantification
 - Scope creep detection
 - Requirements traceability to implementation

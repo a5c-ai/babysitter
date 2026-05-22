@@ -17,6 +17,9 @@
  * - AWS Security Best Practices: https://aws.amazon.com/security/
  * - Prowler: https://github.com/prowler-cloud/prowler
  * - ScoutSuite: https://github.com/nccgroup/ScoutSuite
+ * @graph
+ *   domains: [domain:cybersecurity]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

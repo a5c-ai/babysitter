@@ -1,0 +1,148 @@
+---
+nodeKind: Workflow
+id: workflow:competitive-intelligence-briefing
+attributes:
+  displayName: "Competitive Intelligence Briefing"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Produces structured competitive intelligence briefings for leadership --
+    monitoring competitor product launches, pricing changes, and partnership
+    announcements through automated alert feeds, analyzing competitor
+    positioning shifts via website and messaging audits, comparing
+    feature-by-feature capabilities against the organization's product,
+    tracking competitor hiring patterns and engineering blog signals for
+    technology-direction indicators, synthesizing win/loss interview data for
+    competitive deal dynamics, and distributing actionable competitive
+    battlecards to sales and product teams. Produces monthly competitive
+    intelligence digest and updated battlecard library. Excludes strategic
+    response planning.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:explorer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:strategy
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:strategy-team
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:strategic-initiative-progress-review
+attributes:
+  displayName: "Strategic Initiative Progress Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews progress of active strategic initiatives against planned
+    milestones -- tracking OKR completion percentages and confidence levels
+    across all strategic bets, evaluating resource allocation actuals versus
+    plan by initiative, identifying cross-team dependency blockers requiring
+    executive escalation, reviewing leading indicators and early-warning
+    metrics for at-risk initiatives, facilitating trade-off discussions when
+    initiatives compete for constrained resources, and updating initiative
+    status dashboards for board and leadership visibility. Produces initiative
+    progress report and escalation recommendations. Excludes annual planning
+    and OKR-setting.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:adr-writing
+  applies_to_domain:
+    - target: domain:strategy
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:strategy-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:market-research-synthesis
+attributes:
+  displayName: "Market Research Synthesis"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Synthesizes market research inputs into actionable strategic insights --
+    aggregating findings from industry analyst reports, primary customer
+    interviews, and third-party market data, identifying macro trend signals
+    and emerging technology disruption vectors, segmenting market data by
+    geography, vertical, and company size, correlating customer feedback themes
+    with market opportunity sizing, validating or challenging internal
+    assumptions about market positioning with external evidence, and packaging
+    synthesized findings into executive-ready insight briefs with strategic
+    implications. Produces quarterly market intelligence report and trend
+    radar. Excludes primary research execution.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:explorer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:strategy
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:strategy-team
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:business-model-canvas-review
+attributes:
+  displayName: "Business Model Canvas Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Conducts a structured review of the organization's business model canvas
+    -- reassessing the core value proposition against evolving customer needs
+    and competitive alternatives, evaluating channel strategy effectiveness and
+    distribution economics, reviewing customer segment definitions and
+    willingness-to-pay data, analyzing cost structure evolution and unit
+    economics trends, stress-testing revenue model assumptions against market
+    feedback, identifying new revenue streams or adjacency opportunities, and
+    benchmarking the business model against emerging industry patterns and
+    disruptive entrants. Produces updated business model canvas and strategic
+    pivot recommendations. Excludes operational execution of model changes.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:strategy
+    - target: domain:entrepreneurship
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:strategy-team
+    - target: org-unit:finance-team

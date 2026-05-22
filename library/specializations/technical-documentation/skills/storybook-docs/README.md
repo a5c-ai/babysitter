@@ -30,7 +30,7 @@ This skill provides expertise in Storybook configuration for component documenta
 
 ```json
 {
-  "projectPath": "./packages/ui",
+  "projectPath": "./packages/agent-mux/ui",
   "framework": "react",
   "outputDir": "docs/components",
   "generateMdx": true

@@ -9,6 +9,12 @@ expertise:
   - Data visualization
   - Root cause analysis
   - Management reporting
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:data-analytics, skill-area:business-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:data-analyst]
 ---
 
 # Supply Chain Analyst

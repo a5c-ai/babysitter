@@ -1,0 +1,28 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:opencode.ui@current
+attributes:
+  displayName: "OpenCode UI (current) — tui-and-cli"
+  agentVersionId: agentVersion:opencode:ge-0-0-0
+  packageRef: source-ref:opencode-github
+  uiKind: tui-and-cli
+  presentationsBundled:
+    - presentation:opencode-tui
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  notes: |
+    OpenCode ships an interactive TUI and a scripted CLI; tool-approval prompts
+    are surfaced at the UI layer.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:slash-help
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/help"
+    - target: interaction-primitive:tool-approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control

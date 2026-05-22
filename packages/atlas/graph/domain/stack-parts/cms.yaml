@@ -1,0 +1,11 @@
+nodeKind: StackPart
+id: stack-part:cms
+attributes:
+  displayName: "Content Management System"
+  category: tooling
+  description: |
+    Manages structured content for editors with delivery APIs. Examples: Strapi, Sanity, Contentful, Payload, Directus.
+edges:
+  implemented_by:
+    - target: tool:wordpress
+    - target: tool:strapi

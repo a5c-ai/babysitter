@@ -1,0 +1,386 @@
+---
+nodeKind: Library
+id: library:aeson
+attributes:
+  displayName: "Aeson"
+  belongsToLanguageId: language:haskell
+  category: other
+  description: |
+    De-facto standard JSON library for Haskell — fast encoding and decoding
+    via Generic deriving or manual instances, with Lens integration and
+    support for custom FromJSON/ToJSON type classes.
+edges:
+  belongs_to_language:
+    - language:haskell
+  library_used_by:
+    - target: skill-area:serialization-deserialization
+  alternative_to:
+    - library:serde
+    - library:jackson
+---
+nodeKind: Library
+id: library:servant
+attributes:
+  displayName: "Servant"
+  belongsToLanguageId: language:haskell
+  category: http-server
+  description: |
+    Type-level web API DSL for Haskell that derives server implementations,
+    client functions, and documentation from a single API type, eliminating
+    mismatches between spec and code.
+edges:
+  belongs_to_language:
+    - language:haskell
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:yesod
+---
+nodeKind: Library
+id: library:yesod
+attributes:
+  displayName: "Yesod"
+  belongsToLanguageId: language:haskell
+  category: http-server
+  description: |
+    Full-stack Haskell web framework with type-safe routing via Template
+    Haskell, Shakespearean templates, Persistent ORM integration, and
+    Warp-based deployment.
+edges:
+  belongs_to_language:
+    - language:haskell
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:conduit
+attributes:
+  displayName: "Conduit"
+  belongsToLanguageId: language:haskell
+  category: other
+  description: |
+    Streaming data processing library for Haskell providing deterministic
+    resource handling, composable Sources/Conduits/Sinks, and support for
+    binary, text, and HTTP streaming pipelines.
+edges:
+  belongs_to_language:
+    - language:haskell
+  library_used_by:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - library:fs2
+---
+nodeKind: Library
+id: library:lens
+attributes:
+  displayName: "Lens"
+  belongsToLanguageId: language:haskell
+  category: other
+  description: |
+    Composable optics library for Haskell providing Lenses, Prisms,
+    Traversals, and Isos for precise and composable access to nested
+    immutable data structures.
+edges:
+  belongs_to_language:
+    - language:haskell
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:arrow-kt
+---
+nodeKind: Library
+id: library:mtl
+attributes:
+  displayName: "MTL"
+  belongsToLanguageId: language:haskell
+  category: other
+  description: |
+    Monad Transformer Library for Haskell — canonical typeclasses (MonadReader,
+    MonadWriter, MonadState, MonadError) and transformer stack combinators
+    for effect management without monad boilerplate.
+edges:
+  belongs_to_language:
+    - language:haskell
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:cats
+---
+nodeKind: Library
+id: library:quickcheck
+attributes:
+  displayName: "QuickCheck"
+  belongsToLanguageId: language:haskell
+  category: testing
+  description: |
+    Property-based testing library for Haskell that generates random inputs
+    to falsify programmer-specified invariants, with shrinking to find minimal
+    counterexamples. The original property-based testing tool.
+edges:
+  belongs_to_language:
+    - language:haskell
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:hspec
+---
+nodeKind: Library
+id: library:hspec
+attributes:
+  displayName: "HSpec"
+  belongsToLanguageId: language:haskell
+  category: testing
+  description: |
+    BDD-style testing framework for Haskell with a describe/it DSL,
+    automatic test discovery, HUnit and QuickCheck integration, and
+    colored terminal output.
+edges:
+  belongs_to_language:
+    - language:haskell
+  library_used_by:
+    - target: skill-area:component-testing
+---
+nodeKind: Library
+id: library:stack-lib
+attributes:
+  displayName: "Stack"
+  belongsToLanguageId: language:haskell
+  category: other
+  description: |
+    Cross-platform Haskell build tool that manages GHC installations,
+    Stackage resolver snapshots, and reproducible builds with per-project
+    stack.yaml configuration.
+edges:
+  belongs_to_language:
+    - language:haskell
+  library_used_by:
+    - target: skill-area:cli-tooling
+  alternative_to:
+    - library:cabal-lib
+---
+nodeKind: Library
+id: library:cabal-lib
+attributes:
+  displayName: "Cabal"
+  belongsToLanguageId: language:haskell
+  category: other
+  description: |
+    Official Haskell build system and package format — defines package
+    metadata in .cabal files, manages dependencies via Hackage, and provides
+    the cabal-install CLI for building, testing, and publishing packages.
+edges:
+  belongs_to_language:
+    - language:haskell
+  library_used_by:
+    - target: skill-area:cli-tooling
+---
+nodeKind: Library
+id: library:mux
+attributes:
+  displayName: "Gorilla Mux (mux)"
+  belongsToLanguageId: language:go
+  category: http-server
+  description: |
+    The gorilla/mux package — a powerful Go HTTP request router with
+    regex-based route matching, named parameters, subrouters, and
+    middleware chaining via http.Handler composition.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:chi-middleware
+attributes:
+  displayName: "Chi Middleware"
+  belongsToLanguageId: language:go
+  category: http-server
+  description: |
+    Official middleware bundle for the Chi router — provides composable
+    net/http middleware for logging, recovery, request-id injection,
+    CORS, compression, and authentication.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:cors
+    - library:helmet
+---
+nodeKind: Library
+id: library:gorm-v2
+attributes:
+  displayName: "GORM v2"
+  belongsToLanguageId: language:go
+  category: orm
+  description: |
+    Developer-friendly ORM for Go with full-featured CRUD, associations,
+    hooks, auto-migration, and plugins for soft delete, optimistic locking,
+    and multi-database support; v2 rewrites the query API and improves
+    context propagation.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+---
+nodeKind: Library
+id: library:go-kit
+attributes:
+  displayName: "Go Kit"
+  belongsToLanguageId: language:go
+  category: other
+  description: |
+    Microservices toolkit for Go providing transport-agnostic endpoints,
+    service discovery, load balancing, circuit breaking, distributed
+    tracing, and structured logging primitives.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:tower
+---
+nodeKind: Library
+id: library:fx
+attributes:
+  displayName: "Fx (Uber)"
+  belongsToLanguageId: language:go
+  category: other
+  description: |
+    Application dependency injection framework for Go by Uber — constructor-
+    based DI with lifecycle hooks (OnStart/OnStop), module grouping, and
+    automatic dependency graph wiring without code generation.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:solution-architecture
+  alternative_to:
+    - library:wire-go
+---
+nodeKind: Library
+id: library:wire-go
+attributes:
+  displayName: "Wire (Go)"
+  belongsToLanguageId: language:go
+  category: other
+  description: |
+    Compile-time dependency injection tool for Go by Google — generates
+    provider wiring code from annotated constructor functions, eliminating
+    runtime reflection and making DI graphs statically verifiable.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:solution-architecture
+---
+nodeKind: Library
+id: library:tower
+attributes:
+  displayName: "Tower"
+  belongsToLanguageId: language:rust
+  category: other
+  description: |
+    Modular and reusable components for building robust async network
+    services in Rust — defines the Service and Layer traits used by
+    Hyper, Axum, and Tonic for middleware composition.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - library:go-kit
+---
+nodeKind: Library
+id: library:tonic
+attributes:
+  displayName: "Tonic"
+  belongsToLanguageId: language:rust
+  category: other
+  description: |
+    Native gRPC framework for Rust built on Tokio and Tower — generates
+    client/server stubs from .proto files via tonic-build, with TLS,
+    interceptors, and bi-directional streaming support.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:grpc-js
+---
+nodeKind: Library
+id: library:sqlx-pg
+attributes:
+  displayName: "SQLx (PostgreSQL)"
+  belongsToLanguageId: language:rust
+  category: other
+  description: |
+    Async PostgreSQL driver for Rust via the SQLx framework — compile-time
+    query verification against a live database, connection pooling, and
+    type-safe row mapping without a full ORM.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+---
+nodeKind: Library
+id: library:diesel-rs
+attributes:
+  displayName: "Diesel"
+  belongsToLanguageId: language:rust
+  category: orm
+  description: |
+    Safe, extensible ORM and query builder for Rust — compile-time query
+    checking, schema DSL with migrations, and support for PostgreSQL,
+    MySQL, and SQLite with no runtime overhead.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:sea-orm
+    - library:sqlx-rust
+---
+nodeKind: Library
+id: library:axum-extra
+attributes:
+  displayName: "Axum Extra"
+  belongsToLanguageId: language:rust
+  category: http-server
+  description: |
+    Extension crate for the Axum web framework providing additional
+    extractors (typed headers, cookie jars, multipart), routing helpers,
+    and middleware not included in the core axum crate.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:tower
+---
+nodeKind: Library
+id: library:leptos
+attributes:
+  displayName: "Leptos"
+  belongsToLanguageId: language:rust
+  category: other
+  description: |
+    Full-stack reactive web framework for Rust compiled to WebAssembly —
+    fine-grained reactivity, server functions for seamless client/server
+    data fetching, and SSR/hydration support.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - framework:blazor

@@ -1,0 +1,20 @@
+nodeKind: Domain
+id: domain:infrastructure
+attributes:
+  displayName: "Infrastructure"
+  description: |
+    Infrastructure covers the foundational computing resources and
+    operational practices that underpin all software systems — whether
+    on-premises, in the cloud, or at the edge.
+
+    It includes server and VM provisioning, networking (VPCs, DNS, load
+    balancers, firewalls), storage (block, object, file), identity and
+    access management, cost management, and disaster recovery. This domain
+    sits below Cloud Infrastructure (cloud-specific IaaS/PaaS services)
+    and Platform Engineering (developer-facing abstractions built on top).
+    Infrastructure-as-Code tools (Terraform, Pulumi, Ansible) are central
+    to the discipline.
+edges:
+  contains:
+    - topic:load-balancing
+    - topic:vertical-scaling

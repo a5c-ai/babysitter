@@ -2,6 +2,11 @@
 name: unreal-development
 description: Unreal Engine integration skill for C++/Blueprint development, actor lifecycle management, plugin development, and editor automation. Enables LLMs to interact with Unreal Editor through MCP servers for level manipulation, Blueprint generation, and automated workflows.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engines, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Unreal Development Skill

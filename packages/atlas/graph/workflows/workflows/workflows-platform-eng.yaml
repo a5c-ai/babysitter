@@ -1,0 +1,141 @@
+---
+nodeKind: Workflow
+id: workflow:golden-path-governance
+attributes:
+  displayName: "Golden Path Governance"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews and evolves the internal developer platform's golden paths --
+    evaluating adoption rates for each paved-road template, collecting
+    developer friction feedback, assessing golden-path compliance with
+    updated security and observability standards, deprecating stale
+    templates, proposing new golden paths for emerging tech stacks, and
+    aligning template defaults with infrastructure policy changes.
+    Produces golden-path health report and template update roadmap.
+    Excludes individual template implementation.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+    - target: role:devrel
+  requires_skill_area:
+    - target: skill-area:api-design
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:dx-tooling-maintenance
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:engineering-productivity
+---
+nodeKind: Workflow
+id: workflow:internal-developer-platform-catalog-review
+attributes:
+  displayName: "Internal Developer Platform Catalog Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Audits the internal developer platform service catalog for accuracy
+    and completeness -- verifying service metadata freshness (ownership,
+    runbook links, SLO definitions), identifying orphaned or unmaintained
+    catalog entries, validating API documentation alignment with deployed
+    versions, checking dependency graph accuracy, assessing catalog search
+    and discoverability quality, and tracking catalog adoption across
+    engineering teams. Produces catalog health scorecard and remediation
+    tickets. Excludes catalog infrastructure changes.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:technical-writer
+    - target: role:devops-engineer
+  requires_skill_area:
+    - target: skill-area:api-design
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:dx-tooling-maintenance
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:platform-sla-review
+attributes:
+  displayName: "Platform SLA Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews internal platform SLAs against measured performance --
+    analyzing error-budget burn rates for shared platform services (CI/CD,
+    container registry, secrets management, service mesh), evaluating
+    latency and availability trends, identifying services breaching SLA
+    targets, reviewing consumer team satisfaction scores, and calibrating
+    SLA targets for the next period based on capacity and investment
+    plans. Produces SLA compliance report and updated SLA commitments.
+    Excludes platform incident response.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:infra-engineering
+---
+nodeKind: Workflow
+id: workflow:developer-portal-analytics-review
+attributes:
+  displayName: "Developer Portal Analytics Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews developer portal usage analytics to improve internal
+    developer experience -- analyzing page-view and search-query patterns
+    to identify content gaps, measuring time-to-first-deploy for new
+    engineers against golden paths, tracking API-try-it-out conversion
+    rates, evaluating documentation staleness by last-updated dates,
+    benchmarking portal engagement against onboarding cohorts, and
+    prioritizing portal improvements based on developer journey friction
+    analysis. Produces portal analytics report and improvement backlog.
+    Excludes portal frontend development.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:data-scientist
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:api-design
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:dx-tooling-maintenance
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:developer-relations-team
+    - target: org-unit:platform-team

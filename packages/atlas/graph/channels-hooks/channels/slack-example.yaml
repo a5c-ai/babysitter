@@ -1,0 +1,14 @@
+nodeKind: Channel
+id: channel:slack-example
+attributes:
+  displayName: "Slack example channel"
+  kind: chat-channel
+  endpoint: "https://slack.com/api"
+  brokeringPrimitive: |
+    Messages flow through Slack's Web API and Events API. Slack's
+    servers persist history; the agent maintains only an ephemeral
+    socket-mode or webhook receiver for inbound events.
+  persistent: true
+  description: |
+    A Slack workspace channel used for human/agent collaboration.
+edges:

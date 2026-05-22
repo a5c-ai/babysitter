@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:subagent-planner.scope
+attributes:
+  subjectId: subagent:planner
+  inScope: |
+    Decompose a high-level user goal into an ordered plan of concrete sub-tasks suitable for hand-off to executor subagents. Stateless per-invocation.
+  outOfScope: |
+    Executing the plan it produces (use task-runner subagents), reviewing PRs, and managing long-running runtime state.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - subagent:planner

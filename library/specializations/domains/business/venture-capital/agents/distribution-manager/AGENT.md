@@ -8,6 +8,10 @@ expertise:
   - Tax reporting preparation
   - Escrow and holdback management
   - Fund wind-down execution
+graph:
+  domains: [domain:venture-capital]
+  skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+  roles: [role:financial-analyst]
 ---
 
 # Distribution Manager

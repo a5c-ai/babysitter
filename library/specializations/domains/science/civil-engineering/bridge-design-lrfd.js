@@ -3,6 +3,12 @@
  * @description Bridge design process using AASHTO LRFD specifications including superstructure design, substructure design, and load rating
  * @inputs { projectId: string, bridgeType: string, spanLengths: array, trafficData: object, geotechnicalData: object }
  * @outputs { success: boolean, bridgeDesignReport: object, structuralDrawings: array, loadRating: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:civil-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -2,6 +2,12 @@
 name: localization-coordinator
 description: Coordinates translation workflows, manages locale-specific content, and validates RTL layouts
 expertise: [i18n, l10n, translation, rtl, localization]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:internationalization, skill-area:desktop-ui-frameworks]
+  roles: [role:desktop-developer, role:fullstack-engineer, role:i18n-extractor]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # localization-coordinator

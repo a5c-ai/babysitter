@@ -17,6 +17,10 @@ metadata:
   domain: business
   category: Knowledge Organization
   agent-id: AG-008
+graph:
+  domains: [domain:knowledge-management]
+  skillAreas: [skill-area:data-governance, skill-area:natural-language-processing, skill-area:retrieval-augmented-generation]
+  roles: [role:information-architect, role:data-engineer, role:data-scientist]
 ---
 
 # Knowledge Graph Specialist Agent

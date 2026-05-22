@@ -3,6 +3,12 @@
  * @description Process for implementing and maintaining digital analytics infrastructure including tracking, tagging, and data collection across digital properties
  * @inputs { measurementPlan: object, websiteAccess: object, trackingRequirements: object, outputDir: string }
  * @outputs { success: boolean, configuredAnalytics: object, gtmContainer: object, trackingDocumentation: object, validationReports: array, artifacts: array }
+  * @graph
+ *   domains: [domain:digital-marketing]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
+ *   workflows: [workflow:brand-campaign-launch]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

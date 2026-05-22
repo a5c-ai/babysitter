@@ -1,0 +1,19 @@
+nodeKind: AgentProduct
+id: agent:agent-mux-remote
+attributes:
+  displayName: "agent-mux-remote"
+  vendor: "a5c-ai"
+  homepageUrl: "https://www.npmjs.com/package/@a5c-ai/agent-mux"
+  primarySurface: sdk
+  supportTier: catalog-backed
+  productKind: transport-bridge
+  stackScope: core-runtime-platform
+  description: |
+    Thin transport-only adapter to remote agent sessions. Brokers MCP and
+    proxies events through to a remote agent target (Claude.ai, the Claude
+    desktop app, or any catalog agent reachable over ssh / docker / k8s).
+    It hosts no plugins, skills, slash commands, or TUI of its own — all
+    platform features are supplied by the remote target.
+edges:
+  has_version:
+    - agent-version:agent-mux-remote@current

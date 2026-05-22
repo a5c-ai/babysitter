@@ -1,0 +1,79 @@
+nodeKind: ModelVersion
+id: model:mistral-large-2@current
+attributes:
+  displayName: "Mistral Large 2"
+  costPerMTokInput: 2.0
+  costPerMTokOutput: 6.0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:mistral
+  versionRange: '>=2.0.0 <3.0.0'
+  kind: chat
+  contextWindowTokens: 128000
+  modalities:
+  - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2024-07-24'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2024-07-24'
+  modelCardUrl: https://huggingface.co/mistralai/Mistral-Large-Instruct-2407
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:mistral
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:mistral
+  served_by:
+  - provider:together-ai
+  - provider:fireworks-ai
+  speaks:
+  - model-transport:openai-compat
+  supports:
+  - target: capability:streaming
+    versionRange: '>=2.0.0 <3.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-mistral-large-2
+  - target: capability:supports-text-streaming
+    versionRange: '>=2.0.0 <3.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-mistral-large-2
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=2.0.0 <3.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-mistral-large-2
+  - target: capability:can-multi-turn
+    versionRange: '>=2.0.0 <3.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-mistral-large-2
+  - target: capability:supports-native-tools
+    versionRange: '>=2.0.0 <3.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-mistral-large-2
+  - target: capability:parallel-tool-calls
+    versionRange: '>=2.0.0 <3.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-mistral-large-2
+  - target: capability:requires-tool-approval
+    versionRange: '>=2.0.0 <3.0.0'
+    level: full
+    notes: 'Open-weights model deployed via third-party providers; tool execution
+      by convention requires approval at the agent/runtime layer.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-mistral-large-2

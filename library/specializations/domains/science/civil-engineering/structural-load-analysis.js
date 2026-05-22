@@ -3,6 +3,12 @@
  * @description Comprehensive load analysis process including dead loads, live loads, environmental loads (wind, seismic, snow, rain), and load combinations per ASCE 7
  * @inputs { projectId: string, buildingType: string, siteLocation: object, occupancyCategory: string, buildingGeometry: object }
  * @outputs { success: boolean, loadSummary: object, loadCombinations: array, loadPathDiagrams: array, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:civil-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

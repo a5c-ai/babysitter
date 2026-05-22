@@ -2,6 +2,12 @@
 name: clinical-informatics-specialist
 description: Implement and optimize health IT systems including EHR, HIE, and clinical decision support to improve clinical workflows and data quality
 required-skills: health-data-integration, clinical-decision-support-rules, clinical-workflow-analysis
+graph:
+  domains: [domain:healthcare]
+  specializations: [specialization:clinical-informatics]
+  skillAreas: [skill-area:data-governance, skill-area:data-quality, skill-area:etl-pipelines]
+  workflows: [workflow:experiment-design]
+  roles: [role:data-engineer, role:analytics-engineer]
 ---
 
 # Clinical Informatics Specialist Agent

@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:codex-container-image
+attributes:
+  artifactId: plugin-artifact:codex-container-image
+  displayName: "Codex container image"
+  targetId: plugin-target:codex
+  artifactKind: container-image
+  pathPattern: "ghcr.io/openai/codex"
+  installerSurface: "latest"
+  scriptVariants:
+    - preinstalled
+edges:
+  emits_artifact:
+    - target: plugin-target:codex

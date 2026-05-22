@@ -1,0 +1,18 @@
+nodeKind: AgentProduct
+id: agent:qwen
+attributes:
+  displayName: "Qwen Code"
+  vendor: "Alibaba"
+  homepageUrl: "https://github.com/QwenLM/qwen-code"
+  primarySurface: cli
+  supportTier: catalog-backed
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Alibaba's Qwen Code CLI — a fork of Google's Gemini CLI adapted for
+    Qwen3-Coder models. Speaks an OpenAI-compatible API (DashScope or
+    self-hosted), stores config under `~/.qwen/settings.json`, and supports
+    MCP servers via `mcpServers`.
+edges:
+  has_version:
+    - agent-version:qwen@current

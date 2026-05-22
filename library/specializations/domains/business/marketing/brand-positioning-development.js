@@ -3,6 +3,11 @@
  * @description Define brand's unique market position using target audience, frame of reference, points of differentiation, and reasons to believe. Create positioning statement and validate with target customers.
  * @inputs { brandName: string, industry: string, targetMarket: object, competitors: array, currentPerception: object, businessGoals: object }
  * @outputs { success: boolean, positioningStatement: string, positioningFramework: object, validationPlan: object, artifacts: array }
+  * @graph
+ *   domains: [domain:marketing]
+ *   skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+ *   workflows: [workflow:brand-campaign-launch]
+ *   roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

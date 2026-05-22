@@ -15,6 +15,11 @@ fi
 
 TAG="$1"
 
+if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "error: TAG must match vX.Y.Z format (e.g. v1.2.3), got: ${TAG}" >&2
+  exit 1
+fi
+
 if ! command -v gh >/dev/null 2>&1; then
   echo "error: gh CLI is required for release rollback" >&2
   exit 1

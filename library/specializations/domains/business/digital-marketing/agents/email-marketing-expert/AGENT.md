@@ -16,6 +16,11 @@ metadata:
   domain: business
   category: Marketing Automation
   agent-id: AG-005
+graph:
+  domains: [domain:digital-marketing]
+  specializations: [specialization:digital-marketing-strategy]
+  skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+  roles: [role:marketing-strategist, role:marketing-manager]
 ---
 
 # Email Marketing Expert Agent

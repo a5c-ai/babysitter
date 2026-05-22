@@ -10,6 +10,11 @@ expertise:
   - Effect system design
   - Error handling mechanisms
   - Concurrency primitives design
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+  roles: [role:backend-engineer, role:architect]
 ---
 
 # Language Feature Designer Agent

@@ -1,0 +1,77 @@
+---
+nodeKind: TestSet
+id: test-set:gpqa-diamond-2024
+attributes:
+  displayName: "GPQA Diamond — 2024 release"
+  benchmarkId: benchmark:gpqa
+  caseCount: 198
+  releasedAt: "2023-11-29"
+  composition: |
+    The "diamond" subset of GPQA — 198 graduate-level questions in
+    biology, chemistry, and physics written and validated by domain
+    experts. Diamond is the hardest tier; in-domain experts (PhD
+    students) achieve ~65% accuracy, while non-expert humans with
+    web access score ~34%.
+  homepageUrl: "https://github.com/idavidrein/gpqa"
+  description: |
+    The frozen Diamond split is the standard reported number for
+    vendor announcements (Anthropic, OpenAI, Google) when citing
+    "GPQA Diamond" scores.
+edges: {}
+---
+nodeKind: TestSet
+id: test-set:flores-200-devtest
+attributes:
+  displayName: "FLORES-200 devtest"
+  benchmarkId: benchmark:flores-200
+  caseCount: 1012
+  releasedAt: "2022-07-06"
+  composition: |
+    The FLORES-200 devtest split: 1,012 sentences professionally
+    translated from English into 200 languages (and pivots), used
+    as the canonical held-out evaluation set for many-to-many
+    machine-translation systems.
+  homepageUrl: "https://github.com/facebookresearch/flores"
+  description: |
+    The dev/devtest splits are the canonical held-out evaluation
+    sets for FLORES-200; vendors typically report spBLEU / chrF on
+    devtest.
+edges: {}
+---
+nodeKind: TestSet
+id: test-set:bfcl-v3
+attributes:
+  displayName: "Berkeley Function Calling Leaderboard v3"
+  benchmarkId: benchmark:berkeley-function-calling
+  caseCount: 4951
+  releasedAt: "2024-09-19"
+  composition: |
+    BFCL v3 extends the leaderboard with multi-turn and multi-step
+    function-calling categories alongside the v1 simple/parallel/
+    multiple categories and the v2 "live" user-contributed prompts.
+    The aggregate v3 test bank totals ~4,951 cases across all
+    categories.
+  homepageUrl: "https://gorilla.cs.berkeley.edu/leaderboard.html"
+  description: |
+    BFCL v3 is the canonical multi-turn extension of the Berkeley
+    Function Calling Leaderboard, released in September 2024. It is
+    the standard public reference for LLM function-calling accuracy.
+edges: {}
+---
+nodeKind: TestSet
+id: test-set:truthful-qa-mc
+attributes:
+  displayName: "TruthfulQA — multiple-choice"
+  benchmarkId: benchmark:truthful-qa
+  caseCount: 817
+  releasedAt: "2021-09-08"
+  composition: |
+    The 817-question multiple-choice split of TruthfulQA, covering
+    38 categories of common human misconceptions. Used in MC1 (single
+    correct answer) and MC2 (normalized probability mass over all
+    correct answers) scoring modes.
+  homepageUrl: "https://github.com/sylinrl/TruthfulQA"
+  description: |
+    The MC split is the standard reported number for vendor
+    leaderboards on TruthfulQA.
+edges: {}

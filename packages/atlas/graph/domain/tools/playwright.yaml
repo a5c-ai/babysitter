@@ -1,0 +1,21 @@
+nodeKind: Tool
+id: tool:playwright
+attributes:
+  displayName: "Playwright"
+  homepageUrl: "https://playwright.dev"
+  kind: test-runner
+  language: language:javascript
+  description: |
+    Framework for end-to-end testing across Chromium, Firefox, and WebKit with a single API.
+edges:
+  belongs_to_language:
+    - language:javascript
+  tool_used_by:
+    - target: skill-area:react-testing
+    - target: skill-area:e2e-testing
+  used_for:
+    - skill-area:e2e-testing
+    - skill-area:cross-browser-testing
+  alternative_to:
+    - target: tool:cypress
+      comparison: "E2E testing — Playwright drives browsers externally; Cypress runs in-browser"

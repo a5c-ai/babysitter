@@ -30,6 +30,9 @@
  * - NIST ISO 27001 Implementation: https://csrc.nist.gov/projects/risk-management/sp800-53-controls
  * - BSI ISO 27001 Guidance: https://www.bsigroup.com/en-GB/iso-27001-information-security/
  * - ISMS.online ISO 27001 Toolkit: https://www.isms.online/iso-27001/
+ * @graph
+ *   domains: [domain:security]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

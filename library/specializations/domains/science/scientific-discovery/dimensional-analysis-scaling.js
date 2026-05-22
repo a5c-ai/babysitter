@@ -3,6 +3,13 @@
  * @description Dimensional Analysis and Scaling process - Use physical units and dimensionless combinations to constrain equations and identify scaling laws
  * @inputs { phenomenon: string, variables: array, knownRelations: array, outputDir: string }
  * @outputs { success: boolean, dimensionlessGroups: array, scalingLaws: array, constrainedEquations: array, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

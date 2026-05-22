@@ -1,0 +1,77 @@
+nodeKind: ModelVersion
+id: model:claude-sonnet-3-5@current
+attributes:
+  displayName: "Claude 3.5 Sonnet"
+  modelFamilyId: model-family:claude-sonnet-3
+  versionRange: '>=3.5.0 <3.6.0'
+  kind: chat
+  contextWindowTokens: 200000
+  costPerMTokInput: 3.0
+  costPerMTokOutput: 15.0
+  supportsExtendedThinking: false
+  supportsAdaptiveThinking: false
+  supportsThinkingBudgetTokens: false
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2024-06-20'
+  deprecationDate: '2025-10-22'
+  lifecycleStatus: deprecated
+  lifecycleStatusChangedAt: '2025-10-22'
+  knowledgeCutoffDate: '2024-04-01'
+  safetyTier: anthropic-asl-2
+  modelCardUrl: https://www-cdn.anthropic.com/de8ba9b01c9ab7cbabf5c33b80b7bbc618857627/Model_Card_Claude_3_Addendum.pdf
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:claude-sonnet-3
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:claude-sonnet-3
+  served_by:
+  - provider:anthropic
+  - provider:aws-bedrock
+  - provider:gcp-vertex
+  speaks:
+  - model-transport:anthropic-messages
+  supports:
+  - target: capability:supports-batch-api
+    versionRange: '>=3.5.0 <3.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:parallel-tool-calls
+    versionRange: '>=3.5.0 <3.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-prompt-caching
+    versionRange: '>=3.5.0 <3.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:streaming
+    versionRange: '>=3.5.0 <3.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-text-streaming
+    versionRange: '>=3.5.0 <3.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=3.5.0 <3.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page

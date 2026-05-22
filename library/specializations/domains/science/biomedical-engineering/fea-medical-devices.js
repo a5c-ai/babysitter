@@ -17,6 +17,12 @@
  * - ASME V&V 40:2018 Assessing Credibility of Computational Modeling through Verification and Validation
  * - FDA Guidance on Reporting Computational Modeling Studies
  * - ASTM F2996 Standard Practice for Finite Element Analysis of Non-Modular Metallic Orthopaedic Hip Femoral Stems
+ *
+ * @graph
+ *   domains: [domain:biomedical-engineering]
+ *   skillAreas: [skill-area:data-analysis, skill-area:sensor-fusion, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:biomedical-engineer, role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

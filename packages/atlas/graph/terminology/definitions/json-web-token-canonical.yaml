@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:json-web-token.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:json-web-token
+  text: |
+    JSON Web Token (JWT): a signed, base64url-encoded token format used for stateless authentication and bearer-credential exchange.
+  status: canonical
+edges:
+  defines:
+    - term:json-web-token

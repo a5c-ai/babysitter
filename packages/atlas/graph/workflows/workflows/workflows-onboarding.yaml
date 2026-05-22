@@ -1,0 +1,54 @@
+---
+nodeKind: Workflow
+id: workflow:engineer-onboarding
+attributes:
+  displayName: "Engineer Onboarding"
+  workflowKind: onboarding
+  triggerType: event-driven
+  typicalCadence: "per-hire"
+  complexity: cross-team
+  description: |
+    Guides new engineers from environment setup through first meaningful
+    contribution, covering tooling, access grants, and mentorship pairing.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:tech-lead
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:editor-fluency
+    - target: skill-area:gitops
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:onboard-new-engineer
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:internal-tools
+---
+nodeKind: Workflow
+id: workflow:documentation-publishing
+attributes:
+  displayName: "Documentation Publishing"
+  workflowKind: onboarding
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Produces and publishes user-facing and internal documentation,
+    including API references, guides, and architecture diagrams.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:doc-generator
+    - target: role:devrel
+  applies_to_domain:
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:devrel
+    - target: org-unit:engineering
+    - target: org-unit:devrel-team
+    - target: org-unit:open-source-program-office

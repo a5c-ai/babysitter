@@ -2,6 +2,13 @@
 name: lottie-animations
 description: Lottie animation skill for integrating After Effects animations into iOS, Android, and cross-platform mobile apps with playback control, performance optimization, and interactive animation capabilities.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:animation-transitions, skill-area:mobile-ui-automation]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Lottie Animations Skill

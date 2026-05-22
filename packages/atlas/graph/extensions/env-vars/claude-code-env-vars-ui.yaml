@@ -1,0 +1,95 @@
+nodeKind: EnvVar
+id: env-var:claude-code-no-flicker
+attributes:
+  displayName: CLAUDE_CODE_NO_FLICKER
+  description: Set to 1 to enable fullscreen rendering (research preview).
+  name: CLAUDE_CODE_NO_FLICKER
+  category: ui
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-mouse
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_MOUSE
+  description: Set to 1 to disable mouse tracking in fullscreen rendering.
+  name: CLAUDE_CODE_DISABLE_MOUSE
+  category: ui
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-virtual-scroll
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_VIRTUAL_SCROLL
+  description: Set to 1 to disable virtual scrolling in fullscreen rendering.
+  name: CLAUDE_CODE_DISABLE_VIRTUAL_SCROLL
+  category: ui
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-scroll-speed
+attributes:
+  displayName: CLAUDE_CODE_SCROLL_SPEED
+  description: Mouse wheel scroll multiplier in fullscreen rendering (1-20).
+  name: CLAUDE_CODE_SCROLL_SPEED
+  category: ui
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-syntax-highlight
+attributes:
+  displayName: CLAUDE_CODE_SYNTAX_HIGHLIGHT
+  description: Set to false to disable syntax highlighting in diff output.
+  name: CLAUDE_CODE_SYNTAX_HIGHLIGHT
+  category: ui
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-terminal-title
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_TERMINAL_TITLE
+  description: Set to 1 to disable automatic terminal title updates.
+  name: CLAUDE_CODE_DISABLE_TERMINAL_TITLE
+  category: ui
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-hide-cwd
+attributes:
+  displayName: CLAUDE_CODE_HIDE_CWD
+  description: Set to 1 to hide the working directory in the startup logo.
+  name: CLAUDE_CODE_HIDE_CWD
+  category: ui
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-accessibility
+attributes:
+  displayName: CLAUDE_CODE_CODE_ACCESSIBILITY
+  description: Set to 1 to keep the native terminal cursor visible and disable the inverted-text cursor indicator.
+  name: CLAUDE_CODE_CODE_ACCESSIBILITY
+  category: ui
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

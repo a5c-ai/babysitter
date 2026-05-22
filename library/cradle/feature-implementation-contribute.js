@@ -16,6 +16,11 @@
  * 7. Run Tests & Lint - Verify implementation doesn't break anything (parallel)
  * 8. Review Breakpoint - Let user review all changes before PR
  * 9. Submit PR - Create pull request from fork to upstream (with breakpoint)
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:bug-fixing-from-issues, skill-area:code-review-practice]
+ *   workflows: [workflow:bug-triage, workflow:feature-development]
+ *   roles: [role:backend-engineer, role:devops-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,70 @@
+# Issue Triage Dispatch — research, label, prioritize, and prepare issues for development
+#
+# Usage:
+#   - Automatically triggered when a new issue is opened
+#   - Comment `/triage` on any issue to re-triage
+#   - Or dispatch manually with an issue number
+#
+# The triage agent does NOT create PRs or write code. It researches, labels,
+# deduplicates, prioritizes, and prepares issues for development.
+
+name: Issue Triage Dispatch
+
+on:
+  push:
+    branches: [main, staging, develop]
+    paths: ['.github/workflows/issue-triage-dispatch.yml']
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to triage'
+        required: true
+        type: string
+      instructions:
+        description: 'Additional triage instructions (optional)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+
+jobs:
+  triage:
+    if: >-
+      (github.event_name == 'workflow_dispatch') ||
+      (github.event_name == 'issues' && github.event.action == 'opened') ||
+      startsWith(github.event.comment.body, '/triage')
+    runs-on: ubuntu-latest-l
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+          fetch-depth: 0
+
+      - uses: a5c-ai/babysitter/packages/triggers@staging
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          max-turns: '9999'
+          process-file: .a5c/processes/ci-issue-triage.mjs
+          babysitter-prompt-prefix: '$babysitter:yolo '
+          prompt: |
+            Execute the predefined triage process at .a5c/processes/ci-issue-triage.mjs with these inputs:
+            { "issueNumber": ${{ inputs.issue_number || github.event.issue.number }}, "repo": "a5c-ai/babysitter" }
+            ${{ inputs.instructions || '' }}
+          trigger-query: ''
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

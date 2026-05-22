@@ -1,0 +1,19 @@
+nodeKind: Phase
+id: phase:execute
+attributes:
+  order: 3
+  displayName: "Execute"
+  phaseMachineId: phase-machine:default-process
+  description: |
+    The execute phase of the default process phase machine.
+edges:
+  belongs_to_phase_machine:
+    - phase-machine:default-process
+  exposes_intervention_point:
+    - target: operator-intervention:edit-workflow
+    - target: operator-intervention:change-tracker-state
+    - target: operator-intervention:restart-service
+    - target: operator-intervention:drain-orchestrator
+    - target: operator-intervention:trigger-refresh
+  has_transition:
+    - target: phase-transition:execute-to-review

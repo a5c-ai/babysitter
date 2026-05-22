@@ -9,6 +9,11 @@ expertise:
   - AST design patterns and best practices
   - Error recovery and diagnostic generation
   - Incremental parsing for IDE support
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:compiler-implementation, skill-area:language-design]
+  roles: [role:backend-engineer, role:architect]
 ---
 
 # Compiler Frontend Architect Agent

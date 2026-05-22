@@ -1,0 +1,69 @@
+---
+nodeKind: Workflow
+id: workflow:dei-metrics-review
+attributes:
+  displayName: "DEI Metrics Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews diversity, equity, and inclusion metrics across the organization
+    -- analyzing demographic representation at each level of the org
+    hierarchy, computing pay equity ratios controlling for role, tenure, and
+    geography, measuring promotion velocity disparities across demographic
+    groups, tracking engagement survey sentiment by inclusion dimensions,
+    and benchmarking results against industry peers. Produces DEI dashboard
+    updates, disparity flagging reports, and recommended intervention
+    priorities. Excludes policy drafting.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:dei-inclusion
+    - target: domain:human-resources
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:dei-team
+    - target: org-unit:hr-team
+---
+nodeKind: Workflow
+id: workflow:inclusive-hiring-audit
+attributes:
+  displayName: "Inclusive Hiring Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Audits the hiring process for inclusivity and bias -- reviewing job
+    description language for exclusionary terms using NLP analysis,
+    analyzing applicant funnel conversion rates by demographic group at each
+    interview stage, evaluating interviewer scoring consistency and
+    calibration, assessing accommodation request fulfillment rates, and
+    verifying compliance with EEOC and local fair-employment regulations.
+    Produces bias audit reports, interviewer calibration scorecards, and
+    remediation action plans. Excludes candidate selection decisions.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:prompt-engineering
+  applies_to_domain:
+    - target: domain:dei-inclusion
+    - target: domain:human-resources
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:ai-safety-guardrails
+  performed_by_org_unit:
+    - target: org-unit:dei-team
+    - target: org-unit:hr-team

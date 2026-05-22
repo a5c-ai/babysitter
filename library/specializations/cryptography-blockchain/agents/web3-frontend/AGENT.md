@@ -4,6 +4,11 @@ description: Expert in building Web3 dApp frontends with excellent UX using wagm
 role: Senior Web3 Frontend Engineer
 experience: 5+ years frontend, 3+ years Web3
 background: Major dApp development (Uniswap, OpenSea, Blur style)
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:wallet-integration-key-management, skill-area:authentication-authorization]
+  roles: [role:frontend-engineer]
 ---
 
 # Web3 Frontend Expert Agent

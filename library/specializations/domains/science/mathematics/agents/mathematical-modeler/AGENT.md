@@ -14,6 +14,12 @@ metadata:
   domain: science
   category: applied-mathematics
   phase: 6
+graph:
+  domains: [domain:mathematics]
+  specializations: [specialization:computational-mathematics]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:physics-simulation]
+  workflows: [workflow:experiment-design]
+  roles: [role:computational-scientist, role:research-scientist]
 ---
 
 # Mathematical Modeler

@@ -1,0 +1,135 @@
+nodeKind: Workflow
+id: workflow:compliance-audit
+attributes:
+  displayName: "Compliance Audit"
+  description: |
+    Annual cross-team workflow that evaluates the organisation's adherence to regulatory
+    requirements, contractual obligations, and internal policy standards (e.g. GDPR, HIPAA,
+    PCI-DSS, SOC 2). The compliance officer coordinates with legal, security, engineering,
+    and finance teams to gather evidence across controls. An internal pre-audit assesses
+    readiness before engaging external auditors. Findings and non-conformances are tracked
+    in a remediation register with owners and deadlines. After remediation, evidence is
+    re-submitted, and the final audit report is issued. Board and leadership are briefed on
+    audit outcomes, and the compliance programme is updated to reflect new requirements.
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: complex
+edges:
+  involves_role:
+    - role:compliance-officer
+    - role:legal-counsel
+    - role:audit-analyst
+    - role:security-engineer
+    - role:vp-engineering
+    - role:privacy-engineer
+  applies_to_domain:
+    - domain:cybersecurity
+    - domain:infrastructure
+  triggers_responsibility:
+    - responsibility:compliance-monitoring
+    - responsibility:risk-assessment
+    - responsibility:documentation
+    - responsibility:stakeholder-communication
+---
+nodeKind: Workflow
+id: workflow:data-governance-review
+attributes:
+  displayName: "Data Governance Review"
+  description: |
+    Quarterly workflow ensuring that data assets across the organisation are properly
+    catalogued, classified, owned, and handled in accordance with privacy regulations and
+    internal data policies. Data stewards and the data governance council review the data
+    catalog for completeness, assess retention schedules, and verify that PII and sensitive
+    data handling controls are enforced. Data quality metrics are reviewed and improvement
+    actions assigned. Newly identified data assets are classified and onboarded into the
+    governance framework. The review also assesses cross-border data transfer compliance
+    and consent management effectiveness. Outcomes are documented and reported to the
+    privacy officer and legal team.
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: complex
+edges:
+  involves_role:
+    - role:compliance-officer
+    - role:privacy-engineer
+    - role:data-engineer
+    - role:legal-counsel
+    - role:analytics-engineer
+  applies_to_domain:
+    - domain:data-engineering
+    - domain:databases
+  triggers_responsibility:
+    - responsibility:data-quality
+    - responsibility:compliance-monitoring
+    - responsibility:risk-assessment
+    - responsibility:documentation
+---
+nodeKind: Workflow
+id: workflow:vendor-evaluation
+attributes:
+  displayName: "Vendor Evaluation"
+  description: |
+    On-demand governance workflow triggered when the organisation considers adopting a new
+    third-party vendor, software product, or managed service. A cross-functional evaluation
+    team including procurement, legal, security, and the sponsoring business unit assesses
+    the vendor against defined criteria covering capability fit, financial stability, security
+    posture, compliance certifications, and contract terms. Security reviews the vendor's
+    SOC 2 or equivalent reports, and legal negotiates acceptable data processing agreements.
+    Evaluation results are documented in a vendor assessment report, a recommendation is
+    made, and the final decision is escalated to the appropriate approval authority. Approved
+    vendors are onboarded into the vendor register.
+  workflowKind: governance
+  triggerType: on-demand
+  typicalCadence: "per-vendor"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:compliance-officer
+    - role:legal-counsel
+    - role:security-engineer
+    - role:partnerships-manager
+    - role:vp-engineering
+  applies_to_domain:
+    - domain:cybersecurity
+    - domain:infrastructure
+  triggers_responsibility:
+    - responsibility:vendor-evaluation
+    - responsibility:risk-assessment
+    - responsibility:contract-negotiation
+    - responsibility:compliance-monitoring
+---
+nodeKind: Workflow
+id: workflow:budget-planning
+attributes:
+  displayName: "Budget Planning"
+  description: |
+    Annual cross-team workflow for forecasting, allocating, and approving engineering and
+    technology budgets for the coming fiscal year. Engineering managers and tech leads
+    submit bottom-up resource, tooling, and infrastructure cost projections. The VP of
+    Engineering and CTO consolidate requests, align with strategic priorities, and negotiate
+    with finance for top-down budget envelopes. Headcount plans, cloud spend forecasts, and
+    software licence costs are reviewed against projected revenue growth. Approved budgets
+    are communicated to teams, and quarterly budget reviews track actuals versus plan.
+    The workflow ensures engineering investment is intentional, transparent, and aligned
+    with company objectives.
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: complex
+edges:
+  involves_role:
+    - role:vp-engineering
+    - role:cto
+    - role:engineering-manager
+    - role:project-manager
+    - role:business-analyst
+  applies_to_domain:
+    - domain:cloud-infra
+    - domain:platform-engineering
+  triggers_responsibility:
+    - responsibility:budget-management
+    - responsibility:stakeholder-communication
+    - responsibility:capacity-planning
+    - responsibility:risk-assessment

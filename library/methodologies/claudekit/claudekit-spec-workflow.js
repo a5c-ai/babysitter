@@ -3,6 +3,13 @@
  * @description ClaudeKit Spec Workflow - Full specification lifecycle: create specifications from codebase research, then execute via 6-phase iterative implementation (implement, test, review, improve, commit, track)
  * @inputs { mode: string, feature?: string, specFile?: string, projectRoot?: string, codebaseMap?: object, qualityThreshold?: number, maxImprovementCycles?: number }
  * @outputs { success: boolean, mode: string, spec?: object, implementation?: object, phases: array, qualityScore: number, summary: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:research]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:data-analysis, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:research-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

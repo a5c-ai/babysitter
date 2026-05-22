@@ -27,6 +27,20 @@ function buildContext(nonInteractive: boolean): TaskIntrinsicContext & { nonInte
   };
 }
 
+function buildInternalContext(nonInteractive: boolean): TaskIntrinsicContext & { nonInteractive: boolean; logSeq: number; recordedLogSeqs: Set<number> } {
+  return {
+    runId: "run-bp-test",
+    runDir: "/tmp/run-bp-test",
+    processId: "proc-bp-test",
+    effectIndex: {} as EffectIndex,
+    replayCursor: new ReplayCursor(),
+    now: () => new Date("2026-03-31T00:00:00Z"),
+    nonInteractive,
+    logSeq: 0,
+    recordedLogSeqs: new Set<number>(),
+  };
+}
+
 describe("runBreakpointIntrinsic non-interactive skip", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -61,6 +75,30 @@ describe("runBreakpointIntrinsic non-interactive skip", () => {
     expect(call.eventType).toBe("PROCESS_LOG");
     expect(call.event.label).toBe("breakpoint:skipped");
     expect(call.event.message).toContain("review-gate");
+  });
+
+  it("uses sequential positive logSeq (not -1) for each auto-approved breakpoint", async () => {
+    const { runBreakpointIntrinsic } = await import("../breakpoint");
+    const { appendEvent } = await import("../../../storage/journal");
+
+    const ctx = buildInternalContext(true);
+
+    await runBreakpointIntrinsic("payload-1", ctx, { label: "gate-1" });
+    await runBreakpointIntrinsic("payload-2", ctx, { label: "gate-2" });
+
+    const calls = (appendEvent as ReturnType<typeof vi.fn>).mock.calls;
+    expect(calls.length).toBeGreaterThanOrEqual(2);
+
+    const logSeqs = calls.map((c) => (c[0] as { event: { logSeq: number } }).event.logSeq);
+
+    // Each logSeq must be a positive number, not -1
+    for (const seq of logSeqs) {
+      expect(seq).toBeGreaterThan(0);
+      expect(seq).not.toBe(-1);
+    }
+
+    // Each call must have a DIFFERENT logSeq (sequential, not duplicated)
+    expect(new Set(logSeqs).size).toBe(logSeqs.length);
   });
 
   it("calls runTaskIntrinsic normally when nonInteractive is false", async () => {

@@ -1,0 +1,20 @@
+nodeKind: Language
+id: language:ruby
+attributes:
+  displayName: "Ruby"
+  paradigms:
+    - object-oriented
+    - scripting
+    - functional
+  description: |
+    Ruby is a dynamic, object-oriented, interpreted language designed for
+    developer happiness and productivity. Everything in Ruby is an object,
+    and its expressive, readable syntax encourages concise, elegant code.
+
+    Ruby is the language of Ruby on Rails, the full-stack web framework that
+    popularized convention-over-configuration, MVC architecture, and
+    ActiveRecord ORM. Beyond Rails, Ruby is used in DevOps tooling
+    (Chef, Puppet), API development (Sinatra, Grape), and CLI scripting.
+    The RubyGems ecosystem and Bundler provide rich dependency management.
+    Modern Ruby (3.x) adds Ractors for parallelism and pattern matching.
+edges: {}

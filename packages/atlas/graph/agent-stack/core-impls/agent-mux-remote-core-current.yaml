@@ -1,0 +1,43 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:agent-mux-remote.core@current
+attributes:
+  displayName: agent-mux-remote Core (current) — transport-only delegator
+  agentVersionId: agent-version:agent-mux-remote@current
+  packageRef: source-ref:agent-mux-github
+  loopIteratorPolicy: delegated-to-remote
+  loopIteratorNotes: |
+    No local loop. agent-mux-remote opens a transport (`amux run --json` over local
+    process / ssh / docker / kubectl) and proxies the remote agent's normalized
+    event stream verbatim. Whatever loop semantics the remote agent has are what
+    the host observes.
+  contextManagementStrategy: delegated-to-remote
+  compactionTriggerNotes: |
+    Whatever the remote agent does. No local compaction.
+  subagentInvokerPolicy: delegated-to-remote
+  subagentInvokerNotes: |
+    Subagent semantics, if any, are emitted by the remote agent and proxied verbatim;
+    agent-mux-remote does not introduce its own subagent primitive.
+  resultSynthesisPolicy: delegated-to-remote
+  resultSynthesisNotes: |
+    Final response is whatever the remote agent emits; agent-mux-remote forwards
+    bytes 1:1 over the proxied stream.
+  stopDetectionStrategy: delegated-to-remote
+  transportClientLibrary: none
+  supportedTransportProtocols: []
+  parallelToolCallHandling: delegated-to-remote
+  streamingFidelity: full
+  thinkingChannelHandling: delegated-to-remote
+  notes: |
+    Special case: this AgentCoreImpl exists for ontology completeness but does not
+    implement an agent loop. All Layer-3 (model transport) concerns are delegated
+    to whichever agent runs on the remote target (selected via AMUX_REMOTE_AGENT).
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:agent-mux-remote
+      role: core
+  speaks: []
+  supports_orchestration_primitive:
+    - target: orch-primitive:progress-stream
+    - target: orch-primitive:telemetry-collection

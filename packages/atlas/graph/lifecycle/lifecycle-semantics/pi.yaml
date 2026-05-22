@@ -1,0 +1,15 @@
+nodeKind: LifecycleSemantics
+id: lifecycle-semantics:pi
+attributes:
+  lifecycleSemanticsId: lifecycle-semantics:pi
+  agentId: agent:pi
+  versionRange: ">=0.0.0"
+  runtimeHookMode: unsupported-in-fallback
+  stopHookMode: unsupported-in-fallback
+  backgroundTaskMode: unknown
+  checkpointMode: unspecified
+  pluginContextMode: "skills-and-state-only"
+  platformNuances: []
+edges:
+  applies_to_version:
+    - target: agentVersion:pi:ge-0-0-0

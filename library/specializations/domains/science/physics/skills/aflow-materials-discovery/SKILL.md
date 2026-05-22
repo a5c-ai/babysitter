@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: condensed-matter
   phase: 6
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:computational-scientist]
 ---
 
 # AFLOW Materials Discovery

@@ -1,0 +1,636 @@
+{
+  "generatedAt": "2026-04-27",
+  "familyEntryPoints": [
+    {
+      "surface": "packages/agent-mux",
+      "status": "Public family overview",
+      "canonicalHome": "../packages/agent-mux/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "Use this family README to enter the agent-mux workspace tree before dropping into package-specific READMEs."
+    },
+    {
+      "surface": "packages/hooks-mux",
+      "status": "Public family overview",
+      "canonicalHome": "../packages/hooks-mux/README.md",
+      "supporting": [
+        "../packages/hooks-mux/core/README.md",
+        "../packages/hooks-mux/cli/README.md"
+      ],
+      "note": "Use this family README for the hooks-mux package set and adapter lineup."
+    },
+    {
+      "surface": "plugins",
+      "status": "Public plugin overview",
+      "canonicalHome": "./plugins.md",
+      "supporting": [
+        "../plugins/babysitter/README.md",
+        "../plugins/babysitter-codex/README.md"
+      ],
+      "note": "The docs-site plugin landing page is the canonical discovery entrypoint for harness plugin packages and plugin-system concepts."
+    }
+  ],
+  "surfaces": [
+    {
+      "surface": "packages/atlas",
+      "packageName": "@a5c-ai/atlas",
+      "description": "Atlas catalog graph SDK, CLI, and data.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/atlas/README.md",
+      "supporting": [],
+      "note": "Public npm package for the Atlas catalog graph index and query SDK."
+    },
+    {
+      "surface": "packages/agent-catalog",
+      "packageName": "@a5c-ai/agent-catalog",
+      "description": "Public package for the shared agent ontology, discovery catalog, and packaged evidence graph consumed across the Babysitter toolchain.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/agent-catalog/README.md",
+      "supporting": [],
+      "note": "Public npm package for shared ontology, discovery, and evidence assets used by other published runtimes."
+    },
+    {
+      "surface": "packages/agent-core",
+      "packageName": "@a5c-ai/agent-core",
+      "description": "Built-in agent-core runtime and tool surface for Babysitter.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/agent-core/README.md",
+      "supporting": [],
+      "note": "Public runtime dependency package for advanced orchestration surfaces."
+    },
+    {
+      "surface": "packages/agent-mux/adapters",
+      "packageName": "@a5c-ai/agent-mux-adapters",
+      "description": "Built-in agent adapters for agent-mux",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/agent-mux/adapters/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/agent-mux/cli",
+      "packageName": "@a5c-ai/agent-mux-cli",
+      "description": "CLI binary (amux) for agent-mux",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/agent-mux/cli/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/agent-mux/core",
+      "packageName": "@a5c-ai/agent-mux-core",
+      "description": "Core types, client, and stream engine for agent-mux",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/agent-mux/core/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/agent-mux/gateway",
+      "packageName": "@a5c-ai/agent-mux-gateway",
+      "description": "Gateway package for remote and browser-facing agent-mux surfaces",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/agent-mux/gateway/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/agent-mux/harness-mock",
+      "packageName": "@a5c-ai/agent-mux-harness-mock",
+      "description": "Mock harness simulator for testing agent-mux adapters \u2014 simulates claude-code, codex, and other CLI harnesses",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/agent-mux/harness-mock/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/agent-mux/mobile-android-app",
+      "packageName": "@a5c-ai/agent-mux-mobile-android-app",
+      "description": "Expo-based Android companion app for agent-mux",
+      "hasReadme": false,
+      "status": "Internal-only companion app",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "No package README today. This map is the explicit internal-only note until the surface is promoted."
+    },
+    {
+      "surface": "packages/agent-mux/mobile-ios-app",
+      "packageName": "@a5c-ai/agent-mux-mobile-ios-app",
+      "description": "Expo-based iOS companion app for agent-mux",
+      "hasReadme": false,
+      "status": "Internal-only companion app",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "No package README today. This map is the explicit internal-only note until the surface is promoted."
+    },
+    {
+      "surface": "packages/agent-mux/observability",
+      "packageName": "@a5c-ai/agent-mux-observability",
+      "description": "Logging and telemetry infrastructure for agent-mux",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/agent-mux/observability/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/agent-mux/sdk",
+      "packageName": "@a5c-ai/agent-mux",
+      "description": "Unified dispatch layer for local CLI-based AI coding agents",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/agent-mux/sdk/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/agent-mux/tui",
+      "packageName": "@a5c-ai/agent-mux-tui",
+      "description": "Extensible Ink-based TUI for agent-mux, with a plugin-first architecture",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/agent-mux/tui/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/agent-mux/tv-androidtv-app",
+      "packageName": "@a5c-ai/agent-mux-tv-androidtv-app",
+      "description": "Android TV companion surfaces for agent-mux",
+      "hasReadme": false,
+      "status": "Internal-only companion app",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "No package README today. This map is the explicit internal-only note until the surface is promoted."
+    },
+    {
+      "surface": "packages/agent-mux/tv-appletv-app",
+      "packageName": "@a5c-ai/agent-mux-tv-appletv-app",
+      "description": "Apple TV companion surfaces for agent-mux",
+      "hasReadme": false,
+      "status": "Internal-only companion app",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "No package README today. This map is the explicit internal-only note until the surface is promoted."
+    },
+    {
+      "surface": "packages/agent-mux/ui",
+      "packageName": "@a5c-ai/agent-mux-ui",
+      "description": "Shared UI foundation and session-flow projection surface for browser and React Native agent-mux apps",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/agent-mux/ui/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/agent-mux/watch-watchos-app",
+      "packageName": "@a5c-ai/agent-mux-watch-watchos-app",
+      "description": "watchOS companion surfaces for agent-mux",
+      "hasReadme": false,
+      "status": "Internal-only companion app",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "No package README today. This map is the explicit internal-only note until the surface is promoted."
+    },
+    {
+      "surface": "packages/agent-mux/watch-wearos-app",
+      "packageName": "@a5c-ai/agent-mux-watch-wearos-app",
+      "description": "Wear OS companion surfaces for agent-mux",
+      "hasReadme": false,
+      "status": "Internal-only companion app",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "No package README today. This map is the explicit internal-only note until the surface is promoted."
+    },
+    {
+      "surface": "packages/agent-mux/webui",
+      "packageName": "@a5c-ai/agent-mux-webui",
+      "description": "Browser app for agent-mux gateway control, monitoring, and realtime session-detail flow inspection",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/agent-mux/webui/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/extension-mux",
+      "packageName": "@a5c-ai/extension-mux",
+      "description": "Cross-harness plugin compiler \u2014 compiles a single plugin.json manifest into 9 AI coding agent plugin formats",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/extension-mux/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/tasks-mux",
+      "packageName": "@a5c-ai/tasks-mux",
+      "description": "Serverless breakpoint multiplexing system with pluggable backends and cryptographic signing.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/tasks-mux/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/babysitter",
+      "packageName": "@a5c-ai/babysitter",
+      "description": "Metapackage for installing all babysitter npm packages",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/babysitter/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/babysitter-agent",
+      "packageName": "@a5c-ai/babysitter-agent",
+      "description": "Optional agent runtime CLI for Babysitter orchestration (Pi + agent-mux integration).",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/babysitter-agent/README.md",
+      "supporting": [
+        "../README.md"
+      ],
+      "note": "Public npm package, but it is an advanced/operator-facing runtime CLI rather than the default entrypoint for new users."
+    },
+    {
+      "surface": "packages/babysitter-tui-plugins",
+      "packageName": "@a5c-ai/babysitter-tui-plugins",
+      "description": "Babysitter TUI plugins for agent-mux",
+      "hasReadme": false,
+      "status": "Internal-only workspace",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [],
+      "note": "Internal-only support package for the TUI surface. This map is the explicit documentation home until the workspace gets a README."
+    },
+    {
+      "surface": "packages/breakpoints-mux",
+      "packageName": "@a5c-ai/breakpoints-mux",
+      "description": "Serverless breakpoint multiplexing system with pluggable backends and cryptographic signing.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/breakpoints-mux/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/cloud",
+      "packageName": "@a5c-ai/cloud",
+      "description": "Deployment SDK and CLI for Babysitter Kubernetes environments.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/cloud/README.md",
+      "supporting": [],
+      "note": "README is the canonical public docs home today; the validation matrix does not currently expose a separate central docs entrypoint for this package."
+    },
+    {
+      "surface": "packages/hooks-mux/adapter-claude",
+      "packageName": "@a5c-ai/hooks-mux-adapter-claude",
+      "description": "Claude Code harness adapter for the hooks-mux system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/hooks-mux/adapter-claude/README.md",
+      "supporting": [
+        "../packages/hooks-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/hooks-mux/adapter-codex",
+      "packageName": "@a5c-ai/hooks-mux-adapter-codex",
+      "description": "Codex harness adapter for the hooks-mux system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/hooks-mux/adapter-codex/README.md",
+      "supporting": [
+        "../packages/hooks-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/hooks-mux/adapter-copilot",
+      "packageName": "@a5c-ai/hooks-mux-adapter-copilot",
+      "description": "GitHub Copilot harness adapter for the hooks-mux system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/hooks-mux/adapter-copilot/README.md",
+      "supporting": [
+        "../packages/hooks-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/hooks-mux/adapter-cursor",
+      "packageName": "@a5c-ai/hooks-mux-adapter-cursor",
+      "description": "Cursor harness adapter for the hooks-mux system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/hooks-mux/adapter-cursor/README.md",
+      "supporting": [
+        "../packages/hooks-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/hooks-mux/adapter-gemini",
+      "packageName": "@a5c-ai/hooks-mux-adapter-gemini",
+      "description": "Gemini CLI harness adapter for the hooks-mux system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/hooks-mux/adapter-gemini/README.md",
+      "supporting": [
+        "../packages/hooks-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/hooks-mux/adapter-oh-my-pi",
+      "packageName": "@a5c-ai/hooks-mux-adapter-oh-my-pi",
+      "description": "oh-my-pi harness adapter for the hooks-mux system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/hooks-mux/adapter-oh-my-pi/README.md",
+      "supporting": [
+        "../packages/hooks-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/hooks-mux/adapter-hermes",
+      "packageName": "@a5c-ai/hooks-mux-adapter-hermes",
+      "description": "Hermes harness adapter for the hooks-mux system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/hooks-mux/adapter-hermes/README.md",
+      "supporting": [
+        "../packages/hooks-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/hooks-mux/adapter-openclaw",
+      "packageName": "@a5c-ai/hooks-mux-adapter-openclaw",
+      "description": "OpenClaw harness adapter for the hooks-mux system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/hooks-mux/adapter-openclaw/README.md",
+      "supporting": [
+        "../packages/hooks-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/hooks-mux/adapter-opencode",
+      "packageName": "@a5c-ai/hooks-mux-adapter-opencode",
+      "description": "OpenCode harness adapter for the hooks-mux system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/hooks-mux/adapter-opencode/README.md",
+      "supporting": [
+        "../packages/hooks-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/hooks-mux/adapter-pi",
+      "packageName": "@a5c-ai/hooks-mux-adapter-pi",
+      "description": "Pi harness adapter for the hooks-mux system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/hooks-mux/adapter-pi/README.md",
+      "supporting": [
+        "../packages/hooks-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/hooks-mux/cli",
+      "packageName": "@a5c-ai/hooks-mux-cli",
+      "description": "CLI entrypoint for the hooks-mux system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/hooks-mux/cli/README.md",
+      "supporting": [
+        "../packages/hooks-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/hooks-mux/core",
+      "packageName": "@a5c-ai/hooks-mux-core",
+      "description": "Canonical schemas, types, session store, and merge engine for the hooks-mux system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/hooks-mux/core/README.md",
+      "supporting": [
+        "../packages/hooks-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/krate/core",
+      "packageName": "@a5c-ai/krate",
+      "description": "Kubernetes-native forge runtime with Argo CD GitOps and Gitea-backed Git hosting.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/krate/core/README.md",
+      "supporting": [],
+      "note": "Public npm package for the Krate Kubernetes forge platform."
+    },
+    {
+      "surface": "packages/observer-dashboard",
+      "packageName": "@a5c-ai/babysitter-observer-dashboard",
+      "description": "Real-time observability dashboard for babysitter orchestration runs",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/observer-dashboard/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/sdk",
+      "packageName": "@a5c-ai/babysitter-sdk",
+      "description": "Storage and run-registry primitives for event-sourced babysitter workflows.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/sdk/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/transport-mux",
+      "packageName": "@a5c-ai/transport-mux",
+      "description": "Transport/proxy runtime seam for agent-mux launcher bridging",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/transport-mux/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract for the published transport/proxy runtime seam."
+    },
+    {
+      "surface": "packages/triggers",
+      "packageName": "@a5c-ai/triggers",
+      "description": "Trigger normalization, enrichment, filtering, and GitHub Action glue for agent-mux automation pipelines.",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/triggers/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract for reusable trigger/action glue used with agent-mux pipelines."
+    },
+    {
+      "surface": "plugins/babysitter",
+      "packageName": "Babysitter Claude Code plugin",
+      "description": "Claude Code harness plugin surface shipped from the repo plugin directory.",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "Canonical Claude Code plugin surface. This repo plugin is discoverable from the docs-site plugin landing page and the root README install guide."
+    },
+    {
+      "surface": "plugins/babysitter-codex",
+      "packageName": "@a5c-ai/babysitter-codex",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-codex/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-cursor",
+      "packageName": "@a5c-ai/babysitter-cursor",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-cursor/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-gemini",
+      "packageName": "@a5c-ai/babysitter-gemini",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-gemini/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-github",
+      "packageName": "@a5c-ai/babysitter-github",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-github/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-omp",
+      "packageName": "@a5c-ai/babysitter-omp",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval \u2014 oh-my-pi",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-omp/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-openclaw",
+      "packageName": "@a5c-ai/babysitter-openclaw",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-openclaw/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-opencode",
+      "packageName": "@a5c-ai/babysitter-opencode",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-opencode/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-pi",
+      "packageName": "@a5c-ai/babysitter-pi",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval \u2014 Pi Coding Agent",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-pi/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    }
+  ]
+}

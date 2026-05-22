@@ -4,6 +4,13 @@
  * @inputs { projectName: string, strictness?: string }
  * @outputs { success: boolean, tsConfig: object, types: array, artifacts: array }
  * @references - TypeScript: https://www.typescriptlang.org/docs/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer, role:tech-lead]
+ *   skillAreas: [skill-area:react-components, skill-area:code-analysis-linting]
+ *   topics: [topic:design-patterns]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -25,6 +32,9 @@ export async function process(inputs, ctx) {
   artifacts.push(...pathAliases.artifacts);
 
   let buildOptimization = await ctx.task(buildOptimizationTask, { projectName, outputDir });
+  // TypeScript hard gate (issue #65)
+  const tsCheck = await ctx.task(tsCheckTask, { projectName });
+
     let lastFeedback = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (lastFeedback) {
@@ -47,5 +57,7 @@ export const typeDefinitionsTask = defineTask('type-definitions', (args, taskCtx
 export const pathAliasesTask = defineTask('path-aliases', (args, taskCtx) => ({ kind: 'agent', title: `Path Aliases - ${args.projectName}`, agent: { name: 'path-aliases-specialist', prompt: { role: 'Path Aliases Specialist', task: 'Configure path aliases', context: args, instructions: ['1. Configure baseUrl', '2. Set up paths', '3. Configure @/* alias', '4. Set up component paths', '5. Configure utility paths', '6. Set up type paths', '7. Configure test paths', '8. Set up bundler alias', '9. Configure IDE support', '10. Document aliases'], outputFormat: 'JSON with aliases' }, outputSchema: { type: 'object', required: ['aliases', 'artifacts'], properties: { aliases: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'typescript', 'aliases'] }));
 
 export const buildOptimizationTask = defineTask('build-optimization', (args, taskCtx) => ({ kind: 'agent', title: `Build Optimization - ${args.projectName}`, agent: { name: 'ts-build-specialist', prompt: { role: 'TypeScript Build Specialist', task: 'Optimize TypeScript build', context: args, instructions: ['1. Configure incremental', '2. Set up composite', '3. Configure skipLibCheck', '4. Set up declaration', '5. Configure declarationMap', '6. Set up sourceMap', '7. Configure outDir', '8. Set up tsBuildInfoFile', '9. Configure project references', '10. Document optimization'], outputFormat: 'JSON with optimization' }, outputSchema: { type: 'object', required: ['config', 'artifacts'], properties: { config: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'typescript', 'build'] }));
+
+export const tsCheckTask = defineTask('typescript-check', (args, taskCtx) => ({ kind: 'shell', title: 'TypeScript compilation check', shell: { command: 'npx tsc --noEmit 2>&1', expectedExitCode: 0, timeout: 120000 }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['typescript', 'compilation', 'hard-gate'] }));
 
 export const documentationTask = defineTask('ts-documentation', (args, taskCtx) => ({ kind: 'agent', title: `Documentation - ${args.projectName}`, agent: { name: 'technical-writer-agent', prompt: { role: 'Technical Writer', task: 'Generate TypeScript documentation', context: args, instructions: ['1. Create README', '2. Document configuration', '3. Create types guide', '4. Document aliases', '5. Create build guide', '6. Document patterns', '7. Create migration guide', '8. Document best practices', '9. Create examples', '10. Generate templates'], outputFormat: 'JSON with documentation' }, outputSchema: { type: 'object', required: ['docs', 'artifacts'], properties: { docs: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'typescript', 'documentation'] }));

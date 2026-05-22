@@ -1,0 +1,787 @@
+# Deep Stack Profiles — Volume 1
+# 15 richly-connected stack profiles covering data, ML/AI, platform,
+# security, e-commerce, and developer-experience domains.
+---
+nodeKind: StackProfile
+id: stack-profile:data-lakehouse
+attributes:
+  displayName: "Data Lakehouse Stack (Databricks, Spark, Delta Lake, dbt, Airflow)"
+  description: |
+    A unified analytics platform that combines the flexibility of a data
+    lake with the ACID transaction guarantees and performance of a data
+    warehouse. Databricks provides the managed Spark runtime and Delta Lake
+    table format for schema evolution, time travel, and MERGE operations on
+    cloud object storage.
+
+    dbt handles the transformation layer, turning raw ingested tables into
+    tested, documented analytical models. Airflow orchestrates the end-to-end
+    pipeline from ingestion through transformation to consumption. Python
+    serves as the glue language for custom operators, UDFs, and notebooks.
+    Choose this stack when you need a single copy of data serving both BI
+    dashboards and ML feature engineering, and when your data volumes exceed
+    what a traditional warehouse handles cost-effectively.
+  composes:
+    - tool:databricks
+    - tool:airflow
+    - language:python
+    - language:sql
+    - framework:spark-java
+edges:
+  composed_of:
+    - tool:databricks
+    - tool:airflow
+    - language:python
+    - language:sql
+    - framework:spark-java
+    - tool:prometheus
+    - tool:docker
+  used_by_role:
+    - role:data-engineer
+    - role:analytics-engineer
+    - role:data-scientist
+  follows_workflow:
+    - workflow:data-pipeline-deployment
+    - workflow:dbt-model-review
+  applies_to:
+    - domain:data-engineering
+    - domain:data-science
+  requires_skill_area:
+    - skill-area:etl-pipelines
+    - skill-area:data-warehouse-modeling
+    - skill-area:spark-jobs
+    - skill-area:dbt-modeling
+    - skill-area:data-quality
+---
+nodeKind: StackProfile
+id: stack-profile:stream-processing
+attributes:
+  displayName: "Stream Processing Stack (Kafka, Flink, Schema Registry, Prometheus)"
+  description: |
+    A real-time event streaming architecture for continuous data processing
+    at scale. Apache Kafka serves as the durable, distributed event log
+    while Apache Flink (or Spark Structured Streaming) provides exactly-once
+    stream processing with event-time windowing, watermarks, and stateful
+    aggregations.
+
+    Confluent Schema Registry enforces Avro or Protobuf contracts between
+    producers and consumers, preventing schema drift from breaking
+    downstream systems. Prometheus and Grafana monitor consumer lag, pipeline
+    throughput, and processing latency. This stack is ideal for fraud
+    detection, clickstream analytics, IoT telemetry pipelines, and any
+    workload where batch latency is unacceptable. The primary tradeoff is
+    operational complexity — managing Kafka clusters, Flink checkpoints,
+    and exactly-once semantics requires deep infrastructure expertise.
+  composes:
+    - language:java
+    - language:python
+    - language:protobuf
+    - tool:prometheus
+    - tool:grafana
+edges:
+  composed_of:
+    - language:java
+    - language:python
+    - language:protobuf
+    - tool:prometheus
+    - tool:grafana
+    - tool:kubernetes
+    - tool:docker
+  used_by_role:
+    - role:data-engineer
+    - role:backend-engineer
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:data-pipeline-deployment
+    - workflow:real-time-streaming-health-check
+  applies_to:
+    - domain:data-engineering
+    - domain:backend
+  requires_skill_area:
+    - skill-area:kafka-stream-processing
+    - skill-area:streaming-realtime-processing
+    - skill-area:batch-vs-stream-tradeoffs
+    - skill-area:data-quality
+    - skill-area:observability-instrumentation
+---
+nodeKind: StackProfile
+id: stack-profile:feature-store-mlops
+attributes:
+  displayName: "Feature Store & MLOps Stack (Feast, MLflow, BentoML, K8s, Prometheus)"
+  description: |
+    A production MLOps platform centered on feature management and model
+    lifecycle governance. Feast provides a feature store that bridges
+    offline training (batch features from the warehouse) and online serving
+    (low-latency feature lookups via Redis or DynamoDB), ensuring
+    train-serve consistency.
+
+    MLflow tracks experiments, registers model versions, and manages the
+    promotion pipeline from staging to production. BentoML packages trained
+    models into containerized inference services with adaptive batching
+    and multi-model serving. Kubernetes orchestrates both training jobs and
+    serving deployments with autoscaling. Prometheus monitors inference
+    latency, feature freshness, and data drift. Choose this stack when
+    your ML team needs reproducible pipelines, governed model promotion,
+    and feature reuse across multiple models.
+  composes:
+    - tool:feast
+    - tool:mlflow
+    - tool:bentoml
+    - tool:kubernetes
+    - tool:prometheus
+    - language:python
+edges:
+  composed_of:
+    - tool:feast
+    - tool:mlflow
+    - tool:bentoml
+    - tool:kubernetes
+    - tool:prometheus
+    - language:python
+    - tool:docker
+    - library:redis
+  used_by_role:
+    - role:ml-ops-engineer
+    - role:ml-engineer
+    - role:data-engineer
+  follows_workflow:
+    - workflow:model-deployment-pipeline
+    - workflow:feature-store-management
+  applies_to:
+    - domain:ml-ops
+    - domain:machine-learning
+  requires_skill_area:
+    - skill-area:feature-engineering-pipelines
+    - skill-area:model-registry-management
+    - skill-area:model-serving-deployment
+    - skill-area:ci-cd-ml-pipelines
+    - skill-area:model-monitoring-drift-detection
+---
+nodeKind: StackProfile
+id: stack-profile:llm-fine-tuning
+attributes:
+  displayName: "LLM Fine-Tuning Stack (PyTorch, HuggingFace, PEFT/LoRA, W&B, vLLM)"
+  description: |
+    A specialized stack for adapting large language models to domain-specific
+    tasks through parameter-efficient fine-tuning. PyTorch provides the
+    training runtime. HuggingFace Transformers supplies pre-trained model
+    weights, tokenizers, and the Trainer API. PEFT (Parameter-Efficient
+    Fine-Tuning) with LoRA adapters enables fine-tuning billion-parameter
+    models on consumer or single-node GPU hardware by training only a
+    small fraction of weights.
+
+    Weights & Biases (W&B) tracks training runs, hyperparameters, loss
+    curves, and evaluation metrics. vLLM provides high-throughput inference
+    with PagedAttention for deploying the fine-tuned model. Python is the
+    sole language across the pipeline. The key tradeoff is that LoRA
+    adapters trade some quality ceiling for dramatically lower compute
+    cost; full fine-tuning on large models still requires multi-GPU clusters.
+  composes:
+    - library:pytorch
+    - library:hf-transformers
+    - tool:vllm
+    - language:python
+    - tool:huggingface
+edges:
+  composed_of:
+    - library:pytorch
+    - library:hf-transformers
+    - tool:vllm
+    - language:python
+    - tool:huggingface
+    - tool:docker
+    - tool:kubernetes
+  used_by_role:
+    - role:ml-engineer
+    - role:research-engineer
+    - role:data-scientist
+  follows_workflow:
+    - workflow:model-training-cycle
+    - workflow:hyperparameter-tuning-cycle
+  applies_to:
+    - domain:machine-learning
+    - domain:ml-ai
+  requires_skill_area:
+    - skill-area:ml-fine-tuning
+    - skill-area:deep-learning-libraries
+    - skill-area:machine-learning-frameworks
+    - skill-area:model-serving-deployment
+    - skill-area:llm-infrastructure
+---
+nodeKind: StackProfile
+id: stack-profile:multi-agent-orchestration
+attributes:
+  displayName: "Multi-Agent Orchestration Stack (LangGraph, CrewAI, Redis, PostgreSQL, FastAPI)"
+  description: |
+    An architecture for building systems where multiple AI agents collaborate
+    on complex tasks through structured workflows. LangGraph provides
+    graph-based agent orchestration with cycles, branching, and human-in-the-loop
+    checkpoints. CrewAI enables role-based multi-agent teams with delegation
+    and sequential or parallel task execution.
+
+    Redis serves as the shared memory and message-passing layer between
+    agents. PostgreSQL stores persistent state, conversation histories, and
+    structured outputs. FastAPI exposes the orchestration layer as an async
+    HTTP/WebSocket API. Python is the primary language. This stack excels
+    at research automation, complex document processing, and multi-step
+    decision workflows. The main tradeoff is debugging complexity — tracing
+    failures across multiple agent hops requires robust logging and
+    observability tooling like LangSmith or Langfuse.
+  composes:
+    - framework:langgraph
+    - framework:crewai
+    - framework:fastapi
+    - language:python
+    - library:redis
+edges:
+  composed_of:
+    - framework:langgraph
+    - framework:crewai
+    - framework:fastapi
+    - language:python
+    - library:redis
+    - library:sqlalchemy
+    - tool:docker
+  used_by_role:
+    - role:ml-engineer
+    - role:backend-engineer
+    - role:research-engineer
+  follows_workflow:
+    - workflow:multi-agent-orchestration-review
+    - workflow:agent-evaluation-cycle
+  applies_to:
+    - domain:ml-ai
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:multi-agent-coordination
+    - skill-area:agent-planning-reasoning
+    - skill-area:agentic-loops
+    - skill-area:tool-use
+    - skill-area:chain-of-thought-multistep-orchestration
+---
+nodeKind: StackProfile
+id: stack-profile:agentic-rag
+attributes:
+  displayName: "Agentic RAG Stack (LlamaIndex, ChromaDB, LangChain, FastAPI, React)"
+  description: |
+    A retrieval-augmented generation architecture where an AI agent
+    dynamically decides what to retrieve, how to chunk and re-rank results,
+    and when to perform multi-hop retrieval across heterogeneous data
+    sources. LlamaIndex provides the data connectors, indexing pipelines,
+    and query engines. ChromaDB (or Qdrant) serves as the vector store
+    for embedding-based similarity search.
+
+    LangChain handles prompt orchestration, tool integration, and output
+    parsing. FastAPI exposes the RAG pipeline as an async API with streaming
+    support. React powers the chat frontend with real-time token streaming.
+    This stack is best for enterprise knowledge bases, legal document QA,
+    and customer support copilots where static retrieval falls short and
+    the agent must reason over retrieval strategy. The tradeoff is latency —
+    agentic retrieval adds LLM calls per query compared to single-shot RAG.
+  composes:
+    - library:llama-index
+    - tool:chromadb
+    - framework:langchain
+    - framework:fastapi
+    - framework:react
+    - language:python
+    - language:typescript
+edges:
+  composed_of:
+    - library:llama-index
+    - tool:chromadb
+    - framework:langchain
+    - framework:fastapi
+    - framework:react
+    - language:python
+    - language:typescript
+    - tool:docker
+  used_by_role:
+    - role:ml-engineer
+    - role:backend-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:rag-pipeline-evaluation
+    - workflow:prompt-engineering-iteration
+  applies_to:
+    - domain:ml-ai
+    - domain:knowledge-management
+  requires_skill_area:
+    - skill-area:retrieval-augmented-generation
+    - skill-area:rag-pipeline-engineering
+    - skill-area:embedding-optimization
+    - skill-area:prompt-engineering
+    - skill-area:context-management
+---
+nodeKind: StackProfile
+id: stack-profile:coding-agent-platform
+attributes:
+  displayName: "Coding Agent Platform Stack (Claude Code, hooks-mux, Git, Docker, TypeScript)"
+  description: |
+    A developer tooling stack for building and operating AI-powered coding
+    agents that autonomously navigate codebases, write code, run tests,
+    and submit pull requests. Claude Code (or similar agentic coding CLIs)
+    provides the core agent loop with tool use, file editing, and terminal
+    access. hooks-mux intercepts and orchestrates tool calls for custom
+    validation, logging, and policy enforcement.
+
+    Git provides version control with branching strategies for agent-authored
+    changes. Docker isolates agent execution environments. TypeScript is
+    the primary language for plugin development, hook scripts, and
+    orchestration logic. This stack is suited for teams building internal
+    developer platforms, CI-integrated code review bots, or autonomous
+    maintenance agents. The key tradeoff is trust boundaries — agents need
+    carefully scoped permissions to avoid destructive operations.
+  composes:
+    - language:typescript
+    - tool:docker
+    - tool:gh-cli
+    - tool:github-actions
+edges:
+  composed_of:
+    - language:typescript
+    - language:bash
+    - tool:docker
+    - tool:gh-cli
+    - tool:github-actions
+    - tool:npm
+    - tool:vscode
+  used_by_role:
+    - role:platform-engineer
+    - role:devops-engineer
+    - role:software-engineer
+  follows_workflow:
+    - workflow:ai-pair-programming-governance
+    - workflow:copilot-usage-review
+  applies_to:
+    - domain:software-engineering
+    - domain:platform-engineering
+  requires_skill_area:
+    - skill-area:ai-agent-development
+    - skill-area:agentic-loops
+    - skill-area:tool-use
+    - skill-area:ci-cd
+    - skill-area:developer-experience
+---
+nodeKind: StackProfile
+id: stack-profile:voice-ai-agent
+attributes:
+  displayName: "Voice AI Agent Stack (Whisper, TTS, WebSocket, FastAPI, React)"
+  description: |
+    An end-to-end voice-powered AI agent architecture for building
+    conversational interfaces with speech input and output. OpenAI Whisper
+    (or whisper.cpp) handles automatic speech recognition, converting audio
+    streams to text. A text-to-speech engine synthesizes agent responses
+    back to audio. WebSocket connections enable full-duplex, low-latency
+    audio streaming between client and server.
+
+    FastAPI serves as the async backend, coordinating ASR, LLM inference,
+    and TTS in a streaming pipeline. React powers the frontend with audio
+    capture, playback, and visual feedback. Python handles all server-side
+    logic including audio preprocessing and LLM integration. This stack
+    suits voice assistants, call center copilots, and accessibility-first
+    applications. The main tradeoff is latency — the ASR-to-TTS round trip
+    must stay under 1-2 seconds for natural conversation flow.
+  composes:
+    - framework:fastapi
+    - framework:react
+    - language:python
+    - language:typescript
+    - library:websockets
+edges:
+  composed_of:
+    - framework:fastapi
+    - framework:react
+    - language:python
+    - language:typescript
+    - library:websockets
+    - tool:docker
+    - library:uvicorn
+  used_by_role:
+    - role:ml-engineer
+    - role:fullstack-engineer
+    - role:frontend-engineer
+  follows_workflow:
+    - workflow:prompt-engineering-iteration
+    - workflow:agent-evaluation-cycle
+  applies_to:
+    - domain:ml-ai
+    - domain:frontend
+  requires_skill_area:
+    - skill-area:audio-processing
+    - skill-area:streaming-realtime-processing
+    - skill-area:websocket-design
+    - skill-area:natural-language-processing
+    - skill-area:model-serving-deployment
+---
+nodeKind: StackProfile
+id: stack-profile:edge-ai-iot
+attributes:
+  displayName: "Edge AI / IoT Stack (TensorFlow Lite, MQTT, Rust, InfluxDB, Grafana)"
+  description: |
+    A stack for deploying machine learning models on resource-constrained
+    edge devices and collecting telemetry from distributed IoT networks.
+    TensorFlow Lite (or ONNX Runtime) runs quantized inference models on
+    microcontrollers and single-board computers with minimal memory and
+    power budgets. MQTT provides lightweight pub/sub messaging between
+    edge devices and a central broker.
+
+    Rust is used for performance-critical edge firmware where memory safety
+    and zero-cost abstractions matter. InfluxDB stores time-series telemetry
+    (sensor readings, inference results, device health) with built-in
+    downsampling and retention policies. Grafana visualizes device fleets,
+    model accuracy over time, and alert conditions. This stack is ideal
+    for predictive maintenance, smart agriculture, environmental monitoring,
+    and industrial quality inspection. The tradeoff is model size constraints
+    — quantization and pruning are required to fit models within edge memory.
+  composes:
+    - library:tensorflow
+    - language:rust
+    - tool:grafana
+    - language:python
+edges:
+  composed_of:
+    - library:tensorflow
+    - language:rust
+    - tool:grafana
+    - language:python
+    - language:c
+    - tool:docker
+    - tool:mosquitto
+  used_by_role:
+    - role:embedded-engineer
+    - role:ml-engineer
+    - role:data-engineer
+  follows_workflow:
+    - workflow:firmware-release-cycle
+    - workflow:model-deployment-pipeline
+  applies_to:
+    - domain:iot
+    - domain:embedded-systems
+  requires_skill_area:
+    - skill-area:firmware-development
+    - skill-area:communication-protocols
+    - skill-area:model-serving-deployment
+    - skill-area:sensor-libraries
+    - skill-area:low-power-design
+---
+nodeKind: StackProfile
+id: stack-profile:kubernetes-platform-engineering
+attributes:
+  displayName: "Kubernetes Platform Engineering Stack (K8s, Helm, ArgoCD, Terraform, Backstage)"
+  description: |
+    A comprehensive internal developer platform built on Kubernetes as the
+    compute substrate. Helm packages applications into versioned, templated
+    charts. ArgoCD implements GitOps-based continuous delivery, reconciling
+    cluster state with Git repositories. Terraform provisions the underlying
+    cloud infrastructure (VPCs, node pools, managed services) outside the
+    cluster boundary.
+
+    Backstage serves as the developer portal, providing a service catalog,
+    scaffolding templates (golden paths), and documentation aggregation.
+    Go is the primary language for custom controllers, operators, and CLI
+    tools. This stack is suited for platform teams serving 10+ engineering
+    squads who need self-service deployment, standardized service templates,
+    and centralized observability. The tradeoff is platform complexity —
+    maintaining the platform itself becomes a full-time engineering effort.
+  composes:
+    - tool:kubernetes
+    - tool:helm
+    - tool:argocd
+    - tool:terraform
+    - tool:backstage
+    - language:go
+    - language:yaml
+edges:
+  composed_of:
+    - tool:kubernetes
+    - tool:helm
+    - tool:argocd
+    - tool:terraform
+    - tool:backstage
+    - language:go
+    - language:yaml
+    - language:hcl
+    - tool:docker
+  used_by_role:
+    - role:platform-engineer
+    - role:devops-engineer
+    - role:sre
+  follows_workflow:
+    - workflow:golden-path-governance
+    - workflow:helm-chart-promotion
+  applies_to:
+    - domain:platform-engineering
+    - domain:devops
+  requires_skill_area:
+    - skill-area:k8s-operator-development
+    - skill-area:gitops
+    - skill-area:terraform-infrastructure
+    - skill-area:containerization
+    - skill-area:developer-experience
+---
+nodeKind: StackProfile
+id: stack-profile:observability-stack
+attributes:
+  displayName: "Observability Stack (OpenTelemetry, Prometheus, Grafana, Loki, Tempo)"
+  description: |
+    A full-spectrum observability platform covering metrics, logs, and
+    distributed traces. OpenTelemetry provides vendor-neutral
+    instrumentation SDKs and the OpenTelemetry Collector for receiving,
+    processing, and exporting telemetry data. Prometheus scrapes and stores
+    time-series metrics with PromQL for alerting and dashboarding.
+
+    Grafana serves as the unified visualization layer, querying across all
+    three signal types. Loki indexes and queries log streams using the same
+    label-based approach as Prometheus, avoiding the cost of full-text
+    indexing. Tempo stores distributed traces with minimal infrastructure
+    overhead via object-storage backends. Go is the dominant language in
+    this ecosystem for building exporters, collectors, and custom
+    instrumentation. This stack replaces commercial APM platforms for
+    teams that want full control over their telemetry pipeline at scale.
+  composes:
+    - tool:opentelemetry
+    - tool:prometheus
+    - tool:grafana
+    - tool:loki
+    - tool:tempo
+    - language:go
+edges:
+  composed_of:
+    - tool:opentelemetry
+    - tool:prometheus
+    - tool:grafana
+    - tool:loki
+    - tool:tempo
+    - language:go
+    - tool:kubernetes
+    - tool:docker
+  used_by_role:
+    - role:observability-engineer
+    - role:sre
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:alert-tuning
+    - workflow:slo-burn-rate-review
+  applies_to:
+    - domain:observability
+    - domain:devops
+  requires_skill_area:
+    - skill-area:observability-instrumentation
+    - skill-area:distributed-tracing
+    - skill-area:metrics-dashboarding
+    - skill-area:log-aggregation
+    - skill-area:alerting-oncall
+---
+nodeKind: StackProfile
+id: stack-profile:security-operations
+attributes:
+  displayName: "Security Operations Stack (Trivy, Falco, OPA, Vault, Snyk)"
+  description: |
+    A defense-in-depth security toolchain for cloud-native environments
+    covering vulnerability scanning, runtime threat detection, policy
+    enforcement, and secrets management. Trivy scans container images,
+    filesystems, and IaC templates for known vulnerabilities and
+    misconfigurations. Falco monitors Linux kernel syscalls at runtime to
+    detect anomalous behavior — container escapes, unexpected network
+    connections, and privilege escalations.
+
+    OPA (Open Policy Agent) enforces admission control policies on
+    Kubernetes resources and API requests using Rego rules. Vault manages
+    secrets, certificates, and dynamic credentials with automatic rotation.
+    Snyk integrates into CI pipelines for dependency vulnerability analysis
+    and license compliance. Go and Python are the primary languages for
+    custom policy engines and automation scripts. This stack suits security
+    teams responsible for container and Kubernetes environments.
+  composes:
+    - tool:trivy
+    - tool:falco
+    - tool:opa
+    - tool:vault
+    - tool:snyk
+    - language:go
+    - language:python
+edges:
+  composed_of:
+    - tool:trivy
+    - tool:falco
+    - tool:opa
+    - tool:vault
+    - tool:snyk
+    - language:go
+    - language:python
+    - tool:kubernetes
+    - tool:docker
+  used_by_role:
+    - role:security-engineer
+    - role:devops-engineer
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:container-image-hardening
+    - workflow:iac-security-scanning
+  applies_to:
+    - domain:security
+    - domain:cybersecurity
+  requires_skill_area:
+    - skill-area:vulnerability-scanning
+    - skill-area:runtime-security
+    - skill-area:policy-enforcement
+    - skill-area:container-security
+    - skill-area:threat-detection
+---
+nodeKind: StackProfile
+id: stack-profile:ecommerce-nextjs
+attributes:
+  displayName: "E-Commerce Stack (Next.js, Stripe, Shopify, PostgreSQL, Redis)"
+  description: |
+    A modern headless e-commerce architecture using Next.js as the storefront
+    framework with server-side rendering for SEO and fast initial page loads.
+    Stripe handles payment processing, subscription billing, and checkout
+    sessions. Shopify Storefront API (or a headless Shopify setup) provides
+    the product catalog, inventory management, and order fulfillment layer.
+
+    PostgreSQL stores application-specific data — user profiles, reviews,
+    wishlists, and custom analytics. Redis powers session management, cart
+    state, product recommendation caching, and rate limiting. TypeScript
+    spans the full stack. This architecture suits brands that need custom
+    storefront experiences beyond Shopify's theme system while leveraging
+    Shopify's operational backend. The tradeoff is maintaining two systems
+    — the headless frontend and Shopify's admin — which doubles the
+    integration surface for inventory and order sync.
+  composes:
+    - framework:nextjs
+    - tool:stripe
+    - tool:shopify
+    - language:typescript
+    - library:redis
+edges:
+  composed_of:
+    - framework:nextjs
+    - tool:stripe
+    - tool:shopify
+    - language:typescript
+    - library:redis
+    - library:prisma
+    - library:tailwindcss
+    - tool:docker
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:release-management
+  applies_to:
+    - domain:retail
+    - domain:frontend
+  requires_skill_area:
+    - skill-area:e-commerce
+    - skill-area:payment-processing
+    - skill-area:server-side-rendering
+    - skill-area:caching-strategies
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:developer-portal
+attributes:
+  displayName: "Developer Portal Stack (Backstage, GitHub, OpenAPI, Markdown, TypeScript)"
+  description: |
+    An internal developer portal architecture for centralizing service
+    discovery, API documentation, software templates, and developer
+    tooling. Backstage provides the plugin-based portal framework with a
+    software catalog that indexes all services, libraries, and data
+    pipelines from GitHub repositories. Swagger/OpenAPI specs power
+    interactive API documentation rendered within the portal.
+
+    Markdown drives documentation-as-code, with TechDocs building and
+    publishing docs from repository markdown into the portal. TypeScript
+    is used to build custom Backstage plugins for cost dashboards,
+    deployment status, and on-call schedules. GitHub serves as the source
+    of truth for repository metadata, CI status, and team ownership. This
+    stack suits organizations with 50+ services where discoverability,
+    onboarding speed, and API governance are critical. The tradeoff is
+    ongoing curation — a portal is only useful if its catalog stays current.
+  composes:
+    - tool:backstage
+    - tool:gh-cli
+    - tool:swagger-editor
+    - language:typescript
+    - language:yaml
+edges:
+  composed_of:
+    - tool:backstage
+    - tool:gh-cli
+    - tool:swagger-editor
+    - language:typescript
+    - language:yaml
+    - tool:docker
+    - tool:github-actions
+  used_by_role:
+    - role:platform-engineer
+    - role:developer-advocate
+    - role:engineering-manager
+  follows_workflow:
+    - workflow:developer-portal-analytics-review
+    - workflow:golden-path-governance
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:developer-experience
+    - skill-area:api-doc-generation
+    - skill-area:technical-documentation
+    - skill-area:plugin-systems
+    - skill-area:design-systems
+---
+nodeKind: StackProfile
+id: stack-profile:monorepo-fullstack
+attributes:
+  displayName: "Monorepo Full-Stack Stack (Turborepo, Next.js, NestJS, Prisma, PostgreSQL)"
+  description: |
+    A TypeScript-first monorepo architecture for full-stack web applications
+    where frontend, backend, and shared libraries live in a single
+    repository with unified tooling. Turborepo provides incremental builds,
+    remote caching, and task orchestration across packages. Next.js serves
+    the frontend with SSR, ISR, and API routes. NestJS provides a structured
+    backend framework with dependency injection, guards, and decorators.
+
+    Prisma handles database access with a type-safe ORM, auto-generated
+    client, and declarative schema migrations. PostgreSQL is the production
+    database. TypeScript spans every package, enabling shared types and
+    validation schemas (via Zod) between frontend and backend without code
+    duplication. This stack suits product-focused teams of 5-20 engineers
+    who want maximal code sharing and a single CI pipeline. The tradeoff
+    is monorepo complexity — build caching, dependency hoisting, and CI
+    performance require ongoing attention as the repo grows.
+  composes:
+    - framework:nextjs
+    - framework:nestjs
+    - library:prisma
+    - language:typescript
+    - library:zod
+edges:
+  composed_of:
+    - framework:nextjs
+    - framework:nestjs
+    - library:prisma
+    - language:typescript
+    - library:zod
+    - library:tailwindcss
+    - tool:docker
+    - tool:github-actions
+    - tool:pnpm
+  used_by_role:
+    - role:fullstack-engineer
+    - role:tech-lead
+    - role:frontend-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:monorepo-toolchain-update
+  applies_to:
+    - domain:fullstack
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:typescript-generic-programming
+    - skill-area:ci-cd

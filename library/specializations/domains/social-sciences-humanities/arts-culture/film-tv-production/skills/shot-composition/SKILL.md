@@ -4,6 +4,10 @@ id: SK-FTV-009
 version: 1.0.0
 description: Plan camera angles, movements, shot sizes, and visual design for cinematic storytelling
 specialization: film-tv-production
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:image-processing]
+  roles: [role:creative-director, role:design-lead]
 ---
 
 # Shot Composition Skill

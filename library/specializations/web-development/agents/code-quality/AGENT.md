@@ -9,6 +9,14 @@ expertise:
   - Pre-commit hooks
   - Quality metrics
   - Technical debt
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:tech-lead, role:frontend-engineer]
+  skillAreas: [skill-area:code-analysis-linting, skill-area:code-review-practice]
+  workflows: [workflow:code-review]
+  topics: [topic:code-review-best-practices]
+
 ---
 
 # Code Quality Agent

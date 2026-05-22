@@ -1,0 +1,29 @@
+nodeKind: AgentProduct
+id: agent:babysitter
+attributes:
+  displayName: "babysitter"
+  vendor: "a5c-ai"
+  homepageUrl: "https://github.com/a5c-ai/babysitter"
+  primarySurface: cli
+  supportTier: catalog-backed
+  productKind: multi-surface-suite
+  stackScope: full
+  description: |
+    babysitter — multi-surface umbrella for catalog-driven agentic
+    workflows. Composes the babysitter SDK (programmatic core+runtime),
+    the babysitter-agent CLI binary, and the agent-mux UI suite
+    (TUI/CLI/web/mobile/TV/watch) into a single product narrative.
+    Implements the Symphony SPEC pattern (poll workflow, dispatch agent
+    runs, reconcile, repair) and brokers any harness (claude-code, codex,
+    cursor, opencode, gemini-cli, …) via thin runner adapters. The
+    sibling AgentProducts `agent:babysitter-sdk`, `agent:babysitter-agent`,
+    and `agent:agent-mux` carry the per-surface detail.
+edges:
+  has_version:
+    - agent-version:babysitter@current
+  defines_automation_rule:
+    - target: automation-rule:auto-approve-readonly-clarifications
+    - target: automation-rule:never-auto-approve-destroy
+    - target: automation-rule:never-auto-approve-auth
+    - target: automation-rule:github-issue-opened
+    - target: automation-rule:nightly-triage

@@ -8,6 +8,12 @@ expertise:
   - Readability optimization
   - Responsive typography
   - Vertical rhythm calculation
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:typography, skill-area:design-systems]
+  roles: [role:product-designer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # Typography System Agent

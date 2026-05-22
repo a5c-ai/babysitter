@@ -1,0 +1,17 @@
+nodeKind: Capability
+id: capability:extended-thinking
+attributes:
+  displayName: "Extended thinking"
+  description: |
+    Caller-controlled visible reasoning with an allocatable thinking-token
+    budget. Supported by Claude 3.7+ and Opus 4.x family. Distinct from
+    `capability:adaptive-thinking` (model-driven, no caller budget).
+  appliesToNodeKinds: ["ModelVersion"]
+  category: reasoning
+edges:
+  supported_by:
+    - model:claude-opus-4-5@current
+    - model:claude-opus-4-6@current
+    - model:claude-opus-4-7@current
+    - model:claude-sonnet-4-5@current
+    - model:claude-sonnet-4-6@current

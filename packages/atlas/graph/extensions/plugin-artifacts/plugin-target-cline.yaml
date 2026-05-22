@@ -1,0 +1,43 @@
+nodeKind: PluginTarget
+id: plugin-target:cline
+attributes:
+  displayName: "Cline"
+  hostAgent: agent:cline
+  adapterFamily: shell-hook
+  manifestFormat: "n/a"
+  commandFormat: markdown-commands
+  hookRegistrationFormat: none
+  skillHandling: unsupported
+  marketplacePath: null
+  adapterName: cline
+  scriptVariants:
+    - bash
+  distribution:
+    - manual
+  distributionModel: workspace-generated
+  npmPublishable: false
+  installLayout:
+    harnessHomeRelative: ".cline"
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ".js"
+    installLifecycle: none
+    activationMessage: restart
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: supported
+  launchBehavior:
+    promptDelivery: stdin
+    promptFlag: null
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: false
+    needsIdleKill: true
+edges:
+  hosted_by:
+    - target: agent:cline

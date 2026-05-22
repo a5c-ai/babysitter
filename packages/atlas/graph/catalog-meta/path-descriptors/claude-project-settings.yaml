@@ -1,0 +1,19 @@
+nodeKind: PathDescriptor
+id: path:claude-project-settings
+attributes:
+  pathId: path:claude-project-settings
+  displayName: "Claude Code project settings"
+  path: ".claude/settings.json"
+  pathKind: settings-file
+  ownerKind: AgentRuntimeImpl
+  ownerId: agent-runtime-impl:claude-code.runtime@1.x
+  platform: cross-platform
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: |
+    Per-project Claude Code settings; merges over user settings.
+
+edges:
+  owned_by:
+    - target: agent-runtime-impl:claude-code.runtime@1.x

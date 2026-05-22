@@ -1,0 +1,12 @@
+nodeKind: OrgUnit
+id: org-unit:product-team
+attributes:
+  displayName: "Product Team"
+  kind: team
+  description: |
+    Product management team — owns product direction and prioritization.
+edges:
+  has_member:
+    - target: role:product-owner
+    - target: role:product-designer
+    - target: role:engineering-manager

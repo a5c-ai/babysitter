@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:jest
+attributes:
+  displayName: "Jest"
+  homepageUrl: "https://jestjs.io"
+  kind: test-runner
+  language: language:javascript
+  releasedAt: "2014"
+  description: |
+    JavaScript testing framework with focus on simplicity and zero-config.
+edges:
+  belongs_to_language:
+    - language:javascript
+  tool_used_by:
+    - target: skill-area:react-testing
+  used_for:
+    - skill-area:component-testing
+  alternative_to:
+    - target: tool:vitest
+      comparison: "JavaScript test runners"

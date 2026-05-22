@@ -3,6 +3,12 @@
  * @description Select appropriate reactor type and design reactor systems based on kinetics and process requirements
  * @inputs { processName: string, reactionChemistry: object, throughputRequirements: object, safetyConstraints: object, outputDir: string }
  * @outputs { success: boolean, reactorType: string, design: object, safetyAssessment: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:chemical-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

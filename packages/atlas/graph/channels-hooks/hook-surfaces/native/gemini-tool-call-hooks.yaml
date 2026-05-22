@@ -1,0 +1,51 @@
+---
+nodeKind: HookSurface
+id: hook-surface:gemini.tool-call-pre
+attributes:
+  eventName: "tool_call_pre (Gemini)"
+  displayName: "tool_call_pre (Gemini)"
+  kind: native
+  originVendor: Google
+  direction: pre
+  blocking: true
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [tool_name, tool_input]
+    properties:
+      tool_name: { type: string }
+      tool_input: { type: object }
+      session_id: { type: string }
+  description: |
+    Gemini CLI's pre-tool hook. Fired before each tool invocation;
+    subscribers can deny, mutate args, or inject context. Canonicalizes
+    to PreToolUse via hooks-mux mapping.
+edges:
+  canonicalized_to:
+    - target: hook-surface:pre-tool-use
+---
+nodeKind: HookSurface
+id: hook-surface:gemini.tool-call-post
+attributes:
+  eventName: "tool_call_post (Gemini)"
+  displayName: "tool_call_post (Gemini)"
+  kind: native
+  originVendor: Google
+  direction: post
+  blocking: false
+  family: observer
+  payloadSchema:
+    type: object
+    required: [tool_name, tool_result]
+    properties:
+      tool_name: { type: string }
+      tool_result: { type: object }
+      session_id: { type: string }
+      error: { type: object, description: "Set when the tool call failed; otherwise absent." }
+  description: |
+    Gemini CLI's post-tool hook. Fired after each tool invocation
+    completes (success or failure). Observer-only — cannot block.
+    Canonicalizes to PostToolUse via hooks-mux mapping.
+edges:
+  canonicalized_to:
+    - target: hook-surface:post-tool-use

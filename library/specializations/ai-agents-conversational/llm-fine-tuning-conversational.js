@@ -17,6 +17,9 @@
  * - LoRA: https://huggingface.co/docs/peft/main/en/conceptual_guides/lora
  * - Axolotl: https://github.com/OpenAccess-AI-Collective/axolotl
  * - Unsloth: https://github.com/unslothai/unsloth
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

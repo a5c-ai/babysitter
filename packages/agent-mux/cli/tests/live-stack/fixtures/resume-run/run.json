@@ -1,0 +1,8 @@
+{
+  "runId": "RESUME_FIXTURE_RUN",
+  "processId": "processes/live-stack/summarize-translate-test",
+  "entrypoint": ".a5c/processes/summarize-translate-test.mjs#process",
+  "layoutVersion": "2026.01",
+  "createdAt": "2026-05-01T00:00:00.000Z",
+  "prompt": "Resume test: complete the Odyssey summary and translation"
+}

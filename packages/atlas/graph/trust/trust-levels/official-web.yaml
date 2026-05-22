@@ -1,0 +1,9 @@
+nodeKind: TrustLevel
+id: trust-level:official-web
+attributes:
+  displayName: "Official Web"
+  level: official-web
+  freshnessWindowDaysDefault: 45
+  description: |
+    Vendor-published web doc currently live on the vendor domain.
+edges: {}

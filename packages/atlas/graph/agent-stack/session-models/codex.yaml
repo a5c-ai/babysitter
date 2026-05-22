@@ -1,0 +1,13 @@
+nodeKind: SessionModel
+id: session-model:codex
+attributes:
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  persistence: file
+  controlPlane: self-managed
+  structuredTransport: restart-per-turn
+  canResume: false
+  canFork: false
+  format: jsonl
+edges:
+  state_machine_for:
+    - target: workspace:local-developer-default

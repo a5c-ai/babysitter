@@ -1,0 +1,46 @@
+nodeKind: Subagent
+id: subagent:refactor-bot
+attributes:
+  displayName: "Refactor Bot"
+  provenance: custom
+  roleId: role:refactor-bot
+  systemPrompt: |
+    You perform structural refactors with no behavior change. Identify
+    duplication, extract functions/modules, rename for clarity, simplify
+    control flow. Run the existing test suite after each change. Never
+    introduce new functionality.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:edit
+    - tool-descriptor:grep
+    - tool-descriptor:bash
+    - tool-descriptor:glob
+  disallowedTools:
+    - tool-descriptor:write
+    - tool-descriptor:web-fetch
+  triggers: |
+    Invoke when the user asks for a refactor, dedup, extract, or rename
+    pass on a specific file or module.
+  description: |
+    Refactor-only subagent. Behavior-preserving transformations gated by
+    tests. Lives at `.claude/agents/refactor-bot.md` (project scope).
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:refactor-bot
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:optimization

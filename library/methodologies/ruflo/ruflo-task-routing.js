@@ -3,6 +3,13 @@
  * @description Ruflo Smart Task Routing - Complexity assessment -> Agent Booster check -> model selection -> task delegation with Q-Learning router
  * @inputs { task: string, taskType?: string, projectRoot?: string, costBudget?: number, latencyTarget?: string, routingHistory?: array }
  * @outputs { success: boolean, route: object, result: object, routerFeedback: object, summary: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:ai-agents-conversational]
+ *   skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

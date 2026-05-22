@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:launch-config
+attributes:
+  canonicalDefinitionId: definition:launch-config.canonical
+  displayName: "LaunchConfig"
+  kind: primitive
+  references:
+    - "NodeKind:LaunchConfig"
+  description: |
+    Named spawn recipe
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

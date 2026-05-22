@@ -1,0 +1,10 @@
+nodeKind: Topic
+id: topic:dependency-injection
+attributes:
+  displayName: "Dependency Injection"
+  description: |
+    Dependency Injection as a cross-cutting topic — constructor / setter /
+    container-based wiring, lifetimes, and testability tradeoffs.
+edges:
+  applies_to:
+    - domain:software-engineering

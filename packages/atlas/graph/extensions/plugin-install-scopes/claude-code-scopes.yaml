@@ -1,0 +1,37 @@
+nodeKind: PluginInstallScope
+id: plugin-install-scope:claude-code-user
+attributes:
+  displayName: "User-scoped plugin install"
+  scope: user
+  priority: 20
+  description: |
+    Plugins installed at `~/.claude/plugins/` — apply across all projects for
+    this user account.
+---
+nodeKind: PluginInstallScope
+id: plugin-install-scope:claude-code-project
+attributes:
+  displayName: "Project-scoped plugin install"
+  scope: project
+  priority: 30
+  description: |
+    Plugins installed under `.claude/plugins/` in the project tree — checked
+    into the repo, applied to all contributors.
+---
+nodeKind: PluginInstallScope
+id: plugin-install-scope:claude-code-local
+attributes:
+  displayName: "Local-scoped plugin install"
+  scope: local
+  priority: 10
+  description: |
+    Local/working-tree plugin install — not checked into git; lowest priority.
+---
+nodeKind: PluginInstallScope
+id: plugin-install-scope:claude-code-managed
+attributes:
+  displayName: "Managed-scoped plugin install"
+  scope: managed
+  priority: 40
+  description: |
+    Vendor/enterprise-pushed plugin install — applied via centralized policy.

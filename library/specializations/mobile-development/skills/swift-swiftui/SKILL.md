@@ -5,6 +5,13 @@ version: 1.0.0
 category: Native iOS Development
 slug: swift-swiftui
 status: active
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:ios-native, skill-area:mobile-state-management]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Swift/SwiftUI Development Skill

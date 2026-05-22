@@ -1,0 +1,310 @@
+services:
+  # ---------------- Mock matrix (no credentials) ----------------
+  mock-e2e-claude:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "claude", "--use-mock-harness", "--mock-scenario", "claude-basic", "hello"]
+
+  mock-e2e-codex:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "codex", "--use-mock-harness", "--mock-scenario", "codex-basic", "hello"]
+
+  mock-e2e-cursor:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "cursor", "--use-mock-harness", "--mock-scenario", "cursor-basic", "hello"]
+
+  mock-e2e-gemini:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "gemini", "--use-mock-harness", "--mock-scenario", "gemini-basic", "hello"]
+
+  mock-e2e-opencode:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "opencode", "--use-mock-harness", "--mock-scenario", "opencode-basic", "hello"]
+
+  mock-e2e-openclaw:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "openclaw", "--use-mock-harness", "--mock-scenario", "openclaw-basic", "hello"]
+
+  mock-e2e-copilot:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "copilot", "--use-mock-harness", "--mock-scenario", "copilot-basic", "hello"]
+
+  mock-e2e-hermes:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "hermes", "--use-mock-harness", "--mock-scenario", "hermes-basic", "hello"]
+
+  mock-e2e-pi:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "pi", "--use-mock-harness", "--mock-scenario", "pi-basic", "hello"]
+
+  mock-e2e-omp:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "omp", "--use-mock-harness", "--mock-scenario", "omp-basic", "hello"]
+
+  mock-e2e-agent-mux-remote:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "agent-mux-remote", "--use-mock-harness", "--mock-scenario", "agent-mux-remote-basic", "hello"]
+
+  # New adapters added in recent implementations
+  mock-e2e-droid:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "droid", "--use-mock-harness", "--mock-scenario", "droid-basic", "hello"]
+
+  mock-e2e-amp:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "amp", "--use-mock-harness", "--mock-scenario", "amp-basic", "hello"]
+
+  mock-e2e-qwen:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "qwen", "--use-mock-harness", "--mock-scenario", "qwen-basic", "hello"]
+
+  # SDK and programmatic adapter variants
+  mock-e2e-claude-agent-sdk:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "claude-agent-sdk", "--use-mock-harness", "--mock-scenario", "claude-agent-sdk-basic", "hello"]
+
+  mock-e2e-codex-sdk:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "codex-sdk", "--use-mock-harness", "--mock-scenario", "codex-sdk-basic", "hello"]
+
+  mock-e2e-codex-websocket:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "codex-websocket", "--use-mock-harness", "--mock-scenario", "codex-websocket-basic", "hello"]
+
+  mock-e2e-opencode-http:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "opencode-http", "--use-mock-harness", "--mock-scenario", "opencode-http-basic", "hello"]
+
+  mock-e2e-pi-sdk:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.mock
+    environment:
+      USE_MOCK_HARNESS: "true"
+    command: ["run", "pi-sdk", "--use-mock-harness", "--mock-scenario", "pi-sdk-basic", "hello"]
+
+  # ---------------- Real matrix (credentials required) ----------------
+  real-e2e-claude:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    command: ["run", "claude", "--prompt", "say hi"]
+
+  real-e2e-codex:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    command: ["run", "codex", "--prompt", "say hi"]
+
+  real-e2e-cursor:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      CURSOR_API_KEY: ${CURSOR_API_KEY:-}
+    command: ["run", "cursor", "--prompt", "say hi"]
+
+  real-e2e-gemini:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+    command: ["run", "gemini", "--prompt", "say hi"]
+
+  real-e2e-opencode:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    command: ["run", "opencode", "--prompt", "say hi"]
+
+  real-e2e-openclaw:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      OPENCLAW_API_KEY: ${OPENCLAW_API_KEY:-}
+    command: ["run", "openclaw", "--prompt", "say hi"]
+
+  real-e2e-copilot:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+    command: ["run", "copilot", "--prompt", "say hi"]
+
+  real-e2e-hermes:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      HERMES_API_KEY: ${HERMES_API_KEY:-}
+    command: ["run", "hermes", "--prompt", "say hi"]
+
+  real-e2e-pi:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      INFLECTION_API_KEY: ${INFLECTION_API_KEY:-}
+    command: ["run", "pi", "--prompt", "say hi"]
+
+  real-e2e-omp:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      OMP_API_KEY: ${OMP_API_KEY:-}
+    command: ["run", "omp", "--prompt", "say hi"]
+
+  real-e2e-agent-mux-remote:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      AGENT_MUX_REMOTE_URL: ${AGENT_MUX_REMOTE_URL:-}
+    command: ["run", "agent-mux-remote", "--prompt", "say hi"]
+
+  # New adapters added in recent implementations
+  real-e2e-droid:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      DROID_API_KEY: ${DROID_API_KEY:-}
+    command: ["run", "droid", "--prompt", "say hi"]
+
+  real-e2e-amp:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      SOURCEGRAPH_ACCESS_TOKEN: ${SOURCEGRAPH_ACCESS_TOKEN:-}
+    command: ["run", "amp", "--prompt", "say hi"]
+
+  real-e2e-qwen:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      QWEN_API_KEY: ${QWEN_API_KEY:-}
+    command: ["run", "qwen", "--prompt", "say hi"]
+
+  # SDK and programmatic adapter variants (use same credentials as base adapters)
+  real-e2e-claude-agent-sdk:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    command: ["run", "claude-agent-sdk", "--prompt", "say hi"]
+
+  real-e2e-codex-sdk:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    command: ["run", "codex-sdk", "--prompt", "say hi"]
+
+  real-e2e-codex-websocket:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    command: ["run", "codex-websocket", "--prompt", "say hi"]
+
+  real-e2e-opencode-http:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    command: ["run", "opencode-http", "--prompt", "say hi"]
+
+  real-e2e-pi-sdk:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile.real
+    environment:
+      INFLECTION_API_KEY: ${INFLECTION_API_KEY:-}
+    command: ["run", "pi-sdk", "--prompt", "say hi"]

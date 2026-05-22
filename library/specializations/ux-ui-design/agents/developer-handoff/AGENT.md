@@ -8,6 +8,12 @@ expertise:
   - Measurement annotation
   - Implementation guidelines
   - Code reference generation
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:design-systems, skill-area:figma-prototyping]
+  roles: [role:product-designer, role:frontend-engineer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # Developer Handoff Agent

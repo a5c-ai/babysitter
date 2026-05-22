@@ -3,6 +3,12 @@
  * @description End-to-end process for producing blog content from ideation to publication, including research, writing, editing, SEO optimization, and publishing
  * @inputs { contentBrief: object, keywordTargets: array, brandGuidelines: object, visualAssets: array, outputDir: string }
  * @outputs { success: boolean, publishedPost: object, optimizedMetadata: object, visualAssets: array, performanceBaseline: object, artifacts: array }
+  * @graph
+ *   domains: [domain:digital-marketing]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
+ *   workflows: [workflow:brand-campaign-launch]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

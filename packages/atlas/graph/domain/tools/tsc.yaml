@@ -1,0 +1,17 @@
+nodeKind: Tool
+id: tool:tsc
+attributes:
+  displayName: "TypeScript Compiler"
+  homepageUrl: "https://www.typescriptlang.org"
+  kind: transpiler
+  language: language:typescript
+  description: |
+    TypeScript compiler - type-checks .ts/.tsx and emits JavaScript.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - target: skill-area:code-quality
+  alternative_to:
+    - target: tool:mypy
+      comparison: "Type checkers — tsc checks TypeScript; mypy checks Python"

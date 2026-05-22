@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:tool-server-mcp-stripe.scope
+attributes:
+  subjectId: tool-server:mcp-stripe
+  inScope: |
+    Stripe API access — customers, subscriptions, payments, invoices, refunds.
+  outOfScope: |
+    Other payment processors (Adyen, Braintree), tax-engine logic, and PCI-card-data handling.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - tool-server:mcp-stripe

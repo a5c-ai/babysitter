@@ -1,0 +1,266 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:observability-pipeline
+attributes:
+  displayName: Observability pipeline (meta)
+  clusterNumber: 17
+  scope: 'Conceptual aggregation of NodeKinds describing the telemetry data plane: ObservabilityBackend (a vendor-bound trace/metric/log ingestion endpoint, with kind enum collapsing legacy MetricSink and LogSink) and Span (the leaf unit of distributed tracing emitted by Effects / Invocations). Members live in editorial cluster observability-pipeline in ontology-schema.yaml. catalog update widened emits_signals_to and exports_to so runtime / platform implementations and platform services can attach as sources.'
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:observability-backend
+  - target: meta-node-kind:span
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:observability-backend
+attributes:
+  displayName: ObservabilityBackend (meta)
+  name: ObservabilityBackend
+  cluster: observability-pipeline
+  prefix: obs-backend
+  origin: standard
+  purpose: an observability backend that ingests traces / metrics / logs (Datadog, Honeycomb, OTel collector, ...). Collapses MetricSink and LogSink into a single NodeKind discriminated by `kind`.
+  exampleCount: 0
+  invariants:
+  - 'id starts with obs-backend:'
+edges:
+  in_cluster:
+  - target: meta-cluster:observability-pipeline
+  contains_meta_attribute:
+  - target: meta-attribute:observability-backend--id
+  - target: meta-attribute:observability-backend--display-name
+  - target: meta-attribute:observability-backend--kind
+  - target: meta-attribute:observability-backend--protocols
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:span
+attributes:
+  displayName: Span (meta)
+  name: Span
+  cluster: observability-pipeline
+  prefix: span
+  origin: universal
+  purpose: a single trace span emitted by an Effect / Invocation; the leaf unit of distributed tracing
+  exampleCount: 0
+  invariants:
+  - 'id starts with span:'
+edges:
+  in_cluster:
+  - target: meta-cluster:observability-pipeline
+  contains_meta_attribute:
+  - target: meta-attribute:span--id
+  - target: meta-attribute:span--trace-id
+  - target: meta-attribute:span--parent-span-id
+  - target: meta-attribute:span--kind
+---
+nodeKind: MetaAttribute
+id: meta-attribute:observability-backend--id
+attributes:
+  displayName: ObservabilityBackend.id
+  name: id
+  parentNodeKindId: meta-node-kind:observability-backend
+  type: id
+  required: true
+  description: id on ObservabilityBackend.
+edges:
+  defined_on:
+  - target: meta-node-kind:observability-backend
+---
+nodeKind: MetaAttribute
+id: meta-attribute:observability-backend--display-name
+attributes:
+  displayName: ObservabilityBackend.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:observability-backend
+  type: string
+  required: true
+  description: displayName on ObservabilityBackend.
+edges:
+  defined_on:
+  - target: meta-node-kind:observability-backend
+---
+nodeKind: MetaAttribute
+id: meta-attribute:observability-backend--kind
+attributes:
+  displayName: ObservabilityBackend.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:observability-backend
+  type: enum<trace,metric,log,multi>
+  required: false
+  description: kind on ObservabilityBackend (pipeline modality; `multi` indicates the backend ingests multiple signal types).
+edges:
+  defined_on:
+  - target: meta-node-kind:observability-backend
+---
+nodeKind: MetaAttribute
+id: meta-attribute:observability-backend--protocols
+attributes:
+  displayName: ObservabilityBackend.protocols
+  name: protocols
+  parentNodeKindId: meta-node-kind:observability-backend
+  type: list<string>
+  required: false
+  description: protocols on ObservabilityBackend (wire protocols, e.g. otlp-grpc, otlp-http, statsd, prometheus-remote-write).
+edges:
+  defined_on:
+  - target: meta-node-kind:observability-backend
+---
+nodeKind: MetaAttribute
+id: meta-attribute:span--id
+attributes:
+  displayName: Span.id
+  name: id
+  parentNodeKindId: meta-node-kind:span
+  type: id
+  required: true
+  description: id on Span.
+edges:
+  defined_on:
+  - target: meta-node-kind:span
+---
+nodeKind: MetaAttribute
+id: meta-attribute:span--trace-id
+attributes:
+  displayName: Span.traceId
+  name: traceId
+  parentNodeKindId: meta-node-kind:span
+  type: string
+  required: false
+  description: traceId on Span (W3C trace correlation id).
+edges:
+  defined_on:
+  - target: meta-node-kind:span
+---
+nodeKind: MetaAttribute
+id: meta-attribute:span--parent-span-id
+attributes:
+  displayName: Span.parentSpanId
+  name: parentSpanId
+  parentNodeKindId: meta-node-kind:span
+  type: string
+  required: false
+  description: parentSpanId on Span (parent span identifier within the same trace).
+edges:
+  defined_on:
+  - target: meta-node-kind:span
+---
+nodeKind: MetaAttribute
+id: meta-attribute:span--kind
+attributes:
+  displayName: Span.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:span
+  type: enum<server,client,producer,consumer,internal>
+  required: false
+  description: kind on Span (OTel span-kind classification).
+edges:
+  defined_on:
+  - target: meta-node-kind:span
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:exports-to
+attributes:
+  displayName: exports_to (meta)
+  name: exports_to
+  source:
+  - meta-node-kind:span
+  target:
+  - meta-node-kind:observability-backend
+  cardinality: N:1
+  origin: standard
+  description: a Span exports to an ObservabilityBackend (per-span data-plane edge). catalog update widening also permits AgentRuntimeImpl / AgentPlatformImpl / PlatformService sources, owned by agent-stack / domain meta-registries.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:span
+  target_of_meta_edge:
+  - target: meta-node-kind:observability-backend
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:emits-signals-to
+attributes:
+  displayName: emits_signals_to (meta)
+  name: emits_signals_to
+  source: []
+  target:
+  - meta-node-kind:observability-backend
+  cardinality: N:N
+  origin: standard
+  description: a runtime/platform implementation or first-party platform service emits telemetry signals (traces / metrics / logs) to an ObservabilityBackend at the integration layer (distinct from Span.exports_to which is the per-span data-plane edge). Sources (AgentRuntimeImpl / AgentPlatformImpl / PlatformService) are owned by agent-stack and domain meta-registries.
+edges:
+  target_of_meta_edge:
+  - target: meta-node-kind:observability-backend
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:parented-by
+attributes:
+  displayName: parented_by (meta)
+  name: parented_by
+  source:
+  - meta-node-kind:span
+  target:
+  - meta-node-kind:span
+  cardinality: N:1
+  origin: universal
+  description: a Span is parented by another Span within the same trace (parentSpanId reference). Self-referential within the observability-pipeline cluster.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:span
+  target_of_meta_edge:
+  - target: meta-node-kind:span
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:emitted-by-span
+attributes:
+  displayName: emitted_by_span (meta)
+  name: emitted_by_span
+  source:
+  - meta-node-kind:span
+  target: []
+  cardinality: N:1
+  origin: standard
+  description: a Span is emitted by an Effect / Invocation. Targets are owned by agent-stack / lifecycle meta-registries.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:span
+---
+nodeKind: MetaEnum
+id: meta-enum:obs-backend-kind
+attributes:
+  displayName: ObservabilityBackend kind
+  name: kind
+  values:
+  - value: trace
+    description: Backend ingests trace/span data only.
+  - value: metric
+    description: Backend ingests metric data only.
+  - value: log
+    description: Backend ingests log data only.
+  - value: multi
+    description: Backend ingests multiple signal types.
+  usedOnAttributes:
+  - meta-attribute:observability-backend--kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:observability-backend--kind
+---
+nodeKind: MetaEnum
+id: meta-enum:span-kind
+attributes:
+  displayName: Span kind
+  name: kind
+  values:
+  - value: server
+    description: Inbound RPC / HTTP server-side handler.
+  - value: client
+    description: Outbound RPC / HTTP client call.
+  - value: producer
+    description: Message producer (publish to queue / topic).
+  - value: consumer
+    description: Message consumer (receive from queue / topic).
+  - value: internal
+    description: Internal computation, not crossing a process boundary.
+  usedOnAttributes:
+  - meta-attribute:span--kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:span--kind

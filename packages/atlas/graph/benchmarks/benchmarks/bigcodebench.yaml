@@ -1,0 +1,12 @@
+nodeKind: Benchmark
+id: benchmark:bigcodebench
+attributes:
+  displayName: "BigCodeBench"
+  homepageUrl: https://github.com/bigcode-project/bigcodebench
+  kind: code-generation
+  targetsKind: ModelVersion
+  description: |
+    Practical and challenging code-generation benchmark from the BigCode project — function-completion across diverse libraries.
+edges:
+  applies_to:
+    - target: domain:software-engineering

@@ -1,0 +1,31 @@
+nodeKind: ToolServer
+id: tool-server:brave-search-mcp
+attributes:
+  displayName: "Brave Search MCP"
+  description: "MCP server providing web and local search via the Brave Search API. Enables AI agents to perform web searches and local business lookups. Supports stdio transport."
+  protocol: mcp
+  category: search
+  repoUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
+  npmPackage: "@modelcontextprotocol/server-brave-search"
+  maintainer: Anthropic
+  mcpTransports:
+    - mcp-transport:stdio
+  tools:
+    - tool-descriptor:brave.web-search
+    - tool-descriptor:brave.local-search
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:brave.web-search
+  - target: tool-descriptor:brave.local-search
+  implements:
+    - target: extension-interface:orchestration
+  requires_capability:
+    - target: capability:supports-mcp
+      level: required
+  sourced_from:
+    - target: source-ref:mcp-servers-registry
+  integrates_with:
+    - target: stack-part:search-index
+  lib_applies_to_domain:
+    - target: domain:software-engineering

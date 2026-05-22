@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:eval-run.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:eval-run
+  text: |
+    one execution of a benchmark against a target
+  status: canonical
+edges:
+  defines:
+    - term:eval-run

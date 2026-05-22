@@ -23,6 +23,13 @@
  * - kqueue: https://www.freebsd.org/cgi/man.cgi?query=kqueue
  * - The C10K Problem: http://www.kegel.com/c10k.html
  * - io_uring: https://kernel.dk/io_uring.pdf
+ * @graph
+ *   domains: [domain:networking]
+ *   specializations: [specialization:network-programming]
+ *   skillAreas: [skill-area:protocol-design, skill-area:socket-programming]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:circuit-breakers]
+ *   workflows: [workflow:protocol-implementation-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

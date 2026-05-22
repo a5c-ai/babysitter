@@ -1,0 +1,381 @@
+---
+nodeKind: Library
+id: library:express
+attributes:
+  displayName: "Express"
+  belongsToLanguageId: language:javascript
+  category: http-server
+  description: |
+    Minimal and flexible Node.js web application framework providing a
+    robust set of features for building single-page, multi-page, and
+    hybrid web applications with a rich middleware ecosystem.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:backend-api-design
+  alternative_to:
+    - framework:fastify
+---
+nodeKind: Library
+id: library:socket-io
+attributes:
+  displayName: "Socket.IO"
+  belongsToLanguageId: language:javascript
+  category: http-server
+  description: |
+    Real-time bidirectional event-based communication library for Node.js
+    and the browser, built on WebSockets with fallback transports and
+    support for rooms, namespaces, and acknowledgements.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:streaming-realtime-processing
+  alternative_to:
+    - library:websockets
+---
+nodeKind: Library
+id: library:passport
+attributes:
+  displayName: "Passport"
+  belongsToLanguageId: language:javascript
+  category: auth
+  description: |
+    Authentication middleware for Node.js supporting 500+ strategies
+    including local username/password, OAuth 2.0, OpenID Connect, and
+    JWT, designed to be unobtrusive and modular.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:authentication
+  alternative_to:
+    - library:next-auth
+    - library:lucia
+---
+nodeKind: Library
+id: library:bcrypt
+attributes:
+  displayName: "bcrypt"
+  belongsToLanguageId: language:javascript
+  category: crypto
+  description: |
+    Node.js library for hashing passwords using the bcrypt adaptive
+    cost algorithm, providing salted hashes and configurable work
+    factors to guard against brute-force attacks.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:authentication-authorization
+  alternative_to:
+    - library:jsonwebtoken
+---
+nodeKind: Library
+id: library:jsonwebtoken
+attributes:
+  displayName: "jsonwebtoken"
+  belongsToLanguageId: language:javascript
+  category: auth
+  description: |
+    Node.js implementation of JSON Web Tokens (RFC 7519) supporting
+    signing with HMAC, RSA, and ECDSA algorithms, plus verification
+    and decoding of access and refresh tokens.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:authentication-authorization
+  alternative_to:
+    - library:next-auth
+---
+nodeKind: Library
+id: library:cors
+attributes:
+  displayName: "cors"
+  belongsToLanguageId: language:javascript
+  category: http-server
+  description: |
+    Express/Connect middleware that sets Cross-Origin Resource Sharing
+    headers, with options to configure allowed origins, methods, headers,
+    and preflight caching.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:backend-api-design
+  alternative_to:
+    - library:helmet
+---
+nodeKind: Library
+id: library:helmet
+attributes:
+  displayName: "Helmet"
+  belongsToLanguageId: language:javascript
+  category: http-server
+  description: |
+    Collection of Express middleware functions that set HTTP security
+    headers — CSP, HSTS, X-Frame-Options, and more — to protect
+    Node.js web applications from common vulnerabilities.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:backend-security
+  alternative_to:
+    - library:cors
+---
+nodeKind: Library
+id: library:morgan
+attributes:
+  displayName: "morgan"
+  belongsToLanguageId: language:javascript
+  category: logging
+  description: |
+    HTTP request logger middleware for Node.js/Express, supporting
+    predefined formats (combined, dev, tiny) and custom token-based
+    format strings with stream output support.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:observability-instrumentation
+  alternative_to:
+    - library:winston
+    - library:pino
+---
+nodeKind: Library
+id: library:multer
+attributes:
+  displayName: "Multer"
+  belongsToLanguageId: language:javascript
+  category: http-server
+  description: |
+    Express middleware for handling multipart/form-data, primarily used
+    for file uploads; supports disk and memory storage engines with
+    configurable file filters and size limits.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:backend-api-design
+  alternative_to:
+    - library:express
+---
+nodeKind: Library
+id: library:nodemailer
+attributes:
+  displayName: "Nodemailer"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Module for sending emails from Node.js applications, supporting
+    SMTP, OAuth2, and various transport plugins; handles attachments,
+    HTML content, and embedded images.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:backend-async-processing
+  alternative_to:
+    - library:bull
+---
+nodeKind: Library
+id: library:bull
+attributes:
+  displayName: "Bull"
+  belongsToLanguageId: language:javascript
+  category: concurrency
+  description: |
+    Premium Redis-backed job and message queue for Node.js, supporting
+    delayed jobs, repeatable jobs, rate limiting, priority queues, and
+    event-based progress reporting.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:backend-async-processing
+  alternative_to:
+    - library:bullmq
+---
+nodeKind: Library
+id: library:bullmq
+attributes:
+  displayName: "BullMQ"
+  belongsToLanguageId: language:javascript
+  category: concurrency
+  description: |
+    Modern TypeScript-first Redis-backed message and job queue for
+    Node.js, successor to Bull with improved worker concurrency,
+    flow producers, sandboxed processors, and better type safety.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:backend-async-processing
+---
+nodeKind: Library
+id: library:ioredis
+attributes:
+  displayName: "ioredis"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Robust, full-featured Redis client for Node.js with support for
+    Cluster, Sentinel, Streams, Lua scripting, pipelining, and
+    automatic reconnection.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:caching-strategies
+  alternative_to:
+    - library:redis
+---
+nodeKind: Library
+id: library:redis
+attributes:
+  displayName: "node-redis"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Official Redis client for Node.js with a promise-based API,
+    support for Redis 6+ ACLs, Streams, and client-side caching,
+    maintained by the Redis project.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:caching-strategies
+---
+nodeKind: Library
+id: library:mongoose
+attributes:
+  displayName: "Mongoose"
+  belongsToLanguageId: language:javascript
+  category: orm
+  description: |
+    MongoDB object modeling library for Node.js providing schema
+    definitions, validation, middleware hooks, population, and a
+    query builder over the native MongoDB driver.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:backend-data-persistence
+  alternative_to:
+    - target: library:prisma
+      comparison: "JS/TS ORMs — Mongoose is MongoDB-specific; Prisma is multi-database"
+    - target: library:typeorm
+      comparison: "JS/TS ORMs — Mongoose is MongoDB-specific; TypeORM supports SQL and MongoDB"
+---
+nodeKind: Library
+id: library:winston
+attributes:
+  displayName: "Winston"
+  belongsToLanguageId: language:javascript
+  category: logging
+  description: |
+    Universal logging library for Node.js supporting multiple transports
+    (console, file, HTTP, stream), log levels, custom formats, and
+    runtime-configurable log routing.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:observability-instrumentation
+  alternative_to:
+    - target: library:pino
+      comparison: "Node.js loggers — Winston is transport-rich; Pino is low-overhead JSON"
+---
+nodeKind: Library
+id: library:pino
+attributes:
+  displayName: "Pino"
+  belongsToLanguageId: language:javascript
+  category: logging
+  description: |
+    Very low-overhead JSON logger for Node.js using asynchronous writes
+    and a separate transport process; natively supported by Fastify and
+    compatible with most logging aggregators.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:observability-instrumentation
+  alternative_to:
+    - target: library:winston
+      comparison: "Node.js loggers — Pino is low-overhead JSON; Winston is transport-rich"
+---
+nodeKind: Library
+id: library:dotenv
+attributes:
+  displayName: "dotenv"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Zero-dependency module that loads environment variables from a .env
+    file into process.env, decoupling configuration from code following
+    the Twelve-Factor App methodology.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:backend-api-design
+  alternative_to:
+    - library:python-dotenv
+    - library:viper
+---
+nodeKind: Library
+id: library:chalk
+attributes:
+  displayName: "Chalk"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Terminal string styling library for Node.js with chainable API for
+    colors, backgrounds, and text modifiers; auto-detects color support
+    and respects NO_COLOR / FORCE_COLOR env vars.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:cli-design
+  alternative_to:
+    - library:rich-lib
+---
+nodeKind: Library
+id: library:commander
+attributes:
+  displayName: "Commander"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Complete solution for building Node.js CLI programs — argument
+    parsing, subcommands, options with defaults, auto-generated help
+    text, and custom error handling.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:cli-design
+  alternative_to:
+    - library:inquirer
+    - library:zx
+---
+nodeKind: Library
+id: library:inquirer
+attributes:
+  displayName: "Inquirer"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Collection of interactive command-line user interfaces for Node.js,
+    providing prompts for input, lists, checkboxes, confirm dialogs,
+    and password fields for CLI tools.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:cli-design

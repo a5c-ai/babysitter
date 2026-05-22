@@ -32,6 +32,9 @@
  * - Alation: https://www.alation.com/
  * - Apache Atlas: https://atlas.apache.org/
  * - Data Catalog Best Practices: https://cloud.google.com/architecture/data-catalog-best-practices
+ * @graph
+ *   domains: [domain:data-engineering]
+ *   workflows: [workflow:data-pipeline-deployment, workflow:data-governance-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

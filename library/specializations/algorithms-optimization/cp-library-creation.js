@@ -15,6 +15,12 @@
  * @references
  * - CP-Algorithms: https://cp-algorithms.com/
  * - Competitive Programming 4 by Steven Halim
+ * @graph
+ *   domains: [domain:computer-science]
+ *   specializations: [specialization:algorithms-optimization]
+ *   skillAreas: [skill-area:dynamic-programming, skill-area:graph-algorithms, skill-area:competitive-intelligence]
+ *   roles: [role:backend-engineer, role:computational-scientist]
+ *   workflows: [workflow:competitive-analysis]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

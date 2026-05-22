@@ -1,0 +1,145 @@
+---
+nodeKind: Workflow
+id: workflow:test-strategy-planning
+attributes:
+  displayName: "Test Strategy Planning"
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Defines and updates the org-wide test strategy including test pyramid
+    balance, coverage targets, environment strategy, and test data management.
+    Excludes individual test authoring.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:tech-lead
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:react-testing
+    - target: skill-area:chaos-engineering
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:test-automation-pipeline
+attributes:
+  displayName: "Test Automation Pipeline"
+  workflowKind: development
+  triggerType: continuous
+  typicalCadence: "continuous"
+  complexity: single-team
+  description: |
+    Maintains and evolves the CI test automation infrastructure — test runners,
+    parallelization, result reporting, and test environment provisioning.
+    Excludes writing individual test cases.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:react-testing
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:engineering-productivity
+    - target: org-unit:internal-tools
+---
+nodeKind: Workflow
+id: workflow:design-system-maintenance
+attributes:
+  displayName: "Design System Maintenance"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Governs the shared component library and design tokens — adding new
+    components, deprecating old ones, versioning, and ensuring cross-product
+    consistency. Excludes product-specific UI work.
+edges:
+  involves_role:
+    - target: role:implementer
+    - target: role:product-designer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:react-state-management
+    - target: skill-area:typescript-generic-programming
+  applies_to_domain:
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:review-prs-merge-decisions
+  performed_by_org_unit:
+    - target: org-unit:frontend-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:accessibility-audit
+attributes:
+  displayName: "Accessibility Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Systematic audit of product surfaces for WCAG compliance — automated
+    scanning, manual screen-reader testing, remediation tracking, and
+    compliance reporting. Excludes initial design review.
+edges:
+  involves_role:
+    - target: role:implementer
+    - target: role:product-designer
+    - target: role:test-writer
+  requires_skill_area:
+    - target: skill-area:react-state-management
+    - target: skill-area:react-testing
+  applies_to_domain:
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:frontend-team
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:performance-budget-enforcement
+attributes:
+  displayName: "Performance Budget Enforcement"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "per-pull-request"
+  complexity: single-team
+  description: |
+    Enforces bundle-size and runtime performance budgets in CI — measures
+    Core Web Vitals, flags regressions, and gates deployments that violate
+    thresholds. Excludes backend latency optimization.
+edges:
+  involves_role:
+    - target: role:performance-profiler
+    - target: role:implementer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:react-state-management
+    - target: skill-area:serverless-cold-start-optimization
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:review-prs-merge-decisions
+  performed_by_org_unit:
+    - target: org-unit:frontend-team
+    - target: org-unit:engineering-productivity

@@ -2,6 +2,13 @@
 name: soap-to-rest-converter
 description: Convert SOAP web services to REST APIs with WSDL parsing and resource modeling
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:api-design, skill-area:breaking-change-management]
+  roles: [role:backend-engineer, role:architect]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # SOAP to REST Converter Skill

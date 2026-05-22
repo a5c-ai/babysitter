@@ -1,0 +1,287 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-run
+attributes:
+  displayName: "amux run"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "run"
+  flags:
+    - "--stream:0:enable streaming output"
+    - "--no-stream:0:disable streaming"
+    - "--thinking-effort:1:low|medium|high|max"
+    - "--thinking-budget:1:thinking budget tokens"
+    - "--thinking-override:1:JSON object override for thinking config"
+    - "--temperature:1:sampling temperature 0.0-2.0"
+    - "--top-p:1:nucleus sampling"
+    - "--top-k:1:top-k sampling"
+    - "--max-tokens:1:max output tokens"
+    - "--max-output-tokens:1:max output tokens (alias)"
+    - "--max-turns:1:maximum agentic turns"
+    - "--session:1:resume session id"
+    - "--fork:1:fork session id"
+    - "--no-session:0:ephemeral run"
+    - "--system:1:system prompt"
+    - "--system-mode:1:prepend|append|replace"
+    - "--cwd:1:working directory"
+    - "--env:N:KEY=VALUE pair (repeatable)"
+    - "--yolo:0:auto-approve all tool calls"
+    - "--deny:0:auto-deny all approval requests"
+    - "--timeout:1:overall timeout ms"
+    - "--inactivity-timeout:1:inactivity timeout ms"
+    - "--output-format:1:event/JSONL output format"
+    - "--tag:N:tag (repeatable)"
+    - "--run-id:1:explicit run id"
+    - "--attach:N:attachment ref (repeatable)"
+    - "--skill:N:skill name (repeatable)"
+    - "--agents-doc:1:path to AGENTS.md"
+    - "--mcp-server:N:MCP server spec (repeatable)"
+    - "--project-id:1:project id"
+    - "--profile:1:named profile to apply"
+    - "-p / --prompt:1:prompt text"
+    - "--non-interactive:0:force headless one-shot"
+    - "-i / --interactive:0:enter interactive REPL"
+    - "-q / --quiet:0:suppress non-essential output"
+    - "--use-mock-harness:0:swap in mock harness adapter"
+    - "--mock-scenario:1:mock scenario name"
+  subcommandExitCodes:
+    - "0:success:run completed"
+    - "1:general-error:internal/INTERNAL or unhandled adapter error"
+    - "2:usage-error:VALIDATION_ERROR (missing prompt/agent, mutual exclusion)"
+    - "3:agent-not-found:AGENT_NOT_FOUND/UNKNOWN_AGENT"
+    - "4:agent-not-installed:AGENT_NOT_INSTALLED"
+    - "5:auth-error:AUTH_ERROR"
+    - "6:capability-error:CAPABILITY_ERROR (e.g. interactive unsupported)"
+    - "7:config-error:CONFIG_ERROR / CONFIG_LOCK_ERROR"
+    - "8:session-not-found:SESSION_NOT_FOUND"
+    - "9:profile-not-found:PROFILE_NOT_FOUND"
+    - "11:timeout:TIMEOUT / INACTIVITY_TIMEOUT / runResult.exitReason=timeout|inactivity"
+    - "12:agent-crashed:AGENT_CRASH / runResult.exitReason=crashed|killed"
+    - "13:aborted:ABORTED / runResult.exitReason=aborted|interrupted"
+    - "14:rate-limited:RATE_LIMITED"
+    - "15:context-exceeded:CONTEXT_EXCEEDED"
+  description: |
+    Run an agent with a prompt. Resolves agent + prompt from positionals/flags/stdin,
+    optionally swaps in a mock harness, calls client.run() and streams events
+    (text deltas in plain mode, JSONL in --json mode). Source:
+    packages/agent-mux/cli/src/commands/run.ts:188-313.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-install
+attributes:
+  displayName: "amux install"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "install"
+  flags:
+    - "--all:0:install every registered agent"
+    - "--force:0:reinstall even if already present"
+    - "--dry-run:0:print planned command without executing"
+    - "--pkg-version:1:pin to specific version (npm only)"
+  subcommandExitCodes:
+    - "0:success:installed (or already-installed/manual)"
+    - "1:general-error:install failed / spawn error"
+    - "2:usage-error:missing <agent> when --all not used"
+    - "3:agent-not-found:UNKNOWN_AGENT"
+  description: |
+    Install one agent CLI (or `--all`). Dispatches to adapter.install(),
+    rendering result.method (npm/brew/manual/already-installed). Source:
+    packages/agent-mux/cli/src/commands/install.ts:60-195.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-update
+attributes:
+  displayName: "amux update"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "update"
+  flags:
+    - "--all:0:update every registered agent"
+    - "--dry-run:0:print planned command without executing"
+  subcommandExitCodes:
+    - "0:success:updated (or manual instructions emitted)"
+    - "1:general-error:update failed"
+    - "2:usage-error:missing <agent> when --all not used"
+    - "3:agent-not-found:UNKNOWN_AGENT"
+  description: |
+    Update one agent CLI (or `--all`). Dispatches to adapter.update().
+    Source: packages/agent-mux/cli/src/commands/install.ts:201-262.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-detect
+attributes:
+  displayName: "amux detect"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "detect"
+  flags:
+    - "--all:0:detect every registered agent"
+  subcommandExitCodes:
+    - "0:success:reported install status"
+    - "1:general-error:detectInstallation threw"
+    - "2:usage-error:missing <agent> when --all not used"
+    - "3:agent-not-found:UNKNOWN_AGENT"
+  description: |
+    Report installed version/path/notes for one agent (or `--all`). Calls
+    adapter.detectInstallation(). Source:
+    packages/agent-mux/cli/src/commands/install.ts:268-401.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-uninstall
+attributes:
+  displayName: "amux uninstall"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "uninstall"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:uninstalled"
+    - "1:general-error:no supported uninstall method or spawn failed"
+    - "2:usage-error:missing <agent>"
+    - "3:agent-not-found:UNKNOWN_AGENT"
+  description: |
+    Uninstall an agent CLI binary by reversing its npm/brew install method.
+    Source: packages/agent-mux/cli/src/commands/install.ts:407-473.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-adapters-list
+attributes:
+  displayName: "amux adapters list"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "adapters list"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:listed adapters"
+    - "1:general-error:internal error"
+  description: |
+    List registered adapters (default subcommand when none given).
+    Source: packages/agent-mux/cli/src/commands/adapters.ts:58-78.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-adapters-detect
+attributes:
+  displayName: "amux adapters detect"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "adapters detect"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:detection result emitted"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent>"
+  description: |
+    Detect whether the named adapter is installed (delegates to
+    AdapterRegistry.detect). Source:
+    packages/agent-mux/cli/src/commands/adapters.ts:80-107.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-adapters-info
+attributes:
+  displayName: "amux adapters info"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "adapters info"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:capabilities printed"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent>"
+  description: |
+    Print the capability table for an adapter. Source:
+    packages/agent-mux/cli/src/commands/adapters.ts:109-127.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-models-list
+attributes:
+  displayName: "amux models list"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "models list"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:catalog printed"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent>"
+  description: |
+    Print the model catalog for an agent. Source:
+    packages/agent-mux/cli/src/commands/models.ts:111-142.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-models-info
+attributes:
+  displayName: "amux models info"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "models info"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:model details printed"
+    - "1:general-error:model not found / internal"
+    - "2:usage-error:missing <agent> or <model>"
+    - "3:agent-not-found:AGENT_NOT_FOUND when modelId unknown"
+  description: |
+    Print details for one model (alias: `amux models get`). Source:
+    packages/agent-mux/cli/src/commands/models.ts:144-168.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-models-refresh
+attributes:
+  displayName: "amux models refresh"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "models refresh"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:catalog refreshed"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent>"
+  description: |
+    Refresh the cached model list for an agent. Source:
+    packages/agent-mux/cli/src/commands/models.ts:170-185.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-models-current
+attributes:
+  displayName: "amux models current"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "models current"
+  flags: []
+  subcommandExitCodes:
+    - "0:success:current model selection printed"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent>"
+  description: |
+    Print the currently configured/effective model for an agent. Source:
+    packages/agent-mux/cli/src/commands/models.ts:187-220.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-mux-cli-models-set
+attributes:
+  displayName: "amux models set"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "amux"
+  subcommandVerb: "models set"
+  flags:
+    - "--provider:1:override provider when setting model"
+  subcommandExitCodes:
+    - "0:success:model selection saved"
+    - "1:general-error:internal error"
+    - "2:usage-error:missing <agent>/<model> or VALIDATION_ERROR from validate()"
+  description: |
+    Persist a model (and optional provider) selection for an agent.
+    Source: packages/agent-mux/cli/src/commands/models.ts:222-261.

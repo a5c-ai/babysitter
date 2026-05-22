@@ -1,0 +1,124 @@
+nodeKind: Claim
+id: claim:source-provenance-run4-extensions-tool-servers-brave-search-mcp-yaml
+attributes:
+  subjectKind: ToolServer
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
+    is the migrated source reference for ToolServer tool-server:brave-search-mcp.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-server:brave-search-mcp
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
+  evidenceSourceIds:
+  - evidence:source-provenance-run4-extensions-tool-servers-brave-search-mcp-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-server:brave-search-mcp
+  backed_by_evidence:
+  - evidence:source-provenance-run4-extensions-tool-servers-brave-search-mcp-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run4-extensions-tool-servers-fetch-mcp-yaml
+attributes:
+  subjectKind: ToolServer
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch is
+    the migrated source reference for ToolServer tool-server:fetch-mcp.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-server:fetch-mcp
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
+  evidenceSourceIds:
+  - evidence:source-provenance-run4-extensions-tool-servers-fetch-mcp-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-server:fetch-mcp
+  backed_by_evidence:
+  - evidence:source-provenance-run4-extensions-tool-servers-fetch-mcp-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run4-extensions-tool-servers-postgres-mcp-yaml
+attributes:
+  subjectKind: ToolServer
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/postgres
+    is the migrated source reference for ToolServer tool-server:postgres-mcp.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-server:postgres-mcp
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/postgres
+  evidenceSourceIds:
+  - evidence:source-provenance-run4-extensions-tool-servers-postgres-mcp-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-server:postgres-mcp
+  backed_by_evidence:
+  - evidence:source-provenance-run4-extensions-tool-servers-postgres-mcp-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run4-extensions-tool-servers-slack-mcp-yaml
+attributes:
+  subjectKind: ToolServer
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/slack is
+    the migrated source reference for ToolServer tool-server:slack-mcp.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-server:slack-mcp
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/slack
+  evidenceSourceIds:
+  - evidence:source-provenance-run4-extensions-tool-servers-slack-mcp-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-server:slack-mcp
+  backed_by_evidence:
+  - evidence:source-provenance-run4-extensions-tool-servers-slack-mcp-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run4-extensions-tool-servers-sqlite-mcp-yaml
+attributes:
+  subjectKind: ToolServer
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite
+    is the migrated source reference for ToolServer tool-server:sqlite-mcp.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-server:sqlite-mcp
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite
+  evidenceSourceIds:
+  - evidence:source-provenance-run4-extensions-tool-servers-sqlite-mcp-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-server:sqlite-mcp
+  backed_by_evidence:
+  - evidence:source-provenance-run4-extensions-tool-servers-sqlite-mcp-yaml

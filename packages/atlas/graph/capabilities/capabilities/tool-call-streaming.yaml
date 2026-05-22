@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:supports-tool-call-streaming
+attributes:
+  displayName: "Supports tool-call streaming"
+  description: |
+    The entity can stream the arguments of a tool call as they are
+    produced, rather than only after the call is fully assembled.
+  appliesToNodeKinds: ["AgentVersion", "ModelVersion"]
+  category: tool
+edges: {}

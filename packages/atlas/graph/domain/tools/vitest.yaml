@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:vitest
+attributes:
+  displayName: "Vitest"
+  homepageUrl: "https://vitest.dev"
+  kind: test-runner
+  language: language:javascript
+  releasedAt: "2021"
+  description: |
+    Vite-native unit-test framework - fast, ESM-first.
+edges:
+  belongs_to_language:
+    - language:javascript
+  tool_used_by:
+    - target: skill-area:react-testing
+  used_for:
+    - skill-area:component-testing
+  alternative_to:
+    - target: tool:jest
+      comparison: "JavaScript test runners"

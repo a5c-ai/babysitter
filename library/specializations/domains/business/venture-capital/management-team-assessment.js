@@ -3,6 +3,11 @@
  * @description Structured evaluation of founding team and leadership including background verification, reference checks, skills gap analysis, and organizational culture assessment
  * @inputs { companyName: string, teamMembers: array, roleRequirements: object }
  * @outputs { success: boolean, teamAssessment: object, skillsAnalysis: object, cultureAssessment: object, recommendations: array, artifacts: array }
+  * @graph
+ *   domains: [domain:venture-capital]
+ *   skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+ *   roles: [role:financial-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

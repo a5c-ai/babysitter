@@ -1,0 +1,26 @@
+nodeKind: OrchestratorState
+id: orchestrator-state:default
+attributes:
+  displayName: "Default Symphony orchestrator state"
+  pollIntervalMs: 15000
+  maxConcurrentAgents: 4
+  activeRunsCount: 2
+  claimedIssueIds:
+    - "ACA-390"
+    - "ACA-391"
+  retryQueueSize: 1
+  completedCount: 27
+  lastPollAt: "2026-05-01T10:31:00Z"
+  lastReconcileAt: "2026-05-01T10:30:00Z"
+  codexTotals:
+    inputTokens: 1245000
+    outputTokens: 321000
+    totalTokens: 1566000
+    secondsRunning: 7320
+  lastRateLimitObservation:
+    capturedAt: "2026-05-01T10:30:55Z"
+    vendor: anthropic
+    primaryLimit:
+      used: 4200
+      max: 5000
+      resetAt: "2026-05-01T11:00:00Z"

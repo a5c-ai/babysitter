@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:subagent-code-reviewer.scope
+attributes:
+  subjectId: subagent:code-reviewer
+  inScope: |
+    Review pull-request diffs for correctness, security, performance, and style; emit structured comments and a summary verdict. Stateless per-invocation.
+  outOfScope: |
+    Authoring new features end-to-end, planning multi-step implementations (use planner subagent), and exploring unfamiliar codebases (use explorer subagent).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - subagent:code-reviewer

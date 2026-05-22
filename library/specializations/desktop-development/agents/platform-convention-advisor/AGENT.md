@@ -2,6 +2,12 @@
 name: platform-convention-advisor
 description: Advises on platform-specific UI conventions (Windows Fluent, macOS HIG, GNOME/KDE)
 expertise: [hig, fluent-design, gnome, kde, platform-conventions]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # platform-convention-advisor

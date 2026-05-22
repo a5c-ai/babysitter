@@ -1,0 +1,156 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:claude-code.core@1.x
+attributes:
+  displayName: Claude Code Core (1.x)
+  agentVersionId: agentVersion:claude:ge-0-0-0
+  packageRef: source-ref:claude-code-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: 'Tool-use loop: each turn the model emits zero or more `tool_use`
+    blocks; the runtime
+
+    executes them and appends `tool_result` blocks back into the message list. The
+    loop
+
+    advances until the model returns an Anthropic Messages `stop_reason: "end_turn"`
+
+    (or `"tool_use"` after which tools are run and the next turn is fetched). The
+
+    PreCompact hook fires when context approaches the configured threshold and the
+
+    runtime injects a summarized history before the next turn.
+
+    '
+  contextManagementStrategy: platform-managed
+  compactionTriggerThresholdTokens: 0
+  compactionTriggerNotes: 'PreCompact hook fires as the conversation approaches the
+    active model''s context
+
+    window (community-observed at ~70% fill). Vendor docs do not publish an exact
+
+    threshold; treat the integer field as TODO until Anthropic documents one.
+
+    '
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: 'Subagents are invoked via the built-in `Task` tool (a.k.a.
+    the `Agent` tool). The
+
+    parent loop emits a `tool_use` for `Task` with a subagent name + prompt; the runtime
+
+    spawns a nested tool-use loop for the subagent and returns its final assistant
+    text
+
+    as the `tool_result`. Up to 10 subagents can run in parallel.
+
+    '
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: 'The final assistant text is streamed verbatim to the host
+    as it arrives; on
+
+    `stop_reason: "end_turn"` the runtime emits the `Stop` hook (and `SubagentStop`
+
+    for nested Task invocations) and closes the turn.
+
+    '
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: '@anthropic-ai/claude-agent-sdk'
+  supportedTransportProtocols:
+  - model-transport:anthropic-messages
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: passthrough
+  loopBudgetKnobs:
+  - max_turns
+  - max_budget_usd
+  compactionTrigger: both
+  streamingBlocks:
+  - text
+  - thinking
+  - tool_use
+  effortLevelDelegation: native
+edges:
+  composes:
+  - target: agent:claude-code
+    role: core
+  depends_on:
+  - target: source-ref:claude-code-github
+  speaks:
+  - target: model-transport:anthropic-messages
+  realizes:
+  - target: layer:4-agent-core
+  supports:
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Multi-turn conversation is the default; the core maintains
+
+      transcript state across turns.
+
+      '
+  - target: capability:parallel-tool-calls
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'The core dispatches parallel tool calls natively when the model
+
+      emits multiple tool_use blocks in a single turn
+
+      (parallelToolCallHandling=native).
+
+      '
+    evidenceSourceIds:
+    - evidence:anthropic-tool-use-2026
+  - target: capability:streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code streams model output token-by-token through the core
+
+      loop''s transport client.
+
+      '
+  - target: capability:supports-thinking
+    versionRange: '>=1.2.0 <2.0.0'
+    level: full
+    notes: 'The core passes thinking blocks through unmodified to the
+
+      presentation layer (thinkingChannelHandling=passthrough).
+
+      '
+    evidenceSourceIds:
+    - evidence:anthropic-claude-code-thinking-2026-01
+  - target: capability:supports-tool-use
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Claude Code dispatches `tool_use` blocks emitted by the model and
+
+      feeds back `tool_result` blocks on the next turn.
+
+      '
+  output_guard_applied_by:
+  - target: output-guard:claude-code-aup-refusal
+  fires_hook:
+  - target: hook-surface:pre-tool-use
+  - target: hook-surface:post-tool-use
+  - target: hook-surface:user-prompt-submit
+  - target: hook-surface:stop
+  - target: hook-surface:claude.subagent-start
+  - target: hook-surface:subagent-stop
+  - target: hook-surface:pre-compact
+  emits_message_type:
+  - target: protocol-message:system-message
+  - target: protocol-message:assistant-message
+  - target: protocol-message:user-message
+  - target: protocol-message:stream-event
+  - target: protocol-message:result-message-success
+  - target: protocol-message:result-message-error-max-turns
+  - target: protocol-message:result-message-error-max-budget-usd
+  - target: protocol-message:result-message-error-during-execution
+  - target: protocol-message:result-message-error-max-structured-output-retries
+  supports_effort_level:
+  - target: effort-level:low
+  - target: effort-level:medium
+  - target: effort-level:high
+  - target: effort-level:xhigh
+  - target: effort-level:max
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:budget-stop
+    - target: orch-primitive:result-validation

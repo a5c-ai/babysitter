@@ -3,6 +3,12 @@
  * @description GSD phase execution - parallel task execution with atomic commits
  * @inputs { phaseId: string, phaseName: string, plans: array }
  * @outputs { success: boolean, results: array, commits: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:backend-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

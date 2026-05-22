@@ -1,0 +1,126 @@
+---
+nodeKind: Workflow
+id: workflow:ai-agent-adoption-rollout
+attributes:
+  displayName: "AI Agent Adoption Rollout"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-tool"
+  complexity: cross-team
+  description: |
+    End-to-end rollout of a new AI agent tool or capability across
+    the org — from evaluation through pilot, guardrail setup, training,
+    and org-wide enablement. Excludes vendor contract negotiation.
+edges:
+  involves_role:
+    - target: role:ai-champion
+    - target: role:ml-engineer
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:agentic-loops
+    - target: skill-area:prompt-engineering
+    - target: skill-area:eval-driven-development
+    - target: skill-area:tool-use
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:ai-tooling-evaluation
+    - target: responsibility:ai-agent-adoption-strategy
+    - target: responsibility:ai-knowledge-sharing
+  performed_by_org_unit:
+    - target: org-unit:ai-enablement
+    - target: org-unit:engineering
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:ai-usage-review
+attributes:
+  displayName: "AI Agent Usage Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: moderate
+  description: |
+    Monthly review of AI agent usage across teams — cost, quality,
+    safety incidents, anti-patterns, and adoption metrics. Excludes
+    individual prompt debugging.
+edges:
+  involves_role:
+    - target: role:ai-champion
+    - target: role:engineering-manager
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:eval-driven-development
+    - target: skill-area:context-management
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:ai-agent-usage-review
+    - target: responsibility:ai-safety-guardrails
+  performed_by_org_unit:
+    - target: org-unit:ai-enablement
+---
+nodeKind: Workflow
+id: workflow:ai-safety-guardrail-maintenance
+attributes:
+  displayName: "AI Safety Guardrail Maintenance"
+  workflowKind: security
+  triggerType: continuous
+  typicalCadence: "continuous"
+  complexity: moderate
+  description: |
+    Ongoing maintenance of AI agent safety boundaries — prompt injection
+    defenses, output validation rules, human-in-the-loop gates, and
+    model access controls. Excludes model training and fine-tuning.
+edges:
+  involves_role:
+    - target: role:ai-champion
+    - target: role:security-reviewer
+    - target: role:ml-engineer
+  requires_skill_area:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:agentic-loops
+    - target: skill-area:tool-use
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:ml-ops
+  triggers_responsibility:
+    - target: responsibility:ai-safety-guardrails
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:ai-enablement
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:ai-knowledge-sharing
+attributes:
+  displayName: "AI Knowledge Sharing"
+  workflowKind: onboarding
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: simple
+  description: |
+    Internal demos, workshops, and office hours on AI agent patterns —
+    prompt engineering, tool-use design, and eval strategies. Excludes
+    formal training programs and certifications.
+edges:
+  involves_role:
+    - target: role:ai-champion
+    - target: role:technical-writer
+    - target: role:devrel
+  requires_skill_area:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:agentic-loops
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:ai-knowledge-sharing
+  performed_by_org_unit:
+    - target: org-unit:ai-enablement
+    - target: org-unit:devrel

@@ -1,0 +1,22 @@
+nodeKind: StackPart
+id: stack-part:time-series-database
+attributes:
+  displayName: "Time-Series Database"
+  category: data-store
+  description: |
+    Database purpose-built for storing and querying time-stamped, append-heavy
+    data streams such as metrics, sensor readings, events, and financial tick
+    data. TSDBs exploit temporal locality and columnar compression to store
+    high-cardinality time series efficiently.
+
+    Prometheus stores metrics scraped from service endpoints and is the
+    standard Kubernetes monitoring TSDB. InfluxDB (with Flux/InfluxQL) and
+    TimescaleDB (a PostgreSQL extension) target higher ingest rates and
+    longer retention. VictoriaMetrics is a high-performance Prometheus-
+    compatible alternative. Key concerns include retention policies,
+    downsampling, cardinality management, and PromQL/Flux query optimization.
+  commonImplementations:
+    - tool:prometheus
+edges:
+  implemented_by:
+    - tool:prometheus

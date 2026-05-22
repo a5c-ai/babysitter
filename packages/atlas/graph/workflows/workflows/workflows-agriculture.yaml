@@ -1,0 +1,72 @@
+---
+nodeKind: Workflow
+id: workflow:precision-agriculture-data-pipeline
+attributes:
+  displayName: "Precision Agriculture Data Pipeline"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Manages the ingestion and processing of precision agriculture sensor
+    data -- collecting soil-moisture, nutrient-level, and weather-station
+    readings from field IoT networks, integrating satellite and drone
+    multispectral imagery for vegetation-index computation (NDVI, EVI),
+    running data-quality validation against sensor calibration baselines,
+    and feeding processed datasets into variable-rate application maps for
+    fertilizer, irrigation, and pest-management systems. Produces
+    georeferenced field-health dashboards, sensor anomaly reports, and
+    prescription maps. Excludes agronomic decision-making.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:kafka-stream-processing
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:agriculture
+    - target: domain:data-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:crop-yield-forecasting
+attributes:
+  displayName: "Crop Yield Forecasting"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Generates crop yield forecasts across growing regions -- ingesting
+    historical yield records, current-season remote-sensing vegetation
+    indices, soil-quality survey data, and weather-model outputs, running
+    ensemble machine-learning models calibrated per crop variety and region,
+    quantifying forecast uncertainty through Monte Carlo simulation, and
+    feeding production estimates into supply-chain and commodity-trading
+    planning systems. Produces yield forecast reports with confidence
+    intervals, model performance dashboards, and early-warning alerts for
+    below-trend projections. Excludes planting and harvesting operations.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:ml-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:agriculture
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:analytics-team

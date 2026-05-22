@@ -18,6 +18,12 @@
  * - ASTM E139: Standard Test Methods for Conducting Creep Tests of Metallic Materials
  * - ASTM E21: Standard Test Methods for Elevated Temperature Tension Tests of Metallic Materials
  * - ASTM E2714: Standard Test Method for Creep-Fatigue Testing
+ *
+ * @graph
+ *   domains: [domain:materials-science]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

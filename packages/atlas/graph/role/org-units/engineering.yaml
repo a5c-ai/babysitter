@@ -1,0 +1,14 @@
+nodeKind: OrgUnit
+id: org-unit:engineering
+attributes:
+  displayName: "Engineering"
+  kind: department
+  description: |
+    The Engineering organization.
+edges:
+  has_member:
+    - target: role:fullstack-engineer
+    - target: role:backend-engineer
+    - target: role:frontend-engineer
+    - target: role:tech-lead
+    - target: role:engineering-manager

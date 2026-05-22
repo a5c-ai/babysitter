@@ -1,0 +1,380 @@
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-llama-3-1-405b-instruct
+attributes:
+  displayName: "Hugging Face — meta-llama/Llama-3.1-405B-Instruct model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/meta-llama/Llama-3.1-405B-Instruct
+  sourcePathOrUrl: https://huggingface.co/meta-llama/Llama-3.1-405B-Instruct
+  locator: "model card — Capabilities & Tool use section"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-llama-3-1-70b-instruct
+attributes:
+  displayName: "Hugging Face — meta-llama/Llama-3.1-70B-Instruct model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct
+  sourcePathOrUrl: https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct
+  locator: "model card — Capabilities & Tool use section"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-llama-3-3-70b-instruct
+attributes:
+  displayName: "Hugging Face — meta-llama/Llama-3.3-70B-Instruct model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct
+  sourcePathOrUrl: https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct
+  locator: "model card — Capabilities section"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-llama-4-maverick
+attributes:
+  displayName: "Hugging Face — meta-llama/Llama-4-Maverick model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/meta-llama/Llama-4-Maverick-17B-128E-Instruct
+  sourcePathOrUrl: https://huggingface.co/meta-llama/Llama-4-Maverick-17B-128E-Instruct
+  locator: "model card — Multimodal & tool use"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-llama-4-scout
+attributes:
+  displayName: "Hugging Face — meta-llama/Llama-4-Scout model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/meta-llama/Llama-4-Scout-17B-16E-Instruct
+  sourcePathOrUrl: https://huggingface.co/meta-llama/Llama-4-Scout-17B-16E-Instruct
+  locator: "model card — Multimodal & tool use"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-llama-4-405b-instruct
+attributes:
+  displayName: "Hugging Face — meta-llama/Llama-4-405B-Instruct model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/meta-llama
+  sourcePathOrUrl: https://huggingface.co/meta-llama
+  locator: "Llama-4 collection landing"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-qwen-2-5-72b-instruct
+attributes:
+  displayName: "Hugging Face — Qwen/Qwen2.5-72B-Instruct model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/Qwen/Qwen2.5-72B-Instruct
+  sourcePathOrUrl: https://huggingface.co/Qwen/Qwen2.5-72B-Instruct
+  locator: "model card — Tool Use & Function Calling"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-qwen-2-5-coder-32b
+attributes:
+  displayName: "Hugging Face — Qwen/Qwen2.5-Coder-32B-Instruct model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct
+  sourcePathOrUrl: https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct
+  locator: "model card — Code generation & tool use"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-qwq-32b-preview
+attributes:
+  displayName: "Hugging Face — Qwen/QwQ-32B-Preview model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/Qwen/QwQ-32B-Preview
+  sourcePathOrUrl: https://huggingface.co/Qwen/QwQ-32B-Preview
+  locator: "model card — Reasoning & limitations"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-deepseek-v3
+attributes:
+  displayName: "Hugging Face — deepseek-ai/DeepSeek-V3 model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/deepseek-ai/DeepSeek-V3
+  sourcePathOrUrl: https://huggingface.co/deepseek-ai/DeepSeek-V3
+  locator: "model card — Function calling section"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-deepseek-r1
+attributes:
+  displayName: "Hugging Face — deepseek-ai/DeepSeek-R1 model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/deepseek-ai/DeepSeek-R1
+  sourcePathOrUrl: https://huggingface.co/deepseek-ai/DeepSeek-R1
+  locator: "model card — Reasoning & chain-of-thought"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+attributes:
+  displayName: "Hugging Face — deepseek-ai/DeepSeek-R1-Distill-Qwen-32B model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B
+  sourcePathOrUrl: https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B
+  locator: "model card — Distillation & reasoning behavior"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-mistral-large-2
+attributes:
+  displayName: "Hugging Face — mistralai/Mistral-Large-Instruct-2407 (Mistral Large 2)"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/mistralai/Mistral-Large-Instruct-2407
+  sourcePathOrUrl: https://huggingface.co/mistralai/Mistral-Large-Instruct-2407
+  locator: "model card — Function calling section"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:mistral-medium-3-launch
+attributes:
+  displayName: "Mistral AI — Mistral Medium 3 launch announcement"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://mistral.ai/news/mistral-medium-3
+  sourcePathOrUrl: https://mistral.ai/news/mistral-medium-3
+  locator: "post body — capabilities section"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-codestral-22b
+attributes:
+  displayName: "Hugging Face — mistralai/Codestral-22B-v0.1"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/mistralai/Codestral-22B-v0.1
+  sourcePathOrUrl: https://huggingface.co/mistralai/Codestral-22B-v0.1
+  locator: "model card — Code completion section"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-codestral-25-01
+attributes:
+  displayName: "Mistral AI — Codestral 25.01 announcement"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://mistral.ai/news/codestral-2501
+  sourcePathOrUrl: https://mistral.ai/news/codestral-2501
+  locator: "post body — FIM & coding capabilities"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-phi-3-medium
+attributes:
+  displayName: "Hugging Face — microsoft/Phi-3-medium-4k-instruct"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/microsoft/Phi-3-medium-4k-instruct
+  sourcePathOrUrl: https://huggingface.co/microsoft/Phi-3-medium-4k-instruct
+  locator: "model card — Capabilities & limitations"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-phi-3-mini
+attributes:
+  displayName: "Hugging Face — microsoft/Phi-3-mini-4k-instruct"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/microsoft/Phi-3-mini-4k-instruct
+  sourcePathOrUrl: https://huggingface.co/microsoft/Phi-3-mini-4k-instruct
+  locator: "model card — Capabilities & limitations"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-gemma-2-27b
+attributes:
+  displayName: "Hugging Face — google/gemma-2-27b-it"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/google/gemma-2-27b-it
+  sourcePathOrUrl: https://huggingface.co/google/gemma-2-27b-it
+  locator: "model card — Usage & limitations"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-command-r-plus
+attributes:
+  displayName: "Hugging Face — CohereForAI/c4ai-command-r-plus"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/CohereForAI/c4ai-command-r-plus
+  sourcePathOrUrl: https://huggingface.co/CohereForAI/c4ai-command-r-plus
+  locator: "model card — Tool use & RAG section"
+  capturedAt: "2026-04-28T00:00:00Z"
+  observedAt: "2026-04-28T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc

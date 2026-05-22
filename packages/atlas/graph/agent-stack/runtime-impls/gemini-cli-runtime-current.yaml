@@ -1,0 +1,68 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:gemini-cli.runtime@current
+attributes:
+  displayName: Gemini CLI Runtime (current)
+  agentVersionId: agentVersion:gemini:ge-0-0-0
+  subagentDispatchMechanism: none
+  subagentChildSessionPolicy: inline-no-child-session
+  subagentToolScopePolicy: inherit-parent
+  packageRef: source-ref:gemini-cli-github
+  builtInTools:
+  - tool-descriptor:read
+  - tool-descriptor:write
+  - tool-descriptor:edit
+  - tool-descriptor:bash
+  - tool-descriptor:grep
+  - tool-descriptor:web-search
+  toolRegistryDiscovery: static-bundled
+  hookSockets:
+  - hook-surface:gemini.pre-prompt
+  - hook-surface:gemini.post-response
+  internalSessionStateLocation: ~/.gemini/sessions/
+  sessionFileFormat: jsonl
+  sessionFilePathConvention: ~/.gemini/sessions/<session-id>.jsonl
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: native-sandbox
+  runtimeIdentity: api-key
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  supportsStreaming: true
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:gemini-cli
+    role: runtime
+  exposes:
+  - target: hook-surface:gemini.pre-prompt
+  - target: hook-surface:gemini.post-response
+  - target: hook-surface:gemini.tool-call-pre
+  - target: hook-surface:gemini.tool-call-post
+  - target: hook-surface:before-tool-selection
+  - target: hook-surface:before-model
+  - target: hook-surface:after-model
+  - target: hook-surface:before-agent
+  bundles:
+  - target: tool-descriptor:read
+  - target: tool-descriptor:write
+  - target: tool-descriptor:edit
+  - target: tool-descriptor:bash
+  - target: tool-descriptor:grep
+  - target: tool-descriptor:web-search
+  connects:
+  - target: mcp-transport:stdio
+  supports:
+  - target: capability:mcp-stdio
+    versionRange: '*'
+    level: full
+  - target: capability:supports-mcp
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'MCP via stdio.
+      '
+  has_env_var:
+  - target: env-var:gemini-api-key
+  - target: env-var:google-api-key
+  - target: env-var:gemini-cli-debug
+  speaks:
+    - target: mcp-transport:stdio

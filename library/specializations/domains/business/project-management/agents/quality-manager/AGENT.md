@@ -15,6 +15,11 @@ metadata:
   domain: business
   category: Quality Management
   id: AG-012
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:change-management, skill-area:compliance-automation, skill-area:business-analysis]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:audit-analyst, role:compliance-officer]
 ---
 
 # Quality Manager Agent

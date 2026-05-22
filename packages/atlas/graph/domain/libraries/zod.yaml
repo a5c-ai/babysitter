@@ -1,0 +1,17 @@
+nodeKind: Library
+id: library:zod
+attributes:
+  displayName: "Zod"
+  belongsToLanguageId: language:typescript
+  category: validation
+  description: |
+    TypeScript-first schema declaration and validation library. Defines runtime schemas and infers static types from them.
+edges:
+  belongs_to_language:
+    - language:typescript
+  library_used_by:
+    - target: skill-area:data-validation-sanitization
+  alternative_to:
+    - library:yup
+    - library:joi
+    - library:io-ts

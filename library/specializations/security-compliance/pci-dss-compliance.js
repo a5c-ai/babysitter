@@ -32,6 +32,9 @@
  * - Penetration Testing Guidance: https://www.pcisecuritystandards.org/document_library?document=penetration-testing-guidance
  * - Network Segmentation: https://www.pcisecuritystandards.org/document_library?document=guidance-pci-dss-scoping-and-network-segmentation
  * - Tokenization Guidelines: https://www.pcisecuritystandards.org/document_library?document=tokenization-guidelines
+ * @graph
+ *   domains: [domain:security, role:security-engineer]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

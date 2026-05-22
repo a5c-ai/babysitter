@@ -1,0 +1,12 @@
+nodeKind: Domain
+id: domain:observability
+attributes:
+  displayName: "Observability"
+  description: |
+    Observability domain — metrics, logs, traces, profiling, and
+    telemetry-driven operations of distributed systems.
+edges:
+  contains:
+    - specialization:observability
+    - topic:slo-sli
+    - topic:incident-management

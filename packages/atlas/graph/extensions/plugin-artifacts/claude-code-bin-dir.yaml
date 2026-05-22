@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:claude-code-bin-dir
+attributes:
+  artifactId: plugin-artifact:claude-code-bin-dir
+  displayName: "Claude Code plugin bin directory"
+  targetId: plugin-target:claude-code
+  artifactKind: settings-fragment
+  pathPattern: "bin/"
+  installerSurface: "fs"
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code

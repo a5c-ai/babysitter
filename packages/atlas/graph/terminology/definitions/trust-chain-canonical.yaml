@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:trust-chain.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:trust-chain
+  text: |
+    Trust Chain refers to chained-evidence provenance graphs. Currently OUT OF SCOPE for the catalog (see ScopeBoundary trust-chain).
+  status: canonical
+edges:
+  defines:
+    - term:trust-chain

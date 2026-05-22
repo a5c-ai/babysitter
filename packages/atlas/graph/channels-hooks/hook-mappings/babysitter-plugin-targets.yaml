@@ -1,0 +1,505 @@
+# Hook mappings for babysitter plugin targets (migrated from agent-catalog)
+---
+nodeKind: HookMapping
+id: hook-mapping:session-start-claude-code
+attributes:
+  mappingId: hook-mapping:session-start-claude-code
+  hookId: hook-surface:session-start
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: SessionStart
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-start
+---
+nodeKind: HookMapping
+id: hook-mapping:session-start-codex
+attributes:
+  mappingId: hook-mapping:session-start-codex
+  hookId: hook-surface:session-start
+  targetId: agentVersion:codex:ge-0-119-0
+  nativeName: SessionStart
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: codex
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-start
+---
+nodeKind: HookMapping
+id: hook-mapping:session-start-cursor
+attributes:
+  mappingId: hook-mapping:session-start-cursor
+  hookId: hook-surface:session-start
+  targetId: agentVersion:cursor:ge-0-0-0
+  nativeName: sessionStart
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: cursor
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-start
+---
+nodeKind: HookMapping
+id: hook-mapping:session-start-github-copilot
+attributes:
+  mappingId: hook-mapping:session-start-github-copilot
+  hookId: hook-surface:session-start
+  targetId: agentVersion:copilot:ge-0-0-0
+  nativeName: sessionStart
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: copilot
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-start
+---
+nodeKind: HookMapping
+id: hook-mapping:session-start-opencode
+attributes:
+  mappingId: hook-mapping:session-start-opencode
+  hookId: hook-surface:session-start
+  targetId: agentVersion:opencode:ge-0-0-0
+  nativeName: session.created
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: opencode
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-start
+---
+nodeKind: HookMapping
+id: hook-mapping:stop-codex
+attributes:
+  mappingId: hook-mapping:stop-codex
+  hookId: hook-surface:stop
+  targetId: agentVersion:codex:ge-0-119-0
+  nativeName: Stop
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: codex
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.stop
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:stop
+---
+nodeKind: HookMapping
+id: hook-mapping:stop-cursor
+attributes:
+  mappingId: hook-mapping:stop-cursor
+  hookId: hook-surface:stop
+  targetId: agentVersion:cursor:ge-0-0-0
+  nativeName: stop
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: cursor
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.stop
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:stop
+---
+nodeKind: HookMapping
+id: hook-mapping:user-prompt-submit-codex
+attributes:
+  mappingId: hook-mapping:user-prompt-submit-codex
+  hookId: hook-surface:user-prompt-submit
+  targetId: agentVersion:codex:ge-0-119-0
+  nativeName: UserPromptSubmit
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: codex
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.user_prompt_submitted
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:user-prompt-submit
+---
+nodeKind: HookMapping
+id: hook-mapping:user-prompt-submit-github-copilot
+attributes:
+  mappingId: hook-mapping:user-prompt-submit-github-copilot
+  hookId: hook-surface:user-prompt-submit
+  targetId: agentVersion:copilot:ge-0-0-0
+  nativeName: userPromptSubmitted
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: copilot
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.user_prompt_submitted
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:user-prompt-submit
+---
+nodeKind: HookMapping
+id: hook-mapping:pre-tool-use-opencode
+attributes:
+  mappingId: hook-mapping:pre-tool-use-opencode
+  hookId: hook-surface:pre-tool-use
+  targetId: agentVersion:opencode:ge-0-0-0
+  nativeName: tool.execute.before
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: opencode
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: true
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:pre-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:post-tool-use-opencode
+attributes:
+  mappingId: hook-mapping:post-tool-use-opencode
+  hookId: hook-surface:post-tool-use
+  targetId: agentVersion:opencode:ge-0-0-0
+  nativeName: tool.execute.after
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: opencode
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:post-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:after-agent-gemini
+attributes:
+  mappingId: hook-mapping:after-agent-gemini
+  hookId: hook-surface:after-agent
+  targetId: agentVersion:gemini:ge-0-0-0
+  nativeName: AfterAgent
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: gemini
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.after_agent
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:after-agent
+---
+nodeKind: HookMapping
+id: hook-mapping:session-end-github-copilot
+attributes:
+  mappingId: hook-mapping:session-end-github-copilot
+  hookId: hook-surface:session-end
+  targetId: agentVersion:copilot:ge-0-0-0
+  nativeName: sessionEnd
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: copilot
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-end
+---
+nodeKind: HookMapping
+id: hook-mapping:shell-env-opencode
+attributes:
+  mappingId: hook-mapping:shell-env-opencode
+  hookId: hook-surface:shell-env
+  targetId: agentVersion:opencode:ge-0-0-0
+  nativeName: shell.env
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: opencode
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:shell-env
+---
+nodeKind: HookMapping
+id: hook-mapping:user-prompt-submit-pi
+attributes:
+  mappingId: hook-mapping:user-prompt-submit-pi
+  hookId: hook-surface:user-prompt-submit
+  targetId: agentVersion:pi:ge-0-0-0
+  nativeName: context
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.before_agent
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:user-prompt-submit
+---
+nodeKind: HookMapping
+id: hook-mapping:pre-tool-use-pi
+attributes:
+  mappingId: hook-mapping:pre-tool-use-pi
+  hookId: hook-surface:pre-tool-use
+  targetId: agentVersion:pi:ge-0-0-0
+  nativeName: tool_call
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: true
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:pre-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:before-provider-request-pi
+attributes:
+  mappingId: hook-mapping:before-provider-request-pi
+  hookId: hook-surface:before-provider-request
+  targetId: agentVersion:pi:ge-0-0-0
+  nativeName: before_provider_request
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: model.before_request
+  blockCapability: false
+  mutationCapability: false
+  scope: model
+edges:
+  maps_hook:
+    - target: hook-surface:before-provider-request
+---
+nodeKind: HookMapping
+id: hook-mapping:session-start-pi
+attributes:
+  mappingId: hook-mapping:session-start-pi
+  hookId: hook-surface:session-start
+  targetId: agentVersion:pi:ge-0-0-0
+  nativeName: session_start
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-start
+---
+nodeKind: HookMapping
+id: hook-mapping:stop-pi
+attributes:
+  mappingId: hook-mapping:stop-pi
+  hookId: hook-surface:stop
+  targetId: agentVersion:pi:ge-0-0-0
+  nativeName: stop
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.stop
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:stop
+---
+nodeKind: HookMapping
+id: hook-mapping:user-prompt-submit-oh-my-pi
+attributes:
+  mappingId: hook-mapping:user-prompt-submit-oh-my-pi
+  hookId: hook-surface:user-prompt-submit
+  targetId: agentVersion:omp:ge-0-0-0
+  nativeName: context
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.config_changed
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:user-prompt-submit
+---
+nodeKind: HookMapping
+id: hook-mapping:pre-tool-use-oh-my-pi
+attributes:
+  mappingId: hook-mapping:pre-tool-use-oh-my-pi
+  hookId: hook-surface:pre-tool-use
+  targetId: agentVersion:omp:ge-0-0-0
+  nativeName: tool_call
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:pre-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:before-provider-request-oh-my-pi
+attributes:
+  mappingId: hook-mapping:before-provider-request-oh-my-pi
+  hookId: hook-surface:before-provider-request
+  targetId: agentVersion:omp:ge-0-0-0
+  nativeName: before_provider_request
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: model.before_request
+  blockCapability: false
+  mutationCapability: false
+  scope: model
+edges:
+  maps_hook:
+    - target: hook-surface:before-provider-request
+---
+nodeKind: HookMapping
+id: hook-mapping:session-start-oh-my-pi
+attributes:
+  mappingId: hook-mapping:session-start-oh-my-pi
+  hookId: hook-surface:session-start
+  targetId: agentVersion:omp:ge-0-0-0
+  nativeName: session_start
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-start
+---
+nodeKind: HookMapping
+id: hook-mapping:stop-oh-my-pi
+attributes:
+  mappingId: hook-mapping:stop-oh-my-pi
+  hookId: hook-surface:stop
+  targetId: agentVersion:omp:ge-0-0-0
+  nativeName: stop
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.stop
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:stop

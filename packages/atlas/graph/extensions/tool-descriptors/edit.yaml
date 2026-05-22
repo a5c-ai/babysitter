@@ -1,0 +1,27 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:edit
+attributes:
+  schema: '{}'
+  displayName: "Edit"
+  description: |
+    Make exact string replacements within an existing file. Standard
+    tool across coding agents (Claude Code Edit, Codex apply_patch,
+    Cursor edit, etc.).
+  inputSchema:
+    type: object
+    required: [file_path, old_string, new_string]
+    properties:
+      file_path: { type: string, description: "Absolute path to the file to edit" }
+      old_string: { type: string, description: "Exact string to replace" }
+      new_string: { type: string, description: "Replacement string" }
+      replace_all: { type: boolean, description: "Replace all occurrences (default false)" }
+  outputSchema:
+    type: object
+    properties:
+      success: { type: boolean }
+  mode: normal
+  streamable: false
+edges:
+  denied_by_reason:
+    - target: permission-denial-reason:claude-code-plan-mode-write-blocked
+    - target: permission-denial-reason:claude-code-classifier-blocked

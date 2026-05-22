@@ -1,0 +1,17 @@
+nodeKind: EvalRun
+id: eval-run:swe-bench-verified.claude-sonnet-4-5.2025-09
+attributes:
+  benchmarkId: benchmark:swe-bench-verified
+  testSetId: test-set:swe-bench-verified-2024-12
+  target: model:claude-sonnet-4-5@current
+  targetId: model:claude-sonnet-4-5@current
+  runAt: "2025-09-29T00:00:00Z"
+  runBy: "anthropic"
+  configHash: "sha256:placeholder-claude-sonnet-4-5-swe-bench-verified"
+edges:
+  evaluates_target:
+    - model:claude-sonnet-4-5@current
+  uses_test_set:
+    - test-set:swe-bench-verified-2024-12
+  for_benchmark:
+    - benchmark:swe-bench-verified

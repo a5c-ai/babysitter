@@ -8,6 +8,11 @@ expertise:
   - Degenerate case identification
   - Algorithm selection for geometry problems
   - Visualization for verification
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:computational-geometry]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # Geometry Specialist Agent

@@ -18,6 +18,12 @@ metadata:
     - quality-control
     - ngs
     - qc
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:data-analysis, skill-area:python-data-pipelines, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:lab-technician]
 ---
 
 # FastQC Quality Analyzer Skill

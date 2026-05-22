@@ -1,0 +1,389 @@
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:ask-user-question
+attributes:
+  schema: '{}'
+  displayName: "AskUserQuestion"
+  description: |
+    Asks multiple-choice questions to gather requirements or clarify
+    ambiguity from the user. Permission: not required.
+  inputSchema:
+    type: object
+    required: [questions]
+    properties:
+      questions:
+        type: array
+        items:
+          type: object
+          required: [question, header, options]
+          properties:
+            question: { type: string }
+            header: { type: string }
+            options:
+              type: array
+              items:
+                type: object
+                properties:
+                  label: { type: string }
+            multiSelect: { type: boolean }
+      answers:
+        type: object
+        description: "Answers map; populated by the host UI on resolve."
+  mode: normal
+  streamable: false
+  timeoutMs: 600000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:cron-create
+attributes:
+  schema: '{}'
+  displayName: "CronCreate"
+  description: |
+    Schedule a recurring or one-shot prompt within the current session.
+    Tasks are session-scoped and restored on --resume / --continue if not
+    expired. Disabled when CLAUDE_CODE_DISABLE_CRON=1.
+  inputSchema:
+    type: object
+    required: [schedule, prompt]
+    properties:
+      schedule: { type: string, description: "Cron expression or one-shot ISO timestamp" }
+      prompt: { type: string }
+      task_id: { type: string }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:cron-delete
+attributes:
+  schema: '{}'
+  displayName: "CronDelete"
+  description: |
+    Cancel a scheduled task by ID. Permission: not required.
+  inputSchema:
+    type: object
+    required: [task_id]
+    properties:
+      task_id: { type: string }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:cron-list
+attributes:
+  schema: '{}'
+  displayName: "CronList"
+  description: |
+    List all scheduled tasks in the session. Permission: not required.
+  inputSchema:
+    type: object
+    properties: {}
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:exit-plan-mode
+attributes:
+  schema: '{}'
+  displayName: "ExitPlanMode"
+  description: |
+    Present a plan for approval and exit plan mode. Permission required —
+    user reviews the plan before normal mode resumes.
+  inputSchema:
+    type: object
+    required: [plan]
+    properties:
+      plan: { type: string, description: "Markdown plan to present for approval" }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:exit-worktree
+attributes:
+  schema: '{}'
+  displayName: "ExitWorktree"
+  description: |
+    Exit a worktree session and return to the original directory. Not
+    available to subagents.
+  inputSchema:
+    type: object
+    properties: {}
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:list-mcp-resources-tool
+attributes:
+  schema: '{}'
+  displayName: "ListMcpResourcesTool"
+  description: |
+    List resources exposed by connected MCP servers. Permission: not
+    required (read-only).
+  inputSchema:
+    type: object
+    properties:
+      server: { type: string, description: "Optional MCP server name to filter" }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:lsp
+attributes:
+  schema: '{}'
+  displayName: "LSP"
+  description: |
+    Code intelligence via language servers — jump to definitions, find
+    references, type info, list symbols, find implementations, trace call
+    hierarchies. Auto-reports type errors after edits. Inactive until a
+    code-intelligence plugin is installed.
+  inputSchema:
+    type: object
+    required: [action]
+    properties:
+      action:
+        type: string
+        enum: [definition, references, type-info, list-symbols, implementations, call-hierarchy, diagnostics]
+      file_path: { type: string }
+      line: { type: integer }
+      column: { type: integer }
+      symbol: { type: string }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:monitor
+attributes:
+  schema: '{}'
+  displayName: "Monitor"
+  description: |
+    Run a command in the background and feed each output line back to
+    Claude. Claude reacts to log entries / file changes / polled status
+    without pausing the conversation. Same permission rules as Bash. Not
+    available on Bedrock / Vertex / Foundry, or when DISABLE_TELEMETRY /
+    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC is set. Requires Claude
+    Code v2.1.98+.
+  inputSchema:
+    type: object
+    required: [command]
+    properties:
+      command: { type: string }
+      description: { type: string }
+  mode: streaming
+  streamable: true
+edges:
+  assesses_policy:
+    - target: content-policy:default-acceptable-use
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:powershell
+attributes:
+  schema: '{}'
+  displayName: "PowerShell"
+  description: |
+    Execute PowerShell commands natively. On Windows without Git Bash,
+    enabled automatically; on Windows with Git Bash, rolling out
+    progressively (override via CLAUDE_CODE_USE_POWERSHELL_TOOL=0/1). On
+    Linux/macOS/WSL, opt-in (requires PowerShell 7+ on PATH). PowerShell
+    profiles are not loaded; on Windows, sandboxing is not supported.
+  inputSchema:
+    type: object
+    required: [command]
+    properties:
+      command: { type: string }
+      timeout: { type: integer }
+      run_in_background: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 120000
+edges:
+  assesses_policy:
+    - target: content-policy:default-acceptable-use
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:read-mcp-resource-tool
+attributes:
+  schema: '{}'
+  displayName: "ReadMcpResourceTool"
+  description: |
+    Read a specific MCP resource by URI. Permission: not required
+    (read-only).
+  inputSchema:
+    type: object
+    required: [uri]
+    properties:
+      uri: { type: string }
+      server: { type: string }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:send-message
+attributes:
+  schema: '{}'
+  displayName: "SendMessage"
+  description: |
+    Send a message to an agent-team teammate, or resume a stopped subagent
+    by its agent ID. Stopped subagents auto-resume in the background.
+    Available only when CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 is set.
+  inputSchema:
+    type: object
+    required: [recipient, message]
+    properties:
+      recipient: { type: string, description: "Teammate name or subagent ID" }
+      message: { type: string }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:skill
+attributes:
+  schema: '{}'
+  displayName: "Skill"
+  description: |
+    Execute a skill within the main conversation. Permission required.
+    The single tool entry covers every skill — extending Claude with
+    reusable prompt-based workflows uses this tool rather than adding new
+    tool entries per skill.
+  inputSchema:
+    type: object
+    required: [skill_name]
+    properties:
+      skill_name: { type: string }
+      arguments: { type: string, description: "Optional $ARGUMENTS payload" }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:task-create
+attributes:
+  schema: '{}'
+  displayName: "TaskCreate"
+  description: |
+    Create a new task in the task list. Used in interactive mode (the
+    non-interactive equivalent is TodoWrite). Permission: not required.
+  inputSchema:
+    type: object
+    required: [description]
+    properties:
+      description: { type: string }
+      dependencies: { type: array, items: { type: string } }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:task-get
+attributes:
+  schema: '{}'
+  displayName: "TaskGet"
+  description: |
+    Retrieve full details for a specific task. Permission: not required.
+  inputSchema:
+    type: object
+    required: [task_id]
+    properties:
+      task_id: { type: string }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:task-list
+attributes:
+  schema: '{}'
+  displayName: "TaskList"
+  description: |
+    List all tasks with their current status. Permission: not required.
+  inputSchema:
+    type: object
+    properties:
+      status: { type: string, description: "Optional status filter" }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:task-update
+attributes:
+  schema: '{}'
+  displayName: "TaskUpdate"
+  description: |
+    Update task status, dependencies, details — or delete tasks.
+    Permission: not required.
+  inputSchema:
+    type: object
+    required: [task_id]
+    properties:
+      task_id: { type: string }
+      status: { type: string }
+      dependencies: { type: array }
+      details: { type: string }
+      delete: { type: boolean }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:team-create
+attributes:
+  schema: '{}'
+  displayName: "TeamCreate"
+  description: |
+    Create an agent team with multiple teammates. Available only when
+    CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 is set.
+  inputSchema:
+    type: object
+    required: [team_name, teammates]
+    properties:
+      team_name: { type: string }
+      teammates:
+        type: array
+        items: { type: object }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:team-delete
+attributes:
+  schema: '{}'
+  displayName: "TeamDelete"
+  description: |
+    Disband an agent team and clean up teammate processes. Available only
+    when CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 is set.
+  inputSchema:
+    type: object
+    required: [team_name]
+    properties:
+      team_name: { type: string }
+  mode: normal
+  streamable: false
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:tool-search
+attributes:
+  schema: '{}'
+  displayName: "ToolSearch"
+  description: |
+    Search for and load deferred MCP tools when MCP tool search is
+    enabled. Permission: not required (read-only deferred-tool fetch).
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+      max_results: { type: integer }
+  mode: normal
+  streamable: false
+edges: {}

@@ -1,0 +1,155 @@
+---
+nodeKind: ModelProviderProduct
+id: provider:anthropic
+attributes:
+  providerId: "anthropic"
+  displayName: "Anthropic"
+  kindLabel: "foundation-model-provider"
+  vendor: "Anthropic"
+  homepage: "https://www.anthropic.com/product/claude-code"
+  apiFamilies:
+    - "messages"
+  authKinds:
+    - "ANTHROPIC_API_KEY"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-agent-mux-host"
+    - "web-anthropic-claude-code"
+edges:
+  has_version:
+    - providerVersion:anthropic:ge-0-0-0
+---
+nodeKind: ModelProviderProduct
+id: provider:openai
+attributes:
+  providerId: "openai"
+  displayName: "OpenAI"
+  kindLabel: "foundation-model-provider"
+  vendor: "OpenAI"
+  homepage: "https://developers.openai.com/codex"
+  apiFamilies:
+    - "responses"
+    - "chat"
+  authKinds:
+    - "OPENAI_API_KEY"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-hooks-detector"
+    - "web-openai-codex-skills"
+edges:
+  has_version:
+    - providerVersion:openai:ge-0-0-0
+---
+nodeKind: ModelProviderProduct
+id: provider:google
+attributes:
+  providerId: "google"
+  displayName: "Google"
+  kindLabel: "foundation-model-provider"
+  vendor: "Google"
+  homepage: null
+  apiFamilies:
+    - "generateContent"
+  authKinds:
+    - "GOOGLE_API_KEY"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-gemini"
+    - "web-gemini-hooks"
+edges:
+  has_version:
+    - providerVersion:google:ge-0-0-0
+---
+nodeKind: ModelProviderProduct
+id: provider:github
+attributes:
+  providerId: "github"
+  displayName: "GitHub"
+  kindLabel: "model-access-broker"
+  vendor: "GitHub"
+  homepage: null
+  apiFamilies:
+    - "chat"
+  authKinds:
+    - "GITHUB_TOKEN"
+    - "COPILOT_GITHUB_TOKEN"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-copilot"
+    - "web-github-copilot-agent"
+---
+nodeKind: ModelProviderProduct
+id: provider:bedrock
+attributes:
+  providerId: "bedrock"
+  displayName: "Bedrock"
+  kindLabel: "cloud-provider"
+  vendor: "Bedrock"
+  homepage: null
+  apiFamilies: []
+  authKinds: []
+  evidenceRefs:
+    - "repo-transport-mux-readme"
+    - "repo-transport-mux-architecture"
+---
+nodeKind: ModelProviderProduct
+id: provider:vertex
+attributes:
+  providerId: "vertex"
+  displayName: "Vertex"
+  kindLabel: "cloud-provider"
+  vendor: "Vertex"
+  homepage: null
+  apiFamilies: []
+  authKinds: []
+  evidenceRefs:
+    - "repo-transport-mux-readme"
+    - "repo-transport-mux-architecture"
+---
+nodeKind: ModelProviderProduct
+id: provider:foundry
+attributes:
+  providerId: "foundry"
+  displayName: "Foundry"
+  kindLabel: "cloud-provider"
+  vendor: "Foundry"
+  homepage: null
+  apiFamilies: []
+  authKinds: []
+  evidenceRefs:
+    - "repo-transport-mux-readme"
+    - "repo-transport-mux-architecture"
+---
+nodeKind: ModelProviderProduct
+id: provider:cloudflare-ai
+attributes:
+  providerId: "cloudflare-ai"
+  displayName: "Cloudflare Workers AI"
+  kindLabel: "inference-provider"
+  vendor: "Cloudflare"
+  homepage: "https://developers.cloudflare.com/workers-ai/"
+  apiFamilies:
+    - "run"
+  authKinds:
+    - "CLOUDFLARE_API_TOKEN"
+    - "CLOUDFLARE_ACCOUNT_ID"
+  evidenceRefs:
+    - "pi-packages-ai-providers"
+---
+nodeKind: ModelProviderProduct
+id: provider:azure-openai
+attributes:
+  providerId: "azure-openai"
+  displayName: "Azure OpenAI"
+  kindLabel: "cloud-provider"
+  vendor: "Microsoft"
+  homepage: "https://azure.microsoft.com/en-us/products/ai-services/openai-service"
+  apiFamilies:
+    - "responses"
+    - "chat"
+    - "completions"
+  authKinds:
+    - "AZURE_OPENAI_API_KEY"
+    - "AZURE_AD_TOKEN"
+  evidenceRefs:
+    - "pi-packages-ai-providers"

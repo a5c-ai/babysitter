@@ -1,0 +1,18 @@
+nodeKind: HookMapping
+id: hook-mapping:post-tool-use-hermes
+attributes:
+  mappingId: hook-mapping:post-tool-use-hermes
+  hookId: hook-surface:post-tool-use
+  targetId: agent-version:hermes@current
+  nativeName: onEvent
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: hermes
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+edges:
+  maps_hook:
+    - target: hook-surface:post-tool-use
+  emits_hook:
+    - target: agent-version:hermes@current

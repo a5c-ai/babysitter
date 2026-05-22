@@ -1,0 +1,8 @@
+nodeKind: OutOfScopeReason
+id: out-of-scope-reason:runtime-only
+attributes:
+  reasonKind: "runtime-only"
+  displayName: "Runtime Only"
+  description: |
+    Only meaningful at runtime; not a catalog concern.
+edges: {}

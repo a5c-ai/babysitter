@@ -1,0 +1,35 @@
+nodeKind: AgentHostTransport
+id: agent-host-transport:terminal-cli
+attributes:
+  displayName: "Interactive terminal CLI"
+  kind: stdio-pty
+  description: |
+    The agent runs as an interactive CLI in a pseudo-terminal: stdin
+    is a TTY, stdout/stderr render ANSI sequences, and the host can
+    inject keystrokes (including raw-mode bindings) and observe the
+    rendered terminal session. Used by agent-mux when wrapping
+    interactive harnesses such as Claude Code, Codex, Cursor CLI,
+    Gemini CLI, and Copilot CLI.
+  inboundMessageFormat: |
+    Free-form text typed into the TTY plus optional CLI-argument
+    bootstrap. Hosts that drive the session programmatically use
+    stdin injection (newline-terminated lines or raw keystrokes
+    including `^C`, arrow keys, etc.). No standard JSON envelope.
+  outboundMessageFormat: |
+    Rendered ANSI terminal output on stdout/stderr. Agents may also
+    emit structured events via auxiliary mechanisms (sidecar files,
+    additional file descriptors, or `--output-format` flags), but the
+    primary surface is human-readable terminal text.
+  signalForwarding: |
+    Standard POSIX signals (SIGINT for cancel, SIGTERM/SIGKILL for
+    shutdown). On Windows the host sends `CTRL_C_EVENT` via
+    `GenerateConsoleCtrlEvent`. Closing the master PTY also signals
+    end-of-session.
+  ptySemantics: |
+    Full PTY: `isatty()` returns true, raw mode and ANSI control
+    sequences are honoured, and the host typically allocates a
+    master/slave PTY pair (`openpty(3)` / ConPTY on Windows).
+edges:
+  used_by:
+    - agentVersion:claude:ge-0-0-0
+    - agentVersion:codex:ge-0-119-0

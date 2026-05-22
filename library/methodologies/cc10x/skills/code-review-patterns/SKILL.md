@@ -2,17 +2,14 @@
 name: code-review-patterns
 description: Multi-dimensional code assessment across security, quality, performance, and maintainability with confidence-gated reporting (>=80%) and Router Contract generation.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Code Review Patterns
-
-## Overview
-
-Structured patterns for multi-dimensional code review with strict confidence gating. Only issues with >=80% confidence are reported. Zero tolerance for empty catch blocks.
-
-## Four Dimensions
-
-### Security (weight: 30%)
 - Injection vulnerabilities (SQL, XSS, command)
 - Authentication and authorization patterns
 - Secrets handling (no hardcoded credentials)

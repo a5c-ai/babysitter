@@ -14,6 +14,12 @@ expertise:
   - Performance comparison
   - Risk assessment
   - Cutover planning
+graph:
+  domains: [domain:data-engineering]
+  specializations: [specialization:data-engineering-analytics]
+  skillAreas: [skill-area:etl-pipelines, skill-area:data-warehouse-modeling]
+  roles: [role:data-engineer, role:analytics-engineer]
+  workflows: [workflow:data-pipeline-deployment]
 ---
 
 # Migration Specialist Agent

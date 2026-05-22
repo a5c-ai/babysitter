@@ -1,0 +1,364 @@
+
+---
+nodeKind: Tool
+id: tool:attio
+attributes:
+  displayName: "Attio"
+  homepageUrl: "https://attio.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    CRM platform surfaced by Ora for sales, account management, and revenue operations workflows.
+  ora:
+    domain: attio.com
+    score: 84
+    grade: B
+    category: "CRM"
+    tags: [crm, sales, account management, revenue operations]
+    scoreUrl: https://ora.run/score/attio.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:account-executive
+      confidence: high
+      evidence: "Ora surfaced Attio as a high-scoring CRM match for sales and revenue operations workflows."
+    - target: role:sales-engineer
+      confidence: medium
+      evidence: "CRM account context supports technical sales discovery and follow-up."
+---
+nodeKind: Tool
+id: tool:close
+attributes:
+  displayName: "Close"
+  homepageUrl: "https://www.close.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Sales CRM surfaced by Ora for account management, pipeline, and revenue operations workflows.
+  ora:
+    domain: close.com
+    score: 74
+    grade: B
+    category: "CRM"
+    tags: [crm, sales, calling, pipeline, revenue operations]
+    scoreUrl: https://ora.run/score/close.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:account-executive
+      confidence: high
+      evidence: "Pipeline and outreach CRM data supports account-executive workflows."
+---
+nodeKind: Tool
+id: tool:copper
+attributes:
+  displayName: "Copper"
+  homepageUrl: "https://www.copper.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    CRM surfaced by Ora for account management and revenue operations workflows.
+  ora:
+    domain: copper.com
+    score: 71
+    grade: B
+    category: "CRM"
+    tags: [crm, sales, google workspace, pipeline]
+    scoreUrl: https://ora.run/score/copper.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:account-executive
+      confidence: medium
+      evidence: "CRM pipeline and account context supports sales workflow projection."
+---
+nodeKind: Tool
+id: tool:pipedrive
+attributes:
+  displayName: "Pipedrive"
+  homepageUrl: "https://www.pipedrive.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Sales CRM surfaced by Ora for revenue operations, account management, and pipeline workflows.
+  ora:
+    domain: pipedrive.com
+    score: 62
+    grade: C
+    category: "CRM"
+    tags: [crm, pipeline, sales, deals]
+    scoreUrl: https://ora.run/score/pipedrive.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:account-executive
+      confidence: medium
+      evidence: "Deal-stage and pipeline metadata supports revenue workflow review."
+---
+nodeKind: Tool
+id: tool:klaviyo
+attributes:
+  displayName: "Klaviyo"
+  homepageUrl: "https://www.klaviyo.com"
+  kind: workflow-automation
+  languageApplicability: neutral
+  description: |
+    Marketing automation and customer messaging platform surfaced by Ora for campaign analytics and content workflows.
+  ora:
+    domain: klaviyo.com
+    score: 79
+    grade: B
+    category: "E-commerce"
+    tags: [marketing automation, email, ecommerce, campaign analytics]
+    scoreUrl: https://ora.run/score/klaviyo.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:marketing-manager
+      confidence: high
+      evidence: "Ora surfaced Klaviyo for marketing automation, campaign analytics, and content workflows."
+    - target: workflow:demand-generation-campaign
+      confidence: high
+      evidence: "Campaign and segment automation are direct demand-generation projection points."
+    - target: workflow:campaign-post-mortem-analysis
+      confidence: medium
+      evidence: "Campaign metrics support post-mortem analysis."
+---
+nodeKind: Tool
+id: tool:june
+attributes:
+  displayName: "June"
+  homepageUrl: "https://www.june.so"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Product analytics platform surfaced by Ora for campaign analytics, product insights, and growth workflows.
+  ora:
+    domain: june.so
+    score: 0
+    grade: F
+    category: "Data & Analytics"
+    tags: [product analytics, b2b saas, customer insights]
+    scoreUrl: https://ora.run/score/june.so
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:marketing-manager
+      confidence: medium
+      evidence: "Product/customer analytics can support campaign segmentation and growth review."
+---
+nodeKind: Tool
+id: tool:ramp
+attributes:
+  displayName: "Ramp"
+  homepageUrl: "https://ramp.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Finance automation, expense, card, and procurement platform surfaced by Ora for accounting and procurement workflows.
+  ora:
+    domain: ramp.com
+    score: 0
+    grade: F
+    category: "Payments & Fintech"
+    tags: [expenses, procurement, corporate cards, finance automation]
+    scoreUrl: https://ora.run/score/ramp.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:business-analyst
+      confidence: medium
+      evidence: "Spend and procurement data supports finance process analysis."
+    - target: workflow:accounts-payable-cycle
+      confidence: high
+      evidence: "Expense and procurement workflows map to accounts payable cycle projections."
+    - target: workflow:financial-close-cycle
+      confidence: medium
+      evidence: "Spend reconciliation and approvals support financial close review."
+---
+nodeKind: Tool
+id: tool:dbt-labs
+attributes:
+  displayName: "dbt Labs"
+  homepageUrl: "https://www.getdbt.com"
+  kind: sql-tool
+  languageApplicability: neutral
+  description: |
+    Analytics engineering and transformation platform surfaced by Ora for dbt, warehouse, and orchestration workflows.
+  ora:
+    domain: getdbt.com
+    score: 0
+    grade: F
+    category: "Data & Analytics"
+    tags: [dbt, analytics engineering, data transformations, warehouse]
+    scoreUrl: https://ora.run/score/getdbt.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:data-engineer
+      confidence: high
+      evidence: "dbt transformations and lineage support data engineering workflows."
+    - target: responsibility:data-pipeline-reliability
+      confidence: high
+      evidence: "Transformation tests and model lineage are pipeline reliability inputs."
+    - target: workflow:data-pipeline-monitoring
+      confidence: high
+      evidence: "Ora surfaced dbt Labs for data engineering orchestration and warehouse workflows."
+---
+nodeKind: Tool
+id: tool:labelbox
+attributes:
+  displayName: "Labelbox"
+  homepageUrl: "https://labelbox.com"
+  kind: ai-dev-tool
+  languageApplicability: neutral
+  description: |
+    Data labeling and AI data platform surfaced by Ora for data engineering and AI/ML workflow coverage.
+  ora:
+    domain: labelbox.com
+    score: 0
+    grade: F
+    category: "AI & ML"
+    tags: [data labeling, training data, ai data, mlops]
+    scoreUrl: https://ora.run/score/labelbox.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:ml-engineer
+      confidence: medium
+      evidence: "Training data labeling supports model development and validation workflows."
+---
+nodeKind: Tool
+id: tool:linode
+attributes:
+  displayName: "Linode"
+  homepageUrl: "https://www.linode.com"
+  kind: orchestrator
+  languageApplicability: neutral
+  description: |
+    Cloud infrastructure provider surfaced by Ora for DevSecOps, cloud cost, and platform operations workflows.
+  ora:
+    domain: linode.com
+    score: 0
+    grade: F
+    category: "Infrastructure & DevOps"
+    tags: [cloud, compute, kubernetes, devops]
+    scoreUrl: https://ora.run/score/linode.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "Cloud resource inventory and operations support DevSecOps and FinOps workflows."
+    - target: workflow:cloud-cost-anomaly-detection
+      confidence: medium
+      evidence: "Cloud usage and resource metadata are cost-anomaly inputs."
+---
+nodeKind: Tool
+id: tool:tavily
+attributes:
+  displayName: "Tavily"
+  homepageUrl: "https://www.tavily.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Agent search API surfaced by Ora for knowledge search, RAG retrieval, and enterprise research workflows.
+  ora:
+    domain: tavily.com
+    score: 80
+    grade: B
+    category: "Agent Tools"
+    tags: [search, web search, rag, retrieval, agent tools]
+    scoreUrl: https://ora.run/score/tavily.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:technical-writer
+      confidence: medium
+      evidence: "Search/retrieval supports documentation research and source discovery."
+    - target: workflow:developer-documentation-review
+      confidence: medium
+      evidence: "RAG retrieval can project related docs and external references into review workflows."
+---
+nodeKind: Tool
+id: tool:exa
+attributes:
+  displayName: "Exa"
+  homepageUrl: "https://exa.ai"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Neural/web search API surfaced by Ora for knowledge search, RAG, and retrieval workflows.
+  ora:
+    domain: exa.ai
+    score: 66
+    grade: C
+    category: "Agent Tools"
+    tags: [search, neural search, web search, rag]
+    scoreUrl: https://ora.run/score/exa.ai
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:technical-writer
+      confidence: medium
+      evidence: "Search and retrieval APIs support documentation research and knowledge-base review."
+---
+nodeKind: Tool
+id: tool:cohere
+attributes:
+  displayName: "Cohere"
+  homepageUrl: "https://cohere.com"
+  kind: ai-dev-tool
+  languageApplicability: neutral
+  description: |
+    AI platform surfaced by Ora for enterprise retrieval, embedding, reranking, and RAG workflows.
+  ora:
+    domain: cohere.com
+    score: 65
+    grade: C
+    category: "AI & ML"
+    tags: [rag, embeddings, reranking, enterprise search, ai]
+    scoreUrl: https://ora.run/score/cohere.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:ml-engineer
+      confidence: medium
+      evidence: "Embedding and reranking tools support retrieval and RAG workflow implementation."
+---
+nodeKind: Tool
+id: tool:perplexity
+attributes:
+  displayName: "Perplexity"
+  homepageUrl: "https://www.perplexity.ai"
+  kind: ai-dev-tool
+  languageApplicability: neutral
+  description: |
+    AI answer/search platform surfaced by Ora for knowledge search and retrieval workflows.
+  ora:
+    domain: perplexity.ai
+    score: 64
+    grade: C
+    category: "AI & ML"
+    tags: [search, answer engine, research, retrieval]
+    scoreUrl: https://ora.run/score/perplexity.ai
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:technical-writer
+      confidence: medium
+      evidence: "Answer/search workflows support documentation research and knowledge discovery."

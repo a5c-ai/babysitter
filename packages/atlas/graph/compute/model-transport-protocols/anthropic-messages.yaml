@@ -1,0 +1,105 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:anthropic-messages
+attributes:
+  displayName: "Anthropic Messages"
+  vendor: "Anthropic"
+  specUrl: "https://docs.anthropic.com/en/api/messages"
+  streamingFraming: sse
+  toolUseSchema: |
+    Tool calls appear as `tool_use` content blocks with `id`, `name`, and
+    `input`; results are returned as `tool_result` blocks referencing the
+    same `id`.
+  thinkingChannel: content-block
+  cacheControl: explicit
+  firstSpecVersion: "2023-07-12"
+  currentSpecVersion: "2025-04-01"
+  status: standard
+  requestBodyShape: |
+    POST /v1/messages
+    JSON body (top-level fields):
+      - `model` (required, string)
+      - `messages` (required, array of `{role: "user"|"assistant", content: string|ContentBlock[]}`)
+      - `system` (optional, string or array of content blocks)
+      - `max_tokens` (required, int)
+      - `tools` (optional, array of tool definitions `{name, description, input_schema}`)
+      - `tool_choice` (optional, `{type: "auto"|"any"|"tool", name?}`)
+      - `temperature`, `top_p`, `top_k`, `stop_sequences` (optional)
+      - `stream` (optional, bool)
+      - `thinking` (optional, `{type: "enabled", budget_tokens}` for extended thinking)
+      - `metadata` (optional, `{user_id?}`)
+  responseBodyShape: |
+    Non-streaming response (HTTP 200 application/json):
+      {
+        "id": "msg_...",
+        "type": "message",
+        "role": "assistant",
+        "model": "...",
+        "content": [ ContentBlock, ... ],
+        "stop_reason": "end_turn"|"max_tokens"|"stop_sequence"|"tool_use",
+        "stop_sequence": null|string,
+        "usage": {
+          "input_tokens": int,
+          "output_tokens": int,
+          "cache_creation_input_tokens"?: int,
+          "cache_read_input_tokens"?: int
+        }
+      }
+  streamingEventTypes:
+    - message_start
+    - content_block_start
+    - content_block_delta
+    - content_block_stop
+    - message_delta
+    - message_stop
+    - ping
+    - error
+  toolCallWireFormat: |
+    A `tool_use` content block in `message.content`:
+      { "type": "tool_use", "id": "toolu_...", "name": "<tool_name>", "input": { ... } }
+    `id` is the call correlation handle echoed back on the matching tool result.
+  toolResultWireFormat: |
+    A `tool_result` content block in a subsequent user-role message:
+      { "type": "tool_result",
+        "tool_use_id": "toolu_...",
+        "content": string | ContentBlock[],
+        "is_error"?: bool }
+  errorEnvelope: |
+    Non-2xx response, `application/json`:
+      { "type": "error",
+        "error": { "type": "invalid_request_error"|"authentication_error"|"permission_error"|"not_found_error"|"rate_limit_error"|"api_error"|"overloaded_error"|"request_too_large", "message": string } }
+    HTTP status: 400/401/403/404/413/429/500/529 according to `error.type`.
+  cacheControlWireFormat: |
+    Per-content-block annotation:
+      { "type": "text", "text": "...", "cache_control": { "type": "ephemeral", "ttl"?: "5m"|"1h" } }
+    Up to four cache breakpoints per request. Applies to system, messages, and tools.
+  rateLimitSignaling: |
+    Response headers on every request:
+      - `anthropic-ratelimit-requests-limit`, `anthropic-ratelimit-requests-remaining`,
+        `anthropic-ratelimit-requests-reset`
+      - `anthropic-ratelimit-tokens-limit`, `anthropic-ratelimit-tokens-remaining`,
+        `anthropic-ratelimit-tokens-reset`
+      - `anthropic-ratelimit-input-tokens-*`, `anthropic-ratelimit-output-tokens-*`
+    On HTTP 429: `retry-after` header (seconds).
+  reasoningWireFormat: |
+    A `thinking` content block:
+      { "type": "thinking", "thinking": "<text>", "signature": "<opaque>" }
+    Redacted variant when content is filtered server-side:
+      { "type": "redacted_thinking", "data": "<opaque>" }
+    Both must be echoed back verbatim (preserving signatures) on multi-turn
+    tool-use loops or extended-thinking continuations.
+  authHeaderFormat: |
+    `x-api-key: <ANTHROPIC_API_KEY>`
+    (Bedrock / Vertex use their respective IAM/OAuth flows instead.)
+  versioningHeader: |
+    Mandatory: `anthropic-version: 2023-06-01`
+    Optional opt-ins: `anthropic-beta: <feature>[,<feature>...]`
+edges:
+  realizes:
+    - target: layer:3-transport
+  served_by:
+    - provider:anthropic
+    - provider:aws-bedrock
+  spoken_by:
+    - model:claude-opus-4-7@current
+  bridged_by:
+    - transport-proxy:agent-mux-proxy

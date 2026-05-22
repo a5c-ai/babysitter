@@ -1,0 +1,155 @@
+nodeKind: AgentVersion
+id: agentVersion:gemini:ge-0-0-0
+attributes:
+  agentId: "gemini"
+  aliases:
+    - "gemini-cli"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  displayName: "Gemini CLI"
+  summary: "Google's CLI agent for coding tasks"
+  sourcePackage: "@google/gemini-cli"
+  osSupport:
+    - "linux"
+    - "macos"
+    - "windows"
+  agentProductId: agent:gemini-cli
+  versionRange: ">=0.0.0"
+  releasedAt: "2025-06-25"
+  cliCommand: "gemini"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "API Key"
+        envVars: [GOOGLE_API_KEY, GEMINI_API_KEY]
+      - type: browser_login
+        name: "Browser Login"
+    authFiles:
+      - "~/.config/gemini/settings.json"
+    hostEnvSignals:
+      - GEMINI_CLI
+      - GEMINI_SESSION_ID
+    sessionDir: "~/.gemini/sessions"
+    sessionPersistence: file
+    automationEnv:
+      GEMINI_CLI_TRUST_WORKSPACE: "true"
+    approvalModes:
+      - yolo
+      - prompt
+    capabilityFlags:
+      canResume: true
+      canFork: false
+      supportsMultiTurn: true
+      sessionPersistence: file
+      supportsTextStreaming: true
+      supportsToolCallStreaming: true
+      supportsThinkingStreaming: true
+      supportsNativeTools: true
+      supportsMCP: true
+      supportsParallelToolCalls: true
+      requiresToolApproval: true
+      supportsThinking: true
+      supportsJsonMode: true
+      supportsStructuredOutput: true
+      structuredSessionTransport: restart-per-turn
+      sessionControlPlane: self-managed
+      supportsSkills: false
+      supportsAgentsMd: false
+      skillsFormat: none
+      supportsSubagentDispatch: false
+      supportsParallelExecution: false
+      maxParallelTasks: 1
+      supportsInteractiveMode: true
+      supportsStdinInjection: true
+      supportsImageInput: true
+      supportsImageOutput: false
+      supportsFileAttachments: true
+      supportsPlugins: true
+      pluginFormats: [mcp-server]
+      supportedPlatforms: [darwin, linux, win32]
+      thinkingEffortLevels: [low, medium, high]
+      requiresGitRepo: false
+      requiresPty: false
+    runtimeHooks:
+      preToolUse: nonblocking
+      postToolUse: nonblocking
+      sessionStart: nonblocking
+      sessionEnd: nonblocking
+      stop: nonblocking
+      userPromptSubmit: nonblocking
+    configSchema:
+      configFormat: json
+      configFilePaths:
+        - "~/.config/gemini/settings.json"
+    displayName: "Gemini CLI"
+    defaultModelId: "gemini-2.5-pro"
+  hookSupport:
+    interactive:
+      sessionStart: native
+      stop: native
+      userPromptSubmit: native
+      preToolUse: native
+      sessionEnd: native
+    nonInteractive:
+      sessionStart: emulated
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: true
+    positionalPrompt: true
+edges:
+  version_of:
+    - agent:gemini-cli
+  composed_of:
+    - target: agent-core-impl:gemini-cli.core@current
+      role: core
+    - target: agent-runtime-impl:gemini-cli.runtime@current
+      role: runtime
+    - target: agent-platform-impl:gemini-cli.platform@current
+      role: platform
+    - target: agent-ui-impl:gemini-cli.ui@current
+      role: ui
+    - target: knowledge-fabric-impl:gemini-cli.knowledge@current
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:gemini-cli-memory
+  sourced_from: []
+  supports:
+    - target: capability:skills
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Gemini CLI documents first-class agent skills across workspace, user, and extension tiers.
+    - target: capability:supports-thinking
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Gemini CLI documented as an interactive and automation-capable terminal agent surface.
+    - target: capability:interactive-mode
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Interactive REPL semantics documented directly in the Gemini CLI reference.
+    - target: capability:stdin-injection
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Headless and piped execution documented separately from interactive usage.
+    - target: capability:vision-input
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Public Gemini CLI evidence describes multimodal CLI support.
+    - target: capability:runtime-hooks
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Gemini CLI hook events documented directly.
+    - target: capability:stop-hook
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Normalized stop-hook backed by Gemini's documented end-of-loop hook events.
+    - target: capability:can-resume
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Gemini CLI resume semantics documented through both session management and checkpoint restoration.

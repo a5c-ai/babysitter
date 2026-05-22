@@ -16,6 +16,11 @@
  * @references
  * - PMI Quality Management: https://www.pmi.org/pmbok-guide-standards/foundational/pmbok
  * - ISO 9001: https://www.iso.org/iso-9001-quality-management.html
+  * @graph
+ *   domains: [domain:project-management]
+ *   skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning]
+ *   workflows: [workflow:project-kickoff, workflow:project-kickoff]
+ *   roles: [role:project-manager, role:scrum-master]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

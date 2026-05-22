@@ -1,0 +1,623 @@
+# NodeKinds for cluster 4-surfacing-path.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:workspace
+  name: Workspace
+  origin: universal
+  prefix: workspace
+  cluster: 4-surfacing-path
+  purpose: project context with sessions+repos
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: rootPath
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: materialization
+    type: enum<worktree,symlink,clone,copy,virtual>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: How the workspace projects onto the filesystem. `worktree`=git-worktree (default for git repos); `symlink`=path alias; `clone`=independent full git clone; `copy`=non-git filesystem snapshot (for non-git workspaces); `virtual`=overlay/FUSE/in-memory projection. `clone`/`copy`/`virtual` resolve OQ oq:workspace-materialization-extensions.
+  - name: storageBackend
+    type: enum<local-fs,nfs,s3-mounted,container-volume,tmpfs,ide-managed>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Where the workspace bytes physically live. `local-fs`=ordinary disk on the host; `nfs`=network filesystem (incl. SMB); `s3-mounted`=object-store fronted by FUSE/goofys/etc.; `container-volume`=docker/podman volume; `tmpfs`=RAM-backed (ephemeral); `ide-managed`=IDE controls the underlying store (e.g. JetBrains Gateway, GitHub Codespaces remote root).
+  - name: encryptionAtRest
+    type: enum<none,os-keystore,hardware-encrypted,per-file-encrypted>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Encryption posture of the workspace bytes at rest. `none`=plaintext on disk; `os-keystore`=OS-managed full-disk / FileVault / BitLocker / LUKS; `hardware-encrypted`=SED / TPM-bound volume; `per-file-encrypted`=fscrypt / EFS / per-file envelope.
+  - name: indexingState
+    type: enum<not-indexed,indexing,indexed,partial>
+    required: false
+    notes: 'For IDE-managed workspaces: the indexing state of the project (symbol index, language servers, embeddings).'
+  - name: gitHooksInstalled
+    type: list<string>
+    required: false
+    notes: List of hook names installed in `.git/hooks/` (e.g. `pre-commit`, `pre-push`, `commit-msg`). Empty list means no agent-installed hooks.
+  - name: agentArtifactsScope
+    type: enum<inside-workspace,sibling-dir,xdg-state,none>
+    required: false
+    notes: Where agent artifacts (history, scratch files, plan files) live relative to the workspace. `inside-workspace`=under the workspace root (e.g. `.claude/`, `.codex/`); `sibling-dir`=adjacent directory; `xdg-state`=`$XDG_STATE_HOME` or platform equivalent; `none`=no persistent agent artifacts.
+  - name: multiTenantPolicy
+    type: enum<single-user,multi-user-rw,multi-user-readonly>
+    required: false
+    notes: 'For shared workspaces: `single-user`=one human owner; `multi-user-rw`=multiple agents/humans may write concurrently; `multi-user-readonly`=multiple may read, single writer.'
+  - name: filesystemSafetyInvariants
+    type: list<enum<workspace-confined-writes,no-cross-workspace-traversal,no-symlink-escape,tmp-dir-isolated,git-hooks-sandboxed>>
+    required: false
+    notes: catalog pass 18 / FilesystemSafetyInvariant enum. Informational safety descriptor — NOT Trust Chain. Captures the symphony §15-equivalent invariants without introducing trust evidence.
+  incomingEdges:
+  - uses_workspace
+  - used_by_run_attempt
+  - owns_workspace
+  - groups_workspace
+  outgoingEdges:
+  - materializes_as
+  - runs_via
+  - versioned_via
+  - workspace_owned_by
+  - workspace_in_project
+  invariants: []
+  examples: []
+- id: node:worktree
+  name: Worktree
+  origin: universal
+  prefix: worktree
+  cluster: 4-surfacing-path
+  purpose: git-worktree per-branch isolation
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: workspaceId
+    type: ref<Workspace>
+    required: true
+  - name: path
+    type: string
+    required: true
+  - name: branch
+    type: string
+    required: true
+  incomingEdges:
+  - materializes_as
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:execution
+  name: Execution
+  origin: universal
+  prefix: execution
+  cluster: 4-surfacing-path
+  purpose: where/how work runs (local/docker/ssh/k8s/cloud/direct)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<local
+    docker: null
+    ssh: null
+    kubernetes: null
+    cloud: null
+    direct>: null
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: processLifecycleModel
+    type: enum<unix-pgroup,windows-job-object,docker-stop,k8s-grace,ssh-tty,direct>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Per-mode process-lifecycle model. Unix uses process-groups + signal-set; Windows uses Job Objects; Docker translates SIGTERM through the entrypoint's PID-1; k8s honours `terminationGracePeriodSeconds`; ssh inherits TTY semantics. Resolves OQ oq:platform-process-lifecycle (recorded as gap-of-record — no cross-OS standard exists).
+  - name: signalPropagation
+    type: enum<best-effort,reliable,degraded,unsupported>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Signal-propagation reliability across the spawn boundary. Local/docker = reliable for SIGTERM/SIGKILL; ssh = best-effort (TTY-dependent); k8s = reliable for SIGTERM with race against grace-period; cloud = degraded (provider-dependent). Resolves OQ oq:cross-platform-signal-propagation as gap-of-record.
+  - name: resourceLimits
+    type: map<string,string>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: 'Resource budget for the execution. Conventional keys: `cpu` (e.g. `2`, `500m`), `memoryMb` (int as string), `timeoutMs`, `networkAllowed` (`true`/`false`), `diskQuota` (e.g. `10Gi`). Empty/absent means inherit from host.'
+  - name: isolation
+    type: enum<none,namespace,container,vm,wasm-sandbox>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Mechanism that separates this execution from the host. `none`=share host process tree; `namespace`=Linux namespaces (pid/net/mount); `container`=full container runtime; `vm`=hypervisor-backed VM (firecracker/kata/qemu); `wasm-sandbox`=wasm host.
+  - name: networkPolicy
+    type: enum<unrestricted,egress-allowlist,egress-denylist,air-gapped>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Network egress posture for the execution. Distinct from `Sandbox.networkPolicy` (which is the policy primitive); this records the *actual* posture of this execution mode.
+  - name: fsAccess
+    type: enum<unrestricted,workspace-only,read-only,overlay-fs>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Filesystem access posture. `unrestricted`=full host fs; `workspace-only`=bind-mount of workspace root only; `read-only`=mounted ro; `overlay-fs`=writes go to a copy-on-write upper layer (changes discardable).
+  - name: gpuAccess
+    type: enum<none,shared,exclusive,passthrough>
+    required: false
+    notes: GPU exposure to the execution. `none`=no GPU; `shared`=time-sliced (MPS, MIG share); `exclusive`=dedicated device; `passthrough`=PCI-passthrough into a VM.
+  - name: sandboxImpl
+    type: enum<agentsh,docker,firecracker,gvisor,kata,wasm-time,qemu,none>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Concrete tool that enforces the sandbox for this execution. `agentsh`=agent-mux per-task wrapper; `docker`=docker/podman; `firecracker`=AWS micro-VM; `gvisor`=user-space kernel; `kata`=kata-containers; `wasm-time`=wasmtime; `qemu`=full QEMU. `none`=relies solely on host.
+  incomingEdges:
+  - runs_via
+  outgoingEdges:
+  - sandboxed_by
+  invariants: []
+  examples: []
+- id: node:sandbox
+  name: Sandbox
+  origin: universal
+  prefix: sandbox
+  cluster: 4-surfacing-path
+  purpose: what work is allowed to do (policy primitive)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: filesystemPolicy
+    type: enum<read-only
+    read-write: null
+    sandboxed: null
+    confined>: null
+    required: true
+  - name: networkPolicy
+    type: enum<none
+    egress-only: null
+    full: null
+    allowlist>: null
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: fsAllowList
+    type: list<string>
+    required: false
+    notes: Glob/path patterns of filesystem locations the sandbox is permitted to read/write. Empty list (combined with `fsDenyList`) means fall back to `filesystemPolicy`.
+  - name: fsDenyList
+    type: list<string>
+    required: false
+    notes: Glob/path patterns of filesystem locations the sandbox MUST NOT touch (takes precedence over allow-list).
+  - name: netAllowList
+    type: list<string>
+    required: false
+    notes: Allow-list of network destinations (URLs, domains, IPs, CIDRs). Used when `networkPolicy=allowlist`.
+  - name: netDenyList
+    type: list<string>
+    required: false
+    notes: Deny-list of network destinations (URLs, domains, IPs, CIDRs). Takes precedence over `netAllowList`.
+  - name: execAllowedBinaries
+    type: list<string>
+    required: false
+    notes: Allow-list of binaries the sandboxed process may exec. Empty means inherit from host PATH.
+  - name: execDeniedBinaries
+    type: list<string>
+    required: false
+    notes: Deny-list of binaries (e.g. `sudo`, `curl`) the sandboxed process MUST NOT exec.
+  - name: envVarScope
+    type: enum<inherit-all,inherit-allowlist,scrub-all-set-by-config>
+    required: false
+    notes: Environment variable strategy. `inherit-all`=parent env passed through; `inherit-allowlist`=only declared vars passed; `scrub-all-set-by-config`=clean env, populated solely from sandbox config.
+  - name: secretAccessScope
+    type: enum<none,named,all>
+    required: false
+    notes: Secret-store access posture. `none`=no access to host secret stores; `named`=specific named secrets only; `all`=full access (rare, dangerous).
+  - name: auditLogPolicy
+    type: enum<none,structured-jsonl,otel-traced>
+    required: false
+    notes: How sandbox-policy decisions are recorded. `none`=no audit; `structured-jsonl`=append-only JSONL log of policy events; `otel-traced`=OpenTelemetry spans/events.
+  - name: policyEvaluationPoint
+    type: enum<pre-call,continuous,post-call-attestation>
+    required: false
+    notes: When the policy is evaluated. `pre-call`=before the gated action runs (default); `continuous`=enforced kernel-side throughout (e.g. seccomp, eBPF); `post-call-attestation`=action runs, then attested/audited.
+  incomingEdges:
+  - sandboxed_by
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:interaction-pattern
+  name: InteractionPattern
+  origin: universal
+  prefix: interaction-pattern
+  cluster: 4-surfacing-path
+  purpose: a high-level interaction pattern
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: subtype
+    type: enum<multi-agent,single-agent,human-in-the-loop,broadcast,negotiation,delegation,critique,consensus>
+    required: false
+    notes: catalog pass 19 (planner 2026-05-01) — subtype discriminator. Seeded with multi-agent (formerly proposed as standalone MultiAgentPattern NodeKind, demoted per reviewer collapse).
+  incomingEdges: []
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:interaction-primitive
+  name: InteractionPrimitive
+  origin: universal
+  prefix: interaction-primitive
+  cluster: 4-surfacing-path
+  purpose: a concrete primitive (slash-command, @-mention, fork, voice, drag-drop, status-line, share-session, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<slash-command,at-mention,fork,resume,thread,reaction,voice,telemetry,multimodal-input,collaborative,prompt-ui,keybinding,editor-ui,cli,deep-link,cli-subcommand,tui-command,mock-scenario>
+    required: false
+    notes: Primitive kind. Existing surface stub examples use `surface` (slash-command|prompt-ui|keybinding|editor-ui|cli); kind is the canonical taxonomy. When both are present, `kind` wins. `deep-link` (catalog pass 83) covers URL-scheme handlers like `claude-cli://open` and `vscode://anthropic.claude-code/open` — folded in from the demoted DeepLinkHandler NodeKind. `cli-subcommand` (catalog pass 95) covers CLI subcommand verbs exposed under a single bin (e.g. `amux-triggers enrich|evaluate|--help`); reuses the existing `flags` / `argSchema` attribute slots. `tui-command` (catalog pass 97c) covers in-process TUI command primitives (command-palette, prompt-input, model-picker) that have distinct interactive behaviors beyond pure presentation. `mock-scenario` (catalog pass 97c) covers behavioral mock scenarios in @a5c-ai/agent-mux-harness-mock that drive deterministic mock-process / http-mock / websocket-mock fixtures.
+  - name: urlScheme
+    type: string
+    required: false
+    notes: For kind=deep-link — URI scheme prefix (e.g. `claude-cli://`, `vscode://anthropic.claude-code/`).
+  - name: pathPattern
+    type: string
+    required: false
+    notes: For kind=deep-link — accepted URL path (e.g. `open`).
+  - name: urlParams
+    type: list<string>
+    required: false
+    notes: For kind=deep-link — accepted query parameters (e.g. `q`, `cwd`, `repo`).
+  - name: registrationLocation
+    type: map<string,string>
+    required: false
+    notes: For kind=deep-link — per-platform handler-registration path (macOS / linux / windows / all).
+  - name: disableSetting
+    type: string
+    required: false
+    notes: For kind=deep-link — settings.json key that opts out of registration (e.g. `disableDeepLinkRegistration`).
+  - name: requiresVersionRange
+    type: string
+    required: false
+    notes: Minimum agent version required for this primitive (e.g. `>=2.1.91`).
+  - name: surface
+    type: enum<slash-command,prompt-ui,keybinding,editor-ui,cli,voice,status-line,multimodal-input,collaborative>
+    required: false
+    notes: |
+      Concrete UI surface where the primitive is perceived/rendered to the user
+      (NOT how it's invoked — that's `supports_interaction_primitive.mechanism`).
+      Examples: a TodoWrite primitive renders as `editor-ui` (the rendered todo
+      list); a slash-command renders as `slash-command`; an Ask-User-Question
+      renders as `prompt-ui` (the question shown to the user).
+  - name: category
+    type: ref<InteractionPrimitiveCategory>
+    required: false
+    notes: Editorial grouping. The 12-category taxonomy (approval, collaborative, configuration, content-input, context, control, human-in-loop, lifecycle, multimodal, navigation, telemetry, voice) is recorded as `InteractionPrimitiveCategory` enum-nodes; bind via this attribute.
+  - name: keyboardShortcut
+    type: string
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Default keyboard shortcut, OS-conditional notation allowed (e.g. `Cmd+K / Ctrl+K`). Absent = no default keybinding.
+  - name: availableInModes
+    type: list<enum<chat,plan,composer,edit>>
+    required: false
+    notes: Subset of UI modes where the primitive is reachable. Empty/absent = available in all modes.
+  - name: requiresPermission
+    type: bool
+    required: false
+    notes: Whether invoking the primitive triggers a permission prompt or capability gate (e.g. mic access for voice, screen-share for follow-agent).
+  - name: parentBin
+    type: string
+    required: false
+    notes: For kind=cli-subcommand — the parent CLI bin the verb is invoked under (e.g. `amux-triggers`).
+  - name: subcommandVerb
+    type: string
+    required: false
+    notes: For kind=cli-subcommand — the verb literal (e.g. `enrich`, `evaluate`, `help`).
+  - name: flags
+    type: list<string>
+    required: false
+    notes: |
+      For kind=cli-subcommand — flag entries as `<flag>:<arity>:<purpose>` (e.g.
+      `--backend:1:select trigger backend`, `--include-diff:0:flip include-diff toggle`,
+      `--output:1:write JSON to file`).
+  - name: subcommandExitCodes
+    type: list<string>
+    required: false
+    notes: For kind=cli-subcommand — `<code>:<symbol>:<meaning>` triples specific to this subcommand.
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - supported_by_agent_ui
+  - exposes_subcommand
+  outgoingEdges:
+  - requires_capability
+  - in_category
+  invariants: []
+  examples: []
+- id: node:orchestration-primitive
+  name: OrchestrationPrimitive
+  origin: universal
+  prefix: orch-primitive
+  cluster: 4-surfacing-path
+  purpose: an orchestration-level control-plane action or pattern (dispatch, handoff, replay, reconcile, poll, retry, approval gates, budget controls, workspace lifecycle) that realizes layer:13-orchestration
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: orchestrationKind
+    type: enum<dispatch,reconciliation,polling,retry,workspace-lifecycle,session-lifecycle,task-lifecycle,approval-gate,budget-control,workflow-loading,multi-agent-coordination,progress-tracking,cost-tracking,audit,health-check,dependency-resolution,priority-queue,rollback,notification>
+    required: false
+  - name: trigger
+    type: enum<periodic,event-driven,manual,on-state-change,on-failure>
+    required: false
+  incomingEdges:
+  - supports_orchestration_primitive
+  - orch_triggered_by
+  outgoingEdges:
+  - orch_applies_to
+  - orch_requires_skill_area
+  - orch_triggers
+  - orch_implements_workflow
+  - orchestration_primitive_supported_by
+  - realizes
+  invariants: []
+  examples: []
+- id: node:interaction-primitive-category
+  name: InteractionPrimitiveCategory
+  origin: universal
+  prefix: interaction-primitive-category
+  cluster: 4-surfacing-path
+  purpose: |
+    editorial grouping for InteractionPrimitives across 12 values:
+    `control` — issue commands/transitions (slash-clear, command-palette);
+    `navigation` — move between views/sessions (model-picker, session-list);
+    `context` — add/manage conversation context (paste-image);
+    `approval` — accept/reject an agent-proposed action (tool-approval-prompt);
+    `voice` — voice I/O;
+    `telemetry` — observability/metrics (transcript-export);
+    `multimodal` — non-text I/O;
+    `collaborative` — multi-user/sharing;
+    `configuration` — change agent settings (slash-model, slash-mode);
+    `content-input` — primary content authoring (prompt-input, file-attachment);
+    `human-in-loop` — agent asks user a question (ask-user-question, plan-review);
+    `lifecycle` — session/run lifecycle (resume-session, fork-session).
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: value
+    type: enum<approval,collaborative,configuration,content-input,context,control,human-in-loop,lifecycle,multimodal,navigation,telemetry,voice>
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - in_category
+  outgoingEdges: []
+  isolatedAllowed: true
+  invariants: []
+  examples: []
+- id: node:presentation
+  name: Presentation
+  origin: universal
+  prefix: presentation
+  cluster: 4-surfacing-path
+  purpose: a concrete app shell (TUI, IDE, web, mobile, CI)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<tui,cli,ide-extension,web,mobile,tv,watch,ci,desktop,headless>
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: renderingTechnology
+    type: enum<vt100,vte,terminal-emulator,electron,webview,native-cocoa,native-win32,flutter,react-native,next-js,jetbrains-platform,vs-code-extension>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Concrete rendering substrate. `vt100`/`vte`/`terminal-emulator`=text shell variants; `electron`=Chromium+Node desktop shell; `webview`=embedded browser view; `native-cocoa`/`native-win32`=OS-native UI toolkits; `flutter`/`react-native`=cross-platform UI; `next-js`=server-rendered web; `jetbrains-platform`=IntelliJ Platform plugin host; `vs-code-extension`=VS Code extension API host.
+  - name: themeSupport
+    type: enum<none,light-dark,full-customizable>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Theme support. `none`=fixed appearance; `light-dark`=two-mode toggle (often follows OS); `full-customizable`=user/extension-supplied themes.
+  - name: accessibilitySupport
+    type: enum<none,basic,wcag-aa,wcag-aaa>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: Accessibility posture. `none`=no a11y affordances; `basic`=screen-reader friendly text output; `wcag-aa`/`wcag-aaa`=conforms to the WCAG level claimed by vendor.
+  - name: offlineMode
+    type: enum<no,partial,full>
+    required: false
+    notes: Whether the surface itself functions without network. `no`=requires network; `partial`=local UI works but core agent calls require network; `full`=fully usable offline (e.g. local model fallback).
+  - name: platforms
+    type: list<enum<darwin,linux,win32,web,ios,android>>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: OS / runtime platforms the presentation ships for.
+  - name: bundleSize
+    type: string
+    required: false
+    notes: Approx install / download footprint as a human-readable string (e.g. `~12 MB`, `~250 MB`). Free-form; replace with a structured numeric type once vendors publish stable figures.
+  - name: updateChannel
+    type: enum<auto,manual,extension-store,build-from-source>
+    required: false
+    evidence: vendor-doc-or-better
+    notes: How the presentation receives updates. `auto`=in-app auto-update; `manual`=user runs npm/brew/installer; `extension-store`=marketplace/extension-host pushes updates; `build-from-source`=user compiles.
+  - name: accessibilityShortcuts
+    type: list<string>
+    required: false
+    notes: List of accessibility-related keyboard shortcuts the surface advertises (e.g. `Ctrl+Alt+H` open help, `Tab` focus rotation).
+  incomingEdges:
+  - bundled_with
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:workflow-definition
+  name: WorkflowDefinition
+  origin: derived
+  originContext: catalog pass 18 / Symphony §5 — repo-versioned WORKFLOW.md contract (distinct from generic ProcessDescriptor)
+  prefix: workflow
+  cluster: 4-surfacing-path
+  purpose: a repo-versioned WORKFLOW.md contract (front-matter tracker binding, polling, workspace-root, agent-executable, hooks, prompt-template body)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: sourcePath
+    type: string
+    required: true
+    notes: Repo-relative path to WORKFLOW.md (or equivalent).
+  - name: frontMatterTrackerKind
+    type: ref<IssueTracker>
+    required: false
+  - name: frontMatterPolling
+    type: map<string
+    any>: null
+    required: false
+    notes: Inline polling block (pollIntervalMs, activeStates, terminalStates).
+  - name: frontMatterWorkspaceRoot
+    type: string
+    required: false
+  - name: frontMatterAgentExecutable
+    type: string
+    required: false
+  - name: frontMatterHooks
+    type: list<string>
+    required: false
+  - name: frontMatterCodexConfig
+    type: map<string
+    any>: null
+    required: false
+  - name: pollIntervalMs
+    type: int
+    required: false
+  - name: activeStates
+    type: list<string>
+    required: false
+  - name: terminalStates
+    type: list<string>
+    required: false
+  - name: workspaceRoot
+    type: string
+    required: false
+  - name: agentExecutable
+    type: string
+    required: false
+  - name: hooks
+    type: list<string>
+    required: false
+  - name: codexConfig
+    type: map<string
+    any>: null
+    required: false
+  - name: promptTemplate
+    type: markdown
+    required: false
+    notes: Body of WORKFLOW.md after front-matter — drives the agent prompt.
+  - name: schemaVersion
+    type: semver
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - targets_tracker
+  - invokes_agent
+  - applies_secret_policy
+  - versioned_via
+  invariants:
+  - id starts with workflow: null
+  examples: []
+- id: node:dashboard
+  name: Dashboard
+  origin: universal
+  originContext: catalog pass 18 / Symphony §13.7.1 — data-bound operator surface (collapsed HumanReadableStatusSurface into Dashboard.format=tui-panel|ansi-text|json-only per reviewer)
+  prefix: dashboard
+  cluster: 4-surfacing-path
+  purpose: an operator-facing data-bound surface (HTML, client app, TUI panel, ANSI text, JSON) sourced from RuntimeSnapshot and/or APIEndpoints
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: format
+    type: enum<server-rendered-html,client-app,tui-panel,ansi-text,json-only>
+    required: true
+    notes: DashboardFormat enum. tui-panel/ansi-text/json-only absorb the collapsed HumanReadableStatusSurface kinds.
+  - name: routePath
+    type: string
+    required: false
+  - name: refreshCadence
+    type: enum<live-sse,poll,on-demand>
+    required: false
+  - name: refreshMode
+    type: enum<poll,on-event,manual>
+    required: false
+    notes: Finer-grained refresh model used by tui-panel/ansi-text variants (absorbed from HumanReadableStatusSurface.refreshMode).
+  - name: dataSource
+    type: enum<orchestrator-state,run-journal,live-sessions,api-endpoint,runtime-snapshot>
+    required: false
+    notes: Coarse data-source descriptor; reads_endpoint / derives_from edges carry the precise binding.
+  - name: loadBearing
+    type: bool
+    required: false
+    notes: false captures the HumanReadableStatusSurface 'neverLoadBearing' invariant (status display, not control surface).
+  - name: readOnly
+    type: bool
+    required: false
+  - name: dataSourceEndpointIds
+    type: list<ref<APIEndpoint>>
+    required: false
+    notes: Inline list of endpoint refs (reads_endpoint edges remain the primary data-plane binding).
+  - name: runtimeSnapshotSourceId
+    type: ref<RuntimeSnapshot>
+    required: false
+    notes: Inline ref to the RuntimeSnapshot used for catalog provenance (derives_from edge remains primary).
+  incomingEdges: []
+  outgoingEdges:
+  - reads_endpoint
+  - derives_from
+  invariants:
+  - id starts with dashboard: null
+  examples: []

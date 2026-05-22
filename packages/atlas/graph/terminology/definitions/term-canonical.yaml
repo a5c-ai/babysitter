@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:term.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:term
+  text: |
+    a named term in the ontology
+  status: canonical
+edges:
+  defines:
+    - term:term

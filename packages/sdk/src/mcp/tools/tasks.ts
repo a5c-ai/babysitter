@@ -1,6 +1,6 @@
 import * as path from "path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { commitEffectResult } from "../../runtime/commitEffectResult";
 import { loadJournal } from "../../storage";
 import { readTaskDefinition, readTaskResult } from "../../storage/tasks";

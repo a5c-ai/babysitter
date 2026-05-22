@@ -10,6 +10,14 @@ expertise:
   - Performance testing for APIs
   - Schema validation
   - Mock server design
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer, role:backend-engineer]
+  skillAreas: [skill-area:api-contract-testing, skill-area:integration-testing]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
+
 ---
 
 # API Testing Expert Agent

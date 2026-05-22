@@ -17,6 +17,12 @@
  * - Electron Notification: https://www.electronjs.org/docs/latest/api/notification
  * - Windows Toast Notifications: https://docs.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/toast-notifications
  * - macOS User Notifications: https://developer.apple.com/documentation/usernotifications
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:desktop-development]
+ *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+ *   roles: [role:desktop-developer, role:fullstack-engineer]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -40,7 +46,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...requirements.artifacts);
 
   // Phase 2: Core Notification Module
-  let coreModule = await ctx.task(implementCoreNotificationTask, { projectName, framework, notificationTypes, outputDir });
+  const coreModule = await ctx.task(implementCoreNotificationTask, { projectName, framework, notificationTypes, outputDir });
   artifacts.push(...coreModule.artifacts);
 
   // Phase 3: Platform-specific implementations
@@ -56,34 +62,27 @@ export async function process(inputs, ctx) {
     actionNotifications = await ctx.task(implementActionNotificationsTask, { projectName, framework, targetPlatforms, outputDir });
     artifacts.push(...actionNotifications.artifacts);
   }
+
   // Phase 5: Progress Notifications
   let progressNotifications = null;
   if (notificationTypes.includes('progress')) {
     progressNotifications = await ctx.task(implementProgressNotificationsTask, { projectName, framework, targetPlatforms, outputDir });
     artifacts.push(...progressNotifications.artifacts);
   }
+
   // Phase 6: Scheduled Notifications
   let scheduledNotifications = null;
   if (notificationTypes.includes('scheduled')) {
     scheduledNotifications = await ctx.task(implementScheduledNotificationsTask, { projectName, framework, targetPlatforms, outputDir });
     artifacts.push(...scheduledNotifications.artifacts);
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      coreModule = await ctx.task(implementCoreNotificationTask, { ...{ projectName, framework, notificationTypes, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Notification types implemented: ${notificationTypes.join(', ')}. Platforms: ${targetPlatforms.join(', ')}. Review implementation?`,
     title: 'Notification Implementation Review',
-    context: { runId: ctx.runId, notificationTypes, targetPlatforms },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, notificationTypes, targetPlatforms }
+  });
+
   // Phase 7: Permission Handling
   const permissions = await ctx.task(implementNotificationPermissionsTask, { projectName, framework, targetPlatforms, outputDir });
   artifacts.push(...permissions.artifacts);

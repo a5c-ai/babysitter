@@ -9,6 +9,11 @@ expertise:
   - Capability building
   - Progress tracking
   - Sustainability assurance
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:change-management-leadership, skill-area:strategic-planning, skill-area:organizational-design]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:strategic-planner, role:hr-manager]
 ---
 
 # OpEx Program Manager

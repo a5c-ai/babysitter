@@ -1,0 +1,44 @@
+nodeKind: ToolServer
+id: tool-server:github-issues-mcp
+attributes:
+  displayName: "GitHub Issues MCP"
+  description: "MCP server for GitHub issue management in enterprise contexts. Enables AI agents to create, list, update, and comment on GitHub issues. Supports stdio transport."
+  protocol: mcp
+  category: version-control
+  repoUrl: https://github.com/github/github-mcp-server
+  maintainer: GitHub
+  mcpTransports:
+    - mcp-transport:stdio
+  tools:
+    - tool-descriptor:github.create-issue
+    - tool-descriptor:github.create-issue
+    - tool-descriptor:github.list-issues
+    - tool-descriptor:github.get-issue
+    - tool-descriptor:github.update-issue
+    - tool-descriptor:github.add-issue-comment
+  sourceRef: source-ref:github-mcp-servers
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:github.create-issue
+  - target: tool-descriptor:github.create-issue
+  - target: tool-descriptor:github.list-issues
+  - target: tool-descriptor:github.get-issue
+  - target: tool-descriptor:github.update-issue
+  - target: tool-descriptor:github.add-issue-comment
+  implements:
+    - target: extension-interface:orchestration
+  requires_capability:
+    - target: capability:supports-mcp
+      level: required
+  sourced_from:
+    - target: source-ref:github-mcp-servers
+  integrates_with:
+    - target: issue-tracker:github-issues
+    - target: provider:github
+    - target: vcs-host:github
+  mcp_config_scoped_to:
+    - target: mcp-config-scope:claude-code-enterprise
+  has_connection_state:
+    - target: mcp-connection-state:claude-code-needs-auth-github
+  lib_applies_to_domain:
+    - target: domain:software-engineering

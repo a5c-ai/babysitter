@@ -1,0 +1,44 @@
+nodeKind: FailureClass
+id: failure-class:workflow-config
+attributes:
+  displayName: "workflow-config"
+  scope: workflow-config
+  defaultRecoveryStrategyId: recovery-strategy:skip-tick
+  description: "Misconfigured WORKFLOW.md front-matter or missing required fields."
+  neverCrashesOrchestrator: true
+---
+nodeKind: FailureClass
+id: failure-class:workspace
+attributes:
+  displayName: "workspace"
+  scope: workspace
+  defaultRecoveryStrategyId: recovery-strategy:skip-tick
+  description: "Workspace materialization or cwd resolution failure."
+  neverCrashesOrchestrator: true
+---
+nodeKind: FailureClass
+id: failure-class:agent-session
+attributes:
+  displayName: "agent-session"
+  scope: agent-session
+  defaultRecoveryStrategyId: recovery-strategy:retry-backoff
+  description: "Agent subprocess errors: timeouts, port exit, turn failures."
+  neverCrashesOrchestrator: true
+---
+nodeKind: FailureClass
+id: failure-class:tracker
+attributes:
+  displayName: "tracker"
+  scope: tracker
+  defaultRecoveryStrategyId: recovery-strategy:skip-tick
+  description: "Issue tracker fetch / write failures."
+  neverCrashesOrchestrator: true
+---
+nodeKind: FailureClass
+id: failure-class:observability
+attributes:
+  displayName: "observability"
+  scope: observability
+  defaultRecoveryStrategyId: recovery-strategy:best-effort-log
+  description: "Dashboard / logging / metric pipeline failures; never load-bearing."
+  neverCrashesOrchestrator: true

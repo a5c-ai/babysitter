@@ -1,0 +1,11 @@
+nodeKind: Specialization
+id: specialization:go-microservices
+attributes:
+  displayName: "Go Microservices"
+  parentDomainId: domain:software-engineering
+  description: |
+    Go-based microservice development — gRPC/HTTP services, context
+    propagation, structured logging, and small-binary deploy targets.
+edges:
+  specializes:
+    - domain:software-engineering

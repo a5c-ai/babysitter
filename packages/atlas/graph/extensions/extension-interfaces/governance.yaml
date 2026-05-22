@@ -1,0 +1,21 @@
+nodeKind: ExtensionInterface
+id: extension-interface:governance
+attributes:
+  interfaceVersion: "1.0.0"
+  description: Governance
+  displayName: "Governance"
+  concern: "Policy enforcement on actions, outputs, and code changes."
+  surface: |
+    `evaluate(action) -> {allow, deny, ask}`, plus `auditLog(event)`.
+    Implementations may chain policies (OPA, Cedar, custom).
+  builtInDefault: |
+    Pre-tool-use hook with a static allowlist. Audit log written to
+    `.a5c/audit.log` as JSONL.
+  notableImpls:
+    - agent-governance-impl:babysitter-plugin.governance@current
+    - agent-governance-impl:babysitter-sdk-tool.governance@current
+    - plugin:babysitter-platform-plugin
+    - tool-descriptor:babysitter-sdk-process-api
+    - subagent:code-reviewer
+    - skill:security-review
+edges: {}

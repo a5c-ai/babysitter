@@ -1,0 +1,30 @@
+nodeKind: StateMachine
+id: state-machine:effect
+attributes:
+  governsNodeKindId: "node-kind:Effect"
+  displayName: "Effect"
+  targetNodeKind: Effect
+  description: |
+    Lifecycle for an effect request (orchestrator-mediated side effect such
+    as a breakpoint or sub-task) from request through resolution.
+  states:
+    - id: effect.requested
+      displayName: "Effect / requested"
+      terminal: false
+      description: The 'requested' state of the effect state machine.
+    - id: effect.pending
+      displayName: "Effect / pending"
+      terminal: false
+      description: The 'pending' state of the effect state machine.
+    - id: effect.ok
+      displayName: "Effect / ok"
+      terminal: true
+      description: The 'ok' state of the effect state machine.
+    - id: effect.error
+      displayName: "Effect / error"
+      terminal: true
+      description: The 'error' state of the effect state machine.
+    - id: effect.cancelled
+      displayName: "Effect / cancelled"
+      terminal: true
+      description: The 'cancelled' state of the effect state machine.

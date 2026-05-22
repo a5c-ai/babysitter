@@ -1,0 +1,26 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:fetch.fetch
+attributes:
+  schema: '{}'
+  displayName: "Fetch: Fetch URL"
+  description: |
+    Fetch a URL and return its content, optionally converting HTML to
+    markdown for LLM consumption.
+  inputSchema:
+    type: object
+    required: [url]
+    properties:
+      url: { type: string }
+      max_length: { type: integer }
+      start_index: { type: integer }
+      raw: { type: boolean }
+  outputSchema:
+    type: object
+    properties:
+      content: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:fetch-mcp

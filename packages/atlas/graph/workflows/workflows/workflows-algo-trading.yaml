@@ -1,0 +1,212 @@
+---
+nodeKind: Workflow
+id: workflow:algo-strategy-backtesting
+attributes:
+  displayName: "Algorithmic Strategy Backtesting"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-strategy-iteration"
+  complexity: complex
+  description: |
+    Executes historical backtesting of algorithmic trading strategies —
+    preparing cleaned tick/bar data with survivorship-bias-free universes,
+    running walk-forward optimization across in-sample/out-of-sample
+    windows, performing regime analysis to assess strategy behaviour across
+    bull/bear/sideways markets, and applying overfitting checks including
+    combinatorial cross-validation and deflated Sharpe ratios. Produces
+    backtest performance reports with risk-adjusted metrics (Sharpe,
+    Sortino, max drawdown, Calmar) and statistical significance tests.
+    Excludes live deployment and capital allocation decisions.
+edges:
+  involves_role:
+    - target: role:quantitative-analyst
+    - target: role:research-analyst
+    - target: role:trading-systems-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:algorithmic-trading
+    - target: domain:quantitative-finance
+  triggers_responsibility:
+    - target: responsibility:backtesting-validation
+    - target: responsibility:model-validation
+  performed_by_org_unit:
+    - target: org-unit:quant-research
+    - target: org-unit:trading-desk
+---
+nodeKind: Workflow
+id: workflow:algo-strategy-paper-trading
+attributes:
+  displayName: "Algorithmic Strategy Paper Trading"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "2-to-8-weeks-per-strategy"
+  complexity: complex
+  description: |
+    Validates algorithmic trading strategies through live paper-trading
+    before real capital deployment — connecting strategies to live market
+    data feeds with simulated order execution, monitoring fill assumptions
+    against real order-book depth, tracking slippage deviation from
+    backtest estimates, and comparing paper P&L against backtest
+    expectations with drift thresholds. Produces go/no-go deployment
+    recommendations with statistical confidence intervals on expected live
+    performance. Excludes actual capital allocation and risk limit setting.
+edges:
+  involves_role:
+    - target: role:quantitative-analyst
+    - target: role:trading-systems-engineer
+    - target: role:risk-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:algorithmic-trading
+    - target: domain:trading-operations
+  triggers_responsibility:
+    - target: responsibility:backtesting-validation
+    - target: responsibility:trading-system-reliability
+  performed_by_org_unit:
+    - target: org-unit:quant-research
+    - target: org-unit:trading-desk
+---
+nodeKind: Workflow
+id: workflow:execution-algorithm-optimization
+attributes:
+  displayName: "Execution Algorithm Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: complex
+  description: |
+    Tunes execution algorithms (VWAP, TWAP, Implementation Shortfall) for
+    optimal slippage and fill-rate performance — analyzing historical
+    execution quality against arrival price benchmarks, measuring market
+    impact across different order sizes and volatility regimes, calibrating
+    participation rate limits and urgency parameters, and evaluating dark
+    pool routing versus lit venue allocation. Produces parameter adjustment
+    recommendations and execution cost analysis reports with
+    basis-point-level attribution. Excludes strategy-level alpha signal
+    development.
+edges:
+  involves_role:
+    - target: role:trading-systems-engineer
+    - target: role:quantitative-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:rate-limiting
+  applies_to_domain:
+    - target: domain:algorithmic-trading
+    - target: domain:trading-operations
+    - target: domain:market-data
+  triggers_responsibility:
+    - target: responsibility:trading-system-reliability
+  performed_by_org_unit:
+    - target: org-unit:trading-desk
+---
+nodeKind: Workflow
+id: workflow:hft-latency-profiling
+attributes:
+  displayName: "HFT Latency Profiling"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: complex
+  description: |
+    Performs microsecond-level latency analysis of the full order path in
+    high-frequency trading systems — profiling network hop timings from
+    co-location cage to exchange matching engine, measuring kernel-bypass
+    and FPGA gating delays, analyzing tick-to-trade latency distributions
+    across percentiles, identifying jitter sources in NIC timestamping and
+    serialization, and benchmarking against competitive latency targets.
+    Produces latency heat-maps, bottleneck reports, and hardware/software
+    optimization recommendations. Excludes trading strategy logic and
+    alpha signal research.
+edges:
+  involves_role:
+    - target: role:trading-systems-engineer
+    - target: role:quantitative-analyst
+  requires_skill_area:
+    - target: skill-area:rust-async-runtime
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:algorithmic-trading
+    - target: domain:capital-markets
+  triggers_responsibility:
+    - target: responsibility:trading-system-reliability
+  performed_by_org_unit:
+    - target: org-unit:trading-desk
+    - target: org-unit:quant-research
+---
+nodeKind: Workflow
+id: workflow:market-making-parameter-tuning
+attributes:
+  displayName: "Market-Making Parameter Tuning"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: complex
+  description: |
+    Calibrates market-making strategy parameters for optimal risk-adjusted
+    profitability — adjusting bid-ask spread widths based on realized
+    volatility and inventory costs, tuning inventory position limits and
+    skew functions, optimizing quoting speed and cancel-to-fill ratios,
+    configuring adverse selection filters against toxic order flow, and
+    setting per-symbol and aggregate risk thresholds. Produces parameter
+    configuration updates and performance attribution showing spread
+    capture versus inventory management costs. Excludes new instrument
+    onboarding and exchange connectivity work.
+edges:
+  involves_role:
+    - target: role:quantitative-analyst
+    - target: role:trading-systems-engineer
+    - target: role:risk-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:rate-limiting
+  applies_to_domain:
+    - target: domain:algorithmic-trading
+    - target: domain:capital-markets
+    - target: domain:financial-risk-management
+  triggers_responsibility:
+    - target: responsibility:model-validation
+    - target: responsibility:risk-reporting
+  performed_by_org_unit:
+    - target: org-unit:trading-desk
+    - target: org-unit:quant-research
+---
+nodeKind: Workflow
+id: workflow:momentum-signal-research
+attributes:
+  displayName: "Momentum Signal Research"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-research-sprint"
+  complexity: complex
+  description: |
+    Discovers and validates momentum and mean-reversion signals from
+    tick-level and bar-level market data — constructing candidate signal
+    features from price, volume, and order-book imbalance data, performing
+    single-sort portfolio analysis to assess monotonicity and decay
+    profiles, testing signal orthogonality against known factors, running
+    turnover and transaction cost analysis, and validating out-of-sample
+    predictive power with proper temporal cross-validation. Produces
+    signal research reports with information coefficients, decay curves,
+    and capacity estimates. Excludes portfolio construction and execution
+    algorithm design.
+edges:
+  involves_role:
+    - target: role:quantitative-analyst
+    - target: role:research-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  applies_to_domain:
+    - target: domain:algorithmic-trading
+    - target: domain:quantitative-finance
+    - target: domain:market-data
+  triggers_responsibility:
+    - target: responsibility:research-publication
+    - target: responsibility:backtesting-validation
+  performed_by_org_unit:
+    - target: org-unit:quant-research

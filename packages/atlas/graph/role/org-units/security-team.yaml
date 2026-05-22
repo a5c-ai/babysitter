@@ -1,0 +1,12 @@
+nodeKind: OrgUnit
+id: org-unit:security-team
+attributes:
+  displayName: "Security Team"
+  kind: team
+  description: |
+    Security team — owns AppSec, infrastructure security, and incident response.
+edges:
+  has_member:
+    - target: role:security-engineer
+    - target: role:security-reviewer
+    - target: role:security-scanner-bot

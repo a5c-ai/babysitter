@@ -1,0 +1,30 @@
+---
+nodeKind: Tool
+id: tool:redis-cli
+attributes:
+  languageApplicability: neutral
+  displayName: "redis-cli"
+  homepageUrl: "https://redis.io/docs/latest/develop/tools/cli/"
+  kind: sql-tool
+  description: |
+    Official command-line client for Redis: interactive REPL,
+    scripting, MONITOR, and cluster operations.
+edges:
+  tool_used_by:
+    - target: skill-area:cli-tooling
+---
+nodeKind: Tool
+id: tool:mongosh
+attributes:
+  displayName: "MongoDB Shell (mongosh)"
+  homepageUrl: "https://www.mongodb.com/docs/mongodb-shell/"
+  kind: sql-tool
+  language: language:javascript
+  description: |
+    Modern MongoDB shell — Node.js-based REPL with full driver API,
+    autocomplete, and scripting support.
+edges:
+  belongs_to_language:
+    - language:javascript
+  tool_used_by:
+    - target: skill-area:cli-tooling

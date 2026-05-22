@@ -1,0 +1,37 @@
+name: Atlas Testable Claims
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday at 6am UTC
+  workflow_dispatch: {}
+
+jobs:
+  verify-claims:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --prefer-offline --legacy-peer-deps
+      - run: npm run build -w packages/atlas
+      - run: npm run build -w packages/hooks-mux/core -w packages/hooks-mux/cli
+        continue-on-error: true
+      - name: Stop-hook control claims (vitest)
+        run: npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts --reporter=verbose
+        continue-on-error: true
+      - name: Validate library bridge
+        run: node packages/atlas/scripts/validate-library-bridge.mjs --strict
+      - name: Run testable claims
+        run: node packages/atlas/scripts/run-testable-claims.mjs
+      - name: Find untested claims
+        run: node packages/atlas/scripts/find-untested-claims.mjs
+      - name: Graph quality score
+        run: node packages/atlas/scripts/graph-quality.mjs
+      - name: Validate edges
+        run: node packages/atlas/scripts/validate-edges.mjs --summary
+      - name: Deferred node status
+        run: node packages/atlas/scripts/resolve-deferred-nodes.mjs
+      - name: Canonicalization report
+        run: node packages/atlas/scripts/compact-canonicalized.mjs

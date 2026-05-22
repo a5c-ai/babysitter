@@ -1,0 +1,13 @@
+nodeKind: PermissionMode
+id: permission-mode:claude-code-bypass-permissions
+attributes:
+  displayName: "Claude Code bypass-permissions (--dangerously-skip-permissions)"
+  mode: bypass-permissions
+  isReadOnly: false
+  requiresUserConsent: true
+  enteredVia: cli-flag
+  description: |
+    All permission gates disabled — write/edit/bash tools execute without
+    prompts. Gated by isBypassPermissionsModeAvailable; entered via the
+    --dangerously-skip-permissions CLI flag and visible in session state for
+    audit. Used by trusted automation (CI, dev containers).

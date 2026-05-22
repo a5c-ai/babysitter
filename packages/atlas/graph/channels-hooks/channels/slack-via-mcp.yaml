@@ -1,0 +1,21 @@
+nodeKind: Channel
+id: channel:slack-via-mcp
+attributes:
+  displayName: "Slack channel exposed via MCP"
+  kind: mcp-channel
+  endpoint: "mcp://slack-connector"
+  brokeringPrimitive: |
+    A Slack workspace surfaced to the agent through an MCP server.
+    The MCP server brokers between the agent (which speaks MCP tool
+    calls like slack_send_message / slack_read_channel) and Slack's
+    Web API + Events API. Outbound messages are tool calls; inbound
+    notifications arrive as MCP notifications when the connector
+    supports streaming. The channel is persistent for the duration
+    of the MCP session (i.e., for the chat).
+  persistent: true
+  description: |
+    Mediated Slack access — the agent never holds a Slack token
+    directly, only the MCP server does. Used by chat-style harnesses
+    (Claude.ai web with Slack connector, Codex with the Slack MCP
+    plugin, etc.).
+edges:

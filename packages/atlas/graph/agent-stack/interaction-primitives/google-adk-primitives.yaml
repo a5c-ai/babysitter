@@ -1,0 +1,65 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:google-adk-dev-ui
+attributes:
+  displayName: "Google ADK Development UI"
+  description: |
+    Built-in local development UI for testing and debugging ADK agent
+    interactions. Provides a web-based chat interface for sending messages
+    to agents, inspecting tool calls, viewing session state, and debugging
+    agent-to-agent (A2A) communication flows during development.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:telemetry
+  integrates_with:
+    - target: framework:google-adk
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:google-adk-a2a-dispatch
+attributes:
+  displayName: "Google ADK A2A Agent Dispatch"
+  description: |
+    Agent-to-Agent protocol dispatch primitive in Google ADK. Enables
+    an ADK agent to discover, communicate with, and delegate tasks to
+    other A2A-compatible agents across organizational boundaries.
+    Supports task lifecycle management and SSE-based streaming for
+    inter-agent communication.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:lifecycle
+  integrates_with:
+    - target: framework:google-adk
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:google-adk-sequential-agent
+attributes:
+  displayName: "Google ADK Sequential Agent Composition"
+  description: |
+    Sequential agent composition pattern in Google ADK. Chains multiple
+    sub-agents into a pipeline where each agent's output feeds into the
+    next, enabling multi-step reasoning workflows with clear handoff
+    points between specialized agents.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  integrates_with:
+    - target: framework:google-adk

@@ -11,6 +11,11 @@ metadata:
   specialization: operations
   domain: business
   category: operational-analytics
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:statistical-analysis, skill-area:capacity-planning-ops, skill-area:data-analytics]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:data-analyst, role:business-analyst]
 ---
 
 # Cycle Time Analyzer

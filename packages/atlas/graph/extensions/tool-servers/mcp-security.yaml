@@ -1,0 +1,110 @@
+nodeKind: ToolServer
+id: tool-server:mcp-snyk
+attributes:
+  displayName: Snyk MCP Server
+  description: |
+    MCP server providing access to Snyk security scanning.
+    Enables AI agents to run SAST, SCA, IaC, and container scans,
+    query vulnerability databases, generate SBOMs, and triage findings.
+  protocol: mcp
+  category: security
+  repoUrl: https://github.com/snyk/mcp-server
+  maintainer: Snyk
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:security-reviewer
+      confidence: high
+      evidence: "Dependency and container vulnerability results support security review."
+    - target: role:dependency-updater
+      confidence: high
+      evidence: "Dependency vulnerability data informs update priority and remediation."
+    - target: responsibility:run-security-scans
+      confidence: high
+      evidence: "Snyk is a security scanning surface."
+    - target: workflow:vulnerability-management
+      confidence: high
+      evidence: "Findings, severity, and remediation metadata project vulnerability workflows."
+  integrates_with:
+  - target: tool:snyk
+  lib_applies_to_domain:
+  - target: domain:cybersecurity
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-sonarqube
+attributes:
+  displayName: SonarQube MCP Server
+  description: |
+    MCP server providing access to SonarQube code quality platform.
+    Enables AI agents to query code quality metrics, inspect issues,
+    review security hotspots, and analyze technical debt.
+  protocol: mcp
+  category: security
+  repoUrl: https://github.com/SonarSource/sonar-mcp-server
+  maintainer: SonarSource
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:security-reviewer
+      confidence: medium
+      evidence: "Static analysis findings support security and quality review."
+    - target: responsibility:run-security-scans
+      confidence: high
+      evidence: "SonarQube provides code quality and security scanning results."
+    - target: workflow:vulnerability-management
+      confidence: medium
+      evidence: "Security hotspots and code smells feed remediation workflows."
+  integrates_with:
+  - target: tool:sonarqube
+  lib_applies_to_domain:
+  - target: domain:cybersecurity
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-1password
+attributes:
+  displayName: 1Password MCP Server
+  description: |
+    MCP server providing access to 1Password secret management.
+    Enables AI agents to retrieve secrets, list vaults, and resolve
+    credential references without exposing raw secret values in context.
+  protocol: mcp
+  category: security
+  repoUrl: https://github.com/1Password/mcp-server
+  maintainer: 1Password
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:secrets-manager
+  lib_applies_to_domain:
+  - target: domain:cybersecurity
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-vault
+attributes:
+  displayName: HashiCorp Vault MCP Server
+  description: |
+    MCP server providing access to HashiCorp Vault secret management.
+    Enables AI agents to read secrets, list secret engines, manage
+    policies, and interact with dynamic credential backends.
+  protocol: mcp
+  category: security
+  repoUrl: https://github.com/hashicorp/vault-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:vault
+  - target: stack-part:secrets-manager
+  lib_applies_to_domain:
+  - target: domain:cybersecurity
+  - target: domain:devops

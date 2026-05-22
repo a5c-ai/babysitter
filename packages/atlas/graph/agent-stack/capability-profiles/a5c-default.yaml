@@ -1,0 +1,75 @@
+nodeKind: CapabilityProfile
+id: capability-profile:a5c.default
+attributes:
+  agentVersionId: agent-version:a5c@current
+  displayName: "a5c (default)"
+  default: true
+  description: |
+    Default capability profile for the a5c agent (the babysitter monorepo).
+    a5c is a harness-agnostic orchestration substrate: it does not host its
+    own model loop directly, instead delegating model interaction to a
+    bridged backend harness (Claude Code, Codex, Gemini, OpenCode, etc.) via
+    agent-mux. Its native capabilities are orchestration primitives —
+    multi-harness mediation, PID-scoped session binding, journal-based
+    effect/breakpoint mediation, and skill/plugin/process composition —
+    rather than direct model-loop capabilities. Capabilities the bridged
+    backend exposes (streaming, tool-use, thinking) are advertised through
+    the AgentCoreImpl/AgentRuntimeImpl `supports` edges, not duplicated here.
+
+    Source citations:
+      - packages/sdk/src/runtime/replay/effectIndex.ts (journal event types
+        EFFECT_REQUESTED / EFFECT_RESOLVED / EFFECT_PROGRESS / EFFECT_CANCELLED
+        / RUN_CREATED / RUN_COMPLETED / RUN_FAILED / COST_TRACKED).
+      - packages/sdk/src/cli/main/usage.ts (--interactive / --non-interactive
+        / yolo CLI flags).
+      - packages/sdk/src/cli/commands/instructions.ts (PID-scoped AGENT_SESSION_ID
+        marker semantics).
+      - packages/agent-mux (multi-harness mediation runtime).
+  overrides:
+    capability:supports-tool-use:
+      enabled: true
+      level: full
+      note: |
+        Delegated through agent-mux to whichever harness the run is bound to.
+    capability:supports-mcp:
+      enabled: true
+      level: full
+      note: |
+        a5c platform exposes stdio, streamable-http, and http-sse MCP
+        transports (see agent-runtime-impl:a5c.runtime@current.connects).
+    capability:streaming:
+      enabled: true
+      level: full
+      note: |
+        a5c-unified-transport normalizes streaming across bridged harnesses.
+    capability:supports-plugins:
+      enabled: true
+      level: full
+      note: |
+        Native a5c-plugin descriptor; see agent-platform-impl:a5c.platform@current.
+    capability:supports-custom-subagents:
+      enabled: true
+      level: full
+      note: |
+        Subagents declared via defineTask() in JS/TS or claude-code-md format.
+    capability:can-resume:
+      enabled: true
+      level: full
+      note: |
+        Sessions persist via AGENT_SESSION_ID PID-scoped marker plus harness
+        env file; orchestrator re-binds on resume.
+    capability:can-fork:
+      enabled: true
+      level: full
+      note: |
+        Subagent dispatch creates ephemeral child sessions
+        (subagentChildSessionPolicy=ephemeral-child-session).
+    capability:requires-tool-approval:
+      enabled: true
+      level: full
+      note: |
+        Default mode (--interactive) gates tool execution behind operator
+        approval / breakpoint mediation. yolo / --non-interactive bypasses.
+edges:
+  applies_to_version:
+    - agent-version:a5c@current

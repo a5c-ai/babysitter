@@ -2,6 +2,12 @@
 name: payer-contract-analysis
 description: Analyze payer contracts for reimbursement rates, terms, and value-based incentives to optimize revenue and support contract negotiations
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
+graph:
+  domains: [domain:healthcare]
+  specializations: [specialization:clinical-informatics]
+  skillAreas: [skill-area:financial-modeling, skill-area:data-analysis, skill-area:compliance-automation]
+  workflows: [workflow:experiment-design]
+  roles: [role:financial-analyst, role:legal-advisor]
 ---
 
 # Payer Contract Analysis

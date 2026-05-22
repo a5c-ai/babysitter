@@ -1,0 +1,97 @@
+---
+nodeKind: Workflow
+id: workflow:ad-tech-stack-setup
+attributes:
+  displayName: "Ad Tech Stack Setup"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Establishes the advertising technology foundation — implementing tracking
+    pixels across web properties, configuring server-side conversion APIs,
+    setting up cross-platform attribution, validating data flow from ad
+    platforms through to CRM, and establishing conversion event taxonomies.
+    Produces a verified tech stack with documented data flows and testing
+    procedures. Excludes ongoing campaign management and media buying.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:advertising-channel-evaluation
+attributes:
+  displayName: "Advertising Channel Evaluation"
+  workflowKind: governance
+  triggerType: on-demand
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Evaluates new advertising channels and platforms for potential ROI —
+    assessing audience reach and overlap with existing channels, estimating
+    cost-per-acquisition based on benchmarks, reviewing platform targeting
+    capabilities, analyzing competitive adoption signals, and designing
+    pilot test frameworks. Produces go/no-go recommendations with pilot
+    budgets and success criteria. Excludes channel activation and creative
+    adaptation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:strategy
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:strategy-team
+---
+nodeKind: Workflow
+id: workflow:ad-fraud-detection-setup
+attributes:
+  displayName: "Ad Fraud Detection Setup"
+  workflowKind: security
+  triggerType: on-demand
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Establishes ad fraud prevention and invalid traffic detection
+    capabilities — evaluating and integrating verification vendors,
+    configuring bot detection rules, setting up invalid traffic filtering
+    at the pre-bid and post-bid stages, establishing anomaly detection
+    thresholds for click and impression patterns, and defining escalation
+    procedures for suspected fraud. Produces fraud detection rulebook and
+    monitoring dashboards. Excludes ongoing media optimization.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:analytics-team

@@ -1,0 +1,140 @@
+---
+nodeKind: Tool
+id: tool:zendesk
+attributes:
+  displayName: "Zendesk"
+  homepageUrl: "https://www.zendesk.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Customer service platform for managing support tickets, live chat,
+    and help center content. Provides agent workspaces, automation rules,
+    macros, and analytics for customer support operations.
+edges:
+  tool_used_by:
+    - target: skill-area:customer-support
+  used_for:
+    - skill-area:customer-support
+  alternative_to:
+    - target: tool:freshdesk
+      comparison: "Customer support platforms"
+    - target: tool:hubspot
+      comparison: "CRM and support platforms"
+    - target: tool:salesforce
+      comparison: "CRM and support platforms"
+---
+nodeKind: Tool
+id: tool:freshdesk
+attributes:
+  displayName: "Freshdesk"
+  homepageUrl: "https://www.freshworks.com/freshdesk/"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Cloud-based customer support helpdesk by Freshworks. Provides
+    ticketing, omnichannel inbox, automation, SLA management, and
+    a self-service knowledge base for support teams.
+edges:
+  supports_work:
+    - target: role:support-engineer
+      confidence: high
+      evidence: "Ora surfaced Freshdesk for customer support ticket triage and knowledge-base workflows."
+    - target: responsibility:triage-incoming-issues
+      confidence: high
+      evidence: "Helpdesk tickets and SLA context support issue intake and routing."
+  tool_used_by:
+    - target: skill-area:customer-support
+  used_for:
+    - skill-area:customer-support
+  alternative_to:
+    - target: tool:zendesk
+      comparison: "Customer support platforms"
+    - target: tool:hubspot
+      comparison: "CRM and support platforms"
+    - target: tool:salesforce
+      comparison: "CRM and support platforms"
+---
+nodeKind: Tool
+id: tool:hubspot
+attributes:
+  displayName: "HubSpot"
+  homepageUrl: "https://www.hubspot.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    CRM platform with integrated marketing, sales, and service hubs.
+    Manages contacts, deals, pipelines, email sequences, and customer
+    support tickets across the full customer lifecycle.
+edges:
+  supports_work:
+    - target: role:marketing-manager
+      confidence: high
+      evidence: "Ora surfaced HubSpot for marketing automation and campaign analytics workflows."
+    - target: role:account-executive
+      confidence: medium
+      evidence: "CRM contact and deal state supports revenue operations workflows."
+  tool_used_by:
+    - target: skill-area:customer-support
+    - target: skill-area:sales-operations
+  used_for:
+    - skill-area:customer-support
+  alternative_to:
+    - target: tool:salesforce
+      comparison: "CRM platforms"
+    - target: tool:zendesk
+      comparison: "CRM and support platforms"
+    - target: tool:freshdesk
+      comparison: "CRM and support platforms"
+---
+nodeKind: Tool
+id: tool:salesforce
+attributes:
+  displayName: "Salesforce"
+  homepageUrl: "https://www.salesforce.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Enterprise CRM and cloud platform for sales, service, marketing,
+    and analytics. Provides customizable objects, automation via Flow,
+    and an extensive AppExchange ecosystem for B2B and B2C workflows.
+edges:
+  supports_work:
+    - target: role:account-executive
+      confidence: high
+      evidence: "Ora surfaced Salesforce as a top CRM match for sales account management and revenue operations."
+    - target: role:sales-engineer
+      confidence: medium
+      evidence: "CRM opportunity and account context support technical sales workflows."
+  tool_used_by:
+    - target: skill-area:sales-operations
+    - target: skill-area:customer-support
+  used_for:
+    - skill-area:customer-support
+  alternative_to:
+    - target: tool:hubspot
+      comparison: "CRM platforms"
+    - target: tool:zendesk
+      comparison: "CRM and support platforms"
+    - target: tool:freshdesk
+      comparison: "CRM and support platforms"
+---
+nodeKind: Tool
+id: tool:servicenow
+attributes:
+  displayName: "ServiceNow"
+  homepageUrl: "https://www.servicenow.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Enterprise IT service management (ITSM) and workflow automation
+    platform. Provides incident, change, and problem management alongside
+    HR service delivery, security operations, and custom app development.
+edges:
+  tool_used_by:
+    - target: skill-area:itsm
+    - target: skill-area:operations-automation
+  used_for:
+    - skill-area:customer-support
+  alternative_to:
+    - target: tool:intercom
+      comparison: "Customer support — ServiceNow is enterprise ITSM; Intercom is messaging-first"

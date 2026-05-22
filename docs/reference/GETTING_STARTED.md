@@ -36,7 +36,6 @@ Run the verification script to check all dependencies at once:
 
 ```bash
 # From your project directory containing the plugin
-bash plugins/babysitter/scripts/verify-install.sh
 ```
 
 **Expected output when all checks pass:**
@@ -61,8 +60,6 @@ Babysitter Plugin Installation Verification
 === Summary ===
 All checks passed! The babysitter plugin is ready to use.
 ```
-
-> **Tip:** Run `bash plugins/babysitter/scripts/verify-install.sh --json` for machine-readable output.
 
 ### Install Missing Dependencies
 
@@ -92,7 +89,7 @@ Choose one of three installation methods:
 In Claude Code, run:
 
 ```
-/plugin marketplace add a5c-ai/babysitter
+/plugin marketplace add a5c-ai/babysitter-claude
 /plugin install babysitter@a5c.ai
 ```
 
@@ -100,23 +97,35 @@ After installation:
 1. Restart Claude Code if prompted
 2. Verify with `/skills` - look for "babysitter" in the list
 
-### Option B: Manual Installation (Global)
+### Option B: Manual Installation from Source (Global)
 
 ```bash
-# Clone to Claude Code plugins directory
-git clone https://github.com/a5c-ai/babysitter.git ~/.claude/plugins/babysitter
+# Clone the source repo
+git clone https://github.com/a5c-ai/babysitter.git ~/src/babysitter
+cd ~/src/babysitter
+
+# Generate the harness-specific plugin bundles from plugins/babysitter-unified
+npm run generate:plugins
+
+# Install the generated Claude Code bundle
+mkdir -p ~/.claude/plugins/babysitter
+cp -r artifacts/generated-plugins/claude-code/* ~/.claude/plugins/babysitter/
 ```
 
-### Option C: Project-Local Installation
+### Option C: Manual Installation from Source (Project-Local)
 
 For project-specific plugin usage:
 
 ```bash
+# Generate the plugin bundle from the repo root first
+npm run generate:plugins
+
 # Create plugin directory in your project
 mkdir -p .claude/plugins
 
-# Clone the plugin
-git clone https://github.com/a5c-ai/babysitter.git .claude/plugins/babysitter
+# Copy the generated Claude Code bundle into the project-local plugins dir
+mkdir -p .claude/plugins/babysitter
+cp -r artifacts/generated-plugins/claude-code/* .claude/plugins/babysitter/
 ```
 
 ### Verify Installation
@@ -235,7 +244,7 @@ You can specify which methodology to use:
 /babysitter:call use Spec-Kit for implementing the requirements in spec.md
 ```
 
-See [PROCESS_SELECTION.md](./PROCESS_SELECTION.md) for help choosing the right methodology.
+See the [Process Selection Guide](https://github.com/a5c-ai/babysitter/blob/main/docs/reference/PROCESS_SELECTION.md) for help choosing the right methodology.
 
 ---
 
@@ -246,7 +255,7 @@ See [PROCESS_SELECTION.md](./PROCESS_SELECTION.md) for help choosing the right m
 Babysitter creates a run directory with all artifacts:
 
 ```
-.a5c/runs/<runId>/
+~/.a5c/runs/<runId>/   # default; use <repo>/.a5c/runs/<runId>/ when BABYSITTER_RUNS_SCOPE=repo
 ├── run.json           # Run metadata
 ├── inputs.json        # Your inputs
 ├── journal.jsonl      # Event log (append-only)
@@ -292,8 +301,9 @@ Babysitter uses quality gates to ensure work meets standards:
 
 **Solution:** Verify plugin installation:
 1. Check plugin directory exists: `ls ~/.claude/plugins/babysitter/`
-2. Restart Claude Code
-3. Run `/skills` again
+2. If you installed from source, re-run `npm run generate:plugins` before copying the bundle so the Claude Code files are generated from `plugins/babysitter-unified`
+3. Restart Claude Code
+4. Run `/skills` again
 
 #### Issue: "jq: command not found" during execution
 
@@ -330,8 +340,7 @@ choco install jq
 **Solution:** Make hook scripts executable:
 
 ```bash
-chmod +x plugins/babysitter/hooks/*.sh
-chmod +x plugins/babysitter/scripts/*.sh
+chmod +x plugins/babysitter-unified/hooks/*.sh
 ```
 
 ### Health Check
@@ -339,7 +348,6 @@ chmod +x plugins/babysitter/scripts/*.sh
 Run the health check script to diagnose issues:
 
 ```bash
-bash plugins/babysitter/scripts/health-check.sh --verbose
 ```
 
 **Health status meanings:**
@@ -358,7 +366,7 @@ Now that you understand how to use Babysitter, explore these resources:
 
 ### Choose Your Methodology
 
-See [PROCESS_SELECTION.md](./PROCESS_SELECTION.md) for a guide on choosing the right methodology:
+See the [Process Selection Guide](https://github.com/a5c-ai/babysitter/blob/main/docs/reference/PROCESS_SELECTION.md) for a guide on choosing the right methodology:
 
 | Methodology | Best For |
 |-------------|----------|
@@ -386,14 +394,11 @@ See [PROCESS_SELECTION.md](./PROCESS_SELECTION.md) for a guide on choosing the r
 
 ### Advanced Topics
 
-- **[Plugin Specification](./BABYSITTER_PLUGIN_SPECIFICATION.md)** - Complete architecture documentation
-- **[Advanced Patterns](./skills/babysit/reference/ADVANCED_PATTERNS.md)** - Agent tasks, parallel execution
-- **[Troubleshooting Guide](./TROUBLESHOOTING.md)** - Comprehensive problem-solving
+- **[Unified Plugin Source](https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-unified)** - Maintained plugin source tree
+- **[Advanced Patterns](https://github.com/a5c-ai/babysitter/blob/main/docs/reference/ADVANCED_PATTERNS.md)** - Agent tasks, parallel execution
+- **[Troubleshooting Guide](https://github.com/a5c-ai/babysitter/blob/main/docs/reference/TROUBLESHOOTING.md)** - Comprehensive problem-solving
 
 ### Utility Scripts
-
-- **[verify-install.sh](./scripts/verify-install.sh)** - Validate installation
-- **[health-check.sh](./scripts/health-check.sh)** - Runtime diagnostics
 
 ---
 

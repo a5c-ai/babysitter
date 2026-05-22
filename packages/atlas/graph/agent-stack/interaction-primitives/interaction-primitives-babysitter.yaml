@@ -1,0 +1,198 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-call
+attributes:
+  displayName: "/babysitter:call"
+  description: "Orchestrate a babysitter run. Use to start babysitting a complex workflow."
+  surface: slash-command
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat, plan]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:lifecycle
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-plan
+attributes:
+  displayName: "/babysitter:plan"
+  description: "Plan a babysitter run without actually executing it. Builds the best process design only."
+  surface: slash-command
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat, plan]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:lifecycle
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-resume
+attributes:
+  displayName: "/babysitter:resume"
+  description: "Resume orchestrating a babysitter run. Discovers incomplete runs if no run-id given."
+  surface: slash-command
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:lifecycle
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-yolo
+attributes:
+  displayName: "/babysitter:yolo"
+  description: "Run babysitter non-interactively — no user interaction or breakpoints."
+  surface: slash-command
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:configuration
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-forever
+attributes:
+  displayName: "/babysitter:forever"
+  description: "Start a never-ending babysitter run via an infinite ctx.sleep loop."
+  surface: slash-command
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-doctor
+attributes:
+  displayName: "/babysitter:doctor"
+  description: "Diagnose babysitter run health — journal, state cache, effects, locks, sessions, logs, disk."
+  surface: slash-command
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat, plan]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:telemetry
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-cleanup
+attributes:
+  displayName: "/babysitter:cleanup"
+  description: "Aggregate insights and clean up .a5c/runs and .a5c/processes. Supports --dry-run and --keep-days N."
+  surface: slash-command
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-retrospect
+attributes:
+  displayName: "/babysitter:retrospect"
+  description: "Analyze a run's results and surface process improvement suggestions."
+  surface: slash-command
+  availableInModes: [chat, plan]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-observe
+attributes:
+  displayName: "/babysitter:observe"
+  description: "Launch the babysitter observer dashboard (real-time UI watching .a5c/runs/)."
+  surface: slash-command
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:telemetry
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-help
+attributes:
+  displayName: "/babysitter:help"
+  description: "Help and documentation for babysitter commands, processes, skills, agents, methodologies."
+  surface: slash-command
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-plugins
+attributes:
+  displayName: "/babysitter:plugins"
+  description: "Manage babysitter plugins (install, update, uninstall, marketplaces, create new)."
+  surface: slash-command
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-project-install
+attributes:
+  displayName: "/babysitter:project-install"
+  description: "Onboard a project to babysitter — research, interview, profile, install tools, optional CI/CD."
+  surface: slash-command
+  availableInModes: [chat, plan]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-user-install
+attributes:
+  displayName: "/babysitter:user-install"
+  description: "Onboard a user to babysitter — interview, profile, configure tools."
+  surface: slash-command
+  availableInModes: [chat, plan]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-assimilate
+attributes:
+  displayName: "/babysitter:assimilate"
+  description: "Assimilate an external methodology/harness/spec into babysitter processes (skills + agents)."
+  surface: slash-command
+  availableInModes: [chat, plan]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:babysitter-contrib
+attributes:
+  displayName: "/babysitter:contrib"
+  description: "Submit feedback or contribute to the babysitter project."
+  surface: slash-command
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction

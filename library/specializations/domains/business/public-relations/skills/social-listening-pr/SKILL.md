@@ -17,6 +17,10 @@ metadata:
     - Sprinklr API
     - Talkwalker API
     - Native social APIs
+graph:
+  domains: [domain:public-relations]
+  skillAreas: [skill-area:digital-marketing-analytics, skill-area:community-management, skill-area:brand-positioning]
+  roles: [role:marketing-strategist, role:content-strategist, role:data-analyst]
 ---
 
 # Social Listening Skill

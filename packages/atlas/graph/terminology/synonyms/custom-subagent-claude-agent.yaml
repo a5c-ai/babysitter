@@ -1,0 +1,13 @@
+nodeKind: Synonym
+id: synonym:custom-subagent-claude-agent
+attributes:
+  termAId: term:subagent
+  termBId: term:anthropic-skill
+  direction: bidirectional
+  note: |
+    In Claude Code, custom subagents are defined via .claude/agents/<name>.md files; the term "claude agent file" refers to the same concept as a custom Subagent definition.
+edges:
+  synonym_a:
+    - term:subagent
+  synonym_b:
+    - term:anthropic-skill

@@ -1,0 +1,93 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Run E2E tests
+        run: |
+          npx vitest run --config vitest.e2e.config.ts
+        env:
+          NODE_ENV: test
+
+  docker-compose-mock:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          # Subprocess adapters with working harness-mock scenarios
+          - mock-e2e-claude
+          - mock-e2e-codex
+          - mock-e2e-cursor
+          - mock-e2e-gemini
+          - mock-e2e-openclaw
+          - mock-e2e-hermes
+          - mock-e2e-pi
+          - mock-e2e-omp
+          # TODO: re-enable once mock scenarios exist:
+          # - mock-e2e-opencode (needs opencode:basic-text scenario)
+          # - mock-e2e-copilot (needs copilot:basic-text scenario)
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build mock E2E image (${{ matrix.service }})
+        run: docker compose -f docker/e2e/docker-compose.yml build ${{ matrix.service }}
+      - name: Run mock E2E (${{ matrix.service }})
+        run: docker compose -f docker/e2e/docker-compose.yml up --exit-code-from ${{ matrix.service }} ${{ matrix.service }}
+
+  docker-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Run docker-gated E2E
+        env:
+          DOCKER_E2E: '1'
+        run: npx vitest run packages/core/tests/docker-e2e.test.ts
+
+  k8s-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Start kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: amux-e2e
+      - name: Run k8s-gated E2E
+        env:
+          K8S_E2E: '1'
+        run: npx vitest run packages/core/tests/k8s-e2e.test.ts

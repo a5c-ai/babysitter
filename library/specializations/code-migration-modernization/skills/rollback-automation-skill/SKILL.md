@@ -2,6 +2,13 @@
 name: rollback-automation-skill
 description: Automate rollback procedures with state snapshots, rollback scripts, and verification automation
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:deployment-infrastructure-management, skill-area:gitops]
+  roles: [role:devops-engineer, role:sre]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Rollback Automation Skill

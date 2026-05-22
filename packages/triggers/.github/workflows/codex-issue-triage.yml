@@ -1,0 +1,37 @@
+# Codex Issue Triage — vanilla NI mode
+#
+# Triages and labels newly opened issues using Codex in plain
+# non-interactive mode (no babysitter plugin, no bridges).
+
+name: Codex Issue Triage
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: a5c-ai/babysitter/packages/triggers@main
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: non-interactive
+          prompt: |
+            Read the issue title and body. Classify it as one of:
+            bug, feature, question, documentation, infrastructure.
+            Add the appropriate label using the GitHub CLI.
+          max-turns: '10'
+          trigger-query: |
+            event: issues
+            action: opened
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AMUX_API_BASE: ${{ vars.AZURE_OPENAI_ENDPOINT }}

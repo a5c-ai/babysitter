@@ -17,6 +17,12 @@
  * - Vulkan Compute Shaders: https://vulkan-tutorial.com/Compute_Shader
  * - DirectCompute: https://learn.microsoft.com/en-us/windows/win32/direct3d11/direct3d-11-advanced-stages-compute-shader
  * - Metal Compute: https://developer.apple.com/metal/
+ * @graph
+ *   domains: [domain:scientific-computing]
+ *   specializations: [specialization:gpu-programming]
+ *   skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders, skill-area:shader-programming]
+ *   roles: [role:computational-scientist, role:ml-engineer]
+ *   workflows: [workflow:performance-profiling-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

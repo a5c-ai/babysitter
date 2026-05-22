@@ -5,6 +5,13 @@
  * @outputs { success: boolean, phoneticAnalysis: object, phonologicalSystem: object, rules: array, artifacts: array }
  * @recommendedSkills SK-HUM-003 (ipa-transcription-phonological-analysis), SK-HUM-012 (morphosyntactic-analysis)
  * @recommendedAgents AG-HUM-003 (documentary-linguist)
+ *
+ * @graph
+ *   domains: [domain:humanities]
+ *   specializations: [specialization:digital-humanities]
+ *   skillAreas: [skill-area:data-analysis, skill-area:deep-web-research, skill-area:docs-as-code]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

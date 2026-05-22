@@ -1,0 +1,15 @@
+nodeKind: LifecycleSemantics
+id: lifecycle-semantics:opencode
+attributes:
+  lifecycleSemanticsId: lifecycle-semantics:opencode
+  agentId: agent:opencode
+  versionRange: ">=0.0.0"
+  runtimeHookMode: native-shell-hooks
+  stopHookMode: session-end-hook
+  backgroundTaskMode: unknown
+  checkpointMode: unspecified
+  pluginContextMode: "plugin.json + event hooks"
+  platformNuances: []
+edges:
+  applies_to_version:
+    - target: agentVersion:opencode:ge-0-0-0

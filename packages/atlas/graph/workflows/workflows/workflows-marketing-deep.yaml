@@ -1,0 +1,129 @@
+---
+nodeKind: Workflow
+id: workflow:email-marketing-campaign-cycle
+attributes:
+  displayName: "Email Marketing Campaign Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Manages the recurring email marketing execution cycle — building
+    audience segments from behavioral and CRM data, designing A/B test
+    variants for subject lines and content, monitoring deliverability
+    health indicators like bounce rates and spam complaints, analyzing
+    open/click/conversion metrics by segment, and refining send-time
+    optimization. Produces campaign performance reports and segment
+    refinement recommendations. Excludes marketing automation platform
+    administration.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:content-team
+---
+nodeKind: Workflow
+id: workflow:influencer-partnership-management
+attributes:
+  displayName: "Influencer Partnership Management"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Manages the influencer marketing lifecycle — identifying potential
+    partners based on audience alignment and engagement quality, conducting
+    outreach and negotiation, coordinating content deliverables and approval
+    workflows, tracking campaign performance through unique codes and UTM
+    links, and measuring ROI against comparable paid channels. Produces
+    partnership performance reports and renewal recommendations. Excludes
+    legal contract drafting.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:product-designer
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+    - target: domain:public-relations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:content-team
+---
+nodeKind: Workflow
+id: workflow:event-marketing-coordination
+attributes:
+  displayName: "Event Marketing Coordination"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Coordinates marketing presence at conferences, webinars, and sponsored
+    events — managing booth logistics, speaker submission pipelines,
+    attendee pre-event nurture sequences, on-site lead capture workflows,
+    real-time social amplification, and post-event follow-up cadences.
+    Produces event ROI analysis including cost-per-lead and pipeline
+    influence attribution. Excludes long-term event strategy and
+    sponsorship contract negotiation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:devrel
+    - target: role:product-designer
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:public-relations
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:sales-team
+---
+nodeKind: Workflow
+id: workflow:product-marketing-launch
+attributes:
+  displayName: "Product Marketing Launch"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Orchestrates the product marketing dimension of a launch — developing
+    positioning and messaging frameworks, creating competitive battlecards,
+    building demo scripts and sales enablement decks, coordinating analyst
+    briefings, authoring launch blog posts and press materials, and arming
+    customer-facing teams with talk tracks. Produces a launch readiness
+    package. Excludes engineering release coordination and product roadmap
+    decisions.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:product-designer
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:sales
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:product-team
+    - target: org-unit:sales-team

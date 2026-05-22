@@ -9,6 +9,12 @@ expertise:
   - Churn analysis and prevention
   - Customer feedback programs
   - Advisory board management
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:customer-success, skill-area:product-analytics]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # Customer Success PM Agent

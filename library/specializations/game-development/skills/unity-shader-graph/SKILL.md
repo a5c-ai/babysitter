@@ -2,6 +2,11 @@
 name: unity-shader-graph
 description: Unity Shader Graph skill for visual shader authoring, custom nodes, and material effects.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:shader-programming, skill-area:game-engines]
+  roles: [role:game-developer]
 ---
 
 # Unity Shader Graph Skill

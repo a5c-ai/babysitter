@@ -1,0 +1,23 @@
+nodeKind: Presentation
+id: presentation:claude-code-tui
+attributes:
+  displayName: "Claude Code TUI"
+  kind: tui
+  description: |
+    Terminal UI bundled with Claude Code. Renders streaming model output,
+    tool-use blocks, slash commands, and permission prompts in a
+    full-screen ink-based shell.
+  renderingTechnology: vte
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+  bundleSize: "~80 MB"
+  updateChannel: auto
+  accessibilityShortcuts:
+    - "Esc Esc: jump to most recent user message"
+    - "Ctrl+C: cancel current turn"
+    - "Ctrl+D: exit"
+edges:
+  bundled_with:
+    - agent-platform-impl:claude-code.platform@1.x

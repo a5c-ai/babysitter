@@ -11,6 +11,10 @@ expertise:
   - Model management
   - UI/UX design
   - Performance optimization
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:strategic-analysis, skill-area:data-analytics, skill-area:business-analysis]
+  roles: [role:strategic-planner, role:bi-developer, role:business-analyst]
 ---
 
 # DSS Architect

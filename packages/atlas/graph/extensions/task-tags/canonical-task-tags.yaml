@@ -1,0 +1,54 @@
+nodeKind: TaskTag
+id: task-tag:tech-debt
+attributes:
+  displayName: tech-debt
+  name: tech-debt
+  key: tech-debt
+  scope: team
+  description: Work that pays down accumulated technical debt rather than delivering new functionality.
+  color: '#a16207'
+  order: 10
+edges:
+  scoped_to_team:
+  - target: org-unit:platform-team
+  scoped_to_workspace:
+  - target: workspace:local-developer-default
+---
+nodeKind: TaskTag
+id: task-tag:needs-design
+attributes:
+  displayName: needs-design
+  name: needs-design
+  key: needs-design
+  scope: global
+  description: Issue requires a design / spec round before implementation can start.
+  color: '#7c3aed'
+  order: 20
+edges: {}
+---
+nodeKind: TaskTag
+id: task-tag:agent-mux-frontend
+attributes:
+  displayName: frontend (agent-mux)
+  name: frontend
+  key: frontend
+  scope: project
+  scopeId: project:agent-mux
+  description: Frontend (webui / ui) work within the agent-mux project.
+  color: '#0ea5e9'
+  order: 5
+edges:
+  scoped_to_project:
+  - target: project:agent-mux
+---
+nodeKind: TaskTag
+id: task-tag:security-review
+attributes:
+  displayName: security-review
+  name: security-review
+  key: security-review
+  scope: global
+  description: Issue requires a security review before merge.
+  color: '#dc2626'
+  order: 30
+edges: {}

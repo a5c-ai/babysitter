@@ -1,0 +1,1745 @@
+# NodeKinds for cluster 6-lifecycle.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:run
+  name: Run
+  origin: universal
+  prefix: run
+  cluster: 6-lifecycle
+  purpose: |
+    Bounded orchestration unit (event-sourced; journaled). A Run is the
+    top-level container. ONE Run may have MULTIPLE RunAttempts — each
+    retry is a new RunAttempt. The Run's status reflects the latest
+    attempt's status. Distinct from RunAttempt (per-attempt persisted
+    record with retry/backoff metadata) and LiveSession (the in-flight
+    observable while an attempt is executing).
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: startedAt
+    type: iso-timestamp
+    required: true
+  - name: endedAt
+    type: iso-timestamp
+    required: false
+  - name: status
+    type: enum<running
+    completed: null
+    failed: null
+    aborted>: null
+    required: true
+  - name: completionProof
+    type: string
+    required: false
+  - name: createdAt
+    type: iso-timestamp
+    required: false
+  - name: currentStateId
+    type: id
+    required: false
+  - name: processId
+    type: string
+    required: false
+  - name: runDir
+    type: string
+    required: false
+  incomingEdges:
+  - attests_to
+  - triggers_run
+  - compliance_for
+  - scopes_runs
+  - attempt_of
+  outgoingEdges:
+  - spans
+  - uses_async_job
+  - has_preflight
+  - performs_reconciliation
+  - issues_resume_token
+  - triggered_by
+  - complies_with
+  - records_usage
+  - uses_context_bundle
+  - scoped_to_tenant
+  - has_attempt
+  invariants: []
+  examples: []
+- id: node:invocation
+  name: Invocation
+  origin: universal
+  prefix: invocation
+  cluster: 6-lifecycle
+  purpose: bounded agent execution (one process spawn or equivalent)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: agentVersionId
+    type: ref<AgentVersion>
+    required: true
+  - name: startedAt
+    type: iso-timestamp
+    required: true
+  - name: endedAt
+    type: iso-timestamp
+    required: false
+  - name: status
+    type: enum<running
+    completed: null
+    failed: null
+    aborted>: null
+    required: true
+  - name: currentStateId
+    type: id
+    required: false
+  - name: exitCode
+    type: int
+    required: false
+  - name: runId
+    type: id
+    required: false
+  - name: sessionId
+    type: id
+    required: false
+  incomingEdges:
+  - spans
+  - attests_to
+  outgoingEdges:
+  - runs_via
+  - executes_in
+  - records_usage
+  invariants: []
+  examples: []
+- id: node:session
+  name: Session
+  origin: universal
+  prefix: session
+  cluster: 6-lifecycle
+  purpose: |
+    Durable persisted conversational state — transcript and supporting
+    artifacts an agent can resume from. Distinct from LiveSession (the
+    ephemeral in-flight observable that shadows a Session while a
+    RunAttempt is executing).
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: workspaceId
+    type: ref<Workspace>
+    required: false
+  - name: createdAt
+    type: iso-timestamp
+    required: true
+  - name: lastActivityAt
+    type: iso-timestamp
+    required: true
+  - name: agentVersionId
+    type: id
+    required: false
+  - name: currentStateId
+    type: id
+    required: false
+  - name: filePath
+    type: string
+    required: false
+  - name: forkPoint
+    type: any
+    required: false
+  - name: format
+    type: string
+    required: false
+  - name: parentSessionId
+    type: id
+    required: false
+  incomingEdges:
+  - scopes_runs
+  - projects_session
+  - shadows_session
+  outgoingEdges:
+  - scoped_to_tenant
+  - has_flow_projection
+  - recorded_attention
+  - has_child_session
+  - has_live_session_shadow
+  invariants: []
+  examples: []
+- id: node:child-session
+  name: ChildSession
+  origin: universal
+  prefix: child-session
+  cluster: 6-lifecycle
+  purpose: |
+    A session spawned as a child of another session for subagent/tool dispatch.
+    Distinct from Session (parent runtime context). Records parent linkage,
+    dispatched subagent (if any), tool invocation that triggered the spawn,
+    return-to address for the result, and lifecycle timestamps.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: parentSessionId
+    type: ref<Session>
+    required: true
+  - name: spawnTrigger
+    type: enum<subagent-dispatch,tool-call,manual,scheduled-task>
+    required: true
+  - name: subagentId
+    type: ref<Subagent>
+    required: false
+    notes: When spawnTrigger=subagent-dispatch, the dispatched subagent.
+  - name: invokingToolId
+    type: ref<ToolDescriptor>
+    required: false
+    notes: When spawnTrigger=tool-call or subagent-dispatch-via-tool, the ToolDescriptor that triggered the spawn (e.g. claude-code's Task tool).
+  - name: lifecyclePolicy
+    type: enum<ephemeral,persistent,cached>
+    required: true
+    notes: ephemeral=ends when subagent returns, persistent=survives parent run, cached=reused for similar tasks.
+  - name: startedAt
+    type: iso-timestamp
+    required: false
+  - name: endedAt
+    type: iso-timestamp
+    required: false
+  - name: status
+    type: enum<running,completed,failed,cancelled>
+    required: false
+  - name: returnedTo
+    type: string
+    required: false
+    notes: Where the child session's result flows back (e.g. parent session's ToolResult).
+  incomingEdges:
+  - has_child_session
+  - dispatched_to_child_session
+  - executed_in_child_session
+  - triggers_child_session
+  outgoingEdges:
+  - parent_session
+  - runs_subagent
+  - runs_skill
+  - invoking_tool
+  invariants:
+  - id starts with child-session:
+  - if spawnTrigger=subagent-dispatch then subagentId required
+  examples:
+  - graph/lifecycle/child-sessions/canonical-child-sessions.yaml
+- id: node:phase
+  name: Phase
+  origin: universal
+  prefix: phase
+  cluster: 6-lifecycle
+  purpose: a named state in a phase machine
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: order
+    type: int
+    required: true
+  - name: description
+    type: markdown
+    required: false
+  - name: phaseMachineId
+    type: id
+    required: false
+  incomingEdges:
+  - has_phase
+  outgoingEdges:
+  - phase_in
+  - exposes_intervention_point
+  - has_transition
+  invariants: []
+  examples: []
+- id: node:phase-transition
+  name: PhaseTransition
+  origin: universal
+  prefix: phase-transition
+  cluster: 6-lifecycle
+  purpose: transition between two phases (gateable)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: fromPhaseId
+    type: ref<Phase>
+    required: true
+  - name: toPhaseId
+    type: ref<Phase>
+    required: true
+  - name: gate
+    type: string
+    required: false
+  - name: event
+    type: string
+    required: false
+  - name: stopMessage
+    type: string
+    required: false
+  incomingEdges:
+  - transition_of
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:effect
+  name: Effect
+  origin: a5c
+  originContext: Babysitter SDK
+  prefix: effect
+  cluster: 6-lifecycle
+  purpose: unit of external work in a Run (a5c-flavored)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: runId
+    type: ref<Run>
+    required: true
+  - name: kind
+    type: string
+    required: true
+  - name: status
+    type: enum<pending
+    running: null
+    completed: null
+    failed>: null
+    required: true
+  - name: currentStateId
+    type: id
+    required: false
+  - name: invocationId
+    type: id
+    required: false
+  - name: request
+    type: any
+    required: false
+  - name: requestedAt
+    type: iso-timestamp
+    required: false
+  - name: resolvedAt
+    type: iso-timestamp
+    required: false
+  - name: result
+    type: any
+    required: false
+  incomingEdges:
+  - emitted_by_span
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:lifecycle-state
+  name: LifecycleState
+  origin: universal
+  prefix: lifecycle-state
+  cluster: 6-lifecycle
+  purpose: a state in a state machine
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: terminal_state
+    type: bool
+    required: true
+  incomingEdges:
+  - transitions_to
+  outgoingEdges:
+  - transitions_to
+  - belongs_to_machine
+  invariants:
+  - exactly one belongs_to_machine edge (V-10.1)
+  - non-terminal states have at least one transitions_to (V-10.3)
+  examples: []
+- id: node:state-machine
+  name: StateMachine
+  origin: universal
+  prefix: state-machine
+  cluster: 6-lifecycle
+  purpose: a named state machine over a NodeKind
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: governsNodeKindId
+    type: ref<NodeKind>
+    required: true
+  - name: targetNodeKind
+    type: string
+    required: false
+    notes: PascalCase NodeKind name this machine governs (Run, Invocation, Session, Effect, Phase). Mirrors governsNodeKindId in human-readable form.
+  - name: description
+    type: markdown
+    required: false
+  - name: states
+    type: list<map<id,displayName,terminal,description,entryActions,exitActions>>
+    required: false
+    notes: Inline state declarations (remodel 2026-04-29 — change J). Preferred form for trivial machines; for machines whose states need their own files (rich metadata, many edges), use separate LifecycleState NodeKind entries instead.
+  - name: transitions
+    type: list<map<from,to,event,gate>>
+    required: false
+    notes: Inline transitions between states (remodel 2026-04-29 — change J). `from` and `to` are state ids (slug or fully-qualified lifecycle-state:<machine>.<state>).
+  incomingEdges:
+  - belongs_to_machine
+  - phase_in
+  outgoingEdges:
+  - state_machine_for
+  - has_phase
+  invariants:
+  - has at least one terminal state (V-10.2) — checked via inline states[].terminal or via separate LifecycleState entries
+  examples: []
+- id: node:phase-machine
+  name: PhaseMachine
+  origin: a5c
+  prefix: phase-machine
+  cluster: 6-lifecycle
+  purpose: 'a finite-state machine over Phase nodes declared by a reliability-interface
+
+    impl; distinct from StateMachine which is general over any NodeKind
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: phases
+    type: list<ref<Phase>>
+    required: true
+    notes: ≥2 entries; mirrors has_phase / composed_of edges.
+  - name: transitions
+    type: list<ref<PhaseTransition>>
+    required: false
+    notes: Ordered list of PhaseTransitions defining the legal moves between phases. Optional when transitions are inferred from PhaseTransition nodes' fromPhaseId/toPhaseId edges.
+  - name: initialPhase
+    type: ref<Phase>
+    required: true
+    notes: Renamed from initialPhaseId for examples-parity.
+  - name: terminalPhases
+    type: list<ref<Phase>>
+    required: true
+    notes: ≥1 entry; renamed from terminalPhaseIds for examples-parity.
+  - name: declaredBy
+    type: ref<Plugin>
+    required: false
+    notes: Which reliability-interface impl declared this machine (Plugin or ExtensionInterface ref). Optional for catalog-default machines like default-process.
+  - name: arbitrationPolicy
+    type: enum<most-restrictive-wins
+    first-impl-wins: null
+    declared-precedence>: null
+    required: false
+    notes: How to combine phase machines when multiple reliability-interface impls declare overlapping ones.
+  incomingEdges:
+  - state_machine_for
+  outgoingEdges:
+  - has_phase
+  - transitions_via
+  - declared_by
+  - composed_of
+  invariants:
+  - phases list MUST contain ≥2 entries
+  - terminalPhases MUST contain ≥1 entry and every entry MUST appear in phases
+  - initialPhase MUST appear in phases
+  examples:
+  - graph/lifecycle/phase-machines/default-process.yaml
+- id: node:automation-rule
+  name: AutomationRule
+  origin: a5c
+  prefix: automation-rule
+  cluster: 6-lifecycle
+  purpose: 'A reactor rule that, on a trigger (timer cron expression or webhook
+
+    delivery), creates a canonical kanban issue from a fixed task template
+
+    and routes it onto a target board. AutomationRule sits between an
+
+    external signal (clock or HTTP delivery) and a `Run` / kanban issue:
+
+    it does NOT mutate the board directly — it always emits a canonical
+
+    issue which is then projected onto a derived board. Sourced from
+
+    packages/agent-mux/core/src/automation.ts (AutomationRule,
+
+    TimerAutomationTrigger, WebhookAutomationTrigger).
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+    notes: AutomationRule.name in the source.
+  - name: triggerType
+    type: enum<timer
+    webhook>: null
+    required: true
+    evidence: vendor-doc-or-better
+  - name: cron
+    type: string
+    required: false
+    notes: Required when triggerType = timer. RFC-style cron expression.
+  - name: timezone
+    type: string
+    required: false
+    notes: IANA timezone for cron evaluation.
+  - name: webhookPort
+    type: int
+    required: false
+    notes: Required when triggerType = webhook.
+  - name: webhookPath
+    type: string
+    required: false
+  - name: webhookMethod
+    type: enum<POST>
+    required: false
+  - name: webhookAuthType
+    type: enum<none
+    bearer>: null
+    required: false
+  - name: sourceEvent
+    type: string
+    required: false
+    notes: Optional external event identifier (e.g., GitHub event name).
+  - name: lifecycleState
+    type: enum<draft
+    active: null
+    paused: null
+    disabled: null
+    archived>: null
+    required: true
+  - name: targetProjectId
+    type: string
+    required: true
+    notes: Canonical project the rule files issues into.
+  - name: targetBoardProjectId
+    type: string
+    required: true
+    notes: Derived kanban board the issue projects onto.
+  - name: taskTemplateTitle
+    type: string
+    required: true
+    notes: AutomationTaskTemplate.title — drives created issue title.
+  - name: taskTemplatePriority
+    type: enum<critical,high,medium,low>
+    required: false
+  - name: taskTemplateStatus
+    type: enum<backlog
+    ready>: null
+    required: false
+  - name: routingAction
+    type: enum<canonical-issue-create,shared-board-derive>
+    required: true
+    notes: 'Always combines the two: rule emits a canonical issue, derived board projects it.'
+  - name: sourceKind
+    type: enum<manual,config-file,api,external-system>
+    required: true
+  - name: createdAt
+    type: iso-date
+    required: true
+  - name: lastTriggeredAt
+    type: iso-date
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - automation_rule_defined_by
+  outgoingEdges:
+  - emits_canonical_issue
+  invariants:
+  - id starts with automation-rule: null
+  - triggerType = timer implies cron is present
+  - triggerType = webhook implies webhookPort is present
+  - lifecycleState in {draft,active,paused,disabled,archived}
+  - routingAction MUST always include canonical-issue-create + shared-board-derive (rule never mutates board directly)
+  examples:
+  - graph/lifecycle/automation-rules/nightly-triage-timer.yaml
+  - graph/lifecycle/automation-rules/github-issue-webhook.yaml
+- id: node:session-semantics
+  name: SessionSemantics
+  origin: universal
+  prefix: session-semantics
+  cluster: 6-lifecycle
+  purpose: per-agent session behavior — dir strategy, id sources, resume/fork/prune semantics, concurrency model
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: sessionSemanticsId
+    type: string
+    required: true
+  - name: agentId
+    type: id
+    required: true
+    notes: ref<AgentProduct> | ref<AgentVersion>
+  - name: versionRange
+    type: versionRange
+    required: true
+    evidence: vendor-doc-or-better
+  - name: sessionDirStrategy
+    type: string
+    required: true
+    evidence: vendor-doc-or-better
+  - name: sessionIdSources
+    type: list<string>
+    required: true
+    evidence: vendor-doc-or-better
+  - name: resumeSemantics
+    type: markdown
+    required: true
+  - name: forkSemantics
+    type: markdown
+    required: false
+  - name: pruneSemantics
+    type: markdown
+    required: false
+  - name: concurrencyModel
+    type: enum<single-writer
+    multi-reader: null
+    multi-writer: null
+    unspecified>: null
+    required: false
+  - name: multiTenantPolicy
+    type: enum<isolated
+    shared: null
+    unspecified>: null
+    required: false
+  - name: stateFilePatterns
+    type: list<string>
+    required: false
+  - name: pidMarkerPolicy
+    type: enum<env-or-run-dir
+    run-dir-only: null
+    none>: null
+    required: false
+  - name: metadataFields
+    type: list<map<string
+    any>>: null
+    required: false
+  incomingEdges:
+  - supersedes
+  outgoingEdges:
+  - applies_to_version
+  - references_path
+  - supersedes
+  invariants:
+  - agentId resolves
+  - sessionIdSources non-empty
+  examples: []
+- id: node:lifecycle-semantics
+  name: LifecycleSemantics
+  origin: universal
+  prefix: lifecycle-semantics
+  cluster: 6-lifecycle
+  purpose: per-agent runtime lifecycle — hook mode, stop-hook mode, background tasks, checkpoints, plugin context
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: lifecycleSemanticsId
+    type: string
+    required: true
+  - name: agentId
+    type: id
+    required: true
+    notes: ref<AgentProduct> | ref<AgentVersion>
+  - name: versionRange
+    type: versionRange
+    required: true
+    evidence: vendor-doc-or-better
+  - name: runtimeHookMode
+    type: enum<native-shell-hooks
+    native-shell-hooks-with-windows-support: null
+    native-hooks-with-extension-manifest: null
+    opt-in: null
+    unsupported-in-fallback: null
+    none>: null
+    required: true
+    evidence: vendor-doc-or-better
+  - name: stopHookMode
+    type: enum<blocking-stop-hook
+    advisory-stop-hook: null
+    after-agent-hook: null
+    session-end-hook: null
+    unsupported-in-fallback: null
+    none>: null
+    required: true
+    evidence: vendor-doc-or-better
+  - name: backgroundTaskMode
+    type: enum<supported
+    unsupported-documented: null
+    unknown: null
+    native: null
+    polled: null
+    none>: null
+    required: true
+    evidence: vendor-doc-or-better
+  - name: checkpointMode
+    type: enum<auto
+    manual: null
+    documented: null
+    unspecified: null
+    none>: null
+    required: true
+    evidence: vendor-doc-or-better
+  - name: pluginContextMode
+    type: string
+    required: false
+  - name: streamingResume
+    type: enum<supported
+    degraded: null
+    none>: null
+    required: false
+  - name: platformNuances
+    type: list<string>
+    required: false
+  incomingEdges:
+  - supersedes
+  outgoingEdges:
+  - applies_to_version
+  - references_path
+  - supersedes
+  invariants:
+  - agentId resolves
+  - runtimeHookMode=unsupported-in-fallback implies all HookMappings for this agent carry requiresRuntimeHooks=false or supportLevel=unsupported
+  examples: []
+- id: node:run-attempt
+  name: RunAttempt
+  origin: derived
+  originContext: catalog pass 18 / Symphony §4.1.5 + §8.4 — attempt-numbered Run sub-entity
+  prefix: run-attempt
+  cluster: 6-lifecycle
+  purpose: |
+    A single attempt within a Run. Carries retry-backoff metadata and
+    per-attempt status. Distinct from Run (which spans all attempts)
+    and LiveSession (which is the in-flight observable while THIS
+    attempt is executing). The owning Run is reached via the
+    `attempt_of` edge (catalog pass 49 — replaces the prior FK-by-attribute
+    `runId`).
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: error
+    type: string
+    required: false
+    notes: Convenience freeform error summary (alias of errorMessage).
+  - name: attemptNumber
+    type: int
+    required: true
+    constraint: '>= 1'
+  - name: startedAt
+    type: iso-timestamp
+    required: true
+  - name: endedAt
+    type: iso-timestamp
+    required: false
+  - name: status
+    type: enum<running,completed,failed,aborted,retrying>
+    required: true
+  - name: errorCategoryId
+    type: ref<ErrorCategory>
+    required: false
+    notes: Normalized error category when status in {failed,aborted,retrying}.
+  - name: errorMessage
+    type: string
+    required: false
+    notes: Free-form fallback when no ErrorCategory mapping exists.
+  - name: workspacePath
+    type: string
+    required: false
+  - name: issueId
+    type: ref<Issue>
+    required: false
+  - name: issueIdentifier
+    type: string
+    required: false
+    notes: Tracker-native identifier (e.g. PROJ-123) for cross-system display.
+  - name: backoffStrategy
+    type: enum<none,linear,exponential,exponential-jitter,constant>
+    required: false
+    notes: RetryBackoffStrategy enum (Symphony §8.4).
+  - name: baseDelayMs
+    type: int
+    required: false
+  - name: capDelayMs
+    type: int
+    required: false
+  - name: dueAtMs
+    type: int
+    required: false
+    notes: Wall-clock target (ms epoch) for the next retry tick when status=retrying.
+  incomingEdges:
+  - has_attempt
+  - dispatched_as_run_attempt
+  outgoingEdges:
+  - uses_workspace
+  - for_issue
+  - has_live_session
+  - records_usage
+  - uses_context_bundle
+  - attempt_of
+  - dispatch_origin
+  invariants:
+  - id starts with run-attempt: null
+  - attemptNumber >= 1
+  examples: []
+- id: node:live-session
+  name: LiveSession
+  origin: derived
+  originContext: catalog pass 18 / Symphony §4.1.6 — in-flight observable distinct from durable Session
+  prefix: live-session
+  cluster: 6-lifecycle
+  purpose: |
+    Ephemeral in-flight observable while a RunAttempt is currently
+    executing. Holds running token totals, last stream event, the
+    agent-subprocess PID, and shadows the durable Session via the
+    `shadows_session` edge (catalog pass 49 — replaces the prior FK-by-attribute
+    `sessionId`). Disappears when the RunAttempt ends. Distinct from
+    Session (durable) and RunAttempt (the persisted record).
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: threadId
+    type: string
+    required: false
+  - name: turnId
+    type: string
+    required: false
+  - name: sessionIdComposition
+    type: string
+    required: false
+    notes: How the live session id is composed (e.g. '${threadId}-${turnId}').
+  - name: agentSubprocessPid
+    type: int
+    required: false
+  - name: startedAt
+    type: iso-timestamp
+    required: true
+  - name: lastEventAt
+    type: iso-timestamp
+    required: false
+  - name: lastEvent
+    type: string
+    required: false
+    notes: Most recent stream-event kind observed (member of AgentHostTransport.streamEventKinds enum).
+  - name: lastMessage
+    type: string
+    required: false
+  - name: turnCount
+    type: int
+    required: false
+  - name: lastTurnLifecycle
+    type: enum<in-progress,success,failure,cancelled,timeout>
+    required: false
+    notes: TurnLifecycle enum (Symphony §7.2; user-pinned values 2026-05-01).
+  - name: inputTokens
+    type: int
+    required: false
+  - name: outputTokens
+    type: int
+    required: false
+  - name: totalTokens
+    type: int
+    required: false
+  - name: tokenAccountingMode
+    type: enum<absolute,delta,mixed-prefer-absolute>
+    required: false
+    notes: TokenAccountingSemantics enum (Symphony §13.5).
+  incomingEdges:
+  - has_live_session
+  - has_live_session_shadow
+  outgoingEdges:
+  - driven_by_run_attempt
+  - shadows_session
+  invariants:
+  - id starts with live-session: null
+  examples: []
+- id: node:orchestrator-state
+  name: OrchestratorState
+  origin: derived
+  originContext: catalog pass 18 / Symphony §4.1.8 OrchestratorRuntimeState
+  prefix: orchestrator-state
+  cluster: 6-lifecycle
+  purpose: orchestration control-plane state (poll/concurrency, claimed-issue set, codex totals, last reconcile)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: codexTotals
+    type: map<string
+    any>: null
+    required: false
+    notes: Inline aggregate totals block (alias for the codexTotals* breakdowns).
+  - name: lastRateLimitObservation
+    type: map<string
+    any>: null
+    required: false
+    notes: Inline rate-limit observation block (capturedAt, vendor, primaryLimit, secondaryLimit, rawPayloadRef).
+  - name: pollIntervalMs
+    type: int
+    required: true
+  - name: maxConcurrentAgents
+    type: int
+    required: true
+  - name: activeRunsCount
+    type: int
+    required: false
+  - name: claimedIssueIds
+    type: list<string>
+    required: false
+    notes: Tracker-native identifiers currently claimed by this orchestrator instance.
+  - name: retryQueueSize
+    type: int
+    required: false
+  - name: completedCount
+    type: int
+    required: false
+  - name: lastPollAt
+    type: iso-timestamp
+    required: false
+  - name: lastReconcileAt
+    type: iso-timestamp
+    required: false
+  - name: codexTotalsInputTokens
+    type: int
+    required: false
+  - name: codexTotalsOutputTokens
+    type: int
+    required: false
+  - name: codexTotalsTotalTokens
+    type: int
+    required: false
+  - name: codexTotalsSecondsRunning
+    type: int
+    required: false
+  incomingEdges:
+  - snapshots_state
+  outgoingEdges: []
+  invariants:
+  - id starts with orchestrator-state: null
+  examples: []
+- id: node:dispatch-preflight
+  name: DispatchPreflight
+  origin: derived
+  originContext: catalog pass 18 / Symphony §6.3 — pre-Run validation gate
+  prefix: dispatch-preflight
+  cluster: 6-lifecycle
+  purpose: orchestrator-startup validation gate (tracker creds, agent binary, workspace root) — runs once before any Run
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: validations
+    type: list<enum<tracker-credentials,project-slug,agent-binary,workspace-root-writable,network-egress,workflow-definition-loadable>>
+    required: true
+  - name: resultStatus
+    type: enum<passed,blocked>
+    required: false
+  - name: blockingErrorIds
+    type: list<ref<ErrorCategory>>
+    required: false
+  - name: blockingErrors
+    type: list<string>
+    required: false
+    notes: Free-form list of blocking error labels (alias of blockingErrorIds when ErrorCategory mapping is not yet known).
+  incomingEdges:
+  - preflight_for
+  outgoingEdges: []
+  invariants:
+  - id starts with dispatch-preflight: null
+  examples: []
+- id: node:reconciliation
+  name: Reconciliation
+  origin: derived
+  originContext: catalog pass 18 / Symphony §8.5 reconciliation step
+  prefix: reconciliation
+  cluster: 6-lifecycle
+  purpose: a reconciliation pass (timer/operator/terminal-state/completion) capturing trigger, outcome, and counts
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: trigger
+    type: enum<timer,operator,terminal-state,completion>
+    required: true
+  - name: startedAt
+    type: iso-timestamp
+    required: true
+  - name: endedAt
+    type: iso-timestamp
+    required: false
+  - name: refreshedIssueCount
+    type: int
+    required: false
+  - name: stoppedRunsCount
+    type: int
+    required: false
+  - name: cleanedWorkspacesCount
+    type: int
+    required: false
+  - name: outcome
+    type: enum<clean,partial-failure,skipped>
+    required: false
+  incomingEdges:
+  - reconciliation_performed_by
+  outgoingEdges: []
+  invariants:
+  - id starts with reconciliation: null
+  examples: []
+- id: node:operator-intervention-point
+  name: OperatorInterventionPoint
+  origin: derived
+  originContext: catalog pass 18 / Symphony §14.4 — operational lever (user override 2026-05-01 keeps as separate NodeKind, distinct from in-flow HumanCheckpoint)
+  prefix: operator-intervention
+  cluster: 6-lifecycle
+  purpose: operational intervention surface (operator-actuated) — distinct from HumanCheckpoint (which is in-run mid-flow narrative consult)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: kind
+    type: enum<edit-workflow,change-tracker-state,restart-service,drain-orchestrator,trigger-refresh>
+    required: true
+  - name: triggerSurface
+    type: enum<filesystem,tracker-ui,api-endpoint,signal>
+    required: true
+  - name: sideEffects
+    type: list<enum<auto-reapply,stop-and-clean,stop-no-cleanup,requeue>>
+    required: false
+  - name: idempotent
+    type: bool
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - intervention_point_exposed_by
+  outgoingEdges: []
+  invariants:
+  - id starts with operator-intervention: null
+  examples: []
+- id: node:error-category
+  name: ErrorCategory
+  origin: standard
+  originContext: catalog pass 18 / Symphony §10.6 + §11.4 normalized error taxonomy
+  prefix: error-category
+  cluster: 6-lifecycle
+  purpose: a normalized error category within a failure layer (e.g. response_timeout, codex_not_found, invalid_workspace_cwd)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: layer
+    type: enum<agent-runner,tracker,workflow-config,workspace,observability>
+    required: true
+  - name: retryable
+    type: bool
+    required: true
+  - name: severity
+    type: enum<transient,permanent,configuration>
+    required: true
+  - name: exampleExitCode
+    type: int
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: mappedFailureClassId
+    type: ref<FailureClass>
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - categorized_as
+  invariants:
+  - id starts with error-category: null
+  examples: []
+- id: node:failure-class
+  name: FailureClass
+  origin: standard
+  originContext: catalog pass 18 / Symphony §14.1 top-level failure taxonomy
+  prefix: failure-class
+  cluster: 6-lifecycle
+  purpose: top-level failure layer (workspace, agent-session, tracker, workflow-config, observability) — coarser than ErrorCategory
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: scope
+    type: enum<workflow-config,workspace,agent-session,tracker,observability>
+    required: true
+  - name: defaultRecoveryStrategyId
+    type: ref<RecoveryStrategy>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: neverCrashesOrchestrator
+    type: bool
+    required: false
+  incomingEdges:
+  - categorized_as
+  - handles_failure
+  outgoingEdges: []
+  invariants:
+  - id starts with failure-class: null
+  examples: []
+- id: node:recovery-strategy
+  name: RecoveryStrategy
+  origin: standard
+  originContext: catalog pass 18 / Symphony §14.2 per-class recovery action vocabulary
+  prefix: recovery-strategy
+  cluster: 6-lifecycle
+  purpose: a recovery action bound to a FailureClass (skip-dispatch, retry-with-backoff, escalate-to-operator, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: backoffSpec
+    type: map<string
+    any>: null
+    required: false
+    notes: Inline backoff block (alias for backoffSpec* breakdowns).
+  - name: handlesFailureClassId
+    type: ref<FailureClass>
+    required: false
+    notes: Inline ref to the failure class this strategy handles (handles_failure edge remains primary).
+  - name: action
+    type: enum<skip-dispatch,retry-with-backoff,skip-tick,keep-workers,best-effort-log,escalate-to-operator>
+    required: true
+  - name: backoffSpecBaseMs
+    type: int
+    required: false
+  - name: backoffSpecCapMs
+    type: int
+    required: false
+  - name: backoffSpecStrategy
+    type: enum<none,linear,exponential,exponential-jitter,constant>
+    required: false
+    notes: RetryBackoffStrategy enum.
+  - name: maxAttempts
+    type: int
+    required: false
+  - name: escalationPolicy
+    type: enum<none,surface-to-operator,page>
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - handles_failure
+  invariants:
+  - id starts with recovery-strategy: null
+  examples: []
+- id: node:partial-state-recovery
+  name: PartialStateRecovery
+  origin: standard
+  originContext: catalog pass 18 / Symphony §14.3 non-persistence guarantee — informational policy
+  prefix: partial-state-recovery
+  cluster: 6-lifecycle
+  purpose: declares restart semantics (which state survives, which is in-memory, recovery steps)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: persistentStateKinds
+    type: list<enum<none,terminal-workspaces-cleaned,completed-issue-set,run-journals>>
+    required: true
+  - name: inMemoryStateKinds
+    type: list<enum<running-sessions,retry-timers,claimed-set>>
+    required: false
+  - name: restartRecoverySteps
+    type: list<string>
+    required: false
+  incomingEdges: []
+  outgoingEdges: []
+  invariants:
+  - id starts with partial-state-recovery: null
+  examples: []
+- id: node:activity-entry
+  name: ActivityEntry
+  origin: derived
+  originContext: catalog pass 52 / agent-mux KanbanActivityEntry (packages/agent-mux/core/src/kanban.ts) — kanban-level audit/activity-feed entry (issue moved, decomposition added, run dispatched, etc.)
+  prefix: activity-entry
+  cluster: 6-lifecycle
+  purpose: an entry in the kanban-level activity feed (issue moved to In-Progress, PR linked, decomposition added, run dispatched). Distinct from RunJournalEvent (run-level effect events) and Span (observability traces) — ActivityEntry is the user-visible audit trail
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: actorKind
+    type: enum<human,agent,system>
+    required: true
+    notes: KanbanActivityActorKind.
+  - name: actorId
+    type: string
+    required: false
+    notes: id of the actor (Role id, AgentVersion id, or system process id).
+  - name: actorDisplayName
+    type: string
+    required: false
+  - name: entityKind
+    type: enum<project,issue,board,workspace>
+    required: true
+    notes: KanbanActivityEntityType (project | issue | board | workspace).
+  - name: entityId
+    type: string
+    required: true
+  - name: action
+    type: string
+    required: true
+    notes: e.g. moved-to-in-progress, decomposition-added, dependency-blocked, run-dispatched.
+  - name: summary
+    type: markdown
+    required: false
+  - name: createdAt
+    type: iso-timestamp
+    required: true
+  incomingEdges:
+  - has_activity_entry
+  outgoingEdges:
+  - activity_for_issue
+  - activity_for_project
+  - activity_for_workspace
+  - activity_for_board_snapshot
+  invariants:
+  - id starts with activity-entry: null
+  examples: []
+- id: node:issue-dispatch-state
+  name: IssueDispatchState
+  origin: derived
+  originContext: catalog pass 52 / agent-mux KanbanIssueDispatchState (packages/agent-mux/core/src/kanban.ts) — readiness of an issue for dispatch to an agent
+  prefix: issue-dispatch-state
+  cluster: 6-lifecycle
+  purpose: records whether an Issue is currently dispatchable to an agent (acceptance criteria + dependencies satisfied; workspace ready) and the currently dispatched RunAttempt(s) if any. Bridges Issue (catalog pass 19) + RunAttempt (catalog pass 18) + AcceptanceCriterion (catalog pass 32)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: readiness
+    type: enum<needs-decomposition,ready,blocked,dispatched,completed>
+    required: true
+    notes: KanbanDispatchReadiness.
+  - name: blockedReasons
+    type: list<string>
+    required: false
+  - name: runIds
+    type: list<ref<Run>>
+    required: false
+    notes: Currently or last dispatched Run ids.
+  - name: sessionIds
+    type: list<ref<Session>>
+    required: false
+  - name: lastDispatchedAt
+    type: iso-timestamp
+    required: false
+  - name: renderedContext
+    type: markdown
+    required: false
+    notes: Rendered dispatch-context block (KanbanIssueDispatchState.renderedContext).
+  incomingEdges:
+  - has_dispatch_state
+  outgoingEdges:
+  - dispatch_state_of_issue
+  - dispatched_as_run_attempt
+  invariants:
+  - id starts with issue-dispatch-state: null
+  examples: []
+- id: node:retry-policy
+  name: RetryPolicy
+  origin: derived
+  originContext: catalog pass 53 / claude-code services/api/withRetry.ts (DEFAULT_MAX_RETRIES=10, MAX_529_RETRIES=3, BASE_DELAY_MS=500, FOREGROUND_529_RETRY_SOURCES, persistent/fast-mode variants) + pi-mono coding-agent retry-on-transport-error patterns. Declarative retry spec consumed by transport clients and AgentRuntimeImpl loops; distinct from RecoveryStrategy (which binds an action to a FailureClass).
+  prefix: retry-policy
+  cluster: 6-lifecycle
+  purpose: declarative retry policy for transport / API calls — max attempts, backoff, jitter, retryable-error class set, per-call-source overrides, fallback-model trigger, persistent / fast-mode variants
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: maxRetries
+    type: int
+    required: false
+    notes: Default attempt cap (claude-code DEFAULT_MAX_RETRIES=10).
+  - name: maxRetriesOnOverload
+    type: int
+    required: false
+    notes: Cap for overloaded (529) errors specifically (claude-code MAX_529_RETRIES=3).
+  - name: baseDelayMs
+    type: int
+    required: false
+    notes: Base delay before first retry (claude-code BASE_DELAY_MS=500).
+  - name: maxDelayMs
+    type: int
+    required: false
+    notes: Cap on per-attempt computed delay (default 32000ms in claude-code; 5min/6h in persistent mode).
+  - name: backoffStrategy
+    type: enum<none,linear,constant,exponential,exponential-jitter>
+    required: false
+    notes: Backoff curve. claude-code withRetry uses exponential-jitter (~25% jitter).
+  - name: jitterFactor
+    type: float
+    required: false
+    notes: Fraction of base delay added as random jitter (claude-code 0.25).
+  - name: honorRetryAfterHeader
+    type: bool
+    required: false
+    notes: If true, server-supplied Retry-After overrides computed backoff.
+  - name: floorOutputTokens
+    type: int
+    required: false
+    notes: Minimum max_tokens floor when retrying after a max_tokens-context-overflow (claude-code FLOOR_OUTPUT_TOKENS=3000).
+  - name: retryableStatusCodes
+    type: list<int>
+    required: false
+    notes: HTTP status codes that trigger retry (e.g. 408,409,429,500,502,503,504,529).
+  - name: retryableErrorCategoryIds
+    type: list<ref<ErrorCategory>>
+    required: false
+    notes: References to ErrorCategory entries that this policy retries (preferred over status code list when mapping exists).
+  - name: foregroundOnlyOnOverload
+    type: bool
+    required: false
+    notes: If true, only retry overload (529) when call source is foreground/user-blocking — bails immediately on background sources to avoid capacity-cascade amplification (claude-code FOREGROUND_529_RETRY_SOURCES gate).
+  - name: foregroundSources
+    type: list<string>
+    required: false
+    notes: Allow-list of QuerySource values treated as foreground (claude-code FOREGROUND_529_RETRY_SOURCES).
+  - name: variant
+    type: enum<default,persistent,fast-mode,background-bail,custom>
+    required: false
+    notes: claude-code distinguishes default / persistent (CLAUDE_CODE_UNATTENDED_RETRY chunked keep-alive yields) / fast-mode (cooldown trigger) variants.
+  - name: heartbeatIntervalMs
+    type: int
+    required: false
+    notes: For persistent variant — chunk size for sleeps so the host sees periodic activity (claude-code HEARTBEAT_INTERVAL_MS=30000).
+  - name: persistentMaxBackoffMs
+    type: int
+    required: false
+    notes: Persistent-mode delay cap (claude-code PERSISTENT_MAX_BACKOFF_MS=300000).
+  - name: persistentResetCapMs
+    type: int
+    required: false
+    notes: Persistent-mode wait-until-reset cap (claude-code PERSISTENT_RESET_CAP_MS=21600000).
+  - name: fastModeCooldownMs
+    type: int
+    required: false
+    notes: Cooldown duration after fast-mode rejection (claude-code MIN_COOLDOWN_MS=600000, default 30min).
+  - name: fastModeShortRetryThresholdMs
+    type: int
+    required: false
+    notes: claude-code SHORT_RETRY_THRESHOLD_MS=20000.
+  - name: triggersFallbackModelOn
+    type: enum<none,repeated-overload,auth-fail,server-error>
+    required: false
+    notes: When this policy escalates to a fallback model (claude-code FallbackTriggeredError after MAX_529_RETRIES).
+  - name: clearsAuthCacheOn
+    type: list<int>
+    required: false
+    notes: "Status codes that trigger auth-cache invalidation before retry (claude-code 401 clearApiKeyHelperCache, OAuth 401 handleOAuth401Error, Bedrock/Vertex auth clear creds)."
+  - name: disablesKeepAliveOn
+    type: list<string>
+    required: false
+    notes: Connection-error codes that trigger keep-alive teardown (claude-code ECONNRESET, EPIPE → disableKeepAlive()).
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - governs_retries_for
+  outgoingEdges:
+  - retries_error_category
+  invariants:
+  - id starts with retry-policy: null
+  examples: []
+- id: node:token-budget
+  name: TokenBudget
+  origin: derived
+  originContext: catalog pass 53 / claude-code services/api/withRetry.ts (FLOOR_OUTPUT_TOKENS, parseMaxTokensContextOverflowError context-limit recovery) + claude-code query/tokenBudget.ts + agent-stack.compactionTriggerThresholdTokens. Per-call/per-Run/per-RunAttempt input/output/total token cap with overflow recovery semantics — distinct from BudgetPolicy (cost ceiling) and CompactionPolicy (when to compact context).
+  prefix: token-budget
+  cluster: 6-lifecycle
+  purpose: a per-call / per-run input+output+total token budget with overflow / floor / safety-buffer semantics consumed by transport clients and agent loops
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: scope
+    type: enum<call,turn,run-attempt,run,session>
+    required: true
+    notes: Granularity at which the budget is enforced.
+  - name: maxInputTokens
+    type: int
+    required: false
+  - name: maxOutputTokens
+    type: int
+    required: false
+    notes: Per-call max_tokens hard cap requested of the API.
+  - name: maxTotalTokens
+    type: int
+    required: false
+    notes: Combined input+output cap; usually = model context window.
+  - name: contextWindowTokens
+    type: int
+    required: false
+    notes: Underlying model context window (informational, used to compute available output).
+  - name: floorOutputTokens
+    type: int
+    required: false
+    notes: Lower bound when shrinking max_tokens after a context-overflow retry (claude-code FLOOR_OUTPUT_TOKENS=3000).
+  - name: safetyBufferTokens
+    type: int
+    required: false
+    notes: Tokens reserved when computing availableContext on overflow recovery (claude-code inline safetyBuffer=1000).
+  - name: thinkingBudgetTokens
+    type: int
+    required: false
+    notes: Reserved for extended-thinking (claude-code ThinkingConfig.budgetTokens), subtracted from available output on recovery.
+  - name: enforcement
+    type: enum<advisory,reject,truncate,compact-on-overflow,downscale-output>
+    required: false
+    notes: claude-code behavior on `input length and max_tokens exceed context limit` is downscale-output via maxTokensOverride.
+  - name: onExceededAction
+    type: enum<error,trigger-compaction,trigger-fallback-model,reduce-max-tokens>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - enforces_token_budget
+  outgoingEdges: []
+  invariants:
+  - id starts with token-budget: null
+  examples: []
+- id: node:permission-mode
+  name: PermissionMode
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code types/permissions.ts PermissionMode enum + Tool.ts
+    ToolPermissionContext (mode, additionalWorkingDirectories,
+    alwaysAllow/Deny/AskRules, isBypassPermissionsModeAvailable, prePlanMode).
+    The permission mode is a session-scoped state that gates tool execution.
+    claude-code EnterPlanModeTool flips mode to plan via applyPermissionUpdate
+    (prepareContextForPlanMode(...), {type:setMode, mode:plan,
+    destination:session}); ExitPlanMode restores prePlanMode. Distinct from
+    RunAttempt.status (lifecycle) and AgentControlMode (coordinator vs normal).
+  prefix: permission-mode
+  cluster: 6-lifecycle
+  purpose: |
+    A named permission mode controlling which tools can run without prompting
+    and how denials are handled — default (prompt-on-write), plan (read-only +
+    interview), accept-edits (auto-allow writes), bypass-permissions
+    (skip-everything), auto (classifier-driven). Modes can be entered from
+    tool calls, settings, CLI flags, or restored from session state. Carries
+    its rule book (alwaysAllow/Deny/Ask) and additional working dirs.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: mode
+    type: enum<default,plan,accept-edits,bypass-permissions,auto,dont-ask,untrusted,on-failure,on-request,never>
+    required: true
+    notes: claude-code PermissionMode enum plus vendor-specific approval policies. plan = read-only exploration; auto = classifier decides per-call; dont-ask normalizes Anthropic agent-loop `dontAsk`; Codex CLI approval policies are `untrusted`, `on-failure`, `on-request`, and `never`.
+  - name: isReadOnly
+    type: bool
+    required: false
+    notes: True when mode is plan — write/edit tools are disabled.
+  - name: requiresUserConsent
+    type: bool
+    required: false
+    notes: True when entering this mode requires a user-side approval dialog (plan mode entry, bypass-permissions enable).
+  - name: enteredVia
+    type: enum<tool-call,cli-flag,settings-default,session-resume,env-var,model-initiated>
+    required: false
+    notes: claude-code EnterPlanModeTool sets mode=plan via tool-call with destination=session; bypass-permissions can be cli-flag (--dangerously-skip-permissions).
+  - name: prePlanMode
+    type: enum<default,accept-edits,bypass-permissions,auto>
+    required: false
+    notes: claude-code ToolPermissionContext.prePlanMode — stores the mode to restore on ExitPlanMode (only meaningful when mode=plan and entry was model-initiated).
+  - name: shouldAvoidPermissionPrompts
+    type: bool
+    required: false
+    notes: claude-code ToolPermissionContext.shouldAvoidPermissionPrompts — true for background agents that cannot show UI; permission prompts auto-deny.
+  - name: awaitAutomatedChecksBeforeDialog
+    type: bool
+    required: false
+    notes: claude-code ToolPermissionContext.awaitAutomatedChecksBeforeDialog — coordinator workers wait for classifier+hooks before showing a dialog.
+  - name: classifierActive
+    type: bool
+    required: false
+    notes: True when mode=auto and the auto-classifier is actively gating tool calls (claude-code prepareContextForPlanMode side effect for users with defaultMode=auto).
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - operates_in_permission_mode
+  - mode_transitions_from
+  - mode_transitions_to
+  outgoingEdges:
+  - has_permission_rule
+  invariants:
+  - id starts with permission-mode:
+  - mode=plan implies isReadOnly=true
+  - prePlanMode set implies mode=plan
+  examples:
+  - graph/lifecycle/permission-modes/default-mode.yaml
+  - graph/lifecycle/permission-modes/plan-mode.yaml
+  - graph/lifecycle/permission-modes/bypass-permissions.yaml
+- id: node:worktree-session
+  name: WorktreeSession
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code tools/EnterWorktreeTool/EnterWorktreeTool.ts +
+    utils/worktree.ts (createWorktreeForSession, getCurrentWorktreeSession,
+    saveWorktreeState) + ExitWorktreeTool. EnterWorktree creates an isolated
+    git worktree, chdirs into it, calls setOriginalCwd, clears
+    SystemPromptSections/MemoryFileCaches/PlansDirectory caches, and persists
+    a WorktreeSession record. Distinct from Workspace (the durable git
+    checkout) — WorktreeSession is the per-session worktree binding.
+  prefix: worktree-session
+  cluster: 6-lifecycle
+  purpose: |
+    A git-worktree binding for a single Session — the worktree path, optional
+    branch, parent session, and bookkeeping for cache invalidation when CWD
+    flips. Created by EnterWorktree; cleared by ExitWorktree or session end.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: sessionId
+    type: ref<Session>
+    required: false
+    notes: Optional — examples may omit the ref when the parent Session entry is not yet in the catalog.
+  - name: mainRepoRoot
+    type: string
+    required: true
+    notes: Canonical git root the worktree was branched from (claude-code findCanonicalGitRoot).
+  - name: worktreePath
+    type: string
+    required: true
+  - name: worktreeBranch
+    type: string
+    required: false
+  - name: slug
+    type: string
+    required: false
+    notes: Validated slug (claude-code validateWorktreeSlug — letters/digits/dots/underscores/dashes, max 64 chars per segment).
+  - name: createdMidSession
+    type: bool
+    required: false
+    notes: True when the EnterWorktree tool created the worktree mid-session (logEvent tengu_worktree_created mid_session).
+  - name: cleanupOnExit
+    type: enum<keep,prune,prompt-user>
+    required: false
+    notes: claude-code ExitWorktree behavior — exits the session prompts the user; explicit ExitWorktreeTool removes the worktree.
+  - name: invalidatesCaches
+    type: list<enum<system-prompt-sections,memory-file-caches,plans-directory,cwd-bound-services>>
+    required: false
+    notes: claude-code EnterWorktreeTool.call clears clearSystemPromptSections, clearMemoryFileCaches, getPlansDirectory.cache after chdir.
+  - name: createdAt
+    type: iso-timestamp
+    required: false
+  - name: endedAt
+    type: iso-timestamp
+    required: false
+  incomingEdges:
+  - has_worktree_session
+  outgoingEdges:
+  - worktree_for_session
+  invariants:
+  - id starts with worktree-session:
+  examples:
+  - graph/lifecycle/worktree-sessions/claude-code-mid-session.yaml
+- id: node:agent-control-mode
+  name: AgentControlMode
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code coordinator/coordinatorMode.ts (isCoordinatorMode,
+    matchSessionMode, getCoordinatorSystemPrompt) + Tool.ts ToolUseContext.agentId
+    (subagent vs main thread) + ASYNC_AGENT_ALLOWED_TOOLS set. Coordinator mode
+    flips the env var CLAUDE_CODE_COORDINATOR_MODE=1 and switches the system
+    prompt + worker tool inventory; resumed sessions call matchSessionMode to
+    re-align the env var with the stored mode. Distinct from PermissionMode
+    (which gates tools) — AgentControlMode shapes the system prompt and
+    dispatch posture.
+  prefix: agent-control-mode
+  cluster: 6-lifecycle
+  purpose: |
+    Top-level agent posture mode (coordinator/normal/bare/remote/non-interactive)
+    that determines the system prompt template, tool inventory, subagent
+    dispatch policy, and which auto-features (auto-memory, auto-dream, prompt
+    suggestion) run. Persisted on the Session and re-applied on resume.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: mode
+    type: enum<normal,coordinator,bare-simple,remote-ccr,non-interactive-print,kairos-channels>
+    required: true
+    notes: claude-code distinguishes via CLAUDE_CODE_COORDINATOR_MODE / CLAUDE_CODE_SIMPLE / CLAUDE_CODE_REMOTE / KAIROS feature gate / getIsNonInteractiveSession().
+  - name: envVar
+    type: string
+    required: false
+    notes: Source env var (e.g. CLAUDE_CODE_COORDINATOR_MODE=1, CLAUDE_CODE_SIMPLE=1, CLAUDE_CODE_REMOTE=1).
+  - name: featureGate
+    type: string
+    required: false
+    notes: Feature flag controlling availability (claude-code feature(COORDINATOR_MODE), feature(KAIROS)).
+  - name: persistedOnSession
+    type: bool
+    required: false
+    notes: claude-code matchSessionMode reads/writes session.mode and reconciles env var on resume.
+  - name: workerToolInventory
+    type: list<string>
+    required: false
+    notes: Tools made available to dispatched workers (claude-code ASYNC_AGENT_ALLOWED_TOOLS minus INTERNAL_WORKER_TOOLS).
+  - name: disablesFeatures
+    type: list<enum<auto-memory,auto-dream,prompt-suggestion,extract-memories,nested-memory,plan-mode,worktree-mode>>
+    required: false
+    notes: claude-code bare/remote modes disable auto-memory + extract; coordinator hides plan-mode etc.
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - operates_in_control_mode
+  outgoingEdges: []
+  invariants:
+  - id starts with agent-control-mode:
+  examples:
+  - graph/lifecycle/agent-control-modes/claude-code-coordinator.yaml
+  - graph/lifecycle/agent-control-modes/claude-code-bare-simple.yaml
+- id: node:consolidation-lock
+  name: ConsolidationLock
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code services/autoDream/autoDream.ts +
+    services/autoDream/consolidationLock.ts (readLastConsolidatedAt,
+    listSessionsTouchedSince, tryAcquireConsolidationLock,
+    rollbackConsolidationLock). Time gate (minHours), session-count gate
+    (minSessions), mtime-based lock so concurrent processes cant double-fire
+    consolidation. Failure rolls back the mtime so the next non-force turn
+    re-attempts.
+  prefix: consolidation-lock
+  cluster: 6-lifecycle
+  purpose: |
+    Cross-process lock for memory-consolidation runs (autoDream, /dream,
+    extract-memories) keyed by an mtime-on-disk file plus throttle cadence
+    (time-since-last + session-count). Records gate values, current state,
+    and last-fired timestamp.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: lockKind
+    type: enum<auto-dream,extract-memories,team-sync,manual-dream>
+    required: true
+  - name: lockFilePath
+    type: string
+    required: false
+    notes: Path to the lock-file whose mtime is the throttle marker (typically under memdir).
+  - name: minHoursBetweenRuns
+    type: int
+    required: false
+    notes: claude-code DEFAULTS.minHours=24.
+  - name: minSessionsBetweenRuns
+    type: int
+    required: false
+    notes: claude-code DEFAULTS.minSessions=5.
+  - name: scanThrottleMs
+    type: int
+    required: false
+    notes: claude-code SESSION_SCAN_INTERVAL_MS=10*60*1000 — session-gate scan throttle when time-gate already passed.
+  - name: lastConsolidatedAt
+    type: iso-timestamp
+    required: false
+  - name: rollbackOnFailure
+    type: bool
+    required: false
+    notes: claude-code rollbackConsolidationLock(priorMtime) restores mtime so the gate re-opens on next turn.
+  - name: bypassUnderForce
+    type: bool
+    required: false
+    notes: claude-code isForced() bypasses time/session gates but not the lock.
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - guarded_by_consolidation_lock
+  outgoingEdges: []
+  invariants:
+  - id starts with consolidation-lock:
+  examples:
+  - graph/lifecycle/consolidation-locks/claude-code-auto-dream.yaml
+

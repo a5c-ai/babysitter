@@ -1,0 +1,14 @@
+nodeKind: Synonym
+id: synonym:skill-anthropic-led
+attributes:
+  termAId: term:anthropic-skill
+  termBId: term:skill
+  direction: bidirectional
+  note: |
+    Anthropic-published "Skills" and our catalog Skill node kind are the
+    same primitive (SKILL.md-driven extensions).
+edges:
+  synonym_a:
+    - term:anthropic-skill
+  synonym_b:
+    - term:skill

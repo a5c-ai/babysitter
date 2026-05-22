@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:cursor-hooks-mux
+attributes:
+  signalId: discovery-signal:cursor-hooks-mux
+  signalKind: env-any
+  key: cursor
+  matchMode: all
+  confidence: medium
+  scope: hooks-mux
+  signals:
+    - CURSOR_PROJECT_DIR
+    - CURSOR_VERSION
+  absentSignals: []
+  argvMatches: []
+  metadataFields: []
+  consumer: hooks-mux-core
+  notes: 'Ordered adapter auto-detection rule used by hooks-mux. Verbatim from legacy discovery:cursor:hooks-mux:6.'
+edges:
+  applies_to:
+    - target: agent:cursor

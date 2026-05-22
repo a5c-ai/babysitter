@@ -1,0 +1,18 @@
+nodeKind: LaunchConfig
+id: launch-config:pi.default
+attributes:
+  agentVersionId: agentVersion:pi:ge-0-70-0
+  displayName: "Pi (default)"
+  env: {}
+  commArgs: []
+  description: |
+    Default launch recipe for Pi CLI. Spawns the `pi` CLI with no extra
+    argv, no environment overrides, and the version's default capability
+    profile.
+edges:
+  requires_capability:
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0'
+      level: full
+  runs_via:
+    - target: execution:local-host

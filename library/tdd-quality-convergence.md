@@ -291,6 +291,6 @@ $CLI run:continue .a5c/runs/<runId> --auto-node-tasks --auto-node-max 10
 
 ## See Also
 
-- `plugins/babysitter/skills/babysit/SKILL.md` - Core orchestration workflow
-- `plugins/babysitter/skills/babysit/reference/ADVANCED_PATTERNS.md` - Pattern 5 (Agent), Pattern 6 (Skill), Pattern 7 (Iterative Convergence)
+- `plugins/babysitter-unified/skills/babysit/SKILL.md` - Core orchestration workflow
+- `library/reference/ADVANCED_PATTERNS.md` - Pattern 5 (Agent), Pattern 6 (Skill), Pattern 7 (Iterative Convergence)
 - `packages/sdk/sdk.md` - SDK API reference

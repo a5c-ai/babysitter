@@ -6,6 +6,12 @@ backlog-id: AG-015
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:penetration-testing-ethical-hacking, skill-area:endpoint-security-edr]
+  roles: [role:security-engineer]
+  workflows: [workflow:penetration-testing-cycle, workflow:vulnerability-management]
 ---
 
 # hardware-security-researcher

@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:turbopack
+attributes:
+  displayName: "Turbopack"
+  homepageUrl: "https://turbo.build/pack"
+  kind: bundler
+  description: |
+    Incremental bundler optimized for JavaScript and TypeScript, written in Rust by Vercel.
+edges:
+  belongs_to_language:
+    - target: language:javascript
+  used_for:
+    - target: skill-area:ci-pipeline-optimization
+  alternative_to:
+    - target: tool:webpack
+      comparison: "JavaScript bundlers"
+    - target: tool:vite
+      comparison: "JavaScript bundlers"
+    - target: tool:parcel
+      comparison: "JavaScript bundlers"

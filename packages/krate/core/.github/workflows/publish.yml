@@ -1,0 +1,142 @@
+name: Krate Publish
+
+on:
+  push:
+    branches: [develop, staging, main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: publish-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Run check suite
+        run: npm run check
+      - name: Package tarball
+        run: npm pack --json
+      - name: Upload npm package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-package
+          path: "*.tgz"
+      - name: Upload dist artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-artifacts
+          path: dist/
+      - name: Upload ui standalone
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-standalone
+          path: ../web/.next/standalone/
+      - name: Generate release checksums
+        run: |
+          mkdir -p dist/checksums
+          sha256sum *.tgz dist/**/* > dist/checksums/SHA256SUMS 2>/dev/null || true
+      - name: Upload release checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-checksums
+          path: dist/checksums/
+
+  publish-image:
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ghcr.io/${{ github.repository }}/krate-controller:${{ github.sha }}
+
+  publish-chart:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package Helm chart
+        run: |
+          mkdir -p dist/charts
+          helm package charts/krate -d dist/charts/
+      - name: Generate chart checksums
+        run: |
+          cd dist/charts
+          sha256sum dist/charts/*.tgz > SHA256SUMS
+      - name: Push chart to OCI registry
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          helm push dist/charts/*.tgz oci://ghcr.io/${{ github.repository }}/charts
+
+  deploy-krate:
+    needs: [publish-image, publish-chart]
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: krate-production
+      url: https://krate.a5c.ai
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Krate To AKS
+        env:
+          AZURE_ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+          KRATE_GITHUB_CLIENT_ID: ${{ secrets.KRATE_GITHUB_CLIENT_ID }}
+          KRATE_GITHUB_CLIENT_SECRET: ${{ secrets.KRATE_GITHUB_CLIENT_SECRET }}
+          KRATE_HOST_DEVELOP: krate-develop.a5c.ai
+          KRATE_HOST_STAGING: krate-staging.a5c.ai
+          KRATE_HOST_PRODUCTION: krate.a5c.ai
+        run: |
+          set -euo pipefail
+
+          # Build and push container image
+          docker build -f Dockerfile -t "${AZURE_ACR_NAME}.azurecr.io/krate-controller:${{ github.sha }}" .
+          docker push "${AZURE_ACR_NAME}.azurecr.io/krate-controller:${{ github.sha }}"
+
+          # Create image pull secret
+          kubectl create secret docker-registry acr-pull \
+            --docker-server="${AZURE_ACR_NAME}.azurecr.io" \
+            --docker-username="${AZURE_ACR_NAME}" \
+            --docker-password="${ACR_TOKEN}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          HELM_RELEASE="krate"
+
+          # Generate deploy values
+          cat > /tmp/krate-deploy-values.yaml <<VALS
+          image:
+            repository: ${AZURE_ACR_NAME}.azurecr.io/krate-controller
+            tag: ${{ github.sha }}
+          auth:
+            github:
+              clientId: ${KRATE_GITHUB_CLIENT_ID}
+              clientSecret: ${KRATE_GITHUB_CLIENT_SECRET}
+          VALS
+
+          # Deploy with Helm
+          helm upgrade --install "${HELM_RELEASE}" ../charts/ \
+            --namespace krate-system \
+            --values /tmp/krate-deploy-values.yaml \
+            --wait
+
+          # Verify rollout
+          kubectl rollout status deployment/"${HELM_RELEASE}-krate-web" --timeout=300s

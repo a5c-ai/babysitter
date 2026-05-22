@@ -1,0 +1,18 @@
+nodeKind: Tool
+id: tool:kustomize
+attributes:
+  displayName: "Kustomize"
+  homepageUrl: "https://kustomize.io"
+  kind: orchestrator
+  description: |
+    Kubernetes-native configuration management with template-free YAML customization.
+edges:
+  belongs_to_language:
+    - target: language:yaml
+  used_for:
+    - target: skill-area:deployment-automation
+  alternative_to:
+    - target: tool:helm
+      comparison: "Kubernetes config — Kustomize uses overlay patching; Helm uses templated charts"
+    - target: tool:helmfile
+      comparison: "Kubernetes config management"

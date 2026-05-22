@@ -1,0 +1,12 @@
+nodeKind: PermissionMode
+id: permission-mode:claude-code-default
+attributes:
+  displayName: "Claude Code default permission mode"
+  mode: default
+  isReadOnly: false
+  requiresUserConsent: false
+  enteredVia: settings-default
+  description: |
+    Standard interactive mode — read tools auto-allow, write/edit/bash prompt
+    the user via the permission dialog. The empty ToolPermissionContext
+    initializes here.

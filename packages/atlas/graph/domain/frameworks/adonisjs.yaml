@@ -1,0 +1,19 @@
+nodeKind: Framework
+id: framework:adonisjs
+attributes:
+  displayName: "AdonisJS"
+  homepageUrl: "https://adonisjs.com"
+  belongsToLanguageId: language:typescript
+  category: web-backend
+  description: |
+    AdonisJS — a full-stack TypeScript Node.js MVC framework with a
+    Laravel-inspired developer experience: Lucid ORM, Edge templating,
+    auth, and an extensive CLI (Ace).
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - framework:nestjs
+    - framework:fastify

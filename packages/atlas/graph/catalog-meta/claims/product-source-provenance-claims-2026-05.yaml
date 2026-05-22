@@ -1,0 +1,99 @@
+nodeKind: Claim
+id: claim:source-provenance-agent-stack-products-hermes-yaml
+attributes:
+  subjectKind: AgentProduct
+  statement: docs/agent-mux/reference/agents/hermes.md is the migrated source reference
+    for AgentProduct agent:hermes.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: agent:hermes
+  attribute: source
+  value: docs/agent-mux/reference/agents/hermes.md
+  evidenceSourceIds:
+  - evidence:source-provenance-hermes-product-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - agent:hermes
+  backed_by_evidence:
+  - evidence:source-provenance-hermes-product-doc
+---
+nodeKind: Claim
+id: claim:source-provenance-agent-stack-products-omp-yaml
+attributes:
+  subjectKind: AgentProduct
+  statement: plugins/babysitter-omp/package.json peerDependencies is the migrated
+    source reference for AgentProduct agent:omp.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: agent:omp
+  attribute: source
+  value: plugins/babysitter-omp/package.json
+  evidenceSourceIds:
+  - evidence:source-provenance-omp-package-peer-dependency
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - agent:omp
+  backed_by_evidence:
+  - evidence:source-provenance-omp-package-peer-dependency
+---
+nodeKind: Claim
+id: claim:source-provenance-agent-stack-products-openclaw-yaml
+attributes:
+  subjectKind: AgentProduct
+  statement: packages/agent-mux/adapters/src/openclaw-adapter.ts is the migrated source
+    reference for AgentProduct agent:openclaw.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: agent:openclaw
+  attribute: source
+  value: packages/agent-mux/adapters/src/openclaw-adapter.ts
+  evidenceSourceIds:
+  - evidence:source-provenance-openclaw-adapter-source
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - agent:openclaw
+  backed_by_evidence:
+  - evidence:source-provenance-openclaw-adapter-source
+---
+nodeKind: Claim
+id: claim:source-provenance-agent-stack-products-pi-yaml
+attributes:
+  subjectKind: AgentProduct
+  statement: plugins/babysitter-pi/package.json peerDependencies is the migrated source
+    reference for AgentProduct agent:pi.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: agent:pi
+  attribute: source
+  value: plugins/babysitter-pi/package.json
+  evidenceSourceIds:
+  - evidence:source-provenance-pi-package-peer-dependency
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - agent:pi
+  backed_by_evidence:
+  - evidence:source-provenance-pi-package-peer-dependency

@@ -5,6 +5,12 @@
  * @outputs { success: boolean, visualPackage: object, artifacts: array }
  * @recommendedSkills SK-FTV-005 (storyboard-prompting), SK-FTV-006 (video-prompt-engineering), SK-FTV-009 (shot-composition)
  * @recommendedAgents AG-FTV-002 (visual-director-agent)
+ *
+ * @graph
+ *   domains: [domain:arts-culture]
+ *   skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:data-analysis]
+ *   roles: [role:creative-director, role:design-lead]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

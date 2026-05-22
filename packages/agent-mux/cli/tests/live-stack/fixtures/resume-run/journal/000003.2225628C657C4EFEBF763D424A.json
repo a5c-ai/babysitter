@@ -1,0 +1,10 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-05-01T00:00:00.000Z",
+  "data": {
+    "effectId": "E001",
+    "kind": "shell",
+    "taskId": "summarize-translate.prepare-output-dir"
+  },
+  "checksum": "e79955bc7453ff825779ac51ca826075db575d9c1f396ec76c5065e1dc12e906"
+}

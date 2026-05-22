@@ -1,0 +1,15 @@
+nodeKind: LifecycleSemantics
+id: lifecycle-semantics:openclaw
+attributes:
+  lifecycleSemanticsId: lifecycle-semantics:openclaw
+  agentId: agent:openclaw
+  versionRange: ">=0.0.0"
+  runtimeHookMode: unsupported-in-fallback
+  stopHookMode: unsupported-in-fallback
+  backgroundTaskMode: unknown
+  checkpointMode: unspecified
+  pluginContextMode: "plugin.json + adapter events"
+  platformNuances: []
+edges:
+  applies_to_version:
+    - target: agentVersion:openclaw:ge-0-0-0

@@ -1,0 +1,77 @@
+nodeKind: ModelVersion
+id: model:deepseek-r1-distill-qwen-32b@current
+attributes:
+  displayName: "DeepSeek R1 Distill Qwen 32B"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:deepseek
+  versionRange: '>=1.0.0 <2.0.0'
+  kind: reasoning
+  contextWindowTokens: 128000
+  modalities:
+  - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-01-20'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-01-20'
+  modelCardUrl: https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:deepseek
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:deepseek
+  served_by:
+  - provider:deepseek
+  - provider:together-ai
+  - provider:fireworks-ai
+  speaks:
+  - model-transport:openai-compat
+  supports:
+  - target: capability:streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  - target: capability:supports-text-streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  - target: capability:supports-thinking
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Distilled from R1; preserves the chain-of-thought reasoning behaviour.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  - target: capability:extended-thinking
+    versionRange: '>=1.0.0 <2.0.0'
+    level: partial
+    notes: 'Distillation reduces reasoning depth versus the full R1 model.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  - target: capability:requires-tool-approval
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-r1-distill-qwen-32b

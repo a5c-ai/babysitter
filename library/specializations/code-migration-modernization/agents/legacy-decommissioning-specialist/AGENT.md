@@ -8,6 +8,13 @@ skills:
   - dead-code-eliminator
   - compliance-validator
   - rollback-automation-skill
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:dead-code-elimination, skill-area:compliance-automation]
+  roles: [role:architect, role:tech-lead]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Legacy Decommissioning Specialist Agent

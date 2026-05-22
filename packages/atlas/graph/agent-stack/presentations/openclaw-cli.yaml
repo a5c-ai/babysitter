@@ -1,0 +1,20 @@
+nodeKind: Presentation
+id: presentation:openclaw-cli
+attributes:
+  displayName: "OpenClaw CLI"
+  kind: tui
+  description: |
+    Terminal interface bundled with OpenClaw. Surfaced through the
+    agent-mux adapter for v6.
+  renderingTechnology: terminal-emulator
+  themeSupport: none
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+  bundleSize: "~10 MB"
+  updateChannel: manual
+  accessibilityShortcuts:
+    - "Ctrl+C: cancel"
+edges:
+  bundled_with:
+    - agent-platform-impl:openclaw.platform@current

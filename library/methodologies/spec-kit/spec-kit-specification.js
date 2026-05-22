@@ -3,6 +3,12 @@
  * @description Spec Kit specification workflow: constitution establishment + specification writing + clarification. Produces a complete, refined feature specification from business intent following GitHub's Spec-Driven Development.
  * @inputs { projectName: string, featureDescription: string, projectType?: string, existingConstitution?: object, targetAudience?: string, complianceRequirements?: array }
  * @outputs { success: boolean, constitution: object, specification: object, clarifications: object, specDocument: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:prioritization-frameworks, skill-area:product-discovery, skill-area:roadmap-planning]
+ *   workflows: [workflow:product-discovery, workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:engineering-manager, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

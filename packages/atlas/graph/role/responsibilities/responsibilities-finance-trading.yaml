@@ -1,0 +1,84 @@
+---
+nodeKind: Responsibility
+id: responsibility:model-validation
+attributes:
+  displayName: "Model validation"
+  cadence: on-demand
+  description: |
+    Validate quantitative models — pricing, risk, and alpha models —
+    against independent benchmarks and back-tests.
+edges:
+  held_by:
+    - target: role:quantitative-analyst
+    - target: role:risk-analyst
+---
+nodeKind: Responsibility
+id: responsibility:trading-system-reliability
+attributes:
+  displayName: "Trading system reliability"
+  cadence: continuous
+  description: |
+    Maintain trading system uptime, latency SLAs, and failover readiness.
+edges:
+  held_by:
+    - target: role:trading-systems-engineer
+    - target: role:platform-engineer
+---
+nodeKind: Responsibility
+id: responsibility:portfolio-rebalancing
+attributes:
+  displayName: "Portfolio rebalancing"
+  cadence: scheduled
+  description: |
+    Execute portfolio rebalancing per investment policy and risk limits.
+edges:
+  held_by:
+    - target: role:portfolio-manager
+---
+nodeKind: Responsibility
+id: responsibility:risk-reporting
+attributes:
+  displayName: "Risk reporting"
+  cadence: scheduled
+  description: |
+    Produce daily/weekly risk reports — VaR, exposure, limit breaches,
+    stress test results.
+edges:
+  held_by:
+    - target: role:risk-analyst
+---
+nodeKind: Responsibility
+id: responsibility:research-publication
+attributes:
+  displayName: "Research publication"
+  cadence: on-demand
+  description: |
+    Publish investment research notes, model updates, and market
+    commentaries.
+edges:
+  held_by:
+    - target: role:research-analyst
+---
+nodeKind: Responsibility
+id: responsibility:regulatory-reporting
+attributes:
+  displayName: "Regulatory reporting"
+  cadence: scheduled
+  description: |
+    File regulatory reports — transaction reporting, position limits,
+    best execution.
+edges:
+  held_by:
+    - target: role:compliance-officer
+---
+nodeKind: Responsibility
+id: responsibility:backtesting-validation
+attributes:
+  displayName: "Backtesting validation"
+  cadence: on-demand
+  description: |
+    Validate backtesting methodology — walk-forward tests, overfitting
+    checks, regime analysis.
+edges:
+  held_by:
+    - target: role:quantitative-analyst

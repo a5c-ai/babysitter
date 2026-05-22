@@ -7,6 +7,12 @@ metadata:
   version: "1.0.0"
   category: versioning-compatibility
   backlog-id: SK-SDK-005
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:breaking-change-management, skill-area:semver-discipline]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # api-diff-analyzer

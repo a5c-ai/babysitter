@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:biome
+attributes:
+  displayName: "Biome"
+  homepageUrl: "https://biomejs.dev"
+  kind: linter
+  language: language:javascript
+  releasedAt: "2023"
+  description: |
+    Toolchain combining a fast linter and formatter for the web - successor to Rome.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:code-quality
+  alternative_to:
+    - target: tool:eslint
+      comparison: "JavaScript linters / formatters"
+    - target: tool:prettier
+      comparison: "JavaScript linters / formatters"

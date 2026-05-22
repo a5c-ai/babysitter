@@ -1,0 +1,1955 @@
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:babysitter-agent:ge-5-0-0:mcp
+attributes:
+  supportId: "capabilitySupport:babysitter-agent:ge-5-0-0:mcp"
+  capabilityId: "mcp"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:babysitter-agent:ge-5-0-0"
+  versionRange: ">=5.0.0"
+  notes: "babysitter-agent can launch a built-in MCP server and agent-facing MCP integration surfaces."
+  evidenceRefs:
+    - "repo-babysitter-agent-package"
+    - "repo-babysitter-agent-cli"
+edges:
+  capability_of_version:
+    - target: agentVersion:babysitter-agent:ge-5-0-0
+  evidences_capability:
+    - target: capability:supports-mcp
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:babysitter-agent:ge-5-0-0:interactive-mode
+attributes:
+  supportId: "capabilitySupport:babysitter-agent:ge-5-0-0:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:babysitter-agent:ge-5-0-0"
+  versionRange: ">=5.0.0"
+  notes: "babysitter-agent is a terminal-first runtime CLI with interactive create-run, observe, and orchestration flows."
+  evidenceRefs:
+    - "repo-babysitter-agent-package"
+    - "repo-babysitter-agent-cli"
+edges:
+  capability_of_version:
+    - target: agentVersion:babysitter-agent:ge-5-0-0
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:babysitter-agent:ge-5-0-0:stdin-injection
+attributes:
+  supportId: "capabilitySupport:babysitter-agent:ge-5-0-0:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:babysitter-agent:ge-5-0-0"
+  versionRange: ">=5.0.0"
+  notes: "babysitter-agent accepts prompts, command templates, and harness invocations via CLI input arguments."
+  evidenceRefs:
+    - "repo-babysitter-agent-package"
+    - "repo-babysitter-agent-cli"
+edges:
+  capability_of_version:
+    - target: agentVersion:babysitter-agent:ge-5-0-0
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:babysitter-agent:ge-5-0-0:session-resume
+attributes:
+  supportId: "capabilitySupport:babysitter-agent:ge-5-0-0:session-resume"
+  capabilityId: "session-resume"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:babysitter-agent:ge-5-0-0"
+  versionRange: ">=5.0.0"
+  notes: "babysitter-agent resumes runs and sessions through explicit resume-run and session-history command surfaces."
+  evidenceRefs:
+    - "repo-babysitter-agent-package"
+    - "repo-babysitter-agent-cli"
+edges:
+  capability_of_version:
+    - target: agentVersion:babysitter-agent:ge-5-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:claude:ge-0-0-0:skills
+attributes:
+  supportId: "capabilitySupport:claude:ge-0-0-0:skills"
+  capabilityId: "skills"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:claude:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Claude Code documents skills and slash commands directly, while the local target mapping anchors how plugin surfaces map into the ontology."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-claude"
+    - "repo-target-index"
+    - "web-claude-code-commands"
+    - "web-claude-code-skills"
+    - "web-claude-code-claude-directory"
+edges:
+  capability_of_version:
+    - target: agentVersion:claude:ge-0-0-0
+  evidences_capability:
+    - target: capability:skills
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:claude:ge-0-0-0:thinking
+attributes:
+  supportId: "capabilitySupport:claude:ge-0-0-0:thinking"
+  capabilityId: "thinking"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:claude:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Claude Code is documented as an interactive agentic coding surface that reasons over the codebase and executes tool-assisted work."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-anthropic-claude-code"
+    - "web-claude-code-overview"
+    - "web-claude-code-quickstart"
+    - "web-claude-code-interactive-mode"
+edges:
+  capability_of_version:
+    - target: agentVersion:claude:ge-0-0-0
+  evidences_capability:
+    - target: capability:supports-thinking
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:claude:ge-0-0-0:mcp
+attributes:
+  supportId: "capabilitySupport:claude:ge-0-0-0:mcp"
+  capabilityId: "mcp"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:claude:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "MCP support now points to official Claude Code documentation instead of inheriting only the generic Claude product pages."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-claude-code-mcp"
+    - "web-claude-code-tools-reference"
+    - "web-claude-code-features-overview"
+edges:
+  capability_of_version:
+    - target: agentVersion:claude:ge-0-0-0
+  evidences_capability:
+    - target: capability:supports-mcp
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:claude:ge-0-0-0:tool-approval
+attributes:
+  supportId: "capabilitySupport:claude:ge-0-0-0:tool-approval"
+  capabilityId: "tool-approval"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:claude:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Permission modes and auto mode document Claude Code's native approval boundary model for tools and edits."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-claude-code-permissions"
+    - "web-claude-code-permission-modes"
+    - "web-anthropic-claude-code-auto-mode"
+edges:
+  capability_of_version:
+    - target: agentVersion:claude:ge-0-0-0
+  evidences_capability:
+    - target: capability:tool-approval
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:claude:ge-0-0-0:interactive-mode
+attributes:
+  supportId: "capabilitySupport:claude:ge-0-0-0:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:claude:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Interactive CLI usage is directly documented rather than inferred from generic product marketing."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-anthropic-claude-code"
+    - "web-claude-code-overview"
+    - "web-claude-code-quickstart"
+    - "web-claude-code-interactive-mode"
+edges:
+  capability_of_version:
+    - target: agentVersion:claude:ge-0-0-0
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:claude:ge-0-0-0:stdin-injection
+attributes:
+  supportId: "capabilitySupport:claude:ge-0-0-0:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:claude:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Scripted prompt-mode CLI flows and continue flags provide the strongest official basis for non-interactive input semantics."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-claude-code-headless"
+    - "web-claude-code-cli-reference"
+edges:
+  capability_of_version:
+    - target: agentVersion:claude:ge-0-0-0
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:claude:ge-0-0-0:image-input
+attributes:
+  supportId: "capabilitySupport:claude:ge-0-0-0:image-input"
+  capabilityId: "image-input"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:claude:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Image input remains backed by official Claude multimodal documentation, with lower confidence than the Claude Code-specific docs used elsewhere."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-claude-platform-vision"
+    - "web-claude-code-overview"
+edges:
+  capability_of_version:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:claude:ge-0-0-0:runtime-hooks
+attributes:
+  supportId: "capabilitySupport:claude:ge-0-0-0:runtime-hooks"
+  capabilityId: "runtime-hooks"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:claude:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Runtime hooks are now tied to the official hook reference and guide plus the local plugin target shape."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-claude"
+    - "repo-target-index"
+    - "web-claude-code-hooks"
+    - "web-claude-code-hooks-guide"
+edges:
+  capability_of_version:
+    - target: agentVersion:claude:ge-0-0-0
+  evidences_capability:
+    - target: capability:runtime-hooks
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:claude:ge-0-0-0:stop-hook
+attributes:
+  supportId: "capabilitySupport:claude:ge-0-0-0:stop-hook"
+  capabilityId: "stop-hook"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:claude:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Stop-hook support is modeled separately so the stop lifecycle claim is not diluted into the generic hook bundle."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-claude"
+    - "repo-target-index"
+    - "web-claude-code-hooks"
+    - "web-claude-code-hooks-guide"
+edges:
+  capability_of_version:
+    - target: agentVersion:claude:ge-0-0-0
+  evidences_capability:
+    - target: capability:stop-hook
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:claude:ge-0-0-0:subagent-dispatch
+attributes:
+  supportId: "capabilitySupport:claude:ge-0-0-0:subagent-dispatch"
+  capabilityId: "subagent-dispatch"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:claude:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Subagent dispatch is backed by the official custom-subagents documentation."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-claude-code-subagents"
+    - "web-claude-code-features-overview"
+    - "web-claude-code-claude-directory"
+edges:
+  capability_of_version:
+    - target: agentVersion:claude:ge-0-0-0
+  evidences_capability:
+    - target: capability:supports-subagent-dispatch
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:claude:ge-0-0-0:parallel-execution
+attributes:
+  supportId: "capabilitySupport:claude:ge-0-0-0:parallel-execution"
+  capabilityId: "parallel-execution"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:claude:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Parallel execution is tied to official subagent and agent-team references rather than the generic autonomy announcement alone."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-claude-code-subagents"
+    - "web-claude-code-agent-teams"
+    - "web-claude-code-quickstart"
+edges:
+  capability_of_version:
+    - target: agentVersion:claude:ge-0-0-0
+  evidences_capability:
+    - target: capability:supports-parallel-execution
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:claude:ge-0-0-0:session-resume
+attributes:
+  supportId: "capabilitySupport:claude:ge-0-0-0:session-resume"
+  capabilityId: "session-resume"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:claude:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Session resume is tied to checkpointing and continue flows rather than only background-agent marketing."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-claude-code-checkpointing"
+    - "web-claude-code-headless"
+    - "web-claude-code-cli-reference"
+edges:
+  capability_of_version:
+    - target: agentVersion:claude:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills"
+  capabilityId: "skills"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-0-0-lt-0-119-0"
+  versionRange: ">=0.0.0 <0.119.0"
+  notes: "Codex skills are documented directly, while the local target profile explains how command-derived skills map into the shared ontology."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-codex"
+    - "repo-target-index"
+    - "web-codex-skills"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-0-0-lt-0-119-0
+  evidences_capability:
+    - target: capability:skills
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:thinking
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-0-0-lt-0-119-0:thinking"
+  capabilityId: "thinking"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-0-0-lt-0-119-0"
+  versionRange: ">=0.0.0 <0.119.0"
+  notes: "Codex CLI is documented as an interactive coding-agent surface with persistent threads and tool-assisted execution."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-codex-cli"
+    - "web-codex-cli-features"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-0-0-lt-0-119-0
+  evidences_capability:
+    - target: capability:supports-thinking
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:interactive-mode
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-0-0-lt-0-119-0:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-0-0-lt-0-119-0"
+  versionRange: ">=0.0.0 <0.119.0"
+  notes: "Interactive terminal usage is grounded in Codex CLI docs rather than inferred from the skills page."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-codex-cli"
+    - "web-codex-cli-features"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-0-0-lt-0-119-0
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stdin-injection
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-0-0-lt-0-119-0"
+  versionRange: ">=0.0.0 <0.119.0"
+  notes: "Non-interactive Codex execution is documented separately for scripting and CI usage."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-codex-noninteractive"
+    - "web-codex-cli-reference"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-0-0-lt-0-119-0
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:image-input
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-0-0-lt-0-119-0:image-input"
+  capabilityId: "image-input"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-0-0-lt-0-119-0"
+  versionRange: ">=0.0.0 <0.119.0"
+  notes: "Multimodal Codex support is documented, but the public evidence is broader than a single CLI-only image-input flag."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-codex-cli"
+    - "web-codex-cli-features"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-0-0-lt-0-119-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks"
+  capabilityId: "runtime-hooks"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-0-0-lt-0-119-0"
+  versionRange: ">=0.0.0 <0.119.0"
+  notes: "Codex has first-party hook docs, while pre-0.119.0 Windows hook support remains a repo-specific lifecycle nuance."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-codex"
+    - "repo-target-index"
+    - "repo-codex-windows-hooks"
+    - "web-codex-hooks"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-0-0-lt-0-119-0
+  evidences_capability:
+    - target: capability:runtime-hooks
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook"
+  capabilityId: "stop-hook"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-0-0-lt-0-119-0"
+  versionRange: ">=0.0.0 <0.119.0"
+  notes: "Stop-hook mapping is normalized from the documented Codex hook system plus the local target-name mapping, with the Windows version nuance kept explicit."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-codex"
+    - "repo-target-index"
+    - "repo-codex-windows-hooks"
+    - "web-codex-hooks"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-0-0-lt-0-119-0
+  evidences_capability:
+    - target: capability:stop-hook
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:session-resume
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-0-0-lt-0-119-0:session-resume"
+  capabilityId: "session-resume"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-0-0-lt-0-119-0"
+  versionRange: ">=0.0.0 <0.119.0"
+  notes: "Session continuation is supported through transcript and thread persistence rather than piggybacking on the hooks docs."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-codex-cli-features"
+    - "web-codex-cli-reference"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-0-0-lt-0-119-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-119-0:skills
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-119-0:skills"
+  capabilityId: "skills"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  versionRange: ">=0.119.0"
+  notes: "Codex skills are documented directly, while the local target profile explains how command-derived skills map into the shared ontology."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-codex"
+    - "repo-target-index"
+    - "web-codex-skills"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-119-0
+  evidences_capability:
+    - target: capability:skills
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-119-0:thinking
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-119-0:thinking"
+  capabilityId: "thinking"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  versionRange: ">=0.119.0"
+  notes: "Codex CLI is documented as an interactive coding-agent surface with persistent threads and tool-assisted execution."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-codex-cli"
+    - "web-codex-cli-features"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-119-0
+  evidences_capability:
+    - target: capability:supports-thinking
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-119-0:interactive-mode
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-119-0:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  versionRange: ">=0.119.0"
+  notes: "Interactive terminal usage is grounded in Codex CLI docs rather than inferred from the skills page."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-codex-cli"
+    - "web-codex-cli-features"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-119-0
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-119-0:stdin-injection
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-119-0:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  versionRange: ">=0.119.0"
+  notes: "Non-interactive Codex execution is documented separately for scripting and CI usage."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-codex-noninteractive"
+    - "web-codex-cli-reference"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-119-0
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-119-0:image-input
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-119-0:image-input"
+  capabilityId: "image-input"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  versionRange: ">=0.119.0"
+  notes: "Multimodal Codex support is documented, but the public evidence is broader than a single CLI-only image-input flag."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-codex-cli"
+    - "web-codex-cli-features"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-119-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-119-0:runtime-hooks
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-119-0:runtime-hooks"
+  capabilityId: "runtime-hooks"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  versionRange: ">=0.119.0"
+  notes: "Codex has first-party hook docs, and 0.119.0+ removes the local Windows hook caveat."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-codex"
+    - "repo-target-index"
+    - "repo-codex-windows-hooks"
+    - "web-codex-hooks"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-119-0
+  evidences_capability:
+    - target: capability:runtime-hooks
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-119-0:stop-hook
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-119-0:stop-hook"
+  capabilityId: "stop-hook"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  versionRange: ">=0.119.0"
+  notes: "Stop-hook mapping is normalized from the documented Codex hook system plus the local target-name mapping."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-codex"
+    - "repo-target-index"
+    - "repo-codex-windows-hooks"
+    - "web-codex-hooks"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-119-0
+  evidences_capability:
+    - target: capability:stop-hook
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:codex:ge-0-119-0:session-resume
+attributes:
+  supportId: "capabilitySupport:codex:ge-0-119-0:session-resume"
+  capabilityId: "session-resume"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  versionRange: ">=0.119.0"
+  notes: "Session continuation is supported through transcript and thread persistence rather than piggybacking on the hooks docs."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-codex-cli-features"
+    - "web-codex-cli-reference"
+edges:
+  capability_of_version:
+    - target: agentVersion:codex:ge-0-119-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:copilot:ge-0-0-0:skills
+attributes:
+  supportId: "capabilitySupport:copilot:ge-0-0-0:skills"
+  capabilityId: "skills"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:copilot:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Copilot CLI plugins explicitly bundle reusable agents, skills, hooks, and integrations."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-copilot"
+    - "repo-target-index"
+    - "web-github-copilot-cli-plugins"
+    - "web-github-copilot-cli-plugin-reference"
+edges:
+  capability_of_version:
+    - target: agentVersion:copilot:ge-0-0-0
+  evidences_capability:
+    - target: capability:skills
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:copilot:ge-0-0-0:thinking
+attributes:
+  supportId: "capabilitySupport:copilot:ge-0-0-0:thinking"
+  capabilityId: "thinking"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:copilot:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "GitHub documents Copilot CLI and Copilot coding-agent workflows as interactive agentic coding surfaces."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-github-copilot-cli-overview"
+    - "web-github-copilot-cli-getting-started"
+    - "web-github-copilot-agent"
+edges:
+  capability_of_version:
+    - target: agentVersion:copilot:ge-0-0-0
+  evidences_capability:
+    - target: capability:supports-thinking
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:copilot:ge-0-0-0:interactive-mode
+attributes:
+  supportId: "capabilitySupport:copilot:ge-0-0-0:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:copilot:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Interactive Copilot CLI usage is documented directly instead of being inferred from the cloud-agent docs."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-github-copilot-cli-overview"
+    - "web-github-copilot-cli-getting-started"
+    - "web-github-copilot-agent"
+edges:
+  capability_of_version:
+    - target: agentVersion:copilot:ge-0-0-0
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:copilot:ge-0-0-0:stdin-injection
+attributes:
+  supportId: "capabilitySupport:copilot:ge-0-0-0:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:copilot:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "The public Copilot CLI docs cover command-line prompting flows, which is the strongest official basis for non-interactive input semantics."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-github-copilot-cli-overview"
+    - "web-github-copilot-cli-getting-started"
+edges:
+  capability_of_version:
+    - target: agentVersion:copilot:ge-0-0-0
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:copilot:ge-0-0-0:image-input
+attributes:
+  supportId: "capabilitySupport:copilot:ge-0-0-0:image-input"
+  capabilityId: "image-input"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:copilot:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Public image-input evidence is strongest in the Copilot SDK rather than the CLI docs, so this row keeps lower-confidence external support."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-github-copilot-sdk-image-input"
+edges:
+  capability_of_version:
+    - target: agentVersion:copilot:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:copilot:ge-0-0-0:runtime-hooks
+attributes:
+  supportId: "capabilitySupport:copilot:ge-0-0-0:runtime-hooks"
+  capabilityId: "runtime-hooks"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:copilot:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Copilot CLI exposes hooks directly and the local target profile refines the canonical hook-name mapping into the ontology."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-copilot"
+    - "repo-target-index"
+    - "web-github-copilot-cli-hooks"
+    - "web-github-copilot-hooks-config"
+edges:
+  capability_of_version:
+    - target: agentVersion:copilot:ge-0-0-0
+  evidences_capability:
+    - target: capability:runtime-hooks
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:copilot:ge-0-0-0:stop-hook
+attributes:
+  supportId: "capabilitySupport:copilot:ge-0-0-0:stop-hook"
+  capabilityId: "stop-hook"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:copilot:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "The normalized stop-hook capability is derived from Copilot's documented lifecycle hooks plus the local hook-name mapping."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-copilot"
+    - "repo-target-index"
+    - "web-github-copilot-cli-hooks"
+    - "web-github-copilot-hooks-config"
+edges:
+  capability_of_version:
+    - target: agentVersion:copilot:ge-0-0-0
+  evidences_capability:
+    - target: capability:stop-hook
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:copilot:ge-0-0-0:mcp
+attributes:
+  supportId: "capabilitySupport:copilot:ge-0-0-0:mcp"
+  capabilityId: "mcp"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:copilot:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "GitHub documents MCP both for Copilot CLI and for the Copilot cloud agent."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-copilot"
+    - "repo-target-index"
+    - "web-github-copilot-cli-mcp"
+    - "web-github-copilot-mcp"
+edges:
+  capability_of_version:
+    - target: agentVersion:copilot:ge-0-0-0
+  evidences_capability:
+    - target: capability:supports-mcp
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:copilot:ge-0-0-0:session-resume
+attributes:
+  supportId: "capabilitySupport:copilot:ge-0-0-0:session-resume"
+  capabilityId: "session-resume"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:copilot:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Public session persistence evidence comes from Copilot CLI config-directory documentation rather than the generic coding-agent docs."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-github-copilot-cli-config-dir"
+    - "web-github-copilot-cli-getting-started"
+edges:
+  capability_of_version:
+    - target: agentVersion:copilot:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:cursor:ge-0-0-0:skills
+attributes:
+  supportId: "capabilitySupport:cursor:ge-0-0-0:skills"
+  capabilityId: "skills"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:cursor:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Cursor rules and AGENTS.md support provide the strongest first-party basis for reusable persistent guidance in the local skills abstraction."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-cursor"
+    - "repo-target-index"
+    - "web-cursor-rules"
+edges:
+  capability_of_version:
+    - target: agentVersion:cursor:ge-0-0-0
+  evidences_capability:
+    - target: capability:skills
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:cursor:ge-0-0-0:thinking
+attributes:
+  supportId: "capabilitySupport:cursor:ge-0-0-0:thinking"
+  capabilityId: "thinking"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:cursor:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Cursor documents both IDE and terminal agent surfaces for autonomous coding tasks."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-cursor-agent-overview"
+    - "web-cursor-cli-overview"
+    - "web-cursor-cli-using"
+edges:
+  capability_of_version:
+    - target: agentVersion:cursor:ge-0-0-0
+  evidences_capability:
+    - target: capability:supports-thinking
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:cursor:ge-0-0-0:interactive-mode
+attributes:
+  supportId: "capabilitySupport:cursor:ge-0-0-0:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:cursor:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Interactive Cursor behavior is backed by the CLI and agent docs rather than repo-only target metadata."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-cursor-agent-overview"
+    - "web-cursor-cli-overview"
+    - "web-cursor-cli-using"
+edges:
+  capability_of_version:
+    - target: agentVersion:cursor:ge-0-0-0
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:cursor:ge-0-0-0:stdin-injection
+attributes:
+  supportId: "capabilitySupport:cursor:ge-0-0-0:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:cursor:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Cursor documents headless and terminal-driven execution flows for non-interactive usage."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-cursor-cli-headless"
+    - "web-cursor-cli-using"
+edges:
+  capability_of_version:
+    - target: agentVersion:cursor:ge-0-0-0
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:cursor:ge-0-0-0:image-input
+attributes:
+  supportId: "capabilitySupport:cursor:ge-0-0-0:image-input"
+  capabilityId: "image-input"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:cursor:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Cursor's agent overview documents image-capable reads and image generation, which is the strongest public basis for multimodal support."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-cursor-agent-overview"
+edges:
+  capability_of_version:
+    - target: agentVersion:cursor:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:cursor:ge-0-0-0:runtime-hooks
+attributes:
+  supportId: "capabilitySupport:cursor:ge-0-0-0:runtime-hooks"
+  capabilityId: "runtime-hooks"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:cursor:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Cursor exposes hooks directly and the local target profile refines which canonical hook names map into the shared ontology."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-cursor"
+    - "repo-target-index"
+    - "web-cursor-hooks"
+edges:
+  capability_of_version:
+    - target: agentVersion:cursor:ge-0-0-0
+  evidences_capability:
+    - target: capability:runtime-hooks
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:cursor:ge-0-0-0:stop-hook
+attributes:
+  supportId: "capabilitySupport:cursor:ge-0-0-0:stop-hook"
+  capabilityId: "stop-hook"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:cursor:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "The normalized stop-hook capability is grounded in Cursor hooks plus the local stop-name mapping."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-cursor"
+    - "repo-target-index"
+    - "web-cursor-hooks"
+edges:
+  capability_of_version:
+    - target: agentVersion:cursor:ge-0-0-0
+  evidences_capability:
+    - target: capability:stop-hook
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:cursor:ge-0-0-0:session-resume
+attributes:
+  supportId: "capabilitySupport:cursor:ge-0-0-0:session-resume"
+  capabilityId: "session-resume"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:cursor:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Cursor documents checkpoint restoration and persistent shell-mode context, which is the strongest public basis for resuming work."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-cursor-agent-overview"
+    - "web-cursor-cli-shell-mode"
+edges:
+  capability_of_version:
+    - target: agentVersion:cursor:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:gemini:ge-0-0-0:skills
+attributes:
+  supportId: "capabilitySupport:gemini:ge-0-0-0:skills"
+  capabilityId: "skills"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:gemini:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Gemini CLI documents first-class agent skills across workspace, user, and extension tiers."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-gemini"
+    - "repo-target-index"
+    - "web-gemini-cli-skills"
+edges:
+  capability_of_version:
+    - target: agentVersion:gemini:ge-0-0-0
+  evidences_capability:
+    - target: capability:skills
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:gemini:ge-0-0-0:thinking
+attributes:
+  supportId: "capabilitySupport:gemini:ge-0-0-0:thinking"
+  capabilityId: "thinking"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:gemini:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Gemini CLI is documented as an interactive and automation-capable terminal agent surface."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-gemini-cli-index"
+    - "web-gemini-cli-reference"
+edges:
+  capability_of_version:
+    - target: agentVersion:gemini:ge-0-0-0
+  evidences_capability:
+    - target: capability:supports-thinking
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:gemini:ge-0-0-0:interactive-mode
+attributes:
+  supportId: "capabilitySupport:gemini:ge-0-0-0:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:gemini:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Interactive REPL semantics are documented directly in the Gemini CLI reference."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-gemini-cli-index"
+    - "web-gemini-cli-reference"
+edges:
+  capability_of_version:
+    - target: agentVersion:gemini:ge-0-0-0
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:gemini:ge-0-0-0:stdin-injection
+attributes:
+  supportId: "capabilitySupport:gemini:ge-0-0-0:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:gemini:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Headless and piped execution are documented separately from interactive usage."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-gemini-cli-headless"
+    - "web-gemini-cli-reference"
+edges:
+  capability_of_version:
+    - target: agentVersion:gemini:ge-0-0-0
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:gemini:ge-0-0-0:image-input
+attributes:
+  supportId: "capabilitySupport:gemini:ge-0-0-0:image-input"
+  capabilityId: "image-input"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:gemini:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Public Gemini CLI evidence for image input is weaker than for hooks or resume, but the docs and changelog do describe multimodal CLI support."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-gemini-cli-index"
+    - "web-gemini-cli-changelog"
+edges:
+  capability_of_version:
+    - target: agentVersion:gemini:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:gemini:ge-0-0-0:runtime-hooks
+attributes:
+  supportId: "capabilitySupport:gemini:ge-0-0-0:runtime-hooks"
+  capabilityId: "runtime-hooks"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:gemini:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Gemini CLI hook events are documented directly, instead of relying on local hook-name mapping alone."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-gemini"
+    - "repo-target-index"
+    - "web-gemini-cli-hooks"
+edges:
+  capability_of_version:
+    - target: agentVersion:gemini:ge-0-0-0
+  evidences_capability:
+    - target: capability:runtime-hooks
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:gemini:ge-0-0-0:stop-hook
+attributes:
+  supportId: "capabilitySupport:gemini:ge-0-0-0:stop-hook"
+  capabilityId: "stop-hook"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:gemini:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "The normalized stop-hook capability is backed by Gemini's documented end-of-loop hook events rather than a literal Stop event name."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-gemini"
+    - "repo-target-index"
+    - "web-gemini-cli-hooks"
+edges:
+  capability_of_version:
+    - target: agentVersion:gemini:ge-0-0-0
+  evidences_capability:
+    - target: capability:stop-hook
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:gemini:ge-0-0-0:session-resume
+attributes:
+  supportId: "capabilitySupport:gemini:ge-0-0-0:session-resume"
+  capabilityId: "session-resume"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:gemini:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Gemini CLI resume semantics are documented through both session management and checkpoint restoration."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-gemini-cli-session-management"
+    - "web-gemini-cli-checkpointing"
+edges:
+  capability_of_version:
+    - target: agentVersion:gemini:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:omp:ge-0-0-0:skills
+attributes:
+  supportId: "capabilitySupport:omp:ge-0-0-0:skills"
+  capabilityId: "skills"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:omp:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Oh-My-Pi documents file-backed skills explicitly, so this row no longer relies only on the fallback metadata."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-omp-skills"
+edges:
+  capability_of_version:
+    - target: agentVersion:omp:ge-0-0-0
+  evidences_capability:
+    - target: capability:skills
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:omp:ge-0-0-0:thinking
+attributes:
+  supportId: "capabilitySupport:omp:ge-0-0-0:thinking"
+  capabilityId: "thinking"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:omp:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Oh-My-Pi publicly describes itself as a terminal coding agent with a broad tool surface."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-omp-readme"
+edges:
+  capability_of_version:
+    - target: agentVersion:omp:ge-0-0-0
+  evidences_capability:
+    - target: capability:supports-thinking
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:omp:ge-0-0-0:interactive-mode
+attributes:
+  supportId: "capabilitySupport:omp:ge-0-0-0:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:omp:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Interactive terminal behavior is grounded in the upstream product README instead of only the local fallback metadata."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-omp-readme"
+edges:
+  capability_of_version:
+    - target: agentVersion:omp:ge-0-0-0
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:omp:ge-0-0-0:stdin-injection
+attributes:
+  supportId: "capabilitySupport:omp:ge-0-0-0:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:omp:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Public operator docs are thin for non-interactive prompting, so this row keeps the local fallback metadata as the main source of truth."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-omp-readme"
+edges:
+  capability_of_version:
+    - target: agentVersion:omp:ge-0-0-0
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:omp:ge-0-0-0:image-input
+attributes:
+  supportId: "capabilitySupport:omp:ge-0-0-0:image-input"
+  capabilityId: "image-input"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:omp:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "The public README advertises image support, but public technical detail is thinner than for sessions or hooks."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-omp-readme"
+edges:
+  capability_of_version:
+    - target: agentVersion:omp:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:omp:ge-0-0-0:session-resume
+attributes:
+  supportId: "capabilitySupport:omp:ge-0-0-0:session-resume"
+  capabilityId: "session-resume"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:omp:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Oh-My-Pi documents resume, continue, fork, and session switching as first-class session operations."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-omp-session-resume"
+edges:
+  capability_of_version:
+    - target: agentVersion:omp:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:openclaw:ge-0-0-0:skills
+attributes:
+  supportId: "capabilitySupport:openclaw:ge-0-0-0:skills"
+  capabilityId: "skills"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:openclaw:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-hooks-detector"
+    - "repo-target-index"
+edges:
+  capability_of_version:
+    - target: agentVersion:openclaw:ge-0-0-0
+  evidences_capability:
+    - target: capability:skills
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:openclaw:ge-0-0-0:thinking
+attributes:
+  supportId: "capabilitySupport:openclaw:ge-0-0-0:thinking"
+  capabilityId: "thinking"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:openclaw:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-hooks-detector"
+    - "repo-target-index"
+edges:
+  capability_of_version:
+    - target: agentVersion:openclaw:ge-0-0-0
+  evidences_capability:
+    - target: capability:supports-thinking
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:openclaw:ge-0-0-0:interactive-mode
+attributes:
+  supportId: "capabilitySupport:openclaw:ge-0-0-0:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:openclaw:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-hooks-detector"
+    - "repo-target-index"
+edges:
+  capability_of_version:
+    - target: agentVersion:openclaw:ge-0-0-0
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:openclaw:ge-0-0-0:stdin-injection
+attributes:
+  supportId: "capabilitySupport:openclaw:ge-0-0-0:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:openclaw:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-hooks-detector"
+    - "repo-target-index"
+edges:
+  capability_of_version:
+    - target: agentVersion:openclaw:ge-0-0-0
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:openclaw:ge-0-0-0:image-input
+attributes:
+  supportId: "capabilitySupport:openclaw:ge-0-0-0:image-input"
+  capabilityId: "image-input"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:openclaw:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-hooks-detector"
+    - "repo-target-index"
+edges:
+  capability_of_version:
+    - target: agentVersion:openclaw:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:openclaw:ge-0-0-0:session-resume
+attributes:
+  supportId: "capabilitySupport:openclaw:ge-0-0-0:session-resume"
+  capabilityId: "session-resume"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:openclaw:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-hooks-detector"
+    - "repo-target-index"
+edges:
+  capability_of_version:
+    - target: agentVersion:openclaw:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:opencode:ge-0-0-0:skills
+attributes:
+  supportId: "capabilitySupport:opencode:ge-0-0-0:skills"
+  capabilityId: "skills"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:opencode:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "OpenCode documents reusable command surfaces, which is the strongest first-party basis for the local skills abstraction."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-index"
+    - "web-opencode-commands"
+edges:
+  capability_of_version:
+    - target: agentVersion:opencode:ge-0-0-0
+  evidences_capability:
+    - target: capability:skills
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:opencode:ge-0-0-0:thinking
+attributes:
+  supportId: "capabilitySupport:opencode:ge-0-0-0:thinking"
+  capabilityId: "thinking"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:opencode:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "OpenCode is documented as an interactive terminal coding surface backed by configurable providers."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-opencode-tui"
+    - "web-opencode-providers"
+edges:
+  capability_of_version:
+    - target: agentVersion:opencode:ge-0-0-0
+  evidences_capability:
+    - target: capability:supports-thinking
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:opencode:ge-0-0-0:interactive-mode
+attributes:
+  supportId: "capabilitySupport:opencode:ge-0-0-0:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:opencode:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Interactive terminal use is documented directly in the OpenCode TUI docs."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "web-opencode-tui"
+    - "web-opencode-providers"
+edges:
+  capability_of_version:
+    - target: agentVersion:opencode:ge-0-0-0
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:opencode:ge-0-0-0:stdin-injection
+attributes:
+  supportId: "capabilitySupport:opencode:ge-0-0-0:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:opencode:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Public docs are thinner for non-interactive prompt injection, so the local fallback metadata remains the primary source of truth."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-index"
+    - "web-opencode-tui"
+    - "web-opencode-commands"
+edges:
+  capability_of_version:
+    - target: agentVersion:opencode:ge-0-0-0
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:opencode:ge-0-0-0:image-input
+attributes:
+  supportId: "capabilitySupport:opencode:ge-0-0-0:image-input"
+  capabilityId: "image-input"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:opencode:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Public OpenCode docs do not provide strong technical detail for image input, so this row keeps the local fallback metadata only."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-index"
+    - "web-opencode-tui"
+edges:
+  capability_of_version:
+    - target: agentVersion:opencode:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:opencode:ge-0-0-0:runtime-hooks
+attributes:
+  supportId: "capabilitySupport:opencode:ge-0-0-0:runtime-hooks"
+  capabilityId: "runtime-hooks"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:opencode:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "OpenCode plugins expose hook-based extensibility, which is the strongest first-party basis for runtime hooks."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-index"
+    - "web-opencode-plugins"
+edges:
+  capability_of_version:
+    - target: agentVersion:opencode:ge-0-0-0
+  evidences_capability:
+    - target: capability:runtime-hooks
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:opencode:ge-0-0-0:stop-hook
+attributes:
+  supportId: "capabilitySupport:opencode:ge-0-0-0:stop-hook"
+  capabilityId: "stop-hook"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:opencode:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "The local ontology still normalizes stop-hook separately, but the public first-party support is the broader plugin hook system."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-index"
+    - "web-opencode-plugins"
+edges:
+  capability_of_version:
+    - target: agentVersion:opencode:ge-0-0-0
+  evidences_capability:
+    - target: capability:stop-hook
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:opencode:ge-0-0-0:session-resume
+attributes:
+  supportId: "capabilitySupport:opencode:ge-0-0-0:session-resume"
+  capabilityId: "session-resume"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:opencode:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Public OpenCode docs describe where sessions are stored, which is useful but still weaker than the local fallback metadata for full resume semantics."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-index"
+    - "web-opencode-windows-wsl"
+edges:
+  capability_of_version:
+    - target: agentVersion:opencode:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:pi:ge-0-0-0:skills
+attributes:
+  supportId: "capabilitySupport:pi:ge-0-0-0:skills"
+  capabilityId: "skills"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:pi:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+edges:
+  capability_of_version:
+    - target: agentVersion:pi:ge-0-0-0
+  evidences_capability:
+    - target: capability:skills
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:pi:ge-0-0-0:thinking
+attributes:
+  supportId: "capabilitySupport:pi:ge-0-0-0:thinking"
+  capabilityId: "thinking"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:pi:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+edges:
+  capability_of_version:
+    - target: agentVersion:pi:ge-0-0-0
+  evidences_capability:
+    - target: capability:supports-thinking
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:pi:ge-0-0-0:interactive-mode
+attributes:
+  supportId: "capabilitySupport:pi:ge-0-0-0:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:pi:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+edges:
+  capability_of_version:
+    - target: agentVersion:pi:ge-0-0-0
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:pi:ge-0-0-0:stdin-injection
+attributes:
+  supportId: "capabilitySupport:pi:ge-0-0-0:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:pi:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+edges:
+  capability_of_version:
+    - target: agentVersion:pi:ge-0-0-0
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:pi:ge-0-0-0:image-input
+attributes:
+  supportId: "capabilitySupport:pi:ge-0-0-0:image-input"
+  capabilityId: "image-input"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:pi:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+edges:
+  capability_of_version:
+    - target: agentVersion:pi:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:pi:ge-0-0-0:session-resume
+attributes:
+  supportId: "capabilitySupport:pi:ge-0-0-0:session-resume"
+  capabilityId: "session-resume"
+  supportLevel: "native"
+  subjectKind: "AgentVersion"
+  subjectId: "agentVersion:pi:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata."
+  evidenceRefs:
+    - "repo-sdk-fallback"
+edges:
+  capability_of_version:
+    - target: agentVersion:pi:ge-0-0-0
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:anthropic:streaming
+attributes:
+  supportId: "capabilitySupport:anthropic:streaming"
+  capabilityId: "streaming"
+  supportLevel: "provider-specific"
+  subjectKind: "ModelProviderVersion"
+  subjectId: "providerVersion:anthropic:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "anthropic"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-agent-mux-host"
+    - "web-anthropic-claude-code"
+edges:
+  capability_of_version:
+    - target: providerVersion:anthropic:ge-0-0-0
+  evidences_capability:
+    - target: capability:streaming
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:anthropic:tool-calling
+attributes:
+  supportId: "capabilitySupport:anthropic:tool-calling"
+  capabilityId: "tool-calling"
+  supportLevel: "provider-specific"
+  subjectKind: "ModelProviderVersion"
+  subjectId: "providerVersion:anthropic:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "anthropic"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-agent-mux-host"
+    - "web-anthropic-claude-code"
+edges:
+  capability_of_version:
+    - target: providerVersion:anthropic:ge-0-0-0
+  evidences_capability:
+    - target: capability:tool-calling
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:openai:streaming
+attributes:
+  supportId: "capabilitySupport:openai:streaming"
+  capabilityId: "streaming"
+  supportLevel: "provider-specific"
+  subjectKind: "ModelProviderVersion"
+  subjectId: "providerVersion:openai:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "openai"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-hooks-detector"
+    - "web-openai-codex-skills"
+edges:
+  capability_of_version:
+    - target: providerVersion:openai:ge-0-0-0
+  evidences_capability:
+    - target: capability:streaming
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:openai:tool-calling
+attributes:
+  supportId: "capabilitySupport:openai:tool-calling"
+  capabilityId: "tool-calling"
+  supportLevel: "provider-specific"
+  subjectKind: "ModelProviderVersion"
+  subjectId: "providerVersion:openai:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "openai"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-hooks-detector"
+    - "web-openai-codex-skills"
+edges:
+  capability_of_version:
+    - target: providerVersion:openai:ge-0-0-0
+  evidences_capability:
+    - target: capability:tool-calling
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:google:streaming
+attributes:
+  supportId: "capabilitySupport:google:streaming"
+  capabilityId: "streaming"
+  supportLevel: "provider-specific"
+  subjectKind: "ModelProviderVersion"
+  subjectId: "providerVersion:google:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "google"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-gemini"
+    - "web-gemini-hooks"
+edges:
+  capability_of_version:
+    - target: providerVersion:google:ge-0-0-0
+  evidences_capability:
+    - target: capability:streaming
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:google:tool-calling
+attributes:
+  supportId: "capabilitySupport:google:tool-calling"
+  capabilityId: "tool-calling"
+  supportLevel: "provider-specific"
+  subjectKind: "ModelProviderVersion"
+  subjectId: "providerVersion:google:ge-0-0-0"
+  versionRange: ">=0.0.0"
+  notes: "google"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-target-gemini"
+    - "web-gemini-hooks"
+edges:
+  capability_of_version:
+    - target: providerVersion:google:ge-0-0-0
+  evidences_capability:
+    - target: capability:tool-calling
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:terminal-cli:interactive-mode
+attributes:
+  supportId: "capabilitySupport:terminal-cli:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "TransportRuntime"
+  subjectId: "transportRuntime:terminal-cli"
+  versionRange: ">=0.0.0"
+  notes: "Interactive terminal CLI runtime"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-agent-mux-host"
+edges:
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:terminal-cli:stdin-injection
+attributes:
+  supportId: "capabilitySupport:terminal-cli:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "TransportRuntime"
+  subjectId: "transportRuntime:terminal-cli"
+  versionRange: ">=0.0.0"
+  notes: "Interactive terminal CLI runtime"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-agent-mux-host"
+edges:
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:shell-hook-runtime:runtime-hooks
+attributes:
+  supportId: "capabilitySupport:shell-hook-runtime:runtime-hooks"
+  capabilityId: "runtime-hooks"
+  supportLevel: "native"
+  subjectKind: "TransportRuntime"
+  subjectId: "transportRuntime:shell-hook-runtime"
+  versionRange: ">=0.0.0"
+  notes: "Runtime hook execution surface"
+  evidenceRefs:
+    - "repo-target-index"
+    - "repo-target-claude"
+    - "repo-target-codex"
+edges:
+  evidences_capability:
+    - target: capability:runtime-hooks
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:shell-hook-runtime:stop-hook
+attributes:
+  supportId: "capabilitySupport:shell-hook-runtime:stop-hook"
+  capabilityId: "stop-hook"
+  supportLevel: "native"
+  subjectKind: "TransportRuntime"
+  subjectId: "transportRuntime:shell-hook-runtime"
+  versionRange: ">=0.0.0"
+  notes: "Runtime hook execution surface"
+  evidenceRefs:
+    - "repo-target-index"
+    - "repo-target-claude"
+    - "repo-target-codex"
+edges:
+  evidences_capability:
+    - target: capability:stop-hook
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:shell-hook-runtime:stdin-injection
+attributes:
+  supportId: "capabilitySupport:shell-hook-runtime:stdin-injection"
+  capabilityId: "stdin-injection"
+  supportLevel: "native"
+  subjectKind: "TransportRuntime"
+  subjectId: "transportRuntime:shell-hook-runtime"
+  versionRange: ">=0.0.0"
+  notes: "Runtime hook execution surface"
+  evidenceRefs:
+    - "repo-target-index"
+    - "repo-target-claude"
+    - "repo-target-codex"
+edges:
+  evidences_capability:
+    - target: capability:stdin-injection
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:shell-hook-runtime:interactive-mode
+attributes:
+  supportId: "capabilitySupport:shell-hook-runtime:interactive-mode"
+  capabilityId: "interactive-mode"
+  supportLevel: "native"
+  subjectKind: "TransportRuntime"
+  subjectId: "transportRuntime:shell-hook-runtime"
+  versionRange: ">=0.0.0"
+  notes: "Runtime hook execution surface"
+  evidenceRefs:
+    - "repo-target-index"
+    - "repo-target-claude"
+    - "repo-target-codex"
+edges:
+  evidences_capability:
+    - target: capability:interactive-mode
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:amux-proxy:streaming
+attributes:
+  supportId: "capabilitySupport:amux-proxy:streaming"
+  capabilityId: "streaming"
+  supportLevel: "native"
+  subjectKind: "TransportRuntime"
+  subjectId: "transportRuntime:amux-proxy"
+  versionRange: ">=0.0.0"
+  notes: "amux-proxy protocol/provider bridge"
+  evidenceRefs:
+    - "repo-transport-mux-readme"
+    - "repo-transport-mux-architecture"
+    - "repo-transport-mux-migration"
+edges:
+  evidences_capability:
+    - target: capability:streaming
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:amux-proxy:proxy-transport-emulation
+attributes:
+  supportId: "capabilitySupport:amux-proxy:proxy-transport-emulation"
+  capabilityId: "proxy-transport-emulation"
+  supportLevel: "native"
+  subjectKind: "TransportRuntime"
+  subjectId: "transportRuntime:amux-proxy"
+  versionRange: ">=0.0.0"
+  notes: "amux-proxy protocol/provider bridge"
+  evidenceRefs:
+    - "repo-transport-mux-readme"
+    - "repo-transport-mux-architecture"
+    - "repo-transport-mux-migration"
+edges:
+  evidences_capability:
+    - target: capability:proxy-transport-emulation
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:amux-proxy:model-discovery
+attributes:
+  supportId: "capabilitySupport:amux-proxy:model-discovery"
+  capabilityId: "model-discovery"
+  supportLevel: "native"
+  subjectKind: "TransportRuntime"
+  subjectId: "transportRuntime:amux-proxy"
+  versionRange: ">=0.0.0"
+  notes: "amux-proxy protocol/provider bridge"
+  evidenceRefs:
+    - "repo-transport-mux-readme"
+    - "repo-transport-mux-architecture"
+    - "repo-transport-mux-migration"
+edges:
+  evidences_capability:
+    - target: capability:model-discovery
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:amux-proxy:token-counting
+attributes:
+  supportId: "capabilitySupport:amux-proxy:token-counting"
+  capabilityId: "token-counting"
+  supportLevel: "native"
+  subjectKind: "TransportRuntime"
+  subjectId: "transportRuntime:amux-proxy"
+  versionRange: ">=0.0.0"
+  notes: "amux-proxy protocol/provider bridge"
+  evidenceRefs:
+    - "repo-transport-mux-readme"
+    - "repo-transport-mux-architecture"
+    - "repo-transport-mux-migration"
+edges:
+  evidences_capability:
+    - target: capability:token-counting
+---
+nodeKind: CapabilitySupport
+id: capabilitySupport:amux-proxy:tool-calling
+attributes:
+  supportId: "capabilitySupport:amux-proxy:tool-calling"
+  capabilityId: "tool-calling"
+  supportLevel: "native"
+  subjectKind: "TransportRuntime"
+  subjectId: "transportRuntime:amux-proxy"
+  versionRange: ">=0.0.0"
+  notes: "amux-proxy protocol/provider bridge"
+  evidenceRefs:
+    - "repo-transport-mux-readme"
+    - "repo-transport-mux-architecture"
+    - "repo-transport-mux-migration"
+edges:
+  evidences_capability:
+    - target: capability:tool-calling

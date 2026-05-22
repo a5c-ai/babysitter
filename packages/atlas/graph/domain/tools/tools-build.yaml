@@ -1,0 +1,67 @@
+---
+nodeKind: Tool
+id: tool:gradle
+attributes:
+  displayName: "Gradle"
+  homepageUrl: "https://gradle.org"
+  kind: build-tool
+  language: language:java
+  description: |
+    JVM build tool with Groovy/Kotlin DSLs, incremental builds, and a
+    rich plugin ecosystem (Android, Spring Boot, Kotlin).
+edges:
+  belongs_to_language:
+    - language:java
+  used_for:
+    - target: skill-area:ci-pipeline-optimization
+  alternative_to:
+    - target: tool:maven
+      comparison: "JVM build tools — Gradle uses Groovy/Kotlin DSL; Maven uses XML"
+    - target: tool:sbt
+      comparison: "JVM build tools"
+    - target: tool:bazel
+      comparison: "Build systems — Gradle is JVM-focused; Bazel is multi-language"
+---
+nodeKind: Tool
+id: tool:maven
+attributes:
+  displayName: "Apache Maven"
+  homepageUrl: "https://maven.apache.org"
+  kind: build-tool
+  language: language:java
+  description: |
+    XML-driven JVM build tool with a convention-based lifecycle, POM
+    dependency model, and a vast plugin set.
+edges:
+  belongs_to_language:
+    - language:java
+  used_for:
+    - target: skill-area:ci-pipeline-optimization
+  alternative_to:
+    - target: tool:gradle
+      comparison: "JVM build tools — Maven uses XML; Gradle uses Groovy/Kotlin DSL"
+    - target: tool:sbt
+      comparison: "JVM build tools"
+    - target: tool:bazel
+      comparison: "Build systems — Maven is JVM-focused; Bazel is multi-language"
+---
+nodeKind: Tool
+id: tool:sbt
+attributes:
+  displayName: "sbt"
+  homepageUrl: "https://www.scala-sbt.org"
+  kind: build-tool
+  language: language:scala
+  description: |
+    Scala-centric build tool with incremental compilation, REPL,
+    cross-version builds, and plugin DSL.
+edges:
+  belongs_to_language:
+    - language:scala
+  used_for:
+    - target: skill-area:ci-pipeline-optimization
+  alternative_to:
+    - target: tool:gradle
+      comparison: "JVM build tools"
+    - target: tool:maven
+      comparison: "JVM build tools"

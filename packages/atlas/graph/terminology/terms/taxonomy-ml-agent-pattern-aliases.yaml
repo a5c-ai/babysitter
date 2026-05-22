@@ -1,0 +1,372 @@
+---
+nodeKind: Term
+id: term:transfer-learning
+attributes:
+  displayName: "Transfer Learning"
+  kind: concept
+  references:
+    - specialization:llm-fine-tuning
+  description: |
+    Taxonomy alias term for adapting pretrained models to new tasks or domains.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:fine-tuning-models
+attributes:
+  displayName: "Fine-Tuning Models"
+  kind: concept
+  references:
+    - specialization:llm-fine-tuning
+  description: |
+    Taxonomy alias term for fine-tuning model weights or adapters.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:active-learning
+attributes:
+  displayName: "Active Learning"
+  kind: concept
+  references:
+    - skill-area:training-data-testing
+  description: |
+    Taxonomy alias term for feedback loops that prioritize informative samples.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:federated-learning
+attributes:
+  displayName: "Federated Learning"
+  kind: concept
+  references:
+    - skill-area:ml-governance-compliance
+  description: |
+    Taxonomy alias term for distributed privacy-aware collaborative training.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:continual-learning
+attributes:
+  displayName: "Continual Learning"
+  kind: concept
+  references:
+    - skill-area:automated-retraining
+  description: |
+    Taxonomy alias term for systems that update models over time after deployment.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:ab-testing-models
+attributes:
+  displayName: "A/B Testing for Models"
+  kind: concept
+  references:
+    - skill-area:ab-testing-experimentation
+    - skill-area:model-validation-testing
+  description: |
+    Taxonomy alias term for comparative model experiments in production-like settings.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:performance-metrics-monitoring
+attributes:
+  displayName: "Performance Metrics Monitoring"
+  kind: concept
+  references:
+    - skill-area:model-monitoring-drift-detection
+  description: |
+    Taxonomy alias term for monitoring latency, throughput, and quality metrics.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:logging-metrics-aggregation
+attributes:
+  displayName: "Logging and Metrics Aggregation"
+  kind: concept
+  references:
+    - skill-area:observability-pipeline
+  description: |
+    Taxonomy alias term for consolidated telemetry collection and routing.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:anomaly-detection-predictions
+attributes:
+  displayName: "Anomaly Detection in Predictions"
+  kind: concept
+  references:
+    - skill-area:model-monitoring-drift-detection
+  description: |
+    Taxonomy alias term for surfacing unusual or degraded model output patterns.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:model-rollback-strategies
+attributes:
+  displayName: "Model Rollback Strategies"
+  kind: concept
+  references:
+    - skill-area:model-registry-management
+    - skill-area:automated-retraining
+  description: |
+    Taxonomy alias term for controlled fallback and rollback of model versions.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:dag-pipelines
+attributes:
+  displayName: "Directed Acyclic Graph (DAG) Pipelines"
+  kind: concept
+  references:
+    - skill-area:feature-engineering-pipelines
+    - skill-area:ml-pipeline-testing
+  description: |
+    Taxonomy alias term for DAG-structured ML and data workflow execution.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:workflow-orchestration-tools
+attributes:
+  displayName: "Workflow Orchestration Tools"
+  kind: concept
+  references:
+    - skill-area:feature-engineering-pipelines
+    - skill-area:background-job-processing
+  description: |
+    Taxonomy alias term for orchestrating staged workflow execution and retries.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:automl-pipelines
+attributes:
+  displayName: "Automated Machine Learning (AutoML) Pipelines"
+  kind: concept
+  references:
+    - skill-area:hyperparameter-tuning-experiment-management
+  description: |
+    Taxonomy alias term for automated model-search and evaluation pipelines.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:hyperparameter-tuning
+attributes:
+  displayName: "Hyperparameter Tuning"
+  kind: concept
+  references:
+    - skill-area:hyperparameter-tuning-experiment-management
+  description: |
+    Taxonomy alias term for structured hyperparameter search and trial analysis.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:model-registry-patterns
+attributes:
+  displayName: "Model Registry Patterns"
+  kind: concept
+  references:
+    - skill-area:model-registry-management
+  description: |
+    Taxonomy alias term for versioned model registration and promotion design.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:ci-cd-machine-learning
+attributes:
+  displayName: "CI/CD for Machine Learning"
+  kind: concept
+  references:
+    - skill-area:ci-cd-ml-pipelines
+  description: |
+    Taxonomy alias term for delivery automation across ML lifecycle stages.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:multi-agent-systems
+attributes:
+  displayName: "Multi-Agent Systems"
+  kind: concept
+  references:
+    - skill-area:multi-agent-coordination
+  description: |
+    Taxonomy alias term for systems composed of collaborating agents.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:memory-based-agents
+attributes:
+  displayName: "Memory-based Agents"
+  kind: concept
+  references:
+    - skill-area:context-management
+  description: |
+    Taxonomy alias term for agents that retain and reuse contextual memory.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:chain-of-thought-orchestration
+attributes:
+  displayName: "Chain-of-Thought Orchestration"
+  kind: concept
+  references:
+    - skill-area:agent-planning-reasoning
+    - skill-area:agentic-loops
+  description: |
+    Taxonomy alias term for multi-step reasoning and orchestration behavior.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:tool-driven-agent
+attributes:
+  displayName: "Tool-Driven Agent"
+  kind: concept
+  references:
+    - skill-area:tool-use
+  description: |
+    Taxonomy alias term for agents centered around tool invocation and control.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:agent-environment-loop
+attributes:
+  displayName: "Agent and Environment Loop"
+  kind: concept
+  references:
+    - skill-area:agentic-loops
+  description: |
+    Taxonomy alias term for iterative agent-environment execution loops.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:hierarchical-agent-architectures
+attributes:
+  displayName: "Hierarchical Agent Architectures"
+  kind: concept
+  references:
+    - skill-area:agent-planning-reasoning
+    - skill-area:multi-agent-coordination
+  description: |
+    Taxonomy alias term for tiered planner-executor or manager-worker agent structures.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:instruction-tuned-llms
+attributes:
+  displayName: "Instruction-Tuned LLMs"
+  kind: concept
+  references:
+    - skill-area:prompt-engineering
+    - specialization:llm-fine-tuning
+  description: |
+    Taxonomy alias term for instruction-following model behavior and tuning.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:chain-of-thought-prompting
+attributes:
+  displayName: "Chain-of-Thought Prompting"
+  kind: concept
+  references:
+    - skill-area:prompt-engineering
+    - skill-area:agent-planning-reasoning
+  description: |
+    Taxonomy alias term for prompting techniques that elicit intermediate reasoning.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:fine-tuning-full-lora-peft
+attributes:
+  displayName: "Fine-Tuning (Full / LoRA / PEFT)"
+  kind: concept
+  references:
+    - specialization:llm-fine-tuning
+  description: |
+    Taxonomy alias term for full-parameter and adapter-based fine-tuning strategies.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering
+---
+nodeKind: Term
+id: term:system-user-prompting-layers
+attributes:
+  displayName: "System and User Prompting Layers"
+  kind: concept
+  references:
+    - skill-area:prompt-engineering
+  description: |
+    Taxonomy alias term for layered prompt roles and instruction composition.
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering

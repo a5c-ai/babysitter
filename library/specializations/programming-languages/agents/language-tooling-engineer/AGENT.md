@@ -10,6 +10,11 @@ expertise:
   - Refactoring operations
   - Source map generation
   - REPL development
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:compiler-implementation, skill-area:language-design]
+  roles: [role:backend-engineer]
 ---
 
 # Language Tooling Engineer Agent

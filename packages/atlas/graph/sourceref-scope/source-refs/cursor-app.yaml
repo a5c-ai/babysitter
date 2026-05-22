@@ -1,0 +1,10 @@
+nodeKind: SourceRef
+id: source-ref:cursor-app
+attributes:
+  description: "Cursor IDE (proprietary download)"
+  displayName: "Cursor IDE (proprietary download)"
+  repoUrl: https://www.cursor.com
+  ref: stable
+  path: "."
+  kind: download
+edges: {}

@@ -1,0 +1,68 @@
+---
+nodeKind: Workflow
+id: workflow:cad-design-review
+attributes:
+  displayName: "CAD Design Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-revision"
+  complexity: single-team
+  description: |
+    Reviews CAD models for design intent, manufacturability, and
+    standards compliance -- checking GD&T callouts against functional
+    requirements, validating draft angles and undercuts for moldability,
+    verifying interference/clash detection results, confirming material
+    selections match operating conditions, and ensuring revision control
+    and metadata conform to PDM/PLM workflows. Excludes CAD model
+    creation.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:principal-engineer
+    - target: role:test-writer
+  requires_skill_area:
+    - target: skill-area:computational-geometry
+    - target: skill-area:code-review-practice
+  applies_to_domain:
+    - target: domain:mechanical-engineering
+    - target: domain:materials-science
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:code-review-coverage
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:thermal-simulation-validation
+attributes:
+  displayName: "Thermal Simulation Validation"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-design-iteration"
+  complexity: single-team
+  description: |
+    Validates thermal simulations (CFD/FEA) against design requirements
+    -- checking mesh independence studies, verifying boundary condition
+    assumptions (convection coefficients, radiation view factors),
+    correlating simulation predictions with thermocouple/IR camera test
+    data, confirming junction temperatures remain within component
+    derating curves, and documenting thermal margin for worst-case
+    operating conditions. Excludes thermal design changes.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:data-scientist
+    - target: role:performance-profiler
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:performance-testing
+  applies_to_domain:
+    - target: domain:mechanical-engineering
+    - target: domain:physics
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:research-engineering

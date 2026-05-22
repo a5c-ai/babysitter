@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anthropic.com/bpx/responder-profile.schema.json",
+  "title": "ResponderProfile",
+  "description": "Schema for a responder profile used by the Breakpoints Mux system.",
+  "type": "object",
+  "required": ["id", "name", "title", "domains", "tags", "availability", "responseTimeSla"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for the responder."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Display name of the responder."
+    },
+    "title": {
+      "type": "string",
+      "description": "Professional title or role."
+    },
+    "domains": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "High-level routing domains for the responder."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Keywords, technologies, and specialties used for matching."
+    },
+    "availability": {
+      "type": "boolean",
+      "description": "Whether the responder is currently available for questions."
+    },
+    "responseTimeSla": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Maximum expected response time in milliseconds."
+    },
+    "publicKeyFingerprint": {
+      "type": "string",
+      "description": "Optional fingerprint for provenance-aware responder flows."
+    }
+  }
+}

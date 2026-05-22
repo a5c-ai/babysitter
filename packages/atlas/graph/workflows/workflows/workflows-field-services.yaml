@@ -1,0 +1,70 @@
+---
+nodeKind: Workflow
+id: workflow:field-dispatch-optimization
+attributes:
+  displayName: "Field Dispatch Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Optimizes field technician dispatching and route planning -- analyzing
+    incoming service requests by priority and SLA deadlines, matching
+    technician skill certifications to job requirements, computing optimal
+    travel routes considering traffic patterns and geographic clustering,
+    balancing workload across the mobile workforce, and re-dispatching in
+    real time when emergencies or cancellations occur. Produces daily
+    dispatch schedules, route manifests, and utilization reports. Excludes
+    technician hiring and training.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:field-services
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:work-order-lifecycle-management
+attributes:
+  displayName: "Work Order Lifecycle Management"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: single-team
+  description: |
+    Manages work orders from creation through completion -- triaging
+    incoming maintenance and service requests, assigning priority based on
+    asset criticality and customer SLA tiers, tracking technician progress
+    through mobile check-in/check-out, validating parts consumption against
+    inventory, capturing proof-of-completion with photos and digital
+    signatures, and triggering invoicing workflows upon closure. Produces
+    work order audit trails, first-time-fix-rate metrics, and parts usage
+    reports. Excludes inventory procurement.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:end-user
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:field-services
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:it-service-management

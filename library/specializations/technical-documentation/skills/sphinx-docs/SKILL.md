@@ -6,6 +6,11 @@ backlog-id: SK-004
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:technical-documentation]
+  skillAreas: [skill-area:docs-as-code, skill-area:api-doc-generation]
+  roles: [role:technical-writer, role:documentation-engineer]
 ---
 
 # Sphinx Documentation Skill

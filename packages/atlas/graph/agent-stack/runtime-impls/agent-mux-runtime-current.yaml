@@ -1,0 +1,31 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:agent-mux.runtime@current
+attributes:
+  displayName: "agent-mux Runtime (current) — gateway + adapters"
+  agentVersionId: agent-version:agent-mux@current
+  packageRef: source-ref:agent-mux-github
+  subagentDispatchMechanism: none
+  builtInTools: []
+  toolRegistryDiscovery: not-applicable
+  hookSockets: []
+  internalSessionStateLocation: "delegated-to-remote"
+  sessionFileFormat: delegated-to-remote
+  sessionFilePathConvention: "delegated-to-remote"
+  approvalGatingPrimitive: delegated-to-remote
+  subprocessSandboxStrategy: invocation-mode
+  runtimeIdentity: delegated-to-remote
+  supportedMCPTransports: []
+  supportsStreaming: true
+  notes: |
+    agent-mux runtime hosts the gateway + adapters that bridge to remote
+    agents. Tools, hooks, and sandbox are owned by the bridged remote
+    agent. The runtime layer's responsibility is normalizing the event
+    stream and routing it to the multi-surface presentations.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:agent-mux
+      role: runtime
+  bundles: []
+  connects: []

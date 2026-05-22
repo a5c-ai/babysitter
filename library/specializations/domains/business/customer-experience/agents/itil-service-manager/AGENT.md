@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: Service Management
   id: AG-005
+graph:
+  domains: [domain:customer-experience]
+  skillAreas: [skill-area:customer-success, skill-area:incident-management, skill-area:change-management-ops]
+  workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+  roles: [role:customer-success-manager, role:support-engineer, role:operations-analyst]
 ---
 
 # ITIL Service Manager Agent

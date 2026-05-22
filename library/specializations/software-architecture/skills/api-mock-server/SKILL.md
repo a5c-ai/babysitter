@@ -6,6 +6,14 @@ allowed-tools:
   - Read
   - Write
   - Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:service-mocking, skill-area:api-design]
+  roles: [role:backend-engineer, role:qa-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:api-design]
+
 ---
 
 # API Mock Server Skill

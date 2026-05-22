@@ -7,6 +7,13 @@ metadata:
   version: "1.0.0"
   category: environment-management
   backlog-id: SK-020
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:containerization]
+  roles: [role:qa-engineer, role:devops-engineer]
+  topics: [topic:test-driven-development]
+
 ---
 
 # docker-test-environments

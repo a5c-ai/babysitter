@@ -1,0 +1,11 @@
+nodeKind: Capability
+id: capability:supports-vertex-reasoning-engine
+attributes:
+  displayName: "Supports Vertex Reasoning Engine"
+  description: |
+    The provider supports Vertex AI Reasoning Engine — a managed runtime
+    for hosting agentic / reasoning workflows with checkpointing and
+    state. Vertex-specific.
+  appliesToNodeKinds: ["Provider"]
+  category: provider-feature
+edges: {}
