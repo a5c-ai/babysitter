@@ -240,9 +240,14 @@ function appendHarnessSessionArgs(plan: LaunchPlan, session: SessionArgs): void 
       plan.args.push(lb.sessionIdFlag, session.sessionId);
     }
 
-    // Prompt delivery (non-interactive only for cli-flag/exec-subcommand)
+    // Prompt delivery (non-interactive only for cli-flag/exec-subcommand).
+    // On Windows with shell:true, long prompts with special chars get mangled
+    // by cmd.exe, so fall back to stdin delivery.
+    const forceStdin = process.platform === 'win32';
     if (session.prompt && !session.resumeId) {
-      if (lb.promptDelivery === 'cli-flag' && lb.promptFlag && !interactive) {
+      if (forceStdin) {
+        // On Windows, all prompts go through stdin to avoid cmd.exe escaping issues
+      } else if (lb.promptDelivery === 'cli-flag' && lb.promptFlag && !interactive) {
         plan.args.push(lb.promptFlag, session.prompt);
       } else if (lb.promptDelivery === 'exec-subcommand' && lb.execSubcommand && !interactive) {
         plan.args.unshift(lb.execSubcommand, session.prompt);
@@ -1456,12 +1461,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
   }
 
   const launchBehavior = getLaunchBehavior(plan.harness);
-  const promptDeliveredViaArgs = launchBehavior
-    ? launchBehavior.promptDelivery !== 'stdin'
-    : false;
+  const promptInArgs = prompt ? plan.args.some(a => a === prompt) : false;
   const keepStdinOpen = launchBehavior?.stdinBehavior === 'keep-open';
 
-  if (prompt && child.stdin && !ptyProcess && !promptDeliveredViaArgs) {
+  if (prompt && child.stdin && !ptyProcess && !promptInArgs) {
     child.stdin.write(prompt + '\n');
     if (!isInteractive && !keepStdinOpen) {
       child.stdin.end();
@@ -1473,7 +1476,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       process.stdin.pipe(child.stdin);
     }
   }
-  if (promptDeliveredViaArgs && child.stdin && !ptyProcess) {
+  if (promptInArgs && child.stdin && !ptyProcess) {
     child.stdin.end();
   }
 

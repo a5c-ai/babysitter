@@ -167,9 +167,13 @@ describe('launchCommand transport-mux integration', () => {
     expect(spawnMock.mock.calls[0]?.[1]).toContain('model_providers.amux-proxy.wire_api="responses"');
     expect(runtimeStop).toHaveBeenCalledTimes(1);
     const spawnedArgs = spawnMock.mock.calls[0]?.[1] as string[];
-    expect(spawnedArgs).toContain('exec');
-    expect(spawnedArgs).toContain('hello');
-    expect(child.stdin.write).not.toHaveBeenCalled();
+    if (process.platform === 'win32') {
+      expect(child.stdin.write).toHaveBeenCalledWith('hello\n');
+    } else {
+      expect(spawnedArgs).toContain('exec');
+      expect(spawnedArgs).toContain('hello');
+      expect(child.stdin.write).not.toHaveBeenCalled();
+    }
     expect(child.stdin.end).toHaveBeenCalledTimes(1);
   });
 
@@ -242,9 +246,13 @@ describe('launchCommand transport-mux integration', () => {
       expect(code).toBe(0);
       expect(spawnMock).toHaveBeenCalledTimes(1);
       const spawnedArgs = spawnMock.mock.calls[0]?.[1] as string[];
-      expect(spawnedArgs).toContain('-p');
-      expect(spawnedArgs).toContain('write the file');
-      expect(child.stdin.write).not.toHaveBeenCalled();
+      if (process.platform === 'win32') {
+        expect(child.stdin.write).toHaveBeenCalledWith('write the file\n');
+      } else {
+        expect(spawnedArgs).toContain('-p');
+        expect(spawnedArgs).toContain('write the file');
+        expect(child.stdin.write).not.toHaveBeenCalled();
+      }
       expect(child.stdin.end).toHaveBeenCalledTimes(1);
       expect(runtimeStop).toHaveBeenCalledTimes(1);
     } finally {
