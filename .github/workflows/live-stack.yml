@@ -61,7 +61,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci || npm install --legacy-peer-deps
+          npm install --legacy-peer-deps
           if [[ "$RUNNER_OS" == "Linux" ]]; then
             npm install --no-save @rollup/rollup-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @rolldown/binding-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
@@ -329,7 +329,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci || npm install --legacy-peer-deps
+          npm install --legacy-peer-deps
           if [[ "$RUNNER_OS" == "Linux" ]]; then
             npm install --no-save @rollup/rollup-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @rolldown/binding-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
