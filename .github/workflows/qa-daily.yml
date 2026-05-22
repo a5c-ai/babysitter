@@ -38,10 +38,16 @@ jobs:
     name: Comprehensive QA
     runs-on: ubuntu-latest-l
     steps:
-      - uses: actions/checkout@v4
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        continue-on-error: true
+        uses: a5c-ai/generate-token-action@main
+
+      - uses: actions/checkout@v6
         with:
           ref: staging
           fetch-depth: 0
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
 
       - uses: a5c-ai/babysitter/packages/triggers@staging
         with:
@@ -106,7 +112,7 @@ jobs:
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
 
   # ──────────────────────────────────────────────────────────────────────
   # Job 2: Triage untriaged issues
@@ -115,10 +121,16 @@ jobs:
     name: Triage Sweep
     runs-on: ubuntu-latest-l
     steps:
-      - uses: actions/checkout@v4
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        continue-on-error: true
+        uses: a5c-ai/generate-token-action@main
+
+      - uses: actions/checkout@v6
         with:
           ref: staging
           fetch-depth: 0
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
 
       - uses: a5c-ai/babysitter/packages/triggers@staging
         with:
@@ -150,7 +162,7 @@ jobs:
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
 
   # ──────────────────────────────────────────────────────────────────────
   # Job 3: Changelog and wiki update
@@ -159,10 +171,16 @@ jobs:
     name: Changelog & Wiki Update
     runs-on: ubuntu-latest-l
     steps:
-      - uses: actions/checkout@v4
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        continue-on-error: true
+        uses: a5c-ai/generate-token-action@main
+
+      - uses: actions/checkout@v6
         with:
           ref: staging
           fetch-depth: 0
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
 
       - uses: a5c-ai/babysitter/packages/triggers@staging
         with:
@@ -216,7 +234,7 @@ jobs:
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
 
   # ──────────────────────────────────────────────────────────────────────
   # Job 4: Review unreviewed PRs
@@ -225,10 +243,16 @@ jobs:
     name: PR Review Sweep
     runs-on: ubuntu-latest-l
     steps:
-      - uses: actions/checkout@v4
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        continue-on-error: true
+        uses: a5c-ai/generate-token-action@main
+
+      - uses: actions/checkout@v6
         with:
           ref: staging
           fetch-depth: 0
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
 
       - uses: a5c-ai/babysitter/packages/triggers@staging
         with:
@@ -271,4 +295,4 @@ jobs:
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
