@@ -26,17 +26,17 @@ const REQUIRED_PACKED_PATHS = [
 ];
 
 const REQUIRED_README_EXPORTS = [
-  '@a5c-ai/agent-mux-core',
-  '@a5c-ai/agent-mux-core/browser',
-  '@a5c-ai/agent-mux-core/kanban',
-  '@a5c-ai/agent-mux-core/automation',
+  '@a5c-ai/agent-comm-mux',
+  '@a5c-ai/agent-comm-mux/browser',
+  '@a5c-ai/agent-comm-mux/kanban',
+  '@a5c-ai/agent-comm-mux/automation',
 ];
 
 const REQUIRED_README_COMMANDS = [
-  'npm run build --workspace=@a5c-ai/agent-mux-core',
-  'npm run test --workspace=@a5c-ai/agent-mux-core',
-  'npm run verify:release --workspace=@a5c-ai/agent-mux-core',
-  'npm pack --json --dry-run --workspace=@a5c-ai/agent-mux-core',
+  'npm run build --workspace=@a5c-ai/agent-comm-mux',
+  'npm run test --workspace=@a5c-ai/agent-comm-mux',
+  'npm run verify:release --workspace=@a5c-ai/agent-comm-mux',
+  'npm pack --json --dry-run --workspace=@a5c-ai/agent-comm-mux',
 ];
 
 function expect(condition, message) {
@@ -75,8 +75,8 @@ export function verifyAgentMuxCoreRelease({ packageRoot, manifest, packEntries }
   const readme = fs.readFileSync(path.join(packageRoot, 'README.md'), 'utf8');
 
   expect(
-    manifest.name === '@a5c-ai/agent-mux-core',
-    'packages/agent-mux/core/package.json name must stay @a5c-ai/agent-mux-core'
+    manifest.name === '@a5c-ai/agent-comm-mux',
+    'packages/agent-mux/core/package.json name must stay @a5c-ai/agent-comm-mux'
   );
   expect(
     manifest.publishConfig?.access === 'public',
@@ -158,7 +158,7 @@ function main() {
     packEntries,
   });
 
-  console.log('agent-mux-core release verification passed');
+  console.log('agent-comm-mux release verification passed');
 }
 
 if (process.argv[1] === __filename) {

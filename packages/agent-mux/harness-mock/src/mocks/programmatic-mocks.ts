@@ -1,4 +1,4 @@
-import type { AgentEvent, RunOptions } from '@a5c-ai/agent-mux-core';
+import type { AgentEvent, RunOptions } from '@a5c-ai/agent-comm-mux';
 import type {
   MockStreamEvent,
   ProgrammaticMockBuilder,

@@ -98,7 +98,7 @@
     },
     {
       "surface": "packages/agent-mux/core",
-      "packageName": "@a5c-ai/agent-mux-core",
+      "packageName": "@a5c-ai/agent-comm-mux",
       "description": "Core types, client, and stream engine for agent-mux",
       "hasReadme": true,
       "status": "Public family package",

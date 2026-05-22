@@ -51,7 +51,7 @@ vi.mock('@a5c-ai/agent-catalog', () => ({
   getSessionConfig: vi.fn(() => ({})),
 }));
 
-vi.mock('@a5c-ai/agent-mux-core', () => ({
+vi.mock('@a5c-ai/agent-comm-mux', () => ({
   PROVIDER_DEFAULTS: {
     bedrock: { envKey: undefined },
   },

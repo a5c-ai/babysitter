@@ -162,10 +162,10 @@ jobs:
           set -euo pipefail
           npm run verify:release --workspace=@a5c-ai/agent-mux-tui 2>&1 | tee artifacts/test-logs/agent-mux-tui-release.log
 
-      - name: agent-mux-core release verification
+      - name: agent-comm-mux release verification
         run: |
           set -euo pipefail
-          npm run verify:release --workspace=@a5c-ai/agent-mux-core 2>&1 | tee artifacts/test-logs/agent-mux-core-release.log
+          npm run verify:release --workspace=@a5c-ai/agent-comm-mux 2>&1 | tee artifacts/test-logs/agent-comm-mux-release.log
 
       - name: Build realtime flow surfaces
         run: |

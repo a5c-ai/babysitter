@@ -7,7 +7,7 @@ Mock infrastructure is not part of this package anymore. Import subprocess, SDK,
 ## Install
 
 ```bash
-npm install @a5c-ai/agent-mux-adapters @a5c-ai/agent-mux-core
+npm install @a5c-ai/agent-mux-adapters @a5c-ai/agent-comm-mux
 ```
 
 Requires Node.js >= 20.9.0. ESM-only.
@@ -16,7 +16,7 @@ Requires Node.js >= 20.9.0. ESM-only.
 
 ```ts
 import { registerBuiltinAdapters } from '@a5c-ai/agent-mux-adapters';
-import { defaultRegistry } from '@a5c-ai/agent-mux-core';
+import { defaultRegistry } from '@a5c-ai/agent-comm-mux';
 
 registerBuiltinAdapters(defaultRegistry);
 ```

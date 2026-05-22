@@ -15,7 +15,7 @@ import type {
   ServerHealth,
   ServerInfo,
   Session,
-} from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
 
 import { readAuthConfigIdentity } from './auth-config.js';
 import { BaseRemoteAdapter } from './remote-adapter-base.js';

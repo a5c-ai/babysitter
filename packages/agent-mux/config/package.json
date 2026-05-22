@@ -50,6 +50,6 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@a5c-ai/agent-mux-core": "5.0.0"
+    "@a5c-ai/agent-comm-mux": "5.0.0"
   }
 }

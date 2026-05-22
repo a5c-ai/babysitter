@@ -103,13 +103,13 @@ const updateLockVersion = (path, version) => {
   const lockUpdates = {
     "packages/agent-mux/adapters": {
       version,
-      dependencies: { "@a5c-ai/agent-mux-core": version }
+      dependencies: { "@a5c-ai/agent-comm-mux": version }
     },
     "packages/agent-mux/cli": {
       version,
       dependencies: {
         "@a5c-ai/agent-mux-adapters": version,
-        "@a5c-ai/agent-mux-core": version,
+        "@a5c-ai/agent-comm-mux": version,
         "@a5c-ai/agent-mux-gateway": version,
         "@a5c-ai/agent-mux-observability": version
       }
@@ -122,12 +122,12 @@ const updateLockVersion = (path, version) => {
       version,
       dependencies: {
         "@a5c-ai/agent-mux-adapters": version,
-        "@a5c-ai/agent-mux-core": version
+        "@a5c-ai/agent-comm-mux": version
       }
     },
     "packages/agent-mux/harness-mock": {
       version,
-      dependencies: { "@a5c-ai/agent-mux-core": version }
+      dependencies: { "@a5c-ai/agent-comm-mux": version }
     },
     "packages/agent-mux/mobile-android-app": {
       version,
@@ -145,7 +145,7 @@ const updateLockVersion = (path, version) => {
       dependencies: {
         "@a5c-ai/agent-mux-adapters": version,
         "@a5c-ai/agent-mux-cli": version,
-        "@a5c-ai/agent-mux-core": version
+        "@a5c-ai/agent-comm-mux": version
       }
     },
     "packages/agent-mux/tui": {
@@ -163,7 +163,7 @@ const updateLockVersion = (path, version) => {
     },
     "packages/agent-mux/ui": {
       version,
-      dependencies: { "@a5c-ai/agent-mux-core": version }
+      dependencies: { "@a5c-ai/agent-comm-mux": version }
     },
     "packages/agent-mux/watch-watchos-app": {
       version
@@ -177,7 +177,7 @@ const updateLockVersion = (path, version) => {
     },
     "packages/transport-mux": {
       version,
-      dependencies: { "@a5c-ai/agent-mux-core": version }
+      dependencies: { "@a5c-ai/agent-comm-mux": version }
     },
     "packages/triggers": {
       version
@@ -357,7 +357,7 @@ for (const path of [
   syncDependencyVersion(path, "@a5c-ai/agent-mux", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-adapters", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-cli", newAgentMuxVersion);
-  syncDependencyVersion(path, "@a5c-ai/agent-mux-core", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-comm-mux", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-gateway", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-observability", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-tui", newAgentMuxVersion);

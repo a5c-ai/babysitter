@@ -50,7 +50,7 @@ vi.mock("../../../../interaction", async () => {
   };
 });
 
-vi.mock("@a5c-ai/agent-mux-core", () => {
+vi.mock("@a5c-ai/agent-comm-mux", () => {
   const workspaces: Array<{
     workspaceDefaultCwd: string;
     workspaceRootPath: string;
@@ -256,7 +256,7 @@ import {
   orchestrateIteration,
   commitEffectResult,
 } from "@a5c-ai/babysitter-sdk";
-import { WorkspaceService, resolveWorkspaceDefaultCwd } from "@a5c-ai/agent-mux-core";
+import { WorkspaceService, resolveWorkspaceDefaultCwd } from "@a5c-ai/agent-comm-mux";
 import { invokeHarness } from "../../../invoker";
 import { createAgentCoreSession } from "@a5c-ai/agent-core";
 import { getSessionContext } from "../../../../session/context";

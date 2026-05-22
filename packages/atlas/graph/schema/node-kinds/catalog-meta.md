@@ -352,7 +352,7 @@ and the runtime probe in
 | `scope` | enum<user,system,shell,process,host-detection> | yes | Lexical scope of the signal. atlas retains the legacy lexical scopes plus `host-detection` as used by `agent-mux/core`. |
 | `signals` | list<string> | yes | Concrete probes the signal evaluates (env var names, binary names, file paths, argv tokens). |
 | `argvMatches` | list<string> | no | Argv tokens this signal matches when `scope = host-detection`. Optional in atlas (legacy schema marked required but several imported signals omit it). |
-| `consumer` | string | no | Subsystem that consumes the signal (e.g. `agent-mux-core`). |
+| `consumer` | string | no | Subsystem that consumes the signal (e.g. `agent-comm-mux`). |
 | `metadataFields` | list<map<string,any>> | no | Per-signal metadata extraction recipe: `{ key, envVars: [...] }`. |
 | `notes` | markdown | no | |
 

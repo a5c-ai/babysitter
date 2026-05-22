@@ -1,5 +1,5 @@
 /**
- * @a5c-ai/agent-mux-core
+ * @a5c-ai/agent-comm-mux
  *
  * Core runtime, types, and utilities for agent-mux.
  * Runtime deps: @a5c-ai/agent-catalog and @a5c-ai/agent-mux-observability.

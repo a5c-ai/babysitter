@@ -1,4 +1,4 @@
-import type { Attachment } from '@a5c-ai/agent-mux-core';
+import type { Attachment } from '@a5c-ai/agent-comm-mux';
 
 export type ProtocolVersion = '1';
 

@@ -1,4 +1,4 @@
-import type { AgentMuxClient } from '@a5c-ai/agent-mux-core';
+import type { AgentMuxClient } from '@a5c-ai/agent-comm-mux';
 import type { ParsedArgs } from '../parse-args.js';
 import { ExitCode } from '../exit-codes.js';
 import { printError } from '../output.js';

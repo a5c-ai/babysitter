@@ -23,7 +23,7 @@ The graph has distinct layers (Core, Runtime, Platform, Interaction, Presentatio
 
 | Package | Graph Layer | Role |
 |---------|-------------|------|
-| `agent-mux-core` | L4 Agent-Core, L5 Agent-Runtime | Core types + runtime utilities |
+| `agent-comm-mux` | L4 Agent-Core, L5 Agent-Runtime | Core types + runtime utilities |
 | `agent-mux-adapters` | L5 Agent-Runtime | Harness adapter implementations |
 | `agent-mux-cli` | L10 Interaction | CLI entry point |
 | `agent-mux-gateway` | L6 Agent-Platform | Remote API surface |

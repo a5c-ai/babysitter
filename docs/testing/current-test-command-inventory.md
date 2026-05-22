@@ -38,9 +38,9 @@ Status: Current. This inventory implements roadmap slice 0, "Inventory and namin
 | `@a5c-ai/agent-mux` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/agent-mux-adapters` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-adapters-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/agent-mux-cli` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-cli-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
-| `@a5c-ai/agent-mux-core` | `prepublishOnly` | No-model release gate | release-gate | Mux maintainers | `release-logs/agent-mux-core-prepublishonly.log` | publish.yml validate and publish gates |
-| `@a5c-ai/agent-mux-core` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-core-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
-| `@a5c-ai/agent-mux-core` | `verify:release` | No-model release gate | release-gate | Mux maintainers | `release-logs/agent-mux-core-verify-release.log` | publish.yml validate and publish gates |
+| `@a5c-ai/agent-comm-mux` | `prepublishOnly` | No-model release gate | release-gate | Mux maintainers | `release-logs/agent-comm-mux-prepublishonly.log` | publish.yml validate and publish gates |
+| `@a5c-ai/agent-comm-mux` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-comm-mux-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
+| `@a5c-ai/agent-comm-mux` | `verify:release` | No-model release gate | release-gate | Mux maintainers | `release-logs/agent-comm-mux-verify-release.log` | publish.yml validate and publish gates |
 | `@a5c-ai/agent-mux-gateway` | `test` | No-model | e2e | Mux maintainers | `e2e/agent-mux-gateway-test` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/agent-mux-harness-mock` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-harness-mock-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/agent-mux-observability` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-observability-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |

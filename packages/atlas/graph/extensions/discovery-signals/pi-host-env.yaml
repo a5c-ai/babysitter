@@ -12,7 +12,7 @@ attributes:
     - PI_SESSION_ID
   argvMatches:
     - pi
-  consumer: agent-mux-core
+  consumer: agent-comm-mux
   metadataFields:
     - { key: session_id, envVars: [PI_SESSION_ID] }
     - { key: run_id,     envVars: [PI_RUN_ID] }

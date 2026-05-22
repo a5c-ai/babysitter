@@ -1,4 +1,4 @@
-import type { AgentEvent } from '@a5c-ai/agent-mux-core';
+import type { AgentEvent } from '@a5c-ai/agent-comm-mux';
 
 export interface ProgrammaticMockConfig {
   name?: string;

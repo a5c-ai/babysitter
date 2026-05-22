@@ -20,7 +20,7 @@ import type {
   AgentEvent,
   AgentConfig,
   InstallMethod,
-} from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
 
 import * as fs from 'node:fs/promises';
 

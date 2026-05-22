@@ -9,7 +9,7 @@ import type {
   KanbanWorkspaceActionResponse,
   KanbanWorkspaceInventory,
   KanbanWorkspaceInventoryQuery,
-} from '@a5c-ai/agent-mux-core/kanban';
+} from '@a5c-ai/agent-comm-mux/kanban';
 
 type EmptyToolArgs = Record<string, never>;
 

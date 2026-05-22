@@ -12,7 +12,7 @@ attributes:
     - OPENCLAW_RUN_ID
   argvMatches:
     - openclaw
-  consumer: agent-mux-core
+  consumer: agent-comm-mux
   metadataFields:
     - { key: session_id, envVars: [OPENCLAW_SESSION] }
     - { key: run_id,     envVars: [OPENCLAW_RUN_ID] }

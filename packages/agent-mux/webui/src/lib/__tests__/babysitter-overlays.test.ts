@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { KanbanBacklogSnapshot, KanbanBoardSnapshot, KanbanReviewArtifact } from "@a5c-ai/agent-mux-core/kanban";
+import type { KanbanBacklogSnapshot, KanbanBoardSnapshot, KanbanReviewArtifact } from "@a5c-ai/agent-comm-mux/kanban";
 
 import { createMockRun, createMockTaskEffect } from "@/test/fixtures";
 

@@ -1,4 +1,4 @@
-import type { RuntimeHookCapabilities, RuntimeHookMode } from '@a5c-ai/agent-mux-core';
+import type { RuntimeHookCapabilities, RuntimeHookMode } from '@a5c-ai/agent-comm-mux';
 
 const NONBLOCKING: RuntimeHookMode = 'nonblocking';
 

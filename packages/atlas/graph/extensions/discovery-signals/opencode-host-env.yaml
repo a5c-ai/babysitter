@@ -12,7 +12,7 @@ attributes:
     - OPENCODE_RUN_ID
   argvMatches:
     - opencode
-  consumer: agent-mux-core
+  consumer: agent-comm-mux
   metadataFields:
     - { key: session_id, envVars: [OPENCODE_SESSION] }
     - { key: run_id,     envVars: [OPENCODE_RUN_ID] }

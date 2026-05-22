@@ -1,4 +1,4 @@
-import type { WorkspaceRuntimeLogLine, WorkspaceRuntimeSurface, WorkspaceTerminalCommand } from '@a5c-ai/agent-mux-core';
+import type { WorkspaceRuntimeLogLine, WorkspaceRuntimeSurface, WorkspaceTerminalCommand } from '@a5c-ai/agent-comm-mux';
 
 import type { LoggedRunEvent } from './event-log.js';
 import type { RunEntry } from './types.js';

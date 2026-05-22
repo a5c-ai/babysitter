@@ -12,14 +12,14 @@ import type {
   AutomationTaskTemplate,
   TimerAutomationTrigger,
   WebhookAutomationTrigger,
-} from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
 import type {
   KanbanDecompositionKind,
   KanbanDecompositionStatus,
   KanbanIssue,
   KanbanIssueSource,
   KanbanPriority,
-} from '@a5c-ai/agent-mux-core/kanban';
+} from '@a5c-ai/agent-comm-mux/kanban';
 
 import { AppError } from '../error-handler.js';
 import { BacklogQueryService } from './backlog-query-service.js';

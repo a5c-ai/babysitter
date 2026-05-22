@@ -12,7 +12,7 @@ attributes:
     - GH_COPILOT_SESSION
   argvMatches:
     - copilot
-  consumer: agent-mux-core
+  consumer: agent-comm-mux
   metadataFields:
     - { key: session_id, envVars: [COPILOT_CLI_SESSION, GH_COPILOT_SESSION] }
 edges:

@@ -27,7 +27,7 @@ import type {
   SpawnArgs,
   ParseContext,
   AgentEvent,
-} from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
 
 /**
  * Abstract base class for remote adapters. Provides shared utilities

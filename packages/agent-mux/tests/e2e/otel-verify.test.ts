@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createClient } from '@a5c-ai/agent-mux-core';
+import { createClient } from '@a5c-ai/agent-comm-mux';
 
 // Mock the whole module at the top level to ensure all imports get the same mock
 vi.mock('@a5c-ai/agent-mux-observability', () => {

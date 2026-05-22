@@ -34,7 +34,7 @@ import {
   type KanbanWorkflowState,
   type KanbanIssueWorkspaceLinkInput,
   type LinkedRunSummary,
-} from '@a5c-ai/agent-mux-core/kanban';
+} from '@a5c-ai/agent-comm-mux/kanban';
 
 import { AppError } from '../error-handler.js';
 import { ReviewService } from '../review-service.js';

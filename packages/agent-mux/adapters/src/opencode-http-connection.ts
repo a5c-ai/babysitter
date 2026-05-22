@@ -8,7 +8,7 @@ import type {
   CostRecord,
   HttpConnection,
   RunOptions,
-} from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
 import type { OpenCodeHttpAdapter } from './opencode-http-adapter.js';
 
 export interface OpenCodeHttpConnectionOptions {

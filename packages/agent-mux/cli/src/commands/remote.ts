@@ -18,8 +18,8 @@ import type {
   AgentMuxClient,
   InvocationMode,
   SpawnArgs,
-} from '@a5c-ai/agent-mux-core';
-import { buildInvocationCommand } from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
+import { buildInvocationCommand } from '@a5c-ai/agent-comm-mux';
 
 import type { ParsedArgs, FlagDef } from '../parse-args.js';
 import { flagBool, flagStr } from '../parse-args.js';

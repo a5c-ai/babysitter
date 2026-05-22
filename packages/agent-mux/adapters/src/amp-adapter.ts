@@ -21,7 +21,7 @@ import type {
   InstalledPlugin,
   PluginInstallOptions,
   AgentConfig,
-} from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import {

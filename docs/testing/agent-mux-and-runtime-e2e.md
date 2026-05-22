@@ -37,7 +37,7 @@ Candidate command grouping:
 
 ```bash
 npm run test --workspace=@a5c-ai/transport-mux
-npm run test --workspace=@a5c-ai/agent-mux-core
+npm run test --workspace=@a5c-ai/agent-comm-mux
 npm run test --workspace=@a5c-ai/agent-mux-adapters
 npm run test --workspace=@a5c-ai/agent-mux-gateway
 npm run test --workspace=@a5c-ai/agent-core

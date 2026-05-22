@@ -12,7 +12,7 @@ attributes:
     - CURSOR_AGENT_SESSION
   argvMatches:
     - cursor-cli
-  consumer: agent-mux-core
+  consumer: agent-comm-mux
   metadataFields:
     - { key: session_id, envVars: [CURSOR_SESSION, CURSOR_AGENT_SESSION] }
 edges:

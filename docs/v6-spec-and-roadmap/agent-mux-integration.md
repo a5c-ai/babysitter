@@ -12,7 +12,7 @@ The integrated `agent-mux` package family includes:
 
 ### Core Infrastructure
 
-- **`@a5c-ai/agent-mux-core`** - Core types, client, and stream engine
+- **`@a5c-ai/agent-comm-mux`** - Core types, client, and stream engine
 - **`@a5c-ai/agent-mux-adapters`** - Built-in harness adapters
 - **`@a5c-ai/agent-mux-cli`** - `amux` command-line interface
 - **`@a5c-ai/agent-mux`** - Main SDK package and dispatch surface

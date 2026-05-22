@@ -240,7 +240,7 @@ aliases:
   # NodeKind: PackageSurface
   # ─────────────────────────────────────────────────────────────────
   - { legacyId: "package:@a5c-ai/agent-catalog",     v6Id: "package-surface:a5c-ai-agent-catalog",     nodeKind: PackageSurface }
-  - { legacyId: "package:@a5c-ai/agent-mux-core",    v6Id: "package-surface:a5c-ai-agent-mux-core",    nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/agent-comm-mux",    v6Id: "package-surface:a5c-ai-agent-comm-mux",    nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/extension-mux", v6Id: "package-surface:a5c-ai-extension-mux", nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/babysitter-sdk",    v6Id: "package-surface:a5c-ai-babysitter-sdk",    nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/catalog",           v6Id: "package-surface:a5c-ai-catalog",           nodeKind: PackageSurface }
@@ -302,6 +302,6 @@ aliases:
 #   referenced by mux generators, so omitted here.
 # - Coverage: ~95 alias rows across 18 NodeKinds. Uncovered legacy prefixes:
 #   `claim:`, `evidence:`, `capabilitySupport:`, `discovery:` — none are
-#   consumed by extension-mux / agent-mux-core / hooks-mux-core codegen
+#   consumed by extension-mux / agent-comm-mux / hooks-mux-core codegen
 #   based on the projection-adapters.md audit.
 

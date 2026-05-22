@@ -40,7 +40,7 @@ import type {
   TurnEndEvent,
   TurnStartEvent,
   ImageOutputEvent,
-} from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
 
 import type { SessionCost, SessionFlowEventBuffer, SessionFlowRun, SessionFlowRunInput } from './types.js';
 import { toTimestamp } from './utils.js';

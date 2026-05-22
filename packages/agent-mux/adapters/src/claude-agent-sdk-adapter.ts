@@ -19,7 +19,7 @@ import type {
   DetectInstallationResult,
   InteractionResponse,
   ProgrammaticRun,
-} from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
 import type {
   Options as ClaudeSdkOptions,
   Query as ClaudeSdkQuery,

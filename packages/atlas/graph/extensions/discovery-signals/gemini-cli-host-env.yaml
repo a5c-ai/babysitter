@@ -12,7 +12,7 @@ attributes:
     - GEMINI_SESSION_ID
   argvMatches:
     - gemini-cli
-  consumer: agent-mux-core
+  consumer: agent-comm-mux
   metadataFields:
     - { key: session_id, envVars: [GEMINI_SESSION_ID] }
 edges:

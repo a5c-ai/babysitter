@@ -17,6 +17,8 @@
     { "path": "packages/agent-mux/core" },
     { "path": "packages/agent-mux/adapters" },
     { "path": "packages/transport-mux" },
+    { "path": "packages/agent-mux/launch" },
+    { "path": "packages/agent-mux/config" },
     { "path": "packages/agent-mux/cli" },
     { "path": "packages/agent-mux/sdk" },
     { "path": "packages/agent-mux/gateway" },

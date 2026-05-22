@@ -1,9 +1,9 @@
 {
-  "name": "@a5c-ai/agent-mux-core",
+  "name": "@a5c-ai/agent-comm-mux",
   "version": "5.0.0",
   "type": "module",
   "license": "MIT",
-  "description": "Core runtime, types, and utilities for agent-mux",
+  "description": "Agent communication mux — event streaming, hooks, sessions",
   "author": "a5c-ai",
   "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux/core#readme",
   "repository": {

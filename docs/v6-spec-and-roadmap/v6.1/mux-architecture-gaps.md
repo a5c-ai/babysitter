@@ -7,7 +7,7 @@ The Atlas graph defines **9 canonical muxes** as the bridging abstractions of th
 | Graph Mux | Protocol Type | Canonical Side | Package(s) |
 |-----------|--------------|----------------|------------|
 | `agent-launch-mux` | spawn | InvocationOptions → SpawnArgs → lifecycle | `agent-mux-cli` (launch.ts) |
-| `agent-comm-mux` | event-stream | Harness-specific events → canonical shape | `agent-mux-core` (client.ts) |
+| `agent-comm-mux` | event-stream | Harness-specific events → canonical shape | `agent-comm-mux` (client.ts) |
 | `agent-config-mux` | config | Per-agent config/auth/install → unified ops | `agent-mux-cli` (install.ts), `agent-mux-adapters` |
 | `hooks-mux` | lifecycle-hook | Native hook names → canonical taxonomy | `hooks-mux-cli`, `hooks-mux-core`, `hooks-mux-adapter-*` |
 | `transport-mux` | inference | Wire protocols → canonical request/response | `transport-mux` |
@@ -54,12 +54,12 @@ The Atlas graph defines **9 canonical muxes** as the bridging abstractions of th
 
 ---
 
-### 2. agent-comm-mux → `agent-mux-core/src/client.ts`
+### 2. agent-comm-mux → `agent-comm-mux/src/client.ts`
 
 **Graph description:** Bridges every in-flight event shape. Channels are absorbed here because the underlying primitive is a structured communication channel between two participants.
 
 **Implementation reality:**
-- `AgentMuxClient` in agent-mux-core handles event streaming
+- `AgentMuxClient` in agent-comm-mux handles event streaming
 - Events are normalized to a common shape across harnesses
 - Session-flow projections in agent-mux-ui consume these events
 
@@ -184,7 +184,7 @@ The Atlas graph defines **9 canonical muxes** as the bridging abstractions of th
 **Graph description:** CLI→MCP gateway, CLI→MCP gateway, and tool-level hooks layered on hooks-mux PreToolUse / PostToolUse.
 
 **Implementation reality:**
-- Tool dispatch is embedded in agent-mux-core and agent-platform
+- Tool dispatch is embedded in agent-comm-mux and agent-platform
 - MCP tool serving is in babysitter-sdk (mcp module)
 - No unified tool-mux abstraction
 
@@ -199,7 +199,7 @@ The Atlas graph defines **9 canonical muxes** as the bridging abstractions of th
 
 ## Agent Stack Implementation Layers (L4-L6)
 
-### agent-core vs agent-mux-core vs agent-platform
+### agent-core vs agent-comm-mux vs agent-platform
 
 The graph defines three implementation node kinds for the agent stack:
 
@@ -209,15 +209,15 @@ The graph defines three implementation node kinds for the agent stack:
 | AgentRuntimeImpl | L5 | `agent-platform` | Host process, CLI, seam contracts |
 | AgentPlatformImpl | L6 | `extension-mux` + `agent-catalog` | Extensions, distribution, ecosystem |
 
-But `agent-mux-core` also implements L4-L5 concerns (event dispatch, session management, adapter registry) without being an "AgentCoreImpl" in the graph.
+But `agent-comm-mux` also implements L4-L5 concerns (event dispatch, session management, adapter registry) without being an "AgentCoreImpl" in the graph.
 
-**Gap:** `agent-mux-core` is the de facto agent core for harness-mediated scenarios but isn't represented as an AgentCoreImpl in the graph. The graph has `agent:agent-mux` as an AgentProduct but its internal decomposition (core/cli/adapters/gateway/tui/ui) isn't modeled.
+**Gap:** `agent-comm-mux` is the de facto agent core for harness-mediated scenarios but isn't represented as an AgentCoreImpl in the graph. The graph has `agent:agent-mux` as an AgentProduct but its internal decomposition (core/cli/adapters/gateway/tui/ui) isn't modeled.
 
 ### Package Decomposition vs Graph Model
 
 | agent-mux Package | Graph Mux | Graph Layer | Notes |
 |-------------------|-----------|-------------|-------|
-| agent-mux-core | agent-comm-mux | L4-L5 | Event streaming, client, types |
+| agent-comm-mux | agent-comm-mux | L4-L5 | Event streaming, client, types |
 | agent-mux-cli | agent-launch-mux + agent-config-mux | L5-L10 | Launch, install, detect |
 | agent-mux-adapters | (part of agent-config-mux) | L5 | Per-harness adapters |
 | agent-mux-gateway | (no direct mux) | L6 | Remote API surface |
@@ -238,6 +238,6 @@ But `agent-mux-core` also implements L4-L5 concerns (event dispatch, session man
 | P1 | agent-launch-mux lifecycle is 2-state not 9-state (M-LAUNCH-01) | No pause/resume/retry for agent invocations |
 | P1 | transport-mux codec incomplete (M-TRANSPORT-01) | Tool schemas dropped, cost tracking missing |
 | P1 | agent-comm-mux event schema not formalized (M-COMM-02) | Each adapter emits different shapes |
-| P2 | agent-mux-core not represented in graph (decomposition gap) | Graph doesn't reflect reality |
+| P2 | agent-comm-mux not represented in graph (decomposition gap) | Graph doesn't reflect reality |
 | P2 | extension-mux ≠ extension-mux naming (M-EXTENSION-01) | Confusing for contributors |
 | P2 | tasks-mux ≠ tasks-mux naming (M-TASKS-01) | Confusing for contributors |

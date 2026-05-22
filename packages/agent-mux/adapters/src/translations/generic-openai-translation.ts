@@ -1,4 +1,4 @@
-import type { ProviderConfig, TransportId } from '@a5c-ai/agent-mux-core';
+import type { ProviderConfig, TransportId } from '@a5c-ai/agent-comm-mux';
 import { getProviderTranslation } from '@a5c-ai/agent-catalog';
 import type { ProviderTranslationRecord, ProviderTranslationEnvMapping } from '@a5c-ai/agent-catalog';
 import type { HarnessProviderTranslation } from '../provider-translation.js';

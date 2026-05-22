@@ -113,7 +113,7 @@ jobs:
           run_bg bash -lc 'cd packages/krate/core && npm run build && cd ../web && npm run build'
 
           npm run build --workspace=@a5c-ai/agent-mux-observability
-          npm run build --workspace=@a5c-ai/agent-mux-core
+          npm run build --workspace=@a5c-ai/agent-comm-mux
 
           leaf_pids=()
           npm run build --workspace=@a5c-ai/agent-mux-adapters & leaf_pids+=("$!")

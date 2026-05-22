@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { AmpAdapter } from '../src/amp-adapter.js';
-import type { RunOptions } from '@a5c-ai/agent-mux-core';
+import type { RunOptions } from '@a5c-ai/agent-comm-mux';
 
 describe('AmpAdapter', () => {
   let adapter: AmpAdapter;

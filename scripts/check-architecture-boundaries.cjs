@@ -17,7 +17,7 @@ const packageFamilies = {
   ],
   "dispatch-core": [
     "@a5c-ai/agent-mux",
-    "@a5c-ai/agent-mux-core",
+    "@a5c-ai/agent-comm-mux",
     "@a5c-ai/agent-mux-adapters",
     "@a5c-ai/agent-mux-cli",
     "@a5c-ai/agent-mux-gateway",

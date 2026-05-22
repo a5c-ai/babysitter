@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { StreamAssembler } from '@a5c-ai/agent-mux-core';
-import type { ParseContext } from '@a5c-ai/agent-mux-core';
+import { StreamAssembler } from '@a5c-ai/agent-comm-mux';
+import type { ParseContext } from '@a5c-ai/agent-comm-mux';
 import { GeminiAdapter } from '../src/gemini-adapter.js';
 
 function makeContext(overrides?: Partial<ParseContext>): ParseContext {

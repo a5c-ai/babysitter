@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { verifyAgentMuxCoreRelease } from '../scripts/verify-release.mjs';
 
 const baseManifest = {
-  name: '@a5c-ai/agent-mux-core',
+  name: '@a5c-ai/agent-comm-mux',
   main: './dist/index.js',
   module: './dist/index.js',
   types: './dist/index.d.ts',
@@ -83,7 +83,7 @@ const basePackEntries = [
 ];
 
 function withPackageRoot(run: (packageRoot: string) => void): void {
-  const packageRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-core-release-'));
+  const packageRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-comm-mux-release-'));
   fs.mkdirSync(path.join(packageRoot, 'dist'), { recursive: true });
   fs.writeFileSync(path.join(packageRoot, 'dist', 'index.js'), 'export {};');
   fs.writeFileSync(path.join(packageRoot, 'dist', 'index.d.ts'), 'export {};');
@@ -96,17 +96,17 @@ function withPackageRoot(run: (packageRoot: string) => void): void {
   fs.writeFileSync(
     path.join(packageRoot, 'README.md'),
     [
-      '# @a5c-ai/agent-mux-core',
+      '# @a5c-ai/agent-comm-mux',
       '',
-      '- `@a5c-ai/agent-mux-core`',
-      '- `@a5c-ai/agent-mux-core/browser`',
-      '- `@a5c-ai/agent-mux-core/kanban`',
-      '- `@a5c-ai/agent-mux-core/automation`',
+      '- `@a5c-ai/agent-comm-mux`',
+      '- `@a5c-ai/agent-comm-mux/browser`',
+      '- `@a5c-ai/agent-comm-mux/kanban`',
+      '- `@a5c-ai/agent-comm-mux/automation`',
       '',
-      'npm run build --workspace=@a5c-ai/agent-mux-core',
-      'npm run test --workspace=@a5c-ai/agent-mux-core',
-      'npm run verify:release --workspace=@a5c-ai/agent-mux-core',
-      'npm pack --json --dry-run --workspace=@a5c-ai/agent-mux-core',
+      'npm run build --workspace=@a5c-ai/agent-comm-mux',
+      'npm run test --workspace=@a5c-ai/agent-comm-mux',
+      'npm run verify:release --workspace=@a5c-ai/agent-comm-mux',
+      'npm pack --json --dry-run --workspace=@a5c-ai/agent-comm-mux',
       '',
     ].join('\n')
   );
@@ -202,16 +202,16 @@ describe('verifyAgentMuxCoreRelease', () => {
       fs.writeFileSync(
         path.join(packageRoot, 'README.md'),
         [
-          '# @a5c-ai/agent-mux-core',
+          '# @a5c-ai/agent-comm-mux',
           '',
-          '- `@a5c-ai/agent-mux-core`',
-          '- `@a5c-ai/agent-mux-core/browser`',
-          '- `@a5c-ai/agent-mux-core/kanban`',
+          '- `@a5c-ai/agent-comm-mux`',
+          '- `@a5c-ai/agent-comm-mux/browser`',
+          '- `@a5c-ai/agent-comm-mux/kanban`',
           '',
-          'npm run build --workspace=@a5c-ai/agent-mux-core',
-          'npm run test --workspace=@a5c-ai/agent-mux-core',
-          'npm run verify:release --workspace=@a5c-ai/agent-mux-core',
-          'npm pack --json --dry-run --workspace=@a5c-ai/agent-mux-core',
+          'npm run build --workspace=@a5c-ai/agent-comm-mux',
+          'npm run test --workspace=@a5c-ai/agent-comm-mux',
+          'npm run verify:release --workspace=@a5c-ai/agent-comm-mux',
+          'npm pack --json --dry-run --workspace=@a5c-ai/agent-comm-mux',
           '',
         ].join('\n')
       );
@@ -222,7 +222,7 @@ describe('verifyAgentMuxCoreRelease', () => {
           manifest: baseManifest,
           packEntries: basePackEntries,
         })
-      ).toThrow(/agent-mux-core\/automation/);
+      ).toThrow(/agent-comm-mux\/automation/);
     });
   });
 });

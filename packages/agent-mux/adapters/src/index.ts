@@ -4,7 +4,7 @@
  * Built-in adapter implementations for all supported agents.
  */
 
-export { type AgentName, type BuiltInAgentName } from '@a5c-ai/agent-mux-core';
+export { type AgentName, type BuiltInAgentName } from '@a5c-ai/agent-comm-mux';
 
 // Base adapter classes and global registry
 export { BaseAgentAdapter, defaultSpawner, registerAdapterFactory, getAdapterFactory, listRegisteredAdapters } from './base-adapter.js';

@@ -1089,7 +1089,7 @@ nodeKinds:
   - name: consumer
     type: string
     required: false
-    notes: Subsystem that consumes the signal (e.g. agent-mux-core).
+    notes: Subsystem that consumes the signal (e.g. agent-comm-mux).
   - name: metadataFields
     type: list<map<string
     any>>: null

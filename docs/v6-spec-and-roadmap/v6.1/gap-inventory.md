@@ -37,7 +37,7 @@ Complete inventory of gaps between the Atlas graph (source of truth) and the cur
 
 | ID | Severity | Gap | Description |
 |----|----------|-----|-------------|
-| G-L45-01 | S3 | Dual implementation paths | Two packages (agent-core, agent-mux-core) both implement L4 concerns. Intentional per v6.0 but increases cognitive load. |
+| G-L45-01 | S3 | Dual implementation paths | Two packages (agent-core, agent-comm-mux) both implement L4 concerns. Intentional per v6.0 but increases cognitive load. |
 | G-L45-02 | S4 | CapabilityProfile not runtime | Graph defines CapabilityProfile as a swappable bundle; no runtime mechanism to swap capability profiles at launch time. |
 
 ### L6: Agent-Platform — Plugin Compiler Mature, Platform Deferred

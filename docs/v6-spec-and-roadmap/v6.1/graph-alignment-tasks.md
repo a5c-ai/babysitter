@@ -59,7 +59,7 @@ The graph defines 3 muxes inside what's currently the agent-mux monolith:
 - `agent-config-mux` (install/config/auth)
 
 Currently these are split differently:
-- `agent-mux-core` = agent-comm-mux + types
+- `agent-comm-mux` = agent-comm-mux + types
 - `agent-mux-cli` = agent-launch-mux + agent-config-mux + interaction
 - `agent-mux-adapters` = part of agent-config-mux
 
@@ -70,7 +70,7 @@ Currently these are split differently:
 - [ ] Extract `agent-config-mux` from `agent-mux-cli/src/commands/install*.ts` + `agent-mux-adapters/` into `packages/agent-mux/config/`
   - npm: `@a5c-ai/agent-config-mux`
   - Owns: install, uninstall, update, detect, auth verification per adapter
-- [ ] Rename `agent-mux-core` to `agent-comm-mux`
+- [ ] Rename `agent-comm-mux` to `agent-comm-mux`
   - npm: `@a5c-ai/agent-comm-mux`
   - Owns: event streaming, client, canonical event schema
 - [ ] Keep `agent-mux-cli` as the composition CLI (`amux`) that wires the 3 muxes together
@@ -107,7 +107,7 @@ Graph: `mux:tool-mux` — CLI→MCP gateway, tool-level hooks, tool dispatch pol
 Currently scattered across:
 - `babysitter-sdk/src/mcp/` (MCP server)
 - `agent-platform/` (tool dispatch)
-- `agent-mux-core/` (tool call events)
+- `agent-comm-mux/` (tool call events)
 
 **Tasks:**
 - [ ] Create `packages/tool-mux/` with npm name `@a5c-ai/tool-mux`
@@ -188,7 +188,7 @@ Update the atlas graph to reflect actual code structure.
 ### 4.1 Add agent-mux internal decomposition to graph
 
 **Tasks:**
-- [ ] Add `AgentCoreImpl` record for agent-mux-core / agent-comm-mux
+- [ ] Add `AgentCoreImpl` record for agent-comm-mux / agent-comm-mux
 - [ ] Add `AgentRuntimeImpl` record for agent-mux-cli (as composition runtime)
 - [ ] Link Presentation records to their implementing packages (agent-mux-tui, agent-mux-ui, agent-mux-webui)
 - [ ] Add SourceRef nodes for each agent-mux sub-package

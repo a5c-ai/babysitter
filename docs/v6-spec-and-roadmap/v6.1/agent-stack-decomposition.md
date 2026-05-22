@@ -185,7 +185,7 @@ As described in graph-alignment-tasks.md Phase 1.3, split into graph-aligned sub
    ↓
 4. Extract agent-launch-mux from agent-mux-cli
 5. Extract agent-config-mux from agent-mux-cli + agent-mux-adapters
-6. Rename agent-mux-core → agent-comm-mux
+6. Rename agent-comm-mux → agent-comm-mux
    ↓
 7. Annotate babysitter-sdk with layer metadata
 8. Annotate agent-platform with layer metadata

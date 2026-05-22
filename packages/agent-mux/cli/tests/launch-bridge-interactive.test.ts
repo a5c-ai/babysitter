@@ -76,7 +76,7 @@ vi.mock('@a5c-ai/agent-mux-adapters', () => ({
   })),
 }));
 
-vi.mock('@a5c-ai/agent-mux-core', () => ({
+vi.mock('@a5c-ai/agent-comm-mux', () => ({
   PROVIDER_DEFAULTS: {},
   StreamAssembler: class {
     feed(line: string) { return line; }

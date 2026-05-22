@@ -3,8 +3,8 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { StreamAssembler } from '@a5c-ai/agent-mux-core';
-import type { ParseContext } from '@a5c-ai/agent-mux-core';
+import { StreamAssembler } from '@a5c-ai/agent-comm-mux';
+import type { ParseContext } from '@a5c-ai/agent-comm-mux';
 import { BabysitterAdapter } from '../src/babysitter-adapter.js';
 
 function makeContext(overrides?: Partial<ParseContext>): ParseContext {

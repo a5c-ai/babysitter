@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import type { AgentEvent } from '@a5c-ai/agent-mux-core';
+import type { AgentEvent } from '@a5c-ai/agent-comm-mux';
 import type {
   MockConnection,
   MockServerInfo,

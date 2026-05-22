@@ -140,7 +140,7 @@ jobs:
 
           # agent-mux critical path (sequential — each depends on previous)
           npm run build --workspace=@a5c-ai/agent-mux-observability
-          npm run build --workspace=@a5c-ai/agent-mux-core
+          npm run build --workspace=@a5c-ai/agent-comm-mux
 
           leaf_pids=()
           npm run build --workspace=@a5c-ai/agent-mux-adapters & leaf_pids+=("$!")
@@ -305,7 +305,7 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/agent-mux-build.cjs test packages/agent-mux/observability 2>&1 | tee artifacts/mux-logs/agent-mux-observability-tests.log
-          node scripts/agent-mux-build.cjs test packages/agent-mux/core 2>&1 | tee artifacts/mux-logs/agent-mux-core-tests.log
+          node scripts/agent-mux-build.cjs test packages/agent-mux/core 2>&1 | tee artifacts/mux-logs/agent-comm-mux-tests.log
           node scripts/agent-mux-build.cjs test packages/agent-mux/adapters 2>&1 | tee artifacts/mux-logs/agent-mux-adapters-tests.log
           node scripts/agent-mux-build.cjs test packages/agent-mux/harness-mock 2>&1 | tee artifacts/mux-logs/agent-mux-harness-mock-tests.log
           node scripts/agent-mux-build.cjs test packages/agent-mux/gateway 2>&1 | tee artifacts/mux-logs/agent-mux-gateway-tests.log
@@ -316,7 +316,7 @@ jobs:
       - name: Verify non-realtime agent-mux release artifacts
         run: |
           set -euo pipefail
-          npm run verify:release --workspace=@a5c-ai/agent-mux-core 2>&1 | tee artifacts/mux-logs/agent-mux-core-release.log
+          npm run verify:release --workspace=@a5c-ai/agent-comm-mux 2>&1 | tee artifacts/mux-logs/agent-comm-mux-release.log
           npm run verify:release --workspace=@a5c-ai/agent-mux-tui 2>&1 | tee artifacts/mux-logs/agent-mux-tui-release.log
 
       - name: Validate transport-mux runtime owner
@@ -865,9 +865,9 @@ jobs:
           - name: hooks-mux-core
             build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/hooks-mux-core
             publish: npm publish --workspace=@a5c-ai/hooks-mux-core --access public --tag "$NPM_TAG"
-          - name: agent-mux-core
-            build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/agent-mux-observability && npm run build --workspace=@a5c-ai/agent-mux-core
-            publish: npm publish --workspace=@a5c-ai/agent-mux-core --access public --tag "$NPM_TAG"
+          - name: agent-comm-mux
+            build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/agent-mux-observability && npm run build --workspace=@a5c-ai/agent-comm-mux
+            publish: npm publish --workspace=@a5c-ai/agent-comm-mux --access public --tag "$NPM_TAG"
           - name: extension-mux
             build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/extension-mux
             publish: npm publish --workspace=@a5c-ai/extension-mux --access public --tag "$NPM_TAG"
@@ -1052,7 +1052,7 @@ jobs:
               npm run build --workspace=@a5c-ai/atlas
               npm run build --workspace=@a5c-ai/agent-catalog
               npm run build --workspace=@a5c-ai/agent-mux-observability
-              npm run build --workspace=@a5c-ai/agent-mux-core
+              npm run build --workspace=@a5c-ai/agent-comm-mux
               npm run build --workspace=@a5c-ai/agent-mux-adapters
           - name: agent-mux-harness-mock
             workspace: '@a5c-ai/agent-mux-harness-mock'
@@ -1061,7 +1061,7 @@ jobs:
               npm run build --workspace=@a5c-ai/atlas
               npm run build --workspace=@a5c-ai/agent-catalog
               npm run build --workspace=@a5c-ai/agent-mux-observability
-              npm run build --workspace=@a5c-ai/agent-mux-core
+              npm run build --workspace=@a5c-ai/agent-comm-mux
               npm run build --workspace=@a5c-ai/agent-mux-harness-mock
           - name: transport-mux
             workspace: '@a5c-ai/transport-mux'
@@ -1070,7 +1070,7 @@ jobs:
               npm run build --workspace=@a5c-ai/atlas
               npm run build --workspace=@a5c-ai/agent-catalog
               npm run build --workspace=@a5c-ai/agent-mux-observability
-              npm run build --workspace=@a5c-ai/agent-mux-core
+              npm run build --workspace=@a5c-ai/agent-comm-mux
               npm run build --workspace=@a5c-ai/transport-mux
     steps:
       - name: Download publish workspace
@@ -1158,7 +1158,7 @@ jobs:
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/agent-catalog
           npm run build --workspace=@a5c-ai/agent-mux-observability
-          npm run build --workspace=@a5c-ai/agent-mux-core
+          npm run build --workspace=@a5c-ai/agent-comm-mux
           npm run build --workspace=@a5c-ai/agent-mux-adapters
           npm run build --workspace=@a5c-ai/agent-mux-gateway
 
@@ -1202,7 +1202,7 @@ jobs:
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/agent-catalog
           npm run build --workspace=@a5c-ai/agent-mux-observability
-          npm run build --workspace=@a5c-ai/agent-mux-core
+          npm run build --workspace=@a5c-ai/agent-comm-mux
           npm run build --workspace=@a5c-ai/agent-mux-adapters
           npm run build --workspace=@a5c-ai/agent-mux-gateway
           npm run build --workspace=@a5c-ai/transport-mux
@@ -1258,7 +1258,7 @@ jobs:
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/agent-catalog
           npm run build --workspace=@a5c-ai/agent-mux-observability
-          npm run build --workspace=@a5c-ai/agent-mux-core
+          npm run build --workspace=@a5c-ai/agent-comm-mux
           npm run build --workspace=@a5c-ai/agent-mux-adapters
           npm run build --workspace=@a5c-ai/agent-mux-gateway
           npm run build --workspace=@a5c-ai/transport-mux
@@ -1315,7 +1315,7 @@ jobs:
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/agent-catalog
           npm run build --workspace=@a5c-ai/agent-mux-observability
-          npm run build --workspace=@a5c-ai/agent-mux-core
+          npm run build --workspace=@a5c-ai/agent-comm-mux
           npm run build --workspace=@a5c-ai/agent-mux-adapters
           npm run build --workspace=@a5c-ai/agent-mux-gateway
           npm run build --workspace=@a5c-ai/transport-mux

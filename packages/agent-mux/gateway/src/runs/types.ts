@@ -4,7 +4,7 @@ import type {
   RunResult,
   WorkspaceRuntimeSurface,
   WorkspaceSessionContext,
-} from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
 
 export type RunStatus = 'running' | 'completed' | 'aborted' | 'failed';
 

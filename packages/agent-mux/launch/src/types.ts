@@ -2,7 +2,7 @@
  * Shared types for the agent-launch-mux package.
  */
 
-import type { TransportId } from '@a5c-ai/agent-mux-core';
+import type { TransportId } from '@a5c-ai/agent-comm-mux';
 
 // ---------------------------------------------------------------------------
 // Launch plan types

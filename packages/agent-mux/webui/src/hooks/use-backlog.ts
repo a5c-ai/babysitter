@@ -13,7 +13,7 @@ import type {
   KanbanProjectSettings,
   KanbanTaskTag,
   KanbanWorkflowState,
-} from "@a5c-ai/agent-mux-core/kanban";
+} from "@a5c-ai/agent-comm-mux/kanban";
 
 import { useSmartPolling } from "./use-smart-polling";
 

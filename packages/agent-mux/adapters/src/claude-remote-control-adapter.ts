@@ -20,8 +20,8 @@ import type {
   RunOptions,
   Session,
   CostRecord,
-} from '@a5c-ai/agent-mux-core';
-import { StreamAssembler } from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
+import { StreamAssembler } from '@a5c-ai/agent-comm-mux';
 
 import { BaseProgrammaticAdapter } from './programmatic-adapter-base.js';
 import { ClaudeAdapter } from './claude-adapter.js';

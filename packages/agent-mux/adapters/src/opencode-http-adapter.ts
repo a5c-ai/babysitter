@@ -27,7 +27,7 @@ import type {
   CostRecord,
   InstalledPlugin,
   PluginInstallOptions,
-} from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
 
 import { BaseRemoteAdapter } from './remote-adapter-base.js';
 import { createVirtualRuntimeHookCapabilities } from './shared/runtime-hooks-virtual.js';

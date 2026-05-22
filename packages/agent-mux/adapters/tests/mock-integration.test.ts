@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { StreamAssembler } from '@a5c-ai/agent-mux-core';
-import type { ParseContext, AgentEvent } from '@a5c-ai/agent-mux-core';
+import { StreamAssembler } from '@a5c-ai/agent-comm-mux';
+import type { ParseContext, AgentEvent } from '@a5c-ai/agent-comm-mux';
 
 import { ClaudeAdapter } from '../src/claude-adapter.js';
 import { CodexAdapter } from '../src/codex-adapter.js';

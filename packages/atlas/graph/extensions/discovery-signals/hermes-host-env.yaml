@@ -12,7 +12,7 @@ attributes:
     - HERMES_RUN_ID
   argvMatches:
     - hermes
-  consumer: agent-mux-core
+  consumer: agent-comm-mux
   metadataFields:
     - { key: session_id, envVars: [HERMES_SESSION] }
     - { key: run_id,     envVars: [HERMES_RUN_ID] }

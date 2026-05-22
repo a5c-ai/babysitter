@@ -10,8 +10,8 @@ import type {
   Session,
   SessionSummary,
   WorkspaceSessionBinding,
-} from '@a5c-ai/agent-mux-core';
-import { WorkspaceService, detectHostHarness } from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
+import { WorkspaceService, detectHostHarness } from '@a5c-ai/agent-comm-mux';
 
 import type { GatewayConfig } from '../config.js';
 import { createGatewayRunClient } from '../builtin-adapters.js';

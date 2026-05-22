@@ -4,7 +4,7 @@
  * @see docs/10-cli-reference.md Section 4
  */
 
-import type { ErrorCode } from '@a5c-ai/agent-mux-core';
+import type { ErrorCode } from '@a5c-ai/agent-comm-mux';
 
 /** CLI exit code constants. */
 export const ExitCode = {

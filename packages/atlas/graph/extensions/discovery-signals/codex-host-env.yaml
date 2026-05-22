@@ -13,7 +13,7 @@ attributes:
     - CODEX_CLI
   argvMatches:
     - codex
-  consumer: agent-mux-core
+  consumer: agent-comm-mux
   metadataFields:
     - { key: session_id, envVars: [CODEX_SESSION_ID] }
     - { key: run_id,     envVars: [CODEX_RUN_ID] }

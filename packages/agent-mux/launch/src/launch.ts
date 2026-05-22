@@ -6,13 +6,13 @@
  * stdin/stdout passthrough and proper signal forwarding.
  */
 
-import type { AgentMuxClient } from '@a5c-ai/agent-mux-core';
+import type { AgentMuxClient } from '@a5c-ai/agent-comm-mux';
 import {
   resolveProvider,
   resolveWorkspaceDefaultCwd,
   WorkspaceService,
-} from '@a5c-ai/agent-mux-core';
-import type { ProviderId, TransportId } from '@a5c-ai/agent-mux-core';
+} from '@a5c-ai/agent-comm-mux';
+import type { ProviderId, TransportId } from '@a5c-ai/agent-comm-mux';
 import { translateForHarness } from '@a5c-ai/agent-mux-adapters';
 import { getLaunchBehavior } from '@a5c-ai/agent-catalog';
 import {
@@ -710,7 +710,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     profile: flagStr(args.flags, 'profile'),
   });
   if (resolvedConfig.auth.type === 'api_key' && !resolvedConfig.auth.apiKey) {
-    const defaults = (await import('@a5c-ai/agent-mux-core')).PROVIDER_DEFAULTS;
+    const defaults = (await import('@a5c-ai/agent-comm-mux')).PROVIDER_DEFAULTS;
     const provId = resolvedConfig.provider;
     const envKey = defaults[provId]?.envKey;
     if (envKey) {
@@ -1046,7 +1046,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       let assembler: any = null;
       let adapter: any = null;
       try {
-        const core = await import('@a5c-ai/agent-mux-core');
+        const core = await import('@a5c-ai/agent-comm-mux');
         assembler = new core.StreamAssembler();
         // Resolve the adapter for this harness to use its parseEvent
         const adaptersModule = await import('@a5c-ai/agent-mux-adapters');
@@ -1225,10 +1225,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     });
 
     // Set up adapter + assembler for parsing PTY output into structured events
-    let assembler: import('@a5c-ai/agent-mux-core').StreamAssembler | null = null;
+    let assembler: import('@a5c-ai/agent-comm-mux').StreamAssembler | null = null;
     let adapter: { parseEvent(line: string, ctx: any): any } | null = null;
     try {
-      const core = await import('@a5c-ai/agent-mux-core');
+      const core = await import('@a5c-ai/agent-comm-mux');
       assembler = new core.StreamAssembler();
       const adaptersModule = await import('@a5c-ai/agent-mux-adapters');
       const factory = adaptersModule.getAdapterFactory?.(plan.harness);
