@@ -873,16 +873,11 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
           });
         }
       } else if (plan.proxy.apiBase && plan.proxy.apiKey) {
-        const isAzureServerless = (plan.proxy.targetProvider === 'foundry' || plan.proxy.targetProvider === 'azure')
-          && !plan.proxy.targetModel.startsWith('gpt-')
-          && !plan.proxy.targetModel.startsWith('o1-')
-          && !plan.proxy.targetModel.startsWith('o3-');
         const { createOpenAICompletionEngine } = await import('./launch-completion-engine.js');
         completionEngine = createOpenAICompletionEngine({
           apiBase: plan.proxy.apiBase,
           apiKey: plan.proxy.apiKey,
           targetModel: plan.proxy.targetModel,
-          serverless: isAzureServerless,
         });
       }
 
