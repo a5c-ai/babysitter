@@ -77,10 +77,21 @@ function translateMessagesToGoogle(messages: CompletionRequest['messages'], sigS
   return result;
 }
 
+function stripUnsupportedSchemaFields(schema: unknown): unknown {
+  if (!schema || typeof schema !== 'object') return schema;
+  if (Array.isArray(schema)) return schema.map(stripUnsupportedSchemaFields);
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(schema as Record<string, unknown>)) {
+    if (key === 'additionalProperties') continue;
+    result[key] = stripUnsupportedSchemaFields(value);
+  }
+  return result;
+}
+
 function buildGoogleBody(messages: CompletionRequest['messages'], tools?: unknown[], sigStore?: Map<string, string>): string {
   const body: Record<string, unknown> = { contents: translateMessagesToGoogle(messages, sigStore) };
   if (tools && tools.length > 0) {
-    body.tools = [{ functionDeclarations: tools.map((t) => { const tool = t as Record<string, unknown>; const fn = tool.function as Record<string, unknown> | undefined; return { name: fn?.name ?? tool.name, description: fn?.description ?? tool.description, parameters: fn?.parameters ?? tool.parameters }; }) }];
+    body.tools = [{ functionDeclarations: tools.map((t) => { const tool = t as Record<string, unknown>; const fn = tool.function as Record<string, unknown> | undefined; return { name: fn?.name ?? tool.name, description: fn?.description ?? tool.description, parameters: stripUnsupportedSchemaFields(fn?.parameters ?? tool.parameters) }; }) }];
   }
   return JSON.stringify(body);
 }
