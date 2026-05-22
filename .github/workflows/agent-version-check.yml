@@ -1,8 +1,7 @@
 # Agent Version Check — daily scan for new agent CLI releases
 #
-# Checks all supported agent CLIs for version updates. When a new version is
-# detected that isn't in the atlas graph, creates a PR to add the version
-# record and opens an issue for full assimilation.
+# An agent discovers all supported agents from the atlas graph, checks for
+# version updates, and creates PRs/issues for new versions.
 
 name: Agent Version Check
 
@@ -45,112 +44,6 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps --prefer-offline
-
-      - name: Build catalog
-        run: |
-          npm run build --workspace=@a5c-ai/atlas
-          npm run build --workspace=@a5c-ai/agent-catalog
-
-      - name: Discover agents and check versions
-        id: discover
-        run: |
-          set -euo pipefail
-
-          echo "## Discovering agents from atlas graph..."
-          TARGETS=$(node -e "
-            const { listPluginTargetDescriptors } = require('@a5c-ai/agent-catalog');
-            const targets = listPluginTargetDescriptors();
-            const result = [];
-            for (const t of targets) {
-              result.push({
-                id: t.targetId,
-                name: t.displayName,
-                cli: t.cliCommand || null,
-                externalPackage: t.externalPackageName || null,
-              });
-            }
-            console.log(JSON.stringify(result));
-          ")
-
-          echo "## Discovering install commands from adapters..."
-          INSTALL_CMDS=$(grep -r 'npm install -g' packages/agent-mux/adapters/src/ 2>/dev/null | grep -v test | grep -v node_modules | grep -oP "'npm install -g [^']+'" | sort -u || true)
-
-          echo "## Checking npm versions..."
-          VERSION_TABLE="| Agent | Package | Latest | Installed | Graph Version |\n|-------|---------|--------|-----------|---------------|\n"
-
-          echo "$TARGETS" | node -e "
-            const fs = require('fs');
-            const { execSync } = require('child_process');
-            const targets = JSON.parse(fs.readFileSync('/dev/stdin', 'utf8'));
-
-            // Also check known npm packages from adapter install commands
-            const knownPackages = {
-              'claude-code': '@anthropic-ai/claude-code',
-              'codex': '@openai/codex',
-              'pi': '@mariozechner/pi-coding-agent',
-              'gemini': '@google/gemini-cli',
-              'cursor': 'cursor-agent',
-              'opencode': '@anomalyco/opencode',
-              'amp': '@sourcegraph/amp-cli',
-              'droid': '@factory/droid-cli',
-            };
-
-            const results = [];
-            const seen = new Set();
-
-            for (const t of targets) {
-              const pkg = t.externalPackage || knownPackages[t.id] || null;
-              if (!pkg || seen.has(pkg)) continue;
-              seen.add(pkg);
-
-              let latest = 'NOT_FOUND';
-              try {
-                latest = execSync('npm view ' + pkg + '@latest version 2>/dev/null', { encoding: 'utf8', timeout: 10000 }).trim();
-              } catch {}
-
-              // Check graph for existing version records
-              let graphVersion = 'none';
-              try {
-                const found = execSync('grep -r \"' + t.id + '\" packages/atlas/graph/agent-stack/agent-versions/ 2>/dev/null | head -1', { encoding: 'utf8' }).trim();
-                if (found) graphVersion = found.split(':').pop().trim();
-              } catch {}
-
-              results.push({ id: t.id, name: t.name, package: pkg, latest, graphVersion });
-              console.error(t.id + ': ' + pkg + '@' + latest);
-            }
-
-            // Also check packages not in plugin targets
-            for (const [id, pkg] of Object.entries(knownPackages)) {
-              if (seen.has(pkg)) continue;
-              seen.add(pkg);
-              let latest = 'NOT_FOUND';
-              try {
-                latest = execSync('npm view ' + pkg + '@latest version 2>/dev/null', { encoding: 'utf8', timeout: 10000 }).trim();
-              } catch {}
-              results.push({ id, name: id, package: pkg, latest, graphVersion: 'none' });
-              console.error(id + ': ' + pkg + '@' + latest);
-            }
-
-            console.log(JSON.stringify(results));
-          " > /tmp/version-check-results.json
-
-          echo "results=$(cat /tmp/version-check-results.json)" >> "$GITHUB_OUTPUT"
-          cat /tmp/version-check-results.json | node -e "
-            const results = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
-            console.log('| Agent | Package | Latest |');
-            console.log('|-------|---------|--------|');
-            for (const r of results) {
-              console.log('| ' + r.name + ' | ' + r.package + ' | ' + r.latest + ' |');
-            }
-          "
-
       - uses: a5c-ai/babysitter/packages/triggers@staging
         with:
           harness: codex
@@ -161,41 +54,50 @@ jobs:
           max-turns: '9999'
           babysitter-prompt-prefix: '$babysitter:yolo '
           prompt: |
-            You are an agent version tracker. The discovery step already ran and
-            produced version check results. Your job is to update the atlas graph
-            for any new versions and open issues.
-            ${{ inputs.dry_run == 'true' && 'DRY RUN: report findings but do NOT create PRs or issues.' || '' }}
+            You are an agent version tracker running a daily check for new agent CLI releases.
+            ${{ inputs.dry_run == 'true' && 'DRY RUN MODE: report findings but do NOT create PRs or issues.' || '' }}
 
-            ## Pre-computed Version Data
+            Your goal: for EVERY agent in the atlas graph, check if there is a newer version
+            than what is recorded, and if so, update the graph and open tracking issues.
 
-            The version check results are in `/tmp/version-check-results.json`.
-            Read it with: `cat /tmp/version-check-results.json | jq .`
+            Work through these steps methodically. Cover ALL agents, not just a few.
 
-            Each entry has: id, name, package, latest (npm version), graphVersion.
+            STEP 1: Build the atlas and agent-catalog so you can query the graph.
+            ```
+            npm run build --workspace=@a5c-ai/atlas
+            npm run build --workspace=@a5c-ai/agent-catalog
+            ```
 
-            ## Your Tasks
+            STEP 2: Query the graph for ALL plugin targets and their install methods.
+            Use the agent-catalog SDK and also check the adapter source code for
+            install commands. Build a complete list of every agent with its npm/pip
+            package name. Do not hardcode — discover from the actual code and graph.
 
-            1. Read `/tmp/version-check-results.json`
-            2. For each agent where `latest` != "NOT_FOUND":
-               a. Check if that version exists in `packages/atlas/graph/agent-stack/agent-versions/`
-               b. If not, create a new AgentVersion YAML file
-               c. Search the web for release notes for that agent+version
-               d. Extract key changes (capabilities, breaking changes, new flags)
-            3. If any changes were made:
-               a. Rebuild atlas: `npm run build --workspace=@a5c-ai/atlas`
-               b. Create branch `agent-versions/daily-$(date +%Y-%m-%d)`
-               c. Commit and create PR against staging
-            4. For each NEW version not previously in the graph:
-               a. Check: `gh issue list --label "agent-version-update" --search "<agent> <version>"`
-               b. If none exists, create an issue titled "Assimilate <agent> v<version> into atlas graph"
-                  with label `agent-version-update,graph-update` and tasks:
-                  - Review release notes
-                  - Update AgentVersion record with full capabilities
-                  - Update PluginTarget if behaviors changed
-                  - Update ProviderTranslation if transport changes
-                  - Update launchBehavior if CLI flags changed
-                  - Run live-stack tests with new version
-            5. Print a summary table of all agents and their status
+            STEP 3: For EACH agent discovered, check the latest published version.
+            Use `npm view <package>@latest version` for npm packages. Search the web
+            for agents not on npm. Record every result.
+
+            STEP 4: Compare each discovered version against existing AgentVersion
+            records in `packages/atlas/graph/agent-stack/agent-versions/`. Read
+            the YAML files to see what is already recorded.
+
+            STEP 5: For each NEW version not in the graph:
+            - Search the web for release notes and changelog
+            - Create or update the AgentVersion YAML file
+            - Note any capability changes, new CLI flags, or breaking changes
+
+            STEP 6: If any graph files were changed:
+            - Rebuild atlas index
+            - Create a branch, commit, and open a PR against staging
+
+            STEP 7: For each new agent+version pair, open a GitHub issue titled
+            "Assimilate <agent> v<version> into atlas graph" with label
+            `agent-version-update,graph-update` (check for duplicates first).
+
+            STEP 8: Print a final summary table covering ALL agents checked.
+
+            IMPORTANT: You must cover every single agent in the graph, not just one or two.
+            Process them systematically in a loop. Do not stop after the first agent.
           trigger-query: ''
         env:
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
