@@ -39,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci --prefer-offline --legacy-peer-deps
-          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+          npm install --no-save @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu 2>/dev/null || true
 
       - name: Generate all target plugins
         run: |
