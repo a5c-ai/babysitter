@@ -1445,7 +1445,11 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     process.on('exit', () => { try { ptyProcess.kill('SIGKILL'); } catch { /* */ } });
   }
 
-  const promptPassedAsFlag = (plan.harness === 'pi' && !isInteractive && plan.args.includes('-p'));
+  const promptPassedAsFlag =
+    (plan.harness === 'pi' && !isInteractive && plan.args.includes('-p')) ||
+    (plan.harness === 'codex' && !isInteractive && plan.args.includes('exec')) ||
+    (plan.harness === 'claude' && !isInteractive && plan.args.includes('-p')) ||
+    (plan.harness === 'gemini' && !isInteractive && plan.args.includes('--prompt'));
   if (prompt && child.stdin && !ptyProcess && !promptPassedAsFlag) {
     child.stdin.write(prompt + '\n');
     if (!isInteractive) {
