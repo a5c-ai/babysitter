@@ -207,13 +207,14 @@ export function createOpenAICompletionEngine(options: {
     async *stream(request: CompletionRequest): AsyncIterable<CompletionStreamEvent> {
       const messages = translateMessagesToOpenAi(request.messages);
       const url = buildUrl(options.apiBase, options.targetModel);
-      console.error(`[transport-mux] OpenAI engine stream: POST ${url.replace(/api-key=[^&]+/, 'api-key=***')}`);
+      const bodyStr = buildBody(messages, options.targetModel, true, request.tools, request.toolChoice);
+      console.error(`[transport-mux] OpenAI engine stream: POST ${url.replace(/api-key=[^&]+/, 'api-key=***')} (${messages.length} msgs, ${request.tools?.length ?? 0} tools, body ${bodyStr.length} bytes)`);
       const response = await fetch(
         url,
         {
           method: 'POST',
           headers: buildHeaders(options.apiKey),
-          body: buildBody(messages, options.targetModel, true, request.tools, request.toolChoice),
+          body: bodyStr,
         },
       );
 
@@ -251,6 +252,9 @@ export function createOpenAICompletionEngine(options: {
 
           try {
             chunkCount++;
+            if (chunkCount === 1) {
+              console.error(`[transport-mux] First stream chunk: ${payload.slice(0, 300)}`);
+            }
             const chunk = JSON.parse(payload) as {
               choices: Array<{
                 delta: {
