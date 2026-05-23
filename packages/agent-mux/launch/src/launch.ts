@@ -1462,7 +1462,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     const resolvedSpawn = await resolveSpawnCommand(plan.command, plan.args);
     // On Windows with shell:true, long prompts get mangled by cmd.exe.
     // Move the prompt from -p flag to stdin delivery instead.
-    if (resolvedSpawn.shell && prompt) {
+    if (process.platform === 'win32' && prompt) {
       const launchBeh = getLaunchBehavior(plan.harness);
       if (launchBeh?.promptDelivery === 'cli-flag' && launchBeh.promptFlag) {
         const flagIdx = resolvedSpawn.args.indexOf(launchBeh.promptFlag);
