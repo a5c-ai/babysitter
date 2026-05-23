@@ -557,3 +557,6 @@ export { resolveProvidersFilePath, loadProvidersFile, writeProvidersFile, upsert
 // Provider support matrix
 export { isNativelySupported, getNativeMechanism, getRequiredProxyTransport, getHarnessDefaultTransport, isTransportCompatible } from './provider-support-matrix.js';
 export type { NativeSupportEntry } from './provider-support-matrix.js';
+
+// Event schemas (TypeBox JSON Schema definitions for all 67 event types)
+export * as schema from './schema/index.js';

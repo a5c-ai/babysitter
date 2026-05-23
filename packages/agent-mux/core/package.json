@@ -92,6 +92,7 @@
   },
   "dependencies": {
     "@a5c-ai/agent-catalog": "5.0.0",
-    "@a5c-ai/agent-mux-observability": "5.0.0"
+    "@a5c-ai/agent-mux-observability": "5.0.0",
+    "@sinclair/typebox": "^0.34.48"
   }
 }
