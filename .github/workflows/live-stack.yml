@@ -378,7 +378,8 @@ jobs:
 
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      - name: Remove agent skill directories from workspace
+      - name: Remove agent skill directories from workspace (vanilla only)
+        if: matrix.install_mode.id == 'vanilla'
         run: |
           rm -rf .codex .claude/commands .gemini CLAUDE.md GEMINI.md AGENTS.md 2>/dev/null || true
           echo "Cleaned agent skill directories to prevent test interference"
