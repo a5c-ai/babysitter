@@ -1474,8 +1474,9 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
           const os = await import('node:os');
           const promptFile = join(os.tmpdir(), `amux-prompt-${Date.now()}.txt`);
           writeFileSync(promptFile, prompt);
-          // Replace the prompt value with '-' (read from stdin)
-          resolvedSpawn.args[flagIdx + 1] = '-';
+          // Remove the prompt value entirely — -p alone triggers print mode
+          // and Claude Code reads the prompt from stdin
+          resolvedSpawn.args.splice(flagIdx + 1, 1);
           // Rebuild as: cmd /c type <promptFile> | <command> <args>
           const quoteIfNeeded = (s: string) => s.includes(' ') ? `"${s}"` : s;
           const quotedArgs = resolvedSpawn.args.map(quoteIfNeeded).join(' ');
