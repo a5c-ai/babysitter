@@ -664,6 +664,7 @@ function openAiChatStreamResponse(
         );
 
         let finishReason: string | null = 'stop';
+        let toolCallIndex = 0;
         for await (const event of stream) {
           if (event.type === 'text-delta' && event.text) {
             controller.enqueue(
@@ -677,6 +678,33 @@ function openAiChatStreamResponse(
                 }),
               ),
             );
+            continue;
+          }
+
+          if (event.type === 'tool-call') {
+            controller.enqueue(
+              encoder.encode(
+                encodeSseChunk('data: ', {
+                  id: responseId,
+                  object: 'chat.completion.chunk',
+                  created,
+                  model: config.targetModel,
+                  choices: [{
+                    index: 0,
+                    delta: {
+                      tool_calls: [{
+                        index: toolCallIndex,
+                        id: event.id,
+                        type: 'function',
+                        function: { name: event.name, arguments: event.arguments },
+                      }],
+                    },
+                    finish_reason: null,
+                  }],
+                }),
+              ),
+            );
+            toolCallIndex++;
             continue;
           }
 
