@@ -282,7 +282,7 @@ jobs:
 
               const claudeCreate = scenario('claude-code','claude',foundry,'create');
               const codexCreate = scenario('codex','codex',google,'create');
-              const piCreate = scenario('pi','pi',kimi,'create');
+              const piCreate = scenario('pi','pi',deepseek,'create');
 
               // BP Interactive: claude+codex+pi (create only)
               const bpInt = [
