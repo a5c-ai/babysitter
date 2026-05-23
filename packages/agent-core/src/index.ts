@@ -75,6 +75,19 @@ export type {
   ContextEntry,
   ContextManagerConfig,
   ContextManager,
+  ContextManagerImplOptions,
+  PriorityCompactionResult,
+  SlidingCompactionResult,
+  SummaryCompactionResult,
+  SummarizeFn,
+} from "./context";
+export {
+  ContextManagerImpl,
+  estimateTokens,
+  estimateEntryTokens,
+  applyPriorityCompaction,
+  applySlidingCompaction,
+  applySummaryCompaction,
 } from "./context";
 export type {
   SynthesisStrategyKind,
