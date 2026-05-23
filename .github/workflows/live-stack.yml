@@ -5,6 +5,8 @@ on:
       - main
       - staging
       - develop
+    paths:
+      - '.github/workflows/live-stack.yml'
   workflow_dispatch:
     inputs:
       ref:
