@@ -314,14 +314,17 @@ async function resolveSpawnCommand(command: string, args: string[]): Promise<{ c
           if (exeMatch?.[1]) {
             const exePath = pathMod.resolve(pathMod.dirname(resolved), exeMatch[1]);
             if (existsSync(exePath)) {
-              console.error(`[amux launch] resolved .cmd → .exe: ${exePath}`);
-              // The npm bin/claude.exe is a tiny shim that resolves relative to its
-              // parent package. Set env to help it find its dependencies.
-              return { command: exePath, args, shell: false };
+              const { statSync } = await import('node:fs');
+              const exeSize = statSync(exePath).size;
+              // Tiny shims (<10KB) are npm launchers that don't reliably process
+              // CLI args when spawned from child_process. Skip to .cmd fallback.
+              if (exeSize > 10240) {
+                console.error(`[amux launch] resolved .cmd → .exe: ${exePath} (${exeSize} bytes)`);
+                return { command: exePath, args, shell: false };
+              }
+              console.error(`[amux launch] .exe shim too small (${exeSize} bytes), using .cmd with stdin`);
             }
           }
-          // If .exe shim found but didn't work on previous attempts,
-          // fall through to .cmd with escaped args
         } catch { /* couldn't parse .cmd */ }
         // Fallback: use cmd.exe with escaped args
         return { command: resolved, args: args.map(escapeCmdArg), shell: true };
