@@ -1285,7 +1285,12 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     }
 
     const resolvedPty = await resolveSpawnCommand(plan.command, plan.args);
-    ptyProcess = nodePty.spawn(resolvedPty.command, resolvedPty.args, {
+    // node-pty's posix_spawnp can fail for some binaries (Bun .exe, npm wrappers).
+    // Fall back to spawning via shell which handles all executable types.
+    const ptyCommand = process.platform === 'win32' ? resolvedPty.command : '/bin/sh';
+    const ptyArgs = process.platform === 'win32' ? resolvedPty.args
+      : ['-c', [resolvedPty.command, ...resolvedPty.args].map(a => a.includes(' ') || /[&|<>^()%!"';]/.test(a) ? `'${a.replace(/'/g, "'\\''")}'` : a).join(' ')];
+    ptyProcess = nodePty.spawn(ptyCommand, ptyArgs, {
       name: 'xterm-256color',
       cols: 120,
       rows: 40,
