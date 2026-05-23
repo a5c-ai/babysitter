@@ -104,6 +104,26 @@ export const babysitterAgentSeamContracts = [
     validationCommands: [...BABYSITTER_AGENT_SEAM_VALIDATION_COMMANDS],
   },
   {
+    id: "platform-capabilities",
+    owner: "platform-core",
+    visibility: "public",
+    responsibilities: [
+      "Own L6 platform capabilities: skill routing, process recommendation, and plugin sandboxing.",
+      "Keep capability implementations grouped under one review boundary.",
+    ],
+    directories: [
+      "skills",
+      "processes",
+      "plugins",
+    ],
+    packageExports: [
+      "./skills",
+      "./processes",
+      "./plugins",
+    ],
+    validationCommands: [...BABYSITTER_AGENT_SEAM_VALIDATION_COMMANDS],
+  },
+  {
     id: "seam-contract",
     owner: "v6-architecture",
     visibility: "public",

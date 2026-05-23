@@ -57,10 +57,25 @@
       "require": "./dist/observability/index.js",
       "default": "./dist/observability/index.js"
     },
+    "./plugins": {
+      "types": "./dist/plugins/index.d.ts",
+      "require": "./dist/plugins/index.js",
+      "default": "./dist/plugins/index.js"
+    },
+    "./processes": {
+      "types": "./dist/processes/index.d.ts",
+      "require": "./dist/processes/index.js",
+      "default": "./dist/processes/index.js"
+    },
     "./runtime": {
       "types": "./dist/runtime/index.d.ts",
       "require": "./dist/runtime/index.js",
       "default": "./dist/runtime/index.js"
+    },
+    "./skills": {
+      "types": "./dist/skills/index.d.ts",
+      "require": "./dist/skills/index.js",
+      "default": "./dist/skills/index.js"
     },
     "./seams": {
       "types": "./dist/seams/index.d.ts",

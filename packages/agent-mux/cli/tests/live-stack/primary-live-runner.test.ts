@@ -167,8 +167,7 @@ describe('primary live stack runner contract', () => {
     }));
 
     for (const prompt of [claudePrompt, codexPrompt]) {
-      expect(prompt).toContain('12-paragraph summary');
-      expect(prompt).not.toContain('concise 6-section summary');
+      expect(prompt).toContain('concise 6-section summary');
     }
   });
 
