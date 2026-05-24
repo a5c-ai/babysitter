@@ -13,7 +13,7 @@ export interface StartTransportMuxRuntimeOptions {
   targetProvider: string;
   targetModel: string;
   exposedTransport: TransportId;
-  authToken?: string;
+  authToken?: string | null;
   apiBase?: string;
   host?: string;
   port?: number;
@@ -62,7 +62,7 @@ export function applyTransportMuxToHarnessEnv(
 export async function startTransportMuxRuntime(
   options: StartTransportMuxRuntimeOptions,
 ): Promise<TransportMuxRuntime> {
-  const authToken = options.authToken ?? randomUUID();
+  const authToken = options.authToken === null ? undefined : (options.authToken ?? randomUUID());
   const config = createProxyConfig({
     targetProvider: options.targetProvider,
     targetModel: options.targetModel,
