@@ -1314,29 +1314,40 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       await prepareClaudeAutomationState(launchCwd, plan.env);
     }
 
+    const resolvedBridge = await resolveSpawnCommand(plan.command, plan.args);
+    // Skip node-pty on macOS ARM64 CI — posix_spawnp fails for all binaries
+    const skipBridgePty = process.platform === 'darwin' && process.arch === 'arm64' && process.env['CI'] === 'true';
     let nodePty: any;
-    try {
-      nodePty = await import('node-pty');
-    } catch {
-      const msg = '--bridge-interactive requires node-pty but it is not available. Install it with: npm install node-pty';
-      if (jsonMode) printJsonError('SPAWN_ERROR', msg);
-      else printError(msg);
-      return ExitCode.GENERAL_ERROR;
+    if (!skipBridgePty) {
+      try {
+        nodePty = await import('node-pty');
+      } catch {
+        // node-pty not available — fall through to child_process fallback below
+      }
     }
 
-    const resolvedPty = await resolveSpawnCommand(plan.command, plan.args);
-    // node-pty's posix_spawnp can fail for some binaries (Bun .exe, npm wrappers).
-    // Fall back to spawning via shell which handles all executable types.
-    const ptyCommand = process.platform === 'win32' ? resolvedPty.command : '/bin/sh';
-    const ptyArgs = process.platform === 'win32' ? resolvedPty.args
-      : ['-c', [resolvedPty.command, ...resolvedPty.args].map(a => a.includes(' ') || /[&|<>^()%!"';]/.test(a) ? `'${a.replace(/'/g, "'\\''")}'` : a).join(' ')];
-    ptyProcess = nodePty.spawn(ptyCommand, ptyArgs, {
-      name: 'xterm-256color',
-      cols: 120,
-      rows: 40,
-      cwd: launchCwd,
-      env: { ...process.env, ...plan.env } as Record<string, string>,
-    });
+    if (nodePty) {
+      const ptyCommand = process.platform === 'win32' ? resolvedBridge.command : '/bin/sh';
+      const ptyArgs = process.platform === 'win32' ? resolvedBridge.args
+        : ['-c', [resolvedBridge.command, ...resolvedBridge.args].map(a => a.includes(' ') || /[&|<>^()%!"';]/.test(a) ? `'${a.replace(/'/g, "'\\''")}'` : a).join(' ')];
+      ptyProcess = nodePty.spawn(ptyCommand, ptyArgs, {
+        name: 'xterm-256color',
+        cols: 120,
+        rows: 40,
+        cwd: launchCwd,
+        env: { ...process.env, ...plan.env } as Record<string, string>,
+      });
+    } else {
+      // Fallback: child_process.spawn with piped stdio (same as NI path)
+      console.error(`[amux launch] bridge-interactive: PTY unavailable (${skipBridgePty ? 'macOS ARM64 CI skip' : 'import failed'}) — using child_process fallback`);
+      const { spawn } = await import('node:child_process');
+      child = spawn(resolvedBridge.command, resolvedBridge.args, {
+        stdio: ['pipe', 'pipe', 'pipe'],
+        env: { ...process.env, ...plan.env },
+        cwd: launchCwd,
+      });
+      child.stderr?.on('data', (chunk: Buffer) => process.stderr.write(chunk));
+    }
 
     // Set up adapter + assembler for parsing PTY output into structured events
     let assembler: import('@a5c-ai/agent-comm-mux').StreamAssembler | null = null;
