@@ -530,11 +530,11 @@ export function AssistantChat({ org, stacks = [] }) {
             </div>
           )}
           {sessions.map((s) => (
-            <button key={s.id} onClick={() => selectSession(s.id)} style={styles.sessionItem(s.id === activeSessionId)}>
+            <div key={s.id} onClick={() => selectSession(s.id)} style={styles.sessionItem(s.id === activeSessionId)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectSession(s.id); } }}>
               <button onClick={(e) => { e.stopPropagation(); deleteSession(s.id); }} style={styles.sessionDelete} aria-label="Delete session" title="Delete session">x</button>
               <span style={styles.sessionLabel}>{s.stackRef || 'assistant'}</span>
               <span style={styles.sessionMeta}>{s.messageCount || 0} messages</span>
-            </button>
+            </div>
           ))}
         </div>
       </div>

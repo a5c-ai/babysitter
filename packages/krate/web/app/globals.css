@@ -889,12 +889,11 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   .routeGrid.two { grid-template-columns: 1fr !important; }
   .routeGrid.three { grid-template-columns: 1fr !important; }
   .topbarNav { display: none; }
-  .sidebar { position: fixed; z-index: 100; transform: translateX(-100%); transition: transform 0.2s; }
-  .sidebar.open { transform: translateX(0); }
+  .appBody { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 760px) {
-  .appTopbar { grid-template-columns: 1fr; gap: 8px; }
+  .appTopbar { grid-template-columns: auto 1fr auto; gap: 8px; }
   .globalSearch { order: 3; }
   .routeMain { padding: 16px 16px 44px; }
   .routeHero, .repoTabs { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
@@ -940,6 +939,65 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 [data-theme="light"] .pill.warn { color: #92400e; background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); }
 [data-theme="light"] .pill.danger { color: #dc2626; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
 [data-theme="light"] .pill.neutral { color: #2563eb; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); }
+
+/* ─── 20. Mobile Navigation Toggle ───────────────────────────────────────── */
+.mobileNavToggle {
+  display: none;
+  align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  padding: 0; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); cursor: pointer;
+}
+.hamburgerIcon {
+  display: flex; flex-direction: column; gap: 4px; width: 18px;
+}
+.hamburgerIcon span {
+  display: block; height: 2px; width: 100%;
+  background: var(--text); border-radius: 1px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.mobileNavOverlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 99;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 768px) {
+  .mobileNavToggle { display: flex; }
+  .mobileNavOverlay { display: block; }
+  .appSidebar {
+    position: fixed; top: 0; left: 0; z-index: 100;
+    width: 280px; height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    background: var(--bg-subtle);
+    padding-top: 60px;
+  }
+  .appSidebar.mobileOpen {
+    transform: translateX(0);
+  }
+  .appSidebar nav { display: grid; gap: 2px; }
+  .sidebarNavGroup { display: grid; gap: 2px; }
+  .sidebarNavGroup h2 { display: block; }
+  .sidebarNavGroup a small { display: block; }
+  .orgSwitcher { display: block; }
+}
+
+/* ─── 21. Load Error Banner ──────────────────────────────────────────────── */
+.loadErrorBanner {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--warning, #f59e0b);
+  font-size: 0.85rem; font-weight: 500;
+}
+.loadErrorBanner a {
+  color: var(--warning, #f59e0b); font-weight: 600; text-decoration: underline;
+}
 
 /* Ensure all misc legacy layout selectors render clean */
 .appTopbar, .appBody, .appContent, .routeMain { width: 100%; max-width: none; margin-left: 0; margin-right: 0; }

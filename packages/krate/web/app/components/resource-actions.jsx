@@ -1,10 +1,29 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useCallback, useEffect } from 'react';
+
+function useSuccessMessage() {
+  const [success, setSuccess] = useState(null);
+  const timerRef = useRef(null);
+  const showSuccess = useCallback((text, href) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setSuccess({ text, href });
+    timerRef.current = setTimeout(() => setSuccess(null), 3000);
+  }, []);
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+  return [success, showSuccess];
+}
+
+function SuccessBanner({ success }) {
+  if (!success) return null;
+  return <p role="status" className="mutationStatus" style={{ color: 'var(--success, #22c55e)' }}>{success.text}{success.href ? <> &middot; <a href={success.href}>View created resource</a></> : null}</p>;
+}
 
 export function RepositoryManager({ namespace, org, repositories = [] }) {
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [success, showSuccess] = useSuccessMessage();
+  const formRef = useRef(null);
   const repositoryNames = repositories.map((repository) => repository.metadata?.name).filter(Boolean);
 
   async function createRepository(formData) {
@@ -22,7 +41,13 @@ export function RepositoryManager({ namespace, org, repositories = [] }) {
         })
       });
       const body = await response.json();
-      setMessage(response.ok ? `Applied Repository/${body.resource?.metadata?.name || formData.get('name')}` : body.message || body.error || 'Repository apply failed');
+      if (response.ok) {
+        const name = body.resource?.metadata?.name || formData.get('name');
+        showSuccess(`Applied Repository/${name}`, `/orgs/${org}/repositories/${name}/code`);
+        formRef.current?.reset();
+      } else {
+        setMessage(body.message || body.error || 'Repository apply failed');
+      }
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -46,7 +71,7 @@ export function RepositoryManager({ namespace, org, repositories = [] }) {
 
   return <div className="card managementCard">
     <div className="cardTitle"><h3>Repository management</h3><span className="pill neutral">Krate-managed</span></div>
-    <form action={createRepository} className="formGrid">
+    <form ref={formRef} action={createRepository} className="formGrid">
       <label><span>Name</span><input name="name" required pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?" placeholder="repository-name" /></label>
       <label><span>Visibility</span><select name="visibility" defaultValue="internal"><option value="private">private</option><option value="internal">internal</option><option value="public">public</option></select></label>
       <label><span>Default branch</span><input name="defaultBranch" defaultValue="main" required /></label>
@@ -54,6 +79,7 @@ export function RepositoryManager({ namespace, org, repositories = [] }) {
     </form>
     <p className="muted">Creates and updates repositories through Krate in workspace <code>{namespace}</code>.</p>
     {repositoryNames.length ? <ul className="compactList repositoryManageList">{repositoryNames.map((name) => <li key={name}><a href={`/orgs/${org}/repositories/${name}/code`}>Repository/{name}</a><span><a href={`/orgs/${org}/repositories/${name}/pull-requests`}>PRs</a><a href={`/orgs/${org}/repositories/${name}/settings`}>Settings</a><button type="button" disabled={busy} onClick={() => deleteRepository(name)}>Delete</button></span></li>)}</ul> : <p className="emptyText">No repositories are available yet.</p>}
+    <SuccessBanner success={success} />
     {message ? <p role="status" className="mutationStatus">{message}</p> : null}
   </div>;
 }
@@ -62,6 +88,8 @@ export function RepositoryManager({ namespace, org, repositories = [] }) {
 export function DeploymentManager({ namespace, org, repositories = [], delivery = {} }) {
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [success, showSuccess] = useSuccessMessage();
+  const deployFormRef = useRef(null);
   const repositoryNames = repositories.map((repository) => repository.metadata?.name).filter(Boolean);
   const deploymentNames = (delivery.applications || []).map((deployment) => deployment.name).filter(Boolean);
 
@@ -91,7 +119,13 @@ export function DeploymentManager({ namespace, org, repositories = [], delivery 
         })
       });
       const body = await response.json();
-      setMessage(response.ok ? `Prepared deployment ${body.resource?.metadata?.name || name}` : body.message || body.error || 'Deployment setup failed');
+      if (response.ok) {
+        const deployName = body.resource?.metadata?.name || name;
+        showSuccess(`Prepared deployment ${deployName}`, `/orgs/${org}/deployments`);
+        deployFormRef.current?.reset();
+      } else {
+        setMessage(body.message || body.error || 'Deployment setup failed');
+      }
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -102,8 +136,9 @@ export function DeploymentManager({ namespace, org, repositories = [], delivery 
   return <div className="card managementCard">
     <div className="cardTitle"><h3>Create deployment</h3><span className="pill neutral">guided</span></div>
     <p className="emptyText">Choose a repository, image, service, and environment. Advanced details stay collapsed after the deployment is prepared.</p>
-    <form action={createDeployment} className="formGrid"><label><span>Name</span><input name="name" required placeholder="web-production" /></label><label><span>Repository</span><select name="repository" required>{repositoryNames.length ? repositoryNames.map((repo) => <option key={repo} value={repo}>{repo}</option>) : <option value="">Create a repository first</option>}</select></label><label><span>Service</span><input name="service" defaultValue="web" required /></label><label><span>Container image</span><input name="image" required placeholder="ghcr.io/acme/web:latest" /></label><label><span>Environment</span><select name="environment" defaultValue="development"><option value="development">development</option><option value="staging">staging</option><option value="production">production</option></select></label><label><span>Port</span><input name="port" type="number" min="1" max="65535" defaultValue="8080" /></label><button type="submit" disabled={busy || repositoryNames.length === 0}>Prepare deployment</button></form>
+    <form ref={deployFormRef} action={createDeployment} className="formGrid"><label><span>Name</span><input name="name" required placeholder="web-production" /></label><label><span>Repository</span><select name="repository" required>{repositoryNames.length ? repositoryNames.map((repo) => <option key={repo} value={repo}>{repo}</option>) : <option value="">Create a repository first</option>}</select></label><label><span>Service</span><input name="service" defaultValue="web" required /></label><label><span>Container image</span><input name="image" required placeholder="ghcr.io/acme/web:latest" /></label><label><span>Environment</span><select name="environment" defaultValue="development"><option value="development">development</option><option value="staging">staging</option><option value="production">production</option></select></label><label><span>Port</span><input name="port" type="number" min="1" max="65535" defaultValue="8080" /></label><button type="submit" disabled={busy || repositoryNames.length === 0}>Prepare deployment</button></form>
     <IdentityList title="Deployment flow" items={[`Repositories available: ${repositoryNames.length}`, `Deployments prepared: ${deploymentNames.length}`, ...(deploymentNames.slice(0, 4).map((name) => `Ready to inspect: ${name}`))]} />
+    <SuccessBanner success={success} />
     {message ? <p role="status" className="mutationStatus">{message}</p> : null}
   </div>;
 }
@@ -111,6 +146,7 @@ export function DeploymentManager({ namespace, org, repositories = [], delivery 
 export function ResourceApplyPanel({ org = 'default', resource }) {
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [success, showSuccess] = useSuccessMessage();
   const initialJson = useMemo(() => sanitizePlan(JSON.stringify(resource, null, 2)), [resource]);
 
   if (!resource) return <div className="card applyPanel emptyState"><div className="cardTitle"><h3>Advanced resource editor</h3><span className="pill neutral">org action</span></div><p className="emptyText">No editable resource is selected yet. Use a guided page first, or open advanced details when you need direct editing.</p><textarea name="resource" value="No resource selected yet." rows={8} readOnly spellCheck="false" /><button type="button" disabled>Save changes</button></div>;
@@ -125,7 +161,11 @@ export function ResourceApplyPanel({ org = 'default', resource }) {
         body: formData.get('resource')
       });
       const body = await response.json();
-      setMessage(response.ok ? `Applied ${body.resource?.kind}/${body.resource?.metadata?.name}` : body.message || body.error || 'Resource apply failed');
+      if (response.ok) {
+        showSuccess(`Applied ${body.resource?.kind}/${body.resource?.metadata?.name}`);
+      } else {
+        setMessage(body.message || body.error || 'Resource apply failed');
+      }
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -137,6 +177,7 @@ export function ResourceApplyPanel({ org = 'default', resource }) {
     <div className="cardTitle"><h3>Advanced resource editor</h3><span className="pill neutral">org action</span></div>
     <textarea name="resource" defaultValue={initialJson} rows={12} spellCheck="false" />
     <button type="submit" disabled={busy}>Save changes</button>
+    <SuccessBanner success={success} />
     {message ? <p role="status" className="mutationStatus">{message}</p> : null}
   </form>;
 }

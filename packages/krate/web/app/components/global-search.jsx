@@ -53,6 +53,7 @@ export function GlobalSearch({ org }) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [noResults, setNoResults] = useState(false);
+  const [searchError, setSearchError] = useState(false);
   const [open, setOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState([]);
@@ -84,6 +85,7 @@ export function GlobalSearch({ org }) {
     if (query.length < 2) {
       setResults([]);
       setNoResults(false);
+      setSearchError(false);
       setLoading(false);
       return;
     }
@@ -95,13 +97,16 @@ export function GlobalSearch({ org }) {
           const data = await res.json();
           setResults(data.results || []);
           setNoResults((data.results || []).length === 0);
+          setSearchError(false);
         } else {
           setResults([]);
-          setNoResults(true);
+          setNoResults(false);
+          setSearchError(true);
         }
       } catch {
         setResults([]);
-        setNoResults(true);
+        setNoResults(false);
+        setSearchError(true);
       } finally {
         setLoading(false);
       }
@@ -146,7 +151,7 @@ export function GlobalSearch({ org }) {
   }
 
   const showRecent = query.length === 0 && recentSearches.length > 0;
-  const showResults = query.length >= 2 && (results.length > 0 || noResults || loading);
+  const showResults = query.length >= 2 && (results.length > 0 || noResults || searchError || loading);
 
   return (
     <div
@@ -164,6 +169,7 @@ export function GlobalSearch({ org }) {
           onFocus={handleFocus}
           onKeyDown={handleKeyDown}
           autoComplete="off"
+          style={searchError ? { borderColor: '#f59e0b' } : undefined}
         />
       </label>
 
@@ -221,7 +227,17 @@ export function GlobalSearch({ org }) {
             </div>
           )}
 
-          {!loading && noResults && query.length >= 2 && (
+          {!loading && searchError && query.length >= 2 && (
+            <div style={{ padding: '12px', fontSize: '0.875rem', color: '#f59e0b', textAlign: 'center' }}>
+              <div>Search unavailable &mdash; check connection</div>
+              <button
+                onClick={() => { setSearchError(false); setQuery((q) => q + ' '); setTimeout(() => setQuery((q) => q.trimEnd()), 10); }}
+                style={{ marginTop: 6, padding: '4px 12px', fontSize: '0.8rem', background: 'none', border: '1px solid #f59e0b', borderRadius: 4, color: '#f59e0b', cursor: 'pointer' }}
+              >Retry</button>
+            </div>
+          )}
+
+          {!loading && !searchError && noResults && query.length >= 2 && (
             <div style={{ padding: '12px', fontSize: '0.875rem', color: 'var(--ink-muted, #6b7280)', textAlign: 'center' }}>
               No results for &ldquo;{query}&rdquo;
             </div>

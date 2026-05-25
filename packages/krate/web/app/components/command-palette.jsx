@@ -55,7 +55,7 @@ function buildCommands(org) {
     { id: 'create-rule', label: 'New Trigger Rule', hint: 'Create a trigger rule', href: prefix('/agents/rules/new'), group: 'Create' },
     { id: 'create-repo', label: 'New Repository', hint: 'Create a repository', href: prefix('/repositories/new'), group: 'Create' },
     // Actions
-    { id: 'action-dispatch', label: 'Dispatch Agent', hint: 'Run an agent now', action: () => document.querySelector('[data-dispatch-button]')?.click(), group: 'Actions' },
+    { id: 'action-dispatch', label: 'Dispatch Agent', hint: 'Run an agent now', href: prefix('/agents/runs'), group: 'Actions' },
     { id: 'action-toggle-dark', label: 'Toggle Dark Mode', hint: 'Switch color theme', action: () => document.documentElement.classList.toggle('dark'), group: 'Actions' },
   ];
 }
@@ -65,6 +65,8 @@ export function CommandPalette({ org, isOpen, onClose }) {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [recentCommandIds, setRecentCommandIds] = useState([]);
+  const [actionError, setActionError] = useState('');
+  const actionErrorTimerRef = useRef(null);
   const inputRef = useRef(null);
 
   const allCommands = buildCommands(org);
@@ -115,12 +117,28 @@ export function CommandPalette({ org, isOpen, onClose }) {
 
   function executeCommand(cmd) {
     addRecentCommand(cmd.id);
-    onClose();
-    if (cmd.href) {
-      router.push(cmd.href);
-    } else if (cmd.action) {
-      cmd.action();
+    setActionError('');
+    try {
+      if (cmd.href) {
+        onClose();
+        router.push(cmd.href);
+      } else if (cmd.action) {
+        onClose();
+        try {
+          cmd.action();
+        } catch {
+          showActionError('Could not execute command');
+        }
+      }
+    } catch {
+      showActionError('Could not execute command');
     }
+  }
+
+  function showActionError(msg) {
+    setActionError(msg);
+    if (actionErrorTimerRef.current) clearTimeout(actionErrorTimerRef.current);
+    actionErrorTimerRef.current = setTimeout(() => setActionError(''), 3000);
   }
 
   function handleInputKeyDown(e) {
@@ -248,6 +266,11 @@ export function CommandPalette({ org, isOpen, onClose }) {
             );
           })}
         </div>
+        {actionError && (
+          <div style={{ padding: '8px 16px', fontSize: '0.8rem', color: '#ef4444', background: 'rgba(239, 68, 68, 0.08)', borderTop: '1px solid rgba(239, 68, 68, 0.3)' }}>
+            {actionError}
+          </div>
+        )}
         <div style={{ borderTop: '1px solid var(--border, #e5e7eb)', padding: '8px 16px', display: 'flex', gap: 16, fontSize: '0.75rem', color: 'var(--ink-muted, #9ca3af)' }}>
           <span><kbd style={{ background: 'var(--bg, #f3f4f6)', border: '1px solid var(--border, #d1d5db)', borderRadius: 2, padding: '1px 4px' }}>↑↓</kbd> navigate</span>
           <span><kbd style={{ background: 'var(--bg, #f3f4f6)', border: '1px solid var(--border, #d1d5db)', borderRadius: 2, padding: '1px 4px' }}>↵</kbd> select</span>

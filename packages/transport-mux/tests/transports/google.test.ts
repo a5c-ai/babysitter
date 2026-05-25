@@ -55,7 +55,7 @@ describe('google transport', () => {
     });
 
     expect(response.status).toBe(200);
-    expect(response.headers.get('content-type')).toContain('application/x-ndjson');
+    expect(response.headers.get('content-type')).toContain('text/event-stream');
     const body = await response.text();
     expect(body).toContain('"text":"Gemini reply"');
     expect(engine.requests[0]?.stream).toBe(true);

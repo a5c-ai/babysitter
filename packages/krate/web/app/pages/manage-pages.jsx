@@ -6,16 +6,23 @@ import { SecretManager } from '../components/secret-manager.jsx';
 import { ResourceActions, InlineCreateForm } from '../components/resource-crud-actions.jsx';
 import { HealthMonitor } from '../components/health-monitor.jsx';
 
-export function LoginPage() {
+const AUTH_ERROR_MESSAGES = {
+  provider_not_found: 'This sign-in provider is not available. Please choose another method or contact your administrator.',
+  provider_disabled: 'This sign-in provider is currently disabled. Please choose another method or contact your administrator.',
+};
+
+export function LoginPage({ error = null } = {}) {
   const config = createAuthProviderConfig();
   const methods = listEnabledAuthProviders(config).map((provider) => ({ id: provider.id, href: `/api/auth/${provider.id}`, label: `Continue with ${provider.label}` }));
   if (config.delegatedIdentity.enabled) methods.push({ id: 'workspace-identity', href: '/api/auth/delegated', label: 'Use workspace identity' });
+  const errorMessage = error ? (AUTH_ERROR_MESSAGES[error] || 'An authentication error occurred. Please try again.') : null;
   return <main id="main-content" className="loginMain" aria-labelledby="login-title">
     <section className="loginCard" aria-label="Krate sign in">
       <a className="loginBrand" href="/login" aria-label="a5c.ai Krate sign in"><span className="brandSigil">K</span><span className="brandWordmark"><strong>Kr<span>ate</span></strong><em>a5c.ai</em></span></a>
       <span className="eyebrow">account</span>
       <h1 id="login-title">Sign in to Krate</h1>
       <p className="lede">Use an administrator-configured sign-in method to continue.</p>
+      {errorMessage ? <p className="loginNotice" role="alert">{errorMessage}</p> : null}
       {methods.length ? <div className="heroActions verticalActions" aria-label="Sign-in methods">{methods.map((method) => <a key={method.id} href={method.href}>{method.label}</a>)}</div> : <p className="loginNotice">No browser sign-in method is configured for this endpoint.</p>}
     </section>
   </main>;

@@ -152,7 +152,12 @@ export function sanitizeAction(value) {
 }
 
 export async function loadKrateUi(org = null) {
-  const model = await fetchControllerUiModel({ organization: org, useCache: true, swrOptions: { staleMs: 5 * 60_000 } });
+  let model;
+  try {
+    model = await fetchControllerUiModel({ organization: org, useCache: true, swrOptions: { staleMs: 5 * 60_000 } });
+  } catch (error) {
+    model = { org: { slug: org || 'default' }, orgs: [], resources: [], views: { dashboard: { repositories: [] } }, agents: {}, metrics: {}, _loadError: error.message || 'Failed to load data from controller' };
+  }
   const activeOrg = org || model.org?.slug || 'default';
   const resourceByKind = new Map(model.resources.map((resource) => [resource.kind, resource]));
   await hydrateEmptyOrgResources(resourceByKind, activeOrg, ORG_HYDRATED_RESOURCE_KINDS);

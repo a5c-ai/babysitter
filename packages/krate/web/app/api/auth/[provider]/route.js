@@ -14,11 +14,13 @@ export async function GET(request, { params }) {
   const { provider } = await params;
   const config = createAuthProviderConfig();
   const selected = config.providers[provider];
-  if (!selected) return Response.json({ error: 'not_found', message: 'Sign-in provider is not available' }, { status: 404 });
+  if (!selected) {
+    return Response.redirect(new URL(`/login?error=provider_not_found`, request.url).toString(), 302);
+  }
   try {
     const redirect = buildAuthorizationRedirect({ provider: selected, requestUrl: resolvePublicUrl(request) });
     return Response.redirect(redirect.url, 302);
   } catch (error) {
-    return Response.json({ error: 'disabled', message: error.message }, { status: 400 });
+    return Response.redirect(new URL(`/login?error=provider_disabled`, request.url).toString(), 302);
   }
 }

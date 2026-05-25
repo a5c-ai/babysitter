@@ -75,11 +75,16 @@ export function IssueEditor({ org, issue, repo = null, project = null }) {
     const body = commentBody.trim();
     if (!body) return;
     const comment = { id: `comment-${Date.now()}`, author: 'Krate user', body, createdAt: new Date().toISOString() };
+    const previousComments = comments;
     const nextComments = [...comments, comment];
+    // Optimistic update: show comment immediately
+    setComments(nextComments);
+    setCommentBody('');
     const ok = await patchIssue({ spec: { comments: nextComments } });
-    if (ok) {
-      setComments(nextComments);
-      setCommentBody('');
+    if (!ok) {
+      // Revert optimistic update on failure
+      setComments(previousComments);
+      setCommentBody(body);
     }
   }
 
