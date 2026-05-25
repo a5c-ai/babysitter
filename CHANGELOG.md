@@ -6,6 +6,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased] - 2026-05-25
+
+### feat
+- 85bf9b9b2 feat(krate-web): add stack inline editor, fix RBAC deletion cleanup (Tal Muskal, 6 hours ago)
+
+### fix
+- af82b2659 fix(krate-web): add cache invalidation to repository, dispatch, and conflict routes (Tal Muskal, 4 hours ago)
+- a6661b3b8 fix(live-stack): update stale test assertions for prompt text and create-mode cleanup (Tal Muskal, 6 hours ago)
+- 82b214fdd fix(krate-web): fix broken CRUD actions, API paths, and missing endpoints across console (Tal Muskal, 6 hours ago)
+- 09a5cc834 fix(live-stack): hooks-mux optional in interactive mode, not just bridged-hooks (Tal Muskal, 6 hours ago)
+- 98adc381c fix(live-stack): cross-platform BP fixture setup (bash→node) (Tal Muskal, 6 hours ago)
+- aeb77e1b9 fix(live-stack): macOS BI child_process fallback + Windows BP npm spawn (Tal Muskal, 6 hours ago)
+- 8994fb43a fix: gemini-cli prompt + macOS BI stdout capture + BP resume command (Tal Muskal, 7 hours ago)
+- 07d877d5a fix(transport-mux): whitelist root path / for proxy auth (health checks) (Tal Muskal, 9 hours ago)
+- f888f721b fix(launch): add PTY skip + child_process fallback to bridge-interactive path (#308) (Tal Muskal, 10 hours ago)
+- b4e0d9f87 fix(launch): BI fallback uses pipe stdio (matching NI) + debug logging (Tal Muskal, 11 hours ago)
+- 6ab464ce4 fix(launch): use resolveSpawnCommand in BI fallback path (Tal Muskal, 12 hours ago)
+- 7495ef6c9 fix(transport-mux): update google streaming test to expect text/event-stream (Tal Muskal, 12 hours ago)
+- 7cd802acc fix: three live-stack fixes — macOS BI skip, hooks trust pattern, gemini SSE (Tal Muskal, 12 hours ago)
+- 04ca6ab00 fix(sdk): update fallback metadata contract test for LOCAL_FALLBACK merge (Tal Muskal, 23 hours ago)
+- b0a5280e9 fix(launch-mux): auto-trust codex hooks in bridged-interactive mode (#309) (Tal Muskal, 24 hours ago)
+- f4f6eba7b fix(launch-mux): robust PTY fallback for macOS ARM64 posix_spawnp failures (#308) (Tal Muskal, 24 hours ago)
+
+### test
+- 162419dd9 fix(test): use /babysitter:resume for BP resume mode (#312) (Tal Muskal, 9 hours ago)
+- c7c9387a8 fix(test): only require hooks-mux logs in bridged-hooks mode, not interactive (Tal Muskal, 24 hours ago)
+
+### ci
+- 732ae0718 fix(ci): fix tool-mux/launch-mux build order in publish-packages-from-tag (Tal Muskal, 6 hours ago)
+- 0acb12b0c fix(ci): add push trigger to live-stack-published for GitHub workflow discovery (Tal Muskal, 12 hours ago)
+- 7068be42b fix(ci): add hooks-mux-adapter-hermes and krate to version bump paths (Tal Muskal, 12 hours ago)
+- 690771e15 fix(ci): add agent-config-mux, agent-launch-mux, tool-mux to publish pipeline (Tal Muskal, 12 hours ago)
+- f3231e185 feat(ci): add live-stack-published workflow — tests with npm packages only (Tal Muskal, 12 hours ago)
+- 6f65d1699 fix(ci): add agent-runtime, omni, tool-mux to publish pipeline and version bumps (Tal Muskal, 24 hours ago)
+
+### chore
+- e4a494a26 chore: trigger workflow discovery for live-stack-published (Tal Muskal, 12 hours ago)
+- 75193c134 redesign(krate-web): modern dark-first Terminal Craft design system (Tal Muskal, 12 hours ago)
+- a4cc57b13 Move CLI implementation into omni (Tal Muskal, 12 hours ago)
+- 0ca99c5d8 Revert "fix(test): only require hooks-mux logs in bridged-hooks mode, not interactive" (Tal Muskal, 24 hours ago)
+
 ## [Unreleased] - 2026-05-22
 
 ### feat
