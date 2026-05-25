@@ -8,7 +8,7 @@ function useSuccessMessage() {
   const showSuccess = useCallback((text, href) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     setSuccess({ text, href });
-    timerRef.current = setTimeout(() => setSuccess(null), 3000);
+    timerRef.current = setTimeout(() => { setSuccess(null); window.location.reload(); }, 1500);
   }, []);
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
   return [success, showSuccess];
