@@ -19,6 +19,7 @@ export interface CommandExecution {
   readonly env: Record<string, string>;
   readonly cwd: string;
   readonly timeoutMs: number;
+  readonly shell?: boolean;
 }
 
 export interface CommandResult {
@@ -348,7 +349,7 @@ export async function executeChildProcessCommand(execution: CommandExecution): P
     const child = spawn(execution.command, execution.args, {
       cwd: execution.cwd,
       env: { ...process.env, ...execution.env },
-      shell: false,
+      shell: execution.shell ?? false,
       detached: process.platform !== 'win32',
       stdio: ['pipe', 'pipe', 'pipe'],
     });
@@ -429,9 +430,15 @@ export async function executePtyCommand(execution: CommandExecution): Promise<Co
 
 function commandExecution(env: Record<string, string>, overrideKey: string, defaultCommand: string, args: readonly string[], cwd: string, timeoutMs: number): CommandExecution {
   const overrideBin = env[overrideKey];
-  return overrideBin
-    ? { command: process.execPath, args: [overrideBin, ...args], env, cwd, timeoutMs }
-    : { command: defaultCommand, args, env, cwd, timeoutMs };
+  if (overrideBin) {
+    return { command: process.execPath, args: [overrideBin, ...args], env, cwd, timeoutMs };
+  }
+  // On Windows, .cmd scripts (npm, npx) require shell: true to execute.
+  // amux is resolved via resolveSpawnCommand and uses shell: false.
+  if (process.platform === 'win32' && ['npm', 'npx'].includes(defaultCommand)) {
+    return { command: defaultCommand, args, env, cwd, timeoutMs, shell: true };
+  }
+  return { command: defaultCommand, args, env, cwd, timeoutMs };
 }
 
 function buildCommandEnv(env: Record<string, string | undefined>, cwd: string): Record<string, string> {

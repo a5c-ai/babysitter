@@ -1347,7 +1347,6 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         cwd: launchCwd,
       });
       child.stderr?.on('data', (chunk: Buffer) => process.stderr.write(chunk));
-      child.stdout?.on('data', (chunk: Buffer) => process.stdout.write(chunk));
     }
 
     // Set up adapter + assembler for parsing PTY output into structured events
@@ -1380,18 +1379,6 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     let apiKeyPromptHandled = false;
     let bypassPromptHandled = false;
     let hooksTrustHandled = false;
-    let babysitterSkillFollowupInjected = false;
-    const maybeInjectBabysitterSkillFollowup = (output: string) => {
-      if (babysitterSkillFollowupInjected || !promptInvokesBabysitterSlashCommand(prompt)) return;
-      if (!stripTerminalControl(output).includes('Skill(babysitter:babysit)')) return;
-      babysitterSkillFollowupInjected = true;
-      setTimeout(() => {
-        if (!ptyTerminationExpected) {
-          ptyProcess.write(buildBabysitterSkillFollowupPrompt(prompt));
-          setTimeout(() => ptyProcess.write('\r'), 500);
-        }
-      }, 1000);
-    };
     let idleTimer: ReturnType<typeof setTimeout> | null = null;
     const IDLE_TIMEOUT_MS = 30_000;
     const harnessesWithEndEvents = new Set(['claude', 'codex', 'gemini', 'opencode']);
@@ -1411,37 +1398,19 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       adapterState: {},
     };
 
-    ptyProcess.onData((data: string) => {
-      // Buffer all PTY output — never write synchronously to stdout (pipe deadlock)
+    // Shared output handler: buffer, parse events, detect turn completion.
+    // Used by both PTY onData and child_process stdout.
+    const writeInput = (text: string) => {
+      if (ptyProcess) ptyProcess.write(text);
+      else if (child?.stdin?.writable) child.stdin.write(text);
+    };
+
+    const handleOutputChunk = (data: string) => {
       outputBuf += data;
       capturedOutputChunks.push(data);
 
-      // Auto-respond to Claude Code interactive prompts that block automation.
-      // ANSI cursor-move codes replace spaces, so stripped text is concatenated.
-      const stripped = outputBuf.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
-      if (!apiKeyPromptHandled && stripped.includes('usethisAPIkey')) {
-        apiKeyPromptHandled = true;
-        // Default is "No (recommended)". Send Up arrow + Enter to select "Yes".
-        setTimeout(() => ptyProcess.write('\x1b[A\r'), 200);
-      }
-      if (!bypassPromptHandled && stripped.includes('BypassPermissionsmode')) {
-        bypassPromptHandled = true;
-        // Default is "No, exit". Send Down arrow + Enter to select "Yes, I accept".
-        setTimeout(() => ptyProcess.write('\x1b[B\r'), 200);
-      }
-      // Codex hooks trust prompt: "Hooks can run outside the sandbox after you trust them"
-      // or "hooks are new or changed. Hooks need review"
-      if (!hooksTrustHandled && (stripped.includes('Hooks need review') || stripped.includes('hooks need review') || stripped.includes('Hooks can run outside the sandbox'))) {
-        hooksTrustHandled = true;
-        // Send "2" to select "Trust all" option, then Enter
-        setTimeout(() => ptyProcess.write('2\r'), 300);
-      }
-
-      maybeInjectBabysitterSkillFollowup(outputBuf);
-
       if (!assembler || !adapter || turnComplete) return;
 
-      // Strip ANSI escapes, then feed lines to the event parser
       const clean = data.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*\x07/g, '');
       lineBuf += clean;
 
@@ -1462,14 +1431,12 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
             eventCount++;
             parseCtx.lastEventType = ev.type;
 
-            // Emit as NDJSON bridge event
             emitBridgeEvent({
               type: ev.type,
               timestamp: new Date().toISOString(),
               data: ev,
             });
 
-            // Detect turn completion events — schedule PTY termination
             if (ev.type === 'message_stop' || ev.type === 'turn_end' || ev.type === 'session_end') {
               turnComplete = true;
               if (idleTimer) clearTimeout(idleTimer);
@@ -1477,7 +1444,6 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
               return;
             }
 
-            // Idle timeout termination for harnesses without structured end events.
             if (useIdleTimeout) {
               if (idleTimer) clearTimeout(idleTimer);
               idleTimer = setTimeout(() => {
@@ -1490,72 +1456,139 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
           }
         } catch { /* parse error — ignore */ }
       }
-    });
+    };
 
-    // Inject prompt after observed onboarding prompts are dismissed.
-    // If the PTY stays silent, inject after a short startup grace period because
-    // some harnesses wait for input without rendering an initial prompt.
-    if (prompt) {
-      const startedAt = Date.now();
-      let promptInjected = false;
-      let artifactMonitor: ReturnType<typeof setInterval> | undefined;
-      const injectPrompt = () => {
-        if (promptInjected) return;
-        promptInjected = true;
-        ptyProcess.write(prompt);
-        setTimeout(() => ptyProcess.write('\r'), 500);
-        artifactMonitor = startPromptArtifactCompletionMonitor({
-          prompt,
-          cwd: launchCwd,
-          onComplete: () => {
-            if (artifactMonitor) clearInterval(artifactMonitor);
-            completePtyPrompt();
-          },
-        });
-        ptyCleanup.push(() => { if (artifactMonitor) clearInterval(artifactMonitor); });
-      };
-      const checkAndInject = () => {
-        if (promptInjected) return;
-        if (outputBuf.length === 0) {
-          if (Date.now() - startedAt >= 1000) injectPrompt();
-          else setTimeout(checkAndInject, 100);
-          return;
+    let babysitterSkillFollowupInjected = false;
+    const maybeInjectBabysitterSkillFollowup = (output: string) => {
+      if (babysitterSkillFollowupInjected || !promptInvokesBabysitterSlashCommand(prompt)) return;
+      if (!stripTerminalControl(output).includes('Skill(babysitter:babysit)')) return;
+      babysitterSkillFollowupInjected = true;
+      setTimeout(() => {
+        if (!ptyTerminationExpected) {
+          writeInput(buildBabysitterSkillFollowupPrompt(prompt));
+          setTimeout(() => writeInput('\r'), 500);
         }
+      }, 1000);
+    };
+
+    if (ptyProcess) {
+      ptyProcess.onData((data: string) => {
+        handleOutputChunk(data);
 
         const stripped = outputBuf.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
-        if (apiKeyPromptHandled || bypassPromptHandled) {
-          setTimeout(injectPrompt, 2000);
-        } else if (stripped.includes('APIkey') || stripped.includes('Bypass')) {
-          setTimeout(checkAndInject, 500);
-        } else {
-          setTimeout(injectPrompt, 3000);
+        if (!apiKeyPromptHandled && stripped.includes('usethisAPIkey')) {
+          apiKeyPromptHandled = true;
+          setTimeout(() => ptyProcess.write('\x1b[A\r'), 200);
         }
-      };
-      checkAndInject();
-    }
-
-    // Create a fake ChildProcess-like for signal handling
-    child = { pid: ptyProcess.pid, kill: (sig: string) => ptyProcess.kill(sig) } as any;
-
-    // On PTY exit, flush remaining buffered text as a final output event
-    const origOnExit = ptyProcess.onExit.bind(ptyProcess);
-    const exitPromise = new Promise<number>((resolve) => {
-      origOnExit(({ exitCode: code }: { exitCode: number }) => {
-        // Flush any remaining output as a final bridge event
-        if (outputBuf.length > 0) {
-          emitBridgeEvent({
-            type: 'output',
-            timestamp: new Date().toISOString(),
-            data: { text: outputBuf },
-          });
-          outputBuf = '';
+        if (!bypassPromptHandled && stripped.includes('BypassPermissionsmode')) {
+          bypassPromptHandled = true;
+          setTimeout(() => ptyProcess.write('\x1b[B\r'), 200);
         }
-        resolve(code);
+        if (!hooksTrustHandled && (stripped.includes('Hooks need review') || stripped.includes('hooks need review') || stripped.includes('Hooks can run outside the sandbox'))) {
+          hooksTrustHandled = true;
+          setTimeout(() => ptyProcess.write('2\r'), 300);
+        }
+
+        maybeInjectBabysitterSkillFollowup(outputBuf);
       });
-    });
 
-    // Store the exit promise so main exit handler can use it
-    (child as any).__bridgeExitPromise = exitPromise;
+      if (prompt) {
+        const startedAt = Date.now();
+        let promptInjected = false;
+        let artifactMonitor: ReturnType<typeof setInterval> | undefined;
+        const injectPrompt = () => {
+          if (promptInjected) return;
+          promptInjected = true;
+          ptyProcess.write(prompt);
+          setTimeout(() => ptyProcess.write('\r'), 500);
+          artifactMonitor = startPromptArtifactCompletionMonitor({
+            prompt,
+            cwd: launchCwd,
+            onComplete: () => {
+              if (artifactMonitor) clearInterval(artifactMonitor);
+              completePtyPrompt();
+            },
+          });
+          ptyCleanup.push(() => { if (artifactMonitor) clearInterval(artifactMonitor); });
+        };
+        const checkAndInject = () => {
+          if (promptInjected) return;
+          if (outputBuf.length === 0) {
+            if (Date.now() - startedAt >= 1000) injectPrompt();
+            else setTimeout(checkAndInject, 100);
+            return;
+          }
+
+          const stripped = outputBuf.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
+          if (apiKeyPromptHandled || bypassPromptHandled) {
+            setTimeout(injectPrompt, 2000);
+          } else if (stripped.includes('APIkey') || stripped.includes('Bypass')) {
+            setTimeout(checkAndInject, 500);
+          } else {
+            setTimeout(injectPrompt, 3000);
+          }
+        };
+        checkAndInject();
+      }
+
+      child = { pid: ptyProcess.pid, kill: (sig: string) => ptyProcess.kill(sig) } as any;
+
+      const origOnExit = ptyProcess.onExit.bind(ptyProcess);
+      const exitPromise = new Promise<number>((resolve) => {
+        origOnExit(({ exitCode: code }: { exitCode: number }) => {
+          if (outputBuf.length > 0) {
+            emitBridgeEvent({
+              type: 'output',
+              timestamp: new Date().toISOString(),
+              data: { text: outputBuf },
+            });
+            outputBuf = '';
+          }
+          resolve(code);
+        });
+      });
+      (child as any).__bridgeExitPromise = exitPromise;
+    } else {
+      // child_process fallback: pipe stdout through shared handler, deliver prompt via stdin
+      child.stdout?.on('data', (chunk: Buffer) => {
+        const text = chunk.toString('utf8');
+        process.stdout.write(chunk);
+        handleOutputChunk(text);
+        maybeInjectBabysitterSkillFollowup(outputBuf);
+      });
+
+      if (prompt) {
+        // Deliver prompt via stdin after a short startup delay
+        setTimeout(() => {
+          if (child?.stdin?.writable) {
+            child.stdin.write(prompt + '\n');
+          }
+          const artifactMonitor = startPromptArtifactCompletionMonitor({
+            prompt,
+            cwd: launchCwd,
+            onComplete: () => {
+              clearInterval(artifactMonitor);
+              completePtyPrompt();
+            },
+          });
+        }, 2000);
+      }
+
+      const exitPromise = new Promise<number>((resolve) => {
+        child.on('exit', (code: number | null, signal: string | null) => {
+          if (outputBuf.length > 0) {
+            emitBridgeEvent({
+              type: 'output',
+              timestamp: new Date().toISOString(),
+              data: { text: outputBuf },
+            });
+            outputBuf = '';
+          }
+          resolve(signal ? 128 + (signal === 'SIGINT' ? 2 : 15) : (code ?? 1));
+        });
+      });
+      (child as any).__bridgeExitPromise = exitPromise;
+    }
   } else {
     // Non-interactive: plain spawn. Each harness handles non-interactive mode
     // internally (claude -p, codex exec, gemini --prompt, pi -p).
