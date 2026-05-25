@@ -3,8 +3,8 @@ id: agent-version:claude-agent-sdk@current
 attributes:
   agentProductId: agent:claude-agent-sdk
   sourcePackage: "@anthropic-ai/claude-agent-sdk"
-  versionRange: ">=0.3.148"
-  releasedAt: "2026-05-22"
+  versionRange: ">=0.3.150"
+  releasedAt: "2026-05-23"
   cliCommand: "<sdk:@anthropic-ai/claude-agent-sdk>"
   installMethods:
     - install:npm
@@ -21,19 +21,19 @@ edges:
   sourced_from: []
   supports:
     - target: capability:can-multi-turn
-      versionRange: '>=0.3.148'
+      versionRange: '>=0.3.150'
       level: full
       notes: Claude Agent SDK provides a multi-turn agent loop.
     - target: capability:supports-text-streaming
-      versionRange: '>=0.3.148'
+      versionRange: '>=0.3.150'
       level: full
       notes: Claude Agent SDK streams model output.
     - target: capability:supports-tool-use
-      versionRange: '>=0.3.148'
+      versionRange: '>=0.3.150'
       level: full
       notes: Claude Agent SDK dispatches tool calls per turn.
     - target: capability:supports-subagent-dispatch
-      versionRange: '>=0.3.148'
+      versionRange: '>=0.3.150'
       level: full
       notes: Claude Agent SDK supports spawning subagent threads.
   uses_memory_system:

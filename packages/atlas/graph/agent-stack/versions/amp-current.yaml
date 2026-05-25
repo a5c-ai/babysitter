@@ -3,8 +3,8 @@ id: agent-version:amp@current
 attributes:
   agentProductId: agent:amp
   sourcePackage: "@ampcode/cli"
-  versionRange: ">=0.0.1779472071-g128112"
-  releasedAt: "2026-05-22"
+  versionRange: ">=0.0.1779729291-gfe2d7f"
+  releasedAt: "2026-05-25"
   cliCommand: "amp"
   installMethods:
     - install:npm
@@ -28,18 +28,18 @@ edges:
   sourced_from: []
   supports:
     - target: capability:can-multi-turn
-      versionRange: '>=0.0.1779472071-g128112'
+      versionRange: '>=0.0.1779729291-gfe2d7f'
       level: full
       notes: Amp runs multi-turn agentic coding sessions.
     - target: capability:supports-text-streaming
-      versionRange: '>=0.0.1779472071-g128112'
+      versionRange: '>=0.0.1779729291-gfe2d7f'
       level: full
       notes: Amp streams model output in real time.
     - target: capability:supports-tool-use
-      versionRange: '>=0.0.1779472071-g128112'
+      versionRange: '>=0.0.1779729291-gfe2d7f'
       level: full
       notes: Amp drives file edits and terminal commands via tool-use.
     - target: capability:supports-mcp
-      versionRange: '>=0.0.1779472071-g128112'
+      versionRange: '>=0.0.1779729291-gfe2d7f'
       level: full
       notes: Amp supports MCP servers for extensibility.

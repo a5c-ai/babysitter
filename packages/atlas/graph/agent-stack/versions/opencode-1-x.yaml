@@ -13,8 +13,8 @@ attributes:
     - "macos"
     - "windows"
   agentProductId: agent:opencode
-  versionRange: ">=1.15.7"
-  releasedAt: "2026-05-21"
+  versionRange: ">=1.15.10"
+  releasedAt: "2026-05-23"
   cliCommand: "opencode"
   installMethods:
     - install:npm
@@ -124,35 +124,35 @@ edges:
   sourced_from: []
   supports:
     - target: capability:skills
-      versionRange: ">=1.15.7"
+      versionRange: ">=1.15.10"
       level: full
       notes: OpenCode documents reusable command surfaces — first-party basis for the local skills abstraction.
     - target: capability:supports-thinking
-      versionRange: ">=1.15.7"
+      versionRange: ">=1.15.10"
       level: full
       notes: OpenCode documented as an interactive terminal coding surface backed by configurable providers.
     - target: capability:interactive-mode
-      versionRange: ">=1.15.7"
+      versionRange: ">=1.15.10"
       level: full
       notes: Interactive terminal use documented directly in OpenCode TUI docs.
     - target: capability:stdin-injection
-      versionRange: ">=1.15.7"
+      versionRange: ">=1.15.10"
       level: full
       notes: Public docs thinner for non-interactive prompt injection; local fallback metadata remains primary.
     - target: capability:vision-input
-      versionRange: ">=1.15.7"
+      versionRange: ">=1.15.10"
       level: full
       notes: Public OpenCode docs lack strong technical detail for image input.
     - target: capability:runtime-hooks
-      versionRange: ">=1.15.7"
+      versionRange: ">=1.15.10"
       level: full
       notes: OpenCode plugins expose hook-based extensibility — first-party basis for runtime hooks.
     - target: capability:stop-hook
-      versionRange: ">=1.15.7"
+      versionRange: ">=1.15.10"
       level: full
       notes: Local ontology normalizes stop-hook separately; first-party support is the broader plugin hook system.
     - target: capability:can-resume
-      versionRange: ">=1.15.7"
+      versionRange: ">=1.15.10"
       level: full
       notes: Public OpenCode docs describe where sessions are stored.
   uses_memory_system:

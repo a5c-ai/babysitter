@@ -28,7 +28,7 @@ attributes:
     layers on the harness from packages/agent.
 edges:
   has_version:
-    - agentVersion:pi:ge-0-75-4
+    - agentVersion:pi:ge-0-75-5
   composed_of:
     - target: language:typescript
       role: core

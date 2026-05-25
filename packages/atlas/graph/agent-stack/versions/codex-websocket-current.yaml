@@ -2,8 +2,8 @@ nodeKind: AgentVersion
 id: agent-version:codex-websocket@current
 attributes:
   agentProductId: agent:codex
-  versionRange: ">=0.121.0"
-  releasedAt: "2025-01-01"
+  versionRange: ">=0.133.0"
+  releasedAt: "2026-05-21"
   cliCommand: "codex"
   installMethods:
     - install:npm
@@ -21,15 +21,15 @@ edges:
   sourced_from: []
   supports:
     - target: capability:can-multi-turn
-      versionRange: '>=0.121.0'
+      versionRange: '>=0.133.0'
       level: full
       notes: Codex WebSocket transport enables multi-turn sessions.
     - target: capability:supports-text-streaming
-      versionRange: '>=0.121.0'
+      versionRange: '>=0.133.0'
       level: full
       notes: Codex streams output over WebSocket.
     - target: capability:supports-tool-use
-      versionRange: '>=0.121.0'
+      versionRange: '>=0.133.0'
       level: full
       notes: Codex dispatches sandboxed tool calls.
   uses_memory_system:

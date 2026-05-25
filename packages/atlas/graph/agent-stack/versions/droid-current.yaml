@@ -3,8 +3,8 @@ id: agent-version:droid@current
 attributes:
   agentProductId: agent:droid
   sourcePackage: "@factory/cli"
-  versionRange: ">=0.131.0"
-  releasedAt: "2026-05-21"
+  versionRange: ">=0.132.1"
+  releasedAt: "2026-05-24"
   cliCommand: "droid"
   installMethods:
     - install:npm
@@ -26,19 +26,19 @@ edges:
   sourced_from: []
   supports:
     - target: capability:can-multi-turn
-      versionRange: '>=0.131.0'
+      versionRange: '>=0.132.1'
       level: full
       notes: Droid operates as a multi-turn coding agent.
     - target: capability:supports-text-streaming
-      versionRange: '>=0.131.0'
+      versionRange: '>=0.132.1'
       level: full
       notes: Droid streams model output in the terminal.
     - target: capability:supports-tool-use
-      versionRange: '>=0.131.0'
+      versionRange: '>=0.132.1'
       level: full
       notes: Droid drives file edits and commands via tool-use.
     - target: capability:supports-mcp
-      versionRange: '>=0.131.0'
+      versionRange: '>=0.132.1'
       level: full
       notes: Droid supports MCP server integration.
   uses_memory_system:
