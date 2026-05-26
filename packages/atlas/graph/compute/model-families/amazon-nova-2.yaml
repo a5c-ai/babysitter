@@ -8,6 +8,7 @@ attributes:
   modalities:
     - text
     - image
+    - audio
     - video
   status: current
 edges:
@@ -15,3 +16,4 @@ edges:
     - target: layer:1-model
   has_version:
     - model:amazon-nova-2-lite@current
+    - model:amazon-nova-2-sonic@current

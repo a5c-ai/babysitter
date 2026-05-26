@@ -1,0 +1,75 @@
+nodeKind: EvidenceSource
+id: evidence:amazon-nova-2-lite-model-card
+attributes:
+  displayName: "Amazon Nova 2 Lite model card"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-lite.html
+  sourcePathOrUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-lite.html
+  locator: "Nova 2 Lite model ids, modalities, context window, output limit, lifecycle, and Bedrock API support"
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:amazon-nova-2-lite-launch-blog
+attributes:
+  displayName: "Introducing Amazon Nova 2 Lite"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://aws.amazon.com/blogs/aws/introducing-amazon-nova-2-lite-a-fast-cost-effective-reasoning-model/
+  sourcePathOrUrl: https://aws.amazon.com/blogs/aws/introducing-amazon-nova-2-lite-a-fast-cost-effective-reasoning-model/
+  locator: "Nova 2 Lite launch announcement and December 2, 2025 release date"
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:amazon-nova-2-sonic-model-card
+attributes:
+  displayName: "Amazon Nova 2 Sonic model card"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-sonic.html
+  sourcePathOrUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-sonic.html
+  locator: "Nova 2 Sonic model id and low-latency speech-to-speech streaming behavior"
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:bedrock-bidirectional-stream-api
+attributes:
+  displayName: "Bedrock Runtime InvokeModelWithBidirectionalStream API"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModelWithBidirectionalStream.html
+  sourcePathOrUrl: https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModelWithBidirectionalStream.html
+  locator: "Bidirectional event-stream runtime API used for real-time model streaming"
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web

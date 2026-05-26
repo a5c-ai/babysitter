@@ -4,12 +4,18 @@ attributes:
   displayName: "Amazon Nova 2 Lite"
   costPerMTokInput: 0
   costPerMTokOutput: 0
+  providerModelIds:
+    - amazon.nova-2-lite-v1:0
+    - us.amazon.nova-2-lite-v1:0
+    - eu.amazon.nova-2-lite-v1:0
+    - global.amazon.nova-2-lite-v1:0
   supportsExtendedThinking: true
   supportsThinkingBudgetTokens: false
   modelFamilyId: model-family:amazon-nova-2
   versionRange: '>=2.0.0 <3.0.0'
   kind: multimodal
   contextWindowTokens: 1000000
+  maxOutputTokens: 64000
   modalities:
     - text
     - image
@@ -30,6 +36,10 @@ attributes:
   supportsFineTuning: false
   regions:
     - global
+  notes: |
+    Bedrock-native Nova 2 Lite model identifiers are tracked as providerModelIds.
+    Pricing is region/model specific on the Bedrock pricing page and is not
+    hardcoded in this graph node.
 edges:
   belongs_to_family:
     - target: model-family:amazon-nova-2
@@ -41,10 +51,25 @@ edges:
     - provider:aws-bedrock
   speaks:
     - model-transport:bedrock-converse
+    - model-transport:bedrock-invoke
   supports:
     - target: capability:supports-tool-use
       versionRange: '>=2.0.0 <3.0.0'
       level: full
+      evidenceSourceIds:
+        - evidence:amazon-nova-2-lite-model-card
     - target: capability:vision-input
       versionRange: '>=2.0.0 <3.0.0'
       level: full
+      evidenceSourceIds:
+        - evidence:amazon-nova-2-lite-model-card
+    - target: capability:extended-thinking
+      versionRange: '>=2.0.0 <3.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:amazon-nova-2-lite-model-card
+    - target: capability:supports-prompt-caching
+      versionRange: '>=2.0.0 <3.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:amazon-nova-2-lite-model-card
