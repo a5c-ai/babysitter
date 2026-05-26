@@ -85,10 +85,9 @@ export async function appendHooksLog(
 
   try {
     const logDir = getHooksLogDir();
-    await fs.promises.mkdir(logDir, { recursive: true });
-    await fs.promises.appendFile(getHooksLogPath(), JSON.stringify(entry) + '\n', 'utf8');
+    fs.mkdirSync(logDir, { recursive: true });
+    fs.appendFileSync(getHooksLogPath(), JSON.stringify(entry) + '\n', 'utf8');
   } catch (err) {
-    // Log the error to stderr so we can diagnose CI failures
     process.stderr.write(`[hooks-logger] FAILED to write log: ${err instanceof Error ? err.message : String(err)} (dir=${getHooksLogDir()}, home=${process.env.HOME ?? 'unset'})\n`);
   }
 }
