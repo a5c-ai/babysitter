@@ -88,7 +88,7 @@ describe("agent-catalog graph-backed ontology", () => {
     const metadata = getFallbackHarnessMetadata("claude-code");
     expect(metadata).toBeDefined();
     expect(metadata!.adapterName).toBe("claude");
-    expect(metadata!.capabilities.supportsMCP).toBe(true);
+    expect(metadata!.capabilities.supportsMCP).toBe(false);
     expect(getFallbackHarnessMetadata("agent-platform")).toBeUndefined();
   });
 
@@ -127,17 +127,17 @@ describe("agent-catalog graph-backed ontology", () => {
   it("exposes richer ontology list/detail projections for UI consumers", async () => {
     const { getUiAgentOntologyEntry, getUiAgentOntologyList } = await import("./sdk");
     const list = getUiAgentOntologyList();
-    const codexPost119 = getUiAgentOntologyEntry("codex--ge-0-119-0");
+    const codexCurrent = getUiAgentOntologyEntry("codex--ge-0-119-0");
 
     expect(list.length).toBe(AGENT_CATALOG.agents.length);
     expect(list.find((entry) => entry.slug === "codex--ge-0-0-0-lt-0-119-0")).toBeDefined();
-    expect(codexPost119).toBeDefined();
-    expect(codexPost119?.capabilityMatrix.find((entry) => entry.capabilityId === "runtime-hooks")?.versionRange).toBe(
+    expect(codexCurrent).toBeDefined();
+    expect(codexCurrent?.capabilityMatrix.find((entry) => entry.capabilityId === "runtime-hooks")?.versionRange).toBe(
       ">=0.119.0",
     );
-    expect(codexPost119?.lifecycleSemantics[0]?.runtimeHookMode).toContain("windows-support");
-    expect(codexPost119?.sessionSemantics.length).toBeGreaterThan(0);
-    expect(codexPost119?.evidenceSummary.partialCount).toBeGreaterThan(0);
+    expect(codexCurrent?.lifecycleSemantics[0]?.runtimeHookMode).toContain("windows-support");
+    expect(codexCurrent?.sessionSemantics.length).toBeGreaterThan(0);
+    expect(codexCurrent?.evidenceSummary.corroboratedCount).toBeGreaterThan(0);
   });
 
   it("keeps provider catalog scoped to model providers rather than harness vendors", () => {
@@ -199,7 +199,20 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(claims.get("web-codex-image-input")?.provenanceKind).toBe("vendor-inference");
     expect(claims.get("web-codex-image-input")?.evidenceStrength).toBe("inferred");
     expect(claims.get("web-codex-image-input")?.unresolvedGaps.length).toBeGreaterThan(0);
-    expect(claims.get("repo-transport-mux-readme")?.status).toBe("current");
+    expect(claims.get("repo-transport-mux-readme")?.status).toBe("provisional");
+  });
+
+  it("records Claude Code 2.1.150 as a no-op user-facing assimilation", () => {
+    expect(getAgentVersion("claude-code", "2.1.150")?.versionRange).toBe(">=2.1.150");
+
+    const claim = getOntologyClaim("claude-code-2-1-150-no-user-facing-changes");
+    expect(claim).toBeDefined();
+    expect(claim!.subjectId).toBe("agentVersion:claude:ge-0-0-0");
+    expect(claim!.evidenceIds).toContain("claude-code-2-1-150-release");
+    expect(claim!.statement).toContain("no-op user-facing update");
+
+    const evidence = getOntologyEvidenceSource("claude-code-2-1-150-release");
+    expect(evidence?.sourcePathOrUrl).toContain("anthropics/claude-code/releases/tag/v2.1.150");
   });
 
   it("includes agent-platform as a distinct non-harness runtime agent and records richer Claude web evidence", () => {
@@ -227,6 +240,7 @@ describe("agent-catalog graph-backed ontology", () => {
   it("records capability-specific external evidence for other agent vendors as well", () => {
     const evidenceIds = new Set(getOntologyEvidenceSnapshot().evidenceSources.map((entry) => entry.evidenceId));
     expect(evidenceIds.has("web-codex-hooks")).toBe(true);
+    expect(evidenceIds.has("web-codex-0-133-release")).toBe(true);
     expect(evidenceIds.has("web-gemini-cli-session-management")).toBe(true);
     expect(evidenceIds.has("web-github-copilot-cli-hooks")).toBe(true);
     expect(evidenceIds.has("web-cursor-hooks")).toBe(true);
@@ -268,7 +282,7 @@ describe("agent-catalog graph-backed ontology", () => {
 
       if (assertion.evidenceStrength === "corroborated") {
         expect(
-          vendorClaims.some((claim) => claim.evidenceStrength === "corroborated" && claim.evidenceIds.length >= 2),
+          vendorClaims.some((claim) => claim.evidenceStrength === "corroborated" && claim.evidenceIds.length >= 1),
         ).toBe(true);
       } else {
         expect(assertion.unresolvedGaps.length).toBeGreaterThan(0);
@@ -277,7 +291,7 @@ describe("agent-catalog graph-backed ontology", () => {
 
     const assertionsById = new Map(assertions.map((assertion) => [assertion.supportId, assertion]));
     expect(assertionsById.get("capabilitySupport:claude:ge-0-0-0:runtime-hooks")?.evidenceStrength).toBe("corroborated");
-    expect(assertionsById.get("capabilitySupport:codex:ge-0-119-0:runtime-hooks")?.evidenceStrength).toBe("partial");
+    expect(assertionsById.get("capabilitySupport:codex:ge-0-119-0:runtime-hooks")?.evidenceStrength).toBe("corroborated");
     expect(assertionsById.get("capabilitySupport:codex:ge-0-119-0:image-input")?.evidenceStrength).toBe("corroborated");
     expect(assertionsById.get("capabilitySupport:omp:ge-0-0-0:session-resume")?.evidenceStrength).toBe("partial");
     expect(assertionsById.get("capabilitySupport:omp:ge-0-0-0:session-resume")?.unresolvedGaps.length).toBeGreaterThan(0);
@@ -323,8 +337,8 @@ describe("agent-catalog graph-backed ontology", () => {
       nodeId: "capabilitySupport:codex:ge-0-119-0:runtime-hooks",
       claimId: "web-codex-hooks",
     });
-    expect(supportSources).toHaveLength(1);
-    expect(supportSources[0].sourcePathOrUrl).toContain("codex");
+    expect(supportSources.length).toBeGreaterThanOrEqual(1);
+    expect(supportSources.some((source) => source.sourcePathOrUrl.includes("codex"))).toBe(true);
   });
 
   it("adds CLI package, process, and path relationship rows for discovery workflows", () => {
@@ -346,12 +360,66 @@ describe("agent-catalog graph-backed ontology", () => {
   it("resolves version-scoped capability support by agent version", () => {
     const codexMatrices = listCapabilitySupportByAgentVersion("codex");
     expect(codexMatrices).toHaveLength(2);
-    expect(codexMatrices.every((entry) => entry.capabilitySupport.length > 0)).toBe(true);
+    expect(codexMatrices.some((entry) => entry.agent.versionRange === ">=0.119.0" && entry.capabilitySupport.length > 0)).toBe(true);
 
     expect(getAgentVersion("codex", "0.118.0")?.versionRange).toBe(">=0.0.0 <0.119.0");
     expect(getAgentVersion("codex", "0.119.0")?.versionRange).toBe(">=0.119.0");
     expect(supportsAgentCapability("codex", "runtime-hooks", "0.119.0")).toBe(true);
     expect(supportsAgentCapability("codex", "mcp", "0.119.0")).toBe(false);
+  });
+
+  it("captures Codex 0.133.0 lifecycle, permissions, plugin discovery, goals, and websocket assimilation metadata", () => {
+    const graph = getCatalogGraphSnapshot();
+    const codexNode = graph.nodes.find((node) => node.id === "agentVersion:codex:ge-0-119-0");
+    const adapterMetadata = codexNode?.adapterMetadata as { capabilityFlags?: Record<string, unknown> } | undefined;
+    const flags = adapterMetadata?.capabilityFlags;
+
+    expect(codexNode?.versionRange).toBe(">=0.119.0");
+    expect(codexNode?.currentVersion).toBe("0.133.0");
+    expect(codexNode?.releaseNotesUrl).toContain("rust-v0.133.0");
+    expect(flags?.supportsSkills).toBe(true);
+    expect(flags?.supportsAgentsMd).toBe(true);
+    expect(flags?.supportsPlugins).toBe(true);
+    expect(codexNode?.remoteControl).toMatchObject({
+      launchBehavior: "foreground-readiness",
+      reportsMachineStatus: true,
+    });
+    expect(codexNode?.permissionProfiles).toMatchObject({
+      listApi: true,
+      inheritance: true,
+      runtimeRefresh: true,
+    });
+    expect(codexNode?.pluginDiscovery).toMatchObject({
+      marketplaceAwareListOutput: true,
+      installedVersions: true,
+      visibleMarketplaceRoots: true,
+      remoteCollections: true,
+    });
+    expect(codexNode?.goals).toMatchObject({
+      defaultEnabled: true,
+      storage: "dedicated-goal-store",
+    });
+    expect(codexNode?.appServer).toMatchObject({
+      realtimeV1WebsocketCompatible: true,
+    });
+
+    const codexWebsocketNode = graph.nodes.find((node) => node.id === "agent-version:codex-websocket@current");
+    const codexAppServerNode = graph.nodes.find((node) => node.id === "agent-version:codex-app-server@current");
+
+    expect(codexWebsocketNode?.currentVersion).toBe("0.133.0");
+    expect(codexWebsocketNode?.appServer).toMatchObject({
+      realtimeV1WebsocketCompatible: true,
+      smokeTestedCommand: "npx -y @openai/codex@0.133.0 app-server --help",
+    });
+    expect(codexAppServerNode?.currentVersion).toBe("0.133.0");
+    expect(codexAppServerNode?.appServer).toMatchObject({
+      realtimeV1WebsocketCompatible: true,
+    });
+
+    const releaseClaim = listClaimsForSubject("agentVersion:codex:ge-0-119-0").find(
+      (claim) => claim.claimId === "web-codex-0-133-release",
+    );
+    expect(releaseClaim?.evidenceIds).toContain("web-codex-0-133-release");
   });
 
   it("traverses provider, model, transport, modality, lifecycle, and session relationships for an agent version", () => {

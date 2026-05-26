@@ -7,6 +7,7 @@ attributes:
   commArgs: []
   description: |-
     Default Codex CLI launch recipe. Spawns the `codex` CLI with no extra argv and uses the user's configured approval policy, sandbox mode, model, and project configuration.
+    For 0.133.0+, remote-control launch behavior is modeled separately: `codex remote-control` runs in the foreground, waits for readiness, reports machine status, and keeps explicit start/stop commands.
 edges:
   requires_capability:
     - target: capability:streaming
@@ -17,6 +18,46 @@ edges:
       level: full
     - target: capability:supports-mcp
       versionRange: '>=1.0.0 <2.0.0'
+      level: full
+  runs_via:
+    - target: execution:local-host
+---
+nodeKind: LaunchConfig
+id: launch-config:codex.remote-control
+attributes:
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  displayName: Codex remote-control foreground readiness launch
+  env: {}
+  commArgs:
+    - remote-control
+  description: |-
+    Codex CLI 0.133.0 remote-control launch recipe. The command runs in the foreground, waits for readiness, and reports machine status for callers that need a ready remote-control endpoint.
+edges:
+  requires_capability:
+    - target: capability:supports-tool-use
+      versionRange: '>=0.133.0'
+      level: full
+  runs_via:
+    - target: execution:local-host
+---
+nodeKind: LaunchConfig
+id: launch-config:codex.remote-control-start-stop
+attributes:
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  displayName: Codex remote-control explicit start/stop launch
+  env: {}
+  commArgs:
+    - remote-control
+    - start
+  stopArgs:
+    - remote-control
+    - stop
+  description: |-
+    Codex CLI 0.133.0 daemon-style remote-control lifecycle recipe with explicit start and stop commands for supervisors that manage the service boundary themselves.
+edges:
+  requires_capability:
+    - target: capability:supports-tool-use
+      versionRange: '>=0.133.0'
       level: full
   runs_via:
     - target: execution:local-host

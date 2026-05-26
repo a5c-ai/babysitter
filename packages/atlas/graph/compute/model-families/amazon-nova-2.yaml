@@ -1,0 +1,17 @@
+nodeKind: ModelFamily
+id: model-family:amazon-nova-2
+attributes:
+  displayName: "Amazon Nova 2"
+  providerId: aws-bedrock
+  family: amazon-nova
+  generation: "2"
+  modalities:
+    - text
+    - image
+    - video
+  status: current
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:amazon-nova-2-lite@current

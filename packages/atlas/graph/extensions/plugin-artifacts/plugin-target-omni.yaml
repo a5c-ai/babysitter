@@ -1,0 +1,93 @@
+nodeKind: PluginTarget
+id: plugin-target:omni
+attributes:
+  displayName: "Omni"
+  hostAgent: agent:omni
+  adapterFamily: internal
+  manifestFormat: "none"
+  commandFormat: "none"
+  adapterName: omni
+  skillHandling: none
+  hookRegistrationFormat: none
+  hookRegistrationOutputPath: null
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
+  pluginRootEnvVar: null
+  pluginRootEnvVarForExtension: null
+  scriptVariants:
+    - bash
+    - powershell
+  distribution:
+    - npm-cli
+  distributionModel: monorepo
+  marketplacePath: null
+  npmPublishable: true
+  installLayout: null
+  packageMetadata:
+    moduleType: module
+    binScriptExt: ".js"
+    installLifecycle: none
+    activationMessage: null
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: unsupported
+  cliCommand: "omni"
+  callerEnvVars:
+    - "AGENT_SESSION_ID"
+  configPaths: []
+  processNames:
+    - "omni"
+    - "agent-platform"
+  capabilities:
+    - SessionBinding
+    - HeadlessPrompt
+  adapterModule: null
+  externalRepo: null
+  externalPackageName: "@a5c-ai/omni"
+  generatedSourceDir: null
+  marketplaceSpecs: []
+  requiredSurfaceFile: null
+  promptCapabilities:
+    - hooks
+    - task-tool
+    - breakpoint-routing
+  loopControlTerm: internal
+  hookDriven: false
+  interactiveToolName: null
+  sessionEnvVarsDescription: "AGENT_SESSION_ID for session tracking"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: null
+  defaultTransportId: openai-chat
+  hooksMuxFamily: null
+  sessionIdQuality: generated
+  supportsOrderedFanout: false
+  supportsNativeAdditionalContext: false
+  supportsBlock: false
+  supportsAsk: false
+  supportsToolInputMutation: false
+  supportsToolResultMutation: false
+  supportsPersistedEnv: false
+  envPersistenceMode: none
+  toolInterceptionScope: none
+  launchBehavior:
+    promptDelivery: cli-flag
+    promptFlag: "--prompt"
+    promptExtraFlags:
+      - "--non-interactive"
+      - "--json"
+    execSubcommand: null
+    resumeDelivery: flag
+    resumeFlag: "--run-id"
+    sessionIdFlag: null
+    maxTurnsFlag: "--max-iterations"
+    stdinBehavior: close-after-prompt
+    selfExits: true
+    needsIdleKill: false
+
+edges:
+  hosted_by:
+    - target: agent:omni

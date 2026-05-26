@@ -11,7 +11,7 @@ const STACK_LAYERS = [
   { key: 'layer:2-provider', label: 'Provider', position: 2, atlasKinds: ['Provider', 'ModelProviderProduct', 'ModelProviderVersion'], description: 'Model API provider (Anthropic, OpenAI, Azure, etc.)' },
   { key: 'layer:3-transport', label: 'Transport', position: 3, atlasKinds: ['TransportProtocol', 'ModelTransportProtocol'], description: 'Communication protocol (stdio, HTTP, WebSocket)' },
   { key: 'layer:4-platform', label: 'Platform', position: 4, atlasKinds: ['AgentProduct', 'AgentRuntimeImpl', 'AgentPlatformImpl', 'AgentCoreImpl', 'Platform'], description: 'Agent platform target (agent-mux supported)' },
-  { key: 'layer:5-tools', label: 'Tools', position: 5, atlasKinds: ['Tool', 'ToolDescriptor', 'ToolServer', 'MCPPrompt', 'MCPResource'], description: 'Tools, MCP servers, and tool descriptors' },
+  { key: 'layer:5-tools', label: 'Tools', position: 5, atlasKinds: ['Tool', 'ToolDescriptor', 'ToolServer', 'MCPPrompt', 'MCPResource'], description: 'Tools, MCP servers, and tool descriptors', subcategories: { internal: { kinds: ['Tool', 'ToolDescriptor'], label: 'Internal Platform Tools' }, external: { kinds: ['ToolServer', 'MCPPrompt', 'MCPResource'], label: 'External Tools' } } },
   { key: 'layer:6-plugins', label: 'Plugins', position: 6, atlasKinds: ['PluginArtifact', 'Plugin', 'PluginCommand', 'PluginSkill', 'PluginHook'], description: 'Plugins, commands, skills, and hooks' },
 ];
 
@@ -53,6 +53,25 @@ const badgeStyle = {
 
 const resultGridStyle = {
   display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.5rem',
+};
+
+const subSectionHeaderStyle = {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+  cursor: 'pointer', padding: '0.5rem 0.625rem',
+  borderRadius: '0.25rem', background: '#f1f5f9',
+  border: '1px solid #e2e8f0', userSelect: 'none',
+  fontSize: '0.8125rem', marginBottom: '0.375rem',
+};
+
+const memoryToggleStyle = {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+  padding: '0.5rem 0.75rem', borderRadius: '0.375rem',
+  border: '1px solid #e2e8f0', fontSize: '0.8125rem',
+  transition: 'border-color 0.15s, background 0.15s',
+};
+
+const memoryToggleSelectedStyle = {
+  ...memoryToggleStyle, borderColor: '#7c3aed', background: '#f5f3ff',
 };
 
 // ---------------------------------------------------------------------------
@@ -205,6 +224,295 @@ function LayerSection({ layer, atlasProxyUrl, selected, onToggle }) {
 }
 
 // ---------------------------------------------------------------------------
+// Tools Layer Section with internal/external sub-sections
+// ---------------------------------------------------------------------------
+
+function ToolsLayerSection({ layer, atlasProxyUrl, selected, onToggle }) {
+  const [open, setOpen] = useState(false);
+  const subcats = layer.subcategories || {};
+  const internalKinds = new Set(subcats.internal?.kinds || []);
+  const externalKinds = new Set(subcats.external?.kinds || []);
+  const internalLabel = subcats.internal?.label || 'Internal Tools';
+  const externalLabel = subcats.external?.label || 'External Tools';
+
+  const internalSelected = (selected || []).filter((s) => internalKinds.has(s.nodeKind));
+  const externalSelected = (selected || []).filter((s) => externalKinds.has(s.nodeKind));
+  const selectionCount = (selected || []).length;
+
+  return (
+    <div style={{ marginBottom: '0.5rem' }}>
+      <div style={sectionHeaderStyle} onClick={() => setOpen((o) => !o)}>
+        <span>
+          <strong>{layer.label}</strong>
+          {layer.position != null && (
+            <span style={{ color: '#64748b', fontSize: '0.75rem', marginLeft: 6 }}>Layer {layer.position}</span>
+          )}
+          {selectionCount > 0 && (
+            <span style={{ ...badgeStyle, background: '#dbeafe', color: '#1e40af' }}>{selectionCount} selected</span>
+          )}
+        </span>
+        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          {layer.atlasKinds.join(', ')} {open ? '▲' : '▼'}
+        </span>
+      </div>
+
+      {open && (
+        <div style={{ ...sectionBodyStyle, gap: '0.75rem' }}>
+          {/* Internal Platform Tools sub-section */}
+          <ToolSubSection
+            label={internalLabel}
+            kinds={subcats.internal?.kinds || []}
+            layerKey={layer.key}
+            atlasProxyUrl={atlasProxyUrl}
+            selected={internalSelected}
+            onToggle={onToggle}
+          />
+          {/* External Tools sub-section */}
+          <ToolSubSection
+            label={externalLabel}
+            kinds={subcats.external?.kinds || []}
+            layerKey={layer.key}
+            atlasProxyUrl={atlasProxyUrl}
+            selected={externalSelected}
+            onToggle={onToggle}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ToolSubSection({ label, kinds, layerKey, atlasProxyUrl, selected, onToggle }) {
+  const [subOpen, setSubOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [initialLoaded, setInitialLoaded] = useState(false);
+  const debounceRef = useRef(null);
+
+  const kindsParam = kinds.join(',');
+  const selectionCount = selected?.length || 0;
+  const selectedIds = new Set((selected || []).map((s) => s.id));
+
+  const loadInitial = useCallback(async () => {
+    if (initialLoaded) return;
+    setLoading(true);
+    try {
+      const url = `${atlasProxyUrl}?kinds=${encodeURIComponent(kindsParam)}&mode=browse`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        setResults(data.hits || data.instances || []);
+      }
+    } catch { /* network error */ }
+    setLoading(false);
+    setInitialLoaded(true);
+  }, [atlasProxyUrl, kindsParam, initialLoaded]);
+
+  useEffect(() => {
+    if (!subOpen) return;
+    if (!query.trim()) { loadInitial(); return; }
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const url = `${atlasProxyUrl}?q=${encodeURIComponent(query)}&kinds=${encodeURIComponent(kindsParam)}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          setResults(data.hits || []);
+        }
+      } catch { /* keep previous */ }
+      setLoading(false);
+    }, 300);
+    return () => clearTimeout(debounceRef.current);
+  }, [query, subOpen, atlasProxyUrl, kindsParam, loadInitial]);
+
+  function handleToggleOpen() {
+    const next = !subOpen;
+    setSubOpen(next);
+    if (next && !initialLoaded && !query.trim()) loadInitial();
+  }
+
+  return (
+    <div>
+      <div style={subSectionHeaderStyle} onClick={handleToggleOpen}>
+        <span>
+          {label}
+          {selectionCount > 0 && (
+            <span style={{ ...badgeStyle, background: '#dbeafe', color: '#1e40af', fontSize: '0.625rem' }}>{selectionCount}</span>
+          )}
+        </span>
+        <span style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>
+          {kinds.join(', ')} {subOpen ? '▲' : '▼'}
+        </span>
+      </div>
+
+      {subOpen && (
+        <div style={{ padding: '0 0.375rem 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+          <input
+            type="text"
+            placeholder={`Search ${label.toLowerCase()}...`}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            style={inputStyle}
+          />
+
+          {loading && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Loading...</span>}
+
+          {results.length > 0 && (
+            <div style={resultGridStyle}>
+              {results.map((hit) => {
+                const isSelected = selectedIds.has(hit.id);
+                return (
+                  <div
+                    key={hit.id}
+                    style={isSelected ? cardSelectedStyle : cardStyle}
+                    onClick={() => onToggle(layerKey, hit)}
+                  >
+                    <div>
+                      <strong style={{ fontSize: '0.8125rem' }}>{hit.displayName || hit.id}</strong>
+                      <span style={badgeStyle}>{hit.nodeKind}</span>
+                    </div>
+                    {hit.snippet && (
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.3, marginTop: 2 }}>
+                        {hit.snippet.slice(0, 120)}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {!loading && results.length === 0 && initialLoaded && (
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>No records found.</span>
+          )}
+
+          {selectionCount > 0 && (
+            <div style={{ marginTop: '0.25rem' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569' }}>Selected:</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.25rem' }}>
+                {selected.map((s) => (
+                  <span
+                    key={s.id}
+                    onClick={() => onToggle(layerKey, s)}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      fontSize: '0.75rem', padding: '2px 8px', borderRadius: '9999px',
+                      background: '#dbeafe', color: '#1e40af', cursor: 'pointer',
+                    }}
+                  >
+                    {s.displayName || s.id} &times;
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Memory Repository Section
+// ---------------------------------------------------------------------------
+
+function MemoryRepositorySection({ org, selectedRepos, onToggleRepo }) {
+  const [open, setOpen] = useState(false);
+  const [repos, setRepos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!open || loaded) return;
+    setLoading(true);
+    fetch(`/api/orgs/${encodeURIComponent(org)}/resources?kind=AgentMemoryRepository`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data) setRepos(Array.isArray(data) ? data : data.items || []);
+      })
+      .catch(() => {})
+      .finally(() => { setLoading(false); setLoaded(true); });
+  }, [open, org, loaded]);
+
+  const selectionCount = selectedRepos?.length || 0;
+  const selectedNames = new Set((selectedRepos || []).map((r) => r.name));
+
+  return (
+    <div style={{ marginBottom: '0.5rem' }}>
+      <div style={sectionHeaderStyle} onClick={() => setOpen((o) => !o)}>
+        <span>
+          <strong>Memory</strong>
+          {selectionCount > 0 && (
+            <span style={{ ...badgeStyle, background: '#ede9fe', color: '#5b21b6' }}>{selectionCount} selected</span>
+          )}
+        </span>
+        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          AgentMemoryRepository {open ? '▲' : '▼'}
+        </span>
+      </div>
+
+      {open && (
+        <div style={sectionBodyStyle}>
+          {loading && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Loading memory repositories...</span>}
+
+          {!loading && repos.length === 0 && loaded && (
+            <div style={{ fontSize: '0.8125rem', color: '#9ca3af' }}>
+              No memory repositories available.{' '}
+              <a href={`/orgs/${org}/agents/memory`} style={{ color: '#7c3aed', textDecoration: 'underline' }}>
+                Create one
+              </a>
+            </div>
+          )}
+
+          {repos.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+              {repos.map((repo) => {
+                const repoName = repo.metadata?.name || repo.name || repo.id;
+                const repoUrl = repo.spec?.repoUrl || repo.spec?.url || '';
+                const isSelected = selectedNames.has(repoName);
+                return (
+                  <div
+                    key={repoName}
+                    style={isSelected ? memoryToggleSelectedStyle : memoryToggleStyle}
+                    onClick={() => onToggleRepo({ name: repoName, url: repoUrl })}
+                  >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <strong>{repoName}</strong>
+                      {repoUrl && (
+                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{repoUrl}</span>
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        width: 36, height: 20, borderRadius: 10,
+                        background: isSelected ? '#7c3aed' : '#d1d5db',
+                        position: 'relative', transition: 'background 0.2s', cursor: 'pointer', flexShrink: 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 16, height: 16, borderRadius: '50%',
+                          background: '#fff', position: 'absolute', top: 2,
+                          left: isSelected ? 18 : 2,
+                          transition: 'left 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Model Inference Section (KServe)
 // ---------------------------------------------------------------------------
 
@@ -348,6 +656,12 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
 
+  // Memory repository selections: [{ name, url }, ...]
+  const [selectedMemoryRepos, setSelectedMemoryRepos] = useState(() => {
+    const existing = spec.memoryRepositoryRefs || [];
+    return existing.map((ref) => ({ name: ref, url: '' }));
+  });
+
   // KServe inference service selection
   const [selectedInference, setSelectedInference] = useState(null);
 
@@ -365,6 +679,13 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
           ? current.filter((r) => r.id !== record.id)
           : [...current, { id: record.id, nodeKind: record.nodeKind, displayName: record.displayName || record.id }],
       };
+    });
+  }
+
+  function handleToggleMemoryRepo(repo) {
+    setSelectedMemoryRepos((prev) => {
+      const exists = prev.some((r) => r.name === repo.name);
+      return exists ? prev.filter((r) => r.name !== repo.name) : [...prev, repo];
     });
   }
 
@@ -427,13 +748,27 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
         approvalMode: 'prompt',
         // Agent role for policies and permissions
         ...(roleSelections.length ? { agentRole: { refs: roleSelections.map((r) => ({ id: r.id, nodeKind: r.nodeKind, displayName: r.displayName })) } } : {}),
-        // MCP server refs from tools layer
+        // Internal tools (Tool, ToolDescriptor) — structured filter
+        ...(toolSelections.filter((r) => r.nodeKind === 'Tool' || r.nodeKind === 'ToolDescriptor').length
+          ? { internalTools: { enabled: true, filter: toolSelections.filter((r) => r.nodeKind === 'Tool' || r.nodeKind === 'ToolDescriptor').map((r) => r.id) } }
+          : {}),
+        // External tools (ToolServer, MCPPrompt, MCPResource) — structured refs
+        ...(toolSelections.filter((r) => r.nodeKind === 'ToolServer' || r.nodeKind === 'MCPPrompt' || r.nodeKind === 'MCPResource').length
+          ? {
+            externalTools: {
+              mcpServerRefs: toolSelections.filter((r) => r.nodeKind === 'ToolServer' || r.nodeKind === 'MCPPrompt').map((r) => r.id),
+              cliToolRefs: [],
+              openApiRefs: toolSelections.filter((r) => r.nodeKind === 'MCPResource').map((r) => r.id),
+            },
+          }
+          : {}),
+        // Backward-compat flat mcpServerRefs
         ...(toolSelections.filter((r) => r.nodeKind === 'ToolServer' || r.nodeKind === 'MCPPrompt').length
           ? { mcpServerRefs: toolSelections.filter((r) => r.nodeKind === 'ToolServer' || r.nodeKind === 'MCPPrompt').map((r) => r.id) }
           : {}),
-        // Tool refs from tools layer
-        ...(toolSelections.filter((r) => r.nodeKind === 'Tool' || r.nodeKind === 'ToolDescriptor').length
-          ? { toolRefs: toolSelections.filter((r) => r.nodeKind === 'Tool' || r.nodeKind === 'ToolDescriptor').map((r) => r.id) }
+        // Memory repository associations
+        ...(selectedMemoryRepos.length
+          ? { memoryRepositoryRefs: selectedMemoryRepos.map((r) => r.name) }
           : {}),
         // Plugin refs from plugins layer
         ...(pluginSelections.length
@@ -530,15 +865,25 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
                 </span>
               )}
             </h4>
-            {STACK_LAYERS.map((layer) => (
-              <LayerSection
-                key={layer.key}
-                layer={layer}
-                atlasProxyUrl={atlasProxyUrl}
-                selected={selections[layer.key]}
-                onToggle={handleToggle}
-              />
-            ))}
+            {STACK_LAYERS.map((layer) =>
+              layer.subcategories ? (
+                <ToolsLayerSection
+                  key={layer.key}
+                  layer={layer}
+                  atlasProxyUrl={atlasProxyUrl}
+                  selected={selections[layer.key]}
+                  onToggle={handleToggle}
+                />
+              ) : (
+                <LayerSection
+                  key={layer.key}
+                  layer={layer}
+                  atlasProxyUrl={atlasProxyUrl}
+                  selected={selections[layer.key]}
+                  onToggle={handleToggle}
+                />
+              )
+            )}
           </div>
 
           {/* Composition Facets */}
@@ -566,6 +911,23 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
               org={org}
               selectedInference={selectedInference}
               onSelectInference={setSelectedInference}
+            />
+          </div>
+
+          {/* Memory Repositories */}
+          <div>
+            <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>
+              Memory
+              {selectedMemoryRepos.length > 0 && (
+                <span style={{ fontWeight: 400, fontSize: '0.75rem', color: '#64748b', marginLeft: 8 }}>
+                  {selectedMemoryRepos.length} repo{selectedMemoryRepos.length !== 1 ? 's' : ''} attached
+                </span>
+              )}
+            </h4>
+            <MemoryRepositorySection
+              org={org}
+              selectedRepos={selectedMemoryRepos}
+              onToggleRepo={handleToggleMemoryRepo}
             />
           </div>
 

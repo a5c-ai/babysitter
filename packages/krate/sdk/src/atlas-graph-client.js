@@ -16,7 +16,7 @@ export const STACK_LAYERS = [
   { key: 'layer:2-provider', label: 'Provider', kind: 'stack-layer', position: 2, atlasKinds: ['Provider', 'ModelProviderProduct', 'ModelProviderVersion'], description: 'Model API provider (Anthropic, OpenAI, Azure, etc.)' },
   { key: 'layer:3-transport', label: 'Transport', kind: 'stack-layer', position: 3, atlasKinds: ['TransportProtocol', 'ModelTransportProtocol'], description: 'Communication protocol (stdio, HTTP, WebSocket)' },
   { key: 'layer:4-platform', label: 'Platform', kind: 'stack-layer', position: 4, atlasKinds: ['AgentProduct', 'AgentRuntimeImpl', 'AgentPlatformImpl', 'AgentCoreImpl', 'Platform'], description: 'Agent platform target (agent-mux supported agents only)' },
-  { key: 'layer:5-tools', label: 'Tools', kind: 'stack-layer', position: 5, atlasKinds: ['Tool', 'ToolDescriptor', 'ToolServer', 'MCPPrompt', 'MCPResource'], description: 'Tools, MCP servers, and tool descriptors' },
+  { key: 'layer:5-tools', label: 'Tools', kind: 'stack-layer', position: 5, atlasKinds: ['Tool', 'ToolDescriptor', 'ToolServer', 'MCPPrompt', 'MCPResource'], description: 'Tools, MCP servers, and tool descriptors', subcategories: { internal: { kinds: ['Tool', 'ToolDescriptor'], label: 'Internal Platform Tools' }, external: { kinds: ['ToolServer', 'MCPPrompt', 'MCPResource'], label: 'External Tools' } } },
   { key: 'layer:6-plugins', label: 'Plugins', kind: 'stack-layer', position: 6, atlasKinds: ['PluginArtifact', 'Plugin', 'PluginCommand', 'PluginSkill', 'PluginHook'], description: 'Plugins, commands, skills, and hooks' },
 ];
 

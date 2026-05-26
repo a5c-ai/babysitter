@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "echo 'no lint configured'",
-    "test": "node --test tests/build-smoke.test.js tests/api-auth.test.js tests/status-tones.test.js tests/issue-workflow.test.js tests/krate-improvements.test.js tests/inference-routes.test.js tests/assistant-routes.test.js tests/artifact-routes.test.js"
+    "test": "node --test tests/build-smoke.test.js tests/api-auth.test.js tests/status-tones.test.js tests/issue-workflow.test.js tests/krate-improvements.test.js tests/inference-routes.test.js tests/assistant-routes.test.js tests/artifact-routes.test.js tests/resource-contract.test.js"
   },
   "dependencies": {
     "@a5c-ai/krate-sdk": "*",

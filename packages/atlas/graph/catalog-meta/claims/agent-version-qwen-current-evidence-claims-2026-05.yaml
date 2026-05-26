@@ -1,0 +1,97 @@
+nodeKind: Claim
+id: claim:agent-version-qwen-current-versionrange
+attributes:
+  subjectId: agent-version:qwen@current
+  attribute: versionRange
+  value: '>=0.16.1'
+  subjectKind: AgentVersion
+  statement: agent-version:qwen@current versionRange is >=0.16.1.
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:qwen-code-release-v0-16-1
+  claimedAt: '2026-05-26T07:11:00Z'
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: Evidence binding for Qwen Code 0.16.1 version assimilation.
+edges:
+  backed_by_evidence:
+    - evidence:qwen-code-release-v0-16-1
+  about_subject:
+    - agent-version:qwen@current
+---
+nodeKind: Claim
+id: claim:agent-version-qwen-current-tool-result-invariant
+attributes:
+  subjectId: agent-version:qwen@current
+  attribute: toolUseFailurePathInvariant
+  value: closed-in-0.16.1
+  subjectKind: AgentVersion
+  statement: Qwen Code 0.16.1 closes the upstream tool_use/tool_result invariant across failure paths.
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:qwen-code-release-v0-16-1
+  claimedAt: '2026-05-26T07:11:00Z'
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: This repository records the upstream behavior; it does not implement a Qwen tool loop requiring local failure-path tests.
+edges:
+  backed_by_evidence:
+    - evidence:qwen-code-release-v0-16-1
+  about_subject:
+    - agent-version:qwen@current
+    - agent-core-impl:qwen.core@current
+---
+nodeKind: Claim
+id: claim:agent-version-qwen-current-telemetry-ttft-genai
+attributes:
+  subjectId: agent-runtime-impl:qwen.runtime@current
+  attribute: telemetryNotes
+  value: ttft-genai-dual-emit
+  subjectKind: AgentRuntimeImpl
+  statement: Qwen Code 0.16.1 adds TTFT capture and GenAI semantic-convention telemetry dual emit upstream.
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:qwen-code-release-v0-16-1
+  claimedAt: '2026-05-26T07:11:00Z'
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: No Qwen-specific telemetry ingestion implementation was found in this repository.
+edges:
+  backed_by_evidence:
+    - evidence:qwen-code-release-v0-16-1
+  about_subject:
+    - agent-runtime-impl:qwen.runtime@current
+---
+nodeKind: Claim
+id: claim:agent-version-qwen-current-windows-terminal-install
+attributes:
+  subjectId: agent-platform-impl:qwen.platform@current
+  attribute: windowsInstallNotes
+  value: bat-crlf-mintty-osc8-gate
+  subjectKind: AgentPlatformImpl
+  statement: Qwen Code 0.16.1 renormalizes install-qwen-standalone.bat CRLF storage and gates mintty OSC 8 detection on TERM_PROGRAM_VERSION >= 3.3.
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:qwen-code-release-v0-16-1
+  claimedAt: '2026-05-26T07:11:00Z'
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: Babysitter does not vendor the upstream BAT file; this is cataloged as Qwen CLI distribution/runtime behavior.
+edges:
+  backed_by_evidence:
+    - evidence:qwen-code-release-v0-16-1
+  about_subject:
+    - agent-platform-impl:qwen.platform@current
+    - agent-ui-impl:qwen.ui@current

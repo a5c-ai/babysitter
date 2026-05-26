@@ -1,0 +1,50 @@
+nodeKind: ModelVersion
+id: model:amazon-nova-2-lite@current
+attributes:
+  displayName: "Amazon Nova 2 Lite"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:amazon-nova-2
+  versionRange: '>=2.0.0 <3.0.0'
+  kind: multimodal
+  contextWindowTokens: 1000000
+  modalities:
+    - text
+    - image
+    - video
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: video
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-12-02'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-12-02'
+  modelCardUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-lite.html
+  supportsFineTuning: false
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:amazon-nova-2
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:amazon-nova-2
+  served_by:
+    - provider:aws-bedrock
+  speaks:
+    - model-transport:bedrock-converse
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=2.0.0 <3.0.0'
+      level: full
+    - target: capability:vision-input
+      versionRange: '>=2.0.0 <3.0.0'
+      level: full

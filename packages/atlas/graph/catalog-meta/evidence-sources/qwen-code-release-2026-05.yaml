@@ -1,0 +1,28 @@
+nodeKind: EvidenceSource
+id: evidence:qwen-code-release-v0-16-1
+attributes:
+  displayName: Qwen Code v0.16.1 release notes
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/QwenLM/qwen-code/releases/tag/v0.16.1
+  sourcePathOrUrl: https://github.com/QwenLM/qwen-code/releases/tag/v0.16.1
+  locator: Qwen Code release v0.16.1
+  capturedAt: '2026-05-26T07:11:00Z'
+  observedAt: '2026-05-26T07:11:00Z'
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T07:11:00Z'
+  notes: |
+    Release notes list the upstream 0.16.1 changes assimilated into the Atlas
+    graph: tool_use/tool_result invariant closure across failure paths, TTFT
+    capture and GenAI semantic-convention telemetry dual emit, tab-indented
+    notebook formatting preservation, Express 5.2.1, CRLF storage for
+    install-qwen-standalone.bat, and mintty OSC 8 detection gated on
+    TERM_PROGRAM_VERSION >= 3.3.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:qwen@current
+    - source-ref:qwen-code-github

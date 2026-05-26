@@ -27,5 +27,7 @@ edges:
     - target: layer:2-provider
   serves:
     - model:deepseek-v3@current
+    - model:deepseek-v4-pro@current
+    - model:deepseek-v4-flash@current
     - model:deepseek-r1@current
     - model:deepseek-r1-distill-qwen-32b@current

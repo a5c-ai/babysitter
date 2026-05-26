@@ -1,0 +1,34 @@
+nodeKind: Provider
+id: provider:xai
+attributes:
+  displayName: "xAI"
+  vendor: "xAI"
+  versionRange: ">=2024-01-01"
+  authMethods:
+    - api-key
+  authMethodNotes: |
+    Standard `Authorization: Bearer <api-key>` on xAI's
+    OpenAI-compatible API surface.
+  endpoints:
+    base: "https://api.x.ai/v1"
+    chat_completions: "https://api.x.ai/v1/chat/completions"
+    models: "https://api.x.ai/v1/models"
+  pricing: |
+    See https://docs.x.ai/developers/models for current per-model rates.
+  rateLimitSignalingProtocol: |
+    OpenAI-compatible 429/error semantics; exact rate-limit headers should
+    be confirmed against live responses.
+  dataResidencyOptions:
+    - us
+  vendorFeatures:
+    - capability:streaming
+    - capability:supports-tool-use
+    - capability:supports-structured-output
+  slaTier: "xai-no-public-sla"
+  regions:
+    - global
+edges:
+  realizes:
+    - target: layer:2-provider
+  serves:
+    - model:grok-4-3@current

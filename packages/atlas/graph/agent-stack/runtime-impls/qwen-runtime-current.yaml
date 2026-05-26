@@ -14,6 +14,11 @@ attributes:
   approvalGatingPrimitive: per-call
   subprocessSandboxStrategy: platform-deferred
   runtimeIdentity: api-key
+  telemetryNotes: |
+    Qwen Code 0.16.1 adds upstream TTFT capture and dual emission for GenAI
+    semantic-convention telemetry. No Qwen-specific telemetry ingestion path is
+    implemented in this repository; adapter consumers should preserve those
+    upstream attributes when proxying Qwen telemetry.
   supportedMCPTransports:
   - mcp-transport:stdio
   supportsStreaming: true

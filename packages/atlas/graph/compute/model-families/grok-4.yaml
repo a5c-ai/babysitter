@@ -1,0 +1,16 @@
+nodeKind: ModelFamily
+id: model-family:grok-4
+attributes:
+  displayName: "Grok 4"
+  providerId: xai
+  family: grok
+  generation: "4"
+  modalities:
+    - text
+    - image
+  status: current
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:grok-4-3@current

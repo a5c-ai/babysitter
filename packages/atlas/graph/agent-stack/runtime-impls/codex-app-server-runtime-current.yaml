@@ -22,11 +22,14 @@ attributes:
   - mcp-transport:stdio
   - mcp-transport:streamable-http
   supportsStreaming: true
+  realtimeV1WebsocketCompatible: true
   notes: |
     The app-server reuses the Codex Rust runtime: same built-in tool set,
     same MCP brokering, same wrapped-shell sandbox. Distinct from the CLI
     runtime in that consumers drive sessions via JSON-RPC requests
-    instead of through the bundled TUI.
+    instead of through the bundled TUI. Codex CLI 0.133.0 confirms realtime v1
+    websocket compatibility and keeps ws:// endpoints available via
+    `codex app-server --listen`.
 edges:
   realizes:
     - target: layer:5-agent-runtime

@@ -843,7 +843,7 @@ const BABYSITTER_PLUGIN_TARGETS = new Set([
   "plugin-target:claude-code", "plugin-target:codex", "plugin-target:cursor",
   "plugin-target:gemini-cli", "plugin-target:copilot-cli", "plugin-target:pi",
   "plugin-target:omp", "plugin-target:opencode", "plugin-target:openclaw",
-  "plugin-target:hermes",
+  "plugin-target:hermes", "plugin-target:omni",
 ]);
 
 // Atlas uses different IDs for some targets

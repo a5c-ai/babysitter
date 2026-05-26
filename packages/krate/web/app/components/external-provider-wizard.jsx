@@ -257,6 +257,11 @@ function Step5Review({ name, providerType, hosting, baseUrl, interfaces, secretR
   );
 }
 
+function defaultEndpointForProvider(type) {
+  const endpoints = { github: 'https://api.github.com', gitlab: 'https://gitlab.com', bitbucket: 'https://api.bitbucket.org', gitea: 'https://gitea.example.com', azure_devops: 'https://dev.azure.com' };
+  return endpoints[type] || 'https://api.github.com';
+}
+
 export function ExternalProviderWizard({ org, onCancel, onSuccess }) {
   const defaultNav = () => { window.location.href = `/orgs/${encodeURIComponent(org)}/external`; };
   const handleCancel = onCancel || defaultNav;
@@ -288,7 +293,7 @@ export function ExternalProviderWizard({ org, onCancel, onSuccess }) {
       metadata: { name },
       spec: {
         providerType,
-        ...(hosting === 'self-hosted' && baseUrl ? { baseUrl } : {}),
+        endpoint: hosting === 'self-hosted' && baseUrl ? baseUrl : defaultEndpointForProvider(providerType),
         interfaces,
         secretRef,
       },

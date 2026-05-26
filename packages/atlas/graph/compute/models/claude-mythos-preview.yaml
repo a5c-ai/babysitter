@@ -1,0 +1,50 @@
+nodeKind: ModelVersion
+id: model:claude-mythos-preview@current
+attributes:
+  displayName: "Claude Mythos Preview"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: true
+  supportsAdaptiveThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:claude-mythos
+  versionRange: '>=0.1.0 <1.0.0'
+  kind: reasoning
+  contextWindowTokens: 0
+  modalities:
+    - text
+    - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-04-07'
+  lifecycleStatus: preview
+  lifecycleStatusChangedAt: '2026-04-07'
+  modelCardUrl: https://red.anthropic.com/2026/mythos-preview/
+  supportsFineTuning: false
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:claude-mythos
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:claude-mythos
+  served_by:
+    - provider:anthropic
+    - provider:aws-bedrock
+    - provider:azure-foundry
+  speaks:
+    - model-transport:anthropic-messages
+  supports:
+    - target: capability:adaptive-thinking
+      versionRange: '>=0.1.0 <1.0.0'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=0.1.0 <1.0.0'
+      level: full

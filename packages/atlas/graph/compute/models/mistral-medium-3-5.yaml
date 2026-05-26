@@ -1,0 +1,50 @@
+nodeKind: ModelVersion
+id: model:mistral-medium-3-5@current
+attributes:
+  displayName: "Mistral Medium 3.5"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:mistral
+  versionRange: '>=3.5.0 <4.0.0'
+  kind: multimodal
+  contextWindowTokens: 256000
+  modalities:
+    - text
+    - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-04-30'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-04-30'
+  modelCardUrl: https://huggingface.co/mistralai/Mistral-Medium-3.5-128B
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:mistral
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:mistral
+  supersedes:
+    - target: model:mistral-medium-3@current
+  served_by:
+    - provider:mistral
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=3.5.0 <4.0.0'
+      level: full
+    - target: capability:vision-input
+      versionRange: '>=3.5.0 <4.0.0'
+      level: full

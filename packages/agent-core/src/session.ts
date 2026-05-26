@@ -40,20 +40,28 @@ function resolveEndpoint(options: AgentCoreSessionOptions): ResolvedEndpoint {
   const amuxApiBase = process.env["AMUX_API_BASE"];
   const amuxApiKey = process.env["AMUX_API_KEY"];
   const amuxModel = process.env["AMUX_MODEL"];
-  const azureApiKey = process.env["AZURE_API_KEY"];
+  const azureApiKey = process.env["AZURE_API_KEY"] || process.env["AZURE_OPENAI_API_KEY"];
+  const azureProject = process.env["AZURE_OPENAI_PROJECT_NAME"];
   const openaiApiKey = process.env["OPENAI_API_KEY"];
+  const openaiModel = process.env["OPENAI_MODEL"];
   const anthropicApiKey = process.env["ANTHROPIC_API_KEY"];
 
-  const model = options.model ?? amuxModel ?? "gpt-4o";
+  const model = options.model || amuxModel || openaiModel || "gpt-4o";
 
   if (amuxProvider === "foundry" || amuxProvider === "azure") {
-    const apiBase = amuxApiBase ?? "";
-    const apiKey = amuxApiKey ?? azureApiKey ?? "";
+    const apiBase = amuxApiBase || "";
+    const apiKey = amuxApiKey || azureApiKey || "";
     return { apiBase: `${apiBase}/openai`, apiKey, model, isAzure: true, isAnthropic: false };
   }
 
+  // Azure OpenAI via AZURE_OPENAI_API_KEY + AZURE_OPENAI_PROJECT_NAME
+  if (azureApiKey && azureProject) {
+    const apiBase = `https://${azureProject}.services.ai.azure.com/openai`;
+    return { apiBase, apiKey: azureApiKey, model, isAzure: true, isAnthropic: false };
+  }
+
   if (amuxApiBase) {
-    const apiKey = amuxApiKey ?? openaiApiKey ?? "";
+    const apiKey = amuxApiKey || openaiApiKey || "";
     return { apiBase: amuxApiBase, apiKey, model, isAzure: false, isAnthropic: false };
   }
 
@@ -66,7 +74,18 @@ function resolveEndpoint(options: AgentCoreSessionOptions): ResolvedEndpoint {
     return { apiBase: "https://api.anthropic.com", apiKey: anthropicApiKey, model: anthropicModel, isAzure: false, isAnthropic: true };
   }
 
-  return { apiBase: "https://api.openai.com/v1", apiKey: amuxApiKey ?? "", model, isAzure: false, isAnthropic: false };
+  if (!amuxApiKey) {
+    throw new Error(
+      "No API credentials found. Set one of: " +
+      "AMUX_PROVIDER + AMUX_API_BASE + AZURE_API_KEY (for Foundry/Azure), " +
+      "OPENAI_API_KEY (for OpenAI), " +
+      "ANTHROPIC_API_KEY (for Anthropic), " +
+      "or AMUX_API_BASE + AMUX_API_KEY (for custom endpoint). " +
+      "Alternatively, use --harness claude-code to route through an installed agent."
+    );
+  }
+
+  return { apiBase: "https://api.openai.com/v1", apiKey: amuxApiKey, model, isAzure: false, isAnthropic: false };
 }
 
 async function callCompletionApi(
@@ -176,7 +195,7 @@ export class AgentCoreSessionHandle {
     }
 
     this.isActive = true;
-    const effectiveTimeout = timeout ?? this.options.timeout ?? DEFAULT_TIMEOUT_MS;
+    const effectiveTimeout = (timeout || this.options.timeout) || DEFAULT_TIMEOUT_MS;
     const start = Date.now();
 
     const followUps = this.queuedFollowUps;

@@ -1,4 +1,4 @@
-import { createKrateApiController, orgNamespaceName, clearSnapshotCache } from '@a5c-ai/krate-sdk';
+import { createKrateApiController, orgNamespaceName, clearSnapshotCache, validateResource, ALL_KINDS } from '@a5c-ai/krate-sdk';
 import { withAuth } from '../../../../lib/api-auth.js';
 import { errorResponse, invalidateApiCache } from '../../../../lib/api-errors.js';
 
@@ -28,6 +28,11 @@ export const POST = withAuth(async (request, { params }) => {
       metadata: { ...(resource.metadata || {}), namespace: namespace, labels: { ...(resource.metadata?.labels || {}), 'krate.a5c.ai/org': org, 'krate.a5c.ai/namespace': namespace } },
       spec: { ...(resource.spec || {}), organizationRef: org }
     };
+    if (scoped.kind && ALL_KINDS.has(scoped.kind)) {
+      try { validateResource(scoped); } catch (validationError) {
+        return errorResponse(`Validation failed: ${validationError.message}`, 422);
+      }
+    }
     const result = await controller.applyResource(scoped);
     clearSnapshotCache();
     invalidateApiCache();

@@ -1,0 +1,15 @@
+nodeKind: ModelFamily
+id: model-family:qwen-3-coder
+attributes:
+  displayName: "Qwen3 Coder"
+  providerId: alibaba
+  family: qwen
+  generation: "3"
+  modalities:
+    - text
+  status: current
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:qwen3-coder-480b-a35b-instruct@current

@@ -141,6 +141,7 @@ jobs:
           npm run build --workspace=@a5c-ai/babysitter-sdk
           (cd packages/agent-core && npx tsc --build --force tsconfig.json)
           (cd packages/agent-platform && npx tsc --build tsconfig.json)
+          (cd packages/omni && npx tsc --build tsconfig.json)
 
           wait_all
 
@@ -199,6 +200,7 @@ jobs:
                 'omp': {agent:'omp', amux_agent:'omp'},
                 'droid': {agent:'droid', amux_agent:'droid'},
                 'amp': {agent:'amp', amux_agent:'amp'},
+                'omni': {agent:'omni', amux_agent:'omni'},
               };
               const models = {
                 'foundry-gpt55': {provider:'foundry-openai', amux_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AMUX_API_BASE'},
@@ -375,8 +377,9 @@ jobs:
           for pair in \
             "amux:packages/agent-mux/cli/dist/index.js" \
             "agent-platform:packages/omni/dist/cli/main.js" \
+            "omni:packages/omni/dist/cli/main.js" \
             "babysitter:packages/sdk/dist/cli/main.js" \
-            "a5c-hooks-mux:packages/hooks-mux/cli/dist/index.js"
+            "a5c-hooks-mux:packages/hooks-mux/cli/dist/cli/main.js"
           do
             name="${pair%%:*}"
             script="${pair#*:}"

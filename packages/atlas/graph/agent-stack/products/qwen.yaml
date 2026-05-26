@@ -12,7 +12,9 @@ attributes:
     Alibaba's Qwen Code CLI — a fork of Google's Gemini CLI adapted for
     Qwen3-Coder models. Speaks an OpenAI-compatible API (DashScope or
     self-hosted), stores config under `~/.qwen/settings.json`, and supports
-    MCP servers via `mcpServers`.
+    MCP servers via `mcpServers`. Current catalog metadata tracks v0.16.1 and
+    records its tool-result, telemetry, notebook formatting, and Windows
+    terminal/install compatibility updates.
 edges:
   has_version:
     - agent-version:qwen@current

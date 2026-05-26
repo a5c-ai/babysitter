@@ -102,17 +102,19 @@ function AddServiceAccountForm({ org, onCreated }) {
       spec: {
         organizationRef: org,
         namespace: namespace.trim() || `krate-org-${org}`,
+        serviceAccountName: name.trim(),
       },
     };
 
     const roleBindingResource = {
       apiVersion: 'krate.a5c.ai/v1alpha1',
       kind: 'AgentRoleBinding',
-      metadata: { name: `${name.trim()}-${effectiveRole}` },
+      metadata: { name: `${name.trim()}-binding` },
       spec: {
         organizationRef: org,
-        serviceAccountRef: name.trim(),
+        subject: name.trim(),
         roleRef: effectiveRole,
+        scope: namespace.trim() || `krate-org-${org}`,
         namespace: namespace.trim() || `krate-org-${org}`,
       },
     };

@@ -1,0 +1,48 @@
+nodeKind: ModelVersion
+id: model:deepseek-v4-pro@current
+attributes:
+  displayName: "DeepSeek V4 Pro"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:deepseek
+  versionRange: '>=4.0.0 <5.0.0'
+  kind: reasoning
+  contextWindowTokens: 1000000
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-04-24'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-04-24'
+  modelCardUrl: https://api-docs.deepseek.com/news/news260424
+  supportsFineTuning: false
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:deepseek
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:deepseek
+  supersedes:
+    - target: model:deepseek-v3@current
+  served_by:
+    - provider:deepseek
+    - provider:together-ai
+    - provider:fireworks-ai
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:streaming
+      versionRange: '>=4.0.0 <5.0.0'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=4.0.0 <5.0.0'
+      level: partial

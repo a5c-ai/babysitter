@@ -1,0 +1,193 @@
+# Model Version Check — daily scan for new foundation model releases
+#
+# An agent checks all major model providers for new model releases,
+# version updates, and capability changes, then creates issues for
+# new models that should be added to the atlas graph.
+
+name: Model Version Check
+
+on:
+  push:
+    branches: [main, staging]
+    paths: ['.github/workflows/model-version-check.yml']
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — detect versions but do not create issues'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: model-version-check
+  cancel-in-progress: false
+
+jobs:
+  check-versions:
+    name: Check Model Versions
+    runs-on: ubuntu-latest-l
+    steps:
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        continue-on-error: true
+        uses: a5c-ai/generate-token-action@main
+
+      - uses: actions/checkout@v6
+        with:
+          ref: staging
+          fetch-depth: 0
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+      - uses: a5c-ai/babysitter/packages/triggers@staging
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          max-turns: '9999'
+          babysitter-prompt-prefix: '$babysitter:yolo '
+          prompt: |
+            You are a model version tracker. Check ALL major model providers for
+            new model releases, version updates, deprecations, and capability changes.
+            ${{ inputs.dry_run == 'true' && 'DRY RUN MODE: report findings but do NOT create issues.' || '' }}
+
+            STEP 1: Build atlas.
+            ```
+            npm run build --workspace=@a5c-ai/atlas
+            ```
+
+            STEP 2: Read current model records from the graph.
+            Read these files to understand what models and providers are already tracked:
+            ```
+            cat packages/atlas/graph/capabilities-and-models/model-provider-product.yaml
+            cat packages/atlas/graph/capabilities-and-models/model-provider-version.yaml
+            cat packages/atlas/graph/capabilities-and-models/model-version-defaults.yaml
+            ```
+            Also check evidence claims:
+            ```
+            ls packages/atlas/graph/catalog-meta/claims/model-version-*
+            ```
+
+            STEP 3: Check EACH provider for new models. Use web search for each.
+            Cover ALL of these providers systematically:
+
+            **Anthropic (Claude)**
+            - Search: "anthropic new model release 2026" "claude new model"
+            - Check: https://docs.anthropic.com/en/docs/about-claude/models
+            - Models to track: Claude Opus, Sonnet, Haiku families + versions
+            - Note: model IDs (claude-opus-4-7, claude-sonnet-4-6, etc.), context windows, pricing
+
+            **OpenAI (GPT)**
+            - Search: "openai new model release 2026" "gpt new model"
+            - Check: https://platform.openai.com/docs/models
+            - Models to track: GPT-5.x, GPT-4o, o-series reasoning models
+            - Note: model IDs, deprecation dates, API availability
+
+            **Google (Gemini)**
+            - Search: "google gemini new model 2026" "gemini model update"
+            - Check: https://ai.google.dev/gemini-api/docs/models
+            - Models to track: Gemini 2.x, Gemini Flash, Gemini Pro
+            - Note: model IDs, API versions, multimodal capabilities
+
+            **xAI (Grok)**
+            - Search: "xai grok new model 2026" "grok model release"
+            - Check: https://docs.x.ai/docs/models
+            - Models to track: Grok-3, Grok-2, Grok-beta
+            - Note: API compatibility (OpenAI-compatible), pricing
+
+            **Meta (Llama)**
+            - Search: "meta llama new model 2026" "llama release"
+            - Models to track: Llama 4.x series
+            - Note: where available (Together, Fireworks, Azure, etc.)
+
+            **DeepSeek**
+            - Search: "deepseek new model 2026" "deepseek v4"
+            - Models to track: DeepSeek-V4, DeepSeek-Coder, DeepSeek-R1
+            - Note: API compatibility, Azure availability
+
+            **Mistral**
+            - Search: "mistral new model 2026" "mistral AI release"
+            - Models to track: Mistral Large, Codestral, Pixtral
+            - Note: model IDs, API endpoints
+
+            **Alibaba (Qwen)**
+            - Search: "qwen new model 2026" "qwen code model"
+            - Models to track: Qwen-3, Qwen-Coder
+            - Note: availability on major clouds
+
+            **Amazon (Nova)**
+            - Search: "amazon nova model 2026" "bedrock new models"
+            - Models to track: Nova Pro, Nova Lite
+            - Note: Bedrock availability
+
+            **Cohere (Command)**
+            - Search: "cohere new model 2026" "command-r"
+            - Models to track: Command R+, Embed v4
+            - Note: API changes
+
+            **Together AI / Fireworks / Groq (inference providers)**
+            - Search for new models available on these platforms
+            - Note: any exclusive or early-access models
+
+            STEP 4: Compare findings against graph records.
+            For each model found in Step 3, check if it already exists in the graph.
+            Identify:
+            - Completely new models not in the graph at all
+            - Existing models with new versions (e.g., claude-sonnet-4-5 → 4-6)
+            - Deprecated models that should be marked as such
+            - New capabilities (extended context, vision, tool use) for existing models
+            - Pricing changes
+
+            STEP 5: For each NEW model or significant update, check for existing issue:
+            ```
+            gh issue list --label "model-version-update" --search "<model-name>"
+            ```
+
+            If none exists, create an issue with REAL research content:
+            ```
+            gh issue create \
+              --title "Track <model-name> <version>" \
+              --label "model-version-update,graph-update" \
+              --body "<content>"
+            ```
+
+            The issue body MUST contain:
+            - Exact model ID and version
+            - Provider and API family (Messages, Chat Completions, etc.)
+            - Release date (if known)
+            - Links to actual documentation / announcement
+            - Context window size
+            - Key capabilities (tool use, vision, code, reasoning)
+            - Pricing tier (if available)
+            - Whether it's available through Azure/Bedrock/Vertex (cross-provider)
+            - What needs to change in our graph (new ModelVersion node, new edges, etc.)
+            - Whether our transport-mux proxy supports the required API format
+
+            STEP 6: If graph YAML changes are needed:
+            - Update or create model records in capabilities-and-models/
+            - Branch: `model-versions/daily-$(date +%Y-%m-%d)`
+            - Commit and create ONE PR against staging
+            - Rebuild: `npm run build --workspace=@a5c-ai/atlas`
+
+            STEP 7: Print a comprehensive summary table:
+            | Provider | Model | Latest Version | In Graph? | Status |
+            |----------|-------|---------------|-----------|--------|
+            Cover EVERY provider from Step 3.
+
+            IMPORTANT: Be thorough. Check EVERY provider listed above.
+            Do NOT skip providers. Do NOT stop after the first few.
+            Search the web for EACH provider individually.
+          trigger-query: ''
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}

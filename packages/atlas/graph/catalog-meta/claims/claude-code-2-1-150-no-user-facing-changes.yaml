@@ -1,0 +1,26 @@
+nodeKind: Claim
+id: claim:claude-code-2-1-150-no-user-facing-changes
+attributes:
+  claimId: claude-code-2-1-150-no-user-facing-changes
+  subjectKind: "AgentVersion"
+  statement: "Claude Code v2.1.150 was assimilated as a no-op user-facing update: release notes identify internal infrastructure improvements only, with no CLI flags, API or transport behavior, install metadata, launch behavior, hook bridge, or plugin-handling changes to model."
+  confidence: "high"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "strong"
+  status: "accepted"
+  subjectId: agentVersion:claude:ge-0-0-0
+  attribute: releaseAssimilation
+  value: "2.1.150:no-user-facing-changes"
+  evidenceIds:
+    - claude-code-2-1-150-release
+  evidenceSourceIds:
+    - evidence:claude-code-2-1-150-release
+  claimedAt: "2026-05-26T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+edges:
+  about_subject:
+    - agentVersion:claude:ge-0-0-0
+  backed_by_evidence:
+    - evidence:claude-code-2-1-150-release
+  sourced_from:
+    - evidence:claude-code-2-1-150-release

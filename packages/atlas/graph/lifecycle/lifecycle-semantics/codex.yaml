@@ -4,13 +4,17 @@ attributes:
   lifecycleSemanticsId: lifecycle-semantics:codex
   agentId: agent:codex
   versionRange: ">=0.119.0"
-  runtimeHookMode: native-shell-hooks-with-windows-support
+  runtimeHookMode: native-shell-hooks-with-windows-support-and-extension-observers
   stopHookMode: blocking-stop-hook
-  backgroundTaskMode: unsupported-documented
+  backgroundTaskMode: app-server-managed-with-race-fixes
   checkpointMode: unspecified
-  pluginContextMode: "package.json + hooks.json"
+  pluginContextMode: "package.json + hooks.json + marketplace-aware discovery"
   platformNuances:
     - "windows-hook-threshold:0.119.0"
+    - "permission-profiles:inheritance+requirements.toml+runtime-refresh"
+    - "remote-control:foreground-readiness+explicit-start-stop"
+    - "goals:default-on-dedicated-store"
+    - "websocket:realtime-v1-compatible"
 edges:
   applies_to_version:
     - target: agentVersion:codex:ge-0-119-0

@@ -471,6 +471,31 @@ describe("CLI main entry", () => {
     await fs.rm(tmpDir, { recursive: true, force: true });
   });
 
+  it("supports --effect-id flag form for task:post", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-flag")]));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "--effect-id",
+      "ef-flag",
+      "--status",
+      "ok",
+      "--value-inline",
+      '{"ok":true}',
+      "--runs-dir",
+      ".",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(commitEffectResultMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        effectId: "ef-flag",
+      })
+    );
+  });
+
   it("rejects task:post ok results without a value payload", async () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-no-value")]));
 

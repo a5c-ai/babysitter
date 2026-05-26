@@ -1,0 +1,16 @@
+nodeKind: ModelFamily
+id: model-family:cohere-embed-v4
+attributes:
+  displayName: "Cohere Embed v4"
+  providerId: cohere
+  family: cohere-embed
+  generation: "4"
+  modalities:
+    - text
+    - image
+  status: current
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:cohere-embed-v4-0@current

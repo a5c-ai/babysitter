@@ -15,6 +15,7 @@ export function StackEditForm({ org, stack }) {
     model: stack?.spec?.model || '',
     maxTokens: stack?.spec?.maxTokens || '',
     budgetLimitUsd: stack?.spec?.budgetLimitUsd || '',
+    memoryRepositoryRefs: (stack?.spec?.memoryRepositoryRefs || []).join(', '),
   });
 
   function handleChange(field, value) {
@@ -34,6 +35,8 @@ export function StackEditForm({ org, stack }) {
     if (fields.model) spec.model = fields.model;
     if (fields.maxTokens) spec.maxTokens = Number(fields.maxTokens) || undefined;
     if (fields.budgetLimitUsd) spec.budgetLimitUsd = Number(fields.budgetLimitUsd) || undefined;
+    const memRefs = fields.memoryRepositoryRefs ? fields.memoryRepositoryRefs.split(',').map((s) => s.trim()).filter(Boolean) : [];
+    if (memRefs.length) spec.memoryRepositoryRefs = memRefs;
     try {
       const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/AgentStack/${encodeURIComponent(stack.metadata.name)}`, {
         method: 'POST',
@@ -80,6 +83,7 @@ export function StackEditForm({ org, stack }) {
         <label><span style={labelStyle}>Max tokens</span><input style={inputStyle} type="number" value={fields.maxTokens} onChange={(e) => handleChange('maxTokens', e.target.value)} placeholder="4096" /></label>
         <label style={{ gridColumn: '1 / -1' }}><span style={labelStyle}>Description</span><input style={inputStyle} value={fields.description} onChange={(e) => handleChange('description', e.target.value)} placeholder="What this stack does" /></label>
         <label><span style={labelStyle}>Budget limit (USD)</span><input style={inputStyle} type="number" step="0.01" value={fields.budgetLimitUsd} onChange={(e) => handleChange('budgetLimitUsd', e.target.value)} placeholder="10.00" /></label>
+        <label style={{ gridColumn: '1 / -1' }}><span style={labelStyle}>Memory repository refs (comma-separated)</span><input style={inputStyle} value={fields.memoryRepositoryRefs} onChange={(e) => handleChange('memoryRepositoryRefs', e.target.value)} placeholder="org-memory, shared-knowledge" /></label>
       </div>
       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
         <button type="submit" disabled={saving} style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem', borderRadius: '4px', border: 'none', background: 'var(--accent, #2563eb)', color: '#fff', cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.6 : 1 }}>

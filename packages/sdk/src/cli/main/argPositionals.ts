@@ -5,7 +5,11 @@ export function applyPositionalArgs(parsed: ParsedArgs, positionals: string[]) {
     case "task:post":
     case "task:cancel":
     case "task:show":
-      [parsed.runDirArg, parsed.effectId] = positionals;
+      if (parsed.effectId) {
+        [parsed.runDirArg] = positionals;
+      } else {
+        [parsed.runDirArg, parsed.effectId] = positionals;
+      }
       return;
     case "task:list":
     case "run:assign-process":

@@ -60,6 +60,39 @@ spec:
                 x-kubernetes-preserve-unknown-fields: true
               toolProfileRef:
                 type: string
+              internalTools:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+                properties:
+                  enabled:
+                    type: boolean
+                    default: true
+                  filter:
+                    type: array
+                    items:
+                      type: string
+              externalTools:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+                properties:
+                  mcpServerRefs:
+                    type: array
+                    items:
+                      type: string
+                  cliToolRefs:
+                    type: array
+                    items:
+                      type: string
+                  openApiRefs:
+                    type: array
+                    items:
+                      type: string
+              memoryRepositoryRefs:
+                type: array
+                items:
+                  type: string
+              memorySnapshotRef:
+                type: string
               mcpServerRefs:
                 type: array
                 items:

@@ -73,8 +73,11 @@ export function createAgentStackController(options = {}) {
         }
       }
 
-      // mcpServerRefs
-      const mcpServerRefs = spec.mcpServerRefs || [];
+      // mcpServerRefs — support both flat spec.mcpServerRefs and structured spec.externalTools.mcpServerRefs
+      const mcpServerRefs = [
+        ...(spec.mcpServerRefs || []),
+        ...(spec.externalTools?.mcpServerRefs || [])
+      ].filter((v, i, a) => a.indexOf(v) === i); // dedupe
       let allMcpFound = true;
       for (const ref of mcpServerRefs) {
         const servers = resources.AgentMcpServer || [];
@@ -84,6 +87,21 @@ export function createAgentStackController(options = {}) {
         } else {
           allMcpFound = false;
           missing.push(`AgentMcpServer/${ref}`);
+        }
+      }
+
+      // memoryRepositoryRefs — resolve memory repository associations
+      const memoryRepositoryRefs = spec.memoryRepositoryRefs || [];
+      const resolvedMemoryRepos = [];
+      let allMemoryReposFound = true;
+      for (const ref of memoryRepositoryRefs) {
+        const repos = resources.AgentMemoryRepository || [];
+        const repo = repos.find((r) => r.metadata?.name === ref);
+        if (repo) {
+          resolvedMemoryRepos.push(repo.metadata.name);
+        } else {
+          allMemoryReposFound = false;
+          missing.push(`AgentMemoryRepository/${ref}`);
         }
       }
 
@@ -183,6 +201,14 @@ export function createAgentStackController(options = {}) {
         message: allContextLabelsFound ? 'All context labels exist' : `Missing context labels: ${contextLabelRefs.filter((ref) => !resolvedContextLabels.includes(ref)).join(', ')}`
       });
 
+      const memoryBound = memoryRepositoryRefs.length === 0 || allMemoryReposFound;
+      conditions.push({
+        type: 'MemoryBound',
+        status: memoryBound ? 'True' : 'False',
+        reason: memoryRepositoryRefs.length === 0 ? 'NoMemoryRefsConfigured' : allMemoryReposFound ? 'AllMemoryReposResolved' : 'MissingMemoryRepos',
+        message: memoryRepositoryRefs.length === 0 ? 'No memory repository references configured' : allMemoryReposFound ? 'All memory repositories resolved' : `Missing memory repositories: ${memoryRepositoryRefs.filter((ref) => !resolvedMemoryRepos.includes(ref)).join(', ')}`
+      });
+
       // --- Permission review conditions via permissionReviewer ---
       const serviceAccountRef = spec.runtimeIdentity?.serviceAccountRef || spec.runtimeIdentity;
       const serviceAccounts = resources.AgentServiceAccount || [];
@@ -250,7 +276,8 @@ export function createAgentStackController(options = {}) {
           mcpServers: clone(resolvedMcpServers),
           skills: clone(resolvedSkills),
           subagents: clone(resolvedSubagents),
-          contextLabels: clone(resolvedContextLabels)
+          contextLabels: clone(resolvedContextLabels),
+          memoryRepos: clone(resolvedMemoryRepos)
         },
         validation: allTrue ? 'valid' : hasErrors ? 'invalid' : 'warning',
         permissionDecision: permissionReview.decision

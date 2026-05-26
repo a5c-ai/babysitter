@@ -67,27 +67,60 @@ async function execCommand(
   args: string[],
   options: { cwd: string; env: Record<string, string>; verbose?: boolean; stdin?: string },
 ): Promise<string> {
-  const { execFileSync } = await import('node:child_process');
+  const { spawnSync, execFileSync } = await import('node:child_process');
 
   const mergedEnv = { ...process.env, ...options.env };
 
   if (options.verbose) {
     console.error(`[bridge-hooks] exec: ${bin} ${args.join(' ')}`);
   }
-
-  const { spawnSync } = await import('node:child_process');
-  const proc = spawnSync(bin, args, {
+  // On Windows, shell:true splits --handler values at spaces. Resolve the
+  // binary to a node-invocable .js entry to avoid shell entirely.
+  let resolvedBin = bin;
+  let resolvedArgs = args;
+  let useShell = false;
+  if (process.platform === 'win32') {
+    // Try to find the .js entry point from the npm .cmd shim or PATH scripts
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const pathDirs = (mergedEnv['PATH'] || '').split(';');
+    for (const dir of pathDirs) {
+      // Check for .cmd shim (npm global install)
+      const cmdPath = path.join(dir, `${bin}.cmd`);
+      try {
+        const content = fs.readFileSync(cmdPath, 'utf-8');
+        const jsMatch = content.match(/"([^"]+\.js)"/);
+        if (jsMatch) {
+          resolvedBin = process.execPath;
+          resolvedArgs = [jsMatch[1], ...args];
+          break;
+        }
+      } catch { /* not found */ }
+      // Check for shell script (workspace link)
+      const shPath = path.join(dir, bin);
+      try {
+        const content = fs.readFileSync(shPath, 'utf-8');
+        const nodeMatch = content.match(/exec\s+node\s+"([^"]+)"/);
+        if (nodeMatch) {
+          resolvedBin = process.execPath;
+          resolvedArgs = [nodeMatch[1], ...args];
+          break;
+        }
+      } catch { /* not found */ }
+    }
+    if (resolvedBin === bin) useShell = true; // fallback
+  }
+  const proc = spawnSync(resolvedBin, resolvedArgs, {
     cwd: options.cwd,
     env: mergedEnv,
     encoding: 'utf-8',
     timeout: 30_000,
     stdio: [options.stdin ? 'pipe' : 'ignore', 'pipe', 'pipe'],
     input: options.stdin,
-    shell: process.platform === 'win32',
+    shell: useShell,
   });
-  // Forward child stderr so hooks-mux logger diagnostics are visible
-  if (proc.stderr) {
-    process.stderr.write(proc.stderr);
+  if (proc.stderr && options.verbose) {
+    console.error(`[bridge-hooks] child stderr: ${proc.stderr.substring(0, 500)}`);
   }
   if (proc.status !== 0) {
     throw new Error(`${bin} exited with ${proc.status}: ${proc.stderr || proc.stdout}`);
@@ -155,7 +188,9 @@ export class BridgeHookEmulator {
     }
     const handlerCommand = babysitterCmd.join(' ');
 
-    console.error(`[bridge-hooks] invokeHookEvent(${nativeEvent}): hooksMuxBin=${this.hooksMuxBin}, adapter=${this.adapter}`);
+    if (this.ctx.verbose) {
+      console.error(`[bridge-hooks] invokeHookEvent(${nativeEvent}): hooksMuxBin=${this.hooksMuxBin}, adapter=${this.adapter}`);
+    }
     try {
       const args = [
         'invoke',
@@ -165,14 +200,18 @@ export class BridgeHookEmulator {
         '--json',
       ];
 
-      console.error(`[bridge-hooks] exec: ${this.hooksMuxBin} ${args.join(' ')}`);
+      if (this.ctx.verbose) {
+        console.error(`[bridge-hooks] exec: ${this.hooksMuxBin} ${args.join(' ')}`);
+      }
       const result = await execCommand(this.hooksMuxBin, args, {
         cwd: this.ctx.cwd,
         env: this.ctx.env,
         verbose: this.ctx.verbose,
         stdin: JSON.stringify({ event: nativeEvent }),
       });
-      console.error(`[bridge-hooks] hooks-mux invoke succeeded for ${nativeEvent}`);
+      if (this.ctx.verbose) {
+        console.error(`[bridge-hooks] hooks-mux invoke succeeded for ${nativeEvent}`);
+      }
       return result;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);

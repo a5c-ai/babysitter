@@ -170,15 +170,16 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 /* Top bar */
 .appTopbar {
   position: sticky; top: 0; z-index: 12;
-  display: grid;
-  grid-template-columns: max-content minmax(220px, 420px) minmax(0, 1fr) max-content;
-  gap: 14px; align-items: center;
+  display: flex; align-items: center; gap: 12px;
   width: 100%; margin: 0;
   padding: 10px 20px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   backdrop-filter: blur(12px);
 }
+.appTopbar .globalSearch { flex: 0 1 320px; min-width: 140px; }
+.appTopbar .topbarNav { flex: 0 0 auto; }
+.appTopbar .topbarAccount { margin-left: auto; flex-shrink: 0; }
 
 .brandMark {
   display: flex; align-items: center; gap: 10px;
@@ -268,26 +269,28 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .appSidebar {
   position: sticky; top: 53px; align-self: start;
   min-height: calc(100vh - 53px);
-  padding: 16px 12px 32px;
+  padding: 12px 10px 32px;
   border-right: 1px solid var(--border);
   background: var(--bg-subtle);
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 .sidebarSectionTitle {
-  margin: 0 8px 8px;
+  margin: 0 8px 6px;
   color: var(--text-muted);
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
 }
-.appSidebar nav { display: grid; gap: 2px; }
+.appSidebar nav { display: grid; gap: 0; }
 .appSidebar a {
   display: flex; align-items: center;
-  min-height: 32px; padding: 6px 10px;
+  min-height: 28px; padding: 4px 10px;
   border-radius: var(--radius-sm);
   border-left: 2px solid transparent;
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.85rem; font-weight: 500;
-  transition: all 0.15s;
+  font-size: 0.8rem; font-weight: 500;
+  transition: all 0.12s;
 }
 .appSidebar a:hover, .appSidebar a:focus-visible { color: var(--text); background: var(--surface); }
 .appSidebar a[aria-current="page"] {
@@ -298,28 +301,37 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 /* Org switcher */
 .orgSwitcher {
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface);
 }
-.orgSwitcher summary { display: grid; gap: 2px; padding: 10px 12px; cursor: pointer; list-style: none; }
+.orgSwitcher summary { display: grid; gap: 2px; padding: 8px 10px; cursor: pointer; list-style: none; }
 .orgSwitcher summary::-webkit-details-marker { display: none; }
-.orgSwitcher summary span, .sidebarNavGroup h2 {
+.orgSwitcher summary span {
   margin: 0; color: var(--text-muted);
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
 }
-.orgSwitcher summary strong { color: var(--text); font-size: 0.9rem; }
+.orgSwitcher summary strong { color: var(--text); font-size: 0.85rem; }
 .orgSwitcher > div { display: grid; gap: 2px; padding: 0 6px 8px; }
-.sidebarNavGroup { display: grid; gap: 2px; }
-.sidebarNavGroup h2 { padding: 0 10px; }
-.sidebarNavGroup a { display: grid; gap: 1px; align-items: center; min-height: 40px; }
-.sidebarNavGroup a span { font-weight: 600; }
-.sidebarNavGroup a small { color: var(--text-muted); font-size: 0.72rem; font-weight: 400; }
-.advancedNav { margin-top: 4px; border-top: 1px solid var(--border); padding-top: 8px; }
-.advancedNav summary { min-height: 32px; padding: 6px 10px; color: var(--text-muted); cursor: pointer; font-size: 0.82rem; font-weight: 500; }
-.advancedNav a { margin-top: 2px; }
+
+/* Navigation groups */
+.sidebarNavGroup { display: grid; gap: 0; margin-bottom: 4px; }
+.sidebarNavGroup h2 {
+  margin: 0; padding: 12px 10px 4px;
+  color: var(--text-muted);
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  border-top: 1px solid var(--border);
+}
+.sidebarNavGroup:first-child h2 { border-top: none; padding-top: 4px; }
+.sidebarNavGroup a { display: block; min-height: auto; padding: 5px 10px; line-height: 1.3; }
+.sidebarNavGroup a span { font-weight: 500; font-size: 0.8rem; }
+.sidebarNavGroup a small { display: none; }
+.advancedNav { margin-top: 4px; border-top: 1px solid var(--border); padding-top: 6px; }
+.advancedNav summary { min-height: 28px; padding: 4px 10px; color: var(--text-muted); cursor: pointer; font-size: 0.78rem; font-weight: 500; }
+.advancedNav a { margin-top: 1px; }
 
 /* Main content area */
 .appContent { min-width: 0; }
@@ -831,24 +843,13 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .loginNotice { margin: 20px 0 0; padding: 14px 16px; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); color: var(--warning); background: rgba(245, 158, 11, 0.06); font-size: 0.85rem; }
 
 .krateRecoveryOverlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: clamp(20px, 5vw, 64px); background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); }
-.krateLoadingView { width: min(100%, 480px); padding: clamp(24px, 5vw, 40px); border: 1px solid rgba(139, 109, 71, 0.35); border-radius: 12px; color: #3d2e1c; background: linear-gradient(168deg, #f6f0e2 0%, #ede4d0 40%, #e8ddc5 100%); box-shadow: 0 4px 24px rgba(61, 46, 28, 0.12), inset 0 1px 0 rgba(255, 251, 244, 0.6); text-align: center; position: relative; overflow: hidden; }
-.krateLoadingView::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; border-radius: inherit; }
-.krateLoadingView.fullPage { min-height: 100vh; width: 100%; border: 0; border-radius: 0; box-shadow: none; display: grid; align-content: center; justify-items: center; background: linear-gradient(168deg, #f6f0e2 0%, #ede4d0 50%, #e2d6be 100%); }
-.krateCircleLoader { position: relative; width: 96px; height: 96px; margin: 0 auto 24px; }
-.krateCircleSvg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.krateCircleTrack { fill: none; stroke: rgba(139, 109, 71, 0.15); stroke-width: 3; }
-.krateCircleArc { fill: none; stroke: #8b6d47; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 213.6; stroke-dashoffset: 160.2; animation: krateCircleSpin 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-.krateCircleMark { position: absolute; inset: 0; display: grid; place-items: center; font-family: 'Geist', serif; font-weight: 800; font-size: 1.6rem; color: #5b3817; letter-spacing: -0.03em; }
-.krateLoadingText h2 { margin: 0 0 8px; font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 700; color: #3d2e1c; letter-spacing: -0.02em; }
-.krateLoadingText p { margin: 0; color: #7a6a56; font-style: italic; font-size: 0.9rem; }
-.routeLoadingPhases { position: relative; width: min(100%, 360px); margin-top: 20px; }
-.routeLoadingPhases span { display: block; animation: krateRouteLoadingPhase 7.2s steps(1, end) infinite; color: #8b7a66; font-size: 0.82rem; font-weight: 500; }
-.routeLoadingPhases span:not(:first-child) { position: absolute; inset: 0; opacity: 0; }
-.routeLoadingPhases span:nth-child(2) { animation-delay: 1.8s; }
-.routeLoadingPhases span:nth-child(3) { animation-delay: 3.6s; }
-.routeLoadingPhases span:nth-child(4) { animation-delay: 5.4s; }
-@keyframes krateCircleSpin { 0% { stroke-dashoffset: 213.6; transform: rotate(0deg); } 50% { stroke-dashoffset: 53.4; } 100% { stroke-dashoffset: 213.6; transform: rotate(720deg); } }
-@keyframes krateRouteLoadingPhase { 0%, 24.9% { opacity: 1; } 25%, 100% { opacity: 0; } }
+.krateLoadingView { width: min(100%, 480px); padding: clamp(24px, 5vw, 40px); text-align: center; color: var(--text); }
+.krateLoadingView.fullPage { min-height: 100vh; width: 100%; display: grid; align-content: center; justify-items: center; background: var(--bg); }
+.krateSpinner { width: 40px; height: 40px; margin: 0 auto 16px; }
+.krateSpinner svg { width: 100%; height: 100%; }
+.krateSpinnerArc { animation: krateSpinnerRotate 0.8s linear infinite; transform-origin: center; }
+.krateLoadingLabel { margin: 0; color: var(--text-muted); font-size: 0.85rem; font-weight: 500; }
+@keyframes krateSpinnerRotate { to { transform: rotate(360deg); } }
 .krateLoadingPhase { min-height: 1.4em; margin: 0 0 8px; color: #3d2e1c; font-weight: 600; }
 .krateLoadingFootnote { color: #a89880; font-size: 0.78rem; margin-top: 12px; display: block; }
 .krateRecoveryHint { width: min(100%, 480px); margin: 14px auto 0; color: #7a6a56; text-align: center; font-size: 0.85rem; }
@@ -899,7 +900,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 @media (max-width: 760px) {
-  .appTopbar { grid-template-columns: auto 1fr auto; gap: 8px; }
+  .appTopbar { gap: 8px; }
   .globalSearch { order: 3; }
   .routeMain { padding: 16px 16px 44px; }
   .routeHero, .repoTabs { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }

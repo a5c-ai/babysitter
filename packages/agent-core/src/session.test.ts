@@ -7,6 +7,14 @@ describe("AgentCoreSessionHandle", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", mockFetch);
     vi.stubEnv("OPENAI_API_KEY", "test-key");
+    // Clear provider env vars so tests use the stubbed OPENAI_API_KEY
+    vi.stubEnv("AMUX_PROVIDER", "");
+    vi.stubEnv("AMUX_API_BASE", "");
+    vi.stubEnv("AMUX_API_KEY", "");
+    vi.stubEnv("AZURE_API_KEY", "");
+    vi.stubEnv("AZURE_OPENAI_API_KEY", "");
+    vi.stubEnv("AZURE_OPENAI_PROJECT_NAME", "");
+    vi.stubEnv("ANTHROPIC_API_KEY", "");
   });
 
   afterEach(() => {

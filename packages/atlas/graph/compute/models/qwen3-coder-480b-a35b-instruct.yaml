@@ -1,0 +1,46 @@
+nodeKind: ModelVersion
+id: model:qwen3-coder-480b-a35b-instruct@current
+attributes:
+  displayName: "Qwen3 Coder 480B A35B Instruct"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:qwen-3-coder
+  versionRange: '>=3.0.0 <4.0.0'
+  kind: code-completion
+  contextWindowTokens: 262144
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-07-23'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-07-23'
+  modelCardUrl: https://huggingface.co/Qwen/Qwen3-Coder-480B-A35B-Instruct
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:qwen-3-coder
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:qwen-3-coder
+  supersedes:
+    - target: model:qwen-2-5-coder-32b@current
+  served_by:
+    - provider:aws-bedrock
+    - provider:together-ai
+    - provider:fireworks-ai
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full

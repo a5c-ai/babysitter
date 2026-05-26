@@ -22,10 +22,28 @@ edges:
   supported_by_claim: []
 ---
 nodeKind: Claim
+id: claim:web-codex-0-133-release
+attributes:
+  claimId: web-codex-0-133-release
+  statement: "Codex CLI 0.133.0 makes goals default-on with dedicated storage, improves remote-control foreground readiness and explicit lifecycle commands, expands permission profiles and plugin discovery metadata, exposes richer extension lifecycle events, and fixes realtime v1 websocket compatibility."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: high
+  status: current
+  provenanceKind: vendor-documentation
+  evidenceStrength: corroborated
+  evidenceIds:
+    - web-codex-0-133-release
+  unresolvedGaps: []
+edges:
+  sourced_from:
+    - evidence:web-codex-0-133-release
+---
+nodeKind: Claim
 id: claim:web-codex-hooks
 attributes:
   claimId: web-codex-hooks
-  statement: "Codex CLI supports runtime hooks for tool-use interception and custom lifecycle events."
+  statement: "Codex CLI supports runtime hooks for tool-use interception and custom lifecycle events; 0.133.0 expands extension observation across subagent lifecycle, tool execution, turn metadata, async approval, and turn processing."
   subjectKind: AgentVersion
   subjectId: "agentVersion:codex:ge-0-119-0"
   confidence: medium
@@ -34,17 +52,19 @@ attributes:
   evidenceStrength: partial
   evidenceIds:
     - web-codex-hooks
+    - web-codex-0-133-release
   unresolvedGaps:
-    - "Only one vendor documentation source confirms hook support for Codex CLI."
+    - "The release notes confirm expanded lifecycle observation, while the stable hooks docs remain the primary hook-surface reference."
 edges:
   sourced_from:
     - evidence:web-codex-hooks
+    - evidence:web-codex-0-133-release
 ---
 nodeKind: Claim
 id: claim:web-codex-session-resume
 attributes:
   claimId: web-codex-session-resume
-  statement: "Codex CLI supports session resume through its conversation history and checkpoint mechanisms."
+  statement: "Codex CLI supports session resume through its conversation history and checkpoint mechanisms, with 0.133.0 adding default-on goals backed by dedicated storage across active turns."
   subjectKind: AgentVersion
   subjectId: "agentVersion:codex:ge-0-119-0"
   confidence: high
@@ -54,11 +74,13 @@ attributes:
   evidenceIds:
     - web-codex-cli
     - web-codex-cli-features
+    - web-codex-0-133-release
   unresolvedGaps: []
 edges:
   sourced_from:
     - evidence:web-codex-cli
     - evidence:web-codex-cli-features
+    - evidence:web-codex-0-133-release
 ---
 nodeKind: Claim
 id: claim:web-codex-image-input

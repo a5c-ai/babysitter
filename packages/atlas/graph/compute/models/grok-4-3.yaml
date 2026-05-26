@@ -1,0 +1,50 @@
+nodeKind: ModelVersion
+id: model:grok-4-3@current
+attributes:
+  displayName: "Grok 4.3"
+  costPerMTokInput: 1.25
+  costPerMTokOutput: 2.5
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:grok-4
+  versionRange: '>=4.3.0 <4.4.0'
+  kind: multimodal
+  contextWindowTokens: 1000000
+  modalities:
+    - text
+    - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-05-01'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-05-01'
+  modelCardUrl: https://docs.x.ai/developers/models/grok-4.3
+  supportsFineTuning: false
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:grok-4
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:grok-4
+  served_by:
+    - provider:xai
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=4.3.0 <4.4.0'
+      level: full
+    - target: capability:supports-structured-output
+      versionRange: '>=4.3.0 <4.4.0'
+      level: full
+    - target: capability:vision-input
+      versionRange: '>=4.3.0 <4.4.0'
+      level: full

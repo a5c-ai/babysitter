@@ -12,6 +12,8 @@ attributes:
   notes: |
     Qwen Code is a fork of Gemini CLI; it ships an interactive TUI plus a
     scripted CLI. Slash commands largely inherit from the upstream Gemini CLI.
+    Version 0.16.1 gates mintty OSC 8 hyperlink detection on
+    TERM_PROGRAM_VERSION >= 3.3, reducing Windows terminal false positives.
 edges:
   realizes:
     - target: layer:11-presentation

@@ -5,9 +5,18 @@ attributes:
   sourcePackage: "@qwen-code/qwen-code"
   versionRange: ">=0.16.1"
   releasedAt: "2026-05-23"
+  releaseNotesUrl: https://github.com/QwenLM/qwen-code/releases/tag/v0.16.1
   cliCommand: "qwen"
   installMethods:
     - install:npm
+  assimilationNotes: |
+    Qwen Code 0.16.1 keeps the npm package/install surface unchanged.
+    The release closes the upstream tool_use/tool_result invariant across
+    failure paths, adds TTFT capture plus GenAI semantic-convention dual
+    telemetry emission, preserves tab-indented notebook formatting, updates
+    internal Express server dependencies to 5.2.1, normalizes the standalone
+    Windows install BAT CRLF storage, and gates mintty OSC 8 detection on
+    TERM_PROGRAM_VERSION >= 3.3.
   minSchemaVersion: "6.0.0"
 edges:
   version_of:
@@ -21,7 +30,9 @@ edges:
       role: platform
     - target: agent-ui-impl:qwen.ui@current
       role: ui
-  sourced_from: []
+  sourced_from:
+    - source-ref:qwen-code-github
+    - evidence:qwen-code-release-v0-16-1
   supports:
     - target: capability:can-multi-turn
       versionRange: '>=0.16.1'
@@ -34,7 +45,7 @@ edges:
     - target: capability:supports-tool-use
       versionRange: '>=0.16.1'
       level: full
-      notes: Qwen agent drives file edits and commands via tool-use.
+      notes: Qwen agent drives file edits and commands via tool-use. Version 0.16.1 closes the upstream tool_use/tool_result failure-path invariant.
     - target: capability:supports-mcp
       versionRange: '>=0.16.1'
       level: full

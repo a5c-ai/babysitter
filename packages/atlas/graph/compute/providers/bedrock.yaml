@@ -78,10 +78,15 @@ attributes:
 edges:
   realizes:
     - target: layer:2-provider
+  serves:
+    - model:amazon-nova-2-lite@current
+    - model:claude-mythos-preview@current
+    - model:mistral-large-3@current
+    - model:qwen3-coder-480b-a35b-instruct@current
+    - model:cohere-embed-v4-0@current
+    - model:claude-opus-4-7@current
   supports:
     - target: capability:supports-bedrock-guardrails
       versionRange: '>=2024-01-01'
     - target: capability:model-discovery
       versionRange: '>=2024-01-01'
-  serves:
-    - model:claude-opus-4-7@current

@@ -31,7 +31,9 @@ edges:
   realizes:
     - target: layer:2-provider
   serves:
+    - model:command-a-plus-05-2026@current
     - model:command-r-plus@current
+    - model:cohere-embed-v4-0@current
     - model:cohere-embed-english-v3@current
   emits_message_type:
     - protocol-message:cohere-message-start

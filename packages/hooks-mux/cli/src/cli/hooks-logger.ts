@@ -68,10 +68,7 @@ export async function appendHooksLog(
   message: string,
   context?: Record<string, unknown>,
 ): Promise<void> {
-  // Debug: always output to stderr to verify binary version in CI
-  process.stderr.write(`[hooks-logger-v2] appendHooksLog(${command}, ${level}, ${message.substring(0, 40)})\n`);
   if (!shouldLog(level)) {
-    process.stderr.write(`[hooks-logger-v2] shouldLog(${level}) = false, configured=${process.env[LOG_LEVEL_ENV] ?? 'unset'}\n`);
     return;
   }
 

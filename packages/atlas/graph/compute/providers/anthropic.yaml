@@ -76,6 +76,7 @@ edges:
     notes: Anthropic supports tool-use schema-constrained output; native response_format json_schema is partial (via tool-use
       idiom).
   serves:
+  - model:claude-mythos-preview@current
   - model:claude-opus-4-7@current
   - model:claude-opus-4-6@current
   - model:claude-opus-4-5@current

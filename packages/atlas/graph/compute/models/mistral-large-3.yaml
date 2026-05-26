@@ -1,0 +1,50 @@
+nodeKind: ModelVersion
+id: model:mistral-large-3@current
+attributes:
+  displayName: "Mistral Large 3"
+  costPerMTokInput: 0.5
+  costPerMTokOutput: 1.5
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:mistral
+  versionRange: '>=3.0.0 <4.0.0'
+  kind: multimodal
+  contextWindowTokens: 256000
+  modalities:
+    - text
+    - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-12-02'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-12-02'
+  modelCardUrl: https://docs.mistral.ai/models/model-cards/mistral-large-3-25-12
+  supportsFineTuning: false
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:mistral
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:mistral
+  supersedes:
+    - target: model:mistral-large-2@current
+  served_by:
+    - provider:mistral
+    - provider:aws-bedrock
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full
+    - target: capability:vision-input
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full

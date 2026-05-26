@@ -60,6 +60,21 @@ export function createAgentDispatchController(options = {}) {
         throw new Error('resolveStack requires a valid AgentStack resource with spec');
       }
       const spec = stack.spec;
+
+      // Merge flat mcpServerRefs with structured externalTools.mcpServerRefs (deduplicated)
+      const mergedMcpServers = [
+        ...(spec.mcpServerRefs || []),
+        ...(spec.externalTools?.mcpServerRefs || [])
+      ].filter((v, i, a) => a.indexOf(v) === i);
+
+      const memoryConfig = {};
+      if (spec.memoryRepositoryRefs && spec.memoryRepositoryRefs.length > 0) {
+        memoryConfig.memoryRepositoryRefs = clone(spec.memoryRepositoryRefs);
+      }
+      if (spec.memorySnapshotRef) {
+        memoryConfig.memorySnapshotRef = spec.memorySnapshotRef;
+      }
+
       return {
         adapter: spec.adapter || spec.baseAgent || 'claude-code',
         provider: spec.provider || 'anthropic',
@@ -69,13 +84,14 @@ export function createAgentDispatchController(options = {}) {
           developer: spec.developerPrompt || null,
           task: spec.taskPrompt || null,
         },
-        mcpServers: clone(spec.mcpServerRefs || []),
+        mcpServers: clone(mergedMcpServers),
         skills: clone(spec.skillRefs || []),
         approvalMode: spec.approvalMode || 'prompt',
         env: {
           KRATE_ORG: organizationRef,
           KRATE_STACK_NAME: stack.metadata?.name || 'unknown',
         },
+        memoryConfig: Object.keys(memoryConfig).length > 0 ? memoryConfig : null,
       };
     },
 
@@ -250,11 +266,15 @@ export function createAgentDispatchController(options = {}) {
       }
       const permissionSnapshot = permissionReviewer.createPermissionSnapshot(review);
 
-      // 3. Memory snapshot — create if any AgentMemoryRepository exists in resources
+      // 3. Memory snapshot — use stack-scoped memoryRepositoryRefs if present, else fall back to all repos
       let memorySnapshot = null;
-      const memoryRepos = resources.AgentMemoryRepository || [];
-      if (memoryRepos.length > 0) {
-        const memRepo = memoryRepos[0];
+      const allMemoryRepos = resources.AgentMemoryRepository || [];
+      const stackMemoryRefs = stack.spec?.memoryRepositoryRefs || [];
+      const scopedMemoryRepos = stackMemoryRefs.length > 0
+        ? allMemoryRepos.filter((r) => stackMemoryRefs.includes(r.metadata?.name))
+        : allMemoryRepos;
+      if (scopedMemoryRepos.length > 0) {
+        const memRepo = scopedMemoryRepos[0];
         const timeTravel = memoryController.resolveTimeTravel({ mode: 'current', commits: [] });
         memorySnapshot = memoryController.createMemorySnapshot({
           memoryRepository: memRepo.metadata.name,
@@ -398,6 +418,17 @@ export function createAgentDispatchController(options = {}) {
       const resolvedCallbackUrl = callbackUrl || process.env.KRATE_CALLBACK_URL || null;
 
       try {
+        // Inject memory config env vars into the Job when memory repos are scoped
+        const jobEnv = { ...executionConfig.env };
+        if (executionConfig.memoryConfig) {
+          if (executionConfig.memoryConfig.memoryRepositoryRefs) {
+            jobEnv.KRATE_MEMORY_REPOS = executionConfig.memoryConfig.memoryRepositoryRefs.join(',');
+          }
+          if (executionConfig.memoryConfig.memorySnapshotRef) {
+            jobEnv.KRATE_MEMORY_SNAPSHOT = executionConfig.memoryConfig.memorySnapshotRef;
+          }
+        }
+
         const { jobManifest, jobName } = agentMuxClient.createAgentJob({
           adapter: executionConfig.adapter,
           provider: executionConfig.provider,
@@ -410,7 +441,7 @@ export function createAgentDispatchController(options = {}) {
           serviceAccount: stack.spec?.runtimeIdentity?.serviceAccountRef,
           callbackUrl: resolvedCallbackUrl,
           prompt: executionConfig.prompt,
-          env: executionConfig.env,
+          env: jobEnv,
           workspace: pvcName ? { pvcName } : undefined,
           resources: stack.spec?.resources,
         });

@@ -1,0 +1,49 @@
+nodeKind: ModelVersion
+id: model:command-a-plus-05-2026@current
+attributes:
+  displayName: "Command A+ 05-2026"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:cohere-command
+  versionRange: '>=2026.05.0 <2026.06.0'
+  kind: multimodal
+  contextWindowTokens: 128000
+  modalities:
+    - text
+    - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-05-01'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-05-01'
+  modelCardUrl: https://docs.cohere.com/docs/command-a-plus
+  supportsFineTuning: false
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:cohere-command
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:cohere-command
+  supersedes:
+    - target: model:command-r-plus@current
+  served_by:
+    - provider:cohere
+  speaks:
+    - model-transport:cohere-chat
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=2026.05.0 <2026.06.0'
+      level: full
+    - target: capability:vision-input
+      versionRange: '>=2026.05.0 <2026.06.0'
+      level: full

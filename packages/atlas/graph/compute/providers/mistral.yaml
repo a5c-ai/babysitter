@@ -30,7 +30,9 @@ edges:
   realizes:
     - target: layer:2-provider
   serves:
+    - model:mistral-large-3@current
     - model:mistral-large-2@current
+    - model:mistral-medium-3-5@current
     - model:mistral-medium-3@current
     - model:codestral-25-01@current
     - model:codestral-22b@current

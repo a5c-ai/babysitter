@@ -323,6 +323,10 @@ export const FLAG_PARSERS: Record<string, FlagParser> = {
     parsed.keepDays = parsePositiveInteger(expectFlagValue(args, index + 1, "--keep-days"), "--keep-days");
     return index + 1;
   },
+  "--effect-id": (parsed, args, index) => {
+    parsed.effectId = expectFlagValue(args, index + 1, "--effect-id");
+    return index + 1;
+  },
   "--reason": (parsed, args, index) => {
     parsed.cancelReason = expectFlagValue(args, index + 1, "--reason");
     return index + 1;

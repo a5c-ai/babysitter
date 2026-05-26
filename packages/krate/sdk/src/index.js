@@ -29,8 +29,12 @@ export { mapOidcIdentity } from '../../core/src/identity-policy.js';
 // Resource Model
 export {
   createResource,
+  validateResource,
+  resourceSchemaForKind,
+  RESOURCE_DEFINITIONS,
   CONFIG_KINDS,
   AGGREGATED_KINDS,
+  ALL_KINDS,
   clone,
   resourceToYaml
 } from '../../core/src/resource-model.js';

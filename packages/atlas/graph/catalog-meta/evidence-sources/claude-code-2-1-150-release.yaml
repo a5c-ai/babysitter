@@ -1,0 +1,18 @@
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-150-release
+attributes:
+  displayName: "Claude Code v2.1.150 release notes"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.150
+  sourcePathOrUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.150
+  locator: "anthropics/claude-code release v2.1.150"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
