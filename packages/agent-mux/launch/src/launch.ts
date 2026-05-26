@@ -1000,6 +1000,16 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         console.error(`[amux launch] Gemini proxy: GOOGLE_API_KEY=proxy-token, endpoint=${proxyOrigin}`);
       }
 
+      // Omni (agent-core): set AMUX_* env vars to route through the proxy.
+      // agent-core's resolveEndpoint() checks AMUX_PROVIDER first.
+      if (plan.harness === 'omni') {
+        plan.env['AMUX_API_BASE'] = proxyRuntime.url;
+        plan.env['AMUX_API_KEY'] = proxyRuntime.authToken ?? 'proxy-token';
+        plan.env['AMUX_PROVIDER'] = plan.proxy?.targetProvider ?? 'openai';
+        plan.env['AMUX_MODEL'] = plan.proxy?.targetModel ?? plan.model ?? '';
+        console.error(`[amux launch] Omni proxy: AMUX_API_BASE=${proxyRuntime.url}, AMUX_PROVIDER=${plan.env['AMUX_PROVIDER']}, AMUX_MODEL=${plan.env['AMUX_MODEL']}`);
+      }
+
       // Generic OpenAI-compatible harnesses: set OPENAI_API_KEY + OPENAI_BASE_URL
       // to route through the proxy for harnesses that use the openai-chat/responses transport.
       if (['codex', 'cursor', 'hermes', 'omp', 'openclaw', 'opencode'].includes(plan.harness)) {
