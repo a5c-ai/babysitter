@@ -39,7 +39,6 @@ edges:
   - provider:aws-bedrock
   - provider:together-ai
   - provider:fireworks-ai
-  - provider:groq
   speaks:
   - model-transport:openai-compat
   supports:

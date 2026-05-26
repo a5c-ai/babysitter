@@ -42,4 +42,6 @@ edges:
   realizes:
     - target: layer:2-provider
   serves:
-    - model:llama-4-405b-instruct@current
+    - model:llama-4-scout@current
+    - model:llama-4-maverick@current
+    - model:qwen3-32b@current

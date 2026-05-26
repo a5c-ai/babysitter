@@ -1,0 +1,151 @@
+nodeKind: EvidenceSource
+id: evidence:together-ai-deepseek-v4-docs-2026-05
+attributes:
+  displayName: "Together AI DeepSeek V4 quickstart"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.together.ai/docs/deepseek-v4-quickstart
+  sourcePathOrUrl: https://docs.together.ai/docs/deepseek-v4-quickstart
+  locator: "DeepSeek V4 provider quickstart"
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:together-ai-serverless-models-2026-05
+attributes:
+  displayName: "Together AI serverless model catalog"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.together.ai/docs/serverless-models
+  sourcePathOrUrl: https://docs.together.ai/docs/serverless-models
+  locator: "Serverless models catalog"
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:fireworks-ai-deepseek-v4-page-2026-05
+attributes:
+  displayName: "Fireworks AI DeepSeek V4 page"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://fireworks.ai/deepseek
+  sourcePathOrUrl: https://fireworks.ai/deepseek
+  locator: "DeepSeek V4 is live on Fireworks"
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:groqcloud-models-docs-2026-05
+attributes:
+  displayName: "GroqCloud supported models documentation"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://console.groq.com/docs/models
+  sourcePathOrUrl: https://console.groq.com/docs/models
+  locator: "Supported Models - GroqDocs"
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:fireworks-ai-qwen3-coder-model-page-2026-05
+attributes:
+  displayName: "Fireworks AI Qwen3 Coder 480B A35B Instruct model page"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://fireworks.ai/models/fireworks/qwen3-coder-480b-a35b-instruct
+  sourcePathOrUrl: https://fireworks.ai/models/fireworks/qwen3-coder-480b-a35b-instruct
+  locator: "Qwen3 Coder 480B A35B Instruct API & Playground"
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:fireworks-ai-llama4-scout-model-page-2026-05
+attributes:
+  displayName: "Fireworks AI Llama 4 Scout Instruct model page"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://fireworks.ai/models/fireworks/llama4-scout-instruct-basic
+  sourcePathOrUrl: https://fireworks.ai/models/fireworks/llama4-scout-instruct-basic
+  locator: "Llama 4 Scout Instruct (Basic) API & Playground"
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:fireworks-ai-llama4-maverick-model-page-2026-05
+attributes:
+  displayName: "Fireworks AI Llama 4 Maverick Instruct model page"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://fireworks.ai/models/fireworks/llama4-maverick-instruct-basic
+  sourcePathOrUrl: https://fireworks.ai/models/fireworks/llama4-maverick-instruct-basic
+  locator: "Llama 4 Maverick Instruct (Basic) API & Playground"
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-qwen3-32b
+attributes:
+  displayName: "Hugging Face — Qwen/Qwen3-32B model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/Qwen/Qwen3-32B
+  sourcePathOrUrl: https://huggingface.co/Qwen/Qwen3-32B
+  locator: "model card"
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc

@@ -1,0 +1,64 @@
+nodeKind: ModelVersion
+id: model:qwen3-32b@current
+attributes:
+  displayName: "Qwen3 32B"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:qwen-3
+  versionRange: '>=3.0.0 <4.0.0'
+  kind: reasoning
+  contextWindowTokens: 131072
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-04-29'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-04-29'
+  modelCardUrl: https://huggingface.co/Qwen/Qwen3-32B
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:qwen-3
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:qwen-3
+  served_by:
+    - provider:groq
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:streaming
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:hf-model-card-qwen3-32b
+    - target: capability:supports-text-streaming
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:hf-model-card-qwen3-32b
+    - target: capability:can-multi-turn
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:hf-model-card-qwen3-32b
+    - target: capability:supports-thinking
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:hf-model-card-qwen3-32b
+    - target: capability:requires-tool-approval
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:hf-model-card-qwen3-32b

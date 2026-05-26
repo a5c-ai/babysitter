@@ -1,0 +1,164 @@
+nodeKind: Claim
+id: claim:together-ai-serves-deepseek-v4-current
+attributes:
+  subjectId: provider:together-ai
+  subjectKind: Provider
+  attribute: serves
+  value: Together AI serves DeepSeek V4 Pro and DeepSeek V4 Flash through its OpenAI-compatible inference API.
+  statement: Together AI provider availability includes DeepSeek V4 Pro and DeepSeek V4 Flash model deployments.
+  evidenceSourceIds:
+    - evidence:together-ai-deepseek-v4-docs-2026-05
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - provider:together-ai
+  backed_by_evidence:
+    - evidence:together-ai-deepseek-v4-docs-2026-05
+---
+nodeKind: Claim
+id: claim:together-ai-serves-current-qwen-and-llama-open-models
+attributes:
+  subjectId: provider:together-ai
+  subjectKind: Provider
+  attribute: serves
+  value: Together AI serves current Qwen and Meta open-weight model deployments in its serverless model catalog.
+  statement: Together AI provider availability includes source-backed Qwen and Llama model deployments modeled by provider:together-ai serves edges.
+  evidenceSourceIds:
+    - evidence:together-ai-serverless-models-2026-05
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - provider:together-ai
+  backed_by_evidence:
+    - evidence:together-ai-serverless-models-2026-05
+---
+nodeKind: Claim
+id: claim:fireworks-ai-serves-deepseek-v4-current
+attributes:
+  subjectId: provider:fireworks-ai
+  subjectKind: Provider
+  attribute: serves
+  value: Fireworks AI serves DeepSeek V4 through its OpenAI-compatible inference platform.
+  statement: Fireworks AI provider availability includes DeepSeek V4 model deployments modeled by provider:fireworks-ai serves edges.
+  evidenceSourceIds:
+    - evidence:fireworks-ai-deepseek-v4-page-2026-05
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - provider:fireworks-ai
+  backed_by_evidence:
+    - evidence:fireworks-ai-deepseek-v4-page-2026-05
+---
+nodeKind: Claim
+id: claim:fireworks-ai-serves-qwen3-coder-current
+attributes:
+  subjectId: provider:fireworks-ai
+  subjectKind: Provider
+  attribute: serves
+  value: Fireworks AI serves Qwen3 Coder 480B A35B Instruct as an on-demand deployable model.
+  statement: Fireworks AI provider availability includes Qwen3 Coder 480B A35B Instruct modeled by provider:fireworks-ai serves edges.
+  evidenceSourceIds:
+    - evidence:fireworks-ai-qwen3-coder-model-page-2026-05
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - provider:fireworks-ai
+  backed_by_evidence:
+    - evidence:fireworks-ai-qwen3-coder-model-page-2026-05
+---
+nodeKind: Claim
+id: claim:fireworks-ai-serves-llama4-scout-maverick-current
+attributes:
+  subjectId: provider:fireworks-ai
+  subjectKind: Provider
+  attribute: serves
+  value: Fireworks AI serves Llama 4 Scout Instruct and Llama 4 Maverick Instruct on-demand model deployments.
+  statement: Fireworks AI provider availability includes Llama 4 Scout and Llama 4 Maverick model deployments modeled by provider:fireworks-ai serves edges.
+  evidenceSourceIds:
+    - evidence:fireworks-ai-llama4-scout-model-page-2026-05
+    - evidence:fireworks-ai-llama4-maverick-model-page-2026-05
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - provider:fireworks-ai
+  backed_by_evidence:
+    - evidence:fireworks-ai-llama4-scout-model-page-2026-05
+    - evidence:fireworks-ai-llama4-maverick-model-page-2026-05
+---
+nodeKind: Claim
+id: claim:groq-serves-current-open-weight-lineup-2026-05
+attributes:
+  subjectId: provider:groq
+  subjectKind: Provider
+  attribute: serves
+  value: GroqCloud serves Llama 4 Scout, Llama 4 Maverick, and Qwen3 32B model deployments in its supported models catalog.
+  statement: Groq provider availability is modeled with current GroqCloud open-weight model deployments instead of the stale Llama 4 405B-only record.
+  evidenceSourceIds:
+    - evidence:groqcloud-models-docs-2026-05
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - provider:groq
+  backed_by_evidence:
+    - evidence:groqcloud-models-docs-2026-05
+---
+nodeKind: Claim
+id: claim:model-version-qwen3-32b-current-provider-availability
+attributes:
+  subjectId: model:qwen3-32b@current
+  subjectKind: ModelVersion
+  attribute: served_by
+  value: Qwen3 32B is served by GroqCloud as qwen/qwen3-32b.
+  statement: model:qwen3-32b@current has a provider deployment on GroqCloud.
+  evidenceSourceIds:
+    - evidence:groqcloud-models-docs-2026-05
+    - evidence:hf-model-card-qwen3-32b
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - model:qwen3-32b@current
+  backed_by_evidence:
+    - evidence:groqcloud-models-docs-2026-05
+    - evidence:hf-model-card-qwen3-32b
