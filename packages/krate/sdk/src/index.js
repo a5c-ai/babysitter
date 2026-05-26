@@ -235,6 +235,17 @@ export {
   KSERVE_API_VERSION
 } from '../../core/src/krate-inference-service-controller.js';
 
+// Model Route Controller (Envoy AI Gateway)
+export {
+  createModelRouteController,
+  MODEL_ROUTE_CONTROLLER_BOUNDARY,
+  validateModelRoute,
+  VALID_ROUTE_TYPES,
+  VALID_EXTERNAL_PROTOCOLS,
+  ENVOY_AI_GATEWAY_API_GROUP,
+  ENVOY_AI_GATEWAY_API_VERSION
+} from '../../core/src/model-route-controller.js';
+
 // Artifact Registry Controller
 export {
   createArtifactRegistryController,
