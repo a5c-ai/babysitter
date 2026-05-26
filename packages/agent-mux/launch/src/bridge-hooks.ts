@@ -86,8 +86,9 @@ async function execCommand(
     shell: process.platform === 'win32',
   });
   // Forward child stderr so hooks-mux logger diagnostics are visible
+  console.error(`[bridge-hooks] spawnSync result: status=${proc.status}, stdout=${proc.stdout?.length ?? 0}c, stderr=${proc.stderr?.length ?? 0}c`);
   if (proc.stderr) {
-    process.stderr.write(proc.stderr);
+    console.error(`[bridge-hooks] child stderr: ${proc.stderr.substring(0, 500)}`);
   }
   if (proc.status !== 0) {
     throw new Error(`${bin} exited with ${proc.status}: ${proc.stderr || proc.stdout}`);
