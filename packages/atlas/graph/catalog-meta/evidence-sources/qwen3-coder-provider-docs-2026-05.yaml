@@ -1,0 +1,76 @@
+---
+nodeKind: EvidenceSource
+id: evidence:alibaba-model-studio-qwen-coder-2026-05
+attributes:
+  displayName: "Alibaba Cloud Model Studio — Qwen-Coder"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://www.alibabacloud.com/help/en/model-studio/qwen-coder
+  sourcePathOrUrl: https://www.alibabacloud.com/help/en/model-studio/qwen-coder
+  locator: "Qwen-Coder docs — qwen3-coder-next examples and tool calling"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:aws-bedrock-qwen3-coder-480b-2026-05
+attributes:
+  displayName: "Amazon Bedrock — Qwen3 Coder 480B A35B Instruct"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-qwen-qwen3-coder-480b-a35b-instruct.html
+  sourcePathOrUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-qwen-qwen3-coder-480b-a35b-instruct.html
+  locator: "model card — model ids, launch date, context window, APIs"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:aws-bedrock-qwen3-coder-30b-2026-05
+attributes:
+  displayName: "Amazon Bedrock — Qwen3-Coder-30B-A3B-Instruct"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-qwen-qwen3-coder-30b-a3b-instruct.html
+  sourcePathOrUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-qwen-qwen3-coder-30b-a3b-instruct.html
+  locator: "model card — model ids, launch date, context window, APIs"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:aws-bedrock-qwen3-coder-next-2026-05
+attributes:
+  displayName: "Amazon Bedrock — Qwen3 Coder Next"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-qwen-qwen3-coder-next.html
+  sourcePathOrUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-qwen-qwen3-coder-next.html
+  locator: "model card — model ids, launch date, context window, APIs"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc

@@ -1,0 +1,16 @@
+{
+  "issueNumber": 358,
+  "baseBranch": "staging",
+  "targetBranch": "agent/issue-358",
+  "expectedFiles": [
+    ".a5c/processes/issue-358-xai-grok-4-3.mjs",
+    ".a5c/processes/issue-358-xai-grok-4-3.inputs.json",
+    "packages/atlas/graph/compute/model-families/grok-4.yaml",
+    "packages/atlas/graph/compute/models/grok-4-3.yaml",
+    "packages/atlas/graph/compute/providers/xai.yaml",
+    "packages/atlas/graph/extensions/provider-versions/provider-versions-anthropic-openai.yaml",
+    "packages/atlas/graph/catalog-meta/evidence-sources/xai-grok-4-3.yaml",
+    "packages/atlas/graph/catalog-meta/claims/model-version-model-grok-4-3-current-evidence-claims-2026-05.yaml",
+    "packages/atlas/graph/catalog-meta/claims/provider-xai-evidence-claims-2026-05.yaml"
+  ]
+}

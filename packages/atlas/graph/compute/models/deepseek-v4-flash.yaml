@@ -2,8 +2,8 @@ nodeKind: ModelVersion
 id: model:deepseek-v4-flash@current
 attributes:
   displayName: "DeepSeek V4 Flash"
-  costPerMTokInput: 0
-  costPerMTokOutput: 0
+  costPerMTokInput: 0.14
+  costPerMTokOutput: 0.28
   supportsExtendedThinking: true
   supportsThinkingBudgetTokens: false
   modelFamilyId: model-family:deepseek
@@ -18,9 +18,9 @@ attributes:
     - kind: text
       direction: output
   releaseDate: '2026-04-24'
-  lifecycleStatus: ga
+  lifecycleStatus: preview
   lifecycleStatusChangedAt: '2026-04-24'
-  modelCardUrl: https://api-docs.deepseek.com/news/news260424
+  modelCardUrl: https://fe-static.deepseek.com/chat/transparency/deepseek-V4-model-card-EN.pdf
   supportsFineTuning: false
   regions:
     - global
@@ -43,3 +43,26 @@ edges:
     - target: capability:streaming
       versionRange: '>=4.0.0 <5.0.0'
       level: full
+      evidenceSourceIds:
+        - evidence:deepseek-v4-release
+    - target: capability:supports-tool-use
+      versionRange: '>=4.0.0 <5.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:deepseek-v4-pricing
+    - target: capability:supports-thinking
+      versionRange: '>=4.0.0 <5.0.0'
+      level: full
+      notes: "DeepSeek documents V4 Flash as supporting both thinking and non-thinking modes."
+      evidenceSourceIds:
+        - evidence:deepseek-v4-pricing
+    - target: capability:extended-thinking
+      versionRange: '>=4.0.0 <5.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:deepseek-v4-release
+    - target: capability:can-multi-turn
+      versionRange: '>=4.0.0 <5.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:deepseek-v4-pricing

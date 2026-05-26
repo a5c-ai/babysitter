@@ -65,6 +65,12 @@ rules:
 
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
+  - apiGroups: ["gateway.envoyproxy.io"]
+
+    resources: ["aigatewayrouteconfigs"]
+
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
   - apiGroups: ["apps"]
 
     resources: ["deployments"]

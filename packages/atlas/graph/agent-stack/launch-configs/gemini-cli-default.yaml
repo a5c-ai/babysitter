@@ -1,0 +1,27 @@
+nodeKind: LaunchConfig
+id: launch-config:gemini.default
+attributes:
+  agentVersionId: agentVersion:gemini-cli:ge-0-0-0
+  displayName: Gemini CLI default launch
+  env: {}
+  commArgs: []
+  description: |-
+    Gemini CLI default launch — no special flags.
+edges:
+  requires_capability: []
+
+---
+nodeKind: LaunchConfig
+id: launch-config:gemini.dangerously-bypass-approvals-and-sandbox
+attributes:
+  agentVersionId: agentVersion:gemini-cli:ge-0-0-0
+  displayName: Gemini CLI dangerous bypass launch
+  env: {}
+  commArgs:
+    - --yolo
+  description: |-
+    Gemini CLI launch recipe for `--yolo`, which auto-approves all tool
+    calls without user confirmation. Equivalent to --approval-mode yolo.
+    Intended for CI/test environments where interactive approval is not possible.
+edges:
+  requires_capability: []

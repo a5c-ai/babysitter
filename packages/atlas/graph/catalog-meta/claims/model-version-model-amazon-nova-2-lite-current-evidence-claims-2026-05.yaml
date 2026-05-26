@@ -1,0 +1,91 @@
+nodeKind: Claim
+id: claim:model-version-model-amazon-nova-2-lite-current-providermodelids
+attributes:
+  subjectId: model:amazon-nova-2-lite@current
+  attribute: providerModelIds
+  value: amazon.nova-2-lite-v1:0, us.amazon.nova-2-lite-v1:0, eu.amazon.nova-2-lite-v1:0, global.amazon.nova-2-lite-v1:0
+  subjectKind: ModelVersion
+  statement: model:amazon-nova-2-lite@current providerModelIds include Bedrock base, US, EU, and global Nova 2 Lite identifiers.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-2-lite-model-card
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-2-lite-model-card
+  about_subject:
+    - model:amazon-nova-2-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-amazon-nova-2-lite-current-contextwindowtokens
+attributes:
+  subjectId: model:amazon-nova-2-lite@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: model:amazon-nova-2-lite@current contextWindowTokens is 1000000.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-2-lite-model-card
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-2-lite-model-card
+  about_subject:
+    - model:amazon-nova-2-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-amazon-nova-2-lite-current-maxoutputtokens
+attributes:
+  subjectId: model:amazon-nova-2-lite@current
+  attribute: maxOutputTokens
+  value: '64000'
+  subjectKind: ModelVersion
+  statement: model:amazon-nova-2-lite@current maxOutputTokens is 64000.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-2-lite-model-card
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-2-lite-model-card
+  about_subject:
+    - model:amazon-nova-2-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-model-amazon-nova-2-lite-current-modalities
+attributes:
+  subjectId: model:amazon-nova-2-lite@current
+  attribute: modalities
+  value: text, image, video
+  subjectKind: ModelVersion
+  statement: model:amazon-nova-2-lite@current modalities are text, image, and video input with text output.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-2-lite-model-card
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-2-lite-model-card
+  about_subject:
+    - model:amazon-nova-2-lite@current

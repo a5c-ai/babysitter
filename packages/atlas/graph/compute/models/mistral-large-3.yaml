@@ -39,12 +39,17 @@ edges:
   served_by:
     - provider:mistral
     - provider:aws-bedrock
+    - provider:azure-foundry
   speaks:
     - model-transport:openai-compat
   supports:
     - target: capability:supports-tool-use
       versionRange: '>=3.0.0 <4.0.0'
       level: full
+      evidenceSourceIds:
+        - evidence:mistral-large-3-model-card
     - target: capability:vision-input
       versionRange: '>=3.0.0 <4.0.0'
       level: full
+      evidenceSourceIds:
+        - evidence:mistral-large-3-model-card

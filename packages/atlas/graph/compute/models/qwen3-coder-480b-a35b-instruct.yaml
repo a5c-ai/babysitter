@@ -23,6 +23,9 @@ attributes:
   modelCardUrl: https://huggingface.co/Qwen/Qwen3-Coder-480B-A35B-Instruct
   supportsFineTuning: true
   fineTuningKind: full
+  providerModelIds:
+    awsBedrockRuntime: qwen.qwen3-coder-480b-a35b-v1:0
+    awsBedrockMantle: qwen.qwen3-coder-480b-a35b-instruct
   regions:
     - global
 edges:
@@ -40,6 +43,7 @@ edges:
     - provider:fireworks-ai
   speaks:
     - model-transport:openai-compat
+    - model-transport:bedrock-converse
   supports:
     - target: capability:supports-tool-use
       versionRange: '>=3.0.0 <4.0.0'

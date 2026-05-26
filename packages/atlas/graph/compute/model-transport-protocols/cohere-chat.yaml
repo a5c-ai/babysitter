@@ -1,0 +1,56 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:cohere-chat
+attributes:
+  displayName: "Cohere v2 Chat"
+  vendor: "Cohere"
+  specUrl: "https://docs.cohere.com/reference/chat"
+  streamingFraming: sse
+  thinkingChannel: none
+  cacheControl: none
+  firstSpecVersion: "2024-09"
+  currentSpecVersion: "v2"
+  status: standard
+  requestBodyShape: |
+    POST /v2/chat
+    Headers:
+      - `Authorization: Bearer <api-key>`
+      - `Content-Type: application/json`
+    Body includes `model`, `messages`, and optional generation,
+    citation, document, and tool-use fields.
+  responseBodyShape: |
+    Non-streaming responses return a Cohere chat message envelope with
+    generated content, finish reason, and usage metadata where available.
+  streamingEventTypes:
+    - message-start
+    - content-start
+    - content-delta
+    - content-end
+    - tool-call-start
+    - tool-call-delta
+    - tool-call-end
+    - message-end
+  streamEventKinds:
+    - content-delta
+    - tool-input-delta
+    - citation-delta
+    - message-stop
+  toolCallWireFormat: |
+    Cohere v2 Chat emits tool-call events and tool call objects carrying
+    tool name plus JSON input arguments.
+  toolResultWireFormat: |
+    Tool results are supplied back to the chat endpoint as tool-result
+    content/messages associated with the requested tool call.
+  errorEnvelope: |
+    Cohere API errors return JSON with an error message and HTTP status.
+    Rate limits use HTTP 429.
+  authHeaderFormat: |
+    `Authorization: Bearer <api-key>`
+  versioningHeader: |
+    API version is path-versioned through `/v2/chat`.
+edges:
+  realizes:
+    - target: layer:3-transport
+  served_by:
+    - provider:cohere
+  spoken_by:
+    - model:command-a-plus-05-2026@current

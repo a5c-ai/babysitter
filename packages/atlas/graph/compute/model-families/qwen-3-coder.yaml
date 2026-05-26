@@ -3,6 +3,9 @@ id: model-family:qwen-3-coder
 attributes:
   displayName: "Qwen3 Coder"
   providerId: alibaba
+  providerIds:
+    - alibaba-cloud
+    - aws-bedrock
   family: qwen
   generation: "3"
   modalities:
@@ -13,3 +16,5 @@ edges:
     - target: layer:1-model
   has_version:
     - model:qwen3-coder-480b-a35b-instruct@current
+    - model:qwen3-coder-30b-a3b-instruct@current
+    - model:qwen3-coder-next@current

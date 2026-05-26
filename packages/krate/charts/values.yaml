@@ -273,6 +273,12 @@ argocd:
 kyverno:
   install: false
 
+envoyAiGateway:
+  install: false
+  enabled: true
+  defaultBackend: "kserve"
+  externalProviders: {}
+
 kserve:
   enabled: false
   discoverExisting: true

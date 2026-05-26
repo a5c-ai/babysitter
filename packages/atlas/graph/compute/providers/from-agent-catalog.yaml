@@ -95,5 +95,6 @@ edges:
     - target: layer:2-provider
   serves:
     - model:claude-mythos-preview@current
+    - model:mistral-large-3@current
     - model:phi-3-medium@current
     - model:phi-3-mini@current

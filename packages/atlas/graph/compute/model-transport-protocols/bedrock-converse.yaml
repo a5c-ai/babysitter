@@ -132,4 +132,5 @@ edges:
   served_by:
     - provider:aws-bedrock
   spoken_by:
+    - model:amazon-nova-2-lite@current
     - model:claude-opus-4-7@current

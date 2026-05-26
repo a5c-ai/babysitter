@@ -26,6 +26,10 @@ dependencies:
     repository: https://kyverno.github.io/kyverno/
     condition: kyverno.install
     alias: kyverno-subchart
+  - name: envoy-ai-gateway
+    version: "~0.5"
+    repository: oci://docker.io/envoyproxy/ai-gateway-helm
+    condition: envoyAiGateway.install
 annotations:
   krate.a5c.ai/package-surface: mvp-model
   krate.a5c.ai/release-gate: npm-run-check

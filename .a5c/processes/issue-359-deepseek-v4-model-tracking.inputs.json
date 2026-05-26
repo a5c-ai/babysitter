@@ -1,0 +1,13 @@
+{
+  "issueNumber": 359,
+  "baseBranch": "staging",
+  "workBranch": "agent/issue-359",
+  "modelIds": [
+    "model:deepseek-v4-pro@current",
+    "model:deepseek-v4-flash@current"
+  ],
+  "verificationCommands": [
+    "npm run verify:metadata",
+    "npm run validate:edges"
+  ]
+}

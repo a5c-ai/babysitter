@@ -1,0 +1,49 @@
+nodeKind: ModelVersion
+id: model:qwen3-coder-30b-a3b-instruct@current
+attributes:
+  displayName: "Qwen3-Coder-30B-A3B-Instruct"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:qwen-3-coder
+  versionRange: '>=3.0.0 <4.0.0'
+  kind: code-completion
+  contextWindowTokens: 262144
+  maxOutputTokens: 16384
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-07-31'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-07-31'
+  modelCardUrl: https://huggingface.co/Qwen/Qwen3-Coder-30B-A3B-Instruct
+  supportsFineTuning: true
+  fineTuningKind: full
+  providerModelIds:
+    awsBedrockRuntime: qwen.qwen3-coder-30b-a3b-v1:0
+    awsBedrockMantle: qwen.qwen3-coder-30b-a3b-instruct
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:qwen-3-coder
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:qwen-3-coder
+  supersedes:
+    - target: model:qwen-2-5-coder-32b@current
+  served_by:
+    - provider:aws-bedrock
+  speaks:
+    - model-transport:openai-compat
+    - model-transport:bedrock-converse
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full

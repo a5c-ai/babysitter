@@ -45,6 +45,10 @@ edges:
     - target: capability:supports-tool-use
       versionRange: '>=3.5.0 <4.0.0'
       level: full
+      evidenceSourceIds:
+        - evidence:mistral-medium-3-5-hf-model-card
     - target: capability:vision-input
       versionRange: '>=3.5.0 <4.0.0'
       level: full
+      evidenceSourceIds:
+        - evidence:mistral-medium-3-5-hf-model-card

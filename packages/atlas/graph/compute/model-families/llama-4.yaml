@@ -8,4 +8,5 @@ edges:
   realizes:
     - target: layer:1-model
   has_version:
-    - model:llama-4-405b-instruct@current
+    - model:llama-4-scout@current
+    - model:llama-4-maverick@current

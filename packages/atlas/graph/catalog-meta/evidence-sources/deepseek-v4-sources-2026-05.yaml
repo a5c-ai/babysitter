@@ -1,0 +1,76 @@
+---
+nodeKind: EvidenceSource
+id: evidence:deepseek-v4-release
+attributes:
+  displayName: "DeepSeek API Docs - DeepSeek-V4 Preview release"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://api-docs.deepseek.com/news/news260424
+  sourcePathOrUrl: https://api-docs.deepseek.com/news/news260424
+  locator: "release notes - V4 Pro, V4 Flash, 1M context, API availability"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:deepseek-v4-pricing
+attributes:
+  displayName: "DeepSeek API Docs - Models & Pricing"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://api-docs.deepseek.com/quick_start/pricing
+  sourcePathOrUrl: https://api-docs.deepseek.com/quick_start/pricing
+  locator: "model details table - deepseek-v4-flash and deepseek-v4-pro"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:together-deepseek-v4-quickstart
+attributes:
+  displayName: "Together AI Docs - DeepSeek V4 quickstart"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.together.ai/docs/deepseek-v4-quickstart
+  sourcePathOrUrl: https://docs.together.ai/docs/deepseek-v4-quickstart
+  locator: "quickstart - DeepSeek V4 model availability"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 60
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:fireworks-deepseek-v4
+attributes:
+  displayName: "Fireworks AI - DeepSeek V4"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://fireworks.ai/deepseek
+  sourcePathOrUrl: https://fireworks.ai/deepseek
+  locator: "DeepSeek V4 provider page"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 60
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc

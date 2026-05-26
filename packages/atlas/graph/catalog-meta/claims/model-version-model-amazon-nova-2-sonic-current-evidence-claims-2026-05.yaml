@@ -1,0 +1,70 @@
+nodeKind: Claim
+id: claim:model-version-model-amazon-nova-2-sonic-current-providermodelids
+attributes:
+  subjectId: model:amazon-nova-2-sonic@current
+  attribute: providerModelIds
+  value: amazon.nova-2-sonic-v1:0
+  subjectKind: ModelVersion
+  statement: model:amazon-nova-2-sonic@current providerModelIds include amazon.nova-2-sonic-v1:0.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-2-sonic-model-card
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-2-sonic-model-card
+  about_subject:
+    - model:amazon-nova-2-sonic@current
+---
+nodeKind: Claim
+id: claim:model-version-model-amazon-nova-2-sonic-current-modalities
+attributes:
+  subjectId: model:amazon-nova-2-sonic@current
+  attribute: modalities
+  value: audio, text
+  subjectKind: ModelVersion
+  statement: model:amazon-nova-2-sonic@current is modeled for bidirectional audio conversation with text event support.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-2-sonic-model-card
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-2-sonic-model-card
+  about_subject:
+    - model:amazon-nova-2-sonic@current
+---
+nodeKind: Claim
+id: claim:model-version-model-amazon-nova-2-sonic-current-speaks
+attributes:
+  subjectId: model:amazon-nova-2-sonic@current
+  attribute: speaks
+  value: model-transport:bedrock-bidirectional-stream
+  subjectKind: ModelVersion
+  statement: model:amazon-nova-2-sonic@current speaks the Bedrock bidirectional streaming runtime protocol.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-2-sonic-model-card
+    - evidence:bedrock-bidirectional-stream-api
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-2-sonic-model-card
+    - evidence:bedrock-bidirectional-stream-api
+  about_subject:
+    - model:amazon-nova-2-sonic@current

@@ -12,6 +12,7 @@ import { createSyncController } from './external/sync-controller.js';
 import { createWebhookController } from './external/webhook-controller.js';
 import { createWriteController } from './external/write-controller.js';
 import { createConflictController } from './external/conflict-controller.js';
+import { createModelRouteController } from './model-route-controller.js';
 
 export const KRATE_API_CONTROLLER_BOUNDARY = {
   role: 'krate-api-controller',
@@ -293,6 +294,30 @@ export function createKrateApiController(options = {}) {
         namespace: input.namespace || namespace,
         organizationRef: input.organizationRef || 'default'
       });
+    },
+
+    // ---------------------------------------------------------------------------
+    // Model Route catalog
+    // ---------------------------------------------------------------------------
+
+    /**
+     * List the unified model catalog for an organization by resolving all
+     * KrateModelRoute resources through the model-route-controller.
+     *
+     * @param {string} org - organization slug
+     * @returns {Promise<Array<{ name: string, provider: string, type: string, status: string, endpoint: string, protocol: string }>>}
+     */
+    async listModelCatalog(org) {
+      const slug = normalizeOrgSlug(org);
+      const orgNs = orgNamespaceName(slug);
+      const result = await resourceGateway.list('KrateModelRoute');
+      const routes = normalizeResourceList(result).filter(
+        (item) => item.metadata?.namespace === orgNs
+      );
+      const snapshot = await resourceGateway.snapshot();
+      const allResources = normalizeResourceList(snapshot?.resources || snapshot?.items || snapshot || []);
+      const routeController = createModelRouteController();
+      return routeController.listModelCatalog(routes, allResources);
     },
 
     // ---------------------------------------------------------------------------

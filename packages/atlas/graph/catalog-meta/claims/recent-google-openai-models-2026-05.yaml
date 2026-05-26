@@ -65,6 +65,50 @@ edges:
     - evidence:openai-api-pricing-2026-05
 ---
 nodeKind: Claim
+id: claim:recent-model-gpt-5.5-pro-exists
+attributes:
+  subjectKind: "ModelVersion"
+  statement: "OpenAI lists GPT-5.5 pro as an API model with published context, pricing, endpoint, and capability metadata."
+  confidence: "high"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "strong"
+  status: "open"
+  subjectId: model:gpt-5.5-pro@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  evidenceSourceIds:
+    - evidence:openai-gpt-5-5-pro-model-doc-2026-05
+  claimedAt: "2026-05-26T19:30:00Z"
+  claimedBy: a5c-ai-catalog
+edges:
+  about_subject:
+    - model:gpt-5.5-pro@current
+  backed_by_evidence:
+    - evidence:openai-gpt-5-5-pro-model-doc-2026-05
+---
+nodeKind: Claim
+id: claim:recent-model-gpt-5.4-nano-exists
+attributes:
+  subjectKind: "ModelVersion"
+  statement: "OpenAI lists GPT-5.4 nano as an API model with published context, pricing, endpoint, and capability metadata."
+  confidence: "high"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "strong"
+  status: "open"
+  subjectId: model:gpt-5.4-nano@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  evidenceSourceIds:
+    - evidence:openai-gpt-5-4-nano-model-doc-2026-05
+  claimedAt: "2026-05-26T19:30:00Z"
+  claimedBy: a5c-ai-catalog
+edges:
+  about_subject:
+    - model:gpt-5.4-nano@current
+  backed_by_evidence:
+    - evidence:openai-gpt-5-4-nano-model-doc-2026-05
+---
+nodeKind: Claim
 id: claim:recent-model-gemini-3-pro-exists
 attributes:
   subjectKind: "ModelVersion"

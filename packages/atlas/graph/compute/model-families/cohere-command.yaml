@@ -8,4 +8,5 @@ edges:
   realizes:
     - target: layer:1-model
   has_version:
+    - model:command-a-plus-05-2026@current
     - model:command-r-plus@current

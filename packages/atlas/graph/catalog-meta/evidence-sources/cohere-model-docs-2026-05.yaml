@@ -1,0 +1,95 @@
+---
+nodeKind: EvidenceSource
+id: evidence:cohere-command-a-plus-doc
+attributes:
+  displayName: "Cohere docs - Command A+"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.cohere.com/docs/command-a-plus
+  sourcePathOrUrl: https://docs.cohere.com/docs/command-a-plus
+  locator: "Command A+ model documentation"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:cohere-command-a-plus-hf-model-card
+attributes:
+  displayName: "Hugging Face - CohereLabs/command-a-plus-05-2026-bf16"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/CohereLabs/command-a-plus-05-2026-bf16
+  sourcePathOrUrl: https://huggingface.co/CohereLabs/command-a-plus-05-2026-bf16
+  locator: "model card"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:cohere-embed-v4-doc
+attributes:
+  displayName: "Cohere docs - Embed v4.0"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.cohere.com/docs/cohere-embed
+  sourcePathOrUrl: https://docs.cohere.com/docs/cohere-embed
+  locator: "Cohere Embed API and model documentation"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:aws-bedrock-cohere-embed-v4-doc
+attributes:
+  displayName: "AWS Bedrock docs - Cohere Embed v4"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-embed-v4.html
+  sourcePathOrUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-embed-v4.html
+  locator: "model parameters page"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:oracle-cohere-embed-4-doc
+attributes:
+  displayName: "Oracle Cloud docs - Cohere Embed 4"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.oracle.com/en-us/iaas/Content/generative-ai/cohere-embed-4.htm
+  sourcePathOrUrl: https://docs.oracle.com/en-us/iaas/Content/generative-ai/cohere-embed-4.htm
+  locator: "Cohere Embed 4 model documentation"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
