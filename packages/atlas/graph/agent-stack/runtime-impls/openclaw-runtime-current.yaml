@@ -2,7 +2,7 @@ nodeKind: AgentRuntimeImpl
 id: agent-runtime-impl:openclaw.runtime@current
 attributes:
   displayName: OpenClaw Runtime (current)
-  agentVersionId: agentVersion:openclaw:ge-2026-5-20
+  agentVersionId: agentVersion:openclaw:ge-2026-5-22
   subagentDispatchMechanism: none
   packageRef: source-ref:openclaw-github
   builtInTools:
@@ -18,6 +18,11 @@ attributes:
   approvalGatingPrimitive: per-call
   subprocessSandboxStrategy: none
   runtimeIdentity: api-key
+  startupReadinessNotes: >
+    OpenClaw 2026.5.22 Gateway readiness caches channel catalog and plugin
+    metadata snapshots, lazy-loads startup-idle plugin work, core gateway method
+    handlers, and the embedded ACPX runtime, and avoids repeated filesystem
+    probes on startup hot paths.
   supportedMCPTransports:
   - mcp-transport:stdio
   supportsStreaming: true

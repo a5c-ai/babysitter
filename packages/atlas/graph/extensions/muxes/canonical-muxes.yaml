@@ -87,7 +87,7 @@ edges:
     - target: agentVersion:copilot:ge-1-0-51
     - target: agentVersion:pi:ge-0-75-4
     - target: agentVersion:omp:ge-15-2-4
-    - target: agentVersion:openclaw:ge-2026-5-20
+    - target: agentVersion:openclaw:ge-2026-5-22
     - target: agent-version:hermes@current
     - target: agent-version:qwen@current
     - target: agent-version:droid@current
@@ -142,7 +142,7 @@ edges:
     - target: agentVersion:copilot:ge-1-0-51
     - target: agentVersion:pi:ge-0-75-4
     - target: agentVersion:omp:ge-15-2-4
-    - target: agentVersion:openclaw:ge-2026-5-20
+    - target: agentVersion:openclaw:ge-2026-5-22
     - target: agent-version:hermes@current
 ---
 nodeKind: Mux
@@ -266,7 +266,7 @@ edges:
     - target: agentVersion:copilot:ge-1-0-51
     - target: agentVersion:pi:ge-0-75-4
     - target: agentVersion:omp:ge-15-2-4
-    - target: agentVersion:openclaw:ge-2026-5-20
+    - target: agentVersion:openclaw:ge-2026-5-22
     - target: agent-version:hermes@current
 ---
 nodeKind: Mux

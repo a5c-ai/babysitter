@@ -2,7 +2,7 @@ nodeKind: AgentUIImpl
 id: agent-ui-impl:openclaw.ui@current
 attributes:
   displayName: "OpenClaw UI (current) — tui-only"
-  agentVersionId: agentVersion:openclaw:ge-2026-5-20
+  agentVersionId: agentVersion:openclaw:ge-2026-5-22
   packageRef: source-ref:openclaw-github
   uiKind: tui-only
   presentationsBundled:

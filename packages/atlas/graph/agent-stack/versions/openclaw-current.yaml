@@ -20,10 +20,34 @@ attributes:
     - install:npm
   minSchemaVersion: "6.0.0"
   adapterMetadata:
+    releaseNotes:
+      version: "2026.5.22"
+      gatewayStartup: >
+        Gateway ready signals no longer wait on unused handler trees or ACPX
+        probes. Startup hot paths reuse channel catalog reads, immutable plugin
+        metadata snapshots, plugin SDK alias maps, and skip irrelevant
+        filesystem probes.
+      pluginSdk:
+        - "Generic channel-message poll sender for channel plugins."
+        - "Row-level session workflow helpers; loadSessionStore deprecated."
+        - "Embedding provider capability contract and registration API."
+      meetingNotes:
+        sourceProviderContract: true
+        cliAccess: "read-only openclaw meeting-notes"
+        importModes:
+          - manual-transcript
+        autoStartCaptureConfig: true
+        liveSources:
+          - discord-voice
+      providerAuth:
+        xaiGrokWebSearch: >
+          Grok web_search reuses xAI OAuth auth profiles and threads the active
+          agent auth profile through web search.
+        mediaProviderTimeouts: true
     authMethods:
       - type: api_key
         name: "Provider API Key"
-        envVars: [ANTHROPIC_API_KEY, OPENAI_API_KEY]
+        envVars: [ANTHROPIC_API_KEY, OPENAI_API_KEY, XAI_API_KEY]
     authFiles:
       - "~/.openclaw/config.json"
     hostEnvSignals:
@@ -67,6 +91,8 @@ attributes:
       supportedPlatforms: [darwin, linux, win32]
       requiresGitRepo: false
       requiresPty: false
+      supportsChannelMessagePollSender: true
+      supportsMeetingNotesSourceProviders: true
     runtimeHooks:
       preToolUse: nonblocking
       postToolUse: nonblocking
@@ -78,6 +104,7 @@ attributes:
       configFormat: json
       configFilePaths:
         - "~/.openclaw/config.json"
+      bareCliBehavior: "classic onboarding before authored config exists"
     displayName: "OpenClaw"
     defaultModelId: "default"
   hookSupport:

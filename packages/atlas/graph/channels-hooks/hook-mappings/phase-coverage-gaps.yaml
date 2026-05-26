@@ -554,7 +554,7 @@ id: hook-mapping:plugin-session-start-openclaw
 attributes:
   mappingId: hook-mapping:plugin-session-start-openclaw
   hookId: hook-surface:session-start
-  targetId: agentVersion:openclaw:ge-2026-5-20
+  targetId: agentVersion:openclaw:ge-2026-5-22
   nativeName: plugin.session.start
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -575,7 +575,7 @@ id: hook-mapping:plugin-session-end-openclaw
 attributes:
   mappingId: hook-mapping:plugin-session-end-openclaw
   hookId: hook-surface:session-end
-  targetId: agentVersion:openclaw:ge-2026-5-20
+  targetId: agentVersion:openclaw:ge-2026-5-22
   nativeName: plugin.session.end
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -596,7 +596,7 @@ id: hook-mapping:plugin-tool-before-openclaw
 attributes:
   mappingId: hook-mapping:plugin-tool-before-openclaw
   hookId: hook-surface:pre-tool-use
-  targetId: agentVersion:openclaw:ge-2026-5-20
+  targetId: agentVersion:openclaw:ge-2026-5-22
   nativeName: plugin.tool.before
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -617,7 +617,7 @@ id: hook-mapping:plugin-tool-after-openclaw
 attributes:
   mappingId: hook-mapping:plugin-tool-after-openclaw
   hookId: hook-surface:post-tool-use
-  targetId: agentVersion:openclaw:ge-2026-5-20
+  targetId: agentVersion:openclaw:ge-2026-5-22
   nativeName: plugin.tool.after
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -638,7 +638,7 @@ id: hook-mapping:plugin-turn-stop-openclaw
 attributes:
   mappingId: hook-mapping:plugin-turn-stop-openclaw
   hookId: hook-surface:stop
-  targetId: agentVersion:openclaw:ge-2026-5-20
+  targetId: agentVersion:openclaw:ge-2026-5-22
   nativeName: plugin.turn.stop
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -659,7 +659,7 @@ id: hook-mapping:plugin-prompt-submitted-openclaw
 attributes:
   mappingId: hook-mapping:plugin-prompt-submitted-openclaw
   hookId: hook-surface:user-prompt-submit
-  targetId: agentVersion:openclaw:ge-2026-5-20
+  targetId: agentVersion:openclaw:ge-2026-5-22
   nativeName: plugin.prompt.submitted
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -681,7 +681,7 @@ id: hook-mapping:gateway-request-received-openclaw
 attributes:
   mappingId: hook-mapping:gateway-request-received-openclaw
   hookId: hook-surface:session-start
-  targetId: agentVersion:openclaw:ge-2026-5-20
+  targetId: agentVersion:openclaw:ge-2026-5-22
   nativeName: gateway.request.received
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -702,7 +702,7 @@ id: hook-mapping:gateway-request-routed-openclaw
 attributes:
   mappingId: hook-mapping:gateway-request-routed-openclaw
   hookId: hook-surface:user-prompt-submit
-  targetId: agentVersion:openclaw:ge-2026-5-20
+  targetId: agentVersion:openclaw:ge-2026-5-22
   nativeName: gateway.request.routed
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -723,7 +723,7 @@ id: hook-mapping:gateway-request-completed-openclaw
 attributes:
   mappingId: hook-mapping:gateway-request-completed-openclaw
   hookId: hook-surface:session-end
-  targetId: agentVersion:openclaw:ge-2026-5-20
+  targetId: agentVersion:openclaw:ge-2026-5-22
   nativeName: gateway.request.completed
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -744,7 +744,7 @@ id: hook-mapping:gateway-auth-check-openclaw
 attributes:
   mappingId: hook-mapping:gateway-auth-check-openclaw
   hookId: hook-surface:tool-permission-request
-  targetId: agentVersion:openclaw:ge-2026-5-20
+  targetId: agentVersion:openclaw:ge-2026-5-22
   nativeName: gateway.auth.check
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false

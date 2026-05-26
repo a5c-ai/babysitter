@@ -78,6 +78,9 @@ attributes:
   envPersistenceMode: runtime_hook
   toolInterceptionScope: all
   launchBehavior:
+    notes: >
+      Bare `openclaw` starts classic onboarding before an authored config exists;
+      configured installs continue through the normal configured Gateway path.
     promptDelivery: stdin
     promptFlag: null
     execSubcommand: null

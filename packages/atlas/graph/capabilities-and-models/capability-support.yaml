@@ -1268,7 +1268,7 @@ attributes:
   capabilityId: "skills"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-20"
+  subjectId: "agentVersion:openclaw:ge-2026-5-22"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1277,7 +1277,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-20
+    - target: agentVersion:openclaw:ge-2026-5-22
   evidences_capability:
     - target: capability:skills
 ---
@@ -1288,7 +1288,7 @@ attributes:
   capabilityId: "thinking"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-20"
+  subjectId: "agentVersion:openclaw:ge-2026-5-22"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1297,7 +1297,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-20
+    - target: agentVersion:openclaw:ge-2026-5-22
   evidences_capability:
     - target: capability:supports-thinking
 ---
@@ -1308,7 +1308,7 @@ attributes:
   capabilityId: "interactive-mode"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-20"
+  subjectId: "agentVersion:openclaw:ge-2026-5-22"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1317,7 +1317,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-20
+    - target: agentVersion:openclaw:ge-2026-5-22
   evidences_capability:
     - target: capability:interactive-mode
 ---
@@ -1328,7 +1328,7 @@ attributes:
   capabilityId: "stdin-injection"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-20"
+  subjectId: "agentVersion:openclaw:ge-2026-5-22"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1337,7 +1337,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-20
+    - target: agentVersion:openclaw:ge-2026-5-22
   evidences_capability:
     - target: capability:stdin-injection
 ---
@@ -1348,7 +1348,7 @@ attributes:
   capabilityId: "image-input"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-20"
+  subjectId: "agentVersion:openclaw:ge-2026-5-22"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1357,7 +1357,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-20
+    - target: agentVersion:openclaw:ge-2026-5-22
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:openclaw:ge-0-0-0:session-resume
@@ -1366,7 +1366,7 @@ attributes:
   capabilityId: "session-resume"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-20"
+  subjectId: "agentVersion:openclaw:ge-2026-5-22"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1375,7 +1375,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-20
+    - target: agentVersion:openclaw:ge-2026-5-22
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:opencode:ge-0-0-0:skills

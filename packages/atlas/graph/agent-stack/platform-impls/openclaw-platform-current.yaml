@@ -2,7 +2,7 @@ nodeKind: AgentPlatformImpl
 id: agent-platform-impl:openclaw.platform@current
 attributes:
   displayName: OpenClaw Platform (current)
-  agentVersionId: agentVersion:openclaw:ge-2026-5-20
+  agentVersionId: agentVersion:openclaw:ge-2026-5-22
   subagentDefinitionFormat: none
   packageRef: source-ref:openclaw-github
   nativeExtensionFormat: openclaw-plugin

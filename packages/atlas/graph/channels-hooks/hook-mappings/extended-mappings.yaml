@@ -1097,7 +1097,7 @@ id: hook-mapping:openclaw-on-event-native
 attributes:
   mappingId: hook-mapping:openclaw-on-event-native
   hookId: hook-surface:openclaw.on-event
-  targetId: agentVersion:openclaw:ge-2026-5-20
+  targetId: agentVersion:openclaw:ge-2026-5-22
   nativeName: onEvent
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -1113,7 +1113,7 @@ edges:
   maps_hook:
     - target: hook-surface:openclaw.on-event
   emits_hook:
-    - target: agentVersion:openclaw:ge-2026-5-20
+    - target: agentVersion:openclaw:ge-2026-5-22
 ---
 # ── BeforePromptBuild canonical hook ──
 nodeKind: HookMapping
