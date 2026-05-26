@@ -575,7 +575,7 @@ edges:
   integrates_with:
     - target: agentVersion:cursor:ge-0-0-0
     - target: agentVersion:claude:ge-0-0-0
-    - target: agentVersion:copilot:ge-1-0-51
+    - target: agentVersion:copilot:ge-1-0-54
     - target: agent-version:windsurf@current
     - target: agent-version:cline@current
     - target: agent-version:roo-code@current

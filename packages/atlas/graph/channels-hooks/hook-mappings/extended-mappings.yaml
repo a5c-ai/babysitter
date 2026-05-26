@@ -7,7 +7,7 @@ id: hook-mapping:copilot-pre-tool-native
 attributes:
   mappingId: hook-mapping:copilot-pre-tool-native
   hookId: hook-surface:copilot.pre-tool
-  targetId: agentVersion:copilot:ge-1-0-51
+  targetId: agentVersion:copilot:ge-1-0-54
   nativeName: pre_tool
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -23,14 +23,14 @@ edges:
   maps_hook:
     - target: hook-surface:copilot.pre-tool
   emits_hook:
-    - target: agentVersion:copilot:ge-1-0-51
+    - target: agentVersion:copilot:ge-1-0-54
 ---
 nodeKind: HookMapping
 id: hook-mapping:copilot-post-tool-native
 attributes:
   mappingId: hook-mapping:copilot-post-tool-native
   hookId: hook-surface:copilot.post-tool
-  targetId: agentVersion:copilot:ge-1-0-51
+  targetId: agentVersion:copilot:ge-1-0-54
   nativeName: post_tool
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -46,7 +46,7 @@ edges:
   maps_hook:
     - target: hook-surface:copilot.post-tool
   emits_hook:
-    - target: agentVersion:copilot:ge-1-0-51
+    - target: agentVersion:copilot:ge-1-0-54
 ---
 # ── OpenCode native hooks ──
 nodeKind: HookMapping

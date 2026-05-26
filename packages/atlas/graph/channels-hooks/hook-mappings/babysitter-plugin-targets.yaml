@@ -68,7 +68,7 @@ id: hook-mapping:session-start-github-copilot
 attributes:
   mappingId: hook-mapping:session-start-github-copilot
   hookId: hook-surface:session-start
-  targetId: agentVersion:copilot:ge-1-0-51
+  targetId: agentVersion:copilot:ge-1-0-54
   nativeName: sessionStart
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -173,7 +173,7 @@ id: hook-mapping:user-prompt-submit-github-copilot
 attributes:
   mappingId: hook-mapping:user-prompt-submit-github-copilot
   hookId: hook-surface:user-prompt-submit
-  targetId: agentVersion:copilot:ge-1-0-51
+  targetId: agentVersion:copilot:ge-1-0-54
   nativeName: userPromptSubmitted
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -257,7 +257,7 @@ id: hook-mapping:session-end-github-copilot
 attributes:
   mappingId: hook-mapping:session-end-github-copilot
   hookId: hook-surface:session-end
-  targetId: agentVersion:copilot:ge-1-0-51
+  targetId: agentVersion:copilot:ge-1-0-54
   nativeName: sessionEnd
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true

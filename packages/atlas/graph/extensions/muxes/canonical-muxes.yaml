@@ -84,7 +84,7 @@ edges:
     - target: agentVersion:cursor:ge-0-0-0
     - target: agentVersion:gemini:ge-0-0-0
     - target: agentVersion:opencode:ge-0-0-0
-    - target: agentVersion:copilot:ge-1-0-51
+    - target: agentVersion:copilot:ge-1-0-54
     - target: agentVersion:pi:ge-0-75-4
     - target: agentVersion:omp:ge-15-2-4
     - target: agentVersion:openclaw:ge-2026-5-20
@@ -139,7 +139,7 @@ edges:
     - target: agentVersion:cursor:ge-0-0-0
     - target: agentVersion:gemini:ge-0-0-0
     - target: agentVersion:opencode:ge-0-0-0
-    - target: agentVersion:copilot:ge-1-0-51
+    - target: agentVersion:copilot:ge-1-0-54
     - target: agentVersion:pi:ge-0-75-4
     - target: agentVersion:omp:ge-15-2-4
     - target: agentVersion:openclaw:ge-2026-5-20
@@ -219,7 +219,7 @@ edges:
     - target: agentVersion:cursor:ge-0-0-0
     - target: agentVersion:gemini:ge-0-0-0
     - target: agentVersion:opencode:ge-0-0-0
-    - target: agentVersion:copilot:ge-1-0-51
+    - target: agentVersion:copilot:ge-1-0-54
 ---
 nodeKind: Mux
 id: mux:hooks-mux
@@ -263,7 +263,7 @@ edges:
     - target: agentVersion:cursor:ge-0-0-0
     - target: agentVersion:gemini:ge-0-0-0
     - target: agentVersion:opencode:ge-0-0-0
-    - target: agentVersion:copilot:ge-1-0-51
+    - target: agentVersion:copilot:ge-1-0-54
     - target: agentVersion:pi:ge-0-75-4
     - target: agentVersion:omp:ge-15-2-4
     - target: agentVersion:openclaw:ge-2026-5-20

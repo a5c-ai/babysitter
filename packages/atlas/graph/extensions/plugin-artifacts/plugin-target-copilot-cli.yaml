@@ -34,6 +34,11 @@ attributes:
       - hooks.json
       - AGENTS.md
     emitCjsWrappers: false
+    customAgentFrontmatter:
+      deferred-tool-loading:
+        support: native
+        versionRange: ">=1.0.52"
+        notes: "Custom agents can opt into deferred tool loading through `deferred-tool-loading` frontmatter, enabling tool-search discovery for large tool lists."
   componentSupport:
     agents: native
     context: native
@@ -82,6 +87,13 @@ attributes:
   supportsPersistedEnv: false
   envPersistenceMode: wrapper_only
   toolInterceptionScope: all
+  description: |
+    GitHub Copilot CLI plugin target for the current `>=1.0.54` surface.
+    Since 1.0.52, non-interactive `plugin`, `mcp`, `help`, and `version`
+    subcommands are treated as stdin-safe administrative commands and do not
+    consume caller stdin. Generated wrappers should preserve closed-stdin
+    prompt delivery for headless prompt runs while avoiding stdin piping for
+    those administrative subcommands.
   launchBehavior:
     promptDelivery: stdin
     promptFlag: null
@@ -93,6 +105,11 @@ attributes:
     stdinBehavior: close-after-prompt
     selfExits: false
     needsIdleKill: true
+    stdinSafeNonInteractiveSubcommands:
+      - plugin
+      - mcp
+      - help
+      - version
 
 edges:
   hosted_by:

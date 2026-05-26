@@ -257,7 +257,7 @@ id: hook-mapping:tool-before-copilot
 attributes:
   mappingId: hook-mapping:tool-before-copilot
   hookId: hook-surface:pre-tool-use
-  targetId: agentVersion:copilot:ge-1-0-51
+  targetId: agentVersion:copilot:ge-1-0-54
   nativeName: preToolUse
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -278,7 +278,7 @@ id: hook-mapping:tool-after-copilot
 attributes:
   mappingId: hook-mapping:tool-after-copilot
   hookId: hook-surface:post-tool-use
-  targetId: agentVersion:copilot:ge-1-0-51
+  targetId: agentVersion:copilot:ge-1-0-54
   nativeName: postToolUse
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -299,7 +299,7 @@ id: hook-mapping:compact-before-copilot
 attributes:
   mappingId: hook-mapping:compact-before-copilot
   hookId: hook-surface:pre-compact
-  targetId: agentVersion:copilot:ge-1-0-51
+  targetId: agentVersion:copilot:ge-1-0-54
   nativeName: PreCompact
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -426,7 +426,7 @@ id: hook-mapping:error-copilot
 attributes:
   mappingId: hook-mapping:error-copilot
   hookId: hook-surface:error
-  targetId: agentVersion:copilot:ge-1-0-51
+  targetId: agentVersion:copilot:ge-1-0-54
   nativeName: errorOccurred
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false

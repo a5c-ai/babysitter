@@ -2,7 +2,7 @@ nodeKind: AgentUIImpl
 id: agent-ui-impl:copilot-cli.ui@current
 attributes:
   displayName: "GitHub Copilot CLI UI (current) — cli-only"
-  agentVersionId: agentVersion:copilot:ge-1-0-51
+  agentVersionId: agentVersion:copilot:ge-1-0-54
   packageRef: source-ref:gh-copilot-github
   uiKind: cli-only
   presentationsBundled:

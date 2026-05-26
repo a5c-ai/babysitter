@@ -21,6 +21,16 @@ attributes:
   installMethods:
     - install:gh-extension
   minSchemaVersion: "6.0.0"
+  notes: |
+    Assimilated through GitHub Copilot CLI 1.0.54. The 1.0.52-1.0.54
+    release window keeps the install surface unchanged (`gh extension
+    install github/gh-copilot` / `@github/copilot`) while adding
+    stdin-safe non-interactive plugin/mcp/help/version subcommands,
+    saved-cwd resume semantics with `-C <dir>` override, MCP OAuth config
+    migration from `oauth.clientId` / `oauth.callbackPort` to
+    `oauthClientId` / `auth.redirectPort`, custom-agent
+    `deferred-tool-loading` frontmatter, and enforced context-window tiers
+    for compaction, truncation, and token display.
   adapterMetadata:
     installCommands:
       - type: gh-extension
@@ -83,6 +93,14 @@ attributes:
       configFormat: json
       configFilePaths:
         - "~/.config/github-copilot/settings.json"
+      migrations:
+        - from: "oauth.clientId"
+          to: "oauthClientId"
+          versionRange: ">=1.0.52"
+        - from: "oauth.callbackPort"
+          to: "auth.redirectPort"
+          versionRange: ">=1.0.52"
+      oauthRedirectPortKey: "auth.redirectPort"
     displayName: "GitHub Copilot"
     defaultModelId: "gpt-4o"
   hookSupport:

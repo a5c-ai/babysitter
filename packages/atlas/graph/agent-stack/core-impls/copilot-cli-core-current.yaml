@@ -2,7 +2,7 @@ nodeKind: AgentCoreImpl
 id: agent-core-impl:copilot-cli.core@current
 attributes:
   displayName: GitHub Copilot CLI Core (current)
-  agentVersionId: agentVersion:copilot:ge-1-0-51
+  agentVersionId: agentVersion:copilot:ge-1-0-54
   packageRef: source-ref:gh-copilot-github
   loopIteratorPolicy: server-managed
   loopIteratorNotes: 'The Copilot CLI does not run a local tool-use loop. It opens
@@ -14,17 +14,20 @@ attributes:
 
     '
   contextManagementStrategy: server-managed
-  compactionTriggerNotes: 'Context-management is fully server-side and not exposed
-    to the CLI.
-
-    '
+  compactionTriggerNotes: |
+    Context-management is server-managed. As of Copilot CLI 1.0.52 in the
+    current `>=1.0.54` surface, the selected context-window tier is enforced
+    end-to-end: the default ~200K-token tier and 1M-token tier constrain
+    compaction, truncation, and token display consistently. `/compact`
+    accepts optional focus instructions that shape the resulting compaction
+    summary.
   subagentInvokerPolicy: not-applicable
-  subagentInvokerNotes: 'Copilot CLI does not expose a subagent primitive; the server
-    may internally
-
-    decompose tasks but the protocol remains a single chat session.
-
-    '
+  subagentInvokerNotes: |
+    Copilot CLI does not expose a subagent primitive; the server may
+    internally decompose tasks but the protocol remains a single chat
+    session. Custom agents can opt into `deferred-tool-loading` frontmatter
+    in the `>=1.0.54` surface so large tool lists are discovered lazily
+    through tool-search rather than eagerly loaded into the context window.
   resultSynthesisPolicy: server-managed
   resultSynthesisNotes: 'Server emits the final answer as a streamed text response;
     the CLI prints it

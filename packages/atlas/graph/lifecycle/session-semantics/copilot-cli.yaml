@@ -3,20 +3,28 @@ id: session-semantics:copilot-cli
 attributes:
   sessionSemanticsId: session-semantics:copilot-cli
   agentId: agent:copilot-cli
-  versionRange: ">=0.0.0"
+  versionRange: ">=1.0.54"
   sessionDirStrategy: ".a5c/runs"
   sessionIdSources:
     - COPILOT_SESSION_ID
     - COPILOT_CLI_SESSION
     - GH_COPILOT_SESSION
-  resumeSemantics: Copilot surfaces session IDs from CLI and GitHub session variables.
+  resumeSemantics: |
+    Copilot surfaces session IDs from CLI and GitHub session variables. In
+    the `>=1.0.54` surface, sessions resume from their saved working
+    directory by default; callers can pass `-C <dir>` to override the
+    resume cwd. Relative `--attachment` and `--log-dir` values resolve from
+    the saved cwd when resuming.
   stateFilePatterns:
     - ".a5c/runs/**"
   pidMarkerPolicy: env-or-run-dir
   metadataFields:
     - { key: session_id, envVars: [COPILOT_CLI_SESSION, GH_COPILOT_SESSION] }
+    - { key: saved_cwd, source: session-file, versionRange: ">=1.0.54" }
+    - { key: resume_cwd_override, flag: "-C", versionRange: ">=1.0.54" }
+    - { key: relative_path_base, appliesToFlags: ["--attachment", "--log-dir"], source: saved_cwd, versionRange: ">=1.0.54" }
 edges:
   applies_to_version:
-    - target: agentVersion:copilot:ge-1-0-51
+    - target: agentVersion:copilot:ge-1-0-54
   references_path:
     - target: path:a5c-runs-dir
