@@ -1073,7 +1073,7 @@ id: hook-mapping:omp-on-event-native
 attributes:
   mappingId: hook-mapping:omp-on-event-native
   hookId: hook-surface:omp.on-event
-  targetId: agentVersion:omp:ge-15-2-4
+  targetId: agentVersion:omp:ge-15-3-1
   nativeName: onEvent
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -1089,7 +1089,7 @@ edges:
   maps_hook:
     - target: hook-surface:omp.on-event
   emits_hook:
-    - target: agentVersion:omp:ge-15-2-4
+    - target: agentVersion:omp:ge-15-3-1
 ---
 # ── OpenClaw onEvent hook ──
 nodeKind: HookMapping

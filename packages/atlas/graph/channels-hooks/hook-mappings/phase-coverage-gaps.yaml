@@ -469,7 +469,7 @@ id: hook-mapping:session-end-oh-my-pi
 attributes:
   mappingId: hook-mapping:session-end-oh-my-pi
   hookId: hook-surface:session-end
-  targetId: agentVersion:omp:ge-15-2-4
+  targetId: agentVersion:omp:ge-15-3-1
   nativeName: session_end
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -490,7 +490,7 @@ id: hook-mapping:tool-result-oh-my-pi
 attributes:
   mappingId: hook-mapping:tool-result-oh-my-pi
   hookId: hook-surface:post-tool-use
-  targetId: agentVersion:omp:ge-15-2-4
+  targetId: agentVersion:omp:ge-15-3-1
   nativeName: tool_result
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -511,7 +511,7 @@ id: hook-mapping:prompt-oh-my-pi
 attributes:
   mappingId: hook-mapping:prompt-oh-my-pi
   hookId: hook-surface:user-prompt-submit
-  targetId: agentVersion:omp:ge-15-2-4
+  targetId: agentVersion:omp:ge-15-3-1
   nativeName: prompt
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -532,7 +532,7 @@ id: hook-mapping:error-oh-my-pi
 attributes:
   mappingId: hook-mapping:error-oh-my-pi
   hookId: hook-surface:error
-  targetId: agentVersion:omp:ge-15-2-4
+  targetId: agentVersion:omp:ge-15-3-1
   nativeName: error
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false

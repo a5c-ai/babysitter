@@ -3,7 +3,7 @@ id: hook-mapping:post-tool-use-omp
 attributes:
   mappingId: hook-mapping:post-tool-use-omp
   hookId: hook-surface:post-tool-use
-  targetId: agentVersion:omp:ge-15-2-4
+  targetId: agentVersion:omp:ge-15-3-1
   nativeName: onEvent
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -19,4 +19,4 @@ edges:
   maps_hook:
     - target: hook-surface:post-tool-use
   emits_hook:
-    - target: agentVersion:omp:ge-15-2-4
+    - target: agentVersion:omp:ge-15-3-1

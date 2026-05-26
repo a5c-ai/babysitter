@@ -404,7 +404,7 @@ id: hook-mapping:user-prompt-submit-oh-my-pi
 attributes:
   mappingId: hook-mapping:user-prompt-submit-oh-my-pi
   hookId: hook-surface:user-prompt-submit
-  targetId: agentVersion:omp:ge-15-2-4
+  targetId: agentVersion:omp:ge-15-3-1
   nativeName: context
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -425,7 +425,7 @@ id: hook-mapping:pre-tool-use-oh-my-pi
 attributes:
   mappingId: hook-mapping:pre-tool-use-oh-my-pi
   hookId: hook-surface:pre-tool-use
-  targetId: agentVersion:omp:ge-15-2-4
+  targetId: agentVersion:omp:ge-15-3-1
   nativeName: tool_call
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -446,7 +446,7 @@ id: hook-mapping:before-provider-request-oh-my-pi
 attributes:
   mappingId: hook-mapping:before-provider-request-oh-my-pi
   hookId: hook-surface:before-provider-request
-  targetId: agentVersion:omp:ge-15-2-4
+  targetId: agentVersion:omp:ge-15-3-1
   nativeName: before_provider_request
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -467,7 +467,7 @@ id: hook-mapping:session-start-oh-my-pi
 attributes:
   mappingId: hook-mapping:session-start-oh-my-pi
   hookId: hook-surface:session-start
-  targetId: agentVersion:omp:ge-15-2-4
+  targetId: agentVersion:omp:ge-15-3-1
   nativeName: session_start
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -488,7 +488,7 @@ id: hook-mapping:stop-oh-my-pi
 attributes:
   mappingId: hook-mapping:stop-oh-my-pi
   hookId: hook-surface:stop
-  targetId: agentVersion:omp:ge-15-2-4
+  targetId: agentVersion:omp:ge-15-3-1
   nativeName: stop
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true

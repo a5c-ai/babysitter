@@ -44,7 +44,7 @@ aliases:
   - { legacyId: "agent-version:copilot-cli@current",        v6Id: "agentVersion:copilot:ge-1-0-54",                  nodeKind: AgentVersion }
   - { legacyId: "agent-version:cursor@current",             v6Id: "agentVersion:cursor:ge-0-0-0",                    nodeKind: AgentVersion }
   - { legacyId: "agent-version:gemini-cli@current",         v6Id: "agentVersion:gemini:ge-0-0-0",                    nodeKind: AgentVersion }
-  - { legacyId: "agent-version:omp@current",                v6Id: "agentVersion:omp:ge-15-2-4",                      nodeKind: AgentVersion }
+  - { legacyId: "agent-version:omp@current",                v6Id: "agentVersion:omp:ge-15-3-1",                      nodeKind: AgentVersion }
   - { legacyId: "agent-version:openclaw@current",           v6Id: "agentVersion:openclaw:ge-2026-5-22",              nodeKind: AgentVersion }
   - { legacyId: "agent-version:opencode@1.x",               v6Id: "agentVersion:opencode:ge-0-0-0",                  nodeKind: AgentVersion }
   - { legacyId: "agent-version:pi@current",                 v6Id: "agentVersion:pi:ge-0-75-5",                       nodeKind: AgentVersion }

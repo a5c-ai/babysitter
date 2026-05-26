@@ -2,7 +2,7 @@ nodeKind: AgentPlatformImpl
 id: agent-platform-impl:omp.platform@current
 attributes:
   displayName: OMP Platform (current)
-  agentVersionId: agentVersion:omp:ge-15-2-4
+  agentVersionId: agentVersion:omp:ge-15-3-1
   subagentDefinitionFormat: none
   packageRef: source-ref:omp-github
   nativeExtensionFormat: omp-plugin

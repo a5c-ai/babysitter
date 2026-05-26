@@ -12,4 +12,4 @@ attributes:
   platformNuances: []
 edges:
   applies_to_version:
-    - target: agentVersion:omp:ge-15-2-4
+    - target: agentVersion:omp:ge-15-3-1
