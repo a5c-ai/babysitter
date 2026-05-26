@@ -3,7 +3,7 @@ id: hook-mapping:before-provider-request-pi
 attributes:
   mappingId: hook-mapping:before-provider-request-pi
   hookId: hook-surface:pi.on-event
-  targetId: agentVersion:pi:ge-0-75-4
+  targetId: agentVersion:pi:ge-0-75-5
   nativeName: beforeProviderRequest
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -17,7 +17,7 @@ edges:
   maps_hook:
     - target: hook-surface:pi.on-event
   emits_hook:
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
 ---
 nodeKind: HookMapping
 id: hook-mapping:after-agent-gemini

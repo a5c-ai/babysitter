@@ -1541,14 +1541,14 @@ attributes:
   capabilityId: "skills"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:pi:ge-0-75-4"
+  subjectId: "agentVersion:pi:ge-0-75-5"
   versionRange: ">=0.0.0"
   notes: "Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata."
   evidenceRefs:
     - "repo-sdk-fallback"
 edges:
   capability_of_version:
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
   evidences_capability:
     - target: capability:skills
 ---
@@ -1559,14 +1559,14 @@ attributes:
   capabilityId: "thinking"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:pi:ge-0-75-4"
+  subjectId: "agentVersion:pi:ge-0-75-5"
   versionRange: ">=0.0.0"
   notes: "Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata."
   evidenceRefs:
     - "repo-sdk-fallback"
 edges:
   capability_of_version:
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
   evidences_capability:
     - target: capability:supports-thinking
 ---
@@ -1577,14 +1577,14 @@ attributes:
   capabilityId: "interactive-mode"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:pi:ge-0-75-4"
+  subjectId: "agentVersion:pi:ge-0-75-5"
   versionRange: ">=0.0.0"
   notes: "Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata."
   evidenceRefs:
     - "repo-sdk-fallback"
 edges:
   capability_of_version:
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
   evidences_capability:
     - target: capability:interactive-mode
 ---
@@ -1595,14 +1595,14 @@ attributes:
   capabilityId: "stdin-injection"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:pi:ge-0-75-4"
+  subjectId: "agentVersion:pi:ge-0-75-5"
   versionRange: ">=0.0.0"
   notes: "Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata."
   evidenceRefs:
     - "repo-sdk-fallback"
 edges:
   capability_of_version:
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
   evidences_capability:
     - target: capability:stdin-injection
 ---
@@ -1613,14 +1613,14 @@ attributes:
   capabilityId: "image-input"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:pi:ge-0-75-4"
+  subjectId: "agentVersion:pi:ge-0-75-5"
   versionRange: ">=0.0.0"
   notes: "Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata."
   evidenceRefs:
     - "repo-sdk-fallback"
 edges:
   capability_of_version:
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:pi:ge-0-0-0:session-resume
@@ -1629,14 +1629,14 @@ attributes:
   capabilityId: "session-resume"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:pi:ge-0-75-4"
+  subjectId: "agentVersion:pi:ge-0-75-5"
   versionRange: ">=0.0.0"
   notes: "Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata."
   evidenceRefs:
     - "repo-sdk-fallback"
 edges:
   capability_of_version:
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:anthropic:streaming

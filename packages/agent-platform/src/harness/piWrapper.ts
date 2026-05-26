@@ -1,7 +1,7 @@
 /**
  * Pi programmatic API wrapper.
  *
- * Wraps `@mariozechner/pi-coding-agent`'s `createAgentSession()` to expose
+ * Wraps `@earendil-works/pi-coding-agent`'s `createAgentSession()` to expose
  * a persistent `AgentSession` through a babysitter-friendly interface.
  *
  * The session is lazily initialized on first use and reused across prompts.
@@ -62,7 +62,7 @@ function resolvePiAgentDir(agentDir?: string): string {
 /**
  * Handle for interacting with the Pi coding agent programmatically.
  *
- * Wraps `AgentSession` from `@mariozechner/pi-coding-agent`. The underlying
+ * Wraps `AgentSession` from `@earendil-works/pi-coding-agent`. The underlying
  * session is created lazily on first `prompt()` call and reused thereafter.
  */
 export class AgentCoreSessionHandle {

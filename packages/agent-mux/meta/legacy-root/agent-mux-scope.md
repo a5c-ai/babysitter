@@ -553,7 +553,7 @@ OpenCode
   brew (mac):  brew install opencode/tap/opencode
 
 Pi
-  npm (all):   npm install -g @mariozechner/pi-coding-agent
+  npm (all):   npm install -g @earendil-works/pi-coding-agent
 
 omp (oh-my-pi)
   npm (all):   npm install -g @oh-my-pi/pi-coding-agent

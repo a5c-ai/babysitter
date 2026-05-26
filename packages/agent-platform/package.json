@@ -120,7 +120,7 @@
     "@a5c-ai/agent-runtime": "5.0.0",
     "@a5c-ai/babysitter-sdk": "5.0.0",
     "@agentsh/secure-sandbox": "^0.1.7",
-    "@earendil-works/pi-coding-agent": "^0.74.0",
+    "@earendil-works/pi-coding-agent": "^0.75.5",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@sinclair/typebox": "^0.34.48",
     "ws": "^8.20.0",

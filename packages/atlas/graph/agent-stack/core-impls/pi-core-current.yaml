@@ -2,7 +2,7 @@ nodeKind: AgentCoreImpl
 id: agent-core-impl:pi.core@current
 attributes:
   displayName: Pi Core (current)
-  agentVersionId: agentVersion:pi:ge-0-75-4
+  agentVersionId: agentVersion:pi:ge-0-75-5
   packageRef: source-ref:pi-github
   loopIteratorPolicy: tool-use-loop
   loopIteratorNotes: 'Tool-use loop over Anthropic Messages or OpenAI Responses; tool

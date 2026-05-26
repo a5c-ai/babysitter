@@ -741,7 +741,7 @@ Model-dependent. Passed as provider-level parameter when model supports thinking
 
 | Platform | Type | Command |
 |---|---|---|
-| all | npm | `npm install -g @mariozechner/pi-coding-agent` |
+| all | npm | `npm install -g @earendil-works/pi-coding-agent` |
 
 ### 9.7 Auth Detection
 

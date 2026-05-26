@@ -143,7 +143,12 @@ describe("agent-core tools", () => {
     });
 
     expect(getText(readResult)).toBe("2\tsecond line");
+    expect(getText(readResult)).not.toContain("1\tfirst line");
     expect(getText(editResult)).toContain("File edited:");
+    expect(getText(editResult)).toContain("--- a/note.txt");
+    expect(getText(editResult)).toContain("+++ b/note.txt");
+    expect(getText(editResult)).toContain("-second line");
+    expect(getText(editResult)).toContain("+updated line");
     expect(readFileSync(filePath, "utf8")).toContain("updated line");
     expect(getText(failedEdit)).toBe("Error: old_string not found in note.txt. Ensure it matches exactly.");
     expect(onToolUse).toHaveBeenNthCalledWith(1, "read", { path: "note.txt", offset: 2, limit: 1 });

@@ -47,7 +47,7 @@ aliases:
   - { legacyId: "agent-version:omp@current",                v6Id: "agentVersion:omp:ge-15-2-4",                      nodeKind: AgentVersion }
   - { legacyId: "agent-version:openclaw@current",           v6Id: "agentVersion:openclaw:ge-2026-5-20",              nodeKind: AgentVersion }
   - { legacyId: "agent-version:opencode@1.x",               v6Id: "agentVersion:opencode:ge-0-0-0",                  nodeKind: AgentVersion }
-  - { legacyId: "agent-version:pi@current",                 v6Id: "agentVersion:pi:ge-0-75-4",                       nodeKind: AgentVersion }
+  - { legacyId: "agent-version:pi@current",                 v6Id: "agentVersion:pi:ge-0-75-5",                       nodeKind: AgentVersion }
 
   # ─────────────────────────────────────────────────────────────────
   # NodeKind: PluginTarget (mux generator critical)
@@ -304,4 +304,3 @@ aliases:
 #   `claim:`, `evidence:`, `capabilitySupport:`, `discovery:` — none are
 #   consumed by extension-mux / agent-comm-mux / hooks-mux-core codegen
 #   based on the projection-adapters.md audit.
-

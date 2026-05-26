@@ -73,7 +73,7 @@ export interface PiAgentSession {
   get messages(): unknown[];
 }
 
-const PI_MODULE_ID = "@mariozechner/pi-coding-agent";
+const PI_MODULE_ID = "@earendil-works/pi-coding-agent";
 
 const dynamicImportPi: (specifier: string) => Promise<unknown> = (() => {
   if (process.env.VITEST) {
@@ -90,7 +90,7 @@ export async function loadPiModule(): Promise<PiCodingAgentModule> {
   } catch {
     throw new BabysitterRuntimeError(
       "PiModuleNotFound",
-      "Cannot load @mariozechner/pi-coding-agent — is the package installed?",
+      "Cannot load @earendil-works/pi-coding-agent — is the package installed?",
       { category: ErrorCategory.Configuration },
     );
   }

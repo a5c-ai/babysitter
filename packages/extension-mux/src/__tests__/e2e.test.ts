@@ -258,7 +258,7 @@ describe('e2e: sample plugin compilation', () => {
       const ext = fs.readFileSync(
         path.join(result.outputDir, 'extensions/index.ts'), 'utf-8'
       );
-      expect(ext).toContain('@mariozechner/pi-coding-agent');
+      expect(ext).toContain('@earendil-works/pi-coding-agent');
       expect(ext).toContain('export default function activate(pi: ExtensionAPI): void');
       expect(ext).toContain('const forwardPrimary = async (args: unknown) => {');
       expect(ext).toContain('pi.sendUserMessage(toSkillPrompt("sample-plugin", String(args ?? "").trim()));');

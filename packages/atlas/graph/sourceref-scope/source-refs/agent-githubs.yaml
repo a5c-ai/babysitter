@@ -120,8 +120,8 @@ id: source-ref:pi-github
 attributes:
   description: "Pi agent (GitHub)"
   displayName: "Pi agent (GitHub)"
-  repoUrl: https://github.com/pi-labs/pi
-  ref: main
+  repoUrl: https://github.com/earendil-works/pi
+  ref: v0.75.5
   path: "."
   kind: github-repo
 edges: {}

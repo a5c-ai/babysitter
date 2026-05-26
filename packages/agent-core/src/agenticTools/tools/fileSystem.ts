@@ -6,6 +6,23 @@ import { DEFAULT_SEARCH_TIMEOUT, MAX_READ_LINES, getRgPath, spawnAsync } from ".
 import { errorResult, ok } from "../shared/results";
 import { globToRegex, resolveSafe, walkDir } from "../shared/paths";
 
+function escapePatchPath(value: string): string {
+  return value.replace(/\\/g, "/");
+}
+
+function buildUnifiedPatch(filePath: string, before: string, after: string): string {
+  const label = escapePatchPath(filePath);
+  const beforeLines = before.split("\n");
+  const afterLines = after.split("\n");
+  return [
+    `--- a/${label}`,
+    `+++ b/${label}`,
+    `@@ -1,${beforeLines.length} +1,${afterLines.length} @@`,
+    ...beforeLines.map((line) => `-${line}`),
+    ...afterLines.map((line) => `+${line}`),
+  ].join("\n");
+}
+
 export function createFileSystemTools(options: AgenticToolOptions): CustomToolDefinition[] {
   const { workspace } = options;
 
@@ -68,7 +85,8 @@ export function createFileSystemTools(options: AgenticToolOptions): CustomToolDe
           ? content.split(oldString).join(newString)
           : content.replace(oldString, newString);
         fs.writeFileSync(filePath, updated, "utf8");
-        return ok(`File edited: ${filePath}`);
+        const relativePath = path.relative(workspace, filePath) || String(params.path);
+        return ok(`File edited: ${filePath}\nUnified patch:\n${buildUnifiedPatch(relativePath, content, updated)}`);
       },
     },
     {

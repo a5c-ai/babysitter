@@ -2,7 +2,7 @@ nodeKind: AgentRuntimeImpl
 id: agent-runtime-impl:pi.runtime@current
 attributes:
   displayName: Pi Runtime (current)
-  agentVersionId: agentVersion:pi:ge-0-75-4
+  agentVersionId: agentVersion:pi:ge-0-75-5
   subagentDispatchMechanism: none
   packageRef: source-ref:pi-github
   builtInTools:

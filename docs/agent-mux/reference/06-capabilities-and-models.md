@@ -635,7 +635,7 @@ Prerequisite check: `gh --version`
 
 | Platform | Type | Command |
 |---|---|---|
-| all | npm | `npm install -g @mariozechner/pi-coding-agent` |
+| all | npm | `npm install -g @earendil-works/pi-coding-agent` |
 
 ### 7.8 omp (oh-my-pi)
 

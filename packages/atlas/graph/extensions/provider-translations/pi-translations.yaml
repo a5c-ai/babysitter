@@ -62,6 +62,39 @@ edges:
     - target: provider:anthropic
 ---
 nodeKind: ProviderTranslation
+id: provider-translation:pi:custom-anthropic-compatible
+attributes:
+  harness: pi
+  provider: _group
+  providerGroup:
+    - custom-anthropic
+    - anthropic-compatible
+  proxyRequired: false
+  envMapping:
+    - envVar: ANTHROPIC_API_KEY
+      source: auth.apiKey
+      condition: present
+  args:
+    - "--provider"
+    - "anthropic"
+  compat:
+    forceAdaptiveThinking:
+      type: boolean
+      introducedIn: "0.75.5"
+      default: false
+      notes: >
+        Custom Anthropic-compatible Pi model configs can opt into adaptive
+        Claude thinking behavior with compat.forceAdaptiveThinking.
+  notes: >
+    Pi 0.75.5 custom Anthropic-compatible providers may set
+    compat.forceAdaptiveThinking in model configuration.
+edges:
+  translates_for:
+    - target: agent:pi
+  uses_provider:
+    - target: provider:anthropic
+---
+nodeKind: ProviderTranslation
 id: provider-translation:pi:local-compatible
 attributes:
   harness: pi

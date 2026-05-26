@@ -3,7 +3,7 @@ id: hook-mapping:post-tool-use-pi
 attributes:
   mappingId: hook-mapping:post-tool-use-pi
   hookId: hook-surface:post-tool-use
-  targetId: agentVersion:pi:ge-0-75-4
+  targetId: agentVersion:pi:ge-0-75-5
   nativeName: onEvent
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -19,4 +19,4 @@ edges:
   maps_hook:
     - target: hook-surface:post-tool-use
   emits_hook:
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5

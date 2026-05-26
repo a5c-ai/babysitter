@@ -238,7 +238,7 @@ nodeKind: KnowledgeFabricImpl
 id: knowledge-fabric-impl:pi.knowledge@current
 attributes:
   displayName: "Pi Knowledge Fabric — CLAUDE.md (Claude Code compatible)"
-  agentVersionId: agentVersion:pi:ge-0-75-4
+  agentVersionId: agentVersion:pi:ge-0-75-5
   description: |
     Pi uses Claude Code's CLAUDE.md file format as its knowledge fabric,
     providing cross-compatibility with Claude Code's instruction system.
@@ -261,7 +261,7 @@ edges:
   realizes:
     - target: layer:12-knowledge-fabric
   composes:
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
       role: knowledge-fabric
 ---
 nodeKind: KnowledgeFabricImpl

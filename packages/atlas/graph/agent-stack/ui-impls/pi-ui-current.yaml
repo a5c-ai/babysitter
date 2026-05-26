@@ -2,7 +2,7 @@ nodeKind: AgentUIImpl
 id: agent-ui-impl:pi.ui@current
 attributes:
   displayName: "Pi UI (current) — tui-and-cli"
-  agentVersionId: agentVersion:pi:ge-0-75-4
+  agentVersionId: agentVersion:pi:ge-0-75-5
   packageRef: source-ref:pi-github
   uiKind: tui-and-cli
   presentationsBundled:

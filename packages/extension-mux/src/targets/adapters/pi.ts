@@ -81,7 +81,7 @@ export function generatePiManifest(manifest: ResolvedManifest, targetName = 'pi'
       skills: ['./skills'],
     },
     peerDependencies: {
-      '@mariozechner/pi-coding-agent': '*',
+      '@earendil-works/pi-coding-agent': '*',
     },
     scripts: {
       test: 'npm run validate:ci',

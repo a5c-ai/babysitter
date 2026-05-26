@@ -85,7 +85,7 @@ edges:
     - target: agentVersion:gemini:ge-0-0-0
     - target: agentVersion:opencode:ge-0-0-0
     - target: agentVersion:copilot:ge-1-0-51
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
     - target: agentVersion:omp:ge-15-2-4
     - target: agentVersion:openclaw:ge-2026-5-20
     - target: agent-version:hermes@current
@@ -140,7 +140,7 @@ edges:
     - target: agentVersion:gemini:ge-0-0-0
     - target: agentVersion:opencode:ge-0-0-0
     - target: agentVersion:copilot:ge-1-0-51
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
     - target: agentVersion:omp:ge-15-2-4
     - target: agentVersion:openclaw:ge-2026-5-20
     - target: agent-version:hermes@current
@@ -264,7 +264,7 @@ edges:
     - target: agentVersion:gemini:ge-0-0-0
     - target: agentVersion:opencode:ge-0-0-0
     - target: agentVersion:copilot:ge-1-0-51
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
     - target: agentVersion:omp:ge-15-2-4
     - target: agentVersion:openclaw:ge-2026-5-20
     - target: agent-version:hermes@current
@@ -307,7 +307,7 @@ edges:
     - target: agentVersion:codex:ge-0-119-0
     - target: agentVersion:cursor:ge-0-0-0
     - target: agentVersion:opencode:ge-0-0-0
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
     - target: agentVersion:omp:ge-15-2-4
 ---
 nodeKind: Mux

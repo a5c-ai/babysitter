@@ -17,6 +17,6 @@ attributes:
     - { key: run_id,     envVars: [PI_RUN_ID] }
 edges:
   applies_to_version:
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5
   references_path:
     - target: path:a5c-runs-dir

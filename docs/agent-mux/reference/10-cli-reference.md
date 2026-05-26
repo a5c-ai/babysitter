@@ -586,7 +586,7 @@ amux install <agent> [flags...]
 | `cursor` | winget | `winget install Cursor.Cursor` | win32 | -- |
 | `opencode` | npm | `npm install -g opencode` | all | -- |
 | `opencode` | brew | `brew install opencode/tap/opencode` | darwin | -- |
-| `pi` | npm | `npm install -g @mariozechner/pi-coding-agent` | all | -- |
+| `pi` | npm | `npm install -g @earendil-works/pi-coding-agent` | all | -- |
 | `omp` | npm | `npm install -g @oh-my-pi/pi-coding-agent` | all | -- |
 | `openclaw` | npm | `npm install -g openclaw` | all | Requires Node 22.16+, 16GB RAM minimum. |
 | `hermes` | pip | `pip install hermes-agent` | all | Requires Python >= 3.11. Alternative: `uv pip install hermes-agent`. |

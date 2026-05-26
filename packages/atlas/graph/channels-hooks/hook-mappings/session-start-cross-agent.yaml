@@ -23,7 +23,7 @@ id: hook-mapping:session-start-pi
 attributes:
   mappingId: hook-mapping:session-start-pi
   hookId: hook-surface:session-start
-  targetId: agentVersion:pi:ge-0-75-4
+  targetId: agentVersion:pi:ge-0-75-5
   nativeName: SessionStart
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -36,4 +36,4 @@ edges:
   maps_hook:
     - target: hook-surface:session-start
   emits_hook:
-    - target: agentVersion:pi:ge-0-75-4
+    - target: agentVersion:pi:ge-0-75-5

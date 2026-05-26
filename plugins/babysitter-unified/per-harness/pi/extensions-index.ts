@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { execSync } from "child_process";
 import * as path from "path";
 import { initI18n, t } from "./extensions-i18n.js";

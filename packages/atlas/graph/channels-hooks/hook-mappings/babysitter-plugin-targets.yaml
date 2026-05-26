@@ -299,7 +299,7 @@ id: hook-mapping:user-prompt-submit-pi
 attributes:
   mappingId: hook-mapping:user-prompt-submit-pi
   hookId: hook-surface:user-prompt-submit
-  targetId: agentVersion:pi:ge-0-75-4
+  targetId: agentVersion:pi:ge-0-75-5
   nativeName: context
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -320,7 +320,7 @@ id: hook-mapping:pre-tool-use-pi
 attributes:
   mappingId: hook-mapping:pre-tool-use-pi
   hookId: hook-surface:pre-tool-use
-  targetId: agentVersion:pi:ge-0-75-4
+  targetId: agentVersion:pi:ge-0-75-5
   nativeName: tool_call
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -341,7 +341,7 @@ id: hook-mapping:before-provider-request-pi
 attributes:
   mappingId: hook-mapping:before-provider-request-pi
   hookId: hook-surface:before-provider-request
-  targetId: agentVersion:pi:ge-0-75-4
+  targetId: agentVersion:pi:ge-0-75-5
   nativeName: before_provider_request
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -362,7 +362,7 @@ id: hook-mapping:session-start-pi
 attributes:
   mappingId: hook-mapping:session-start-pi
   hookId: hook-surface:session-start
-  targetId: agentVersion:pi:ge-0-75-4
+  targetId: agentVersion:pi:ge-0-75-5
   nativeName: session_start
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -383,7 +383,7 @@ id: hook-mapping:stop-pi
 attributes:
   mappingId: hook-mapping:stop-pi
   hookId: hook-surface:stop
-  targetId: agentVersion:pi:ge-0-75-4
+  targetId: agentVersion:pi:ge-0-75-5
   nativeName: stop
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true

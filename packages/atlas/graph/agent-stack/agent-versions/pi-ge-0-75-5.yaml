@@ -16,6 +16,11 @@ attributes:
   versionRange: ">=0.75.5"
   releasedAt: "2026-05-23"
   cliCommand: "pi"
+  releaseHighlights:
+    - "Collapsed read tool cards show only the read line until Ctrl+O expansion."
+    - "Edit tool result details include a standard unified patch for SDK consumers."
+    - "pi update and git package installs reconcile pinned refs while preserving settings."
+    - "Custom Anthropic-compatible models can set compat.forceAdaptiveThinking."
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"
@@ -77,6 +82,11 @@ attributes:
       configFormat: json
       configFilePaths:
         - "~/.pi/agent/settings.json"
+      compatFields:
+        forceAdaptiveThinking:
+          type: boolean
+          introducedIn: "0.75.5"
+          scope: custom-anthropic-compatible-model
     displayName: "Pi"
     defaultModelId: "default"
   interactiveSignals:

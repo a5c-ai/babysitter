@@ -1303,7 +1303,7 @@ dist/github-copilot/
     "skills": ["./skills"]
   },
   "dependencies": { "@a5c-ai/babysitter-sdk": "5.0.0" },
-  "peerDependencies": { "@mariozechner/pi-coding-agent": "*" },
+  "peerDependencies": { "@earendil-works/pi-coding-agent": "*" },
   "scripts": {
     "test": "node --test test/integration.test.js && node test/packaged-install.test.cjs",
     "sync:commands": "node scripts/sync-command-docs.cjs",
@@ -1333,7 +1333,7 @@ The Pi extension file registers slash commands that forward to babysitter skills
 
 Generation rules:
 
-1. Import the Pi extension API type: `import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";`
+1. Import the Pi extension API type: `import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";`
 2. Define a `COMMANDS` array containing all command names (e.g., `["assimilate", "call", "cleanup", "contrib", "doctor", "forever", "help", ...]`)
 3. Define a `toSkillPrompt(name, args)` helper that returns `` `/skill:${name}${args ? ` ${args}` : ""}` ``
 4. Export a default `activate(pi: ExtensionAPI)` function that:
@@ -1348,7 +1348,7 @@ The `COMMANDS` list is derived from the UPF `commands/` directory: take each `*.
 **Reference implementation** (from the Pi per-harness source overlay under `plugins/babysitter-unified/per-harness/pi/`):
 
 ```typescript
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const COMMANDS = [
   "assimilate", "call", "cleanup", "contrib", "doctor",
@@ -1418,9 +1418,9 @@ dist/pi/
 **Native format:** Identical to Pi, but with:
 - Package name: `@a5c-ai/babysitter-omp`
 - `"omp"` field instead of `"pi"` in package.json
-- `peerDependencies` on `@oh-my-pi/pi-coding-agent` instead of `@mariozechner/pi-coding-agent`
+- `peerDependencies` on `@oh-my-pi/pi-coding-agent` instead of `@earendil-works/pi-coding-agent`
 - Binary name: `babysitter-omp`
-- Extensions import from `@oh-my-pi/pi-coding-agent` instead of `@mariozechner/pi-coding-agent`
+- Extensions import from `@oh-my-pi/pi-coding-agent` instead of `@earendil-works/pi-coding-agent`
 
 The `extensions/index.js` generation follows the same rules as Pi (see section 4.6), but the import type reference changes to `import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";`.
 

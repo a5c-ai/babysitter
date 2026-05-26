@@ -136,12 +136,12 @@
   "dependencies": {
     "@a5c-ai/agent-mux": "^5.0.0",
     "@a5c-ai/compendium": "^0.1.0",
-    "@earendil-works/pi-coding-agent": "0.74.0",
+    "@earendil-works/pi-coding-agent": "0.75.5",
     "@modelcontextprotocol/sdk": "1.29.0",
     "expo": "^55.0.24",
     "expo-notifications": "^55.0.23",
     "express-rate-limit": "8.5.1",
-    "react-native": "^0.85.3",
-    "node-domexception": "file:third_party/node-domexception"
+    "node-domexception": "file:third_party/node-domexception",
+    "react-native": "^0.85.3"
   }
 }

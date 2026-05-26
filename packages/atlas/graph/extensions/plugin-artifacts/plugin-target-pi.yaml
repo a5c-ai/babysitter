@@ -27,7 +27,7 @@ attributes:
     binScriptExt: ".cjs"
     installLifecycle: none
     activationMessage: restart
-    peerDependencyPackage: "@mariozechner/pi-coding-agent"
+    peerDependencyPackage: "@earendil-works/pi-coding-agent"
     emitCjsWrappers: false
   componentSupport:
     agents: native
