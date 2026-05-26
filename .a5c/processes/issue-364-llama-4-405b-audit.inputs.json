@@ -1,0 +1,7 @@
+{
+  "issueNumber": 364,
+  "qualityCommands": [
+    "npm run verify:metadata",
+    "npm run build --workspace=@a5c-ai/atlas"
+  ]
+}

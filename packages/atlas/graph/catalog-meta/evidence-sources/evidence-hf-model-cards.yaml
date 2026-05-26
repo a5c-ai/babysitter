@@ -152,25 +152,6 @@ edges:
     - trust-level:vendor-doc
 ---
 nodeKind: EvidenceSource
-id: evidence:hf-model-card-llama-4-405b-instruct
-attributes:
-  displayName: "Hugging Face — meta-llama/Llama-4-405B-Instruct model card"
-  kindLabel: web
-  trustLevel: trust-level:vendor-doc
-  sourceUrl: https://huggingface.co/meta-llama
-  sourcePathOrUrl: https://huggingface.co/meta-llama
-  locator: "Llama-4 collection landing"
-  capturedAt: "2026-04-28T00:00:00Z"
-  observedAt: "2026-04-28T00:00:00Z"
-  observedBy: a5c-ai-team
-  freshnessWindowDays: 90
-  reviewOwner: "@a5c-ai/catalog"
-  reviewedAt: "2026-04-28T00:00:00Z"
-edges:
-  has_trust_level:
-    - trust-level:vendor-doc
----
-nodeKind: EvidenceSource
 id: evidence:hf-model-card-qwen-2-5-72b-instruct
 attributes:
   displayName: "Hugging Face — Qwen/Qwen2.5-72B-Instruct model card"
