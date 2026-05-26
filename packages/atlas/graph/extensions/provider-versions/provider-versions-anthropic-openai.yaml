@@ -60,3 +60,27 @@ edges:
       versionRange: ">=0.0.0"
       level: full
       notes: "google"
+---
+nodeKind: ProviderVersion
+id: provider-version:xai-ge-0-0-0
+attributes:
+  displayName: "xAI Chat API (>=0.0.0)"
+  providerId: provider:xai
+  versionRange: ">=0.0.0"
+  description: |
+    Open-ended ProviderVersion entry pinning capability claims to the
+    xAI OpenAI-compatible chat-completions API across observed versions.
+edges:
+  supports:
+    - target: capability:streaming
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "xai"
+    - target: capability:supports-tool-use
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "xai"
+    - target: capability:supports-structured-output
+      versionRange: ">=0.0.0"
+      level: full
+      notes: "xai"

@@ -1,0 +1,37 @@
+nodeKind: EvidenceSource
+id: evidence:xai-grok-4-3-model-docs
+attributes:
+  displayName: xAI Grok 4.3 model documentation
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.x.ai/developers/models/grok-4.3
+  sourcePathOrUrl: https://docs.x.ai/developers/models/grok-4.3
+  locator: Grok 4.3 model page with modalities, context window, pricing, regions, and feature flags
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:xai-api-reference-docs
+attributes:
+  displayName: xAI Inference REST API documentation
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.x.ai/developers/rest-api-reference
+  sourcePathOrUrl: https://docs.x.ai/developers/rest-api-reference
+  locator: Inference REST API overview with OpenAI compatibility, base route, auth header, and route families
+  capturedAt: '2026-05-26T00:00:00Z'
+  observedAt: '2026-05-26T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-26T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
