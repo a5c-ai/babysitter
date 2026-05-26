@@ -149,4 +149,99 @@ attributes:
 edges:
   has_trust_level:
     - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-gemini-3-5-flash-model-doc-2026-05
+attributes:
+  displayName: "Google AI Gemini 3.5 Flash model documentation, May 2026"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash
+  sourcePathOrUrl: https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash
+  locator: "Model code, supported data types, token limits, capabilities, and stable alias"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-gemini-3-5-flash-whats-new-2026-05
+attributes:
+  displayName: "Google AI What's new in Gemini 3.5 Flash, May 2026"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://ai.google.dev/gemini-api/docs/whats-new-gemini-3.5
+  sourcePathOrUrl: https://ai.google.dev/gemini-api/docs/whats-new-gemini-3.5
+  locator: "GA status, migration from Gemini 3 Flash Preview, thinking_level guidance, and inherited Gemini 3 capabilities"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-gemini-3-5-flash-pricing-2026-05
+attributes:
+  displayName: "Google AI Gemini 3.5 Flash pricing, May 2026"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://ai.google.dev/gemini-api/docs/pricing#gemini-3.5-flash
+  sourcePathOrUrl: https://ai.google.dev/gemini-api/docs/pricing#gemini-3.5-flash
+  locator: "Gemini 3.5 Flash paid tier input and output pricing"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-gemini-3-5-flash-changelog-2026-05
+attributes:
+  displayName: "Google AI Gemini API changelog for Gemini 3.5 Flash, May 2026"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://ai.google.dev/gemini-api/docs/changelog#05-19-2026
+  sourcePathOrUrl: https://ai.google.dev/gemini-api/docs/changelog#05-19-2026
+  locator: "May 19, 2026 release note for gemini-3.5-flash GA"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-cloud-gemini-3-5-flash-model-doc-2026-05
+attributes:
+  displayName: "Google Cloud Gemini 3.5 Flash model documentation, May 2026"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash
+  sourcePathOrUrl: https://cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash
+  locator: "Google Cloud model page listing Gemini 3.5 Flash"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
 
