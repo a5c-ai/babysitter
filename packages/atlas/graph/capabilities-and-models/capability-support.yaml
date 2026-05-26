@@ -495,12 +495,13 @@ attributes:
   subjectKind: "AgentVersion"
   subjectId: "agentVersion:codex:ge-0-119-0"
   versionRange: ">=0.119.0"
-  notes: "Codex skills are documented directly, while the local target profile explains how command-derived skills map into the shared ontology."
+  notes: "Codex skills are documented directly; 0.133.0 also makes plugin and skill warmup/discovery easier to inspect through marketplace-aware list output, installed versions, visible marketplace roots, and remote collections."
   evidenceRefs:
     - "repo-sdk-fallback"
     - "repo-target-codex"
     - "repo-target-index"
     - "web-codex-skills"
+    - "web-codex-0-133-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -521,6 +522,7 @@ attributes:
     - "repo-sdk-fallback"
     - "web-codex-cli"
     - "web-codex-cli-features"
+    - "web-codex-0-133-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -541,6 +543,7 @@ attributes:
     - "repo-sdk-fallback"
     - "web-codex-cli"
     - "web-codex-cli-features"
+    - "web-codex-0-133-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -561,6 +564,7 @@ attributes:
     - "repo-sdk-fallback"
     - "web-codex-noninteractive"
     - "web-codex-cli-reference"
+    - "web-codex-0-133-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -581,6 +585,7 @@ attributes:
     - "repo-sdk-fallback"
     - "web-codex-cli"
     - "web-codex-cli-features"
+    - "web-codex-0-133-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -594,13 +599,14 @@ attributes:
   subjectKind: "AgentVersion"
   subjectId: "agentVersion:codex:ge-0-119-0"
   versionRange: ">=0.119.0"
-  notes: "Codex has first-party hook docs, and 0.119.0+ removes the local Windows hook caveat."
+  notes: "Codex has first-party hook docs; 0.133.0 adds richer extension lifecycle observation for subagent start/stop, tool execution, turn metadata, async approval, and turn processing."
   evidenceRefs:
     - "repo-sdk-fallback"
     - "repo-target-codex"
     - "repo-target-index"
     - "repo-codex-windows-hooks"
     - "web-codex-hooks"
+    - "web-codex-0-133-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -616,13 +622,14 @@ attributes:
   subjectKind: "AgentVersion"
   subjectId: "agentVersion:codex:ge-0-119-0"
   versionRange: ">=0.119.0"
-  notes: "Stop-hook mapping is normalized from the documented Codex hook system plus the local target-name mapping."
+  notes: "Stop-hook mapping is normalized from the documented Codex hook system plus the local target-name mapping, with 0.133.0 app-server race fixes reducing startup/shutdown edge cases around hook delivery."
   evidenceRefs:
     - "repo-sdk-fallback"
     - "repo-target-codex"
     - "repo-target-index"
     - "repo-codex-windows-hooks"
     - "web-codex-hooks"
+    - "web-codex-0-133-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -638,11 +645,12 @@ attributes:
   subjectKind: "AgentVersion"
   subjectId: "agentVersion:codex:ge-0-119-0"
   versionRange: ">=0.119.0"
-  notes: "Session continuation is supported through transcript and thread persistence rather than piggybacking on the hooks docs."
+  notes: "Session continuation is supported through transcript and thread persistence; 0.133.0 adds default-on goal tracking backed by dedicated storage across active turns."
   evidenceRefs:
     - "repo-sdk-fallback"
     - "web-codex-cli-features"
     - "web-codex-cli-reference"
+    - "web-codex-0-133-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0

@@ -523,6 +523,26 @@ edges:
     - trust-level:vendor-doc
 ---
 nodeKind: EvidenceSource
+id: evidence:web-codex-0-133-release
+attributes:
+  evidenceId: web-codex-0-133-release
+  displayName: "Codex CLI 0.133.0 release notes"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/openai/codex/releases/tag/rust-v0.133.0
+  sourcePathOrUrl: https://github.com/openai/codex/releases/tag/rust-v0.133.0
+  locator: "0.133.0 release notes"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
 id: evidence:web-codex-noninteractive
 attributes:
   evidenceId: web-codex-noninteractive

@@ -144,15 +144,54 @@ attributes:
   runtimeFamily: "cli-harness"
   releaseChannel: "stable"
   displayName: "Codex CLI"
-  summary: "OpenAI's open-source CLI coding agent"
+  summary: "OpenAI's open-source CLI coding agent, assimilated through 0.133.0"
   sourcePackage: "@openai/codex"
   osSupport:
     - "linux"
     - "macos"
     - "windows"
   agentProductId: agent:codex
-  versionRange: ">=0.133.0"
+  versionRange: ">=0.119.0"
+  currentVersion: "0.133.0"
   releasedAt: "2026-05-21"
+  upstreamReleaseTag: "rust-v0.133.0"
+  releaseNotesUrl: "https://github.com/openai/codex/releases/tag/rust-v0.133.0"
+  assimilationNotes:
+    - "Goals are default-on in 0.133.0 and backed by dedicated storage."
+    - "codex remote-control is modeled as foreground readiness plus explicit start/stop lifecycle commands."
+    - "Permission profiles expose list APIs, inheritance, requirements.toml support, runtime refresh, and stronger Windows sandbox integration."
+    - "Plugin discovery reports marketplace-aware list output, installed versions, marketplace roots, and remote collections."
+    - "Extensions can observe subagent lifecycle, tool execution, turn metadata, async approval, and turn processing."
+    - "App-server fixes include startup/shutdown race fixes and realtime v1 websocket compatibility."
+  goals:
+    defaultEnabled: true
+    storage: dedicated-goal-store
+    progressScope: active-turns
+  remoteControl:
+    launchBehavior: foreground-readiness
+    reportsMachineStatus: true
+    explicitLifecycleCommands: [start, stop]
+  permissionProfiles:
+    listApi: true
+    inheritance: true
+    requirementsToml: managed
+    runtimeRefresh: true
+    windowsSandboxIntegration: resolved-profiles
+  pluginDiscovery:
+    marketplaceAwareListOutput: true
+    installedVersions: true
+    visibleMarketplaceRoots: true
+    remoteCollections: true
+  extensionEvents:
+    observesSubagentLifecycle: true
+    observesToolExecution: true
+    observesTurnMetadata: true
+    asyncApproval: true
+    asyncTurnProcessing: true
+  appServer:
+    startupRaceFix: true
+    shutdownRaceFix: true
+    realtimeV1WebsocketCompatible: true
   cliCommand: "codex"
   installMethods:
     - install:npm
@@ -196,9 +235,9 @@ attributes:
       supportsStructuredOutput: true
       structuredSessionTransport: restart-per-turn
       sessionControlPlane: self-managed
-      supportsSkills: false
-      supportsAgentsMd: false
-      skillsFormat: none
+      supportsSkills: true
+      supportsAgentsMd: true
+      skillsFormat: codex-skills
       supportsSubagentDispatch: false
       supportsParallelExecution: false
       maxParallelTasks: 1
@@ -207,11 +246,40 @@ attributes:
       supportsImageInput: false
       supportsImageOutput: false
       supportsFileAttachments: false
-      supportsPlugins: false
+      supportsPlugins: true
       supportedPlatforms: [darwin, linux, win32]
       thinkingEffortLevels: []
       requiresGitRepo: false
       requiresPty: false
+    goals:
+      defaultEnabled: true
+      storage: dedicated-goal-store
+      progressScope: active-turns
+    remoteControl:
+      launchBehavior: foreground-readiness
+      reportsMachineStatus: true
+      explicitLifecycleCommands: [start, stop]
+    permissionProfiles:
+      listApi: true
+      inheritance: true
+      requirementsToml: managed
+      runtimeRefresh: true
+      windowsSandboxIntegration: resolved-profiles
+    pluginDiscovery:
+      marketplaceAwareListOutput: true
+      installedVersions: true
+      visibleMarketplaceRoots: true
+      remoteCollections: true
+    extensionEvents:
+      observesSubagentLifecycle: true
+      observesToolExecution: true
+      observesTurnMetadata: true
+      asyncApproval: true
+      asyncTurnProcessing: true
+    appServer:
+      startupRaceFix: true
+      shutdownRaceFix: true
+      realtimeV1WebsocketCompatible: true
     runtimeHooks:
       preToolUse: nonblocking
       postToolUse: nonblocking
@@ -278,14 +346,14 @@ edges:
     - discovery-signal:codex-host-env
   supports:
     - target: capability:supports-agents-md
-      versionRange: '>=0.133.0'
+      versionRange: '>=0.119.0'
       level: full
-      notes: Codex CLI reads AGENTS.md as long-term memory at session bootstrap. Source — github.com/openai/codex docs/.
+      notes: Codex CLI reads AGENTS.md as long-term memory at session bootstrap, with 0.133.0 fixes for global reads and invalid UTF-8 warnings.
     - target: capability:requires-pty
-      versionRange: '>=0.133.0'
+      versionRange: '>=0.119.0'
       level: partial
       notes: Interactive TUI mode requires PTY; --quiet / scripted mode does not.
     - target: capability:supports-file-attachments
-      versionRange: '>=0.133.0'
+      versionRange: '>=0.119.0'
       level: partial
       notes: TUI accepts pasted content; image attachments via --add-image.

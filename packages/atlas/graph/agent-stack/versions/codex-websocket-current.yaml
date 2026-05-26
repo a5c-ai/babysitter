@@ -3,11 +3,17 @@ id: agent-version:codex-websocket@current
 attributes:
   agentProductId: agent:codex
   versionRange: ">=0.133.0"
+  currentVersion: "0.133.0"
   releasedAt: "2026-05-21"
+  upstreamReleaseTag: "rust-v0.133.0"
+  releaseNotesUrl: "https://github.com/openai/codex/releases/tag/rust-v0.133.0"
   cliCommand: "codex"
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"
+  appServer:
+    realtimeV1WebsocketCompatible: true
+    smokeTestedCommand: "npx -y @openai/codex@0.133.0 app-server --help"
 edges:
   version_of:
     - agent:codex
@@ -27,7 +33,7 @@ edges:
     - target: capability:supports-text-streaming
       versionRange: '>=0.133.0'
       level: full
-      notes: Codex streams output over WebSocket.
+      notes: Codex streams output over WebSocket; 0.133.0 release notes call out realtime v1 websocket compatibility, and the app-server help exposes ws:// --listen endpoints.
     - target: capability:supports-tool-use
       versionRange: '>=0.133.0'
       level: full
