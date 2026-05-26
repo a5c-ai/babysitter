@@ -6,8 +6,19 @@ attributes:
   workspacePath: packages/omni
   moduleType: typescript
   surfaceKinds:
+    - agent-runtime
+    - bin-entrypoint
+    - cli
     - llm-client
     - provider-facade
-  sourceOfTruthRole: wrapper-over-graph
+  sourceOfTruthRole: application
   publishedTo: npm
   versionPolicy: semver
+  # Source: packages/omni/package.json (exports ./cli barrel + root barrel).
+  # Bin: omni. Composes agent-core, agent-runtime, agent-platform, agent-mux,
+  # and babysitter-sdk into a single installable product.
+edges:
+  references_path:
+    - target: path:a5c-runs-dir
+  exposes_subcommand:
+    - target: interaction-primitive:babysitter-sdk-cli-harness-runtime

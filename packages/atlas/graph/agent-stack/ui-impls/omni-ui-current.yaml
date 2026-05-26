@@ -1,0 +1,41 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:omni.ui@current
+attributes:
+  displayName: "omni UI (current) — CLI binary"
+  agentVersionId: agent-version:omni@current
+  packageRef: source-ref:packages-omni
+  uiKind: cli-only
+  presentationsBundled:
+    - presentation:omni-cli
+  themeSupport: none
+  accessibilitySupport: basic
+  notes: |
+    omni's user-facing surface is its CLI binary (`omni`). The CLI wraps
+    agent-platform and agent-mux surfaces. Operator UIs (TUI, web, mobile)
+    are delivered via the agent-mux package family.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  bundled_with:
+    - target: presentation:omni-cli
+  supports_interaction_primitive:
+    - target: interaction-primitive:babysitter-run-create
+      attributes:
+        mechanism: native-api
+        invocationToken: "omni run:create"
+    - target: interaction-primitive:babysitter-run-iterate
+      attributes:
+        mechanism: native-api
+        invocationToken: "omni run:iterate"
+    - target: interaction-primitive:babysitter-task-post
+      attributes:
+        mechanism: native-api
+        invocationToken: "omni task:post"
+    - target: interaction-primitive:babysitter-doctor
+      attributes:
+        mechanism: native-api
+        invocationToken: "omni doctor"
+    - target: interaction-primitive:babysitter-mcp-server
+      attributes:
+        mechanism: native-api
+        invocationToken: "omni mcp"

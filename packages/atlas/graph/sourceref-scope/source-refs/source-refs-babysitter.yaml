@@ -111,7 +111,7 @@ attributes:
 nodeKind: SourceRef
 id: source-ref:packages-omni
 attributes:
-  description: '@a5c-ai/omni — omni-model client (provider-agnostic LLM facade)'
+  description: '@a5c-ai/omni — top-level integrated agent product (CLI binary + barrel exports)'
   displayName: a5c-ai/babysitter — packages/omni
   repoUrl: https://github.com/a5c-ai/babysitter
   ref: main

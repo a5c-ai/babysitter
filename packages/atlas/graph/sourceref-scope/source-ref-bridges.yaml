@@ -129,7 +129,7 @@ nodes:
     kind: SourceRef
     edges:
       source_of:
-        - target: agent:agent-platform
+        - target: agent:omni
   - id: source-ref:context7-mcp
     kind: SourceRef
     edges:
