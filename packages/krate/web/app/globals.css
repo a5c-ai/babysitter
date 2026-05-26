@@ -170,15 +170,16 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 /* Top bar */
 .appTopbar {
   position: sticky; top: 0; z-index: 12;
-  display: grid;
-  grid-template-columns: max-content minmax(220px, 420px) minmax(0, 1fr) max-content;
-  gap: 14px; align-items: center;
+  display: flex; align-items: center; gap: 12px;
   width: 100%; margin: 0;
   padding: 10px 20px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   backdrop-filter: blur(12px);
 }
+.appTopbar .globalSearch { flex: 0 1 320px; min-width: 140px; }
+.appTopbar .topbarNav { flex: 0 0 auto; }
+.appTopbar .topbarAccount { margin-left: auto; flex-shrink: 0; }
 
 .brandMark {
   display: flex; align-items: center; gap: 10px;
@@ -268,26 +269,28 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .appSidebar {
   position: sticky; top: 53px; align-self: start;
   min-height: calc(100vh - 53px);
-  padding: 16px 12px 32px;
+  padding: 12px 10px 32px;
   border-right: 1px solid var(--border);
   background: var(--bg-subtle);
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 .sidebarSectionTitle {
-  margin: 0 8px 8px;
+  margin: 0 8px 6px;
   color: var(--text-muted);
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
 }
-.appSidebar nav { display: grid; gap: 2px; }
+.appSidebar nav { display: grid; gap: 0; }
 .appSidebar a {
   display: flex; align-items: center;
-  min-height: 32px; padding: 6px 10px;
+  min-height: 28px; padding: 4px 10px;
   border-radius: var(--radius-sm);
   border-left: 2px solid transparent;
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.85rem; font-weight: 500;
-  transition: all 0.15s;
+  font-size: 0.8rem; font-weight: 500;
+  transition: all 0.12s;
 }
 .appSidebar a:hover, .appSidebar a:focus-visible { color: var(--text); background: var(--surface); }
 .appSidebar a[aria-current="page"] {
@@ -298,28 +301,37 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 /* Org switcher */
 .orgSwitcher {
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface);
 }
-.orgSwitcher summary { display: grid; gap: 2px; padding: 10px 12px; cursor: pointer; list-style: none; }
+.orgSwitcher summary { display: grid; gap: 2px; padding: 8px 10px; cursor: pointer; list-style: none; }
 .orgSwitcher summary::-webkit-details-marker { display: none; }
-.orgSwitcher summary span, .sidebarNavGroup h2 {
+.orgSwitcher summary span {
   margin: 0; color: var(--text-muted);
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
 }
-.orgSwitcher summary strong { color: var(--text); font-size: 0.9rem; }
+.orgSwitcher summary strong { color: var(--text); font-size: 0.85rem; }
 .orgSwitcher > div { display: grid; gap: 2px; padding: 0 6px 8px; }
-.sidebarNavGroup { display: grid; gap: 2px; }
-.sidebarNavGroup h2 { padding: 0 10px; }
-.sidebarNavGroup a { display: grid; gap: 1px; align-items: center; min-height: 40px; }
-.sidebarNavGroup a span { font-weight: 600; }
-.sidebarNavGroup a small { color: var(--text-muted); font-size: 0.72rem; font-weight: 400; }
-.advancedNav { margin-top: 4px; border-top: 1px solid var(--border); padding-top: 8px; }
-.advancedNav summary { min-height: 32px; padding: 6px 10px; color: var(--text-muted); cursor: pointer; font-size: 0.82rem; font-weight: 500; }
-.advancedNav a { margin-top: 2px; }
+
+/* Navigation groups */
+.sidebarNavGroup { display: grid; gap: 0; margin-bottom: 4px; }
+.sidebarNavGroup h2 {
+  margin: 0; padding: 12px 10px 4px;
+  color: var(--text-muted);
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  border-top: 1px solid var(--border);
+}
+.sidebarNavGroup:first-child h2 { border-top: none; padding-top: 4px; }
+.sidebarNavGroup a { display: block; min-height: auto; padding: 5px 10px; line-height: 1.3; }
+.sidebarNavGroup a span { font-weight: 500; font-size: 0.8rem; }
+.sidebarNavGroup a small { display: none; }
+.advancedNav { margin-top: 4px; border-top: 1px solid var(--border); padding-top: 6px; }
+.advancedNav summary { min-height: 28px; padding: 4px 10px; color: var(--text-muted); cursor: pointer; font-size: 0.78rem; font-weight: 500; }
+.advancedNav a { margin-top: 1px; }
 
 /* Main content area */
 .appContent { min-width: 0; }
@@ -899,7 +911,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 @media (max-width: 760px) {
-  .appTopbar { grid-template-columns: auto 1fr auto; gap: 8px; }
+  .appTopbar { gap: 8px; }
   .globalSearch { order: 3; }
   .routeMain { padding: 16px 16px 44px; }
   .routeHero, .repoTabs { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
