@@ -800,11 +800,28 @@ async function validateAgentBehavior(
       ),
     ];
     let hooksLogsFound = false;
+    const hooksLogSearchResults: string[] = [];
     for (const dir of hooksLogCandidates) {
       try {
         const entries = await fs.readdir(dir);
+        hooksLogSearchResults.push(`${dir}: ${entries.length} files (${entries.join(', ')})`);
         if (entries.length > 0) { hooksLogsFound = true; break; }
-      } catch { /* dir doesn't exist */ }
+      } catch (e) {
+        hooksLogSearchResults.push(`${dir}: ${e instanceof Error ? e.code ?? e.message : 'error'}`);
+      }
+    }
+    console.error(`[hooks-log-search] ${hooksLogSearchResults.join(' | ')}`);
+    if (!hooksLogsFound) {
+      // Also check os.homedir() in case process.env.HOME differs
+      const osHome = (await import('node:os')).homedir();
+      const osHomeDir = path.join(osHome, '.a5c', 'logs', 'hooks');
+      try {
+        const entries = await fs.readdir(osHomeDir);
+        console.error(`[hooks-log-search] os.homedir=${osHome}: ${entries.length} files (${entries.join(', ')})`);
+        if (entries.length > 0) hooksLogsFound = true;
+      } catch (e) {
+        console.error(`[hooks-log-search] os.homedir=${osHome}: ${e instanceof Error ? e.code ?? e.message : 'error'}`);
+      }
     }
     // hooks-mux-session: check hooks-mux session logs and run journal for stop hook events
     // (run this before stop-hooks so journal evidence is available for both checks)
