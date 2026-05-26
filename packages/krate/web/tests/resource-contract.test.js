@@ -100,10 +100,35 @@ test('trigger rule form emits all required AgentTriggerRule spec fields', () => 
 
 // ── Contract: external provider wizard sends required fields ──────────────
 
-test('external provider wizard emits providerType', () => {
+test('external provider wizard emits all required ExternalBackendProvider fields', () => {
   const source = readFile('app', 'components', 'external-provider-wizard.jsx');
   assert.match(source, /providerType/);
+  assert.match(source, /endpoint:/);
+  assert.doesNotMatch(source, /spec:\s*\{[^}]*baseUrl:/, 'should use "endpoint" not "baseUrl" in spec');
   assert.match(source, /ExternalBackendProvider/);
+});
+
+// ── Contract: memory ontology editor sends required fields ────────────────
+
+test('memory ontology editor emits required AgentMemoryOntology fields', () => {
+  const source = readFile('app', 'components', 'memory-ontology-editor.jsx');
+  assert.match(source, /memoryRepository/);
+  assert.match(source, /ontologyPath/);
+  assert.match(source, /AgentMemoryOntology/);
+});
+
+// ── Contract: InlineCreateForm does not hardcode Active phase ─────────────
+
+test('InlineCreateForm does not hardcode status.phase to Active', () => {
+  const source = readFile('app', 'components', 'resource-crud-actions.jsx');
+  assert.doesNotMatch(source, /phase:\s*['"]Active['"]/);
+});
+
+// ── Contract: ExternalWebhookConfig is a known resource kind ──────────────
+
+test('ExternalWebhookConfig is in RESOURCE_DEFINITIONS', () => {
+  assert.ok(RESOURCE_DEFINITIONS.ExternalWebhookConfig, 'ExternalWebhookConfig must be in RESOURCE_DEFINITIONS');
+  assert.ok(Array.isArray(RESOURCE_DEFINITIONS.ExternalWebhookConfig.requiredSpec));
 });
 
 // ── Contract: adapter form sends required fields ──────────────────────────

@@ -58,10 +58,12 @@ function NodeKindBadge({ kind }) {
   );
 }
 
-export function MemoryOntologyEditor({ org, initialOntology = null }) {
+export function MemoryOntologyEditor({ org, initialOntology = null, memoryRepository = '' }) {
   const existing = initialOntology;
   const existingName = existing?.metadata?.name || '';
   const [ontologyName, setOntologyName] = useState(existingName || 'default');
+  const [memRepo, setMemRepo] = useState(existing?.spec?.memoryRepository || memoryRepository || '');
+  const [ontologyPath, setOntologyPath] = useState(existing?.spec?.ontologyPath || '.krate/ontology.yaml');
   const [nodeKinds, setNodeKinds] = useState(
     (existing?.spec?.nodeKinds || []).map((k) =>
       typeof k === 'string' ? { name: k, description: '', color: '#3b82f6' } : k
@@ -129,6 +131,8 @@ export function MemoryOntologyEditor({ org, initialOntology = null }) {
       kind: 'AgentMemoryOntology',
       metadata: { name: ontologyName },
       spec: {
+        memoryRepository: memRepo || 'default',
+        ontologyPath: ontologyPath || '.krate/ontology.yaml',
         nodeKinds: nodeKinds.map((k) => ({ name: k.name, description: k.description, color: k.color })),
         edgeKinds: edgeKinds.map((k) => ({ name: k.name, sourceKinds: k.sourceKinds, targetKinds: k.targetKinds })),
       },
@@ -193,19 +197,22 @@ export function MemoryOntologyEditor({ org, initialOntology = null }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Ontology name */}
+      {/* Ontology identity */}
       <div className="card">
-        <div className="cardTitle"><h3>Ontology name</h3></div>
-        <div style={{ maxWidth: 320 }}>
-          <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>Name</label>
-          <input
-            type="text"
-            value={ontologyName}
-            onChange={(e) => setOntologyName(e.target.value)}
-            placeholder="default"
-            style={inputStyle}
-          />
-          <p style={{ color: '#6b7280', fontSize: '0.75rem', marginTop: '0.25rem' }}>The Kubernetes resource name for this AgentMemoryOntology.</p>
+        <div className="cardTitle"><h3>Ontology identity</h3></div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+          <div>
+            <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>Name</label>
+            <input type="text" value={ontologyName} onChange={(e) => setOntologyName(e.target.value)} placeholder="default" style={inputStyle} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>Memory repository</label>
+            <input type="text" value={memRepo} onChange={(e) => setMemRepo(e.target.value)} placeholder="org-memory" style={inputStyle} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>Ontology path</label>
+            <input type="text" value={ontologyPath} onChange={(e) => setOntologyPath(e.target.value)} placeholder=".krate/ontology.yaml" style={inputStyle} />
+          </div>
         </div>
       </div>
 

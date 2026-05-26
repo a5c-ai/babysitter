@@ -165,7 +165,7 @@ export function InlineCreateForm({ org, namespace = 'krate-system', kind, apiVer
         kind,
         metadata: { name, namespace },
         spec: { organizationRef: org, ...spec },
-        status: { phase: 'Active' }
+        status: {}
       };
       const response = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources`, {
         method: 'POST',
