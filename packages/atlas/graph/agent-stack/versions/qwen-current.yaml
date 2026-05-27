@@ -57,4 +57,6 @@ edges:
       level: full
       notes: Qwen agent supports MCP server integration.
   uses_memory_system:
+    - target: memory-system:qwen-code-memory
+      notes: Qwen Code 0.16.2 adds `.qwen/QWEN.local.md` as project-local context.
     - target: memory-system:file-based-markdown-pattern

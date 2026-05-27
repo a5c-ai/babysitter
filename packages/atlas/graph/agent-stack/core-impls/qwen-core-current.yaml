@@ -15,12 +15,16 @@ attributes:
     tool_result in the next model turn.
   contextManagementStrategy: platform-managed
   compactionTriggerNotes: |
-    Inherits Gemini CLI's context strategy — relies on the model's
-    1M-token context window directly; no in-CLI compaction.
+    Qwen Code 0.16.2 redesigns auto-compaction thresholds around a three-tier
+    ladder. Catalog consumers should treat compaction as CLI-managed rather
+    than assuming direct 1M-token-context pass-through for long sessions.
+    The same release enables Token Plan cache control in the core request path.
   subagentInvokerPolicy: not-applicable
   subagentInvokerNotes: |
     Qwen Code does not advertise subagent dispatch (supportsSubagentDispatch
-    is false in the adapter's capabilities).
+    is false in the adapter's capabilities). Upstream 0.16.2 does limit
+    background-agent concurrency for its native parallel fan-out UI/runtime
+    paths; agent-mux still does not expose those paths as subagent dispatch.
   resultSynthesisPolicy: model-direct
   resultSynthesisNotes: |
     Final text is streamed via the OpenAI-compatible streaming protocol.

@@ -9,17 +9,38 @@ attributes:
   nativeExtensionManifestPath: ""
   nativeExtensionsDirectoryPath: []
   skillFormat: none
-  skillsDirectoryPath: []
+  skillsDirectoryPath:
+  - ~/.qwen/skills/
+  - .qwen/skills/
+  - <qwen-code-package>/skills/
   customSlashCommandsPath: []
   subagentsDirectoryPath: []
   hooksDirectoryOrConfigPath: []
   settingsFiles:
   - ~/.qwen/settings.json
+  - .qwen/settings.json
+  - QWEN.md
+  - .qwen/QWEN.local.md
   pluginRegistryPath: ""
   capabilityProfileRegistry: false
   launchConfigRegistry: false
   platformIdentityStrategy: api-key
   updateChannelMechanism: npm
+  launchBehavior:
+    promptExtraFlags:
+    - "--worktree"
+    notes: |
+      Qwen Code 0.16.2 adds a startup --worktree flag with symlinkDirectories
+      and PR-ref support. agent-mux does not yet have a typed RunOptions
+      worktree field, so this is tracked as launch metadata for future adapter
+      wiring.
+  headlessModeNotes: |
+    Qwen Code 0.16.2 adds headless / non-interactive runaway-protection
+    guardrails. Preserve those upstream limits when wrapping qwen in unattended
+    orchestration.
+  skillNotes: |
+    Qwen Code 0.16.2 ships a built-in memory-leak-debug skill for heap snapshot
+    diagnosis. The graph records the skill as skill:qwen-memory-leak-debug.
   windowsInstallNotes: |
     Qwen Code 0.16.2 keeps the npm package unchanged and renormalizes CRLF
     storage for the upstream install-qwen-standalone.bat script. Babysitter does

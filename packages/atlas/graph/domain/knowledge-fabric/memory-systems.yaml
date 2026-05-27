@@ -374,6 +374,27 @@ edges:
     - target: layer:12-knowledge-fabric
 ---
 nodeKind: MemorySystem
+id: memory-system:qwen-code-memory
+attributes:
+  displayName: "Qwen Code Memory"
+  description: |
+    Qwen Code's instruction-file memory system. QWEN.md is the primary
+    persistent project context file, read at session start and injected into
+    the agent context. Qwen Code 0.16.2 adds `.qwen/QWEN.local.md` as a
+    project-local context location for repository-scoped notes that should
+    stay local to the checkout rather than living in shared team memory.
+  memoryKind: file-based
+  persistence: project-scoped
+  autoExtraction: false
+  consolidation: manual
+  storageFormat: markdown
+  privacyFilter: false
+  deduplication: none
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: MemorySystem
 id: memory-system:amp-memory
 attributes:
   displayName: "Amp Memory"

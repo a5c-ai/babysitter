@@ -1,0 +1,30 @@
+nodeKind: Skill
+id: skill:qwen-memory-leak-debug
+attributes:
+  displayName: "Qwen Memory Leak Debug"
+  description: |
+    Built-in Qwen Code skill added in 0.16.2 for diagnosing memory leaks with
+    heap snapshots. The skill guides collection and interpretation of heap
+    snapshot evidence during long-running Qwen Code sessions.
+  kind: portable-skill
+  invocationMode: model-invoked
+  entrypoint: SKILL.md
+  provenance: built-in
+  version: "0.16.2"
+  releasedAt: "2026-05-27"
+  domains:
+    - domain:software-engineering
+  sourceRef: source-ref:qwen-code-github
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:optimization
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:qwen-code-github
+    - target: evidence:qwen-code-release-v0-16-2
+  addresses:
+    - target: skill-area:observability-instrumentation
+    - target: skill-area:profiling-memory
