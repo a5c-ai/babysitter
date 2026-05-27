@@ -129,12 +129,60 @@ attributes:
   direction: event
   blocking: false
   family: shell-hook
+  payloadSchema:
+    type: object
+    required: [hook_event_name, source]
+    properties:
+      hook_event_name: { type: string, const: "SessionStart" }
+      source: { type: string, enum: [startup, resume] }
+      cwd: { type: string }
+      session_id: { type: string }
+      transcript_path: { type: string }
+      hookSpecificOutput:
+        type: object
+        properties:
+          sessionTitle: { type: string }
+      reloadSkills: { type: boolean }
   description: |
-    Claude Code's SessionStart hook. Fires when a session begins.
+    Claude Code's SessionStart hook. Fires when a session begins or
+    resumes. As of v2.1.152, hook output can request a same-session skill
+    rescan with reloadSkills: true and can set hookSpecificOutput.sessionTitle.
 edges:
   emits_hook:
     - target: agentVersion:claude:ge-0-0-0
       attrs: { since: "1.0.0" }
+---
+nodeKind: HookSurface
+id: hook-surface:claude.message-display
+attributes:
+  eventName: "MessageDisplay (Claude)"
+  displayName: "MessageDisplay (Claude)"
+  kind: native
+  originVendor: Anthropic
+  direction: post
+  blocking: true
+  family: display-hook
+  payloadSchema:
+    type: object
+    required: [hook_event_name, message]
+    properties:
+      hook_event_name: { type: string, const: "MessageDisplay" }
+      message: { type: string }
+      session_id: { type: string }
+      transcript_path: { type: string }
+      hookSpecificOutput:
+        type: object
+        properties:
+          message: { type: string }
+          hide: { type: boolean }
+  description: |
+    Claude Code's MessageDisplay hook. Introduced in v2.1.152 to let hooks
+    transform or hide assistant text at display time without changing the
+    underlying transcript.
+edges:
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0
+      attrs: { since: "2.1.152" }
 ---
 nodeKind: HookSurface
 id: hook-surface:claude.session-end

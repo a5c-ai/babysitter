@@ -219,6 +219,14 @@ describe("agent-catalog graph-backed ontology", () => {
 
     const evidence = getOntologyEvidenceSource("claude-code-2-1-152-release");
     expect(evidence?.sourcePathOrUrl).toContain("anthropics/claude-code/releases/tag/v2.1.152");
+
+    expect(graph.nodes.find((entry) => entry.id === "hook-surface:claude.message-display")).toBeDefined();
+    expect(listOntologyNodesByKind("InteractionPrimitive").find((entry) => entry.id === "interaction-primitive:slash-reload-skills")).toBeDefined();
+    expect(listOntologyNodesByKind("FrontmatterField").find((entry) => entry.id === "frontmatter-field:skill-disallowed-tools")).toBeDefined();
+
+    const platform = listOntologyNodesByKind("AgentPlatformImpl").find((entry) => entry.id === "agent-platform-impl:claude-code.platform@1.x");
+    expect(JSON.stringify(platform)).toContain("pluginSuggestionMarketplaces");
+    expect(JSON.stringify(platform)).toContain("--scope project");
   });
 
   it("records OpenCode 1.15.11 upstream release assimilation", () => {

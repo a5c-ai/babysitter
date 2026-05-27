@@ -23,11 +23,13 @@ import type {
 
 const AGENT_CATALOG_KINDS = new Set([
   "AdapterModel", "AgentProduct", "AgentVersion", "Capability", "CapabilitySupport",
-  "CiSurface", "Claim", "DiscoverySignal", "EvidenceSource",
+  "AgentPlatformImpl", "CiSurface", "Claim", "DiscoverySignal", "EvidenceSource",
+  "FrontmatterField",
   "HookMapping", "HookSurface", "LifecycleSemantics", "Modality",
   "ModelFamily", "ModelProviderProduct", "ModelProviderVersion", "ModelVersion",
   "PackageSurface", "PathDescriptor", "PluginArtifact", "PluginTarget",
   "ProcessDescriptor", "ProviderTranslation", "SessionSemantics", "TransportProtocol", "TransportRuntime",
+  "InteractionPrimitive",
 ]);
 
 function isAgentCatalogRecord(record: AtlasRecord): boolean {

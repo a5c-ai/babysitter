@@ -16,6 +16,10 @@ attributes:
   notes: |
     Release notes list user-facing CLI, hook, skill, plugin, fallback-model,
     auto-mode, and TUI changes assimilated into the Claude Code version record.
+    Structured graph updates cover MessageDisplay, SessionStart reloadSkills
+    and sessionTitle output, disallowed-tools frontmatter, /reload-skills,
+    pluginSuggestionMarketplaces, marketplace remove --scope, fallback-model
+    session persistence, and auto mode's no-consent behavior.
 edges:
   has_trust_level:
     - trust-level:official-web

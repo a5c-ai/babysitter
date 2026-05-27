@@ -50,6 +50,15 @@ attributes:
   - list
   - update
   - remove
+  marketplaceCommandOptions:
+    remove:
+    - --scope user
+    - --scope project
+    - --scope local
+  managedSettings:
+    pluginSuggestionMarketplaces:
+      valueType: list
+      description: Organization allowlist for context-aware plugin suggestions.
   pluginCommands:
   - install
   - disable
@@ -150,6 +159,7 @@ edges:
   - target: frontmatter-field:skill-disable-model-invocation
   - target: frontmatter-field:skill-user-invocable
   - target: frontmatter-field:skill-allowed-tools
+  - target: frontmatter-field:skill-disallowed-tools
   - target: frontmatter-field:skill-model
   - target: frontmatter-field:skill-effort
   - target: frontmatter-field:skill-context

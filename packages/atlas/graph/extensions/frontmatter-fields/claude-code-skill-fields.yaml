@@ -81,6 +81,16 @@ attributes:
   description: Tool allowlist scoped to this skill's invocation.
 ---
 nodeKind: FrontmatterField
+id: frontmatter-field:skill-disallowed-tools
+attributes:
+  displayName: "Skill/slash command frontmatter: disallowed-tools"
+  name: disallowed-tools
+  valueType: list
+  required: "no"
+  appliesTo: skill-or-slash-command
+  description: Tool denylist scoped to the active skill or slash command invocation. Introduced in Claude Code v2.1.152.
+---
+nodeKind: FrontmatterField
 id: frontmatter-field:skill-model
 attributes:
   displayName: "Skill frontmatter: model"

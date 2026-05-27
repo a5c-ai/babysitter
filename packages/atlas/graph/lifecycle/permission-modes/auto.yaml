@@ -11,4 +11,6 @@ attributes:
     Per-call classifier decides whether to gate or auto-allow. The classifier
     inspects tool name, arguments, and recent context to choose between
     auto-allow / prompt / deny. Promoted from `permissionModes:
-    [auto]` flat-list attribute.
+    [auto]` flat-list attribute. Claude Code v2.1.152 removed the previous
+    opt-in consent requirement for auto mode, so this mode is modeled with
+    requiresUserConsent: false.
