@@ -98,7 +98,7 @@ export function buildPrimaryLiveStackCommands(
         '--prompt',
         prompt,
         '--max-turns',
-        String(resolveLaunchMaxTurns(scenario)),
+        String(resolveLaunchMaxTurns(scenario, options.env['LIVE_STACK_PROCESS_MODE'])),
         '--non-interactive',
         '--json',
       ],
@@ -147,7 +147,7 @@ export function buildPrimaryLiveStackCommands(
       '--prompt',
       prompt,
       '--max-turns',
-      String(resolveLaunchMaxTurns(scenario)),
+      String(resolveLaunchMaxTurns(scenario, options.env['LIVE_STACK_PROCESS_MODE'])),
       ...(() => {
         if (isInteractive && process.stdin.isTTY) return [];
         if (isInteractive && !process.stdin.isTTY) {
@@ -246,13 +246,15 @@ function bridgeFlags(env: Record<string, string | undefined>): string[] {
   return flags;
 }
 
-function resolveLaunchMaxTurns(scenario: LiveStackScenario): number {
+function resolveLaunchMaxTurns(scenario: LiveStackScenario, processMode = 'predefined'): number {
   if (scenario.agent.agent === 'agent-platform') {
     return 1;
   }
   if (scenario.agent.installMode === 'babysitter-plugin') {
     // Claude-code needs more turns through the proxy for babysitter orchestration
-    return scenario.agent.agent === 'claude-code' ? 60 : 30;
+    if (scenario.agent.agent === 'claude-code') return 60;
+    if (processMode === 'create' && scenario.agent.agent === 'pi') return 60;
+    return 30;
   }
   return 15;
 }
@@ -500,24 +502,15 @@ function buildPrompt(scenario: LiveStackScenario, traceId: string, env: Record<s
     const processMode = env['LIVE_STACK_PROCESS_MODE'] ?? 'predefined';
     if (processMode === 'create') {
       const createInstructions = [
-        'STEP 1 — Read the skeleton at .a5c/processes/odyssey-live-test.skeleton.mjs.',
-        'Create .a5c/processes/odyssey-live-test.mjs by filling in the skeleton.',
-        'Do NOT use any existing process file — you MUST write odyssey-live-test.mjs yourself.',
-        'Requirements:',
-        '- Replace all <FILL> placeholders with real implementations',
-        '- import { defineTask } from "@a5c-ai/babysitter-sdk"',
-        '- export async function process(inputs, ctx) { ... }',
-        '- Define at least 3 tasks using defineTask()',
-        '- Use ctx.parallel.all() for concurrent work',
-        '- Include a // @reference comment listing process library paths you researched',
-        '- Write the final markdown to <outputDir>/<traceId>-odyssey.md',
-        '- The document must have 12 paragraph headings and Greek characters',
-        'Write this file to disk before proceeding.',
+        'CREATE odyssey-live-test.mjs: read .a5c/processes/odyssey-live-test.skeleton.mjs, then write your completed process to .a5c/processes/odyssey-live-test.mjs.',
+        'Do not use .a5c/processes/summarize-translate-test.mjs or any existing process file.',
+        'Keep the created file self-contained and preserve the @reference comment in the skeleton.',
         '',
-        'STEP 2 — Verify: run `node -e "import(\'.a5c/processes/odyssey-live-test.mjs\').then(m => console.log(typeof m.process))"` — must print "function".',
-        'If it fails, fix the syntax error and retry.',
+        'CHECK odyssey-live-test.mjs: confirm the file exists, has no unresolved placeholders, imports defineTask, exports process, and imports successfully with:',
+        '`node -e "import(\'.a5c/processes/odyssey-live-test.mjs\').then(m => console.log(typeof m.process))"`',
+        'The command must print "function"; if not, fix the file and check again before continuing.',
         '',
-        `STEP 3 — ${coreTask}. Use ONLY the process at .a5c/processes/odyssey-live-test.mjs (the one you created).`,
+        `RUN the process: ${coreTask}. Use only .a5c/processes/odyssey-live-test.mjs, the process you created.`,
       ].join('\n');
       if (scenario.agent.agent === 'claude-code') return `/babysitter:call ${createInstructions}`;
       if (scenario.agent.agent === 'codex') return `$babysitter:call ${createInstructions}`;
@@ -722,6 +715,29 @@ function firstMatch(value: string, pattern: RegExp): string | undefined {
   return pattern.exec(value)?.[1];
 }
 
+function validateCreatedProcessContent(processContent: string): string[] {
+  const failures: string[] = [];
+  if (/<FILL/.test(processContent)) {
+    failures.push('unresolved <FILL> placeholder');
+  }
+  if (!/@reference/.test(processContent)) {
+    failures.push('missing @reference marker');
+  }
+  if (!/\bexport\s+(?:async\s+)?function\s+process\b/.test(processContent)) {
+    failures.push('missing exported process function');
+  }
+  if (!/\bdefineTask\s*\(/.test(processContent)) {
+    failures.push('missing defineTask task definition');
+  }
+  if (!/\bctx\.parallel\.all\s*\(/.test(processContent)) {
+    failures.push('missing ctx.parallel.all usage');
+  }
+  if (/summarize-translate-test\.mjs/.test(processContent)) {
+    failures.push('references summarize-translate-test.mjs');
+  }
+  return failures;
+}
+
 async function validateAgentBehavior(
   scenario: LiveStackScenario,
   cwd: string,
@@ -779,10 +795,13 @@ async function validateAgentBehavior(
     const processFile = path.join(cwd, '.a5c', 'processes', 'odyssey-live-test.mjs');
     let processContent = '';
     try { processContent = await fs.readFile(processFile, 'utf8'); } catch { /* */ }
-    if (processContent && /@reference/.test(processContent)) {
-      entries.push({ name: 'process-creation', status: 'passed', detail: `process file created with @reference marker (${processContent.length} bytes)` });
-    } else if (processContent) {
-      entries.push({ name: 'process-creation', status: 'failed', detail: `process file exists (${processContent.length} bytes) but missing @reference marker` });
+    if (processContent) {
+      const processFailures = validateCreatedProcessContent(processContent);
+      if (processFailures.length === 0) {
+        entries.push({ name: 'process-creation', status: 'passed', detail: `process file created with required create-mode markers (${processContent.length} bytes)` });
+      } else {
+        entries.push({ name: 'process-creation', status: 'failed', detail: `process file exists (${processContent.length} bytes) but ${processFailures.join('; ')}` });
+      }
     } else {
       deferredProcessCreationEntries.push({ name: 'process-creation', status: 'pending' as 'passed', detail: 'no .a5c/processes/odyssey-live-test.mjs file created by the agent before run proof' });
     }
