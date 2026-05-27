@@ -683,6 +683,18 @@ function CuratedModelCatalog({ org, services, onDeploy }) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || `Failed with status ${res.status}`);
       }
+      // Auto-create a model route so it's immediately available through the gateway
+      fetch(`/api/orgs/${org}/inference/routes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `route-${model.id}`,
+          modelName: model.name,
+          routeType: 'internal',
+          inferenceServiceRef: model.id,
+          protocol: 'v2',
+        }),
+      }).catch(() => {});
       setDeployResult({ success: true, model });
       if (onDeploy) onDeploy();
     } catch (err) {
