@@ -1,0 +1,86 @@
+nodeKind: ModelVersion
+id: model:gpt-oss-120b@current
+attributes:
+  displayName: "gpt-oss-120b"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:gpt-oss
+  versionRange: '>=120.0.0 <121.0.0'
+  kind: reasoning
+  contextWindowTokens: 131072
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-08-05'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-08-05'
+  modelCardUrl: https://huggingface.co/openai/gpt-oss-120b
+  supportsFineTuning: true
+  fineTuningKind: full
+  license: apache-2.0
+  parameterCount: 117000000000
+  activeParameterCount: 5100000000
+  requiredPromptFormat: harmony
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:gpt-oss
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:gpt-oss
+  served_by:
+    - provider:ollama
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:streaming
+      versionRange: '>=120.0.0 <121.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:openai-gpt-oss-120b-model-card
+    - target: capability:supports-text-streaming
+      versionRange: '>=120.0.0 <121.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:openai-gpt-oss-120b-model-card
+    - target: capability:supports-thinking
+      versionRange: '>=120.0.0 <121.0.0'
+      level: full
+      notes: "OpenAI describes gpt-oss as a reasoning model with configurable reasoning effort."
+      evidenceSourceIds:
+        - evidence:openai-gpt-oss-120b-model-card
+    - target: capability:extended-thinking
+      versionRange: '>=120.0.0 <121.0.0'
+      level: full
+      notes: "The model card exposes full chain-of-thought for debugging; applications should not show it to end users."
+      evidenceSourceIds:
+        - evidence:openai-gpt-oss-120b-model-card
+    - target: capability:supports-thinking-streaming
+      versionRange: '>=120.0.0 <121.0.0'
+      level: partial
+      notes: "Reasoning output depends on the selected OpenAI-compatible inference server."
+      evidenceSourceIds:
+        - evidence:openai-gpt-oss-120b-model-card
+    - target: capability:supports-tool-use
+      versionRange: '>=120.0.0 <121.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:openai-gpt-oss-120b-model-card
+    - target: capability:requires-tool-approval
+      versionRange: '>=120.0.0 <121.0.0'
+      level: full
+      notes: "Open-weights model deployed through local or third-party runtimes; tool execution is governed by the agent/runtime layer."
+      evidenceSourceIds:
+        - evidence:openai-gpt-oss-120b-model-card
+  supports_effort_level:
+    - target: effort-level:low
+    - target: effort-level:medium
+    - target: effort-level:high

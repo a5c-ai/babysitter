@@ -1,0 +1,205 @@
+nodeKind: Claim
+id: claim:model-version-model-gpt-oss-120b-current-identity
+attributes:
+  subjectId: model:gpt-oss-120b@current
+  attribute: id
+  value: model:gpt-oss-120b@current
+  subjectKind: ModelVersion
+  statement: model:gpt-oss-120b@current tracks OpenAI gpt-oss-120b, the larger gpt-oss open-weight reasoning model.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-gpt-oss-120b-model-card
+    - evidence:openai-gpt-oss-cookbook-topic
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for OpenAI gpt-oss model identity.
+edges:
+  backed_by_evidence:
+    - evidence:openai-gpt-oss-120b-model-card
+    - evidence:openai-gpt-oss-cookbook-topic
+  about_subject:
+    - model:gpt-oss-120b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-oss-20b-current-identity
+attributes:
+  subjectId: model:gpt-oss-20b@current
+  attribute: id
+  value: model:gpt-oss-20b@current
+  subjectKind: ModelVersion
+  statement: model:gpt-oss-20b@current tracks OpenAI gpt-oss-20b, the smaller gpt-oss open-weight reasoning model.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-gpt-oss-20b-model-card
+    - evidence:openai-gpt-oss-cookbook-topic
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for OpenAI gpt-oss model identity.
+edges:
+  backed_by_evidence:
+    - evidence:openai-gpt-oss-20b-model-card
+    - evidence:openai-gpt-oss-cookbook-topic
+  about_subject:
+    - model:gpt-oss-20b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-oss-120b-current-contextwindowtokens
+attributes:
+  subjectId: model:gpt-oss-120b@current
+  attribute: contextWindowTokens
+  value: '131072'
+  subjectKind: ModelVersion
+  statement: model:gpt-oss-120b@current contextWindowTokens is 131072.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-gpt-oss-120b-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: The Hugging Face config for openai/gpt-oss-120b sets max_position_embeddings to 131072.
+edges:
+  backed_by_evidence:
+    - evidence:openai-gpt-oss-120b-model-card
+  about_subject:
+    - model:gpt-oss-120b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-oss-20b-current-contextwindowtokens
+attributes:
+  subjectId: model:gpt-oss-20b@current
+  attribute: contextWindowTokens
+  value: '131072'
+  subjectKind: ModelVersion
+  statement: model:gpt-oss-20b@current contextWindowTokens is 131072.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-gpt-oss-20b-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: The Hugging Face config for openai/gpt-oss-20b sets max_position_embeddings to 131072.
+edges:
+  backed_by_evidence:
+    - evidence:openai-gpt-oss-20b-model-card
+  about_subject:
+    - model:gpt-oss-20b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-oss-current-release-date
+attributes:
+  subjectId: model-family:gpt-oss
+  attribute: releaseDate
+  value: '2025-08-05'
+  subjectKind: ModelFamily
+  statement: OpenAI announced the gpt-oss open-weight model family on 2025-08-05.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-gpt-oss-announcement
+    - evidence:openai-gpt-oss-120b-model-card
+    - evidence:openai-gpt-oss-20b-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: The announcement URL is the canonical OpenAI launch source; model-card citations record the 2025 model-card publication year.
+edges:
+  backed_by_evidence:
+    - evidence:openai-gpt-oss-announcement
+    - evidence:openai-gpt-oss-120b-model-card
+    - evidence:openai-gpt-oss-20b-model-card
+  about_subject:
+    - model-family:gpt-oss
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-oss-current-license
+attributes:
+  subjectId: model-family:gpt-oss
+  attribute: license
+  value: apache-2.0
+  subjectKind: ModelFamily
+  statement: OpenAI gpt-oss model cards publish gpt-oss-120b and gpt-oss-20b under the Apache 2.0 license.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-gpt-oss-120b-model-card
+    - evidence:openai-gpt-oss-20b-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for open-weight licensing.
+edges:
+  backed_by_evidence:
+    - evidence:openai-gpt-oss-120b-model-card
+    - evidence:openai-gpt-oss-20b-model-card
+  about_subject:
+    - model-family:gpt-oss
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-oss-current-reasoning
+attributes:
+  subjectId: model-family:gpt-oss
+  attribute: supportsThinking
+  value: 'true'
+  subjectKind: ModelFamily
+  statement: gpt-oss models support configurable reasoning effort and expose reasoning output to the serving application.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-gpt-oss-120b-model-card
+    - evidence:openai-gpt-oss-20b-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: User-facing products should not expose full chain-of-thought even when available to the application.
+edges:
+  backed_by_evidence:
+    - evidence:openai-gpt-oss-120b-model-card
+    - evidence:openai-gpt-oss-20b-model-card
+  about_subject:
+    - model-family:gpt-oss
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-oss-current-ollama-serving
+attributes:
+  subjectId: provider:ollama
+  attribute: serves
+  value: model:gpt-oss-120b@current, model:gpt-oss-20b@current
+  subjectKind: Provider
+  statement: OpenAI gpt-oss model cards document Ollama commands for running gpt-oss-120b and gpt-oss-20b locally.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-gpt-oss-120b-model-card
+    - evidence:openai-gpt-oss-20b-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Provider pricing for hosted deployments is separate from the open-weight model metadata.
+edges:
+  backed_by_evidence:
+    - evidence:openai-gpt-oss-120b-model-card
+    - evidence:openai-gpt-oss-20b-model-card
+  about_subject:
+    - provider:ollama

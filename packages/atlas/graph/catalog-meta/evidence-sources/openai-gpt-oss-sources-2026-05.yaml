@@ -1,0 +1,75 @@
+nodeKind: EvidenceSource
+id: evidence:openai-gpt-oss-cookbook-topic
+attributes:
+  displayName: "OpenAI Developers Cookbook - gpt-oss topic"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://developers.openai.com/cookbook/topic/gpt-oss
+  sourcePathOrUrl: https://developers.openai.com/cookbook/topic/gpt-oss
+  locator: "gpt-oss topic page and article index"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:openai-gpt-oss-120b-model-card
+attributes:
+  displayName: "OpenAI - gpt-oss-120b model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/openai/gpt-oss-120b
+  sourcePathOrUrl: https://huggingface.co/openai/gpt-oss-120b
+  locator: "model card - model size, license, reasoning, serving, and fine-tuning sections"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:openai-gpt-oss-20b-model-card
+attributes:
+  displayName: "OpenAI - gpt-oss-20b model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/openai/gpt-oss-20b
+  sourcePathOrUrl: https://huggingface.co/openai/gpt-oss-20b
+  locator: "model card - model size, license, reasoning, serving, and fine-tuning sections"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:openai-gpt-oss-announcement
+attributes:
+  displayName: "OpenAI - Introducing gpt-oss"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://openai.com/index/introducing-gpt-oss/
+  sourcePathOrUrl: https://openai.com/index/introducing-gpt-oss/
+  locator: "announcement page"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web

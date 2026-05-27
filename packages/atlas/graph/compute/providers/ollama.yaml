@@ -34,6 +34,8 @@ edges:
   realizes:
     - target: layer:2-provider
   serves:
+    - model:gpt-oss-120b@current
+    - model:gpt-oss-20b@current
     - model:llama-3-3-70b-instruct@current
     - model:gemma-2-27b@current
   emits_message_type:
