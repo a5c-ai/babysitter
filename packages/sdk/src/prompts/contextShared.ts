@@ -3,17 +3,23 @@ import type { PromptContext } from "./types";
 const DEFAULT_PLATFORM = typeof process !== "undefined" ? process.platform : "linux";
 
 const DEFAULT_CLI_SETUP_SNIPPET = [
-  'Use the installed CLI alias:',
+  'Read the SDK version from `versions.json` when available, otherwise use the latest SDK:',
   '',
   '```bash',
-  'CLI="babysitter"',
+  'SDK_VERSION=$(node -e "try{console.log(JSON.parse(require(\'fs\').readFileSync(\'versions.json\',\'utf8\')).sdkVersion||\'latest\')}catch{console.log(\'latest\')}")',
   '```',
   '',
-  'If it is not available on the path, use:',
+  'Use an installed `babysitter` command only after proving it can execute:',
   '',
   '```bash',
-  'CLI="npx -y @a5c-ai/babysitter-sdk"',
+  'if command -v babysitter >/dev/null 2>&1 && babysitter --version >/dev/null 2>&1; then',
+  '  CLI="babysitter"',
+  'else',
+  '  CLI="npm exec --yes --package @a5c-ai/babysitter-sdk@$SDK_VERSION -- babysitter"',
+  'fi',
   '```',
+  '',
+  'If a stale or broken global shim fails with `MODULE_NOT_FOUND`, repair it with `npm rm -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk && npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION`, then re-run `babysitter --version`.',
 ].join('\n');
 
 const INTERNAL_CLI_SETUP_SNIPPET = [
@@ -29,11 +35,19 @@ const CLAUDE_CODE_CLI_SETUP_SNIPPET = [
   '',
   '```bash',
   'SDK_VERSION=$(node -e "try{console.log(JSON.parse(require(\'fs\').readFileSync(\'${CLAUDE_PLUGIN_ROOT}/versions.json\',\'utf8\')).sdkVersion||\'latest\')}catch{console.log(\'latest\')}")',
-  'npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION',
-  'CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"',
   '```',
   '',
-  'If `babysitter` is already installed globally at the correct version, you may use `CLI="babysitter"` instead.',
+  'Use an installed `babysitter` command only after proving it can execute:',
+  '',
+  '```bash',
+  'if command -v babysitter >/dev/null 2>&1 && babysitter --version >/dev/null 2>&1; then',
+  '  CLI="babysitter"',
+  'else',
+  '  CLI="npm exec --yes --package @a5c-ai/babysitter-sdk@$SDK_VERSION -- babysitter"',
+  'fi',
+  '```',
+  '',
+  'If a stale or broken global shim fails with `MODULE_NOT_FOUND`, repair it with `npm rm -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk && npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION`, then re-run `babysitter --version`.',
 ].join('\n');
 
 const COMMON_DEFAULTS: Partial<PromptContext> = {
