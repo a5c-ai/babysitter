@@ -127,7 +127,7 @@ specific CLI commands involved.
 #### Checklist
 
 - [ ] Determine the SDK version to install (from plugin manifest or pinned version)
-- [ ] Attempt global install; fall back to local prefix install; fall back to npx
+- [ ] Attempt global install; fall back to local prefix install; fall back to explicit-bin npm exec
 - [ ] Gate installation behind a marker file to avoid repeated install attempts
 - [ ] Verify the CLI is callable: `babysitter version --json`
 
@@ -141,7 +141,7 @@ function ensureBabysitterCLI(sdkVersion):
         return "babysitter"
 
     if fileExists(markerFile):
-        // Already tried installing; fall through to npx
+        // Already tried installing; fall through to explicit-bin npm exec
     else:
         // Attempt global install
         result = shell("npm install -g @a5c-ai/babysitter-sdk@{sdkVersion}")
@@ -153,8 +153,8 @@ function ensureBabysitterCLI(sdkVersion):
     if commandExists("babysitter"):
         return "babysitter"
 
-    // Final fallback: use npx on every invocation
-    return "npx -y @a5c-ai/babysitter-sdk@{sdkVersion} babysitter"
+    // Final fallback: use explicit-bin npm exec on every invocation
+    return "npm exec --yes --package @a5c-ai/babysitter-sdk@{sdkVersion} -- babysitter"
 ```
 
 #### CLI Command
@@ -1842,7 +1842,6 @@ main().catch(err => { console.error(err); process.exit(1); });
 | `babysitter session:check-iteration --session-id ID --state-dir DIR --json` | Check iteration guards | 2g |
 | `babysitter run:repair-journal RUNDIR --json` | Repair inconsistent journal | 7 |
 | `babysitter hook:run --hook-type TYPE --harness NAME --json` | Dispatch a lifecycle hook | 5 |
-
 
 
 

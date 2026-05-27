@@ -145,6 +145,14 @@ added 1 packages in 15s
 babysitter --version
 ```
 
+If `babysitter` exists on PATH but fails with `MODULE_NOT_FOUND`, remove the stale global shim and reinstall the SDK-backed CLI:
+
+```bash
+npm rm -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk
+npm install -g @a5c-ai/babysitter-sdk@latest
+babysitter --version
+```
+
 #### Step 2: Install the Optional Runtime CLI
 
 Install this only if you need `agent-platform` commands for headless orchestration, the internal harness, daemon utilities, MCP serving, or the TUI:

@@ -1,17 +1,19 @@
 'use strict';
 
 const path = require('path');
+
+const PACKAGE_ROOT = path.resolve(__dirname, '..');
+const UNIFIED_PLUGIN_ROOT = path.resolve(PACKAGE_ROOT, '..', '..');
+const REPO_ROOT = path.resolve(UNIFIED_PLUGIN_ROOT, '..', '..');
 const {
   listMarkdownBasenames,
   reportCheckResult,
   syncCommandMirrors,
   syncSkillsFromCommands,
   writeFileIfChanged,
-} = require('../../../scripts/plugin-command-sync-lib.cjs');
+} = require(path.join(REPO_ROOT, 'scripts', 'plugin-command-sync-lib.cjs'));
 
-const PACKAGE_ROOT = path.resolve(__dirname, '..');
-const REPO_ROOT = path.resolve(PACKAGE_ROOT, '..', '..');
-const ROOT_COMMANDS = path.join(REPO_ROOT, 'plugins', 'babysitter', 'commands');
+const ROOT_COMMANDS = path.join(UNIFIED_PLUGIN_ROOT, 'commands');
 const COMMANDS_ROOT = path.join(PACKAGE_ROOT, 'commands');
 const SKILLS_ROOT = path.join(PACKAGE_ROOT, 'skills');
 const LABEL = 'babysitter-pi sync';
@@ -35,21 +37,27 @@ Read the SDK version from \`versions.json\` to ensure version compatibility:
 PLUGIN_ROOT="\${PI_PLUGIN_ROOT:-\$(pwd)}"
 SDK_VERSION=$(node -e "try{const fs=require('fs');const path=require('path');const pluginRoot=process.env.PI_PLUGIN_ROOT||process.env.PLUGIN_ROOT||process.cwd();const probes=[path.join(pluginRoot,'versions.json'),path.join(pluginRoot,'plugins','babysitter-pi','versions.json'),path.join(pluginRoot,'node_modules','@a5c-ai','babysitter-pi','versions.json'),path.join(process.cwd(),'node_modules','@a5c-ai','babysitter-pi','versions.json')];for(const probe of probes){if(fs.existsSync(probe)){console.log(JSON.parse(fs.readFileSync(probe,'utf8')).sdkVersion||'latest');process.exit(0)}}console.log('latest')}catch{console.log('latest')}")
 npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
-CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"
+if command -v babysitter >/dev/null 2>&1 && babysitter --version >/dev/null 2>&1; then
+  CLI="babysitter"
+else
+  CLI="npm exec --yes --package @a5c-ai/babysitter-sdk@$SDK_VERSION -- babysitter"
+fi
 \`\`\`
+
+If a stale or broken global shim fails with \`MODULE_NOT_FOUND\`, repair it with \`npm rm -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk && npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION\`, then re-run \`babysitter --version\`.
 
 ## Instructions
 
 Run the following command to get full orchestration instructions:
 
 \`\`\`bash
-babysitter instructions:babysit-skill --harness pi --interactive
+$CLI instructions:babysit-skill --harness pi --interactive
 \`\`\`
 
 For non-interactive mode:
 
 \`\`\`bash
-babysitter instructions:babysit-skill --harness pi --no-interactive
+$CLI instructions:babysit-skill --harness pi --no-interactive
 \`\`\`
 
 Follow the instructions returned by the command above to orchestrate the run.

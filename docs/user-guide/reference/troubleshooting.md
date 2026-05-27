@@ -105,27 +105,35 @@ Error: Cannot find module '@a5c-ai/babysitter-sdk'
 ```bash
 npm list -g @a5c-ai/babysitter-sdk
 which babysitter
+babysitter --version
 echo $PATH
 ```
 
 **Solutions:**
 
-1. **Install the main CLI globally:**
+1. **Repair a stale global shim:**
+   ```bash
+   npm rm -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk
+   npm install -g @a5c-ai/babysitter-sdk@latest
+   babysitter --version
+   ```
+
+2. **Use npm exec with an explicit package/bin when you cannot modify globals:**
+   ```bash
+   npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter --version
+   ```
+
+3. **Install the main CLI globally:**
    ```bash
    npm install -g @a5c-ai/babysitter@latest
    ```
 
-2. **Use npx (always works for the main CLI):**
-   ```bash
-   npx -y @a5c-ai/babysitter@latest --version
-   ```
-
-3. **If your code imports the SDK, install it in the project too:**
+4. **If your code imports the SDK, install it in the project too:**
    ```bash
    npm install @a5c-ai/babysitter-sdk
    ```
 
-4. **Check PATH includes npm global bin:**
+5. **Check PATH includes npm global bin:**
    ```bash
    npm bin -g
    # Add this to your PATH if not included

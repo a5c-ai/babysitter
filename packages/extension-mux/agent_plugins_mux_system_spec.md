@@ -1976,8 +1976,8 @@ if [ "$NEEDS_SDK_INSTALL" = true ] && [ ! -f "$SDK_MARKER_FILE" ]; then
   echo "$SDK_VERSION" > "$SDK_MARKER_FILE" 2>/dev/null
 fi
 
-if ! command -v babysitter &>/dev/null; then
-  babysitter() { npx -y "@a5c-ai/babysitter-sdk@${SDK_VERSION}" "$@"; }
+if ! command -v babysitter &>/dev/null || ! babysitter --version &>/dev/null; then
+  babysitter() { npm exec --yes --package "@a5c-ai/babysitter-sdk@${SDK_VERSION}" -- babysitter "$@"; }
   export -f babysitter
 fi
 

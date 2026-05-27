@@ -183,7 +183,7 @@ babysitter-session-start-hook.sh
         |       |       |
         |       |       +-- [marker exists] Skip install
         |       |
-        |       +-- [still not found] Create npx fallback function
+        |       +-- [still not found] Create explicit-bin npm exec fallback function
         |
         +-- 3. Capture stdin to temp file (clean EOF for Node.js)
         |
@@ -229,7 +229,7 @@ The shell script uses a four-tier fallback for CLI availability:
 | 1 | Global `babysitter` binary | Already on PATH |
 | 2 | `npm i -g` (global install) | Marker file absent, permissions OK |
 | 3 | `npm i -g --prefix $HOME/.local` | Global install fails (permissions) |
-| 4 | `npx -y @a5c-ai/babysitter-sdk@{version}` | All installs failed |
+| 4 | `npm exec --yes --package @a5c-ai/babysitter-sdk@{version} -- babysitter` | All installs failed |
 
 The marker file (`{PLUGIN_ROOT}/.babysitter-install-attempted`) prevents repeated install attempts.
 
