@@ -1,0 +1,67 @@
+{
+  "issueNumber": 339,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-339-claude-bi-live-stack",
+  "targetFiles": [
+    "packages/agent-mux/launch/src/launch.ts",
+    "packages/agent-mux/launch/src/bridge-hooks.ts",
+    "packages/agent-mux/cli/src/commands/launch.ts",
+    "packages/agent-mux/cli/src/commands/launch-bridge-hooks.ts",
+    "packages/agent-mux/cli/tests/launch-bridge-interactive.test.ts",
+    "packages/agent-mux/cli/tests/launch-runtime-integration.test.ts",
+    "packages/agent-mux/cli/tests/live-stack/primary-live-runner.test.ts",
+    "packages/agent-mux/cli/tests/live-stack/scenario-contract.test.ts",
+    "packages/agent-mux/cli/tests/live-stack/scenario-contract.ts",
+    "packages/agent-catalog/src/data.ts",
+    "packages/agent-catalog/src/models.ts",
+    "packages/agent-catalog/src/sdk.ts",
+    "packages/sdk/src/harness/amuxFallbackMetadata.ts",
+    "packages/sdk/src/harness/amuxFallbackMetadata.contract.test.ts",
+    ".github/workflows/live-stack.yml"
+  ],
+  "liveVerification": {
+    "workflow": ".github/workflows/live-stack.yml",
+    "ref": "agent/issue-339-claude-bi-live-stack",
+    "requiredOperatingSystems": [
+      "ubuntu-latest-l",
+      "windows-latest"
+    ],
+    "claudeModels": [
+      "foundry-gpt55",
+      "foundry-gpt54mini",
+      "foundry-deepseek",
+      "google-gemini31",
+      "anthropic-sonnet46"
+    ],
+    "requiredCells": [
+      { "agent": "claude", "model": "foundry-gpt55", "mode": "ni", "install": "vanilla", "live": true },
+      { "agent": "claude", "model": "foundry-gpt55", "mode": "bridged-interactive", "install": "vanilla", "live": true },
+      { "agent": "claude", "model": "foundry-gpt55", "mode": "bridged-hooks", "install": "bp", "live": true },
+      { "agent": "claude", "model": "foundry-gpt54mini", "mode": "ni", "install": "vanilla", "live": true },
+      { "agent": "claude", "model": "foundry-gpt54mini", "mode": "bridged-interactive", "install": "vanilla", "live": true },
+      { "agent": "claude", "model": "foundry-gpt54mini", "mode": "bridged-hooks", "install": "bp", "live": true },
+      { "agent": "claude", "model": "foundry-deepseek", "mode": "ni", "install": "vanilla", "live": true },
+      { "agent": "claude", "model": "foundry-deepseek", "mode": "bridged-interactive", "install": "vanilla", "live": true },
+      { "agent": "claude", "model": "foundry-deepseek", "mode": "bridged-hooks", "install": "bp", "live": true },
+      { "agent": "claude", "model": "google-gemini31", "mode": "ni", "install": "vanilla", "live": true },
+      { "agent": "claude", "model": "google-gemini31", "mode": "bridged-interactive", "install": "vanilla", "live": true },
+      { "agent": "claude", "model": "google-gemini31", "mode": "bridged-hooks", "install": "bp", "live": true },
+      { "agent": "claude", "model": "anthropic-sonnet46", "mode": "ni", "install": "vanilla", "live": true },
+      { "agent": "claude", "model": "anthropic-sonnet46", "mode": "bridged-interactive", "install": "vanilla", "live": true },
+      { "agent": "claude", "model": "anthropic-sonnet46", "mode": "bridged-hooks", "install": "bp", "live": true }
+    ],
+    "artifactChecklist": [
+      "agent-mux-events",
+      "transport-mux-trace",
+      "provider-trace-redacted",
+      "plugin-command-transcript for babysitter-plugin lanes",
+      "Live Stack report artifact"
+    ],
+    "acceptanceCriteria": [
+      "Targeted Vitest regression tests fail before the fix and pass after the fix.",
+      "Ubuntu and Windows claude-code bridged-interactive lanes pass for every listed model, with NI lanes passing as controls.",
+      "Ubuntu and Windows claude-code bridged-hooks babysitter-plugin lanes pass for every listed model, or any remaining failure is proven unrelated by artifacts.",
+      "No solution relies on increasing arbitrary sleeps as the primary fix."
+    ]
+  }
+}
