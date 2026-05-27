@@ -14,6 +14,7 @@ attributes:
     - "windows"
   agentProductId: agent:opencode
   versionRange: ">=1.15.11"
+  currentVersion: "1.15.11"
   releasedAt: "2026-05-27"
   releaseNotesUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.15.11"
   assimilationNotes:
@@ -21,7 +22,11 @@ attributes:
     - "Experimental background agents now push updates without polling."
     - "Config can set only modalities.input or modalities.output."
     - "Remote-backed projects now resolve a stable project identity."
-    - "Dynamic MCP servers disconnect cleanly when removed, and the shell tool advertises the configured timeout to the model."
+    - "Dynamic MCP servers disconnect cleanly when removed, resumed sessions no longer continue orphaned interrupted tools, and the shell tool advertises the configured timeout to the model."
+    - "Provider/runtime fixes cover DigitalOcean OAuth-token inference, Google tool calling after the upstream tool ID regression, OpenAI reasoning summary blocks, and Google Vertex reasoning signatures."
+    - "TUI prompt sizing is responsive/configurable, diff scrolling is accelerated, and external editors open from the worktree directory when available."
+    - "Desktop v2 home, prompt, status popover, session controls, server-list merging, session timeline interactions, titlebar cache handling, health checks, and window restore behavior were refined or fixed."
+    - "Extensions gained a plugin dispose hook and Codex plugin requests now send the expected session ID header."
     - "Install methods and package name remain unchanged."
   cliCommand: "opencode"
   installMethods:

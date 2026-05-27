@@ -66,8 +66,9 @@ attributes:
   notes: |
     Release notes list provider headerTimeout config, push-based experimental
     background-agent updates, partial modalities config, stable remote-backed
-    project identity, dynamic MCP server disconnect cleanup, and shell timeout
-    advertisement.
+    project identity, dynamic MCP server disconnect cleanup, DigitalOcean,
+    Google, OpenAI, Vertex, resumed-session, TUI, Desktop, extension, and
+    shell-timeout changes.
 edges:
   has_trust_level:
     - trust-level:official-web
@@ -97,3 +98,31 @@ edges:
     - trust-level:official-web
   references:
     - agentVersion:omp:ge-15-5-6
+---
+nodeKind: EvidenceSource
+id: evidence:copilot-cli-1-0-55-3-release
+attributes:
+  displayName: "GitHub Copilot CLI v1.0.55-3 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/github/copilot-cli/releases/tag/v1.0.55-3
+  sourcePathOrUrl: https://github.com/github/copilot-cli/releases/tag/v1.0.55-3
+  locator: "github/copilot-cli release v1.0.55-3"
+  capturedAt: "2026-05-27T16:55:00Z"
+  observedAt: "2026-05-27T16:55:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T16:55:00Z"
+  notes: |
+    Release notes list hook progress streaming, pluginDirectories on
+    session.create and session.resume RPC, direct remote-session deletion from
+    the picker, owner/repo#ref marketplace plugin add syntax, tmux 3.6b pane
+    progress integration, --plugin-dir skill precedence over personal-home
+    skills, authenticated copilot update/version release API requests, and
+    legacy snake_case settings migration preservation.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:copilot:ge-1-0-55-3

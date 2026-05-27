@@ -128,7 +128,9 @@ edges:
       role: platform
     - target: agent-ui-impl:copilot-cli.ui@current
       role: ui
-  sourced_from: []
+  sourced_from:
+    - source-ref:gh-copilot-github
+    - evidence:copilot-cli-1-0-55-3-release
   supports:
     - target: capability:skills
       versionRange: ">=1.0.55-3"

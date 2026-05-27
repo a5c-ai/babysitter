@@ -221,17 +221,32 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(evidence?.sourcePathOrUrl).toContain("anthropics/claude-code/releases/tag/v2.1.152");
   });
 
-  it("records Qwen Code 0.16.2 memory, skill, launch, and SDK timeout metadata", () => {
+  it("records OpenCode 1.15.11 upstream release assimilation", () => {
+    const version = getAgentVersion("opencode", "1.15.11");
     const graph = getCatalogGraphSnapshot();
-    const node = graph.nodes.find((entry) => entry.id === "agent-version:qwen@current");
-    const evidence = graph.nodes.find((entry) => entry.id === "evidence:qwen-code-release-v0-16-2");
+    const node = graph.nodes.find((entry) => entry.id === "agentVersion:opencode:ge-0-0-0");
 
-    expect(node?.versionRange).toBe(">=0.16.2");
-    expect(node?.releaseNotesUrl).toContain("QwenLM/qwen-code/releases/tag/v0.16.2");
-    expect(String(node?.assimilationNotes)).toContain("canUseTool timeouts");
-    expect(String(evidence?.notes)).toContain(".qwen/QWEN.local.md");
-    expect(String(evidence?.notes)).toContain("memory-leak-debug");
-    expect(String(evidence?.notes)).toContain("startup --worktree");
+    expect(version?.versionRange).toBe(">=1.15.11");
+    expect(node?.currentVersion).toBe("1.15.11");
+    expect(node?.releaseNotesUrl).toContain("anomalyco/opencode/releases/tag/v1.15.11");
+    expect(node?.assimilationNotes).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("headerTimeout"),
+        expect.stringContaining("modalities.input"),
+        expect.stringContaining("Dynamic MCP servers disconnect cleanly"),
+        expect.stringContaining("DigitalOcean OAuth-token inference"),
+        expect.stringContaining("plugin dispose hook"),
+      ]),
+    );
+
+    const evidence = getOntologyEvidenceSource("opencode-1-15-11-release");
+    expect(evidence?.sourcePathOrUrl).toContain("anomalyco/opencode/releases/tag/v1.15.11");
+
+    const claims = listClaimsForSubject("agentVersion:opencode:ge-0-0-0");
+    expect(claims.map((claim) => claim.claimId)).toContain("opencode-1-15-11-release-assimilation");
+    expect(claims.find((claim) => claim.claimId === "opencode-1-15-11-release-assimilation")?.statement).toContain(
+      "TUI and Desktop refinements",
+    );
   });
 
   it("includes agent-platform as a distinct non-harness runtime agent and records richer Claude web evidence", () => {
