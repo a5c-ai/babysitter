@@ -19,7 +19,7 @@ attributes:
     with deep adapter integration for orchestrated workflows.
 edges:
   has_version:
-    - agentVersion:openclaw:ge-2026-5-22
+    - agentVersion:openclaw:ge-2026-5-26
   composed_of:
     - target: language:typescript
       role: core

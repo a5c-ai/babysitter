@@ -3,22 +3,22 @@ id: claim:agent-version-qwen-current-versionrange
 attributes:
   subjectId: agent-version:qwen@current
   attribute: versionRange
-  value: '>=0.16.1'
+  value: '>=0.16.2'
   subjectKind: AgentVersion
-  statement: agent-version:qwen@current versionRange is >=0.16.1.
+  statement: agent-version:qwen@current versionRange is >=0.16.2.
   confidence: high
   provenanceKind: release-notes
   evidenceStrength: strong
   status: accepted
   evidenceSourceIds:
-    - evidence:qwen-code-release-v0-16-1
-  claimedAt: '2026-05-26T07:11:00Z'
+    - evidence:qwen-code-release-v0-16-2
+  claimedAt: '2026-05-27T16:35:00Z'
   claimedBy: codex-babysitter-yolo
   claimKind: assertion
-  note: Evidence binding for Qwen Code 0.16.1 version assimilation.
+  note: Evidence binding for Qwen Code 0.16.2 version assimilation.
 edges:
   backed_by_evidence:
-    - evidence:qwen-code-release-v0-16-1
+    - evidence:qwen-code-release-v0-16-2
   about_subject:
     - agent-version:qwen@current
 ---
@@ -27,22 +27,22 @@ id: claim:agent-version-qwen-current-tool-result-invariant
 attributes:
   subjectId: agent-version:qwen@current
   attribute: toolUseFailurePathInvariant
-  value: closed-in-0.16.1
+  value: closed-in-0.16.2
   subjectKind: AgentVersion
-  statement: Qwen Code 0.16.1 closes the upstream tool_use/tool_result invariant across failure paths.
+  statement: Qwen Code 0.16.2 closes the upstream tool_use/tool_result invariant across failure paths.
   confidence: high
   provenanceKind: release-notes
   evidenceStrength: strong
   status: accepted
   evidenceSourceIds:
-    - evidence:qwen-code-release-v0-16-1
-  claimedAt: '2026-05-26T07:11:00Z'
+    - evidence:qwen-code-release-v0-16-2
+  claimedAt: '2026-05-27T16:35:00Z'
   claimedBy: codex-babysitter-yolo
   claimKind: assertion
   note: This repository records the upstream behavior; it does not implement a Qwen tool loop requiring local failure-path tests.
 edges:
   backed_by_evidence:
-    - evidence:qwen-code-release-v0-16-1
+    - evidence:qwen-code-release-v0-16-2
   about_subject:
     - agent-version:qwen@current
     - agent-core-impl:qwen.core@current
@@ -54,20 +54,20 @@ attributes:
   attribute: telemetryNotes
   value: ttft-genai-dual-emit
   subjectKind: AgentRuntimeImpl
-  statement: Qwen Code 0.16.1 adds TTFT capture and GenAI semantic-convention telemetry dual emit upstream.
+  statement: Qwen Code 0.16.2 adds TTFT capture and GenAI semantic-convention telemetry dual emit upstream.
   confidence: high
   provenanceKind: release-notes
   evidenceStrength: strong
   status: accepted
   evidenceSourceIds:
-    - evidence:qwen-code-release-v0-16-1
-  claimedAt: '2026-05-26T07:11:00Z'
+    - evidence:qwen-code-release-v0-16-2
+  claimedAt: '2026-05-27T16:35:00Z'
   claimedBy: codex-babysitter-yolo
   claimKind: assertion
   note: No Qwen-specific telemetry ingestion implementation was found in this repository.
 edges:
   backed_by_evidence:
-    - evidence:qwen-code-release-v0-16-1
+    - evidence:qwen-code-release-v0-16-2
   about_subject:
     - agent-runtime-impl:qwen.runtime@current
 ---
@@ -78,20 +78,20 @@ attributes:
   attribute: windowsInstallNotes
   value: bat-crlf-mintty-osc8-gate
   subjectKind: AgentPlatformImpl
-  statement: Qwen Code 0.16.1 renormalizes install-qwen-standalone.bat CRLF storage and gates mintty OSC 8 detection on TERM_PROGRAM_VERSION >= 3.3.
+  statement: Qwen Code 0.16.2 renormalizes install-qwen-standalone.bat CRLF storage and gates mintty OSC 8 detection on TERM_PROGRAM_VERSION >= 3.3.
   confidence: high
   provenanceKind: release-notes
   evidenceStrength: strong
   status: accepted
   evidenceSourceIds:
-    - evidence:qwen-code-release-v0-16-1
-  claimedAt: '2026-05-26T07:11:00Z'
+    - evidence:qwen-code-release-v0-16-2
+  claimedAt: '2026-05-27T16:35:00Z'
   claimedBy: codex-babysitter-yolo
   claimKind: assertion
   note: Babysitter does not vendor the upstream BAT file; this is cataloged as Qwen CLI distribution/runtime behavior.
 edges:
   backed_by_evidence:
-    - evidence:qwen-code-release-v0-16-1
+    - evidence:qwen-code-release-v0-16-2
   about_subject:
     - agent-platform-impl:qwen.platform@current
     - agent-ui-impl:qwen.ui@current

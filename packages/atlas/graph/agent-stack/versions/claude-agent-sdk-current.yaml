@@ -3,8 +3,14 @@ id: agent-version:claude-agent-sdk@current
 attributes:
   agentProductId: agent:claude-agent-sdk
   sourcePackage: "@anthropic-ai/claude-agent-sdk"
-  versionRange: ">=0.3.150"
-  releasedAt: "2026-05-23"
+  versionRange: ">=0.3.152"
+  releasedAt: "2026-05-27"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.152"
+  assimilationNotes:
+    - "SessionStart hooks can return reloadSkills: true, so hook bridges may need to propagate this field before the first model turn."
+    - "SessionStart hooks can set hookSpecificOutput.sessionTitle for startup and resume title control."
+    - "New MessageDisplay hook event can transform or hide assistant message text before display."
+    - "Install method remains npm install @anthropic-ai/claude-agent-sdk@0.3.152; package name unchanged."
   cliCommand: "<sdk:@anthropic-ai/claude-agent-sdk>"
   installMethods:
     - install:npm
@@ -21,19 +27,19 @@ edges:
   sourced_from: []
   supports:
     - target: capability:can-multi-turn
-      versionRange: '>=0.3.150'
+      versionRange: '>=0.3.152'
       level: full
       notes: Claude Agent SDK provides a multi-turn agent loop.
     - target: capability:supports-text-streaming
-      versionRange: '>=0.3.150'
+      versionRange: '>=0.3.152'
       level: full
       notes: Claude Agent SDK streams model output.
     - target: capability:supports-tool-use
-      versionRange: '>=0.3.150'
+      versionRange: '>=0.3.152'
       level: full
       notes: Claude Agent SDK dispatches tool calls per turn.
     - target: capability:supports-subagent-dispatch
-      versionRange: '>=0.3.150'
+      versionRange: '>=0.3.152'
       level: full
       notes: Claude Agent SDK supports spawning subagent threads.
   uses_memory_system:

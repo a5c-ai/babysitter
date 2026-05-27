@@ -9,7 +9,7 @@ attributes:
     Qwen Code is a fork of Google's Gemini CLI. The tool-use loop runs
     over an OpenAI-compatible chat-completions API (DashScope or
     self-hosted), executing model-emitted tool calls and posting
-    responses back until the model finishes. In 0.16.1, upstream closed
+    responses back until the model finishes. In 0.16.2, upstream closed
     tool_use/tool_result invariant handling across failure paths, so catalog
     consumers should treat failed tool executions as still requiring a matched
     tool_result in the next model turn.
@@ -32,7 +32,7 @@ attributes:
   streamingFidelity: full
   thinkingChannelHandling: not-supported
   notebookFormattingNotes: |
-    Qwen Code 0.16.1 preserves tab-indented notebook formatting in upstream
+    Qwen Code 0.16.2 preserves tab-indented notebook formatting in upstream
     notebook edit/read paths. This repository does not implement that Qwen
     notebook loop directly; the graph records the upstream runtime behavior.
 edges:

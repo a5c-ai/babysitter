@@ -341,7 +341,7 @@ attributes:
   evidence: |
     Reviewed atlas graph for Gemini CLI:
     - No supports edge for capability:supports-plugin-marketplaces on
-      agentVersion:gemini:ge-0-0-0
+      agentVersion:gemini:ge-0-43-0
     - compactionTriggerNotes confirms 1M-token native context window with
       no in-CLI compaction
     Both claims validated against graph data and public Gemini CLI docs.

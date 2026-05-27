@@ -2,7 +2,7 @@ nodeKind: AgentUIImpl
 id: agent-ui-impl:omp.ui@current
 attributes:
   displayName: "OMP UI (current) — tui-only"
-  agentVersionId: agentVersion:omp:ge-15-3-1
+  agentVersionId: agentVersion:omp:ge-15-5-6
   packageRef: source-ref:omp-github
   uiKind: tui-only
   presentationsBundled:

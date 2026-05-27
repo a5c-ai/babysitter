@@ -3,7 +3,7 @@ id: lifecycle-semantics:copilot-cli
 attributes:
   lifecycleSemanticsId: lifecycle-semantics:copilot-cli
   agentId: agent:copilot-cli
-  versionRange: ">=1.0.54"
+  versionRange: ">=1.0.55-3"
   runtimeHookMode: native-shell-hooks
   stopHookMode: session-end-hook
   backgroundTaskMode: unknown
@@ -16,4 +16,4 @@ attributes:
     - "1.0.52 retries HTTP/2 upload stalls over HTTP/1.1."
 edges:
   applies_to_version:
-    - target: agentVersion:copilot:ge-1-0-54
+    - target: agentVersion:copilot:ge-1-0-55-3

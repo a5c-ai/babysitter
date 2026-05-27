@@ -14,8 +14,20 @@ attributes:
     - "macos"
     - "windows"
   agentProductId: agent:claude-code
-  versionRange: ">=2.1.150"
-  releasedAt: "2026-05-23"
+  versionRange: ">=2.1.152"
+  currentVersion: "2.1.152"
+  releasedAt: "2026-05-27"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.152"
+  assimilationNotes:
+    - "/code-review --fix now applies review findings to the working tree, and /simplify invokes /code-review --fix."
+    - "Skills and slash commands can set disallowed-tools frontmatter to remove tools while active."
+    - "New /reload-skills command and SessionStart hook reloadSkills: true allow same-session skill re-scans."
+    - "SessionStart hooks can set hookSpecificOutput.sessionTitle on startup and resume."
+    - "New MessageDisplay hook event lets hooks transform or hide assistant message text as displayed."
+    - "pluginSuggestionMarketplaces managed setting allowlists organization marketplaces for context-aware plugin suggestions."
+    - "claude plugin marketplace remove accepts --scope user|project|local."
+    - "Configured --fallback-model now takes over for the rest of the session when the primary model is not found."
+    - "Auto mode no longer requires opt-in consent."
   cliCommand: "claude"
   installMethods:
     - install:npm
@@ -168,128 +180,128 @@ edges:
   sourced_from: []
   supports:
     - target: capability:skills
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Claude Code documents skills and slash commands directly, while the local target mapping anchors how plugin surfaces map into the ontology.
     - target: capability:supports-thinking
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Claude Code is documented as an interactive agentic coding surface that reasons over the codebase and executes tool-assisted work.
     - target: capability:supports-mcp
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: MCP support points to official Claude Code documentation instead of inheriting only generic Claude product pages.
     - target: capability:tool-approval
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Permission modes and auto mode document Claude Code's native approval boundary model for tools and edits.
     - target: capability:interactive-mode
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Interactive CLI usage is directly documented rather than inferred from generic product marketing.
     - target: capability:stdin-injection
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Scripted prompt-mode CLI flows and continue flags provide the strongest official basis for non-interactive input semantics.
     - target: capability:vision-input
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Image input is backed by official Claude multimodal documentation, with lower confidence than the Claude Code-specific docs used elsewhere.
     - target: capability:runtime-hooks
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Runtime hooks tied to the official hook reference and guide plus the local plugin target shape.
     - target: capability:stop-hook
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Stop-hook support is modeled separately so the stop lifecycle claim is not diluted into the generic hook bundle.
     - target: capability:supports-subagent-dispatch
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Subagent dispatch is backed by the official custom-subagents documentation.
     - target: capability:parallel-tool-calls
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Parallel execution is tied to official subagent and agent-team references.
     - target: capability:can-resume
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Session resume is tied to checkpointing and continue flows.
     - target: capability:supports-agents-md
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Claude Code reads CLAUDE.md (and AGENTS.md as alternate name) at session bootstrap; /memory edits this file.
     - target: capability:supports-parallel-execution
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Subagents dispatched via the Task tool can run concurrently within one session.
     - target: capability:requires-git-repo
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: partial
       notes: Claude Code starts outside git repos but git-aware features (diffs, branch awareness) are degraded.
     - target: capability:requires-pty
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: partial
       notes: Interactive mode requires PTY; --print mode works without one.
     - target: capability:supports-file-attachments
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Drag-drop / paste of files (images, docs, code) into the TUI is supported.
     - target: capability:supports-image-output
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: partial
       notes: Image output is provider-bound (Anthropic Messages API does not currently emit image blocks; some hosted models do).
     - target: capability:supports-local-models
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: partial
       notes: Claude Code routes inference through Anthropic / Bedrock / Vertex by default; local-model routing is via transport-mux + a Local Model Source provider configured in settings.
     - target: capability:supports-agent-teams
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: Experimental — gated by CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1. Source — https://docs.claude.com/en/docs/claude-code/agent-teams.
     - target: capability:supports-plugin-marketplaces
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: '/plugin marketplace add|list|update|remove + /plugin install|disable|enable|uninstall. Source — https://docs.claude.com/en/docs/claude-code/discover-plugins.'
     - target: capability:supports-deep-links
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: claude-cli://open + vscode://anthropic.claude-code/open. Source — https://docs.claude.com/en/docs/claude-code/deep-links.
     - target: capability:supports-skill-dynamic-context-injection
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: 'Inline !`cmd` and ```! blocks plus $ARGUMENTS / $N / ${CLAUDE_SESSION_ID} / ${CLAUDE_EFFORT} / ${CLAUDE_SKILL_DIR} substitutions. Source — https://docs.claude.com/en/docs/claude-code/skills.'
     - target: capability:supports-skill-shell-execution-policy
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: disableSkillShellExecution setting + per-skill shell (bash|powershell) frontmatter. Source — Anthropic skills doc.
     - target: capability:supports-result-message-typing
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
       notes: 'Agent SDK ResultMessage subtypes — success, error_max_turns, error_max_budget_usd, error_during_execution, error_max_structured_output_retries. Source — https://docs.claude.com/en/api/agent-sdk/agent-loop.'
     - target: capability:supports-skill-frontmatter-paths-glob
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
     - target: capability:supports-skill-positional-arguments
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
     - target: capability:supports-subagent-tool-allowlist
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
     - target: capability:supports-claude-cli-url-scheme
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
     - target: capability:supports-deep-link-vscode-handler
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
     - target: capability:supports-agent-loop-budget-limit
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
     - target: capability:supports-agent-loop-turn-limit
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
     - target: capability:supports-env-var-feature-gating
-      versionRange: ">=2.1.150"
+      versionRange: ">=2.1.152"
       level: full
   has_output_style:
     - target: output-style:claude-code-learning

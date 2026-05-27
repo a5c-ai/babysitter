@@ -495,13 +495,13 @@ attributes:
   subjectKind: "AgentVersion"
   subjectId: "agentVersion:codex:ge-0-119-0"
   versionRange: ">=0.119.0"
-  notes: "Codex skills are documented directly; 0.133.0 also makes plugin and skill warmup/discovery easier to inspect through marketplace-aware list output, installed versions, visible marketplace roots, and remote collections."
+  notes: "Codex skills are documented directly; 0.134.0 also makes plugin and skill warmup/discovery easier to inspect through marketplace-aware list output, installed versions, visible marketplace roots, and remote collections."
   evidenceRefs:
     - "repo-sdk-fallback"
     - "repo-target-codex"
     - "repo-target-index"
     - "web-codex-skills"
-    - "web-codex-0-133-release"
+    - "web-codex-0-134-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -522,7 +522,7 @@ attributes:
     - "repo-sdk-fallback"
     - "web-codex-cli"
     - "web-codex-cli-features"
-    - "web-codex-0-133-release"
+    - "web-codex-0-134-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -543,7 +543,7 @@ attributes:
     - "repo-sdk-fallback"
     - "web-codex-cli"
     - "web-codex-cli-features"
-    - "web-codex-0-133-release"
+    - "web-codex-0-134-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -564,7 +564,7 @@ attributes:
     - "repo-sdk-fallback"
     - "web-codex-noninteractive"
     - "web-codex-cli-reference"
-    - "web-codex-0-133-release"
+    - "web-codex-0-134-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -585,7 +585,7 @@ attributes:
     - "repo-sdk-fallback"
     - "web-codex-cli"
     - "web-codex-cli-features"
-    - "web-codex-0-133-release"
+    - "web-codex-0-134-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -599,14 +599,14 @@ attributes:
   subjectKind: "AgentVersion"
   subjectId: "agentVersion:codex:ge-0-119-0"
   versionRange: ">=0.119.0"
-  notes: "Codex has first-party hook docs; 0.133.0 adds richer extension lifecycle observation for subagent start/stop, tool execution, turn metadata, async approval, and turn processing."
+  notes: "Codex has first-party hook docs; 0.134.0 adds richer extension lifecycle observation for subagent start/stop, tool execution, turn metadata, async approval, and turn processing."
   evidenceRefs:
     - "repo-sdk-fallback"
     - "repo-target-codex"
     - "repo-target-index"
     - "repo-codex-windows-hooks"
     - "web-codex-hooks"
-    - "web-codex-0-133-release"
+    - "web-codex-0-134-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -622,14 +622,14 @@ attributes:
   subjectKind: "AgentVersion"
   subjectId: "agentVersion:codex:ge-0-119-0"
   versionRange: ">=0.119.0"
-  notes: "Stop-hook mapping is normalized from the documented Codex hook system plus the local target-name mapping, with 0.133.0 app-server race fixes reducing startup/shutdown edge cases around hook delivery."
+  notes: "Stop-hook mapping is normalized from the documented Codex hook system plus the local target-name mapping, with 0.134.0 app-server race fixes reducing startup/shutdown edge cases around hook delivery."
   evidenceRefs:
     - "repo-sdk-fallback"
     - "repo-target-codex"
     - "repo-target-index"
     - "repo-codex-windows-hooks"
     - "web-codex-hooks"
-    - "web-codex-0-133-release"
+    - "web-codex-0-134-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -645,12 +645,12 @@ attributes:
   subjectKind: "AgentVersion"
   subjectId: "agentVersion:codex:ge-0-119-0"
   versionRange: ">=0.119.0"
-  notes: "Session continuation is supported through transcript and thread persistence; 0.133.0 adds default-on goal tracking backed by dedicated storage across active turns."
+  notes: "Session continuation is supported through transcript and thread persistence; 0.134.0 adds default-on goal tracking backed by dedicated storage across active turns."
   evidenceRefs:
     - "repo-sdk-fallback"
     - "web-codex-cli-features"
     - "web-codex-cli-reference"
-    - "web-codex-0-133-release"
+    - "web-codex-0-134-release"
 edges:
   capability_of_version:
     - target: agentVersion:codex:ge-0-119-0
@@ -662,7 +662,7 @@ attributes:
   capabilityId: "skills"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:copilot:ge-1-0-54"
+  subjectId: "agentVersion:copilot:ge-1-0-55-3"
   versionRange: ">=0.0.0"
   notes: "Copilot CLI plugins explicitly bundle reusable agents, skills, hooks, and integrations."
   evidenceRefs:
@@ -673,7 +673,7 @@ attributes:
     - "web-github-copilot-cli-plugin-reference"
 edges:
   capability_of_version:
-    - target: agentVersion:copilot:ge-1-0-54
+    - target: agentVersion:copilot:ge-1-0-55-3
   evidences_capability:
     - target: capability:skills
 ---
@@ -684,7 +684,7 @@ attributes:
   capabilityId: "thinking"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:copilot:ge-1-0-54"
+  subjectId: "agentVersion:copilot:ge-1-0-55-3"
   versionRange: ">=0.0.0"
   notes: "GitHub documents Copilot CLI and Copilot coding-agent workflows as interactive agentic coding surfaces."
   evidenceRefs:
@@ -694,7 +694,7 @@ attributes:
     - "web-github-copilot-agent"
 edges:
   capability_of_version:
-    - target: agentVersion:copilot:ge-1-0-54
+    - target: agentVersion:copilot:ge-1-0-55-3
   evidences_capability:
     - target: capability:supports-thinking
 ---
@@ -705,7 +705,7 @@ attributes:
   capabilityId: "interactive-mode"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:copilot:ge-1-0-54"
+  subjectId: "agentVersion:copilot:ge-1-0-55-3"
   versionRange: ">=0.0.0"
   notes: "Interactive Copilot CLI usage is documented directly instead of being inferred from the cloud-agent docs."
   evidenceRefs:
@@ -715,7 +715,7 @@ attributes:
     - "web-github-copilot-agent"
 edges:
   capability_of_version:
-    - target: agentVersion:copilot:ge-1-0-54
+    - target: agentVersion:copilot:ge-1-0-55-3
   evidences_capability:
     - target: capability:interactive-mode
 ---
@@ -726,7 +726,7 @@ attributes:
   capabilityId: "stdin-injection"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:copilot:ge-1-0-54"
+  subjectId: "agentVersion:copilot:ge-1-0-55-3"
   versionRange: ">=0.0.0"
   notes: "The public Copilot CLI docs cover command-line prompting flows, which is the strongest official basis for non-interactive input semantics."
   evidenceRefs:
@@ -735,7 +735,7 @@ attributes:
     - "web-github-copilot-cli-getting-started"
 edges:
   capability_of_version:
-    - target: agentVersion:copilot:ge-1-0-54
+    - target: agentVersion:copilot:ge-1-0-55-3
   evidences_capability:
     - target: capability:stdin-injection
 ---
@@ -746,7 +746,7 @@ attributes:
   capabilityId: "image-input"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:copilot:ge-1-0-54"
+  subjectId: "agentVersion:copilot:ge-1-0-55-3"
   versionRange: ">=0.0.0"
   notes: "Public image-input evidence is strongest in the Copilot SDK rather than the CLI docs, so this row keeps lower-confidence external support."
   evidenceRefs:
@@ -754,7 +754,7 @@ attributes:
     - "web-github-copilot-sdk-image-input"
 edges:
   capability_of_version:
-    - target: agentVersion:copilot:ge-1-0-54
+    - target: agentVersion:copilot:ge-1-0-55-3
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:copilot:ge-0-0-0:runtime-hooks
@@ -763,7 +763,7 @@ attributes:
   capabilityId: "runtime-hooks"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:copilot:ge-1-0-54"
+  subjectId: "agentVersion:copilot:ge-1-0-55-3"
   versionRange: ">=0.0.0"
   notes: "Copilot CLI exposes hooks directly and the local target profile refines the canonical hook-name mapping into the ontology."
   evidenceRefs:
@@ -774,7 +774,7 @@ attributes:
     - "web-github-copilot-hooks-config"
 edges:
   capability_of_version:
-    - target: agentVersion:copilot:ge-1-0-54
+    - target: agentVersion:copilot:ge-1-0-55-3
   evidences_capability:
     - target: capability:runtime-hooks
 ---
@@ -785,7 +785,7 @@ attributes:
   capabilityId: "stop-hook"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:copilot:ge-1-0-54"
+  subjectId: "agentVersion:copilot:ge-1-0-55-3"
   versionRange: ">=0.0.0"
   notes: "The normalized stop-hook capability is derived from Copilot's documented lifecycle hooks plus the local hook-name mapping."
   evidenceRefs:
@@ -796,7 +796,7 @@ attributes:
     - "web-github-copilot-hooks-config"
 edges:
   capability_of_version:
-    - target: agentVersion:copilot:ge-1-0-54
+    - target: agentVersion:copilot:ge-1-0-55-3
   evidences_capability:
     - target: capability:stop-hook
 ---
@@ -807,7 +807,7 @@ attributes:
   capabilityId: "mcp"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:copilot:ge-1-0-54"
+  subjectId: "agentVersion:copilot:ge-1-0-55-3"
   versionRange: ">=0.0.0"
   notes: "GitHub documents MCP both for Copilot CLI and for the Copilot cloud agent."
   evidenceRefs:
@@ -818,7 +818,7 @@ attributes:
     - "web-github-copilot-mcp"
 edges:
   capability_of_version:
-    - target: agentVersion:copilot:ge-1-0-54
+    - target: agentVersion:copilot:ge-1-0-55-3
   evidences_capability:
     - target: capability:supports-mcp
 ---
@@ -829,7 +829,7 @@ attributes:
   capabilityId: "session-resume"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:copilot:ge-1-0-54"
+  subjectId: "agentVersion:copilot:ge-1-0-55-3"
   versionRange: ">=0.0.0"
   notes: "Public session persistence evidence comes from Copilot CLI config-directory documentation rather than the generic coding-agent docs."
   evidenceRefs:
@@ -838,7 +838,7 @@ attributes:
     - "web-github-copilot-cli-getting-started"
 edges:
   capability_of_version:
-    - target: agentVersion:copilot:ge-1-0-54
+    - target: agentVersion:copilot:ge-1-0-55-3
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:cursor:ge-0-0-0:skills
@@ -1007,7 +1007,7 @@ attributes:
   capabilityId: "skills"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:gemini:ge-0-0-0"
+  subjectId: "agentVersion:gemini:ge-0-43-0"
   versionRange: ">=0.0.0"
   notes: "Gemini CLI documents first-class agent skills across workspace, user, and extension tiers."
   evidenceRefs:
@@ -1017,7 +1017,7 @@ attributes:
     - "web-gemini-cli-skills"
 edges:
   capability_of_version:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
   evidences_capability:
     - target: capability:skills
 ---
@@ -1028,7 +1028,7 @@ attributes:
   capabilityId: "thinking"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:gemini:ge-0-0-0"
+  subjectId: "agentVersion:gemini:ge-0-43-0"
   versionRange: ">=0.0.0"
   notes: "Gemini CLI is documented as an interactive and automation-capable terminal agent surface."
   evidenceRefs:
@@ -1037,7 +1037,7 @@ attributes:
     - "web-gemini-cli-reference"
 edges:
   capability_of_version:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
   evidences_capability:
     - target: capability:supports-thinking
 ---
@@ -1048,7 +1048,7 @@ attributes:
   capabilityId: "interactive-mode"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:gemini:ge-0-0-0"
+  subjectId: "agentVersion:gemini:ge-0-43-0"
   versionRange: ">=0.0.0"
   notes: "Interactive REPL semantics are documented directly in the Gemini CLI reference."
   evidenceRefs:
@@ -1057,7 +1057,7 @@ attributes:
     - "web-gemini-cli-reference"
 edges:
   capability_of_version:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
   evidences_capability:
     - target: capability:interactive-mode
 ---
@@ -1068,7 +1068,7 @@ attributes:
   capabilityId: "stdin-injection"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:gemini:ge-0-0-0"
+  subjectId: "agentVersion:gemini:ge-0-43-0"
   versionRange: ">=0.0.0"
   notes: "Headless and piped execution are documented separately from interactive usage."
   evidenceRefs:
@@ -1077,7 +1077,7 @@ attributes:
     - "web-gemini-cli-reference"
 edges:
   capability_of_version:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
   evidences_capability:
     - target: capability:stdin-injection
 ---
@@ -1088,7 +1088,7 @@ attributes:
   capabilityId: "image-input"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:gemini:ge-0-0-0"
+  subjectId: "agentVersion:gemini:ge-0-43-0"
   versionRange: ">=0.0.0"
   notes: "Public Gemini CLI evidence for image input is weaker than for hooks or resume, but the docs and changelog do describe multimodal CLI support."
   evidenceRefs:
@@ -1097,7 +1097,7 @@ attributes:
     - "web-gemini-cli-changelog"
 edges:
   capability_of_version:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:gemini:ge-0-0-0:runtime-hooks
@@ -1106,7 +1106,7 @@ attributes:
   capabilityId: "runtime-hooks"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:gemini:ge-0-0-0"
+  subjectId: "agentVersion:gemini:ge-0-43-0"
   versionRange: ">=0.0.0"
   notes: "Gemini CLI hook events are documented directly, instead of relying on local hook-name mapping alone."
   evidenceRefs:
@@ -1116,7 +1116,7 @@ attributes:
     - "web-gemini-cli-hooks"
 edges:
   capability_of_version:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
   evidences_capability:
     - target: capability:runtime-hooks
 ---
@@ -1127,7 +1127,7 @@ attributes:
   capabilityId: "stop-hook"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:gemini:ge-0-0-0"
+  subjectId: "agentVersion:gemini:ge-0-43-0"
   versionRange: ">=0.0.0"
   notes: "The normalized stop-hook capability is backed by Gemini's documented end-of-loop hook events rather than a literal Stop event name."
   evidenceRefs:
@@ -1137,7 +1137,7 @@ attributes:
     - "web-gemini-cli-hooks"
 edges:
   capability_of_version:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
   evidences_capability:
     - target: capability:stop-hook
 ---
@@ -1148,7 +1148,7 @@ attributes:
   capabilityId: "session-resume"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:gemini:ge-0-0-0"
+  subjectId: "agentVersion:gemini:ge-0-43-0"
   versionRange: ">=0.0.0"
   notes: "Gemini CLI resume semantics are documented through both session management and checkpoint restoration."
   evidenceRefs:
@@ -1157,7 +1157,7 @@ attributes:
     - "web-gemini-cli-checkpointing"
 edges:
   capability_of_version:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:omp:ge-0-0-0:skills
@@ -1166,7 +1166,7 @@ attributes:
   capabilityId: "skills"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:omp:ge-15-3-1"
+  subjectId: "agentVersion:omp:ge-15-5-6"
   versionRange: ">=0.0.0"
   notes: "Oh-My-Pi documents file-backed skills explicitly, so this row no longer relies only on the fallback metadata."
   evidenceRefs:
@@ -1174,7 +1174,7 @@ attributes:
     - "web-omp-skills"
 edges:
   capability_of_version:
-    - target: agentVersion:omp:ge-15-3-1
+    - target: agentVersion:omp:ge-15-5-6
   evidences_capability:
     - target: capability:skills
 ---
@@ -1185,7 +1185,7 @@ attributes:
   capabilityId: "thinking"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:omp:ge-15-3-1"
+  subjectId: "agentVersion:omp:ge-15-5-6"
   versionRange: ">=0.0.0"
   notes: "Oh-My-Pi publicly describes itself as a terminal coding agent with a broad tool surface."
   evidenceRefs:
@@ -1193,7 +1193,7 @@ attributes:
     - "web-omp-readme"
 edges:
   capability_of_version:
-    - target: agentVersion:omp:ge-15-3-1
+    - target: agentVersion:omp:ge-15-5-6
   evidences_capability:
     - target: capability:supports-thinking
 ---
@@ -1204,7 +1204,7 @@ attributes:
   capabilityId: "interactive-mode"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:omp:ge-15-3-1"
+  subjectId: "agentVersion:omp:ge-15-5-6"
   versionRange: ">=0.0.0"
   notes: "Interactive terminal behavior is grounded in the upstream product README instead of only the local fallback metadata."
   evidenceRefs:
@@ -1212,7 +1212,7 @@ attributes:
     - "web-omp-readme"
 edges:
   capability_of_version:
-    - target: agentVersion:omp:ge-15-3-1
+    - target: agentVersion:omp:ge-15-5-6
   evidences_capability:
     - target: capability:interactive-mode
 ---
@@ -1223,7 +1223,7 @@ attributes:
   capabilityId: "stdin-injection"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:omp:ge-15-3-1"
+  subjectId: "agentVersion:omp:ge-15-5-6"
   versionRange: ">=0.0.0"
   notes: "Public operator docs are thin for non-interactive prompting, so this row keeps the local fallback metadata as the main source of truth."
   evidenceRefs:
@@ -1231,7 +1231,7 @@ attributes:
     - "web-omp-readme"
 edges:
   capability_of_version:
-    - target: agentVersion:omp:ge-15-3-1
+    - target: agentVersion:omp:ge-15-5-6
   evidences_capability:
     - target: capability:stdin-injection
 ---
@@ -1242,7 +1242,7 @@ attributes:
   capabilityId: "image-input"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:omp:ge-15-3-1"
+  subjectId: "agentVersion:omp:ge-15-5-6"
   versionRange: ">=0.0.0"
   notes: "The public README advertises image support, but public technical detail is thinner than for sessions or hooks."
   evidenceRefs:
@@ -1250,7 +1250,7 @@ attributes:
     - "web-omp-readme"
 edges:
   capability_of_version:
-    - target: agentVersion:omp:ge-15-3-1
+    - target: agentVersion:omp:ge-15-5-6
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:omp:ge-0-0-0:session-resume
@@ -1259,7 +1259,7 @@ attributes:
   capabilityId: "session-resume"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:omp:ge-15-3-1"
+  subjectId: "agentVersion:omp:ge-15-5-6"
   versionRange: ">=0.0.0"
   notes: "Oh-My-Pi documents resume, continue, fork, and session switching as first-class session operations."
   evidenceRefs:
@@ -1267,7 +1267,7 @@ attributes:
     - "web-omp-session-resume"
 edges:
   capability_of_version:
-    - target: agentVersion:omp:ge-15-3-1
+    - target: agentVersion:omp:ge-15-5-6
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:openclaw:ge-0-0-0:skills
@@ -1276,7 +1276,7 @@ attributes:
   capabilityId: "skills"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-22"
+  subjectId: "agentVersion:openclaw:ge-2026-5-26"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1285,7 +1285,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-22
+    - target: agentVersion:openclaw:ge-2026-5-26
   evidences_capability:
     - target: capability:skills
 ---
@@ -1296,7 +1296,7 @@ attributes:
   capabilityId: "thinking"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-22"
+  subjectId: "agentVersion:openclaw:ge-2026-5-26"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1305,7 +1305,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-22
+    - target: agentVersion:openclaw:ge-2026-5-26
   evidences_capability:
     - target: capability:supports-thinking
 ---
@@ -1316,7 +1316,7 @@ attributes:
   capabilityId: "interactive-mode"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-22"
+  subjectId: "agentVersion:openclaw:ge-2026-5-26"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1325,7 +1325,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-22
+    - target: agentVersion:openclaw:ge-2026-5-26
   evidences_capability:
     - target: capability:interactive-mode
 ---
@@ -1336,7 +1336,7 @@ attributes:
   capabilityId: "stdin-injection"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-22"
+  subjectId: "agentVersion:openclaw:ge-2026-5-26"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1345,7 +1345,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-22
+    - target: agentVersion:openclaw:ge-2026-5-26
   evidences_capability:
     - target: capability:stdin-injection
 ---
@@ -1356,7 +1356,7 @@ attributes:
   capabilityId: "image-input"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-22"
+  subjectId: "agentVersion:openclaw:ge-2026-5-26"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1365,7 +1365,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-22
+    - target: agentVersion:openclaw:ge-2026-5-26
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:openclaw:ge-0-0-0:session-resume
@@ -1374,7 +1374,7 @@ attributes:
   capabilityId: "session-resume"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-22"
+  subjectId: "agentVersion:openclaw:ge-2026-5-26"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1383,7 +1383,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-22
+    - target: agentVersion:openclaw:ge-2026-5-26
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:opencode:ge-0-0-0:skills

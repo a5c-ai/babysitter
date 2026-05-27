@@ -45,7 +45,7 @@ attributes:
     Generic OpenAI-compatible translation used by agents that speak the
     OpenAI protocol natively (Cursor, OMP, OpenClaw, Hermes, Droid, Amp).
     Sets both OPENAI_BASE_URL and OPENAI_API_BASE (legacy). Suppresses
-    ANTHROPIC_API_KEY for non-anthropic providers. OpenClaw 2026.5.22 reuses
+    ANTHROPIC_API_KEY for non-anthropic providers. OpenClaw 2026.5.26 reuses
     xAI OAuth auth profiles for Grok web_search and carries the active agent
     auth profile through web_search calls; media providers may declare default
     operation timeouts.

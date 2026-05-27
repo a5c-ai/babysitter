@@ -14,4 +14,4 @@ attributes:
     coding-agent workflows through GitHub-hosted infrastructure.
 edges:
   has_version:
-    - agentVersion:copilot:ge-1-0-54
+    - agentVersion:copilot:ge-1-0-55-3

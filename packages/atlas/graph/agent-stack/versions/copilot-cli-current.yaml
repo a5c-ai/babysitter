@@ -1,5 +1,5 @@
 nodeKind: AgentVersion
-id: agentVersion:copilot:ge-1-0-54
+id: agentVersion:copilot:ge-1-0-55-3
 attributes:
   agentId: "copilot"
   aliases:
@@ -15,22 +15,23 @@ attributes:
     - "macos"
     - "windows"
   agentProductId: agent:copilot-cli
-  versionRange: ">=1.0.54"
-  releasedAt: "2026-05-24"
+  versionRange: ">=1.0.55-3"
+  releasedAt: "2026-05-27"
+  upstreamReleaseTag: "v1.0.55-3"
+  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.55-3"
   cliCommand: "gh copilot"
   installMethods:
     - install:gh-extension
   minSchemaVersion: "6.0.0"
   notes: |
-    Assimilated through GitHub Copilot CLI 1.0.54. The 1.0.52-1.0.54
-    release window keeps the install surface unchanged (`gh extension
-    install github/gh-copilot` / `@github/copilot`) while adding
-    stdin-safe non-interactive plugin/mcp/help/version subcommands,
-    saved-cwd resume semantics with `-C <dir>` override, MCP OAuth config
-    migration from `oauth.clientId` / `oauth.callbackPort` to
-    `oauthClientId` / `auth.redirectPort`, custom-agent
-    `deferred-tool-loading` frontmatter, and enforced context-window tiers
-    for compaction, truncation, and token display.
+    Assimilated through GitHub Copilot CLI 1.0.55-3. The release keeps the
+    install surface unchanged (`gh extension install github/gh-copilot` /
+    `@github/copilot`) while adding hook progress streaming, pluginDirectories
+    on session.create and session.resume RPC, direct remote-session deletion
+    from the picker, owner/repo#ref marketplace plugin installation, tmux 3.6b
+    pane progress integration, --plugin-dir skill precedence over personal-home
+    skills, authenticated copilot update/version release API requests, and
+    settings migration preservation for legacy snake_case keys.
   adapterMetadata:
     installCommands:
       - type: gh-extension
@@ -130,39 +131,39 @@ edges:
   sourced_from: []
   supports:
     - target: capability:skills
-      versionRange: ">=1.0.54"
+      versionRange: ">=1.0.55-3"
       level: full
       notes: Copilot CLI plugins explicitly bundle reusable agents, skills, hooks, and integrations.
     - target: capability:supports-thinking
-      versionRange: ">=1.0.54"
+      versionRange: ">=1.0.55-3"
       level: full
       notes: GitHub documents Copilot CLI and Copilot coding-agent workflows as interactive agentic coding surfaces.
     - target: capability:interactive-mode
-      versionRange: ">=1.0.54"
+      versionRange: ">=1.0.55-3"
       level: full
       notes: Interactive Copilot CLI usage is documented directly.
     - target: capability:stdin-injection
-      versionRange: ">=1.0.54"
+      versionRange: ">=1.0.55-3"
       level: full
       notes: Public Copilot CLI docs cover command-line prompting flows.
     - target: capability:vision-input
-      versionRange: ">=1.0.54"
+      versionRange: ">=1.0.55-3"
       level: full
       notes: Public image-input evidence is strongest in the Copilot SDK rather than CLI docs.
     - target: capability:runtime-hooks
-      versionRange: ">=1.0.54"
+      versionRange: ">=1.0.55-3"
       level: full
       notes: Copilot CLI exposes hooks directly; the local target profile refines canonical hook-name mapping.
     - target: capability:stop-hook
-      versionRange: ">=1.0.54"
+      versionRange: ">=1.0.55-3"
       level: full
       notes: Normalized stop-hook capability derived from documented lifecycle hooks + local hook-name mapping.
     - target: capability:supports-mcp
-      versionRange: ">=1.0.54"
+      versionRange: ">=1.0.55-3"
       level: full
       notes: GitHub documents MCP for Copilot CLI and the Copilot cloud agent.
     - target: capability:can-resume
-      versionRange: ">=1.0.54"
+      versionRange: ">=1.0.55-3"
       level: full
       notes: Public session persistence evidence comes from Copilot CLI config-directory documentation.
   uses_memory_system:

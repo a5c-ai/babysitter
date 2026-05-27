@@ -2,7 +2,7 @@ nodeKind: AgentCoreImpl
 id: agent-core-impl:openclaw.core@current
 attributes:
   displayName: OpenClaw Core (current)
-  agentVersionId: agentVersion:openclaw:ge-2026-5-22
+  agentVersionId: agentVersion:openclaw:ge-2026-5-26
   packageRef: source-ref:openclaw-github
   loopIteratorPolicy: tool-use-loop
   loopIteratorNotes: 'Multi-provider tool-use loop with native parallel-tool dispatch.

@@ -27,7 +27,7 @@ attributes:
     The app-server reuses the Codex Rust runtime: same built-in tool set,
     same MCP brokering, same wrapped-shell sandbox. Distinct from the CLI
     runtime in that consumers drive sessions via JSON-RPC requests
-    instead of through the bundled TUI. Codex CLI 0.133.0 confirms realtime v1
+    instead of through the bundled TUI. Codex CLI 0.134.0 confirms realtime v1
     websocket compatibility and keeps ws:// endpoints available via
     `codex app-server --listen`.
 edges:

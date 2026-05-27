@@ -2,7 +2,7 @@ nodeKind: AgentRuntimeImpl
 id: agent-runtime-impl:gemini-cli.runtime@current
 attributes:
   displayName: Gemini CLI Runtime (current)
-  agentVersionId: agentVersion:gemini:ge-0-0-0
+  agentVersionId: agentVersion:gemini:ge-0-43-0
   subagentDispatchMechanism: none
   subagentChildSessionPolicy: inline-no-child-session
   subagentToolScopePolicy: inherit-parent

@@ -7,7 +7,7 @@ id: hook-mapping:copilot-pre-tool-native
 attributes:
   mappingId: hook-mapping:copilot-pre-tool-native
   hookId: hook-surface:copilot.pre-tool
-  targetId: agentVersion:copilot:ge-1-0-54
+  targetId: agentVersion:copilot:ge-1-0-55-3
   nativeName: pre_tool
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -23,14 +23,14 @@ edges:
   maps_hook:
     - target: hook-surface:copilot.pre-tool
   emits_hook:
-    - target: agentVersion:copilot:ge-1-0-54
+    - target: agentVersion:copilot:ge-1-0-55-3
 ---
 nodeKind: HookMapping
 id: hook-mapping:copilot-post-tool-native
 attributes:
   mappingId: hook-mapping:copilot-post-tool-native
   hookId: hook-surface:copilot.post-tool
-  targetId: agentVersion:copilot:ge-1-0-54
+  targetId: agentVersion:copilot:ge-1-0-55-3
   nativeName: post_tool
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -46,7 +46,7 @@ edges:
   maps_hook:
     - target: hook-surface:copilot.post-tool
   emits_hook:
-    - target: agentVersion:copilot:ge-1-0-54
+    - target: agentVersion:copilot:ge-1-0-55-3
 ---
 # ── OpenCode native hooks ──
 nodeKind: HookMapping
@@ -979,7 +979,7 @@ id: hook-mapping:gemini-pre-prompt-native
 attributes:
   mappingId: hook-mapping:gemini-pre-prompt-native
   hookId: hook-surface:gemini.pre-prompt
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: pre_prompt
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -995,14 +995,14 @@ edges:
   maps_hook:
     - target: hook-surface:gemini.pre-prompt
   emits_hook:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
 ---
 nodeKind: HookMapping
 id: hook-mapping:gemini-tool-call-pre-native
 attributes:
   mappingId: hook-mapping:gemini-tool-call-pre-native
   hookId: hook-surface:gemini.tool-call-pre
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: tool_call_pre
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -1018,14 +1018,14 @@ edges:
   maps_hook:
     - target: hook-surface:gemini.tool-call-pre
   emits_hook:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
 ---
 nodeKind: HookMapping
 id: hook-mapping:gemini-tool-call-post-native
 attributes:
   mappingId: hook-mapping:gemini-tool-call-post-native
   hookId: hook-surface:gemini.tool-call-post
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: tool_call_post
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -1041,7 +1041,7 @@ edges:
   maps_hook:
     - target: hook-surface:gemini.tool-call-post
   emits_hook:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
 ---
 # ── Hermes onEvent hook ──
 nodeKind: HookMapping
@@ -1073,7 +1073,7 @@ id: hook-mapping:omp-on-event-native
 attributes:
   mappingId: hook-mapping:omp-on-event-native
   hookId: hook-surface:omp.on-event
-  targetId: agentVersion:omp:ge-15-3-1
+  targetId: agentVersion:omp:ge-15-5-6
   nativeName: onEvent
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -1089,7 +1089,7 @@ edges:
   maps_hook:
     - target: hook-surface:omp.on-event
   emits_hook:
-    - target: agentVersion:omp:ge-15-3-1
+    - target: agentVersion:omp:ge-15-5-6
 ---
 # ── OpenClaw onEvent hook ──
 nodeKind: HookMapping
@@ -1097,7 +1097,7 @@ id: hook-mapping:openclaw-on-event-native
 attributes:
   mappingId: hook-mapping:openclaw-on-event-native
   hookId: hook-surface:openclaw.on-event
-  targetId: agentVersion:openclaw:ge-2026-5-22
+  targetId: agentVersion:openclaw:ge-2026-5-26
   nativeName: onEvent
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -1113,7 +1113,7 @@ edges:
   maps_hook:
     - target: hook-surface:openclaw.on-event
   emits_hook:
-    - target: agentVersion:openclaw:ge-2026-5-22
+    - target: agentVersion:openclaw:ge-2026-5-26
 ---
 # ── BeforePromptBuild canonical hook ──
 nodeKind: HookMapping

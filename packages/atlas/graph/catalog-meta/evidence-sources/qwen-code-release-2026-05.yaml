@@ -1,25 +1,27 @@
 nodeKind: EvidenceSource
-id: evidence:qwen-code-release-v0-16-1
+id: evidence:qwen-code-release-v0-16-2
 attributes:
-  displayName: Qwen Code v0.16.1 release notes
+  displayName: Qwen Code v0.16.2 release notes
   kindLabel: release-notes
   trustLevel: trust-level:official-web
-  sourceUrl: https://github.com/QwenLM/qwen-code/releases/tag/v0.16.1
-  sourcePathOrUrl: https://github.com/QwenLM/qwen-code/releases/tag/v0.16.1
-  locator: Qwen Code release v0.16.1
-  capturedAt: '2026-05-26T07:11:00Z'
-  observedAt: '2026-05-26T07:11:00Z'
+  sourceUrl: https://github.com/QwenLM/qwen-code/releases/tag/v0.16.2
+  sourcePathOrUrl: https://github.com/QwenLM/qwen-code/releases/tag/v0.16.2
+  locator: Qwen Code release v0.16.2
+  capturedAt: '2026-05-27T16:35:00Z'
+  observedAt: '2026-05-27T16:35:00Z'
   observedBy: codex-babysitter-yolo
   freshnessWindowDays: 90
   reviewOwner: '@a5c-ai/catalog'
-  reviewedAt: '2026-05-26T07:11:00Z'
+  reviewedAt: '2026-05-27T16:35:00Z'
   notes: |
-    Release notes list the upstream 0.16.1 changes assimilated into the Atlas
-    graph: tool_use/tool_result invariant closure across failure paths, TTFT
-    capture and GenAI semantic-convention telemetry dual emit, tab-indented
-    notebook formatting preservation, Express 5.2.1, CRLF storage for
-    install-qwen-standalone.bat, and mintty OSC 8 detection gated on
-    TERM_PROGRAM_VERSION >= 3.3.
+    Release notes list the upstream 0.16.2 changes assimilated into the Atlas
+    graph: .qwen/QWEN.local.md project-local memory, memory-leak-debug skill,
+    background-agent concurrency limits, Token Plan cache control, three-tier
+    auto-compaction thresholds, headless runaway-protection guardrails,
+    startup --worktree and symlinkDirectories support, SDK canUseTool timeout
+    handling, CLI chunks in the SDK package, and the 0.16.1 tool_use/tool_result
+    invariant, telemetry, notebook formatting, and Windows terminal/install
+    compatibility fixes retained in this line.
 edges:
   has_trust_level:
     - trust-level:official-web

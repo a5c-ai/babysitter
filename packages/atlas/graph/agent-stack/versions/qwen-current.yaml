@@ -3,14 +3,20 @@ id: agent-version:qwen@current
 attributes:
   agentProductId: agent:qwen
   sourcePackage: "@qwen-code/qwen-code"
-  versionRange: ">=0.16.1"
-  releasedAt: "2026-05-23"
-  releaseNotesUrl: https://github.com/QwenLM/qwen-code/releases/tag/v0.16.1
+  versionRange: ">=0.16.2"
+  releasedAt: "2026-05-27"
+  releaseNotesUrl: https://github.com/QwenLM/qwen-code/releases/tag/v0.16.2
   cliCommand: "qwen"
   installMethods:
     - install:npm
   assimilationNotes: |
-    Qwen Code 0.16.1 keeps the npm package/install surface unchanged.
+    Qwen Code 0.16.2 keeps the npm package/install surface unchanged.
+    The release adds .qwen/QWEN.local.md project-local memory, a
+    memory-leak-debug skill, background-agent concurrency limits, Token Plan
+    cache control, a three-tier auto-compaction threshold redesign, headless
+    runaway-protection guardrails, a startup --worktree flag with symlink
+    directory and PR-ref support, and SDK fixes for canUseTool timeouts and CLI
+    chunks in the SDK package.
     The release closes the upstream tool_use/tool_result invariant across
     failure paths, adds TTFT capture plus GenAI semantic-convention dual
     telemetry emission, preserves tab-indented notebook formatting, updates
@@ -32,22 +38,22 @@ edges:
       role: ui
   sourced_from:
     - source-ref:qwen-code-github
-    - evidence:qwen-code-release-v0-16-1
+    - evidence:qwen-code-release-v0-16-2
   supports:
     - target: capability:can-multi-turn
-      versionRange: '>=0.16.1'
+      versionRange: '>=0.16.2'
       level: full
       notes: Qwen agent runs multi-turn coding sessions.
     - target: capability:supports-text-streaming
-      versionRange: '>=0.16.1'
+      versionRange: '>=0.16.2'
       level: full
       notes: Qwen agent streams model output in the terminal.
     - target: capability:supports-tool-use
-      versionRange: '>=0.16.1'
+      versionRange: '>=0.16.2'
       level: full
-      notes: Qwen agent drives file edits and commands via tool-use. Version 0.16.1 closes the upstream tool_use/tool_result failure-path invariant.
+      notes: Qwen agent drives file edits and commands via tool-use. Version 0.16.2 keeps that invariant while adding headless runaway-protection guardrails and SDK canUseTool timeout handling.
     - target: capability:supports-mcp
-      versionRange: '>=0.16.1'
+      versionRange: '>=0.16.2'
       level: full
       notes: Qwen agent supports MCP server integration.
   uses_memory_system:

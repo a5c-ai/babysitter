@@ -2,7 +2,7 @@ nodeKind: AgentPlatformImpl
 id: agent-platform-impl:gemini-cli.platform@current
 attributes:
   displayName: Gemini CLI Platform (current)
-  agentVersionId: agentVersion:gemini:ge-0-0-0
+  agentVersionId: agentVersion:gemini:ge-0-43-0
   subagentDefinitionFormat: none
   packageRef: source-ref:gemini-cli-github
   nativeExtensionFormat: gemini-extension

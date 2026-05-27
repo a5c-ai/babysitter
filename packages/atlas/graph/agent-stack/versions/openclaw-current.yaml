@@ -1,5 +1,5 @@
 nodeKind: AgentVersion
-id: agentVersion:openclaw:ge-2026-5-22
+id: agentVersion:openclaw:ge-2026-5-26
 attributes:
   agentId: "openclaw"
   aliases: []
@@ -13,15 +13,23 @@ attributes:
     - "macos"
     - "windows"
   agentProductId: agent:openclaw
-  versionRange: ">=2026.5.22"
-  releasedAt: "2026-05-24"
+  versionRange: ">=2026.5.26"
+  releasedAt: "2026-05-27"
+  releaseNotesUrl: "https://github.com/openclaw/openclaw/releases/tag/v2026.5.26-beta.2"
   cliCommand: "openclaw"
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"
   adapterMetadata:
     releaseNotes:
-      version: "2026.5.22"
+      version: "2026.5.26"
+      highlights:
+        - "Gateway and reply paths avoid repeated plugin, channel, session, usage-cost, warning, scheduled-service, and filesystem scans."
+        - "Transcript-backed meeting summaries, source-provider chunks, cleaned user turns, media provenance, Codex mirrors, WebChat replies, and CLI/TUI replay converge on one transcript path."
+        - "Telegram, iMessage, WhatsApp, Discord, Signal, and mobile approval flows gained channel-specific reliability and reaction approval improvements."
+        - "Talk and realtime voice runs can be inspected, steered, cancelled, or followed up from Web UI and Discord voice."
+        - "Browser snapshot reads honor SSRF policy, fetched file text is wrapped as external content, and serialized tool-call text is scrubbed from replies."
+        - "Codex app-server resume, timeout, usage-limit recovery, dynamic tool-schema guards, xAI usage-limit surfacing, and local approval resolution improve provider-specific recovery."
       gatewayStartup: >
         Gateway ready signals no longer wait on unused handler trees or ACPX
         probes. Startup hot paths reuse channel catalog reads, immutable plugin
@@ -143,26 +151,26 @@ edges:
   sourced_from: []
   supports:
     - target: capability:skills
-      versionRange: ">=2026.5.22"
+      versionRange: ">=2026.5.26"
       level: full
       notes: OpenClaw fallback metadata; runtime hooks and stop hooks remain unsupported in current shared metadata.
     - target: capability:supports-thinking
-      versionRange: ">=2026.5.22"
+      versionRange: ">=2026.5.26"
       level: full
       notes: OpenClaw fallback metadata.
     - target: capability:interactive-mode
-      versionRange: ">=2026.5.22"
+      versionRange: ">=2026.5.26"
       level: full
       notes: OpenClaw fallback metadata.
     - target: capability:stdin-injection
-      versionRange: ">=2026.5.22"
+      versionRange: ">=2026.5.26"
       level: full
       notes: OpenClaw fallback metadata.
     - target: capability:vision-input
-      versionRange: ">=2026.5.22"
+      versionRange: ">=2026.5.26"
       level: full
       notes: OpenClaw fallback metadata.
     - target: capability:can-resume
-      versionRange: ">=2026.5.22"
+      versionRange: ">=2026.5.26"
       level: full
       notes: OpenClaw fallback metadata.

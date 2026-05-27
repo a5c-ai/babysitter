@@ -14,7 +14,7 @@ attributes:
     with the local workspace through file and shell tool use.
 edges:
   has_version:
-    - agentVersion:gemini:ge-0-0-0
+    - agentVersion:gemini:ge-0-43-0
   composed_of:
     - target: language:typescript
       role: core

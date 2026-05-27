@@ -7,7 +7,7 @@ attributes:
   commArgs: []
   description: |-
     Default Codex CLI launch recipe. Spawns the `codex` CLI with no extra argv and uses the user's configured approval policy, sandbox mode, model, and project configuration.
-    For 0.133.0+, remote-control launch behavior is modeled separately: `codex remote-control` runs in the foreground, waits for readiness, reports machine status, and keeps explicit start/stop commands.
+    For 0.134.0+, remote-control launch behavior is modeled separately: `codex remote-control` runs in the foreground, waits for readiness, reports machine status, and keeps explicit start/stop commands.
 edges:
   requires_capability:
     - target: capability:streaming
@@ -31,11 +31,11 @@ attributes:
   commArgs:
     - remote-control
   description: |-
-    Codex CLI 0.133.0 remote-control launch recipe. The command runs in the foreground, waits for readiness, and reports machine status for callers that need a ready remote-control endpoint.
+    Codex CLI 0.134.0 remote-control launch recipe. The command runs in the foreground, waits for readiness, and reports machine status for callers that need a ready remote-control endpoint.
 edges:
   requires_capability:
     - target: capability:supports-tool-use
-      versionRange: '>=0.133.0'
+      versionRange: '>=0.134.0'
       level: full
   runs_via:
     - target: execution:local-host
@@ -53,11 +53,11 @@ attributes:
     - remote-control
     - stop
   description: |-
-    Codex CLI 0.133.0 daemon-style remote-control lifecycle recipe with explicit start and stop commands for supervisors that manage the service boundary themselves.
+    Codex CLI 0.134.0 daemon-style remote-control lifecycle recipe with explicit start and stop commands for supervisors that manage the service boundary themselves.
 edges:
   requires_capability:
     - target: capability:supports-tool-use
-      versionRange: '>=0.133.0'
+      versionRange: '>=0.134.0'
       level: full
   runs_via:
     - target: execution:local-host

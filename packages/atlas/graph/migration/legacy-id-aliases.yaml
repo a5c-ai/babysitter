@@ -41,11 +41,11 @@ aliases:
   - { legacyId: "agent-version:claude-code@1.x",            v6Id: "agentVersion:claude:ge-0-0-0",                    nodeKind: AgentVersion, notes: "host rename + range collapse" }
   - { legacyId: "agent-version:codex@1.x",                  v6Id: "agentVersion:codex:ge-0-0-0-lt-0-119-0",          nodeKind: AgentVersion, notes: "v6 splits codex < 0.119; legacy collapsed to 1.x" }
   - { legacyId: "agent-version:codex@1.x",                  v6Id: "agentVersion:codex:ge-0-119-0",                   nodeKind: AgentVersion }
-  - { legacyId: "agent-version:copilot-cli@current",        v6Id: "agentVersion:copilot:ge-1-0-54",                  nodeKind: AgentVersion }
+  - { legacyId: "agent-version:copilot-cli@current",        v6Id: "agentVersion:copilot:ge-1-0-55-3",                  nodeKind: AgentVersion }
   - { legacyId: "agent-version:cursor@current",             v6Id: "agentVersion:cursor:ge-0-0-0",                    nodeKind: AgentVersion }
-  - { legacyId: "agent-version:gemini-cli@current",         v6Id: "agentVersion:gemini:ge-0-0-0",                    nodeKind: AgentVersion }
-  - { legacyId: "agent-version:omp@current",                v6Id: "agentVersion:omp:ge-15-3-1",                      nodeKind: AgentVersion }
-  - { legacyId: "agent-version:openclaw@current",           v6Id: "agentVersion:openclaw:ge-2026-5-22",              nodeKind: AgentVersion }
+  - { legacyId: "agent-version:gemini-cli@current",         v6Id: "agentVersion:gemini:ge-0-43-0",                    nodeKind: AgentVersion }
+  - { legacyId: "agent-version:omp@current",                v6Id: "agentVersion:omp:ge-15-5-6",                      nodeKind: AgentVersion }
+  - { legacyId: "agent-version:openclaw@current",           v6Id: "agentVersion:openclaw:ge-2026-5-26",              nodeKind: AgentVersion }
   - { legacyId: "agent-version:opencode@1.x",               v6Id: "agentVersion:opencode:ge-0-0-0",                  nodeKind: AgentVersion }
   - { legacyId: "agent-version:pi@current",                 v6Id: "agentVersion:pi:ge-0-75-5",                       nodeKind: AgentVersion }
 

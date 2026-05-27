@@ -2,7 +2,7 @@ nodeKind: AgentCoreImpl
 id: agent-core-impl:omp.core@current
 attributes:
   displayName: OMP Core (current)
-  agentVersionId: agentVersion:omp:ge-15-3-1
+  agentVersionId: agentVersion:omp:ge-15-5-6
   packageRef: source-ref:omp-github
   loopIteratorPolicy: tool-use-loop
   loopIteratorNotes: 'OMP inherits Pi''s serial tool-use loop. Loop advances on provider

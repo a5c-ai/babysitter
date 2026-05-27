@@ -3,7 +3,7 @@ id: hook-mapping:post-tool-use-gemini
 attributes:
   mappingId: hook-mapping:post-tool-use-gemini
   hookId: hook-surface:post-tool-use
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: post_response
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -19,4 +19,4 @@ edges:
   maps_hook:
     - target: hook-surface:post-tool-use
   emits_hook:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0

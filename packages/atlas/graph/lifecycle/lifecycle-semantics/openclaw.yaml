@@ -12,4 +12,4 @@ attributes:
   platformNuances: []
 edges:
   applies_to_version:
-    - target: agentVersion:openclaw:ge-2026-5-22
+    - target: agentVersion:openclaw:ge-2026-5-26

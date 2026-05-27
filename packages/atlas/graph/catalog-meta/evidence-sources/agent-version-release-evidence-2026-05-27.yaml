@@ -1,0 +1,99 @@
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-152-release
+attributes:
+  displayName: "Claude Code v2.1.152 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.152
+  sourcePathOrUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.152
+  locator: "anthropics/claude-code release v2.1.152"
+  capturedAt: "2026-05-27T16:35:00Z"
+  observedAt: "2026-05-27T16:35:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T16:35:00Z"
+  notes: |
+    Release notes list user-facing CLI, hook, skill, plugin, fallback-model,
+    auto-mode, and TUI changes assimilated into the Claude Code version record.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:ge-0-0-0
+---
+nodeKind: EvidenceSource
+id: evidence:codex-rust-v0-134-0-release
+attributes:
+  displayName: "Codex CLI 0.134.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/openai/codex/releases/tag/rust-v0.134.0
+  sourcePathOrUrl: https://github.com/openai/codex/releases/tag/rust-v0.134.0
+  locator: "openai/codex release rust-v0.134.0"
+  capturedAt: "2026-05-27T16:35:00Z"
+  observedAt: "2026-05-27T16:35:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T16:35:00Z"
+  notes: |
+    Release notes list local conversation search, --profile migration,
+    MCP HTTP/OAuth setup, schema preservation/compaction, read-only MCP tool
+    concurrency, richer extension/hook context, remote websocket recovery, and
+    managed network-proxy handling.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:codex:ge-0-119-0
+---
+nodeKind: EvidenceSource
+id: evidence:opencode-1-15-11-release
+attributes:
+  displayName: "OpenCode v1.15.11 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anomalyco/opencode/releases/tag/v1.15.11
+  sourcePathOrUrl: https://github.com/anomalyco/opencode/releases/tag/v1.15.11
+  locator: "anomalyco/opencode release v1.15.11"
+  capturedAt: "2026-05-27T16:35:00Z"
+  observedAt: "2026-05-27T16:35:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T16:35:00Z"
+  notes: |
+    Release notes list provider headerTimeout config, push-based experimental
+    background-agent updates, partial modalities config, stable remote-backed
+    project identity, dynamic MCP server disconnect cleanup, and shell timeout
+    advertisement.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:opencode:ge-0-0-0
+---
+nodeKind: EvidenceSource
+id: evidence:omp-15-5-6-release
+attributes:
+  displayName: "Oh-My-Pi v15.5.6 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.5.6
+  sourcePathOrUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.5.6
+  locator: "can1357/oh-my-pi release v15.5.6"
+  capturedAt: "2026-05-27T16:35:00Z"
+  observedAt: "2026-05-27T16:35:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T16:35:00Z"
+  notes: |
+    Release notes list Codex WebSocket idle-reuse controls and recovery plus
+    URL/directory selector parsing improvements.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:ge-15-5-6

@@ -21,7 +21,7 @@ attributes:
   platformIdentityStrategy: api-key
   updateChannelMechanism: npm
   windowsInstallNotes: |
-    Qwen Code 0.16.1 keeps the npm package unchanged and renormalizes CRLF
+    Qwen Code 0.16.2 keeps the npm package unchanged and renormalizes CRLF
     storage for the upstream install-qwen-standalone.bat script. Babysitter does
     not vendor that BAT script; Windows install behavior remains an upstream
     Qwen CLI distribution concern.
