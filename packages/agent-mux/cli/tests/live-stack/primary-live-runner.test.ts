@@ -53,6 +53,65 @@ function foundryClaudeVanillaScenario(): LiveStackScenario {
   });
 }
 
+const CLAUDE_LIVE_MODEL_CASES = [
+  {
+    provider: 'foundry-openai',
+    amuxProvider: 'foundry',
+    model: 'gpt-5.5',
+    requiredEnv: 'AZURE_API_KEY,AMUX_API_BASE',
+    credentials: { AZURE_API_KEY: 'sk-live-secret', AMUX_API_BASE: 'https://foundry.example.test' },
+  },
+  {
+    provider: 'google',
+    amuxProvider: 'google',
+    model: 'gemini-3.5-flash',
+    requiredEnv: 'GOOGLE_API_KEY',
+    credentials: { GOOGLE_API_KEY: 'google-secret' },
+  },
+  {
+    provider: 'anthropic-direct',
+    amuxProvider: 'anthropic',
+    model: 'claude-sonnet-4-6',
+    requiredEnv: 'ANTHROPIC_API_KEY',
+    credentials: { ANTHROPIC_API_KEY: 'sk-ant-secret' },
+  },
+  {
+    provider: 'foundry-openai',
+    amuxProvider: 'foundry',
+    model: 'DeepSeek-V4-Pro',
+    requiredEnv: 'AZURE_API_KEY,AMUX_API_BASE',
+    credentials: { AZURE_API_KEY: 'sk-live-secret', AMUX_API_BASE: 'https://foundry.example.test' },
+  },
+  {
+    provider: 'foundry-openai',
+    amuxProvider: 'foundry',
+    model: 'gpt-5.4-mini',
+    requiredEnv: 'AZURE_API_KEY,AMUX_API_BASE',
+    credentials: { AZURE_API_KEY: 'sk-live-secret', AMUX_API_BASE: 'https://foundry.example.test' },
+  },
+] as const;
+
+function claudeScenarioFor(modelCase: typeof CLAUDE_LIVE_MODEL_CASES[number], installMode: 'vanilla' | 'babysitter-plugin'): LiveStackScenario {
+  return liveStackScenarioFromEnv({
+    LIVE_STACK_SCENARIO_ID: `live.agent-mux.claude-code.${modelCase.provider}.${modelCase.model}`,
+    LIVE_STACK_AGENT_PATH: 'agent-mux',
+    LIVE_STACK_AGENT: 'claude-code',
+    LIVE_STACK_AMUX_AGENT: 'claude',
+    LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+    LIVE_STACK_INSTALL_MODE: installMode,
+    LIVE_STACK_PROVIDER: modelCase.provider,
+    LIVE_STACK_AMUX_PROVIDER: modelCase.amuxProvider,
+    LIVE_STACK_MODEL: modelCase.model,
+    LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+    LIVE_STACK_REQUIRED_ENV: modelCase.requiredEnv,
+    LIVE_STACK_LAYERS: installMode,
+    LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+    LIVE_STACK_EXPECTED_ARTIFACTS: installMode === 'babysitter-plugin'
+      ? 'agent-mux-events,plugin-command-transcript,transport-mux-trace,provider-trace-redacted'
+      : 'agent-mux-events,transport-mux-trace,provider-trace-redacted',
+  });
+}
+
 function promptFor(scenario: LiveStackScenario, env: Record<string, string | undefined> = {}): string | undefined {
   const commands = buildPrimaryLiveStackCommands(scenario, {
     cwd: '/repo',
@@ -191,6 +250,56 @@ describe('primary live stack runner contract', () => {
     expect(launch?.args).toContain('--bridge-interactive');
     expect(launch?.args).toContain('--bridge-hooks');
     expect(launch?.args).not.toContain('-p');
+  });
+
+  it('constructs Claude all-model bridged-interactive and bridged-hooks lanes with non-interactive controls', () => {
+    const laneCases = [
+      {
+        installMode: 'vanilla' as const,
+        env: { LIVE_STACK_INTERACTIVE: 'false', LIVE_STACK_BRIDGE_INTERACTIVE: 'true', LIVE_STACK_BRIDGE_HOOKS: 'false' },
+        expectedBridgeFlags: ['--bridge-interactive'],
+        rejectedBridgeFlags: ['--bridge-hooks'],
+      },
+      {
+        installMode: 'babysitter-plugin' as const,
+        env: {
+          LIVE_STACK_INTERACTIVE: 'false',
+          LIVE_STACK_BRIDGE_INTERACTIVE: 'true',
+          LIVE_STACK_BRIDGE_HOOKS: 'true',
+          LIVE_STACK_PROCESS_MODE: 'create',
+        },
+        expectedBridgeFlags: ['--bridge-interactive', '--bridge-hooks'],
+        rejectedBridgeFlags: [],
+      },
+    ];
+
+    for (const modelCase of CLAUDE_LIVE_MODEL_CASES) {
+      for (const lane of laneCases) {
+        const scenario = claudeScenarioFor(modelCase, lane.installMode);
+        const commands = buildPrimaryLiveStackCommands(scenario, {
+          cwd: '/repo',
+          timeoutMs: 1000,
+          env: {
+            ...modelCase.credentials,
+            LIVE_STACK_TRACE_ID: `trace-${modelCase.model}`,
+            ...lane.env,
+          },
+        });
+        const launch = commands.at(-1);
+
+        expect(launch?.args).toContain('launch');
+        expect(launch?.args).toContain('claude');
+        expect(launch?.args).toContain(modelCase.amuxProvider);
+        expect(launch?.args).toContain(modelCase.model);
+        expect(launch?.args).toContain('--no-interactive');
+        expect(launch?.args).toContain('--with-proxy-if-needed');
+        expect(launch?.args).toContain('--prompt');
+        expect(launch?.args).toContain('--max-turns');
+        expect(launch?.args).toContain('--yolo');
+        for (const flag of lane.expectedBridgeFlags) expect(launch?.args).toContain(flag);
+        for (const flag of lane.rejectedBridgeFlags) expect(launch?.args).not.toContain(flag);
+      }
+    }
   });
 
   it('pins babysitter-plugin runs to the workspace runs directory', () => {

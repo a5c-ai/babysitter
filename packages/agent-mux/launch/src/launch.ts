@@ -388,7 +388,7 @@ async function prepareHarnessAutomationState(harness: string, cwd: string, env: 
   if (harness === 'codex') await prepareCodexAutomationState(cwd);
   const automationEnv = getAutomationEnv(harness);
   for (const [key, value] of Object.entries(automationEnv)) {
-    env[key] = value;
+    if (typeof value === 'string') env[key] = value;
   }
 }
 
@@ -1109,6 +1109,8 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
   let ptyProcess: any = null;
   let ptyTerminationExpected = false;
   let stdinPromptOverride: string | undefined;
+  let spawnedArgsForPromptCheck = plan.args;
+  let promptDeliveredInArgs = prompt ? plan.args.some(a => a === prompt) : false;
   const ptyCleanup: Array<() => void> = [];
   const capturedOutputChunks: string[] = [];
   const completePtyPrompt = () => {
@@ -1309,6 +1311,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       ptyProcess = null;
       const { spawn } = await import('node:child_process');
       const fallbackResolved = await resolveSpawnCommand(plan.command, plan.args);
+      spawnedArgsForPromptCheck = fallbackResolved.args;
       console.error(`[amux launch] BI fallback spawn: ${fallbackResolved.command} args=${fallbackResolved.args.length} stdio=['pipe','pipe','pipe']`);
       child = spawn(fallbackResolved.command, fallbackResolved.args, {
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -1331,6 +1334,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     }
 
     const resolvedBridge = await resolveSpawnCommand(plan.command, plan.args);
+    spawnedArgsForPromptCheck = resolvedBridge.args;
     // Skip node-pty on macOS ARM64 CI — posix_spawnp fails for all binaries
     const skipBridgePty = process.platform === 'darwin' && process.arch === 'arm64' && process.env['CI'] === 'true';
     let nodePty: any;
@@ -1359,17 +1363,21 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       // it into the command args using the harness's NI delivery method.
       console.error(`[amux launch] bridge-interactive: PTY unavailable (${skipBridgePty ? 'macOS ARM64 CI skip' : 'import failed'}) — using child_process fallback`);
       const fallbackLb = getLaunchBehavior(plan.harness);
-      const promptInArgs = prompt ? resolvedBridge.args.some(a => a === prompt) : true;
-      if (prompt && !promptInArgs && fallbackLb) {
+      const bridgeFallbackArgs = [...plan.args];
+      const promptInFallbackArgs = prompt ? bridgeFallbackArgs.some(a => a === prompt) : true;
+      if (prompt && !promptInFallbackArgs && fallbackLb) {
         if (fallbackLb.promptDelivery === 'cli-flag' && fallbackLb.promptFlag) {
-          resolvedBridge.args.push(fallbackLb.promptFlag, prompt, ...(fallbackLb.promptExtraFlags ?? []));
+          bridgeFallbackArgs.push(fallbackLb.promptFlag, prompt, ...(fallbackLb.promptExtraFlags ?? []));
         } else if (fallbackLb.promptDelivery === 'exec-subcommand' && fallbackLb.execSubcommand) {
-          resolvedBridge.args.unshift(fallbackLb.execSubcommand, prompt);
+          bridgeFallbackArgs.unshift(fallbackLb.execSubcommand, prompt);
         }
+        promptDeliveredInArgs = bridgeFallbackArgs.some(a => a === prompt);
         console.error(`[amux launch] BI fallback: injected prompt into args (${fallbackLb.promptDelivery})`);
       }
+      const fallbackResolved = await resolveSpawnCommand(plan.command, bridgeFallbackArgs);
+      spawnedArgsForPromptCheck = fallbackResolved.args;
       const { spawn } = await import('node:child_process');
-      child = spawn(resolvedBridge.command, resolvedBridge.args, {
+      child = spawn(fallbackResolved.command, fallbackResolved.args, {
         stdio: ['pipe', 'pipe', 'pipe'],
         env: { ...process.env, ...plan.env },
         cwd: launchCwd,
@@ -1577,30 +1585,14 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       });
       (child as any).__bridgeExitPromise = exitPromise;
     } else {
-      // child_process fallback: pipe stdout through shared handler, deliver prompt via stdin
+      // child_process fallback: pipe stdout through shared handler. Prompt delivery
+      // is handled by args when supported, otherwise by the common stdin path below.
       child.stdout?.on('data', (chunk: Buffer) => {
         const text = chunk.toString('utf8');
         process.stdout.write(chunk);
         handleOutputChunk(text);
         maybeInjectBabysitterSkillFollowup(outputBuf);
       });
-
-      if (prompt) {
-        // Deliver prompt via stdin after a short startup delay
-        setTimeout(() => {
-          if (child?.stdin?.writable) {
-            child.stdin.write(prompt + '\n');
-          }
-          const artifactMonitor = startPromptArtifactCompletionMonitor({
-            prompt,
-            cwd: launchCwd,
-            onComplete: () => {
-              clearInterval(artifactMonitor);
-              completePtyPrompt();
-            },
-          });
-        }, 2000);
-      }
 
       const exitPromise = new Promise<number>((resolve) => {
         child.on('exit', (code: number | null, signal: string | null) => {
@@ -1622,6 +1614,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     // internally (claude -p, codex exec, gemini --prompt, pi -p).
     const { spawn } = await import('node:child_process');
     const resolvedSpawn = await resolveSpawnCommand(plan.command, plan.args);
+    spawnedArgsForPromptCheck = resolvedSpawn.args;
     // No special Windows prompt override needed — Bun binaries are handled via
     // .cmd shim fallback in resolveSpawnCommand (shell:true + escapeCmdArg).
     console.error(`[amux launch] spawn: ${resolvedSpawn.command} shell=${resolvedSpawn.shell} args[0..2]=${resolvedSpawn.args.slice(0, 3).join(' ')} totalArgs=${resolvedSpawn.args.length}${stdinPromptOverride ? ' (prompt→stdin)' : ''}`);
@@ -1703,7 +1696,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
 
   const launchBehavior = getLaunchBehavior(plan.harness);
   const effectivePrompt = stdinPromptOverride ?? prompt;
-  const promptInArgs = effectivePrompt ? plan.args.some(a => a === effectivePrompt) : false;
+  const promptInArgs = effectivePrompt ? promptDeliveredInArgs || spawnedArgsForPromptCheck.some(a => a === effectivePrompt) : false;
   const needsStdinDelivery = stdinPromptOverride || !promptInArgs;
   const keepStdinOpen = launchBehavior?.stdinBehavior === 'keep-open';
   if (!isInteractive && effectivePrompt) {
