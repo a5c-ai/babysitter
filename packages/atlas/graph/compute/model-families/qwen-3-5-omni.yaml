@@ -1,0 +1,20 @@
+nodeKind: ModelFamily
+id: model-family:qwen-3-5-omni
+attributes:
+  displayName: "Qwen 3.5 Omni"
+  providerId: alibaba
+  providerIds:
+    - alibaba-cloud
+  family: qwen
+  generation: "3.5"
+  modalities:
+    - text
+    - image
+    - audio
+    - video
+  status: current
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:qwen3-5-omni-plus@current

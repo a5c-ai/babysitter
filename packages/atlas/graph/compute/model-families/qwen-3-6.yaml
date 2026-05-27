@@ -1,0 +1,20 @@
+nodeKind: ModelFamily
+id: model-family:qwen-3-6
+attributes:
+  displayName: "Qwen 3.6"
+  providerId: alibaba
+  providerIds:
+    - alibaba-cloud
+  family: qwen
+  generation: "3.6"
+  modalities:
+    - text
+    - image
+    - video
+  status: current
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:qwen3-6-plus@current
+    - model:qwen3-6-flash@current
