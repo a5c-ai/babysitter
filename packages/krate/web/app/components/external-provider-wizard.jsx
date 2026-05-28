@@ -8,12 +8,18 @@ const PROVIDER_TYPES = [
   { value: 'bitbucket', label: 'Bitbucket', description: 'Bitbucket Cloud or Data Center' },
   { value: 'gitea', label: 'Gitea', description: 'Gitea or Forgejo self-hosted' },
   { value: 'azure_devops', label: 'Azure DevOps', description: 'Azure DevOps Services or Server' },
+  { value: 'vercel', label: 'Vercel', description: 'Vercel deployment and hosting platform' },
+  { value: 'cloudflare', label: 'Cloudflare', description: 'Cloudflare Workers, Pages, and R2' },
+  { value: 'firebase', label: 'Firebase', description: 'Google Firebase hosting and functions' },
+  { value: 'netlify', label: 'Netlify', description: 'Netlify hosting and edge functions' },
 ];
 
 const INTERFACES = [
   { value: 'gitForge', label: 'Git forge', description: 'Repository management and webhooks' },
   { value: 'issueTracking', label: 'Issue tracking', description: 'Issues, milestones, and labels' },
   { value: 'cicd', label: 'CI/CD', description: 'Pipelines, jobs, and run triggers' },
+  { value: 'artifactRegistry', label: 'Artifact registry', description: 'Package feeds, container images, and build artifacts' },
+  { value: 'appHosting', label: 'Application hosting', description: 'Deploy targets like Vercel, Cloudflare, Firebase, or Netlify' },
 ];
 
 const TOTAL_STEPS = 5;
@@ -258,7 +264,7 @@ function Step5Review({ name, providerType, hosting, baseUrl, interfaces, secretR
 }
 
 function defaultEndpointForProvider(type) {
-  const endpoints = { github: 'https://api.github.com', gitlab: 'https://gitlab.com', bitbucket: 'https://api.bitbucket.org', gitea: 'https://gitea.example.com', azure_devops: 'https://dev.azure.com' };
+  const endpoints = { github: 'https://api.github.com', gitlab: 'https://gitlab.com', bitbucket: 'https://api.bitbucket.org', gitea: 'https://gitea.example.com', azure_devops: 'https://dev.azure.com', vercel: 'https://api.vercel.com', cloudflare: 'https://api.cloudflare.com', firebase: 'https://firebase.googleapis.com', netlify: 'https://api.netlify.com' };
   return endpoints[type] || 'https://api.github.com';
 }
 
