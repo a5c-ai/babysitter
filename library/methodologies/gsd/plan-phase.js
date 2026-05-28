@@ -254,6 +254,8 @@ export const generatePlansTask = defineTask('generate-plans', (args, taskCtx) =>
         'Provide detailed, actionable steps in <action>',
         'Define clear verification command in <verify>',
         'Specify success criteria in <done>',
+        'For media-touching plans, include a Device test matrix section with iPad Safari (PWA install), iPhone Safari (PWA install), macOS Safari (web), and Desktop Chrome (web) rows.',
+        'Each media device row must be marked PASS, FAIL, or SKIP with one-line evidence; SKIP requires a justification.',
         'If previous feedback exists, address all concerns',
         'Ensure plans collectively satisfy ALL requirements',
         'Plans should be executable in parallel or clear sequence'

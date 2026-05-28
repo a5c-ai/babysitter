@@ -41,6 +41,24 @@ profile read/write/merge operations MUST use the babysitter CLI commands
 `profile:render`). Never instruct agents to import or call SDK profile functions
 directly.
 
+**IMPL.md media-device gate**: If the planned or implemented changes touch
+media, voice, audio, STT, TTS, hands-free, or related browser-device paths,
+the emitted implementation plan/IMPL.md must include this block and every row
+must be filled with `PASS`, `FAIL`, or `SKIP` plus one-line evidence:
+
+```markdown
+## Device test matrix (REQUIRED for media-touching changes)
+
+For each of the following, mark PASS / FAIL / SKIP with one-line evidence:
+
+- [ ] iPad Safari (PWA install)
+- [ ] iPhone Safari (PWA install)
+- [ ] macOS Safari (web)
+- [ ] Desktop Chrome (web)
+
+If SKIP, justify why (e.g. "non-iOS-Safari path; lint-only change").
+```
+
 After the process is created and before creating the run:
 
 - **Interactive mode**: describe the process at high level (not the code or

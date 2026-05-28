@@ -59,6 +59,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -86,6 +88,14 @@ jobs:
         run: |
           set -euo pipefail
           npm run verify:metadata 2>&1 | tee artifacts/test-logs/metadata.log
+
+      - name: Process guard
+        env:
+          PROCESS_CHECK_BASE: ${{ github.event.pull_request.base.sha || 'origin/staging' }}
+          PROCESS_CHECK_PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+          npm run check:processes 2>&1 | tee artifacts/test-logs/processes.log
 
       - name: Architecture boundary gate
         run: |

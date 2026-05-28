@@ -8,6 +8,26 @@
 - Unless otherwise specified, prefer quality gated iterative development loops
   in the process.
 
+- For media-touching work (media, voice, audio, STT, TTS, hands-free, browser
+  capture/playback, or adjacent device-bound paths), require the generated
+  implementation plan/IMPL.md to include:
+
+  ```markdown
+  ## Device test matrix (REQUIRED for media-touching changes)
+
+  For each of the following, mark PASS / FAIL / SKIP with one-line evidence:
+
+  - [ ] iPad Safari (PWA install)
+  - [ ] iPhone Safari (PWA install)
+  - [ ] macOS Safari (web)
+  - [ ] Desktop Chrome (web)
+
+  If SKIP, justify why (e.g. "non-iOS-Safari path; lint-only change").
+  ```
+
+  Every row must be filled with `PASS`, `FAIL`, or `SKIP` plus one-line
+  evidence before the process is considered ready.
+
 - You can change the process after the run is created or during the run (and
   adapt the process accordingly and journal accordingly) in case you discover new
   information or requirements.

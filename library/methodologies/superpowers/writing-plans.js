@@ -56,7 +56,12 @@ const agentWritePlanDocTask = defineTask('plan-write-document', async (args, ctx
   labels: ['superpowers', 'writing-plans', 'documentation'],
   io: {
     inputs: { task: 'string', tasks: 'array', techStack: 'object', architecture: 'string' },
-    outputs: { planPath: 'string', content: 'string', committed: 'boolean' }
+    outputs: {
+      planPath: 'string',
+      content: 'string',
+      committed: 'boolean',
+      mediaDeviceMatrix: 'required when media, voice, audio, STT, TTS, hands-free, or browser capture/playback paths are touched'
+    }
   }
 });
 
@@ -101,6 +106,14 @@ const agentWriteTaskPersistenceTask = defineTask('plan-write-persistence', async
  *   **Step 3:** Write minimal implementation (with code)
  *   **Step 4:** Run test to verify it passes (with command + expected output)
  *   **Step 5:** Commit (with exact git commands)
+ *
+ * Media-touching plans must also include:
+ *   ## Device test matrix (REQUIRED for media-touching changes)
+ *   - [ ] iPad Safari (PWA install): PASS/FAIL/SKIP - one-line evidence
+ *   - [ ] iPhone Safari (PWA install): PASS/FAIL/SKIP - one-line evidence
+ *   - [ ] macOS Safari (web): PASS/FAIL/SKIP - one-line evidence
+ *   - [ ] Desktop Chrome (web): PASS/FAIL/SKIP - one-line evidence
+ *   SKIP rows require a justification.
  *
  * Attribution: Adapted from https://github.com/pcvelz/superpowers
  *
