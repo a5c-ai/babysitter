@@ -130,3 +130,80 @@ edges:
     - trust-level:official-web
   references:
     - agentVersion:copilot:ge-1-0-55-3
+---
+nodeKind: EvidenceSource
+id: evidence:copilot-cli-1-0-55-5-release
+attributes:
+  displayName: "GitHub Copilot CLI v1.0.55-5 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/github/copilot-cli/releases/tag/v1.0.55-5
+  sourcePathOrUrl: https://github.com/github/copilot-cli/releases/tag/v1.0.55-5
+  locator: "github/copilot-cli release v1.0.55-5"
+  capturedAt: "2026-05-28T14:55:00Z"
+  observedAt: "2026-05-28T14:55:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-28T14:55:00Z"
+  notes: |
+    Release notes state that MCP configuration now opens in a dedicated screen
+    with scrollable server and tool lists when content exceeds the visible area.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:copilot:ge-1-0-55-3
+---
+nodeKind: EvidenceSource
+id: evidence:copilot-cli-1-0-55-6-release
+attributes:
+  displayName: "GitHub Copilot CLI v1.0.55-6 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/github/copilot-cli/releases/tag/v1.0.55-6
+  sourcePathOrUrl: https://github.com/github/copilot-cli/releases/tag/v1.0.55-6
+  locator: "github/copilot-cli release v1.0.55-6"
+  capturedAt: "2026-05-28T14:55:00Z"
+  observedAt: "2026-05-28T14:55:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-28T14:55:00Z"
+  notes: |
+    Release notes add `/autopilot <objective>` with `/goal` as an alias,
+    enable the cell-based terminal renderer by default, capture per-extension
+    log files and surface them through the `extensions_manage` tool, discover
+    project extensions in non-git folder-backed `.github/extensions`
+    workspaces, and allow `/statusline` and `/theme` while the agent is
+    executing.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:copilot:ge-1-0-55-3
+---
+nodeKind: EvidenceSource
+id: evidence:copilot-cli-1-0-55-7-release
+attributes:
+  displayName: "GitHub Copilot CLI v1.0.55-7 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/github/copilot-cli/releases/tag/v1.0.55-7
+  sourcePathOrUrl: https://github.com/github/copilot-cli/releases/tag/v1.0.55-7
+  locator: "github/copilot-cli release v1.0.55-7"
+  capturedAt: "2026-05-28T14:55:00Z"
+  observedAt: "2026-05-28T14:55:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-28T14:55:00Z"
+  notes: |
+    Release notes state that `exit_plan_mode` is only offered while the session
+    is in plan mode and that native binary crashes fall through to the
+    JavaScript fallback instead of silently exiting.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:copilot:ge-1-0-55-3

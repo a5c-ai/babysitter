@@ -52,6 +52,20 @@ import {
 
 const CATALOG_TEST_TIMEOUT_MS = 60_000;
 
+function slugifyVersionRange(versionRange: string): string {
+  return versionRange
+    .replace(/>=/g, "ge-")
+    .replace(/<=/g, "le-")
+    .replace(/>/g, "gt-")
+    .replace(/</g, "lt-")
+    .replace(/=/g, "eq-")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-zA-Z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+}
+
 describe("agent-catalog graph-backed ontology", () => {
   it("loads YAML graph metadata and schema", () => {
     expect(getCatalogGraphDocument().graphId).toBe("graph:agent-catalog");
@@ -82,6 +96,19 @@ describe("agent-catalog graph-backed ontology", () => {
     const codex = listAgentVersions().filter((agent) => agent.agentId === "codex");
     expect(codex).toHaveLength(2);
     expect(codex.map((agent) => agent.versionRange)).toContain(">=0.119.0");
+  });
+
+  it("keeps the Copilot AgentVersion id slug aligned with its versionRange slug", () => {
+    const graph = getCatalogGraphSnapshot();
+    const mismatches = graph.nodes
+      .filter((node) => node.kind === "AgentVersion" && node.agentId === "copilot")
+      .map((node) => ({
+        id: String(node.id),
+        expectedId: `agentVersion:${node.agentId}:${slugifyVersionRange(String(node.versionRange))}`,
+      }))
+      .filter((entry) => entry.id !== entry.expectedId);
+
+    expect(mismatches).toEqual([]);
   });
 
   it("exposes shared fallback metadata for sdk consumers", () => {
@@ -202,18 +229,18 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(claims.get("repo-transport-mux-readme")?.status).toBe("provisional");
   });
 
-  it("records Claude Code 2.1.152 user-facing hook, skill, and plugin changes", () => {
-    const version = getAgentVersion("claude-code", "2.1.152");
+  it("records Claude Code current user-facing hook, skill, and plugin changes", () => {
+    const version = getAgentVersion("claude-code", "2.1.153");
     const graph = getCatalogGraphSnapshot();
     const node = graph.nodes.find((entry) => entry.id === "agentVersion:claude:ge-0-0-0");
 
-    expect(version?.versionRange).toBe(">=2.1.152");
-    expect(node?.releaseNotesUrl).toContain("anthropics/claude-code/releases/tag/v2.1.152");
+    expect(version?.versionRange).toBe(">=2.1.153");
+    expect(node?.releaseNotesUrl).toContain("anthropics/claude-code/releases/tag/v2.1.153");
     expect(node?.assimilationNotes).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("MessageDisplay hook event"),
-        expect.stringContaining("/reload-skills"),
-        expect.stringContaining("plugin marketplace remove accepts --scope"),
+        expect.stringContaining("skipLfs"),
+        expect.stringContaining("COLUMNS and LINES"),
+        expect.stringContaining("/model now saves"),
       ]),
     );
 
