@@ -522,8 +522,8 @@ function buildPrompt(scenario: LiveStackScenario, traceId: string, env: Record<s
         '',
         `RUN the process: ${coreTask}. Use only .a5c/processes/odyssey-live-test.mjs, the process you created.`,
       ].join('\n');
-      if (scenario.agent.agent === 'claude-code' || scenario.agent.agent === 'pi') return `/babysitter:call ${createInstructions}`;
-      if (scenario.agent.agent === 'codex') return `$babysitter:call ${createInstructions}`;
+      if (scenario.agent.agent === 'claude-code' || scenario.agent.agent === 'pi') return `/babysitter:yolo ${createInstructions}`;
+      if (scenario.agent.agent === 'codex') return `$babysitter:yolo ${createInstructions}`;
       return createInstructions;
     }
     if (processMode === 'resume') {
@@ -738,9 +738,6 @@ function validateCreatedProcessContent(processContent: string): string[] {
   }
   if (!/\bdefineTask\s*\(/.test(processContent)) {
     failures.push('missing defineTask task definition');
-  }
-  if (!/\bctx\.parallel\.all\s*\(/.test(processContent)) {
-    failures.push('missing ctx.parallel.all usage');
   }
   if (/summarize-translate-test\.mjs/.test(processContent)) {
     failures.push('references summarize-translate-test.mjs');
