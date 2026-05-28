@@ -1,4 +1,4 @@
-import { createKrateApiController, orgNamespaceName } from '@a5c-ai/krate-sdk';
+import { createKrateApiController, orgNamespaceName, createVirtualModelHookBridge, createVirtualModelController } from '@a5c-ai/krate-sdk';
 import { withAuth } from '../../../../../lib/api-auth.js';
 import { errorResponse } from '../../../../../lib/api-errors.js';
 import { getAssistantRuntime, storeArtifact } from '../../../../../lib/assistant-runtime.js';
@@ -21,14 +21,36 @@ export const POST = withAuth(async (request, { params }) => {
 
   const controller = createKrateApiController({ namespace: orgNamespaceName(org) });
 
+  // Virtual model hooks
+  const bridge = createVirtualModelHookBridge({ controller: createVirtualModelController() });
+  let matchedVm = null;
   try {
-    const result = await runtime.generate(task.trim(), {
+    const vmResult = await controller.listResourceForOrg(org, 'KrateVirtualModel');
+    matchedVm = bridge.matchVirtualModel(stackRef || 'assistant', vmResult?.items || vmResult || []);
+  } catch {}
+
+  let resolvedTask = task.trim();
+  if (matchedVm) {
+    const preResult = bridge.handleHook('VirtualModel.PreCompletion', { request: { task: resolvedTask, context } }, matchedVm);
+    if (preResult.decision === 'deny') return errorResponse(preResult.message || 'Blocked by virtual model policy', 403);
+    if (preResult.decision === 'modify' && preResult.modifiedInput?.request?.task) resolvedTask = preResult.modifiedInput.request.task;
+  }
+
+  try {
+    const result = await runtime.generate(resolvedTask, {
       controller,
       context,
       responseFormat,
       stackRef: stackRef || 'assistant',
       outputType: resolvedOutputType,
     });
+
+    if (matchedVm) {
+      const postResult = bridge.handleHook('VirtualModel.PostCompletion', { response: result }, matchedVm);
+      if (postResult.decision === 'modify' && postResult.modifiedInput?.response) {
+        Object.assign(result, postResult.modifiedInput.response);
+      }
+    }
 
     // For HTML and JSX output, store as an artifact that can be served via GET
     let artifactId = null;

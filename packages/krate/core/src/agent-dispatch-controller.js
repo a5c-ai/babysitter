@@ -44,6 +44,7 @@ export function createAgentDispatchController(options = {}) {
   const workspaceController = options.workspaceController || createAgentWorkspaceController();
   const eventBus = options.eventBus || null;
   const lifecycleEmitter = options.lifecycleEmitter || (eventBus ? createHooksLifecycleEmitter(eventBus) : null);
+  const hookBridge = options.hookBridge || null;
 
   return {
     role: 'agent-dispatch-controller',
@@ -255,6 +256,23 @@ export function createAgentDispatchController(options = {}) {
     },
 
     async createManualDispatch({ repository, ref, sourceRefs = [], agentStack, taskKind, actor, namespace = 'default', organizationRef = 'default', resources = {}, callbackUrl } = {}, options = {}) {
+      // 0. Virtual model PreModelResolution hook — can redirect to a different model/stack
+      if (hookBridge) {
+        const virtualModels = resources.KrateVirtualModel || [];
+        const matchedVm = hookBridge.matchVirtualModel(agentStack, virtualModels);
+        if (matchedVm) {
+          const preResult = hookBridge.handleHook('VirtualModel.PreModelResolution', {
+            modelId: agentStack, repository, actor, taskKind
+          }, matchedVm);
+          if (preResult.decision === 'deny') {
+            return { error: true, reason: 'virtual-model-denied', message: preResult.message || 'Blocked by virtual model policy' };
+          }
+          if (preResult.decision === 'modify' && preResult.modifiedInput?.modelId) {
+            agentStack = preResult.modifiedInput.modelId;
+          }
+        }
+      }
+
       // 1. Find stack
       const stack = (resources.AgentStack || []).find(s => s.metadata?.name === agentStack);
       if (!stack) return { error: true, reason: 'stack-not-found', message: `AgentStack '${agentStack}' not found` };
