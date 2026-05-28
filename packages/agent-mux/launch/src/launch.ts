@@ -992,13 +992,16 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         const proxyOrigin = new URL(proxyRuntime.url).origin;
         plan.env['GOOGLE_GEMINI_BASE_URL'] = proxyOrigin;
         plan.env['GEMINI_CLI_TRUST_WORKSPACE'] = '1';
-        if (!process.env['GOOGLE_GENAI_USE_VERTEXAI'] && !process.env['GOOGLE_CLOUD_PROJECT']) {
-          const envKey = process.env['GOOGLE_API_KEY'] || process.env['GEMINI_API_KEY'] || '';
-          const googleKey = envKey.startsWith('AIza') ? envKey : 'AIzaSyA-proxy-placeholder-key-000000000000';
-          plan.env['GOOGLE_API_KEY'] = googleKey;
-          plan.env['GEMINI_API_KEY'] = googleKey;
-        }
-        console.error(`[amux launch] Gemini proxy: endpoint=${proxyOrigin}, vertexAI=${process.env['GOOGLE_GENAI_USE_VERTEXAI'] ?? 'unset'}`);
+        plan.env['GOOGLE_GENAI_USE_VERTEXAI'] = 'false';
+        plan.env['GOOGLE_CLOUD_PROJECT'] = '';
+        plan.env['GOOGLE_CLOUD_LOCATION'] = '';
+        plan.env['GOOGLE_APPLICATION_CREDENTIALS'] = '';
+        plan.env['CLOUDSDK_CONFIG'] = '';
+        const envKey = process.env['GOOGLE_API_KEY'] || process.env['GEMINI_API_KEY'] || '';
+        const googleKey = envKey.startsWith('AIza') ? envKey : 'AIzaSyDfake0proxy0key0for0transport0mux';
+        plan.env['GOOGLE_API_KEY'] = googleKey;
+        plan.env['GEMINI_API_KEY'] = googleKey;
+        console.error(`[amux launch] Gemini proxy: endpoint=${proxyOrigin}, key=${googleKey.slice(0, 10)}...`);
       }
 
       // Omni (agent-core): set AMUX_* env vars to route through the proxy.
