@@ -265,8 +265,8 @@ jobs:
           LIVE_STACK_EXPECTED_ARTIFACTS: ${{ matrix.install_mode.expected_artifacts }}
           LIVE_STACK_RUN_MODEL_TESTS: ${{ matrix.scenario.live && '1' || '0' }}
           LIVE_STACK_REQUIRE_EVIDENCE: '1'
-          LIVE_STACK_TEST_TIMEOUT_MS: '780000'
-          LIVE_STACK_COMMAND_TIMEOUT_MS: '720000'
+          LIVE_STACK_TEST_TIMEOUT_MS: '960000'
+          LIVE_STACK_COMMAND_TIMEOUT_MS: '900000'
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

@@ -184,18 +184,25 @@ describe('live stack scenario contract primitives', () => {
       events: [{ token: '[REDACTED]' }, { status: 'ok' }],
     });
   });
-  it('keeps live-stack workflow step timeouts aligned with live test budgets', () => {
-    const workflow = fs.readFileSync('.github/workflows/live-stack.yml', 'utf8');
+  it('keeps live-stack workflow step timeouts aligned with live test and command budgets', () => {
     const liveStepPattern = /- name: Run selected live stack E2E\n(?<body>[\s\S]*?)(?=\n\s*- name:|\n\s{2}\w|$)/g;
-    const liveSteps = Array.from(workflow.matchAll(liveStepPattern));
+    const workflowPaths = ['.github/workflows/live-stack.yml', '.github/workflows/live-stack-published.yml'];
+
+    const liveSteps = workflowPaths.flatMap((workflowPath) => {
+      const workflow = fs.readFileSync(workflowPath, 'utf8');
+      return Array.from(workflow.matchAll(liveStepPattern)).map((step) => ({ workflowPath, step }));
+    });
 
     expect(liveSteps.length).toBeGreaterThan(0);
-    for (const step of liveSteps) {
+    for (const { workflowPath, step } of liveSteps) {
       const body = step.groups?.['body'] ?? '';
       const timeoutMinutes = Number(/timeout-minutes:\s*(\d+)/.exec(body)?.[1] ?? '0');
       const testTimeoutMs = Number(/LIVE_STACK_TEST_TIMEOUT_MS:\s*'?(\d+)'?/.exec(body)?.[1] ?? '0');
+      const commandTimeoutMs = Number(/LIVE_STACK_COMMAND_TIMEOUT_MS:\s*'?(\d+)'?/.exec(body)?.[1] ?? '0');
       const requiredMinutes = Math.ceil(testTimeoutMs / 60_000);
 
+      expect(commandTimeoutMs, workflowPath).toBeGreaterThanOrEqual(900_000);
+      expect(testTimeoutMs, workflowPath).toBeGreaterThan(commandTimeoutMs);
       expect(timeoutMinutes).toBeGreaterThanOrEqual(requiredMinutes);
     }
   });
