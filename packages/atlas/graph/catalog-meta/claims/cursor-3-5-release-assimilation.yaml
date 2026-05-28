@@ -1,0 +1,28 @@
+nodeKind: Claim
+id: claim:cursor-3-5-release-assimilation
+attributes:
+  claimId: cursor-3-5-release-assimilation
+  subjectKind: AgentVersion
+  subjectId: agentVersion:cursor:ge-0-0-0
+  attribute: releaseAssimilation
+  value: "3.5:shared-canvases-and-loop"
+  statement: "Cursor 3.5 is assimilated as the current Cursor graph version: it adds shared canvases for read-only browser snapshots of agent-created artifacts, exposes shared canvases from the Cursor Dashboard on Pro, Teams, and Enterprise plans, and adds a /loop skill for repeated local agent work while keeping the curl install method unchanged."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cursor-3-5-release
+  evidenceIds:
+    - cursor-3-5-release
+  claimedAt: "2026-05-28T14:57:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "The stable AgentVersion node id and broad versionRange are preserved; the concrete upstream version is recorded in currentVersion/release metadata."
+edges:
+  about_subject:
+    - agentVersion:cursor:ge-0-0-0
+  backed_by_evidence:
+    - evidence:cursor-3-5-release
+  sourced_from:
+    - evidence:cursor-3-5-release

@@ -1,6 +1,6 @@
 # Platform Boundary Hardening
 
-> Six process-template hardenings derived from a 3-day retrospective across 18 babysitter runs in the [cookbook](https://github.com/anthropics/cookbook) repo (2026-05-21 → 2026-05-23).
+> Seven process-template hardenings derived from a 3-day retrospective across 18 babysitter runs in the [cookbook](https://github.com/anthropics/cookbook) repo (2026-05-21 → 2026-05-23).
 
 ## Why this doc exists
 
@@ -10,11 +10,11 @@ The cookbook retro window saw:
 
 - 18 feature runs, all passing the gate on first impl attempt (zero retries).
 - Reviewer scores 92–98.
-- **9+ post-deploy hotfixes**, each falling into one of six platform-boundary classes.
+- **9+ post-deploy hotfixes**, each falling into one of seven platform-boundary classes.
 
 Each hotfix cost between 5 minutes (env-var typo) and ~1 hour (RLS write-grant diagnosis post-synthesis). All of them are preventable with small, mechanical additions to the process templates.
 
-This doc enumerates the six classes with concrete recommendations. Each section is independently actionable — a future PR can pick any one and apply it without touching the others.
+This doc enumerates the seven classes with concrete recommendations. Each section is independently actionable — a future PR can pick any one and apply it without touching the others.
 
 ---
 
@@ -320,6 +320,99 @@ if (
 
 ---
 
+## 7. `NEXT_PUBLIC_*` debug gates are not a DCE boundary
+
+**Incident.** A cookbook voice-integration preview guarded verbose client logs
+with `if (process.env.NEXT_PUBLIC_VOICE_DEBUG === '1') { ... }`. In the Vercel
+preview build, the emitted production chunk still contained the diagnostic log
+strings when `NEXT_PUBLIC_VOICE_DEBUG` was unset or set to `0`. Next.js had
+compiled the check as a runtime comparison instead of constant-folding the
+branch away.
+
+**Why this is a class.** The live-verify gate often proves a frontend change
+shipped by building locally, finding a new `data-testid` or marker in
+`.vercel/output/static/_next/static/chunks/<chunk>.js`, fetching the deployed
+chunk, and grepping for the same marker. That pattern is valid for intentional
+shipped verification markers. It becomes ambiguous when a run also expects
+`NEXT_PUBLIC_*` runtime comparisons to remove diagnostic/debug text from the
+same production chunks: the grep can silently tolerate leaked diagnostics, or it
+can confuse the developer by finding a string that was expected to disappear.
+
+**Recommendation.** Live-verify guidance for Next.js projects should add a
+pre-flight warning when it sees `process.env.NEXT_PUBLIC_*` inside a debug,
+trace, verbose logging, or diagnostics branch:
+
+> `NEXT_PUBLIC_*` values are public client bundle inputs. Treat client-side
+> `process.env.NEXT_PUBLIC_*` comparisons as runtime configuration, not as a
+> guaranteed dead-code-elimination boundary for diagnostic/debug strings.
+
+For debug-only code that must disappear from production bundles, prefer a
+compile-time boolean defined in the build config:
+
+```js
+// next.config.js or next.config.mjs
+import webpack from 'webpack';
+
+export default {
+  webpack(config) {
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        __VOICE_DEBUG__: JSON.stringify(
+          process.env.NEXT_PUBLIC_VOICE_DEBUG === '1'
+        ),
+      })
+    );
+
+    return config;
+  },
+};
+```
+
+Then guard source code with the compile-time constant:
+
+```js
+if (typeof __VOICE_DEBUG__ !== 'undefined' && __VOICE_DEBUG__) {
+  console.debug('voice debug marker');
+}
+```
+
+The live-verify task should distinguish two chunk-grep categories:
+
+```markdown
+## Chunk-grep evidence
+
+- [ ] Intentional shipped verification markers are present in local and
+      deployed chunks. Examples: `data-testid`, feature marker constants,
+      accessibility labels that are part of the UI contract.
+- [ ] Diagnostic/debug text that must not ship is guarded by a compile-time
+      constant such as `__VOICE_DEBUG__`, not only by
+      `process.env.NEXT_PUBLIC_*`.
+- [ ] If a deployed chunk contains diagnostic/debug text, report that as a
+      production-bundle leak unless the implementation explicitly documents why
+      the string is intended to ship.
+```
+
+Implement-task prompt addition:
+
+> If the project is a Next.js app and the run adds or relies on
+> `process.env.NEXT_PUBLIC_*` checks around verbose logs, diagnostics, trace
+> output, or other debug-only strings, do not treat that guard as proof the
+> strings will be removed from production chunks. Either replace the guard with
+> a compile-time constant from `next.config.js` / `next.config.mjs` using
+> `webpack.DefinePlugin` (or the project's Turbopack-equivalent define
+> mechanism), or call out the remaining production-bundle risk in the
+> live-verify artifact.
+
+Live-verify task addition:
+
+> When chunk-grepping Next.js builds, classify hits as either intentional
+> shipped verification markers or diagnostic/debug text. Presence of intentional
+> markers proves deployment. Presence of diagnostic/debug text proves only that
+> the string shipped; it must not be accepted as dead-code-elimination evidence
+> for a `NEXT_PUBLIC_*` guard.
+
+---
+
 ## Implementation order (suggested)
 
 For reviewers landing these changes:
@@ -330,6 +423,7 @@ For reviewers landing these changes:
 4. **#5 (real-device checklist)** — add the snippet file. The implement-task prompt addition is one paragraph.
 5. **#2 (env-verify helper)** — needs an actual helper implementation. ~80 lines including the Levenshtein. Highest LOC, but mechanical.
 6. **#6 (interactive breakpoint)** — depends on #5 to be useful. Order last.
+7. **#7 (`NEXT_PUBLIC_*` debug gates)** — docs-only update for the live-verify prompt/checklist. Land whenever touching Next.js chunk-grep guidance.
 
 Each is independently revertable. Each closes one platform-boundary class of bug. None depend on the others to work.
 
@@ -337,6 +431,6 @@ Each is independently revertable. Each closes one platform-boundary class of bug
 
 ## Provenance
 
-These six improvements came out of a retrospective covering 18 babysitter runs in the cookbook repo over 2026-05-21 → 2026-05-23. The retro is reproducible from the run artifacts at `.a5c/runs/01KS*` in the cookbook source. A rendered HTML version of the retro is preserved at the contributor's machine if reviewers want the full incident-level context.
+These seven improvements came out of a retrospective covering 18 babysitter runs in the cookbook repo over 2026-05-21 → 2026-05-23. The retro is reproducible from the run artifacts at `.a5c/runs/01KS*` in the cookbook source. A rendered HTML version of the retro is preserved at the contributor's machine if reviewers want the full incident-level context.
 
 Open-source projects integrating Vercel/Supabase/iOS/external-APIs through the babysitter will see the same platform-boundary classes. These hardenings aren't cookbook-specific — they generalize.

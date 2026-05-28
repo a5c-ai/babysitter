@@ -83,7 +83,7 @@ attributes:
     execSubcommand: null
     resumeDelivery: null
     resumeFlag: null
-    sessionIdFlag: null
+    sessionIdFlag: "--session-id"
     maxTurnsFlag: null
     stdinBehavior: close-after-prompt
     selfExits: false

@@ -1166,7 +1166,7 @@ attributes:
   capabilityId: "skills"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:omp:ge-15-5-6"
+  subjectId: "agentVersion:omp:ge-15-5-9"
   versionRange: ">=0.0.0"
   notes: "Oh-My-Pi documents file-backed skills explicitly, so this row no longer relies only on the fallback metadata."
   evidenceRefs:
@@ -1174,7 +1174,7 @@ attributes:
     - "web-omp-skills"
 edges:
   capability_of_version:
-    - target: agentVersion:omp:ge-15-5-6
+    - target: agentVersion:omp:ge-15-5-9
   evidences_capability:
     - target: capability:skills
 ---
@@ -1185,7 +1185,7 @@ attributes:
   capabilityId: "thinking"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:omp:ge-15-5-6"
+  subjectId: "agentVersion:omp:ge-15-5-9"
   versionRange: ">=0.0.0"
   notes: "Oh-My-Pi publicly describes itself as a terminal coding agent with a broad tool surface."
   evidenceRefs:
@@ -1193,7 +1193,7 @@ attributes:
     - "web-omp-readme"
 edges:
   capability_of_version:
-    - target: agentVersion:omp:ge-15-5-6
+    - target: agentVersion:omp:ge-15-5-9
   evidences_capability:
     - target: capability:supports-thinking
 ---
@@ -1204,7 +1204,7 @@ attributes:
   capabilityId: "interactive-mode"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:omp:ge-15-5-6"
+  subjectId: "agentVersion:omp:ge-15-5-9"
   versionRange: ">=0.0.0"
   notes: "Interactive terminal behavior is grounded in the upstream product README instead of only the local fallback metadata."
   evidenceRefs:
@@ -1212,7 +1212,7 @@ attributes:
     - "web-omp-readme"
 edges:
   capability_of_version:
-    - target: agentVersion:omp:ge-15-5-6
+    - target: agentVersion:omp:ge-15-5-9
   evidences_capability:
     - target: capability:interactive-mode
 ---
@@ -1223,7 +1223,7 @@ attributes:
   capabilityId: "stdin-injection"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:omp:ge-15-5-6"
+  subjectId: "agentVersion:omp:ge-15-5-9"
   versionRange: ">=0.0.0"
   notes: "Public operator docs are thin for non-interactive prompting, so this row keeps the local fallback metadata as the main source of truth."
   evidenceRefs:
@@ -1231,7 +1231,7 @@ attributes:
     - "web-omp-readme"
 edges:
   capability_of_version:
-    - target: agentVersion:omp:ge-15-5-6
+    - target: agentVersion:omp:ge-15-5-9
   evidences_capability:
     - target: capability:stdin-injection
 ---
@@ -1242,7 +1242,7 @@ attributes:
   capabilityId: "image-input"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:omp:ge-15-5-6"
+  subjectId: "agentVersion:omp:ge-15-5-9"
   versionRange: ">=0.0.0"
   notes: "The public README advertises image support, but public technical detail is thinner than for sessions or hooks."
   evidenceRefs:
@@ -1250,7 +1250,7 @@ attributes:
     - "web-omp-readme"
 edges:
   capability_of_version:
-    - target: agentVersion:omp:ge-15-5-6
+    - target: agentVersion:omp:ge-15-5-9
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:omp:ge-0-0-0:session-resume
@@ -1259,7 +1259,7 @@ attributes:
   capabilityId: "session-resume"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:omp:ge-15-5-6"
+  subjectId: "agentVersion:omp:ge-15-5-9"
   versionRange: ">=0.0.0"
   notes: "Oh-My-Pi documents resume, continue, fork, and session switching as first-class session operations."
   evidenceRefs:
@@ -1267,7 +1267,7 @@ attributes:
     - "web-omp-session-resume"
 edges:
   capability_of_version:
-    - target: agentVersion:omp:ge-15-5-6
+    - target: agentVersion:omp:ge-15-5-9
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:openclaw:ge-0-0-0:skills
@@ -1276,7 +1276,7 @@ attributes:
   capabilityId: "skills"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-26"
+  subjectId: "agentVersion:openclaw:ge-2026-5-27"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1285,7 +1285,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:openclaw:ge-2026-5-27
   evidences_capability:
     - target: capability:skills
 ---
@@ -1296,7 +1296,7 @@ attributes:
   capabilityId: "thinking"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-26"
+  subjectId: "agentVersion:openclaw:ge-2026-5-27"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1305,7 +1305,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:openclaw:ge-2026-5-27
   evidences_capability:
     - target: capability:supports-thinking
 ---
@@ -1316,7 +1316,7 @@ attributes:
   capabilityId: "interactive-mode"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-26"
+  subjectId: "agentVersion:openclaw:ge-2026-5-27"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1325,7 +1325,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:openclaw:ge-2026-5-27
   evidences_capability:
     - target: capability:interactive-mode
 ---
@@ -1336,7 +1336,7 @@ attributes:
   capabilityId: "stdin-injection"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-26"
+  subjectId: "agentVersion:openclaw:ge-2026-5-27"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1345,7 +1345,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:openclaw:ge-2026-5-27
   evidences_capability:
     - target: capability:stdin-injection
 ---
@@ -1356,7 +1356,7 @@ attributes:
   capabilityId: "image-input"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-26"
+  subjectId: "agentVersion:openclaw:ge-2026-5-27"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1365,7 +1365,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:openclaw:ge-2026-5-27
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:openclaw:ge-0-0-0:session-resume
@@ -1374,7 +1374,7 @@ attributes:
   capabilityId: "session-resume"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:openclaw:ge-2026-5-26"
+  subjectId: "agentVersion:openclaw:ge-2026-5-27"
   versionRange: ">=0.0.0"
   notes: "OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported."
   evidenceRefs:
@@ -1383,7 +1383,7 @@ attributes:
     - "repo-target-index"
 edges:
   capability_of_version:
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:openclaw:ge-2026-5-27
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:opencode:ge-0-0-0:skills

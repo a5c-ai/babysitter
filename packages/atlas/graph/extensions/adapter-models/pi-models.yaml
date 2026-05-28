@@ -20,8 +20,15 @@ attributes:
   supportsFileInput: false
   cliArgKey: "--model"
   cliArgValue: default
-  lastUpdated: "2025-01-01"
+  lastUpdated: "2026-05-27"
   source: bundled
+  codexResponses:
+    cacheAffinityHeader: "session-id"
+    legacyProxyIncompatibleHeader: "session_id"
+    contextWindowFixes:
+      - modelId: openai-codex/gpt-5.3-codex-spark
+        contextWindow: 128000
+        introducedIn: "0.76.0"
 edges:
   model_for:
     - target: agent:pi

@@ -18,6 +18,12 @@ attributes:
   approvalGatingPrimitive: per-call
   subprocessSandboxStrategy: none
   runtimeIdentity: api-key
+  rpcToolOptions:
+    bash:
+      excludeFromContext:
+        supported: true
+        introducedIn: "0.76.0"
+        notes: "RPC clients can suppress bash command output from the next prompt context."
   supportedMCPTransports:
   - mcp-transport:stdio
   supportsStreaming: true
@@ -40,11 +46,17 @@ attributes:
       Session state is managed by the harness with JSONL-tree persistence.
       Sessions support resume, fork, and branch operations. The harness
       tracks conversation structure as a tree of turns.
+      Pi 0.76.0 adds `--session-id <id>` so callers can create or resume
+      an exact project-local session instead of relying only on env state.
     executionEnvironment: |
       The harness provides an execution-env abstraction layer that
       normalizes OS, shell, and filesystem access across platforms.
       Tool implementations (bash, read, write, edit) are dispatched
       through this abstraction.
+    rpcBashContextControl: |
+      Pi 0.76.0 RPC mode accepts `excludeFromContext` on `bash`.
+      When true, command output is returned to the RPC caller but omitted
+      from context sent with the next model prompt.
 edges:
   realizes:
     - target: layer:5-agent-runtime

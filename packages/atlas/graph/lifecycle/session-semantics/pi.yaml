@@ -8,6 +8,9 @@ attributes:
   sessionIdSources:
     - PI_SESSION_ID
     - PI_RUN_ID
+    - "--session-id"
+  explicitSessionIdFlag: "--session-id"
+  explicitSessionIdIntroducedIn: "0.76.0"
   resumeSemantics: Pi sessions are keyed by explicit run/session identifiers.
   stateFilePatterns:
     - ".a5c/runs/**"
@@ -15,6 +18,7 @@ attributes:
   metadataFields:
     - { key: session_id, envVars: [PI_SESSION_ID] }
     - { key: run_id,     envVars: [PI_RUN_ID] }
+    - { key: session_id_arg, argvFlag: "--session-id" }
 edges:
   applies_to_version:
     - target: agentVersion:pi:ge-0-75-5

@@ -1,5 +1,5 @@
 nodeKind: AgentVersion
-id: agentVersion:openclaw:ge-2026-5-26
+id: agentVersion:openclaw:ge-2026-5-27
 attributes:
   agentId: "openclaw"
   aliases: []
@@ -28,7 +28,7 @@ attributes:
         - "Security and content boundaries were tightened for group prompt text, repeated-dot hostnames, side-effecting command wrappers, unsafe Node env overrides, no-auth Tailscale exposure, and node/device-role approvals."
         - "Codex app-server runs are more reliable: runtime models resolve first, workspace memory routes through tools, shared clients survive startup/helper failures, hook relay generations survive restarts, and false runtime live switches are avoided."
         - "Gateway and reply paths reuse more session, plugin, auth, tool-search, and metadata caches while visible replies avoid hidden cleanup timeouts."
-        - "OpenAI-compatible embedding providers are core; DeepInfra catalog browsing, Pixverse video generation, VLLM thinking params, Claude CLI OAuth overlays, and bare direct Anthropic IDs were updated."
+        - "OpenAI-compatible embedding providers are core; DeepInfra catalog browsing, Pixverse video generation, VLLM thinking params, Claude CLI OAuth overlays, and direct Anthropic model IDs were updated."
         - "Telegram, iMessage, Slack, Matrix, QQBot, Discord, and Google Chat received channel delivery and approval reliability fixes."
         - "Release/package paths now honor npm dist exclusions, package Docker runtime workspace templates, and run stricter postpublish checks."
       gatewayStartup: >
@@ -37,9 +37,12 @@ attributes:
         metadata snapshots, plugin SDK alias maps, and skip irrelevant
         filesystem probes.
       replyPathCacheCoverage:
-        - plugin
-        - channel
         - session
+        - plugin
+        - auth
+        - channel
+        - tool-search
+        - metadata
         - usage-cost
         - warning
         - scheduled-service
@@ -62,6 +65,19 @@ attributes:
         browserSnapshots: "SSRF policy enforcement"
         fetchedFiles: "wrapped as external content"
         replyScrubbing: "serialized tool-call text is scrubbed from replies"
+      securityContentBoundaries:
+        groupPromptText: "kept out of system prompts"
+        hostnameNormalization: "repeated-dot hostnames are normalized"
+        blockedCommandWrappers: "side-effecting command wrappers are blocked"
+        blockedRuntimeEnvOverrides: "unsafe Node runtime env overrides are blocked"
+        tailscaleExposure: "no-auth Tailscale exposure is rejected"
+        deviceRoleApprovals: "node/device-role approvals require admin authority"
+      codexAppServer:
+        modelResolution: "runtime models resolve first"
+        workspaceMemoryRouting: "workspace memory routes through tools"
+        sharedClients: "shared app-server clients survive startup/helper failures"
+        hookRelayGenerations: "hook relay generations survive restarts"
+        runtimeLiveSwitches: "false runtime live switches are avoided"
       providerRecovery:
         namedAuthProfiles: true
         openaiSamplingParams: true
@@ -72,6 +88,26 @@ attributes:
         dynamicToolSchemaGuards: true
         xaiUsageLimitSurfacing: true
         ollamaTopPNormalization: true
+      providerCatalog:
+        openaiCompatibleEmbeddingProviders: "core"
+        deepInfraCatalogBrowsing: true
+        pixverseVideoGeneration: true
+        vllmThinkingParams: true
+        claudeCliOauthOverlays: true
+        directAnthropicModelIds: true
+      channelDelivery:
+        fixedChannels:
+          - Telegram
+          - iMessage
+          - Slack
+          - Matrix
+          - QQBot
+          - Discord
+          - Google Chat
+      releasePackaging:
+        npmDistExclusions: true
+        dockerRuntimeWorkspaceTemplates: true
+        stricterPostpublishChecks: true
       pluginSdk:
         - "Generic channel-message poll sender for channel plugins."
         - "Row-level session workflow helpers; loadSessionStore deprecated."
