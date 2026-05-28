@@ -265,14 +265,14 @@ runs:
         if [ "$INPUT_INCLUDE_DIFF" = "true" ]; then
           INCLUDE_DIFF_ARGS+=(--include-diff)
         fi
-        triggers enrich \
+        triggers-mux enrich \
           --backend "$INPUT_TRIGGER_BACKEND" \
           --token "$EFFECTIVE_GITHUB_TOKEN" \
           "${INCLUDE_DIFF_ARGS[@]}" \
           --output "$EVENT_FILE"
         if [ -z "$INPUT_TRIGGER_QUERY" ]; then
           echo '{"matched":true,"reasons":["no trigger query configured"]}' > "$RESULT_FILE"
-        elif triggers evaluate \
+        elif triggers-mux evaluate \
           --backend "$INPUT_TRIGGER_BACKEND" \
           --query "$INPUT_TRIGGER_QUERY" \
           --token "$EFFECTIVE_GITHUB_TOKEN" \
