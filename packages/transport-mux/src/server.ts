@@ -1299,12 +1299,18 @@ function openAiResponsesResponse(result: CompletionResult, config: ProxyConfig) 
 }
 
 function googleResponse(result: CompletionResult) {
-  const parts: Record<string, unknown>[] = [{ text: result.text }];
+  const parts: Record<string, unknown>[] = [];
+  if (result.text) parts.push({ text: result.text });
   if (result.toolCalls && result.toolCalls.length > 0) {
     for (const tc of result.toolCalls) {
-      parts.push({ functionCall: { name: tc.name, args: JSON.parse(tc.arguments || '{}') } });
+      try {
+        parts.push({ functionCall: { name: tc.name, args: JSON.parse(tc.arguments || '{}') } });
+      } catch {
+        parts.push({ functionCall: { name: tc.name, args: {} } });
+      }
     }
   }
+  if (parts.length === 0) parts.push({ text: result.text ?? '' });
   return {
     candidates: [
       {
@@ -1312,7 +1318,7 @@ function googleResponse(result: CompletionResult) {
           role: 'model',
           parts,
         },
-        finishReason: result.toolCalls?.length ? 'TOOL_CALLS' : 'STOP',
+        finishReason: result.toolCalls?.length ? 'STOP' : 'STOP',
       },
     ],
     usageMetadata: {
