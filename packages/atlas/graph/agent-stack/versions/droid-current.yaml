@@ -3,11 +3,13 @@ id: agent-version:droid@current
 attributes:
   agentProductId: agent:droid
   sourcePackage: "@factory/cli"
-  versionRange: ">=0.134.0"
-  releasedAt: "2026-05-26"
-  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.134.0"
+  versionRange: ">=0.135.0"
+  currentVersion: "0.135.0"
+  releasedAt: "2026-05-28"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.135.0"
   assimilationNotes:
-    - "npm latest moved from 0.132.1 to 0.134.0; no public Factory release note, GitHub release, or changelog entry was found for 0.134.0."
+    - "npm latest moved from 0.134.0 to 0.135.0; no public Factory GitHub release or changelog entry was found for 0.135.0."
+    - "Factory docs published after 0.135.0 document hooks storage moving to .factory/hooks.json instead of .factory/hooks/hooks.json, and document os-sandboxing beta plus Factory Router docs."
     - "Repository metadata still points at Factory-AI/factory apps/cli and package name remains @factory/cli."
     - "No public evidence was found for CLI flag, transport, MCP, auth, or install-method changes in this release."
   cliCommand: "droid"
@@ -31,19 +33,19 @@ edges:
   sourced_from: []
   supports:
     - target: capability:can-multi-turn
-      versionRange: '>=0.134.0'
+      versionRange: '>=0.135.0'
       level: full
       notes: Droid operates as a multi-turn coding agent.
     - target: capability:supports-text-streaming
-      versionRange: '>=0.134.0'
+      versionRange: '>=0.135.0'
       level: full
       notes: Droid streams model output in the terminal.
     - target: capability:supports-tool-use
-      versionRange: '>=0.134.0'
+      versionRange: '>=0.135.0'
       level: full
       notes: Droid drives file edits and commands via tool-use.
     - target: capability:supports-mcp
-      versionRange: '>=0.134.0'
+      versionRange: '>=0.135.0'
       level: full
       notes: Droid supports MCP server integration.
   uses_memory_system:

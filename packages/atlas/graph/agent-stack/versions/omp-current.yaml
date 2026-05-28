@@ -14,13 +14,15 @@ attributes:
     - "macos"
     - "windows"
   agentProductId: agent:omp
-  versionRange: ">=15.5.6"
-  releasedAt: "2026-05-27"
-  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v15.5.6"
+  versionRange: ">=15.5.9"
+  currentVersion: "15.5.9"
+  releasedAt: "2026-05-28"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v15.5.9"
   assimilationNotes:
-    - "Added PI_CODEX_WEBSOCKET_MAX_IDLE_REUSE_MS to bound idle Codex WebSocket reuse, with 0 disabling the check."
-    - "Stale or silent Codex WebSocket connections are dropped after idle/ping thresholds and stale response frames are purged between turns."
-    - "URL and directory selectors support multiple line ranges, raw mode plus ranges, and clear out-of-bounds directory errors."
+    - "v15.5.7 adds OpenRouter model variants, xAI Grok OAuth login, and OpenRouter API-key login validation."
+    - "v15.5.8 adds credential completion probes plus Wafer Pass and Wafer Serverless providers."
+    - "v15.5.9 changes native addon extraction to reuse cached .node files when sizes match and ships standalone binaries with a compressed native-addon archive."
+    - "v15.5.9 hardens native addon extraction by rejecting unsafe archive entries and non-file entries before writing binaries."
     - "Install method and package name remain npm install -g @oh-my-pi/pi-coding-agent."
   cliCommand: "omp"
   installMethods:
@@ -113,27 +115,27 @@ edges:
   sourced_from: []
   supports:
     - target: capability:skills
-      versionRange: ">=15.5.6"
+      versionRange: ">=15.5.9"
       level: full
       notes: Oh-My-Pi documents file-backed skills explicitly.
     - target: capability:supports-thinking
-      versionRange: ">=15.5.6"
+      versionRange: ">=15.5.9"
       level: full
       notes: Oh-My-Pi publicly described as a terminal coding agent with broad tool surface.
     - target: capability:interactive-mode
-      versionRange: ">=15.5.6"
+      versionRange: ">=15.5.9"
       level: full
       notes: Interactive terminal behavior grounded in upstream product README.
     - target: capability:stdin-injection
-      versionRange: ">=15.5.6"
+      versionRange: ">=15.5.9"
       level: full
       notes: Public operator docs are thin; local fallback metadata remains primary source of truth.
     - target: capability:vision-input
-      versionRange: ">=15.5.6"
+      versionRange: ">=15.5.9"
       level: full
       notes: Public README advertises image support; technical detail is thinner.
     - target: capability:can-resume
-      versionRange: ">=15.5.6"
+      versionRange: ">=15.5.9"
       level: full
       notes: Oh-My-Pi documents resume, continue, fork, and session switching as first-class session operations.
   uses_memory_system:

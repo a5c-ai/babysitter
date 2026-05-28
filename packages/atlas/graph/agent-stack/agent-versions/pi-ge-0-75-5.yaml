@@ -5,7 +5,7 @@ attributes:
   aliases: []
   runtimeFamily: "cli-harness"
   releaseChannel: "stable"
-  displayName: "Pi CLI (>=0.75.5)"
+  displayName: "Pi CLI (>=0.76.0)"
   summary: "Pi CLI coding agent current npm line with read, bash, edit, write tools and session management"
   sourcePackage: "@earendil-works/pi-coding-agent"
   osSupport:
@@ -13,14 +13,17 @@ attributes:
     - "macos"
     - "windows"
   agentProductId: agent:pi
-  versionRange: ">=0.75.5"
-  releasedAt: "2026-05-23"
+  versionRange: ">=0.76.0"
+  currentVersion: "0.76.0"
+  releasedAt: "2026-05-27"
+  releaseNotesUrl: "https://github.com/earendil-works/pi/releases/tag/v0.76.0"
   cliCommand: "pi"
   releaseHighlights:
-    - "Collapsed read tool cards show only the read line until Ctrl+O expansion."
-    - "Edit tool result details include a standard unified patch for SDK consumers."
-    - "pi update and git package installs reconcile pinned refs while preserving settings."
-    - "Custom Anthropic-compatible models can set compat.forceAdaptiveThinking."
+    - "Added --session-id for scripts to create or resume an exact project-local session."
+    - "RPC bash calls can pass excludeFromContext to keep command output out of the next prompt."
+    - "Codex WebSocket/SSE waits are bounded, retry.provider.maxRetries controls provider retries, and SDK retries default to zero."
+    - "Terminal editing improved for Apple Terminal Shift+Enter, Windows/JetBrains capability detection, and Unicode-aware word navigation."
+    - "OpenAI Codex Responses cache-affinity headers now send session-id instead of proxy-incompatible session_id."
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"
@@ -125,32 +128,32 @@ edges:
   sourced_from: []
   supports:
     - target: capability:interactive-mode
-      versionRange: ">=0.75.5"
+      versionRange: ">=0.76.0"
       level: full
       notes: Pi fallback harness with interactive sessions.
     - target: capability:stdin-injection
-      versionRange: ">=0.75.5"
+      versionRange: ">=0.76.0"
       level: full
       notes: Pi fallback harness.
     - target: capability:can-resume
-      versionRange: ">=0.75.5"
+      versionRange: ">=0.76.0"
       level: full
       notes: |
         Multi-turn JSONL-tree sessions with resume, fork, and branch operations.
     - target: capability:supports-compaction
-      versionRange: ">=0.75.5"
+      versionRange: ">=0.76.0"
       level: full
       notes: |
         Client-side branch-summarization compaction via AgentHarness.
         Configurable threshold and summarization strategy.
     - target: capability:supports-prompt-templates
-      versionRange: ">=0.75.5"
+      versionRange: ">=0.76.0"
       level: full
       notes: |
         Parameterized prompt-template system for system prompts,
         tool descriptions, and context injection.
     - target: capability:supports-session-management
-      versionRange: ">=0.75.5"
+      versionRange: ">=0.76.0"
       level: full
       notes: |
         Harness-managed session lifecycle with JSONL-tree persistence,

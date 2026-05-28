@@ -3,12 +3,12 @@ id: agent-version:amp@current
 attributes:
   agentProductId: agent:amp
   sourcePackage: "@ampcode/cli"
-  versionRange: ">=0.0.1779896748-g596c49"
-  currentVersion: "0.0.1779896748-g596c49"
-  releasedAt: "2026-05-27"
-  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1779896748-g596c49"
+  versionRange: ">=0.0.1779959155-g362e01"
+  currentVersion: "0.0.1779959155-g362e01"
+  releasedAt: "2026-05-28"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1779959155-g362e01"
   assimilationNotes:
-    - "npm latest moved from 0.0.1779729291-gfe2d7f to 0.0.1779896748-g596c49; no public Amp changelog or GitHub release note was found for this commit-stamped npm build."
+    - "npm latest moved from 0.0.1779896748-g596c49 to 0.0.1779959155-g362e01; no public Amp changelog or GitHub release note was found for this commit-stamped npm build."
     - "Install method and package name remain npm install -g @ampcode/cli."
     - "No release-note evidence of CLI flag, transport, auth, MCP, or package-name changes was found."
   cliCommand: "amp"
@@ -34,18 +34,18 @@ edges:
   sourced_from: []
   supports:
     - target: capability:can-multi-turn
-      versionRange: '>=0.0.1779896748-g596c49'
+      versionRange: '>=0.0.1779959155-g362e01'
       level: full
       notes: Amp runs multi-turn agentic coding sessions.
     - target: capability:supports-text-streaming
-      versionRange: '>=0.0.1779896748-g596c49'
+      versionRange: '>=0.0.1779959155-g362e01'
       level: full
       notes: Amp streams model output in real time.
     - target: capability:supports-tool-use
-      versionRange: '>=0.0.1779896748-g596c49'
+      versionRange: '>=0.0.1779959155-g362e01'
       level: full
       notes: Amp drives file edits and terminal commands via tool-use.
     - target: capability:supports-mcp
-      versionRange: '>=0.0.1779896748-g596c49'
+      versionRange: '>=0.0.1779959155-g362e01'
       level: full
       notes: Amp supports MCP servers for extensibility.
