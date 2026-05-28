@@ -13,6 +13,10 @@ attributes:
   sessionFilePathConvention: ~/.droid/sessions/<session-id>.jsonl
   approvalGatingPrimitive: per-call
   subprocessSandboxStrategy: platform-deferred
+  sandboxingNotes: |
+    Factory docs published after Droid 0.135.0 describe os-sandboxing beta
+    behavior. Keep the strategy platform-deferred until public CLI flags or
+    config keys are confirmed, but retain the version-linked observation.
   runtimeIdentity: api-key
   supportedMCPTransports:
   - mcp-transport:stdio

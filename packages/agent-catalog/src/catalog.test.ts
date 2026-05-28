@@ -264,6 +264,34 @@ describe("agent-catalog graph-backed ontology", () => {
     );
   });
 
+  it("records Gemini CLI 0.44.0 without splitting stable graph identity", () => {
+    const version = getAgentVersion("gemini", "0.44.0");
+    const graph = getCatalogGraphSnapshot();
+    const node = graph.nodes.find((entry) => entry.id === "agentVersion:gemini:ge-0-43-0");
+
+    expect(version?.versionRange).toBe(">=0.43.0");
+    expect(node?.currentVersion).toBe("0.44.0");
+    expect(node?.releaseNotesUrl).toContain("google-gemini/gemini-cli/releases/tag/v0.44.0");
+    expect(node?.assimilationNotes).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("Auto modes were merged into a single Auto mode"),
+        expect.stringContaining("Keychain auth now works for --list-sessions"),
+        expect.stringContaining("agent-tui and tui-tester"),
+      ]),
+    );
+
+    expect(graph.nodes.find((entry) => entry.id === "agentVersion:gemini:ge-0-44-0")).toBeUndefined();
+    expect(
+      listCliGraphEdges({
+        fromNodeId: "agentVersion:gemini:ge-0-43-0",
+        relation: "sourced_from",
+      }).map((edge) => edge.toNodeId),
+    ).toContain("evidence:gemini-cli-0-44-0-release");
+
+    const evidence = getOntologyEvidenceSource("gemini-cli-0-44-0-release");
+    expect(evidence?.sourcePathOrUrl).toContain("google-gemini/gemini-cli/releases/tag/v0.44.0");
+  });
+
   it("includes agent-platform as a distinct non-harness runtime agent and records richer Claude web evidence", () => {
     const babysitterAgent = listAgentVersions().find((agent) => agent.agentId === "agent-platform");
     expect(babysitterAgent).toBeDefined();
