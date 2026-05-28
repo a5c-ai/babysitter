@@ -476,6 +476,15 @@ function encodeSseChunk(prefix: string, payload: unknown): string {
   return `${prefix}${JSON.stringify(payload)}\n\n`;
 }
 
+function parseJsonObject(value: string | undefined): Record<string, unknown> {
+  try {
+    const parsed: unknown = JSON.parse(value || '{}');
+    return toRecord(parsed) ?? {};
+  } catch {
+    return {};
+  }
+}
+
 function openAiResponsesUsage(result?: CompletionResult) {
   if (!result) return null;
   return {
@@ -1068,7 +1077,7 @@ function googleStreamResponse(stream: AsyncIterable<CompletionStreamEvent>): Res
             controller.enqueue(
               encoder.encode(
                 `data: ${JSON.stringify({
-                  candidates: [{ content: { parts: [{ functionCall: { name: event.name, args: JSON.parse(event.arguments || '{}') } }], role: 'model' } }],
+                  candidates: [{ content: { parts: [{ functionCall: { name: event.name, args: parseJsonObject(event.arguments) } }], role: 'model' } }],
                 })}\n\n`,
               ),
             );

@@ -52,6 +52,7 @@ interface GoogleFunctionDeclaration {
   name: string;
   description?: string;
   parameters?: Record<string, unknown>;
+  parametersJsonSchema?: Record<string, unknown>;
 }
 
 interface GoogleToolEntry {
@@ -98,7 +99,12 @@ export class GoogleCodec implements TransportCodec {
       const declarations: GoogleFunctionDeclaration[] = [];
       for (const toolEntry of body.tools as GoogleToolEntry[]) {
         if (Array.isArray(toolEntry.functionDeclarations)) {
-          declarations.push(...toolEntry.functionDeclarations);
+          declarations.push(
+            ...toolEntry.functionDeclarations.map((decl) => ({
+              ...decl,
+              parameters: decl.parameters ?? decl.parametersJsonSchema,
+            })),
+          );
         }
       }
       if (declarations.length > 0) {
@@ -175,7 +181,7 @@ export class GoogleCodec implements TransportCodec {
           result.push({
             name: decl.name,
             description: decl.description,
-            parameters: decl.parameters,
+            parameters: decl.parameters ?? decl.parametersJsonSchema,
           });
         }
         continue;
@@ -192,6 +198,8 @@ export class GoogleCodec implements TransportCodec {
           parameters:
             record.parameters && typeof record.parameters === 'object'
               ? (record.parameters as Record<string, unknown>)
+              : record.parametersJsonSchema && typeof record.parametersJsonSchema === 'object'
+                ? (record.parametersJsonSchema as Record<string, unknown>)
               : undefined,
         });
       }

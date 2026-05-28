@@ -61,6 +61,128 @@ describe('google transport', () => {
     expect(engine.requests[0]?.stream).toBe(true);
   });
 
+  it('preserves Google parametersJsonSchema and streams functionCall args', async () => {
+    const engine = {
+      requests: [] as unknown[],
+      async complete() {
+        throw new Error('complete should not be used for stream requests');
+      },
+      async *stream(request: unknown) {
+        this.requests.push(request);
+        yield {
+          type: 'tool-call' as const,
+          id: 'call_write',
+          name: 'write_file',
+          arguments: JSON.stringify({ file_path: '/tmp/out.txt', content: 'hello' }),
+        };
+        yield {
+          type: 'done' as const,
+          finishReason: 'stop',
+          usage: { promptTokens: 10, completionTokens: 5, totalTokens: 15 },
+        };
+      },
+    };
+    const app = createTestApp(
+      {
+        targetProvider: 'openai',
+        targetModel: 'openai/gpt-5.4-mini',
+        exposedTransport: 'google',
+      },
+      engine,
+    );
+
+    const response = await app.request('/v1beta/models/gemini-pro:streamGenerateContent', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': 'test-token',
+      },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: 'write a file' }] }],
+        tools: [
+          {
+            functionDeclarations: [
+              {
+                name: 'write_file',
+                description: 'Write a file',
+                parametersJsonSchema: {
+                  type: 'object',
+                  required: ['file_path', 'content'],
+                  properties: {
+                    file_path: { type: 'string' },
+                    content: { type: 'string' },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    expect(response.status).toBe(200);
+    const body = await response.text();
+    expect(body).toContain('"functionCall"');
+    expect(body).toContain('"file_path":"/tmp/out.txt"');
+    expect(body).toContain('"content":"hello"');
+
+    const request = engine.requests[0] as { tools?: Array<{ parameters?: Record<string, unknown> }> };
+    expect(request.tools?.[0]?.parameters).toEqual({
+      type: 'object',
+      required: ['file_path', 'content'],
+      properties: {
+        file_path: { type: 'string' },
+        content: { type: 'string' },
+      },
+    });
+  });
+
+  it('streams an empty functionCall args object when tool-call arguments are malformed JSON', async () => {
+    const engine = {
+      requests: [] as unknown[],
+      async complete() {
+        throw new Error('complete should not be used for stream requests');
+      },
+      async *stream(request: unknown) {
+        this.requests.push(request);
+        yield {
+          type: 'tool-call' as const,
+          id: 'call_bad',
+          name: 'write_file',
+          arguments: '{"file_path":',
+        };
+        yield {
+          type: 'done' as const,
+          finishReason: 'stop',
+          usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 },
+        };
+      },
+    };
+    const app = createTestApp(
+      {
+        targetProvider: 'openai',
+        targetModel: 'openai/gpt-5.4-mini',
+        exposedTransport: 'google',
+      },
+      engine,
+    );
+
+    const response = await app.request('/v1beta/models/gemini-pro:streamGenerateContent', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': 'test-token',
+      },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: 'write a file' }] }],
+      }),
+    });
+
+    expect(response.status).toBe(200);
+    const body = await response.text();
+    expect(body).toContain('"functionCall":{"name":"write_file","args":{}}');
+  });
+
   it('rejects google stream flags on the buffered generateContent route', async () => {
     const app = createTestApp(
       {
