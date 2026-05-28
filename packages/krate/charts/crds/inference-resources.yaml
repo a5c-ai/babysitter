@@ -367,7 +367,7 @@ spec:
                           type: string
               hooks:
                 type: object
-                description: JS hook bodies for programmable routing and transformation
+                description: JS hook bodies for routing, transformation, and agentic lifecycle
                 properties:
                   routeSelect:
                     type: string
@@ -378,6 +378,22 @@ spec:
                   sessionLifecycle:
                     type: string
                   observe:
+                    type: string
+                  onSessionStart:
+                    type: string
+                  onSessionEnd:
+                    type: string
+                  onTurnEnd:
+                    type: string
+                  onPreToolUse:
+                    type: string
+                  onPostToolUse:
+                    type: string
+                  onUserPromptSubmit:
+                    type: string
+                  onError:
+                    type: string
+                  onCompact:
                     type: string
               sessionConfig:
                 type: object

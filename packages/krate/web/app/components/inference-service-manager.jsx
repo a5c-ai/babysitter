@@ -1173,7 +1173,7 @@ function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCancel, l
     routes: [{ modelRouteRef: '', weight: 1, priority: 0 }],
     fallbackChain: [],
     rules: [],
-    hooks: { routeSelect: '', requestTransform: '', responseTransform: '', sessionLifecycle: '', observe: '' },
+    hooks: { routeSelect: '', requestTransform: '', responseTransform: '', sessionLifecycle: '', observe: '', onSessionStart: '', onSessionEnd: '', onTurnEnd: '', onPreToolUse: '', onPostToolUse: '', onUserPromptSubmit: '', onError: '', onCompact: '' },
     sessionEnabled: false,
     maxTurns: 10,
     escalationThreshold: 100000,
@@ -1351,13 +1351,35 @@ function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCancel, l
       </CollapsibleSection>
 
       {/* Hooks */}
-      <CollapsibleSection title="Hooks">
+      <CollapsibleSection title="Routing & Transform Hooks">
         {[
-          ['routeSelect', 'return args.routes[0].modelRouteRef; // select route based on args.requestContext'],
-          ['requestTransform', 'return args.request; // modify outbound request'],
-          ['responseTransform', 'return args.response; // modify inbound response'],
-          ['sessionLifecycle', 'return { action: "continue" }; // handle session events via args.event, args.session'],
-          ['observe', '// side-effect only: log args.event, args.metrics, context.modelName'],
+          ['routeSelect', 'return args.routes[0].modelRouteRef; // pick route from args.requestContext'],
+          ['requestTransform', 'return args.request; // modify prompt before sending'],
+          ['responseTransform', 'return args.response; // filter response before returning'],
+          ['observe', '// emit: args.event, args.metrics, context.modelName'],
+        ].map(([hookName, placeholder]) => (
+          <div key={hookName}>
+            <label style={{ ...labelStyle, fontSize: '0.75rem' }}>{hookName}</label>
+            <textarea
+              style={{ ...inputStyle, height: '3.5rem', fontFamily: 'monospace', fontSize: '0.75rem', resize: 'vertical' }}
+              value={form.hooks[hookName]}
+              onChange={(e) => updateHook(hookName, e.target.value)}
+              placeholder={placeholder}
+            />
+          </div>
+        ))}
+      </CollapsibleSection>
+      <CollapsibleSection title="Agentic Lifecycle Hooks">
+        {[
+          ['onSessionStart', '// args.session — fired when agent session begins'],
+          ['onSessionEnd', '// args.session — fired when agent session ends'],
+          ['onTurnEnd', 'return { action: "continue" }; // args.turn, args.session — after each assistant turn'],
+          ['onPreToolUse', 'return { allow: true }; // args.toolCall, args.session — gate tool calls'],
+          ['onPostToolUse', 'return { modified: null }; // args.toolCall, args.result, args.session'],
+          ['onUserPromptSubmit', 'return { block: false }; // args.prompt, args.session — gate user input'],
+          ['onError', 'return { retry: false, fallbackRoute: null }; // args.error, args.session'],
+          ['onCompact', 'return { modified: null }; // args.summary, args.session — modify compaction'],
+          ['sessionLifecycle', 'return { action: "continue" }; // args.event, args.session — general lifecycle'],
         ].map(([hookName, placeholder]) => (
           <div key={hookName}>
             <label style={{ ...labelStyle, fontSize: '0.75rem' }}>{hookName}</label>

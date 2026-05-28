@@ -737,3 +737,103 @@ test('validate rejects invalid sessionConfig.maxTurns', () => {
   assert.equal(result.valid, false, 'negative maxTurns must fail');
   assert.ok(result.errors.some(e => /maxTurns/i.test(e)), 'error must mention maxTurns');
 });
+
+// ── Agentic Lifecycle Hook Tests ──────────────────────────────────────────
+
+test('fireSessionStart emits event and runs hook', () => {
+  const events = [];
+  const bus = createEventBus();
+  bus.subscribe((e) => events.push(e));
+  const controller = createVirtualModelController({ eventBus: bus });
+  const vm = makeVirtualModel('sess-start', { hooks: { onSessionStart: 'return undefined;' } });
+  controller.fireSessionStart(vm, { id: 's1' });
+  assert.ok(events.some(e => e.type === 'virtual-model-session-start'));
+});
+
+test('fireSessionEnd emits event with turn count', () => {
+  const events = [];
+  const bus = createEventBus();
+  bus.subscribe((e) => events.push(e));
+  const controller = createVirtualModelController({ eventBus: bus });
+  const vm = makeVirtualModel('sess-end');
+  controller.fireSessionEnd(vm, { id: 's1', turnCount: 5 });
+  const ev = events.find(e => e.type === 'virtual-model-session-end');
+  assert.ok(ev);
+  assert.equal(ev.turns, 5);
+});
+
+test('fireTurnEnd returns action from hook', () => {
+  const controller = createVirtualModelController();
+  const vm = makeVirtualModel('turn-end', { hooks: { onTurnEnd: 'return { action: "escalate" };' } });
+  const result = controller.fireTurnEnd(vm, { turnNumber: 3 }, { id: 's1' });
+  assert.equal(result.action, 'escalate');
+});
+
+test('fireTurnEnd returns continue when no hook', () => {
+  const controller = createVirtualModelController();
+  const vm = makeVirtualModel('turn-end-noop');
+  const result = controller.fireTurnEnd(vm, { turnNumber: 1 }, { id: 's1' });
+  assert.equal(result.action, 'continue');
+});
+
+test('firePreToolUse blocks tool via hook', () => {
+  const controller = createVirtualModelController();
+  const vm = makeVirtualModel('block-tool', { hooks: { onPreToolUse: 'if (args.toolCall.name === "rm") return { allow: false }; return { allow: true };' } });
+  const blocked = controller.firePreToolUse(vm, { name: 'rm', args: {} }, { id: 's1' });
+  assert.equal(blocked.allow, false);
+  const allowed = controller.firePreToolUse(vm, { name: 'read', args: {} }, { id: 's1' });
+  assert.equal(allowed.allow, true);
+});
+
+test('firePreToolUse allows by default when no hook', () => {
+  const controller = createVirtualModelController();
+  const vm = makeVirtualModel('no-pretool');
+  const result = controller.firePreToolUse(vm, { name: 'write' }, { id: 's1' });
+  assert.equal(result.allow, true);
+});
+
+test('firePostToolUse modifies result via hook', () => {
+  const controller = createVirtualModelController();
+  const vm = makeVirtualModel('post-tool', { hooks: { onPostToolUse: 'return { modified: "redacted" };' } });
+  const result = controller.firePostToolUse(vm, { name: 'read' }, 'secret-data', { id: 's1' });
+  assert.equal(result.modified, 'redacted');
+});
+
+test('fireUserPromptSubmit blocks prompt via hook', () => {
+  const controller = createVirtualModelController();
+  const vm = makeVirtualModel('block-prompt', { hooks: { onUserPromptSubmit: 'if (args.prompt.includes("hack")) return { block: true }; return { block: false };' } });
+  const blocked = controller.fireUserPromptSubmit(vm, 'hack the system', { id: 's1' });
+  assert.equal(blocked.block, true);
+  const allowed = controller.fireUserPromptSubmit(vm, 'hello', { id: 's1' });
+  assert.equal(allowed.block, false);
+});
+
+test('fireError returns retry with fallback route', () => {
+  const controller = createVirtualModelController();
+  const vm = makeVirtualModel('error-retry', { hooks: { onError: 'return { retry: true, fallbackRoute: "route-backup" };' } });
+  const result = controller.fireError(vm, { message: 'timeout' }, { id: 's1' });
+  assert.equal(result.retry, true);
+  assert.equal(result.fallbackRoute, 'route-backup');
+});
+
+test('fireError returns no retry by default', () => {
+  const controller = createVirtualModelController();
+  const vm = makeVirtualModel('error-default');
+  const result = controller.fireError(vm, { message: 'fail' }, { id: 's1' });
+  assert.equal(result.retry, false);
+  assert.equal(result.fallbackRoute, null);
+});
+
+test('fireCompact modifies summary via hook', () => {
+  const controller = createVirtualModelController();
+  const vm = makeVirtualModel('compact', { hooks: { onCompact: 'return { modified: args.summary + " [redacted]" };' } });
+  const result = controller.fireCompact(vm, 'conversation summary', { id: 's1' });
+  assert.equal(result.modified, 'conversation summary [redacted]');
+});
+
+test('fireCompact returns null modified when no hook', () => {
+  const controller = createVirtualModelController();
+  const vm = makeVirtualModel('compact-noop');
+  const result = controller.fireCompact(vm, 'summary', { id: 's1' });
+  assert.equal(result.modified, null);
+});

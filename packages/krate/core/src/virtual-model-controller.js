@@ -379,6 +379,74 @@ export function createVirtualModelController(options = {}) {
       });
     },
 
+    // ── Agentic Lifecycle Hooks ─────────────────────────────────────────────
+
+    fireSessionStart(virtualModel, session) {
+      const hookBody = virtualModel?.spec?.hooks?.onSessionStart;
+      if (hookBody) this.executeHook('onSessionStart', hookBody, { session }, { modelName: virtualModel?.spec?.modelName });
+      eventBus.emit({ type: 'virtual-model-session-start', kind: 'KrateVirtualModel', name: virtualModel?.metadata?.name, modelName: virtualModel?.spec?.modelName, sessionId: session?.id, timestamp: new Date().toISOString() });
+    },
+
+    fireSessionEnd(virtualModel, session) {
+      const hookBody = virtualModel?.spec?.hooks?.onSessionEnd;
+      if (hookBody) this.executeHook('onSessionEnd', hookBody, { session }, { modelName: virtualModel?.spec?.modelName });
+      eventBus.emit({ type: 'virtual-model-session-end', kind: 'KrateVirtualModel', name: virtualModel?.metadata?.name, modelName: virtualModel?.spec?.modelName, sessionId: session?.id, turns: session?.turnCount, timestamp: new Date().toISOString() });
+    },
+
+    fireTurnEnd(virtualModel, turn, session) {
+      const hookBody = virtualModel?.spec?.hooks?.onTurnEnd;
+      if (hookBody) {
+        const result = this.executeHook('onTurnEnd', hookBody, { turn, session }, { modelName: virtualModel?.spec?.modelName });
+        if (result && typeof result === 'object') return result;
+      }
+      return { action: 'continue' };
+    },
+
+    firePreToolUse(virtualModel, toolCall, session) {
+      const hookBody = virtualModel?.spec?.hooks?.onPreToolUse;
+      if (hookBody) {
+        const result = this.executeHook('onPreToolUse', hookBody, { toolCall, session }, { modelName: virtualModel?.spec?.modelName });
+        if (result && typeof result === 'object') return { allow: result.allow !== false, modified: result.modified || null };
+      }
+      return { allow: true, modified: null };
+    },
+
+    firePostToolUse(virtualModel, toolCall, toolResult, session) {
+      const hookBody = virtualModel?.spec?.hooks?.onPostToolUse;
+      if (hookBody) {
+        const result = this.executeHook('onPostToolUse', hookBody, { toolCall, result: toolResult, session }, { modelName: virtualModel?.spec?.modelName });
+        if (result && typeof result === 'object') return { modified: result.modified || null };
+      }
+      return { modified: null };
+    },
+
+    fireUserPromptSubmit(virtualModel, prompt, session) {
+      const hookBody = virtualModel?.spec?.hooks?.onUserPromptSubmit;
+      if (hookBody) {
+        const result = this.executeHook('onUserPromptSubmit', hookBody, { prompt, session }, { modelName: virtualModel?.spec?.modelName });
+        if (result && typeof result === 'object') return { block: !!result.block, modified: result.modified || null };
+      }
+      return { block: false, modified: null };
+    },
+
+    fireError(virtualModel, error, session) {
+      const hookBody = virtualModel?.spec?.hooks?.onError;
+      if (hookBody) {
+        const result = this.executeHook('onError', hookBody, { error, session }, { modelName: virtualModel?.spec?.modelName });
+        if (result && typeof result === 'object') return { retry: !!result.retry, fallbackRoute: result.fallbackRoute || null };
+      }
+      return { retry: false, fallbackRoute: null };
+    },
+
+    fireCompact(virtualModel, summary, session) {
+      const hookBody = virtualModel?.spec?.hooks?.onCompact;
+      if (hookBody) {
+        const result = this.executeHook('onCompact', hookBody, { summary, session }, { modelName: virtualModel?.spec?.modelName });
+        if (result && typeof result === 'object') return { modified: result.modified || null };
+      }
+      return { modified: null };
+    },
+
     /**
      * Reconcile a set of virtual models, resolving routes and producing conditions.
      *
