@@ -30,7 +30,8 @@ edges:
       role: platform
     - target: agent-ui-impl:droid.ui@current
       role: ui
-  sourced_from: []
+  sourced_from:
+    - target: evidence:droid-cli-0-135-0-release
   supports:
     - target: capability:can-multi-turn
       versionRange: '>=0.135.0'

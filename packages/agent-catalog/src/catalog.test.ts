@@ -257,6 +257,28 @@ describe("agent-catalog graph-backed ontology", () => {
     );
   });
 
+  it("records Droid CLI 0.135.0 graph metadata", () => {
+    const graph = getCatalogGraphSnapshot();
+    const node = graph.nodes.find((entry) => entry.id === "agent-version:droid@current");
+
+    expect(node?.versionRange).toBe(">=0.135.0");
+    expect(node?.currentVersion).toBe("0.135.0");
+    expect(node?.releaseNotesUrl).toContain("@factory/cli/v/0.135.0");
+    expect(node?.assimilationNotes).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(".factory/hooks.json"),
+        expect.stringContaining("os-sandboxing beta"),
+        expect.stringContaining("Factory Router"),
+      ]),
+    );
+
+    const evidence = getOntologyEvidenceSource("droid-cli-0-135-0-release");
+    expect(evidence?.sourcePathOrUrl).toContain("@factory/cli/v/0.135.0");
+
+    const platform = listOntologyNodesByKind("AgentPlatformImpl").find((entry) => entry.id === "agent-platform-impl:droid.platform@current");
+    expect(JSON.stringify(platform)).toContain(".factory/hooks.json");
+  });
+
   it("includes agent-platform as a distinct non-harness runtime agent and records richer Claude web evidence", () => {
     const babysitterAgent = listAgentVersions().find((agent) => agent.agentId === "agent-platform");
     expect(babysitterAgent).toBeDefined();

@@ -12,7 +12,12 @@ attributes:
   skillsDirectoryPath: []
   customSlashCommandsPath: []
   subagentsDirectoryPath: []
-  hooksDirectoryOrConfigPath: []
+  hooksDirectoryOrConfigPath:
+  - .factory/hooks.json
+  hooksConfigNotes: |
+    Factory docs published after Droid 0.135.0 document hook configuration
+    storage at `.factory/hooks.json`, replacing the earlier
+    `.factory/hooks/hooks.json` path.
   settingsFiles:
   - ~/.config/droid/config.json
   - ~/.droid/auth.json

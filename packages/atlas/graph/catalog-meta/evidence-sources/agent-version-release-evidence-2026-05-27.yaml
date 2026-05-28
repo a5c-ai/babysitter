@@ -130,3 +130,31 @@ edges:
     - trust-level:official-web
   references:
     - agentVersion:copilot:ge-1-0-55-3
+---
+nodeKind: EvidenceSource
+id: evidence:droid-cli-0-135-0-release
+attributes:
+  displayName: "Factory Droid CLI 0.135.0 npm release"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://www.npmjs.com/package/@factory/cli/v/0.135.0
+  sourcePathOrUrl: https://www.npmjs.com/package/@factory/cli/v/0.135.0
+  locator: "@factory/cli npm package version 0.135.0"
+  capturedAt: "2026-05-28T14:55:00Z"
+  observedAt: "2026-05-28T14:55:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-28T14:55:00Z"
+  notes: |
+    npm records @factory/cli version 0.135.0. No public Factory GitHub
+    release or changelog entry was found for this version during the issue
+    research. Related public Factory docs commits after the publish document
+    hook configuration storage at `.factory/hooks.json`, os-sandboxing beta,
+    and Factory Router docs; those observations are modeled conservatively as
+    graph metadata and notes rather than new confirmed CLI flags.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:droid@current
