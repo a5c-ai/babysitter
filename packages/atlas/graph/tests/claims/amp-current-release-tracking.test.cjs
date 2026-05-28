@@ -1,8 +1,8 @@
 // Claim under test: implicit (graph/agent-stack/versions/amp-current.yaml)
-// Statement: Amp current tracks @ampcode/cli 0.0.1779896748-g596c49 as the
+// Statement: Amp current tracks @ampcode/cli 0.0.1779959155-g362e01 as the
 // current npm-backed release, with no public release-note evidence for launch,
 // transport, auth, MCP, API, package, or install-method changes.
-// Source: npmjs.com/package/@ampcode/cli/v/0.0.1779896748-g596c49 and issue #446.
+// Source: npmjs.com/package/@ampcode/cli/v/0.0.1779959155-g362e01 and issue #503.
 // Cadence: weekly. Commit-stamped upstream CLI releases are high churn, so the
 // catalog needs a cheap guardrail against silently losing the assimilation note.
 
@@ -11,7 +11,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const TARGET_VERSION = '0.0.1779896748-g596c49';
+const TARGET_VERSION = '0.0.1779959155-g362e01';
 
 test('claim:amp-current-release-tracking - catalog records target npm release metadata', () => {
   const versionFile = path.resolve(
