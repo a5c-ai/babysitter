@@ -9,6 +9,24 @@ attributes:
     - presentation:claude-code-tui
   themeSupport: light-dark
   accessibilitySupport: basic
+  statusLineCommandEnvVars:
+    introducedIn: "2.1.153"
+    envVars:
+      - COLUMNS
+      - LINES
+    description: Status line commands receive terminal dimensions for width-aware rendering.
+  agentsDispatchAutocomplete:
+    introducedIn: "2.1.153"
+    includesNativeSlashCommands: true
+    includesBundledSkills: true
+    pullRequestColumnFormats:
+      single: "PR #N"
+      multiple: "N PRs"
+  modelPickerKeybindingMigration:
+    introducedIn: "2.1.153"
+    removedAction: "modelPicker:setAsDefault"
+    replacementAction: "modelPicker:thisSessionOnly"
+    defaultSelectionPersistence: new-sessions
   notes: |
     Claude Code ships an interactive TUI (the `claude` command) and a non-interactive
     CLI (scripted prompt-mode flows); the user-facing slash commands, tool-approval
