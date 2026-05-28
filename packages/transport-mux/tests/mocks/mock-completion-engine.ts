@@ -42,6 +42,15 @@ export function createMockCompletionEngine(
       if (result.text) {
         yield { type: 'text-delta', text: result.text };
       }
+      for (const toolCall of result.toolCalls ?? []) {
+        yield {
+          type: 'tool-call',
+          id: toolCall.id,
+          name: toolCall.name,
+          arguments: toolCall.arguments,
+          metadata: toolCall.metadata,
+        };
+      }
       yield {
         type: 'done',
         finishReason: result.finishReason,

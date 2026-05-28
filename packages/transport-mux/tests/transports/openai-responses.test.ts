@@ -49,6 +49,19 @@ function createToolCallEngine(): CompletionEngine & { requests: CompletionReques
   };
 }
 
+function parseSseEvents(body: string): Array<{ event?: string; data?: Record<string, unknown> | string }> {
+  return body
+    .split('\n\n')
+    .map((chunk) => chunk.trim())
+    .filter(Boolean)
+    .map((chunk) => {
+      const event = chunk.split('\n').find((line) => line.startsWith('event: '))?.slice('event: '.length);
+      const dataLine = chunk.split('\n').find((line) => line.startsWith('data: '))?.slice('data: '.length);
+      if (!dataLine || dataLine === '[DONE]') return { event, data: dataLine };
+      return { event, data: JSON.parse(dataLine) as Record<string, unknown> };
+    });
+}
+
 describe('openai responses transport', () => {
   it('returns responses output text', async () => {
     const app = createTestApp(
@@ -179,12 +192,23 @@ describe('openai responses transport', () => {
     expect(body).toContain('"type":"function_call"');
     expect(body).toContain('"call_id":"toolu_write_file"');
 
-    const completedLine = body
-      .split('\n')
-      .find((line) => line.startsWith('data: ') && line.includes('"type":"response.completed"'));
-    expect(completedLine).toBeDefined();
-    const completed = JSON.parse(completedLine!.slice('data: '.length));
-    expect(completed.response.output).toContainEqual(expect.objectContaining({
+    const events = parseSseEvents(body);
+    const functionCallAdded = events.find((event) => event.event === 'response.output_item.added' &&
+      (event.data as { item?: { type?: string } }).item?.type === 'function_call')?.data as { item?: Record<string, unknown> } | undefined;
+    const argumentsDelta = events.find((event) => event.event === 'response.function_call_arguments.delta')?.data as { delta?: string } | undefined;
+    const argumentsDone = events.find((event) => event.event === 'response.function_call_arguments.done')?.data as { arguments?: string } | undefined;
+    const completed = events.find((event) => event.event === 'response.completed')?.data as { response?: { output?: unknown[] } } | undefined;
+
+    expect(functionCallAdded?.item).toMatchObject({
+      type: 'function_call',
+      call_id: 'toolu_write_file',
+      name: 'Write',
+      arguments: '',
+      status: 'in_progress',
+    });
+    expect(argumentsDelta?.delta).toBe(JSON.stringify({ file_path: '/tmp/odyssey.md', content: '# Odyssey' }));
+    expect(argumentsDone?.arguments).toBe(JSON.stringify({ file_path: '/tmp/odyssey.md', content: '# Odyssey' }));
+    expect(completed?.response?.output).toContainEqual(expect.objectContaining({
       type: 'function_call',
       call_id: 'toolu_write_file',
       name: 'Write',
@@ -293,7 +317,17 @@ describe('openai responses transport', () => {
           type: 'function_call',
           call_id: 'toolu_write_file',
           name: 'Write',
+          arguments: '',
+          status: 'in_progress',
         }),
+      }));
+      expect(events).toContainEqual(expect.objectContaining({
+        type: 'response.function_call_arguments.delta',
+        delta: JSON.stringify({ file_path: '/tmp/odyssey.md', content: '# Odyssey' }),
+      }));
+      expect(events).toContainEqual(expect.objectContaining({
+        type: 'response.function_call_arguments.done',
+        arguments: JSON.stringify({ file_path: '/tmp/odyssey.md', content: '# Odyssey' }),
       }));
       const completed = events.find((event) => event.type === 'response.completed');
       expect((completed?.response as { output?: unknown[] }).output).toContainEqual(expect.objectContaining({
