@@ -55,35 +55,35 @@ edges:
     - target: capability:supports-github-trigger
       versionRange: '>=0.4.0'
       level: full
-      notes: 'normalizeGithub + REST changed-files enrichment (packages/triggers/src/backends/github.ts, src/enrich.ts:61).'
+      notes: 'normalizeGithub + REST changed-files enrichment (packages/triggers-mux/src/backends/github.ts, src/enrich.ts:61).'
     - target: capability:supports-gitlab-trigger
       versionRange: '>=0.4.0'
       level: full
-      notes: 'normalizeGitlab via object_kind/object_attributes (packages/triggers/src/backends/gitlab.ts).'
+      notes: 'normalizeGitlab via object_kind/object_attributes (packages/triggers-mux/src/backends/gitlab.ts).'
     - target: capability:supports-bitbucket-trigger
       versionRange: '>=0.4.0'
       level: full
-      notes: 'normalizeBitbucket; action derived from event-name suffix after `:` (packages/triggers/src/backends/bitbucket.ts).'
+      notes: 'normalizeBitbucket; action derived from event-name suffix after `:` (packages/triggers-mux/src/backends/bitbucket.ts).'
     - target: capability:supports-generic-webhook-trigger
       versionRange: '>=0.4.0'
       level: full
-      notes: 'normalizeGeneric fallback (packages/triggers/src/backends/generic-webhook.ts).'
+      notes: 'normalizeGeneric fallback (packages/triggers-mux/src/backends/generic-webhook.ts).'
     - target: capability:supports-trigger-query-dsl
       versionRange: '>=0.4.0'
       level: full
-      notes: 'parseQuery: key:value, JSON object, expression clause (packages/triggers/src/query.ts:75).'
+      notes: 'parseQuery: key:value, JSON object, expression clause (packages/triggers-mux/src/query.ts:75).'
     - target: capability:supports-trigger-glob-paths
       versionRange: '>=0.4.0'
       level: full
-      notes: 'globToRegExp + matchesGlob; ** any-depth, * single-segment, ? single-char (packages/triggers/src/query.ts:20).'
+      notes: 'globToRegExp + matchesGlob; ** any-depth, * single-segment, ? single-char (packages/triggers-mux/src/query.ts:20).'
     - target: capability:supports-trigger-diff-enrichment
       versionRange: '>=0.4.0'
       level: full
-      notes: 'enrichDiffsWithLocalGit via `git show --unified=80` (packages/triggers/src/enrich.ts:45).'
+      notes: 'enrichDiffsWithLocalGit via `git show --unified=80` (packages/triggers-mux/src/enrich.ts:45).'
     - target: capability:supports-trigger-expression-clause
       versionRange: '>=0.4.0'
       level: full
-      notes: 'evaluateExpression with `~` (contains) and `==` (equals), &&-joined (packages/triggers/src/query.ts:55).'
+      notes: 'evaluateExpression with `~` (contains) and `==` (equals), &&-joined (packages/triggers-mux/src/query.ts:55).'
   defines_frontmatter_field:
     - target: frontmatter-field:task-schema-id
     - target: frontmatter-field:task-schema-name

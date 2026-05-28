@@ -2,7 +2,7 @@ nodeKind: KnowledgeFabricImpl
 id: knowledge-fabric-impl:gemini-cli.knowledge@current
 attributes:
   displayName: "Gemini CLI Knowledge Fabric — GEMINI.md"
-  agentVersionId: agentVersion:gemini:ge-0-0-0
+  agentVersionId: agentVersion:gemini:ge-0-43-0
   description: |
     Gemini CLI's knowledge fabric is built on GEMINI.md files that provide
     persistent project-level and user-level instructions. Like Claude Code's
@@ -27,5 +27,5 @@ edges:
   realizes:
     - target: layer:12-knowledge-fabric
   composes:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
       role: knowledge-fabric

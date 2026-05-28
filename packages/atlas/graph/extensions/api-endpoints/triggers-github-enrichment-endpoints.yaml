@@ -1,5 +1,5 @@
 # Outbound REST endpoints called by `enrichGithubFromApi`
-# (packages/triggers/src/enrich.ts:61-96). These are GitHub REST API calls
+# (packages/triggers-mux/src/enrich.ts:61-96). These are GitHub REST API calls
 # made during trigger enrichment to lift `changes[]` for PRs / commits.
 nodeKind: APIEndpoint
 id: api-endpoint:github-pulls-files

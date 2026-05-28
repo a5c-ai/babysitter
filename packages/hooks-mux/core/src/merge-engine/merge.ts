@@ -37,6 +37,9 @@ export interface MergedExecutionResult {
   continueSession: boolean;
   stopReason: string;
   suppressOutput: boolean;
+  sessionTitle?: string;
+  reloadSkills?: boolean;
+  displayContent?: string;
   followUpMessage: string;
   metadata: Record<string, unknown>;
   diagnostics: MergeDiagnostics;
@@ -238,6 +241,9 @@ export function mergeResults(
   let mutatingWriterCount = 0;
   let continueSession = true;
   let suppressOutput = false;
+  let sessionTitle: string | undefined;
+  let reloadSkills: boolean | undefined;
+  let displayContent: string | undefined;
   const stopReasonParts: string[] = [];
   const reasonParts: string[] = [];
   const followUpParts: string[] = [];
@@ -332,6 +338,17 @@ export function mergeResults(
       suppressOutput = true;
     }
 
+    // --- Claude SessionStart / MessageDisplay hook-specific fields ---
+    if (r.sessionTitle !== undefined) {
+      sessionTitle = r.sessionTitle;
+    }
+    if (r.reloadSkills !== undefined) {
+      reloadSkills = r.reloadSkills;
+    }
+    if (r.displayContent !== undefined) {
+      displayContent = r.displayContent;
+    }
+
     // --- stopReason (typed field) ---
     if (r.stopReason) stopReasonParts.push(r.stopReason);
 
@@ -375,6 +392,9 @@ export function mergeResults(
     toolMutation,
     continueSession,
     suppressOutput,
+    sessionTitle,
+    reloadSkills,
+    displayContent,
     stopReason,
     followUpMessage: followUpParts.join('\n---\n'),
     metadata,

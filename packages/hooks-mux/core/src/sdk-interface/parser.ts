@@ -104,12 +104,12 @@ export function validateHookResult(result: unknown): result is UnifiedHookResult
   }
 
   // Optional string fields
-  for (const field of ['reason', 'systemMessage', 'additionalContext', 'followUpMessage', 'stopReason'] as const) {
+  for (const field of ['reason', 'systemMessage', 'additionalContext', 'followUpMessage', 'stopReason', 'sessionTitle', 'displayContent'] as const) {
     if (result[field] !== undefined && typeof result[field] !== 'string') return false;
   }
 
   // Optional boolean fields
-  for (const field of ['continueSession', 'suppressOutput'] as const) {
+  for (const field of ['continueSession', 'suppressOutput', 'reloadSkills'] as const) {
     if (result[field] !== undefined && typeof result[field] !== 'boolean') return false;
   }
 

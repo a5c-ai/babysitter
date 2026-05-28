@@ -202,17 +202,59 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(claims.get("repo-transport-mux-readme")?.status).toBe("provisional");
   });
 
-  it("records Claude Code 2.1.150 as a no-op user-facing assimilation", () => {
-    expect(getAgentVersion("claude-code", "2.1.150")?.versionRange).toBe(">=2.1.150");
+  it("records Claude Code 2.1.152 user-facing hook, skill, and plugin changes", () => {
+    const version = getAgentVersion("claude-code", "2.1.152");
+    const graph = getCatalogGraphSnapshot();
+    const node = graph.nodes.find((entry) => entry.id === "agentVersion:claude:ge-0-0-0");
 
-    const claim = getOntologyClaim("claude-code-2-1-150-no-user-facing-changes");
-    expect(claim).toBeDefined();
-    expect(claim!.subjectId).toBe("agentVersion:claude:ge-0-0-0");
-    expect(claim!.evidenceIds).toContain("claude-code-2-1-150-release");
-    expect(claim!.statement).toContain("no-op user-facing update");
+    expect(version?.versionRange).toBe(">=2.1.152");
+    expect(node?.releaseNotesUrl).toContain("anthropics/claude-code/releases/tag/v2.1.152");
+    expect(node?.assimilationNotes).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("MessageDisplay hook event"),
+        expect.stringContaining("/reload-skills"),
+        expect.stringContaining("plugin marketplace remove accepts --scope"),
+      ]),
+    );
 
-    const evidence = getOntologyEvidenceSource("claude-code-2-1-150-release");
-    expect(evidence?.sourcePathOrUrl).toContain("anthropics/claude-code/releases/tag/v2.1.150");
+    const evidence = getOntologyEvidenceSource("claude-code-2-1-152-release");
+    expect(evidence?.sourcePathOrUrl).toContain("anthropics/claude-code/releases/tag/v2.1.152");
+
+    expect(graph.nodes.find((entry) => entry.id === "hook-surface:claude.message-display")).toBeDefined();
+    expect(listOntologyNodesByKind("InteractionPrimitive").find((entry) => entry.id === "interaction-primitive:slash-reload-skills")).toBeDefined();
+    expect(listOntologyNodesByKind("FrontmatterField").find((entry) => entry.id === "frontmatter-field:skill-disallowed-tools")).toBeDefined();
+
+    const platform = listOntologyNodesByKind("AgentPlatformImpl").find((entry) => entry.id === "agent-platform-impl:claude-code.platform@1.x");
+    expect(JSON.stringify(platform)).toContain("pluginSuggestionMarketplaces");
+    expect(JSON.stringify(platform)).toContain("--scope project");
+  });
+
+  it("records OpenCode 1.15.11 upstream release assimilation", () => {
+    const version = getAgentVersion("opencode", "1.15.11");
+    const graph = getCatalogGraphSnapshot();
+    const node = graph.nodes.find((entry) => entry.id === "agentVersion:opencode:ge-0-0-0");
+
+    expect(version?.versionRange).toBe(">=1.15.11");
+    expect(node?.currentVersion).toBe("1.15.11");
+    expect(node?.releaseNotesUrl).toContain("anomalyco/opencode/releases/tag/v1.15.11");
+    expect(node?.assimilationNotes).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("headerTimeout"),
+        expect.stringContaining("modalities.input"),
+        expect.stringContaining("Dynamic MCP servers disconnect cleanly"),
+        expect.stringContaining("DigitalOcean OAuth-token inference"),
+        expect.stringContaining("plugin dispose hook"),
+      ]),
+    );
+
+    const evidence = getOntologyEvidenceSource("opencode-1-15-11-release");
+    expect(evidence?.sourcePathOrUrl).toContain("anomalyco/opencode/releases/tag/v1.15.11");
+
+    const claims = listClaimsForSubject("agentVersion:opencode:ge-0-0-0");
+    expect(claims.map((claim) => claim.claimId)).toContain("opencode-1-15-11-release-assimilation");
+    expect(claims.find((claim) => claim.claimId === "opencode-1-15-11-release-assimilation")?.statement).toContain(
+      "TUI and Desktop refinements",
+    );
   });
 
   it("includes agent-platform as a distinct non-harness runtime agent and records richer Claude web evidence", () => {
@@ -240,7 +282,7 @@ describe("agent-catalog graph-backed ontology", () => {
   it("records capability-specific external evidence for other agent vendors as well", () => {
     const evidenceIds = new Set(getOntologyEvidenceSnapshot().evidenceSources.map((entry) => entry.evidenceId));
     expect(evidenceIds.has("web-codex-hooks")).toBe(true);
-    expect(evidenceIds.has("web-codex-0-133-release")).toBe(true);
+    expect(evidenceIds.has("web-codex-0-134-release")).toBe(true);
     expect(evidenceIds.has("web-gemini-cli-session-management")).toBe(true);
     expect(evidenceIds.has("web-github-copilot-cli-hooks")).toBe(true);
     expect(evidenceIds.has("web-cursor-hooks")).toBe(true);
@@ -368,15 +410,20 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(supportsAgentCapability("codex", "mcp", "0.119.0")).toBe(false);
   });
 
-  it("captures Codex 0.133.0 lifecycle, permissions, plugin discovery, goals, and websocket assimilation metadata", () => {
+  it("captures Codex 0.134.0 lifecycle, permissions, plugin discovery, goals, and websocket assimilation metadata", () => {
     const graph = getCatalogGraphSnapshot();
     const codexNode = graph.nodes.find((node) => node.id === "agentVersion:codex:ge-0-119-0");
     const adapterMetadata = codexNode?.adapterMetadata as { capabilityFlags?: Record<string, unknown> } | undefined;
     const flags = adapterMetadata?.capabilityFlags;
 
     expect(codexNode?.versionRange).toBe(">=0.119.0");
-    expect(codexNode?.currentVersion).toBe("0.133.0");
-    expect(codexNode?.releaseNotesUrl).toContain("rust-v0.133.0");
+    expect(codexNode?.currentVersion).toBe("0.134.0");
+    expect(codexNode?.releaseNotesUrl).toContain("rust-v0.134.0");
+    expect(codexNode?.assimilationNotes).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("managed network proxy environment"),
+      ]),
+    );
     expect(flags?.supportsSkills).toBe(true);
     expect(flags?.supportsAgentsMd).toBe(true);
     expect(flags?.supportsPlugins).toBe(true);
@@ -406,20 +453,20 @@ describe("agent-catalog graph-backed ontology", () => {
     const codexWebsocketNode = graph.nodes.find((node) => node.id === "agent-version:codex-websocket@current");
     const codexAppServerNode = graph.nodes.find((node) => node.id === "agent-version:codex-app-server@current");
 
-    expect(codexWebsocketNode?.currentVersion).toBe("0.133.0");
+    expect(codexWebsocketNode?.currentVersion).toBe("0.134.0");
     expect(codexWebsocketNode?.appServer).toMatchObject({
       realtimeV1WebsocketCompatible: true,
-      smokeTestedCommand: "npx -y @openai/codex@0.133.0 app-server --help",
+      smokeTestedCommand: "npx -y @openai/codex@0.134.0 app-server --help",
     });
-    expect(codexAppServerNode?.currentVersion).toBe("0.133.0");
+    expect(codexAppServerNode?.currentVersion).toBe("0.134.0");
     expect(codexAppServerNode?.appServer).toMatchObject({
       realtimeV1WebsocketCompatible: true,
     });
 
     const releaseClaim = listClaimsForSubject("agentVersion:codex:ge-0-119-0").find(
-      (claim) => claim.claimId === "web-codex-0-133-release",
+      (claim) => claim.claimId === "web-codex-0-134-release",
     );
-    expect(releaseClaim?.evidenceIds).toContain("web-codex-0-133-release");
+    expect(releaseClaim?.evidenceIds).toContain("web-codex-0-134-release");
   });
 
   it("traverses provider, model, transport, modality, lifecycle, and session relationships for an agent version", () => {

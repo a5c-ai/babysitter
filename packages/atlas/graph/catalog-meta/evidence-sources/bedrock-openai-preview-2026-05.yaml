@@ -1,0 +1,37 @@
+nodeKind: EvidenceSource
+id: evidence:aws-bedrock-openai-preview-2026-05
+attributes:
+  displayName: "AWS Bedrock OpenAI limited preview, May 2026"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://aws.amazon.com/bedrock/openai/
+  sourcePathOrUrl: https://aws.amazon.com/bedrock/openai/
+  locator: "OpenAI on Amazon Bedrock limited preview page"
+  capturedAt: "2026-05-27T16:53:11Z"
+  observedAt: "2026-05-27T16:53:11Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T16:53:11Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:aws-blog-openai-bedrock-expanded-partnership-2026-05
+attributes:
+  displayName: "AWS blog - expanded OpenAI partnership for Bedrock"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://aws.amazon.com/blogs/aws/top-announcements-of-the-whats-next-with-aws-2026/
+  sourcePathOrUrl: https://aws.amazon.com/blogs/aws/top-announcements-of-the-whats-next-with-aws-2026/
+  locator: "AWS and OpenAI expanded partnership section"
+  capturedAt: "2026-05-27T16:53:11Z"
+  observedAt: "2026-05-27T16:53:11Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T16:53:11Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web

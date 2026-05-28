@@ -116,3 +116,54 @@ attributes:
   evidenceRefs:
     - "repo-transport-mux-readme"
     - "repo-transport-mux-architecture"
+---
+nodeKind: ModelProviderVersion
+id: providerVersion:together-ai:serverless-2026-05
+attributes:
+  providerVersionId: "providerVersion:together-ai:serverless-2026-05"
+  providerId: "together-ai"
+  versionRange: ">=2026-05-27"
+  apiBasePatterns:
+    - "https://api.together.xyz/v1"
+  authSignals:
+    - "TOGETHER_API_KEY"
+  envSignals: []
+  regionConstraints:
+    - "global"
+    - "us-east-1"
+  evidenceRefs:
+    - "evidence:together-ai-serverless-models-2026-05"
+---
+nodeKind: ModelProviderVersion
+id: providerVersion:fireworks-ai:serverless-2026-05
+attributes:
+  providerVersionId: "providerVersion:fireworks-ai:serverless-2026-05"
+  providerId: "fireworks-ai"
+  versionRange: ">=2026-05-27"
+  apiBasePatterns:
+    - "https://api.fireworks.ai/inference/v1"
+  authSignals:
+    - "FIREWORKS_API_KEY"
+  envSignals: []
+  regionConstraints:
+    - "global"
+    - "us"
+  evidenceRefs:
+    - "evidence:fireworks-ai-models-2026-05"
+---
+nodeKind: ModelProviderVersion
+id: providerVersion:groq:openai-compatible-2026-05
+attributes:
+  providerVersionId: "providerVersion:groq:openai-compatible-2026-05"
+  providerId: "groq"
+  versionRange: ">=2026-05-27"
+  apiBasePatterns:
+    - "https://api.groq.com/openai/v1"
+  authSignals:
+    - "GROQ_API_KEY"
+  envSignals: []
+  regionConstraints:
+    - "global"
+    - "us"
+  evidenceRefs:
+    - "evidence:groq-console-models-2026-05"

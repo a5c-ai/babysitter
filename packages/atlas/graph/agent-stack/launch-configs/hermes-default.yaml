@@ -18,10 +18,10 @@ attributes:
   displayName: Hermes dangerous bypass launch
   env: {}
   commArgs:
-    - --auto-approve
+    - --yolo
   description: |-
-    Hermes launch recipe for `--auto-approve`, which auto-approves all
-    tool calls without user confirmation. Intended for CI/test
-    environments where interactive approval is not possible.
+    Hermes launch recipe for `--yolo`, which auto-approves all tool
+    calls without user confirmation. Intended for CI/test environments
+    where interactive approval is not possible.
 edges:
   requires_capability: []

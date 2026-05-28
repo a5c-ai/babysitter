@@ -6,8 +6,8 @@ attributes:
     Normalizes GitHub webhook / Actions payloads (issues, pull_request,
     issue_comment, push) into NormalizedTriggerEvent and enriches
     changed files via REST + local git fallback.
-    Source: packages/triggers/src/backends/github.ts:4
-    (normalizeGithub); packages/triggers/src/enrich.ts:61
+    Source: packages/triggers-mux/src/backends/github.ts:4
+    (normalizeGithub); packages/triggers-mux/src/enrich.ts:61
     (enrichGithubFromApi).
   appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
   category: extension
@@ -22,7 +22,7 @@ attributes:
   description: |
     Normalizes GitLab webhook payloads via object_kind /
     object_attributes shape; merge_request, push, note, issue.
-    Source: packages/triggers/src/backends/gitlab.ts:4
+    Source: packages/triggers-mux/src/backends/gitlab.ts:4
     (normalizeGitlab).
   appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
   category: extension
@@ -37,7 +37,7 @@ attributes:
   description: |
     Normalizes Bitbucket Cloud webhook payloads (pullrequest:*,
     repo:push). Action is derived from the event name suffix after the
-    colon. Source: packages/triggers/src/backends/bitbucket.ts:4
+    colon. Source: packages/triggers-mux/src/backends/bitbucket.ts:4
     (normalizeBitbucket).
   appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
   category: extension
@@ -53,7 +53,7 @@ attributes:
     Fallback JSON-webhook normalizer with flexible top-level field
     discovery (event/action/actor/repository/ref/sha/title/body/
     labels/changes). Source:
-    packages/triggers/src/backends/generic-webhook.ts:4
+    packages/triggers-mux/src/backends/generic-webhook.ts:4
     (normalizeGeneric).
   appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
   category: extension
@@ -70,8 +70,8 @@ attributes:
     `contains`/`diff`/`path`/`file`/`branch`/`label` keys plus an
     optional JSON object form (`{...}`) and an `expression` clause
     using `~` (contains) and `==` (equals) operators joined by `&&`.
-    Source: packages/triggers/src/query.ts:75 (parseQuery),
-    packages/triggers/src/query.ts:55 (evaluateExpression).
+    Source: packages/triggers-mux/src/query.ts:75 (parseQuery),
+    packages/triggers-mux/src/query.ts:55 (evaluateExpression).
   appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
   category: extension
 edges:
@@ -87,8 +87,8 @@ attributes:
     (`path:packages/agent-mux/**`). `**` matches any depth, `*` matches
     a single segment, `?` matches a single character; backslashes are
     normalized to forward slashes before matching.
-    Source: packages/triggers/src/query.ts:20 (globToRegExp),
-    packages/triggers/src/query.ts:39 (matchesGlob).
+    Source: packages/triggers-mux/src/query.ts:20 (globToRegExp),
+    packages/triggers-mux/src/query.ts:39 (matchesGlob).
   appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
   category: extension
 edges:
@@ -103,7 +103,7 @@ attributes:
     With `--include-diff`, the enricher runs `git show --unified=80
     <ref>` (10 MiB maxBuffer) and attaches per-file patches onto each
     NormalizedTriggerEvent change record so `diff:<text>` query terms
-    can match. Source: packages/triggers/src/enrich.ts:45
+    can match. Source: packages/triggers-mux/src/enrich.ts:45
     (enrichDiffsWithLocalGit).
   appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
   category: extension
@@ -120,7 +120,7 @@ attributes:
     `&&`. Each clause uses `field ~ 'value'` (contains, case-insensitive)
     or `field == 'value'` (equals). Fields: event/eventName, action,
     backend, text, diff, path/paths/files, branch/ref, label/labels.
-    Source: packages/triggers/src/query.ts:55 (evaluateExpression).
+    Source: packages/triggers-mux/src/query.ts:55 (evaluateExpression).
   appliesToNodeKinds: ["OperationalTrigger", "AgentPlatformImpl"]
   category: extension
 edges:

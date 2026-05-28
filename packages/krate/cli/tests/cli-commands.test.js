@@ -68,6 +68,10 @@ function createMockController(overrides = {}) {
       return { conflictName: opts.conflictName, strategy: opts.strategy, resolved: true };
     },
 
+    async listModelCatalog() {
+      return { models: [] };
+    },
+
     ...overrides,
   };
 }
@@ -288,15 +292,16 @@ test('MCP prompts/get unknown prompt returns JSON-RPC error', async () => {
 // Part 3: MCP resources feature
 // ---------------------------------------------------------------------------
 
-test('MCP resources/list returns all 2 resources', async () => {
+test('MCP resources/list returns all 3 resources', async () => {
   const server = createMcpServer({ controller: createMockController() });
   const resp = await server.handleMessage(rpc('resources/list'));
   assert.ok(resp.result, 'must return a result');
   assert.ok(Array.isArray(resp.result.resources), 'must return resources array');
-  assert.equal(resp.result.resources.length, 2, 'must return exactly 2 resources');
+  assert.equal(resp.result.resources.length, 3, 'must return exactly 3 resources');
   const uris = resp.result.resources.map((r) => r.uri);
   assert.ok(uris.includes('krate://snapshot'), 'must include snapshot resource');
   assert.ok(uris.includes('krate://stacks'), 'must include stacks resource');
+  assert.ok(uris.includes('krate://models'), 'must include models resource');
 });
 
 test('MCP resources/list resource entries have uri, name, description', async () => {
@@ -353,8 +358,8 @@ test('MCP_PROMPTS static export has 3 entries', () => {
   assert.ok(MCP_PROMPTS.every((p) => p.name && p.description), 'all prompts must have name and description');
 });
 
-test('MCP_RESOURCES static export has 2 entries', () => {
-  assert.equal(MCP_RESOURCES.length, 2);
+test('MCP_RESOURCES static export has 3 entries', () => {
+  assert.equal(MCP_RESOURCES.length, 3);
   assert.ok(MCP_RESOURCES.every((r) => r.uri && r.name && r.description), 'all resources must have uri, name, description');
 });
 

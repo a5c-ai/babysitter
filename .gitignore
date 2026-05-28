@@ -99,3 +99,4 @@ coverage/
 artifacts/external-plugin-repos/
 {}
 /artifacts/
+packages/krate/web/test-results/

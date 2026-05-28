@@ -82,6 +82,7 @@ edges:
   realizes:
     - target: layer:2-provider
   serves:
+    - model:gpt-5.5@current
     - model:amazon-nova-2-lite@current
     - model:amazon-nova-2-sonic@current
     - model:claude-mythos-preview@current

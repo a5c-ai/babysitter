@@ -205,7 +205,7 @@ nodeKind: KnowledgeFabricImpl
 id: knowledge-fabric-impl:openclaw.knowledge@current
 attributes:
   displayName: "OpenClaw Knowledge Fabric — .agents directory + .crabbox.yaml"
-  agentVersionId: agentVersion:openclaw:ge-2026-5-22
+  agentVersionId: agentVersion:openclaw:ge-2026-5-26
   description: |
     OpenClaw's knowledge fabric is built on the .agents directory pattern and
     .crabbox.yaml configuration. The .agents directory contains agent-specific
@@ -229,7 +229,7 @@ edges:
   realizes:
     - target: layer:12-knowledge-fabric
   composes:
-    - target: agentVersion:openclaw:ge-2026-5-22
+    - target: agentVersion:openclaw:ge-2026-5-26
       role: knowledge-fabric
   uses_memory_system:
     - target: memory-system:openclaw-soul-memory

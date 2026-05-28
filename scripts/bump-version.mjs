@@ -179,7 +179,7 @@ const updateLockVersion = (path, version) => {
       version,
       dependencies: { "@a5c-ai/agent-comm-mux": version }
     },
-    "packages/triggers": {
+    "packages/triggers-mux": {
       version
     },
     "packages/agent-core": {
@@ -300,7 +300,7 @@ const agentMuxManifestPaths = [
   "packages/agent-mux/launch/package.json",
   "packages/transport-mux/package.json",
   "packages/tool-mux/package.json",
-  "packages/triggers/package.json",
+  "packages/triggers-mux/package.json",
 ];
 
 const pluginPackageManifestPaths = [

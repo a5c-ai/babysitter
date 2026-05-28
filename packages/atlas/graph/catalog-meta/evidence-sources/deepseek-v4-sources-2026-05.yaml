@@ -38,6 +38,139 @@ edges:
     - trust-level:vendor-doc
 ---
 nodeKind: EvidenceSource
+id: evidence:deepseek-api-quickstart
+attributes:
+  displayName: "DeepSeek API Docs - Your First API Call"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://api-docs.deepseek.com/
+  sourcePathOrUrl: https://api-docs.deepseek.com/
+  locator: "quick start - OpenAI and Anthropic base URLs, V4 model invocation"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:deepseek-anthropic-api
+attributes:
+  displayName: "DeepSeek API Docs - Anthropic API"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://api-docs.deepseek.com/guides/anthropic_api
+  sourcePathOrUrl: https://api-docs.deepseek.com/guides/anthropic_api
+  locator: "Anthropic API guide - base URL, model invocation, field compatibility"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:deepseek-thinking-mode
+attributes:
+  displayName: "DeepSeek API Docs - Thinking Mode"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://api-docs.deepseek.com/guides/thinking_mode
+  sourcePathOrUrl: https://api-docs.deepseek.com/guides/thinking_mode
+  locator: "thinking mode guide - V4 thinking and non-thinking controls"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:deepseek-json-output
+attributes:
+  displayName: "DeepSeek API Docs - JSON Output"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://api-docs.deepseek.com/guides/json_mode
+  sourcePathOrUrl: https://api-docs.deepseek.com/guides/json_mode
+  locator: "JSON Output guide - response_format json_object"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:deepseek-tool-calls
+attributes:
+  displayName: "DeepSeek API Docs - Tool Calls"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://api-docs.deepseek.com/guides/tool_calls
+  sourcePathOrUrl: https://api-docs.deepseek.com/guides/tool_calls
+  locator: "Tool Calls guide - OpenAI-style tool calls, thinking/non-thinking support"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:deepseek-chat-prefix-completion
+attributes:
+  displayName: "DeepSeek API Docs - Chat Prefix Completion (Beta)"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://api-docs.deepseek.com/guides/chat_prefix_completion
+  sourcePathOrUrl: https://api-docs.deepseek.com/guides/chat_prefix_completion
+  locator: "Chat Prefix Completion guide - beta prefix completion base URL and V4 usage"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:deepseek-fim-completion
+attributes:
+  displayName: "DeepSeek API Docs - FIM Completion (Beta)"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://api-docs.deepseek.com/guides/fim_completion
+  sourcePathOrUrl: https://api-docs.deepseek.com/guides/fim_completion
+  locator: "FIM Completion guide - beta fill-in-middle completion and V4 usage"
+  capturedAt: "2026-05-26T00:00:00Z"
+  observedAt: "2026-05-26T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
 id: evidence:together-deepseek-v4-quickstart
 attributes:
   displayName: "Together AI Docs - DeepSeek V4 quickstart"

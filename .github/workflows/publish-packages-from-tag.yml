@@ -101,7 +101,7 @@ jobs:
             @a5c-ai/tasks-mux \
             @a5c-ai/cloud \
             @a5c-ai/agent-mux-observability \
-            @a5c-ai/triggers \
+            @a5c-ai/triggers-mux \
             @a5c-ai/babysitter-observer-dashboard
 
           run_many "Build core packages" \
@@ -196,7 +196,7 @@ jobs:
             @a5c-ai/tasks-mux \
             @a5c-ai/cloud \
             @a5c-ai/agent-mux-observability \
-            @a5c-ai/triggers \
+            @a5c-ai/triggers-mux \
             @a5c-ai/babysitter-observer-dashboard
 
           publish_many "Publish core packages" \

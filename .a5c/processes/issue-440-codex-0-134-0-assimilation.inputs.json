@@ -1,0 +1,7 @@
+{
+  "issueNumber": 440,
+  "baseBranch": "staging",
+  "workBranch": "agent/issue-440",
+  "targetVersion": "0.134.0",
+  "previousVersion": "0.133.0"
+}

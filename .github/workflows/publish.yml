@@ -133,7 +133,7 @@ jobs:
             npm run build --workspace=@a5c-ai/hooks-mux-cli
           '
           run_bg npm run build --workspace=@a5c-ai/extension-mux
-          run_bg npm run build --workspace=@a5c-ai/triggers
+          run_bg npm run build --workspace=@a5c-ai/triggers-mux
           run_bg npm run build:observer
           run_bg npm run build:cloud
           run_bg bash -lc 'cd packages/krate/core && npm run build && cd ../web && npm run build'
@@ -311,7 +311,7 @@ jobs:
           node scripts/agent-mux-build.cjs test packages/agent-mux/gateway 2>&1 | tee artifacts/mux-logs/agent-mux-gateway-tests.log
           node scripts/agent-mux-build.cjs test packages/agent-mux/cli 2>&1 | tee artifacts/mux-logs/agent-mux-cli-tests.log
           node scripts/agent-mux-build.cjs test packages/agent-mux/sdk 2>&1 | tee artifacts/mux-logs/agent-mux-sdk-tests.log
-          npm run test:unit --workspace=@a5c-ai/triggers 2>&1 | tee artifacts/mux-logs/triggers-tests.log
+          npm run test:unit --workspace=@a5c-ai/triggers-mux 2>&1 | tee artifacts/mux-logs/triggers-tests.log
 
       - name: Verify non-realtime agent-mux release artifacts
         run: |
@@ -385,8 +385,8 @@ jobs:
       - name: Triggers e2e + coverage
         run: |
           set -euo pipefail
-          npm run test:e2e --workspace=@a5c-ai/triggers 2>&1 | tee artifacts/e2e-logs/triggers-e2e.log
-          npm run test:coverage --workspace=@a5c-ai/triggers 2>&1 | tee artifacts/e2e-logs/triggers-coverage.log
+          npm run test:e2e --workspace=@a5c-ai/triggers-mux 2>&1 | tee artifacts/e2e-logs/triggers-e2e.log
+          npm run test:coverage --workspace=@a5c-ai/triggers-mux 2>&1 | tee artifacts/e2e-logs/triggers-coverage.log
 
       - name: Krate e2e + smoke
         run: |
@@ -797,11 +797,11 @@ jobs:
           - name: triggers
             build: |
               set -euo pipefail
-              npm run build --workspace=@a5c-ai/triggers
-              npm run test:unit --workspace=@a5c-ai/triggers
-              npm run test:e2e --workspace=@a5c-ai/triggers
-              npm run test:coverage --workspace=@a5c-ai/triggers
-            publish: npm publish --workspace=@a5c-ai/triggers --access public --tag "$NPM_TAG"
+              npm run build --workspace=@a5c-ai/triggers-mux
+              npm run test:unit --workspace=@a5c-ai/triggers-mux
+              npm run test:e2e --workspace=@a5c-ai/triggers-mux
+              npm run test:coverage --workspace=@a5c-ai/triggers-mux
+            publish: npm publish --workspace=@a5c-ai/triggers-mux --access public --tag "$NPM_TAG"
           - name: observer-dashboard
             build: npm run build:observer
             publish: npm publish --workspace=@a5c-ai/babysitter-observer-dashboard --access public --tag "$NPM_TAG"

@@ -13,8 +13,21 @@ attributes:
     - "macos"
     - "windows"
   agentProductId: agent:opencode
-  versionRange: ">=1.15.10"
-  releasedAt: "2026-05-23"
+  versionRange: ">=1.15.11"
+  currentVersion: "1.15.11"
+  releasedAt: "2026-05-27"
+  releaseNotesUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.15.11"
+  assimilationNotes:
+    - "Provider requests gained headerTimeout config with a 10s default for default OpenAI setups."
+    - "Experimental background agents now push updates without polling."
+    - "Config can set only modalities.input or modalities.output."
+    - "Remote-backed projects now resolve a stable project identity."
+    - "Dynamic MCP servers disconnect cleanly when removed, resumed sessions no longer continue orphaned interrupted tools, and the shell tool advertises the configured timeout to the model."
+    - "Provider/runtime fixes cover DigitalOcean OAuth-token inference, Google tool calling after the upstream tool ID regression, OpenAI reasoning summary blocks, and Google Vertex reasoning signatures."
+    - "TUI prompt sizing is responsive/configurable, diff scrolling is accelerated, and external editors open from the worktree directory when available."
+    - "Desktop v2 home, prompt, status popover, session controls, server-list merging, session timeline interactions, titlebar cache handling, health checks, and window restore behavior were refined or fixed."
+    - "Extensions gained a plugin dispose hook and Codex plugin requests now send the expected session ID header."
+    - "Install methods and package name remain unchanged."
   cliCommand: "opencode"
   installMethods:
     - install:npm
@@ -124,35 +137,35 @@ edges:
   sourced_from: []
   supports:
     - target: capability:skills
-      versionRange: ">=1.15.10"
+      versionRange: ">=1.15.11"
       level: full
       notes: OpenCode documents reusable command surfaces — first-party basis for the local skills abstraction.
     - target: capability:supports-thinking
-      versionRange: ">=1.15.10"
+      versionRange: ">=1.15.11"
       level: full
       notes: OpenCode documented as an interactive terminal coding surface backed by configurable providers.
     - target: capability:interactive-mode
-      versionRange: ">=1.15.10"
+      versionRange: ">=1.15.11"
       level: full
       notes: Interactive terminal use documented directly in OpenCode TUI docs.
     - target: capability:stdin-injection
-      versionRange: ">=1.15.10"
+      versionRange: ">=1.15.11"
       level: full
       notes: Public docs thinner for non-interactive prompt injection; local fallback metadata remains primary.
     - target: capability:vision-input
-      versionRange: ">=1.15.10"
+      versionRange: ">=1.15.11"
       level: full
       notes: Public OpenCode docs lack strong technical detail for image input.
     - target: capability:runtime-hooks
-      versionRange: ">=1.15.10"
+      versionRange: ">=1.15.11"
       level: full
       notes: OpenCode plugins expose hook-based extensibility — first-party basis for runtime hooks.
     - target: capability:stop-hook
-      versionRange: ">=1.15.10"
+      versionRange: ">=1.15.11"
       level: full
       notes: Local ontology normalizes stop-hook separately; first-party support is the broader plugin hook system.
     - target: capability:can-resume
-      versionRange: ">=1.15.10"
+      versionRange: ">=1.15.11"
       level: full
       notes: Public OpenCode docs describe where sessions are stored.
   uses_memory_system:

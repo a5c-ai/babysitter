@@ -117,7 +117,7 @@ jobs:
             npm run build --workspace=@a5c-ai/hooks-mux-cli
           '
           run_bg npm run build --workspace=@a5c-ai/extension-mux
-          run_bg npm run build --workspace=@a5c-ai/triggers
+          run_bg npm run build --workspace=@a5c-ai/triggers-mux
           run_bg npm run build:observer
           run_bg npm run build:cloud
           run_bg bash -lc 'cd packages/krate/core && npm run build && cd ../web && npm run build'

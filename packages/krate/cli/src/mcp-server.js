@@ -19,6 +19,9 @@ export const MCP_TOOLS = [
   { name: 'krate_sync_external', description: 'Trigger an external sync for a binding', inputSchema: { type: 'object', properties: { bindingName: { type: 'string' }, kind: { type: 'string' }, localName: { type: 'string' }, spec: { type: 'object' }, externalEnvelope: { type: 'object' }, watermark: { type: 'string' } }, required: ['bindingName', 'kind', 'localName'] } },
   { name: 'krate_resolve_conflict', description: 'Resolve an external sync conflict', inputSchema: { type: 'object', properties: { conflictName: { type: 'string' }, strategy: { type: 'string' }, resolvedValue: {} }, required: ['conflictName', 'strategy'] } },
   { name: 'krate_audit_query', description: 'Query audit events with optional org/action/time filters', inputSchema: { type: 'object', properties: { org: { type: 'string' }, action: { type: 'string' }, since: { type: 'string' }, until: { type: 'string' }, limit: { type: 'number' }, offset: { type: 'number' } } } },
+  { name: 'krate_model_catalog', description: 'List all available models (internal KServe + external cloud LLM) from the unified model catalog', inputSchema: { type: 'object', properties: { org: { type: 'string' } } } },
+  { name: 'krate_list_model_routes', description: 'List KrateModelRoute resources for model routing', inputSchema: { type: 'object', properties: {} } },
+  { name: 'krate_create_model_route', description: 'Create a KrateModelRoute for internal or external model routing', inputSchema: { type: 'object', properties: { name: { type: 'string' }, org: { type: 'string' }, modelName: { type: 'string' }, routeType: { type: 'string', enum: ['internal', 'external'] }, inferenceServiceRef: { type: 'string' }, provider: { type: 'string' }, endpoint: { type: 'string' }, modelId: { type: 'string' } }, required: ['name', 'org', 'modelName', 'routeType'] } },
 ];
 
 export const MCP_PROMPTS = [
@@ -47,6 +50,12 @@ export const MCP_RESOURCES = [
     uri: 'krate://stacks',
     name: 'Agent Stacks',
     description: 'List of configured agent stacks',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'krate://models',
+    name: 'Model Catalog',
+    description: 'Unified catalog of internal and external models',
     mimeType: 'application/json',
   },
 ];
@@ -431,6 +440,31 @@ async function executeTool(controller, toolName, args) {
       });
     }
 
+    case 'krate_model_catalog':
+      return controller.listModelCatalog(args.org || 'default');
+
+    case 'krate_list_model_routes':
+      return controller.listResource('KrateModelRoute');
+
+    case 'krate_create_model_route': {
+      const routeSpec = {
+        organizationRef: args.org,
+        modelName: args.modelName,
+        routeType: args.routeType,
+      };
+      if (args.routeType === 'internal') {
+        routeSpec.internal = { inferenceServiceRef: args.inferenceServiceRef || args.modelName, protocol: 'v2' };
+      } else {
+        routeSpec.external = { provider: args.provider || 'custom', endpoint: args.endpoint, model: args.modelId || args.modelName };
+      }
+      return controller.applyResource({
+        apiVersion: 'krate.a5c.ai/v1alpha1',
+        kind: 'KrateModelRoute',
+        metadata: { name: args.name, namespace: orgNamespaceName(args.org) },
+        spec: routeSpec,
+      });
+    }
+
     default:
       throw new Error(`Tool not implemented: ${toolName}`);
   }
@@ -445,6 +479,9 @@ async function readMcpResource(controller, uri) {
 
     case 'krate://stacks':
       return controller.listResource('AgentStack');
+
+    case 'krate://models':
+      return controller.listModelCatalog('default');
 
     default:
       throw new Error(`Resource URI not implemented: ${uri}`);

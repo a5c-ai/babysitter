@@ -10,6 +10,7 @@ export type {
   ClaudeStopPayload,
   ClaudeUserPromptSubmitPayload,
   ClaudeSubagentStopPayload,
+  ClaudeMessageDisplayPayload,
 } from './normalizer';
 export { renderClaudeOutput } from './renderer';
 export { renderClaudeOutput as renderForInvoke } from './renderer';
@@ -18,6 +19,7 @@ export type {
   ClaudePostToolUseOutput,
   ClaudeStopOutput,
   ClaudeSessionStartOutput,
+  ClaudeMessageDisplayOutput,
   ClaudeGenericOutput,
 } from './renderer';
 export { resolveSessionId } from './session-resolver';

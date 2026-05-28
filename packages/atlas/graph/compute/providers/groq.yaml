@@ -44,3 +44,5 @@ edges:
   serves:
     - model:llama-4-maverick@current
     - model:llama-4-scout@current
+  has_version:
+    - providerVersion:groq:openai-compatible-2026-05

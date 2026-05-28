@@ -30,6 +30,7 @@ attributes:
   - hook-surface:session-start
   - hook-surface:session-end
   - hook-surface:pre-compact
+  - hook-surface:claude.message-display
   internalSessionStateLocation: ~/.claude/projects/<hash>/
   sessionFileFormat: jsonl
   sessionFilePathConvention: ~/.claude/projects/<project-path-hash>/<session-uuid>.jsonl
@@ -87,6 +88,7 @@ edges:
   - target: hook-surface:claude.pre-compact
   - target: hook-surface:claude.session-start
   - target: hook-surface:claude.session-end
+  - target: hook-surface:claude.message-display
   - target: agent-host-transport:http
   - target: agent-host-transport:mcp-mediated
   - target: agent-host-transport:ws

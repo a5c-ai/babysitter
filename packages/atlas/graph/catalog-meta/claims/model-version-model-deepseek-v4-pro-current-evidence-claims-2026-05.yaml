@@ -1,0 +1,521 @@
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-model-code
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: modelCode
+  value: deepseek-v4-pro
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current maps to the DeepSeek API model code deepseek-v4-pro.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-api-quickstart
+    - evidence:deepseek-anthropic-api
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for the DeepSeek V4 Pro API model identifier.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-api-quickstart
+    - evidence:deepseek-anthropic-api
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-version-name
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: providerModelIds
+  value: "deepseekApi=deepseek-v4-pro;deepseekVersion=DeepSeek-V4-Pro"
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current uses DeepSeek-V4-Pro as the vendor version name for the deepseek-v4-pro API model.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-release
+    - evidence:deepseek-v4-pricing
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for the issue #431 exact model ID/version pair.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-release
+    - evidence:deepseek-v4-pricing
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-versionrange
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: versionRange
+  value: '>=4.0.0 <5.0.0'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current versionRange is >=4.0.0 <5.0.0.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-release
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for DeepSeek V4 Pro version family membership.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-release
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-kind
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: kind
+  value: reasoning
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current kind is reasoning.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-thinking-mode
+    - evidence:deepseek-v4-pricing
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for DeepSeek V4 Pro thinking-mode support.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-thinking-mode
+    - evidence:deepseek-v4-pricing
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-contextwindowtokens
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current contextWindowTokens is 1000000.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-release
+    - evidence:deepseek-v4-pricing
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for DeepSeek V4 Pro 1M-token context window.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-release
+    - evidence:deepseek-v4-pricing
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-maxoutputtokens
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: maxOutputTokens
+  value: '384000'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current maxOutputTokens is 384000.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-pricing
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for DeepSeek V4 Pro maximum output tokens.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-pricing
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-costpermtokinput
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: costPerMTokInput
+  value: '0.435'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current costPerMTokInput is 0.435 for cache-miss input tokens during the promotional V4 Pro period.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-pricing
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Promotional price; DeepSeek notes a post-promotion pricing adjustment after 2026-05-31 15:59 UTC.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-pricing
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-costpermtokcachedinput
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: costPerMTokCachedInput
+  value: '0.003625'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current cache-hit input pricing is 0.003625 USD per million tokens during the promotional V4 Pro period.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-pricing
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Promotional cache-hit price; DeepSeek notes a post-promotion pricing adjustment after 2026-05-31 15:59 UTC.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-pricing
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-costpermtokoutput
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: costPerMTokOutput
+  value: '0.87'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current costPerMTokOutput is 0.87 during the promotional V4 Pro period.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-pricing
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Promotional output price; DeepSeek notes a post-promotion pricing adjustment after 2026-05-31 15:59 UTC.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-pricing
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-thinking-modes
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: thinkingModes
+  value: thinking, non-thinking
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current supports both thinking and non-thinking modes.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-thinking-mode
+    - evidence:deepseek-v4-pricing
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: DeepSeek documents both V4 thinking and non-thinking controls.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-thinking-mode
+    - evidence:deepseek-v4-pricing
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-supportsextendedthinking
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: supportsExtendedThinking
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current supportsExtendedThinking is True.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-thinking-mode
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for DeepSeek V4 Pro thinking output support.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-thinking-mode
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current supportsThinkingBudgetTokens is False.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-anthropic-api
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: DeepSeek's Anthropic-format compatibility table says thinking is supported while budget_tokens is ignored.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-anthropic-api
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-modalities
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: modalities
+  value: text
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current modalities is text.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-release
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for text input/output modality.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-release
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-modalitydirections
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current modalityDirections is kind=text;direction=input, kind=text;direction=output.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-release
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for text input and text output directions.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-release
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-lifecyclestatus
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: lifecycleStatus
+  value: preview
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current lifecycleStatus is preview.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-release
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for the DeepSeek-V4 Preview release status.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-release
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-releasedate
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: releaseDate
+  value: '2026-04-24'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current releaseDate is 2026-04-24.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-release
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for the DeepSeek V4 Preview release date.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-release
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-modelcardurl
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: modelCardUrl
+  value: https://fe-static.deepseek.com/chat/transparency/deepseek-V4-model-card-EN.pdf
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current modelCardUrl is https://fe-static.deepseek.com/chat/transparency/deepseek-V4-model-card-EN.pdf.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-release
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for the DeepSeek V4 model-card URL.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-release
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-supportsfinetuning
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: supportsFineTuning
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current supportsFineTuning is False.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: adequate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-release
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: DeepSeek V4 API documentation does not advertise fine-tuning for this preview model.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-release
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-regions
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: regions
+  value: global
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current regions is global.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: adequate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-api-quickstart
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for first-party DeepSeek API availability; no Azure, Bedrock, or Vertex availability is asserted.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-api-quickstart
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-speaks
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: speaks
+  value: model-transport:openai-compat, model-transport:anthropic-messages
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current is available through DeepSeek's OpenAI-compatible and Anthropic-format API surfaces.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-api-quickstart
+    - evidence:deepseek-anthropic-api
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #431 API-family coverage.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-api-quickstart
+    - evidence:deepseek-anthropic-api
+  about_subject:
+    - model:deepseek-v4-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-pro-current-json-tool-prefix-fim
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  attribute: supports
+  value: capability:supports-json-mode, capability:supports-tool-use, chat-prefix-completion-beta, fim-completion-beta-non-thinking
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-pro@current supports JSON output, tool calls, chat prefix completion beta, and FIM completion beta in non-thinking mode.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-json-output
+    - evidence:deepseek-tool-calls
+    - evidence:deepseek-chat-prefix-completion
+    - evidence:deepseek-fim-completion
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: FIM and chat-prefix completion are represented as Claim metadata rather than new capability nodes.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-json-output
+    - evidence:deepseek-tool-calls
+    - evidence:deepseek-chat-prefix-completion
+    - evidence:deepseek-fim-completion
+  about_subject:
+    - model:deepseek-v4-pro@current

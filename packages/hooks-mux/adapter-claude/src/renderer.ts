@@ -37,6 +37,21 @@ export interface ClaudeStopOutput {
 export interface ClaudeSessionStartOutput {
   /** Additional context injected into the model's context window. */
   additionalContext?: string;
+  /** Hook-specific output consumed by Claude on session start. */
+  hookSpecificOutput?: {
+    hookEventName: 'SessionStart';
+    additionalContext?: string;
+    sessionTitle?: string;
+    reloadSkills?: boolean;
+  };
+}
+
+/** MessageDisplay hook output. */
+export interface ClaudeMessageDisplayOutput {
+  hookSpecificOutput?: {
+    hookEventName: 'MessageDisplay';
+    displayContent?: string;
+  };
 }
 
 /** Generic output shape for events with no specific output contract. */
@@ -91,6 +106,8 @@ export function renderClaudeOutput(
       return renderStopOutput(result);
     case 'SessionStart':
       return renderSessionStartOutput(result);
+    case 'MessageDisplay':
+      return renderMessageDisplayOutput(result);
     default:
       return renderGenericOutput(result);
   }
@@ -161,7 +178,47 @@ function renderSessionStartOutput(result: UnifiedHookResult): Record<string, unk
     output['additionalContext'] = result.additionalContext;
   }
 
+  const hookSpecificOutput: Record<string, unknown> = {
+    hookEventName: 'SessionStart',
+  };
+
+  if (result.additionalContext) {
+    hookSpecificOutput['additionalContext'] = result.additionalContext;
+  }
+  if (result.sessionTitle != null) {
+    hookSpecificOutput['sessionTitle'] = result.sessionTitle;
+  }
+  if (result.reloadSkills != null) {
+    hookSpecificOutput['reloadSkills'] = result.reloadSkills;
+  }
+
+  if (Object.keys(hookSpecificOutput).length > 1) {
+    output['hookSpecificOutput'] = hookSpecificOutput;
+  }
+
   return output;
+}
+
+function renderMessageDisplayOutput(result: UnifiedHookResult): Record<string, unknown> {
+  if (result.displayContent != null) {
+    return {
+      hookSpecificOutput: {
+        hookEventName: 'MessageDisplay',
+        displayContent: result.displayContent,
+      },
+    };
+  }
+
+  if (result.suppressOutput === true) {
+    return {
+      hookSpecificOutput: {
+        hookEventName: 'MessageDisplay',
+        displayContent: '',
+      },
+    };
+  }
+
+  return {};
 }
 
 function renderGenericOutput(result: UnifiedHookResult): Record<string, unknown> {

@@ -1,6 +1,8 @@
+import { EventEmitter } from 'node:events';
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { PassThrough } from 'node:stream';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -10,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const execSyncMock = vi.fn(() => '');
 const spawnMock = vi.fn();
+const getLaunchBehaviorMock = vi.fn();
 
 vi.mock('node:child_process', () => ({
   execSync: execSyncMock,
@@ -104,7 +107,7 @@ vi.mock('@a5c-ai/agent-catalog', () => ({
   getHookSupport: vi.fn(() => ({})),
   getAdapterMetadata: vi.fn(() => null),
   getSessionConfig: vi.fn(() => ({})),
-  getLaunchBehavior: vi.fn(() => undefined),
+  getLaunchBehavior: getLaunchBehaviorMock,
 }));
 
 // ---------------------------------------------------------------------------
@@ -119,6 +122,21 @@ describe('bridge-interactive spawn', () => {
     vi.resetModules();
     execSyncMock.mockReset();
     spawnMock.mockReset();
+    getLaunchBehaviorMock.mockReset();
+    getLaunchBehaviorMock.mockImplementation((harness: string) => {
+      if (harness !== 'claude') return undefined;
+      return {
+        promptDelivery: 'cli-flag',
+        promptFlag: '-p',
+        stdinBehavior: 'close-after-prompt',
+        selfExits: true,
+        needsIdleKill: false,
+        sessionIdFlag: '--session-id',
+        maxTurnsFlag: '--max-turns',
+        resumeDelivery: 'flag',
+        resumeFlag: '--resume',
+      };
+    });
     ptySpawnMock.mockClear();
     ptyMockControl.shouldThrow = false;
     stdoutChunks = [];
@@ -132,6 +150,7 @@ describe('bridge-interactive spawn', () => {
 
   afterEach(() => {
     process.stdout.write = origWrite;
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -163,6 +182,110 @@ describe('bridge-interactive spawn', () => {
       },
     } as any;
   }
+
+  function makeSpawnChild() {
+    const child = new EventEmitter() as EventEmitter & {
+      pid: number;
+      stdin: { write: ReturnType<typeof vi.fn>; end: ReturnType<typeof vi.fn>; readonly writable: boolean };
+      stdout: PassThrough;
+      stderr: PassThrough;
+      kill: ReturnType<typeof vi.fn>;
+    };
+    let writable = true;
+    child.pid = 4242;
+    child.stdin = {
+      write: vi.fn(() => true),
+      end: vi.fn(() => { writable = false; }),
+      get writable() { return writable; },
+    };
+    child.stdout = new PassThrough();
+    child.stderr = new PassThrough();
+    child.kill = vi.fn();
+    return child;
+  }
+
+  function stdinWriteText(child: ReturnType<typeof makeSpawnChild>): string {
+    return child.stdin.write.mock.calls.map(([chunk]) => String(chunk)).join('');
+  }
+
+  function withMockPlatform(platform: NodeJS.Platform): () => void {
+    const descriptor = Object.getOwnPropertyDescriptor(process, 'platform');
+    Object.defineProperty(process, 'platform', { value: platform, configurable: true });
+    return () => {
+      if (descriptor) Object.defineProperty(process, 'platform', descriptor);
+    };
+  }
+
+  it('keeps Claude child_process fallback prompts in args instead of stdin when node-pty is unavailable', async () => {
+    vi.useFakeTimers();
+    ptyMockControl.shouldThrow = true;
+    const prompt = 'write .a5c-live-test/fallback-prompt.md';
+    const child = makeSpawnChild();
+    spawnMock.mockReturnValue(child);
+    const { launchCommand, LAUNCH_FLAGS, parseArgs } = await importModules();
+
+    const launchPromise = launchCommand(
+      makeClient(),
+      parseArgs(
+        ['launch', 'claude', '--bridge-interactive', '--no-interactive', '--prompt', prompt],
+        LAUNCH_FLAGS,
+      ),
+    );
+
+    try {
+      await vi.waitFor(() => expect(spawnMock).toHaveBeenCalledTimes(1));
+      const spawnedArgs = spawnMock.mock.calls[0]?.[1] as string[];
+      expect(spawnedArgs.filter((arg) => arg === prompt)).toHaveLength(1);
+      expect(spawnedArgs[spawnedArgs.indexOf('-p') + 1]).toBe(prompt);
+
+      await vi.advanceTimersByTimeAsync(2500);
+      expect(stdinWriteText(child)).not.toContain(prompt);
+      expect(child.stdin.end).toHaveBeenCalled();
+    } finally {
+      child.emit('exit', 0, null);
+      await launchPromise.catch(() => undefined);
+    }
+  });
+
+  it('preserves Windows .cmd fallback prompts with spaces quotes and parens without delayed stdin', async () => {
+    vi.useFakeTimers();
+    ptyMockControl.shouldThrow = true;
+    const restorePlatform = withMockPlatform('win32');
+    const prompt = 'summarize "Act (I)" and write .a5c-live-test/windows prompt.md';
+    const child = makeSpawnChild();
+    spawnMock.mockReturnValue(child);
+    execSyncMock.mockImplementation((command: string) => {
+      if (command.startsWith('where claude')) return 'C:\\Users\\runner\\AppData\\Roaming\\npm\\claude.cmd\r\n';
+      return '';
+    });
+    const { launchCommand, LAUNCH_FLAGS, parseArgs } = await importModules();
+
+    const launchPromise = launchCommand(
+      makeClient(),
+      parseArgs(
+        ['launch', 'claude', '--bridge-interactive', '--no-interactive', '--prompt', prompt],
+        LAUNCH_FLAGS,
+      ),
+    );
+
+    try {
+      await vi.waitFor(() => expect(spawnMock).toHaveBeenCalledTimes(1));
+      const spawnedArgs = spawnMock.mock.calls[0]?.[1] as string[];
+      const resolvedInvocation = spawnedArgs.join('\0');
+      const normalizedInvocation = resolvedInvocation.replace(/""/g, '"');
+      expect((normalizedInvocation.match(new RegExp(prompt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) ?? [])).toHaveLength(1);
+      expect(normalizedInvocation).toContain(prompt);
+      expect(spawnMock.mock.calls[0]?.[0]).toBe(process.env['ComSpec'] ?? 'cmd.exe');
+
+      await vi.advanceTimersByTimeAsync(2500);
+      expect(stdinWriteText(child)).not.toContain(prompt);
+      expect(child.stdin.end).toHaveBeenCalled();
+    } finally {
+      child.emit('exit', 0, null);
+      await launchPromise.catch(() => undefined);
+      restorePlatform();
+    }
+  });
 
   it('preseeds first-run trust state for CI harness launches', async () => {
     const { launchCommand, LAUNCH_FLAGS, parseArgs } = await importModules();

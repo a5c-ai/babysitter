@@ -3,7 +3,7 @@ id: hook-mapping:pre-tool-use-gemini
 attributes:
   mappingId: hook-mapping:pre-tool-use-gemini
   hookId: hook-surface:pre-tool-use
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: pre_prompt
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -19,4 +19,4 @@ edges:
   maps_hook:
     - target: hook-surface:pre-tool-use
   emits_hook:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0

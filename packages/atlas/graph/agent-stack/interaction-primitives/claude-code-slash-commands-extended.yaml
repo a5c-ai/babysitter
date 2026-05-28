@@ -194,6 +194,25 @@ edges:
     - target: layer:10-interaction
 ---
 nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-reload-skills
+attributes:
+  displayName: "/reload-skills"
+  description: |
+    Re-scan installed Skills without restarting the Claude Code session.
+    Added in Claude Code v2.1.152; SessionStart hook output can also request
+    the same behavior with reloadSkills: true.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:context
+  availableInModes: [chat, plan]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:context
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
 id: interaction-primitive:slash-plugin
 attributes:
   displayName: "/plugin"

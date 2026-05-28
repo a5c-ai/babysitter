@@ -14,6 +14,9 @@ export interface UnifiedHookResult {
   continueSession?: boolean;
   stopReason?: string;
   suppressOutput?: boolean;
+  sessionTitle?: string;
+  reloadSkills?: boolean;
+  displayContent?: string;
 
   toolMutation?: {
     mode: 'replace' | 'patch';

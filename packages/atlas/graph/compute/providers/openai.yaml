@@ -86,6 +86,7 @@ edges:
     notes: response_format json_schema with strict=true introduced in 2024-08.
   serves:
   - model:gpt-5@current
+  - model:gpt-5.3-codex@current
   - model:gpt-5.5-pro@current
   - model:gpt-5.4-nano@current
   emits_message_type:

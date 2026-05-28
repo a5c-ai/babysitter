@@ -131,7 +131,7 @@ graph TB
 | `packages/transport-mux` | HTTP proxy: protocol translation between harness ↔ provider |
 | `packages/hooks-mux` | Hook normalization: native events → canonical phases |
 | `packages/sdk` | Babysitter SDK: run lifecycle, session binding, MCP tools |
-| `packages/triggers` | GitHub Action: trigger evaluation + agent dispatch |
+| `packages/triggers-mux` | GitHub Action: trigger evaluation + agent dispatch |
 | `packages/krate` | Kubernetes operator + web UI for cloud deployment |
 | `packages/extension-mux` | Plugin generator: unified source → per-harness distributions |
 | `packages/agent-platform` | Standalone babysitter agent (internal harness) |

@@ -567,12 +567,12 @@
       "note": "README is the canonical package-level contract for the published transport/proxy runtime seam."
     },
     {
-      "surface": "packages/triggers",
-      "packageName": "@a5c-ai/triggers",
+      "surface": "packages/triggers-mux",
+      "packageName": "@a5c-ai/triggers-mux",
       "description": "Trigger normalization, enrichment, filtering, and GitHub Action glue for agent-mux automation pipelines.",
       "hasReadme": true,
       "status": "Public family package",
-      "canonicalHome": "../packages/triggers/README.md",
+      "canonicalHome": "../packages/triggers-mux/README.md",
       "supporting": [
         "./agent-mux/README.md"
       ],

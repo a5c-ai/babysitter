@@ -1208,7 +1208,7 @@ nodeKinds:
       Catalog pass 18 introduced the operator-issued lifecycle set. Catalog pass 94
       (Catalog pass 94) extended the enum to cover `webhook-event` and `vcs-event` — the
       VCS / generic-webhook normalization triggers exposed by
-      `@a5c-ai/triggers` (packages/triggers/src/types.ts:1, TriggerBackend
+      `@a5c-ai/triggers-mux` (packages/triggers-mux/src/types.ts:1, TriggerBackend
       union: github | gitlab | bitbucket | generic-webhook).
   - name: effect
     type: string
@@ -1225,14 +1225,14 @@ nodeKinds:
     required: false
     notes: |
       `webhook` and `vcs-event` added Catalog pass 94 to capture the
-      `@a5c-ai/triggers` invocation surfaces (HTTP webhook payload arriving
+      `@a5c-ai/triggers-mux` invocation surfaces (HTTP webhook payload arriving
       via GitHub Actions / generic webhook receiver, normalized into a
       single event shape).
   - name: backend
     type: enum<github,gitlab,bitbucket,generic-webhook>
     required: false
     notes: |
-      Catalog pass 94 — TriggerBackend union from packages/triggers/src/types.ts:1.
+      Catalog pass 94 — TriggerBackend union from packages/triggers-mux/src/types.ts:1.
       Identifies which VCS / webhook payload taxonomy this trigger
       normalizes against.
   - name: eventTaxonomy
@@ -1243,22 +1243,22 @@ nodeKinds:
       backend is known to handle (e.g. `issue_comment`, `pull_request`,
       `push`, `merge_request`, `pullrequest:created`). Open-ended; the
       normalizer accepts arbitrary strings via env / payload fallback
-      (packages/triggers/src/enrich.ts:99).
+      (packages/triggers-mux/src/enrich.ts:99).
   - name: dispatchModel
     type: enum<normalize-and-evaluate,direct-cli,reusable-action>
     required: false
     notes: |
       Catalog pass 94 — captures how the trigger is fired:
       `normalize-and-evaluate` (CLI: enrich → evaluate → exit-code 0 or 78,
-      packages/triggers/src/cli.ts:50), `direct-cli` (manual amux-triggers
+      packages/triggers-mux/src/cli.ts:50), `direct-cli` (manual amux-triggers
       invocation), `reusable-action` (GitHub Action composite at
-      packages/triggers/action.yml).
+      packages/triggers-mux/action.yml).
   - name: payloadShape
     type: string
     required: false
     notes: |
       Catalog pass 94 — TypeScript interface name in
-      packages/triggers/src/types.ts that defines the normalized payload
+      packages/triggers-mux/src/types.ts that defines the normalized payload
       this trigger emits. Always `NormalizedTriggerEvent` for the four
       backend triggers (types.ts:11).
   - name: queryDsl
@@ -1266,7 +1266,7 @@ nodeKinds:
     required: false
     notes: |
       Catalog pass 94 — the trigger query DSL accepted by
-      `parseQuery` (packages/triggers/src/query.ts:75). `key-colon-value`
+      `parseQuery` (packages/triggers-mux/src/query.ts:75). `key-colon-value`
       = `event:issue_comment text:@develop-this`; `json-object` = JSON
       `TriggerQuery`; `expression-clause` = `text ~ '@x' && event == 'pull_request'`.
   - name: cliEntrypoint
@@ -1274,27 +1274,27 @@ nodeKinds:
     required: false
     notes: |
       Catalog pass 94 — bin entry that fires the trigger
-      (packages/triggers/package.json:28 — `amux-triggers` →
+      (packages/triggers-mux/package.json:28 — `amux-triggers` →
       `./dist/cli.js`).
   - name: enrichmentSources
     type: list<enum<workflow-event-payload,github-rest-api,local-git-show,git-diff-unified>>
     required: false
     notes: |
       Catalog pass 94 — channels the enricher draws from
-      (packages/triggers/src/enrich.ts: readPayload, enrichGithubFromApi,
+      (packages/triggers-mux/src/enrich.ts: readPayload, enrichGithubFromApi,
       enrichWithLocalGit, enrichDiffsWithLocalGit).
   - name: sourceCitation
     type: string
     required: false
     notes: |
       Catalog pass 94 — verbatim file:line citation into
-      `packages/triggers/` for traceability of every value above.
+      `packages/triggers-mux/` for traceability of every value above.
   - name: exitCodeSemantics
     type: list<string>
     required: false
     notes: |
       Catalog pass 95 — `<code>:<symbol>:<meaning>` triples for the trigger's
-      process-exit contract. For amux-triggers (packages/triggers/src/cli.ts:65):
+      process-exit contract. For amux-triggers (packages/triggers-mux/src/cli.ts:65):
       `0:matched:trigger query matched, downstream pipeline runs`,
       `78:skip:trigger query did not match (action.yml:165 treats 78 as soft-skip)`,
       `1:error:invalid args / unhandled exception`.
@@ -1313,7 +1313,7 @@ nodeKinds:
   name: GithubActionStep
   origin: a5c
   originContext: |
-    Catalog pass 95 — the seven steps in `packages/triggers/action.yml` (composite GitHub
+    Catalog pass 95 — the seven steps in `packages/triggers-mux/action.yml` (composite GitHub
     Action) carry per-step name, shell, run-script, conditional `if:`, env-var
     bag, and ordering. The existing `WorkflowDefinition` NodeKind models
     repo-versioned WORKFLOW.md (Symphony §5 issue-tracker binding) — an
@@ -1395,7 +1395,7 @@ nodeKinds:
   origin: a5c
   originContext: |
     Catalog pass 95 — the trigger query DSL implemented by
-    `packages/triggers/src/query.ts` has a small but real production-rule
+    `packages/triggers-mux/src/query.ts` has a small but real production-rule
     grammar (compact-key-value, JSON-object, expression-clause, glob,
     contains-operator, equals-operator). For codegen of a parser the
     productions need to be enumerated rather than collapsed into a
@@ -1444,7 +1444,7 @@ nodeKinds:
   - name: parserEntrypoint
     type: string
     required: false
-    notes: Function name + file path implementing the parser (e.g. `parseQuery (packages/triggers/src/query.ts:75)`).
+    notes: Function name + file path implementing the parser (e.g. `parseQuery (packages/triggers-mux/src/query.ts:75)`).
   - name: sourceCitation
     type: string
     required: false
@@ -2678,7 +2678,7 @@ nodeKinds:
       and outputs (which carry the same valueType / required / default /
       description metadata payload as skill frontmatter) can be modeled
       as FrontmatterField rather than as opaque string attributes on the
-      OperationalTrigger record. Source: packages/triggers/action.yml
+      OperationalTrigger record. Source: packages/triggers-mux/action.yml
       (16 inputs + 3 outputs).
       catalog pass 99 widened further to include `cursor-rule` (for `.mdc`
       Cursor rule frontmatter — `description` / `globs` / `alwaysApply`)

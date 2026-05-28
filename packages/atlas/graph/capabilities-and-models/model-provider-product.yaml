@@ -153,3 +153,63 @@ attributes:
     - "AZURE_AD_TOKEN"
   evidenceRefs:
     - "pi-packages-ai-providers"
+---
+nodeKind: ModelProviderProduct
+id: provider:together-ai
+attributes:
+  providerId: "together-ai"
+  displayName: "Together AI"
+  kindLabel: "inference-provider"
+  vendor: "Together AI"
+  homepage: "https://www.together.ai/"
+  apiFamilies:
+    - "openai-chat"
+    - "openai-completions"
+    - "openai-embeddings"
+    - "models"
+  authKinds:
+    - "TOGETHER_API_KEY"
+  evidenceRefs:
+    - "evidence:together-ai-serverless-models-2026-05"
+edges:
+  has_version:
+    - providerVersion:together-ai:serverless-2026-05
+---
+nodeKind: ModelProviderProduct
+id: provider:fireworks-ai
+attributes:
+  providerId: "fireworks-ai"
+  displayName: "Fireworks AI"
+  kindLabel: "inference-provider"
+  vendor: "Fireworks AI"
+  homepage: "https://fireworks.ai/"
+  apiFamilies:
+    - "openai-chat"
+    - "openai-completions"
+    - "models"
+  authKinds:
+    - "FIREWORKS_API_KEY"
+  evidenceRefs:
+    - "evidence:fireworks-ai-models-2026-05"
+edges:
+  has_version:
+    - providerVersion:fireworks-ai:serverless-2026-05
+---
+nodeKind: ModelProviderProduct
+id: provider:groq
+attributes:
+  providerId: "groq"
+  displayName: "Groq"
+  kindLabel: "inference-provider"
+  vendor: "Groq Inc."
+  homepage: "https://groq.com/"
+  apiFamilies:
+    - "openai-chat"
+    - "models"
+  authKinds:
+    - "GROQ_API_KEY"
+  evidenceRefs:
+    - "evidence:groq-console-models-2026-05"
+edges:
+  has_version:
+    - providerVersion:groq:openai-compatible-2026-05

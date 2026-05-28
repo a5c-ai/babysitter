@@ -1,0 +1,255 @@
+---
+nodeKind: Claim
+id: claim:provider-together-ai-serverless-catalog-2026-05
+attributes:
+  subjectId: provider:together-ai
+  subjectKind: Provider
+  attribute: providerCatalogAvailability
+  value: deepseek-ai/DeepSeek-V4-Pro; Qwen/Qwen3-235B-A22B-Instruct-2507-tput; moonshotai/Kimi-K2.6; openai/gpt-oss-120b; openai/gpt-oss-20b
+  statement: "Together AI serverless catalog lists current chat model IDs including deepseek-ai/DeepSeek-V4-Pro, Qwen/Qwen3-235B-A22B-Instruct-2507-tput, moonshotai/Kimi-K2.6, openai/gpt-oss-120b, and openai/gpt-oss-20b."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-27T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-catalog-availability
+  evidenceSourceIds:
+    - evidence:together-ai-serverless-models-2026-05
+edges:
+  about_subject:
+    - provider:together-ai
+  backed_by_evidence:
+    - evidence:together-ai-serverless-models-2026-05
+---
+nodeKind: Claim
+id: claim:provider-together-ai-deepseek-v4-pro-provider-id
+attributes:
+  subjectId: model:deepseek-v4-pro@current
+  subjectKind: ModelVersion
+  attribute: served_by
+  value: provider:together-ai; providerModelId=deepseek-ai/DeepSeek-V4-Pro; contextWindowTokens=512000; inputPerMTokUsd=2.10; cachedInputPerMTokUsd=0.20; outputPerMTokUsd=4.40
+  statement: "Together AI serves DeepSeek V4 Pro as deepseek-ai/DeepSeek-V4-Pro with a 512,000-token provider context window, cached input pricing, function calling, and structured outputs in the serverless catalog."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-27T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-catalog-availability
+  evidenceSourceIds:
+    - evidence:together-ai-serverless-models-2026-05
+edges:
+  about_subject:
+    - model:deepseek-v4-pro@current
+    - provider:together-ai
+  backed_by_evidence:
+    - evidence:together-ai-serverless-models-2026-05
+---
+nodeKind: Claim
+id: claim:provider-together-ai-qwen3-coder-480b-family-delta
+attributes:
+  subjectId: provider:together-ai
+  subjectKind: Provider
+  attribute: providerCatalogAvailability
+  value: Qwen/Qwen3-235B-A22B-Instruct-2507-tput; contextWindowTokens=262144; inputPerMTokUsd=0.20; outputPerMTokUsd=0.60
+  statement: "Together AI serverless catalog includes a Qwen3 hosted delta, Qwen/Qwen3-235B-A22B-Instruct-2507-tput, with 262,144-token context and token pricing distinct from the existing Qwen3-Coder Bedrock claims."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-27T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-catalog-availability
+  evidenceSourceIds:
+    - evidence:together-ai-serverless-models-2026-05
+edges:
+  about_subject:
+    - provider:together-ai
+  backed_by_evidence:
+    - evidence:together-ai-serverless-models-2026-05
+---
+nodeKind: Claim
+id: claim:provider-together-ai-kimi-gpt-oss-deltas
+attributes:
+  subjectId: provider:together-ai
+  subjectKind: Provider
+  attribute: providerCatalogAvailability
+  value: moonshotai/Kimi-K2.6 contextWindowTokens=262144; openai/gpt-oss-120b contextWindowTokens=128000; openai/gpt-oss-20b contextWindowTokens=128000
+  statement: "Together AI serverless catalog includes Moonshot Kimi K2.6 and OpenAI GPT-OSS 120B/20B provider IDs with documented context windows and serverless pricing."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-27T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-catalog-availability
+  evidenceSourceIds:
+    - evidence:together-ai-serverless-models-2026-05
+edges:
+  about_subject:
+    - provider:together-ai
+  backed_by_evidence:
+    - evidence:together-ai-serverless-models-2026-05
+---
+nodeKind: Claim
+id: claim:provider-fireworks-ai-architecture-catalog-2026-05
+attributes:
+  subjectId: provider:fireworks-ai
+  subjectKind: Provider
+  attribute: providerCatalogAvailability
+  value: DeepSeek V1/V2/V3; Qwen/Qwen2/Qwen2.5/Qwen2.5-VL/Qwen3; Kimi K2 family; Llama 1/2/3/3.1/4; GPT-OSS 120B/20B
+  statement: "Fireworks AI models documentation lists supported hosted architectures including DeepSeek V1/V2/V3, Qwen through Qwen3, Kimi K2 family, Llama 4, and GPT-OSS 120B/20B."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-27T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-catalog-availability
+  evidenceSourceIds:
+    - evidence:fireworks-ai-models-2026-05
+edges:
+  about_subject:
+    - provider:fireworks-ai
+  backed_by_evidence:
+    - evidence:fireworks-ai-models-2026-05
+---
+nodeKind: Claim
+id: claim:provider-fireworks-ai-openai-compatible-inference
+attributes:
+  subjectId: provider:fireworks-ai
+  subjectKind: Provider
+  attribute: transportProtocol
+  value: openai-chat; openai-completions; models
+  statement: "Fireworks AI provider modeling remains OpenAI-compatible for chat/completions and model listing while specific model availability is tracked as provider-catalog evidence."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-27T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-protocol
+  evidenceSourceIds:
+    - evidence:fireworks-ai-models-2026-05
+edges:
+  about_subject:
+    - provider:fireworks-ai
+  backed_by_evidence:
+    - evidence:fireworks-ai-models-2026-05
+---
+nodeKind: Claim
+id: claim:provider-groq-hosted-models-2026-05
+attributes:
+  subjectId: provider:groq
+  subjectKind: Provider
+  attribute: providerCatalogAvailability
+  value: openai/gpt-oss-120b; openai/gpt-oss-20b; meta-llama/llama-4-scout-17b-16e-instruct; openai/gpt-oss-safeguard-20b; qwen/qwen3-32b
+  statement: "Groq Console models documentation lists hosted and preview provider IDs including GPT-OSS 120B/20B, Llama 4 Scout, Safety GPT-OSS 20B, and Qwen3-32B."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-27T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-catalog-availability
+  evidenceSourceIds:
+    - evidence:groq-console-models-2026-05
+edges:
+  about_subject:
+    - provider:groq
+  backed_by_evidence:
+    - evidence:groq-console-models-2026-05
+---
+nodeKind: Claim
+id: claim:provider-groq-gpt-oss-context-pricing
+attributes:
+  subjectId: provider:groq
+  subjectKind: Provider
+  attribute: providerCatalogAvailability
+  value: openai/gpt-oss-120b contextWindowTokens=131072 maxCompletionTokens=65536 inputPerMTokUsd=0.15 outputPerMTokUsd=0.60; openai/gpt-oss-20b contextWindowTokens=131072 maxCompletionTokens=65536 inputPerMTokUsd=0.075 outputPerMTokUsd=0.30
+  statement: "Groq Console models documentation lists GPT-OSS 120B and GPT-OSS 20B with 131,072-token context windows, 65,536 max completion tokens, and per-token pricing."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-27T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-catalog-availability
+  evidenceSourceIds:
+    - evidence:groq-console-models-2026-05
+edges:
+  about_subject:
+    - provider:groq
+  backed_by_evidence:
+    - evidence:groq-console-models-2026-05
+---
+nodeKind: Claim
+id: claim:provider-groq-llama-4-scout-preview
+attributes:
+  subjectId: model:llama-4-scout@current
+  subjectKind: ModelVersion
+  attribute: served_by
+  value: provider:groq; providerModelId=meta-llama/llama-4-scout-17b-16e-instruct; lifecycleStatus=preview; contextWindowTokens=131072; maxCompletionTokens=8192
+  statement: "Groq Console models documentation lists Llama 4 Scout as preview model meta-llama/llama-4-scout-17b-16e-instruct with 131,072-token provider context and 8,192 max completion tokens."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-27T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-catalog-availability
+  evidenceSourceIds:
+    - evidence:groq-console-models-2026-05
+edges:
+  about_subject:
+    - model:llama-4-scout@current
+    - provider:groq
+  backed_by_evidence:
+    - evidence:groq-console-models-2026-05
+---
+nodeKind: Claim
+id: claim:provider-groq-preview-deprecation-policy-note
+attributes:
+  subjectId: provider:groq
+  subjectKind: Provider
+  attribute: lifecyclePolicy
+  value: Preview models are evaluation-only and may be discontinued at short notice; deprecated models are listed under Groq deprecation guidance.
+  statement: "Groq Console models documentation marks preview models as evaluation-only and notes that they may be discontinued at short notice, with deprecated models handled through Groq deprecation guidance."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-27T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: lifecycle
+  evidenceSourceIds:
+    - evidence:groq-console-models-2026-05
+edges:
+  about_subject:
+    - provider:groq
+  backed_by_evidence:
+    - evidence:groq-console-models-2026-05
+---
+nodeKind: Claim
+id: claim:provider-groq-openai-compatible-models-endpoint
+attributes:
+  subjectId: provider:groq
+  subjectKind: Provider
+  attribute: transportProtocol
+  value: openai-chat; models=https://api.groq.com/openai/v1/models
+  statement: "Groq Console models documentation states hosted models are accessible through the GroqCloud Models API and the OpenAI-compatible /openai/v1/models endpoint."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-27T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-protocol
+  evidenceSourceIds:
+    - evidence:groq-console-models-2026-05
+edges:
+  about_subject:
+    - provider:groq
+  backed_by_evidence:
+    - evidence:groq-console-models-2026-05

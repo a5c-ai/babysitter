@@ -24,7 +24,7 @@ id: hook-mapping:after-agent-gemini
 attributes:
   mappingId: hook-mapping:after-agent-gemini
   hookId: hook-surface:gemini.post-response
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: afterAgent
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -37,4 +37,4 @@ edges:
   maps_hook:
     - target: hook-surface:gemini.post-response
   emits_hook:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0

@@ -1,0 +1,8 @@
+{
+  "issueNumber": 443,
+  "baseBranch": "staging",
+  "targetBranch": "agent/issue-443",
+  "specPath": ".a5c/processes/specs/issue-443-openclaw-2026-5-26.md",
+  "targetVersionId": "agentVersion:openclaw:ge-2026-5-26",
+  "previousVersionId": "agentVersion:openclaw:ge-2026-5-22"
+}

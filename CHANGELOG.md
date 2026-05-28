@@ -6,6 +6,56 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased] - 2026-05-27
+
+### feat
+- 4341056a3 feat(krate-web): add unified model catalog UI and model route management (Tal Muskal, 21 hours ago)
+- 856661cf5 feat(atlas): track Claude Mythos Preview (a5c automation, 21 hours ago)
+- e18aedba6 feat(krate): add model route controller for Envoy AI Gateway integration (Tal Muskal, 21 hours ago)
+- c37f18de0 feat(graph): track Cohere Command A+ and Embed v4 (a5c automation, 21 hours ago)
+- b39c512e1 feat(atlas): track Mistral Large 3 and Medium 3.5 (a5c-ai agent, 21 hours ago)
+- ca359f4a4 feat(krate): add Envoy AI Gateway dependency and KrateModelRoute CRD (Tal Muskal, 21 hours ago)
+- 25ef6dd42 feat(omni): add omni agent as amux-launchable harness with live-stack support (Tal Muskal, 21 hours ago)
+- b627b64c6 feat(krate-web): add For Agents documentation page with MCP setup guide (Tal Muskal, 22 hours ago)
+- 80cdfa162 feat(krate): add resource contract tests and server-side validation (Tal Muskal, 22 hours ago)
+
+### fix
+- 0e4576396 fix(hermes): add --auto-approve launch config for NI file writes (Tal Muskal, 6 minutes ago)
+- 2aefa94e4 fix(atlas): set omni plugin-target npmPublishable=false (Tal Muskal, 7 minutes ago)
+- 735811478 fix(krate): remove broken Envoy AI Gateway Helm subchart dependency (Tal Muskal, 27 minutes ago)
+- f4b8b240e fix(omni): use non-Azure proxy mode so agent-core sends Bearer auth (Tal Muskal, 20 hours ago)
+- 4ab83c990 fix(omni): inject AMUX_* proxy env vars for agent-core endpoint resolution (Tal Muskal, 20 hours ago)
+- 65b995a05 fix(omni): map 'omni' to 'omni yolo' in CLI_COMMAND_MAP, fix prompt delivery (Tal Muskal, 20 hours ago)
+- 50815d58d fix(launch): TS errors — optional chaining on adapter, rename duplicate launchBehavior (Tal Muskal, 20 hours ago)
+- ef50e66ba fix(launch): allow catalog-only harnesses (no adapter) like omni to be launched (Tal Muskal, 21 hours ago)
+- 9ecb2859e fix(gemini-cli): add --yolo launch config for auto-approval in NI mode (Tal Muskal, 21 hours ago)
+- 3451e5728 fix(live-stack): skip amux install for omni (already linked by CI workflow) (Tal Muskal, 21 hours ago)
+- 541935650 fix(agent-platform): fix PI_PARENT_PROMPT_TIMEOUT_MS=0 causing instant abort (Tal Muskal, 21 hours ago)
+- 8a704053a fix(krate): fix 4 resource schema mismatches caught by strengthened contract tests (Tal Muskal, 21 hours ago)
+
+### refactor
+- d2d6d00d5 refactor(agent-platform): extract agent-core-loop.ts from pi.ts (Tal Muskal, 21 hours ago)
+- ff213e0aa refactor(agent-platform): rename PI_ timeout constants to generic agent-core names (Tal Muskal, 21 hours ago)
+
+### docs
+- cc9e2061b docs: daily changelog update (a5c automation, 21 hours ago)
+
+### test
+- No changes recorded.
+
+### ci
+- 02b2d5017 fix(ci): fix bridge-hooks tests for spawnSync, fix extension-mux sdkDefaults count (Tal Muskal, 23 minutes ago)
+- 88aae424e fix(ci): update tests for timeout=900000, exclude omni from hooks adapters, fix extension-mux counts (Tal Muskal, 10 hours ago)
+
+### chore
+- 1435ff462 Audit Llama 4 405B graph record (a5c agent, 21 hours ago)
+- ff41c83e7 Track DeepSeek V4 models in Atlas graph (a5c automation, 21 hours ago)
+- 6dd580720 Track OpenAI GPT-5 variants for issue #356 (a5c-ai agent, 21 hours ago)
+- df02a45b2 Track Qwen3 Coder model updates (a5c automation, 21 hours ago)
+- b3f746f70 Add Gemini 3.5 Flash to Atlas graph (a5c-agent, 21 hours ago)
+- 0c9027d7c Track Amazon Nova 2 models (a5c-ai-codex, 21 hours ago)
+- 456233c95 Track xAI Grok 4.3 graph records (a5c-ai-agent, 21 hours ago)
+
 ## [Unreleased] - 2026-05-26
 
 ### feat

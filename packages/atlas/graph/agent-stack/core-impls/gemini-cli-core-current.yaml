@@ -2,7 +2,7 @@ nodeKind: AgentCoreImpl
 id: agent-core-impl:gemini-cli.core@current
 attributes:
   displayName: Gemini CLI Core (current)
-  agentVersionId: agentVersion:gemini:ge-0-0-0
+  agentVersionId: agentVersion:gemini:ge-0-43-0
   packageRef: source-ref:gemini-cli-github
   loopIteratorPolicy: tool-use-loop
   loopIteratorNotes: 'Tool-use loop over Gemini''s `generateContent` (streaming) API.

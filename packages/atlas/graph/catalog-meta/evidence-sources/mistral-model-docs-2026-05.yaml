@@ -1,0 +1,75 @@
+nodeKind: EvidenceSource
+id: evidence:mistral-medium-3-5-model-card
+attributes:
+  displayName: "Mistral AI docs — Mistral Medium 3.5 model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.mistral.ai/models/mistral-medium-3-5-26-04
+  sourcePathOrUrl: https://docs.mistral.ai/models/mistral-medium-3-5-26-04
+  locator: "model card — model description, weights, context, and modalities"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:mistral-codestral-25-08-model-card
+attributes:
+  displayName: "Mistral AI docs — Codestral 25.08 model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.mistral.ai/models/codestral-25-08
+  sourcePathOrUrl: https://docs.mistral.ai/models/codestral-25-08
+  locator: "model card — release timing, coding/FIM capabilities, and context size"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:mistral-models-overview-2026-05
+attributes:
+  displayName: "Mistral AI docs — models overview"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.mistral.ai/getting-started/models/overview
+  sourcePathOrUrl: https://docs.mistral.ai/getting-started/models/overview
+  locator: "models overview — API endpoints, versions, aliases, and max tokens"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:mistral-api-pricing-2026-05
+attributes:
+  displayName: "Mistral AI — API pricing"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://mistral.ai/pricing#api-pricing
+  sourcePathOrUrl: https://mistral.ai/pricing#api-pricing
+  locator: "API pricing table — per-million token input/output prices"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc

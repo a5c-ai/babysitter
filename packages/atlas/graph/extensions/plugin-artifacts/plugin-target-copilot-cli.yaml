@@ -88,7 +88,7 @@ attributes:
   envPersistenceMode: wrapper_only
   toolInterceptionScope: all
   description: |
-    GitHub Copilot CLI plugin target for the current `>=1.0.54` surface.
+    GitHub Copilot CLI plugin target for the current `>=1.0.55-3` surface.
     Since 1.0.52, non-interactive `plugin`, `mcp`, `help`, and `version`
     subcommands are treated as stdin-safe administrative commands and do not
     consume caller stdin. Generated wrappers should preserve closed-stdin

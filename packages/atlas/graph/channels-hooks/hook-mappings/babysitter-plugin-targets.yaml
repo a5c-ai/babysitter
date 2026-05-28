@@ -68,7 +68,7 @@ id: hook-mapping:session-start-github-copilot
 attributes:
   mappingId: hook-mapping:session-start-github-copilot
   hookId: hook-surface:session-start
-  targetId: agentVersion:copilot:ge-1-0-54
+  targetId: agentVersion:copilot:ge-1-0-55-3
   nativeName: sessionStart
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -173,7 +173,7 @@ id: hook-mapping:user-prompt-submit-github-copilot
 attributes:
   mappingId: hook-mapping:user-prompt-submit-github-copilot
   hookId: hook-surface:user-prompt-submit
-  targetId: agentVersion:copilot:ge-1-0-54
+  targetId: agentVersion:copilot:ge-1-0-55-3
   nativeName: userPromptSubmitted
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -236,7 +236,7 @@ id: hook-mapping:after-agent-gemini
 attributes:
   mappingId: hook-mapping:after-agent-gemini
   hookId: hook-surface:after-agent
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: AfterAgent
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -257,7 +257,7 @@ id: hook-mapping:session-end-github-copilot
 attributes:
   mappingId: hook-mapping:session-end-github-copilot
   hookId: hook-surface:session-end
-  targetId: agentVersion:copilot:ge-1-0-54
+  targetId: agentVersion:copilot:ge-1-0-55-3
   nativeName: sessionEnd
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -404,7 +404,7 @@ id: hook-mapping:user-prompt-submit-oh-my-pi
 attributes:
   mappingId: hook-mapping:user-prompt-submit-oh-my-pi
   hookId: hook-surface:user-prompt-submit
-  targetId: agentVersion:omp:ge-15-3-1
+  targetId: agentVersion:omp:ge-15-5-6
   nativeName: context
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -425,7 +425,7 @@ id: hook-mapping:pre-tool-use-oh-my-pi
 attributes:
   mappingId: hook-mapping:pre-tool-use-oh-my-pi
   hookId: hook-surface:pre-tool-use
-  targetId: agentVersion:omp:ge-15-3-1
+  targetId: agentVersion:omp:ge-15-5-6
   nativeName: tool_call
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -446,7 +446,7 @@ id: hook-mapping:before-provider-request-oh-my-pi
 attributes:
   mappingId: hook-mapping:before-provider-request-oh-my-pi
   hookId: hook-surface:before-provider-request
-  targetId: agentVersion:omp:ge-15-3-1
+  targetId: agentVersion:omp:ge-15-5-6
   nativeName: before_provider_request
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -467,7 +467,7 @@ id: hook-mapping:session-start-oh-my-pi
 attributes:
   mappingId: hook-mapping:session-start-oh-my-pi
   hookId: hook-surface:session-start
-  targetId: agentVersion:omp:ge-15-3-1
+  targetId: agentVersion:omp:ge-15-5-6
   nativeName: session_start
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -488,7 +488,7 @@ id: hook-mapping:stop-oh-my-pi
 attributes:
   mappingId: hook-mapping:stop-oh-my-pi
   hookId: hook-surface:stop
-  targetId: agentVersion:omp:ge-15-3-1
+  targetId: agentVersion:omp:ge-15-5-6
   nativeName: stop
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true

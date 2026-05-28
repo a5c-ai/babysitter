@@ -1,5 +1,5 @@
-# packages/triggers/action.yml `runs.steps[]` decomposed.
-# Source: packages/triggers/action.yml lines 133-372. 10 steps in order.
+# packages/triggers-mux/action.yml `runs.steps[]` decomposed.
+# Source: packages/triggers-mux/action.yml lines 133-372. 10 steps in order.
 nodeKind: GithubActionStep
 id: github-action-step:triggers-action-setup-node
 attributes:
@@ -9,7 +9,7 @@ attributes:
   shell: none
   usesRef: "actions/setup-node@v4"
   envVars: []
-  sourceCitation: "packages/triggers/action.yml:80-83"
+  sourceCitation: "packages/triggers-mux/action.yml:80-83"
 edges:
   executed_by_trigger:
     - target: operational-trigger:amux-triggers-action
@@ -26,7 +26,7 @@ attributes:
   continueOnError: true
   stepId: "a5c-token"
   envVars: []
-  sourceCitation: "packages/triggers/action.yml:85-89"
+  sourceCitation: "packages/triggers-mux/action.yml:85-89"
 edges:
   executed_by_trigger:
     - target: operational-trigger:amux-triggers-action
@@ -46,8 +46,8 @@ attributes:
     cd "$REPO_ROOT"
     npm ci
     npm run build:agent-mux
-    npm run build --workspace=@a5c-ai/triggers
-  sourceCitation: "packages/triggers/action.yml:91-101"
+    npm run build --workspace=@a5c-ai/triggers-mux
+  sourceCitation: "packages/triggers-mux/action.yml:91-101"
 edges:
   executed_by_trigger:
     - target: operational-trigger:amux-triggers-action
@@ -69,7 +69,7 @@ attributes:
     REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
     cd "$INPUT_WORKING_DIRECTORY"
     node "$REPO_ROOT/packages/agent-mux/cli/dist/index.js" install "$INPUT_HARNESS" || true
-  sourceCitation: "packages/triggers/action.yml:158-169"
+  sourceCitation: "packages/triggers-mux/action.yml:158-169"
 edges:
   executed_by_trigger:
     - target: operational-trigger:amux-triggers-action
@@ -97,7 +97,7 @@ attributes:
       mkdir -p .a5c/processes
       cp "$INPUT_PROCESS_FILE" .a5c/processes/
     fi
-  sourceCitation: "packages/triggers/action.yml:171-199"
+  sourceCitation: "packages/triggers-mux/action.yml:171-199"
 edges:
   executed_by_trigger:
     - target: operational-trigger:amux-triggers-action
@@ -121,7 +121,7 @@ attributes:
       [ -z "$plugin" ] && continue
       node "$REPO_ROOT/packages/agent-mux/cli/dist/index.js" plugin install "$INPUT_ADAPTER" "$plugin"
     done <<< "$INPUT_PLUGINS"
-  sourceCitation: "packages/triggers/action.yml:201-211"
+  sourceCitation: "packages/triggers-mux/action.yml:201-211"
 edges:
   executed_by_trigger:
     - target: operational-trigger:amux-triggers-action
@@ -149,14 +149,14 @@ attributes:
     if [ "$INPUT_INCLUDE_DIFF" = "true" ]; then
       INCLUDE_DIFF_ARGS+=(--include-diff)
     fi
-    node "$REPO_ROOT/packages/triggers/dist/cli.js" enrich \
+    node "$REPO_ROOT/packages/triggers-mux/dist/cli.js" enrich \
       --backend "$INPUT_TRIGGER_BACKEND" \
       --token "$EFFECTIVE_GITHUB_TOKEN" \
       "${INCLUDE_DIFF_ARGS[@]}" \
       --output "$EVENT_FILE"
     if [ -z "$INPUT_TRIGGER_QUERY" ]; then
       echo '{"matched":true,"reasons":["no trigger query configured"]}' > "$RESULT_FILE"
-    elif node "$REPO_ROOT/packages/triggers/dist/cli.js" evaluate \
+    elif node "$REPO_ROOT/packages/triggers-mux/dist/cli.js" evaluate \
       --backend "$INPUT_TRIGGER_BACKEND" \
       --query "$INPUT_TRIGGER_QUERY" \
       --token "$EFFECTIVE_GITHUB_TOKEN" \
@@ -173,7 +173,7 @@ attributes:
     echo "matched=$MATCHED" >> "$GITHUB_OUTPUT"
     echo "event=$EVENT_FILE" >> "$GITHUB_OUTPUT"
     cat "$RESULT_FILE"
-  sourceCitation: "packages/triggers/action.yml:216-258"
+  sourceCitation: "packages/triggers-mux/action.yml:216-258"
 edges:
   executed_by_trigger:
     - target: operational-trigger:amux-triggers-action
@@ -193,7 +193,7 @@ attributes:
   runScript: |
     set -euo pipefail
     bash -euo pipefail -c "$INPUT_PRE_RUN"
-  sourceCitation: "packages/triggers/action.yml:259-269"
+  sourceCitation: "packages/triggers-mux/action.yml:259-269"
 edges:
   executed_by_trigger:
     - target: operational-trigger:amux-triggers-action
@@ -269,7 +269,7 @@ attributes:
       echo "exit-code=$status" >> "$GITHUB_OUTPUT"
       exit "$status"
     fi
-  sourceCitation: "packages/triggers/action.yml:270-360"
+  sourceCitation: "packages/triggers-mux/action.yml:270-360"
 edges:
   executed_by_trigger:
     - target: operational-trigger:amux-triggers-action
@@ -289,7 +289,7 @@ attributes:
   runScript: |
     set -euo pipefail
     bash -euo pipefail -c "$INPUT_POST_RUN"
-  sourceCitation: "packages/triggers/action.yml:362-372"
+  sourceCitation: "packages/triggers-mux/action.yml:362-372"
 edges:
   executed_by_trigger:
     - target: operational-trigger:amux-triggers-action

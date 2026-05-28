@@ -11,7 +11,7 @@ attributes:
     - CODEX_PLUGIN_ROOT
   resumeSemantics: |
     Codex session binding relies on thread/session IDs and plugin-root state.
-    In 0.133.0, active goal progress is tracked through dedicated goal storage
+    In 0.134.0, active goal progress is tracked through dedicated goal storage
     across active turns rather than ad hoc session transcript state.
   stateFilePatterns:
     - ".a5c/runs/**"

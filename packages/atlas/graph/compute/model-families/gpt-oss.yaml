@@ -1,0 +1,12 @@
+nodeKind: ModelFamily
+id: model-family:gpt-oss
+attributes:
+  displayName: "GPT-OSS"
+  vendor: "OpenAI"
+  homepageUrl: "https://openai.com/open-models"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:gpt-oss-120b@current
+    - model:gpt-oss-20b@current

@@ -1,6 +1,6 @@
 # Triggers & CI Integration
 
-The `@a5c-ai/triggers` package provides a GitHub Action and CLI for running coding agents from CI pipelines.
+The `@a5c-ai/triggers-mux` package provides a GitHub Action and CLI for running coding agents from CI pipelines.
 
 ## Architecture
 
@@ -43,4 +43,4 @@ When `babysitter-plugin: true`, the action:
 4. Copies process file to `.a5c/processes/`
 5. Launches with bridge flags
 
-See [triggers README](../../packages/triggers/README.md) for full input reference and examples.
+See [triggers README](../../packages/triggers-mux/README.md) for full input reference and examples.

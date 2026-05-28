@@ -67,6 +67,15 @@ export interface ClaudeSubagentStopPayload extends ClaudeStdinBase {
   last_assistant_message?: string;
 }
 
+/** MessageDisplay-specific fields. */
+export interface ClaudeMessageDisplayPayload extends ClaudeStdinBase {
+  turn_id?: string;
+  message_id?: string;
+  index?: number;
+  final?: boolean;
+  delta?: string;
+}
+
 /**
  * Parse raw stdin input (string or object) into a structured object.
  */
@@ -196,6 +205,14 @@ export function buildPayload(
     case 'Notification':
       if (stdinData.message != null) payload.message = stdinData.message;
       if (stdinData.title != null) payload.title = stdinData.title;
+      break;
+
+    case 'MessageDisplay':
+      if (stdinData.turn_id != null) payload.turnId = stdinData.turn_id;
+      if (stdinData.message_id != null) payload.messageId = stdinData.message_id;
+      if (stdinData.index != null) payload.index = stdinData.index;
+      if (stdinData.final != null) payload.final = stdinData.final;
+      if (stdinData.delta != null) payload.delta = stdinData.delta;
       break;
 
     default:

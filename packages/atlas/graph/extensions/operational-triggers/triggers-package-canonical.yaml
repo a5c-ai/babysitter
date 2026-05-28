@@ -39,11 +39,11 @@ attributes:
   - Writes enriched event JSON to RUNNER_TEMP/agent-mux-event.json
   - Writes evaluation result JSON to RUNNER_TEMP/agent-mux-trigger.json
   - On match runs pre-run, then `amux <command>`, then post-run (action.yml:174-232)
-  sourceCitation: 'packages/triggers/src/backends/github.ts:4 (normalizeGithub),
+  sourceCitation: 'packages/triggers-mux/src/backends/github.ts:4 (normalizeGithub),
 
-    packages/triggers/src/enrich.ts:61 (enrichGithubFromApi),
+    packages/triggers-mux/src/enrich.ts:61 (enrichGithubFromApi),
 
-    packages/triggers/action.yml:131-172 (Evaluate trigger step).
+    packages/triggers-mux/action.yml:131-172 (Evaluate trigger step).
 
     '
   exitCodeSemantics:
@@ -91,9 +91,9 @@ attributes:
   - workflow-event-payload
   - local-git-show
   - git-diff-unified
-  sourceCitation: 'packages/triggers/src/backends/gitlab.ts:4 (normalizeGitlab),
+  sourceCitation: 'packages/triggers-mux/src/backends/gitlab.ts:4 (normalizeGitlab),
 
-    packages/triggers/src/enrich.ts:99 (enrichEvent — non-github branch
+    packages/triggers-mux/src/enrich.ts:99 (enrichEvent — non-github branch
 
     skips API enrichment).
 
@@ -141,7 +141,7 @@ attributes:
   - workflow-event-payload
   - local-git-show
   - git-diff-unified
-  sourceCitation: 'packages/triggers/src/backends/bitbucket.ts:4 (normalizeBitbucket).
+  sourceCitation: 'packages/triggers-mux/src/backends/bitbucket.ts:4 (normalizeBitbucket).
 
     '
   exitCodeSemantics:
@@ -185,9 +185,9 @@ attributes:
   - workflow-event-payload
   - local-git-show
   - git-diff-unified
-  sourceCitation: 'packages/triggers/src/backends/generic-webhook.ts:4
+  sourceCitation: 'packages/triggers-mux/src/backends/generic-webhook.ts:4
 
-    (normalizeGeneric); packages/triggers/src/enrich.ts:9
+    (normalizeGeneric); packages/triggers-mux/src/enrich.ts:9
 
     (detectBackend default ''github'' fallback path).
 
@@ -209,7 +209,7 @@ id: operational-trigger:amux-triggers-action
 attributes:
   displayName: Agent Mux — reusable GitHub Action composite
   triggerKind: vcs-event
-  effect: 'Composite action at packages/triggers/action.yml. Supports all harnesses
+  effect: 'Composite action at packages/triggers-mux/action.yml. Supports all harnesses
 
     (claude, codex, pi, gemini, copilot, cursor, opencode, hermes) with providers
 
@@ -217,7 +217,7 @@ attributes:
 
     optional a5c GitHub App token exchange → npm ci + build agent-mux +
 
-    build @a5c-ai/triggers → optional `amux install <harness>` →
+    build @a5c-ai/triggers-mux → optional `amux install <harness>` →
 
     optional babysitter plugin install → optional legacy plugin install → enrich →
 
@@ -235,7 +235,7 @@ attributes:
   dispatchModel: reusable-action
   payloadShape: NormalizedTriggerEvent
   queryDsl: key-colon-value
-  cliEntrypoint: 'uses: ./packages/triggers'
+  cliEntrypoint: 'uses: ./packages/triggers-mux'
   enrichmentSources:
   - workflow-event-payload
   - github-rest-api
@@ -247,7 +247,7 @@ attributes:
   - Outputs exit-code=<amux exit code> (action.yml:73)
   - May install agent-mux harness + plugins side-effectfully before evaluation (action.yml:103-129)
   - Sets AMUX_TRIGGER_EVENT_PATH env var for pre-run, amux, post-run steps
-  sourceCitation: 'packages/triggers/action.yml (full composite action; inputs
+  sourceCitation: 'packages/triggers-mux/action.yml (full composite action; inputs
 
     1-65, outputs 66-75, steps 77-232).
 

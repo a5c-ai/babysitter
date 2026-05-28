@@ -7,17 +7,23 @@ attributes:
   authMethods:
     - api-key
   authMethodNotes: |
-    Standard `Authorization: Bearer <api-key>` for the DeepSeek API.
+    OpenAI-compatible requests use `Authorization: Bearer <api-key>`.
+    Anthropic-format requests use the Anthropic SDK/API-key header shape
+    against the DeepSeek Anthropic-compatible base URL.
   endpoints:
     base: "https://api.deepseek.com"
     chat_completions: "https://api.deepseek.com/chat/completions"
+    anthropic_base: "https://api.deepseek.com/anthropic"
   pricing: |
     See https://platform.deepseek.com/api-docs/pricing for current per-model rates.
   rateLimitSignalingProtocol: |
     HTTP 429 with `Retry-After`. OpenAI-shaped error envelope.
   dataResidencyOptions:
     - cn
-  vendorFeatures: []
+  vendorFeatures:
+    - capability:supports-prompt-caching
+    - capability:supports-json-mode
+    - capability:supports-tool-use
   slaTier: "deepseek-standard"
   regions:
     - global
@@ -25,6 +31,16 @@ attributes:
 edges:
   realizes:
     - target: layer:2-provider
+  supports:
+    - target: capability:supports-prompt-caching
+      versionRange: '>=2026-04-24'
+      level: full
+    - target: capability:supports-json-mode
+      versionRange: '>=2026-04-24'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=2026-04-24'
+      level: full
   serves:
     - model:deepseek-v3@current
     - model:deepseek-v4-pro@current

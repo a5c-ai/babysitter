@@ -20,6 +20,9 @@ const MCP_TOOLS = [
   { name: 'krate_sync_external', description: 'Trigger external backend sync', params: 'bindingName, kind, localName' },
   { name: 'krate_resolve_conflict', description: 'Resolve an external sync conflict', params: 'conflictName, strategy' },
   { name: 'krate_audit_query', description: 'Query audit events with filters', params: 'org, action, since, until' },
+  { name: 'krate_model_catalog', description: 'List unified model catalog (internal + external)', params: 'org' },
+  { name: 'krate_list_model_routes', description: 'List model routing rules', params: '—' },
+  { name: 'krate_create_model_route', description: 'Create a model route for internal or external models', params: 'name, org, modelName, routeType' },
 ];
 
 const MCP_PROMPTS = [
@@ -31,6 +34,7 @@ const MCP_PROMPTS = [
 const MCP_RESOURCES = [
   { uri: 'krate://snapshot', name: 'Workspace Snapshot', mimeType: 'application/json' },
   { uri: 'krate://stacks', name: 'Agent Stacks', mimeType: 'application/json' },
+  { uri: 'krate://models', name: 'Model Catalog', mimeType: 'application/json' },
 ];
 
 function CodeBlock({ children, title }) {
@@ -86,7 +90,7 @@ export default async function ForAgentsPage({ params }) {
     }
   }
 }`}</CodeBlock>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.5rem' }}>After adding the configuration, restart Claude Code. The agent will discover 14 tools, 3 prompts, and 2 resources.</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.5rem' }}>After adding the configuration, restart Claude Code. The agent will discover 17 tools, 3 prompts, and 3 resources.</p>
       </Section>
 
       <Section title="Cursor / Windsurf / other MCP clients">
@@ -119,7 +123,7 @@ export default async function ForAgentsPage({ params }) {
         </div>
       </Section>
 
-      <Section title="MCP tools (14)">
+      <Section title="MCP tools (17)">
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>These tools are available to any MCP-connected agent after running <code>krate mcp</code>.</p>
         <div className="resourceTable">
           {MCP_TOOLS.map((tool) => <div key={tool.name} className="resourceRow" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '0.75rem', alignItems: 'center' }}>
@@ -139,7 +143,7 @@ export default async function ForAgentsPage({ params }) {
         </div>
       </Section>
 
-      <Section title="MCP resources (2)">
+      <Section title="MCP resources (3)">
         <div className="resourceTable">
           {MCP_RESOURCES.map((resource) => <div key={resource.uri} className="resourceRow" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', alignItems: 'center' }}>
             <code style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent)' }}>{resource.uri}</code>
@@ -151,6 +155,7 @@ export default async function ForAgentsPage({ params }) {
 
       <Section title="Model Gateway">
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>The Krate Model Gateway provides unified model routing through Envoy AI Gateway. Agents request models by logical name and the gateway routes to the correct backend — either an internal KServe InferenceService or an external cloud LLM.</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>The <a href={orgHref(activeOrg, '/inference')} style={{ color: 'var(--accent)', fontWeight: 600 }}>Inference page</a> includes a curated model catalog with 15+ popular open models (Llama 3.1, Mistral, Phi-3, Code Llama, BGE, Whisper, and more) that you can deploy to your cluster with one click. Browse by category, review resource requirements, and deploy directly from the UI.</p>
         <CodeBlock title="Install Envoy AI Gateway (prerequisite)">{`kubectl apply -k "github.com/envoyproxy/ai-gateway/manifests?ref=main"`}</CodeBlock>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '1rem' }}>Krate manages KrateModelRoute resources that generate AIGatewayRoute configs automatically.</p>
         <div className="resourceTable">

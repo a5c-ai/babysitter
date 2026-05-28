@@ -35,6 +35,17 @@ attributes:
   supportsFineTuning: false
   regions:
   - global
+  providerAvailability:
+  - provider: provider:aws-bedrock
+    status: limited-preview
+    announcedAt: '2026-05-25'
+    evidenceSourceIds:
+    - evidence:aws-bedrock-openai-preview-2026-05
+    notes: |
+      AWS lists GPT-5.5 among the latest OpenAI models planned for preview
+      on Amazon Bedrock through existing Bedrock APIs. Public sources reviewed
+      for issue #434 did not expose exact Bedrock model IDs or Bedrock-specific
+      pricing.
 edges:
   belongs_to_family:
     - target: model-family:gpt-5
@@ -44,6 +55,7 @@ edges:
   - model-family:gpt-5
   served_by:
   - provider:openai
+  - provider:aws-bedrock
   speaks:
   - model-transport:openai-responses
   - model-transport:openai-chat-completions

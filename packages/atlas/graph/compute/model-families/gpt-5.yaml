@@ -10,6 +10,7 @@ edges:
   has_version:
     - model:gpt-5@current
     - model:gpt-5-mini@current
+    - model:gpt-5.3-codex@current
     - model:gpt-5.4@current
     - model:gpt-5.4-mini@current
     - model:gpt-5.5@current

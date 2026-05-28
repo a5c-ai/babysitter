@@ -110,7 +110,7 @@ id: hook-mapping:session-end-gemini
 attributes:
   mappingId: hook-mapping:session-end-gemini
   hookId: hook-surface:session-end
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: SessionEnd
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -131,7 +131,7 @@ id: hook-mapping:user-prompt-submit-gemini
 attributes:
   mappingId: hook-mapping:user-prompt-submit-gemini
   hookId: hook-surface:user-prompt-submit
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: UserPromptSubmit
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -152,7 +152,7 @@ id: hook-mapping:tool-before-gemini
 attributes:
   mappingId: hook-mapping:tool-before-gemini
   hookId: hook-surface:pre-tool-use
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: BeforeTool
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -173,7 +173,7 @@ id: hook-mapping:tool-after-gemini
 attributes:
   mappingId: hook-mapping:tool-after-gemini
   hookId: hook-surface:post-tool-use
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: AfterTool
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -194,7 +194,7 @@ id: hook-mapping:session-idle-gemini
 attributes:
   mappingId: hook-mapping:session-idle-gemini
   hookId: hook-surface:session-idle
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: SessionIdle
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -215,7 +215,7 @@ id: hook-mapping:shell-env-gemini
 attributes:
   mappingId: hook-mapping:shell-env-gemini
   hookId: hook-surface:shell-env
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: ShellEnv
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -236,7 +236,7 @@ id: hook-mapping:pre-compact-gemini
 attributes:
   mappingId: hook-mapping:pre-compact-gemini
   hookId: hook-surface:pre-compact
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: PreCompact
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -257,7 +257,7 @@ id: hook-mapping:tool-before-copilot
 attributes:
   mappingId: hook-mapping:tool-before-copilot
   hookId: hook-surface:pre-tool-use
-  targetId: agentVersion:copilot:ge-1-0-54
+  targetId: agentVersion:copilot:ge-1-0-55-3
   nativeName: preToolUse
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -278,7 +278,7 @@ id: hook-mapping:tool-after-copilot
 attributes:
   mappingId: hook-mapping:tool-after-copilot
   hookId: hook-surface:post-tool-use
-  targetId: agentVersion:copilot:ge-1-0-54
+  targetId: agentVersion:copilot:ge-1-0-55-3
   nativeName: postToolUse
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -299,7 +299,7 @@ id: hook-mapping:compact-before-copilot
 attributes:
   mappingId: hook-mapping:compact-before-copilot
   hookId: hook-surface:pre-compact
-  targetId: agentVersion:copilot:ge-1-0-54
+  targetId: agentVersion:copilot:ge-1-0-55-3
   nativeName: PreCompact
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -342,7 +342,7 @@ id: hook-mapping:before-tool-selection-gemini
 attributes:
   mappingId: hook-mapping:before-tool-selection-gemini
   hookId: hook-surface:before-tool-selection
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: BeforeToolSelection
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -363,7 +363,7 @@ id: hook-mapping:before-model-gemini
 attributes:
   mappingId: hook-mapping:before-model-gemini
   hookId: hook-surface:before-model
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: BeforeModel
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -384,7 +384,7 @@ id: hook-mapping:after-model-gemini
 attributes:
   mappingId: hook-mapping:after-model-gemini
   hookId: hook-surface:after-model
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: AfterModel
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -405,7 +405,7 @@ id: hook-mapping:before-agent-gemini
 attributes:
   mappingId: hook-mapping:before-agent-gemini
   hookId: hook-surface:before-agent
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: BeforeAgent
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -426,7 +426,7 @@ id: hook-mapping:error-copilot
 attributes:
   mappingId: hook-mapping:error-copilot
   hookId: hook-surface:error
-  targetId: agentVersion:copilot:ge-1-0-54
+  targetId: agentVersion:copilot:ge-1-0-55-3
   nativeName: errorOccurred
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -469,7 +469,7 @@ id: hook-mapping:session-end-oh-my-pi
 attributes:
   mappingId: hook-mapping:session-end-oh-my-pi
   hookId: hook-surface:session-end
-  targetId: agentVersion:omp:ge-15-3-1
+  targetId: agentVersion:omp:ge-15-5-6
   nativeName: session_end
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -490,7 +490,7 @@ id: hook-mapping:tool-result-oh-my-pi
 attributes:
   mappingId: hook-mapping:tool-result-oh-my-pi
   hookId: hook-surface:post-tool-use
-  targetId: agentVersion:omp:ge-15-3-1
+  targetId: agentVersion:omp:ge-15-5-6
   nativeName: tool_result
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -511,7 +511,7 @@ id: hook-mapping:prompt-oh-my-pi
 attributes:
   mappingId: hook-mapping:prompt-oh-my-pi
   hookId: hook-surface:user-prompt-submit
-  targetId: agentVersion:omp:ge-15-3-1
+  targetId: agentVersion:omp:ge-15-5-6
   nativeName: prompt
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -532,7 +532,7 @@ id: hook-mapping:error-oh-my-pi
 attributes:
   mappingId: hook-mapping:error-oh-my-pi
   hookId: hook-surface:error
-  targetId: agentVersion:omp:ge-15-3-1
+  targetId: agentVersion:omp:ge-15-5-6
   nativeName: error
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -554,7 +554,7 @@ id: hook-mapping:plugin-session-start-openclaw
 attributes:
   mappingId: hook-mapping:plugin-session-start-openclaw
   hookId: hook-surface:session-start
-  targetId: agentVersion:openclaw:ge-2026-5-22
+  targetId: agentVersion:openclaw:ge-2026-5-26
   nativeName: plugin.session.start
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -575,7 +575,7 @@ id: hook-mapping:plugin-session-end-openclaw
 attributes:
   mappingId: hook-mapping:plugin-session-end-openclaw
   hookId: hook-surface:session-end
-  targetId: agentVersion:openclaw:ge-2026-5-22
+  targetId: agentVersion:openclaw:ge-2026-5-26
   nativeName: plugin.session.end
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -596,7 +596,7 @@ id: hook-mapping:plugin-tool-before-openclaw
 attributes:
   mappingId: hook-mapping:plugin-tool-before-openclaw
   hookId: hook-surface:pre-tool-use
-  targetId: agentVersion:openclaw:ge-2026-5-22
+  targetId: agentVersion:openclaw:ge-2026-5-26
   nativeName: plugin.tool.before
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -617,7 +617,7 @@ id: hook-mapping:plugin-tool-after-openclaw
 attributes:
   mappingId: hook-mapping:plugin-tool-after-openclaw
   hookId: hook-surface:post-tool-use
-  targetId: agentVersion:openclaw:ge-2026-5-22
+  targetId: agentVersion:openclaw:ge-2026-5-26
   nativeName: plugin.tool.after
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -638,7 +638,7 @@ id: hook-mapping:plugin-turn-stop-openclaw
 attributes:
   mappingId: hook-mapping:plugin-turn-stop-openclaw
   hookId: hook-surface:stop
-  targetId: agentVersion:openclaw:ge-2026-5-22
+  targetId: agentVersion:openclaw:ge-2026-5-26
   nativeName: plugin.turn.stop
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -659,7 +659,7 @@ id: hook-mapping:plugin-prompt-submitted-openclaw
 attributes:
   mappingId: hook-mapping:plugin-prompt-submitted-openclaw
   hookId: hook-surface:user-prompt-submit
-  targetId: agentVersion:openclaw:ge-2026-5-22
+  targetId: agentVersion:openclaw:ge-2026-5-26
   nativeName: plugin.prompt.submitted
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -681,7 +681,7 @@ id: hook-mapping:gateway-request-received-openclaw
 attributes:
   mappingId: hook-mapping:gateway-request-received-openclaw
   hookId: hook-surface:session-start
-  targetId: agentVersion:openclaw:ge-2026-5-22
+  targetId: agentVersion:openclaw:ge-2026-5-26
   nativeName: gateway.request.received
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -702,7 +702,7 @@ id: hook-mapping:gateway-request-routed-openclaw
 attributes:
   mappingId: hook-mapping:gateway-request-routed-openclaw
   hookId: hook-surface:user-prompt-submit
-  targetId: agentVersion:openclaw:ge-2026-5-22
+  targetId: agentVersion:openclaw:ge-2026-5-26
   nativeName: gateway.request.routed
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -723,7 +723,7 @@ id: hook-mapping:gateway-request-completed-openclaw
 attributes:
   mappingId: hook-mapping:gateway-request-completed-openclaw
   hookId: hook-surface:session-end
-  targetId: agentVersion:openclaw:ge-2026-5-22
+  targetId: agentVersion:openclaw:ge-2026-5-26
   nativeName: gateway.request.completed
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false
@@ -744,7 +744,7 @@ id: hook-mapping:gateway-auth-check-openclaw
 attributes:
   mappingId: hook-mapping:gateway-auth-check-openclaw
   hookId: hook-surface:tool-permission-request
-  targetId: agentVersion:openclaw:ge-2026-5-22
+  targetId: agentVersion:openclaw:ge-2026-5-26
   nativeName: gateway.auth.check
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: false

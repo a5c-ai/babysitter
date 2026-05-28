@@ -19,6 +19,6 @@ attributes:
     - { key: run_id,     envVars: [OPENCLAW_RUN_ID] }
 edges:
   applies_to_version:
-    - target: agentVersion:openclaw:ge-2026-5-22
+    - target: agentVersion:openclaw:ge-2026-5-26
   references_path:
     - target: path:a5c-runs-dir

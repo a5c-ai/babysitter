@@ -2,7 +2,7 @@ nodeKind: AgentRuntimeImpl
 id: agent-runtime-impl:openclaw.runtime@current
 attributes:
   displayName: OpenClaw Runtime (current)
-  agentVersionId: agentVersion:openclaw:ge-2026-5-22
+  agentVersionId: agentVersion:openclaw:ge-2026-5-26
   subagentDispatchMechanism: none
   packageRef: source-ref:openclaw-github
   builtInTools:
@@ -19,10 +19,22 @@ attributes:
   subprocessSandboxStrategy: none
   runtimeIdentity: api-key
   startupReadinessNotes: >
-    OpenClaw 2026.5.22 Gateway readiness caches channel catalog and plugin
-    metadata snapshots, lazy-loads startup-idle plugin work, core gateway method
-    handlers, and the embedded ACPX runtime, and avoids repeated filesystem
-    probes on startup hot paths.
+    OpenClaw 2026.5.26 Gateway readiness and reply paths cache plugin,
+    channel, session, usage-cost, warning, scheduled-service, and filesystem
+    scan results; cache channel catalog and plugin metadata snapshots;
+    lazy-load startup-idle plugin work, core gateway method handlers, and the
+    embedded ACPX runtime; and avoid repeated filesystem probes on hot paths.
+  transcriptPathNotes: >
+    Meeting summaries, source-provider chunks, cleaned user turns, media
+    provenance, Codex mirrors, WebChat replies, and CLI/TUI replay are
+    transcript-backed through the core transcript path.
+  channelApprovalNotes: >
+    Signal, iMessage, and WhatsApp reaction approval flows are modeled as
+    channel-specific reliability surfaces; Discord voice can inspect, steer,
+    cancel, or follow up realtime Talk runs.
+  browserSecurityNotes: >
+    Browser snapshot reads honor SSRF policy, fetched file text is wrapped as
+    external content, and serialized tool-call text is scrubbed from replies.
   supportedMCPTransports:
   - mcp-transport:stdio
   supportsStreaming: true

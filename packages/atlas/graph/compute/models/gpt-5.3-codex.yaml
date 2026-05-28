@@ -1,0 +1,77 @@
+nodeKind: ModelVersion
+id: model:gpt-5.3-codex@current
+attributes:
+  displayName: "GPT-5.3-Codex"
+  supportsExtendedThinking: false
+  modelFamilyId: model-family:gpt-5
+  versionRange: '>=5.3.0 <5.4.0'
+  kind: reasoning
+  contextWindowTokens: 400000
+  maxOutputTokens: 128000
+  costPerMTokInput: 1.75
+  costPerMTokCachedInput: 0.175
+  costPerMTokOutput: 14.0
+  supportsThinking: true
+  thinkingEffortLevels:
+  - low
+  - medium
+  - high
+  - xhigh
+  supportsThinkingBudgetTokens: false
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-05-27'
+  releaseDateNotes: "Public release date was not stated on the OpenAI model page; date is the catalog first-observed tracker date."
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-05-27'
+  knowledgeCutoffDate: '2025-08-31'
+  modelCardUrl: https://developers.openai.com/api/docs/models/gpt-5.3-codex
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:gpt-5
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:gpt-5
+  served_by:
+  - provider:openai
+  speaks:
+  - model-transport:openai-responses
+  supports:
+  - target: capability:supports-prompt-caching
+    versionRange: '>=5.3.0 <5.4.0'
+    level: partial
+    notes: GPT-5.3-Codex lists a cached input token price.
+    evidenceSourceIds:
+    - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  - target: capability:streaming
+    versionRange: '>=5.3.0 <5.4.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  - target: capability:supports-tool-use
+    versionRange: '>=5.3.0 <5.4.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  - target: capability:supports-structured-output
+    versionRange: '>=5.3.0 <5.4.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  supports_effort_level:
+  - target: effort-level:low
+  - target: effort-level:medium
+  - target: effort-level:high
+  - target: effort-level:xhigh

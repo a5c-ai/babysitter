@@ -38,6 +38,7 @@ attributes:
   vendorFeatures:
     - capability:supports-tool-use
     - capability:streaming
+    - capability:supports-batch-api
   slaTier: "fireworks-no-public-sla"
   regions:
     - global
@@ -50,3 +51,5 @@ edges:
     - model:qwen3-coder-480b-a35b-instruct@current
     - model:llama-4-maverick@current
     - model:llama-4-scout@current
+  has_version:
+    - providerVersion:fireworks-ai:serverless-2026-05

@@ -56,7 +56,7 @@ const packageFamilies = {
     "@a5c-ai/hooks-mux-adapter-openclaw",
     "@a5c-ai/hooks-mux-adapter-opencode",
     "@a5c-ai/hooks-mux-adapter-pi",
-    "@a5c-ai/triggers",
+    "@a5c-ai/triggers-mux",
   ],
   "downstream-consumers": [
     "@a5c-ai/babysitter-observer-dashboard",

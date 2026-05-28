@@ -4766,21 +4766,21 @@ NodeKind. **Result: 0 new anti-patterns.**
 
 
 
-## Catalog pass 94 — @a5c-ai/triggers package surface modeled (2026-05-04)
+## Catalog pass 94 — @a5c-ai/triggers-mux package surface modeled (2026-05-04)
 
-Catalog pass 94 catalogs `packages/triggers/` (`@a5c-ai/triggers` v0.4.9) into atlas
+Catalog pass 94 catalogs `packages/triggers-mux/` (`@a5c-ai/triggers-mux` v0.4.9) into atlas
 as `OperationalTrigger` records, capturing all four `TriggerBackend`
 variants plus the reusable composite GitHub Action.
 
 ### Package surface inventory
 
 - 4 backends: github, gitlab, bitbucket, generic-webhook
-  (packages/triggers/src/types.ts:1 TriggerBackend union).
+  (packages/triggers-mux/src/types.ts:1 TriggerBackend union).
 - 5 source modules: action.ts, enrich.ts, query.ts, cli.ts, index.ts +
   6 backend modules (github, gitlab, bitbucket, generic-webhook,
   utils, index).
 - 1 CLI binary (`amux-triggers` → ./dist/cli.js).
-- 1 reusable GitHub Action composite (`packages/triggers/action.yml`
+- 1 reusable GitHub Action composite (`packages/triggers-mux/action.yml`
   with 16 inputs / 3 outputs / 7 steps).
 - Dispatch model (1 line): enricher reads payload (workflow event JSON
   or local) → normalizer per backend → optional REST/git diff
@@ -4843,7 +4843,7 @@ dangling / parse 0 / 0 / 0.
 
 - Edited only `C:/work/v6/graph/`.
 - Trust Chain remains OUT OF SCOPE.
-- Every value cites `packages/triggers/` source (file:line in
+- Every value cites `packages/triggers-mux/` source (file:line in
   `sourceCitation` attribute or in YAML comment).
 - No new NodeKinds; no new EdgeKinds (re-used `OperationalTrigger`,
   `Capability`, `PackageSurface`, plus existing `supports` /
@@ -4852,9 +4852,9 @@ dangling / parse 0 / 0 / 0.
 - Dead-EdgeKinds 11 (≤ 13 cap honored).
 
 
-## Catalog pass 95 - @a5c-ai/triggers package deep-decomposition (catalog pass 95, 2026-05-04)
+## Catalog pass 95 - @a5c-ai/triggers-mux package deep-decomposition (catalog pass 95, 2026-05-04)
 
-catalog pass 95 deepens catalog pass 94 trigger modeling so the @a5c-ai/triggers package
+catalog pass 95 deepens catalog pass 94 trigger modeling so the @a5c-ai/triggers-mux package
 can be regenerated from the atlas graph alone. catalog pass 94 had compressed seven
 decomposable surfaces into string attributes on five OperationalTrigger
 records; catalog pass 95 promotes each surface to first-class records with edges.
@@ -4863,13 +4863,13 @@ records; catalog pass 95 promotes each surface to first-class records with edges
 
 | # | Surface | NodeKind | Records | Source |
 | - | --- | --- | --- | --- |
-| 1 | action.yml inputs (16) + outputs (3) | FrontmatterField (extended appliesTo enum) | 19 | packages/triggers/action.yml:9-75 |
-| 2 | action.yml runs.steps[] | GithubActionStep (new, tight) | 9 | packages/triggers/action.yml:80-232 |
-| 3 | TriggerQuery DSL grammar | Grammar (new, cross-cutting) | 1 | packages/triggers/src/query.ts:20-100 |
-| 4 | Per-backend REST endpoints | APIEndpoint (reused) | 2 | packages/triggers/src/enrich.ts:61-96 |
-| 5 | NormalizedTriggerEvent + TriggerChange payload schemas | SharedContextSpec (extended w/ fieldSchema, typescriptInterface) | 2 | packages/triggers/src/types.ts:3-28 |
-| 6 | Exit-code semantics (0/78/non-zero) | exitCodeSemantics attribute on OperationalTrigger | 5 records carry it | packages/triggers/src/cli.ts:65 + action.yml:165,217-220 |
-| 7 | amux-triggers CLI subcommands | InteractionPrimitive (kind=cli-subcommand, new attrs parentBin/subcommandVerb/flags/subcommandExitCodes) | 3 (enrich, evaluate, --help) | packages/triggers/src/cli.ts:18-69 |
+| 1 | action.yml inputs (16) + outputs (3) | FrontmatterField (extended appliesTo enum) | 19 | packages/triggers-mux/action.yml:9-75 |
+| 2 | action.yml runs.steps[] | GithubActionStep (new, tight) | 9 | packages/triggers-mux/action.yml:80-232 |
+| 3 | TriggerQuery DSL grammar | Grammar (new, cross-cutting) | 1 | packages/triggers-mux/src/query.ts:20-100 |
+| 4 | Per-backend REST endpoints | APIEndpoint (reused) | 2 | packages/triggers-mux/src/enrich.ts:61-96 |
+| 5 | NormalizedTriggerEvent + TriggerChange payload schemas | SharedContextSpec (extended w/ fieldSchema, typescriptInterface) | 2 | packages/triggers-mux/src/types.ts:3-28 |
+| 6 | Exit-code semantics (0/78/non-zero) | exitCodeSemantics attribute on OperationalTrigger | 5 records carry it | packages/triggers-mux/src/cli.ts:65 + action.yml:165,217-220 |
+| 7 | amux-triggers CLI subcommands | InteractionPrimitive (kind=cli-subcommand, new attrs parentBin/subcommandVerb/flags/subcommandExitCodes) | 3 (enrich, evaluate, --help) | packages/triggers-mux/src/cli.ts:18-69 |
 
 Total: 36 new graph records (19+9+1+2+2+3) + catalog pass 94 5 OperationalTrigger
 records updated with new edges and exitCodeSemantics.
@@ -4944,7 +4944,7 @@ this expectation here. No allowlist change needed.
 
 ### Codegen-readiness verdict for the triggers package
 
-GREEN -- given atlas alone, the @a5c-ai/triggers package can be
+GREEN -- given atlas alone, the @a5c-ai/triggers-mux package can be
 regenerated: package.json from PackageSurface + exposes_subcommand,
 action.yml from the 5 OperationalTriggers + 19 FrontmatterFields + 9
 GithubActionSteps, src/types.ts from the 2 SharedContextSpec field
@@ -4974,7 +4974,7 @@ which are stylistic, not behavioral.
 
 - Edited only C:/work/v6/graph/.
 - Trust Chain remains OUT OF SCOPE.
-- No fabrication: every value cited verbatim from packages/triggers/ source.
+- No fabrication: every value cited verbatim from packages/triggers-mux/ source.
 - No regressions: structural / dangling / parse / orphan all 0;
   dead-EdgeKinds unchanged at 11; dead-NodeKinds steady at 1
   (expected zero-instance deferred work item).

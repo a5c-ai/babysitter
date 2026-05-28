@@ -111,11 +111,11 @@ Status: Current. This inventory implements roadmap slice 0, "Inventory and namin
 | `@a5c-ai/transport-mux` | `test` | No-model | e2e | Mux maintainers | `e2e/transport-mux-test` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/transport-mux` | `test:e2e` | No-model | e2e | Mux maintainers | `e2e/transport-mux-test-e2e` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/transport-mux` | `test:unit` | No-model | unit-or-integration | Mux maintainers | `test-logs/transport-mux-test-unit.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
-| `@a5c-ai/triggers` | `prepublishOnly` | No-model release gate | release-gate | Triggers maintainers | `release-logs/triggers-prepublishonly.log` | publish.yml validate and publish gates |
-| `@a5c-ai/triggers` | `test` | No-model | e2e | Triggers maintainers | `e2e/triggers-test` | ci.yml test/workspace-coverage; publish.yml validate_mux |
-| `@a5c-ai/triggers` | `test:coverage` | No-model | coverage | Triggers maintainers | `coverage/triggers-test-coverage` | ci.yml test/workspace-coverage; publish.yml validate_mux |
-| `@a5c-ai/triggers` | `test:e2e` | No-model | e2e | Triggers maintainers | `e2e/triggers-test-e2e` | ci.yml test/workspace-coverage; publish.yml validate_mux |
-| `@a5c-ai/triggers` | `test:unit` | No-model | contract | Triggers maintainers | `test-logs/triggers-test-unit.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
+| `@a5c-ai/triggers-mux` | `prepublishOnly` | No-model release gate | release-gate | Triggers maintainers | `release-logs/triggers-prepublishonly.log` | publish.yml validate and publish gates |
+| `@a5c-ai/triggers-mux` | `test` | No-model | e2e | Triggers maintainers | `e2e/triggers-test` | ci.yml test/workspace-coverage; publish.yml validate_mux |
+| `@a5c-ai/triggers-mux` | `test:coverage` | No-model | coverage | Triggers maintainers | `coverage/triggers-test-coverage` | ci.yml test/workspace-coverage; publish.yml validate_mux |
+| `@a5c-ai/triggers-mux` | `test:e2e` | No-model | e2e | Triggers maintainers | `e2e/triggers-test-e2e` | ci.yml test/workspace-coverage; publish.yml validate_mux |
+| `@a5c-ai/triggers-mux` | `test:unit` | No-model | contract | Triggers maintainers | `test-logs/triggers-test-unit.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@v6/graph-tools` | `smoke` | No-model | smoke | Catalog/Atlas maintainers | `test-logs/v6-graph-tools-smoke.log` | ci.yml test or package-local validation when package is touched |
 | `babysitter` | `check:library-syntax` | No-model | static-check | CI maintainers | `test-logs/babysitter-check-library-syntax.log` | ci.yml test or package-local validation when package is touched |
 | `babysitter` | `check:plugin-commands` | No-model | static-check | CI maintainers | `test-logs/babysitter-check-plugin-commands.log` | ci.yml test or package-local validation when package is touched |

@@ -1,0 +1,26 @@
+nodeKind: Claim
+id: claim:opencode-1-15-11-release-assimilation
+attributes:
+  claimId: opencode-1-15-11-release-assimilation
+  subjectKind: AgentVersion
+  subjectId: agentVersion:opencode:ge-0-0-0
+  attribute: releaseAssimilation
+  value: "1.15.11:upstream-release-tracked"
+  statement: "OpenCode v1.15.11 is assimilated as the current OpenCode CLI graph version, with release metadata covering provider headerTimeout, push-based background agents, partial modalities config, stable remote-backed project identity, dynamic MCP disconnect cleanup, provider/runtime fixes, TUI and Desktop refinements, extension dispose hooks, and unchanged opencode-ai install metadata."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:opencode-1-15-11-release
+  claimedAt: "2026-05-27T16:50:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "The npm package remains opencode-ai; repository metadata records upstream behavior without adding local adapter runtime changes."
+edges:
+  about_subject:
+    - agentVersion:opencode:ge-0-0-0
+  backed_by_evidence:
+    - evidence:opencode-1-15-11-release
+  sourced_from:
+    - evidence:opencode-1-15-11-release

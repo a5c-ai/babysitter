@@ -59,6 +59,10 @@ function createMockController() {
     async resolveExternalConflict(opts) {
       return { conflictName: opts.conflictName, strategy: opts.strategy, resolved: true };
     },
+
+    async listModelCatalog() {
+      return { models: [] };
+    },
   };
 }
 
@@ -73,8 +77,8 @@ function rpc(method, params = {}, id = 1) {
 // Tests
 // ---------------------------------------------------------------------------
 
-test('MCP_TOOLS array has 14 entries', () => {
-  assert.equal(MCP_TOOLS.length, 14);
+test('MCP_TOOLS array has 17 entries', () => {
+  assert.equal(MCP_TOOLS.length, 17);
   const names = MCP_TOOLS.map((t) => t.name);
   assert.ok(names.includes('krate_list_resources'));
   assert.ok(names.includes('krate_get_resource'));
@@ -110,10 +114,10 @@ test('handleMessage initialize returns capabilities with tools', async () => {
   assert.equal(resp.result.protocolVersion, '2024-11-05');
 });
 
-test('handleMessage tools/list returns all 14 tool definitions', async () => {
+test('handleMessage tools/list returns all 17 tool definitions', async () => {
   const server = createMcpServer({ controller: createMockController() });
   const resp = await server.handleMessage(rpc('tools/list'));
-  assert.equal(resp.result.tools.length, 14);
+  assert.equal(resp.result.tools.length, 17);
   for (const tool of resp.result.tools) {
     assert.ok(tool.name, 'each tool has a name');
     assert.ok(tool.description, 'each tool has a description');

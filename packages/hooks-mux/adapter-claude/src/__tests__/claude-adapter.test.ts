@@ -48,6 +48,7 @@ describe('mappings', () => {
       Stop: 'turn.stop',
       SubagentStop: 'subagent.end',
       Notification: 'notification',
+      MessageDisplay: 'message.received',
     };
 
     for (const [native, canonical] of Object.entries(expected)) {
@@ -268,6 +269,27 @@ describe('normalizeClaude', () => {
       expect(event.payload.message).toBe('The build completed successfully in 12.3s.');
     });
 
+    it('normalizes MessageDisplay display deltas', () => {
+      const event = normalizeClaude('MessageDisplay', {
+        session_id: 'sess_abc123def456',
+        turn_id: 'turn_123',
+        message_id: 'display_msg_123',
+        index: 2,
+        final: false,
+        delta: 'Newly completed line\\n',
+      });
+
+      expect(event.phase).toBe('message.received');
+      expect(event.rawEventName).toBe('MessageDisplay');
+      expect(event.payload).toMatchObject({
+        turnId: 'turn_123',
+        messageId: 'display_msg_123',
+        index: 2,
+        final: false,
+        delta: 'Newly completed line\\n',
+      });
+    });
+
     it('normalizes PreCompact', () => {
       const event = normalizeClaude('PreCompact', fixtures.PRE_COMPACT);
       expect(event.phase).toBe('session.compact.before');
@@ -403,6 +425,52 @@ describe('renderClaudeOutput', () => {
       );
       expect(output).toEqual({
         additionalContext: 'Session initialized with project context.',
+        hookSpecificOutput: {
+          hookEventName: 'SessionStart',
+          additionalContext: 'Session initialized with project context.',
+        },
+      });
+    });
+
+    it('renders reloadSkills and sessionTitle hook-specific output', () => {
+      const output = renderClaudeOutput(
+        { reloadSkills: true, sessionTitle: 'Prepared workspace' },
+        'SessionStart',
+      );
+
+      expect(output).toEqual({
+        hookSpecificOutput: {
+          hookEventName: 'SessionStart',
+          reloadSkills: true,
+          sessionTitle: 'Prepared workspace',
+        },
+      });
+    });
+  });
+
+  describe('MessageDisplay rendering', () => {
+    it('renders transformed display content', () => {
+      const output = renderClaudeOutput(
+        { displayContent: 'Replacement display text\\n' },
+        'MessageDisplay',
+      );
+
+      expect(output).toEqual({
+        hookSpecificOutput: {
+          hookEventName: 'MessageDisplay',
+          displayContent: 'Replacement display text\\n',
+        },
+      });
+    });
+
+    it('renders empty display content when suppressed', () => {
+      const output = renderClaudeOutput({ suppressOutput: true }, 'MessageDisplay');
+
+      expect(output).toEqual({
+        hookSpecificOutput: {
+          hookEventName: 'MessageDisplay',
+          displayContent: '',
+        },
       });
     });
   });

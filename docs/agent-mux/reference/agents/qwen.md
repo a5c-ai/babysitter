@@ -59,10 +59,10 @@ Registry: https://modelcontextprotocol.io
 - MCP servers are configured under `mcpServers` in `~/.qwen/settings.json`.
 - Capabilities are set conservatively — thinking, JSON mode, and image input
   default to `false` pending upstream confirmation.
-- Qwen Code 0.16.1 keeps the npm package unchanged. Upstream fixed
-  tool_use/tool_result closure on failure paths, added TTFT and GenAI telemetry
-  emission, preserved tab-indented notebook formatting, normalized standalone
-  Windows BAT storage, and gates mintty OSC 8 detection on
-  `TERM_PROGRAM_VERSION >= 3.3`. agent-mux does not vendor Qwen's BAT file or
-  implement Qwen's upstream tool loop, so these are tracked as catalog/runtime
-  compatibility notes rather than local adapter tests.
+- Qwen Code 0.16.2 keeps the npm package unchanged. Upstream adds
+  `.qwen/QWEN.local.md` project-local context, the `memory-leak-debug` skill,
+  background-agent concurrency limits, Token Plan cache control, a three-tier
+  auto-compaction ladder, headless runaway-protection guardrails, startup
+  `--worktree` support, and SDK fixes for `canUseTool` timeouts and packaged
+  CLI chunks. The graph tracks these as catalog/runtime compatibility metadata;
+  agent-mux does not yet expose a typed worktree option for Qwen launch.

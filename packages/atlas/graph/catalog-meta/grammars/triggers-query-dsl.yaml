@@ -1,4 +1,4 @@
-# Source: parseQuery() at packages/triggers/src/query.ts:75-100,
+# Source: parseQuery() at packages/triggers-mux/src/query.ts:75-100,
 # evaluateExpression() at lines 55-73, globToRegExp() at lines 20-37.
 nodeKind: Grammar
 id: grammar:amux-triggers-query-dsl
@@ -39,9 +39,9 @@ attributes:
     - "== : binary equals (for list-valued fields, membership)"
     - "&& : binary clause-and (whitespace-padded; only top-level conjunction supported)"
     - ":  : key-value separator in compact form"
-  globSyntax: "** matches any (including '/'); * matches non-slash; ? matches single non-slash; all other regex specials are literally escaped (packages/triggers/src/query.ts:20-37)."
-  parserEntrypoint: "parseQuery (packages/triggers/src/query.ts:75); evaluateExpression (packages/triggers/src/query.ts:55); globToRegExp (packages/triggers/src/query.ts:20)"
-  sourceCitation: "packages/triggers/src/query.ts:20-100"
+  globSyntax: "** matches any (including '/'); * matches non-slash; ? matches single non-slash; all other regex specials are literally escaped (packages/triggers-mux/src/query.ts:20-37)."
+  parserEntrypoint: "parseQuery (packages/triggers-mux/src/query.ts:75); evaluateExpression (packages/triggers-mux/src/query.ts:55); globToRegExp (packages/triggers-mux/src/query.ts:20)"
+  sourceCitation: "packages/triggers-mux/src/query.ts:20-100"
 edges:
   grammar_parses_for:
     - target: operational-trigger:amux-triggers-github

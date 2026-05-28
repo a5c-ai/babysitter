@@ -221,7 +221,7 @@ As described in graph-alignment-tasks.md Phase 1.3, split into graph-aligned sub
 | `@a5c-ai/tool-mux` | `mux:tool-mux` (new, seeded from agent-core) | L8 |
 | `@a5c-ai/agent-catalog` | Knowledge catalog | L12 |
 | `@a5c-ai/atlas` | Graph data + indexer | Cross-cutting |
-| `@a5c-ai/triggers` | Automation triggers | Cross-cutting |
+| `@a5c-ai/triggers-mux` | Automation triggers | Cross-cutting |
 | `@a5c-ai/cloud` | Deployment | Cross-cutting |
 | `@a5c-ai/observer-dashboard` | Observability UI | L11 |
 | `@a5c-ai/krate-*` | Project management | L6 |

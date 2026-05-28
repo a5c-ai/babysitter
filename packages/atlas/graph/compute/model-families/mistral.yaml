@@ -13,4 +13,5 @@ edges:
     - model:mistral-medium-3-5@current
     - model:mistral-medium-3@current
     - model:codestral-22b@current
+    - model:codestral-25-08@current
     - model:codestral-25-01@current

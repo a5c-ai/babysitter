@@ -10,6 +10,7 @@ attributes:
   versionRange: '>=4.0.0 <5.0.0'
   kind: reasoning
   contextWindowTokens: 1000000
+  maxOutputTokens: 384000
   modalities:
     - text
   modalityDirections:
@@ -22,6 +23,9 @@ attributes:
   lifecycleStatusChangedAt: '2026-04-24'
   modelCardUrl: https://fe-static.deepseek.com/chat/transparency/deepseek-V4-model-card-EN.pdf
   supportsFineTuning: false
+  providerModelIds:
+    deepseekApi: deepseek-v4-pro
+    deepseekVersion: DeepSeek-V4-Pro
   regions:
     - global
 edges:
@@ -39,6 +43,7 @@ edges:
     - provider:fireworks-ai
   speaks:
     - model-transport:openai-compat
+    - model-transport:anthropic-messages
   supports:
     - target: capability:streaming
       versionRange: '>=4.0.0 <5.0.0'
@@ -46,6 +51,16 @@ edges:
       evidenceSourceIds:
         - evidence:deepseek-v4-release
     - target: capability:supports-tool-use
+      versionRange: '>=4.0.0 <5.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:deepseek-v4-pricing
+    - target: capability:supports-json-mode
+      versionRange: '>=4.0.0 <5.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:deepseek-json-output
+    - target: capability:supports-prompt-caching
       versionRange: '>=4.0.0 <5.0.0'
       level: full
       evidenceSourceIds:

@@ -1,0 +1,254 @@
+nodeKind: Claim
+id: claim:model-version-model-mistral-medium-3-5-current-providermodelids
+attributes:
+  subjectId: model:mistral-medium-3-5@current
+  attribute: providerModelIds
+  value: mistral-medium-3-5-26-04, mistral-medium-latest
+  subjectKind: ModelVersion
+  statement: model:mistral-medium-3-5@current providerModelIds include mistral-medium-3-5-26-04 and mistral-medium-latest.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-medium-3-5-model-card
+    - evidence:mistral-api-pricing-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:mistral-medium-3-5-model-card
+    - evidence:mistral-api-pricing-2026-05
+  about_subject:
+    - model:mistral-medium-3-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-medium-3-5-current-contextwindowtokens
+attributes:
+  subjectId: model:mistral-medium-3-5@current
+  attribute: contextWindowTokens
+  value: '256000'
+  subjectKind: ModelVersion
+  statement: model:mistral-medium-3-5@current contextWindowTokens is 256000.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-medium-3-5-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:mistral-medium-3-5-model-card
+  about_subject:
+    - model:mistral-medium-3-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-medium-3-5-current-costpermtokinput
+attributes:
+  subjectId: model:mistral-medium-3-5@current
+  attribute: costPerMTokInput
+  value: '1.5'
+  subjectKind: ModelVersion
+  statement: model:mistral-medium-3-5@current costPerMTokInput is 1.5.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-api-pricing-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:mistral-api-pricing-2026-05
+  about_subject:
+    - model:mistral-medium-3-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-medium-3-5-current-costpermtokoutput
+attributes:
+  subjectId: model:mistral-medium-3-5@current
+  attribute: costPerMTokOutput
+  value: '7.5'
+  subjectKind: ModelVersion
+  statement: model:mistral-medium-3-5@current costPerMTokOutput is 7.5.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-api-pricing-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:mistral-api-pricing-2026-05
+  about_subject:
+    - model:mistral-medium-3-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-medium-3-5-current-kind
+attributes:
+  subjectId: model:mistral-medium-3-5@current
+  attribute: kind
+  value: multimodal
+  subjectKind: ModelVersion
+  statement: model:mistral-medium-3-5@current kind is multimodal.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-medium-3-5-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:mistral-medium-3-5-model-card
+  about_subject:
+    - model:mistral-medium-3-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-medium-3-5-current-lifecyclestatus
+attributes:
+  subjectId: model:mistral-medium-3-5@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:mistral-medium-3-5@current lifecycleStatus is ga.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-medium-3-5-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:mistral-medium-3-5-model-card
+  about_subject:
+    - model:mistral-medium-3-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-medium-3-5-current-modalities
+attributes:
+  subjectId: model:mistral-medium-3-5@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:mistral-medium-3-5@current modalities are text and image input with text output.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-medium-3-5-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:mistral-medium-3-5-model-card
+  about_subject:
+    - model:mistral-medium-3-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-medium-3-5-current-modalitydirections
+attributes:
+  subjectId: model:mistral-medium-3-5@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:mistral-medium-3-5@current modalityDirections are text input, image input, and text output.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-medium-3-5-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:mistral-medium-3-5-model-card
+  about_subject:
+    - model:mistral-medium-3-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-medium-3-5-current-modelcardurl
+attributes:
+  subjectId: model:mistral-medium-3-5@current
+  attribute: modelCardUrl
+  value: https://docs.mistral.ai/models/mistral-medium-3-5-26-04
+  subjectKind: ModelVersion
+  statement: model:mistral-medium-3-5@current modelCardUrl is https://docs.mistral.ai/models/mistral-medium-3-5-26-04.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-medium-3-5-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:mistral-medium-3-5-model-card
+  about_subject:
+    - model:mistral-medium-3-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-medium-3-5-current-supportsfinetuning
+attributes:
+  subjectId: model:mistral-medium-3-5@current
+  attribute: supportsFineTuning
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:mistral-medium-3-5@current supportsFineTuning is True.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-api-pricing-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:mistral-api-pricing-2026-05
+  about_subject:
+    - model:mistral-medium-3-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-mistral-medium-3-5-current-versionrange
+attributes:
+  subjectId: model:mistral-medium-3-5@current
+  attribute: versionRange
+  value: '>=3.5.0 <4.0.0'
+  subjectKind: ModelVersion
+  statement: model:mistral-medium-3-5@current versionRange is >=3.5.0 <4.0.0.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-medium-3-5-model-card
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:mistral-medium-3-5-model-card
+  about_subject:
+    - model:mistral-medium-3-5@current

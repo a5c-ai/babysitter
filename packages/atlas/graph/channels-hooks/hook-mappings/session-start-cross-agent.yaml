@@ -3,7 +3,7 @@ id: hook-mapping:session-start-gemini
 attributes:
   mappingId: hook-mapping:session-start-gemini
   hookId: hook-surface:session-start
-  targetId: agentVersion:gemini:ge-0-0-0
+  targetId: agentVersion:gemini:ge-0-43-0
   nativeName: SessionStart
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
@@ -16,7 +16,7 @@ edges:
   maps_hook:
     - target: hook-surface:session-start
   emits_hook:
-    - target: agentVersion:gemini:ge-0-0-0
+    - target: agentVersion:gemini:ge-0-43-0
 ---
 nodeKind: HookMapping
 id: hook-mapping:session-start-pi

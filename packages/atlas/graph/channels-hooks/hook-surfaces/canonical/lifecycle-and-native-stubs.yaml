@@ -22,6 +22,31 @@ attributes:
 edges:
 ---
 nodeKind: HookSurface
+id: hook-surface:message-received
+attributes:
+  eventName: "MessageReceived (canonical)"
+  displayName: "MessageReceived (canonical)"
+  kind: canonical
+  direction: event
+  blocking: false
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [message_id, delta]
+    properties:
+      turn_id: { type: string }
+      message_id: { type: string }
+      index: { type: integer }
+      final: { type: boolean }
+      delta:
+        type: string
+        description: "New assistant message display text delta."
+  description: |
+    Fires as assistant message text is received for display. Handlers may
+    transform display-only text without changing stored transcript content.
+edges:
+---
+nodeKind: HookSurface
 id: hook-surface:pre-compact
 attributes:
   eventName: "PreCompact (canonical)"

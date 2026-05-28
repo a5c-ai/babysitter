@@ -1,0 +1,57 @@
+---
+nodeKind: EvidenceSource
+id: evidence:together-ai-serverless-models-2026-05
+attributes:
+  displayName: "Together AI Docs - Serverless models"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.together.ai/docs/serverless-models
+  sourcePathOrUrl: https://docs.together.ai/docs/serverless-models
+  locator: "serverless model table - provider model IDs, context, pricing, function calling, structured outputs"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:fireworks-ai-models-2026-05
+attributes:
+  displayName: "Fireworks AI Docs - Models"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.fireworks.ai/models
+  sourcePathOrUrl: https://docs.fireworks.ai/models
+  locator: "models documentation - supported model architectures and OpenAI-compatible inference surface"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:groq-console-models-2026-05
+attributes:
+  displayName: "Groq Console Docs - Models"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://console.groq.com/docs/models
+  sourcePathOrUrl: https://console.groq.com/docs/models
+  locator: "hosted and preview model tables - provider model IDs, context, pricing, rate limits, deprecation note"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc

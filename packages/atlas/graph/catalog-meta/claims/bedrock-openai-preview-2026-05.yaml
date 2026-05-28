@@ -1,0 +1,99 @@
+nodeKind: Claim
+id: claim:model-gpt-5-5-bedrock-limited-preview-availability
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: served_by
+  value: provider:aws-bedrock
+  subjectKind: ModelVersion
+  statement: "model:gpt-5.5@current is available through Amazon Bedrock in limited preview."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:aws-bedrock-openai-preview-2026-05
+    - evidence:aws-blog-openai-bedrock-expanded-partnership-2026-05
+  claimedAt: "2026-05-27T16:53:11Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: "Issue #434 intentionally does not assert exact Bedrock model IDs or pricing because the reviewed official sources did not expose them."
+edges:
+  backed_by_evidence:
+    - evidence:aws-bedrock-openai-preview-2026-05
+    - evidence:aws-blog-openai-bedrock-expanded-partnership-2026-05
+  about_subject:
+    - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-gpt-5-5-bedrock-provider-model-ids-unresolved
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: providerModelIds
+  value: unresolved
+  subjectKind: ModelVersion
+  statement: "Exact Bedrock provider model IDs for model:gpt-5.5@current were not exposed in the official preview sources reviewed for issue #434."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: adequate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:aws-bedrock-openai-preview-2026-05
+    - evidence:aws-blog-openai-bedrock-expanded-partnership-2026-05
+  claimedAt: "2026-05-27T16:53:11Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: limitation
+edges:
+  backed_by_evidence:
+    - evidence:aws-bedrock-openai-preview-2026-05
+    - evidence:aws-blog-openai-bedrock-expanded-partnership-2026-05
+  about_subject:
+    - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:agent-codex-bedrock-limited-preview-availability
+attributes:
+  subjectId: agent:codex
+  attribute: providerAvailability
+  value: provider:aws-bedrock
+  subjectKind: AgentProduct
+  statement: "agent:codex has Amazon Bedrock limited-preview availability for enterprise coding workflows."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:aws-bedrock-openai-preview-2026-05
+    - evidence:aws-blog-openai-bedrock-expanded-partnership-2026-05
+  claimedAt: "2026-05-27T16:53:11Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: "The current graph models Codex as an AgentProduct, not a ModelVersion, so issue #434 tracks Codex on Bedrock at the product availability layer."
+edges:
+  backed_by_evidence:
+    - evidence:aws-bedrock-openai-preview-2026-05
+    - evidence:aws-blog-openai-bedrock-expanded-partnership-2026-05
+  about_subject:
+    - agent:codex
+---
+nodeKind: Claim
+id: claim:agent-codex-bedrock-api-surface-limited-preview
+attributes:
+  subjectId: agent:codex
+  attribute: bedrockApiSurface
+  value: bedrock-api
+  subjectKind: AgentProduct
+  statement: "Codex on Amazon Bedrock is described as available through the Bedrock API, starting with Codex CLI, desktop app, and Visual Studio Code extension surfaces."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:aws-blog-openai-bedrock-expanded-partnership-2026-05
+  claimedAt: "2026-05-27T16:53:11Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:aws-blog-openai-bedrock-expanded-partnership-2026-05
+  about_subject:
+    - agent:codex

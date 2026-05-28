@@ -1,6 +1,6 @@
-# packages/triggers/action.yml inputs (25) + outputs (3) decomposed into
+# packages/triggers-mux/action.yml inputs (25) + outputs (3) decomposed into
 # per-field FrontmatterField records.
-# Source: packages/triggers/action.yml (lines 9-120 inputs, 121-131 outputs).
+# Source: packages/triggers-mux/action.yml (lines 9-120 inputs, 121-131 outputs).
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-command
 attributes:

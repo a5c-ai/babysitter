@@ -307,6 +307,96 @@ describe('invoke — full CLI pipeline (e2e)', { timeout: 30000 }, () => {
     expect(ctx.AGENT_ADAPTER).toBe('claude');
   });
 
+  it('Claude SessionStart invoke renders reloadSkills and sessionTitle hook output', async () => {
+    const handlerCmd = await writeHandlerScript(tmpRoot, 'claude-sessionstart-reload-skills', `
+      process.stdout.write(JSON.stringify({
+        reloadSkills: true,
+        sessionTitle: 'Skills ready'
+      }));
+    `);
+
+    const result = await runCli(
+      claudeInvokeArgs('SessionStart', [
+        '--handler', handlerCmd,
+      ]),
+      {
+        stdin: JSON.stringify({
+          session_id: 'e2e-sessionstart-reload-skills',
+          source: 'startup',
+        }),
+        env: baseEnv(),
+      },
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(parseOutput(result.stdout)).toEqual({
+      additionalContext: '',
+      hookSpecificOutput: {
+        hookEventName: 'SessionStart',
+        reloadSkills: true,
+        sessionTitle: 'Skills ready',
+      },
+      metadata: {
+        AGENT_ADAPTER: 'claude',
+        AGENT_SESSION_ID: 'e2e-sessionstart-reload-skills',
+      },
+    });
+  });
+
+  it('Claude MessageDisplay invoke normalizes and renders displayContent', async () => {
+    const handlerCmd = await writeHandlerScript(tmpRoot, 'claude-message-display', `
+      const chunks = [];
+      process.stdin.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+      process.stdin.on('end', () => {
+        const event = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+        process.stdout.write(JSON.stringify({
+          displayContent: JSON.stringify({
+            phase: event.phase,
+            payload: event.payload,
+          })
+        }));
+      });
+    `);
+
+    const result = await runCli(
+      claudeInvokeArgs('MessageDisplay', [
+        '--handler', handlerCmd,
+      ]),
+      {
+        stdin: JSON.stringify({
+          session_id: 'e2e-message-display',
+          turn_id: 'turn-1',
+          message_id: 'message-1',
+          index: 0,
+          final: false,
+          delta: 'hello\\n',
+        }),
+        env: baseEnv(),
+      },
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(parseOutput(result.stdout)).toEqual({
+      hookSpecificOutput: {
+        hookEventName: 'MessageDisplay',
+        displayContent: JSON.stringify({
+          phase: 'message.received',
+          payload: {
+            turnId: 'turn-1',
+            messageId: 'message-1',
+            index: 0,
+            final: false,
+            delta: 'hello\\n',
+          },
+        }),
+      },
+      metadata: {
+        AGENT_ADAPTER: 'claude',
+        AGENT_SESSION_ID: 'e2e-message-display',
+      },
+    });
+  });
+
   it('invoke with no handlers produces noop output', async () => {
     const stdinPayload = JSON.stringify({
     });
