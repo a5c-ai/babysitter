@@ -67,7 +67,7 @@ async function execCommand(
   args: string[],
   options: { cwd: string; env: Record<string, string>; verbose?: boolean; stdin?: string },
 ): Promise<string> {
-  const { spawnSync, execFileSync } = await import('node:child_process');
+  const { spawnSync } = await import('node:child_process');
 
   const mergedEnv = { ...process.env, ...options.env };
 
@@ -83,31 +83,46 @@ async function execCommand(
     // Try to find the .js entry point from the npm .cmd shim or PATH scripts
     const fs = await import('node:fs');
     const path = await import('node:path');
-    const pathDirs = (mergedEnv['PATH'] || '').split(';');
-    for (const dir of pathDirs) {
-      // Check for .cmd shim (npm global install)
-      const cmdPath = path.join(dir, `${bin}.cmd`);
-      try {
-        const content = fs.readFileSync(cmdPath, 'utf-8');
-        const jsMatch = content.match(/"([^"]+\.js)"/);
-        if (jsMatch) {
-          resolvedBin = process.execPath;
-          resolvedArgs = [jsMatch[1], ...args];
-          break;
+    const pathValue = options.env['PATH'] || options.env['Path'] || options.env['path']
+      || mergedEnv['Path'] || mergedEnv['PATH'] || mergedEnv['path'] || '';
+    const pathDirs = pathValue.split(path.delimiter).filter(Boolean);
+    const hasPathSeparator = bin.includes('/') || bin.includes('\\');
+    const candidateDirs = hasPathSeparator ? [path.dirname(bin)] : pathDirs;
+    const candidateNames = hasPathSeparator
+      ? [path.basename(bin)]
+      : [bin, `${bin}.cmd`, `${bin}.ps1`];
+
+    for (const dir of candidateDirs) {
+      for (const name of candidateNames) {
+        const candidatePath = path.join(dir, name);
+
+        // Check for .cmd shim (npm global install)
+        if (candidatePath.toLowerCase().endsWith('.cmd')) {
+          try {
+            const content = fs.readFileSync(candidatePath, 'utf-8');
+            const jsMatch = content.match(/"([^"]+\.js)"/);
+            if (jsMatch) {
+              resolvedBin = process.execPath;
+              resolvedArgs = [jsMatch[1], ...args];
+              break;
+            }
+          } catch { /* not found */ }
         }
-      } catch { /* not found */ }
-      // Check for shell script (workspace link)
-      const shPath = path.join(dir, bin);
-      try {
-        const content = fs.readFileSync(shPath, 'utf-8');
-        const nodeMatch = content.match(/exec\s+node\s+"([^"]+)"/);
-        if (nodeMatch) {
-          resolvedBin = process.execPath;
-          resolvedArgs = [nodeMatch[1], ...args];
-          break;
-        }
-      } catch { /* not found */ }
+
+        // Check for shell script (workspace link)
+        try {
+          const content = fs.readFileSync(candidatePath, 'utf-8');
+          const nodeMatch = content.match(/exec\s+node\s+"([^"]+)"/);
+          if (nodeMatch) {
+            resolvedBin = process.execPath;
+            resolvedArgs = [nodeMatch[1], ...args];
+            break;
+          }
+        } catch { /* not found */ }
+      }
+      if (resolvedBin !== bin) break;
     }
+
     if (resolvedBin === bin) useShell = true; // fallback
   }
   const proc = spawnSync(resolvedBin, resolvedArgs, {
@@ -119,6 +134,9 @@ async function execCommand(
     input: options.stdin,
     shell: useShell,
   });
+  if (proc.error) {
+    throw new Error(`${bin} failed to start: ${proc.error.message}`);
+  }
   if (proc.stderr && options.verbose) {
     console.error(`[bridge-hooks] child stderr: ${proc.stderr.substring(0, 500)}`);
   }
