@@ -51,6 +51,7 @@ export * from './external/write-controller.js';
 export * from './external/conflict-controller.js';
 export * from './krate-inference-service-controller.js';
 export * from './model-route-controller.js';
+export * from './virtual-model-controller.js';
 export * from './artifact-registry-controller.js';
 export * from './audit-controller.js';
 export * from './async-controller.js';

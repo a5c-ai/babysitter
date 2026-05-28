@@ -246,6 +246,13 @@ export {
   ENVOY_AI_GATEWAY_API_VERSION
 } from '../../core/src/model-route-controller.js';
 
+// Virtual Model Controller
+export {
+  createVirtualModelController,
+  VIRTUAL_MODEL_CONTROLLER_BOUNDARY,
+  validateVirtualModel
+} from '../../core/src/virtual-model-controller.js';
+
 // Artifact Registry Controller
 export {
   createArtifactRegistryController,

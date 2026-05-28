@@ -255,3 +255,160 @@ spec:
                   x-kubernetes-preserve-unknown-fields: true
               resolvedEndpoint:
                 type: string
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kratevirtualmodels.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: kratevirtualmodels
+    singular: kratevirtualmodel
+    kind: KrateVirtualModel
+    shortNames:
+    - kvm
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Model
+      type: string
+      jsonPath: .spec.modelName
+    - name: Routes
+      type: integer
+      jsonPath: .status.resolvedRoutes
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - modelName
+            - routes
+            properties:
+              organizationRef:
+                type: string
+              modelName:
+                type: string
+                description: Logical model name that consumers request
+              routes:
+                type: array
+                description: Weighted route references for traffic distribution
+                items:
+                  type: object
+                  required:
+                  - modelRouteRef
+                  properties:
+                    modelRouteRef:
+                      type: string
+                    weight:
+                      type: integer
+                      default: 100
+                    priority:
+                      type: integer
+                      default: 100
+                    conditions:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+              fallbackChain:
+                type: array
+                description: Ordered list of fallback route references
+                items:
+                  type: string
+              rules:
+                type: array
+                description: Declarative routing rules evaluated before weighted selection
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    conditions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          field:
+                            type: string
+                          operator:
+                            type: string
+                            enum:
+                            - eq
+                            - neq
+                            - gt
+                            - lt
+                            - gte
+                            - lte
+                            - in
+                            - contains
+                            - matches
+                          value:
+                            x-kubernetes-preserve-unknown-fields: true
+                    action:
+                      type: object
+                      properties:
+                        route:
+                          type: string
+              hooks:
+                type: object
+                description: JS hook bodies for programmable routing and transformation
+                properties:
+                  routeSelect:
+                    type: string
+                  requestTransform:
+                    type: string
+                  responseTransform:
+                    type: string
+                  sessionLifecycle:
+                    type: string
+                  observe:
+                    type: string
+              sessionConfig:
+                type: object
+                description: Session lifecycle management configuration
+                properties:
+                  enabled:
+                    type: boolean
+                    default: false
+                  maxTurns:
+                    type: integer
+                  escalationThreshold:
+                    type: integer
+                  stateFields:
+                    type: array
+                    items:
+                      type: string
+              enabled:
+                type: boolean
+                default: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            properties:
+              phase:
+                type: string
+              conditions:
+                type: array
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+              resolvedRoutes:
+                type: integer
+              activeSessionCount:
+                type: integer
