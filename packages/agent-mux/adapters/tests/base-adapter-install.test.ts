@@ -141,6 +141,28 @@ describe('BaseAgentAdapter.install (default)', () => {
     expect(res.command).toMatch(/@3\.1\.0$/);
   });
 
+  it('pins Gemini CLI install to the validated 0.43.x line', async () => {
+    const adapter = new GeminiAdapter();
+    const { spawner, calls } = spawnerFrom(() => ({ code: 0, stdout: '', stderr: '' }));
+    adapter.setSpawner(spawner);
+
+    const res = await adapter.install({ dryRun: true });
+
+    expect(res.command).toBe('npm install -g @google/gemini-cli@0.43.0');
+    expect(res.command).not.toBe('npm install -g @google/gemini-cli');
+    expect(calls.length).toBe(0);
+  });
+
+  it('does not double-pin Gemini CLI when an explicit version is requested', async () => {
+    const adapter = new GeminiAdapter();
+    const { spawner } = spawnerFrom(() => ({ code: 0, stdout: '', stderr: '' }));
+    adapter.setSpawner(spawner);
+
+    const res = await adapter.install({ dryRun: true, version: '0.43.0' });
+
+    expect(res.command).toBe('npm install -g @google/gemini-cli@0.43.0');
+  });
+
   it('cursor install resolves curl install (not manual)', async () => {
     const adapter = new CursorAdapter();
     let installed = false;
