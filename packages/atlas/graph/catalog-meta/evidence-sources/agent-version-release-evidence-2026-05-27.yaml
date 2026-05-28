@@ -132,3 +132,32 @@ edges:
     - trust-level:official-web
   references:
     - agentVersion:copilot:ge-1-0-55-3
+---
+nodeKind: EvidenceSource
+id: evidence:gemini-cli-0-44-0-release
+attributes:
+  displayName: "Gemini CLI v0.44.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/google-gemini/gemini-cli/releases/tag/v0.44.0
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/releases/tag/v0.44.0
+  locator: "google-gemini/gemini-cli release v0.44.0"
+  capturedAt: "2026-05-28T14:55:00Z"
+  observedAt: "2026-05-28T14:55:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-28T14:55:00Z"
+  notes: |
+    Release notes list the merged single Auto mode, keychain auth support for
+    --list-sessions and non-interactive mode, MCP OAuth refresh-token rotation
+    and token refresh fixes, NO_PROXY handling, configured MCP servers in
+    non-interactive mode, first-wins project-prioritized agent registration,
+    isolated subagent thread context, AgentSession invocation wiring for the
+    agent tool, new agent-tui and tui-tester skills, and proxy, sandbox, path
+    validation, binary detection, and Windows/PTY reliability fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:gemini:ge-0-43-0

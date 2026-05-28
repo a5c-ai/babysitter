@@ -50,6 +50,14 @@ attributes:
   - remoteUrl
   - gitRepo
   subagentToolInheritance: allowlist
+  subagentMcpPolicy:
+    introducedIn: "2.1.153"
+    respectsStrictMcpConfigFlag: "--strict-mcp-config"
+    respectsBareModeFlag: "--bare"
+    respectsRemoteMode: true
+    respectsEnterpriseManagedMcpConfig: true
+    respectsServerAllowDenyPolicy: true
+    notes: Claude Code 2.1.153 applies MCP server visibility and policy consistently to subagent launches.
   skillScopePrecedence:
   - enterprise
   - personal
@@ -63,6 +71,9 @@ attributes:
     linux: "$XDG_DATA_HOME/applications/claude-code-url-handler.desktop"
     windows: "HKEY_CURRENT_USER\\Software\\Classes\\claude-cli"
   outputGuardMechanism: structured-output-passthrough
+  startupAuthNoticeCoalescing:
+    introducedIn: "2.1.153"
+    combinedMcpServerAndConnectorAuthNotices: true
 edges:
   realizes:
     - target: layer:5-agent-runtime

@@ -22,6 +22,7 @@ attributes:
     - "token usage and cost reporting"
     - "error-mapping across providers"
     - "model name aliasing per provider"
+    - "OpenClaw 2026.5.27 Codex app-server assumptions: runtime models resolve first and workspace memory routes through tools before proxy dispatch"
   catalogInputNodeKinds:
     - ModelTransportProtocol
     - ModelVersion
@@ -59,6 +60,7 @@ attributes:
     - "env-var conventions per agent (ANTHROPIC_API_KEY vs OPENAI_API_KEY vs GITHUB_TOKEN)"
     - "working-directory mapping (especially --add-dir for skill directories)"
     - "subprocess management (Unix pgroups vs Windows Job Objects)"
+    - "OpenClaw 2026.5.27 package launches honor npm dist exclusions, Docker runtime workspace templates, and stricter postpublish checks"
     - "signal propagation (especially across ssh / docker / k8s)"
     - "retry policy and lifecycle hooks (onSpawnError, onTimeout, onProcessExit, shouldRetry)"
     - "min-version enforcement (semver gate)"
@@ -86,8 +88,8 @@ edges:
     - target: agentVersion:opencode:ge-0-0-0
     - target: agentVersion:copilot:ge-1-0-51
     - target: agentVersion:pi:ge-0-75-4
-    - target: agentVersion:omp:ge-15-5-9
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:omp:ge-15-5-6
+    - target: agentVersion:openclaw:ge-2026-5-27
     - target: agent-version:hermes@current
     - target: agent-version:qwen@current
     - target: agent-version:droid@current
@@ -141,8 +143,8 @@ edges:
     - target: agentVersion:opencode:ge-0-0-0
     - target: agentVersion:copilot:ge-1-0-51
     - target: agentVersion:pi:ge-0-75-4
-    - target: agentVersion:omp:ge-15-5-9
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:omp:ge-15-5-6
+    - target: agentVersion:openclaw:ge-2026-5-27
     - target: agent-version:hermes@current
 ---
 nodeKind: Mux
@@ -265,8 +267,8 @@ edges:
     - target: agentVersion:opencode:ge-0-0-0
     - target: agentVersion:copilot:ge-1-0-51
     - target: agentVersion:pi:ge-0-75-4
-    - target: agentVersion:omp:ge-15-5-9
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:omp:ge-15-5-6
+    - target: agentVersion:openclaw:ge-2026-5-27
     - target: agent-version:hermes@current
 ---
 nodeKind: Mux
@@ -481,7 +483,7 @@ edges:
     - target: agentVersion:copilot:ge-1-0-55-3
     - target: agentVersion:pi:ge-0-75-4
     - target: agentVersion:omp:ge-15-2-4
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:openclaw:ge-2026-5-27
     - target: agent-version:hermes@current
     - target: agent-version:qwen@current
     - target: agent-version:droid@current
@@ -536,7 +538,7 @@ edges:
     - target: agentVersion:copilot:ge-1-0-55-3
     - target: agentVersion:pi:ge-0-75-4
     - target: agentVersion:omp:ge-15-2-4
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:openclaw:ge-2026-5-27
     - target: agent-version:hermes@current
 ---
 nodeKind: Mux
@@ -660,7 +662,7 @@ edges:
     - target: agentVersion:copilot:ge-1-0-55-3
     - target: agentVersion:pi:ge-0-75-4
     - target: agentVersion:omp:ge-15-2-4
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:openclaw:ge-2026-5-27
     - target: agent-version:hermes@current
 ---
 nodeKind: Mux
@@ -875,7 +877,7 @@ edges:
     - target: agentVersion:copilot:ge-1-0-51
     - target: agentVersion:pi:ge-0-75-5
     - target: agentVersion:omp:ge-15-2-4
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:openclaw:ge-2026-5-27
     - target: agent-version:hermes@current
     - target: agent-version:qwen@current
     - target: agent-version:droid@current
@@ -930,7 +932,7 @@ edges:
     - target: agentVersion:copilot:ge-1-0-51
     - target: agentVersion:pi:ge-0-75-5
     - target: agentVersion:omp:ge-15-2-4
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:openclaw:ge-2026-5-27
     - target: agent-version:hermes@current
 ---
 nodeKind: Mux
@@ -1054,7 +1056,7 @@ edges:
     - target: agentVersion:copilot:ge-1-0-51
     - target: agentVersion:pi:ge-0-75-5
     - target: agentVersion:omp:ge-15-2-4
-    - target: agentVersion:openclaw:ge-2026-5-26
+    - target: agentVersion:openclaw:ge-2026-5-27
     - target: agent-version:hermes@current
 ---
 nodeKind: Mux

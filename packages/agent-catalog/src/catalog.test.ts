@@ -52,6 +52,20 @@ import {
 
 const CATALOG_TEST_TIMEOUT_MS = 60_000;
 
+function slugifyVersionRange(versionRange: string): string {
+  return versionRange
+    .replace(/>=/g, "ge-")
+    .replace(/<=/g, "le-")
+    .replace(/>/g, "gt-")
+    .replace(/</g, "lt-")
+    .replace(/=/g, "eq-")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-zA-Z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+}
+
 describe("agent-catalog graph-backed ontology", () => {
   it("loads YAML graph metadata and schema", () => {
     expect(getCatalogGraphDocument().graphId).toBe("graph:agent-catalog");
@@ -82,6 +96,19 @@ describe("agent-catalog graph-backed ontology", () => {
     const codex = listAgentVersions().filter((agent) => agent.agentId === "codex");
     expect(codex).toHaveLength(2);
     expect(codex.map((agent) => agent.versionRange)).toContain(">=0.119.0");
+  });
+
+  it("keeps the Copilot AgentVersion id slug aligned with its versionRange slug", () => {
+    const graph = getCatalogGraphSnapshot();
+    const mismatches = graph.nodes
+      .filter((node) => node.kind === "AgentVersion" && node.agentId === "copilot")
+      .map((node) => ({
+        id: String(node.id),
+        expectedId: `agentVersion:${node.agentId}:${slugifyVersionRange(String(node.versionRange))}`,
+      }))
+      .filter((entry) => entry.id !== entry.expectedId);
+
+    expect(mismatches).toEqual([]);
   });
 
   it("exposes shared fallback metadata for sdk consumers", () => {
@@ -202,31 +229,38 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(claims.get("repo-transport-mux-readme")?.status).toBe("provisional");
   });
 
-  it("records Claude Code 2.1.152 user-facing hook, skill, and plugin changes", () => {
-    const version = getAgentVersion("claude-code", "2.1.152");
+  it("records Claude Code 2.1.153 user-facing plugin, status-line, MCP, and keybinding changes", () => {
+    const version = getAgentVersion("claude-code", "2.1.153");
     const graph = getCatalogGraphSnapshot();
     const node = graph.nodes.find((entry) => entry.id === "agentVersion:claude:ge-0-0-0");
 
-    expect(version?.versionRange).toBe(">=2.1.152");
-    expect(node?.releaseNotesUrl).toContain("anthropics/claude-code/releases/tag/v2.1.152");
+    expect(version?.versionRange).toBe(">=2.1.153");
+    expect(node?.releaseNotesUrl).toContain("anthropics/claude-code/releases/tag/v2.1.153");
     expect(node?.assimilationNotes).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("MessageDisplay hook event"),
-        expect.stringContaining("/reload-skills"),
-        expect.stringContaining("plugin marketplace remove accepts --scope"),
+        expect.stringContaining("skipLfs"),
+        expect.stringContaining("COLUMNS and LINES"),
+        expect.stringContaining("strict-mcp-config"),
+        expect.stringContaining("modelPicker:thisSessionOnly"),
       ]),
     );
 
-    const evidence = getOntologyEvidenceSource("claude-code-2-1-152-release");
-    expect(evidence?.sourcePathOrUrl).toContain("anthropics/claude-code/releases/tag/v2.1.152");
+    const evidence = getOntologyEvidenceSource("claude-code-2-1-153-release");
+    expect(evidence?.sourcePathOrUrl).toContain("anthropics/claude-code/releases/tag/v2.1.153");
 
-    expect(graph.nodes.find((entry) => entry.id === "hook-surface:claude.message-display")).toBeDefined();
-    expect(listOntologyNodesByKind("InteractionPrimitive").find((entry) => entry.id === "interaction-primitive:slash-reload-skills")).toBeDefined();
-    expect(listOntologyNodesByKind("FrontmatterField").find((entry) => entry.id === "frontmatter-field:skill-disallowed-tools")).toBeDefined();
+    const ui = listOntologyNodesByKind("AgentUIImpl").find((entry) => entry.id === "agent-ui-impl:claude-code.ui@current");
+    expect(JSON.stringify(ui)).toContain("COLUMNS");
+    expect(JSON.stringify(ui)).toContain("PR #N");
+    expect(JSON.stringify(ui)).toContain("modelPicker:thisSessionOnly");
 
     const platform = listOntologyNodesByKind("AgentPlatformImpl").find((entry) => entry.id === "agent-platform-impl:claude-code.platform@1.x");
-    expect(JSON.stringify(platform)).toContain("pluginSuggestionMarketplaces");
-    expect(JSON.stringify(platform)).toContain("--scope project");
+    expect(JSON.stringify(platform)).toContain("skipLfs");
+    expect(JSON.stringify(platform)).toContain("globalNpmAutoUpdateFailureNotice");
+
+    const runtime = listOntologyNodesByKind("AgentRuntimeImpl").find((entry) => entry.id === "agent-runtime-impl:claude-code.runtime@1.x");
+    expect(JSON.stringify(runtime)).toContain("--strict-mcp-config");
+    expect(JSON.stringify(runtime)).toContain("--bare");
+    expect(JSON.stringify(runtime)).toContain("combinedMcpServerAndConnectorAuthNotices");
   });
 
   it("records OpenCode 1.15.11 upstream release assimilation", () => {
@@ -257,31 +291,32 @@ describe("agent-catalog graph-backed ontology", () => {
     );
   });
 
-  it("keeps OMP 15.5.9 graph identity aligned with its version range", () => {
-    const version = getAgentVersion("omp", "15.5.9");
+  it("records Gemini CLI 0.44.0 without splitting stable graph identity", () => {
+    const version = getAgentVersion("gemini", "0.44.0");
     const graph = getCatalogGraphSnapshot();
-    const node = graph.nodes.find((entry) => entry.id === "agentVersion:omp:ge-15-5-9");
+    const node = graph.nodes.find((entry) => entry.id === "agentVersion:gemini:ge-0-43-0");
 
-    expect(version?.versionRange).toBe(">=15.5.9");
-    expect(node?.versionRange).toBe(">=15.5.9");
-    expect(node?.currentVersion).toBe("15.5.9");
-    expect(node?.releaseNotesUrl).toContain("can1357/oh-my-pi/releases/tag/v15.5.9");
+    expect(version?.versionRange).toBe(">=0.43.0");
+    expect(node?.currentVersion).toBe("0.44.0");
+    expect(node?.releaseNotesUrl).toContain("google-gemini/gemini-cli/releases/tag/v0.44.0");
     expect(node?.assimilationNotes).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("OpenRouter model variants"),
-        expect.stringContaining("Wafer Pass"),
-        expect.stringContaining("compressed native-addon archive"),
-        expect.stringContaining("unsafe archive entries"),
+        expect.stringContaining("Auto modes were merged into a single Auto mode"),
+        expect.stringContaining("Keychain auth now works for --list-sessions"),
+        expect.stringContaining("agent-tui and tui-tester"),
       ]),
     );
-    expect(graph.nodes.find((entry) => entry.id === "agentVersion:omp:ge-15-5-6")).toBeUndefined();
-    expect(JSON.stringify(graph.edges)).not.toContain("agentVersion:omp:ge-15-5-6");
 
-    const evidence = getOntologyEvidenceSource("omp-15-5-9-release");
-    expect(evidence?.sourcePathOrUrl).toContain("can1357/oh-my-pi/releases/tag/v15.5.9");
+    expect(graph.nodes.find((entry) => entry.id === "agentVersion:gemini:ge-0-44-0")).toBeUndefined();
     expect(
-      graph.edges.some((edge) => edge.from === "evidence:omp-15-5-9-release" && edge.to === "agentVersion:omp:ge-15-5-9"),
-    ).toBe(true);
+      listCliGraphEdges({
+        fromNodeId: "agentVersion:gemini:ge-0-43-0",
+        relation: "sourced_from",
+      }).map((edge) => edge.toNodeId),
+    ).toContain("evidence:gemini-cli-0-44-0-release");
+
+    const evidence = getOntologyEvidenceSource("gemini-cli-0-44-0-release");
+    expect(evidence?.sourcePathOrUrl).toContain("google-gemini/gemini-cli/releases/tag/v0.44.0");
   });
 
   it("includes agent-platform as a distinct non-harness runtime agent and records richer Claude web evidence", () => {

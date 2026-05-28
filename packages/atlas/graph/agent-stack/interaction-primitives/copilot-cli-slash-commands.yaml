@@ -1,0 +1,38 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:copilot-slash-autopilot
+attributes:
+  displayName: "/autopilot"
+  description: |
+    GitHub Copilot CLI command that keeps autopilot focused on a supplied
+    objective.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:mode-control
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:mode-control
+  sourced_from:
+    - evidence:copilot-cli-1-0-55-6-release
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:copilot-slash-goal
+attributes:
+  displayName: "/goal"
+  description: |
+    GitHub Copilot CLI alias for `/autopilot <objective>`.
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:mode-control
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  in_category:
+    - target: interaction-primitive-category:mode-control
+  sourced_from:
+    - evidence:copilot-cli-1-0-55-6-release
+  realizes:
+    - target: layer:10-interaction
