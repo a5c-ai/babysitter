@@ -130,3 +130,29 @@ edges:
     - trust-level:official-web
   references:
     - agentVersion:copilot:ge-1-0-55-3
+---
+nodeKind: EvidenceSource
+id: evidence:pi-0-76-0-release
+attributes:
+  displayName: "Pi v0.76.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/earendil-works/pi/releases/tag/v0.76.0
+  sourcePathOrUrl: https://github.com/earendil-works/pi/releases/tag/v0.76.0
+  locator: "earendil-works/pi release v0.76.0"
+  capturedAt: "2026-05-28T14:55:00Z"
+  observedAt: "2026-05-28T14:55:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-28T14:55:00Z"
+  notes: |
+    Release notes list --session-id for exact project-local session creation
+    or resume, RPC bash excludeFromContext, bounded Codex Responses
+    WebSocket/SSE waits, retry.provider.maxRetries with SDK retries defaulting
+    to zero, and session-id cache-affinity headers replacing session_id.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:pi:ge-0-75-5

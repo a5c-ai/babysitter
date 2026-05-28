@@ -12,10 +12,13 @@ attributes:
     - PI_SESSION_ID
   argvMatches:
     - pi
+  argvFlags:
+    - "--session-id"
   consumer: agent-comm-mux
   metadataFields:
     - { key: session_id, envVars: [PI_SESSION_ID] }
     - { key: run_id,     envVars: [PI_RUN_ID] }
+    - { key: session_id_arg, argvFlag: "--session-id" }
 edges:
   applies_to:
     - target: agent:pi

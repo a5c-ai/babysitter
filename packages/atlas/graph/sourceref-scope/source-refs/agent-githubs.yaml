@@ -121,7 +121,7 @@ attributes:
   description: "Pi agent (GitHub)"
   displayName: "Pi agent (GitHub)"
   repoUrl: https://github.com/earendil-works/pi
-  ref: v0.75.5
+  ref: v0.76.0
   path: "."
   kind: github-repo
 edges: {}

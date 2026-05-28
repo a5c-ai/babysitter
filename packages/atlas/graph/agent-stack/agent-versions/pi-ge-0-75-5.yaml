@@ -16,8 +16,15 @@ attributes:
   versionRange: ">=0.76.0"
   currentVersion: "0.76.0"
   releasedAt: "2026-05-27"
+  upstreamReleaseTag: "v0.76.0"
   releaseNotesUrl: "https://github.com/earendil-works/pi/releases/tag/v0.76.0"
   cliCommand: "pi"
+  assimilationNotes:
+    - "Added --session-id <id> so automation can create or resume an exact project-local session."
+    - "RPC bash accepts excludeFromContext to keep selected command output out of the next prompt."
+    - "Codex Responses WebSocket/SSE waits are bounded by httpIdleTimeoutMs, websocketConnectTimeoutMs, and a 10s SSE response-header timeout."
+    - "retry.provider.maxRetries controls provider retries, SDK retries default to zero, and quota/billing 429s are not retried behind Pi's retry handling."
+    - "Codex Responses cache-affinity headers now send session-id instead of proxy-incompatible session_id."
   releaseHighlights:
     - "Added --session-id for scripts to create or resume an exact project-local session."
     - "RPC bash calls can pass excludeFromContext to keep command output out of the next prompt."
@@ -90,6 +97,23 @@ attributes:
           type: boolean
           introducedIn: "0.75.5"
           scope: custom-anthropic-compatible-model
+      retryFields:
+        providerMaxRetries:
+          path: "retry.provider.maxRetries"
+          introducedIn: "0.76.0"
+          notes: "Controls Pi provider retries; SDK retries default to zero."
+        httpIdleTimeoutMs:
+          path: "httpIdleTimeoutMs"
+          introducedIn: "0.76.0"
+          notes: "Applies to OpenAI Codex Responses WebSocket idle waits."
+        websocketConnectTimeoutMs:
+          path: "websocketConnectTimeoutMs"
+          introducedIn: "0.76.0"
+          notes: "Bounds OpenAI Codex Responses WebSocket connect waits."
+    sessionControls:
+      sessionIdFlag: "--session-id"
+      introducedIn: "0.76.0"
+      behavior: "Create or resume an exact project-local session ID."
     displayName: "Pi"
     defaultModelId: "default"
   interactiveSignals:
@@ -126,6 +150,8 @@ edges:
   uses_memory_system:
     - target: memory-system:pi-memory
   sourced_from: []
+  evidenced_by:
+    - evidence:pi-0-76-0-release
   supports:
     - target: capability:interactive-mode
       versionRange: ">=0.76.0"
