@@ -20,6 +20,7 @@ import {
 import { waitForProcessFile } from "./paths";
 import {
   assessWorkspaceForExternalAuthoring,
+  buildExternalProcessDefinitionPrompt,
   buildInternalProcessConformancePrompt,
 } from "./prompts";
 import {
@@ -69,26 +70,61 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
   );
   const workspaceAssessment = await assessWorkspaceForExternalAuthoring(args.workspace);
   writeVerboseData("phasePlanProcess workspace assessment", workspaceAssessment);
-  const processDefinitionSystemPrompt = await buildProcessDefinitionSystemPrompt(
-    args.outputDir,
-    args.promptContext,
-    args.interactive,
-  );
+  const resolvedBackend = resolveAgentCoreBackendForHarness(args.selectedHarnessName);
+  const isRawTextSession = !resolvedBackend;
+
+  let processDefinitionSystemPrompt: string;
+  let basePlanProcessPrompt: string;
+
+  if (isRawTextSession) {
+    // Raw agent-core session: no tool calling. Instruct the model to output
+    // the process definition as a code block in its response text.
+    processDefinitionSystemPrompt = [
+      "You are a babysitter process author. Your job is to write a complete ESM JavaScript process definition.",
+      "You do NOT have access to any tools — no file writing, no bash, no AskUserQuestion.",
+      "Instead, output the entire process file as a single fenced code block (```javascript ... ```).",
+      "",
+      "The code block must contain a complete, syntactically valid ESM module that:",
+      '- Imports defineTask from "@a5c-ai/babysitter-sdk"',
+      "- Exports `async function process(inputs, ctx)`",
+      "- Defines at least one task with defineTask(...) and invokes it via ctx.task(...)",
+      "- Uses `agent` tasks for the main work (planning, implementation, verification)",
+      "- Does NOT use `node` kind effects",
+      "",
+      "Do NOT output explanations, markdown headers, or commentary outside the code block.",
+      "Output ONLY the code block with the complete process file.",
+    ].join("\n");
+    basePlanProcessPrompt = buildExternalProcessDefinitionPrompt({
+      prompt: args.prompt,
+      outputDir: args.outputDir,
+      workspace: args.workspace,
+      promptContext: args.promptContext,
+      workspaceAssessment,
+      preferAgentOnlyTasks: args.invocationCommand === "call",
+    });
+  } else {
+    processDefinitionSystemPrompt = await buildProcessDefinitionSystemPrompt(
+      args.outputDir,
+      args.promptContext,
+      args.interactive,
+    );
+    basePlanProcessPrompt = buildProcessDefinitionUserPrompt(
+      args.prompt,
+      args.outputDir,
+      {
+        interactive: args.interactive,
+        workspaceAssessment: workspaceAssessment.kind,
+        workspaceEntries: workspaceAssessment.entries,
+        preferAgentOnlyTasks: args.invocationCommand === "call",
+      },
+    );
+  }
+
   const intentPrompt = buildUnderstandIntentPrompt({
     prompt: args.prompt,
     interactive: args.interactive,
     workspaceAssessment,
   });
-  const basePlanProcessPrompt = buildProcessDefinitionUserPrompt(
-    args.prompt,
-    args.outputDir,
-    {
-      interactive: args.interactive,
-      workspaceAssessment: workspaceAssessment.kind,
-      workspaceEntries: workspaceAssessment.entries,
-      preferAgentOnlyTasks: args.invocationCommand === "call",
-    },
-  );
   writeVerboseData("phasePlanProcess system prompt", processDefinitionSystemPrompt);
   writeVerboseData("phaseUnderstandIntent prompt", intentPrompt);
   const planProcessToolsMode: AgentCoreSessionOptions["toolsMode"] =
@@ -98,11 +134,11 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
   sessionRef.current = createAgentCoreSession({
     workspace: args.workspace,
     model: args.model,
-    backend: resolveAgentCoreBackendForHarness(args.selectedHarnessName),
-    thinkingLevel: "low",
-    toolsMode: planProcessToolsMode,
-    customTools: mergedCustomTools,
-    uiContext: interactiveUiContext,
+    backend: resolvedBackend,
+    thinkingLevel: isRawTextSession ? undefined : "low",
+    toolsMode: isRawTextSession ? undefined : planProcessToolsMode,
+    customTools: isRawTextSession ? undefined : mergedCustomTools,
+    uiContext: isRawTextSession ? undefined : interactiveUiContext,
     systemPrompt: processDefinitionSystemPrompt,
     isolated: true,
     ephemeral: true,
