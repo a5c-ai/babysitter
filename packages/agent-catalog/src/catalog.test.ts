@@ -202,31 +202,38 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(claims.get("repo-transport-mux-readme")?.status).toBe("provisional");
   });
 
-  it("records Claude Code 2.1.152 user-facing hook, skill, and plugin changes", () => {
-    const version = getAgentVersion("claude-code", "2.1.152");
+  it("records Claude Code 2.1.153 user-facing plugin, status-line, MCP, and keybinding changes", () => {
+    const version = getAgentVersion("claude-code", "2.1.153");
     const graph = getCatalogGraphSnapshot();
     const node = graph.nodes.find((entry) => entry.id === "agentVersion:claude:ge-0-0-0");
 
-    expect(version?.versionRange).toBe(">=2.1.152");
-    expect(node?.releaseNotesUrl).toContain("anthropics/claude-code/releases/tag/v2.1.152");
+    expect(version?.versionRange).toBe(">=2.1.153");
+    expect(node?.releaseNotesUrl).toContain("anthropics/claude-code/releases/tag/v2.1.153");
     expect(node?.assimilationNotes).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("MessageDisplay hook event"),
-        expect.stringContaining("/reload-skills"),
-        expect.stringContaining("plugin marketplace remove accepts --scope"),
+        expect.stringContaining("skipLfs"),
+        expect.stringContaining("COLUMNS and LINES"),
+        expect.stringContaining("strict-mcp-config"),
+        expect.stringContaining("modelPicker:thisSessionOnly"),
       ]),
     );
 
-    const evidence = getOntologyEvidenceSource("claude-code-2-1-152-release");
-    expect(evidence?.sourcePathOrUrl).toContain("anthropics/claude-code/releases/tag/v2.1.152");
+    const evidence = getOntologyEvidenceSource("claude-code-2-1-153-release");
+    expect(evidence?.sourcePathOrUrl).toContain("anthropics/claude-code/releases/tag/v2.1.153");
 
-    expect(graph.nodes.find((entry) => entry.id === "hook-surface:claude.message-display")).toBeDefined();
-    expect(listOntologyNodesByKind("InteractionPrimitive").find((entry) => entry.id === "interaction-primitive:slash-reload-skills")).toBeDefined();
-    expect(listOntologyNodesByKind("FrontmatterField").find((entry) => entry.id === "frontmatter-field:skill-disallowed-tools")).toBeDefined();
+    const ui = listOntologyNodesByKind("AgentUIImpl").find((entry) => entry.id === "agent-ui-impl:claude-code.ui@current");
+    expect(JSON.stringify(ui)).toContain("COLUMNS");
+    expect(JSON.stringify(ui)).toContain("PR #N");
+    expect(JSON.stringify(ui)).toContain("modelPicker:thisSessionOnly");
 
     const platform = listOntologyNodesByKind("AgentPlatformImpl").find((entry) => entry.id === "agent-platform-impl:claude-code.platform@1.x");
-    expect(JSON.stringify(platform)).toContain("pluginSuggestionMarketplaces");
-    expect(JSON.stringify(platform)).toContain("--scope project");
+    expect(JSON.stringify(platform)).toContain("skipLfs");
+    expect(JSON.stringify(platform)).toContain("globalNpmAutoUpdateFailureNotice");
+
+    const runtime = listOntologyNodesByKind("AgentRuntimeImpl").find((entry) => entry.id === "agent-runtime-impl:claude-code.runtime@1.x");
+    expect(JSON.stringify(runtime)).toContain("--strict-mcp-config");
+    expect(JSON.stringify(runtime)).toContain("--bare");
+    expect(JSON.stringify(runtime)).toContain("combinedMcpServerAndConnectorAuthNotices");
   });
 
   it("records OpenCode 1.15.11 upstream release assimilation", () => {

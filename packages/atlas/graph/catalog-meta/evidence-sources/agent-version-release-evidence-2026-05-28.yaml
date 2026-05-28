@@ -1,0 +1,26 @@
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-153-release
+attributes:
+  displayName: "Claude Code v2.1.153 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.153
+  sourcePathOrUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.153
+  locator: "anthropics/claude-code release v2.1.153"
+  capturedAt: "2026-05-28T14:55:00Z"
+  observedAt: "2026-05-28T14:55:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-28T14:55:00Z"
+  notes: |
+    Release notes list plugin marketplace skipLfs support for github/git
+    sources, npm auto-update diagnostics, status-line COLUMNS/LINES env
+    propagation, claude agents autocomplete and PR column formatting, combined
+    MCP auth startup notices, subagent MCP policy fixes, and the model picker
+    keybinding migration to modelPicker:thisSessionOnly.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:ge-0-0-0
