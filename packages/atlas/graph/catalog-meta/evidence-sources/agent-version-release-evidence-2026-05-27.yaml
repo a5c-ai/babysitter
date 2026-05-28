@@ -80,28 +80,30 @@ edges:
     - agentVersion:opencode:ge-0-0-0
 ---
 nodeKind: EvidenceSource
-id: evidence:omp-15-5-6-release
+id: evidence:omp-15-5-9-release
 attributes:
-  displayName: "Oh-My-Pi v15.5.6 release notes"
+  displayName: "Oh-My-Pi v15.5.7 through v15.5.9 release notes"
   kindLabel: release-notes
   trustLevel: trust-level:official-web
-  sourceUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.5.6
-  sourcePathOrUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.5.6
-  locator: "can1357/oh-my-pi release v15.5.6"
-  capturedAt: "2026-05-27T16:35:00Z"
-  observedAt: "2026-05-27T16:35:00Z"
+  sourceUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.5.9
+  sourcePathOrUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.5.9
+  locator: "can1357/oh-my-pi releases v15.5.7, v15.5.8, and v15.5.9"
+  capturedAt: "2026-05-28T13:15:00Z"
+  observedAt: "2026-05-28T13:15:00Z"
   observedBy: codex-babysitter-yolo
   freshnessWindowDays: 45
   reviewOwner: "@a5c-ai/catalog"
-  reviewedAt: "2026-05-27T16:35:00Z"
+  reviewedAt: "2026-05-28T13:15:00Z"
   notes: |
-    Release notes list Codex WebSocket idle-reuse controls and recovery plus
-    URL/directory selector parsing improvements.
+    Release notes list OpenRouter model variants, xAI Grok OAuth and
+    OpenRouter login validation, credential completion probes, Wafer Pass and
+    Wafer Serverless providers, compressed native-addon archives, native addon
+    cache reuse, and native archive-entry validation.
 edges:
   has_trust_level:
     - trust-level:official-web
   references:
-    - agentVersion:omp:ge-15-5-6
+    - agentVersion:omp:ge-15-5-9
 ---
 nodeKind: EvidenceSource
 id: evidence:copilot-cli-1-0-55-3-release
@@ -132,26 +134,27 @@ edges:
     - agentVersion:copilot:ge-1-0-55-3
 ---
 nodeKind: EvidenceSource
-id: evidence:cursor-3-5-release
+id: evidence:pi-0-76-0-release
 attributes:
-  displayName: "Cursor 3.5 shared canvases release notes"
+  displayName: "Pi v0.76.0 release notes"
   kindLabel: release-notes
   trustLevel: trust-level:official-web
-  sourceUrl: https://cursor.com/changelog/shared-canvases
-  sourcePathOrUrl: https://cursor.com/changelog/shared-canvases
-  locator: "Cursor changelog entry: Shared Canvases and /loop Skill"
-  capturedAt: "2026-05-28T14:57:00Z"
-  observedAt: "2026-05-28T14:57:00Z"
+  sourceUrl: https://github.com/earendil-works/pi/releases/tag/v0.76.0
+  sourcePathOrUrl: https://github.com/earendil-works/pi/releases/tag/v0.76.0
+  locator: "earendil-works/pi release v0.76.0"
+  capturedAt: "2026-05-28T14:55:00Z"
+  observedAt: "2026-05-28T14:55:00Z"
   observedBy: codex-babysitter-yolo
   freshnessWindowDays: 45
   reviewOwner: "@a5c-ai/catalog"
-  reviewedAt: "2026-05-28T14:57:00Z"
+  reviewedAt: "2026-05-28T14:55:00Z"
   notes: |
-    Cursor 3.5 release notes announce shared canvases for live snapshots of
-    agent-created artifacts, Cursor Dashboard read-only access on Pro, Teams,
-    and Enterprise plans, and the /loop skill for repeated local agent work.
+    Release notes list --session-id for exact project-local session creation
+    or resume, RPC bash excludeFromContext, bounded Codex Responses
+    WebSocket/SSE waits, retry.provider.maxRetries with SDK retries defaulting
+    to zero, and session-id cache-affinity headers replacing session_id.
 edges:
   has_trust_level:
     - trust-level:official-web
   references:
-    - agentVersion:cursor:ge-0-0-0
+    - agentVersion:pi:ge-0-75-5
