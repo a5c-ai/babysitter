@@ -13,7 +13,7 @@ attributes:
     - "macos"
     - "windows"
   agentProductId: agent:cursor
-  versionRange: ">=3.5"
+  versionRange: ">=0.0.0"
   currentVersion: "3.5"
   releasedAt: "2026-05-20"
   releaseNotesUrl: "https://cursor.com/changelog/shared-canvases"

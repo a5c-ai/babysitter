@@ -43,3 +43,10 @@ edges:
     - target: interaction-primitive:file-attachment
       attributes:
         mechanism: ui-control
+    - target: interaction-primitive:slash-loop
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/loop"
+    - target: interaction-primitive:cursor-shared-canvas
+      attributes:
+        mechanism: native-api
