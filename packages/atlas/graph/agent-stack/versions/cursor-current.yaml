@@ -13,8 +13,15 @@ attributes:
     - "macos"
     - "windows"
   agentProductId: agent:cursor
-  versionRange: ">=0.0.0"
-  releasedAt: "2024-08-01"
+  versionRange: ">=3.5"
+  currentVersion: "3.5"
+  releasedAt: "2026-05-20"
+  releaseNotesUrl: "https://cursor.com/changelog/shared-canvases"
+  assimilationNotes:
+    - "Cursor 3.5 adds shared canvases so teams can share live snapshots of agent-created artifacts such as reports, dashboards, and custom interfaces."
+    - "Shared canvases are available from the Cursor Dashboard with read-only access on Pro, Teams, and Enterprise plans."
+    - "Cursor 3.5 adds a /loop skill for repeated agent work."
+    - "Install method remains curl -fsS https://cursor.com/install | bash."
   cliCommand: "cursor-agent"
   installMethods:
     - install:curl
