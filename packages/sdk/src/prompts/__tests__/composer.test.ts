@@ -234,6 +234,20 @@ describe('composeProcessCreatePrompt', () => {
     expect(output).toContain('Intent Fidelity Checks');
   });
 
+  it('includes reuse-audit pre-flight guidance for plan-only process creation', () => {
+    const output = composeProcessCreatePrompt(createPromptContextFromCatalog('codex'));
+    expect(output).toContain('Phase 0 -- REUSE-AUDIT');
+    expect(output).toContain('Reuse-audit findings (REVIEW BEFORE PROCEEDING)');
+    expect(output).toContain('.a5c/reuse-audit.json');
+  });
+
+  it('includes reuse-audit instructions in interactive and non-interactive planning paths', () => {
+    const output = composeProcessCreatePrompt(createPromptContextFromCatalog('codex'));
+    expect(output).toContain('For `babysitter:plan` or plan-only requests');
+    expect(output).toContain('When running non-interactively');
+    expect(output).toContain('migrations, API routes, environment variables, SDK dependencies, and imports');
+  });
+
   it('does NOT include intent fidelity checks for Claude Code', () => {
     const output = composeProcessCreatePrompt(createPromptContextFromCatalog('claude-code'));
     expect(output).not.toContain('Intent Fidelity Checks');

@@ -41,6 +41,41 @@ profile read/write/merge operations MUST use the babysitter CLI commands
 `profile:render`). Never instruct agents to import or call SDK profile functions
 directly.
 
+**Phase 0 -- REUSE-AUDIT for `babysitter:plan`**: Before drafting a plan that
+introduces new infrastructure such as tables, migrations, API routes,
+environment variables, or SDK installs, run a targeted reuse audit:
+
+1. Extract keyword nouns and verbs from the user prompt.
+2. Scan existing migrations such as `supabase/migrations/*.sql` or the
+   framework-equivalent migration path for those keywords.
+3. Scan API route files such as `src/app/api/**/route.{ts,js}` and equivalent
+   framework route locations by filename and handler content.
+4. Scan environment-variable usage such as `process.env.*<KEYWORD>*` in source
+   files.
+5. Check package dependencies and source imports for SDKs matching the
+   keywords.
+6. If `.a5c/reuse-audit.json` exists, use its scan globs and keyword extraction
+   rules instead of hard-coding project assumptions.
+
+When producing a plan, render this block before Phase 1:
+
+```markdown
+## Reuse-audit findings (REVIEW BEFORE PROCEEDING)
+
+The following pre-existing infrastructure matches keywords from your prompt:
+
+- **Migration**: `<path>` -- `<finding>`. Consider extending this instead of adding a duplicate.
+- **Route**: `<path>` -- `<finding>`. Consider reusing or extending this route.
+- **Env var**: `<NAME>` -- already used by `<path>`. Consider reusing it.
+- **SDK**: `<package>` -- already declared or imported. Consider whether it can serve this feature.
+
+If any of the above changes your plan, revise BEFORE Phase 1.
+```
+
+If the audit finds no matches, still include the heading with a brief "No
+matching existing infrastructure found" note so reviewers know the pre-flight
+ran. Draft the plan with the reuse-audit findings in context.
+
 After the process is created and before creating the run:
 
 - **Interactive mode**: describe the process at high level (not the code or
