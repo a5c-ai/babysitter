@@ -442,14 +442,19 @@ jobs:
           LIVE_STACK_OMNI_BIN: ${{ github.workspace }}/packages/omni/dist/cli/main.js
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          AMUX_PROVIDER: foundry
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_PROJECT_NAME: ${{ vars.AZURE_OPENAI_PROJECT_NAME }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GOOGLE_CLOUD_PROJECT: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           GOOGLE_CLOUD_LOCATION: global
           GOOGLE_GENAI_USE_VERTEXAI: True
         run: |
-          # Verify omni can start
-          node packages/omni/dist/cli/main.js --help 2>&1 | head -3 || echo "OMNI STARTUP FAILED"
+          # Verify omni can start — capture and echo output for debugging
+          echo "::group::Omni startup check"
+          OMNI_CHECK=$(node packages/omni/dist/cli/main.js version 2>&1) && echo "omni ok: $OMNI_CHECK" || echo "OMNI STARTUP FAILED: $OMNI_CHECK"
+          echo "::endgroup::"
           START_TS=$(date +%s)
           npm run test:e2e:live-stack:pipeline
           npm run coverage:e2e:live-stack
