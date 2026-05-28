@@ -497,6 +497,25 @@ function openAiResponsesMessageItem(itemId: string, text: string, status: 'in_pr
   };
 }
 
+function openAiResponsesFunctionCallItem(input: {
+  readonly itemId: string;
+  readonly callId: string;
+  readonly name: string;
+  readonly argumentsText: string;
+  readonly status: 'in_progress' | 'completed';
+  readonly metadata?: Record<string, unknown>;
+}) {
+  return {
+    id: input.itemId,
+    type: 'function_call',
+    call_id: input.callId,
+    name: input.name,
+    arguments: input.argumentsText,
+    status: input.status,
+    ...input.metadata,
+  };
+}
+
 function openAiResponsesShape(input: {
   readonly id: string;
   readonly createdAt: number;
@@ -745,6 +764,7 @@ function openAiResponsesStreamResponse(
     new ReadableStream({
       async start(controller) {
         let outputText = '';
+        const outputItems: unknown[] = [];
         controller.enqueue(
           encoder.encode(
             encodeSseChunk('event: response.created\ndata: ', {
@@ -792,19 +812,52 @@ function openAiResponsesStreamResponse(
               );
             } else if (event.type === 'tool-call') {
               const toolItemId = `fc_${randomUUID()}`;
+              const callId = event.id ?? toolItemId;
+              const argumentsText = event.arguments ?? '';
+              const outputIndex = toolCallIndex + 1;
+              const completedToolItem = openAiResponsesFunctionCallItem({
+                itemId: toolItemId,
+                callId,
+                name: event.name,
+                argumentsText,
+                status: 'completed',
+                metadata: event.metadata,
+              });
               controller.enqueue(
                 encoder.encode(
                   encodeSseChunk('event: response.output_item.added\ndata: ', {
                     type: 'response.output_item.added',
-                    output_index: toolCallIndex + 1,
-                    item: {
-                      type: 'function_call',
-                      id: toolItemId,
-                      call_id: event.id ?? toolItemId,
+                    output_index: outputIndex,
+                    item: openAiResponsesFunctionCallItem({
+                      itemId: toolItemId,
+                      callId,
                       name: event.name,
-                      arguments: event.arguments ?? '',
-                      status: 'completed',
-                    },
+                      argumentsText: '',
+                      status: 'in_progress',
+                      metadata: event.metadata,
+                    }),
+                  }),
+                ),
+              );
+              if (argumentsText) {
+                controller.enqueue(
+                  encoder.encode(
+                    encodeSseChunk('event: response.function_call_arguments.delta\ndata: ', {
+                      type: 'response.function_call_arguments.delta',
+                      item_id: toolItemId,
+                      output_index: outputIndex,
+                      delta: argumentsText,
+                    }),
+                  ),
+                );
+              }
+              controller.enqueue(
+                encoder.encode(
+                  encodeSseChunk('event: response.function_call_arguments.done\ndata: ', {
+                    type: 'response.function_call_arguments.done',
+                    item_id: toolItemId,
+                    output_index: outputIndex,
+                    arguments: argumentsText,
                   }),
                 ),
               );
@@ -812,18 +865,12 @@ function openAiResponsesStreamResponse(
                 encoder.encode(
                   encodeSseChunk('event: response.output_item.done\ndata: ', {
                     type: 'response.output_item.done',
-                    output_index: toolCallIndex + 1,
-                    item: {
-                      type: 'function_call',
-                      id: toolItemId,
-                      call_id: event.id ?? toolItemId,
-                      name: event.name,
-                      arguments: event.arguments ?? '',
-                      status: 'completed',
-                    },
+                    output_index: outputIndex,
+                    item: completedToolItem,
                   }),
                 ),
               );
+              outputItems.push(completedToolItem);
               toolCallIndex++;
             }
           }
@@ -876,7 +923,7 @@ function openAiResponsesStreamResponse(
           encoder.encode(
             encodeSseChunk('event: response.completed\ndata: ', {
               type: 'response.completed',
-              response: openAiResponsesShape({ id: responseId, createdAt, config, status: 'completed', output: [messageItem] }),
+              response: openAiResponsesShape({ id: responseId, createdAt, config, status: 'completed', output: [messageItem, ...outputItems] }),
             }),
           ),
         );
@@ -904,6 +951,7 @@ async function sendOpenAiResponsesWebSocketStream(
   const itemId = `msg_${randomUUID()}`;
   const createdAt = Math.floor(Date.now() / 1000);
   let outputText = '';
+  const outputItems: unknown[] = [];
 
   ws.send(JSON.stringify({
     type: 'response.created',
@@ -922,6 +970,7 @@ async function sendOpenAiResponsesWebSocketStream(
     part: { type: 'output_text', text: '', annotations: [] },
   }));
 
+  let toolCallIndex = 0;
   for await (const event of stream) {
     if (event.type === 'text-delta' && event.text) {
       outputText += event.text;
@@ -933,30 +982,51 @@ async function sendOpenAiResponsesWebSocketStream(
         delta: event.text,
       }));
     } else if (event.type === 'tool-call') {
+      const toolItemId = `fc_${randomUUID()}`;
+      const callId = event.id ?? toolItemId;
+      const argumentsText = event.arguments ?? '';
+      const outputIndex = toolCallIndex + 1;
+      const completedToolItem = openAiResponsesFunctionCallItem({
+        itemId: toolItemId,
+        callId,
+        name: event.name,
+        argumentsText,
+        status: 'completed',
+        metadata: event.metadata,
+      });
       ws.send(JSON.stringify({
         type: 'response.output_item.added',
-        output_index: 1,
-        item: {
-          type: 'function_call',
-          id: event.id,
-          call_id: event.id,
+        output_index: outputIndex,
+        item: openAiResponsesFunctionCallItem({
+          itemId: toolItemId,
+          callId,
           name: event.name,
-          arguments: event.arguments,
-          ...event.metadata,
-        },
+          argumentsText: '',
+          status: 'in_progress',
+          metadata: event.metadata,
+        }),
+      }));
+      if (argumentsText) {
+        ws.send(JSON.stringify({
+          type: 'response.function_call_arguments.delta',
+          item_id: toolItemId,
+          output_index: outputIndex,
+          delta: argumentsText,
+        }));
+      }
+      ws.send(JSON.stringify({
+        type: 'response.function_call_arguments.done',
+        item_id: toolItemId,
+        output_index: outputIndex,
+        arguments: argumentsText,
       }));
       ws.send(JSON.stringify({
         type: 'response.output_item.done',
-        output_index: 1,
-        item: {
-          type: 'function_call',
-          id: event.id,
-          call_id: event.id,
-          name: event.name,
-          arguments: event.arguments,
-          ...event.metadata,
-        },
+        output_index: outputIndex,
+        item: completedToolItem,
       }));
+      outputItems.push(completedToolItem);
+      toolCallIndex++;
     }
   }
 
@@ -982,7 +1052,7 @@ async function sendOpenAiResponsesWebSocketStream(
   }));
   ws.send(JSON.stringify({
     type: 'response.completed',
-    response: openAiResponsesShape({ id: responseId, createdAt, config, status: 'completed', output: [messageItem] }),
+    response: openAiResponsesShape({ id: responseId, createdAt, config, status: 'completed', output: [messageItem, ...outputItems] }),
   }));
 }
 
