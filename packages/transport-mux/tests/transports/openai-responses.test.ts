@@ -127,6 +127,74 @@ describe('openai responses transport', () => {
     expect(engine.requests[0]?.transport).toBe('openai-responses');
   });
 
+  it('preserves function_call_output input items for Anthropic target tool results', async () => {
+    const engine = createMockCompletionEngine({ text: 'done' });
+    const app = createTestApp(
+      {
+        targetProvider: 'anthropic',
+        targetModel: 'anthropic/claude-sonnet-4-6',
+        exposedTransport: 'openai-responses',
+      },
+      engine,
+    );
+
+    const response = await app.request('/v1/responses', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer test-token',
+      },
+      body: JSON.stringify({
+        model: 'gpt-5-codex',
+        input: [
+          {
+            type: 'message',
+            role: 'user',
+            content: [{ type: 'input_text', text: 'write the odyssey artifact' }],
+          },
+          {
+            type: 'function_call',
+            call_id: 'toolu_write_file',
+            name: 'Write',
+            arguments: JSON.stringify({ file_path: '/tmp/odyssey.md', content: '# Odyssey' }),
+          },
+          {
+            type: 'function_call_output',
+            call_id: 'toolu_write_file',
+            output: 'created',
+          },
+        ],
+      }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(engine.requests[0]?.messages).toEqual([
+      {
+        role: 'user',
+        content: 'write the odyssey artifact',
+      },
+      {
+        role: 'assistant',
+        content: '',
+        rawContent: [{
+          type: 'tool_use',
+          id: 'toolu_write_file',
+          name: 'Write',
+          input: { file_path: '/tmp/odyssey.md', content: '# Odyssey' },
+        }],
+      },
+      {
+        role: 'tool',
+        content: 'created',
+        rawContent: [{
+          type: 'tool_result',
+          tool_use_id: 'toolu_write_file',
+          content: 'created',
+        }],
+      },
+    ]);
+  });
+
   it('streams responses events when requested', async () => {
     const engine = createMockCompletionEngine({ text: 'Proxy response' });
     const app = createTestApp(

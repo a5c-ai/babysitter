@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import type {
   CompletionRequest,
+  CompletionRequestMessage,
   CompletionResult,
   CompletionStreamEvent,
 } from '../types.js';
@@ -41,6 +42,95 @@ function textFromInput(input: unknown): string {
     .join(' ');
 }
 
+function parseJsonObject(value: unknown): Record<string, unknown> {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  if (typeof value !== 'string') {
+    return {};
+  }
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? parsed as Record<string, unknown>
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function responseInputMessages(input: unknown): CompletionRequestMessage[] {
+  if (typeof input === 'string') {
+    return input ? [{ role: 'user', content: input }] : [];
+  }
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  const messages: CompletionRequestMessage[] = [];
+  for (const entry of input) {
+    if (typeof entry === 'string') {
+      if (entry) messages.push({ role: 'user', content: entry });
+      continue;
+    }
+    if (!entry || typeof entry !== 'object') {
+      continue;
+    }
+
+    const record = entry as Record<string, unknown>;
+    const type = typeof record.type === 'string' ? record.type : undefined;
+
+    if (type === 'message') {
+      const role = typeof record.role === 'string' ? record.role : 'user';
+      const content = textFromInput(record.content);
+      messages.push({
+        role,
+        content,
+      });
+      continue;
+    }
+
+    if (type === 'function_call') {
+      const callId = String(record.call_id ?? record.id ?? '');
+      const name = String(record.name ?? '');
+      const rawContent = [{
+        type: 'tool_use',
+        id: callId,
+        name,
+        input: parseJsonObject(record.arguments),
+      }];
+      messages.push({
+        role: 'assistant',
+        content: '',
+        rawContent,
+      });
+      continue;
+    }
+
+    if (type === 'function_call_output') {
+      const callId = String(record.call_id ?? record.id ?? '');
+      const output = record.output;
+      const content = typeof output === 'string' ? output : textFromInput(output);
+      messages.push({
+        role: 'tool',
+        content,
+        rawContent: [{
+          type: 'tool_result',
+          tool_use_id: callId,
+          content: output ?? '',
+        }],
+      });
+      continue;
+    }
+
+    if (type === 'input_text' && typeof record.text === 'string') {
+      messages.push({ role: 'user', content: record.text });
+    }
+  }
+
+  return messages;
+}
+
 export class OpenAiResponsesCodec implements TransportCodec {
   readonly transportId = 'openai-responses';
 
@@ -54,11 +144,12 @@ export class OpenAiResponsesCodec implements TransportCodec {
 
   decodeRequest(body: Record<string, unknown>): CompletionRequest {
     const input = textFromInput(body.input);
+    const messages = responseInputMessages(body.input);
 
     return {
       model: typeof body.model === 'string' ? body.model : 'mock-model',
       transport: this.transportId,
-      messages: input ? [{ role: 'user', content: input }] : [],
+      messages,
       tools: Array.isArray(body.tools) ? body.tools : undefined,
       toolChoice: body.tool_choice ?? body.toolChoice ?? undefined,
       stream: body.stream === true,
