@@ -249,6 +249,21 @@ describe('live stack scenario contract primitives', () => {
     }
   });
 
+  it('routes unsupported BP gpt-5.4-mini dispatch cells to a stronger model', () => {
+    for (const workflowPath of ['.github/workflows/live-stack.yml', '.github/workflows/live-stack-published.yml']) {
+      const workflow = fs.readFileSync(workflowPath, 'utf8');
+
+      expect(workflow).toContain('LIVE_STACK_OS:');
+      expect(workflow).toContain('function miniBpSupported(entry)');
+      expect(workflow).toContain("if ((entry.process_mode || 'predefined') !== 'resume') return false;");
+      expect(workflow).toContain("if (entry.mode === 'interactive') return entry.agent === 'codex' || entry.agent === 'pi';");
+      expect(workflow).toContain("if (entry.mode === 'bridged-hooks') return entry.agent === 'pi' && !String(process.env.LIVE_STACK_OS || '').startsWith('windows');");
+      expect(workflow).toContain("return selected.model === 'gpt-5.4-mini' && !miniBpSupported(entry) ? models['foundry-gpt55'] : selected;");
+      expect(workflow).toContain('const m = modelFor(entry);');
+      expect(workflow).not.toContain("const m = models[entry.model] || models['foundry-gpt55'];");
+    }
+  });
+
   it('bounds live-stack artifact upload time', () => {
     const workflow = fs.readFileSync('.github/workflows/live-stack.yml', 'utf8');
     expect(workflow).toMatch(/- name: Upload live stack artifacts[\s\S]*?timeout-minutes:\s*1/);

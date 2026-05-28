@@ -71,6 +71,7 @@ jobs:
         id: matrix
         env:
           DISPATCH_MATRIX: ${{ inputs.matrix }}
+          LIVE_STACK_OS: ${{ inputs.os || 'ubuntu-latest-l' }}
         run: |
           set -euo pipefail
           if [ -n "${DISPATCH_MATRIX:-}" ] && [ "${DISPATCH_MATRIX:-}" != "null" ] && [ "${DISPATCH_MATRIX:-}" != "" ]; then
@@ -101,9 +102,20 @@ jobs:
                 'vanilla': {id:'vanilla', required_trace_ids:'agentMuxRunId,agentMuxSessionId,transportTraceId', expected_artifacts:'agent-mux-events,transport-mux-trace,provider-trace-redacted'},
                 'bp': {id:'babysitter-plugin', required_trace_ids:'agentMuxRunId,agentMuxSessionId,transportTraceId', expected_artifacts:'agent-mux-events,plugin-command-transcript,transport-mux-trace,provider-trace-redacted'},
               };
+              function miniBpSupported(entry) {
+                if (entry.install !== 'bp') return true;
+                if ((entry.process_mode || 'predefined') !== 'resume') return false;
+                if (entry.mode === 'interactive') return entry.agent === 'codex' || entry.agent === 'pi';
+                if (entry.mode === 'bridged-hooks') return entry.agent === 'pi' && !String(process.env.LIVE_STACK_OS || '').startsWith('windows');
+                return false;
+              }
+              function modelFor(entry) {
+                const selected = models[entry.model] || models['foundry-gpt55'];
+                return selected.model === 'gpt-5.4-mini' && !miniBpSupported(entry) ? models['foundry-gpt55'] : selected;
+              }
               function toScenario(entry) {
                 const a = agents[entry.agent] || {agent: entry.agent, amux_agent: entry.agent};
-                const m = models[entry.model] || models['foundry-gpt55'];
+                const m = modelFor(entry);
                 return {
                   id: 'live.agent-mux.' + a.agent + '.' + m.provider + '.' + m.model,
                   agent_path: 'agent-mux', agent: a.agent, amux_agent: a.amux_agent,
