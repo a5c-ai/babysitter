@@ -1,0 +1,92 @@
+{
+  "issueNumber": 367,
+  "title": "Global babysitter shim can point to missing SDK CLI module",
+  "baseBranch": "staging",
+  "plannedProcessEntry": ".a5c/processes/issue-367-global-babysitter-shim-preflight.mjs#process",
+  "labels": [
+    "bug",
+    "sdk",
+    "priority:high",
+    "effort:medium",
+    "ready-for-dev",
+    "plugins",
+    "ci"
+  ],
+  "issueBody": "# Bug report: global `babysitter` shim exists but points to missing SDK CLI module\n\n## Summary\n\nThe global `babysitter` executable can exist on PATH while failing immediately because its target SDK module is missing. This makes Babysitter skills such as `/skill:yolo`, `/babysitter:cleanup`, and `/babysitter:contrib` appear available but unusable at runtime.\n\n## Environment\n\n- Harness: Pi\n- OS/workspace: Windows workspace using Git Bash/PowerShell paths\n- Node observed: `v24.14.0`\n- Shim path found by `where babysitter`:\n  - `C:\\Users\\maksi\\AppData\\Roaming\\npm\\babysitter`\n  - `C:\\Users\\maksi\\AppData\\Roaming\\npm\\babysitter.cmd`\n\n## Reproduction\n\nRun:\n\n```bash\nbabysitter instructions:babysit-skill --harness pi --no-interactive\n```\n\nor:\n\n```bash\nbabysitter --version\n```\n\n## Actual result\n\n```text\nnode:internal/modules/cjs/loader:1459\n  throw err;\n  ^\n\nError: Cannot find module 'C:\\Users\\maksi\\AppData\\Roaming\\npm\\node_modules\\@a5c-ai\\babysitter-sdk\\dist\\cli\\main.js'\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1456:15)\n...\ncode: 'MODULE_NOT_FOUND'\nNode.js v24.14.0\n```\n\n## Expected result\n\nOne of:\n\n1. The shim runs normally; or\n2. Babysitter skill instructions include a robust preflight/repair path when the shim exists but points to a missing SDK module.\n\n## Impact\n\n- `/skill:yolo` could not actually orchestrate a requested run.\n- `/babysitter:cleanup` and `/babysitter:contrib` process routing could not be executed through the intended CLI.\n- The agent had to fall back to manual execution despite the Babysitter skill being invoked.\n\n## Suggested fix\n\n- Add a preflight command in Babysitter Pi skill instructions that validates not just `where/which babysitter`, but also that the target module exists and `babysitter --version` exits successfully.\n- If validation fails, print or run a repair command, e.g. reinstall the SDK globally or route through a known-good `npx` package/bin invocation.\n- The existing `npx -y @a5c-ai/babysitter-sdk@latest babysitter ...` fallback also failed with `npm error could not determine executable to run`, so the documented fallback should be verified against the package's actual `bin` metadata.\n",
+  "triageComment": "Triage Summary: The `babysitter` command can be present on PATH but fail before orchestration starts because the shim resolves to a missing SDK CLI module; the documented npx fallback is also ambiguous. Root cause notes: packages/babysitter/bin/babysitter.js requires @a5c-ai/babysitter-sdk/dist/cli/main.js directly. @a5c-ai/babysitter@latest resolves to 5.0.0 and depends on @a5c-ai/babysitter-sdk@5.0.0; live npx -y @a5c-ai/babysitter@latest --version reproduced the missing-module failure. The Babysitter skill setup fallback in packages/sdk/src/prompts/contextShared.ts and .codex/skills/babysit/SKILL.md uses CLI=\"npx -y @a5c-ai/babysitter-sdk...\". Live npx -y @a5c-ai/babysitter-sdk@latest --version fails with npm error could not determine executable to run; npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter --version succeeds. Existing doctor guidance checks command -v babysitter && babysitter --version, but the yolo/babysit setup path and troubleshooting docs do not yet provide a robust repair path for the case where the shim exists but is broken. Suggested approach: validate executable with command -v babysitter && babysitter --version, use explicit-bin npm fallback such as npm exec --yes --package @a5c-ai/babysitter-sdk@$SDK_VERSION -- babysitter, add stale global shim repair message/path, fix npm dist-tags/dependencies or publish fixed metapackage version, and add a release/package guard for npm pack contents, metapackage shim, npm exec SDK bin, and npx metapackage behavior.",
+  "affectedComponents": [
+    "@a5c-ai/babysitter-sdk CLI/install instructions",
+    "@a5c-ai/babysitter metapackage shim and dependency versioning",
+    "Babysitter plugin skills/docs",
+    "publish/tag validation for npm package releases"
+  ],
+  "expectedBehavior": "The setup path either runs a healthy `babysitter` CLI or gives a verified fallback/repair path when the global shim exists but points at a missing SDK CLI module.",
+  "actualBehavior": "A stale or broken global shim can exist on PATH and fail with MODULE_NOT_FOUND before Babysitter orchestration starts; the documented SDK npx fallback is ambiguous for the package bin metadata.",
+  "constraints": [
+    "Use agent tasks rather than kind: 'shell' subtasks for this direct Babysitter workflow.",
+    "Do not perform npm publish or npm dist-tag mutation from the implementation run.",
+    "Keep breakpoints sparse and only for release/install ambiguity or repeated failed quality gates.",
+    "Preserve public CLI command behavior while changing setup guidance and validation."
+  ],
+  "targetFiles": [
+    "packages/sdk/src/prompts/contextShared.ts",
+    "packages/sdk/src/prompts/__tests__/contextDetect.test.ts",
+    "packages/sdk/src/prompts/__tests__/templateRenderer.test.ts",
+    "packages/sdk/src/cli/commands/__tests__/instructions.test.ts",
+    "packages/sdk/src/cli/commands/health/checks.ts",
+    "packages/sdk/src/cli/commands/health/output.ts",
+    "packages/sdk/src/cli/commands/__tests__/plugin-lifecycle.test.ts",
+    "packages/sdk/scripts/smoke-cli.js",
+    "packages/sdk/package.json",
+    "packages/sdk/README.md",
+    "packages/babysitter/bin/babysitter.js",
+    "packages/babysitter/package.json",
+    ".codex/skills/babysit/SKILL.md",
+    ".github/workflows/publish-packages-from-tag.yml",
+    ".github/workflows/publish.yml"
+  ],
+  "allowedChangedFiles": [
+    "packages/sdk/src/prompts/contextShared.ts",
+    "packages/sdk/src/prompts/__tests__/contextShared.test.ts",
+    "packages/sdk/src/prompts/__tests__/contextDetect.test.ts",
+    "packages/sdk/src/prompts/__tests__/templateRenderer.test.ts",
+    "packages/sdk/src/cli/commands/__tests__/instructions.test.ts",
+    "packages/sdk/src/cli/commands/health/checks.ts",
+    "packages/sdk/src/cli/commands/health/output.ts",
+    "packages/sdk/src/cli/commands/__tests__/health.test.ts",
+    "packages/sdk/scripts/smoke-cli.js",
+    "packages/sdk/scripts/verify-package-health.cjs",
+    "packages/sdk/package.json",
+    "packages/sdk/README.md",
+    "packages/babysitter/bin/babysitter.js",
+    "packages/babysitter/package.json",
+    "packages/babysitter/bin/__tests__/babysitter.test.js",
+    ".codex/skills/babysit/SKILL.md",
+    ".github/workflows/publish-packages-from-tag.yml",
+    ".github/workflows/publish.yml"
+  ],
+  "testTargets": [
+    "packages/sdk/src/prompts/__tests__",
+    "packages/sdk/src/cli/commands/__tests__/instructions.test.ts",
+    "packages/sdk/src/cli/commands/__tests__/health.test.ts",
+    "packages/sdk/scripts/smoke-cli.js",
+    "packages/babysitter/bin/babysitter.js"
+  ],
+  "qualityCommands": [
+    "npm exec --workspace=@a5c-ai/babysitter-sdk -- vitest run src/prompts/__tests__ src/cli/commands/__tests__/instructions.test.ts",
+    "npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk",
+    "npm pack --json --dry-run --workspace=@a5c-ai/babysitter-sdk",
+    "npm run test:sdk",
+    "npm run build:sdk",
+    "npm run verify:metadata"
+  ],
+  "packageHealthChecks": [
+    "After `npm run build:sdk`, assert `packages/sdk/dist/cli/main.js` exists and is included by `npm pack --json --dry-run --workspace=@a5c-ai/babysitter-sdk`.",
+    "In a temporary directory, verify `npm exec --yes --package @a5c-ai/babysitter-sdk@<candidate> -- babysitter --version` invokes the SDK CLI explicitly.",
+    "Verify docs/generated snippets do not depend on ambiguous `npx -y @a5c-ai/babysitter-sdk@<version>` package execution.",
+    "Verify the @a5c-ai/babysitter metapackage shim can resolve `@a5c-ai/babysitter-sdk/dist/cli/main.js` when installed from packed artifacts.",
+    "Verify a simulated existing shim whose SDK target module is missing is rejected by preflight and routed to repair/fallback guidance."
+  ],
+  "maxVerificationAttempts": 2,
+  "branch": "plan/issue-367"
+}

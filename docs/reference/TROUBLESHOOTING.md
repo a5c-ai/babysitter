@@ -32,10 +32,10 @@ Run these commands first to get an overview of your setup:
 # Check runtime health
 
 # Check SDK CLI version
-npx -y @a5c-ai/babysitter-sdk@latest --version
+npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter --version
 
 # Check a specific run status
-CLI="npx -y @a5c-ai/babysitter-sdk@latest"
+CLI="npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter"
 $CLI run:status <runId> --json
 
 # View recent events for a run
@@ -61,7 +61,7 @@ $CLI task:list <runId> --pending --json
 **Step 1: Check task status and result**
 
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk@latest"
+CLI="npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter"
 
 # List all tasks
 $CLI task:list <runId> --json
@@ -269,7 +269,7 @@ echo "[DEBUG] Payload saved to /tmp/hook-debug-$$.json" >&2
 **Step 1: Verify journal integrity**
 
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk@latest"
+CLI="npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter"
 
 # List all events (will error if corrupted)
 $CLI run:events <runId> --json
@@ -523,7 +523,7 @@ jq --version
 **Step 3: Check SDK CLI**
 
 ```bash
-npx -y @a5c-ai/babysitter-sdk@latest --version
+npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter --version
 ```
 
 **Step 4: Check plugin structure**
@@ -574,8 +574,8 @@ scoop install jq
 # Install globally
 npm install -g @a5c-ai/babysitter-sdk@latest
 
-# Or use npx (no install required)
-npx -y @a5c-ai/babysitter-sdk@latest --version
+# Or use npm exec with an explicit package/bin (no install required)
+npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter --version
 ```
 
 **Fix plugin structure:**
@@ -588,15 +588,15 @@ npm --prefix /tmp/babysitter-fresh install
 npm --prefix /tmp/babysitter-fresh run generate:plugins
 ```
 
-**Clear npx cache:**
+**Clear npm exec cache:**
 
-If npx returns stale versions:
+If npm exec returns stale package data:
 
 ```bash
-npx --cache clear
+npm cache verify
 
 # Or specify latest explicitly
-npx -y @a5c-ai/babysitter-sdk@latest --version
+npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter --version
 ```
 
 ### Prevention
@@ -741,8 +741,8 @@ A: Node.js v18 or later is required. Check with `node --version`.
 A:
 ```bash
 npm install -g @a5c-ai/babysitter-sdk@latest
-# Or use npx which always gets latest:
-npx -y @a5c-ai/babysitter-sdk@latest
+# Or use npm exec with an explicit package/bin:
+npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter
 ```
 
 ### Run Management
@@ -869,9 +869,9 @@ $CLI task:list <runId> --pending --json | jq '.tasks'
 ### CLI Help
 
 ```bash
-npx -y @a5c-ai/babysitter-sdk@latest --help
-npx -y @a5c-ai/babysitter-sdk@latest run:create --help
-npx -y @a5c-ai/babysitter-sdk@latest task:post --help
+npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter --help
+npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter run:create --help
+npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter task:post --help
 ```
 
 ### Useful Diagnostic Data to Collect

@@ -1406,6 +1406,9 @@ jobs:
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
 
+      - name: Verify SDK package health
+        run: npm run verify:package-health --workspace=@a5c-ai/babysitter-sdk
+
       - name: Publish babysitter SDK
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -29,12 +29,19 @@ Read the SDK version from `versions.json` to ensure version compatibility:
 
 ```bash
 SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${CODEX_PLUGIN_ROOT}/versions.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}")
-npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
-
-CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"
 ```
 
-If `babysitter` is already installed globally at the correct version, you may use `CLI="babysitter"` instead.
+Use an installed `babysitter` command only after proving it can execute:
+
+```bash
+if command -v babysitter >/dev/null 2>&1 && babysitter --version >/dev/null 2>&1; then
+  CLI="babysitter"
+else
+  CLI="npm exec --yes --package @a5c-ai/babysitter-sdk@$SDK_VERSION -- babysitter"
+fi
+```
+
+If a stale or broken global shim fails with `MODULE_NOT_FOUND`, repair it with `npm rm -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk && npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION`, then re-run `babysitter --version`.
 
 ### jq
 

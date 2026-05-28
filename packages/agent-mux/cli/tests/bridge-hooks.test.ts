@@ -211,6 +211,38 @@ describe('BridgeHookEmulator', () => {
       expect(usesCustomBin || usesBabysitter).toBe(true);
     });
 
+    it('resolves Windows npm shims from Path without shell splitting handler args', async () => {
+      const fs = await import('node:fs/promises');
+      const os = await import('node:os');
+      const path = await import('node:path');
+      const originalPlatform = Object.getOwnPropertyDescriptor(process, 'platform');
+      const shimDir = await fs.mkdtemp(path.join(os.tmpdir(), 'hooks-mux-shim-'));
+      const hooksMuxMain = path.join(shimDir, 'node_modules', '@a5c-ai', 'hooks-mux-cli', 'dist', 'cli', 'main.js');
+      await fs.mkdir(path.dirname(hooksMuxMain), { recursive: true });
+      await fs.writeFile(path.join(shimDir, 'a5c-hooks-mux.cmd'), `@"%~dp0\\node.exe" "${hooksMuxMain}" %*\n`);
+
+      try {
+        Object.defineProperty(process, 'platform', { value: 'win32' });
+        getHookSupportMock.mockReturnValue({ sessionStart: 'unsupported' });
+        spawnSyncMock.mockReturnValue({ status: 0, stdout: '{"runId":"run-shim"}', stderr: '' });
+
+        const emulator = await createEmulator({ env: { Path: shimDir } });
+        const result = await emulator.emulateSessionStart();
+
+        expect(result.runId).toBe('run-shim');
+        expect(spawnSyncMock).toHaveBeenCalled();
+        const [bin, args, options] = spawnSyncMock.mock.calls[0]!;
+        expect(bin).toBe(process.execPath);
+        expect(args[0]).toBe(hooksMuxMain);
+        expect(args).toContain('--handler');
+        expect(args).toContain('babysitter hook:run --hook-type session-start --harness codex --json --runs-dir /tmp/runs:babysitter-session-start');
+        expect(options.shell).toBe(false);
+      } finally {
+        if (originalPlatform) Object.defineProperty(process, 'platform', originalPlatform);
+        await fs.rm(shimDir, { recursive: true, force: true });
+      }
+    });
+
     it('returns emulated:true even if babysitter CLI throws (non-fatal)', async () => {
       getHookSupportMock.mockReturnValue({ sessionStart: 'emulated' });
       // execCommand throws when spawnSync returns non-zero status

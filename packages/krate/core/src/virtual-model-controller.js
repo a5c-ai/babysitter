@@ -4,6 +4,7 @@
 // observability injection.
 
 import { globalEventBus } from './event-bus.js';
+import vm from 'node:vm';
 
 export const VIRTUAL_MODEL_CONTROLLER_BOUNDARY = {
   role: 'virtual-model-controller',
@@ -198,8 +199,17 @@ export function createVirtualModelController(options = {}) {
       if (!hookBody || typeof hookBody !== 'string') return null;
 
       try {
-        const fn = new Function('args', 'context', hookBody);
-        return fn(args, context);
+        const sandbox = {
+          args: Object.freeze(JSON.parse(JSON.stringify(args || {}))),
+          context: Object.freeze(JSON.parse(JSON.stringify(context || {}))),
+          result: null,
+          JSON, Math, Date, String, Number, Array, Object, Boolean, RegExp,
+          parseInt, parseFloat, isNaN, isFinite, encodeURIComponent, decodeURIComponent,
+        };
+        const script = new vm.Script(`result = (function(args, context) { ${hookBody} })(args, context);`);
+        const vmContext = vm.createContext(sandbox);
+        script.runInContext(vmContext, { timeout: 3000 });
+        return sandbox.result;
       } catch {
         return null;
       }

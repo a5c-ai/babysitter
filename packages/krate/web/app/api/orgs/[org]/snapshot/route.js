@@ -1,9 +1,10 @@
 import { createKrateApiController, orgNamespaceName } from '@a5c-ai/krate-sdk';
+import { withAuth } from '../../../../lib/api-auth.js';
 import { errorResponse } from '../../../../lib/api-errors.js';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(_request, { params }) {
+export const GET = withAuth(async (_request, { params }) => {
   const { org } = await params;
   const controller = createKrateApiController({ namespace: orgNamespaceName(org) });
   try {
@@ -54,4 +55,4 @@ export async function GET(_request, { params }) {
   } catch (error) {
     return errorResponse(error.message, 500);
   }
-}
+});

@@ -243,6 +243,23 @@ describe("instructions CLI dispatch", () => {
     expect(payload.harness).toBe("codex");
     expect(payload.harnessSource).toBe("caller");
   });
+
+  it("emits robust babysitter CLI preflight and explicit npm exec fallback", async () => {
+    const code = await createBabysitterCli().run([
+      "instructions:babysit-skill",
+      "--harness",
+      "claude-code",
+      "--no-interactive",
+    ]);
+    expect(code).toBe(0);
+
+    expect(stdoutOutput).toContain("babysitter --version");
+    expect(stdoutOutput).toContain("command -v babysitter");
+    expect(stdoutOutput).toContain(
+      "npm exec --yes --package @a5c-ai/babysitter-sdk@$SDK_VERSION -- babysitter",
+    );
+    expect(stdoutOutput).not.toContain('CLI="npx -y @a5c-ai/babysitter-sdk');
+  });
 });
 
 describe("handleInstructionsCommand — error paths", () => {

@@ -9,7 +9,19 @@ attributes:
       source: auth.apiKey
       condition: present
   args: []
-  notes: Native OpenAI provider for Pi - direct API key pass-through.
+  codexResponses:
+    httpIdleTimeoutMsAppliesToWebSocketIdle: true
+    websocketConnectTimeoutMs: configurable
+    sseResponseHeaderTimeoutMs: 10000
+    providerRetryControl: "retry.provider.maxRetries"
+    sdkMaxRetriesDefault: 0
+    cacheAffinityHeader: "session-id"
+    legacyProxyIncompatibleHeader: "session_id"
+  notes: >
+    Native OpenAI provider for Pi - direct API key pass-through. Pi 0.76.0
+    bounds OpenAI Codex Responses WebSocket/SSE waits, honors
+    retry.provider.maxRetries with SDK retries defaulting to zero, and sends
+    the cache-affinity header as session-id instead of session_id.
 edges:
   translates_for:
     - target: agent:pi
@@ -141,6 +153,8 @@ attributes:
   notes: >
     Default fallback for unsupported providers on Pi.
     Routes through transport-mux proxy exposing OpenAI Chat transport.
+    For Codex Responses proxy integrations, Pi 0.76.0 uses the session-id
+    cache-affinity header name rather than proxy-incompatible session_id.
 edges:
   translates_for:
     - target: agent:pi

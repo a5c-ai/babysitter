@@ -17,7 +17,7 @@ npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
 
 Then use the CLI alias: `CLI="babysitter"`
 
-**Alternatively, use the CLI alias:** `CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"`
+**Alternatively, use the CLI alias:** `CLI="npm exec --yes --package @a5c-ai/babysitter-sdk@$SDK_VERSION -- babysitter"`
 
 ### jq
 

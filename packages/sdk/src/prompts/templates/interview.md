@@ -38,6 +38,14 @@ relevant processes, specializations, skills, subagents, methodologies,
 references, etc. to use as a reference. Use the babysitter CLI discover command
 to find the relevant processes, skills, subagents, etc. at various stages.
 
+For `babysitter:plan` or plan-only requests, run **Phase 0 -- REUSE-AUDIT**
+before drafting any process or infrastructure plan. Extract keyword nouns and
+verbs from the user's prompt, then scan the project for matching existing
+migrations, API routes, environment variables, SDK dependencies, and imports.
+If `.a5c/reuse-audit.json` exists, use its scan globs and keyword extraction
+rules to shape the audit. Surface the findings before Phase 1 so the plan can
+extend or reuse existing infrastructure instead of recreating it.
+
 Then this phase can have: research online, research the repo, user questions, and
 other steps one after the other until the intent, requirements, goal, scope, etc.
 are clear and the user is satisfied with the understanding. After each step,
@@ -61,5 +69,10 @@ When running non-interactively, skip the interview phase entirely. Instead:
    for the most relevant specialization/methodology. Do not skip this search
    step.
 {{/processLibraryRoot}}
-4. Proceed directly to the process creation phase using the extracted
+4. For `babysitter:plan` or plan-only requests, run **Phase 0 -- REUSE-AUDIT**
+   before drafting any process or infrastructure plan. Extract keyword nouns and
+   verbs from the user's prompt, scan for matching existing migrations, API
+   routes, environment variables, SDK dependencies, and imports, and honor
+   `.a5c/reuse-audit.json` scan globs and keyword extraction rules when present.
+5. Proceed directly to the process creation phase using the extracted
    requirements.

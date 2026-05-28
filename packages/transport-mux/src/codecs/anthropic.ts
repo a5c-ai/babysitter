@@ -60,10 +60,14 @@ function normalizeMessages(raw: unknown): CompletionRequest['messages'] {
 
   return raw.map((entry) => {
     const record = entry as { role?: unknown; content?: unknown };
-    return {
+    const message: CompletionRequest['messages'][number] = {
       role: typeof record.role === 'string' ? record.role : 'user',
       content: parseMessageContent(record.content),
     };
+    if (Array.isArray(record.content)) {
+      message.rawContent = record.content;
+    }
+    return message;
   });
 }
 
@@ -106,13 +110,37 @@ export class AnthropicCodec implements TransportCodec {
   /* ---- encodeResult ---------------------------------------------------- */
 
   encodeResult(result: CompletionResult): unknown {
+    const content: Array<Record<string, unknown>> = [];
+    if (result.text) {
+      content.push({ type: 'text', text: result.text });
+    }
+    for (const toolCall of result.toolCalls ?? []) {
+      let input: unknown = {};
+      try {
+        input = JSON.parse(toolCall.arguments || '{}');
+      } catch {
+        input = {};
+      }
+      const block: Record<string, unknown> = {
+        type: 'tool_use',
+        id: toolCall.id,
+        name: toolCall.name,
+        input,
+      };
+      if (toolCall.metadata) Object.assign(block, toolCall.metadata);
+      content.push(block);
+    }
+    if (content.length === 0) {
+      content.push({ type: 'text', text: '' });
+    }
+
     return {
       id: result.id ?? `msg_${randomUUID()}`,
       type: 'message',
       role: result.role ?? 'assistant',
       model: result.model,
-      stop_reason: result.finishReason ?? 'end_turn',
-      content: [{ type: 'text', text: result.text }],
+      stop_reason: result.toolCalls?.length ? 'tool_use' : result.finishReason ?? 'end_turn',
+      content,
       usage: {
         input_tokens: result.usage.promptTokens,
         output_tokens: result.usage.completionTokens,

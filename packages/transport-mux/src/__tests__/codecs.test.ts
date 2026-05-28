@@ -201,6 +201,64 @@ describe('AnthropicCodec', () => {
       expect(req.toolChoice).toEqual({ type: 'auto' });
       expect(req.stream).toBe(true);
     });
+
+    it('preserves Anthropic tool content blocks as rawContent', () => {
+      const req = codec.decodeRequest({
+        messages: [
+          {
+            role: 'assistant',
+            content: [
+              { type: 'text', text: 'I will write it.' },
+              { type: 'tool_use', id: 'toolu_1', name: 'Write', input: { file_path: '/tmp/odyssey.md' } },
+            ],
+          },
+          {
+            role: 'user',
+            content: [
+              { type: 'tool_result', tool_use_id: 'toolu_1', content: 'ok' },
+            ],
+          },
+        ],
+      });
+
+      expect(req.messages[0]).toMatchObject({
+        role: 'assistant',
+        content: 'I will write it.',
+        rawContent: [
+          { type: 'text', text: 'I will write it.' },
+          { type: 'tool_use', id: 'toolu_1', name: 'Write', input: { file_path: '/tmp/odyssey.md' } },
+        ],
+      });
+      expect(req.messages[1]).toMatchObject({
+        role: 'user',
+        content: '',
+        rawContent: [
+          { type: 'tool_result', tool_use_id: 'toolu_1', content: 'ok' },
+        ],
+      });
+    });
+  });
+
+  describe('encodeResult', () => {
+    it('encodes tool calls as Anthropic tool_use content blocks', () => {
+      const encoded = codec.encodeResult(makeResult({
+        text: '',
+        finishReason: 'tool_calls',
+        toolCalls: [{
+          id: 'toolu_write_file',
+          name: 'Write',
+          arguments: JSON.stringify({ file_path: '/tmp/odyssey.md', content: '# Odyssey' }),
+        }],
+      })) as Record<string, unknown>;
+
+      expect(encoded.stop_reason).toBe('tool_use');
+      expect(encoded.content).toContainEqual({
+        type: 'tool_use',
+        id: 'toolu_write_file',
+        name: 'Write',
+        input: { file_path: '/tmp/odyssey.md', content: '# Odyssey' },
+      });
+    });
   });
 
   describe('normalizeTools', () => {
@@ -480,6 +538,57 @@ describe('OpenAiResponsesCodec', () => {
 
     expect(codec.encodeStreamChunk({ type: 'text-delta', text: 'hi' })).toContain('response.output_text.delta');
     expect(codec.encodeStreamChunk({ type: 'done', finishReason: 'stop' })).toContain('response.completed');
+  });
+
+  it('preserves Responses function call and output items for cross-provider tool loops', () => {
+    const request = codec.decodeRequest({
+      model: 'gpt-5-codex',
+      input: [
+        {
+          type: 'message',
+          role: 'user',
+          content: [{ type: 'input_text', text: 'write the odyssey artifact' }],
+        },
+        {
+          type: 'function_call',
+          call_id: 'toolu_write_file',
+          name: 'Write',
+          arguments: JSON.stringify({ file_path: '/tmp/odyssey.md', content: '# Odyssey' }),
+        },
+        {
+          type: 'function_call_output',
+          call_id: 'toolu_write_file',
+          output: 'created',
+        },
+      ],
+    });
+
+    expect(request.messages).toEqual([
+      {
+        role: 'user',
+        content: 'write the odyssey artifact',
+      },
+      {
+        role: 'assistant',
+        content: '',
+        rawContent: [{
+          type: 'tool_use',
+          id: 'toolu_write_file',
+          name: 'Write',
+          input: { file_path: '/tmp/odyssey.md', content: '# Odyssey' },
+        }],
+      },
+      {
+        role: 'tool',
+        content: 'created',
+        rawContent: [{
+          type: 'tool_result',
+          tool_use_id: 'toolu_write_file',
+          content: 'created',
+        }],
+      },
+    ]);
+    expect(request.input).toBe('write the odyssey artifact');
   });
 });
 

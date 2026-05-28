@@ -5,7 +5,7 @@ import { errorResponse, invalidateApiCache } from '../../../../lib/api-errors.js
 export const dynamic = 'force-dynamic';
 
 
-export async function GET(request, { params }) {
+export const GET = withAuth(async (request, { params }) => {
   const { org } = await params;
   const namespace = orgNamespaceName(org);
   const controller = createKrateApiController({ namespace });
@@ -15,7 +15,7 @@ export async function GET(request, { params }) {
   } catch (error) {
     return errorResponse(error.message, error.message?.includes('not found') ? 404 : 500);
   }
-}
+});
 
 export const POST = withAuth(async (request, { params }) => {
   const { org } = await params;

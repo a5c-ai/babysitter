@@ -36,7 +36,8 @@
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
     "test": "vitest run",
     "test:watch": "vitest",
-    "smoke:cli": "node scripts/smoke-cli.js --runs-dir packages/sdk/test-fixtures/cli/runs/smoke"
+    "smoke:cli": "node scripts/smoke-cli.js --runs-dir packages/sdk/test-fixtures/cli/runs/smoke",
+    "verify:package-health": "node scripts/verify-package-health.cjs"
   },
   "dependencies": {
     "@a5c-ai/agent-catalog": "5.0.0",

@@ -55,6 +55,17 @@ attributes:
     - --scope user
     - --scope project
     - --scope local
+  marketplaceSourceOptions:
+    github:
+      - name: skipLfs
+        valueType: boolean
+        introducedIn: "2.1.153"
+        description: Skip Git LFS downloads when cloning or updating GitHub plugin marketplace sources.
+    git:
+      - name: skipLfs
+        valueType: boolean
+        introducedIn: "2.1.153"
+        description: Skip Git LFS downloads when cloning or updating generic git plugin marketplace sources.
   managedSettings:
     pluginSuggestionMarketplaces:
       valueType: list
@@ -89,6 +100,10 @@ attributes:
   pluginAutoUpdateControl:
     disableEnvVar: DISABLE_AUTOUPDATER
     forceEnvVar: FORCE_AUTOUPDATE_PLUGINS
+  updateDiagnostics:
+    globalNpmAutoUpdateFailureNotice: true
+    doctorReportsPreviousUpdateAttempt: true
+    introducedIn: "2.1.153"
 edges:
   realizes:
     - target: layer:6-agent-platform

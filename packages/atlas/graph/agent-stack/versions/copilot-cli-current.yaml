@@ -16,22 +16,25 @@ attributes:
     - "windows"
   agentProductId: agent:copilot-cli
   versionRange: ">=1.0.55-3"
+  currentVersion: "1.0.55-7"
   releasedAt: "2026-05-27"
-  upstreamReleaseTag: "v1.0.55-3"
-  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.55-3"
+  upstreamReleaseTag: "v1.0.55-7"
+  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.55-7"
   cliCommand: "gh copilot"
   installMethods:
     - install:gh-extension
   minSchemaVersion: "6.0.0"
   notes: |
-    Assimilated through GitHub Copilot CLI 1.0.55-3. The release keeps the
+    Assimilated through GitHub Copilot CLI 1.0.55-7. The release keeps the
     install surface unchanged (`gh extension install github/gh-copilot` /
-    `@github/copilot`) while adding hook progress streaming, pluginDirectories
-    on session.create and session.resume RPC, direct remote-session deletion
-    from the picker, owner/repo#ref marketplace plugin installation, tmux 3.6b
-    pane progress integration, --plugin-dir skill precedence over personal-home
-    skills, authenticated copilot update/version release API requests, and
-    settings migration preservation for legacy snake_case keys.
+    `@github/copilot`) while carrying forward the 1.0.55-3 plugin/session
+    additions. 1.0.55-5 gives MCP configuration a dedicated screen with
+    scrollable server and tool lists. 1.0.55-6 adds `/autopilot <objective>`
+    (`/goal` alias), enables the cell-based terminal renderer for everyone,
+    surfaces per-extension logs, discovers project extensions in non-git
+    folder-backed workspaces, and allows `/statusline` and `/theme` while the
+    agent is executing. 1.0.55-7 restricts exit_plan_mode to plan mode and
+    falls back to JavaScript when the native binary crashes.
   adapterMetadata:
     installCommands:
       - type: gh-extension
@@ -131,6 +134,9 @@ edges:
   sourced_from:
     - source-ref:gh-copilot-github
     - evidence:copilot-cli-1-0-55-3-release
+    - evidence:copilot-cli-1-0-55-5-release
+    - evidence:copilot-cli-1-0-55-6-release
+    - evidence:copilot-cli-1-0-55-7-release
   supports:
     - target: capability:skills
       versionRange: ">=1.0.55-3"

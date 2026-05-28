@@ -8,6 +8,14 @@ These rules are specific to this repository and override more generic process-au
 - Keep the orchestration model intact. Do not replace it with helper scripts or ad hoc wrappers.
 - Keep process code aligned with the process-library style and repo conventions.
 
+## Process Shape Selection
+
+Choose the process shape before writing `process.js`:
+
+- Use a flat phase list when the spec is well-defined and the work is wiring or composition. The bug class, if any, is known, and execution should proceed sequentially through clear phases where each phase adds or verifies one defined surface.
+- Use a HYPOTHESES tree when the bug class is unknown and forensics are required. Multiple causal models should compete explicitly, with each hypothesis carrying its own evidence to gather, falsifying observations, and follow-up phases.
+- Rule of thumb: if the first phase is "investigate", use HYPOTHESES-tree mode. If the first phase is "implement X", use flat-phase-list mode.
+
 ## `babysitter:call` Override For This Repo
 
 When authoring a Babysitter process for a direct user request in this repository:
@@ -18,6 +26,23 @@ When authoring a Babysitter process for a direct user request in this repository
 - Still include an interview phase up front when requirements or constraints are unclear.
 
 This is a deliberate repo-specific override of more general guidance that may recommend shell tasks for objective verification.
+
+## `babysitter:plan` Reuse Audit
+
+For plan-only requests, run Phase 0 -- REUSE-AUDIT before drafting process or
+infrastructure work:
+
+- Extract keyword nouns and verbs from the user's prompt.
+- Scan for matching migrations, API routes, environment variables, SDK
+  dependencies, and imports.
+- Honor `.a5c/reuse-audit.json` when present for scan globs and keyword
+  extraction rules.
+- Render `Reuse-audit findings (REVIEW BEFORE PROCEEDING)` before Phase 1,
+  including a brief "No matching existing infrastructure found" note when the
+  audit has no matches.
+
+The plan should use these findings as context before proposing new tables,
+routes, credentials, SDK installs, or equivalent infrastructure.
 
 ## Stability Rules
 

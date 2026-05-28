@@ -165,6 +165,9 @@ jobs:
           build_babysitter_agent
           npm run build --workspace=@a5c-ai/omni
 
+      - name: Verify SDK package health
+        run: npm run verify:package-health --workspace=@a5c-ai/babysitter-sdk
+
       - name: Publish packages from tag
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

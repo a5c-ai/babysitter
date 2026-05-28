@@ -1,14 +1,20 @@
 nodeKind: LaunchConfig
 id: launch-config:pi.default
 attributes:
-  agentVersionId: agentVersion:pi:ge-0-70-0
+  agentVersionId: agentVersion:pi:ge-0-75-5
   displayName: "Pi (default)"
   env: {}
   commArgs: []
+  sessionIdArg:
+    flag: "--session-id"
+    valuePlaceholder: "<id>"
+    introducedIn: "0.76.0"
+    behavior: "Create or resume the exact project-local Pi session ID."
   description: |
     Default launch recipe for Pi CLI. Spawns the `pi` CLI with no extra
-    argv, no environment overrides, and the version's default capability
-    profile.
+    argv by default, no environment overrides, and the version's default
+    capability profile. Pi 0.76.0 also accepts `--session-id <id>` when
+    automation needs deterministic project-local session selection.
 edges:
   requires_capability:
     - target: capability:supports-tool-use

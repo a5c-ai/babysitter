@@ -2,7 +2,7 @@ nodeKind: AgentRuntimeImpl
 id: agent-runtime-impl:openclaw.runtime@current
 attributes:
   displayName: OpenClaw Runtime (current)
-  agentVersionId: agentVersion:openclaw:ge-2026-5-26
+  agentVersionId: agentVersion:openclaw:ge-2026-5-27
   subagentDispatchMechanism: none
   packageRef: source-ref:openclaw-github
   builtInTools:
@@ -19,19 +19,33 @@ attributes:
   subprocessSandboxStrategy: none
   runtimeIdentity: api-key
   startupReadinessNotes: >
-    OpenClaw 2026.5.26 Gateway readiness and reply paths cache plugin,
-    channel, session, usage-cost, warning, scheduled-service, and filesystem
-    scan results; cache channel catalog and plugin metadata snapshots;
-    lazy-load startup-idle plugin work, core gateway method handlers, and the
-    embedded ACPX runtime; and avoid repeated filesystem probes on hot paths.
+    OpenClaw 2026.5.27 Gateway readiness and reply paths cache session,
+    plugin, auth, tool-search, metadata, channel, usage-cost, warning,
+    scheduled-service, and filesystem scan results; cache channel catalog and
+    plugin metadata snapshots; lazy-load startup-idle plugin work, core
+    gateway method handlers, and the embedded ACPX runtime; avoid repeated
+    filesystem probes on hot paths; and keep visible replies out of hidden
+    cleanup timeouts.
+  codexAppServerNotes: >
+    Runtime models resolve first before app-server routing, workspace memory
+    routes through tools, shared app-server clients survive startup/helper
+    failures, hook relay generations survive restarts, and false runtime live
+    switches are avoided.
+  securityBoundaryNotes: >
+    Group prompt text stays out of system prompts, repeated-dot hostnames are
+    normalized, side-effecting command wrappers and unsafe Node runtime env
+    overrides are blocked, no-auth Tailscale exposure is rejected, and
+    node/device-role approvals require admin authority.
   transcriptPathNotes: >
     Meeting summaries, source-provider chunks, cleaned user turns, media
     provenance, Codex mirrors, WebChat replies, and CLI/TUI replay are
     transcript-backed through the core transcript path.
   channelApprovalNotes: >
     Signal, iMessage, and WhatsApp reaction approval flows are modeled as
-    channel-specific reliability surfaces; Discord voice can inspect, steer,
-    cancel, or follow up realtime Talk runs.
+    channel-specific reliability surfaces; Telegram, iMessage, Slack, Matrix,
+    QQBot, Discord, and Google Chat delivery fixes are tracked for channel
+    approval and reply behavior; Discord voice can inspect, steer, cancel, or
+    follow up realtime Talk runs.
   browserSecurityNotes: >
     Browser snapshot reads honor SSRF policy, fetched file text is wrapped as
     external content, and serialized tool-call text is scrubbed from replies.

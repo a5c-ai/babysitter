@@ -1,9 +1,10 @@
 import { createKrateApiController, orgNamespaceName, createVirtualModelHookBridge, createVirtualModelController } from '@a5c-ai/krate-sdk';
+import { withAuth } from '../../../../../lib/api-auth.js';
 import { errorResponse } from '../../../../../lib/api-errors.js';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request, { params }) {
+export const POST = withAuth(async (request, { params }) => {
   const { org } = await params;
   try {
     const body = await request.json();
@@ -32,4 +33,4 @@ export async function POST(request, { params }) {
   } catch (error) {
     return errorResponse(error.message, 500);
   }
-}
+});

@@ -10,7 +10,7 @@ function resolveCliCommand(packageRoot) {
   const versionsPath = path.join(packageRoot, 'versions.json');
   const versions = readJson(versionsPath) || {};
   const ver = versions.sdkVersion || 'latest';
-  return `npx -y @a5c-ai/babysitter-sdk@${ver}`;
+  return `npm exec --yes --package @a5c-ai/babysitter-sdk@${ver} -- babysitter`;
 }
 
 function runCli(packageRoot, cliArgs, options = {}) {

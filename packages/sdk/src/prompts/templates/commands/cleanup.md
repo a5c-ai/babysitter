@@ -16,7 +16,13 @@ Create and run a cleanup process that:
 
 Invoke the babysitter:babysit skill (using the Skill tool) and follow its instructions (SKILL.md).
 
-Create and run a cleanup process using the process at `skills\babysit\process\cradle\cleanup-runs.js/processes/cleanup-runs.js`.
+Resolve the active process library with:
+
+```bash
+babysitter process-library:active --json
+```
+
+Read `binding.dir` from that JSON and create/run the cleanup process from `cradle/cleanup-runs.js#process` relative to that active library root. Do not use plugin-cache-relative cradle paths.
 
 Implementation notes (for the process):
 - Parse arguments for `--dry-run` flag (if present, set dryRun: true in inputs) and `--keep-days N` (default: 7)

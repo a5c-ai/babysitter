@@ -154,7 +154,7 @@ OpenClaw hooks are registered programmatically in `extensions/index.ts` via `api
 **File:** `extensions/hooks/session-start.ts`
 **Maps to:** `babysitter hook:run --hook-type session-start --harness openclaw`
 
-Fires when an OpenClaw session begins. Initializes Babysitter state, ensures the CLI is available (falls back to `npx` if not installed globally), and sets up the state directory. Runs synchronously with a 30-second timeout (60 seconds for `npx` fallback). Errors are logged but do not block the session.
+Fires when an OpenClaw session begins. Initializes Babysitter state, ensures the CLI is available (falls back to explicit-bin `npm exec` if not installed globally), and sets up the state directory. Runs synchronously with a 30-second timeout (60 seconds for the npm exec fallback). Errors are logged but do not block the session.
 
 ### session_end
 
@@ -197,7 +197,7 @@ The SDK version is pinned in `versions.json`:
 {"sdkVersion": "0.0.184-staging.58c6c09c"}
 ```
 
-When the `babysitter` CLI is not available globally, hooks fall back to `npx -y @a5c-ai/babysitter-sdk@<pinned-version>`.
+When the `babysitter` CLI is not available globally, hooks fall back to `npm exec --yes --package @a5c-ai/babysitter-sdk@<pinned-version> -- babysitter`.
 
 ### Config Files
 
@@ -299,8 +299,14 @@ PLUGIN_ROOT="$(pwd)"
 SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${PLUGIN_ROOT}/versions.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}")
 npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
 
-CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"
+if command -v babysitter >/dev/null 2>&1 && babysitter --version >/dev/null 2>&1; then
+  CLI="babysitter"
+else
+  CLI="npm exec --yes --package @a5c-ai/babysitter-sdk@$SDK_VERSION -- babysitter"
+fi
 ```
+
+If a stale or broken global shim fails with `MODULE_NOT_FOUND`, repair it with `npm rm -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk && npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION`, then re-run `babysitter --version`.
 
 ## Troubleshooting
 

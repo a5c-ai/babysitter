@@ -18,21 +18,27 @@ Read the SDK version from `versions.json` to ensure version compatibility:
 SDK_VERSION=$(node -e "try{const fs=require('fs');const probes=['./plugins/babysitter-unified/versions.json','./node_modules/@a5c-ai/babysitter-opencode/versions.json'];for(const probe of probes){if(fs.existsSync(probe)){console.log(JSON.parse(fs.readFileSync(probe,'utf8')).sdkVersion||'latest');process.exit(0)}}console.log('latest')}catch{console.log('latest')}")
 
 npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
-CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"
+if command -v babysitter >/dev/null 2>&1 && babysitter --version >/dev/null 2>&1; then
+  CLI="babysitter"
+else
+  CLI="npm exec --yes --package @a5c-ai/babysitter-sdk@$SDK_VERSION -- babysitter"
+fi
 ```
+
+If a stale or broken global shim fails with `MODULE_NOT_FOUND`, repair it with `npm rm -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk && npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION`, then re-run `babysitter --version`.
 
 ## Instructions
 
 Run the following command to get full orchestration instructions:
 
 ```bash
-babysitter instructions:babysit-skill --harness opencode --interactive
+$CLI instructions:babysit-skill --harness opencode --interactive
 ```
 
 For non-interactive mode:
 
 ```bash
-babysitter instructions:babysit-skill --harness opencode --no-interactive
+$CLI instructions:babysit-skill --harness opencode --no-interactive
 ```
 
 Follow the instructions returned by the command above to orchestrate the run.

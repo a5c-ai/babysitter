@@ -65,7 +65,10 @@ function normalizeOpenAiTools(tools?: unknown[]): OpenAiFunctionTool[] | undefin
         function: {
           name: record['name'],
           description: typeof record['description'] === 'string' ? record['description'] : undefined,
-          parameters: toRecord(record['parameters']) ?? toRecord(record['input_schema']) ?? { type: 'object', properties: {} },
+          parameters: toRecord(record['parameters'])
+            ?? toRecord(record['parametersJsonSchema'])
+            ?? toRecord(record['input_schema'])
+            ?? { type: 'object', properties: {} },
         },
       });
     }

@@ -1,4 +1,5 @@
 import { createKrateApiController, orgNamespaceName } from '@a5c-ai/krate-sdk';
+import { withAuth } from '../../../../lib/api-auth.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,7 @@ function getRelevance(name, displayName, q) {
   return 0;
 }
 
-export async function GET(request, { params }) {
+export const GET = withAuth(async (request, { params }) => {
   const { org } = await params;
   const namespace = orgNamespaceName(org);
   const controller = createKrateApiController({ namespace });
@@ -70,4 +71,4 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});

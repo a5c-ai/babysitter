@@ -21,9 +21,9 @@ This package ships the built runtime in `dist/`, bundled command/skill templates
 The package exposes three binaries:
 
 ```bash
-npx @a5c-ai/babysitter-sdk babysitter --help
-npx @a5c-ai/babysitter-sdk babysitter-sdk --help
-npx @a5c-ai/babysitter-sdk babysitter-mcp-server --help
+npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter --help
+npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter-sdk --help
+npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter-mcp-server --help
 ```
 
 `babysitter` and `babysitter-sdk` point at the same CLI entrypoint. The public command groups currently include:
@@ -59,10 +59,11 @@ npm run lint --workspace=@a5c-ai/babysitter-sdk
 npm run build --workspace=@a5c-ai/babysitter-sdk
 npm run test --workspace=@a5c-ai/babysitter-sdk
 npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk
+npm run verify:package-health --workspace=@a5c-ai/babysitter-sdk
 npm run verify:metadata
 npm pack --json --dry-run --workspace=@a5c-ai/babysitter-sdk
 ```
 
 ## Release Expectations
 
-`@a5c-ai/babysitter-sdk` is a centrally released public package. Keep this README aligned with the actual CLI/API surface, keep `package.json#files` aligned with what ships, and verify the dry-run tarball before changing release-facing behavior.
+`@a5c-ai/babysitter-sdk` is a centrally released public package. Keep this README aligned with the actual CLI/API surface, keep `package.json#files` aligned with what ships, and verify the package health guard plus dry-run tarball before changing release-facing behavior.
