@@ -1029,6 +1029,13 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
             '-c', 'model_providers.amux-proxy.wire_api="responses"',
           ]);
         }
+        if (plan.harness === 'hermes') {
+          plan.args.push(
+            '--provider', 'custom',
+            '--base-url', `${proxyRuntime.url}/v1`,
+            '--api-key', proxyRuntime.authToken ?? 'proxy-token',
+          );
+        }
         console.error(`[amux launch] ${plan.harness} proxy: OPENAI_BASE_URL=${proxyRuntime.url}/v1`);
       }
 

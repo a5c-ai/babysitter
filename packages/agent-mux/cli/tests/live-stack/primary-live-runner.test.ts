@@ -292,7 +292,7 @@ describe('primary live stack runner contract', () => {
         expect(launch?.args).toContain(modelCase.amuxProvider);
         expect(launch?.args).toContain(modelCase.model);
         expect(launch?.args).toContain('--no-interactive');
-        expect(launch?.args).toContain('--with-proxy-if-needed');
+        expect(launch?.args).toContain('--with-proxy');
         expect(launch?.args).toContain('--prompt');
         expect(launch?.args).toContain('--max-turns');
         expect(launch?.args).toContain('--yolo');
