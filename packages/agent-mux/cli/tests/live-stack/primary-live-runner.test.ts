@@ -182,6 +182,31 @@ describe('primary live stack runner contract', () => {
     expect(codexPrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
   });
 
+  it('invokes the Babysitter command for pi create-mode plugin lanes', () => {
+    const piScenario = liveStackScenarioFromEnv({
+      LIVE_STACK_SCENARIO_ID: 'live.agent-mux.pi.foundry-openai.Kimi-K2.6',
+      LIVE_STACK_AGENT_PATH: 'agent-mux',
+      LIVE_STACK_AGENT: 'pi',
+      LIVE_STACK_AMUX_AGENT: 'pi',
+      LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+      LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+      LIVE_STACK_PROVIDER: 'foundry-openai',
+      LIVE_STACK_AMUX_PROVIDER: 'foundry',
+      LIVE_STACK_MODEL: 'Kimi-K2.6',
+      LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+      LIVE_STACK_REQUIRED_ENV: 'AZURE_API_KEY,AMUX_API_BASE',
+      LIVE_STACK_LAYERS: 'babysitter-plugin',
+      LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+      LIVE_STACK_EXPECTED_ARTIFACTS: 'agent-mux-events,plugin-command-transcript,transport-mux-trace,provider-trace-redacted',
+    });
+
+    const piPrompt = promptFor(piScenario, { LIVE_STACK_PROCESS_MODE: 'create' });
+
+    expect(piPrompt).toMatch(/^\/babysitter:call /);
+    expect(piPrompt).toContain('CREATE odyssey-live-test.mjs');
+    expect(piPrompt).toContain('.a5c/processes/odyssey-live-test.mjs');
+  });
+
   it('uses babysitter instructions for yolo plugin commands', async () => {
     const yoloCommand = await fs.readFile(path.join(process.cwd(), 'plugins', 'babysitter-unified', 'commands', 'yolo.md'), 'utf8');
 
@@ -292,7 +317,7 @@ describe('primary live stack runner contract', () => {
         expect(launch?.args).toContain(modelCase.amuxProvider);
         expect(launch?.args).toContain(modelCase.model);
         expect(launch?.args).toContain('--no-interactive');
-        expect(launch?.args).toContain('--with-proxy-if-needed');
+        expect(launch?.args).toContain('--with-proxy');
         expect(launch?.args).toContain('--prompt');
         expect(launch?.args).toContain('--max-turns');
         expect(launch?.args).toContain('--yolo');
@@ -615,7 +640,7 @@ describe('primary live stack runner contract', () => {
     expect(hookCheck?.detail).toContain('hooks-mux log files found');
   });
 
-  it('accepts create-mode plugin lanes when Babysitter run proof exists without a persisted process file', async () => {
+  it('fails create-mode plugin lanes when the agent does not persist the created process file', async () => {
     const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-create-run-proof-'));
     const artifactsDir = path.join(cwd, 'artifacts');
     const traceId = 'trace-create-run-proof';
@@ -663,8 +688,10 @@ describe('primary live stack runner contract', () => {
       },
     });
 
-    expect(result.status).toBe('passed');
-    expect(result.verifications?.find(v => v.name === 'process-creation')?.detail).toContain('run proof');
+    expect(result.status).toBe('failed');
+    const processCreation = result.verifications?.find(v => v.name === 'process-creation');
+    expect(processCreation?.status).toBe('failed');
+    expect(processCreation?.detail).toContain('no .a5c/processes/odyssey-live-test.mjs file created');
   });
 
   it('does not treat bridged auth errors as valid Odyssey artifacts', async () => {

@@ -522,7 +522,7 @@ function buildPrompt(scenario: LiveStackScenario, traceId: string, env: Record<s
         '',
         `RUN the process: ${coreTask}. Use only .a5c/processes/odyssey-live-test.mjs, the process you created.`,
       ].join('\n');
-      if (scenario.agent.agent === 'claude-code') return `/babysitter:call ${createInstructions}`;
+      if (scenario.agent.agent === 'claude-code' || scenario.agent.agent === 'pi') return `/babysitter:call ${createInstructions}`;
       if (scenario.agent.agent === 'codex') return `$babysitter:call ${createInstructions}`;
       return createInstructions;
     }
@@ -758,7 +758,6 @@ async function validateAgentBehavior(
   const entries: VerificationEntry[] = [];
   const isBabysitterAgent = scenario.agent.agent === 'agent-platform';
   const isBabysitterPlugin = scenario.agent.installMode === 'babysitter-plugin';
-  const deferredProcessCreationEntries: VerificationEntry[] = [];
 
   // --- agent-platform: verify model responded with content ---
   if (isBabysitterAgent) {
@@ -813,7 +812,7 @@ async function validateAgentBehavior(
         entries.push({ name: 'process-creation', status: 'failed', detail: `process file exists (${processContent.length} bytes) but ${processFailures.join('; ')}` });
       }
     } else {
-      deferredProcessCreationEntries.push({ name: 'process-creation', status: 'pending' as 'passed', detail: 'no .a5c/processes/odyssey-live-test.mjs file created by the agent before run proof' });
+      entries.push({ name: 'process-creation', status: 'failed', detail: 'no .a5c/processes/odyssey-live-test.mjs file created by the agent' });
     }
   }
 
@@ -1002,18 +1001,6 @@ async function validateAgentBehavior(
         ? `${runCompletionDetail} (journal evidence sufficient)`
         : completionProofDetail;
     entries.push({ name: 'babysitter-completion-proof', status: proofStatus, detail: proofDetail });
-
-    for (const pe of deferredProcessCreationEntries) {
-      if (pe.status === ('pending' as string)) {
-        if (runCompleted || completionProofFound) {
-          entries.push({ ...pe, status: 'passed', detail: `${pe.detail} (slash-command flow completed via Babysitter run proof)` });
-        } else {
-          entries.push({ ...pe, status: 'failed' });
-        }
-      } else {
-        entries.push(pe);
-      }
-    }
 
     for (const he of deferredHooksEntries) {
       if (he.status === ('pending' as string)) {
