@@ -137,12 +137,9 @@ export class HermesAdapter extends BaseAgentAdapter {
       args.push('--yolo');
     }
 
-    args.push('--output-format', 'jsonl');
-
-
     const { prompt, stdin } = this.buildPromptTransport(options);
-    if (stdin === undefined) {
-      args.push('--prompt', prompt);
+    if (options.nonInteractive === true && prompt) {
+      args.push('-z', prompt);
     }
 
     return {
@@ -151,7 +148,7 @@ export class HermesAdapter extends BaseAgentAdapter {
       env: this.buildEnvFromOptions(options),
       cwd: options.cwd ?? process.cwd(),
       usePty: false,
-      stdin,
+      stdin: options.nonInteractive === true ? undefined : stdin,
       timeout: options.timeout,
       inactivityTimeout: options.inactivityTimeout,
     };

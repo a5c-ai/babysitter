@@ -40,7 +40,7 @@ vi.mock('@a5c-ai/agent-catalog', () => ({
       codex: { promptDelivery: 'exec-subcommand', execSubcommand: 'exec', stdinBehavior: 'close-after-prompt', selfExits: true, needsIdleKill: false, resumeDelivery: 'subcommand', resumeSubcommand: 'resume' },
       pi: { promptDelivery: 'cli-flag', promptFlag: '-p', promptExtraFlags: ['--mode', 'json'], stdinBehavior: 'close-after-prompt', selfExits: false, needsIdleKill: true },
       gemini: { promptDelivery: 'cli-flag', promptFlag: '--prompt', stdinBehavior: 'close-after-prompt', selfExits: true, needsIdleKill: false },
-      hermes: { promptDelivery: 'stdin', stdinBehavior: 'keep-open', selfExits: false, needsIdleKill: true },
+      hermes: { promptDelivery: 'cli-flag', promptFlag: '-z', stdinBehavior: 'close-after-prompt', selfExits: true, needsIdleKill: false },
     };
     return behaviors[harness] ?? undefined;
   }),
@@ -257,7 +257,7 @@ describe('launchCommand transport-mux integration', () => {
     }
   });
 
-  it('passes Hermes proxy endpoints through native provider flags', async () => {
+  it('passes Hermes proxy endpoints through a temporary Hermes config', async () => {
     const runtimeStop = vi.fn(async () => {});
     startTransportMuxRuntimeMock.mockResolvedValue({
       url: 'http://127.0.0.1:4012',
@@ -314,7 +314,7 @@ describe('launchCommand transport-mux integration', () => {
     const code = await launchCommand(
       client,
       parseArgs(
-        ['launch', 'hermes', 'foundry', '--with-proxy', '--prompt', 'write the file', '--no-interactive'],
+        ['launch', 'hermes', 'foundry', '--model', 'gpt-5.5', '--with-proxy', '--prompt', 'write the file', '--no-interactive'],
         LAUNCH_FLAGS,
       ),
     );
@@ -322,14 +322,21 @@ describe('launchCommand transport-mux integration', () => {
     expect(code).toBe(0);
     expect(spawnMock).toHaveBeenCalledTimes(1);
     const spawnedArgs = spawnMock.mock.calls[0]?.[1] as string[];
-    expect(spawnedArgs).toContain('--provider');
-    expect(spawnedArgs).toContain('custom');
-    expect(spawnedArgs).toContain('--base-url');
-    expect(spawnedArgs).toContain('http://127.0.0.1:4012/v1');
-    expect(spawnedArgs).toContain('--api-key');
-    expect(spawnedArgs).toContain('runtime-token');
-    expect(child.stdin.write).toHaveBeenCalledWith('write the file\n');
-    expect(child.stdin.end).not.toHaveBeenCalled();
+    expect(spawnedArgs).toContain('-z');
+    expect(spawnedArgs).toContain('write the file');
+    expect(spawnedArgs).not.toContain('--base-url');
+    expect(spawnedArgs).not.toContain('--api-key');
+    expect(spawnMock.mock.calls[0]?.[2]?.env['HERMES_INFERENCE_PROVIDER']).toBe('custom');
+    expect(spawnMock.mock.calls[0]?.[2]?.env['HERMES_INFERENCE_MODEL']).toBe('gpt-5.5');
+    const hermesHome = spawnMock.mock.calls[0]?.[2]?.env['HERMES_HOME'];
+    expect(hermesHome).toBeTruthy();
+    const hermesConfig = fs.readFileSync(path.join(String(hermesHome), 'config.yaml'), 'utf8');
+    expect(hermesConfig).toContain('provider: custom');
+    expect(hermesConfig).toContain('base_url: "http://127.0.0.1:4012/v1"');
+    expect(hermesConfig).toContain('api_key: "runtime-token"');
+    expect(hermesConfig).toContain('api_mode: chat_completions');
+    expect(child.stdin.write).not.toHaveBeenCalled();
+    expect(child.stdin.end).toHaveBeenCalledTimes(1);
     expect(runtimeStop).toHaveBeenCalledTimes(1);
   });
 });

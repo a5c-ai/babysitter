@@ -417,6 +417,31 @@ async function writeJsonObject(filePath: string, value: Record<string, unknown>)
   await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+async function prepareHermesProxyConfig(input: {
+  readonly model: string;
+  readonly baseUrl: string;
+  readonly apiKey: string;
+}): Promise<string> {
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const fs = await import('node:fs/promises');
+  const hermesHome = await fs.mkdtemp(join(tmpdir(), 'amux-hermes-'));
+  const yamlValue = (value: string) => JSON.stringify(value);
+  await fs.writeFile(
+    join(hermesHome, 'config.yaml'),
+    [
+      'model:',
+      `  default: ${yamlValue(input.model)}`,
+      '  provider: custom',
+      `  base_url: ${yamlValue(input.baseUrl)}`,
+      `  api_key: ${yamlValue(input.apiKey)}`,
+      '  api_mode: chat_completions',
+      '',
+    ].join('\n'),
+  );
+  return hermesHome;
+}
+
 function recordObject(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
@@ -1030,11 +1055,15 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
           ]);
         }
         if (plan.harness === 'hermes') {
-          plan.args.push(
-            '--provider', 'custom',
-            '--base-url', `${proxyRuntime.url}/v1`,
-            '--api-key', proxyRuntime.authToken ?? 'proxy-token',
-          );
+          const hermesProxyBaseUrl = `${proxyRuntime.url}/v1`;
+          const hermesProxyApiKey = proxyRuntime.authToken ?? 'proxy-token';
+          plan.env['HERMES_HOME'] = await prepareHermesProxyConfig({
+            model: plan.proxy?.targetModel ?? plan.model,
+            baseUrl: hermesProxyBaseUrl,
+            apiKey: hermesProxyApiKey,
+          });
+          plan.env['HERMES_INFERENCE_PROVIDER'] = 'custom';
+          plan.env['HERMES_INFERENCE_MODEL'] = plan.proxy?.targetModel ?? plan.model;
         }
         console.error(`[amux launch] ${plan.harness} proxy: OPENAI_BASE_URL=${proxyRuntime.url}/v1`);
       }

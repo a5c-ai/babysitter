@@ -77,17 +77,17 @@ attributes:
   envPersistenceMode: wrapper_only
   toolInterceptionScope: none
   launchBehavior:
-    promptDelivery: stdin
-    promptFlag: null
+    promptDelivery: cli-flag
+    promptFlag: "-z"
     promptExtraFlags: []
     execSubcommand: null
     resumeDelivery: null
     resumeFlag: null
     sessionIdFlag: null
     maxTurnsFlag: null
-    stdinBehavior: keep-open
-    selfExits: false
-    needsIdleKill: true
+    stdinBehavior: close-after-prompt
+    selfExits: true
+    needsIdleKill: false
 
 edges:
   hosted_by:

@@ -70,18 +70,34 @@ describe('lightweight adapter parity', () => {
           nonInteractive: true,
         });
 
-        if (name === 'pi' || name === 'omp' || name === 'openclaw' || name === 'hermes') {
+        if (name === 'pi' || name === 'omp' || name === 'openclaw') {
           expect(args.args).toContain('--prompt');
           expect(args.args).toContain('hi');
           expect(args.stdin).toBeUndefined();
         }
+
+        if (name === 'hermes') {
+          expect(args.args).toContain('-z');
+          expect(args.args).toContain('hi');
+          expect(args.args).not.toContain('--prompt');
+          expect(args.args).not.toContain('--output-format');
+          expect(args.stdin).toBeUndefined();
+        }
       });
 
-      it('keeps Hermes in JSONL mode for parseEvent', () => {
+      it('uses Hermes oneshot mode for non-interactive prompt delivery', () => {
         if (name !== 'hermes') return;
-        const args = adapter.buildSpawnArgs({ agent: name as never, prompt: 'hi', cwd: process.cwd() });
-        expect(args.args).toContain('--output-format');
-        expect(args.args).toContain('jsonl');
+        const args = adapter.buildSpawnArgs({
+          agent: name as never,
+          prompt: 'hi',
+          cwd: process.cwd(),
+          nonInteractive: true,
+        });
+        expect(args.args).toContain('-z');
+        expect(args.args).toContain('hi');
+        expect(args.args).not.toContain('--prompt');
+        expect(args.args).not.toContain('--output-format');
+        expect(args.stdin).toBeUndefined();
       });
 
       it('sessionDir returns a non-empty path', () => {

@@ -118,6 +118,17 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(codex!.packageMetadata?.activationMessage).toBe("codex-open-plugins");
   });
 
+  it("models Hermes non-interactive launches through oneshot prompt delivery", () => {
+    const hermes = getPluginTargetDescriptor("hermes");
+
+    expect(hermes?.defaultTransportId).toBe("openai-chat");
+    expect(hermes?.launchBehavior?.promptDelivery).toBe("cli-flag");
+    expect(hermes?.launchBehavior?.promptFlag).toBe("-z");
+    expect(hermes?.launchBehavior?.stdinBehavior).toBe("close-after-prompt");
+    expect(hermes?.launchBehavior?.selfExits).toBe(true);
+    expect(hermes?.launchBehavior?.needsIdleKill).toBe(false);
+  });
+
   it("exposes UI cards and harness images from graph-derived wrappers", () => {
     expect(getUiAgentCards().length).toBe(AGENT_CATALOG.agents.length);
     expect(getUiAgentCards()[0].filePath).toContain("graph/agent-stack/core-impls");
