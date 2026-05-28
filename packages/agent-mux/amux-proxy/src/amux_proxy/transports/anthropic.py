@@ -22,20 +22,52 @@ def create_router(config: ProxyConfig, completion_fn=None) -> APIRouter:
         messages_list = body.get("messages", [])
         litellm_messages = _convert_anthropic_messages(messages_list)
         is_streaming = body.get("stream", False)
+        max_tokens = body.get("max_tokens", 4096)
+
+        # Virtual model PreCompletion hook
+        from amux_proxy.hooks import dispatch_pre_completion
+        pre_hook = await dispatch_pre_completion(
+            model=config.target_model,
+            messages=litellm_messages,
+            max_tokens=max_tokens,
+            transport="anthropic",
+        )
+        if pre_hook.get("decision") == "deny":
+            return JSONResponse(
+                format_anthropic_error(403, pre_hook.get("message", "Blocked by virtual model policy")),
+                status_code=403,
+            )
+        if pre_hook.get("decision") == "modify" and pre_hook.get("modifiedInput", {}).get("messages"):
+            litellm_messages = pre_hook["modifiedInput"]["messages"]
 
         _complete = completion_fn or litellm.acompletion
         try:
             response: Any = await _complete(
                 model=config.target_model,
                 messages=litellm_messages,
-                max_tokens=body.get("max_tokens", 4096),
+                max_tokens=max_tokens,
                 temperature=body.get("temperature"),
                 stream=is_streaming,
                 timeout=config.timeout,
                 num_retries=config.max_retries,
             )
             if not is_streaming:
-                return JSONResponse(_format_anthropic_response(response))
+                formatted = _format_anthropic_response(response)
+                # Virtual model PostCompletion hook
+                from amux_proxy.hooks import dispatch_post_completion
+                post_hook = await dispatch_post_completion(
+                    model=config.target_model,
+                    response_content=json_mod.dumps(formatted),
+                    usage=formatted.get("usage"),
+                    transport="anthropic",
+                )
+                if post_hook.get("decision") == "modify" and post_hook.get("modifiedInput", {}).get("response"):
+                    try:
+                        modified = json_mod.loads(post_hook["modifiedInput"]["response"]) if isinstance(post_hook["modifiedInput"]["response"], str) else post_hook["modifiedInput"]["response"]
+                        formatted.update(modified)
+                    except Exception:
+                        pass
+                return JSONResponse(formatted)
 
             async def generate():  # type: ignore[return]
                 msg_id = f"msg_{id(response)}"
