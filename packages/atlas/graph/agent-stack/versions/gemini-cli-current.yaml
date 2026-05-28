@@ -14,7 +14,7 @@ attributes:
     - "macos"
     - "windows"
   agentProductId: agent:gemini-cli
-  versionRange: ">=0.44.0"
+  versionRange: ">=0.43.0"
   currentVersion: "0.44.0"
   releasedAt: "2026-05-27"
   releaseNotesUrl: "https://github.com/google-gemini/gemini-cli/releases/tag/v0.44.0"
@@ -32,7 +32,7 @@ attributes:
   adapterMetadata:
     installCommands:
       - type: npm
-        command: "npm install -g @google/gemini-cli@0.43.0"
+        command: "npm install -g @google/gemini-cli@0.44.0"
     authMethods:
       - type: api_key
         name: "API Key"
@@ -68,9 +68,9 @@ attributes:
       supportsStructuredOutput: true
       structuredSessionTransport: restart-per-turn
       sessionControlPlane: self-managed
-      supportsSkills: false
+      supportsSkills: true
       supportsAgentsMd: false
-      skillsFormat: none
+      skillsFormat: file
       supportsSubagentDispatch: false
       supportsParallelExecution: false
       maxParallelTasks: 1
@@ -131,37 +131,39 @@ edges:
       role: knowledge-fabric
   uses_memory_system:
     - target: memory-system:gemini-cli-memory
-  sourced_from: []
+  sourced_from:
+    - source-ref:gemini-cli-github
+    - evidence:gemini-cli-0-44-0-release
   supports:
     - target: capability:skills
-      versionRange: ">=0.44.0"
+      versionRange: ">=0.43.0"
       level: full
       notes: Gemini CLI documents first-class agent skills across workspace, user, and extension tiers.
     - target: capability:supports-thinking
-      versionRange: ">=0.44.0"
+      versionRange: ">=0.43.0"
       level: full
       notes: Gemini CLI documented as an interactive and automation-capable terminal agent surface.
     - target: capability:interactive-mode
-      versionRange: ">=0.44.0"
+      versionRange: ">=0.43.0"
       level: full
       notes: Interactive REPL semantics documented directly in the Gemini CLI reference.
     - target: capability:stdin-injection
-      versionRange: ">=0.44.0"
+      versionRange: ">=0.43.0"
       level: full
       notes: Headless and piped execution documented separately from interactive usage.
     - target: capability:vision-input
-      versionRange: ">=0.44.0"
+      versionRange: ">=0.43.0"
       level: full
       notes: Public Gemini CLI evidence describes multimodal CLI support.
     - target: capability:runtime-hooks
-      versionRange: ">=0.44.0"
+      versionRange: ">=0.43.0"
       level: full
       notes: Gemini CLI hook events documented directly.
     - target: capability:stop-hook
-      versionRange: ">=0.44.0"
+      versionRange: ">=0.43.0"
       level: full
       notes: Normalized stop-hook backed by Gemini's documented end-of-loop hook events.
     - target: capability:can-resume
-      versionRange: ">=0.44.0"
+      versionRange: ">=0.43.0"
       level: full
       notes: Gemini CLI resume semantics documented through both session management and checkpoint restoration.
