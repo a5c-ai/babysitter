@@ -257,6 +257,33 @@ describe("agent-catalog graph-backed ontology", () => {
     );
   });
 
+  it("keeps OMP 15.5.9 graph identity aligned with its version range", () => {
+    const version = getAgentVersion("omp", "15.5.9");
+    const graph = getCatalogGraphSnapshot();
+    const node = graph.nodes.find((entry) => entry.id === "agentVersion:omp:ge-15-5-9");
+
+    expect(version?.versionRange).toBe(">=15.5.9");
+    expect(node?.versionRange).toBe(">=15.5.9");
+    expect(node?.currentVersion).toBe("15.5.9");
+    expect(node?.releaseNotesUrl).toContain("can1357/oh-my-pi/releases/tag/v15.5.9");
+    expect(node?.assimilationNotes).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("OpenRouter model variants"),
+        expect.stringContaining("Wafer Pass"),
+        expect.stringContaining("compressed native-addon archive"),
+        expect.stringContaining("unsafe archive entries"),
+      ]),
+    );
+    expect(graph.nodes.find((entry) => entry.id === "agentVersion:omp:ge-15-5-6")).toBeUndefined();
+    expect(JSON.stringify(graph.edges)).not.toContain("agentVersion:omp:ge-15-5-6");
+
+    const evidence = getOntologyEvidenceSource("omp-15-5-9-release");
+    expect(evidence?.sourcePathOrUrl).toContain("can1357/oh-my-pi/releases/tag/v15.5.9");
+    expect(
+      graph.edges.some((edge) => edge.from === "evidence:omp-15-5-9-release" && edge.to === "agentVersion:omp:ge-15-5-9"),
+    ).toBe(true);
+  });
+
   it("includes agent-platform as a distinct non-harness runtime agent and records richer Claude web evidence", () => {
     const babysitterAgent = listAgentVersions().find((agent) => agent.agentId === "agent-platform");
     expect(babysitterAgent).toBeDefined();
