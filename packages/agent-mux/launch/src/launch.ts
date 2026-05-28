@@ -1014,20 +1014,15 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       // API endpoints (see https://geminicli.com/docs/reference/configuration/).
       // The previously-used GOOGLE_AI_STUDIO_API_ENDPOINT was never recognised.
       if (plan.harness === 'gemini') {
-        // Use the real GOOGLE_API_KEY so gemini-cli 0.44.0 passes its own key
-        // format validation. The proxy accepts any auth (authToken: null above),
-        // so the key content doesn't matter for proxy auth — it only needs to
-        // satisfy gemini-cli's pre-connection validation.
-        const realKey = process.env['GOOGLE_API_KEY'] || process.env['GEMINI_API_KEY'] || '';
-        plan.env['GOOGLE_API_KEY'] = realKey;
-        plan.env['GEMINI_API_KEY'] = realKey;
+        // Let gemini-cli use whatever auth method the CI environment provides
+        // (API key or Vertex AI ADC). The proxy accepts any auth via authToken: null.
+        // We only override GOOGLE_GEMINI_BASE_URL to redirect requests to the proxy.
+        // The proxy now handles both /v1beta/models/* (Generative Language API) and
+        // /v1beta1/projects/* (Vertex AI) paths.
         const proxyOrigin = new URL(proxyRuntime.url).origin;
         plan.env['GOOGLE_GEMINI_BASE_URL'] = proxyOrigin;
         plan.env['GEMINI_CLI_TRUST_WORKSPACE'] = '1';
-        plan.env['GOOGLE_GENAI_USE_VERTEXAI'] = 'false';
-        plan.env['GOOGLE_CLOUD_PROJECT'] = '';
-        plan.env['GOOGLE_CLOUD_LOCATION'] = '';
-        console.error(`[amux launch] Gemini proxy: key=${realKey ? realKey.slice(0, 6) + '...' : 'none'}, endpoint=${proxyOrigin}`);
+        console.error(`[amux launch] Gemini proxy: endpoint=${proxyOrigin}, vertexAI=${process.env['GOOGLE_GENAI_USE_VERTEXAI'] ?? 'unset'}`);
       }
 
       // Omni (agent-core): set AMUX_* env vars to route through the proxy.

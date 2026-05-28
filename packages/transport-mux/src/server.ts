@@ -1564,8 +1564,14 @@ export function createTransportMuxApp({ config, completionEngine }: CreateTransp
     return c.json(googleResponse(result));
   });
 
-  app.post('/v1/projects/*', async (c) => {
-    const plan = await createExecutionPlan(c.req.raw, 'vertex-native');
+  // Vertex AI paths: gemini-cli in Vertex AI mode sends to /v1beta1/projects/*/...
+  for (const prefix of ['/v1/projects/*', '/v1beta/projects/*', '/v1beta1/projects/*']) {
+    app.post(prefix, vertexNativeHandler);
+  }
+
+  async function vertexNativeHandler(c: any) {
+    const forceStreaming = c.req.path.endsWith(':streamGenerateContent');
+    const plan = await createExecutionPlan(c.req.raw, 'google', { forceStreaming });
     if (plan instanceof Response) {
       return plan;
     }
@@ -1578,8 +1584,10 @@ export function createTransportMuxApp({ config, completionEngine }: CreateTransp
     if (result instanceof Response) {
       return result;
     }
-    return c.json(googleResponse(result));
-  });
+    return forceStreaming
+      ? renderStreamResponse('google', result as any, config)
+      : c.json(googleResponse(result));
+  }
 
   app.post('/converse', async (c) => {
     const plan = await createExecutionPlan(c.req.raw, 'bedrock-converse');
