@@ -11,7 +11,8 @@ attributes:
   accessibilitySupport: basic
   notes: |
     GitHub Copilot CLI is a non-interactive CLI surface (gh extension); the
-    user-facing primitive set is small (help / suggestion explainers).
+    user-facing primitive set is small but includes focused slash-command
+    controls added through the 1.0.55 line.
 edges:
   realizes:
     - target: layer:11-presentation
@@ -20,3 +21,24 @@ edges:
       attributes:
         mechanism: slash-command
         invocationToken: "/help"
+    - target: interaction-primitive:copilot-slash-autopilot
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/autopilot"
+        argumentPattern: "<objective>"
+    - target: interaction-primitive:copilot-slash-goal
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/goal"
+        aliasFor: "/autopilot"
+        argumentPattern: "<objective>"
+    - target: interaction-primitive:slash-statusline
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/statusline"
+        executionAllowedWhileAgentRuns: true
+    - target: interaction-primitive:slash-theme
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/theme"
+        executionAllowedWhileAgentRuns: true
