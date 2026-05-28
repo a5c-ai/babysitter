@@ -257,6 +257,33 @@ describe("agent-catalog graph-backed ontology", () => {
     );
   });
 
+  it("records Cursor 3.5 shared canvases and /loop graph metadata", () => {
+    const graph = getCatalogGraphSnapshot();
+    const node = graph.nodes.find((entry) => entry.id === "agentVersion:cursor:ge-0-0-0");
+
+    expect(node?.currentVersion).toBe("3.5");
+    expect(node?.versionRange).toBe(">=0.0.0");
+    expect(node?.releaseNotesUrl).toBe("https://cursor.com/changelog/shared-canvases");
+    expect(node?.assimilationNotes).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("shared canvases"),
+        expect.stringContaining("read-only access"),
+        expect.stringContaining("/loop skill"),
+      ]),
+    );
+
+    const evidence = getOntologyEvidenceSource("cursor-3-5-release");
+    expect(evidence?.sourcePathOrUrl).toBe("https://cursor.com/changelog/shared-canvases");
+
+    const claims = listClaimsForSubject("agentVersion:cursor:ge-0-0-0");
+    expect(claims.map((claim) => claim.claimId)).toContain("cursor-3-5-release-assimilation");
+    expect(claims.find((claim) => claim.claimId === "cursor-3-5-release-assimilation")?.statement).toContain(
+      "shared canvases",
+    );
+
+    expect(listOntologyNodesByKind("InteractionPrimitive").find((entry) => entry.id === "interaction-primitive:cursor-shared-canvas")).toBeDefined();
+  });
+
   it("includes agent-platform as a distinct non-harness runtime agent and records richer Claude web evidence", () => {
     const babysitterAgent = listAgentVersions().find((agent) => agent.agentId === "agent-platform");
     expect(babysitterAgent).toBeDefined();

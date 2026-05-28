@@ -130,3 +130,28 @@ edges:
     - trust-level:official-web
   references:
     - agentVersion:copilot:ge-1-0-55-3
+---
+nodeKind: EvidenceSource
+id: evidence:cursor-3-5-release
+attributes:
+  displayName: "Cursor 3.5 shared canvases release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://cursor.com/changelog/shared-canvases
+  sourcePathOrUrl: https://cursor.com/changelog/shared-canvases
+  locator: "Cursor changelog entry: Shared Canvases and /loop Skill"
+  capturedAt: "2026-05-28T14:57:00Z"
+  observedAt: "2026-05-28T14:57:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-28T14:57:00Z"
+  notes: |
+    Cursor 3.5 release notes announce shared canvases for live snapshots of
+    agent-created artifacts, Cursor Dashboard read-only access on Pro, Teams,
+    and Enterprise plans, and the /loop skill for repeated local agent work.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:cursor:ge-0-0-0
