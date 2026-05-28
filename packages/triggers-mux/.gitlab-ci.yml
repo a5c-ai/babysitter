@@ -1,0 +1,77 @@
+# GitLab CI template for triggers-mux — run coding agents from GitLab pipelines.
+#
+# Usage in your .gitlab-ci.yml:
+#   include:
+#     - project: 'a5c-ai/babysitter'
+#       ref: staging
+#       file: 'packages/triggers-mux/.gitlab-ci.yml'
+#
+#   agent-review:
+#     extends: .agent-mux-trigger
+#     variables:
+#       AGENT_HARNESS: claude
+#       AGENT_PROMPT: "Review the merge request changes"
+#       AGENT_PROVIDER: foundry
+#       AGENT_MODEL: gpt-5.5
+
+.agent-mux-trigger:
+  image: node:22
+  variables:
+    AGENT_HARNESS: ""
+    AGENT_PROVIDER: ""
+    AGENT_MODEL: ""
+    AGENT_PROMPT: ""
+    AGENT_COMMAND: launch
+    AGENT_INTERACTION_MODE: non-interactive
+    AGENT_MAX_TURNS: "15"
+    AGENT_TRIGGER_QUERY: ""
+    AGENT_INCLUDE_DIFF: "false"
+    NPM_TAG: staging
+  before_script:
+    - npm install -g --legacy-peer-deps @a5c-ai/agent-mux-cli@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/triggers-mux@$NPM_TAG
+  script:
+    - |
+      set -euo pipefail
+
+      # Trigger evaluation (optional)
+      if [ -n "$AGENT_TRIGGER_QUERY" ]; then
+        EVENT_FILE=$(mktemp)
+        RESULT_FILE=$(mktemp)
+        DIFF_ARGS=""
+        if [ "$AGENT_INCLUDE_DIFF" = "true" ]; then
+          DIFF_ARGS="--include-diff"
+        fi
+        triggers-mux enrich \
+          --backend gitlab \
+          --token "$CI_JOB_TOKEN" \
+          $DIFF_ARGS \
+          --output "$EVENT_FILE"
+        if ! triggers-mux evaluate \
+          --backend gitlab \
+          --query "$AGENT_TRIGGER_QUERY" \
+          --token "$CI_JOB_TOKEN" \
+          $DIFF_ARGS \
+          --output "$RESULT_FILE"; then
+          echo "Trigger query did not match — skipping agent execution."
+          exit 0
+        fi
+      fi
+
+      # Build amux command
+      AMUX_ARGS="$AGENT_COMMAND $AGENT_HARNESS"
+      if [ -n "$AGENT_PROVIDER" ]; then
+        AMUX_ARGS="$AMUX_ARGS $AGENT_PROVIDER"
+      fi
+      if [ -n "$AGENT_MODEL" ]; then
+        AMUX_ARGS="$AMUX_ARGS --model $AGENT_MODEL"
+      fi
+      AMUX_ARGS="$AMUX_ARGS --max-turns $AGENT_MAX_TURNS"
+      if [ "$AGENT_INTERACTION_MODE" = "non-interactive" ]; then
+        AMUX_ARGS="$AMUX_ARGS --no-interactive"
+      fi
+      if [ -n "$AGENT_PROMPT" ]; then
+        AMUX_ARGS="$AMUX_ARGS --prompt \"$AGENT_PROMPT\""
+      fi
+
+      echo "Running: amux $AMUX_ARGS"
+      eval amux $AMUX_ARGS

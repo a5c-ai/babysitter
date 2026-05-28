@@ -40,6 +40,7 @@ vi.mock('@a5c-ai/agent-catalog', () => ({
       codex: { promptDelivery: 'exec-subcommand', execSubcommand: 'exec', stdinBehavior: 'close-after-prompt', selfExits: true, needsIdleKill: false, resumeDelivery: 'subcommand', resumeSubcommand: 'resume' },
       pi: { promptDelivery: 'cli-flag', promptFlag: '-p', promptExtraFlags: ['--mode', 'json'], stdinBehavior: 'close-after-prompt', selfExits: false, needsIdleKill: true },
       gemini: { promptDelivery: 'cli-flag', promptFlag: '--prompt', stdinBehavior: 'close-after-prompt', selfExits: true, needsIdleKill: false },
+      hermes: { promptDelivery: 'stdin', stdinBehavior: 'keep-open', selfExits: false, needsIdleKill: true },
     };
     return behaviors[harness] ?? undefined;
   }),
@@ -254,5 +255,81 @@ describe('launchCommand transport-mux integration', () => {
       else process.env['HOME'] = originalHome;
       fs.rmSync(tempHome, { recursive: true, force: true });
     }
+  });
+
+  it('passes Hermes proxy endpoints through native provider flags', async () => {
+    const runtimeStop = vi.fn(async () => {});
+    startTransportMuxRuntimeMock.mockResolvedValue({
+      url: 'http://127.0.0.1:4012',
+      port: 4012,
+      authToken: 'runtime-token',
+      config: {
+        targetProvider: 'foundry',
+        targetModel: 'foundry/gpt-5.5',
+        exposedTransport: 'openai-chat',
+        host: '127.0.0.1',
+        port: 4012,
+        stream: true,
+      },
+      applyHarnessEnv(env: Record<string, string>) {
+        env['OPENAI_BASE_URL'] = 'http://127.0.0.1:4012';
+        env['OPENAI_API_KEY'] = 'runtime-token';
+        return env;
+      },
+      stop: runtimeStop,
+    });
+
+    const child = new EventEmitter() as EventEmitter & {
+      pid: number;
+      stdin: { write: ReturnType<typeof vi.fn>; end: ReturnType<typeof vi.fn> };
+      stdout: PassThrough;
+      stderr: PassThrough;
+      kill: ReturnType<typeof vi.fn>;
+    };
+    child.pid = 4244;
+    child.stdin = { write: vi.fn(), end: vi.fn() };
+    child.stdout = new PassThrough();
+    child.stderr = new PassThrough();
+    child.kill = vi.fn();
+    spawnMock.mockImplementation(() => {
+      queueMicrotask(() => child.emit('exit', 0, null));
+      return child;
+    });
+
+    const [{ launchCommand, LAUNCH_FLAGS }, { parseArgs }] = await Promise.all([
+      import('../src/commands/launch.js'),
+      import('../src/parse-args.js'),
+    ]);
+
+    const client = {
+      adapters: {
+        get: () => ({
+          agent: 'hermes',
+          detectInstallation: async () => ({ installed: true }),
+        }),
+        list: () => [{ agent: 'hermes' }],
+      },
+    } as any;
+
+    const code = await launchCommand(
+      client,
+      parseArgs(
+        ['launch', 'hermes', 'foundry', '--with-proxy', '--prompt', 'write the file', '--no-interactive'],
+        LAUNCH_FLAGS,
+      ),
+    );
+
+    expect(code).toBe(0);
+    expect(spawnMock).toHaveBeenCalledTimes(1);
+    const spawnedArgs = spawnMock.mock.calls[0]?.[1] as string[];
+    expect(spawnedArgs).toContain('--provider');
+    expect(spawnedArgs).toContain('custom');
+    expect(spawnedArgs).toContain('--base-url');
+    expect(spawnedArgs).toContain('http://127.0.0.1:4012/v1');
+    expect(spawnedArgs).toContain('--api-key');
+    expect(spawnedArgs).toContain('runtime-token');
+    expect(child.stdin.write).toHaveBeenCalledWith('write the file\n');
+    expect(child.stdin.end).not.toHaveBeenCalled();
+    expect(runtimeStop).toHaveBeenCalledTimes(1);
   });
 });

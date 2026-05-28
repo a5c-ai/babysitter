@@ -1,0 +1,117 @@
+# CircleCI config template for triggers-mux — run coding agents from CircleCI.
+#
+# Usage: add the agent-mux-trigger job to your .circleci/config.yml
+#
+# workflows:
+#   agent-review:
+#     jobs:
+#       - agent-mux-trigger:
+#           harness: claude
+#           prompt: "Review the changes"
+
+version: 2.1
+
+executors:
+  node:
+    docker:
+      - image: cimg/node:22.22
+    working_directory: ~/project
+
+commands:
+  install-agent-mux:
+    parameters:
+      npm-tag:
+        type: string
+        default: staging
+    steps:
+      - run:
+          name: Install agent-mux toolchain
+          command: |
+            npm install -g --legacy-peer-deps \
+              @a5c-ai/agent-mux-cli@<< parameters.npm-tag >> \
+              @a5c-ai/babysitter-sdk@<< parameters.npm-tag >> \
+              @a5c-ai/triggers-mux@<< parameters.npm-tag >>
+
+  evaluate-trigger:
+    parameters:
+      query:
+        type: string
+        default: ""
+      include-diff:
+        type: boolean
+        default: false
+    steps:
+      - when:
+          condition: << parameters.query >>
+          steps:
+            - run:
+                name: Evaluate trigger
+                command: |
+                  EVENT_FILE=$(mktemp)
+                  RESULT_FILE=$(mktemp)
+                  DIFF_ARGS=""
+                  if [ "<< parameters.include-diff >>" = "true" ]; then
+                    DIFF_ARGS="--include-diff"
+                  fi
+                  triggers-mux enrich \
+                    --backend github \
+                    --token "$GITHUB_TOKEN" \
+                    $DIFF_ARGS \
+                    --output "$EVENT_FILE"
+                  if ! triggers-mux evaluate \
+                    --backend github \
+                    --query "<< parameters.query >>" \
+                    --token "$GITHUB_TOKEN" \
+                    $DIFF_ARGS \
+                    --output "$RESULT_FILE"; then
+                    echo "Trigger did not match — skipping."
+                    circleci-agent step halt
+                  fi
+
+jobs:
+  agent-mux-trigger:
+    parameters:
+      harness:
+        type: string
+      provider:
+        type: string
+        default: ""
+      model:
+        type: string
+        default: ""
+      prompt:
+        type: string
+        default: ""
+      command:
+        type: string
+        default: launch
+      max-turns:
+        type: integer
+        default: 15
+      trigger-query:
+        type: string
+        default: ""
+      include-diff:
+        type: boolean
+        default: false
+      npm-tag:
+        type: string
+        default: staging
+    executor: node
+    steps:
+      - checkout
+      - install-agent-mux:
+          npm-tag: << parameters.npm-tag >>
+      - evaluate-trigger:
+          query: << parameters.trigger-query >>
+          include-diff: << parameters.include-diff >>
+      - run:
+          name: Run agent
+          command: |
+            CMD="amux << parameters.command >> << parameters.harness >>"
+            [ -n "<< parameters.provider >>" ] && CMD="$CMD << parameters.provider >>"
+            [ -n "<< parameters.model >>" ] && CMD="$CMD --model << parameters.model >>"
+            CMD="$CMD --max-turns << parameters.max-turns >> --no-interactive"
+            [ -n "<< parameters.prompt >>" ] && CMD="$CMD --prompt \"<< parameters.prompt >>\""
+            echo "Running: $CMD"
+            eval $CMD

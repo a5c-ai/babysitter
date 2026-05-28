@@ -1,0 +1,72 @@
+# Bitbucket Pipelines template for triggers-mux — run coding agents from Bitbucket.
+#
+# Usage: copy this into your bitbucket-pipelines.yml or reference as a pipe.
+#
+# pipelines:
+#   pull-requests:
+#     '**':
+#       - step:
+#           name: Agent Review
+#           image: node:22
+#           script:
+#             - export AGENT_HARNESS=claude
+#             - export AGENT_PROMPT="Review the pull request"
+#             - source <(curl -s https://raw.githubusercontent.com/a5c-ai/babysitter/staging/packages/triggers-mux/bitbucket-pipelines.yml)
+
+image: node:22
+
+definitions:
+  steps:
+    - step: &agent-mux-trigger
+        name: Agent Mux Trigger
+        caches:
+          - node
+        script:
+          - |
+            set -euo pipefail
+            NPM_TAG="${NPM_TAG:-staging}"
+
+            npm install -g --legacy-peer-deps \
+              @a5c-ai/agent-mux-cli@$NPM_TAG \
+              @a5c-ai/babysitter-sdk@$NPM_TAG \
+              @a5c-ai/triggers-mux@$NPM_TAG
+
+            # Trigger evaluation (optional)
+            if [ -n "${AGENT_TRIGGER_QUERY:-}" ]; then
+              EVENT_FILE=$(mktemp)
+              RESULT_FILE=$(mktemp)
+              DIFF_ARGS=""
+              if [ "${AGENT_INCLUDE_DIFF:-false}" = "true" ]; then
+                DIFF_ARGS="--include-diff"
+              fi
+              triggers-mux enrich \
+                --backend bitbucket \
+                --token "$BITBUCKET_TOKEN" \
+                $DIFF_ARGS \
+                --output "$EVENT_FILE"
+              if ! triggers-mux evaluate \
+                --backend bitbucket \
+                --query "$AGENT_TRIGGER_QUERY" \
+                --token "$BITBUCKET_TOKEN" \
+                $DIFF_ARGS \
+                --output "$RESULT_FILE"; then
+                echo "Trigger query did not match — skipping."
+                exit 0
+              fi
+            fi
+
+            # Build and run amux command
+            HARNESS="${AGENT_HARNESS:-claude}"
+            PROVIDER="${AGENT_PROVIDER:-}"
+            MODEL="${AGENT_MODEL:-}"
+            PROMPT="${AGENT_PROMPT:-}"
+            MAX_TURNS="${AGENT_MAX_TURNS:-15}"
+
+            CMD="amux ${AGENT_COMMAND:-launch} $HARNESS"
+            [ -n "$PROVIDER" ] && CMD="$CMD $PROVIDER"
+            [ -n "$MODEL" ] && CMD="$CMD --model $MODEL"
+            CMD="$CMD --max-turns $MAX_TURNS --no-interactive"
+            [ -n "$PROMPT" ] && CMD="$CMD --prompt \"$PROMPT\""
+
+            echo "Running: $CMD"
+            eval $CMD

@@ -1,0 +1,86 @@
+// Jenkins Pipeline template for triggers-mux — run coding agents from Jenkins.
+//
+// Usage: reference this as a shared library or copy the stage into your Jenkinsfile.
+//
+// pipeline {
+//   agent { docker { image 'node:22' } }
+//   environment {
+//     AGENT_HARNESS = 'claude'
+//     AGENT_PROMPT  = 'Review the changes'
+//   }
+//   stages {
+//     stage('Agent Review') { steps { agentMuxTrigger() } }
+//   }
+// }
+
+def agentMuxTrigger(Map config = [:]) {
+    def harness      = config.harness      ?: env.AGENT_HARNESS      ?: 'claude'
+    def provider     = config.provider     ?: env.AGENT_PROVIDER     ?: ''
+    def model        = config.model        ?: env.AGENT_MODEL        ?: ''
+    def prompt       = config.prompt       ?: env.AGENT_PROMPT       ?: ''
+    def command      = config.command      ?: env.AGENT_COMMAND      ?: 'launch'
+    def maxTurns     = config.maxTurns     ?: env.AGENT_MAX_TURNS    ?: '15'
+    def triggerQuery = config.triggerQuery  ?: env.AGENT_TRIGGER_QUERY ?: ''
+    def npmTag       = config.npmTag       ?: env.NPM_TAG            ?: 'staging'
+
+    sh """
+        set -euo pipefail
+
+        npm install -g --legacy-peer-deps \\
+            @a5c-ai/agent-mux-cli@${npmTag} \\
+            @a5c-ai/babysitter-sdk@${npmTag} \\
+            @a5c-ai/triggers-mux@${npmTag}
+
+        # Trigger evaluation (optional)
+        if [ -n "${triggerQuery}" ]; then
+            EVENT_FILE=\$(mktemp)
+            RESULT_FILE=\$(mktemp)
+            triggers-mux enrich \\
+                --backend generic-webhook \\
+                --output "\$EVENT_FILE"
+            if ! triggers-mux evaluate \\
+                --backend generic-webhook \\
+                --query "${triggerQuery}" \\
+                --output "\$RESULT_FILE"; then
+                echo "Trigger query did not match — skipping."
+                exit 0
+            fi
+        fi
+
+        # Build and run amux command
+        CMD="amux ${command} ${harness}"
+        [ -n "${provider}" ] && CMD="\$CMD ${provider}"
+        [ -n "${model}" ] && CMD="\$CMD --model ${model}"
+        CMD="\$CMD --max-turns ${maxTurns} --no-interactive"
+        [ -n "${prompt}" ] && CMD="\$CMD --prompt \\"${prompt}\\""
+
+        echo "Running: \$CMD"
+        eval \$CMD
+    """
+}
+
+// Example pipeline
+pipeline {
+    agent { docker { image 'node:22' } }
+
+    environment {
+        AZURE_API_KEY = credentials('azure-openai-api-key')
+        AMUX_API_BASE = credentials('azure-openai-api-base')
+    }
+
+    stages {
+        stage('Agent Code Review') {
+            when { changeRequest() }
+            steps {
+                script {
+                    agentMuxTrigger(
+                        harness: 'claude',
+                        provider: 'foundry',
+                        model: 'gpt-5.5',
+                        prompt: 'Review the pull request changes for bugs and improvements',
+                    )
+                }
+            }
+        }
+    }
+}

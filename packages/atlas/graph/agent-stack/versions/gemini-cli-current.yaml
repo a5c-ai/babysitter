@@ -30,6 +30,9 @@ attributes:
     - install:npm
   minSchemaVersion: "6.0.0"
   adapterMetadata:
+    installCommands:
+      - type: npm
+        command: "npm install -g @google/gemini-cli@0.43.0"
     authMethods:
       - type: api_key
         name: "API Key"

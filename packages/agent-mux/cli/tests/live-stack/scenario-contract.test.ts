@@ -184,18 +184,25 @@ describe('live stack scenario contract primitives', () => {
       events: [{ token: '[REDACTED]' }, { status: 'ok' }],
     });
   });
-  it('keeps live-stack workflow step timeouts aligned with live test budgets', () => {
-    const workflow = fs.readFileSync('.github/workflows/live-stack.yml', 'utf8');
+  it('keeps live-stack workflow step timeouts aligned with live test and command budgets', () => {
     const liveStepPattern = /- name: Run selected live stack E2E\n(?<body>[\s\S]*?)(?=\n\s*- name:|\n\s{2}\w|$)/g;
-    const liveSteps = Array.from(workflow.matchAll(liveStepPattern));
+    const workflowPaths = ['.github/workflows/live-stack.yml', '.github/workflows/live-stack-published.yml'];
+
+    const liveSteps = workflowPaths.flatMap((workflowPath) => {
+      const workflow = fs.readFileSync(workflowPath, 'utf8');
+      return Array.from(workflow.matchAll(liveStepPattern)).map((step) => ({ workflowPath, step }));
+    });
 
     expect(liveSteps.length).toBeGreaterThan(0);
-    for (const step of liveSteps) {
+    for (const { workflowPath, step } of liveSteps) {
       const body = step.groups?.['body'] ?? '';
       const timeoutMinutes = Number(/timeout-minutes:\s*(\d+)/.exec(body)?.[1] ?? '0');
       const testTimeoutMs = Number(/LIVE_STACK_TEST_TIMEOUT_MS:\s*'?(\d+)'?/.exec(body)?.[1] ?? '0');
+      const commandTimeoutMs = Number(/LIVE_STACK_COMMAND_TIMEOUT_MS:\s*'?(\d+)'?/.exec(body)?.[1] ?? '0');
       const requiredMinutes = Math.ceil(testTimeoutMs / 60_000);
 
+      expect(commandTimeoutMs, workflowPath).toBeGreaterThanOrEqual(900_000);
+      expect(testTimeoutMs, workflowPath).toBeGreaterThan(commandTimeoutMs);
       expect(timeoutMinutes).toBeGreaterThanOrEqual(requiredMinutes);
     }
   });
@@ -246,6 +253,21 @@ describe('live stack scenario contract primitives', () => {
 
     for (const jobName of ['live_stack_bp_interactive', 'live_stack_bp_bridged', 'live_stack_vanilla_ni', 'live_stack_vanilla_interactive']) {
       expect(workflow).toMatch(new RegExp(`${jobName}:[\\s\\S]*?matrix:.*fromJSON`));
+    }
+  });
+
+  it('routes unsupported BP gpt-5.4-mini dispatch cells to a stronger model', () => {
+    for (const workflowPath of ['.github/workflows/live-stack.yml', '.github/workflows/live-stack-published.yml']) {
+      const workflow = fs.readFileSync(workflowPath, 'utf8');
+
+      expect(workflow).toContain('LIVE_STACK_OS:');
+      expect(workflow).toContain('function miniBpSupported(entry)');
+      expect(workflow).toContain("if ((entry.process_mode || 'predefined') !== 'resume') return false;");
+      expect(workflow).toContain("if (entry.mode === 'interactive') return entry.agent === 'codex' || entry.agent === 'pi';");
+      expect(workflow).toContain("if (entry.mode === 'bridged-hooks') return entry.agent === 'pi' && !String(process.env.LIVE_STACK_OS || '').startsWith('windows');");
+      expect(workflow).toContain("return selected.model === 'gpt-5.4-mini' && !miniBpSupported(entry) ? models['foundry-gpt55'] : selected;");
+      expect(workflow).toContain('const m = modelFor(entry);');
+      expect(workflow).not.toContain("const m = models[entry.model] || models['foundry-gpt55'];");
     }
   });
 
