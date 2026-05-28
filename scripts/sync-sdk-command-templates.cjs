@@ -14,6 +14,10 @@ const SOURCE_ROOT = path.join(REPO_ROOT, 'plugins', 'babysitter-unified', 'comma
 const TARGET_ROOT = path.join(REPO_ROOT, 'packages', 'sdk', 'src', 'prompts', 'templates', 'commands');
 const LABEL = 'sdk command templates';
 const CHECK = process.argv.includes('--check');
+const OBSOLETE_CLEANUP_PATH_PATTERNS = [
+  /skills[\\/]+babysit[\\/]+process[\\/]+cradle[\\/]+cleanup-runs\.js\/processes\/cleanup-runs\.js/,
+  /cleanup-runs\.js\/processes\/cleanup-runs\.js/,
+];
 
 const TEMPLATE_BUILDERS = {
   'assimilate': ({ description, body }) => [
@@ -137,6 +141,16 @@ function buildTemplate(name, commandMarkdown) {
   );
 }
 
+function findObsoleteCleanupPath(content) {
+  return OBSOLETE_CLEANUP_PATH_PATTERNS.some((pattern) => pattern.test(content));
+}
+
+function assertNoObsoleteCleanupPath(label, content) {
+  if (findObsoleteCleanupPath(content)) {
+    throw new Error(`${label} references the obsolete cleanup cradle process path`);
+  }
+}
+
 function main() {
   const stale = [];
   let updated = 0;
@@ -149,12 +163,20 @@ function main() {
       throw new Error(`Missing source command markdown for ${name}: ${sourcePath}`);
     }
 
-    const expected = buildTemplate(name, fs.readFileSync(sourcePath, 'utf8'));
+    const source = fs.readFileSync(sourcePath, 'utf8');
+    if (name === 'cleanup') {
+      assertNoObsoleteCleanupPath(path.relative(REPO_ROOT, sourcePath), source);
+    }
+
+    const expected = buildTemplate(name, source);
     const actual = fs.existsSync(targetPath)
       ? normalizeNewlines(fs.readFileSync(targetPath, 'utf8'))
       : null;
 
     if (CHECK) {
+      if (name === 'cleanup' && actual) {
+        assertNoObsoleteCleanupPath(path.relative(REPO_ROOT, targetPath), actual);
+      }
       if (actual !== expected) {
         stale.push(path.relative(REPO_ROOT, targetPath));
       }
