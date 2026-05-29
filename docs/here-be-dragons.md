@@ -47,10 +47,10 @@ Both files define the same `globalThis.__kanban_registry__` keys with separate t
 
 Registry is keyed by exact options object reference (WeakMap). Create new options object → get new registry → old processes orphaned. Dispose on wrong reference silently does nothing (returns undefined from WeakMap).
 
-### Silent stdout truncation at 50MB
+### ~~Silent stdout truncation at 50MB~~
 **File:** `packages/agent-core/src/agenticTools/shared/process.ts:55-84`
 
-After `MAX_SPAWN_OUTPUT_BYTES` (50MB), subsequent chunks are silently discarded. No error, no warning to caller. Long-running commands lose output mid-stream. A footnote message is appended but the damage is done — any JSON or structured output after the limit is corrupted.
+**FIXED:** Now emits a visible `[babysitter] WARNING: stdout truncated at ... bytes` message in the output when truncation triggers. Caller can see that data was lost.
 
 ---
 
@@ -78,22 +78,17 @@ After `MAX_SPAWN_OUTPUT_BYTES` (50MB), subsequent chunks are silently discarded.
 
 `agent-core` → re-exports from `agent-runtime` (BackgroundProcessRegistry) → `agent-runtime` may import from `agent-core`. Documented with backward-compat shim comment but fragile.
 
-### Stringly-typed event contracts (no compile-time safety)
+### ~~Stringly-typed event contracts (no compile-time safety)~~
 
-`packages/agent-platform/src/harness/amux/amuxEventMapper.ts:42-56` defines 14 event type strings in BOTH a TypeScript union AND a `Set<string>`. If one is updated without the other, valid events silently become "unknown."
+**FIXED:** `BABYSITTER_EVENT_KINDS` const array is now the single source of truth. Type union and Set are both derived from it — cannot drift apart.
 
 ---
 
 ## Maintenance Minefields
 
-### Shell invocation — 5 locations, subtly different
-- `agent-core/src/agenticTools/tools/execution.ts:54-56` — uses `-c` flag
-- `agent-core/src/session.ts:277` — uses `-lc` flag (loads login profile — **DIFFERENT**)
-- `agent-platform/src/harness/backgroundProcessRegistry.ts:103-106` — uses `-c`
-- `agent-runtime/src/backgroundProcessRegistry.ts:104-108` — uses `-c`
-- `agent-platform/src/harness/agenticTools/tools/execution.ts:54-56` — uses `-c`
+### ~~Shell invocation — 5 locations, subtly different~~
 
-The `-lc` vs `-c` difference means session.ts loads `.bashrc`/`.bash_profile` while others don't. Changing one without checking all 5 causes inconsistent environment behavior.
+**FIXED:** `session.ts` changed from `-lc` to `-c` for consistency. All 5 locations now cross-reference each other with HERE BE DRAGONS comments.
 
 ### Kanban status — 6+ sealed switch statements
 **File:** `packages/agent-mux/core/src/kanban.ts` (2518 lines)
@@ -114,21 +109,18 @@ if (properties.has("agent") && kindValue !== "\"agent\"" && kindValue !== "'agen
 
 Three quote styles checked separately with hardcoded strings. Adding a new kind requires adding 3 branches. Easy copy-paste bug.
 
-### Magic numbers without constants
-- `externalPhase.ts:405` — `.slice(-1500)` output truncation
-- `externalPhase.ts:407` — `.slice(0, 300)` for non-shell (inconsistent)
-- `externalPhase.ts:316,327,342` — `effectId.slice(-8)` as label (why 8?)
-- `fileSystem.ts:183` — `Math.min(limit ?? 500, 5000)` (undocumented caps)
-- `programmaticToolCalling.ts:7` — `DEFAULT_MAX_TOOL_CALLS = 25` (why 25?)
+### ~~Magic numbers without constants~~
+
+**FIXED:** Extracted to named constants: `MAX_SHELL_OUTPUT_TAIL_CHARS`, `MAX_NON_SHELL_OUTPUT_HEAD_CHARS`, `DEFAULT_GLOB_LIMIT`, `MAX_GLOB_LIMIT`. ULID slices and `DEFAULT_MAX_TOOL_CALLS` documented inline.
 
 ---
 
 ## Missing Caveats
 
-### File read silently capped at 10,000 lines
+### ~~File read silently capped at 10,000 lines~~
 **File:** `packages/agent-core/src/agenticTools/tools/fileSystem.ts:42-45`
 
-User requests 50,000 lines, gets 10,000. No indication in the response.
+**FIXED:** Now appends `(capped at 10000 lines — requested N)` when limit is reduced.
 
 ### HTTP fetch response truncated at 50,000 chars
 **File:** `packages/agent-core/src/agenticTools/tools/execution.ts:136-140`
@@ -145,30 +137,26 @@ Unless `raw: true`, response bodies are truncated. The `... (truncated)` suffix 
 
 The timeout sets an abort signal but doesn't guarantee the request stops. Fetch implementations check the signal asynchronously — requests can exceed the timeout window.
 
-### Circuit breaker constants are unexplained
-**File:** `packages/agent-platform/src/harness/internal/createRun/orchestration/constants.ts:5-8`
+### ~~Circuit breaker constants are unexplained~~
+**FIXED:** Each constant now has a comment explaining what it guards against.
 
-`MAX_CONSECUTIVE_TIMEOUTS=3`, `MAX_CONSECUTIVE_STALLS=2`, `MAX_PROCESS_ERROR_STALLS=5`. No explanation of what a "stall" is vs. a "timeout," or why these specific values.
+### ~~DEFAULT_TIMEOUT_MS = 900_000 (15 minutes) — unexplained~~
+**FIXED:** Comment added: accommodates long-running model responses and Azure cold-start latency.
 
-### DEFAULT_TIMEOUT_MS = 900_000 (15 minutes) — unexplained
-**File:** `packages/agent-core/src/session.ts:8`
-
-Why 15 minutes? Is it based on API provider limits? Token generation time? No comment.
-
-### Tool dispose requires exact array reference
+### Tool dispose requires exact array reference — *annotated*
 **File:** `packages/agent-core/src/agenticTools/index.ts:40-50`
 
-`disposeAgentCoreToolDefinitions()` uses a WeakMap keyed by the exact tool array. Pass a copy or recreated array → dispose silently does nothing → background processes leak.
+HERE BE DRAGONS comment added. WeakMap keyed by exact tool array reference — pass a copy and dispose silently fails. Risk remains but is now visible.
 
-### Lazy init race on piWrapper failure
+### Lazy init race on piWrapper failure — *annotated*
 **File:** `packages/agent-platform/src/harness/piWrapper.ts:82-92`
 
-If `doInitialize()` fails, `initPromise` is cleared. Rapid concurrent callers will all retry independently without backoff, potentially spamming the module loader.
+HERE BE DRAGONS comment added. N concurrent callers can trigger N parallel init attempts with no backoff. Risk remains but is now visible.
 
-### Platform-specific shell path assumption
+### Platform-specific shell path assumption — *annotated*
 **File:** `packages/agent-core/src/agenticTools/tools/execution.ts:53-56`
 
-Hardcoded `/bin/bash` for non-Windows. macOS Catalina+ defaults to zsh. If bash isn't at `/bin/bash`, execution fails silently.
+HERE BE DRAGONS comment added. `/bin/bash` hardcoded for non-Windows. Risk remains but is now visible.
 
 ---
 
