@@ -1,0 +1,26 @@
+nodeKind: Claim
+id: claim:opencode-1-15-12-issue-540-release-assimilation
+attributes:
+  claimId: opencode-1-15-12-issue-540-release-assimilation
+  subjectKind: AgentVersion
+  subjectId: agentVersion:opencode:ge-0-0-0
+  attribute: releaseAssimilation
+  value: "1.15.12:issue-540-upstream-release-tracked"
+  statement: "OpenCode v1.15.12 is assimilated for issue #540 with release metadata covering acp-next prompt, slash command, and usage updates; experimental OpenAI Responses WebSocket support via OPENCODE_EXPERIMENTAL_WEBSOCKETS=true; WebSocket timeout, retry-before-fallback, and custom base URL behavior; TUI workspace management and subagent retry status; Desktop tab layout settings; and unchanged opencode-ai install metadata."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:opencode-1-15-12-issue-540-release
+  claimedAt: "2026-05-29T11:20:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "The shared OpenCode version graph file already records currentVersion 1.15.12; this issue-scoped claim avoids modifying shared version files while preserving release provenance for #540."
+edges:
+  about_subject:
+    - agentVersion:opencode:ge-0-0-0
+  backed_by_evidence:
+    - evidence:opencode-1-15-12-issue-540-release
+  sourced_from:
+    - evidence:opencode-1-15-12-issue-540-release

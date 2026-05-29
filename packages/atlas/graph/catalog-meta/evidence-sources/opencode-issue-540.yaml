@@ -1,0 +1,28 @@
+nodeKind: EvidenceSource
+id: evidence:opencode-1-15-12-issue-540-release
+attributes:
+  displayName: "OpenCode v1.15.12 release notes for issue #540"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anomalyco/opencode/releases/tag/v1.15.12
+  sourcePathOrUrl: https://github.com/anomalyco/opencode/releases/tag/v1.15.12
+  locator: "anomalyco/opencode release v1.15.12; issue #540 assimilation"
+  capturedAt: "2026-05-29T11:20:00Z"
+  observedAt: "2026-05-29T11:20:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T11:20:00Z"
+  notes: |
+    Issue #540 tracks OpenCode 1.15.12. The official release notes cover
+    acp-next prompt, slash command, and usage updates; experimental OpenAI
+    Responses WebSocket transport enabled with OPENCODE_EXPERIMENTAL_WEBSOCKETS=true;
+    active WebSocket response timeouts, retry-before-fallback behavior, and
+    custom base URL support; TUI workspace management, prompt-mode navigation,
+    restored thinking spinner, and surfaced subagent retry status; Desktop tab
+    layout settings and V2 fixes. The install package remains opencode-ai.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:opencode:ge-0-0-0
