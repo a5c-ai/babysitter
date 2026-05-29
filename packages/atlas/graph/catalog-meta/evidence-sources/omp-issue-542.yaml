@@ -1,0 +1,299 @@
+nodeKind: EvidenceSource
+id: evidence:omp-issue-542-v15-5-11-release
+attributes:
+  displayName: "Oh-My-Pi v15.5.11 release notes for issue #542"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.5.11
+  sourcePathOrUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.5.11
+  locator: "can1357/oh-my-pi release v15.5.11"
+  capturedAt: "2026-05-29T11:25:00Z"
+  observedAt: "2026-05-29T11:25:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T11:25:00Z"
+  notes: |
+    Issue-scoped evidence for #542. The release notes describe OMP 15.5.11
+    mid-conversation system-role handling for eligible Anthropic Messages
+    turns, supportsMidConversationSystem compatibility settings, Claude Opus
+    4.8 Bedrock Converse model metadata through xhigh effort, five-tier Opus
+    4.7+ adaptive-thinking effort mapping, SQL and Redis SessionStorage
+    backends, package-root SessionStorage exports, write-tool hashline snapshot
+    headers, and sharper stale-snapshot diagnostics.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:ge-15-5-9
+---
+nodeKind: Claim
+id: claim:omp-issue-542-current-version
+attributes:
+  claimId: omp-issue-542-current-version
+  subjectId: agentVersion:omp:ge-15-5-9
+  subjectKind: AgentVersion
+  attribute: currentVersion
+  value: "15.5.11"
+  statement: |
+    OMP tracks upstream Oh-My-Pi v15.5.11 for issue #542.
+  evidenceSourceIds:
+    - evidence:omp-issue-542-v15-5-11-release
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-29T11:25:00Z"
+  claimedBy: "@a5c-ai/catalog"
+  claimKind: assertion
+edges:
+  evidenced_by:
+    - evidence:omp-issue-542-v15-5-11-release
+  claims:
+    - agentVersion:omp:ge-15-5-9
+---
+nodeKind: Claim
+id: claim:omp-issue-542-mid-conversation-system
+attributes:
+  claimId: omp-issue-542-mid-conversation-system
+  subjectId: agentVersion:omp:ge-15-5-9
+  subjectKind: AgentVersion
+  attribute: adapterMetadata.modelCompatibility.supportsMidConversationSystem
+  value:
+    supported: true
+    providerFamily: anthropic
+    transport: anthropic-messages
+    minimumModelFamilyVersion: "claude-opus-4.8"
+    settingName: supportsMidConversationSystem
+  statement: |
+    OMP 15.5.11 adds mid-conversation system message support for eligible
+    Anthropic Messages turns by upgrading developer turns to system role on
+    first-party Claude API with Claude Opus 4.8+ and exposes the
+    supportsMidConversationSystem compatibility setting.
+  evidenceSourceIds:
+    - evidence:omp-issue-542-v15-5-11-release
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-29T11:25:00Z"
+  claimedBy: "@a5c-ai/catalog"
+  claimKind: assertion
+edges:
+  evidenced_by:
+    - evidence:omp-issue-542-v15-5-11-release
+  claims:
+    - agentVersion:omp:ge-15-5-9
+---
+nodeKind: Claim
+id: claim:omp-issue-542-claude-opus-4-8-bedrock-effort
+attributes:
+  claimId: omp-issue-542-claude-opus-4-8-bedrock-effort
+  subjectId: agentVersion:omp:ge-15-5-9
+  subjectKind: AgentVersion
+  attribute: adapterMetadata.modelRegistry.anthropic.claude-opus-4-8
+  value:
+    modelId: anthropic.claude-opus-4-8
+    provider: aws-bedrock
+    transport: bedrock-converse
+    thinkingEffortLevels:
+      - low
+      - medium
+      - high
+      - xhigh
+  statement: |
+    OMP 15.5.11 adds anthropic.claude-opus-4-8 model metadata for Bedrock
+    Converse streaming with effort-based thinking support through xhigh.
+  evidenceSourceIds:
+    - evidence:omp-issue-542-v15-5-11-release
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-29T11:25:00Z"
+  claimedBy: "@a5c-ai/catalog"
+  claimKind: assertion
+edges:
+  evidenced_by:
+    - evidence:omp-issue-542-v15-5-11-release
+  claims:
+    - agentVersion:omp:ge-15-5-9
+---
+nodeKind: Claim
+id: claim:omp-issue-542-adaptive-effort-mapping
+attributes:
+  claimId: omp-issue-542-adaptive-effort-mapping
+  subjectId: agentVersion:omp:ge-15-5-9
+  subjectKind: AgentVersion
+  attribute: adapterMetadata.anthropicAdaptiveThinkingEffortMapping
+  value:
+    appliesTo: "Anthropic Messages API Opus 4.7+"
+    mapping:
+      minimal: low
+      low: medium
+      medium: high
+      high: xhigh
+      xhigh: max
+    legacyExceptions:
+      - "Opus 4.6"
+      - "Bedrock Converse"
+  statement: |
+    OMP 15.5.11 changes Anthropic adaptive-thinking effort mapping for Opus
+    4.7+ on the Messages API to use a five-tier scale, shifting user-facing
+    effort up one notch so xhigh reaches max while Opus 4.6 and Bedrock
+    Converse retain the legacy four-tier mapping.
+  evidenceSourceIds:
+    - evidence:omp-issue-542-v15-5-11-release
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-29T11:25:00Z"
+  claimedBy: "@a5c-ai/catalog"
+  claimKind: assertion
+edges:
+  evidenced_by:
+    - evidence:omp-issue-542-v15-5-11-release
+  claims:
+    - agentVersion:omp:ge-15-5-9
+---
+nodeKind: Claim
+id: claim:omp-issue-542-sql-session-storage
+attributes:
+  claimId: omp-issue-542-sql-session-storage
+  subjectId: agentVersion:omp:ge-15-5-9
+  subjectKind: AgentVersion
+  attribute: adapterMetadata.sessionStorageBackends.sql
+  value:
+    className: SqlSessionStorage
+    interface: SessionStorage
+    runtimeDependency: "bun:sql"
+    supportedAdapters:
+      - postgres
+      - mysql
+      - sqlite
+    appendPattern: append-only-jsonl
+  statement: |
+    OMP 15.5.11 adds SqlSessionStorage, a bun:sql-backed SessionStorage
+    implementation for PostgreSQL, MySQL/MariaDB, or SQLite session JSONL
+    persistence.
+  evidenceSourceIds:
+    - evidence:omp-issue-542-v15-5-11-release
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-29T11:25:00Z"
+  claimedBy: "@a5c-ai/catalog"
+  claimKind: assertion
+edges:
+  evidenced_by:
+    - evidence:omp-issue-542-v15-5-11-release
+  claims:
+    - agentVersion:omp:ge-15-5-9
+---
+nodeKind: Claim
+id: claim:omp-issue-542-redis-session-storage
+attributes:
+  claimId: omp-issue-542-redis-session-storage
+  subjectId: agentVersion:omp:ge-15-5-9
+  subjectKind: AgentVersion
+  attribute: adapterMetadata.sessionStorageBackends.redis
+  value:
+    className: RedisSessionStorage
+    interface: SessionStorage
+    runtimeDependency: "bun:redis"
+    keyspace: session-jsonl
+    artifactStorage: disk
+    exportedFromPackageRoot:
+      - SessionStorage
+      - SessionStorageWriter
+      - FileSessionStorage
+      - MemorySessionStorage
+  statement: |
+    OMP 15.5.11 adds RedisSessionStorage for SessionStorage-compatible Redis
+    session JSONL persistence and exports SessionStorage-related symbols from
+    the package root.
+  evidenceSourceIds:
+    - evidence:omp-issue-542-v15-5-11-release
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-29T11:25:00Z"
+  claimedBy: "@a5c-ai/catalog"
+  claimKind: assertion
+edges:
+  evidenced_by:
+    - evidence:omp-issue-542-v15-5-11-release
+  claims:
+    - agentVersion:omp:ge-15-5-9
+---
+nodeKind: Claim
+id: claim:omp-issue-542-hashline-write-snapshot
+attributes:
+  claimId: omp-issue-542-hashline-write-snapshot
+  subjectId: agentVersion:omp:ge-15-5-9
+  subjectKind: AgentVersion
+  attribute: adapterMetadata.writeTool.hashlineSnapshotHeaders
+  value:
+    enabledInHashlineMode: true
+    appliesTo:
+      - disk-writes
+      - acp-bridge-writes
+      - conflict-resolutions
+    suppressedFor:
+      - non-hashline-mode
+      - archive-writes
+      - sqlite-writes
+      - host-managed-internal-url-targets
+  statement: |
+    OMP 15.5.11 adds fresh hashline snapshot headers to write-tool success
+    text in hashline display mode, allowing the next edit to use a current
+    snapshot without an extra read round trip.
+  evidenceSourceIds:
+    - evidence:omp-issue-542-v15-5-11-release
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-29T11:25:00Z"
+  claimedBy: "@a5c-ai/catalog"
+  claimKind: assertion
+edges:
+  evidenced_by:
+    - evidence:omp-issue-542-v15-5-11-release
+  claims:
+    - agentVersion:omp:ge-15-5-9
+---
+nodeKind: Claim
+id: claim:omp-issue-542-stale-snapshot-diagnostics
+attributes:
+  claimId: omp-issue-542-stale-snapshot-diagnostics
+  subjectId: agentVersion:omp:ge-15-5-9
+  subjectKind: AgentVersion
+  attribute: adapterMetadata.editTool.staleSnapshotDiagnostics
+  value:
+    distinguishes:
+      - recognized-hash-content-drifted
+      - unrecognized-cross-session-or-fabricated-hash
+    includesCurrentFileHash: true
+    includesAnchorContextLines: 2
+  statement: |
+    OMP 15.5.11 changes edit-tool stale-snapshot diagnostics to distinguish
+    in-session file drift from fabricated or cross-session tags, include the
+    current file hash, and provide two lines of context around each anchor.
+  evidenceSourceIds:
+    - evidence:omp-issue-542-v15-5-11-release
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-05-29T11:25:00Z"
+  claimedBy: "@a5c-ai/catalog"
+  claimKind: assertion
+edges:
+  evidenced_by:
+    - evidence:omp-issue-542-v15-5-11-release
+  claims:
+    - agentVersion:omp:ge-15-5-9
