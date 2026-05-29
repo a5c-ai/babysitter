@@ -1,0 +1,210 @@
+nodeKind: Claim
+id: claim:model-version-gemini-3-1-flash-image-issue-534-exists
+attributes:
+  subjectId: model:gemini-3-1-flash-image@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  subjectKind: ModelVersion
+  statement: Google lists gemini-3.1-flash-image as Gemini 3.1 Flash Image, a stable Gemini API Nano Banana 2 image generation model.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-image-models-issue-534
+  - evidence:google-gemini-deprecations-issue-534
+  claimedAt: '2026-05-29T12:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-image-models-issue-534
+  - evidence:google-gemini-deprecations-issue-534
+  about_subject:
+  - model:gemini-3-1-flash-image@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-3-pro-image-issue-534-exists
+attributes:
+  subjectId: model:gemini-3-pro-image@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  subjectKind: ModelVersion
+  statement: Google lists gemini-3-pro-image as a stable Gemini API Nano Banana Pro image generation model; the linked model detail page labels the product Gemini 3.1 Pro Image.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-image-models-issue-534
+  - evidence:google-gemini-deprecations-issue-534
+  claimedAt: '2026-05-29T12:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-image-models-issue-534
+  - evidence:google-gemini-deprecations-issue-534
+  about_subject:
+  - model:gemini-3-pro-image@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-2-5-flash-image-issue-534-lifecycle
+attributes:
+  subjectId: model:gemini-2-5-flash-image@current
+  attribute: eolDate
+  value: '2026-10-02'
+  subjectKind: ModelVersion
+  statement: Google lists gemini-2.5-flash-image with release date 2025-10-02, shutdown date 2026-10-02, and recommended replacement gemini-3.1-flash-image-preview.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-deprecations-issue-534
+  claimedAt: '2026-05-29T12:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-deprecations-issue-534
+  about_subject:
+  - model:gemini-2-5-flash-image@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-2-5-flash-issue-534-lifecycle
+attributes:
+  subjectId: model:gemini-2-5-flash@current
+  attribute: eolDate
+  value: '2026-10-16'
+  subjectKind: ModelVersion
+  statement: Google lists gemini-2.5-flash with release date 2025-06-17, shutdown date 2026-10-16, and recommended replacement gemini-3.5-flash.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-deprecations-issue-534
+  claimedAt: '2026-05-29T12:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-deprecations-issue-534
+  about_subject:
+  - model:gemini-2-5-flash@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-2-5-flash-lite-issue-534-lifecycle
+attributes:
+  subjectId: model:gemini-2-5-flash-lite@current
+  attribute: eolDate
+  value: '2026-10-16'
+  subjectKind: ModelVersion
+  statement: Google lists gemini-2.5-flash-lite with release date 2025-07-22, shutdown date 2026-10-16, and recommended replacement gemini-3.1-flash-lite.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-deprecations-issue-534
+  claimedAt: '2026-05-29T12:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-deprecations-issue-534
+  about_subject:
+  - model:gemini-2-5-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-2-5-pro-issue-534-lifecycle
+attributes:
+  subjectId: model:gemini-2-5-pro@current
+  attribute: eolDate
+  value: '2026-10-16'
+  subjectKind: ModelVersion
+  statement: Google lists gemini-2.5-pro with release date 2025-06-17, shutdown date 2026-10-16, and recommended replacement gemini-3.1-pro-preview.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-deprecations-issue-534
+  claimedAt: '2026-05-29T12:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-deprecations-issue-534
+  about_subject:
+  - model:gemini-2-5-pro@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-2-0-flash-issue-534-lifecycle
+attributes:
+  subjectId: model:gemini-2-0-flash@current
+  attribute: eolDate
+  value: '2026-06-01'
+  subjectKind: ModelVersion
+  statement: Google lists gemini-2.0-flash and gemini-2.0-flash-001 with release date 2025-02-05, shutdown date 2026-06-01, and recommended replacement gemini-2.5-flash.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-deprecations-issue-534
+  claimedAt: '2026-05-29T12:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-deprecations-issue-534
+  about_subject:
+  - model:gemini-2-0-flash@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-2-0-flash-lite-issue-534-lifecycle
+attributes:
+  subjectId: model:gemini-2-0-flash-lite@current
+  attribute: eolDate
+  value: '2026-06-01'
+  subjectKind: ModelVersion
+  statement: Google lists gemini-2.0-flash-lite and gemini-2.0-flash-lite-001 with release date 2025-02-25, shutdown date 2026-06-01, and recommended replacement gemini-2.5-flash-lite.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-deprecations-issue-534
+  claimedAt: '2026-05-29T12:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-deprecations-issue-534
+  about_subject:
+  - model:gemini-2-0-flash-lite@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-2-0-flash-preview-image-generation-issue-534-lifecycle
+attributes:
+  subjectId: model:gemini-2-0-flash-preview-image-generation@current
+  attribute: eolDate
+  value: '2025-11-14'
+  subjectKind: ModelVersion
+  statement: Google lists gemini-2.0-flash-preview-image-generation with release date 2025-05-07, shutdown date 2025-11-14, and recommended replacement gemini-2.5-flash-image.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-deprecations-issue-534
+  claimedAt: '2026-05-29T12:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-deprecations-issue-534
+  about_subject:
+  - model:gemini-2-0-flash-preview-image-generation@current

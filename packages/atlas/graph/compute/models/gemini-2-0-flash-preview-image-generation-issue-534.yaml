@@ -1,0 +1,62 @@
+nodeKind: ModelVersion
+id: model:gemini-2-0-flash-preview-image-generation@current
+attributes:
+  displayName: "Gemini 2.0 Flash Preview Image Generation"
+  supportsExtendedThinking: false
+  safetyTier: google-deepmind-asl-2
+  modelFamilyId: model-family:gemini-2-0
+  versionRange: '>=2.0.0 <2.1.0'
+  kind: multimodal
+  contextWindowTokens: 1000000
+  maxOutputTokens: 8192
+  supportsThinking: false
+  supportsThinkingBudgetTokens: false
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: image
+      direction: output
+    - kind: text
+      direction: output
+  releaseDate: '2025-05-07'
+  lifecycleStatus: retired
+  lifecycleStatusChangedAt: '2025-11-14'
+  deprecationDate: '2025-05-07'
+  eolDate: '2025-11-14'
+  knowledgeCutoffDate: '2024-08-01'
+  modelCardUrl: https://ai.google.dev/gemini-api/docs/deprecations
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:gemini-2-0
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:gemini-2-0
+  served_by:
+  - provider:google
+  speaks:
+  - model-transport:gemini-generate-content
+  supports:
+  - target: capability:vision-input
+    versionRange: '>=2.0.0 <2.1.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-gemini-deprecations-issue-534
+  - target: capability:supports-image-output
+    versionRange: '>=2.0.0 <2.1.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-gemini-deprecations-issue-534
+  - target: capability:supports-batch-api
+    versionRange: '>=2.0.0 <2.1.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-gemini-deprecations-issue-534
