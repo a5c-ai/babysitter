@@ -14,4 +14,7 @@ export * from './pages/playground-pages.jsx';
 // Issue workspace components — explicitly re-exported for discovery.
 // IssueWorkspace renders the repo/project scoped issue list with <IssueCreateForm inline at top.
 // IssueDetailView renders the selected issue detail panel with <IssueEditor for full editing.
-export { IssueWorkspace, IssueDetailView, IssueCreateForm, IssueEditor, IssueDetailPage, IssueScopePage, issuesForScope } from './pages/agent-pages.jsx';
+// IssueWorkspace, IssueDetailView, IssueDetailPage, IssueScopePage, issuesForScope
+// are already covered by `export * from './pages/agent-pages.jsx'` above.
+// IssueCreateForm and IssueEditor live in the component layer:
+export { IssueCreateForm, IssueEditor } from './components/issue-editor.jsx';

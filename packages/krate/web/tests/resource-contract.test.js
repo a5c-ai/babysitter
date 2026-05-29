@@ -200,7 +200,7 @@ test('RBAC settings form emits required AgentServiceAccount fields', () => {
 // ── Contract: project create form sends required KrateProject fields ──────
 
 test('agent pages reference required KrateProject fields', () => {
-  const source = readFile('app', 'pages', 'agent-pages.jsx');
+  const source = readFile('app', 'pages', 'agent-project-pages.jsx');
   assert.match(source, /KrateProject/);
   assert.match(source, /displayName/);
 });
