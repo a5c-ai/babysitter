@@ -87,6 +87,7 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
           <select
             value={selectedImage}
             onChange={(e) => setSelectedImage(e.target.value)}
+            aria-label="Codespace image"
             style={{
               padding: '0.375rem 0.5rem',
               fontSize: '0.75rem',
@@ -102,6 +103,7 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
           <button
             onClick={() => onLaunch?.({ image: selectedImage })}
             style={{ ...btnBase, background: '#22c55e', color: '#fff' }}
+            aria-label={`Launch codespace for workspace ${workspaceName || 'unknown'}`}
           >
             Launch Codespace
           </button>
@@ -131,6 +133,7 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
                 href={codespace.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={`Open codespace for workspace ${workspaceName || 'unknown'} in browser`}
                 style={{
                   ...btnBase,
                   background: '#2563eb',
@@ -146,6 +149,7 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
               <button
                 onClick={() => setConfirmStop(true)}
                 style={{ ...btnBase, background: '#ef4444', color: '#fff' }}
+                aria-label={`Stop codespace for workspace ${workspaceName || 'unknown'}`}
               >
                 Stop Codespace
               </button>
@@ -155,12 +159,14 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
                 <button
                   onClick={() => { setConfirmStop(false); onStop?.(); }}
                   style={{ ...btnBase, background: '#ef4444', color: '#fff' }}
+                  aria-label="Confirm stop codespace"
                 >
                   Yes, Stop
                 </button>
                 <button
                   onClick={() => setConfirmStop(false)}
                   style={{ ...btnBase, background: '#e5e7eb', color: '#374151' }}
+                  aria-label="Cancel stopping codespace"
                 >
                   Cancel
                 </button>

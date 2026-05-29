@@ -86,7 +86,7 @@ export function RepoRuns({ org, repo, runs = [] }) {
         <h3>Pipeline runs</h3>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={pillStyle(runningCount ? 'warn' : 'neutral')}>{runningCount} running</span>
-          <button type="button" style={btnStyle('primary')} onClick={() => setShowForm(v => !v)}>
+          <button type="button" style={btnStyle('primary')} onClick={() => setShowForm(v => !v)} aria-label={showForm ? 'Cancel triggering run' : `Trigger new pipeline run for ${repo}`}>
             {showForm ? 'Cancel' : 'Trigger run'}
           </button>
         </div>
@@ -106,7 +106,7 @@ export function RepoRuns({ org, repo, runs = [] }) {
           </div>
           {message && <p style={{ color: '#dc2626', fontSize: '0.8125rem', margin: 0 }}>{message}</p>}
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button type="submit" style={btnStyle('primary')} disabled={busy}>{busy ? 'Triggering...' : 'Trigger run'}</button>
+            <button type="submit" style={btnStyle('primary')} disabled={busy} aria-label="Submit pipeline run">{busy ? 'Triggering...' : 'Trigger run'}</button>
             <button type="button" style={btnStyle('close')} onClick={() => setShowForm(false)}>Cancel</button>
           </div>
         </form>
@@ -118,6 +118,7 @@ export function RepoRuns({ org, repo, runs = [] }) {
           value={branchFilter}
           onChange={e => setBranchFilter(e.target.value)}
           placeholder="Filter by branch..."
+          aria-label="Filter pipeline runs by branch"
         />
         {branchFilter && (
           <button type="button" style={btnStyle('close')} onClick={() => setBranchFilter('')}>Clear</button>
@@ -130,7 +131,7 @@ export function RepoRuns({ org, repo, runs = [] }) {
           <p style={{ fontSize: '0.875rem' }}>Trigger a run to kick off a pipeline for this repository.</p>
         </div>
       ) : (
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }} role="list" aria-label="Pipeline runs">
           {filteredItems.map(run => {
             const name = run.metadata?.name;
             const phase = run.status?.phase || 'Queued';

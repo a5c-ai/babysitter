@@ -84,6 +84,7 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
                 <button
                   onClick={() => onRemove?.(a)}
                   style={{ ...btnBase, background: '#fee2e2', color: '#991b1b' }}
+                  aria-label={`Remove association ${a.kind} ${a.name}`}
                 >
                   Remove
                 </button>
@@ -102,6 +103,7 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
         <select
           value={newKind}
           onChange={(e) => setNewKind(e.target.value)}
+          aria-label="Association kind"
           style={{
             padding: '0.25rem 0.375rem',
             fontSize: '0.75rem',
@@ -120,6 +122,7 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
           placeholder="Name"
+          aria-label="Association name"
           style={{
             padding: '0.25rem 0.375rem',
             fontSize: '0.75rem',
@@ -137,6 +140,7 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
             background: newName.trim() ? '#2563eb' : '#d1d5db',
             color: '#fff',
           }}
+          aria-label="Add association"
         >
           Add
         </button>

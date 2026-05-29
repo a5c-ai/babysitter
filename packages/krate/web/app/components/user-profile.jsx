@@ -152,7 +152,7 @@ export function UserProfileForm({ org, user }) {
       <div className="card" style={cardStyle}>
         <div className="cardTitle">
           <h2>User info</h2>
-          <button type="button" onClick={() => setEditing(!editing)} style={secondaryStyle}>
+          <button type="button" onClick={() => setEditing(!editing)} style={secondaryStyle} aria-label={editing ? 'Cancel editing profile' : 'Edit user profile'}>
             {editing ? 'Cancel' : 'Edit profile'}
           </button>
         </div>
@@ -170,7 +170,7 @@ export function UserProfileForm({ org, user }) {
               <p style={descStyle}>Get notified about agent run completions, approval requests, and system alerts.</p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <button type="submit" disabled={saveStatus === 'saving'} style={saveStatus === 'saving' ? disabledStyle : primaryStyle}>
+              <button type="submit" disabled={saveStatus === 'saving'} style={saveStatus === 'saving' ? disabledStyle : primaryStyle} aria-label="Save profile changes">
                 {saveStatus === 'saving' ? 'Saving...' : 'Save changes'}
               </button>
               <StatusMsg status={saveStatus} message={saveMessage} />
@@ -199,6 +199,7 @@ export function UserProfileForm({ org, user }) {
                   type="button"
                   onClick={() => handleRevokeKey(key.name)}
                   style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: '#dc2626', borderColor: '#fca5a5' }}
+                  aria-label={`Revoke API key ${key.name}`}
                 >
                   Revoke
                 </button>
@@ -219,7 +220,7 @@ export function UserProfileForm({ org, user }) {
             <label style={labelStyle}>Key name</label>
             <input type="text" value={keyName} onChange={e => setKeyName(e.target.value)} placeholder="my-cli-key" style={inputStyle} />
           </div>
-          <button type="submit" disabled={!keyName.trim() || keyStatus === 'generating'} style={!keyName.trim() || keyStatus === 'generating' ? disabledStyle : primaryStyle}>
+          <button type="submit" disabled={!keyName.trim() || keyStatus === 'generating'} style={!keyName.trim() || keyStatus === 'generating' ? disabledStyle : primaryStyle} aria-label="Generate new API key">
             {keyStatus === 'generating' ? 'Generating...' : 'Generate key'}
           </button>
           <StatusMsg status={keyStatus} message={keyMessage} />
@@ -234,7 +235,7 @@ export function UserProfileForm({ org, user }) {
           <div style={kvRowStyle}><span style={kvLabelStyle}>Session</span><span style={kvValueStyle}>Active</span></div>
         </div>
         <div style={{ paddingTop: '0.5rem' }}>
-          <button type="button" onClick={handleSignOut} style={dangerStyle}>
+          <button type="button" onClick={handleSignOut} style={dangerStyle} aria-label="Sign out of current session">
             Sign out
           </button>
         </div>

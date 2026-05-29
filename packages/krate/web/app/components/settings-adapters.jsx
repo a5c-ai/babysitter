@@ -67,6 +67,7 @@ function AdapterRow({ org, adapter, onDeleted }) {
         onClick={handleDelete}
         disabled={delStatus === 'deleting'}
         style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: '#fca5a5' }}
+        aria-label={`Delete adapter ${name}`}
       >
         {delStatus === 'deleting' ? 'Deleting...' : 'Delete'}
       </button>
@@ -167,7 +168,7 @@ function AddAdapterForm({ org, onCreated }) {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button type="submit" disabled={!canSubmit} style={!canSubmit ? disabledStyle : primaryStyle}>
+            <button type="submit" disabled={!canSubmit} style={!canSubmit ? disabledStyle : primaryStyle} aria-label="Create adapter">
               {status === 'saving' ? 'Saving...' : 'Create adapter'}
             </button>
             <StatusMsg status={status} message={message} />
@@ -197,7 +198,7 @@ export function AdaptersSection({ org, initialAdapters }) {
         <h2>Adapters</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span className={`pill ${adapters.length ? 'good' : 'neutral'}`}>{adapters.length} adapters</span>
-          <button type="button" onClick={() => setShowForm(v => !v)} style={{ ...secondaryStyle, padding: '4px 14px', fontSize: 13 }}>
+          <button type="button" onClick={() => setShowForm(v => !v)} style={{ ...secondaryStyle, padding: '4px 14px', fontSize: 13 }} aria-label={showForm ? 'Cancel adding adapter' : 'Add new adapter'}>
             {showForm ? 'Cancel' : '+ Add adapter'}
           </button>
         </div>

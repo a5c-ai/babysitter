@@ -141,12 +141,13 @@ export function MemorySearchForm({ org, showGraphLinks = true }) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search agent memory..."
+            aria-label="Search query for agent memory"
             style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', fontSize: '0.875rem' }}
           />
         </div>
         <div>
           <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.5rem' }}>Search mode</label>
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', gap: '1.5rem' }} role="radiogroup" aria-label="Search mode">
             {MODES.map(m => (
               <label key={m.value} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8125rem', cursor: 'pointer' }}>
                 <input
@@ -155,6 +156,7 @@ export function MemorySearchForm({ org, showGraphLinks = true }) {
                   value={m.value}
                   checked={mode === m.value}
                   onChange={() => setMode(m.value)}
+                  aria-label={`${m.label}: ${m.description}`}
                 />
                 {m.label}
               </label>
@@ -164,6 +166,7 @@ export function MemorySearchForm({ org, showGraphLinks = true }) {
         <button
           type="submit"
           disabled={status === 'searching' || !query.trim()}
+          aria-label="Search agent memory"
           style={{ alignSelf: 'flex-start', padding: '0.5rem 1.25rem', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '0.375rem', fontSize: '0.875rem', fontWeight: 600, cursor: status === 'searching' ? 'not-allowed' : 'pointer', opacity: status === 'searching' ? 0.7 : 1 }}
         >
           {status === 'searching' ? 'Searching...' : 'Search'}

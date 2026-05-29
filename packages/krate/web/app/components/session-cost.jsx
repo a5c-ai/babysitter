@@ -215,6 +215,8 @@ export function SessionCost({ turns = [], totalCost, compact = false }) {
   if (compact) {
     return (
       <div
+        aria-live="polite"
+        aria-label={`Session cost: ${displayTotal}`}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -244,6 +246,8 @@ export function SessionCost({ turns = [], totalCost, compact = false }) {
   return (
     <div>
       <div
+        aria-live="polite"
+        aria-label={`Total session cost: ${displayTotal}`}
         style={{
           display: 'flex',
           alignItems: 'center',

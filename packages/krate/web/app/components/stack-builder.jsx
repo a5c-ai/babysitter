@@ -257,6 +257,7 @@ export function StackBuilder({ org, existingStack = null }) {
               type="submit"
               disabled={status === 'saving' || !name}
               style={status === 'saving' || !name ? disabledPrimaryStyle : primaryStyle}
+              aria-label={isEditing ? `Update stack ${name}` : `Create stack ${name || 'new'}`}
             >
               {status === 'saving' ? 'Saving...' : isEditing ? 'Update Stack' : 'Create Stack'}
             </button>

@@ -23,6 +23,10 @@ function KanbanCard({ item, columnColor, onDragStart, onDragEnd, isDragging }) {
       onDragStart={(e) => onDragStart(e, item)}
       onDragEnd={onDragEnd}
       className="kanbanCard"
+      role="button"
+      aria-label={`Card: ${title}. Drag to move between columns`}
+      aria-grabbed={isDragging}
+      tabIndex={0}
       style={{
         background: '#fff',
         borderRadius: '0.375rem',
@@ -62,6 +66,7 @@ function KanbanColumn({ col, items, draggingId, dragOverCol, onDragStart, onDrag
   return (
     <section
       className="kanbanColumn"
+      aria-label={`${col.label} column, ${items.length} items`}
       onDragOver={(e) => onDragOver(e, col.id)}
       onDragLeave={onDragLeave}
       onDrop={(e) => onDrop(e, col.id)}

@@ -228,11 +228,11 @@ export function InferenceServiceManager({ org, initialServiceName }) {
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0' }}>
-          <button style={tabStyle(activeTab === 'services')} onClick={() => setActiveTab('services')}>Services</button>
-          <button style={tabStyle(activeTab === 'runtimes')} onClick={() => setActiveTab('runtimes')}>Runtimes</button>
-          <button style={tabStyle(activeTab === 'routes')} onClick={() => setActiveTab('routes')}>Model Routes</button>
-          <button style={tabStyle(activeTab === 'virtual-models')} onClick={() => setActiveTab('virtual-models')}>Virtual Models</button>
+        <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0' }} role="tablist" aria-label="Inference resource tabs">
+          <button style={tabStyle(activeTab === 'services')} onClick={() => setActiveTab('services')} role="tab" aria-selected={activeTab === 'services'} aria-label="Services tab">Services</button>
+          <button style={tabStyle(activeTab === 'runtimes')} onClick={() => setActiveTab('runtimes')} role="tab" aria-selected={activeTab === 'runtimes'} aria-label="Runtimes tab">Runtimes</button>
+          <button style={tabStyle(activeTab === 'routes')} onClick={() => setActiveTab('routes')} role="tab" aria-selected={activeTab === 'routes'} aria-label="Model Routes tab">Model Routes</button>
+          <button style={tabStyle(activeTab === 'virtual-models')} onClick={() => setActiveTab('virtual-models')} role="tab" aria-selected={activeTab === 'virtual-models'} aria-label="Virtual Models tab">Virtual Models</button>
         </div>
         {activeTab === 'services' && !showCreateForm && (
           <button style={btnStyle()} onClick={() => setShowCreateForm(true)}>+ Create Service</button>

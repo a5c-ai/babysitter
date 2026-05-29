@@ -79,17 +79,17 @@ export function RunHistorySection({ active = [], history = [], org }) {
         Runs
       </div>
 
-      <div style={{ display: 'flex', gap: '0.25rem', borderBottom: '1px solid var(--border)', marginBottom: '0.5rem' }}>
-        <button onClick={() => setTab('active')} style={tabStyle(tab === 'active')}>
+      <div style={{ display: 'flex', gap: '0.25rem', borderBottom: '1px solid var(--border)', marginBottom: '0.5rem' }} role="tablist" aria-label="Run history tabs">
+        <button onClick={() => setTab('active')} style={tabStyle(tab === 'active')} role="tab" aria-selected={tab === 'active'} aria-controls="run-history-panel">
           Active ({active.length})
         </button>
-        <button onClick={() => setTab('history')} style={tabStyle(tab === 'history')}>
+        <button onClick={() => setTab('history')} style={tabStyle(tab === 'history')} role="tab" aria-selected={tab === 'history'} aria-controls="run-history-panel">
           History ({history.length})
         </button>
       </div>
 
       {runs.length > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <div id="run-history-panel" role="list" aria-label={tab === 'active' ? 'Active runs' : 'Run history'} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
           {runs.map((run) => {
             const name = run.metadata?.name || 'unknown';
             const stack = run.spec?.agentStack || '--';
@@ -101,6 +101,8 @@ export function RunHistorySection({ active = [], history = [], org }) {
             return (
               <div
                 key={name}
+                role="listitem"
+                aria-label={`Run ${name}, status ${phase}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',

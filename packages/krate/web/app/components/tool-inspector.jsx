@@ -70,6 +70,7 @@ export function ToolCallInspector({ toolName, input, output, status = 'completed
     <details
       open={open}
       onToggle={(e) => setOpen(e.target.open)}
+      aria-label={`Tool call: ${meta.label} - ${summary || 'no input'}`}
       style={{
         border: '1px solid #e2e8f0',
         borderLeft: `3px solid ${color}`,
@@ -222,7 +223,7 @@ export function ToolCallList({ messages }) {
   }
 
   return (
-    <div>
+    <div role="list" aria-label="Tool calls">
       {toolMessages.map((msg, i) => (
         <ToolCallInspector
           key={i}

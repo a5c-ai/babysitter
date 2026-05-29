@@ -67,6 +67,7 @@ function ServiceAccountRow({ org, sa, onDeleted }) {
         onClick={handleDelete}
         disabled={delStatus === 'deleting'}
         style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: '#fca5a5' }}
+        aria-label={`Delete service account ${name}`}
       >
         {delStatus === 'deleting' ? 'Deleting...' : 'Delete'}
       </button>
@@ -194,7 +195,7 @@ function AddServiceAccountForm({ org, onCreated }) {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button type="submit" disabled={!canSubmit} style={!canSubmit ? disabledStyle : primaryStyle}>
+            <button type="submit" disabled={!canSubmit} style={!canSubmit ? disabledStyle : primaryStyle} aria-label="Create service account">
               {status === 'saving' ? 'Creating...' : 'Create service account'}
             </button>
             <StatusMsg status={status} message={message} />
@@ -244,7 +245,7 @@ export function RbacSection({ org, initialServiceAccounts }) {
         <h2>Service Accounts (RBAC)</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span className={`pill ${serviceAccounts.length ? 'good' : 'neutral'}`}>{serviceAccounts.length} accounts</span>
-          <button type="button" onClick={() => setShowForm((v) => !v)} style={{ ...secondaryStyle, padding: '4px 14px', fontSize: 13 }}>
+          <button type="button" onClick={() => setShowForm((v) => !v)} style={{ ...secondaryStyle, padding: '4px 14px', fontSize: 13 }} aria-label={showForm ? 'Cancel adding service account' : 'Add new service account'}>
             {showForm ? 'Cancel' : '+ Add service account'}
           </button>
         </div>

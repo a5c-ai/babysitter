@@ -154,6 +154,7 @@ function ProviderRow({ org, provider, onDeleted }) {
         onClick={handleDelete}
         disabled={delStatus === 'deleting'}
         style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: '#fca5a5' }}
+        aria-label={`Delete provider ${name}`}
       >
         {delStatus === 'deleting' ? 'Deleting...' : 'Delete'}
       </button>
@@ -323,7 +324,7 @@ function AddProviderForm({ org, onCreated, secrets }) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button type="submit" disabled={!canSubmit} style={!canSubmit ? disabledStyle : primaryStyle}>
+            <button type="submit" disabled={!canSubmit} style={!canSubmit ? disabledStyle : primaryStyle} aria-label="Create provider">
               {status === 'saving' ? 'Saving...' : 'Create provider'}
             </button>
             <StatusMsg status={status} message={message} />
@@ -379,7 +380,7 @@ export function ProvidersSection({ org, initialProviders, secrets: initialSecret
         <h2>Providers</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span className={`pill ${providers.length ? 'good' : 'neutral'}`}>{providers.length} providers</span>
-          <button type="button" onClick={() => setShowForm(v => !v)} style={{ ...secondaryStyle, padding: '4px 14px', fontSize: 13 }}>
+          <button type="button" onClick={() => setShowForm(v => !v)} style={{ ...secondaryStyle, padding: '4px 14px', fontSize: 13 }} aria-label={showForm ? 'Cancel adding provider' : 'Add new provider'}>
             {showForm ? 'Cancel' : '+ Add provider'}
           </button>
         </div>

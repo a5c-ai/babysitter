@@ -63,7 +63,7 @@ export function StackEditForm({ org, stack }) {
   if (!editing) {
     return (
       <div style={{ marginTop: '0.75rem' }}>
-        <button type="button" onClick={() => setEditing(true)} style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem', borderRadius: '4px', border: '1px solid var(--border, #d1d5db)', background: 'transparent', cursor: 'pointer', color: 'var(--text, inherit)' }}>
+        <button type="button" onClick={() => setEditing(true)} aria-label={`Edit configuration for stack ${stack?.metadata?.name || 'unknown'}`} style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem', borderRadius: '4px', border: '1px solid var(--border, #d1d5db)', background: 'transparent', cursor: 'pointer', color: 'var(--text, inherit)' }}>
           Edit configuration
         </button>
         {message && <small style={{ marginLeft: '0.5rem', color: message === 'Saved' ? 'var(--success, #22c55e)' : 'var(--danger, #dc2626)', fontSize: '0.75rem' }}>{message}</small>}
@@ -88,10 +88,10 @@ export function StackEditForm({ org, stack }) {
         <label style={{ gridColumn: '1 / -1' }}><span style={labelStyle}>Memory repository refs (comma-separated)</span><input style={inputStyle} value={fields.memoryRepositoryRefs} onChange={(e) => handleChange('memoryRepositoryRefs', e.target.value)} placeholder="org-memory, shared-knowledge" /></label>
       </div>
       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-        <button type="submit" disabled={saving} style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem', borderRadius: '4px', border: 'none', background: 'var(--accent, #2563eb)', color: '#fff', cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.6 : 1 }}>
+        <button type="submit" disabled={saving} aria-label={`Save changes to stack ${stack?.metadata?.name || 'unknown'}`} style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem', borderRadius: '4px', border: 'none', background: 'var(--accent, #2563eb)', color: '#fff', cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.6 : 1 }}>
           {saving ? 'Saving...' : 'Save changes'}
         </button>
-        <button type="button" onClick={() => setEditing(false)} style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem', borderRadius: '4px', border: '1px solid var(--border, #d1d5db)', background: 'transparent', cursor: 'pointer', color: 'var(--text, inherit)' }}>
+        <button type="button" onClick={() => setEditing(false)} aria-label="Cancel editing stack configuration" style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem', borderRadius: '4px', border: '1px solid var(--border, #d1d5db)', background: 'transparent', cursor: 'pointer', color: 'var(--text, inherit)' }}>
           Cancel
         </button>
         {message && <small style={{ color: message === 'Saved' ? 'var(--success, #22c55e)' : 'var(--danger, #dc2626)', fontSize: '0.75rem' }}>{message}</small>}

@@ -110,7 +110,7 @@ function WebhookRow({ webhook, org, onPingResult, onDeleted }) {
       )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem' }}>
-        <button onClick={sendPing} disabled={pinging} style={{ ...ghostStyle, opacity: pinging ? 0.6 : 1 }}>
+        <button onClick={sendPing} disabled={pinging} style={{ ...ghostStyle, opacity: pinging ? 0.6 : 1 }} aria-label={`Send test ping to webhook ${webhook.metadata?.name || 'unnamed'}`}>
           {pinging ? 'Sending...' : 'Send Test Ping'}
         </button>
         <button onClick={async () => {
@@ -120,7 +120,7 @@ function WebhookRow({ webhook, org, onPingResult, onDeleted }) {
             const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/ExternalWebhookConfig/${encodeURIComponent(webhook.metadata?.name)}`, { method: 'DELETE' });
             if (res.ok) { if (onDeleted) onDeleted(webhook.metadata?.name); }
           } catch {} finally { setDeleting(false); }
-        }} disabled={deleting} style={{ ...smallGhostStyle, color: 'var(--danger)', borderColor: '#fca5a5', opacity: deleting ? 0.6 : 1 }}>
+        }} disabled={deleting} style={{ ...smallGhostStyle, color: 'var(--danger)', borderColor: '#fca5a5', opacity: deleting ? 0.6 : 1 }} aria-label={`Delete webhook ${webhook.metadata?.name || 'unnamed'}`}>
           {deleting ? 'Deleting...' : 'Delete'}
         </button>
         {pingMsg && (
@@ -250,7 +250,7 @@ function AddWebhookForm({ org, onCreated }) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingTop: '0.25rem' }}>
-            <button type="submit" disabled={!canSubmit} style={{ ...primaryStyle, opacity: canSubmit ? 1 : 0.5, cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
+            <button type="submit" disabled={!canSubmit} style={{ ...primaryStyle, opacity: canSubmit ? 1 : 0.5, cursor: canSubmit ? 'pointer' : 'not-allowed' }} aria-label="Create webhook">
               {status === 'saving' ? 'Creating...' : 'Create Webhook'}
             </button>
             {status === 'success' && <span style={{ fontSize: 12, color: '#16a34a', fontWeight: 600 }}>{message}</span>}
@@ -322,7 +322,7 @@ export function WebhookManager({ org, webhooks = [] }) {
     <div className="card">
       <div className="cardTitle">
         <h3>Webhook Management</h3>
-        <button onClick={() => setShowAddForm(v => !v)} style={ghostStyle}>
+        <button onClick={() => setShowAddForm(v => !v)} style={ghostStyle} aria-label={showAddForm ? 'Cancel adding webhook' : 'Add new webhook'}>
           {showAddForm ? 'Cancel' : 'Add Webhook'}
         </button>
       </div>

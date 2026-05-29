@@ -113,7 +113,7 @@ export function PullRequestList({ org, repo, pullRequests = [] }) {
         <h3>Pull requests</h3>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={pillStyle(openCount ? 'good' : 'neutral')}>{openCount} open</span>
-          <button type="button" style={btnStyle('primary')} onClick={() => setShowForm(v => !v)}>
+          <button type="button" style={btnStyle('primary')} onClick={() => setShowForm(v => !v)} aria-label={showForm ? 'Cancel creating pull request' : 'Create new pull request'}>
             {showForm ? 'Cancel' : '+ Create PR'}
           </button>
         </div>
@@ -159,7 +159,7 @@ export function PullRequestList({ org, repo, pullRequests = [] }) {
           <p style={{ fontSize: '0.875rem' }}>Create a pull request to start the review process.</p>
         </div>
       ) : (
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }} role="list" aria-label="Pull requests">
           {items.map(pr => {
             const name = pr.metadata?.name;
             const title = pr.spec?.title || name;
@@ -189,18 +189,18 @@ export function PullRequestList({ org, repo, pullRequests = [] }) {
                   <div style={{ display: 'flex', gap: '0.375rem', flexShrink: 0, alignItems: 'center' }}>
                     {isConfirming && confirmAction.action === 'merge' ? (
                       <>
-                        <button type="button" style={btnStyle('merge')} disabled={busy} onClick={() => handleAction(name, 'merge')}>{busy ? '...' : 'Confirm merge'}</button>
-                        <button type="button" style={btnStyle('close')} onClick={() => setConfirmAction(null)}>Cancel</button>
+                        <button type="button" style={btnStyle('merge')} disabled={busy} onClick={() => handleAction(name, 'merge')} aria-label={`Confirm merge of ${title}`}>{busy ? '...' : 'Confirm merge'}</button>
+                        <button type="button" style={btnStyle('close')} onClick={() => setConfirmAction(null)} aria-label={`Cancel merge of ${title}`}>Cancel</button>
                       </>
                     ) : isConfirming && confirmAction.action === 'close' ? (
                       <>
-                        <button type="button" style={btnStyle('danger')} disabled={busy} onClick={() => handleAction(name, 'close')}>{busy ? '...' : 'Confirm close'}</button>
-                        <button type="button" style={btnStyle('close')} onClick={() => setConfirmAction(null)}>Cancel</button>
+                        <button type="button" style={btnStyle('danger')} disabled={busy} onClick={() => handleAction(name, 'close')} aria-label={`Confirm close of ${title}`}>{busy ? '...' : 'Confirm close'}</button>
+                        <button type="button" style={btnStyle('close')} onClick={() => setConfirmAction(null)} aria-label={`Cancel close of ${title}`}>Cancel</button>
                       </>
                     ) : (
                       <>
-                        <button type="button" style={btnStyle('merge')} onClick={() => handleAction(name, 'merge')}>Merge</button>
-                        <button type="button" style={btnStyle('close')} onClick={() => handleAction(name, 'close')}>Close</button>
+                        <button type="button" style={btnStyle('merge')} onClick={() => handleAction(name, 'merge')} aria-label={`Merge pull request ${title}`}>Merge</button>
+                        <button type="button" style={btnStyle('close')} onClick={() => handleAction(name, 'close')} aria-label={`Close pull request ${title}`}>Close</button>
                       </>
                     )}
                   </div>
