@@ -5,11 +5,21 @@ import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { buildEffectIndex, EffectIndex } from "./effectIndex";
 import { ReplayCursor } from "./replayCursor";
-import { ProcessContext } from "../types";
+import { ProcessContext, ForwardFixStrikeBudget } from "../types";
 import { createProcessContext, InternalProcessContext } from "../processContext";
+import { createStrikeTracker, normalizeStrikeBudget } from "../strikeTracker";
 import { replaySchemaVersion } from "../constants";
 import { RunFailedError } from "../exceptions";
 import { journalHeadsEqual, readStateCache, rebuildStateCache, StateCacheSnapshot } from "./stateCache";
+
+/**
+ * Marker label written on PROCESS_LOG events when a forward-fix strike is
+ * recorded. Replay scans for this label to rebuild the in-memory tracker
+ * counts deterministically.
+ */
+export const STRIKE_FAILURE_LOG_LABEL = "strike-budget:failure";
+/** Marker label written when a strike budget is exhausted (informational). */
+export const STRIKE_EXHAUSTED_LOG_LABEL = "strike-budget-exhausted";
 
 export interface CreateReplayEngineOptions {
   runDir: string;
@@ -66,6 +76,34 @@ export async function createReplayEngine(options: CreateReplayEngineOptions): Pr
 
   const replayCursor = new ReplayCursor();
   const processId = metadata.processId ?? metadata.request ?? metadata.runId;
+
+  // Reconstruct the forward-fix strike tracker from journal PROCESS_LOG events.
+  // Each `strike-budget:failure` event carries a `bugClass` field; we replay
+  // those into the tracker so the in-memory counts match the journal state.
+  const rawBudget = (metadata.forwardFixStrikeBudget ?? undefined) as
+    | Partial<ForwardFixStrikeBudget>
+    | undefined;
+  const forwardFixStrikeBudget = rawBudget ? normalizeStrikeBudget(rawBudget) : undefined;
+  const strikeTracker = forwardFixStrikeBudget ? createStrikeTracker(forwardFixStrikeBudget) : undefined;
+  if (strikeTracker) {
+    for (const event of journal) {
+      if (event.type !== "PROCESS_LOG") continue;
+      const data = event.data as { label?: unknown; bugClass?: unknown; effectId?: unknown };
+      if (data?.label !== STRIKE_FAILURE_LOG_LABEL) continue;
+      const bugClass = typeof data.bugClass === "string" ? data.bugClass : undefined;
+      const effectId = typeof data.effectId === "string" ? data.effectId : undefined;
+      if (!bugClass) continue;
+      // Prefer effect-keyed recording (dedupes if event appears twice in
+      // a corrupted journal); fall back to plain recordFailure when the
+      // journal entry pre-dates effectId attribution.
+      if (effectId) {
+        strikeTracker.recordEffectFailure(bugClass, effectId);
+      } else {
+        strikeTracker.recordFailure(bugClass);
+      }
+    }
+  }
+
   const { context, internalContext } = createProcessContext({
     runId: metadata.runId,
     runDir: options.runDir,
@@ -76,6 +114,8 @@ export async function createReplayEngine(options: CreateReplayEngineOptions): Pr
     logger: options.logger,
     recordedLogSeqs,
     nonInteractive: Boolean(metadata.nonInteractive),
+    forwardFixStrikeBudget,
+    strikeTracker,
   });
 
   return {

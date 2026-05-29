@@ -6,9 +6,10 @@ import { runOrchestratorTaskIntrinsic } from "./intrinsics/orchestratorTask";
 import { runHookIntrinsic } from "./intrinsics/hook";
 import { callHook } from "../hooks/dispatcher";
 import { runParallelAll, runParallelMap } from "./intrinsics/parallel";
-import { ProcessContext, ParallelHelpers } from "./types";
+import { ProcessContext, ParallelHelpers, ForwardFixStrikeBudget, StrikeTracker } from "./types";
 import { MissingProcessContextError } from "./exceptions";
 import { appendRunLog } from "../logging/runLogger";
+import { createStrikeTracker, normalizeStrikeBudget } from "./strikeTracker";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 
@@ -23,6 +24,18 @@ export interface ProcessContextInit extends Omit<TaskIntrinsicContext, "now"> {
   recordedLogSeqs?: Set<number>;
   /** When true, breakpoints are auto-approved without human interaction. */
   nonInteractive?: boolean;
+  /**
+   * Forward-fix strike-budget config. When provided, a {@link StrikeTracker}
+   * is constructed and threaded into intrinsic contexts to enforce the
+   * "two strikes, switch to instrumentation" rule.
+   */
+  forwardFixStrikeBudget?: ForwardFixStrikeBudget;
+  /**
+   * Optional pre-built strike tracker. Tests use this to inject a tracker
+   * seeded with prior strikes; production code should leave it undefined and
+   * let `createProcessContext` build a tracker from `forwardFixStrikeBudget`.
+   */
+  strikeTracker?: StrikeTracker;
 }
 
 export interface InternalProcessContext extends TaskIntrinsicContext {
@@ -34,6 +47,10 @@ export interface InternalProcessContext extends TaskIntrinsicContext {
   recordedLogSeqs: Set<number>;
   /** When true, breakpoints are auto-approved without human interaction. */
   nonInteractive: boolean;
+  /** Effective forward-fix strike budget (after defaults), or undefined when not configured. */
+  forwardFixStrikeBudget?: ForwardFixStrikeBudget;
+  /** Strike tracker, or undefined when no budget is configured. */
+  strikeTracker?: StrikeTracker;
 }
 
 const contextStorage = new AsyncLocalStorage<InternalProcessContext>();
@@ -45,6 +62,17 @@ export interface CreateProcessContextResult {
 
 export function createProcessContext(init: ProcessContextInit): CreateProcessContextResult {
   const safeLogger = typeof init.logger === "function" ? init.logger : undefined;
+  // Build (or reuse) the strike tracker when a budget is configured.
+  let effectiveBudget: ForwardFixStrikeBudget | undefined;
+  let strikeTracker: StrikeTracker | undefined = init.strikeTracker;
+  if (init.forwardFixStrikeBudget) {
+    effectiveBudget = normalizeStrikeBudget(init.forwardFixStrikeBudget);
+    if (!strikeTracker) {
+      strikeTracker = createStrikeTracker(effectiveBudget);
+    }
+  } else if (init.strikeTracker) {
+    effectiveBudget = init.strikeTracker.budget;
+  }
   const internal: InternalProcessContext = {
     ...init,
     logger: safeLogger,
@@ -52,6 +80,8 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
     logSeq: 0,
     recordedLogSeqs: init.recordedLogSeqs ?? new Set(),
     nonInteractive: init.nonInteractive ?? false,
+    forwardFixStrikeBudget: effectiveBudget,
+    strikeTracker,
   };
 
   const parallelHelpers: ParallelHelpers = {

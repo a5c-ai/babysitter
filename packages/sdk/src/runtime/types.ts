@@ -76,6 +76,51 @@ export interface EffectAction {
   schedulerHints?: EffectSchedulerHints;
 }
 
+/**
+ * Forward-fix strike-budget configuration. Codifies the "two strikes, switch to
+ * instrumentation" rule: when the same `bugClass` reaches `perBugClass`
+ * consecutive failed forward-fix attempts, the next iteration auto-pivots to
+ * instrumentation (in non-interactive mode) or surfaces a pivot breakpoint
+ * (in interactive mode).
+ */
+export interface ForwardFixStrikeBudget {
+  /**
+   * Number of consecutive failed forward-fix attempts allowed for a single
+   * `bugClass` before pivot. Default 2.
+   */
+  perBugClass: number;
+  /**
+   * Optional named phase the orchestrator should jump to once the budget is
+   * exhausted. The runtime emits this in the `strike-budget-exhausted`
+   * PROCESS_LOG event; downstream harnesses use it to render the pivot.
+   * Default "instrumentation".
+   */
+  pivotPhase?: string;
+  /**
+   * Optional instrumentation-task template id (e.g. `verbose-logs.preview`)
+   * the harness should auto-dispatch on pivot in non-interactive mode.
+   */
+  instrumentationTemplate?: string;
+}
+
+/**
+ * Internal: per-run counter of failed forward-fix attempts per `bugClass`.
+ * Rebuilt deterministically from the journal on every replay-engine init.
+ */
+export interface StrikeTracker {
+  readonly budget: ForwardFixStrikeBudget;
+  /** Current strike counts keyed by bugClass. */
+  readonly counts: Record<string, number>;
+  /** Increment the count for a bugClass and return the new value. */
+  recordFailure(bugClass: string): number;
+  /** Reset the count for a bugClass (call on a successful resolution). */
+  reset(bugClass: string): void;
+  /** Returns true when the bugClass has reached or exceeded the budget. */
+  isExhausted(bugClass: string): boolean;
+  /** Returns the current strike count for a bugClass. */
+  get(bugClass: string): number;
+}
+
 export interface CreateRunOptions {
   runsDir: string;
   runId?: string;
@@ -93,6 +138,12 @@ export interface CreateRunOptions {
   metadata?: JsonRecord;
   lockOwner?: string;
   logger?: ProcessLogger;
+  /**
+   * Optional forward-fix strike-budget config. When provided, the runtime
+   * tracks per-`bugClass` failed forward-fix attempts and auto-pivots to
+   * instrumentation when the budget is exhausted.
+   */
+  forwardFixStrikeBudget?: ForwardFixStrikeBudget;
 }
 
 export interface CreateRunResult {

@@ -7,6 +7,12 @@ export interface RunEntrypointMetadata {
   exportName: string;
 }
 
+export interface ForwardFixStrikeBudgetMetadata extends JsonRecord {
+  perBugClass: number;
+  pivotPhase?: string;
+  instrumentationTemplate?: string;
+}
+
 export interface RunMetadata extends JsonRecord {
   runId: string;
   request: string;
@@ -19,6 +25,10 @@ export interface RunMetadata extends JsonRecord {
   createdAt: string;
   completionProof?: string;
   prompt?: string;
+  /** When true, breakpoints are auto-approved and strike-budget exhaustion auto-pivots. */
+  nonInteractive?: boolean;
+  /** Persisted forward-fix strike-budget config, read by the replay engine. */
+  forwardFixStrikeBudget?: ForwardFixStrikeBudgetMetadata;
 }
 
 export interface CreateRunDirOptions {

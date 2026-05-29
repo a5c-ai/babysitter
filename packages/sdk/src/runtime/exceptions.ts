@@ -458,6 +458,40 @@ export class InvalidTaskDefinitionError extends BabysitterRuntimeError {
   }
 }
 
+/**
+ * Thrown when the forward-fix strike budget for a `bugClass` is exhausted and
+ * the runtime cannot auto-pivot to instrumentation (e.g. misconfiguration:
+ * `pivotPhase` and `instrumentationTemplate` both absent in non-interactive
+ * mode with no fallback). Carries enough context for the orchestrator to
+ * surface a pivot recommendation to the operator.
+ */
+export class StrikeBudgetExhaustedError extends BabysitterIntrinsicError {
+  constructor(
+    public readonly bugClass: string,
+    public readonly strikes: number,
+    public readonly budget: number,
+    public readonly pivotPhase?: string,
+    public readonly instrumentationTemplate?: string
+  ) {
+    super(
+      "StrikeBudgetExhaustedError",
+      `Forward-fix strike budget exhausted for bugClass "${bugClass}" (${strikes} strikes, budget ${budget}). ` +
+        `Pivot to instrumentation${pivotPhase ? ` phase "${pivotPhase}"` : ""}.`,
+      {
+        category: ErrorCategory.Runtime,
+        details: { bugClass, strikes, budget, pivotPhase, instrumentationTemplate },
+        nextSteps: [
+          "Stop attempting forward-fixes for this bug class",
+          "Pivot to instrumentation: capture verbose logs and rebuild the hypothesis tree",
+          pivotPhase
+            ? `Resume orchestration at phase "${pivotPhase}"`
+            : "Configure forwardFixStrikeBudget.pivotPhase to enable auto-pivot",
+        ],
+      }
+    );
+  }
+}
+
 export class InvalidSleepTargetError extends BabysitterRuntimeError {
   constructor(value: string | number) {
     super("InvalidSleepTargetError", `Invalid sleep target: ${value}`, {

@@ -19,10 +19,24 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
   const providedProof =
     typeof options.metadata?.completionProof === "string" ? options.metadata.completionProof : undefined;
   const completionProof = providedProof ?? crypto.randomBytes(16).toString("hex");
-  const extraMetadata = {
+  const extraMetadata: Record<string, unknown> = {
     ...options.metadata,
     completionProof,
   };
+  if (options.forwardFixStrikeBudget) {
+    // Normalize: drop undefined optional fields so JSON serialization stays tidy.
+    const budget = options.forwardFixStrikeBudget;
+    const normalized: Record<string, unknown> = {
+      perBugClass: budget.perBugClass,
+    };
+    if (typeof budget.pivotPhase === "string" && budget.pivotPhase.length > 0) {
+      normalized.pivotPhase = budget.pivotPhase;
+    }
+    if (typeof budget.instrumentationTemplate === "string" && budget.instrumentationTemplate.length > 0) {
+      normalized.instrumentationTemplate = budget.instrumentationTemplate;
+    }
+    extraMetadata.forwardFixStrikeBudget = normalized;
+  }
   const { metadata } = await createRunDir({
     runsRoot: runsDir,
     runId,

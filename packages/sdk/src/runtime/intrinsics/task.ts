@@ -10,6 +10,7 @@ import {
   InvalidTaskDefinitionError,
   InvocationCollisionError,
   RunFailedError,
+  StrikeBudgetExhaustedError,
   rehydrateSerializedError,
 } from "../exceptions";
 import { hashInvocationKey } from "../invocation";
@@ -20,7 +21,9 @@ import {
   EffectAction,
   EffectRecord,
   EffectSchedulerHints,
+  ForwardFixStrikeBudget,
   ProcessLogger,
+  StrikeTracker,
   TaskBuildContext,
   TaskDef,
   TaskInvokeOptions,
@@ -39,6 +42,38 @@ export interface TaskIntrinsicContext {
   replayCursor: ReplayCursor;
   now: () => Date;
   logger?: ProcessLogger;
+  /** When true, strike-budget exhaustion auto-pivots instead of requesting a breakpoint. */
+  nonInteractive?: boolean;
+  /** Configured forward-fix strike budget, if any. */
+  forwardFixStrikeBudget?: ForwardFixStrikeBudget;
+  /** Per-run failed-fix tracker. */
+  strikeTracker?: StrikeTracker;
+}
+
+/**
+ * Derives the bugClass for a task invocation. Priority:
+ *   1. Explicit `invokeOptions.metadata.bugClass` (deterministic).
+ *   2. Heuristic from `invokeOptions.label` (e.g. "fix:ios-cloud-stt-wedge" → "ios-cloud-stt-wedge").
+ *   3. `undefined` — task is not tracked.
+ */
+export function deriveBugClass(
+  invokeOptions?: TaskInvokeOptions,
+  taskId?: string
+): string | undefined {
+  const explicit = invokeOptions?.metadata?.bugClass;
+  if (typeof explicit === "string" && explicit.length > 0) {
+    return explicit;
+  }
+  const label = invokeOptions?.label;
+  if (typeof label === "string" && label.length > 0) {
+    const match = label.match(/^(?:fix|forward-fix|forwardfix)[:/-]\s*(.+)$/i);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+  // Fallback: don't auto-derive from arbitrary taskId — too noisy.
+  void taskId;
+  return undefined;
 }
 
 export interface TaskIntrinsicInvokeOptions<TArgs, TResult> {
@@ -56,6 +91,8 @@ export async function runTaskIntrinsic<TArgs, TResult>(
     throw new InvalidTaskDefinitionError("ctx.task requires a DefinedTask created via defineTask()");
   }
 
+  const bugClass = deriveBugClass(options.invokeOptions, task.id);
+
   const stepId = options.context.replayCursor.nextStepId();
   const invocation = hashInvocationKey({
     processId: options.context.processId,
@@ -65,15 +102,150 @@ export async function runTaskIntrinsic<TArgs, TResult>(
 
   const existing = options.context.effectIndex.getByInvocation(invocation.key);
   if (existing) {
-    return handleExistingInvocation(existing, options);
+    // Replay path: re-emit the prior outcome. handleExistingInvocation
+    // records (dedup'd) strikes for resolved_error effects.
+    return handleExistingInvocation(existing, options, bugClass);
   }
+
+  // Fresh-dispatch path: this is the place to enforce the strike budget.
+  // If the bugClass has already exhausted its budget from prior failed-fix
+  // attempts in this run, short-circuit BEFORE creating a new effect.
+  await maybeEnforceStrikeBudget(bugClass, options.context);
 
   return requestNewEffect(stepId, invocation.key, invocation.digest, options);
 }
 
+/**
+ * Enforces the strike budget for a `bugClass`. When the tracker reports the
+ * budget is exhausted:
+ *   - In non-interactive mode, writes PROCESS_LOG + process artifact and
+ *     throws StrikeBudgetExhaustedError so the orchestrator can pivot.
+ *   - In interactive mode, throws StrikeBudgetExhaustedError immediately;
+ *     callers surface this as a pivot breakpoint.
+ */
+async function maybeEnforceStrikeBudget(
+  bugClass: string | undefined,
+  context: TaskIntrinsicContext
+): Promise<void> {
+  if (!bugClass || !context.strikeTracker || !context.forwardFixStrikeBudget) {
+    return;
+  }
+  if (!context.strikeTracker.isExhausted(bugClass)) {
+    return;
+  }
+  const strikes = context.strikeTracker.get(bugClass);
+  const budget = context.forwardFixStrikeBudget;
+
+  // Emit PROCESS_LOG (reuses existing event type — no schema migration needed).
+  try {
+    await appendEvent({
+      runDir: context.runDir,
+      eventType: "PROCESS_LOG",
+      event: {
+        logSeq: -1,
+        label: "strike-budget-exhausted",
+        bugClass,
+        strikes,
+        budgetPerBugClass: budget.perBugClass,
+        pivotPhase: budget.pivotPhase,
+        instrumentationTemplate: budget.instrumentationTemplate,
+        nonInteractive: Boolean(context.nonInteractive),
+        message:
+          `Forward-fix strike budget exhausted for bugClass "${bugClass}" ` +
+          `(${strikes} strikes, budget ${budget.perBugClass}). ` +
+          `${context.nonInteractive ? "Auto-pivoting" : "Requesting pivot breakpoint"} ` +
+          `to ${budget.pivotPhase ?? "instrumentation"}.`,
+      },
+    });
+  } catch {
+    // Never let logging block orchestration.
+  }
+
+  // In non-interactive mode, ALSO write a small process artifact summarizing
+  // the strike sequence so the orchestrator/operator can read it later.
+  if (context.nonInteractive) {
+    try {
+      const artifactsDir = path.join(context.runDir, "artifacts");
+      await fs.mkdir(artifactsDir, { recursive: true });
+      const artifactPath = path.join(artifactsDir, `strike-budget-${bugClass}.json`);
+      const payload = {
+        bugClass,
+        strikes,
+        budgetPerBugClass: budget.perBugClass,
+        pivotPhase: budget.pivotPhase ?? "instrumentation",
+        instrumentationTemplate: budget.instrumentationTemplate,
+        recordedAt: context.now().toISOString(),
+        runId: context.runId,
+      };
+      await fs.writeFile(artifactPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
+    } catch {
+      // Artifact emission is best-effort; never block on it.
+    }
+  }
+
+  throw new StrikeBudgetExhaustedError(
+    bugClass,
+    strikes,
+    budget.perBugClass,
+    budget.pivotPhase,
+    budget.instrumentationTemplate
+  );
+}
+
+/**
+ * Records a forward-fix strike for `bugClass` keyed by `effectId` and emits a
+ * PROCESS_LOG event so the strike survives replay. Returns the new strike
+ * count, or null when the strike was already recorded for this effectId
+ * (deduplicates across replay iterations).
+ */
+async function recordStrike(
+  bugClass: string,
+  effectId: string,
+  context: TaskIntrinsicContext
+): Promise<number | null> {
+  if (!context.strikeTracker || !context.forwardFixStrikeBudget) {
+    return null;
+  }
+  // Cast: TaskIntrinsicContext exposes the public StrikeTracker; the runtime
+  // builder hands us the InternalStrikeTracker which has effect-keyed APIs.
+  const tracker = context.strikeTracker as StrikeTracker & {
+    recordEffectFailure?: (bugClass: string, effectId: string) => boolean;
+    hasRecordedEffect?: (effectId: string) => boolean;
+  };
+  if (tracker.hasRecordedEffect?.(effectId)) {
+    return null;
+  }
+  const newlyRecorded = tracker.recordEffectFailure
+    ? tracker.recordEffectFailure(bugClass, effectId)
+    : Boolean(tracker.recordFailure(bugClass));
+  if (!newlyRecorded) {
+    return null;
+  }
+  const next = context.strikeTracker.get(bugClass);
+  try {
+    await appendEvent({
+      runDir: context.runDir,
+      eventType: "PROCESS_LOG",
+      event: {
+        logSeq: -1,
+        label: "strike-budget:failure",
+        bugClass,
+        effectId,
+        strikes: next,
+        budgetPerBugClass: context.forwardFixStrikeBudget.perBugClass,
+        message: `Forward-fix strike recorded for bugClass "${bugClass}" (now ${next}/${context.forwardFixStrikeBudget.perBugClass}).`,
+      },
+    });
+  } catch {
+    // Never let logging block orchestration.
+  }
+  return next;
+}
+
 async function handleExistingInvocation<TArgs, TResult>(
   record: EffectRecord,
-  options: TaskIntrinsicInvokeOptions<TArgs, TResult>
+  options: TaskIntrinsicInvokeOptions<TArgs, TResult>,
+  bugClass?: string
 ): Promise<TResult> {
   if (record.status === "requested") {
     const taskDef = await ensureTaskDefinition(options.context.runDir, record);
@@ -81,6 +253,13 @@ async function handleExistingInvocation<TArgs, TResult>(
   }
 
   if (record.status === "resolved_error") {
+    // Record a strike, keyed by effectId for replay-safe dedupe. If the
+    // journal already contains a `strike-budget:failure` event for this
+    // effectId (seeded into the tracker during replay-engine init), this
+    // is a no-op.
+    if (bugClass) {
+      await recordStrike(bugClass, record.effectId, options.context);
+    }
     const error = record.error ? rehydrateSerializedError(record.error) : new Error("Task failed");
     throw error;
   }

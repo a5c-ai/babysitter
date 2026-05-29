@@ -130,6 +130,13 @@ export interface DefinedTask<TArgs = unknown, _TResult = unknown> {
 
 export interface TaskInvokeOptions {
   label?: string;
+  /**
+   * Optional per-invocation metadata. Recognized fields include:
+   * - `bugClass` (string): identifier used by the forward-fix strike-budget
+   *   tracker to group consecutive failed-fix attempts. When omitted, the
+   *   tracker falls back to heuristic derivation from labels/error signature.
+   */
+  metadata?: JsonRecord;
 }
 
 export interface TaskSerializerContext {
