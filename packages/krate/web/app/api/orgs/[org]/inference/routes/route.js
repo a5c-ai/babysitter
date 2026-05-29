@@ -4,12 +4,30 @@ import { errorResponse, invalidateApiCache } from '../../../../../lib/api-errors
 
 export const dynamic = 'force-dynamic';
 
-export const GET = async (_request, { params }) => {
+export const GET = async (request, { params }) => {
   const { org } = await params;
   const controller = createKrateApiController({ namespace: orgNamespaceName(org) });
+  const url = new URL(request.url);
+  const limitParam = url.searchParams.get('limit');
   try {
     const result = await controller.listResourceForOrg(org, 'KrateModelRoute');
-    return Response.json(result, { headers: { 'Cache-Control': 'no-store' } });
+    const allItems = result?.items || (Array.isArray(result) ? result : []);
+
+    if (limitParam == null) {
+      return Response.json(result, { headers: { 'Cache-Control': 'no-store' } });
+    }
+
+    const limit = Math.max(1, Math.min(200, parseInt(limitParam, 10) || 25));
+    const offset = Math.max(0, parseInt(url.searchParams.get('offset'), 10) || 0);
+    const sliced = allItems.slice(offset, offset + limit);
+
+    return Response.json({
+      items: sliced,
+      total: allItems.length,
+      limit,
+      offset,
+      hasMore: offset + limit < allItems.length,
+    }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (err) {
     return errorResponse(err.message || 'Failed to list model routes', 500);
   }

@@ -308,3 +308,58 @@ test('virtual model API route creates KrateVirtualModel with required fields', (
   assert.match(route, /clearSnapshotCache/);
   assert.match(route, /invalidateApiCache/);
 });
+
+// ── Contract: resources GET route supports limit/offset pagination ───────────
+
+test('resources GET route parses limit and offset from searchParams', () => {
+  const route = readFile('app', 'api', 'orgs', '[org]', 'resources', 'route.js');
+  assert.match(route, /searchParams\.get\(['"]limit['"]\)/);
+  assert.match(route, /searchParams\.get\(['"]offset['"]\)/);
+  assert.match(route, /\.slice\(/);
+  assert.match(route, /hasMore/);
+  assert.match(route, /total/);
+});
+
+test('inference services GET route supports limit/offset pagination', () => {
+  const route = readFile('app', 'api', 'orgs', '[org]', 'inference', 'services', 'route.js');
+  assert.match(route, /searchParams\.get\(['"]limit['"]\)/);
+  assert.match(route, /searchParams\.get\(['"]offset['"]\)/);
+  assert.match(route, /\.slice\(/);
+  assert.match(route, /hasMore/);
+});
+
+test('inference routes GET route supports limit/offset pagination', () => {
+  const route = readFile('app', 'api', 'orgs', '[org]', 'inference', 'routes', 'route.js');
+  assert.match(route, /searchParams\.get\(['"]limit['"]\)/);
+  assert.match(route, /searchParams\.get\(['"]offset['"]\)/);
+  assert.match(route, /\.slice\(/);
+  assert.match(route, /hasMore/);
+});
+
+test('inference virtual-models GET route supports limit/offset pagination', () => {
+  const route = readFile('app', 'api', 'orgs', '[org]', 'inference', 'virtual-models', 'route.js');
+  assert.match(route, /searchParams\.get\(['"]limit['"]\)/);
+  assert.match(route, /searchParams\.get\(['"]offset['"]\)/);
+  assert.match(route, /\.slice\(/);
+  assert.match(route, /hasMore/);
+});
+
+// ── Contract: Pagination component exists ───────────────────────────────────
+
+test('Pagination component exists with expected props', () => {
+  const source = readFile('app', 'components', 'pagination.jsx');
+  assert.match(source, /export function Pagination/);
+  assert.match(source, /total/);
+  assert.match(source, /limit/);
+  assert.match(source, /offset/);
+  assert.match(source, /onPageChange/);
+  assert.match(source, /onLimitChange/);
+  assert.match(source, /Prev/);
+  assert.match(source, /Next/);
+});
+
+test('inference-service-manager imports and uses Pagination component', () => {
+  const source = readFile('app', 'components', 'inference-service-manager.jsx');
+  assert.match(source, /import.*Pagination.*from.*pagination/);
+  assert.match(source, /<Pagination/);
+});

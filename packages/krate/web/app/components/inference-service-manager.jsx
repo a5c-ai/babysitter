@@ -7,6 +7,7 @@ import { RuntimeCard, CreateRuntimeForm } from './inference-runtime-list.jsx';
 import { ModelRouteCard, CreateModelRouteForm } from './model-route-manager.jsx';
 import { VirtualModelCard, CreateVirtualModelForm } from './virtual-model-manager.jsx';
 import { CuratedModelCatalog, UnifiedModelCatalogSection } from './curated-model-catalog.jsx';
+import { Pagination } from './pagination.jsx';
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 //
@@ -31,15 +32,29 @@ export function InferenceServiceManager({ org, initialServiceName }) {
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState(null);
 
+  // Pagination state per resource type
+  const [svcLimit, setSvcLimit] = useState(25);
+  const [svcOffset, setSvcOffset] = useState(0);
+  const [svcTotal, setSvcTotal] = useState(0);
+  const [rtLimit, setRtLimit] = useState(25);
+  const [rtOffset, setRtOffset] = useState(0);
+  const [rtTotal, setRtTotal] = useState(0);
+  const [routeLimit, setRouteLimit] = useState(25);
+  const [routeOffset, setRouteOffset] = useState(0);
+  const [routeTotal, setRouteTotal] = useState(0);
+  const [vmLimit, setVmLimit] = useState(25);
+  const [vmOffset, setVmOffset] = useState(0);
+  const [vmTotal, setVmTotal] = useState(0);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const [svcRes, rtRes, routeRes, vmRes] = await Promise.all([
-        fetch(`/api/orgs/${org}/inference/services`),
-        fetch(`/api/orgs/${org}/inference/runtimes`),
-        fetch(`/api/orgs/${org}/inference/routes`),
-        fetch(`/api/orgs/${org}/inference/virtual-models`),
+        fetch(`/api/orgs/${org}/inference/services?limit=${svcLimit}&offset=${svcOffset}`),
+        fetch(`/api/orgs/${org}/inference/runtimes?limit=${rtLimit}&offset=${rtOffset}`),
+        fetch(`/api/orgs/${org}/inference/routes?limit=${routeLimit}&offset=${routeOffset}`),
+        fetch(`/api/orgs/${org}/inference/virtual-models?limit=${vmLimit}&offset=${vmOffset}`),
       ]);
       const svcData = svcRes.ok ? await svcRes.json() : null;
       const rtData = rtRes.ok ? await rtRes.json() : null;
@@ -50,6 +65,11 @@ export function InferenceServiceManager({ org, initialServiceName }) {
       setRoutes(routeData?.items || (Array.isArray(routeData) ? routeData : []));
       setVirtualModels(vmData?.items || (Array.isArray(vmData) ? vmData : []));
 
+      if (svcData?.total != null) setSvcTotal(svcData.total);
+      if (rtData?.total != null) setRtTotal(rtData.total);
+      if (routeData?.total != null) setRouteTotal(routeData.total);
+      if (vmData?.total != null) setVmTotal(vmData.total);
+
       if (initialServiceName) {
         const found = (svcData?.items || []).find(s => (s.metadata?.name || s.name) === initialServiceName);
         if (found) setSelectedService(found);
@@ -59,7 +79,7 @@ export function InferenceServiceManager({ org, initialServiceName }) {
     } finally {
       setLoading(false);
     }
-  }, [org, initialServiceName]);
+  }, [org, initialServiceName, svcLimit, svcOffset, rtLimit, rtOffset, routeLimit, routeOffset, vmLimit, vmOffset]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -266,16 +286,25 @@ export function InferenceServiceManager({ org, initialServiceName }) {
               <button style={btnStyle()} onClick={() => setShowCreateForm(true)}>Create Service</button>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.75rem' }}>
-              {services.map((svc, i) => (
-                <ServiceCard
-                  key={svc.metadata?.name || i}
-                  service={svc}
-                  onView={setSelectedService}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </div>
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.75rem' }}>
+                {services.map((svc, i) => (
+                  <ServiceCard
+                    key={svc.metadata?.name || i}
+                    service={svc}
+                    onView={setSelectedService}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
+              <Pagination
+                total={svcTotal}
+                limit={svcLimit}
+                offset={svcOffset}
+                onPageChange={(o) => setSvcOffset(o)}
+                onLimitChange={(l) => { setSvcLimit(l); setSvcOffset(0); }}
+              />
+            </>
           )}
         </>
       )}
@@ -305,11 +334,20 @@ export function InferenceServiceManager({ org, initialServiceName }) {
               <button style={btnStyle()} onClick={() => setShowRuntimeForm(true)}>Add Runtime</button>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.75rem' }}>
-              {runtimes.map((rt, i) => (
-                <RuntimeCard key={rt.metadata?.name || i} runtime={rt} />
-              ))}
-            </div>
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.75rem' }}>
+                {runtimes.map((rt, i) => (
+                  <RuntimeCard key={rt.metadata?.name || i} runtime={rt} />
+                ))}
+              </div>
+              <Pagination
+                total={rtTotal}
+                limit={rtLimit}
+                offset={rtOffset}
+                onPageChange={(o) => setRtOffset(o)}
+                onLimitChange={(l) => { setRtLimit(l); setRtOffset(0); }}
+              />
+            </>
           )}
         </>
       )}
@@ -341,15 +379,24 @@ export function InferenceServiceManager({ org, initialServiceName }) {
               <button style={btnStyle()} onClick={() => setShowRouteForm(true)}>Create Model Route</button>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.75rem' }}>
-              {routes.map((route, i) => (
-                <ModelRouteCard
-                  key={route.metadata?.name || i}
-                  route={route}
-                  onDelete={handleDeleteRoute}
-                />
-              ))}
-            </div>
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.75rem' }}>
+                {routes.map((route, i) => (
+                  <ModelRouteCard
+                    key={route.metadata?.name || i}
+                    route={route}
+                    onDelete={handleDeleteRoute}
+                  />
+                ))}
+              </div>
+              <Pagination
+                total={routeTotal}
+                limit={routeLimit}
+                offset={routeOffset}
+                onPageChange={(o) => setRouteOffset(o)}
+                onLimitChange={(l) => { setRouteLimit(l); setRouteOffset(0); }}
+              />
+            </>
           )}
         </>
       )}
@@ -380,15 +427,24 @@ export function InferenceServiceManager({ org, initialServiceName }) {
               <button style={btnStyle()} onClick={() => setShowVirtualModelForm(true)}>Create Virtual Model</button>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.75rem' }}>
-              {virtualModels.map((vm, i) => (
-                <VirtualModelCard
-                  key={vm.metadata?.name || i}
-                  vm={vm}
-                  onDelete={handleDeleteVirtualModel}
-                />
-              ))}
-            </div>
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.75rem' }}>
+                {virtualModels.map((vm, i) => (
+                  <VirtualModelCard
+                    key={vm.metadata?.name || i}
+                    vm={vm}
+                    onDelete={handleDeleteVirtualModel}
+                  />
+                ))}
+              </div>
+              <Pagination
+                total={vmTotal}
+                limit={vmLimit}
+                offset={vmOffset}
+                onPageChange={(o) => setVmOffset(o)}
+                onLimitChange={(l) => { setVmLimit(l); setVmOffset(0); }}
+              />
+            </>
           )}
         </>
       )}

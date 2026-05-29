@@ -9,9 +9,29 @@ export const GET = withAuth(async (request, { params }) => {
   const { org } = await params;
   const namespace = orgNamespaceName(org);
   const controller = createKrateApiController({ namespace });
-  const kind = new URL(request.url).searchParams.get('kind') || 'Repository';
+  const url = new URL(request.url);
+  const kind = url.searchParams.get('kind') || 'Repository';
+  const limitParam = url.searchParams.get('limit');
   try {
-    return Response.json(await controller.listResourceForOrg(org, kind), { headers: { 'Cache-Control': 'no-store' } });
+    const result = await controller.listResourceForOrg(org, kind);
+    const allItems = result?.items || (Array.isArray(result) ? result : []);
+
+    // Backward compat: if no limit param, return the raw result as before
+    if (limitParam == null) {
+      return Response.json(result, { headers: { 'Cache-Control': 'no-store' } });
+    }
+
+    const limit = Math.max(1, Math.min(200, parseInt(limitParam, 10) || 25));
+    const offset = Math.max(0, parseInt(url.searchParams.get('offset'), 10) || 0);
+    const sliced = allItems.slice(offset, offset + limit);
+
+    return Response.json({
+      items: sliced,
+      total: allItems.length,
+      limit,
+      offset,
+      hasMore: offset + limit < allItems.length,
+    }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     return errorResponse(error.message, error.message?.includes('not found') ? 404 : 500);
   }
