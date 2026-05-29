@@ -433,10 +433,9 @@ async function prepareHermesProxyConfig(input: {
     [
       'model:',
       `  default: ${yamlValue(input.model)}`,
-      '  provider: custom',
+      '  provider: openrouter',
       `  base_url: ${yamlValue(input.baseUrl)}`,
       `  api_key: ${yamlValue(input.apiKey)}`,
-      '  api_mode: chat_completions',
       '',
     ].join('\n'),
   );
@@ -1057,11 +1056,18 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
           ]);
         }
         if (plan.harness === 'hermes') {
+          // Hermes defaults to OpenRouter as its provider and ignores
+          // OPENAI_BASE_URL. Override via OPENROUTER_API_KEY (auth) and
+          // cli-config.yaml (base_url + provider: openrouter).
+          plan.env['OPENROUTER_API_KEY'] = 'proxy-token';
+          const proxyUrl = `${proxyRuntime.url}/v1`;
+          const targetModel = plan.proxy?.targetModel ?? plan.model;
           await prepareHermesProxyConfig({
-            model: plan.proxy?.targetModel ?? plan.model,
-            baseUrl: `${proxyRuntime.url}/v1`,
+            model: targetModel,
+            baseUrl: proxyUrl,
             apiKey: 'proxy-token',
           });
+          console.error(`[amux launch] hermes config: base_url=${proxyUrl} model=${targetModel}`);
         }
         console.error(`[amux launch] ${plan.harness} proxy: OPENAI_BASE_URL=${proxyRuntime.url}/v1`);
       }
