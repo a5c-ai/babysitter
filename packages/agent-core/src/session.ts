@@ -71,6 +71,9 @@ function resolveEndpoint(options: AgentCoreSessionOptions): ResolvedEndpoint {
 
   if (anthropicApiKey) {
     const anthropicModel = model.startsWith("gpt") ? "claude-sonnet-4-6" : model;
+    if (anthropicModel !== model) {
+      process.stderr.write(`[agent-core] anthropic provider: converting model ${model} → ${anthropicModel}\n`);
+    }
     return { apiBase: "https://api.anthropic.com", apiKey: anthropicApiKey, model: anthropicModel, isAzure: false, isAnthropic: true };
   }
 

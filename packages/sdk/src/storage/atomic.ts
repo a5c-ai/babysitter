@@ -35,6 +35,7 @@ export async function writeFileAtomic(targetPath: string, data: string | Buffer,
     } catch (error) {
       const err = error as NodeJS.ErrnoException;
       if (err.code === "ENOENT") {
+        process.stderr.write('[babysitter] atomic write: rename failed with ENOENT, falling back to non-atomic writeFile\n');
         await fs.writeFile(targetPath, data);
         return;
       }

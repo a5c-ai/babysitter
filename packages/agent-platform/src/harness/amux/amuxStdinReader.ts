@@ -61,8 +61,8 @@ export function createAmuxStdinReader(): AsyncIterable<AmuxInteractionEvent> {
       let parsed: Record<string, unknown>;
       try {
         parsed = JSON.parse(trimmed) as Record<string, unknown>;
-      } catch {
-        // Not JSON -- skip
+      } catch (e) {
+        process.stderr.write(`[babysitter] amux stdin: invalid JSON line, skipping\n`);
         continue;
       }
 

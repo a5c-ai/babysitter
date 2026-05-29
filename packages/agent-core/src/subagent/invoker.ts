@@ -175,6 +175,7 @@ export class SubagentInvokerImpl<TOutput = unknown>
     startMs: number,
     err: unknown,
   ): SubagentResult<TOutput> {
+    process.stderr.write(`[agent-core] subagent ${descriptor.id} ${mode} failed: ${err instanceof Error ? err.stack ?? err.message : String(err)}\n`);
     return {
       agentId: descriptor.id,
       mode,

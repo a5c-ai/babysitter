@@ -100,7 +100,8 @@ function runJsonCli(
           exitCode: payload.exitCode ?? exitCode,
           output: payload.output ?? (stderr.trim() || undefined),
         });
-      } catch {
+      } catch (e) {
+        process.stderr.write(`[cloud] agent output JSON parse failed, treating as raw: ${e instanceof Error ? e.message : String(e)}\n`);
         resolve({
           harness: args[args.length - 1] ?? command,
           success: exitCode === 0,

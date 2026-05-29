@@ -115,6 +115,7 @@ export function createCodeTools(options: AgenticToolOptions): CustomToolDefiniti
             continue;
           }
           if (astResult.exitCode !== 0) {
+            process.stderr.write(`[agent-core] ast-grep failed (exit ${astResult.exitCode}), falling back to ripgrep\n`);
             const grepArgs = ["--no-heading", "--line-number", "--color", "never"];
             if (params.glob) {
               grepArgs.push("--glob", String(params.glob));
@@ -222,18 +223,18 @@ export function createCodeTools(options: AgenticToolOptions): CustomToolDefiniti
           if (result.exitCode === 0 && fs.existsSync(outputPath)) {
             return ok(fs.readFileSync(outputPath, "utf8"));
           }
-        } catch {
-          // fall through to source return
+        } catch (error) {
+          process.stderr.write(`[agent-core] mmdc rendering failed: ${error instanceof Error ? error.message : String(error)}, returning source\n`);
         } finally {
           try {
             fs.unlinkSync(inputPath);
-          } catch {
-            // ignore
+          } catch (unlinkErr) {
+            process.stderr.write(`[agent-core] failed to clean up ${inputPath}: ${unlinkErr instanceof Error ? unlinkErr.message : String(unlinkErr)}\n`);
           }
           try {
             fs.unlinkSync(outputPath);
-          } catch {
-            // ignore
+          } catch (unlinkErr) {
+            process.stderr.write(`[agent-core] failed to clean up ${outputPath}: ${unlinkErr instanceof Error ? unlinkErr.message : String(unlinkErr)}\n`);
           }
         }
         return ok(`(mmdc not available — returning source)\n\n\`\`\`mermaid\n${source}\n\`\`\``);

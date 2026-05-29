@@ -1491,7 +1491,7 @@ export function registerKanbanRoutes(app: Hono): void {
     try {
       const runId = context.req.param('runId');
       const effectId = context.req.param('effectId');
-      const body = await context.req.json().catch(() => ({}));
+      const body = await context.req.json().catch((e) => { process.stderr.write(`[gateway] response parse failed: ${e instanceof Error ? e.message : String(e)}\n`); return {}; });
       const answer = typeof (body as { answer?: unknown }).answer === 'string'
         ? (body as { answer: string }).answer
         : '';

@@ -134,7 +134,7 @@ export async function updateMarketplace(
       try {
         await execFile("git", ["-C", dir, "checkout", branch]);
       } catch {
-        try { await execFile("git", ["-C", dir, "stash"]); } catch { /* Nothing to stash */ }
+        try { await execFile("git", ["-C", dir, "stash"]); } catch (e) { process.stderr.write(`[babysitter] git stash failed: ${e instanceof Error ? e.message : String(e)}\n`); }
         await execFile("git", ["-C", dir, "checkout", "-B", branch, "FETCH_HEAD"]);
       }
     }

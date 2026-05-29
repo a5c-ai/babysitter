@@ -102,7 +102,8 @@ function parseResources(payload: string): readonly StatusResource[] {
   let parsed: unknown;
   try {
     parsed = JSON.parse(payload) as unknown;
-  } catch {
+  } catch (e) {
+    process.stderr.write(`[cloud] resource parse failed: ${e instanceof Error ? e.message : String(e)}\n`);
     return [];
   }
   if (typeof parsed !== "object" || parsed === null || !("items" in parsed) || !Array.isArray((parsed as { items?: unknown }).items)) {

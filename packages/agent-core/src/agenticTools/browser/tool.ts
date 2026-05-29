@@ -44,8 +44,8 @@ export function createBrowserTool(): CustomToolDefinition {
         puppeteer = await (new Function("id", "return import(id)") as (
           id: string,
         ) => Promise<typeof puppeteer>)("puppeteer");
-      } catch {
-        return errorResult("puppeteer is not installed. Install it with: npm install puppeteer");
+      } catch (error) {
+        return errorResult(`puppeteer import failed: ${error instanceof Error ? error.message : String(error)}. Install with: npm install puppeteer`);
       }
 
       if (!browserInstance) {

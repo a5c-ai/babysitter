@@ -51,6 +51,7 @@ export function wrapToolDefinition(
     try {
       return await Promise.resolve(originalExecute(toolCallId, params, onUpdate, toolContext));
     } catch (error) {
+      process.stderr.write(`[agent-core] tool ${definition.name} error: ${error instanceof Error ? error.stack ?? error.message : String(error)}\n`);
       return errorResultFor(error);
     }
   };

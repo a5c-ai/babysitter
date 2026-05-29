@@ -107,7 +107,7 @@ var readFileSync = require("fs").readFileSync;
 
 var PLUGIN_ROOT = process.env.${pluginRootEnvVar} || process.env.PLUGIN_ROOT || path.resolve(__dirname, "..");
 var stdin = "";
-try { stdin = readFileSync(0, "utf8"); } catch {}
+try { stdin = readFileSync(0, "utf8"); } catch (e) { process.stderr.write("[extension-mux] stdin read failed: " + (e instanceof Error ? e.message : String(e)) + "\\n"); }
 try {
   var result = execSync("bash " + JSON.stringify(path.join(PLUGIN_ROOT, "${shellScript}")), {
     input: stdin,
@@ -121,6 +121,7 @@ try {
   });
   process.stdout.write(result);
 } catch (e) {
+  process.stderr.write("[extension-mux] hook execution failed: " + (e instanceof Error ? e.message : String(e)) + "\\n");
   process.stdout.write("{}\\n");
 }
 `;
@@ -272,7 +273,7 @@ try { if (fs.lstatSync(extDir).isSymbolicLink()) process.exit(0); } catch {}
 try {
   var result = spawnSync('gemini', ['extensions', 'install', PACKAGE_ROOT], { stdio: 'inherit', timeout: 60000 });
   if (result.status === 0) process.exit(0);
-} catch {}
+} catch (e) { console.log('[extension-mux] Gemini CLI invocation failed: ' + (e instanceof Error ? e.message : String(e))); }
 
 console.log('[${pluginName}-gemini] Gemini CLI not found. Run: ${pluginName}-gemini install');
 `;
@@ -287,12 +288,13 @@ var fs = require('fs');
 
 var extDir = path.join(require('os').homedir(), '.gemini', 'extensions', '${pluginName}');
 
-try { if (!fs.existsSync(extDir) || fs.lstatSync(extDir).isSymbolicLink()) process.exit(0); } catch {}
+try { if (!fs.existsSync(extDir) || fs.lstatSync(extDir).isSymbolicLink()) process.exit(0); } catch (e) { console.log('[extension-mux] pre-uninstall check failed: ' + (e instanceof Error ? e.message : String(e))); }
 
 try {
   spawnSync('gemini', ['extensions', 'uninstall', '${pluginName}'], { stdio: 'inherit', timeout: 30000 });
-} catch {
-  try { fs.rmSync(extDir, { recursive: true, force: true }); } catch {}
+} catch (e) {
+  console.log('[extension-mux] Gemini CLI uninstall failed: ' + (e instanceof Error ? e.message : String(e)));
+  try { fs.rmSync(extDir, { recursive: true, force: true }); } catch (e2) { console.log('[extension-mux] manual extension dir removal failed: ' + (e2 instanceof Error ? e2.message : String(e2))); }
 }
 `;
 }

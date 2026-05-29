@@ -152,12 +152,12 @@ export class AdapterRegistryImpl implements AdapterRegistry {
     try {
       const auth = await adapter.detectAuth();
       authState = auth.status;
-    } catch {
-      // Detection failure is not fatal
+    } catch (e) {
+      process.stderr.write(`[agent-mux] auth detection failed for ${adapter.agent}: ${e instanceof Error ? e.message : String(e)}\n`);
     }
 
     const installation = typeof adapter.detectInstallation === 'function'
-      ? await adapter.detectInstallation().catch(() => null)
+      ? await adapter.detectInstallation().catch((e) => { process.stderr.write(`[agent-mux] installation detection failed for ${adapter.agent}: ${e instanceof Error ? e.message : String(e)}\n`); return null; })
       : null;
 
     const version = installation?.version ?? null;

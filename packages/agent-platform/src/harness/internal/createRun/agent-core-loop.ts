@@ -137,6 +137,7 @@ export async function promptWithRetry(args: {
       }
 
       const delayMs = TRANSIENT_PROMPT_RETRY_DELAYS_MS[attempt] ?? 0;
+      if (attempt === 0) process.stderr.write(`[babysitter] ${args.label}: transient failure, retrying...\n`);
       attempt += 1;
       args.writeVerbose?.(
         `[${args.label} retry] transient failure; retrying prompt attempt ${attempt}/${TRANSIENT_PROMPT_RETRY_DELAYS_MS.length} after ${delayMs}ms`,
@@ -151,6 +152,7 @@ export async function promptWithRetry(args: {
       }
 
       const delayMs = TRANSIENT_PROMPT_RETRY_DELAYS_MS[attempt] ?? 0;
+      if (attempt === 0) process.stderr.write(`[babysitter] ${args.label}: transient failure, retrying...\n`);
       attempt += 1;
       args.writeVerbose?.(
         `[${args.label} retry] transient exception; retrying prompt attempt ${attempt}/${TRANSIENT_PROMPT_RETRY_DELAYS_MS.length} after ${delayMs}ms`,

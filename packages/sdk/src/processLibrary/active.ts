@@ -196,7 +196,7 @@ export async function getActiveProcessLibraryPath(options: ResolveActiveProcessL
   try {
     const resolved = await resolveActiveProcessLibrary(options);
     if (resolved.binding?.dir) { const dir = path.resolve(resolved.binding.dir); if (await pathExists(dir)) return dir; }
-  } catch { /* Fall through */ }
+  } catch (e) { process.stderr.write(`[babysitter] active process library resolution failed, using default: ${e instanceof Error ? e.message : String(e)}\n`); }
   const spec = getDefaultProcessLibrarySpec({ stateDir: options.stateDir });
   if (await pathExists(spec.processRoot)) return spec.processRoot;
   return null;

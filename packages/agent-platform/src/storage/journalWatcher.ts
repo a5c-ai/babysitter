@@ -84,7 +84,8 @@ export function createJournalWatcher(options: JournalWatcherOptions): JournalWat
       let entries: string[];
       try {
         entries = await fs.readdir(journalDir);
-      } catch {
+      } catch (e) {
+        process.stderr.write(`[babysitter] journal watcher: cannot read ${journalDir}: ${e instanceof Error ? e.message : String(e)}\n`);
         return;
       }
 

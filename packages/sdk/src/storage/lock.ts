@@ -74,6 +74,7 @@ export async function withRunLock<T>(
       if (!isLockHeldError(error) || attempt === retries) {
         throw error;
       }
+      if (attempt === 0) process.stderr.write(`[babysitter] run lock contention on ${runDir}, retrying...\n`);
       await sleep(delayMs);
     }
   }

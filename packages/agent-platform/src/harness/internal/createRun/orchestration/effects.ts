@@ -604,6 +604,7 @@ export async function resolveEffectWithRetry(
         error: error instanceof Error ? error : new Error(String(error)),
       };
     }
+    process.stderr.write(`[babysitter] effect ${action.effectId ?? action.taskDef?.id ?? 'unknown'} retry ${attempt + 1}/${config.maxRetries}: ${lastResult?.error instanceof Error ? lastResult.error.message : String(lastResult?.error ?? 'unknown')}\n`);
     const baseDelay = EFFECT_RETRY_DELAYS_OVERRIDE
       ? (EFFECT_RETRY_DELAYS_OVERRIDE[attempt] ?? 0)
       : Math.min(
@@ -650,6 +651,9 @@ export async function orchestrateIterationWithProcessLoadRetry(args: {
       }
       const delayMs = PROCESS_MODULE_LOAD_RETRY_DELAYS_MS[attempt] ?? 0;
       attempt += 1;
+      process.stderr.write(
+        `[babysitter] process module load attempt ${attempt} failed: ${error instanceof Error ? error.message : String(error)}, retrying...\n`,
+      );
       args.writeVerbose?.(
         `[phaseOrchestration retry] process module load failed for ${args.runDir}; retrying iteration import (attempt ${attempt}/${PROCESS_MODULE_LOAD_RETRY_DELAYS_MS.length}) after ${delayMs}ms`,
       );

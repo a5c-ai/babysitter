@@ -77,7 +77,7 @@ function writeFileIfChanged(filePath, contents) {
   try {
     const existing = fs.readFileSync(filePath, 'utf8');
     if (existing === contents) return false;
-  } catch {}
+  } catch (e) { process.stderr.write('[extension-mux] file read failed for ' + filePath + ', overwriting: ' + (e instanceof Error ? e.message : String(e)) + '\\n'); }
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, contents);
   return true;
@@ -130,7 +130,7 @@ function writeJson(filePath, value) {
 function ensureExecutable(filePath) {
   try {
     fs.chmodSync(filePath, 0o755);
-  } catch {}
+  } catch (e) { process.stderr.write('[extension-mux] chmod failed for ' + filePath + ': ' + (e instanceof Error ? e.message : String(e)) + '\\n'); }
 }
 
 function normalizeMarketplaceSourcePath(source, marketplacePath) {

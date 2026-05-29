@@ -240,7 +240,8 @@ export class ServerBreakpointBackend implements BreakpointBackend {
       let responseBody: unknown;
       try {
         responseBody = await response.json();
-      } catch {
+      } catch (e) {
+        process.stderr.write(`[tasks-mux] response body read failed: ${e instanceof Error ? e.message : String(e)}\n`);
         responseBody = await response.text().catch(() => undefined);
       }
       throw new ServerBackendError(

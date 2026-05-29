@@ -38,6 +38,7 @@ export async function readMcpServersConfig(stateDir: string): Promise<McpServers
   } catch (error) {
     const err = error as NodeJS.ErrnoException;
     if (err.code === "ENOENT") return emptyServersFile();
+    process.stderr.write(`[babysitter] MCP config read error (${err.code}): ${filePath}\n`);
     return emptyServersFile();
   }
   try {
@@ -46,7 +47,8 @@ export async function readMcpServersConfig(stateDir: string): Promise<McpServers
       schemaVersion: typeof data.schemaVersion === "string" ? data.schemaVersion : MCP_SERVERS_SCHEMA_VERSION,
       servers: Array.isArray(data.servers) ? data.servers : [],
     };
-  } catch {
+  } catch (e) {
+    process.stderr.write(`[babysitter] MCP config parse error: ${filePath}: ${e instanceof Error ? e.message : String(e)}\n`);
     return emptyServersFile();
   }
 }

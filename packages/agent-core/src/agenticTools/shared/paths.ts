@@ -60,7 +60,8 @@ export function walkDir(
   let entries: fs.Dirent[];
   try {
     entries = fs.readdirSync(directory, { withFileTypes: true });
-  } catch {
+  } catch (e) {
+    process.stderr.write(`[agent-core] walkDir: cannot read ${directory}: ${e instanceof Error ? e.message : String(e)}\n`);
     return;
   }
   for (const entry of entries) {

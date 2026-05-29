@@ -144,8 +144,8 @@ export async function discoverHarnesses(): Promise<HarnessDiscoveryResult[]> {
   // Try agent-mux first -- it has richer detection and caching.
   try {
     return await discoverHarnessesViaAmux();
-  } catch {
-    // Fall back to legacy direct probing.
+  } catch (e) {
+    process.stderr.write(`[babysitter] amux harness discovery failed, falling back to legacy: ${e instanceof Error ? e.message : String(e)}\n`);
   }
 
   return discoverHarnessesLegacy();

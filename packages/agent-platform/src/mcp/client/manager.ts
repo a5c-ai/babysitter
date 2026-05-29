@@ -268,6 +268,7 @@ export class McpClientManager {
 
     // All retries exhausted
     this._setStatus(record, "error");
+    process.stderr.write(`[babysitter] MCP reconnect failed for ${record.connection.name}: ${record.connection.error ?? 'unknown'}\n`);
     return record.connection;
   }
 

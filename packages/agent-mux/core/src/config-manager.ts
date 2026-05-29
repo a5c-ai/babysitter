@@ -158,7 +158,7 @@ export class ConfigManagerImpl implements ConfigManager {
   /** Serialise writes per agent so concurrent `.set()` cannot interleave. */
   private async _enqueueWrite<T>(agent: AgentName, fn: () => Promise<T>): Promise<T> {
     const prev = this._writeQueue.get(agent) ?? Promise.resolve();
-    const next = prev.catch(() => undefined).then(fn);
+    const next = prev.catch((e) => { process.stderr.write(`[agent-mux] config write failed: ${e instanceof Error ? e.message : String(e)}\n`); return undefined; }).then(fn);
     this._writeQueue.set(agent, next);
     try {
       return await next;

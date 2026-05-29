@@ -109,12 +109,12 @@ export async function cleanupStaleClaudeRuntimeHookDirs(): Promise<void> {
     const stat = await fs.stat(fullPath).catch(() => null);
     if (!stat) return;
     if (now - stat.mtimeMs < STALE_RUNTIME_HOOK_AGE_MS) return;
-    await fs.rm(fullPath, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(fullPath, { recursive: true, force: true }).catch((e) => { process.stderr.write(`[agent-mux] ephemeral config cleanup failed: ${e instanceof Error ? e.message : String(e)}\n`); });
   }));
 }
 
 export async function removeClaudeRuntimeHookConfig(dir: string): Promise<void> {
-  await fs.rm(dir, { recursive: true, force: true }).catch(() => {});
+  await fs.rm(dir, { recursive: true, force: true }).catch((e) => { process.stderr.write(`[agent-mux] ephemeral config cleanup failed: ${e instanceof Error ? e.message : String(e)}\n`); });
 }
 
 export async function createClaudeRuntimeHookConfig(runId: string): Promise<ClaudeRuntimeHookConfig> {
@@ -127,7 +127,7 @@ export async function createClaudeRuntimeHookConfig(runId: string): Promise<Clau
   const shimPath = path.join(dir, 'hook-shim.mjs');
   const socketPath = buildSocketPath(runId);
 
-  await fs.rm(dir, { recursive: true, force: true }).catch(() => {});
+  await fs.rm(dir, { recursive: true, force: true }).catch((e) => { process.stderr.write(`[agent-mux] ephemeral config cleanup failed: ${e instanceof Error ? e.message : String(e)}\n`); });
   await fs.mkdir(dir, { recursive: true });
   await fs.writeFile(secretPath, secret, { encoding: 'utf8', mode: 0o600 });
   await fs.writeFile(shimPath, CLAUDE_HOOK_SHIM_SOURCE, { encoding: 'utf8', mode: 0o700 });

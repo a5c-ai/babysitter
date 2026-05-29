@@ -19,7 +19,7 @@ const appendQueues = new Map<string, Promise<void>>();
 async function withAppendQueue<T>(runDir: string, operation: () => Promise<T>): Promise<T> {
   const key = path.resolve(runDir);
   const previous = appendQueues.get(key) ?? Promise.resolve();
-  const next = previous.catch(() => undefined).then(operation);
+  const next = previous.catch((e) => { process.stderr.write(`[babysitter] journal append queue: previous write failed: ${e instanceof Error ? e.message : String(e)}\n`); }).then(operation);
   const tail = next.then(
     () => undefined,
     () => undefined,

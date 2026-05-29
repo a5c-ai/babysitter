@@ -133,7 +133,7 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
 
       let costStats: unknown = undefined;
       try { const journalEvents = await loadJournal(options.runDir); const costEvents = extractCostEvents(journalEvents); if (costEvents.length > 0) costStats = computeRunCostStats(engine.runId, journalEvents); }
-      catch { /* optional */ }
+      catch (e) { process.stderr.write(`[babysitter] cost computation failed: ${e instanceof Error ? e.message : String(e)}\n`); }
 
       await appendEvent({ runDir: options.runDir, eventType: "RUN_COMPLETED", event: { outputRef, costStats } });
       await rebuildStateCache(options.runDir, { reason: "post_completion" });
@@ -191,13 +191,13 @@ async function loadProcessFunction(options: OrchestrateOptions, defaults: Entryp
     const cwd = process.cwd();
     const sep = process.platform === 'win32' ? ';' : ':';
     process.env['NODE_PATH'] = [path.join(cwd, 'node_modules'), process.env['NODE_PATH']].filter(Boolean).join(sep);
-    try { (require('module') as { _initPaths?: () => void })._initPaths?.(); } catch { /* node internals */ }
+    try { (require('module') as { _initPaths?: () => void })._initPaths?.(); } catch (e) { process.stderr.write(`[babysitter] NODE_PATH _initPaths failed: ${e instanceof Error ? e.message : String(e)}\n`); }
   }
   let mod: Record<string, unknown>;
   try { mod = await dynamicImportModule(moduleUrl); }
   catch {
     // ESM import may fail on some Node/CJS configurations. Fall back to require().
-    try { delete require.cache[require.resolve(resolvedPath)]; } catch { /* */ }
+    try { delete require.cache[require.resolve(resolvedPath)]; } catch (e) { process.stderr.write(`[babysitter] require.cache clear failed for ${resolvedPath}: ${e instanceof Error ? e.message : String(e)}\n`); }
     try { mod = require(resolvedPath) as Record<string, unknown>; }
     catch (error) { throw new RunFailedError(`Failed to load process module at ${resolvedPath}`, { details: { error: serializeUnknownError(error) }, cause: error instanceof Error ? error : undefined }); }
   }

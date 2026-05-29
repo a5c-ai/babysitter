@@ -94,7 +94,7 @@ export function spawnAsync(
     processHandle.on("error", (error) => {
       resolve({
         stdout: concatSafe(stdoutChunks, stdoutTruncated, stdoutBytes),
-        stderr: error.message,
+        stderr: `${error.message}${(error as NodeJS.ErrnoException).code ? ` (${(error as NodeJS.ErrnoException).code})` : ''}`,
         exitCode: 1,
       });
     });

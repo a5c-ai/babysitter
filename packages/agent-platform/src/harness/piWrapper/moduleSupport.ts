@@ -87,10 +87,10 @@ export async function loadPiModule(): Promise<PiCodingAgentModule> {
   try {
     const mod = await dynamicImportPi(PI_MODULE_ID);
     return mod as PiCodingAgentModule;
-  } catch {
+  } catch (importError) {
     throw new BabysitterRuntimeError(
       "PiModuleNotFound",
-      "Cannot load @earendil-works/pi-coding-agent — is the package installed?",
+      `Cannot load @earendil-works/pi-coding-agent — is the package installed? (${(importError as Error).message})`,
       { category: ErrorCategory.Configuration },
     );
   }
@@ -118,6 +118,7 @@ function normalizeAzureOpenAiBaseUrl(value: string): string {
     }
   } catch {
     // Fall back to the raw value when the URL cannot be parsed.
+    process.stderr.write(`[babysitter] Azure OpenAI URL parse failed for "${trimmed}", using raw value\n`);
   }
 
   return trimmed;

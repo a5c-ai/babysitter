@@ -49,6 +49,7 @@ export class McpToolExecutor {
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      process.stderr.write(`[babysitter] MCP tool ${request.toolName} execution error: ${message}\n`);
       return {
         success: false,
         content: [{ type: "text", text: message }],

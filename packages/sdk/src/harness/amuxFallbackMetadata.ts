@@ -179,7 +179,7 @@ const LOCAL_FALLBACK_METADATA: Record<string, AmuxAdapterMetadata> = {
 function buildStaticFallbackMetadata(): Record<string, AmuxAdapterMetadata> {
   try {
     let hostSignalMap: Record<string, string[]> = {};
-    try { hostSignalMap = getHostSignalMap(); } catch { /* */ }
+    try { hostSignalMap = getHostSignalMap(); } catch (e) { process.stderr.write(`[babysitter] getHostSignalMap failed: ${e instanceof Error ? e.message : String(e)}\n`); }
 
     const catalogMetadata = Object.fromEntries(
       Object.values(listCatalogFallbackHarnessMetadata()).map((metadata) => [
@@ -215,7 +215,8 @@ function buildStaticFallbackMetadata(): Record<string, AmuxAdapterMetadata> {
       }
     }
     return merged;
-  } catch {
+  } catch (e) {
+    process.stderr.write(`[babysitter] graph catalog resolution failed, using local fallback metadata: ${e instanceof Error ? e.message : String(e)}\n`);
     return LOCAL_FALLBACK_METADATA;
   }
 }

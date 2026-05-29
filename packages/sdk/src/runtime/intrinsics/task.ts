@@ -130,7 +130,7 @@ async function requestNewEffect<TArgs, TResult>(
     const decision = options.context.policyEngine.evaluate(policyCtx);
     if (options.context.reportPolicyDecision) {
       try { await options.context.reportPolicyDecision({ timestamp: new Date().toISOString(), context: policyCtx, decision, ruleId: decision.rule?.id }); }
-      catch { /* Best-effort */ }
+      catch (e) { process.stderr.write(`[babysitter] policy decision report failed: ${e instanceof Error ? e.message : String(e)}\n`); }
     }
     if (!decision.allowed) {
       throw new RunFailedError(`Policy denied effect dispatch: ${decision.reason} [rule: ${decision.rule?.id ?? "unknown"}]`, { details: { ruleId: decision.rule?.id, decision } });
@@ -151,7 +151,7 @@ async function requestNewEffect<TArgs, TResult>(
         });
         (taskDef as Record<string, unknown>).autoApproval = autoApproval;
       }
-    } catch { /* Non-critical */ }
+    } catch (e) { process.stderr.write(`[babysitter] breakpoint auto-approval eval failed: ${e instanceof Error ? e.message : String(e)}\n`); }
   }
 
   const { taskRef: taskDefRef, inputsRef } = await serializeAndWriteTaskDefinition({

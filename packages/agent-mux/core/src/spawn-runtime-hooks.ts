@@ -142,7 +142,7 @@ export async function createSpawnRuntimeHookBridge(
   };
 
   const awaitIdle = async (): Promise<void> => {
-    await eventChain.catch(() => {});
+    await eventChain.catch((e) => { process.stderr.write(`[agent-mux] hook event chain failed: ${e instanceof Error ? e.message : String(e)}\n`); });
   };
 
   return {

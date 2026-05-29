@@ -127,7 +127,7 @@ function writeProvidersFile(filePath: string, providersFile: AgentMuxProvidersFi
   });
   try {
     fs.chmodSync(filePath, 0o600);
-  } catch {}
+  } catch (e) { process.stderr.write(`[cloud] chmod 600 failed for ${filePath}: ${e instanceof Error ? e.message : String(e)}\n`); }
 }
 
 function providerSecretManifest(
