@@ -47,6 +47,9 @@ function resolveEndpoint(options: AgentCoreSessionOptions): ResolvedEndpoint {
   const anthropicApiKey = process.env["ANTHROPIC_API_KEY"];
 
   const model = options.model || amuxModel || openaiModel || "gpt-4o";
+  if (!options.model && !amuxModel && !openaiModel) {
+    process.stderr.write(`[agent-core] no model specified, defaulting to gpt-4o\n`);
+  }
 
   if (amuxProvider === "foundry" || amuxProvider === "azure") {
     const apiBase = amuxApiBase || "";

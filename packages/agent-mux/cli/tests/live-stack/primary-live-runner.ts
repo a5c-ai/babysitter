@@ -894,7 +894,7 @@ async function validateAgentBehavior(
     } else if (!isInteractiveInvocation && !isBridgeHooksMode) {
       deferredHooksEntries.push({ name: 'stop-hooks', status: 'passed', detail: 'no hooks-mux logs (expected in non-interactive mode — hooks require TTY session)' });
     } else {
-      deferredHooksEntries.push({ name: 'stop-hooks', status: 'pending' as 'passed', detail: 'no hooks-mux log files found' });
+      deferredHooksEntries.push({ name: 'stop-hooks', status: 'failed', detail: 'no hooks-mux log files found (deferred — may pass if run completed)' });
     }
 
     if (hasSessionLogs || hasStopHookInJournal) {
@@ -905,7 +905,7 @@ async function validateAgentBehavior(
     } else if (!isInteractiveInvocation && !isBridgeHooksMode) {
       deferredHooksEntries.push({ name: 'hooks-mux-session', status: 'passed', detail: 'no hooks-mux evidence (expected in non-interactive — hooks require TTY)' });
     } else {
-      deferredHooksEntries.push({ name: 'hooks-mux-session', status: 'pending' as 'passed', detail: 'no hooks-mux logs or stop hook events' });
+      deferredHooksEntries.push({ name: 'hooks-mux-session', status: 'failed', detail: 'no hooks-mux logs or stop hook events (deferred — may pass if run completed)' });
     }
 
     // babysitter-run-completion: check .a5c/runs/ exists and has at least one run with a journal
@@ -916,7 +916,7 @@ async function validateAgentBehavior(
       if (runEntries.length === 0) {
         runCompletionDetail = 'no runs created in .a5c/runs/';
       } else {
-        const MIN_JOURNAL_EVENTS = 3;
+        const MIN_JOURNAL_EVENTS = 5;
         for (const entry of runEntries.slice(-5)) {
           const journalDir = path.join(runsDir, entry, 'journal');
           try {
@@ -991,25 +991,22 @@ async function validateAgentBehavior(
     } catch {
       completionProofDetail = 'no .a5c/runs/ directory found';
     }
-    const proofStatus = completionProofFound || runCompleted ? 'passed' : 'failed';
+    const proofStatus = completionProofFound ? 'passed' : 'failed';
     const proofDetail = completionProofFound
       ? completionProofDetail
       : runCompleted
-        ? `${runCompletionDetail} (journal evidence sufficient)`
+        ? `${completionProofDetail} (run has journal events but no completionProof — process may not have finished)`
         : completionProofDetail;
     entries.push({ name: 'babysitter-completion-proof', status: proofStatus, detail: proofDetail });
 
     for (const he of deferredHooksEntries) {
-      if (he.status === ('pending' as string)) {
-        // In interactive mode (not bridged-hooks), hooks-mux is optional —
-        // the agent handles hooks internally. Only fail if bridged-hooks mode
-        // explicitly requires hooks-mux evidence.
+      if (he.status === 'failed' && he.detail.includes('deferred')) {
         if (isBridgeHooksMode) {
-          entries.push({ ...he, status: 'failed' });
+          entries.push(he);
         } else if (runCompleted || completionProofFound) {
-          entries.push({ ...he, status: 'passed', detail: `${he.detail} (run completed — hooks optional in interactive mode)` });
+          entries.push({ ...he, status: 'passed', detail: `${he.detail} — upgraded: run completed, hooks optional in interactive mode` });
         } else {
-          entries.push({ ...he, status: 'failed' });
+          entries.push(he);
         }
       } else {
         entries.push(he);

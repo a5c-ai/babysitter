@@ -92,8 +92,12 @@ export function resolveProvider(input: ResolveProviderInput): ProviderConfig {
   const defaults = PROVIDER_DEFAULTS[providerId];
 
   const transport: TransportId = (input.transport ?? profile?.transport) as TransportId ?? defaults.transport;
+  const modelSource = input.model ? 'input' : process.env['AMUX_MODEL'] ? 'AMUX_MODEL' : profile?.model ? 'profile' : fileDefaults?.model ? 'defaults-file' : 'provider-default';
   const rawModel = input.model ?? process.env['AMUX_MODEL'] ?? profile?.model ?? fileDefaults?.model ?? defaults.defaultModel;
   const model = translateModelId(rawModel, providerId);
+  if (process.env['AMUX_LOG_LEVEL'] === 'debug') {
+    process.stderr.write(`[amux] resolved model=${model} from ${modelSource} (provider=${providerId})\n`);
+  }
 
   // Auth: merge profile auth with input auth
   const auth = resolveAuth(providerId, {
@@ -110,7 +114,8 @@ export function resolveProvider(input: ResolveProviderInput): ProviderConfig {
   if (profile?.params) {
     Object.assign(params, profile.params);
   }
-  const region = input.region ?? process.env['AMUX_REGION'] ?? process.env['GOOGLE_CLOUD_LOCATION'] ?? process.env['VERTEXAI_LOCATION'] ?? process.env['AWS_REGION'] ?? process.env['AWS_REGION_NAME'] ?? params['region'];
+  const regionSource = input.region ? 'input' : process.env['AMUX_REGION'] ? 'AMUX_REGION' : process.env['GOOGLE_CLOUD_LOCATION'] ? 'GOOGLE_CLOUD_LOCATION' : process.env['VERTEXAI_LOCATION'] ? 'VERTEXAI_LOCATION' : process.env['AWS_REGION'] ? 'AWS_REGION' : process.env['AWS_REGION_NAME'] ? 'AWS_REGION_NAME' : params['region'] ? 'params' : 'none';
+  const region = input.region ?? process.env['AMUX_REGION'] ?? process.env['GOOGLE_CLOUD_LOCATION'] ?? process.env['VERTEXAI_LOCATION'] ?? process.env['AWS_REGION'] ?? process.env['AWS_REGION_NAME'] ?? params['region'] as string | undefined;
   const project = input.project ?? process.env['AMUX_PROJECT'] ?? process.env['GOOGLE_CLOUD_PROJECT'] ?? process.env['VERTEXAI_PROJECT'] ?? params['project'];
   const providersUsingGenericApiBase = new Set(['foundry', 'azure', 'custom', 'local']);
   const amuxApiBase = providersUsingGenericApiBase.has(providerId) ? process.env['AMUX_API_BASE'] : undefined;
@@ -120,8 +125,8 @@ export function resolveProvider(input: ResolveProviderInput): ProviderConfig {
   if (project) params['project'] = project;
   if (apiBase) params['apiBase'] = apiBase;
 
-  // Auto-upgrade google provider to vertex when enterprise credentials are detected
   if (providerId === 'google' && (project || /^true$/i.test(process.env['GOOGLE_GENAI_USE_VERTEXAI'] ?? ''))) {
+    process.stderr.write(`[amux] upgrading google → vertex (project=${project ?? 'n/a'}, GOOGLE_GENAI_USE_VERTEXAI=${process.env['GOOGLE_GENAI_USE_VERTEXAI'] ?? 'unset'})\n`);
     params['useVertexAi'] = true;
   }
   if (input.resourceGroup) params['resourceGroup'] = input.resourceGroup;

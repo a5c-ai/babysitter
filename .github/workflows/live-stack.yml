@@ -228,12 +228,14 @@ jobs:
                 return false;
               }
               function modelFor(entry) {
-                const selected = models[entry.model] || models['foundry-gpt55'];
+                const selected = models[entry.model];
+                if (!selected) throw new Error(`Unknown model '${entry.model}' in matrix. Available: ${Object.keys(models).join(', ')}`);
                 return selected.model === 'gpt-5.4-mini' && !miniBpSupported(entry) ? models['foundry-gpt55'] : selected;
               }
 
               function toScenario(entry) {
-                const a = agents[entry.agent] || {agent: entry.agent, amux_agent: entry.agent};
+                const a = agents[entry.agent];
+                if (!a) throw new Error(`Unknown agent '${entry.agent}' in matrix. Available: ${Object.keys(agents).join(', ')}`);
                 const m = modelFor(entry);
                 return {
                   id: 'live.agent-mux.' + a.agent + '.' + m.provider + '.' + m.model,
@@ -248,8 +250,10 @@ jobs:
               const vanillaNi = [], vanillaInt = [], bpInt = [], bpBridged = [];
               for (const e of input) {
                 const scenario = toScenario(e);
-                const mode = modes[e.mode] || modes['ni'];
-                const install = installModes[e.install] || installModes['vanilla'];
+                const mode = modes[e.mode];
+                if (!mode) throw new Error(`Unknown mode '${e.mode}' in matrix. Available: ${Object.keys(modes).join(', ')}`);
+                const install = installModes[e.install];
+                if (!install) throw new Error(`Unknown install mode '${e.install}' in matrix. Available: ${Object.keys(installModes).join(', ')}`);
                 const combo = {scenario, interaction_mode: mode, install_mode: install};
                 if (e.install === 'bp' && mode.id === 'interactive') bpInt.push(combo);
                 else if (e.install === 'bp' && mode.id === 'bridged-hooks') bpBridged.push(combo);
