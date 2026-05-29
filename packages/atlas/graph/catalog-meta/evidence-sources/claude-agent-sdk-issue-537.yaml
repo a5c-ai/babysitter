@@ -1,0 +1,51 @@
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-156-release-issue-537
+attributes:
+  displayName: "Claude Agent SDK v0.3.156 release notes for issue #537"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.156
+  sourcePathOrUrl: https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.156
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.156"
+  capturedAt: "2026-05-29T12:37:00Z"
+  observedAt: "2026-05-29T12:37:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T12:37:00Z"
+  notes: |
+    Issue #537 tracks Claude Agent SDK 0.3.156. The release notes identify
+    0.3.156 as the SDK parity update for Claude Code 2.1.156, whose relevant
+    capability fix is Opus 4.8 thinking-block handling that previously caused
+    API errors.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:claude-agent-sdk@current
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-156-issue-537-tracker
+attributes:
+  displayName: "GitHub issue #537 Claude Agent SDK v0.3.156 tracker"
+  kindLabel: issue-tracker
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/issues/537
+  sourcePathOrUrl: https://github.com/a5c-ai/babysitter/issues/537
+  locator: "a5c-ai/babysitter issue #537"
+  capturedAt: "2026-05-29T12:37:00Z"
+  observedAt: "2026-05-29T12:37:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T12:37:00Z"
+  notes: |
+    Issue #537 records the requested old version 0.3.153, new version 0.3.156,
+    install-method continuity for npm install @anthropic-ai/claude-agent-sdk@0.3.156,
+    and the need to verify SDK parity metadata for the Claude Code 2.1.156
+    Opus 4.8 thinking-block API-error fix.
+edges:
+  has_trust_level:
+    - trust-level:repo
+  references:
+    - agent-version:claude-agent-sdk@current
