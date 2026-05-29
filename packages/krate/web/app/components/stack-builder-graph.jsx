@@ -25,7 +25,7 @@ const COMPOSITION_FACETS = [
 // ---------------------------------------------------------------------------
 
 const labelStyle = { display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' };
-const inputStyle = { width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db', fontSize: '0.875rem', boxSizing: 'border-box' };
+const inputStyle = { width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', fontSize: '0.875rem', boxSizing: 'border-box' };
 const textareaStyle = { ...inputStyle, resize: 'vertical', fontFamily: 'inherit' };
 
 const sectionHeaderStyle = {
@@ -459,7 +459,7 @@ function MemoryRepositorySection({ org, selectedRepos, onToggleRepo }) {
           {loading && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Loading memory repositories...</span>}
 
           {!loading && repos.length === 0 && loaded && (
-            <div style={{ fontSize: '0.8125rem', color: '#9ca3af' }}>
+            <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
               No memory repositories available.{' '}
               <a href={`/orgs/${org}/agents/memory`} style={{ color: '#7c3aed', textDecoration: 'underline' }}>
                 Create one
@@ -495,7 +495,7 @@ function MemoryRepositorySection({ org, selectedRepos, onToggleRepo }) {
                       <div
                         style={{
                           width: 16, height: 16, borderRadius: '50%',
-                          background: '#fff', position: 'absolute', top: 2,
+                          background: 'var(--surface)', position: 'absolute', top: 2,
                           left: isSelected ? 18 : 2,
                           transition: 'left 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
                         }}
@@ -570,9 +570,9 @@ function ModelInferenceSection({ org, selectedInference, onSelectInference }) {
           {loading && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Loading inference services...</span>}
 
           {!loading && services.length === 0 && (
-            <div style={{ fontSize: '0.8125rem', color: '#9ca3af' }}>
+            <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
               No inference services available.{' '}
-              <a href={`/orgs/${org}/inference`} style={{ color: '#2563eb', textDecoration: 'underline' }}>
+              <a href={`/orgs/${org}/inference`} style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
                 Create one
               </a>
             </div>
@@ -596,10 +596,10 @@ function ModelInferenceSection({ org, selectedInference, onSelectInference }) {
               </select>
 
               {selectedInference && (
-                <div style={{ marginTop: '0.5rem', fontSize: '0.8125rem', color: '#374151', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <div style={{ marginTop: '0.5rem', fontSize: '0.8125rem', color: 'var(--text)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                   <div>
                     <strong>Endpoint:</strong>{' '}
-                    <code style={{ fontSize: '0.75rem', background: '#f3f4f6', padding: '1px 6px', borderRadius: 3 }}>
+                    <code style={{ fontSize: '0.75rem', background: 'var(--bg-subtle)', padding: '1px 6px', borderRadius: 3 }}>
                       {selectedInference.endpoint || 'Not ready'}
                     </code>
                   </div>
@@ -840,7 +840,7 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
                 disabled={isEditing}
                 placeholder="my-agent-stack"
                 required
-                style={{ ...inputStyle, ...(isEditing ? { background: '#f9fafb', color: '#9ca3af' } : {}) }}
+                style={{ ...inputStyle, ...(isEditing ? { background: 'var(--bg-subtle)', color: 'var(--text-muted)' } : {}) }}
               />
             </div>
             <div>
@@ -936,7 +936,7 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
             <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>
               Runtime Identity (RBAC)
             </h4>
-            <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '0.5rem', padding: '1rem' }}>
+            <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1rem' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={labelStyle}>ServiceAccount</label>
@@ -947,21 +947,21 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
                     placeholder="default"
                     style={inputStyle}
                   />
-                  <small style={{ color: '#6b7280', fontSize: '0.75rem' }}>K8s ServiceAccount the agent runs as</small>
+                  <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>K8s ServiceAccount the agent runs as</small>
                 </div>
                 <div>
                   <label style={labelStyle}>Role</label>
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    style={{ ...inputStyle, background: '#fff' }}
+                    style={{ ...inputStyle, background: 'var(--surface)' }}
                   >
                     <option value="cluster-admin">cluster-admin</option>
                     <option value="edit">edit</option>
                     <option value="view">view</option>
                     <option value="custom">custom</option>
                   </select>
-                  <small style={{ color: '#6b7280', fontSize: '0.75rem' }}>ClusterRole or Role binding</small>
+                  <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>ClusterRole or Role binding</small>
                 </div>
                 <div>
                   <label style={labelStyle}>Namespace</label>
@@ -972,7 +972,7 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
                     placeholder={`krate-org-${org}`}
                     style={inputStyle}
                   />
-                  <small style={{ color: '#6b7280', fontSize: '0.75rem' }}>Scope for the role binding</small>
+                  <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Scope for the role binding</small>
                 </div>
               </div>
             </div>
@@ -1028,7 +1028,7 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
               <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 600 }}>{message}</span>
             )}
             {status === 'error' && (
-              <span style={{ fontSize: 13, color: '#dc2626' }}>{message}</span>
+              <span style={{ fontSize: 13, color: 'var(--danger)' }}>{message}</span>
             )}
           </div>
         </div>

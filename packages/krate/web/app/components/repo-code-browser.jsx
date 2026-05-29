@@ -166,11 +166,11 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
     <div
       style={{
         display: 'flex',
-        border: '1px solid #e5e7eb',
+        border: '1px solid var(--border)',
         borderRadius: '0.5rem',
         overflow: 'hidden',
         minHeight: '32rem',
-        background: '#fff',
+        background: 'var(--surface)',
         fontFamily: 'system-ui, -apple-system, sans-serif',
       }}
     >
@@ -183,13 +183,13 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
           borderRight: '1px solid #e5e7eb',
           display: 'flex',
           flexDirection: 'column',
-          background: '#f9fafb',
+          background: 'var(--bg-subtle)',
           flexShrink: 0,
         }}
       >
         {/* Branch selector */}
         <div style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb' }}>
-          <label style={{ display: 'block', fontSize: '0.6875rem', color: '#6b7280', marginBottom: '0.25rem', fontWeight: 600 }}>
+          <label style={{ display: 'block', fontSize: '0.6875rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: 600 }}>
             Branch
           </label>
           <select
@@ -199,9 +199,9 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
               width: '100%',
               padding: '0.25rem 0.375rem',
               fontSize: '0.75rem',
-              border: '1px solid #d1d5db',
+              border: '1px solid var(--border)',
               borderRadius: '0.25rem',
-              background: '#fff',
+              background: 'var(--surface)',
               cursor: 'pointer',
             }}
           >
@@ -241,7 +241,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
           </button>
           {pathSegments.map((seg, idx) => (
             <span key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.125rem' }}>
-              <span style={{ color: '#9ca3af' }}>/</span>
+              <span style={{ color: 'var(--text-muted)' }}>/</span>
               <button
                 onClick={() => navigateTo(idx)}
                 style={{
@@ -267,15 +267,15 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
           style={{ flex: 1, overflowY: 'auto', padding: '0.25rem 0' }}
         >
           {treeLoading ? (
-            <p style={{ padding: '0.75rem 0.5rem', fontSize: '0.75rem', color: '#9ca3af', textAlign: 'center' }}>
+            <p style={{ padding: '0.75rem 0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
               Loading…
             </p>
           ) : treeError ? (
-            <p style={{ padding: '0.5rem', fontSize: '0.75rem', color: '#ef4444' }}>
+            <p style={{ padding: '0.5rem', fontSize: '0.75rem', color: 'var(--danger)' }}>
               Error: {treeError}
             </p>
           ) : !tree || tree.length === 0 ? (
-            <p style={{ padding: '0.5rem', fontSize: '0.75rem', color: '#9ca3af' }}>
+            <p style={{ padding: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               Empty directory
             </p>
           ) : (
@@ -326,7 +326,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
                     {displayName}
                   </span>
                   {!isDir && item.size ? (
-                    <span style={{ fontSize: '0.5625rem', color: '#9ca3af', flexShrink: 0 }}>
+                    <span style={{ fontSize: '0.5625rem', color: 'var(--text-muted)', flexShrink: 0 }}>
                       {formatSize(item.size)}
                     </span>
                   ) : null}
@@ -347,7 +347,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#9ca3af',
+              color: 'var(--text-muted)',
               gap: '0.5rem',
             }}
           >
@@ -365,12 +365,12 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
                 alignItems: 'center',
                 gap: '0.75rem',
                 fontSize: '0.75rem',
-                color: '#6b7280',
-                background: '#f9fafb',
+                color: 'var(--text-muted)',
+                background: 'var(--bg-subtle)',
                 flexWrap: 'wrap',
               }}
             >
-              <strong style={{ color: '#374151', fontFamily: 'monospace', fontSize: '0.8125rem' }}>
+              <strong style={{ color: 'var(--text)', fontFamily: 'monospace', fontSize: '0.8125rem' }}>
                 {selectedFile}
               </strong>
               {fileContent ? (
@@ -388,7 +388,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
                     {language}
                   </span>
                   {fileContent.lastCommit ? (
-                    <span style={{ color: '#9ca3af' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>
                       commit: <code style={{ fontSize: '0.6875rem' }}>{fileContent.lastCommit}</code>
                     </span>
                   ) : null}
@@ -397,7 +397,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
                     download={selectedFile.split('/').pop()}
                     style={{
                       marginLeft: 'auto',
-                      color: '#2563eb',
+                      color: 'var(--accent)',
                       textDecoration: 'none',
                       fontSize: '0.6875rem',
                       border: '1px solid #bfdbfe',
@@ -416,11 +416,11 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
             {/* File content viewer */}
             <div style={{ flex: 1, overflow: 'auto' }}>
               {fileLoading ? (
-                <p style={{ padding: '1.5rem', color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center' }}>
+                <p style={{ padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.875rem', textAlign: 'center' }}>
                   Loading file…
                 </p>
               ) : fileError ? (
-                <p style={{ padding: '1rem', color: '#ef4444', fontSize: '0.875rem' }}>
+                <p style={{ padding: '1rem', color: 'var(--danger)', fontSize: '0.875rem' }}>
                   Error loading file: {fileError}
                 </p>
               ) : fileContent ? (

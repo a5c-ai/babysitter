@@ -21,10 +21,10 @@ function installCommand(registryType, org, feed, name, version) {
 
 // ── Shared styles ────────────────────────────────────────────────────
 const cardStyle = {
-  border: '1px solid #e5e7eb',
+  border: '1px solid var(--border)',
   borderRadius: '0.5rem',
   padding: '1rem',
-  background: '#fff',
+  background: 'var(--surface)',
   display: 'flex',
   flexDirection: 'column',
   gap: '0.75rem',
@@ -32,7 +32,7 @@ const cardStyle = {
 
 const btnPrimary = {
   padding: '0.5rem 1rem',
-  background: '#2563eb',
+  background: 'var(--accent)',
   color: '#fff',
   border: 'none',
   borderRadius: '0.375rem',
@@ -44,26 +44,26 @@ const btnPrimary = {
 const btnSecondary = {
   padding: '0.375rem 0.75rem',
   background: 'none',
-  border: '1px solid #e5e7eb',
+  border: '1px solid var(--border)',
   borderRadius: '0.375rem',
   fontSize: '0.8125rem',
-  color: '#374151',
+  color: 'var(--text)',
   cursor: 'pointer',
 };
 
 const btnDanger = {
   ...btnSecondary,
-  color: '#dc2626',
+  color: 'var(--danger)',
   borderColor: '#fca5a5',
 };
 
 const inputStyle = {
   width: '100%',
   padding: '0.5rem 0.75rem',
-  border: '1px solid #d1d5db',
+  border: '1px solid var(--border)',
   borderRadius: '0.375rem',
   fontSize: '0.875rem',
-  background: '#fff',
+  background: 'var(--surface)',
   boxSizing: 'border-box',
 };
 
@@ -71,11 +71,11 @@ const labelStyle = {
   display: 'block',
   fontSize: '0.8125rem',
   fontWeight: 600,
-  color: '#374151',
+  color: 'var(--text)',
   marginBottom: '0.25rem',
 };
 
-const metaStyle = { fontSize: '0.8125rem', color: '#6b7280' };
+const metaStyle = { fontSize: '0.8125rem', color: 'var(--text-muted)' };
 
 const pillStyle = (t) => ({
   display: 'inline-block',
@@ -149,9 +149,9 @@ function CopyableCode({ text }) {
 function ErrorBanner({ message, onDismiss }) {
   if (!message) return null;
   return (
-    <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '0.375rem', padding: '0.75rem', color: '#dc2626', fontSize: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '0.375rem', padding: '0.75rem', color: 'var(--danger)', fontSize: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <span>{message}</span>
-      {onDismiss && <button onClick={onDismiss} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontWeight: 700 }}>Dismiss</button>}
+      {onDismiss && <button onClick={onDismiss} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontWeight: 700 }}>Dismiss</button>}
     </div>
   );
 }
@@ -183,13 +183,13 @@ function RegistryCard({ registry, feeds, onSelect }) {
         </div>
         <span style={pillStyle(tone)}>{phase}</span>
       </div>
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', fontSize: '0.8125rem', color: '#6b7280' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
         <span>{feedCount} feed{feedCount !== 1 ? 's' : ''}</span>
         {spec.description && <span>· {spec.description}</span>}
       </div>
-      <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
         <span>Endpoint: </span>
-        <code style={{ background: '#f3f4f6', padding: '0.0625rem 0.375rem', borderRadius: '0.25rem', fontSize: '0.75rem', wordBreak: 'break-all' }}>
+        <code style={{ background: 'var(--bg-subtle)', padding: '0.0625rem 0.375rem', borderRadius: '0.25rem', fontSize: '0.75rem', wordBreak: 'break-all' }}>
           {endpoint}
         </code>
       </div>
@@ -295,7 +295,7 @@ function CreateRegistryForm({ org, onCreated, externalProviders }) {
       {autoEndpoint && (
         <div>
           <label style={labelStyle}>Endpoint (auto-generated)</label>
-          <code style={{ display: 'block', background: '#f3f4f6', padding: '0.5rem 0.75rem', borderRadius: '0.375rem', fontSize: '0.8125rem', color: '#374151', wordBreak: 'break-all' }}>
+          <code style={{ display: 'block', background: 'var(--bg-subtle)', padding: '0.5rem 0.75rem', borderRadius: '0.375rem', fontSize: '0.8125rem', color: 'var(--text)', wordBreak: 'break-all' }}>
             {autoEndpoint}
           </code>
         </div>
@@ -325,7 +325,7 @@ function FeedBrowser({ org, feeds, registries, onSelectFeed }) {
 
   if (feeds.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem', background: '#f9fafb', borderRadius: '0.5rem', color: '#6b7280', fontSize: '0.875rem' }}>
+      <div style={{ textAlign: 'center', padding: '2rem', background: 'var(--bg-subtle)', borderRadius: '0.5rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
         No feeds found. Create a feed from a registry detail view.
       </div>
     );
@@ -355,7 +355,7 @@ function FeedBrowser({ org, feeds, registries, onSelectFeed }) {
                     key={feedName}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap',
-                      padding: '0.5rem 0.75rem', background: '#f9fafb', borderRadius: '0.375rem',
+                      padding: '0.5rem 0.75rem', background: 'var(--bg-subtle)', borderRadius: '0.375rem',
                       cursor: 'pointer',
                     }}
                     onClick={() => onSelectFeed(feed)}
@@ -430,7 +430,7 @@ function VersionList({ org, feed, registryType, onBack }) {
     gap: '0.5rem',
     fontWeight: 600,
     fontSize: '0.75rem',
-    color: '#6b7280',
+    color: 'var(--text-muted)',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
     padding: '0.5rem 0.75rem',
@@ -458,9 +458,9 @@ function VersionList({ org, feed, registryType, onBack }) {
       <ErrorBanner message={error} onDismiss={() => setError('')} />
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>Loading versions...</div>
+        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Loading versions...</div>
       ) : versions.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '2rem', background: '#f9fafb', borderRadius: '0.5rem', color: '#6b7280', fontSize: '0.875rem' }}>
+        <div style={{ textAlign: 'center', padding: '2rem', background: 'var(--bg-subtle)', borderRadius: '0.5rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
           No versions published to this feed yet.
         </div>
       ) : (
@@ -583,13 +583,13 @@ function AccessPolicyManager({ org, feed }) {
       <ErrorBanner message={error} onDismiss={() => setError('')} />
 
       {subjects.length === 0 ? (
-        <div style={{ padding: '1rem', background: '#f9fafb', borderRadius: '0.375rem', color: '#6b7280', fontSize: '0.8125rem', textAlign: 'center' }}>
+        <div style={{ padding: '1rem', background: 'var(--bg-subtle)', borderRadius: '0.375rem', color: 'var(--text-muted)', fontSize: '0.8125rem', textAlign: 'center' }}>
           No access subjects configured. Default access policy applies.
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
           {subjects.map((entry, idx) => (
-            <div key={`${entry.subject}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 0.5rem', background: '#f9fafb', borderRadius: '0.25rem' }}>
+            <div key={`${entry.subject}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 0.5rem', background: 'var(--bg-subtle)', borderRadius: '0.25rem' }}>
               <strong style={{ flex: 1, fontSize: '0.8125rem' }}>{entry.subject}</strong>
               <span style={pillStyle(entry.permission === 'admin' ? 'warn' : entry.permission === 'write' ? 'good' : 'neutral')}>{entry.permission}</span>
               <button style={btnDanger} onClick={() => handleRemove(idx)} disabled={saving}>Remove</button>
@@ -697,12 +697,12 @@ export function ArtifactRegistryManager({ org, registries: initialRegistries = [
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
               <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Artifact registries</h3>
-              <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: '#6b7280' }}>{registries.length} configured</p>
+              <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{registries.length} configured</p>
             </div>
           </div>
 
           {registries.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '2rem', background: '#f9fafb', borderRadius: '0.5rem', color: '#6b7280', fontSize: '0.875rem' }}>
+            <div style={{ textAlign: 'center', padding: '2rem', background: 'var(--bg-subtle)', borderRadius: '0.5rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
               No artifact registries configured. Create one to start managing packages and build artifacts.
             </div>
           ) : (

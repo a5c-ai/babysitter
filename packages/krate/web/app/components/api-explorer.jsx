@@ -284,11 +284,11 @@ function EndpointCard({ endpoint, org }) {
   }
 
   const statusColor = response
-    ? response.ok ? '#16a34a' : '#dc2626'
-    : '#6b7280';
+    ? response.ok ? 'var(--success)' : 'var(--danger)'
+    : 'var(--text-muted)';
 
   return (
-    <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, marginBottom: 8, overflow: 'hidden' }}>
+    <div style={{ border: '1px solid var(--border)', borderRadius: 8, marginBottom: 8, overflow: 'hidden' }}>
       {/* Header row */}
       <button
         onClick={() => setExpanded((x) => !x)}
@@ -299,44 +299,44 @@ function EndpointCard({ endpoint, org }) {
           gap: 12,
           width: '100%',
           padding: '10px 16px',
-          background: expanded ? '#f9fafb' : '#fff',
+          background: expanded ? 'var(--bg-subtle)' : 'var(--surface)',
           border: 'none',
           cursor: 'pointer',
           textAlign: 'left',
         }}
       >
         <MethodBadge method={endpoint.method} />
-        <code style={{ fontSize: 13, fontFamily: 'monospace', color: '#111827', flex: 1 }}>{endpoint.path}</code>
-        <span style={{ fontSize: 12, color: '#6b7280', maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <code style={{ fontSize: 13, fontFamily: 'monospace', color: 'var(--text)', flex: 1 }}>{endpoint.path}</code>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)', maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {endpoint.description}
         </span>
-        <span style={{ fontSize: 12, color: '#9ca3af' }}>{expanded ? '▲' : '▼'}</span>
+        <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{expanded ? '▲' : '▼'}</span>
       </button>
 
       {expanded && (
-        <div style={{ borderTop: '1px solid #e5e7eb', padding: '16px', backgroundColor: '#f9fafb' }}>
-          <p style={{ fontSize: 13, color: '#374151', marginBottom: 16 }}>{endpoint.description}</p>
+        <div style={{ borderTop: '1px solid var(--border)', padding: '16px', backgroundColor: 'var(--bg-subtle)' }}>
+          <p style={{ fontSize: 13, color: 'var(--text)', marginBottom: 16 }}>{endpoint.description}</p>
 
           {/* Parameters */}
           {endpoint.parameters.length > 0 && (
             <div style={{ marginBottom: 16 }}>
-              <h4 style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Parameters</h4>
+              <h4 style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Parameters</h4>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                 <thead>
-                  <tr style={{ backgroundColor: '#e5e7eb' }}>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', color: '#374151' }}>Name</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', color: '#374151' }}>In</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', color: '#374151' }}>Required</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', color: '#374151' }}>Description</th>
+                  <tr style={{ backgroundColor: 'var(--border)' }}>
+                    <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--text)' }}>Name</th>
+                    <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--text)' }}>In</th>
+                    <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--text)' }}>Required</th>
+                    <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--text)' }}>Description</th>
                   </tr>
                 </thead>
                 <tbody>
                   {endpoint.parameters.map((p) => (
-                    <tr key={p.name} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: '#fff' }}>
-                      <td style={{ padding: '6px 10px' }}><code style={{ fontFamily: 'monospace', color: '#2563eb' }}>{p.name}</code></td>
-                      <td style={{ padding: '6px 10px', color: '#6b7280' }}>{p.in}</td>
-                      <td style={{ padding: '6px 10px' }}>{p.required ? <span style={{ color: '#dc2626' }}>required</span> : <span style={{ color: '#9ca3af' }}>optional</span>}</td>
-                      <td style={{ padding: '6px 10px', color: '#374151' }}>{p.description}{p.example ? <> (e.g. <code style={{ fontFamily: 'monospace' }}>{p.example}</code>)</> : null}</td>
+                    <tr key={p.name} style={{ borderBottom: '1px solid var(--border)', backgroundColor: 'var(--surface)' }}>
+                      <td style={{ padding: '6px 10px' }}><code style={{ fontFamily: 'monospace', color: 'var(--accent)' }}>{p.name}</code></td>
+                      <td style={{ padding: '6px 10px', color: 'var(--text-muted)' }}>{p.in}</td>
+                      <td style={{ padding: '6px 10px' }}>{p.required ? <span style={{ color: 'var(--danger)' }}>required</span> : <span style={{ color: 'var(--text-secondary)' }}>optional</span>}</td>
+                      <td style={{ padding: '6px 10px', color: 'var(--text)' }}>{p.description}{p.example ? <> (e.g. <code style={{ fontFamily: 'monospace' }}>{p.example}</code>)</> : null}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -347,20 +347,20 @@ function EndpointCard({ endpoint, org }) {
           {/* Request body schema */}
           {endpoint.requestBody && (
             <div style={{ marginBottom: 16 }}>
-              <h4 style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Request Body (JSON)</h4>
-              <pre style={{ background: '#1f2937', color: '#e5e7eb', borderRadius: 6, padding: 12, fontSize: 12, overflow: 'auto', margin: 0 }}>{endpoint.requestBody}</pre>
+              <h4 style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Request Body (JSON)</h4>
+              <pre style={{ background: 'var(--surface-raised)', color: 'var(--text-secondary)', borderRadius: 6, padding: 12, fontSize: 12, overflow: 'auto', margin: 0 }}>{endpoint.requestBody}</pre>
             </div>
           )}
 
           {/* Response schema */}
           <div style={{ marginBottom: 16 }}>
-            <h4 style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Response</h4>
-            <code style={{ display: 'block', background: '#f3f4f6', padding: '8px 12px', borderRadius: 6, fontSize: 12, color: '#374151', fontFamily: 'monospace' }}>{endpoint.responseSchema}</code>
+            <h4 style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Response</h4>
+            <code style={{ display: 'block', background: 'var(--bg-subtle)', padding: '8px 12px', borderRadius: 6, fontSize: 12, color: 'var(--text)', fontFamily: 'monospace' }}>{endpoint.responseSchema}</code>
           </div>
 
           {/* Try it */}
           {endpoint.sseOnly ? (
-            <div style={{ padding: '8px 12px', background: '#fef3c7', borderRadius: 6, fontSize: 12, color: '#92400e' }}>
+            <div style={{ padding: '8px 12px', background: 'var(--bg-subtle)', borderRadius: 6, fontSize: 12, color: 'var(--warning)' }}>
               This is a Server-Sent Events stream. Use <code>new EventSource('{endpoint.path.replace('{org}', org)}')</code> in JavaScript to connect.
             </div>
           ) : (
@@ -368,25 +368,25 @@ function EndpointCard({ endpoint, org }) {
               {!tryOpen ? (
                 <button
                   onClick={() => setTryOpen(true)}
-                  style={{ padding: '6px 16px', borderRadius: 6, border: '1px solid #2563eb', color: '#2563eb', background: '#eff6ff', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+                  style={{ padding: '6px 16px', borderRadius: 6, border: '1px solid var(--accent)', color: 'var(--accent)', background: 'var(--bg-subtle)', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
                 >
                   Try it
                 </button>
               ) : (
-                <div style={{ marginTop: 8, border: '1px solid #dbeafe', borderRadius: 8, padding: 12, background: '#fff' }}>
-                  <h4 style={{ fontSize: 12, fontWeight: 600, color: '#1d4ed8', marginBottom: 12 }}>Try it — {endpoint.method} {endpoint.path}</h4>
+                <div style={{ marginTop: 8, border: '1px solid var(--border)', borderRadius: 8, padding: 12, background: 'var(--surface)' }}>
+                  <h4 style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent)', marginBottom: 12 }}>Try it — {endpoint.method} {endpoint.path}</h4>
 
                   {/* Path params input */}
                   {pathParamNames.filter((k) => k !== 'org').map((key) => (
                     <div key={key} style={{ marginBottom: 8 }}>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4 }}>
-                        {key} <span style={{ color: '#dc2626' }}>*</span>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
+                        {key} <span style={{ color: 'var(--danger)' }}>*</span>
                       </label>
                       <input
                         value={pathParams[key] || ''}
                         onChange={(e) => setPathParams((p) => ({ ...p, [key]: e.target.value }))}
                         placeholder={`Enter ${key}`}
-                        style={{ width: '100%', padding: '6px 10px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'monospace', boxSizing: 'border-box' }}
+                        style={{ width: '100%', padding: '6px 10px', borderRadius: 4, border: '1px solid var(--border)', fontSize: 13, fontFamily: 'monospace', boxSizing: 'border-box' }}
                       />
                     </div>
                   ))}
@@ -394,15 +394,15 @@ function EndpointCard({ endpoint, org }) {
                   {/* Query params */}
                   {endpoint.parameters.filter((p) => p.in === 'query').map((p) => (
                     <div key={p.name} style={{ marginBottom: 8 }}>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4 }}>
-                        {p.name} {p.required && <span style={{ color: '#dc2626' }}>*</span>}
-                        <span style={{ fontWeight: 400, color: '#6b7280' }}> (query)</span>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
+                        {p.name} {p.required && <span style={{ color: 'var(--danger)' }}>*</span>}
+                        <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}> (query)</span>
                       </label>
                       <input
                         value={queryParams[p.name] || ''}
                         onChange={(e) => setQueryParams((q) => ({ ...q, [p.name]: e.target.value }))}
                         placeholder={p.example || `Enter ${p.name}`}
-                        style={{ width: '100%', padding: '6px 10px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'monospace', boxSizing: 'border-box' }}
+                        style={{ width: '100%', padding: '6px 10px', borderRadius: 4, border: '1px solid var(--border)', fontSize: 13, fontFamily: 'monospace', boxSizing: 'border-box' }}
                       />
                     </div>
                   ))}
@@ -410,18 +410,18 @@ function EndpointCard({ endpoint, org }) {
                   {/* Body textarea */}
                   {endpoint.method !== 'GET' && endpoint.method !== 'DELETE' && (
                     <div style={{ marginBottom: 8 }}>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4 }}>Request Body (JSON)</label>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>Request Body (JSON)</label>
                       <textarea
                         value={body}
                         onChange={(e) => setBody(e.target.value)}
                         rows={8}
-                        style={{ width: '100%', padding: '6px 10px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 12, fontFamily: 'monospace', boxSizing: 'border-box', resize: 'vertical' }}
+                        style={{ width: '100%', padding: '6px 10px', borderRadius: 4, border: '1px solid var(--border)', fontSize: 12, fontFamily: 'monospace', boxSizing: 'border-box', resize: 'vertical' }}
                       />
                     </div>
                   )}
 
                   {/* URL preview */}
-                  <div style={{ marginBottom: 12, padding: '6px 10px', background: '#f3f4f6', borderRadius: 4, fontSize: 12, fontFamily: 'monospace', color: '#374151' }}>
+                  <div style={{ marginBottom: 12, padding: '6px 10px', background: 'var(--bg-subtle)', borderRadius: 4, fontSize: 12, fontFamily: 'monospace', color: 'var(--text)' }}>
                     {endpoint.method} {buildUrl()}
                   </div>
 
@@ -429,13 +429,13 @@ function EndpointCard({ endpoint, org }) {
                     <button
                       onClick={handleTry}
                       disabled={loading}
-                      style={{ padding: '6px 16px', borderRadius: 6, border: 'none', background: '#2563eb', color: '#fff', cursor: loading ? 'wait' : 'pointer', fontSize: 13, fontWeight: 600, opacity: loading ? 0.7 : 1 }}
+                      style={{ padding: '6px 16px', borderRadius: 6, border: 'none', background: 'var(--accent)', color: '#fff', cursor: loading ? 'wait' : 'pointer', fontSize: 13, fontWeight: 600, opacity: loading ? 0.7 : 1 }}
                     >
                       {loading ? 'Running...' : 'Run'}
                     </button>
                     <button
                       onClick={() => { setTryOpen(false); setResponse(null); }}
-                      style={{ padding: '6px 16px', borderRadius: 6, border: '1px solid #d1d5db', background: '#fff', color: '#374151', cursor: 'pointer', fontSize: 13 }}
+                      style={{ padding: '6px 16px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer', fontSize: 13 }}
                     >
                       Close
                     </button>
@@ -453,7 +453,7 @@ function EndpointCard({ endpoint, org }) {
                         </span>
                         <button
                           onClick={handleCopy}
-                          style={{ marginLeft: 'auto', padding: '2px 10px', borderRadius: 4, border: '1px solid #d1d5db', background: '#fff', color: '#374151', cursor: 'pointer', fontSize: 11 }}
+                          style={{ marginLeft: 'auto', padding: '2px 10px', borderRadius: 4, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer', fontSize: 11 }}
                         >
                           {copied ? 'Copied!' : 'Copy'}
                         </button>
@@ -481,15 +481,15 @@ export function ApiExplorer({ org = 'default' }) {
   return (
     <div style={{ maxWidth: 960, margin: '0 auto' }}>
       {/* Summary bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, padding: '10px 16px', background: '#f3f4f6', borderRadius: 8, fontSize: 13 }}>
-        <span style={{ color: '#374151' }}><strong>{totalEndpoints}</strong> endpoints</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, padding: '10px 16px', background: 'var(--bg-subtle)', borderRadius: 8, fontSize: 13 }}>
+        <span style={{ color: 'var(--text)' }}><strong>{totalEndpoints}</strong> endpoints</span>
         <span style={{ color: '#d1d5db' }}>|</span>
-        <span style={{ color: '#374151' }}><strong>{ENDPOINT_GROUPS.length}</strong> groups</span>
+        <span style={{ color: 'var(--text)' }}><strong>{ENDPOINT_GROUPS.length}</strong> groups</span>
         <span style={{ color: '#d1d5db' }}>|</span>
-        <span style={{ color: '#6b7280' }}>Organization: <code style={{ fontFamily: 'monospace', color: '#2563eb' }}>{org}</code></span>
+        <span style={{ color: 'var(--text-muted)' }}>Organization: <code style={{ fontFamily: 'monospace', color: 'var(--accent)' }}>{org}</code></span>
         <a
           href={`/api/orgs/${org}/resources`}
-          style={{ marginLeft: 'auto', fontSize: 12, color: '#6b7280' }}
+          style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}
           target="_blank"
           rel="noreferrer"
         >
@@ -502,7 +502,7 @@ export function ApiExplorer({ org = 'default' }) {
         <button
           onClick={() => setActiveGroup(null)}
           style={{
-            padding: '4px 14px', borderRadius: 20, border: '1px solid #d1d5db',
+            padding: '4px 14px', borderRadius: 20, border: '1px solid var(--border)',
             background: activeGroup === null ? '#2563eb' : '#fff',
             color: activeGroup === null ? '#fff' : '#374151',
             cursor: 'pointer', fontSize: 12, fontWeight: 600,
@@ -515,7 +515,7 @@ export function ApiExplorer({ org = 'default' }) {
             key={g.title}
             onClick={() => setActiveGroup(g.title === activeGroup ? null : g.title)}
             style={{
-              padding: '4px 14px', borderRadius: 20, border: '1px solid #d1d5db',
+              padding: '4px 14px', borderRadius: 20, border: '1px solid var(--border)',
               background: activeGroup === g.title ? '#2563eb' : '#fff',
               color: activeGroup === g.title ? '#fff' : '#374151',
               cursor: 'pointer', fontSize: 12, fontWeight: 600,
@@ -530,8 +530,8 @@ export function ApiExplorer({ org = 'default' }) {
       {ENDPOINT_GROUPS.filter((g) => !activeGroup || g.title === activeGroup).map((group) => (
         <div key={group.title} style={{ marginBottom: 28 }}>
           <div style={{ marginBottom: 12 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: 0 }}>{group.title}</h2>
-            <p style={{ fontSize: 13, color: '#6b7280', margin: '2px 0 0' }}>{group.description}</p>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{group.title}</h2>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '2px 0 0' }}>{group.description}</p>
           </div>
           {group.endpoints.map((endpoint, i) => (
             <EndpointCard key={`${endpoint.method}-${endpoint.path}-${i}`} endpoint={endpoint} org={org} />

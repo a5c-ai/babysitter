@@ -32,10 +32,10 @@ function tryParseJson(text) {
 
 const SEGMENT_KINDS = {
   user: { label: 'User', color: '#3b82f6' },
-  assistant: { label: 'Assistant', color: '#6b7280' },
+  assistant: { label: 'Assistant', color: 'var(--text-muted)' },
   thinking: { label: 'Thinking', color: '#a855f7' },
   tool: { label: 'Tool', color: '#f59e0b' },
-  error: { label: 'Error', color: '#ef4444' },
+  error: { label: 'Error', color: 'var(--danger)' },
   lifecycle: { label: 'Lifecycle', color: '#94a3b8' },
 };
 
@@ -128,27 +128,27 @@ function WorkspacePanel({ session }) {
       <div style={{ padding: 12 }}>
         {workspace ? (
           <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 4 }}>WORKSPACE</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>WORKSPACE</div>
             <div style={{ fontFamily: 'monospace', fontSize: 13, color: '#1e293b', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 4, padding: '6px 10px' }}>
               {workspace}
             </div>
           </div>
         ) : (
-          <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>No workspace assigned</div>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>No workspace assigned</div>
         )}
 
         <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 4 }}>FILE TREE</div>
-          <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#374151', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 4, padding: '8px 10px', minHeight: 80 }}>
-            <div style={{ color: '#6b7280', fontStyle: 'italic' }}>File tree not available</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>FILE TREE</div>
+          <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text)', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 4, padding: '8px 10px', minHeight: 80 }}>
+            <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>File tree not available</div>
             <div style={{ marginTop: 4, color: '#94a3b8', fontSize: 11 }}>Connect workspace to browse files</div>
           </div>
         </div>
 
         <div>
-          <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 4 }}>GIT STATUS</div>
-          <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#374151', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 4, padding: '8px 10px' }}>
-            <div style={{ color: '#6b7280', fontStyle: 'italic' }}>git status not available</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>GIT STATUS</div>
+          <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text)', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 4, padding: '8px 10px' }}>
+            <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>git status not available</div>
           </div>
         </div>
       </div>
@@ -168,13 +168,13 @@ function ToolCallCard({ toolName, input, output, status }) {
   return (
     <div style={{ border: '1px solid #e2e8f0', borderLeft: `3px solid ${statusColor}`, borderRadius: 4, padding: '8px 12px', marginBottom: 8, fontSize: 13, backgroundColor: '#fafafa' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: outputPreview ? 4 : 0 }}>
-        <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#6b7280' }}>{renderer.prefix}</span>
+        <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-muted)' }}>{renderer.prefix}</span>
         <strong style={{ fontSize: 12 }}>{renderer.label}</strong>
-        <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#374151', flex: 1 }}>{inputPreview}</span>
+        <span style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text)', flex: 1 }}>{inputPreview}</span>
         <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: statusColor, flexShrink: 0 }} />
       </div>
       {outputPreview && (
-        <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#6b7280', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{outputPreview}</div>
+        <div style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{outputPreview}</div>
       )}
     </div>
   );
@@ -188,8 +188,8 @@ function TranscriptMessageItem({ message }) {
   if (role === 'system' || role === 'thinking') {
     return (
       <div style={{ padding: '8px 12px', marginBottom: 8, backgroundColor: '#f1f5f9', borderRadius: 4, borderLeft: '3px solid #94a3b8' }}>
-        <div style={{ fontSize: 10, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', marginBottom: 4 }}>{role}</div>
-        <div style={{ fontSize: 13, color: '#374151', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>{role}</div>
+        <div style={{ fontSize: 13, color: 'var(--text)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
           {typeof message.content === 'string' ? message.content : JSON.stringify(message.content)}
         </div>
       </div>
@@ -236,7 +236,7 @@ function ChatPanel({ messages = [] }) {
             <div ref={bottomRef} />
           </>
         ) : (
-          <div style={{ textAlign: 'center', padding: '32px 16px', color: '#6b7280' }}>
+          <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--text-muted)' }}>
             <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>No transcript available</div>
             <div style={{ fontSize: 13 }}>Session transcript available when Agent Mux is connected and the session has exchanged messages.</div>
           </div>
@@ -265,7 +265,7 @@ function FlowLaneItem({ run, transcript }) {
     <div style={{ marginBottom: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, fontSize: 13 }}>
         <strong title={runName} style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{runName}</strong>
-        {stackName ? <span style={{ color: '#6b7280', fontSize: 12 }}>{stackName}</span> : null}
+        {stackName ? <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{stackName}</span> : null}
         <span style={{ fontSize: 11, borderRadius: 10, padding: '1px 8px', backgroundColor: pillColor, color: pillText, fontWeight: 600 }}>{phase}</span>
       </div>
       <div style={{ display: 'flex', height: 24, borderRadius: 4, overflow: 'hidden', backgroundColor: '#f1f5f9' }}>
@@ -294,7 +294,7 @@ function FlowLaneItem({ run, transcript }) {
         {Object.entries(SEGMENT_KINDS).map(([key, info]) => {
           const seg = segments.find((s) => s.kind === key);
           if (!seg) return null;
-          return <span key={key} style={{ fontSize: 10, color: '#6b7280' }}><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, backgroundColor: info.color, marginRight: 3 }} />{info.label}: {seg.count}</span>;
+          return <span key={key} style={{ fontSize: 10, color: 'var(--text-muted)' }}><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, backgroundColor: info.color, marginRight: 3 }} />{info.label}: {seg.count}</span>;
         })}
       </div>
     </div>
@@ -313,7 +313,7 @@ function FlowPanel({ runs = [], transcripts = [] }) {
             return <FlowLaneItem key={runName} run={run} transcript={transcript} />;
           })
         ) : (
-          <div style={{ textAlign: 'center', padding: '32px 16px', color: '#6b7280' }}>
+          <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--text-muted)' }}>
             <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>No execution flow data</div>
             <div style={{ fontSize: 13 }}>Flow visualization appears when dispatch runs have been created for this session.</div>
           </div>
@@ -337,7 +337,7 @@ function StatCard({ label, value, accent = false }) {
       minWidth: 120,
       flex: '1 1 auto',
     }}>
-      <div style={{ fontSize: 10, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>{label}</div>
       <div style={{ fontSize: 14, fontWeight: 700, color: accent ? '#1d4ed8' : '#1e293b' }}>{value || '—'}</div>
     </div>
   );

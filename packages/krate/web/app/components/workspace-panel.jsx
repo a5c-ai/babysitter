@@ -41,7 +41,7 @@ function FileIcon({ type, expanded }) {
     return (
       <span
         aria-hidden="true"
-        style={{ fontSize: '0.75rem', marginRight: '0.25rem', color: '#6b7280' }}
+        style={{ fontSize: '0.75rem', marginRight: '0.25rem', color: 'var(--text-muted)' }}
       >
         {expanded ? '▾' : '▸'}
       </span>
@@ -50,7 +50,7 @@ function FileIcon({ type, expanded }) {
   return (
     <span
       aria-hidden="true"
-      style={{ fontSize: '0.75rem', marginRight: '0.25rem', color: '#9ca3af', display: 'inline-block', width: '0.75rem' }}
+      style={{ fontSize: '0.75rem', marginRight: '0.25rem', color: 'var(--text-muted)', display: 'inline-block', width: '0.75rem' }}
     >
       &mdash;
     </span>
@@ -108,7 +108,7 @@ function FileSidebar({ fileTree, sidebarOpen, onToggle }) {
         minWidth: sidebarOpen ? '14rem' : '2.25rem',
         flexShrink: 0,
         borderRight: '1px solid #e5e7eb',
-        background: '#f9fafb',
+        background: 'var(--bg-subtle)',
         borderRadius: '0.5rem 0 0 0.5rem',
         display: 'flex',
         flexDirection: 'column',
@@ -127,7 +127,7 @@ function FileSidebar({ fileTree, sidebarOpen, onToggle }) {
         }}
       >
         {sidebarOpen ? (
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Files
           </span>
         ) : null}
@@ -141,7 +141,7 @@ function FileSidebar({ fileTree, sidebarOpen, onToggle }) {
             padding: '0.125rem 0.25rem',
             borderRadius: '0.25rem',
             fontSize: '0.875rem',
-            color: '#6b7280',
+            color: 'var(--text-muted)',
             marginLeft: sidebarOpen ? 'auto' : 0,
           }}
         >
@@ -174,16 +174,16 @@ function GitStatusBar({ branch, dirty, ahead, behind }) {
         alignItems: 'center',
         gap: '0.625rem',
         padding: '0.375rem 0.625rem',
-        background: '#f3f4f6',
+        background: 'var(--bg-subtle)',
         borderRadius: '0.375rem',
         fontSize: '0.75rem',
         fontFamily: 'var(--font-mono, monospace)',
       }}
     >
-      <span style={{ color: '#6b7280' }} aria-hidden="true">
+      <span style={{ color: 'var(--text-muted)' }} aria-hidden="true">
         &#x2387;
       </span>
-      <span style={{ fontWeight: 600, color: '#111827' }}>{displayBranch}</span>
+      <span style={{ fontWeight: 600, color: 'var(--text)' }}>{displayBranch}</span>
       {isDirty ? (
         <span
           title="Uncommitted changes"
@@ -213,17 +213,17 @@ function GitStatusBar({ branch, dirty, ahead, behind }) {
         </span>
       )}
       {aheadCount > 0 ? (
-        <span style={{ color: '#2563eb' }} title={`${aheadCount} commit(s) ahead of remote`}>
+        <span style={{ color: 'var(--accent)' }} title={`${aheadCount} commit(s) ahead of remote`}>
           &uarr;{aheadCount}
         </span>
       ) : null}
       {behindCount > 0 ? (
-        <span style={{ color: '#dc2626' }} title={`${behindCount} commit(s) behind remote`}>
+        <span style={{ color: 'var(--danger)' }} title={`${behindCount} commit(s) behind remote`}>
           &darr;{behindCount}
         </span>
       ) : null}
       {aheadCount === 0 && behindCount === 0 ? (
-        <span style={{ color: '#9ca3af' }}>up to date</span>
+        <span style={{ color: 'var(--text-muted)' }}>up to date</span>
       ) : null}
     </div>
   );
@@ -264,7 +264,7 @@ function TerminalPlaceholder({ sessionHref }) {
       }}
     >
       <div>
-        <div style={{ color: '#6b7280', marginBottom: '0.5rem', fontSize: '0.6875rem' }}>
+        <div style={{ color: 'var(--text-muted)', marginBottom: '0.5rem', fontSize: '0.6875rem' }}>
           TERMINAL
         </div>
         {connected ? (
@@ -284,7 +284,7 @@ function TerminalPlaceholder({ sessionHref }) {
             />
           </div>
         ) : (
-          <div style={{ color: '#6b7280', fontSize: '0.75rem' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
             No active terminal session. Connect to start a live terminal.
           </div>
         )}
@@ -341,7 +341,7 @@ function ResourceUsageBar({ label, value, max, unit = '%', color = '#3b82f6' }) 
           display: 'flex',
           justifyContent: 'space-between',
           fontSize: '0.75rem',
-          color: '#374151',
+          color: 'var(--text)',
           marginBottom: '0.25rem',
         }}
       >
@@ -426,7 +426,7 @@ function WorkspaceActions({ phase, onSync, onRelease, onDelete }) {
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
       {(phase === 'Ready' || phase === 'InUse') ? (
-        <button onClick={onSync} style={{ ...btnBase, background: '#2563eb', color: '#fff' }}>
+        <button onClick={onSync} style={{ ...btnBase, background: 'var(--accent)', color: '#fff' }}>
           Sync
         </button>
       ) : null}
@@ -542,7 +542,7 @@ export function WorkspacePanel({
           <PvcStatusBadge status={volumeStatus} />
         </div>
         {repository ? (
-          <span style={{ fontSize: '0.8125rem', color: '#6b7280', fontFamily: 'var(--font-mono, monospace)' }}>
+          <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono, monospace)' }}>
             {repository}
           </span>
         ) : null}
@@ -555,7 +555,7 @@ export function WorkspacePanel({
           alignItems: 'center',
           gap: '1rem',
           padding: '0.5rem 0.75rem',
-          background: '#f9fafb',
+          background: 'var(--bg-subtle)',
           borderRadius: '0.375rem',
           fontSize: '0.75rem',
           fontFamily: 'var(--font-mono, monospace)',
@@ -568,9 +568,9 @@ export function WorkspacePanel({
         <span><strong>Capacity:</strong> {capacity}</span>
         <span><strong>Storage class:</strong> {storageClassName}</span>
         {runRef ? (
-          <span style={{ color: '#2563eb' }}><strong>Mounted by:</strong> {runRef}</span>
+          <span style={{ color: 'var(--accent)' }}><strong>Mounted by:</strong> {runRef}</span>
         ) : (
-          <span style={{ color: '#9ca3af' }}>Not mounted</span>
+          <span style={{ color: 'var(--text-muted)' }}>Not mounted</span>
         )}
       </div>
 
@@ -619,7 +619,7 @@ export function WorkspacePanel({
       <div
         style={{
           display: 'flex',
-          border: '1px solid #e5e7eb',
+          border: '1px solid var(--border)',
           borderRadius: '0.5rem',
           overflow: 'hidden',
           minHeight: '18rem',
@@ -656,10 +656,10 @@ export function WorkspacePanel({
                 fontSize: '0.8125rem',
               }}
             >
-              <span style={{ color: '#1d4ed8', fontWeight: 600 }}>Active session</span>
+              <span style={{ color: 'var(--accent)', fontWeight: 600 }}>Active session</span>
               <a
                 href={sessionHref}
-                style={{ color: '#2563eb', textDecoration: 'none', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.75rem' }}
+                style={{ color: 'var(--accent)', textDecoration: 'none', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.75rem' }}
               >
                 {sessionName} &rarr;
               </a>
@@ -668,10 +668,10 @@ export function WorkspacePanel({
             <div
               style={{
                 padding: '0.5rem 0.75rem',
-                background: '#f9fafb',
+                background: 'var(--bg-subtle)',
                 borderRadius: '0.375rem',
                 fontSize: '0.8125rem',
-                color: '#9ca3af',
+                color: 'var(--text-muted)',
               }}
             >
               No active session bound
@@ -687,7 +687,7 @@ export function WorkspacePanel({
               style={{
                 fontSize: '0.75rem',
                 fontWeight: 700,
-                color: '#374151',
+                color: 'var(--text)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
                 marginBottom: '0.5rem',

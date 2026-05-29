@@ -6,7 +6,7 @@ import { KanbanColumn } from './kanban-column.jsx';
 import { KanbanFilters } from './kanban-filters.jsx';
 
 const WORKFLOW_COLUMNS = [
-  { id: 'todo', label: 'Todo', color: '#6b7280', wipLimit: null },
+  { id: 'todo', label: 'Todo', color: 'var(--text-muted)', wipLimit: null },
   { id: 'in-progress', label: 'In Progress', color: '#eab308', wipLimit: 5 },
   { id: 'review', label: 'Review', color: '#3b82f6', wipLimit: 3 },
   { id: 'done', label: 'Done', color: '#22c55e', wipLimit: null },
@@ -58,7 +58,7 @@ function CardDetailModal({ item, onClose, columnColor }) {
     >
       <div
         style={{
-          background: '#fff',
+          background: 'var(--surface)',
           borderRadius: '0.75rem',
           width: '100%',
           maxWidth: '36rem',
@@ -85,7 +85,7 @@ function CardDetailModal({ item, onClose, columnColor }) {
               background: 'none',
               cursor: 'pointer',
               fontSize: '1.25rem',
-              color: '#6b7280',
+              color: 'var(--text-muted)',
               padding: '0.125rem 0.25rem',
               borderRadius: '0.25rem',
               flexShrink: 0,
@@ -96,20 +96,20 @@ function CardDetailModal({ item, onClose, columnColor }) {
         </div>
         <div style={{ padding: '0 1.5rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
           {description ? (
-            <p style={{ margin: 0, fontSize: '0.875rem', color: '#374151', lineHeight: 1.6 }}>{description}</p>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.6 }}>{description}</p>
           ) : (
-            <p style={{ margin: 0, fontSize: '0.875rem', color: '#9ca3af', fontStyle: 'italic' }}>No description provided.</p>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>No description provided.</p>
           )}
           <dl style={{ margin: 0, display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.375rem 1rem', fontSize: '0.8125rem' }}>
             {assignee ? (
               <>
-                <dt style={{ color: '#6b7280', fontWeight: 600 }}>Assignee</dt>
+                <dt style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Assignee</dt>
                 <dd style={{ margin: 0 }}>{assignee}</dd>
               </>
             ) : null}
             {priority ? (
               <>
-                <dt style={{ color: '#6b7280', fontWeight: 600 }}>Priority</dt>
+                <dt style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Priority</dt>
                 <dd style={{ margin: 0 }}>
                   <span style={{ color: priorityColor(priority), fontWeight: 600 }}>{priority}</span>
                 </dd>
@@ -117,13 +117,13 @@ function CardDetailModal({ item, onClose, columnColor }) {
             ) : null}
             {storyPoints != null ? (
               <>
-                <dt style={{ color: '#6b7280', fontWeight: 600 }}>Story points</dt>
+                <dt style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Story points</dt>
                 <dd style={{ margin: 0 }}>{storyPoints}</dd>
               </>
             ) : null}
             {workspaceRef ? (
               <>
-                <dt style={{ color: '#6b7280', fontWeight: 600 }}>Workspace</dt>
+                <dt style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Workspace</dt>
                 <dd style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                   <code style={{ fontSize: '0.75rem' }}>{workspaceRef}</code>
                   {workspacePvcStatus ? (
@@ -143,18 +143,18 @@ function CardDetailModal({ item, onClose, columnColor }) {
             ) : null}
             {sessionRef ? (
               <>
-                <dt style={{ color: '#6b7280', fontWeight: 600 }}>Session</dt>
+                <dt style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Session</dt>
                 <dd style={{ margin: 0 }}>
-                  <a href={`/agents/sessions/${sessionRef}`} style={{ color: '#2563eb', fontSize: '0.75rem' }}>
+                  <a href={`/agents/sessions/${sessionRef}`} style={{ color: 'var(--accent)', fontSize: '0.75rem' }}>
                     {sessionRef.slice(0, 16)}…
                   </a>
-                  {sessionStatus ? <span style={{ marginLeft: '0.375rem', color: '#9ca3af', fontSize: '0.6875rem' }}>{sessionStatus}</span> : null}
+                  {sessionStatus ? <span style={{ marginLeft: '0.375rem', color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{sessionStatus}</span> : null}
                 </dd>
               </>
             ) : null}
             {dispatchRunRef ? (
               <>
-                <dt style={{ color: '#6b7280', fontWeight: 600 }}>Run</dt>
+                <dt style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Run</dt>
                 <dd style={{ margin: 0 }}>
                   <a href={`/agents/runs/${dispatchRunRef}`} style={{ color: '#7c3aed', fontSize: '0.75rem' }}>
                     {dispatchRunRef.slice(0, 16)}…
@@ -164,7 +164,7 @@ function CardDetailModal({ item, onClose, columnColor }) {
             ) : null}
             {agentName ? (
               <>
-                <dt style={{ color: '#6b7280', fontWeight: 600 }}>Agent</dt>
+                <dt style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Agent</dt>
                 <dd style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.375rem', color: '#059669' }}>
                   <span style={{ width: '0.5rem', height: '0.5rem', borderRadius: '9999px', background: '#10b981', flexShrink: 0, animation: 'kanbanPulse 2s infinite' }} />
                   {agentName}
@@ -173,13 +173,13 @@ function CardDetailModal({ item, onClose, columnColor }) {
             ) : null}
             {createdAt ? (
               <>
-                <dt style={{ color: '#6b7280', fontWeight: 600 }}>Created</dt>
+                <dt style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Created</dt>
                 <dd style={{ margin: 0 }}>{createdAt}</dd>
               </>
             ) : null}
             {updatedAt ? (
               <>
-                <dt style={{ color: '#6b7280', fontWeight: 600 }}>Updated</dt>
+                <dt style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Updated</dt>
                 <dd style={{ margin: 0 }}>{updatedAt}</dd>
               </>
             ) : null}
@@ -198,7 +198,7 @@ function CardDetailModal({ item, onClose, columnColor }) {
             </div>
           ) : null}
           {(item.status?.linkedSessions || item.status?.linkedWorkspaces) ? (
-            <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '0.75rem', display: 'flex', gap: '1rem', fontSize: '0.75rem', color: '#9ca3af' }}>
+            <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '0.75rem', display: 'flex', gap: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               {item.status?.linkedSessions ? <span>{item.status.linkedSessions} sessions</span> : null}
               {item.status?.linkedWorkspaces ? <span>{item.status.linkedWorkspaces} workspaces</span> : null}
             </div>
@@ -239,7 +239,7 @@ function StartWorkDialog({ item, onConfirm, onCancel, org }) {
     >
       <div
         style={{
-          background: '#fff',
+          background: 'var(--surface)',
           borderRadius: '0.75rem',
           padding: '1.5rem',
           maxWidth: '28rem',
@@ -250,7 +250,7 @@ function StartWorkDialog({ item, onConfirm, onCancel, org }) {
         <h3 style={{ margin: '0 0 0.75rem', fontSize: '1rem', fontWeight: 700 }}>
           Start work on &quot;{name}&quot;?
         </h3>
-        <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: '#6b7280' }}>
+        <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
           This will create or claim a KrateWorkspace for{' '}
           {repoRef ? `repository ${repoRef}` : 'this item'} and link it to the board card.
         </p>
@@ -283,8 +283,8 @@ function StartWorkDialog({ item, onConfirm, onCancel, org }) {
             style={{
               flex: 1,
               padding: '0.5rem',
-              background: '#f3f4f6',
-              color: '#374151',
+              background: 'var(--bg-subtle)',
+              color: 'var(--text)',
               border: 'none',
               borderRadius: '0.375rem',
               fontSize: '0.875rem',
@@ -573,7 +573,7 @@ export function EnhancedKanbanBoard({
           />
         ))}
         {issues.length === 0 ? (
-          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem 0', color: '#9ca3af' }}>
+          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem 0', color: 'var(--text-muted)' }}>
             <p style={{ fontSize: '0.875rem' }}>Link issues to this project to populate the board</p>
           </div>
         ) : null}

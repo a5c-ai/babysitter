@@ -24,7 +24,7 @@ export function UnifiedModelCatalogSection({ org }) {
       .finally(() => setLoading(false));
   }, [org]);
 
-  if (loading) return <div style={{ fontSize: '0.875rem', color: '#9ca3af', padding: '1rem', textAlign: 'center' }}>Loading catalog...</div>;
+  if (loading) return <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', padding: '1rem', textAlign: 'center' }}>Loading catalog...</div>;
   if (!catalog || !catalog.models?.length) return null;
 
   const internalCount = catalog.models.filter(m => m.type === 'internal').length;
@@ -35,7 +35,7 @@ export function UnifiedModelCatalogSection({ org }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
         <div>
           <div style={{ fontWeight: 700, fontSize: '1rem' }}>Unified Model Catalog</div>
-          <div style={{ fontSize: '0.8125rem', color: '#6b7280' }}>{internalCount} internal + {externalCount} external models</div>
+          <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{internalCount} internal + {externalCount} external models</div>
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '0.625rem' }}>
@@ -170,12 +170,12 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
-          <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#111827', letterSpacing: '-0.01em' }}>Model Catalog</div>
-          <div style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.25rem' }}>
+          <div style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--text)', letterSpacing: '-0.01em' }}>Model Catalog</div>
+          <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
             Browse {CURATED_MODELS.length} curated open models and deploy to your cluster with one click.
           </div>
         </div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', color: '#6b7280', cursor: 'pointer', userSelect: 'none' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', color: 'var(--text-muted)', cursor: 'pointer', userSelect: 'none' }}>
           <input
             type="checkbox"
             checked={hideDeployed}
@@ -226,15 +226,15 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
             >
               {/* Top row: name + provider */}
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.375rem' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#111827' }}>{model.name}</div>
+                <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: 'var(--text)' }}>{model.name}</div>
                 <span style={badgeStyle(catColor)}>{model.category}</span>
               </div>
 
               {/* Provider */}
-              <div style={{ fontSize: '0.8125rem', color: '#6b7280', marginBottom: '0.5rem' }}>{model.provider}</div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>{model.provider}</div>
 
               {/* Description */}
-              <div style={{ fontSize: '0.8125rem', color: '#4b5563', lineHeight: 1.4, marginBottom: '0.75rem', minHeight: '2.5em' }}>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', lineHeight: 1.4, marginBottom: '0.75rem', minHeight: '2.5em' }}>
                 {model.description}
               </div>
 
@@ -273,7 +273,7 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
       </div>
 
       {filtered.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '2rem', color: '#9ca3af', fontSize: '0.875rem' }}>
+        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
           No models match the current filter.
         </div>
       )}
@@ -291,7 +291,7 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
               <div style={{ marginTop: '0.5rem' }}>
                 <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.375rem', padding: '1rem', marginBottom: '1rem' }}>
                   <div style={{ fontWeight: 700, color: '#16a34a', marginBottom: '0.375rem' }}>Service created successfully</div>
-                  <div style={{ fontSize: '0.8125rem', color: '#374151' }}>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text)' }}>
                     <strong>{deployResult.model.name}</strong> is being deployed. It may take a few minutes to become ready.
                   </div>
                 </div>
@@ -306,34 +306,34 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
               <>
                 <div style={{ background: '#f8fafc', borderRadius: '0.5rem', padding: '1rem', marginTop: '0.5rem' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.5rem 1rem', fontSize: '0.8125rem' }}>
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>Model</span>
-                    <span style={{ color: '#111827' }}>{deployTarget.name}</span>
+                    <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Model</span>
+                    <span style={{ color: 'var(--text)' }}>{deployTarget.name}</span>
 
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>Provider</span>
-                    <span style={{ color: '#111827' }}>{deployTarget.provider}</span>
+                    <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Provider</span>
+                    <span style={{ color: 'var(--text)' }}>{deployTarget.provider}</span>
 
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>Category</span>
+                    <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Category</span>
                     <span style={badgeStyle(CATEGORY_COLORS[deployTarget.category] || '#6b7280')}>{deployTarget.category}</span>
 
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>Format</span>
+                    <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Format</span>
                     <span><FrameworkBadge format={deployTarget.modelFormat} /></span>
 
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>Runtime</span>
+                    <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Runtime</span>
                     <code style={{ fontSize: '0.8125rem' }}>{deployTarget.runtime}</code>
 
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>Storage URI</span>
+                    <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Storage URI</span>
                     <code style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>{deployTarget.storageUri}</code>
 
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>GPU</span>
+                    <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>GPU</span>
                     <span>{deployTarget.gpu ? `${deployTarget.minGpu} GPU(s) required` : 'Not required (CPU only)'}</span>
 
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>Memory</span>
+                    <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Memory</span>
                     <span>{deployTarget.minMemory}</span>
                   </div>
                 </div>
 
                 {deployResult?.error && (
-                  <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.375rem', padding: '0.75rem', fontSize: '0.8125rem', color: '#dc2626', marginTop: '0.75rem' }}>
+                  <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.375rem', padding: '0.75rem', fontSize: '0.8125rem', color: 'var(--danger)', marginTop: '0.75rem' }}>
                     {deployResult.error}
                   </div>
                 )}

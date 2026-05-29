@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 
-const labelStyle = { display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem', color: '#374151' };
-const inputStyle = { width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db', fontSize: '0.875rem', boxSizing: 'border-box', background: '#fff' };
+const labelStyle = { display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem', color: 'var(--text)' };
+const inputStyle = { width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', fontSize: '0.875rem', boxSizing: 'border-box', background: 'var(--surface)' };
 const rowStyle = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' };
 
 const STATUS_COLORS = {
   Idle: { color: '#15803d', bg: '#dcfce7', border: '#22c55e' },
-  Running: { color: '#1d4ed8', bg: '#dbeafe', border: '#3b82f6' },
+  Running: { color: 'var(--accent)', bg: '#dbeafe', border: '#3b82f6' },
   Terminating: { color: '#9a3412', bg: '#ffedd5', border: '#f97316' }
 };
 
@@ -21,7 +21,7 @@ function normalizeRunners(runners) {
 }
 
 function RunnerStatusBadge({ status = 'Idle' }) {
-  const s = STATUS_COLORS[status] || { color: '#6b7280', bg: '#f3f4f6', border: '#e5e7eb' };
+  const s = STATUS_COLORS[status] || { color: 'var(--text-muted)', bg: '#f3f4f6', border: '#e5e7eb' };
   return (
     <span style={{
       display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: '9999px',
@@ -37,7 +37,7 @@ function CapacityBar({ used, total, label }) {
   const barColor = pct >= 90 ? '#ef4444' : pct >= 70 ? '#f59e0b' : '#22c55e';
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#6b7280' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
         <span>{label || 'Capacity'}</span>
         <span>{used}/{total} ({pct}%)</span>
       </div>
@@ -63,12 +63,12 @@ function RunnerRow({ runner }) {
       </code>
       <RunnerStatusBadge status={runnerStatus} />
       {safeRunner.runRef && (
-        <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
           job: <code style={{ fontFamily: 'monospace' }}>{safeRunner.runRef}</code>
         </span>
       )}
       {safeRunner.image && (
-        <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{safeRunner.image}</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{safeRunner.image}</span>
       )}
     </div>
   );
@@ -102,7 +102,7 @@ function PoolCard({ pool, org, onScale, onToggleAutoScale }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
         <div>
           <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>{name}</h4>
-          <span style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
+          <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
             {spec.image || 'ubuntu:24.04'} · {spec.trustTier || 'trusted'}
           </span>
         </div>
@@ -110,7 +110,7 @@ function PoolCard({ pool, org, onScale, onToggleAutoScale }) {
           <RunnerStatusBadge status={activeReplicas > 0 ? 'Running' : 'Idle'} />
           <button
             onClick={() => setExpanded((v) => !v)}
-            style={{ padding: '0.25rem 0.625rem', fontSize: '0.8125rem', border: '1px solid #d1d5db', borderRadius: '0.375rem', background: '#f9fafb', cursor: 'pointer' }}>
+            style={{ padding: '0.25rem 0.625rem', fontSize: '0.8125rem', border: '1px solid var(--border)', borderRadius: '0.375rem', background: 'var(--bg-subtle)', cursor: 'pointer' }}>
             {expanded ? 'Collapse' : 'Show runners'}
           </button>
         </div>
@@ -121,23 +121,23 @@ function PoolCard({ pool, org, onScale, onToggleAutoScale }) {
 
       {/* Scale controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '0.875rem', color: '#374151', fontWeight: 600 }}>Warm replicas:</span>
+        <span style={{ fontSize: '0.875rem', color: 'var(--text)', fontWeight: 600 }}>Warm replicas:</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
           <button
             onClick={() => handleScale('down')}
             disabled={scaleTo <= 0}
-            style={{ width: '1.75rem', height: '1.75rem', border: '1px solid #d1d5db', borderRadius: '0.375rem', background: '#f9fafb', cursor: scaleTo <= 0 ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: '1rem', lineHeight: 1 }}>
+            style={{ width: '1.75rem', height: '1.75rem', border: '1px solid var(--border)', borderRadius: '0.375rem', background: 'var(--bg-subtle)', cursor: scaleTo <= 0 ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: '1rem', lineHeight: 1 }}>
             −
           </button>
           <span style={{ minWidth: '2rem', textAlign: 'center', fontWeight: 700, fontSize: '1rem' }}>{scaleTo}</span>
           <button
             onClick={() => handleScale('up')}
             disabled={scaleTo >= maxReplicas}
-            style={{ width: '1.75rem', height: '1.75rem', border: '1px solid #d1d5db', borderRadius: '0.375rem', background: '#f9fafb', cursor: scaleTo >= maxReplicas ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: '1rem', lineHeight: 1 }}>
+            style={{ width: '1.75rem', height: '1.75rem', border: '1px solid var(--border)', borderRadius: '0.375rem', background: 'var(--bg-subtle)', cursor: scaleTo >= maxReplicas ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: '1rem', lineHeight: 1 }}>
             +
           </button>
         </div>
-        <span style={{ fontSize: '0.8125rem', color: '#9ca3af' }}>max: {maxReplicas}</span>
+        <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>max: {maxReplicas}</span>
       </div>
 
       {/* Auto-scale toggle */}
@@ -154,21 +154,21 @@ function PoolCard({ pool, org, onScale, onToggleAutoScale }) {
           <div style={{
             position: 'absolute', top: '0.1875rem', left: autoScale ? '1.125rem' : '0.1875rem',
             width: '0.875rem', height: '0.875rem', borderRadius: '50%',
-            background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
+            background: 'var(--surface)', transition: 'left 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
           }} />
         </div>
-        <span style={{ fontSize: '0.875rem', color: '#374151' }}>Auto-scale</span>
-        {autoScale && <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>scales to queue depth</span>}
+        <span style={{ fontSize: '0.875rem', color: 'var(--text)' }}>Auto-scale</span>
+        {autoScale && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>scales to queue depth</span>}
       </label>
 
       {/* Runner list (expanded) */}
       {expanded && (
         <div>
-          <h5 style={{ margin: '0 0 0.5rem', fontSize: '0.8125rem', fontWeight: 600, color: '#374151' }}>
+          <h5 style={{ margin: '0 0 0.5rem', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text)' }}>
             Runners ({runners.length})
           </h5>
           {runners.length === 0 ? (
-            <p style={{ margin: 0, fontSize: '0.8125rem', color: '#9ca3af' }}>No runners allocated.</p>
+            <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-muted)' }}>No runners allocated.</p>
           ) : (
             runners.map((runner, index) => <RunnerRow key={runner.id || runner.name || index} runner={runner} />)
           )}
@@ -307,7 +307,7 @@ export function RunnerPoolManager({ org = 'default', pools = [], onPoolChange = 
               {localPools.length} pool{localPools.length !== 1 ? 's' : ''}
             </span>
           </div>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: '#6b7280' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
             Manage runner capacity, images, and auto-scale settings for CI and agent dispatch.
           </p>
         </div>
@@ -315,7 +315,7 @@ export function RunnerPoolManager({ org = 'default', pools = [], onPoolChange = 
           onClick={() => setShowForm((v) => !v)}
           style={{
             padding: '0.5rem 1rem', fontSize: '0.875rem', fontWeight: 600,
-            background: '#2563eb', color: '#fff', border: 'none',
+            background: 'var(--accent)', color: '#fff', border: 'none',
             borderRadius: '0.375rem', cursor: 'pointer', flexShrink: 0
           }}>
           {showForm ? 'Cancel' : 'New pool'}
@@ -358,8 +358,8 @@ export function RunnerPoolManager({ org = 'default', pools = [], onPoolChange = 
             </select>
           </div>
 
-          <fieldset style={{ border: '1px solid #e5e7eb', borderRadius: '0.375rem', padding: '0.75rem', margin: 0 }}>
-            <legend style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#374151', padding: '0 0.25rem' }}>Resource limits</legend>
+          <fieldset style={{ border: '1px solid var(--border)', borderRadius: '0.375rem', padding: '0.75rem', margin: 0 }}>
+            <legend style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text)', padding: '0 0.25rem' }}>Resource limits</legend>
             <div style={rowStyle}>
               <div>
                 <label style={labelStyle} htmlFor="pool-cpu-limit">CPU limit</label>
@@ -382,7 +382,7 @@ export function RunnerPoolManager({ org = 'default', pools = [], onPoolChange = 
 
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none' }}>
             <input type="checkbox" checked={form.autoScale} onChange={(e) => setField('autoScale', e.target.checked)} />
-            <span style={{ fontSize: '0.875rem', color: '#374151' }}>Enable auto-scale (queue depth)</span>
+            <span style={{ fontSize: '0.875rem', color: 'var(--text)' }}>Enable auto-scale (queue depth)</span>
           </label>
 
           {message && <p style={{ margin: 0, fontSize: '0.875rem', color: saving ? '#6b7280' : '#15803d' }}>{message}</p>}
@@ -397,7 +397,7 @@ export function RunnerPoolManager({ org = 'default', pools = [], onPoolChange = 
             </button>
             <button type="button" onClick={() => { setShowForm(false); setForm(DEFAULT_FORM); setMessage(''); }} style={{
               padding: '0.5rem 1rem', fontSize: '0.875rem', fontWeight: 600,
-              background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db',
+              background: 'var(--bg-subtle)', color: 'var(--text)', border: '1px solid var(--border)',
               borderRadius: '0.375rem', cursor: 'pointer'
             }}>
               Cancel
@@ -408,8 +408,8 @@ export function RunnerPoolManager({ org = 'default', pools = [], onPoolChange = 
 
       {/* Pool list */}
       {localPools.length === 0 ? (
-        <div className="card" style={{ textAlign: 'center', padding: '2rem', color: '#9ca3af' }}>
-          <p style={{ margin: 0, fontSize: '0.9375rem', fontWeight: 600, color: '#6b7280' }}>No runner pools configured</p>
+        <div className="card" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+          <p style={{ margin: 0, fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-muted)' }}>No runner pools configured</p>
           <p style={{ margin: '0.5rem 0 0', fontSize: '0.8125rem' }}>Create a pool to start scheduling CI jobs and agent dispatch runs.</p>
         </div>
       ) : (
