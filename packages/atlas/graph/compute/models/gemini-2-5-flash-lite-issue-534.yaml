@@ -1,0 +1,78 @@
+nodeKind: ModelVersion
+id: model:gemini-2-5-flash-lite@current
+attributes:
+  displayName: "Gemini 2.5 Flash-Lite"
+  supportsExtendedThinking: false
+  safetyTier: google-deepmind-asl-2
+  modelFamilyId: model-family:gemini-2-5
+  versionRange: '>=2.5.0 <2.6.0'
+  kind: multimodal
+  contextWindowTokens: 1048576
+  maxOutputTokens: 65536
+  costPerMTokInput: 0.1
+  costPerMTokOutput: 0.4
+  supportsThinking: true
+  supportsThinkingBudgetTokens: true
+  modalities:
+  - text
+  - image
+  - audio
+  - video
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: audio
+      direction: input
+    - kind: video
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-07-22'
+  lifecycleStatus: deprecated
+  lifecycleStatusChangedAt: '2026-05-29'
+  deprecationDate: '2026-05-29'
+  eolDate: '2026-10-16'
+  knowledgeCutoffDate: '2025-01-01'
+  modelCardUrl: https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash-lite
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:gemini-2-5
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:gemini-2-5
+  served_by:
+  - provider:google
+  speaks:
+  - model-transport:gemini-generate-content
+  supports:
+  - target: capability:vision-input
+    versionRange: '>=2.5.0 <2.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-gemini-image-models-issue-534
+  - target: capability:supports-batch-api
+    versionRange: '>=2.5.0 <2.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-gemini-image-models-issue-534
+  - target: capability:parallel-tool-calls
+    versionRange: '>=2.5.0 <2.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-gemini-image-models-issue-534
+  - target: capability:supports-structured-output
+    versionRange: '>=2.5.0 <2.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-gemini-image-models-issue-534
+  - target: capability:supports-thinking
+    versionRange: '>=2.5.0 <2.6.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:google-gemini-image-models-issue-534
