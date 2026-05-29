@@ -1,0 +1,6 @@
+nodeKind: ModelFamily
+id: model-family:amazon-nova-2
+patch: true
+edges:
+  has_version:
+    - model:amazon-nova-2-pro-preview@current

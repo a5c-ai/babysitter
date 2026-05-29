@@ -1,0 +1,119 @@
+nodeKind: Claim
+id: claim:model-amazon-nova-2-pro-preview-bedrock-availability-issue-535
+attributes:
+  subjectId: model:amazon-nova-2-pro-preview@current
+  attribute: served_by
+  value: provider:aws-bedrock
+  subjectKind: ModelVersion
+  statement: "Amazon Nova 2 Pro (Preview) is available in Amazon Bedrock via global cross-region inference, with early access available to Amazon Nova Forge customers."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-2-announcement-issue-535
+  claimedAt: '2026-05-29T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-2-announcement-issue-535
+  about_subject:
+    - model:amazon-nova-2-pro-preview@current
+---
+nodeKind: Claim
+id: claim:model-amazon-nova-2-pro-preview-provider-model-ids-unresolved-issue-535
+attributes:
+  subjectId: model:amazon-nova-2-pro-preview@current
+  attribute: providerModelIds
+  value: unresolved
+  subjectKind: ModelVersion
+  statement: "Exact Bedrock provider model IDs for Amazon Nova 2 Pro (Preview) were not exposed in the official public AWS sources reviewed for issue #535."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: adequate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-2-announcement-issue-535
+    - evidence:bedrock-model-card-index-nova2-issue-535
+  claimedAt: '2026-05-29T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: limitation
+  note: "Reviewed sources included the AWS Nova 2 announcement, Amazon Nova models page, Bedrock model-card index, and direct probes for Nova 2 Pro model-card URLs."
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-2-announcement-issue-535
+    - evidence:bedrock-model-card-index-nova2-issue-535
+  about_subject:
+    - model:amazon-nova-2-pro-preview@current
+---
+nodeKind: Claim
+id: claim:model-amazon-nova-2-pro-preview-context-window-issue-535
+attributes:
+  subjectId: model:amazon-nova-2-pro-preview@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: "Amazon Nova 2 Pro (Preview) provides a one-million-token context window."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-2-announcement-issue-535
+  claimedAt: '2026-05-29T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-2-announcement-issue-535
+  about_subject:
+    - model:amazon-nova-2-pro-preview@current
+---
+nodeKind: Claim
+id: claim:model-amazon-nova-2-pro-preview-capabilities-issue-535
+attributes:
+  subjectId: model:amazon-nova-2-pro-preview@current
+  attribute: capabilities
+  value: extended thinking, thinking intensity levels, built-in tools, code interpreter, web grounding, remote MCP tools
+  subjectKind: ModelVersion
+  statement: "Amazon Nova 2 Pro (Preview) supports extended thinking, thinking intensity levels, built-in tools including code interpreter and web grounding, and remote MCP tools."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-2-announcement-issue-535
+  claimedAt: '2026-05-29T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-2-announcement-issue-535
+  about_subject:
+    - model:amazon-nova-2-pro-preview@current
+---
+nodeKind: Claim
+id: claim:model-amazon-nova-2-pro-preview-pricing-unresolved-issue-535
+attributes:
+  subjectId: model:amazon-nova-2-pro-preview@current
+  attribute: pricing
+  value: unresolved
+  subjectKind: ModelVersion
+  statement: "Public, self-serve per-token pricing for Amazon Nova 2 Pro (Preview) was not exposed in the official AWS sources reviewed for issue #535."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: adequate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-2-announcement-issue-535
+    - evidence:amazon-nova-models-page-issue-535
+  claimedAt: '2026-05-29T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: limitation
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-2-announcement-issue-535
+    - evidence:amazon-nova-models-page-issue-535
+  about_subject:
+    - model:amazon-nova-2-pro-preview@current

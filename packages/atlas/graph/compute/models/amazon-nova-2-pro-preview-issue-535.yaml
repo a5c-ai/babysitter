@@ -1,0 +1,82 @@
+nodeKind: ModelVersion
+id: model:amazon-nova-2-pro-preview@current
+attributes:
+  displayName: "Amazon Nova 2 Pro (Preview)"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  pricingNotes: "Preview/early-access pricing was not exposed in the official AWS public sources reviewed for issue #535."
+  providerModelIds: []
+  providerModelIdStatus: unresolved-public-docs
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:amazon-nova-2
+  versionRange: '>=2.0.0 <3.0.0'
+  kind: multimodal
+  contextWindowTokens: 1000000
+  maxOutputTokens: 0
+  maxOutputTokensNotes: "Not exposed in the official AWS public sources reviewed for issue #535."
+  accessStatus: forge-early-access-preview
+  accessNotes: "AWS says Nova 2 Pro is in preview with early access available to Amazon Nova Forge customers through AWS account teams."
+  capabilityTags:
+    - extended-thinking
+    - thinking-intensity-levels
+    - code-interpreter
+    - web-grounding
+    - remote-mcp-tools
+    - agentic-tasks
+    - video-reasoning
+    - software-migrations
+  modalities:
+    - text
+    - image
+    - video
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: video
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-12-02'
+  lifecycleStatus: preview
+  lifecycleStatusChangedAt: '2025-12-02'
+  modelCardUrl: https://aws.amazon.com/about-aws/whats-new/2025/12/nova-2-foundation-models-amazon-bedrock/
+  supportsFineTuning: false
+  regions:
+    - global
+  notes: |
+    Nova 2 Pro is tracked from official AWS announcement and Nova product-page
+    evidence. The reviewed public Bedrock model-card index lists Nova 2 Lite
+    and Nova 2 Sonic but did not expose a dedicated Nova 2 Pro model card or
+    exact Bedrock provider model ID, so providerModelIds is intentionally empty
+    with a limitation claim instead of an inferred amazon.nova-2-pro-* value.
+edges:
+  belongs_to_family:
+    - target: model-family:amazon-nova-2
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:amazon-nova-2
+  served_by:
+    - provider:aws-bedrock
+  speaks:
+    - model-transport:bedrock-converse
+    - model-transport:bedrock-invoke
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=2.0.0 <3.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:amazon-nova-2-announcement-issue-535
+    - target: capability:extended-thinking
+      versionRange: '>=2.0.0 <3.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:amazon-nova-2-announcement-issue-535
+    - target: capability:vision-input
+      versionRange: '>=2.0.0 <3.0.0'
+      level: partial
+      evidenceSourceIds:
+        - evidence:amazon-nova-2-announcement-issue-535

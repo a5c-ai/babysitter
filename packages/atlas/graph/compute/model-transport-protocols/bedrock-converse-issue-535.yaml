@@ -1,0 +1,6 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:bedrock-converse
+patch: true
+edges:
+  spoken_by:
+    - model:amazon-nova-2-pro-preview@current
