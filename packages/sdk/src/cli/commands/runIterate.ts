@@ -130,6 +130,20 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
     };
   }
 
+  if (iterationResult.status === "process-error") {
+    const processError = (iterationResult as { error?: { message?: string } }).error;
+    process.stderr.write(`[run:iterate] process-error: ${processError?.message ?? 'unknown'}\n`);
+    return {
+      iteration,
+      iterationCount,
+      status: "failed",
+      action: "none",
+      reason: `process-error: ${processError?.message ?? 'unknown'}`,
+      warnings: warnings.length ? warnings : undefined,
+      metadata: { runId, processId: metadata.processId, hookStatus: "executed" },
+    };
+  }
+
   if (iterationResult.status === "failed") {
     await callRuntimeHook(
       "on-iteration-end",
