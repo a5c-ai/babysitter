@@ -1,0 +1,8 @@
+extendsNode:
+  nodeKind: ModelTransportProtocol
+  id: model-transport:anthropic-messages
+edges:
+  spoken_by:
+    - model:claude-opus-4-8@current
+  served_by:
+    - provider:aws-bedrock

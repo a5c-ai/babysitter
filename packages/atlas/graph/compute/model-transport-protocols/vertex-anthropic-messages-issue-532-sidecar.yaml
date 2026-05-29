@@ -1,0 +1,6 @@
+extendsNode:
+  nodeKind: ModelTransportProtocol
+  id: model-transport:vertex-anthropic-messages
+edges:
+  spoken_by:
+    - model:claude-opus-4-8@current
