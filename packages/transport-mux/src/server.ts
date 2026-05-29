@@ -1302,7 +1302,7 @@ function anthropicResponse(result: CompletionResult, config: ProxyConfig) {
   if (result.toolCalls) {
     for (const tc of result.toolCalls) {
       let input: unknown;
-      try { input = JSON.parse(tc.arguments); } catch (e) { process.stderr.write(`[transport-mux] tool call arguments parse failed: ${e instanceof Error ? e.message : String(e)}\n`); input = {}; }
+      try { input = JSON.parse(tc.arguments); } catch (e) { process.stderr.write(`[transport-mux] tool call arguments parse failed for ${tc.name}: ${e instanceof Error ? e.message : String(e)}\n`); input = { _parseError: true, _rawArguments: tc.arguments }; }
       const block: Record<string, unknown> = { type: 'tool_use', id: tc.id, name: tc.name, input };
       if (tc.metadata) Object.assign(block, tc.metadata);
       content.push(block);

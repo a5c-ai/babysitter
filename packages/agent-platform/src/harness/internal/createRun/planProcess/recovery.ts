@@ -47,9 +47,9 @@ function extractProcessDefinitionCodeBlock(text: string): string | null {
   }
 
   if (fallback !== null) {
-    process.stderr.write('[babysitter] process recovery: no valid process definition found in code blocks, using best-effort fallback\n');
+    process.stderr.write('[babysitter] process recovery: code blocks found but none look like a process definition, rejecting\n');
   }
-  return fallback;
+  return null;
 }
 
 function extractProcessDefinitionHeredoc(text: string): string | null {

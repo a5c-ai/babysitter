@@ -122,7 +122,8 @@ try {
   process.stdout.write(result);
 } catch (e) {
   process.stderr.write("[extension-mux] hook execution failed: " + (e instanceof Error ? e.message : String(e)) + "\\n");
-  process.stdout.write("{}\\n");
+  process.stdout.write(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }) + "\\n");
+  process.exit(1);
 }
 `;
 }

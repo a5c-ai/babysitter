@@ -132,10 +132,11 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
       const outputRef = await writeRunOutput(options.runDir, output);
 
       let costStats: unknown = undefined;
+      let costError: string | undefined;
       try { const journalEvents = await loadJournal(options.runDir); const costEvents = extractCostEvents(journalEvents); if (costEvents.length > 0) costStats = computeRunCostStats(engine.runId, journalEvents); }
-      catch (e) { process.stderr.write(`[babysitter] cost computation failed: ${e instanceof Error ? e.message : String(e)}\n`); }
+      catch (e) { costError = e instanceof Error ? e.message : String(e); process.stderr.write(`[babysitter] cost computation failed: ${costError}\n`); }
 
-      await appendEvent({ runDir: options.runDir, eventType: "RUN_COMPLETED", event: { outputRef, costStats } });
+      await appendEvent({ runDir: options.runDir, eventType: "RUN_COMPLETED", event: { outputRef, costStats, ...(costError ? { costError } : {}) } });
       await rebuildStateCache(options.runDir, { reason: "post_completion" });
       await callRuntimeHook("on-run-complete", { runId: engine.runId, status: "completed", output, duration: Date.now() - iterationStartedAt }, { cwd: projectRoot, logger });
 
