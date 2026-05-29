@@ -155,6 +155,83 @@ export async function process(inputs, ctx) {
 
 ---
 
+### `forbidden-markers-scanner`
+
+Pre-deploy gate that scans built JS chunks for substring markers listed in a project-local `forbidden-markers.txt`. Designed for projects coming off a restart-from-baseline (the "deploy after gate, not before" pattern) where obsolete saga-era / refactor-removed symbols must never re-ship. The grep is mechanical and the markers list is the contract.
+
+Origin: ported from a cookbook prototype (`scripts/check-no-forbidden.mjs`, 81 lines) that proved the pattern across the VI-restart / iOS-Safari saga (2026-05). See issue [#477](https://github.com/a5c-ai/babysitter/issues/477).
+
+**Import**
+
+```js
+import {
+  parseForbiddenMarkers,
+  scanForbiddenMarkers,
+  checkForbiddenMarkersTask,
+} from './index.js';
+```
+
+**`parseForbiddenMarkers` — synchronous parser**
+
+```js
+function parseForbiddenMarkers(content: string): string[];
+```
+
+Strips blank lines and full-line `#`-prefixed comments; trims each remaining line. Pure function, no I/O. Useful when the markers file lives somewhere unusual (env var, embedded fixture, etc.).
+
+**`scanForbiddenMarkers` — async scanner**
+
+```js
+async function scanForbiddenMarkers(params: {
+  markersFile: string;  // path to forbidden-markers.txt (required)
+  chunksDir:   string;  // path to a built chunks directory (required)
+}): Promise<{
+  ok: boolean;
+  hits: Array<{ marker: string, chunk: string, count: number }>;
+  markerCount: number;
+  chunkCount: number;
+  reason: 'missing-markers-file' | 'missing-chunks-dir' | 'empty-markers' | 'no-chunks' | 'clean' | 'hits';
+}>
+```
+
+Result semantics:
+
+| Situation                                | `ok`  | `hits` | `reason`              |
+|------------------------------------------|-------|--------|-----------------------|
+| `markersFile` does not exist             | true  | []     | `missing-markers-file`|
+| `chunksDir` does not exist               | true  | []     | `missing-chunks-dir`  |
+| markers parsed to an empty list          | true  | []     | `empty-markers`       |
+| `chunksDir` is empty of `.js` files      | true  | []     | `no-chunks`           |
+| scan ran, no marker found in any chunk   | true  | []     | `clean`               |
+| scan ran, at least one marker found      | false | [...]  | `hits`                |
+
+Missing config is a no-op (`ok: true`) by design: misconfiguration is never a deploy block. Only `reason: 'hits'` returns `ok: false`. Each hit includes the literal marker, the absolute chunk path, and the count of occurrences within that chunk; the same marker appearing in N chunks produces N hit entries.
+
+**Usage in a process**
+
+```js
+export async function process(inputs, ctx) {
+  // Direct call — resolves immediately, no harness task dispatched
+  const result = await scanForbiddenMarkers({
+    markersFile: 'scripts/forbidden-markers.txt',
+    chunksDir:   '.vercel/output/static/_next/static/chunks',
+  });
+  if (!result.ok) {
+    throw new Error(
+      `forbidden-markers gate FAILED: ${result.hits.length} hit(s) across ${result.chunkCount} chunks`
+    );
+  }
+
+  // Or dispatch as an orchestrated agent task
+  const gate = await ctx.task(checkForbiddenMarkersTask, {
+    projectDir: '.',
+    // markersFile / chunksDir are inferred from projectDir when omitted
+  });
+}
+```
+
+---
+
 ### `cost-aggregation`
 
 Aggregates cost-proxy metrics across related runs for cumulative effort reporting. Uses journal event counts and `EFFECT_REQUESTED` events as lightweight proxies for computational effort (actual monetary cost being, like contentment, essentially unknowable).
@@ -1084,6 +1161,9 @@ export async function process(inputs, ctx) {
 | `evaluateCompleteness` | `completeness-gate` | `function` | Synchronous evaluation given explicit issue + resolution data |
 | `checkCompleteness` | `completeness-gate` | `async function` | Async evaluation that mines a run directory for evidence |
 | `completenessGateTask` | `completeness-gate` | `TaskDef` | `defineTask` wrapper for harness-driven execution |
+| `parseForbiddenMarkers` | `forbidden-markers-scanner` | `function` | Sync parser for `forbidden-markers.txt` (strips blank lines + `#` comments) |
+| `scanForbiddenMarkers` | `forbidden-markers-scanner` | `async function` | Pre-deploy gate: scan built `.js` chunks for forbidden substring markers |
+| `checkForbiddenMarkersTask` | `forbidden-markers-scanner` | `TaskDef` | `defineTask` wrapper for harness-driven execution |
 | `aggregateCosts` | `cost-aggregation` | `async function` | Aggregate cost-proxy metrics across related runs |
 | `costAggregationTask` | `cost-aggregation` | `TaskDef` | `defineTask` wrapper for harness-driven execution |
 | `createTddTriplet` | `tdd-triplet` | `function` | Factory that returns three `defineTask` descriptors for the write-tests, run-tests, and validate phases |

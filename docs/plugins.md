@@ -371,6 +371,24 @@ A legacy array-format manifest is auto-normalized.
 
 ---
 
+## Built-in Quality Gates
+
+The `babysitter-unified` plugin ships a small set of pre-deploy gates as flat command markdown files under `plugins/babysitter-unified/commands/`. Each command pairs a user-facing slash invocation with a reusable composable helper under `library/processes/shared/`, so the gate can be invoked manually (slash command) or composed programmatically (helper import).
+
+### `babysitter:check-forbidden-markers`
+
+Pre-deploy substring grep for saga-era / obsolete code paths that must never re-ship after a refactor or restart-from-baseline. Reads a project-local `scripts/forbidden-markers.txt` (one marker per line; blank lines + `#` comments allowed) and scans every `.js` chunk under `.vercel/output/static/_next/static/chunks/` (Next.js / Vercel default; configurable for other frameworks).
+
+- **Helper:** `library/processes/shared/forbidden-markers-scanner.js` -- exports `parseForbiddenMarkers`, `scanForbiddenMarkers`, and the `checkForbiddenMarkersTask` `defineTask` wrapper.
+- **Slash command:** `plugins/babysitter-unified/commands/check-forbidden-markers.md`.
+- **Result shape:** `{ ok, hits: Array<{ marker, chunk, count }>, markerCount, chunkCount, reason }`. `reason` is one of `'missing-markers-file' | 'missing-chunks-dir' | 'empty-markers' | 'no-chunks' | 'clean' | 'hits'`.
+- **No-op semantics:** missing markers file, missing chunks dir, empty markers, and empty chunks all return `ok: true`. Only `reason: 'hits'` returns `ok: false` and should block a deploy. This keeps misconfiguration from ever becoming an outage source.
+- **Origin:** generalized from a cookbook prototype (`scripts/check-no-forbidden.mjs`) that caught two near-miss revivals of saga-era markers during the 2026-05 iOS-Safari restart.
+
+Issue: https://github.com/a5c-ai/babysitter/issues/477.
+
+---
+
 ## Further Reading
 
 - [CLI Reference](plugins/cli-reference.md) -- Complete command syntax, flags, and output schemas
