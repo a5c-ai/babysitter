@@ -178,7 +178,7 @@ async function resolveAndPostEffect(
     });
     try {
       const result = await session.prompt(prompt);
-      value = JSON.stringify({ output: result.output, success: result.success });
+      value = JSON.stringify(result.output ?? "");
     } finally {
       session.dispose();
     }
@@ -186,16 +186,15 @@ async function resolveAndPostEffect(
     const command = action.taskDef?.shell?.command ?? "echo ok";
     try {
       const output = execSync(command, { cwd: workspace, encoding: "utf8", timeout: 120_000 });
-      value = JSON.stringify({ stdout: output, exitCode: 0 });
+      value = JSON.stringify(output);
     } catch (err: unknown) {
-      const exitCode = (err as { status?: number }).status ?? 1;
       const stderr = (err as { stderr?: string }).stderr ?? "";
-      value = JSON.stringify({ stdout: "", stderr, exitCode });
+      value = JSON.stringify(stderr || "shell command failed");
     }
   } else if (action.kind === "breakpoint") {
-    value = JSON.stringify({ approved: true, response: "Auto-approved" });
+    value = JSON.stringify("approved");
   } else {
-    value = JSON.stringify({ output: "Skipped", success: true });
+    value = JSON.stringify("ok");
   }
 
   // Post result
