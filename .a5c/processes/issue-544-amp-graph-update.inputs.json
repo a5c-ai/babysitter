@@ -1,0 +1,9 @@
+{
+  "issueNumber": 544,
+  "targetVersion": "0.0.1780032159-g3925ab",
+  "previousVersion": "0.0.1779959155-g362e01",
+  "branchName": "graph-update/544",
+  "claimPath": "packages/atlas/graph/catalog-meta/claims/amp-issue-544.yaml",
+  "processPath": ".a5c/processes/issue-544-amp-graph-update.mjs",
+  "inputsPath": ".a5c/processes/issue-544-amp-graph-update.inputs.json"
+}

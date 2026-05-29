@@ -1,0 +1,26 @@
+nodeKind: Claim
+id: claim:amp-issue-544-release-assimilation
+attributes:
+  claimId: amp-issue-544-release-assimilation
+  subjectKind: AgentVersion
+  subjectId: agent-version:amp@current
+  attribute: releaseAssimilation
+  value: "0.0.1780032159-g3925ab:upstream-release-tracked"
+  statement: "Issue #544 tracks @ampcode/cli 0.0.1780032159-g3925ab as the current Amp CLI graph release, using npm package evidence and preserving unchanged install metadata because no public Amp changelog or GitHub release note was found."
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amp-0-0-1780032159-g3925ab-release
+  claimedAt: "2026-05-29T12:00:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "New issue-scoped graph artifact for #544; the shared Amp AgentVersion and evidence-source files were already updated on staging and are intentionally not modified here."
+edges:
+  about_subject:
+    - agent-version:amp@current
+  backed_by_evidence:
+    - evidence:amp-0-0-1780032159-g3925ab-release
+  sourced_from:
+    - evidence:amp-0-0-1780032159-g3925ab-release
