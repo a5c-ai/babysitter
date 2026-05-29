@@ -13,7 +13,11 @@ import {
 } from '../src/resource-model.js';
 
 const EXTERNAL_CONFIG_KINDS = [
-  'ExternalBackendProvider',
+  'GitProvider',
+  'CiProvider',
+  'IssueTrackerProvider',
+  'AppHostingProvider',
+  'ArtifactRegistryProvider',
   'ExternalBackendBinding',
   'ExternalBackendSyncPolicy',
   'ExternalProviderCapabilityManifest'
@@ -33,8 +37,12 @@ const ALL_EXTERNAL_KINDS = [...EXTERNAL_CONFIG_KINDS, ...EXTERNAL_AGGREGATED_KIN
 /** Minimal valid spec for each external kind, satisfying requiredSpec. */
 function minimalSpecForKind(kind) {
   const specs = {
-    ExternalBackendProvider: { organizationRef: 'default', providerType: 'github', endpoint: 'https://api.github.com' },
-    ExternalBackendBinding: { organizationRef: 'default', providerRef: 'github-provider', credentialRef: 'github-creds' },
+    GitProvider: { organizationRef: 'default', platform: 'github', endpoint: 'https://api.github.com' },
+    CiProvider: { organizationRef: 'default', platform: 'github', endpoint: 'https://api.github.com' },
+    IssueTrackerProvider: { organizationRef: 'default', platform: 'github', endpoint: 'https://api.github.com' },
+    AppHostingProvider: { organizationRef: 'default', platform: 'vercel', endpoint: 'https://api.vercel.com' },
+    ArtifactRegistryProvider: { organizationRef: 'default', platform: 'github_packages', endpoint: 'https://npm.pkg.github.com' },
+    ExternalBackendBinding: { organizationRef: 'default', providerRef: 'github-provider', providerKind: 'GitProvider', credentialRef: 'github-creds' },
     ExternalBackendSyncPolicy: { organizationRef: 'default', providerRef: 'github-provider', syncInterval: '5m' },
     ExternalProviderCapabilityManifest: { organizationRef: 'default', providerRef: 'github-provider', capabilities: ['webhooks', 'pull-requests'] },
     ExternalWebhookDelivery: { organizationRef: 'default', providerRef: 'github-provider', eventType: 'push', payload: {} },
@@ -86,11 +94,11 @@ describe('RESOURCE_DEFINITIONS for external kinds', () => {
 });
 
 describe('createResource for external kinds', () => {
-  it("createResource('ExternalBackendProvider', ...) creates valid resource with apiVersion", () => {
-    const spec = minimalSpecForKind('ExternalBackendProvider');
-    const resource = createResource('ExternalBackendProvider', { name: 'test-provider' }, spec);
+  it("createResource('GitProvider', ...) creates valid resource with apiVersion", () => {
+    const spec = minimalSpecForKind('GitProvider');
+    const resource = createResource('GitProvider', { name: 'test-provider' }, spec);
     assert.equal(resource.apiVersion, 'krate.a5c.ai/v1alpha1');
-    assert.equal(resource.kind, 'ExternalBackendProvider');
+    assert.equal(resource.kind, 'GitProvider');
     assert.equal(resource.metadata.name, 'test-provider');
     assert.equal(resource.metadata.namespace, 'default');
     assert.ok(resource.metadata.labels !== undefined);
@@ -197,19 +205,19 @@ describe('resourceSchemaForKind for external kinds', () => {
 });
 
 describe('kind set counts after external kinds added', () => {
-  it('CONFIG_KINDS has 54 members (42 previous + 4 external config + 1 webhook config + 3 artifact config + 2 inference + 1 model route + 1 virtual model)', () => {
-    assert.equal(CONFIG_KINDS.size, 54);
+  it('CONFIG_KINDS has 58 members (42 previous + 8 external config + 1 webhook config + 3 artifact config + 2 inference + 1 model route + 1 virtual model)', () => {
+    assert.equal(CONFIG_KINDS.size, 58);
   });
 
   it('AGGREGATED_KINDS has 31 members (23 previous + 6 external aggregated + 2 artifact aggregated)', () => {
     assert.equal(AGGREGATED_KINDS.size, 31);
   });
 
-  it('ALL_KINDS has 85 members (65 previous + 10 external + 1 webhook config + 5 artifact + 2 inference + 1 model route + 1 virtual model)', () => {
-    assert.equal(ALL_KINDS.size, 85);
+  it('ALL_KINDS has 89 members (65 previous + 14 external + 1 webhook config + 5 artifact + 2 inference + 1 model route + 1 virtual model)', () => {
+    assert.equal(ALL_KINDS.size, 89);
   });
 
-  it('listResourceDefinitions returns 85 definitions', () => {
-    assert.equal(listResourceDefinitions().length, 85);
+  it('listResourceDefinitions returns 89 definitions', () => {
+    assert.equal(listResourceDefinitions().length, 89);
   });
 });
