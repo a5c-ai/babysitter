@@ -1,10 +1,92 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## [Unreleased] - 2026-05-29
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### New Features
+- push all 10 adversarial dimensions to 100 (8cf40df99, Tal Muskal, 4 hours ago)
+- push all 10 adversarial dimensions to 95+ (f44398767, Tal Muskal, 4 hours ago)
+- server cache, barrel index, shared helper extraction (604adf0db, Tal Muskal, 7 hours ago)
+- 30 new tests, remove mock data, dynamic tool discovery (622b8060e, Tal Muskal, 8 hours ago)
+- fetch dedup, confirm dialog, unsaved changes, component docs (83343e4f5, Tal Muskal, 8 hours ago)
+- complete accessibility — 40→3 components with zero a11y (247665f4b, Tal Muskal, 8 hours ago)
+- router.refresh() migration, API route tests, force-dynamic fixes (fff3bfd54, Tal Muskal, 8 hours ago)
+- add meaningful accessibility attributes to 20 components (3031a8c4a, Tal Muskal, 8 hours ago)
+- add pagination to all list endpoints and UI (8beaf2162, Tal Muskal, 10 hours ago)
+- add evil fallback audit and here be dragons audit processes (1332cb106, Tal Muskal, 10 hours ago)
+- add route-level loading skeletons for 8 sections (f2a23c7d0, Tal Muskal, 11 hours ago)
+- add Getting Started onboarding page (332411dd4, Tal Muskal, 11 hours ago)
+- add transcript viewer to dispatch run detail page (7e5c0dafa, Tal Muskal, 11 hours ago)
+- rewrite external provider wizard and list for typed providers (3e783b005, Tal Muskal, 12 hours ago)
+- replace ExternalBackendProvider with 5 domain-scoped provider kinds (af3843f11, Tal Muskal, 12 hours ago)
+- add inference playground with side-by-side model comparison (58474fad1, Tal Muskal, 13 hours ago)
 
+### Bug Fixes
+- harden remaining critical+high evil fallbacks across repo (ddf00cfb8, Tal Muskal, 5 minutes ago)
+- route opencode through proxy for non-bundled providers (184bda9b0, Tal Muskal, 9 minutes ago)
+- cap CLI orchestration at 20 iterations, bail on no-effects loop (ebd83c458, Tal Muskal, 11 minutes ago)
+- remove mini model silent substitution, log non-zero exit tolerance (eb67d3984, Tal Muskal, 16 minutes ago)
+- paginate agent runs/sessions to 25 items, aria on issue editor (722d2073c, Tal Muskal, 32 minutes ago)
+- write opencode config as file, not just env var (46cdb2450, Tal Muskal, 33 minutes ago)
+- fix real audit issues — 5 unauthed GETs, 8 confirm(), 5 silent catches (dc3e3e4bb, Tal Muskal, 3 hours ago)
+- add GH_TOKEN, CURSOR_API_KEY, COPILOT_GITHUB_TOKEN to live-stack workflow (a9c29d5cb, Tal Muskal, 3 hours ago)
+- single-task process template and 120s iterate timeout (c31b6381d, Tal Muskal, 4 hours ago)
+- remove silent matrix defaults, assertion weakening, and config cascades (bace9627e, Tal Muskal, 8 hours ago)
+- add metadata to 3 issue pages, error boundaries to 10 route groups (8f40b2dbb, Tal Muskal, 8 hours ago)
+- remove 5 evil fallbacks that hide real problems (90df526cf, Tal Muskal, 8 hours ago)
+- add diagnostic logging to 49 critical+high evil fallbacks across all packages (5758e11df, Tal Muskal, 8 hours ago)
+- let hermes call Google directly, mark foundry/anthropic as blocked (4bbaed8cf, Tal Muskal, 9 hours ago)
+- use OPENROUTER_API_KEY and provider: openrouter for hermes (e33d6e123, Tal Muskal, 9 hours ago)
+- write hermes cli-config.yaml with proxy base_url (d8664b0e5, Tal Muskal, 10 hours ago)
+- add hermes provider translations for foundry/anthropic/google (2d62fab2e, Tal Muskal, 10 hours ago)
+- remove hermes custom provider config, use standard OpenAI env (0586b9b16, Tal Muskal, 10 hours ago)
+- disable proxy auth for hermes (like gemini-cli) (a5cd4a554, Tal Muskal, 10 hours ago)
+- log Gitea tree fallback instead of silently swallowing (70a0d6a55, Tal Muskal, 10 hours ago)
+- replace staging Atlas URL with production default (d31c2dc44, Tal Muskal, 10 hours ago)
+- replace silent .catch(() => {}) with console.warn logging (e9153da01, Tal Muskal, 10 hours ago)
+- revert hermes launch to stdin delivery with keep-open (8de323dd6, Tal Muskal, 10 hours ago)
+- adversarial audit fixes — security, errors, docs, accessibility (29c0dd327, Tal Muskal, 10 hours ago)
+- pass thoughtSignatureStore to /v1/responses and WebSocket paths (c14c4500d, Tal Muskal, 11 hours ago)
+- inject prompt flag in bridge-interactive for cli-flag harnesses (ece07b15f, Tal Muskal, 11 hours ago)
+- write hermes proxy config to ~/.hermes/ instead of temp dir (b550e3a54, Tal Muskal, 11 hours ago)
+- add auth to policy-reports, cache invalidation imports to profile (884f0c093, Tal Muskal, 11 hours ago)
+- batch 3 color migration — 465 total replaced (1058→593) (d0a46db4d, Tal Muskal, 11 hours ago)
+- batch 2 color migration + add 'use client' to inference-helpers (c37b7fffe, Tal Muskal, 11 hours ago)
+- hermes back to -z headless mode — stdin TUI doesn't execute tasks (284871025, Tal Muskal, 11 hours ago)
+- harden hook sandbox, add error boundaries, 6 adversarial tests (e6f08431c, Tal Muskal, 11 hours ago)
+- replace 231 hardcoded hex colors with CSS variables (c02c0393c, Tal Muskal, 11 hours ago)
+- write hermes proxy config to cli-config.yaml not config.yaml — fixes #468 (0b2aafe0d, Tal Muskal, 11 hours ago)
+- use positional defineTask form in raw-session template (c29a7e82f, Tal Muskal, 11 hours ago)
+- auto-correct babysitter-sdk import to @a5c-ai/babysitter-sdk (3ec8d665c, Tal Muskal, 12 hours ago)
+- resolve agent prompt from both string and object formats (82c38ac84, Tal Muskal, 12 hours ago)
+- post raw text as CLI orchestration task result (230eaf3af, Tal Muskal, 12 hours ago)
+- instruct raw agent-core process to use fs.writeFile for file output (71300ad56, Tal Muskal, 12 hours ago)
+- pin gemini-cli to 0.43.0 — 0.44.x auth regression confirmed (118589cca, Tal Muskal, 12 hours ago)
+- add CJS require fallback to orchestrateIteration process loader (8d90a7178, Tal Muskal, 12 hours ago)
+- fallback to CJS require when ESM import fails for process modules (52d6f49c5, Tal Muskal, 13 hours ago)
+- ensure .a5c/processes has package.json type:module, use execFileSync (b0dbc67c2, Tal Muskal, 13 hours ago)
+- pin gemini-cli to 0.43.0 + revert proxy env — fixes #483 (fbea9028e, Tal Muskal, 13 hours ago)
+- hermes stdinBehavior keep-open + needsIdleKill — fixes #468 (8e29dd91f, Tal Muskal, 21 hours ago)
+- hermes prompt via stdin instead of -z flag — fixes #468 (25cb23739, Tal Muskal, 21 hours ago)
+- use execFileSync for CLI orchestration to avoid shell escaping (2e5381068, Tal Muskal, 21 hours ago)
+- move hermes --output-format jsonl to unconditional block — fixes #468 (a2f7a5a9f, Tal Muskal, 21 hours ago)
+
+### Refactors
+- split settings-providers (425→259) and inference-playground (528→319) (f315b7e64, Tal Muskal, 5 minutes ago)
+- split kanban-enhanced (602→264) and runner-pool-manager (434→241) (07e894410, Tal Muskal, 10 minutes ago)
+- split assistant-chat.jsx (656→225 lines) into 3 modules (d1c2495bd, Tal Muskal, 16 minutes ago)
+- split workspace-panel.jsx (704→219 lines) into 3 modules (765e828b8, Tal Muskal, 21 minutes ago)
+- split artifact-registry.jsx (753→112 lines) into 4 modules (c0d2bdc85, Tal Muskal, 26 minutes ago)
+- split 1254-line agent-pages.jsx into 11 focused modules (c970bcf16, Tal Muskal, 10 hours ago)
+- extract shared phaseTone helper, remove 7 duplicates (46538b84f, Tal Muskal, 10 hours ago)
+- split inference-service-manager into 7 focused files (2d86aae98, Tal Muskal, 13 hours ago)
+
+### Documentation
+- mark fixed evil fallbacks in evil-fallbacks.md (69e00ef14, Tal Muskal, 22 minutes ago)
+
+### Maintenance
+- add orchestration trace logging for omni CI diagnosis (d1bbc3916, Tal Muskal, 3 hours ago)
+- regenerate dist-types and apply linter auto-fixes (4a9c8597c, Tal Muskal, 8 hours ago)
+- track upstream agent versions (#545) (2f9063d8d, a5c-ai[bot], 13 hours ago)
 
 ## [Unreleased] - 2026-05-27
 
