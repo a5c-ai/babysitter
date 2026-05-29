@@ -13,13 +13,18 @@ attributes:
     - "macos"
     - "windows"
   agentProductId: agent:pi
-  versionRange: ">=0.76.0"
-  currentVersion: "0.76.0"
-  releasedAt: "2026-05-27"
-  upstreamReleaseTag: "v0.76.0"
-  releaseNotesUrl: "https://github.com/earendil-works/pi/releases/tag/v0.76.0"
+  versionRange: ">=0.77.0"
+  currentVersion: "0.77.0"
+  releasedAt: "2026-05-29"
+  upstreamReleaseTag: "v0.77.0"
+  releaseNotesUrl: "https://github.com/earendil-works/pi/releases/tag/v0.77.0"
   cliCommand: "pi"
   assimilationNotes:
+    - "Added --exclude-tools / -xt to disable selected built-in, extension, or custom tools while leaving the rest enabled."
+    - "Headless Codex subscription login can use device-code auth for ChatGPT Plus/Pro Codex subscriptions."
+    - "Extension input events expose streamingBehavior so extensions can distinguish idle prompts, mid-stream steers, and queued follow-ups."
+    - "SIGTERM/SIGHUP exits now run extension session_shutdown cleanup and restore the terminal."
+    - "OpenAI Codex Responses replay after switching from Anthropic extended-thinking sessions now generates unique fallback item IDs."
     - "Added --session-id <id> so automation can create or resume an exact project-local session."
     - "RPC bash accepts excludeFromContext to keep selected command output out of the next prompt."
     - "Codex Responses WebSocket/SSE waits are bounded by httpIdleTimeoutMs, websocketConnectTimeoutMs, and a 10s SSE response-header timeout."
@@ -149,51 +154,52 @@ edges:
       role: knowledge-fabric
   uses_memory_system:
     - target: memory-system:pi-memory
-  sourced_from: []
+  sourced_from:
+    - evidence:pi-0-77-0-release
   evidenced_by:
     - evidence:pi-0-76-0-release
   supports:
     - target: capability:skills
-      versionRange: ">=0.76.0"
+      versionRange: ">=0.77.0"
       level: full
       notes: |
         Pi harness supports skill invocation via formatSkillInvocation.
         Skills are dispatched as structured interactions within the agent loop.
     - target: capability:supports-thinking
-      versionRange: ">=0.76.0"
+      versionRange: ">=0.77.0"
       level: full
       notes: Pi fallback harness with interactive sessions.
     - target: capability:interactive-mode
-      versionRange: ">=0.76.0"
+      versionRange: ">=0.77.0"
       level: full
       notes: Pi fallback harness with interactive sessions.
     - target: capability:stdin-injection
-      versionRange: ">=0.76.0"
+      versionRange: ">=0.77.0"
       level: full
       notes: Pi fallback harness.
     - target: capability:vision-input
-      versionRange: ">=0.76.0"
+      versionRange: ">=0.77.0"
       level: full
       notes: Pi fallback harness.
     - target: capability:can-resume
-      versionRange: ">=0.76.0"
+      versionRange: ">=0.77.0"
       level: full
       notes: |
         Multi-turn JSONL-tree sessions with resume, fork, and branch operations.
     - target: capability:supports-compaction
-      versionRange: ">=0.76.0"
+      versionRange: ">=0.77.0"
       level: full
       notes: |
         Client-side branch-summarization compaction via AgentHarness.
         Configurable threshold and summarization strategy.
     - target: capability:supports-prompt-templates
-      versionRange: ">=0.76.0"
+      versionRange: ">=0.77.0"
       level: full
       notes: |
         Parameterized prompt-template system for system prompts,
         tool descriptions, and context injection.
     - target: capability:supports-session-management
-      versionRange: ">=0.76.0"
+      versionRange: ">=0.77.0"
       level: full
       notes: |
         Harness-managed session lifecycle with JSONL-tree persistence,

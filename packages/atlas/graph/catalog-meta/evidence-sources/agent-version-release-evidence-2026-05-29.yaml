@@ -1,0 +1,226 @@
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-156-release
+attributes:
+  displayName: "Claude Code v2.1.156 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.156
+  sourcePathOrUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.156
+  locator: "anthropics/claude-code release v2.1.156"
+  capturedAt: "2026-05-29T06:30:00Z"
+  observedAt: "2026-05-29T06:30:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T06:30:00Z"
+  notes: |
+    Official release notes say v2.1.156 fixes Opus 4.8 thinking blocks being
+    modified in a way that caused API errors.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:ge-0-0-0
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-156-release
+attributes:
+  displayName: "Claude Agent SDK v0.3.156 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.156
+  sourcePathOrUrl: https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.156
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.156"
+  capturedAt: "2026-05-29T06:30:00Z"
+  observedAt: "2026-05-29T06:30:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T06:30:00Z"
+  notes: |
+    Official release notes say v0.3.156 updates Claude Agent SDK to parity with
+    Claude Code v2.1.156.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:claude-agent-sdk@current
+---
+nodeKind: EvidenceSource
+id: evidence:codex-rust-v0-135-0-release
+attributes:
+  displayName: "OpenAI Codex CLI rust-v0.135.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/openai/codex/releases/tag/rust-v0.135.0
+  sourcePathOrUrl: https://github.com/openai/codex/releases/tag/rust-v0.135.0
+  locator: "openai/codex release rust-v0.135.0"
+  capturedAt: "2026-05-29T06:30:00Z"
+  observedAt: "2026-05-29T06:30:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T06:30:00Z"
+  notes: |
+    Release notes list richer codex doctor diagnostics, remote transport
+    details in /status, Vim mode text-object and interrupt binding updates,
+    named permission profiles, bundled patched zsh helper discovery, resume cwd
+    handling, and dedicated SQLite memory runtime state.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:codex:ge-0-119-0
+    - agent-version:codex-websocket@current
+---
+nodeKind: EvidenceSource
+id: evidence:gemini-cli-0-44-1-release
+attributes:
+  displayName: "Gemini CLI v0.44.1 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/google-gemini/gemini-cli/releases/tag/v0.44.1
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/releases/tag/v0.44.1
+  locator: "google-gemini/gemini-cli release v0.44.1"
+  capturedAt: "2026-05-29T06:30:00Z"
+  observedAt: "2026-05-29T06:30:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T06:30:00Z"
+  notes: |
+    Official release notes identify v0.44.1 as a patch cherry-pick on the
+    v0.44.0 release line, with no public install-method, CLI flag, transport,
+    or MCP change called out.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:gemini:ge-0-43-0
+---
+nodeKind: EvidenceSource
+id: evidence:opencode-1-15-12-release
+attributes:
+  displayName: "OpenCode v1.15.12 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anomalyco/opencode/releases/tag/v1.15.12
+  sourcePathOrUrl: https://github.com/anomalyco/opencode/releases/tag/v1.15.12
+  locator: "anomalyco/opencode release v1.15.12"
+  capturedAt: "2026-05-29T06:30:00Z"
+  observedAt: "2026-05-29T06:30:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T06:30:00Z"
+  notes: |
+    Release notes list acp-next prompt/slash/usage support, experimental OpenAI
+    Responses WebSocket transport with OPENCODE_EXPERIMENTAL_WEBSOCKETS=true,
+    WebSocket timeout/retry/custom-base-url fixes, TUI workspace management and
+    subagent retry status, and desktop tab layout settings.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:opencode:ge-0-0-0
+---
+nodeKind: EvidenceSource
+id: evidence:pi-0-77-0-release
+attributes:
+  displayName: "Pi v0.77.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/earendil-works/pi/releases/tag/v0.77.0
+  sourcePathOrUrl: https://github.com/earendil-works/pi/releases/tag/v0.77.0
+  locator: "earendil-works/pi release v0.77.0"
+  capturedAt: "2026-05-29T06:30:00Z"
+  observedAt: "2026-05-29T06:30:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T06:30:00Z"
+  notes: |
+    Release notes add --exclude-tools / -xt, Codex subscription device-code
+    login, extension input streamingBehavior, SIGTERM/SIGHUP extension cleanup,
+    pi.getAllTools promptGuidelines exposure, and several provider/model replay
+    fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:pi:ge-0-75-5
+---
+nodeKind: EvidenceSource
+id: evidence:omp-15-5-11-release
+attributes:
+  displayName: "Oh-My-Pi v15.5.11 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.5.11
+  sourcePathOrUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.5.11
+  locator: "can1357/oh-my-pi release v15.5.11"
+  capturedAt: "2026-05-29T06:30:00Z"
+  observedAt: "2026-05-29T06:30:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T06:30:00Z"
+  notes: |
+    Release notes add mid-conversation system-message support for Claude Opus
+    4.8+, compatibility settings for that behavior, Opus 4.8 Bedrock metadata,
+    SQL/Redis session storage backends, package-root session-storage exports,
+    hashline snapshot headers, and sharper stale-snapshot diagnostics.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:ge-15-5-9
+---
+nodeKind: EvidenceSource
+id: evidence:droid-cli-0-136-1-release
+attributes:
+  displayName: "Factory Droid CLI 0.136.1 npm package"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: https://www.npmjs.com/package/@factory/cli/v/0.136.1
+  sourcePathOrUrl: https://www.npmjs.com/package/@factory/cli/v/0.136.1
+  locator: "npm @factory/cli v0.136.1"
+  capturedAt: "2026-05-29T06:30:00Z"
+  observedAt: "2026-05-29T06:30:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T06:30:00Z"
+  notes: |
+    npm latest reports @factory/cli 0.136.1 published on 2026-05-29; no public
+    Factory GitHub release or changelog entry was found during this run.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:droid@current
+---
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1780032159-g3925ab-release
+attributes:
+  displayName: "Amp CLI 0.0.1780032159-g3925ab npm package"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: https://www.npmjs.com/package/@ampcode/cli/v/0.0.1780032159-g3925ab
+  sourcePathOrUrl: https://www.npmjs.com/package/@ampcode/cli/v/0.0.1780032159-g3925ab
+  locator: "npm @ampcode/cli v0.0.1780032159-g3925ab"
+  capturedAt: "2026-05-29T06:30:00Z"
+  observedAt: "2026-05-29T06:30:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T06:30:00Z"
+  notes: |
+    npm latest reports @ampcode/cli 0.0.1780032159-g3925ab published on
+    2026-05-29; no public Amp changelog or GitHub release note was found during
+    this run.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:amp@current
