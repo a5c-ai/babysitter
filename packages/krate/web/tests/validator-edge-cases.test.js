@@ -141,3 +141,74 @@ test('string value where array expected throws', () => {
     /must be an array/
   );
 });
+
+// ── Numeric metadata.name throws ───────────────────────────────────────
+
+test('resource with numeric metadata.name throws', () => {
+  assert.throws(
+    () => validateResource({
+      kind: 'Organization',
+      metadata: { name: 42 },
+      spec: { displayName: 'Test Org', namespaceName: 'krate-org-test' },
+      status: {},
+    }),
+    /metadata\.name must be a string/
+  );
+});
+
+// ── Kind not in ALL_KINDS throws ───────────────────────────────────────
+
+test('resource with kind not in ALL_KINDS throws', () => {
+  assert.throws(
+    () => validateResource({
+      kind: 'FakeKind',
+      metadata: { name: 'test' },
+      spec: {},
+      status: {},
+    }),
+    /Unknown Krate resource kind/
+  );
+});
+
+// ── AgentTriggerRule with non-array sources throws ─────────────────────
+
+test('AgentTriggerRule with non-array sources throws type error', () => {
+  assert.throws(
+    () => validateResource({
+      kind: 'AgentTriggerRule',
+      metadata: { name: 'rule-type-err' },
+      spec: { organizationRef: 'default', sources: { webhook: true }, agentStack: 'stack-1', taskKind: 'review' },
+      status: {},
+    }),
+    /must be an array/
+  );
+});
+
+// ── KrateVirtualModel with non-array routes throws ─────────────────────
+
+test('KrateVirtualModel with non-array routes throws type error', () => {
+  assert.throws(
+    () => validateResource({
+      kind: 'KrateVirtualModel',
+      metadata: { name: 'vm-bad-routes' },
+      spec: { organizationRef: 'default', modelName: 'gpt-4', routes: 'route-a' },
+      status: {},
+    }),
+    /must be an array/
+  );
+});
+
+// ── validateResource returns the resource object on success ────────────
+
+test('validateResource returns the resource object on success', () => {
+  const resource = {
+    kind: 'Organization',
+    metadata: { name: 'ret-test' },
+    spec: { displayName: 'Return Test', namespaceName: 'krate-org-ret' },
+    status: {},
+  };
+  const result = validateResource(resource);
+  assert.strictEqual(result, resource, 'should return the same resource object reference');
+  assert.strictEqual(result.kind, 'Organization');
+  assert.strictEqual(result.metadata.name, 'ret-test');
+});

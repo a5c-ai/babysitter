@@ -168,6 +168,7 @@ export function validateResource(resource) {
   if (!resource || typeof resource !== 'object') throw new Error('resource must be an object');
   const definition = resourceDefinitionForKind(resource.kind);
   if (!resource.metadata?.name) throw new Error(`${resource.kind} metadata.name is required`);
+  if (typeof resource.metadata.name !== 'string') throw new Error(`${resource.kind} metadata.name must be a string (got ${typeof resource.metadata.name})`);
   if (!resource.spec || typeof resource.spec !== 'object') resource.spec = {};
   if (!resource.status || typeof resource.status !== 'object') resource.status = {};
   resource.metadata.namespace ||= 'default';

@@ -37,8 +37,9 @@ export const POST = withAuth(async (request, { params }) => {
     let virtualModels = [];
     try {
       virtualModels = await controller.listResources('KrateVirtualModel') || [];
-    } catch {
+    } catch (err) {
       // No virtual models available — proceed without hooks
+      console.warn('[inference/infer] Failed to list virtual models:', err?.message || err);
     }
     const matchedVm = bridge.matchVirtualModel(modelName, virtualModels);
 

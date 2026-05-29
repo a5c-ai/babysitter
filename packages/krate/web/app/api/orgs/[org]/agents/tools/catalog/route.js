@@ -79,8 +79,9 @@ export const GET = withAuth(async function GET(request, { params }) {
         })),
       });
     }
-  } catch {
+  } catch (err) {
     // Controller not available or listing failed — return static catalog only
+    console.warn('[tools/catalog] Failed to discover MCP servers:', err?.message || err);
   }
 
   return Response.json(

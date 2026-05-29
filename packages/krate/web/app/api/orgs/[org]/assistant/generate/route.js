@@ -27,7 +27,9 @@ export const POST = withAuth(async (request, { params }) => {
   try {
     const vmResult = await controller.listResourceForOrg(org, 'KrateVirtualModel');
     matchedVm = bridge.matchVirtualModel(stackRef || 'assistant', vmResult?.items || vmResult || []);
-  } catch {}
+  } catch (err) {
+    console.warn('[assistant/generate] Failed to load virtual models:', err?.message || err);
+  }
 
   let resolvedTask = task.trim();
   if (matchedVm) {

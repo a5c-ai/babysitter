@@ -62,7 +62,8 @@ async function hydrateOrgResourceSummaries(model, org) {
         projects: { ...((model.agents || {}).projects || {}), count: projects.length, items: projects }
       };
     }
-  } catch {
+  } catch (err) {
     // Keep the remote controller model unchanged when local hydration is unavailable.
+    console.warn('[controller] Local hydration unavailable:', err?.message || err);
   }
 }

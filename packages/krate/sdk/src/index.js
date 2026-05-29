@@ -1,14 +1,15 @@
-// API Controller
+/** Create a Krate API controller for a given namespace, providing resource CRUD and org-scoped operations. */
 export { createKrateApiController, KRATE_API_CONTROLLER_BOUNDARY } from '../../core/src/api-controller.js';
 
-// Controller Client (browser/server data fetching)
+/** Fetch the controller UI model from a running Krate API server for dashboard rendering. */
 export { fetchControllerUiModel } from '../../core/src/controller-client.js';
+/** Clear the in-memory snapshot cache to force a fresh kubectl fetch on next read. */
 export { clearSnapshotCache } from '../../core/src/snapshot-cache.js';
 
-// Controller UI Model
+/** Build a controller UI model from raw resources for server-side rendering of the console dashboard. */
 export { createControllerUiModel, issueProjectRefs, issueRepositoryRefs } from '../../core/src/controller-ui.js';
 
-// Authentication
+/** Authentication helpers: OAuth flows, session cookies, identity registration, and team/invite resource creation. */
 export {
   createAuthProviderConfig,
   listEnabledAuthProviders,
@@ -23,10 +24,10 @@ export {
   createTeamResource
 } from '../../core/src/auth.js';
 
-// Identity Policy
+/** Map an OIDC identity to a Krate workspace identity with groups and UID. */
 export { mapOidcIdentity } from '../../core/src/identity-policy.js';
 
-// Resource Model
+/** Resource model: create, validate, and serialize Krate CRD resources across all 89 kinds. */
 export {
   createResource,
   validateResource,
@@ -39,13 +40,13 @@ export {
   resourceToYaml
 } from '../../core/src/resource-model.js';
 
-// Resource Definition Lookup (from kubernetes-controller)
+/** Look up a resource definition by kind name from the kubernetes-controller registry. */
 export { findResourceDefinition } from '../../core/src/kubernetes-controller.js';
 
-// Org Scoping
+/** Derive the Kubernetes namespace name for a given org slug. */
 export { orgNamespaceName, normalizeOrgSlug } from '../../core/src/org-scoping.js';
 
-// Atlas Graph Client
+/** Atlas graph client: fetch records by kind, search the knowledge graph, and access stack layer definitions. */
 export {
   fetchAtlasRecordsByKinds,
   searchAtlasGraph,
@@ -54,23 +55,26 @@ export {
   ALL_LAYER_DEFS
 } from './atlas-graph-client.js';
 
-// External Controllers
+/** External sync controller for reconciling resources from external backends into Krate. */
 export { createSyncController } from '../../core/src/external/sync-controller.js';
+/** External webhook controller for processing inbound webhook deliveries from providers. */
 export { createWebhookController } from '../../core/src/external/webhook-controller.js';
+/** External write controller for pushing Krate resource changes back to external backends. */
 export { createWriteController } from '../../core/src/external/write-controller.js';
+/** External conflict controller for detecting and resolving sync conflicts between Krate and backends. */
 export { createConflictController } from '../../core/src/external/conflict-controller.js';
 
-// External Provider Registry & Factory
+/** Provider registry and factory for creating typed external backend providers (Git, CI, Issue, etc.). */
 export {
   createDefaultProviderRegistry,
   createTypedProvider,
   createExternalBackendProvider
 } from '../../core/src/external/provider-resource-factory.js';
 
-// Event Bus
+/** In-process event bus for publishing and subscribing to lifecycle events across controllers. */
 export { createEventBus, globalEventBus, loadPersistedEvents } from '../../core/src/event-bus.js';
 
-// Agent Controllers
+/** Agent adapter controller for managing adapter definitions with transport type and capabilities. */
 export {
   createAgentAdapterController,
   AGENT_ADAPTER_CONTROLLER_BOUNDARY,
@@ -117,25 +121,25 @@ export {
   AGENT_WRITEBACK_CONTROLLER_BOUNDARY
 } from '../../core/src/agent-writeback-controller.js';
 
-// Agent Stack
+/** Agent stack controller for managing reusable agent definitions with model, prompt, and tools. */
 export {
   createAgentStackController,
   AGENT_STACK_CONTROLLER_BOUNDARY
 } from '../../core/src/agent-stack-controller.js';
 
-// Agent Dispatch
+/** Agent dispatch controller for creating and managing K8s Job-based agent runs. */
 export {
   createAgentDispatchController,
   AGENT_DISPATCH_CONTROLLER_BOUNDARY
 } from '../../core/src/agent-dispatch-controller.js';
 
-// Agent Approval
+/** Agent approval controller for human-in-the-loop gates on tools, secrets, and write-back actions. */
 export {
   createAgentApprovalController,
   AGENT_APPROVAL_CONTROLLER_BOUNDARY
 } from '../../core/src/agent-approval-controller.js';
 
-// Agent Trigger
+/** Agent trigger controller for event-to-stack routing with cron, webhook, comment, and label sources. */
 export {
   createAgentTriggerController,
   AGENT_TRIGGER_CONTROLLER_BOUNDARY,
@@ -148,13 +152,13 @@ export {
   validateTriggerRule
 } from '../../core/src/agent-trigger-controller.js';
 
-// Agent Workspace
+/** Agent workspace controller for managing volume-backed git workspaces with PVC lifecycle. */
 export {
   createAgentWorkspaceController,
   AGENT_WORKSPACE_CONTROLLER_BOUNDARY
 } from '../../core/src/agent-workspace-controller.js';
 
-// Agent Memory
+/** Agent memory controller for managing org-level shared memory repositories and sources. */
 export {
   createAgentMemoryController,
   AGENT_MEMORY_CONTROLLER_BOUNDARY
@@ -167,13 +171,13 @@ export {
   AGENT_MEMORY_QUERY_BOUNDARY
 } from '../../core/src/agent-memory-query.js';
 
-// Agent Permission
+/** Permission reviewer for cross-org denial and workspace policy enforcement on agent actions. */
 export {
   createPermissionReviewer,
   AGENT_PERMISSION_REVIEW_BOUNDARY
 } from '../../core/src/agent-permission-review.js';
 
-// Secret / Config Grants
+/** Secret and config grant controllers for managing explicit access permissions to K8s Secrets and ConfigMaps. */
 export {
   createAgentSecretGrantController,
   createAgentConfigGrantController,
@@ -185,14 +189,14 @@ export {
   revokeGrant
 } from '../../core/src/agent-secret-config-grant-controller.js';
 
-// Audit
+/** Audit controller for querying and streaming audit events with durable delivery. */
 export {
   createAuditController,
   createEventPoller,
   AUDIT_CONTROLLER_BOUNDARY
 } from '../../core/src/audit-controller.js';
 
-// Async utilities
+/** Async utilities: event batching, retry policies, delivery queues, and checkpointing. */
 export {
   createEventBatcher,
   createRetryPolicy,
@@ -200,22 +204,22 @@ export {
   createCheckpointer
 } from '../../core/src/async-controller.js';
 
-// Runner Controller
+/** Runner controller for managing CI runner pools with capacity and cache policies. */
 export {
   createRunnerController,
   RUNNER_CONTROLLER_BOUNDARY
 } from '../../core/src/runner-controller.js';
 
-// Notification Controller
+/** Notification controller for sending alerts and messages through configured channels. */
 export {
   createNotificationController,
   NOTIFICATION_CONTROLLER_BOUNDARY
 } from '../../core/src/notification-controller.js';
 
-// Gitea Service
+/** Create a Gitea service client for repository, branch, and SSH key operations against the Git backend. */
 export { createGiteaService } from '../../core/src/gitea-service.js';
 
-// Memory import / snapshot / ontology
+/** Memory import utilities: parse journals, create snapshots, validate imports, and manage ontologies. */
 export {
   parseJournalForImport,
   createMemorySnapshot,
@@ -226,7 +230,7 @@ export {
   getOntologyEdgeKinds
 } from '../../core/src/agent-memory-import.js';
 
-// KServe Inference Service Controller
+/** KServe inference service controller for managing on-cluster model serving with KServe CRDs. */
 export {
   createInferenceServiceController,
   KRATE_INFERENCE_SERVICE_CONTROLLER_BOUNDARY,
@@ -236,7 +240,7 @@ export {
   KSERVE_API_VERSION
 } from '../../core/src/krate-inference-service-controller.js';
 
-// Model Route Controller (Envoy AI Gateway)
+/** Model route controller for Envoy AI Gateway xDS configuration and LLM traffic management. */
 export {
   createModelRouteController,
   MODEL_ROUTE_CONTROLLER_BOUNDARY,
@@ -247,27 +251,27 @@ export {
   ENVOY_AI_GATEWAY_API_VERSION
 } from '../../core/src/model-route-controller.js';
 
-// Virtual Model Controller
+/** Virtual model controller for programmable model abstraction with routing rules and hook execution. */
 export {
   createVirtualModelController,
   VIRTUAL_MODEL_CONTROLLER_BOUNDARY,
   validateVirtualModel
 } from '../../core/src/virtual-model-controller.js';
 
-// Virtual Model Hook Bridge
+/** Virtual model hook bridge for dispatching lifecycle hooks (session, completion, tool use) to virtual models. */
 export {
   createVirtualModelHookBridge,
   VIRTUAL_MODEL_HOOK_TYPES,
   VIRTUAL_MODEL_HOOK_BRIDGE_BOUNDARY
 } from '../../core/src/virtual-model-hook-bridge.js';
 
-// Artifact Registry Controller
+/** Artifact registry controller for managing package feeds, versions, and access policies. */
 export {
   createArtifactRegistryController,
   ARTIFACT_REGISTRY_CONTROLLER_BOUNDARY
 } from '../../core/src/artifact-registry-controller.js';
 
-// Assistant Runtime
+/** Assistant runtime for in-process chat sessions using the Anthropic API with tool support. */
 export {
   createAssistantRuntime,
   ASSISTANT_RUNTIME_BOUNDARY,

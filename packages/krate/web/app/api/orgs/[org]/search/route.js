@@ -49,8 +49,9 @@ export const GET = withAuth(async (request, { params }) => {
             allResults.push({ kind, name, displayName, href: hrefFn(name), relevance });
           }
         }
-      } catch {
+      } catch (err) {
         // Skip kinds that don't exist or fail
+        console.warn(`[search] Failed to list ${kind}:`, err?.message || err);
       }
     }
 

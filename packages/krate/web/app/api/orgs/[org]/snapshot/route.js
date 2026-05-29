@@ -55,7 +55,9 @@ export const GET = withAuth(async (_request, { params }) => {
           status: p.status?.phase || 'Unknown',
         }));
       });
-    } catch {}
+    } catch (err) {
+      console.warn('[snapshot] Failed to list external providers:', err?.message || err);
+    }
 
     return Response.json({ health, org, timestamp: new Date().toISOString() }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {

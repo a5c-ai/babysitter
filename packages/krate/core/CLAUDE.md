@@ -19,7 +19,7 @@ Krate is split into 4 packages under `packages/krate/`:
 
 ```bash
 npm run build     # Generate dist/ JSON snapshots
-npm test          # Unit + integration tests (node:test) — 1668+ tests
+npm test          # Unit + integration tests (node:test) — 1668 tests
 npm run e2e       # End-to-end package validation — 3 tests
 npm run smoke     # MVP smoke assertions — 21 checks
 npm run serve     # Start HTTP API on port 3080
@@ -35,7 +35,7 @@ node --test tests/*.test.js   # SDK export + integration tests — 78 tests
 ### CLI (`packages/krate/cli`)
 
 ```bash
-node --test tests/*.test.js   # CLI commands + MCP protocol tests — 51+ tests
+node --test tests/*.test.js   # CLI commands + MCP protocol tests — 51 tests
 krate serve                   # Start HTTP API server
 krate mcp                     # Start MCP (Model Context Protocol) server over stdio
 ```
@@ -45,7 +45,7 @@ krate mcp                     # Start MCP (Model Context Protocol) server over s
 ```bash
 npm run build     # Next.js production build (Turbopack)
 npm run dev       # Development server
-npm test          # Route and API utility tests — 115 tests
+npm test          # Route and API utility tests — 160 tests
 ```
 
 ## Architecture

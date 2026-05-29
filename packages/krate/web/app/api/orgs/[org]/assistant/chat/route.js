@@ -34,7 +34,9 @@ export const POST = withAuth(async (request, { params }) => {
       const vmResult = await controller.listResourceForOrg(org, 'KrateVirtualModel');
       virtualModels = vmResult?.items || vmResult || [];
       matchedVm = bridge.matchVirtualModel(stackRef || 'assistant', virtualModels);
-    } catch {}
+    } catch (err) {
+      console.warn('[assistant/chat] Failed to load virtual models:', err?.message || err);
+    }
 
     const sessionState = { id: chatSession.id, turnCount: chatSession.messages?.length || 0 };
 

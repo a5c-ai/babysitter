@@ -160,7 +160,7 @@ export function createSessionCookie(config, profile, options = {}) {
   } else {
     value = payload;
   }
-  return `${config.session.cookieName}=${value}; Path=/; HttpOnly; SameSite=Lax`;
+  return `${config.session.cookieName}=${value}; Path=/; HttpOnly; SameSite=Strict`;
 }
 
 export function parseSessionCookie(config, cookieValue, options = {}) {

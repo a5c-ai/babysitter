@@ -205,7 +205,7 @@ test('web UI and controller API expose live Kubernetes deployment and publishing
 test('web UI is wired to the Kubernetes controller API instead of a static local snapshot', () => {
   const page = read('../web/app/page.jsx');
   const orgPage = read('../web/app/orgs/[org]/page.jsx');
-  const shellModules = ['../web/app/lib/krate-ui.jsx', '../web/app/lib/page-frame.jsx', '../web/app/pages/agent-pages.jsx', '../web/app/pages/repo-pages.jsx', '../web/app/pages/manage-pages.jsx', '../web/app/pages/settings-pages.jsx', '../web/app/pages/external-pages.jsx'];
+  const shellModules = ['../web/app/lib/krate-ui.jsx', '../web/app/lib/page-frame.jsx', '../web/app/pages/agent-pages.jsx', '../web/app/pages/agent-helpers.jsx', '../web/app/pages/repo-pages.jsx', '../web/app/pages/manage-pages.jsx', '../web/app/pages/settings-pages.jsx', '../web/app/pages/external-pages.jsx'];
   const shell = shellModules.map((m) => { try { return readFileSync(m, 'utf8'); } catch { return ''; } }).join('\n');
   const actions = read('../web/app/components/resource-actions.jsx');
   const client = read('src/controller-client.js');
