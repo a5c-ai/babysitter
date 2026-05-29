@@ -1056,18 +1056,12 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
           ]);
         }
         if (plan.harness === 'hermes') {
-          // Hermes defaults to OpenRouter as its provider and ignores
-          // OPENAI_BASE_URL. Override via OPENROUTER_API_KEY (auth) and
-          // cli-config.yaml (base_url + provider: openrouter).
-          plan.env['OPENROUTER_API_KEY'] = 'proxy-token';
-          const proxyUrl = `${proxyRuntime.url}/v1`;
-          const targetModel = plan.proxy?.targetModel ?? plan.model;
-          await prepareHermesProxyConfig({
-            model: targetModel,
-            baseUrl: proxyUrl,
-            apiKey: 'proxy-token',
-          });
-          console.error(`[amux launch] hermes config: base_url=${proxyUrl} model=${targetModel}`);
+          // Hermes v0.15.x hardcodes OpenRouter as its endpoint and ignores
+          // OPENAI_BASE_URL and cli-config.yaml. For providers hermes can
+          // call directly (Google via GOOGLE_API_KEY), bypass the proxy.
+          // For providers requiring proxy (foundry, anthropic), hermes cannot
+          // be redirected — this is tracked in #468.
+          console.error(`[amux launch] hermes: provider=${plan.proxy?.targetProvider}, proxy cannot redirect hermes endpoint`);
         }
         console.error(`[amux launch] ${plan.harness} proxy: OPENAI_BASE_URL=${proxyRuntime.url}/v1`);
       }

@@ -37,13 +37,13 @@ id: provider-translation:hermes:google
 attributes:
   harness: hermes
   provider: google
-  proxyRequired: true
-  proxyExposedTransport: openai-chat
+  proxyRequired: false
   envMapping:
-    - envVar: OPENAI_API_KEY
+    - envVar: GOOGLE_API_KEY
       source: auth.apiKey
       condition: present
   suppressNonAnthropicKey: true
   args: []
   notes: >
-    Hermes speaks OpenAI protocol, not Google. Route through proxy.
+    Hermes can call Google directly via GOOGLE_API_KEY. No proxy needed.
+    Hermes v0.15.x verified working with Google (run 26605537270).
