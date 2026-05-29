@@ -19,6 +19,11 @@ import {
   type OrchestrationState,
 } from "../utils";
 import { MAX_PROCESS_ERROR_RECOVERIES } from "./constants";
+
+/** Max characters of shell output tail included in progress events. */
+const MAX_SHELL_OUTPUT_TAIL_CHARS = 1500;
+/** Max characters of non-shell output head included in progress events. */
+const MAX_NON_SHELL_OUTPUT_HEAD_CHARS = 300;
 import { orchestrateIterationWithProcessLoadRetry, resolveEffectWithRetry } from "./effects";
 import { ensureRunAndMaybeBindFromProcessDefinition } from "../planProcess/runState";
 import { subscribeVerbosePiEvents } from "./verbose";
@@ -313,7 +318,7 @@ async function resolveExternalAction(args: {
       })));
       workerUnsub = subscribeVerbosePiEvents(
         workerSession,
-        `worker:${args.action.effectId.slice(-8)}`,
+        `worker:${args.action.effectId.slice(-8) /* last 8 chars of ULID for human-readable label */}`,
         args.args,
       );
     } else if (shouldUseHostPiWorker) {
@@ -324,7 +329,7 @@ async function resolveExternalAction(args: {
       })));
       workerUnsub = subscribeVerbosePiEvents(
         workerSession,
-        `worker:${args.action.effectId.slice(-8)}`,
+        `worker:${args.action.effectId.slice(-8) /* last 8 chars of ULID for human-readable label */}`,
         args.args,
       );
     }
@@ -339,7 +344,7 @@ async function resolveExternalAction(args: {
       workerUnsub?.();
       workerUnsub = subscribeVerbosePiEvents(
         nextSession,
-        `worker:${args.action.effectId.slice(-8)}`,
+        `worker:${args.action.effectId.slice(-8) /* last 8 chars of ULID for human-readable label */}`,
         args.args,
       );
       return nextSession;
@@ -402,9 +407,9 @@ async function resolveExternalAction(args: {
           ? extractErrorMessage(effectResult.error)
           : undefined,
         output: args.action.kind === "shell"
-          ? (effectResult.stdout ?? (typeof effectResult.value === "string" ? effectResult.value : undefined))?.slice(-1500)
+          ? (effectResult.stdout ?? (typeof effectResult.value === "string" ? effectResult.value : undefined))?.slice(-MAX_SHELL_OUTPUT_TAIL_CHARS)
           : typeof effectResult.value === "string"
-            ? effectResult.value.slice(0, 300)
+            ? effectResult.value.slice(0, MAX_NON_SHELL_OUTPUT_HEAD_CHARS)
             : undefined,
       },
       args.args.json,

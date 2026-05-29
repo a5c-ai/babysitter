@@ -85,6 +85,9 @@ export class AgentCoreSessionHandle {
       await this.initPromise;
       return;
     }
+    // HERE BE DRAGONS: initPromise is cleared on failure so subsequent callers retry.
+    // This means N concurrent callers can all trigger N parallel init attempts
+    // with no backoff. If init fails persistently, this creates a retry storm.
     this.initPromise = this.doInitialize().catch((err: unknown) => {
       this.initPromise = null;
       throw err;

@@ -5,6 +5,8 @@ import type {
   AgentCoreSessionOptions,
 } from "./types";
 
+// 15 minutes — accommodates long-running model responses (e.g., gpt-5.5 thinking)
+// and Azure Foundry cold-start latency. Override per-call via session.prompt(text, timeout).
 const DEFAULT_TIMEOUT_MS = 900_000;
 
 export type AgentCoreEventListener = (event: AgentCoreSessionEvent) => void;
@@ -279,8 +281,12 @@ export class AgentCoreSessionHandle {
     command: string,
     onChunk?: (chunk: string) => void,
   ): Promise<{ output: string; exitCode: number | undefined; cancelled: boolean }> {
+    // HERE BE DRAGONS: Shell invocation is duplicated in 5 files. All must use the same flags.
+    // See also: agent-core/tools/execution.ts, agent-platform/tools/execution.ts,
+    // agent-platform/backgroundProcessRegistry.ts, agent-runtime/backgroundProcessRegistry.ts
+    // Use -c (not -lc) to avoid loading login profile, consistent with all other shell invocations
     const shell = process.platform === "win32" ? "cmd.exe" : "/bin/bash";
-    const args = process.platform === "win32" ? ["/c", command] : ["-lc", command];
+    const args = process.platform === "win32" ? ["/c", command] : ["-c", command];
 
     return new Promise((resolve, reject) => {
       const child = childProcess.spawn(shell, args, {

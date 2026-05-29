@@ -41,8 +41,13 @@ export function createFileSystemTools(options: AgenticToolOptions): CustomToolDe
         const filePath = resolveSafe(workspace, String(params.path));
         const lines = fs.readFileSync(filePath, "utf8").split("\n");
         const start = Math.max(0, ((params.offset as number) ?? 1) - 1);
-        const count = Math.min((params.limit as number) ?? MAX_READ_LINES, MAX_READ_LINES);
-        return ok(lines.slice(start, start + count).map((line, index) => `${start + index + 1}\t${line}`).join("\n"));
+        const requestedLimit = (params.limit as number) ?? MAX_READ_LINES;
+        const count = Math.min(requestedLimit, MAX_READ_LINES);
+        const content = lines.slice(start, start + count).map((line, index) => `${start + index + 1}\t${line}`).join("\n");
+        if (requestedLimit > MAX_READ_LINES) {
+          return ok(`${content}\n(capped at ${MAX_READ_LINES} lines — requested ${requestedLimit})`);
+        }
+        return ok(content);
       },
     },
     {
@@ -180,7 +185,9 @@ export function createFileSystemTools(options: AgenticToolOptions): CustomToolDe
         limit: Type.Optional(Type.Number({ description: "Max results (default: 500)" })),
       }),
       execute: (_toolCallId, params): ToolResult => {
-        const maxResults = Math.min((params.limit as number) ?? 500, 5000);
+        const DEFAULT_GLOB_LIMIT = 500;
+        const MAX_GLOB_LIMIT = 5000;
+        const maxResults = Math.min((params.limit as number) ?? DEFAULT_GLOB_LIMIT, MAX_GLOB_LIMIT);
         const allFiles: string[] = [];
         walkDir(workspace, Boolean(params.hidden), maxResults * 5, allFiles);
 

@@ -4,6 +4,8 @@ import type { AgenticToolOptions, CustomToolDefinition, ToolResult } from "../ty
 import { jsonResult } from "../shared/results";
 
 const DEFAULT_TIMEOUT_MS = 120_000;
+// Prevents infinite tool-calling loops. 25 is high enough for complex multi-step work
+// but low enough to catch runaway recursion.
 const DEFAULT_MAX_TOOL_CALLS = 25;
 
 interface ExecutorConfig {

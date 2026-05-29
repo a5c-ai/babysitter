@@ -59,6 +59,7 @@ export function spawnAsync(
       stdoutBytes += chunk.length;
       if (stdoutBytes > MAX_SPAWN_OUTPUT_BYTES) {
         stdoutTruncated = true;
+        stdoutChunks.push(Buffer.from(`\n[babysitter] WARNING: stdout truncated at ${MAX_SPAWN_OUTPUT_BYTES} bytes. Subsequent output discarded.\n`));
         return;
       }
       stdoutChunks.push(chunk);
@@ -71,6 +72,7 @@ export function spawnAsync(
       stderrBytes += chunk.length;
       if (stderrBytes > MAX_SPAWN_OUTPUT_BYTES) {
         stderrTruncated = true;
+        stderrChunks.push(Buffer.from(`\n[babysitter] WARNING: stderr truncated at ${MAX_SPAWN_OUTPUT_BYTES} bytes. Subsequent output discarded.\n`));
         return;
       }
       stderrChunks.push(chunk);

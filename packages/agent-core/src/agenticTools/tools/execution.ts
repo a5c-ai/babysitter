@@ -50,6 +50,11 @@ export function createExecutionTools(options: AgenticToolOptions): CustomToolDef
           });
         }
 
+        // HERE BE DRAGONS: Shell invocation is duplicated in 5 files. All must use the same flags.
+        // See also: agent-core/session.ts, agent-platform/tools/execution.ts,
+        // agent-platform/backgroundProcessRegistry.ts, agent-runtime/backgroundProcessRegistry.ts
+        // HERE BE DRAGONS: Assumes /bin/bash exists on non-Windows. macOS Catalina+
+        // defaults to zsh, and some containers may not have bash at this path.
         const shell = process.platform === "win32" ? "cmd.exe" : "/bin/bash";
         const shellArgs = process.platform === "win32"
           ? ["/c", String(params.command)]

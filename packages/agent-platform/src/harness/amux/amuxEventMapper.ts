@@ -38,28 +38,11 @@ export interface BabysitterEvent {
 
 /**
  * Known babysitter event kinds derived from agent-mux event types.
+ *
+ * The const array is the single source of truth -- the type union and
+ * runtime Set are both derived from it so they can never drift apart.
  */
-export type BabysitterEventKind =
-  | "session_start"
-  | "session_end"
-  | "text_delta"
-  | "thinking_delta"
-  | "tool_call_start"
-  | "tool_result"
-  | "cost"
-  | "token_usage"
-  | "approval_request"
-  | "input_required"
-  | "error"
-  | "crash"
-  | "context_compacted"
-  | "unknown";
-
-// ---------------------------------------------------------------------------
-// Well-known event type set
-// ---------------------------------------------------------------------------
-
-const KNOWN_EVENT_TYPES = new Set<string>([
+const BABYSITTER_EVENT_KINDS = [
   "session_start",
   "session_end",
   "text_delta",
@@ -73,7 +56,18 @@ const KNOWN_EVENT_TYPES = new Set<string>([
   "error",
   "crash",
   "context_compacted",
-]);
+  "unknown",
+] as const;
+
+export type BabysitterEventKind = (typeof BABYSITTER_EVENT_KINDS)[number];
+
+// ---------------------------------------------------------------------------
+// Well-known event type set (derived from the const array above)
+// ---------------------------------------------------------------------------
+
+const KNOWN_EVENT_TYPES: ReadonlySet<string> = new Set(
+  BABYSITTER_EVENT_KINDS.filter((k) => k !== "unknown"),
+);
 
 // ---------------------------------------------------------------------------
 // Mapper

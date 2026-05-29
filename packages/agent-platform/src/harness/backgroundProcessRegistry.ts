@@ -99,6 +99,9 @@ export class BackgroundProcessRegistry {
 
     const backgroundTaskId = nextUlid();
     const startMs = Date.now();
+    // HERE BE DRAGONS: Shell invocation is duplicated in 5 files. All must use the same flags.
+    // See also: agent-core/session.ts, agent-core/tools/execution.ts,
+    // agent-platform/tools/execution.ts, agent-runtime/backgroundProcessRegistry.ts
     const shell = process.platform === "win32" ? "cmd.exe" : "/bin/bash";
     const shellArgs =
       process.platform === "win32"
