@@ -1,0 +1,27 @@
+nodeKind: EvidenceSource
+id: evidence:web-codex-0-135-release
+attributes:
+  displayName: "OpenAI Codex CLI rust-v0.135.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/openai/codex/releases/tag/rust-v0.135.0
+  sourcePathOrUrl: https://github.com/openai/codex/releases/tag/rust-v0.135.0
+  locator: "openai/codex release rust-v0.135.0"
+  capturedAt: "2026-05-29T12:45:00Z"
+  observedAt: "2026-05-29T12:45:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T12:45:00Z"
+  notes: |
+    Official release notes describe richer codex doctor diagnostics, remote
+    transport status details, named permission profiles, bundled patched zsh
+    helper discovery, resume handling for non-interactive exec sessions and cwd
+    overrides, and a dedicated SQLite memory runtime database.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:codex:ge-0-119-0
+    - agent-version:codex-websocket@current
+    - agent-version:codex-app-server@current

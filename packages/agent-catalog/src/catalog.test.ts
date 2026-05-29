@@ -511,18 +511,20 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(supportsAgentCapability("codex", "mcp", "0.119.0")).toBe(false);
   });
 
-  it("captures Codex 0.134.0 lifecycle, permissions, plugin discovery, goals, and websocket assimilation metadata", () => {
+  it("captures Codex 0.135.0 lifecycle, permissions, plugin discovery, goals, and websocket assimilation metadata", () => {
     const graph = getCatalogGraphSnapshot();
     const codexNode = graph.nodes.find((node) => node.id === "agentVersion:codex:ge-0-119-0");
     const adapterMetadata = codexNode?.adapterMetadata as { capabilityFlags?: Record<string, unknown> } | undefined;
     const flags = adapterMetadata?.capabilityFlags;
 
     expect(codexNode?.versionRange).toBe(">=0.119.0");
-    expect(codexNode?.currentVersion).toBe("0.134.0");
-    expect(codexNode?.releaseNotesUrl).toContain("rust-v0.134.0");
+    expect(codexNode?.currentVersion).toBe("0.135.0");
+    expect(codexNode?.releaseNotesUrl).toContain("rust-v0.135.0");
     expect(codexNode?.assimilationNotes).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("managed network proxy environment"),
+        expect.stringContaining("codex doctor now reports richer environment"),
+        expect.stringContaining("named permission profiles"),
+        expect.stringContaining("dedicated SQLite database"),
       ]),
     );
     expect(flags?.supportsSkills).toBe(true);
@@ -554,20 +556,20 @@ describe("agent-catalog graph-backed ontology", () => {
     const codexWebsocketNode = graph.nodes.find((node) => node.id === "agent-version:codex-websocket@current");
     const codexAppServerNode = graph.nodes.find((node) => node.id === "agent-version:codex-app-server@current");
 
-    expect(codexWebsocketNode?.currentVersion).toBe("0.134.0");
+    expect(codexWebsocketNode?.currentVersion).toBe("0.135.0");
     expect(codexWebsocketNode?.appServer).toMatchObject({
       realtimeV1WebsocketCompatible: true,
-      smokeTestedCommand: "npx -y @openai/codex@0.134.0 app-server --help",
+      smokeTestedCommand: "npx -y @openai/codex@0.135.0 app-server --help",
     });
-    expect(codexAppServerNode?.currentVersion).toBe("0.134.0");
+    expect(codexAppServerNode?.currentVersion).toBe("0.135.0");
     expect(codexAppServerNode?.appServer).toMatchObject({
       realtimeV1WebsocketCompatible: true,
     });
 
     const releaseClaim = listClaimsForSubject("agentVersion:codex:ge-0-119-0").find(
-      (claim) => claim.claimId === "web-codex-0-134-release",
+      (claim) => claim.claimId === "web-codex-0-135-release",
     );
-    expect(releaseClaim?.evidenceIds).toContain("web-codex-0-134-release");
+    expect(releaseClaim?.evidenceIds).toContain("web-codex-0-135-release");
   });
 
   it("traverses provider, model, transport, modality, lifecycle, and session relationships for an agent version", () => {
