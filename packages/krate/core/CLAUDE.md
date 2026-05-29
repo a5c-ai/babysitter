@@ -45,7 +45,7 @@ krate mcp                     # Start MCP (Model Context Protocol) server over s
 ```bash
 npm run build     # Next.js production build (Turbopack)
 npm run dev       # Development server
-npm test          # Route and API utility tests — 160 tests
+npm test          # Route and API utility tests — 173 tests
 ```
 
 ## Architecture

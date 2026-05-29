@@ -110,9 +110,11 @@ function SecretRefField({ label, value, onChange, secrets, required }) {
 function ProviderRow({ org, provider, onDeleted }) {
   const name = provider.metadata?.name;
   const [delStatus, setDelStatus] = useState('idle');
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   async function handleDelete() {
-    if (!confirm(`Delete provider "${name}"?`)) return;
+    if (!confirmDelete) { setConfirmDelete(true); return; }
+    setConfirmDelete(false);
     setDelStatus('deleting');
     try {
       const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/AgentProviderConfig/${encodeURIComponent(name)}`, {
@@ -149,15 +151,36 @@ function ProviderRow({ org, provider, onDeleted }) {
         <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', backgroundColor: phaseTone(provider.status?.phase) }} />
         {provider.status?.phase || 'Pending'}
       </span>
-      <button
-        type="button"
-        onClick={handleDelete}
-        disabled={delStatus === 'deleting'}
-        style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: '#fca5a5' }}
-        aria-label={`Delete provider ${name}`}
-      >
-        {delStatus === 'deleting' ? 'Deleting...' : 'Delete'}
-      </button>
+      {confirmDelete ? (
+        <>
+          <button
+            type="button"
+            onClick={handleDelete}
+            style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: '#fff', backgroundColor: 'var(--danger)', borderColor: 'var(--danger)' }}
+            aria-label={`Confirm delete provider ${name}`}
+          >
+            Confirm
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(false)}
+            style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12 }}
+            aria-label="Cancel delete"
+          >
+            Cancel
+          </button>
+        </>
+      ) : (
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={delStatus === 'deleting'}
+          style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: '#fca5a5' }}
+          aria-label={`Delete provider ${name}`}
+        >
+          {delStatus === 'deleting' ? 'Deleting...' : 'Delete'}
+        </button>
+      )}
     </div>
   );
 }

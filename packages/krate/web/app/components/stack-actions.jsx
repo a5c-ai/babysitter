@@ -6,6 +6,7 @@ export function StackActions({ org, stackName }) {
   const router = useRouter();
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const encodedName = encodeURIComponent(stackName);
   const editHref = `/orgs/${org}/agents/stacks/${encodedName}`;
@@ -32,7 +33,8 @@ export function StackActions({ org, stackName }) {
   }
 
   async function handleDelete() {
-    if (!confirm(`Delete stack "${stackName}"?`)) return;
+    if (!confirmDelete) { setConfirmDelete(true); return; }
+    setConfirmDelete(false);
     setStatus('deleting');
     setErrorMsg(null);
     try {
@@ -67,15 +69,34 @@ export function StackActions({ org, stackName }) {
         >
           {status === 'dispatching' ? 'Dispatching...' : status === 'dispatched' ? 'Dispatched!' : status === 'error' && errorMsg?.startsWith('Dispatch') ? 'Error' : 'Dispatch'}
         </button>
-        <button
-          onClick={handleDelete}
-          style={{ color: 'var(--danger)' }}
-          disabled={status === 'deleting'}
-          aria-label={`Delete stack ${stackName}`}
-          onKeyDown={e => e.key === 'Enter' && status !== 'deleting' && handleDelete()}
-        >
-          {status === 'deleting' ? 'Deleting...' : 'Delete'}
-        </button>
+        {confirmDelete ? (
+          <>
+            <button
+              onClick={handleDelete}
+              style={{ color: '#fff', backgroundColor: 'var(--danger)', border: 'none', borderRadius: 4, padding: '4px 8px', fontWeight: 600 }}
+              aria-label={`Confirm delete stack ${stackName}`}
+            >
+              Confirm
+            </button>
+            <button
+              onClick={() => setConfirmDelete(false)}
+              style={{ padding: '4px 8px' }}
+              aria-label="Cancel delete"
+            >
+              Cancel
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={handleDelete}
+            style={{ color: 'var(--danger)' }}
+            disabled={status === 'deleting'}
+            aria-label={`Delete stack ${stackName}`}
+            onKeyDown={e => e.key === 'Enter' && status !== 'deleting' && handleDelete()}
+          >
+            {status === 'deleting' ? 'Deleting...' : 'Delete'}
+          </button>
+        )}
       </span>
       {errorMsg && (
         <span style={{ color: 'var(--danger)', fontSize: '0.85em' }}>{errorMsg}</span>

@@ -4,7 +4,7 @@ import { errorResponse, invalidateApiCache } from '../../../../../lib/api-errors
 
 export const dynamic = 'force-dynamic';
 
-export const GET = async (request, { params }) => {
+export const GET = withAuth(async (request, { params }) => {
   const { org } = await params;
   const namespace = orgNamespaceName(org);
   const controller = createKrateApiController({ namespace });
@@ -32,7 +32,7 @@ export const GET = async (request, { params }) => {
   } catch (err) {
     return errorResponse(err.message || 'Failed to list serving runtimes', 500);
   }
-};
+});
 
 export const POST = withAuth(async (request, { params }) => {
   const { org } = await params;

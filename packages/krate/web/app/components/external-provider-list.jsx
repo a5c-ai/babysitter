@@ -37,7 +37,7 @@ function scopeBadgeColor(kind) {
   return colors[kind] || { bg: '#f3f4f6', color: 'var(--text)' };
 }
 
-function PlatformGroupCard({ platform, providers, onDelete, removing }) {
+function PlatformGroupCard({ platform, providers, onDelete, removing, confirmTarget, onCancelConfirm }) {
   const icon = PLATFORM_ICONS[platform] || platform.slice(0, 2).toUpperCase();
   const endpoint = providers[0]?.spec?.endpoint || '';
   const secretRef = providers[0]?.spec?.secretRef || '';
@@ -123,26 +123,64 @@ function PlatformGroupCard({ platform, providers, onDelete, removing }) {
 
       {/* Individual provider delete buttons */}
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-        {providers.map((p) => (
-          <button
-            key={`${p.kind}-${p.metadata?.name}`}
-            onClick={() => onDelete(p.kind, p.metadata?.name)}
-            disabled={!!removing}
-            aria-label={`Remove ${SCOPE_LABELS[p.kind] || p.kind} provider ${p.metadata?.name || ''} from ${platform}`}
-            style={{
-              background: 'none',
-              border: '1px solid var(--border)',
-              borderRadius: '0.375rem',
-              padding: '0.25rem 0.625rem',
-              fontSize: '0.75rem',
-              color: 'var(--text-muted)',
-              cursor: removing ? 'not-allowed' : 'pointer',
-              opacity: removing ? 0.5 : 1,
-            }}
-          >
-            Remove {SCOPE_LABELS[p.kind] || p.kind}
-          </button>
-        ))}
+        {providers.map((p) => {
+          const targetKey = `${p.kind}/${p.metadata?.name}`;
+          const isConfirming = confirmTarget === targetKey;
+          return isConfirming ? (
+            <span key={`${p.kind}-${p.metadata?.name}`} style={{ display: 'inline-flex', gap: '0.25rem' }}>
+              <button
+                onClick={() => onDelete(p.kind, p.metadata?.name)}
+                aria-label={`Confirm remove ${SCOPE_LABELS[p.kind] || p.kind} provider ${p.metadata?.name || ''}`}
+                style={{
+                  background: 'var(--danger)',
+                  border: '1px solid var(--danger)',
+                  borderRadius: '0.375rem',
+                  padding: '0.25rem 0.625rem',
+                  fontSize: '0.75rem',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                }}
+              >
+                Confirm
+              </button>
+              <button
+                onClick={onCancelConfirm}
+                aria-label="Cancel remove"
+                style={{
+                  background: 'none',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.375rem',
+                  padding: '0.25rem 0.625rem',
+                  fontSize: '0.75rem',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+            </span>
+          ) : (
+            <button
+              key={`${p.kind}-${p.metadata?.name}`}
+              onClick={() => onDelete(p.kind, p.metadata?.name)}
+              disabled={!!removing}
+              aria-label={`Remove ${SCOPE_LABELS[p.kind] || p.kind} provider ${p.metadata?.name || ''} from ${platform}`}
+              style={{
+                background: 'none',
+                border: '1px solid var(--border)',
+                borderRadius: '0.375rem',
+                padding: '0.25rem 0.625rem',
+                fontSize: '0.75rem',
+                color: 'var(--text-muted)',
+                cursor: removing ? 'not-allowed' : 'pointer',
+                opacity: removing ? 0.5 : 1,
+              }}
+            >
+              Remove {SCOPE_LABELS[p.kind] || p.kind}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -152,9 +190,12 @@ export function ExternalProviderList({ org, providers = [], onAdd, addHref }) {
   const router = useRouter();
   const [removing, setRemoving] = useState(null);
   const [error, setError] = useState('');
+  const [confirmTarget, setConfirmTarget] = useState(null);
 
   async function handleDelete(kind, name) {
-    if (!confirm(`Remove ${kind} "${name}"?`)) return;
+    const targetKey = `${kind}/${name}`;
+    if (confirmTarget !== targetKey) { setConfirmTarget(targetKey); return; }
+    setConfirmTarget(null);
     setRemoving(name);
     setError('');
     try {
@@ -234,6 +275,8 @@ export function ExternalProviderList({ org, providers = [], onAdd, addHref }) {
               providers={group}
               onDelete={handleDelete}
               removing={removing}
+              confirmTarget={confirmTarget}
+              onCancelConfirm={() => setConfirmTarget(null)}
             />
           ))}
         </div>

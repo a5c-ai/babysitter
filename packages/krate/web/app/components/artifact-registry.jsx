@@ -385,6 +385,7 @@ function VersionList({ org, feed, registryType, onBack }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState(null);
+  const [confirmDeleteVersion, setConfirmDeleteVersion] = useState(null);
 
   const feedName = feed.metadata?.name || 'unnamed';
 
@@ -406,7 +407,8 @@ function VersionList({ org, feed, registryType, onBack }) {
   });
 
   async function handleDelete(versionName) {
-    if (!confirm(`Delete version "${versionName}"?`)) return;
+    if (confirmDeleteVersion !== versionName) { setConfirmDeleteVersion(versionName); return; }
+    setConfirmDeleteVersion(null);
     setDeleting(versionName);
     setError('');
     try {
@@ -488,13 +490,30 @@ function VersionList({ org, feed, registryType, onBack }) {
                   <span>{size}</span>
                   <span style={metaStyle}>{typeof published === 'string' ? published.split('T')[0] : published}</span>
                   <span style={metaStyle}>{publishedBy}</span>
-                  <button
-                    style={btnDanger}
-                    onClick={() => handleDelete(v.metadata?.name)}
-                    disabled={deleting === v.metadata?.name}
-                  >
-                    {deleting === v.metadata?.name ? '...' : 'Delete'}
-                  </button>
+                  {confirmDeleteVersion === v.metadata?.name ? (
+                    <>
+                      <button
+                        style={{ ...btnDanger, color: '#fff', backgroundColor: 'var(--danger)', borderColor: 'var(--danger)' }}
+                        onClick={() => handleDelete(v.metadata?.name)}
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        style={btnSecondary}
+                        onClick={() => setConfirmDeleteVersion(null)}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      style={btnDanger}
+                      onClick={() => handleDelete(v.metadata?.name)}
+                      disabled={deleting === v.metadata?.name}
+                    >
+                      {deleting === v.metadata?.name ? '...' : 'Delete'}
+                    </button>
+                  )}
                 </div>
                 <div style={{ padding: '0 0.75rem 0.5rem' }}>
                   <CopyableCode text={cmd} />

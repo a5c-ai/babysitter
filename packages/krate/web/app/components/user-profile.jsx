@@ -35,6 +35,7 @@ export function UserProfileForm({ org, user }) {
   const [keyStatus, setKeyStatus] = useState('idle');
   const [keyMessage, setKeyMessage] = useState('');
   const [generatedKey, setGeneratedKey] = useState('');
+  const [confirmRevokeKey, setConfirmRevokeKey] = useState(null);
 
   useEffect(() => {
     loadApiKeys();
@@ -115,7 +116,8 @@ export function UserProfileForm({ org, user }) {
   }
 
   async function handleRevokeKey(secretName) {
-    if (!confirm(`Revoke API key "${secretName}"? This action cannot be undone.`)) return;
+    if (confirmRevokeKey !== secretName) { setConfirmRevokeKey(secretName); return; }
+    setConfirmRevokeKey(null);
     try {
       const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/secrets/${encodeURIComponent(secretName)}`, {
         method: 'DELETE',
@@ -195,14 +197,35 @@ export function UserProfileForm({ org, user }) {
               <div key={key.name} className="resourceRow" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <strong style={{ flex: '1 1 auto' }}>{key.name}</strong>
                 <span style={{ color: '#6b7280', fontSize: '0.8125rem' }}>{key.purpose || 'API key'}</span>
-                <button
-                  type="button"
-                  onClick={() => handleRevokeKey(key.name)}
-                  style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: '#dc2626', borderColor: '#fca5a5' }}
-                  aria-label={`Revoke API key ${key.name}`}
-                >
-                  Revoke
-                </button>
+                {confirmRevokeKey === key.name ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => handleRevokeKey(key.name)}
+                      style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: '#fff', backgroundColor: '#dc2626', borderColor: '#dc2626' }}
+                      aria-label={`Confirm revoke API key ${key.name}`}
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmRevokeKey(null)}
+                      style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12 }}
+                      aria-label="Cancel revoke"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleRevokeKey(key.name)}
+                    style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: '#dc2626', borderColor: '#fca5a5' }}
+                    aria-label={`Revoke API key ${key.name}`}
+                  >
+                    Revoke
+                  </button>
+                )}
               </div>
             ))}
           </div>

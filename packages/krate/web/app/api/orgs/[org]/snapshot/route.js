@@ -13,7 +13,8 @@ export const GET = withAuth(async (_request, { params }) => {
     try {
       await controller.listResourceForOrg(org, 'Organization');
       health.kubernetes = 'ok';
-    } catch {
+    } catch (err) {
+      console.warn('[snapshot] Kubernetes health check failed:', err?.message || err);
       health.kubernetes = 'error';
     }
 
@@ -23,7 +24,8 @@ export const GET = withAuth(async (_request, { params }) => {
         const res = await fetch(`${giteaUrl}/api/v1/version`, { signal: AbortSignal.timeout(3000) });
         health.gitea = res.ok ? 'ok' : 'error';
       }
-    } catch {
+    } catch (err) {
+      console.warn('[snapshot] Gitea health check failed:', err?.message || err);
       if (process.env.KRATE_GITEA_HTTP_URL) health.gitea = 'error';
     }
 
@@ -34,7 +36,8 @@ export const GET = withAuth(async (_request, { params }) => {
         health.agentMux = res.ok ? 'ok' : 'error';
         health.agentGateway = health.agentMux;
       }
-    } catch {
+    } catch (err) {
+      console.warn('[snapshot] Agent mux/gateway health check failed:', err?.message || err);
       if (process.env.AGENT_MUX_URL || process.env.AGENT_GATEWAY_URL) {
         health.agentMux = 'error';
         health.agentGateway = 'error';

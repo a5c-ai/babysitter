@@ -52,6 +52,7 @@ function WebhookRow({ webhook, org, onPingResult, onDeleted }) {
   const [pinging, setPinging] = useState(false);
   const [pingMsg, setPingMsg] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const spec = webhook.spec || {};
   const events = spec.events || [];
@@ -113,16 +114,27 @@ function WebhookRow({ webhook, org, onPingResult, onDeleted }) {
         <button onClick={sendPing} disabled={pinging} style={{ ...ghostStyle, opacity: pinging ? 0.6 : 1 }} aria-label={`Send test ping to webhook ${webhook.metadata?.name || 'unnamed'}`}>
           {pinging ? 'Sending...' : 'Send Test Ping'}
         </button>
-        <button onClick={async () => {
-          if (!confirm(`Delete webhook "${webhook.metadata?.name}"?`)) return;
-          setDeleting(true);
-          try {
-            const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/ExternalWebhookConfig/${encodeURIComponent(webhook.metadata?.name)}`, { method: 'DELETE' });
-            if (res.ok) { if (onDeleted) onDeleted(webhook.metadata?.name); }
-          } catch (err) { console.warn('Webhook delete failed:', err.message || err); } finally { setDeleting(false); }
-        }} disabled={deleting} style={{ ...smallGhostStyle, color: 'var(--danger)', borderColor: '#fca5a5', opacity: deleting ? 0.6 : 1 }} aria-label={`Delete webhook ${webhook.metadata?.name || 'unnamed'}`}>
-          {deleting ? 'Deleting...' : 'Delete'}
-        </button>
+        {confirmDelete ? (
+          <>
+            <button onClick={async () => {
+              setConfirmDelete(false);
+              setDeleting(true);
+              try {
+                const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/ExternalWebhookConfig/${encodeURIComponent(webhook.metadata?.name)}`, { method: 'DELETE' });
+                if (res.ok) { if (onDeleted) onDeleted(webhook.metadata?.name); }
+              } catch (err) { console.warn('Webhook delete failed:', err.message || err); } finally { setDeleting(false); }
+            }} style={{ ...smallGhostStyle, color: '#fff', backgroundColor: 'var(--danger)', borderColor: 'var(--danger)' }} aria-label={`Confirm delete webhook ${webhook.metadata?.name || 'unnamed'}`}>
+              Confirm
+            </button>
+            <button onClick={() => setConfirmDelete(false)} style={smallGhostStyle} aria-label="Cancel delete">
+              Cancel
+            </button>
+          </>
+        ) : (
+          <button onClick={() => setConfirmDelete(true)} disabled={deleting} style={{ ...smallGhostStyle, color: 'var(--danger)', borderColor: '#fca5a5', opacity: deleting ? 0.6 : 1 }} aria-label={`Delete webhook ${webhook.metadata?.name || 'unnamed'}`}>
+            {deleting ? 'Deleting...' : 'Delete'}
+          </button>
+        )}
         {pingMsg && (
           <span style={{ fontSize: 12, color: pingMsg.startsWith('Ping sent') ? '#16a34a' : '#dc2626', fontWeight: 500 }}>
             {pingMsg}

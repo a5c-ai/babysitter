@@ -25,9 +25,11 @@ function ServiceAccountRow({ org, sa, onDeleted }) {
   const roleRef = sa.spec?.roleRef || 'edit';
   const ns = sa.spec?.namespace || `krate-org-${org}`;
   const [delStatus, setDelStatus] = useState('idle');
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   async function handleDelete() {
-    if (!confirm(`Delete service account "${name}" and its role binding?`)) return;
+    if (!confirmDelete) { setConfirmDelete(true); return; }
+    setConfirmDelete(false);
     setDelStatus('deleting');
     try {
       const rbName = `${name}-binding`;
@@ -62,15 +64,36 @@ function ServiceAccountRow({ org, sa, onDeleted }) {
         }} />
         {sa.status?.phase || 'Pending'}
       </span>
-      <button
-        type="button"
-        onClick={handleDelete}
-        disabled={delStatus === 'deleting'}
-        style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: '#fca5a5' }}
-        aria-label={`Delete service account ${name}`}
-      >
-        {delStatus === 'deleting' ? 'Deleting...' : 'Delete'}
-      </button>
+      {confirmDelete ? (
+        <>
+          <button
+            type="button"
+            onClick={handleDelete}
+            style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: '#fff', backgroundColor: 'var(--danger)', borderColor: 'var(--danger)' }}
+            aria-label={`Confirm delete service account ${name}`}
+          >
+            Confirm
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(false)}
+            style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12 }}
+            aria-label="Cancel delete"
+          >
+            Cancel
+          </button>
+        </>
+      ) : (
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={delStatus === 'deleting'}
+          style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: '#fca5a5' }}
+          aria-label={`Delete service account ${name}`}
+        >
+          {delStatus === 'deleting' ? 'Deleting...' : 'Delete'}
+        </button>
+      )}
     </div>
   );
 }

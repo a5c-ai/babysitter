@@ -8,7 +8,8 @@ const MAX_RECENT = 5;
 function getRecentCommands() {
   try {
     return JSON.parse(localStorage.getItem(RECENT_COMMANDS_KEY) || '[]');
-  } catch {
+  } catch (err) {
+    console.warn('[command-palette] Failed to read recent commands from localStorage:', err.message || err);
     return [];
   }
 }
@@ -17,8 +18,8 @@ function addRecentCommand(id) {
   try {
     const existing = getRecentCommands().filter((c) => c !== id);
     localStorage.setItem(RECENT_COMMANDS_KEY, JSON.stringify([id, ...existing].slice(0, MAX_RECENT)));
-  } catch {
-    // ignore
+  } catch (err) {
+    console.warn('[command-palette] Failed to write recent commands to localStorage:', err.message || err);
   }
 }
 

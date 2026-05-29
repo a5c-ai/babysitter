@@ -49,7 +49,8 @@ export async function GET(request, { params }) {
         if (closed) return;
         try {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
-        } catch {
+        } catch (err) {
+          console.warn('[agent-events-stream] enqueue failed:', err.message || err);
           closed = true;
         }
       };

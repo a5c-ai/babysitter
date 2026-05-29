@@ -25,9 +25,11 @@ function StatusMsg({ status, message }) {
 function AdapterRow({ org, adapter, onDeleted }) {
   const name = adapter.metadata?.name;
   const [delStatus, setDelStatus] = useState('idle');
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   async function handleDelete() {
-    if (!confirm(`Delete adapter "${name}"?`)) return;
+    if (!confirmDelete) { setConfirmDelete(true); return; }
+    setConfirmDelete(false);
     setDelStatus('deleting');
     try {
       const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/AgentAdapter/${encodeURIComponent(name)}`, {
@@ -62,15 +64,36 @@ function AdapterRow({ org, adapter, onDeleted }) {
         <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', backgroundColor: phaseTone(adapter.status?.phase) }} />
         {adapter.status?.phase || 'Pending'}
       </span>
-      <button
-        type="button"
-        onClick={handleDelete}
-        disabled={delStatus === 'deleting'}
-        style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: '#fca5a5' }}
-        aria-label={`Delete adapter ${name}`}
-      >
-        {delStatus === 'deleting' ? 'Deleting...' : 'Delete'}
-      </button>
+      {confirmDelete ? (
+        <>
+          <button
+            type="button"
+            onClick={handleDelete}
+            style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: '#fff', backgroundColor: 'var(--danger)', borderColor: 'var(--danger)' }}
+            aria-label={`Confirm delete adapter ${name}`}
+          >
+            Confirm
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(false)}
+            style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12 }}
+            aria-label="Cancel delete"
+          >
+            Cancel
+          </button>
+        </>
+      ) : (
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={delStatus === 'deleting'}
+          style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: '#fca5a5' }}
+          aria-label={`Delete adapter ${name}`}
+        >
+          {delStatus === 'deleting' ? 'Deleting...' : 'Delete'}
+        </button>
+      )}
     </div>
   );
 }
