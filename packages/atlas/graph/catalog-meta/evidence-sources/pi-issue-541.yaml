@@ -1,0 +1,28 @@
+# Dedicated issue #541 evidence record. Kept separate from date-bucket evidence
+# files to avoid conflicts with concurrent graph-update PRs.
+nodeKind: EvidenceSource
+id: evidence:pi-0-77-0-release-issue-541
+attributes:
+  displayName: "Pi v0.77.0 release notes for issue #541"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/earendil-works/pi/releases/tag/v0.77.0
+  sourcePathOrUrl: https://github.com/earendil-works/pi/releases/tag/v0.77.0
+  locator: "earendil-works/pi release v0.77.0 tracked by issue #541"
+  capturedAt: "2026-05-29T11:30:00Z"
+  observedAt: "2026-05-29T11:30:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T11:30:00Z"
+  notes: |
+    Issue #541 tracks Pi v0.77.0 release notes. The release adds --exclude-tools
+    / -xt for selective tool disablement, headless Codex subscription login via
+    device-code auth, extension InputEvent.streamingBehavior, SIGTERM/SIGHUP
+    extension session_shutdown cleanup, and pi.getAllTools() promptGuidelines
+    exposure.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:pi:ge-0-75-5

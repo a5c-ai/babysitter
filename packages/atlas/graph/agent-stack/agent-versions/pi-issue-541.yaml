@@ -1,0 +1,52 @@
+# Additive issue #541 record. This file intentionally avoids editing the shared
+# Pi current/version YAML files so concurrent graph-update PRs do not conflict.
+nodeKind: AgentVersion
+id: agentVersion:pi:ge-0-75-5
+attributes:
+  assimilationNotes:
+    - "Issue #541 tracks Pi 0.77.0 --exclude-tools / -xt as launch metadata for disabling selected built-in, extension, or custom tools while leaving the rest enabled."
+    - "Issue #541 tracks Pi 0.77.0 Codex subscription device-code login for headless ChatGPT Plus/Pro subscription auth."
+    - "Issue #541 tracks Pi 0.77.0 extension InputEvent.streamingBehavior for idle prompts, mid-stream steers, and queued follow-ups."
+    - "Issue #541 tracks Pi 0.77.0 SIGTERM/SIGHUP handling that runs extension session_shutdown cleanup before restoring the terminal."
+    - "Issue #541 tracks Pi 0.77.0 pi.getAllTools() promptGuidelines exposure for per-tool prompt guidance projection."
+  releaseHighlights:
+    - "Pi 0.77.0 adds --exclude-tools / -xt, Codex subscription device-code auth, InputEvent.streamingBehavior, extension session_shutdown cleanup on SIGTERM/SIGHUP, and pi.getAllTools() promptGuidelines exposure."
+  adapterMetadata:
+    issue541ReleaseAdditions:
+      releaseVersion: "0.77.0"
+      launchBehavior:
+        promptExtraFlags:
+          - "--exclude-tools"
+          - "-xt"
+        notes: "Disables selected built-in, extension, or custom tools while leaving other tools enabled."
+      authFlows:
+        codexSubscriptionDeviceCode:
+          introducedIn: "0.77.0"
+          appliesTo:
+            - "ChatGPT Plus Codex subscription"
+            - "ChatGPT Pro Codex subscription"
+          notes: "Supports headless Codex subscription login via device-code auth."
+      extensionRuntime:
+        inputEventStreamingBehavior:
+          field: "streamingBehavior"
+          introducedIn: "0.77.0"
+          values:
+            - idle-prompt
+            - mid-stream-steer
+            - queued-follow-up
+          notes: "Lets extensions classify prompt timing relative to active generation."
+        shutdownSignals:
+          - signal: SIGTERM
+            cleanupEvent: session_shutdown
+          - signal: SIGHUP
+            cleanupEvent: session_shutdown
+          notes: "Pi runs extension session_shutdown cleanup and restores the terminal before signal exit."
+      toolDescriptorProjection:
+        getAllToolsPromptGuidelines:
+          api: "pi.getAllTools()"
+          field: "promptGuidelines"
+          introducedIn: "0.77.0"
+          notes: "Exposes per-tool prompt guidance through tool descriptors."
+edges:
+  sourced_from:
+    - evidence:pi-0-77-0-release-issue-541
