@@ -1,3 +1,4 @@
+import { createKrateApiController, orgNamespaceName } from '@a5c-ai/krate-sdk';
 import { withAuth } from '../../../../../../lib/api-auth.js';
 
 export const dynamic = 'force-dynamic';
@@ -47,6 +48,43 @@ const INTERNAL_TOOLS_CATALOG = [
   },
 ];
 
-export const GET = withAuth(async function GET() {
-  return Response.json({ categories: INTERNAL_TOOLS_CATALOG }, { headers: { 'Cache-Control': 'public, max-age=3600' } });
+export const GET = withAuth(async function GET(request, { params }) {
+  const { org } = await params;
+  const namespace = orgNamespaceName(org);
+
+  // Start with the static internal tools catalog
+  const categories = [...INTERNAL_TOOLS_CATALOG];
+
+  // Dynamically discover AgentMcpServer resources for this org and merge them in
+  let mcpServers = [];
+  try {
+    const controller = createKrateApiController({ namespace });
+    const result = await controller.listResourceForOrg(org, 'AgentMcpServer');
+    const items = result?.items || (Array.isArray(result) ? result : []);
+    mcpServers = items.map((server) => ({
+      name: server.metadata?.name,
+      transport: server.spec?.transport,
+      scope: server.spec?.scope,
+      purpose: server.spec?.purpose || server.metadata?.annotations?.['krate.a5c.ai/description'] || null,
+    }));
+
+    // If MCP servers were found, add them as a dynamic category
+    if (mcpServers.length > 0) {
+      categories.push({
+        category: 'MCP Servers (Dynamic)',
+        tools: mcpServers.map((s) => ({
+          id: `mcp:${s.name}`,
+          label: s.name,
+          description: s.purpose || `MCP server (${s.transport || 'unknown'} transport)`,
+        })),
+      });
+    }
+  } catch {
+    // Controller not available or listing failed — return static catalog only
+  }
+
+  return Response.json(
+    { categories, mcpServers },
+    { headers: { 'Cache-Control': 'no-store' } }
+  );
 });
