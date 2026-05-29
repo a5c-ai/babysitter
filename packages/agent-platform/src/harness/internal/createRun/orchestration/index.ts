@@ -104,6 +104,7 @@ async function runCliOrchestration(args: RunOrchestrationPhaseArgs): Promise<num
   // Iterate loop
   const maxIterations = args.maxIterations ?? 20;
   for (let i = 1; i <= maxIterations; i++) {
+    process.stderr.write(`[omni-orchestration] iteration ${i}/${maxIterations} starting\n`);
     try {
       const iterResult = execFileSync(babysitterCmd, [...babysitterPrefix, "run:iterate", runDir, "--json", "--iteration", String(i)], {
         cwd: workspace,
@@ -128,8 +129,11 @@ async function runCliOrchestration(args: RunOrchestrationPhaseArgs): Promise<num
 
       // Handle pending effects
       if (parsed.nextActions?.length) {
+        process.stderr.write(`[omni-orchestration] iteration ${i}: ${parsed.nextActions.length} pending effects to resolve\n`);
         for (const action of parsed.nextActions) {
+          process.stderr.write(`[omni-orchestration] resolving effect ${action.effectId} (${action.kind})\n`);
           await resolveAndPostEffect(action, runDir, workspace, model, babysitterBin);
+          process.stderr.write(`[omni-orchestration] effect ${action.effectId} resolved\n`);
         }
       } else if (parsed.status === "none") {
         if (!args.json) {
