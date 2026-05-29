@@ -1,0 +1,27 @@
+nodeKind: EvidenceSource
+id: evidence:claude-code-issue-536-2-1-156-release
+attributes:
+  displayName: "Claude Code v2.1.156 release notes (#536)"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.156
+  sourcePathOrUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.156
+  locator: "anthropics/claude-code release v2.1.156 for issue #536"
+  capturedAt: "2026-05-29T11:20:00Z"
+  observedAt: "2026-05-29T11:20:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T11:20:00Z"
+  notes: |
+    Issue #536 tracks Claude Code v2.1.156. The release notes identify a fix
+    for Opus 4.8 thinking blocks being modified in a way that caused API
+    errors. The issue research found no new CLI flags, package rename,
+    transport change, launch behavior change, install method change, or
+    migration steps; installation remains npm install -g
+    @anthropic-ai/claude-code.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:ge-0-0-0

@@ -1,0 +1,80 @@
+nodeKind: Claim
+id: claim:claude-code-issue-536-current-version
+attributes:
+  claimId: claude-code-issue-536-current-version
+  subjectKind: AgentVersion
+  subjectId: agentVersion:claude:ge-0-0-0
+  attribute: currentVersion
+  value: "2.1.156"
+  statement: "Issue #536 assimilates Claude Code v2.1.156 as the tracked current Claude Code release."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-code-issue-536-2-1-156-release
+  claimedAt: "2026-05-29T11:20:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "Issue-scoped claim added without modifying the shared Claude Code version YAML."
+edges:
+  about_subject:
+    - agentVersion:claude:ge-0-0-0
+  backed_by_evidence:
+    - evidence:claude-code-issue-536-2-1-156-release
+  sourced_from:
+    - evidence:claude-code-issue-536-2-1-156-release
+---
+nodeKind: Claim
+id: claim:claude-code-issue-536-opus-4-8-thinking-block-fix
+attributes:
+  claimId: claude-code-issue-536-opus-4-8-thinking-block-fix
+  subjectKind: AgentVersion
+  subjectId: agentVersion:claude:ge-0-0-0
+  attribute: thinkingBlockHandling
+  value: "opus-4.8-thinking-block-api-error-fix"
+  statement: "Claude Code v2.1.156 fixes Opus 4.8 thinking blocks being modified in a way that caused API errors."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-code-issue-536-2-1-156-release
+  claimedAt: "2026-05-29T11:20:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "This release fact preserves the adapter/thinking-block passthrough concern from issue #536 as graph evidence."
+edges:
+  about_subject:
+    - agentVersion:claude:ge-0-0-0
+  backed_by_evidence:
+    - evidence:claude-code-issue-536-2-1-156-release
+  sourced_from:
+    - evidence:claude-code-issue-536-2-1-156-release
+---
+nodeKind: Claim
+id: claim:claude-code-issue-536-no-migration-surface
+attributes:
+  claimId: claude-code-issue-536-no-migration-surface
+  subjectKind: AgentVersion
+  subjectId: agentVersion:claude:ge-0-0-0
+  attribute: releaseAssimilation
+  value: "2.1.156:no-install-cli-transport-or-migration-change"
+  statement: "Issue #536 records no upstream-mentioned CLI flag, package rename, transport, launch behavior, install method, or migration-step change for Claude Code v2.1.156."
+  confidence: medium
+  provenanceKind: release-notes
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-code-issue-536-2-1-156-release
+  claimedAt: "2026-05-29T11:20:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "Install continuity remains npm install -g @anthropic-ai/claude-code."
+edges:
+  about_subject:
+    - agentVersion:claude:ge-0-0-0
+  backed_by_evidence:
+    - evidence:claude-code-issue-536-2-1-156-release
+  sourced_from:
+    - evidence:claude-code-issue-536-2-1-156-release
