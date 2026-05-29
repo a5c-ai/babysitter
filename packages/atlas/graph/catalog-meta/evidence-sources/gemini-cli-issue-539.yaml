@@ -1,0 +1,37 @@
+nodeKind: EvidenceSource
+id: evidence:gemini-cli-0-44-1-issue-539-release
+attributes:
+  displayName: "Gemini CLI v0.44.1 release notes for issue #539"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/google-gemini/gemini-cli/releases/tag/v0.44.1
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/releases/tag/v0.44.1
+  locator: "google-gemini/gemini-cli release v0.44.1"
+  capturedAt: "2026-05-29T11:20:00Z"
+  observedAt: "2026-05-29T11:20:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T11:20:00Z"
+  notes: |
+    Issue #539 tracks Gemini CLI 0.44.1 as a patch cherry-pick on the 0.44.0
+    line. Public release notes do not call out install-method, CLI flag,
+    transport, MCP, model, or migration changes, so the affected Atlas surface
+    is limited to AgentVersion currentVersion/release evidence.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:gemini:ge-0-43-0
+---
+nodeKind: AgentVersion
+id: agentVersion:gemini:ge-0-43-0
+attributes:
+  patch: true
+  currentVersion: "0.44.1"
+  releasedAt: "2026-05-28"
+  upstreamReleaseTag: "v0.44.1"
+  releaseNotesUrl: "https://github.com/google-gemini/gemini-cli/releases/tag/v0.44.1"
+edges:
+  sourced_from:
+    - evidence:gemini-cli-0-44-1-issue-539-release
