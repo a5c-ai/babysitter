@@ -1,0 +1,105 @@
+{
+  "issueNumber": 622,
+  "baseBranch": "staging",
+  "branchName": "agent/issue-622-agent-identity-migration-compatibility",
+  "title": "Agent identity: migration tooling and backward compatibility",
+  "issueBody": "## Summary\n\nBuild migration tooling to convert existing AgentStack resources (with inline prompts) into the new AgentPersona + AgentDefinition model. Ensure backward compatibility so existing workflows don't break.\n\n## Scope\n\n1. **Compatibility layer in dispatch controller** - accept `agentDefinition` OR `agentStack`, resolve both paths\n2. **Migration script** - extract persona from stack (prompts, skills -> AgentPersona), create binding (AgentDefinition), clean stack\n3. **Deprecation warnings** - log warning when dispatch resolves a stack with inline prompts\n4. **TriggerRule update** - accept `agentDefinition` field alongside existing `agentStack`\n5. **Stack builder UI** - continues creating AgentStack (infra only), separate from persona editor\n6. **MCP tool update** - `krate_dispatch_agent` accepts definition or stack ref\n\n## Reference\n\n- [docs/agent-identity/02-migration.md](packages/krate/docs/agent-identity/02-migration.md) - full migration strategy\n\n## Dependencies\n\n- #620 (agent identity core)",
+  "issueComments": [
+    "Triage summary: Migration and compatibility work is needed so Krate can move from inline AgentStack identity data to AgentPersona + AgentDefinition without breaking existing AgentStack workflows. Recommended approach: add/consume #620 identity resources, centralize dispatch target resolution, preserve legacy stack behavior, add prompt composition precedence, update TriggerRule/web dispatch/forms/krate_dispatch_agent metadata, add migration tooling with dry-run default, backup/reversible behavior, safe apply cleanup ordering, and add deprecation warnings.",
+    "Existing issue comment notes a prior plan PR #663 and an implementation agent running on that plan. When executing this process, audit the current branch first and implement only remaining gaps."
+  ],
+  "labels": [
+    "feature",
+    "krate",
+    "krate-core",
+    "triggers",
+    "effort:medium",
+    "priority:medium",
+    "risk:medium",
+    "ready-for-dev"
+  ],
+  "sourceOfTruthDocs": [
+    "packages/krate/docs/agent-identity/02-migration.md",
+    "packages/krate/docs/agent-identity/01-resource-model.md",
+    "docs/agent-reference/process-authoring.md"
+  ],
+  "processLibraryReferences": [
+    "library/methodologies/spec-kit-brownfield.js",
+    "library/methodologies/atdd-tdd/atdd-tdd.js",
+    "library/specializations/software-architecture/migration-strategy.js",
+    "library/specializations/cli-mcp-development/mcp-tool-implementation.js",
+    "library/methodologies/superpowers/verification-before-completion.js"
+  ],
+  "observedCurrentStateHints": [
+    "AgentPersona and AgentDefinition resources may already exist from #620 in packages/krate/core/src/resource-model.js and packages/krate/charts/crds/agent-resources.yaml.",
+    "Core dispatch may already accept agentDefinition and resolve it through packages/krate/core/src/agent-persona-controller.js.",
+    "TriggerRule tests may already cover agentDefinition support.",
+    "The web dispatch route packages/krate/web/app/api/orgs/[org]/agents/dispatch/route.js still needs auditing for agentDefinition support.",
+    "The Atlas descriptor packages/atlas/graph/extensions/tool-servers/krate-mcp-server.yaml still needs auditing for krate_dispatch_agent accepting definition or stack reference.",
+    "No migration script was observed under packages/krate/core/scripts or packages/krate/cli during planning audit.",
+    "No deprecation warning path for legacy inline stack prompts/skills was observed during planning audit."
+  ],
+  "targetFiles": [
+    "packages/krate/core/src/resource-model.js",
+    "packages/krate/core/src/agent-dispatch-controller.js",
+    "packages/krate/core/src/agent-trigger-controller.js",
+    "packages/krate/core/src/agent-persona-controller.js",
+    "packages/krate/core/src/agent-prompt-composition.js",
+    "packages/krate/core/src/index.js",
+    "packages/krate/core/scripts/*",
+    "packages/krate/cli/src/mcp-server.js",
+    "packages/krate/cli/bin/krate.mjs",
+    "packages/krate/web/app/api/orgs/[org]/agents/dispatch/route.js",
+    "packages/krate/web/app/components/agent/stack-builder.jsx",
+    "packages/krate/web/app/components/agent/stack-builder-graph.jsx",
+    "packages/krate/web/app/components/agent/trigger-rule-form.jsx",
+    "packages/krate/web/app/components/agent/trigger-rule-edit-form.jsx",
+    "packages/krate/charts/crds/agent-resources.yaml",
+    "packages/atlas/graph/extensions/tool-servers/krate-mcp-server.yaml",
+    "packages/krate/core/tests/agent-dispatch-controller.test.js",
+    "packages/krate/core/tests/agent-trigger-controller.test.js",
+    "packages/krate/core/tests/agent-resources.test.js",
+    "packages/krate/core/tests/agent-persona-controller.test.js",
+    "packages/krate/core/tests/agent-prompt-composition.test.js",
+    "packages/krate/cli/tests/mcp-server.test.js",
+    "packages/krate/web/tests/resource-contract.test.js"
+  ],
+  "acceptanceCriteria": [
+    "Legacy AgentStack manual dispatch still works with inline systemPrompt, developerPrompt, taskPrompt, and skillRefs.",
+    "Manual dispatch accepts agentDefinition or agentStack and resolves AgentDefinition to persona plus stack before permission review, memory, workspace, context bundle, and job creation.",
+    "AgentTriggerRule validation, event evaluation, CRD schema, and tests accept agentDefinition alongside agentStack without requiring both.",
+    "Migration tooling defaults to dry-run, extracts inline stack prompts and skillRefs into AgentPersona, creates AgentDefinition binding, emits backup/reversible output, and does not mutate resources unless apply mode is explicit.",
+    "Apply mode writes AgentPersona and AgentDefinition successfully before cleaning stack identity fields; partial failures leave the source stack unchanged.",
+    "Dispatch emits a deprecation warning when a legacy AgentStack with inline prompt fields or skillRefs is used.",
+    "Web dispatch accepts agentDefinition while preserving stackRef and agentStack compatibility.",
+    "Stack builder UI continues creating AgentStack infrastructure and does not become the persona editor in this issue.",
+    "CLI MCP server and Atlas krate_dispatch_agent descriptor accept definition or stack references.",
+    "Docs and examples that describe dispatch or migration contracts are updated only where needed.",
+    "Focused tests and broad repo verification pass or document only environment-specific residual risk."
+  ],
+  "verificationCommands": [
+    "git diff --check",
+    "node --test packages/krate/core/tests/agent-resources.test.js packages/krate/core/tests/agent-persona-controller.test.js packages/krate/core/tests/agent-prompt-composition.test.js packages/krate/core/tests/agent-dispatch-controller.test.js packages/krate/core/tests/agent-trigger-controller.test.js",
+    "node --test packages/krate/cli/tests/mcp-server.test.js",
+    "node --test packages/krate/web/tests/resource-contract.test.js",
+    "npm run build:krate",
+    "npm run test:krate",
+    "npm run build:sdk",
+    "npm run verify:metadata"
+  ],
+  "qualityGates": [
+    "Reuse audit recorded before implementation starts.",
+    "Runtime call paths are traced before file edits.",
+    "Missing coverage is expressed as tests before production changes.",
+    "Migration dry-run and apply behavior are tested for non-destructive defaults and cleanup ordering.",
+    "Legacy AgentStack compatibility has explicit regression coverage.",
+    "AgentDefinition behavior is covered at core, trigger, web, CLI MCP, and descriptor contract surfaces.",
+    "Final review blocks on destructive migration behavior, field contract divergence, or broad unrelated changes."
+  ],
+  "outOfScope": [
+    "Full persona editor UI from the separate web experience work.",
+    "Removing AgentStack inline prompt support or setting a removal timeline.",
+    "Renaming all existing stack references when compatibility can preserve them.",
+    "Re-implementing #620 identity core if it already exists on the base branch."
+  ]
+}
