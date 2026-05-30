@@ -202,6 +202,28 @@ export class GitNativeBackend implements BreakpointBackend {
     return breakpoints;
   }
 
+  private async assertDependenciesResolved(breakpoint: Breakpoint): Promise<void> {
+    const blockingDependencies = breakpoint.dependsOn.filter((dependency) => dependency.blocking !== false);
+    if (blockingDependencies.length === 0) return;
+
+    const unresolved: string[] = [];
+    for (const dependency of blockingDependencies) {
+      try {
+        const upstream = await this.getBreakpoint(dependency.id);
+        const requiredStatus = dependency.requiredStatus ?? "completed";
+        if (upstream.status !== requiredStatus) {
+          unresolved.push(`${dependency.id} (${upstream.status}, requires ${requiredStatus})`);
+        }
+      } catch {
+        unresolved.push(`${dependency.id} (missing)`);
+      }
+    }
+
+    if (unresolved.length > 0) {
+      throw new Error(`Cannot resolve breakpoint "${breakpoint.id}" until dependencies are complete: ${unresolved.join(", ")}`);
+    }
+  }
+
   async submitBreakpoint(params: SubmitBreakpointParams): Promise<Breakpoint> {
     await fs.mkdir(this.breakpointsDir, { recursive: true });
 
@@ -416,6 +438,7 @@ export class GitNativeBackend implements BreakpointBackend {
     if (!validation.valid) {
       throw new Error(validation.reason);
     }
+    await this.assertDependenciesResolved(existing);
     const fromStatus = existing.status;
 
     const answerId = generateBreakpointId();
@@ -588,6 +611,9 @@ export class GitNativeBackend implements BreakpointBackend {
     const validation = validateBreakpointTransition(breakpoint.status, params.status);
     if (!validation.valid) {
       throw new Error(validation.reason);
+    }
+    if (params.status === "answered" || params.status === "completed") {
+      await this.assertDependenciesResolved(breakpoint);
     }
 
     const fromStatus = breakpoint.status;
@@ -868,7 +894,7 @@ function isNotFoundError(error: unknown): boolean {
 }
 
 function isInvalidTransitionError(error: unknown): boolean {
-  return error instanceof Error && /transition|terminal/i.test(error.message);
+  return error instanceof Error && /transition|terminal|dependenc/i.test(error.message);
 }
 
 function redactBreakpointForExport(breakpoint: Breakpoint): Breakpoint {

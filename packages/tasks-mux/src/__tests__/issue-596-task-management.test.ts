@@ -220,6 +220,55 @@ describe("issue #596 task-management primitives", () => {
     ]);
   });
 
+  it("blocks direct and bulk resolution until blocking dependencies reach their required status", async () => {
+    const backend = new GitNativeBackend({ breakpointsDir });
+    const parent = await backend.submitBreakpoint({
+      text: "Parent task",
+      context: makeContext(),
+      routing: makeRouting(),
+    });
+    const child = await backend.submitBreakpoint({
+      text: "Child task",
+      context: makeContext(),
+      routing: makeRouting(),
+      dependsOn: [{ id: parent.id, requiredStatus: "completed" }],
+    });
+
+    await expect(backend.answerBreakpoint(child.id, {
+      responderId: "codex",
+      responderName: "Codex",
+      text: "Approved before dependency",
+      approved: true,
+    })).rejects.toThrow(/dependencies are complete/i);
+
+    const bulkBlocked = await backend.bulkUpdateBreakpoints({
+      ids: [child.id],
+      action: "close",
+      actorId: "codex",
+    });
+    expect(bulkBlocked).toMatchObject({
+      total: 1,
+      succeeded: 0,
+      failed: 1,
+      items: [expect.objectContaining({
+        id: child.id,
+        ok: false,
+        errorCode: "invalid_transition",
+      })],
+    });
+
+    await backend.transitionBreakpoint(parent.id, {
+      status: "completed",
+      actorId: "codex",
+    });
+
+    const closed = await backend.transitionBreakpoint(child.id, {
+      status: "completed",
+      actorId: "codex",
+    });
+    expect(closed.status).toBe("completed");
+  });
+
   it("applies lifecycle validation to claim, answer, and cancel mutations", async () => {
     const backend = new GitNativeBackend({ breakpointsDir });
     const breakpoint = await backend.submitBreakpoint({
