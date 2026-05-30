@@ -138,6 +138,32 @@ test('external sync route forwards supported body fields as sync options', () =>
   }
 });
 
+test('external write intent approve route passes object-shaped approval options', () => {
+  const route = readFile('app', 'api', 'orgs', '[org]', 'external', 'write-intents', '[name]', 'approve', 'route.js');
+  assert.doesNotMatch(
+    route,
+    /approveExternalWriteIntent\(\s*name\s*\)/,
+    'approve route must not pass a bare intent name'
+  );
+  assert.match(route, /intentName:\s*name/, 'approve route must pass intentName');
+  assert.match(route, /approvedBy:/, 'approve route must pass approvedBy');
+  assert.match(route, /resources:\s*body\.resources\s*\|\|\s*\{\}/, 'approve route must pass resources from the request body');
+});
+
+test('model route creation uses applyModelRoute so generated gateway routes are applied', () => {
+  const route = readFile('app', 'api', 'orgs', '[org]', 'inference', 'routes', 'route.js');
+  assert.doesNotMatch(
+    route,
+    /controller\.applyResource\(\s*resource\s*\)/,
+    'model route POST must not persist only KrateModelRoute'
+  );
+  assert.match(
+    route,
+    /controller\.applyModelRoute\(\s*resource\s*\)/,
+    'model route POST must apply KrateModelRoute and generated AIGatewayRoute together'
+  );
+});
+
 // ── Contract: inference infer route uses an existing org-scoped list API ──
 
 test('inference infer route lists virtual models with the org-scoped controller API', () => {
