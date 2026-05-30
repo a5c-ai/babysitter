@@ -1,0 +1,30 @@
+{
+  "issueNumber": 624,
+  "baseBranch": "staging",
+  "branchName": "agent/issue-624-jitsi-crds-controllers-webhook-sync",
+  "maxReviewIterations": 2,
+  "specSources": [
+    "packages/krate/docs/jitsi/03-crds-and-controllers.md",
+    "packages/krate/docs/jitsi/01-architecture.md"
+  ],
+  "expectedScope": [
+    "Add JitsiMeetProvider and JitsiMeetingTemplate as etcd resource kinds.",
+    "Add JitsiMeeting and JitsiRecording as postgres resource kinds.",
+    "Add chart CRDs and package exports for the new Jitsi resource and controller surfaces.",
+    "Implement jitsi-meeting-controller.js with validate, createRoom, endRoom, generateParticipantJwt, reconcile, listActiveMeetings, getMeetingStats, startRecording, and stopRecording.",
+    "Implement jitsi-sync-controller.js following the external sync-controller pattern for Jitsi room, participant, recording, and watermark sync.",
+    "Implement jitsi-agent-bridge.js with meeting capability checks, meeting context preparation, sidecar spec creation, and agent join/leave handling.",
+    "Add /api/orgs/[org]/jitsi/webhooks/ingest with HMAC signature validation, delivery deduplication, and event delegation.",
+    "Emit meeting-created, participant-joined, participant-left, recording-started, and agent-joined-meeting through the existing event bus.",
+    "Keep Jitsi Helm deployment work in #623, web-console management UX in #625, and deeper agent meeting runtime work in #627."
+  ],
+  "qualityGates": [
+    "Phase 0 reuse audit rendered before implementation planning.",
+    "Acceptance and unit tests authored before production code.",
+    "Resource model, controller, sync/webhook, agent bridge, route, event, and export coverage verified.",
+    "Webhook security negative tests cover missing, malformed, invalid, and replayed signatures.",
+    "Non-meeting agent dispatch behavior has a regression guard.",
+    "Focused Krate tests plus broader build/sdk/metadata checks are run or exact blockers are documented.",
+    "Final agent review compares the issue and Jitsi specs directly to the git diff and verification output before delivery."
+  ]
+}
