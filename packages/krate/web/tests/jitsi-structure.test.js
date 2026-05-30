@@ -147,6 +147,14 @@ test('Jitsi controls drive External API commands and Krate meeting actions', () 
   assert.match(controls, /Open direct Jitsi link/);
 });
 
+test('Jitsi end meeting preserves post-meeting resource state', () => {
+  const route = read('app', 'api', 'orgs', '[org]', 'jitsi', 'meetings', '[id]', 'route.js');
+  assert.match(route, /phase:\s*'Ended'/);
+  assert.match(route, /endedAt:\s*new Date\(\)\.toISOString\(\)/);
+  assert.match(route, /eventType:\s*'meeting-ended'/);
+  assert.doesNotMatch(route, /deleteJitsiResource/);
+});
+
 test('Jitsi context panel includes metadata, invited agents, dispatch links, and post-meeting links', () => {
   const context = read('app', 'components', 'jitsi', 'jitsi-participant-list.jsx');
   for (const label of ['Room', 'Template', 'Org', 'Phase', 'TTL']) {

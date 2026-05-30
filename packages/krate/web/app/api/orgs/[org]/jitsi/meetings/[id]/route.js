@@ -1,6 +1,6 @@
 import { withAuth } from '../../../../../../lib/api-auth.js';
 import { errorResponse } from '../../../../../../lib/api-errors.js';
-import { applyJitsiResource, deleteJitsiResource, getJitsiResource } from '../../../../../../lib/jitsi-service.js';
+import { applyJitsiResource, getJitsiResource } from '../../../../../../lib/jitsi-service.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +29,18 @@ export const PATCH = withAuth(async (request, { params }) => {
 export const DELETE = withAuth(async (_request, { params }) => {
   const { org, id } = await params;
   try {
-    return Response.json(await deleteJitsiResource(org, 'JitsiMeeting', id), { headers: { 'Cache-Control': 'no-store' } });
+    const existingResult = await getJitsiResource(org, 'JitsiMeeting', id);
+    const existing = existingResult.resource || existingResult;
+    const resource = {
+      ...existing,
+      status: {
+        ...(existing.status || {}),
+        phase: 'Ended',
+        endedAt: new Date().toISOString(),
+        recording: { ...(existing.status?.recording || {}), active: false },
+      },
+    };
+    return Response.json(await applyJitsiResource(org, resource, { eventType: 'meeting-ended' }), { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     return errorResponse(error.message, 500);
   }
