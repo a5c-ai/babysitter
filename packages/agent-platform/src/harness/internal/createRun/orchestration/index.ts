@@ -289,34 +289,42 @@ async function resolveViaTasksMuxForCli(
   if (decision.responderType !== "agent") {
     return undefined;
   }
+  const fallbackToInternal = shouldFallbackExternalAgentToInternal(action.taskDef);
   if (typeof mux.AgentMuxResponderBackend !== "function") {
+    if (fallbackToInternal) return undefined;
     throw new Error("tasks-mux AgentMuxResponderBackend is unavailable");
   }
 
   const prompt = buildCliAgentPrompt(action.taskDef);
-  const backend = new mux.AgentMuxResponderBackend({
-    adapter: decision.responder?.adapter ?? decision.responder?.id,
-    model: decision.responder?.model ?? model,
-    cwd: workspace,
-  });
-  const breakpoint = await backend.submitBreakpoint({
-    text: prompt,
-    context: {
-      description: action.taskDef?.title ?? action.taskId ?? action.effectId,
-      codeSnippets: [],
-      fileReferences: [],
-      tags: action.labels ?? [],
-    },
-    routing: {
-      strategy: "single",
-      targetResponders: decision.responder?.id ? [decision.responder.id] : [],
-      timeoutMs: 300_000,
-      presentToUser: false,
-      responderType: "agent",
+  let breakpoint: { answers: Array<{ text: string; responderId: string; responderName: string }> };
+  try {
+    const backend = new mux.AgentMuxResponderBackend({
       adapter: decision.responder?.adapter ?? decision.responder?.id,
       model: decision.responder?.model ?? model,
-    },
-  });
+      cwd: workspace,
+    });
+    breakpoint = await backend.submitBreakpoint({
+      text: prompt,
+      context: {
+        description: action.taskDef?.title ?? action.taskId ?? action.effectId,
+        codeSnippets: [],
+        fileReferences: [],
+        tags: action.labels ?? [],
+      },
+      routing: {
+        strategy: "single",
+        targetResponders: decision.responder?.id ? [decision.responder.id] : [],
+        timeoutMs: readExternalAgentTimeoutMs(action.taskDef) ?? 300_000,
+        presentToUser: false,
+        responderType: "agent",
+        adapter: decision.responder?.adapter ?? decision.responder?.id,
+        model: decision.responder?.model ?? model,
+      },
+    });
+  } catch (err) {
+    if (fallbackToInternal) return undefined;
+    throw err;
+  }
   return JSON.stringify(breakpoint.answers[0]?.text ?? "");
 }
 
@@ -344,4 +352,22 @@ function buildCliAgentPrompt(taskDef: { agent?: { prompt?: string | { instructio
     : agentPrompt?.instructions?.join("\n")
       ?? taskDef?.title
       ?? "Execute this task";
+}
+
+function shouldFallbackExternalAgentToInternal(taskDef: Record<string, unknown> | undefined): boolean {
+  const agent = isPlainRecord(taskDef?.agent) ? taskDef.agent : {};
+  const metadata = isPlainRecord(taskDef?.metadata) ? taskDef.metadata : {};
+  return agent.fallbackToInternal === true
+    || metadata.fallbackToInternal === true
+    || agent.fallbackType === "internal"
+    || metadata.fallbackType === "internal";
+}
+
+function readExternalAgentTimeoutMs(taskDef: Record<string, unknown> | undefined): number | undefined {
+  const agent = isPlainRecord(taskDef?.agent) ? taskDef.agent : {};
+  return typeof agent.timeoutMs === "number" ? agent.timeoutMs : undefined;
+}
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }

@@ -20,6 +20,7 @@ export interface ResponderRoutingOptions {
   responderType?: ResponderType;
   adapter?: string;
   fallbackType?: ResponderType;
+  fallbackToInternal?: boolean;
   targetResponders?: string[];
   trackerBackend?: string;
   capabilities?: string[];
@@ -225,6 +226,7 @@ export interface AgentTaskDefinitionOptions<TArgs = unknown> {
   responderType?: TaskValueOrFactory<TArgs, ResponderType | undefined>;
   adapter?: TaskValueOrFactory<TArgs, string | undefined>;
   fallbackType?: TaskValueOrFactory<TArgs, ResponderType | undefined>;
+  fallbackToInternal?: TaskValueOrFactory<TArgs, boolean | undefined>;
   model?: TaskValueOrFactory<TArgs, string | undefined>;
   provider?: TaskValueOrFactory<TArgs, string | undefined>;
   approvalMode?: TaskValueOrFactory<TArgs, string | undefined>;

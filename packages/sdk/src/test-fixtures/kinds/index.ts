@@ -37,6 +37,7 @@ export const externalAgentKindFixtures = {
   prompt: "Review the SDK routing patch.",
   adapter: "codex",
   fallbackType: "internal",
+  fallbackToInternal: true,
   metadata: { subsystem: "sdk" },
 };
 

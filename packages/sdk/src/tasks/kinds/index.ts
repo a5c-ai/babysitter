@@ -86,6 +86,7 @@ export function agentTask<TArgs = unknown, TResult = unknown>(
       responderType,
       adapter,
       fallbackType,
+      fallbackToInternal,
       model,
       provider,
       approvalMode,
@@ -104,6 +105,7 @@ export function agentTask<TArgs = unknown, TResult = unknown>(
       resolveOptionalValue(options.responderType, args, ctx),
       resolveOptionalValue(options.adapter, args, ctx),
       resolveOptionalValue(options.fallbackType, args, ctx),
+      resolveBoolean(options.fallbackToInternal, args, ctx),
       resolveOptionalValue(options.model, args, ctx),
       resolveOptionalValue(options.provider, args, ctx),
       resolveOptionalValue(options.approvalMode, args, ctx),
@@ -119,6 +121,7 @@ export function agentTask<TArgs = unknown, TResult = unknown>(
       responderType,
       adapter,
       fallbackType,
+      fallbackToInternal,
       model,
       provider,
       approvalMode,
@@ -306,6 +309,10 @@ function buildAgentOptions(options: AgentTaskOptions): AgentTaskOptions {
   if (options.responderType !== undefined) agent.responderType = options.responderType;
   if (typeof options.adapter === "string" && options.adapter.trim()) agent.adapter = options.adapter.trim();
   if (options.fallbackType !== undefined) agent.fallbackType = options.fallbackType;
+  if (options.fallbackToInternal === true) {
+    agent.fallbackToInternal = true;
+    agent.fallbackType = "internal";
+  }
   if (typeof options.model === "string" && options.model.trim()) agent.model = options.model;
   if (typeof options.provider === "string" && options.provider.trim()) agent.provider = options.provider;
   if (typeof options.approvalMode === "string" && options.approvalMode.trim()) agent.approvalMode = options.approvalMode;
