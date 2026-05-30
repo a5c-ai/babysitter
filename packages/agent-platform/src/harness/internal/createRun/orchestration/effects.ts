@@ -88,6 +88,10 @@ import {
   harnessSupportsConcurrentEffects,
 } from "./dispatch";
 
+const importOptionalModule = new Function("specifier", "return import(specifier)") as (
+  specifier: string,
+) => Promise<unknown>;
+
 type McpExecutorLike = {
   execute(request: McpToolExecutionRequest): Promise<McpToolResult>;
 };
@@ -607,7 +611,7 @@ async function resolveViaTasksMuxIfRoutable(
     };
   };
   try {
-    mux = await import("@a5c-ai/tasks-mux") as unknown as typeof mux;
+    mux = await importOptionalModule("@a5c-ai/tasks-mux") as typeof mux;
   } catch {
     return undefined;
   }
@@ -908,9 +912,15 @@ async function invokeSubprocessEffect(
       };
     }
 
-    const message = iterationResult.error instanceof Error
-      ? iterationResult.error.message
-      : summarizeSubprocessValue(iterationResult.error);
+    const message = iterationResult.status === "failed" || iterationResult.status === "process-error"
+      ? (
+          iterationResult.error instanceof Error
+            ? iterationResult.error.message
+            : summarizeSubprocessValue(iterationResult.error)
+        )
+      : iterationResult.status === "halted"
+        ? iterationResult.reason
+        : `Nested run ${childRun.runId} returned an unexpected non-completed status`;
     emitAmuxEvent(
       {
         type: "subagent_error",

@@ -326,19 +326,24 @@ export async function runExternalOrchestrationPhase(args: RunOrchestrationPhaseA
         state.iteration -= 1;
         continue;
       }
+      const failureMessage = result.status === "failed"
+        ? extractErrorMessage(result.error)
+        : result.status === "halted"
+          ? result.reason
+          : "Unexpected non-terminal iteration status";
       emitProgress(
         {
           phase: "2",
           status: "failed",
           iteration: state.iteration,
           runStatus: "failed",
-          error: extractErrorMessage(result.error),
+          error: failureMessage,
         },
         args.json,
         args.verbose,
         args.outputMode,
       );
-      await recordExternalRunSummary(state, args, "failed", extractErrorMessage(result.error));
+      await recordExternalRunSummary(state, args, "failed", failureMessage);
       return 1;
     }
     emitProgress(

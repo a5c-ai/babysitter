@@ -29,6 +29,10 @@ import {
   resolveAgentCoreBackendForHarness,
 } from "../utils";
 
+const importOptionalModule = new Function("specifier", "return import(specifier)") as (
+  specifier: string,
+) => Promise<unknown>;
+
 export async function runOrchestrationPhase(
   args: RunOrchestrationPhaseArgs,
 ): Promise<number> {
@@ -256,7 +260,7 @@ async function resolveViaTasksMuxForCli(
     };
   };
   try {
-    mux = await import("@a5c-ai/tasks-mux") as unknown as typeof mux;
+    mux = await importOptionalModule("@a5c-ai/tasks-mux") as typeof mux;
   } catch {
     return undefined;
   }
