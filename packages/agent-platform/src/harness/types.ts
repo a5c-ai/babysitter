@@ -161,6 +161,8 @@ export interface AgentCoreSessionOptions {
   systemPrompt?: string;
   /** Append custom system prompt instructions. */
   appendSystemPrompt?: string[];
+  /** Explicit environment snapshot for integrations that support env injection. Defaults to process.env. */
+  env?: NodeJS.ProcessEnv;
   /** Isolate the session from discovered extensions, skills, and AGENTS files. */
   isolated?: boolean;
   /** Use an in-memory session manager instead of persistent session files. */

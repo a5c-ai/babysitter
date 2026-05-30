@@ -297,8 +297,10 @@ export class AgentCoreSessionHandle {
     // Bridge common Azure env var aliases that pi-coding-agent doesn't know
     // about.  Pi expects AZURE_OPENAI_RESOURCE_NAME; the user's profile may
     // set AZURE_OPENAI_PROJECT_NAME instead.
-    configureAzureOpenAiEnvDefaults(
+    const baseEnv = this.options.env ?? process.env;
+    const azureOpenAiEnv = configureAzureOpenAiEnvDefaults(
       typeof this.options.model === "string" ? this.options.model : undefined,
+      baseEnv,
     );
     const createOpts: Record<string, unknown> = {};
     const cwd = this.options.workspace ?? process.cwd();
@@ -308,6 +310,9 @@ export class AgentCoreSessionHandle {
       Boolean(compressionConfig?.enabled && compressionConfig.layers.sdkContextHook.enabled);
     const compactionSettings = buildCompactionSettings(compactionEnabled);
     createOpts.cwd = cwd;
+    if (Object.keys(azureOpenAiEnv).length > 0) {
+      createOpts.env = { ...baseEnv, ...azureOpenAiEnv };
+    }
     createOpts.agentDir = agentDir;
     if (this.options.thinkingLevel) createOpts.thinkingLevel = this.options.thinkingLevel;
     const customTools = [...(this.options.customTools ?? [])];

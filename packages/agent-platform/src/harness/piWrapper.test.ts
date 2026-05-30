@@ -13,7 +13,7 @@ const mockBuildCompactionSettings = vi.fn(() => ({
   branchSummary: {},
 }));
 const mockDiscoverRepoInstructionPrompts = vi.fn(() => []);
-const mockConfigureAzureOpenAiEnvDefaults = vi.fn();
+const mockConfigureAzureOpenAiEnvDefaults = vi.fn(() => ({}));
 const mockDescribePiModelResolutionFailure = vi.fn((model: string) => `Explicit model "${model}" could not be resolved.`);
 const mockResolvePiModel = vi.fn(() => Promise.resolve(undefined));
 const mockLoadPiModule = vi.fn();
@@ -183,7 +183,7 @@ describe("AgentCoreSessionHandle", () => {
     await expect(session.initialize()).rejects.toThrow(
       'Explicit model "gemini-3.1-pro-preview" could not be resolved.',
     );
-    expect(mockConfigureAzureOpenAiEnvDefaults).toHaveBeenCalledWith("gemini-3.1-pro-preview");
+    expect(mockConfigureAzureOpenAiEnvDefaults).toHaveBeenCalledWith("gemini-3.1-pro-preview", expect.any(Object));
     expect(mockResolvePiModel).toHaveBeenCalled();
     expect(mockDescribePiModelResolutionFailure).toHaveBeenCalledWith("gemini-3.1-pro-preview");
     expect(createAgentSessionOptions).toBeUndefined();

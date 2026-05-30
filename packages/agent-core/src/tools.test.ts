@@ -5,6 +5,7 @@ import { PassThrough } from "node:stream";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 let backgroundTaskCounter = 0;
+const scopedConfig = new Map<string, { value: unknown; scope: "run" | "global"; envKey?: string }>();
 
 vi.mock("node:child_process", () => ({
   spawn: vi.fn(),
@@ -50,6 +51,17 @@ vi.mock("@a5c-ai/babysitter-sdk", () => ({
     layoutVersion: "test",
     largeResultPreviewLimit: 1000,
   })),
+  getScopedConfigEntries: vi.fn(() => scopedConfig.entries()),
+  getScopedConfigValue: vi.fn((key: string) => scopedConfig.get(key)?.value),
+  hasScopedConfigValue: vi.fn((key: string) => scopedConfig.has(key)),
+  listScopedConfigKeys: vi.fn(() => [...scopedConfig.keys()]),
+  resetScopedConfigValue: vi.fn((key?: string) => {
+    if (key) scopedConfig.delete(key);
+    else scopedConfig.clear();
+  }),
+  setScopedConfigValue: vi.fn((key: string, value: unknown, scope: "run" | "global", envKey?: string) => {
+    scopedConfig.set(key, { value, scope, envKey });
+  }),
 }));
 
 import * as childProcess from "node:child_process";
@@ -116,6 +128,7 @@ function mockSpawnExit(exitCode = 0, stdoutText = "") {
 describe("agent-core tools", () => {
   afterEach(() => {
     backgroundTaskCounter = 0;
+    scopedConfig.clear();
     vi.useRealTimers();
     vi.clearAllMocks();
     vi.restoreAllMocks();

@@ -1,4 +1,15 @@
-import { CONFIG_ENV_VARS, DEFAULTS, getConfig, type BabysitterConfig } from "@a5c-ai/babysitter-sdk";
+import {
+  CONFIG_ENV_VARS,
+  DEFAULTS,
+  getConfig,
+  getScopedConfigEntries,
+  getScopedConfigValue,
+  hasScopedConfigValue,
+  listScopedConfigKeys,
+  resetScopedConfigValue,
+  setScopedConfigValue,
+  type BabysitterConfig,
+} from "@a5c-ai/babysitter-sdk";
 
 const EXTENDED_CONFIG_KEYS: ReadonlySet<string> = new Set([
   "model",
@@ -52,10 +63,8 @@ const CONFIG_KEY_TO_ENV: Record<string, string> = {
   nodeTaskTimeout: CONFIG_ENV_VARS.NODE_TASK_TIMEOUT,
 };
 
-const runScopedConfig = new Map<string, unknown>();
-
 export function resetRunScopedConfig(): void {
-  runScopedConfig.clear();
+  resetScopedConfigValue();
 }
 
 export function isValidConfigKey(key: string): boolean {
@@ -80,8 +89,8 @@ export function validateConfigValue(key: string, value: unknown): string | null 
 }
 
 export function getConfigValue(key: string): unknown {
-  if (runScopedConfig.has(key)) {
-    return runScopedConfig.get(key);
+  if (hasScopedConfigValue(key)) {
+    return getScopedConfigValue(key);
   }
   if (BABYSITTER_CONFIG_KEYS.has(key)) {
     const config = getConfig();
@@ -101,30 +110,22 @@ export function listConfigKeys(): string[] {
   return [...new Set<string>([
     ...BABYSITTER_CONFIG_KEYS,
     ...EXTENDED_CONFIG_KEYS,
-    ...runScopedConfig.keys(),
+    ...listScopedConfigKeys(),
   ])];
 }
 
 export function getRunScopedConfigEntries(): IterableIterator<[string, unknown]> {
-  return runScopedConfig.entries();
+  const entries = [...getScopedConfigEntries()].map(([key, entry]) => [key, entry.value] as [string, unknown]);
+  return entries[Symbol.iterator]();
 }
 
 export function setConfigValue(key: string, value: unknown, scope: string): void {
-  if (scope === "global") {
-    const envKey = CONFIG_KEY_TO_ENV[key];
-    if (envKey) {
-      process.env[envKey] = String(value);
-    } else {
-      process.env[`BABYSITTER_${key.replace(/\./g, "_").toUpperCase()}`] = String(value);
-    }
-  }
-  runScopedConfig.set(key, value);
+  const envKey = scope === "global"
+    ? CONFIG_KEY_TO_ENV[key] ?? `BABYSITTER_${key.replace(/\./g, "_").toUpperCase()}`
+    : undefined;
+  setScopedConfigValue(key, value, scope === "global" ? "global" : "run", envKey);
 }
 
 export function resetConfigValue(key?: string): void {
-  if (key) {
-    runScopedConfig.delete(key);
-    return;
-  }
-  runScopedConfig.clear();
+  resetScopedConfigValue(key);
 }

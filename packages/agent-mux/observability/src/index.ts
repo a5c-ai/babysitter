@@ -35,8 +35,10 @@ export * from './types.js';
  */
 export type ObservabilityMode = 'full' | 'simple';
 
+let configuredMode: ObservabilityMode | undefined;
+
 function getMode(): ObservabilityMode {
-  return (process.env.AMUX_OBSERVABILITY_MODE as ObservabilityMode) || 'simple';
+  return configuredMode || (process.env.AMUX_OBSERVABILITY_MODE as ObservabilityMode) || 'simple';
 }
 
 // Exported Logger
@@ -70,7 +72,10 @@ export function createComponentLogger(component: string, context?: any): Logger 
 /**
  * Reconfigure the default logger.
  */
-export function reconfigureLogger(config: any): void {
+export function reconfigureLogger(config: any & { mode?: ObservabilityMode }): void {
+  if (config.mode) {
+    configuredMode = config.mode;
+  }
   // If we are in full mode or should be, reconfigure real logger
   if (getMode() === 'full') {
     reconfigureRealLogger(config);

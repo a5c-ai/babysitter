@@ -26,6 +26,12 @@ export interface PiModelEntry {
   [key: string]: unknown;
 }
 
+export interface AzureOpenAiEnvDefaults {
+  AZURE_OPENAI_RESOURCE_NAME?: string;
+  AZURE_OPENAI_BASE_URL?: string;
+  AZURE_OPENAI_DEPLOYMENT_NAME_MAP?: string;
+}
+
 interface PiAuthStorage {
   create(path?: string): PiAuthStorage;
 }
@@ -124,34 +130,39 @@ function normalizeAzureOpenAiBaseUrl(value: string): string {
   return trimmed;
 }
 
-export function configureAzureOpenAiEnvDefaults(requestedModel?: string): void {
-  const resourceName = process.env.AZURE_OPENAI_RESOURCE_NAME || process.env.AZURE_OPENAI_PROJECT_NAME;
-  if (!process.env.AZURE_OPENAI_RESOURCE_NAME && process.env.AZURE_OPENAI_PROJECT_NAME) {
-    process.env.AZURE_OPENAI_RESOURCE_NAME = process.env.AZURE_OPENAI_PROJECT_NAME;
+export function configureAzureOpenAiEnvDefaults(
+  requestedModel?: string,
+  env: NodeJS.ProcessEnv = process.env,
+): AzureOpenAiEnvDefaults {
+  const resourceName = env.AZURE_OPENAI_RESOURCE_NAME || env.AZURE_OPENAI_PROJECT_NAME;
+  const defaults: AzureOpenAiEnvDefaults = {};
+  if (resourceName) {
+    defaults.AZURE_OPENAI_RESOURCE_NAME = resourceName;
   }
-  if (process.env.AZURE_OPENAI_BASE_URL) {
-    process.env.AZURE_OPENAI_BASE_URL = normalizeAzureOpenAiBaseUrl(process.env.AZURE_OPENAI_BASE_URL);
+  if (env.AZURE_OPENAI_BASE_URL) {
+    defaults.AZURE_OPENAI_BASE_URL = normalizeAzureOpenAiBaseUrl(env.AZURE_OPENAI_BASE_URL);
   } else if (resourceName) {
-    process.env.AZURE_OPENAI_BASE_URL = normalizeAzureOpenAiBaseUrl(`https://${resourceName}.openai.azure.com`);
+    defaults.AZURE_OPENAI_BASE_URL = normalizeAzureOpenAiBaseUrl(`https://${resourceName}.openai.azure.com`);
   }
   if (
     requestedModel &&
     !requestedModel.includes(":") &&
-    process.env.AZURE_OPENAI_DEPLOYMENT &&
-    !process.env.AZURE_OPENAI_DEPLOYMENT_NAME_MAP
+    env.AZURE_OPENAI_DEPLOYMENT &&
+    !env.AZURE_OPENAI_DEPLOYMENT_NAME_MAP
   ) {
-    process.env.AZURE_OPENAI_DEPLOYMENT_NAME_MAP = `${requestedModel}=${process.env.AZURE_OPENAI_DEPLOYMENT}`;
+    defaults.AZURE_OPENAI_DEPLOYMENT_NAME_MAP = `${requestedModel}=${env.AZURE_OPENAI_DEPLOYMENT}`;
+  } else if (env.AZURE_OPENAI_DEPLOYMENT_NAME_MAP) {
+    defaults.AZURE_OPENAI_DEPLOYMENT_NAME_MAP = env.AZURE_OPENAI_DEPLOYMENT_NAME_MAP;
   }
+  return defaults;
 }
 
 function synthesizeAzureModelEntry(modelId: string): PiModelEntry | undefined {
   if (!process.env.AZURE_OPENAI_API_KEY) {
     return undefined;
   }
-  const resourceName = process.env.AZURE_OPENAI_RESOURCE_NAME || process.env.AZURE_OPENAI_PROJECT_NAME;
-  const baseUrl = process.env.AZURE_OPENAI_BASE_URL
-    ? normalizeAzureOpenAiBaseUrl(process.env.AZURE_OPENAI_BASE_URL)
-    : (resourceName ? normalizeAzureOpenAiBaseUrl(`https://${resourceName}.openai.azure.com`) : undefined);
+  const azureDefaults = configureAzureOpenAiEnvDefaults(modelId);
+  const baseUrl = azureDefaults.AZURE_OPENAI_BASE_URL;
   if (!baseUrl) {
     return undefined;
   }

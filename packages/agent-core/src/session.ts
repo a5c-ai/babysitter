@@ -238,15 +238,16 @@ interface ResolvedEndpoint {
 }
 
 function resolveEndpoint(options: AgentCoreSessionOptions): ResolvedEndpoint {
-  const amuxProvider = process.env["AMUX_PROVIDER"];
-  const amuxApiBase = process.env["AMUX_API_BASE"];
-  const amuxApiKey = process.env["AMUX_API_KEY"];
-  const amuxModel = process.env["AMUX_MODEL"];
-  const azureApiKey = process.env["AZURE_API_KEY"] || process.env["AZURE_OPENAI_API_KEY"];
-  const azureProject = process.env["AZURE_OPENAI_PROJECT_NAME"];
-  const openaiApiKey = process.env["OPENAI_API_KEY"];
-  const openaiModel = process.env["OPENAI_MODEL"];
-  const anthropicApiKey = process.env["ANTHROPIC_API_KEY"];
+  const env = options.env ?? process.env;
+  const amuxProvider = env["AMUX_PROVIDER"];
+  const amuxApiBase = env["AMUX_API_BASE"];
+  const amuxApiKey = env["AMUX_API_KEY"];
+  const amuxModel = env["AMUX_MODEL"];
+  const azureApiKey = env["AZURE_API_KEY"] || env["AZURE_OPENAI_API_KEY"];
+  const azureProject = env["AZURE_OPENAI_PROJECT_NAME"];
+  const openaiApiKey = env["OPENAI_API_KEY"];
+  const openaiModel = env["OPENAI_MODEL"];
+  const anthropicApiKey = env["ANTHROPIC_API_KEY"];
 
   const model = options.model || amuxModel || openaiModel || "gpt-4o";
   if (!options.model && !amuxModel && !openaiModel) {

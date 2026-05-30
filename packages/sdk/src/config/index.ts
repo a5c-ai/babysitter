@@ -57,3 +57,17 @@ export {
   resolveRunRootFromRunDir,
   resolveRunsDir,
 } from "./runs";
+
+export {
+  type EnvVarBoundary,
+  type EnvVarContract,
+  type ScopedConfigEntry,
+  type ScopedConfigScope,
+  ENV_VAR_CONTRACTS,
+  getScopedConfigEntries,
+  getScopedConfigValue,
+  hasScopedConfigValue,
+  listScopedConfigKeys,
+  resetScopedConfigValue,
+  setScopedConfigValue,
+} from "./envContract";

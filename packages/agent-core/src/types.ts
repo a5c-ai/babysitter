@@ -109,6 +109,8 @@ export interface AgentCoreSessionOptions extends AgentCoreStructuredOutputOption
   systemPrompt?: string;
   /** Additional system prompt segments appended before dispatch. */
   appendSystemPrompt?: string[];
+  /** Explicit environment snapshot for endpoint resolution. Defaults to process.env. */
+  env?: NodeJS.ProcessEnv;
   /**
    * @deprecated Ignored by the agent-mux-backed agent-core runtime.
    * Use the PI wrapper in `@a5c-ai/agent-platform` if you still need
