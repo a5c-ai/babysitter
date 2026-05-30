@@ -1,62 +1,27 @@
 /**
  * @process repo/issue-579-concurrent-effects-plan
- * @description Implementation process for issue #579: ConcurrentEffects parallel within-harness execution.
- * @inputs { issueNumber: number, baseBranch: string, implementationBranch: string, relatedIssues: number[] }
- * @outputs { success: boolean, phases: string[], design: object, changedFiles: string[], verification: object, review: object }
+ * @description Implementation process for issue #579: dependency-aware ConcurrentEffects within-harness dispatch.
+ * @inputs { issueNumber?: number, baseBranch?: string, implementationBranch?: string, maxImplementationIterations?: number }
+ * @outputs { success, context, design, tests, implementation, verification, review, delivery }
  *
- * @process cradle/feature
+ * @process cradle/feature-harness-integration-contribute
+ * @process methodologies/atdd-tdd/atdd-tdd
  * @process methodologies/shared/root-cause-diagnosis
  * @process methodologies/superpowers/test-driven-development
  * @process methodologies/superpowers/verification-before-completion
- * @process specializations/sdk-platform-development/runtime-orchestration
- * @process specializations/sdk-platform-development/harness-integration
+ * @process processes/shared/ci/idempotency-and-safe-abort
+ * @process specializations/collaboration/github/branch-policies
+ * @process specializations/collaboration/github/issue-linking
+ * @process specializations/sdk-platform-development/sdk-testing-strategy
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
 
-const ISSUE_CONTEXT = {
-  title: 'agent-platform: implement ConcurrentEffects (parallel within-harness)',
-  summary: [
-    'ConcurrentEffects is declared but not implemented end-to-end.',
-    'Existing SDK pieces expose ctx.parallel batching, parallelGroupId, maxConcurrency, and capability-gated run:iterate metadata.',
-    'Agent-platform orchestration loops still resolve effects sequentially and post each result one at a time.',
-    'BackgroundEffects are related but explicitly follow-up scope unless implementation needs a small shared abstraction.',
-  ],
-  labels: [
-    'enhancement',
-    'sdk',
-    'agent-platform',
-    'feature',
-    'priority:high',
-    'P0',
-    'effort:large',
-    'risk:high',
-    'ready-for-dev',
-  ],
-  relatedIssues: [593, 595, 598, 604],
-};
-
-const REUSE_AUDIT_FINDINGS = {
-  heading: 'Reuse-audit findings (REVIEW BEFORE PROCEEDING)',
-  processLibrary: '.a5c/process-library was not present in the checked-out repository during planning; use repo processes, docs, and SDK/agent-platform source patterns instead.',
-  existingInfrastructure: [
-    'packages/sdk/src/harness/types.ts declares HarnessCapability.ConcurrentEffects, BackgroundEffects, and MultiHarnessDispatch.',
-    'packages/sdk/src/runtime/intrinsics/parallel.ts collects ctx.parallel.all/map effects and propagates maxConcurrency/executionStrategy into scheduler hints.',
-    'packages/sdk/src/tasks/batching.ts and packages/sdk/src/tasks/grouping.ts assign parallelGroupId and compute effective concurrency.',
-    'packages/sdk/src/cli/commands/runIterate.ts exposes parallelGroups only when harnessCapabilities includes concurrent-effects.',
-    'packages/sdk/src/cli/main/runInspection.ts currently calls runIterate without harnessCapabilities, so CLI capability propagation is incomplete.',
-    'packages/sdk/src/testing/runHarness.ts and packages/sdk/src/testing/__tests__/parallelHarness.test.ts provide deterministic harness fixtures for scheduler-hint assertions.',
-    'packages/agent-platform/src/harness/internal/createRun/orchestration/externalPhase.ts and effects.ts contain the sequential effect resolution loops that need bounded concurrent dispatch.',
-    'packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts already centralizes resolveEffectWithRetry and commit-compatible result payloads.',
-  ],
-  avoidNewInfrastructureUnlessNeeded: [
-    'Do not add a second effect metadata model; extend EffectSchedulerHints and existing grouping helpers only when required.',
-    'Do not implement BackgroundEffects in this issue except for preserving current classification behavior and not regressing its metadata.',
-    'Do not replace the journal/replay model; keep effect result commits serialized through commitEffectResult.',
-  ],
-};
+const PROCESS_LIBRARY_ROOT = '/home/runner/.a5c/process-library/babysitter-repo/library';
 
 const TARGET_FILES = [
+  'docs/agent-layer-gaps.md',
+  'packages/sdk/src/harness/types.ts',
   'packages/sdk/src/runtime/types.ts',
   'packages/sdk/src/runtime/orchestrateIteration.ts',
   'packages/sdk/src/runtime/intrinsics/parallel.ts',
@@ -66,28 +31,36 @@ const TARGET_FILES = [
   'packages/sdk/src/cli/main/runInspection.ts',
   'packages/sdk/src/testing/runHarness.ts',
   'packages/sdk/src/testing/__tests__/parallelHarness.test.ts',
+  'packages/sdk/src/tasks/__tests__/batching.test.ts',
+  'packages/sdk/src/tasks/__tests__/grouping.test.ts',
+  'packages/agent-platform/src/harness/internal.ts',
+  'packages/agent-platform/src/harness/internal/createRun/orchestration/dispatch.ts',
   'packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts',
   'packages/agent-platform/src/harness/internal/createRun/orchestration/externalPhase.ts',
-  'packages/agent-platform/src/harness/internal/createRun/orchestration/internalPhase.ts',
   'packages/agent-platform/src/harness/internal/createRun/orchestration/index.ts',
+  'packages/agent-platform/src/harness/internal/createRun/orchestration/internalPhase.ts',
+  'packages/agent-platform/src/harness/internal/createRun/orchestration/internalTools.ts',
   'packages/agent-platform/src/harness/internal/createRun/orchestration/types.ts',
-  'packages/agent-platform/src/harness/internal/createRun/__tests__/orchestration.test.ts',
+  'packages/agent-platform/src/harness/internal/createRun/orchestration/__tests__/dispatch.test.ts',
+  'packages/agent-platform/src/harness/internal/createRun/__tests__/createRun.test.ts',
 ];
 
 const QUALITY_GATES = [
-  'Concurrent execution is gated by HarnessCapability.ConcurrentEffects or equivalent selected-harness capability detection; existing sequential behavior remains default.',
-  'Only explicit ctx.parallel groups or effects proven independent by scheduler hints run concurrently; ordinary sequential ctx.task chains remain ordered.',
-  'Dispatch respects maxConcurrency and uses deterministic group ordering for reproducible logs and tests.',
-  'Effect execution uses all-settled aggregation: every sibling success or error is committed before the next replay iteration proceeds.',
-  'commitEffectResult calls remain serialized per run to preserve journal ordering and state-cache consistency.',
-  'Mixed success/failure in a parallel group does not drop successful sibling results and surfaces failed sibling errors deterministically.',
-  'CLI run:iterate capability propagation is fixed so repeated iterations can expose parallelGroups when supported.',
-  'BackgroundEffects metadata and classification are not broken, but non-blocking dispatch stays out of scope for this issue.',
+  'Concurrent dispatch is enabled only when the selected harness declares HarnessCapability.ConcurrentEffects or an equivalent selected-harness capability.',
+  'Existing sequential behavior remains the default for harnesses without concurrent-effects.',
+  'Only explicit ctx.parallel groups or effects proven independent by scheduler hints run concurrently; ordinary ctx.task chains remain ordered.',
+  'parallelGroupId grouping is deterministic, respects executionStrategy, and never merges foreground and background semantics accidentally.',
+  'maxConcurrency is enforced as an upper bound for every eligible group.',
+  'Result handling is all-settled: sibling successes and sibling failures are all preserved.',
+  'commitEffectResult and task:post-equivalent journal writes remain serialized per run and in deterministic action order.',
+  'Mixed success/failure surfaces a deterministic error state without dropping successful sibling commits.',
+  'Regression tests are no-model and require no live harness credentials.',
+  'BackgroundEffects non-blocking dispatch and MultiHarnessDispatch remain follow-up scope unless a small shared helper is unavoidable and explicitly justified.',
 ];
 
 const VERIFICATION_COMMANDS = [
   'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/testing/__tests__/parallelHarness.test.ts packages/sdk/src/tasks/__tests__/grouping.test.ts packages/sdk/src/tasks/__tests__/batching.test.ts',
-  'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/agent-platform/src/harness/internal/createRun/__tests__/orchestration.test.ts',
+  'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/agent-platform/src/harness/internal/createRun/orchestration/__tests__/dispatch.test.ts packages/agent-platform/src/harness/internal/createRun/__tests__/createRun.test.ts',
   'npm run build:sdk',
   'npm run build --workspace=@a5c-ai/agent-platform',
   'npm run test:sdk',
@@ -96,219 +69,242 @@ const VERIFICATION_COMMANDS = [
   'git diff --check',
 ];
 
-const contextAndReuseAuditTask = defineTask('issue-579.context-and-reuse-audit', (args) => ({
-  kind: 'agent',
-  title: 'Read issue #579 and perform reuse audit',
+const readContextTask = defineTask('issue-579.read-context-and-reuse-audit', (args, taskCtx) => ({
+  kind: 'shell',
+  title: 'Read issue #579, code context, and reuse-audit findings',
   labels: ['issue-579', 'context', 'reuse-audit', 'sdk', 'agent-platform'],
-  agent: {
-    name: 'concurrent-effects-archaeologist',
-    prompt: {
-      role: 'senior SDK runtime engineer',
-      task: 'Read issue #579, related comments, and existing repo infrastructure before implementation.',
-      instructions: [
-        'Do not edit files in this task.',
-        'Start with this required heading exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
-        'Issue context:',
-        JSON.stringify(args.issueContext, null, 2),
-        'Planning-time reuse audit:',
-        JSON.stringify(args.reuseAuditFindings, null, 2),
-        'Target files to inspect:',
-        JSON.stringify(args.targetFiles, null, 2),
-        'Re-run or refresh issue context if needed, including comments and labels.',
-        'Inspect the listed SDK and agent-platform files plus any nearby tests before proposing code changes.',
-        'Identify existing helpers to reuse, missing contracts, and implementation risks.',
-        'Return JSON: { reuseAudit: object, currentBehavior: string, affectedFiles: string[], missingContracts: string[], risks: string[], recommendedOrder: string[] }.',
-      ],
-    },
+  shell: {
+    command: [
+      'set -euo pipefail',
+      `gh issue view ${args.issueNumber} --json title,body,labels,comments`,
+      'printf "\\n--- pr check ---\\n"',
+      `gh pr view ${args.issueNumber} --json files,title,body,comments 2>/dev/null || true`,
+      'printf "\\n--- Reuse-audit findings (REVIEW BEFORE PROCEEDING) ---\\n"',
+      'printf "Keywords: ConcurrentEffects, parallel effect dispatch, dependency graph, effect ordering, result aggregation, BackgroundEffects, MultiHarnessDispatch, ctx.parallel, parallelGroupId, maxConcurrency, commitEffectResult, task:post.\\n"',
+      'printf "\\nExisting migrations/routes/env vars/SDK deps/imports matching keywords:\\n"',
+      'rg -n "ConcurrentEffects|BackgroundEffects|MultiHarnessDispatch|ctx\\.parallel|parallelGroupId|maxConcurrency|schedulerHints|parallelGroups|commitEffectResult|task:post|resolveEffectWithRetry|dispatchEffectActions|effect executor|dependency graph|allSettled|all-settled" packages docs .a5c/processes library -g "*.ts" -g "*.tsx" -g "*.js" -g "*.mjs" -g "*.md" -g "*.json" | head -700 || true',
+      'printf "\\n--- active process library matches ---\\n"',
+      `find ${PROCESS_LIBRARY_ROOT} -maxdepth 4 -type f | sed 's#^${PROCESS_LIBRARY_ROOT}/##' | sort | rg -i "sdk|runtime|orchestrat|harness|tdd|quality|github|issue|parallel|concurrent|integration" | head -250 || true`,
+      'printf "\\n--- selected process-library references ---\\n"',
+      `sed -n "1,220p" ${PROCESS_LIBRARY_ROOT}/cradle/feature-harness-integration-contribute.js`,
+      `sed -n "1,180p" ${PROCESS_LIBRARY_ROOT}/methodologies/atdd-tdd/atdd-tdd.js`,
+      `sed -n "1,220p" ${PROCESS_LIBRARY_ROOT}/specializations/sdk-platform-development/sdk-testing-strategy.js`,
+      'printf "\\n--- docs/agent-layer-gaps.md ---\\n"',
+      'sed -n "1,260p" docs/agent-layer-gaps.md',
+      'printf "\\n--- target source excerpts ---\\n"',
+      `for file in ${args.targetFiles.map((file) => `'${file.replace(/'/g, "'\\''")}'`).join(' ')}; do if test -f "$file"; then printf "\\n### %s\\n" "$file"; sed -n "1,260p" "$file"; else printf "\\n### missing: %s\\n" "$file"; fi; done`,
+      'printf "\\n--- package scripts ---\\n"',
+      'node -e "const p=require(\'./package.json\'); console.log(JSON.stringify({scripts:p.scripts, workspaces:p.workspaces}, null, 2))"',
+      'printf "\\n--- git status ---\\n"',
+      'git status --short --branch',
+    ].join('\n'),
+    expectedExitCode: 0,
+    timeout: 300000,
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
   },
 }));
 
-const designTask = defineTask('issue-579.design-concurrent-effects', (args) => ({
+const designTask = defineTask('issue-579.design-contract', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Design dependency-aware concurrent effect execution',
-  labels: ['issue-579', 'design', 'scheduler', 'quality-gate'],
+  title: 'Design ConcurrentEffects execution contract',
+  labels: ['issue-579', 'design', 'runtime-contract'],
   agent: {
-    name: 'concurrent-effects-designer',
+    name: 'concurrent-effects-runtime-architect',
     prompt: {
-      role: 'principal runtime architect',
-      task: 'Design the ConcurrentEffects implementation before coding.',
+      role: 'principal TypeScript runtime architect',
+      task: 'Produce the issue #579 implementation contract from the runtime-read issue and code context.',
       instructions: [
-        'Do not edit files in this task.',
-        'Context and reuse audit:',
-        JSON.stringify(args.context, null, 2),
-        'Quality gates:',
+        'SPEC AND CONTEXT (verbatim, do not paraphrase):',
+        '---',
+        args.contextStdout,
+        '---',
+        'Do not edit files in this phase.',
+        'Trace the runtime call paths from process ctx.parallel collection through run:iterate, pending effects, harness effect resolution, and commitEffectResult/task:post.',
+        'Classify the current branch as missing, partially implemented, or already implemented for each quality gate below.',
         JSON.stringify(args.qualityGates, null, 2),
-        'Design an end-to-end implementation that reuses ctx.parallel scheduler hints and agent-platform resolveEffectWithRetry.',
-        'Define the dependency/order model. Only explicit parallel groups or demonstrably independent effects should run concurrently.',
-        'Define where capability gating lives for SDK CLI, agent-platform selected harnesses, internal orchestration, external orchestration, and the legacy CLI orchestration loop.',
-        'Define all-settled aggregation semantics, result commit serialization, progress events, retry behavior, worker session lifecycle, and cancellation/cleanup behavior.',
-        'Call out any scope-expanding choices. BackgroundEffects and MultiHarnessDispatch must remain follow-up scope unless a tiny shared utility is unavoidable.',
-        'Return JSON: { architecture: string, executionPlan: string[], targetFiles: string[], newHelpers: string[], publicApiChanges: string[], testMatrix: string[], scopeExpansionRequired: boolean, scopeExpansionReason?: string }.',
+        'Define the dependency-aware execution model, selected-harness capability gate, maxConcurrency semantics, all-settled aggregation, serialized commit ordering, retry behavior, cancellation cleanup, and progress/reporting behavior.',
+        'Keep BackgroundEffects non-blocking dispatch and MultiHarnessDispatch out of scope. If a helper touches their metadata, explain why it is not expanding scope.',
+        'Return JSON: { currentStatus: string, alreadyComplete: boolean, runtimeCallPaths: string[], affectedFiles: string[], architecture: string, implementationPhases: string[], testsToAuthorFirst: string[], qualityGates: string[], outOfScope: string[], risks: string[] }.',
       ],
     },
   },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
 }));
 
-const implementSdkTask = defineTask('issue-579.implement-sdk-surfaces', (args) => ({
+const authorTestsTask = defineTask('issue-579.author-contract-tests', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Author ConcurrentEffects regression tests before implementation',
+  labels: ['issue-579', 'tests', 'tdd'],
+  agent: {
+    name: 'concurrent-effects-contract-test-engineer',
+    prompt: {
+      role: 'senior test engineer for deterministic event-sourced orchestration',
+      task: 'Author no-model regression tests for the issue #579 contract before implementation changes.',
+      instructions: [
+        'SPEC AND CONTEXT (verbatim):',
+        '---',
+        args.contextStdout,
+        '---',
+        'IMPLEMENTATION CONTRACT (verbatim):',
+        '---',
+        JSON.stringify(args.design, null, 2),
+        '---',
+        'Author tests strictly from the spec/context and contract above. Avoid reading unrelated implementation directories beyond the target files named in the context.',
+        'Edit only focused test files and narrowly necessary fixtures.',
+        'Cover: capability-gated sequential fallback, explicit parallelGroupId dispatch, maxConcurrency limiting, deterministic commit order, all-settled mixed success/failure aggregation, thrown resolver conversion to error result, ordinary ctx.task ordering, BackgroundEffects remaining non-blocking-dispatch out of scope, CLI run:iterate capability propagation.',
+        'Use fake resolvers, fake harness discovery, and existing SDK test harness helpers. Do not require external agent credentials or sleeps that make tests flaky.',
+        'Return JSON: { changedFiles: string[], testsAdded: string[], expectedInitialFailures: string[], verificationCommands: string[] }.',
+      ],
+    },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+const implementSdkTask = defineTask('issue-579.implement-sdk', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implement SDK scheduler and CLI surfaces',
   labels: ['issue-579', 'implementation', 'sdk'],
   agent: {
     name: 'sdk-concurrent-effects-implementer',
     prompt: {
-      role: 'senior TypeScript SDK maintainer',
-      task: 'Implement the SDK side of ConcurrentEffects.',
+      role: 'senior Babysitter SDK maintainer',
+      task: 'Implement the SDK side of issue #579.',
       instructions: [
-        'Edit the repository directly.',
-        'Design context:',
+        'SPEC AND CONTEXT (verbatim):',
+        '---',
+        args.contextStdout,
+        '---',
+        'IMPLEMENTATION CONTRACT:',
         JSON.stringify(args.design, null, 2),
-        'Keep changes focused on the SDK runtime/types/tasks/CLI surfaces needed for concurrent within-harness dispatch.',
-        'Preserve replay determinism and backward compatibility for harnesses that do not declare concurrent-effects.',
-        'Likely SDK work: strengthen effect scheduler hints/grouping helpers, pass harness capabilities consistently through run:iterate and CLI inspection, and expose enough metadata for agent-platform scheduling.',
-        'Do not implement BackgroundEffects non-blocking dispatch here.',
-        'Return JSON: { changedFiles: string[], summary: string, contractsAdded: string[], compatibilityNotes: string[], testsPlanned: string[] }.',
+        'TESTS AUTHORED FIRST:',
+        JSON.stringify(args.tests, null, 2),
+        'Edit the repository directly and keep changes issue-scoped.',
+        'Preserve existing ctx.parallel collection behavior while strengthening scheduler hints only where the contract requires it.',
+        'Pass harness capabilities consistently through run:iterate and CLI inspection so parallelGroups/concurrent-effects metadata is visible across repeated iterations.',
+        'Do not implement BackgroundEffects non-blocking dispatch or MultiHarnessDispatch.',
+        'Return JSON: { changedFiles: string[], summary: string, contractsAdded: string[], compatibilityNotes: string[] }.',
       ],
     },
   },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
 }));
 
-const implementHarnessTask = defineTask('issue-579.implement-harness-dispatch', (args) => ({
+const implementHarnessTask = defineTask('issue-579.implement-harness', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Implement agent-platform concurrent dispatch',
+  title: 'Implement agent-platform concurrent effect dispatch',
   labels: ['issue-579', 'implementation', 'agent-platform', 'harness'],
   agent: {
-    name: 'agent-platform-concurrent-dispatcher',
+    name: 'agent-platform-concurrent-effects-implementer',
     prompt: {
       role: 'senior agent-platform harness maintainer',
-      task: 'Implement bounded parallel effect dispatch within agent-platform orchestration.',
+      task: 'Implement bounded within-harness concurrent effect dispatch for issue #579.',
       instructions: [
-        'Edit the repository directly.',
-        'Design context:',
+        'SPEC AND CONTEXT (verbatim):',
+        '---',
+        args.contextStdout,
+        '---',
+        'IMPLEMENTATION CONTRACT:',
         JSON.stringify(args.design, null, 2),
-        'SDK implementation summary:',
+        'SDK IMPLEMENTATION SUMMARY:',
         JSON.stringify(args.sdkImplementation, null, 2),
-        'Implement dependency-aware grouped dispatch for eligible pending effects in internal and external orchestration paths.',
-        'Reuse resolveEffectWithRetry for individual effect execution.',
-        'Respect maxConcurrency and selected-harness concurrent-effects capability; fall back to the current sequential loop otherwise.',
-        'Use Promise.allSettled-style aggregation, but serialize commitEffectResult calls to preserve journal ordering.',
-        'Ensure worker sessions/subscriptions are created, retried, and disposed per effect without leaking sessions on partial failure.',
-        'Emit progress for group start, per-effect completion, and group summary where the surrounding code already reports progress.',
-        'Do not broaden scope to BackgroundEffects or MultiHarnessDispatch.',
-        'Return JSON: { changedFiles: string[], summary: string, schedulingBehavior: string, failureBehavior: string, testsPlanned: string[] }.',
+        'Edit the repository directly and keep changes issue-scoped.',
+        'Resolve eligible grouped pending effects concurrently only when selected-harness capability allows it.',
+        'Reuse existing effect resolution and retry helpers. Use all-settled style aggregation and then serialize commitEffectResult calls in deterministic action order.',
+        'Respect maxConcurrency, isolate foreground/background semantics, and preserve existing sequential loops when the capability is absent.',
+        'Clean up worker sessions/subscriptions on success, failure, and cancellation.',
+        'Do not broaden scope to BackgroundEffects non-blocking dispatch or MultiHarnessDispatch.',
+        'Return JSON: { changedFiles: string[], summary: string, schedulingBehavior: string, failureBehavior: string, cleanupBehavior: string }.',
       ],
     },
   },
-}));
-
-const testsTask = defineTask('issue-579.add-regression-tests', (args) => ({
-  kind: 'agent',
-  title: 'Add deterministic ConcurrentEffects regression tests',
-  labels: ['issue-579', 'tests', 'quality-gate'],
-  agent: {
-    name: 'concurrent-effects-test-engineer',
-    prompt: {
-      role: 'senior test engineer for deterministic orchestration runtimes',
-      task: 'Add focused regression tests for ConcurrentEffects.',
-      instructions: [
-        'Edit the repository directly.',
-        'Implementation summaries:',
-        JSON.stringify({ sdk: args.sdkImplementation, harness: args.harnessImplementation }, null, 2),
-        'Add tests proving scheduler hints, capability gating, bounded concurrency, all-settled aggregation, serialized commits, mixed success/failure handling, and sequential fallback.',
-        'Prefer deterministic fake resolvers, fake clocks, and existing testing helpers over sleeps or live harness credentials.',
-        'Include at least one regression that would fail if only the first failed parallel effect were posted and sibling successes were dropped.',
-        'Include at least one regression that proves ordinary sequential ctx.task chains are not parallelized.',
-        'Return JSON: { changedFiles: string[], testsAdded: string[], coverageMap: Record<string, string>, residualGaps: string[] }.',
-      ],
-    },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
   },
 }));
 
-const verificationTask = defineTask('issue-579.verify-quality-gates', (args) => ({
-  kind: 'agent',
-  title: 'Run ConcurrentEffects verification gates',
+const verifyCommandTask = defineTask('issue-579.verify-command', (args, taskCtx) => ({
+  kind: 'shell',
+  title: `Verify issue #579: ${args.name}`,
   labels: ['issue-579', 'verification', 'quality-gate'],
-  agent: {
-    name: 'concurrent-effects-verifier',
-    prompt: {
-      role: 'release-quality engineer',
-      task: 'Verify the ConcurrentEffects implementation against required quality gates.',
-      instructions: [
-        'Run the verification commands below, plus any narrower commands needed to isolate failures.',
-        JSON.stringify(args.verificationCommands, null, 2),
-        'Quality gates:',
-        JSON.stringify(args.qualityGates, null, 2),
-        'Summarize exact pass/fail status for every command and map each quality gate to test evidence or source evidence.',
-        'If a command fails, diagnose whether the implementation or test expectation is wrong and fix only issue-scoped code before rerunning.',
-        'Return JSON: { passed: boolean, commands: Array<{ command: string, status: string, notes?: string }>, gateEvidence: Record<string, string>, failures: string[] }.',
-      ],
-    },
+  shell: {
+    command: args.command,
+    expectedExitCode: 0,
+    timeout: args.timeout ?? 600000,
+  },
+  expectedExitCode: 0,
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
   },
 }));
 
-const artifactReadbackTask = defineTask('issue-579.readback-artifacts', (args) => ({
+const reviewTask = defineTask('issue-579.review', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Read final ConcurrentEffects artifacts',
-  labels: ['issue-579', 'artifacts', 'review'],
-  agent: {
-    name: 'concurrent-effects-artifact-reader',
-    prompt: {
-      role: 'implementation summarizer',
-      task: 'Read final changed files and summarize the diff for review.',
-      instructions: [
-        'Do not make substantive code changes in this task.',
-        'Inspect git status and the diff for issue-scoped files only.',
-        'Target files:',
-        JSON.stringify(args.targetFiles, null, 2),
-        'Return JSON: { changedFiles: string[], diffSummary: string, publicBehaviorChanges: string[], verificationRelevantFiles: string[] }.',
-      ],
-    },
-  },
-}));
-
-const reviewTask = defineTask('issue-579.review-concurrent-effects', (args) => ({
-  kind: 'agent',
-  title: 'Review ConcurrentEffects implementation',
+  title: 'Review ConcurrentEffects implementation against issue #579',
   labels: ['issue-579', 'review', 'quality-gate'],
   agent: {
     name: 'concurrent-effects-reviewer',
     prompt: {
       role: 'principal SDK and harness reviewer',
-      task: 'Review the final ConcurrentEffects implementation against issue #579.',
+      task: 'Perform a code-review style final assessment of issue #579.',
       instructions: [
-        'Review in code-review stance. Findings first, ordered by severity, with file/line references.',
-        'Issue context:',
-        JSON.stringify(args.issueContext, null, 2),
-        'Design:',
+        'SPEC AND CONTEXT (verbatim):',
+        '---',
+        args.contextStdout,
+        '---',
+        'DESIGN:',
         JSON.stringify(args.design, null, 2),
-        'Artifacts:',
-        JSON.stringify(args.artifacts, null, 2),
-        'Verification:',
+        'IMPLEMENTATION:',
+        JSON.stringify(args.implementation, null, 2),
+        'VERIFICATION OUTPUTS:',
         JSON.stringify(args.verification, null, 2),
-        'Check replay determinism, dependency ordering, capability gating, all-settled aggregation, serialized journal commits, worker cleanup, backwards compatibility, and test coverage.',
-        'Return JSON: { approved: boolean, findings: Array<{ severity: string, file?: string, line?: number, issue: string }>, residualRisks: string[], summary: string }.',
+        'Review findings first, ordered by severity, with file/line references.',
+        'Check replay determinism, dependency ordering, capability gating, maxConcurrency, all-settled aggregation, serialized journal commits, worker cleanup, backwards compatibility, and no-model test coverage.',
+        'Return JSON: { approved: boolean, findings: Array<{ severity: string, file?: string, line?: number, issue: string }>, gateEvidence: Record<string, string>, residualRisks: string[], summary: string }.',
       ],
     },
   },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
 }));
 
-const deliveryTask = defineTask('issue-579.prepare-delivery', (args) => ({
+const deliveryTask = defineTask('issue-579.delivery', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Push implementation to existing PR and post update',
+  title: 'Prepare issue #579 implementation PR',
   labels: ['issue-579', 'delivery', 'github'],
   agent: {
-    name: 'concurrent-effects-delivery-agent',
+    name: 'github-delivery-agent',
     prompt: {
-      role: 'maintainer preparing a GitHub delivery',
-      task: 'Commit the issue #579 implementation to the existing PR branch and comment on PR #680.',
+      role: 'maintainer preparing a GitHub implementation PR',
+      task: 'Commit and publish the issue #579 implementation after review approval.',
       instructions: [
-        'Only proceed if review.approved is true and verification.passed is true.',
-        'Preserve unrelated dirty worktree files. Stage only files changed for issue #579.',
-        `Use the existing PR #680 branch ${args.implementationBranch} based on ${args.baseBranch}; do not create a second PR.`,
-        'Push the implementation commit(s) to the existing PR branch.',
-        'Post a PR comment on #680 with the implementation summary, verification commands, and residual risks.',
-        'Return JSON: { prUrl: string, commit: string, prCommentUrl?: string, stagedFiles: string[] }.',
+        'Only proceed if review.approved is true and all verification commands passed.',
+        'Preserve unrelated dirty worktree files. Stage only issue #579 implementation and test files.',
+        `Use implementation branch ${args.implementationBranch} based on ${args.baseBranch}.`,
+        'Create a non-draft PR linking issue #579. If the issue is already implemented on the base branch, comment with verification evidence instead of creating a duplicate implementation PR.',
+        'Post a concise issue comment summarizing phases, verification, residual risks, and the PR link or already-implemented evidence.',
+        'Return JSON: { prUrl?: string, issueCommentUrl?: string, commit?: string, alreadyImplemented?: boolean, summary: string }.',
       ],
     },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
   },
 }));
 
@@ -316,100 +312,94 @@ export async function process(inputs, ctx) {
   const issueNumber = inputs?.issueNumber ?? 579;
   const baseBranch = inputs?.baseBranch ?? 'staging';
   const implementationBranch = inputs?.implementationBranch ?? 'agent/issue-579-concurrent-effects';
+  const maxImplementationIterations = inputs?.maxImplementationIterations ?? 2;
 
-  const context = await ctx.task(contextAndReuseAuditTask, {
+  const context = await ctx.task(readContextTask, {
     issueNumber,
-    issueContext: ISSUE_CONTEXT,
-    reuseAuditFindings: REUSE_AUDIT_FINDINGS,
     targetFiles: TARGET_FILES,
   }, {
-    key: 'issue-579.context-and-reuse-audit',
+    key: 'issue-579.context',
   });
 
   const design = await ctx.task(designTask, {
-    context,
+    contextStdout: context.stdout,
     qualityGates: QUALITY_GATES,
   }, {
     key: 'issue-579.design',
   });
 
-  if (design?.scopeExpansionRequired) {
-    const decision = await ctx.breakpoint({
-      issueNumber,
-      reason: design.scopeExpansionReason,
-      design,
-      question: 'The ConcurrentEffects design requires scope expansion. Approve continuing with the expanded scope?',
-    }, {
-      label: 'Approve issue #579 scope expansion',
-      breakpointId: 'issue-579.scope-expansion',
-    });
-    if (!decision?.approved) {
-      return {
-        success: false,
-        phases: ['context', 'design', 'scope-breakpoint'],
-        design,
-        changedFiles: [],
-        verification: null,
-        review: { approved: false, findings: [{ severity: 'blocked', issue: 'Scope expansion was not approved.' }] },
-      };
-    }
-  }
-
-  const sdkImplementation = await ctx.task(implementSdkTask, {
+  const tests = await ctx.task(authorTestsTask, {
+    contextStdout: context.stdout,
     design,
-  }, {
-    key: 'issue-579.implement-sdk',
-  });
-
-  const harnessImplementation = await ctx.task(implementHarnessTask, {
-    design,
-    sdkImplementation,
-  }, {
-    key: 'issue-579.implement-harness',
-  });
-
-  const tests = await ctx.task(testsTask, {
-    sdkImplementation,
-    harnessImplementation,
   }, {
     key: 'issue-579.tests',
   });
 
-  const verification = await ctx.task(verificationTask, {
-    verificationCommands: VERIFICATION_COMMANDS,
-    qualityGates: QUALITY_GATES,
-    tests,
-  }, {
-    key: 'issue-579.verification',
-  });
+  let sdkImplementation = { skipped: true, reason: 'Design reported issue already complete on this branch.' };
+  let harnessImplementation = { skipped: true, reason: 'Design reported issue already complete on this branch.' };
 
-  const artifacts = await ctx.task(artifactReadbackTask, {
-    targetFiles: TARGET_FILES,
-  }, {
-    key: 'issue-579.artifacts',
-  });
+  if (!design?.alreadyComplete) {
+    let iteration = 0;
+    while (iteration < maxImplementationIterations) {
+      iteration += 1;
+      sdkImplementation = await ctx.task(implementSdkTask, {
+        contextStdout: context.stdout,
+        design,
+        tests,
+        iteration,
+      }, {
+        key: `issue-579.implement-sdk.${iteration}`,
+      });
+
+      harnessImplementation = await ctx.task(implementHarnessTask, {
+        contextStdout: context.stdout,
+        design,
+        tests,
+        sdkImplementation,
+        iteration,
+      }, {
+        key: `issue-579.implement-harness.${iteration}`,
+      });
+      break;
+    }
+  }
+
+  const verification = [];
+  for (const [index, command] of VERIFICATION_COMMANDS.entries()) {
+    const result = await ctx.task(verifyCommandTask, {
+      name: `gate-${index + 1}`,
+      command,
+    }, {
+      key: `issue-579.verify.${index + 1}`,
+    });
+    verification.push({ command, result });
+  }
+
+  const implementation = {
+    sdk: sdkImplementation,
+    harness: harnessImplementation,
+    tests,
+  };
 
   const review = await ctx.task(reviewTask, {
-    issueContext: ISSUE_CONTEXT,
+    contextStdout: context.stdout,
     design,
-    artifacts,
+    implementation,
     verification,
   }, {
     key: 'issue-579.review',
   });
 
-  if (review?.approved === false || verification?.passed === false) {
+  if (review?.approved === false) {
     return {
       success: false,
-      phases: ['context', 'design', 'implementation', 'tests', 'verification', 'artifacts', 'review'],
+      context,
       design,
-      changedFiles: artifacts?.changedFiles ?? [
-        ...(sdkImplementation?.changedFiles ?? []),
-        ...(harnessImplementation?.changedFiles ?? []),
-        ...(tests?.changedFiles ?? []),
-      ],
+      tests,
+      implementation,
       verification,
       review,
+      delivery: null,
     };
   }
 
@@ -417,21 +407,18 @@ export async function process(inputs, ctx) {
     issueNumber,
     baseBranch,
     implementationBranch,
-    verification,
     review,
+    verification,
   }, {
     key: 'issue-579.delivery',
   });
 
   return {
     success: true,
-    phases: ['context', 'design', 'implementation', 'tests', 'verification', 'artifacts', 'review', 'delivery'],
+    context,
     design,
-    changedFiles: artifacts?.changedFiles ?? [
-      ...(sdkImplementation?.changedFiles ?? []),
-      ...(harnessImplementation?.changedFiles ?? []),
-      ...(tests?.changedFiles ?? []),
-    ],
+    tests,
+    implementation,
     verification,
     review,
     delivery,
