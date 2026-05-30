@@ -1144,6 +1144,17 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         '        _ptd.create_output = _safe_create',
         '        import prompt_toolkit.output',
         '        prompt_toolkit.output.create_output = _safe_create',
+        '        import prompt_toolkit.input.defaults as _pid',
+        '        _orig_input = _pid.create_input',
+        '        def _safe_input(*a, **kw):',
+        '            try: return _orig_input(*a, **kw)',
+        '            except Exception:',
+        '                from prompt_toolkit.input.vt100_parser import Vt100Parser',
+        '                from prompt_toolkit.input.posixlike import PosixPipeInput',
+        '                return PosixPipeInput()',
+        '        _pid.create_input = _safe_input',
+        '        import prompt_toolkit.input',
+        '        prompt_toolkit.input.create_input = _safe_input',
         '    except Exception: pass',
       ].join('\n'));
       plan.env['PYTHONPATH'] = patchDir + (plan.env['PYTHONPATH'] ? `;${plan.env['PYTHONPATH']}` : '');
