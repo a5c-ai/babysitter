@@ -35,6 +35,7 @@ import { assessRun } from "../resumeState";
 import type { OrchestrationProgressSnapshot, RunOrchestrationPhaseArgs } from "./types";
 import { subscribeVerbosePiEvents } from "./verbose";
 import { listTasks, readTask } from "../../../../tasks";
+import { addRunSummary } from "../../../../session/history";
 
 export async function runInternalOrchestrationPhase(
   args: RunOrchestrationPhaseArgs,
@@ -102,6 +103,24 @@ export async function runInternalOrchestrationPhase(
       !== before[key as keyof OrchestrationProgressSnapshot]);
   };
   const protectedRunEntries = new Set<string>();
+  let runSummaryRecorded = false;
+  const recordRunSummary = async (status: string, outcome: string): Promise<void> => {
+    const stateFile = state.sessionBound?.stateFile;
+    const sessionId = state.sessionBound?.sessionId;
+    if (runSummaryRecorded || !stateFile || !sessionId || !state.runId) {
+      return;
+    }
+    const recordedAt = new Date().toISOString();
+    await addRunSummary(path.dirname(stateFile), sessionId, {
+      runId: state.runId,
+      processId: path.basename(args.processPath, path.extname(args.processPath)),
+      status,
+      startedAt: recordedAt,
+      completedAt: recordedAt,
+      outcome,
+    });
+    runSummaryRecorded = true;
+  };
   const snapshotProtectedRunEntries = async (): Promise<void> => {
     if (!args.runsDir) {
       return;
@@ -469,19 +488,36 @@ export async function runInternalOrchestrationPhase(
       }
     }
 
-    if (
-      !state.finished &&
-      (state.lastIterationResult?.status === "completed" || state.lastIterationResult?.status === "failed")
-    ) {
-      await invokeTool(finishTool, "babysitter_finish_orchestration", {
-        summary: state.lastIterationResult.status === "completed"
+    if (state.lastIterationResult?.status === "completed" || state.lastIterationResult?.status === "failed") {
+      await recordRunSummary(
+        state.lastIterationResult.status,
+        state.lastIterationResult.status === "completed"
           ? `Run ${state.runId} completed after ${state.iteration} iterations.`
           : `Run ${state.runId} failed after ${state.iteration} iterations.`,
-      });
+      );
+      if (!state.finished) {
+        await invokeTool(finishTool, "babysitter_finish_orchestration", {
+          summary: state.lastIterationResult.status === "completed"
+            ? `Run ${state.runId} completed after ${state.iteration} iterations.`
+            : `Run ${state.runId} failed after ${state.iteration} iterations.`,
+        });
+      }
     }
 
-    return ensureTerminalResult() ?? 1;
+    const terminalResult = ensureTerminalResult();
+    if (terminalResult !== null) {
+      return terminalResult;
+    }
+    await recordRunSummary(
+      "failed",
+      `Max iterations (${args.maxIterations}) reached without completion.`,
+    );
+    return 1;
   } catch (error: unknown) {
+    await recordRunSummary(
+      "failed",
+      error instanceof Error ? error.message : String(error),
+    );
     writeVerboseData(
       "phaseOrchestration error",
       error instanceof Error

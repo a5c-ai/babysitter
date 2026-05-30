@@ -260,6 +260,7 @@ import { WorkspaceService, resolveWorkspaceDefaultCwd } from "@a5c-ai/agent-comm
 import { invokeHarness } from "../../../invoker";
 import { createAgentCoreSession } from "@a5c-ai/agent-core";
 import { getSessionContext } from "../../../../session/context";
+import { getSessionHistory } from "../../../../session/history";
 
 const detectCallerHarnessMock = detectCallerHarness as Mock;
 
@@ -4434,6 +4435,46 @@ describe("handleHarnessCreateRun", () => {
       });
 
       expect(code).toBe(1);
+    });
+
+    it("records a session run summary when internal orchestration completes", async () => {
+      const summaryStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "harness-create-run-summary-state-"));
+      const summaryRunDir = await fs.mkdtemp(path.join(os.tmpdir(), "harness-create-run-summary-run-"));
+      tempDirs.push(summaryStateDir, summaryRunDir);
+      const boundStateDir = path.join(summaryStateDir, "state");
+      await fs.mkdir(boundStateDir, { recursive: true });
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "agent-core" }),
+      ]);
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      const code = await handleHarnessCreateRun({
+        harness: "agent-core",
+        processPath: "/tmp/internal-summary-process.js",
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+        existingRunId: "run-internal-summary",
+        existingRunDir: summaryRunDir,
+        existingSessionBound: {
+          harness: "agent-core",
+          sessionId: "test-internal-summary-session",
+          stateFile: path.join(boundStateDir, "test-internal-summary-session.md"),
+        },
+      });
+
+      expect(code).toBe(0);
+      const history = await getSessionHistory(boundStateDir, "test-internal-summary-session");
+      expect(history.runSummaries).toContainEqual(expect.objectContaining({
+        runId: "run-internal-summary",
+        processId: "internal-summary-process",
+        status: "completed",
+        outcome: expect.stringContaining("completed"),
+      }));
     });
 
     it("returns 1 when max iterations exhausted", async () => {
