@@ -1,7 +1,6 @@
 import * as path from "node:path";
 import * as readline from "node:readline";
 import {
-
   isRetryableEffectError,
   buildBreakpointResult,
   invokePromptEffect,
@@ -12,6 +11,32 @@ import {
   resolveHookDecisionResult,
 } from "./hookDecisionEffects";
 export { readProcessFileFingerprint } from "./effectsHelpers";
+import {
+  evaluateApprovalChain,
+  type ApprovalChainDefinition,
+  type ApprovalChainState,
+} from "../../../../breakpoints/approvalChains";
+import {
+  compactSession as compactSessionOverlay,
+  shouldAutoCompact as shouldAutoCompactSession,
+  type CompactionConfig,
+  type CompactionResult,
+} from "../../../../compression/compaction";
+import {
+  McpToolExecutor,
+  type McpToolExecutionRequest,
+} from "../../../../mcp/client/executor";
+import {
+  McpClientManager,
+  type McpTransportFactory,
+} from "../../../../mcp/client/manager";
+import { McpToolRegistry } from "../../../../mcp/client/toolRegistry";
+import type { McpToolResult } from "../../../../mcp/client/types";
+import {
+  checkBudget as checkSessionBudget,
+  updateSessionCost as updateSessionCostState,
+  type BudgetCheckResult,
+} from "../../../../session/cost";
 import { getAdapterByName } from "../../../";
 import type { StreamingOutputOptions } from "../../../types";
 import {
@@ -54,6 +79,63 @@ import {
 } from "./constants";
 import { dispatchEffectActions } from "./dispatch";
 
+type McpExecutorLike = {
+  execute(request: McpToolExecutionRequest): Promise<McpToolResult>;
+};
+
+interface McpRoutingOptions {
+  executor?: McpExecutorLike;
+  manager?: McpClientManager;
+  registry?: McpToolRegistry;
+  transportFactory?: McpTransportFactory;
+  stateDir?: string;
+  autoConnect?: boolean;
+  cacheTtlMs?: number;
+}
+
+interface EffectResolverOptions {
+  workspace?: string;
+  model?: string;
+  interactive?: boolean;
+  compressionConfig?: CompressionConfig | null;
+  streaming?: StreamingOutputOptions;
+  runsDir?: string;
+  runId?: string;
+  runDir?: string;
+  sessionId?: string;
+  maxIterations?: number;
+  verbose?: boolean;
+  outputMode?: "cli" | "json" | "tui" | "amux-events";
+  mcp?: McpRoutingOptions;
+}
+
+export interface PostEffectOverlayArgs {
+  runId?: string;
+  runDir?: string;
+  runsDir?: string;
+  stateDir?: string;
+  sessionId?: string;
+  effectCost?: {
+    totalCostUsd?: number;
+    inputTokens?: number;
+    outputTokens?: number;
+  };
+  estimatedStateTokens?: number;
+  compactionConfig?: CompactionConfig | null;
+  updateSessionCost?: typeof updateSessionCostState;
+  checkBudget?: typeof checkSessionBudget;
+  compactSession?: typeof compactSessionOverlay;
+  shouldAutoCompact?: typeof shouldAutoCompactSession;
+}
+
+export interface PostEffectOverlayResult {
+  budget?: BudgetCheckResult;
+  compaction?: {
+    triggered: boolean;
+    results: CompactionResult[];
+  };
+}
+
 export function resolveHarnessSessionIdForBinding(
   args: { selectedHarnessName: string },
   adapter: NonNullable<ReturnType<typeof getAdapterByName>>,
@@ -75,20 +157,7 @@ export function resolveHarnessSessionIdForBinding(
 export async function resolveEffect(
   action: EffectAction,
   harnessName: string,
-  options: {
-    workspace?: string;
-    model?: string;
-    interactive?: boolean;
-    compressionConfig?: CompressionConfig | null;
-    streaming?: StreamingOutputOptions;
-    runsDir?: string;
-    runId?: string;
-    runDir?: string;
-    sessionId?: string;
-    maxIterations?: number;
-    verbose?: boolean;
-    outputMode?: "cli" | "json" | "tui" | "amux-events";
-  },
+  options: EffectResolverOptions,
   piSession?: AgentCoreSessionHandle | null,
   discovered?: HarnessDiscoveryResult[],
   rl?: readline.Interface | null,
@@ -106,6 +175,9 @@ export async function resolveEffect(
   }
 
   const kind = action.kind;
+  if (kind === "mcp" || getMcpTaskConfig(action)) {
+    return resolveMcpEffect(action, options);
+  }
   if (kind === "node" || kind === "orchestrator_task") {
     const meta = action.taskDef?.metadata as Record<string, unknown> | undefined;
     const prompt = typeof meta?.prompt === "string"
@@ -179,6 +251,17 @@ export async function resolveEffect(
     };
   }
   if (kind === "breakpoint") {
+    const chainResult = resolveConfiguredApprovalChain(action);
+    if (chainResult && chainResult.status !== "approved") {
+      return {
+        status: "ok",
+        value: {
+          approved: false,
+          option: chainResult.status,
+          approvalChain: chainResult,
+        },
+      };
+    }
     const question = (action.taskDef as Record<string, unknown>)?.question as string | undefined
       ?? action.taskDef?.title
       ?? "Breakpoint reached. Continue?";
@@ -251,6 +334,187 @@ export async function resolveEffect(
   }
   const fallbackPrompt = action.taskDef?.title ?? `Handle effect ${action.effectId} (kind: ${kind})`;
   return invokePromptEffect(action, harnessName, fallbackPrompt, options, undefined);
+}
+
+function getMcpTaskConfig(action: EffectAction): Record<string, unknown> | undefined {
+  const taskDef = action.taskDef as Record<string, unknown> | undefined;
+  const direct = taskDef?.mcp;
+  if (isPlainRecord(direct)) {
+    return direct;
+  }
+  const metadata = taskDef?.metadata;
+  if (isPlainRecord(metadata) && isPlainRecord(metadata.mcp)) {
+    return metadata.mcp;
+  }
+  return undefined;
+}
+
+function getMcpRequest(action: EffectAction, options: EffectResolverOptions): McpToolExecutionRequest {
+  const config = getMcpTaskConfig(action);
+  if (!config) {
+    throw new Error(`MCP effect ${action.effectId} is missing taskDef.mcp configuration`);
+  }
+  const qualifiedName = typeof config.qualifiedName === "string"
+    ? config.qualifiedName
+    : typeof config.tool === "string"
+      ? config.tool
+      : undefined;
+  const colonIdx = qualifiedName?.indexOf(":") ?? -1;
+  const serverName = typeof config.serverName === "string"
+    ? config.serverName
+    : colonIdx > 0 && qualifiedName
+      ? qualifiedName.slice(0, colonIdx)
+      : undefined;
+  const toolName = typeof config.toolName === "string"
+    ? config.toolName
+    : colonIdx > 0 && qualifiedName
+      ? qualifiedName.slice(colonIdx + 1)
+      : undefined;
+  if (!serverName || !toolName) {
+    throw new Error(`MCP effect ${action.effectId} requires serverName and toolName`);
+  }
+  const args = isPlainRecord(config.args) ? config.args : {};
+  const context = {
+    ...(isPlainRecord(args.context) ? args.context : {}),
+    ...(options.runId ? { runId: options.runId } : {}),
+    ...(options.runDir ? { runDir: options.runDir } : {}),
+    ...(options.sessionId ? { sessionId: options.sessionId } : {}),
+    ...(options.workspace ? { workspace: options.workspace } : {}),
+  };
+  return {
+    serverName,
+    toolName,
+    args: {
+      ...args,
+      context,
+    },
+  };
+}
+
+async function resolveMcpExecutor(options: EffectResolverOptions): Promise<McpExecutorLike> {
+  if (options.mcp?.executor) {
+    return options.mcp.executor;
+  }
+  const manager = options.mcp?.manager ?? (
+    options.mcp?.transportFactory
+      ? new McpClientManager({
+        stateDir: options.mcp.stateDir ?? options.runDir ?? process.cwd(),
+        transportFactory: options.mcp.transportFactory,
+      })
+      : undefined
+  );
+  if (!manager) {
+    throw new Error("MCP effect routing requires an executor, manager, or transportFactory");
+  }
+  await manager.initialize(options.mcp?.autoConnect ?? true);
+  const registry = options.mcp?.registry ?? new McpToolRegistry(manager, {
+    cacheTtlMs: options.mcp?.cacheTtlMs,
+  });
+  await registry.refreshAll();
+  return new McpToolExecutor(manager);
+}
+
+function mcpResultToStdout(result: McpToolResult): string {
+  return result.content
+    .map((item) => typeof item.text === "string" ? item.text : typeof item.data === "string" ? item.data : "")
+    .filter(Boolean)
+    .join("\n");
+}
+
+function streamMcpOutput(text: string, streaming?: StreamingOutputOptions): void {
+  if (!streaming?.onLine || !text) {
+    return;
+  }
+  for (const line of text.split(/\r?\n/)) {
+    if (line.length > 0) {
+      streaming.onLine(line, "stdout");
+    }
+  }
+}
+
+async function resolveMcpEffect(
+  action: EffectAction,
+  options: EffectResolverOptions,
+): Promise<ResolveEffectResult> {
+  const executor = await resolveMcpExecutor(options);
+  const request = getMcpRequest(action, options);
+  const result = await executor.execute(request);
+  const stdout = mcpResultToStdout(result);
+  streamMcpOutput(stdout, options.streaming);
+  return {
+    status: result.success ? "ok" : "error",
+    value: result,
+    error: result.success ? undefined : new Error(result.error ?? stdout),
+    stdout,
+    stderr: result.success ? undefined : result.error,
+  };
+}
+
+function resolveConfiguredApprovalChain(action: EffectAction): ReturnType<typeof evaluateApprovalChain> | undefined {
+  const metadata = action.taskDef?.metadata;
+  if (!isPlainRecord(metadata)) {
+    return undefined;
+  }
+  if (!isApprovalChainDefinition(metadata.approvalChain) || !isApprovalChainState(metadata.approvalChainState)) {
+    return undefined;
+  }
+  return evaluateApprovalChain(metadata.approvalChain, metadata.approvalChainState);
+}
+
+function isApprovalChainDefinition(value: unknown): value is ApprovalChainDefinition {
+  return isPlainRecord(value)
+    && typeof value.chainId === "string"
+    && Array.isArray(value.steps);
+}
+
+function isApprovalChainState(value: unknown): value is ApprovalChainState {
+  return isPlainRecord(value)
+    && typeof value.chainId === "string"
+    && typeof value.currentStepIndex === "number"
+    && Array.isArray(value.completedSteps);
+}
+
+export async function applyPostEffectOrchestrationOverlays(
+  args: PostEffectOverlayArgs,
+): Promise<PostEffectOverlayResult> {
+  const result: PostEffectOverlayResult = {};
+  const updateSessionCost = args.updateSessionCost ?? updateSessionCostState;
+  const checkBudget = args.checkBudget ?? checkSessionBudget;
+  const compactSession = args.compactSession ?? compactSessionOverlay;
+  const shouldAutoCompact = args.shouldAutoCompact ?? shouldAutoCompactSession;
+
+  if (args.stateDir && args.sessionId && args.runId && args.effectCost) {
+    const costState = await updateSessionCost(args.stateDir, args.sessionId, {
+      runId: args.runId,
+      costUsd: args.effectCost.totalCostUsd ?? 0,
+      inputTokens: args.effectCost.inputTokens ?? 0,
+      outputTokens: args.effectCost.outputTokens ?? 0,
+    });
+    result.budget = checkBudget(costState);
+  }
+
+  if (
+    args.stateDir &&
+    args.sessionId &&
+    args.runsDir &&
+    args.compactionConfig &&
+    typeof args.estimatedStateTokens === "number" &&
+    shouldAutoCompact(args.estimatedStateTokens, args.compactionConfig)
+  ) {
+    result.compaction = {
+      triggered: true,
+      results: await compactSession(
+        args.stateDir,
+        args.sessionId,
+        args.runsDir,
+        args.compactionConfig,
+      ),
+    };
+  } else {
+    result.compaction = { triggered: false, results: [] };
+  }
+
+  return result;
 }
 
 function parseSubprocessSpec(
@@ -328,20 +592,7 @@ async function disposeWorkerSession(session: AgentCoreSessionHandle | null | und
 async function invokeSubprocessEffect(
   action: EffectAction,
   harnessName: string,
-  options: {
-    workspace?: string;
-    model?: string;
-    interactive?: boolean;
-    compressionConfig?: CompressionConfig | null;
-    streaming?: StreamingOutputOptions;
-    runsDir?: string;
-    runId?: string;
-    runDir?: string;
-    sessionId?: string;
-    maxIterations?: number;
-    verbose?: boolean;
-    outputMode?: "cli" | "json" | "tui" | "amux-events";
-  },
+  options: EffectResolverOptions,
   discovered?: HarnessDiscoveryResult[],
   rl?: readline.Interface | null,
   json?: boolean,
@@ -539,20 +790,8 @@ async function invokeSubprocessEffect(
 export async function resolveEffectWithRetry(
   action: EffectAction,
   harnessName: string,
-  options: {
-    workspace?: string;
-    model?: string;
-    interactive?: boolean;
-    compressionConfig?: CompressionConfig | null;
+  options: EffectResolverOptions & {
     retryConfig?: Partial<EffectRetryConfig>;
-    streaming?: StreamingOutputOptions;
-    runsDir?: string;
-    runId?: string;
-    runDir?: string;
-    sessionId?: string;
-    maxIterations?: number;
-    verbose?: boolean;
-    outputMode?: "cli" | "json" | "tui" | "amux-events";
   },
   piSession?: AgentCoreSessionHandle | null,
   discovered?: HarnessDiscoveryResult[],

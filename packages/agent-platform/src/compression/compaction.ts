@@ -1,5 +1,5 @@
 /**
- * Status: NOT INTEGRATED YET
+ * Status: Integrated with agent-platform orchestration.
  * Moved from @a5c-ai/babysitter-sdk.
  * GAP-PERF-002: Session Compaction.
  *

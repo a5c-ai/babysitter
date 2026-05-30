@@ -1,5 +1,10 @@
 import * as path from "node:path";
-import { commitEffectResult } from "@a5c-ai/babysitter-sdk";
+import {
+  buildEffectIndex,
+  commitEffectResult,
+} from "@a5c-ai/babysitter-sdk";
+import { DEFAULT_COMPACTION_CONFIG } from "../../../../compression/compaction";
+import { computeEffectCosts } from "../../../../cost/effectCost";
 import {
   BabysitterRuntimeError,
   ErrorCategory,
@@ -23,7 +28,11 @@ import { MAX_PROCESS_ERROR_RECOVERIES } from "./constants";
 const MAX_SHELL_OUTPUT_TAIL_CHARS = 1500;
 /** Max characters of non-shell output head included in progress events. */
 const MAX_NON_SHELL_OUTPUT_HEAD_CHARS = 300;
-import { orchestrateIterationWithProcessLoadRetry, resolveEffectWithRetry } from "./effects";
+import {
+  applyPostEffectOrchestrationOverlays,
+  orchestrateIterationWithProcessLoadRetry,
+  resolveEffectWithRetry,
+} from "./effects";
 import { dispatchEffectActions } from "./dispatch";
 import { ensureRunAndMaybeBindFromProcessDefinition } from "../planProcess/runState";
 import { subscribeVerbosePiEvents } from "./verbose";
@@ -187,6 +196,32 @@ export async function runExternalOrchestrationPhase(args: RunOrchestrationPhaseA
                 startedAt,
                 finishedAt,
               },
+            });
+            const stateDir = state.sessionBound?.stateFile
+              ? path.dirname(state.sessionBound.stateFile)
+              : undefined;
+            const costResult = await buildEffectIndex({ runDir: state.runDir! })
+              .then(computeEffectCosts)
+              .catch(() => undefined);
+            await applyPostEffectOrchestrationOverlays({
+              runId: state.runId,
+              runDir: state.runDir,
+              runsDir: args.runsDir ?? path.dirname(state.runDir!),
+              stateDir,
+              sessionId: state.sessionBound?.sessionId,
+              effectCost: costResult && costResult.effects.length > 0
+                ? {
+                  totalCostUsd: costResult.totalCostUsd,
+                  inputTokens: costResult.effects.reduce((sum, effect) => sum + effect.inputTokens, 0),
+                  outputTokens: costResult.effects.reduce((sum, effect) => sum + effect.outputTokens, 0),
+                }
+                : undefined,
+              estimatedStateTokens: Math.ceil(JSON.stringify({
+                iteration: state.iteration,
+                lastEffect: action.effectId,
+                output: effectResult.stdout ?? effectResult.stderr ?? effectResult.value,
+              }).length / 4),
+              compactionConfig: DEFAULT_COMPACTION_CONFIG,
             });
           },
         });
