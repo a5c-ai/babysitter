@@ -348,6 +348,7 @@ describe('createAgentMuxClient — Jitsi sidecar job contract from docs/jitsi/06
         tts: { provider: 'openai', voice: 'nova', speed: '1.0' },
         stt: { provider: 'deepgram' },
         vad: { provider: 'local-vad' },
+        goodbyeMessage: 'Standup Bot is leaving the meeting.',
       },
     });
 
@@ -375,6 +376,7 @@ describe('createAgentMuxClient — Jitsi sidecar job contract from docs/jitsi/06
     assert.equal(sidecarEnv.JITSI_TTS_SPEED, '1.0');
     assert.equal(sidecarEnv.JITSI_STT_PROVIDER, 'deepgram');
     assert.equal(sidecarEnv.JITSI_VAD_PROVIDER, 'local-vad');
+    assert.equal(sidecarEnv.JITSI_GOODBYE_MESSAGE, 'Standup Bot is leaving the meeting.');
     assert.equal(sidecarEnv.AGENT_SOCKET_PATH, '/tmp/jitsi-agent.sock');
 
     assert.deepEqual(agent.volumeMounts.find((mount) => mount.name === 'agent-socket'), { name: 'agent-socket', mountPath: '/tmp' });

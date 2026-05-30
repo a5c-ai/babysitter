@@ -9,6 +9,8 @@ function participantNames(participants = []) {
   return participants.map((participant) => participant.name || participant.id).filter(Boolean);
 }
 
+const IMMEDIATE_DISCONNECT_REASONS = new Set(['sigterm', 'startup_failed']);
+
 export function createJitsiSidecarRuntime({ config, jitsi, broadcast = () => {}, audio = null }) {
   if (!config?.roomUrl || !config?.roomId) {
     throw new Error('Jitsi sidecar runtime requires roomUrl and roomId');
@@ -101,6 +103,9 @@ export function createJitsiSidecarRuntime({ config, jitsi, broadcast = () => {},
 
     async stop(reason = 'shutdown') {
       stopped = true;
+      if (config.goodbyeMessage && !IMMEDIATE_DISCONNECT_REASONS.has(reason) && typeof jitsi.sendChat === 'function') {
+        await jitsi.sendChat(config.goodbyeMessage).catch(() => {});
+      }
       if (typeof jitsi.disconnect === 'function') {
         await jitsi.disconnect(reason);
       }

@@ -126,16 +126,42 @@ describe('Jitsi sidecar runtime command/event contract', () => {
     assert.equal(sent[1].reason, 'network');
   });
 
-  it('disconnect command performs graceful Jitsi leave', async () => {
+  it('disconnect command sends configured goodbye chat before graceful Jitsi leave', async () => {
     const jitsi = adapter();
     const runtime = createJitsiSidecarRuntime({
-      config: { roomUrl: 'https://meet.example.test/standup', jwt: 'jwt', roomId: 'standup' },
+      config: {
+        roomUrl: 'https://meet.example.test/standup',
+        jwt: 'jwt',
+        roomId: 'standup',
+        goodbyeMessage: 'Agent is leaving the meeting.',
+      },
       jitsi,
       broadcast: () => {},
     });
 
     await runtime.handleCommand({ action: 'disconnect', reason: 'task_complete' });
 
-    assert.deepEqual(jitsi.calls, [['disconnect', 'task_complete']]);
+    assert.deepEqual(jitsi.calls, [
+      ['sendChat', 'Agent is leaving the meeting.'],
+      ['disconnect', 'task_complete'],
+    ]);
+  });
+
+  it('forced SIGTERM leave disconnects without waiting on goodbye chat', async () => {
+    const jitsi = adapter();
+    const runtime = createJitsiSidecarRuntime({
+      config: {
+        roomUrl: 'https://meet.example.test/standup',
+        jwt: 'jwt',
+        roomId: 'standup',
+        goodbyeMessage: 'Agent is leaving the meeting.',
+      },
+      jitsi,
+      broadcast: () => {},
+    });
+
+    await runtime.stop('sigterm');
+
+    assert.deepEqual(jitsi.calls, [['disconnect', 'sigterm']]);
   });
 });
