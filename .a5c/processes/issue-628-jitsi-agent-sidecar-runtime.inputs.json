@@ -1,0 +1,24 @@
+{
+  "issueNumber": 628,
+  "baseBranch": "staging",
+  "branchName": "feature/issue-628-jitsi-agent-sidecar-runtime",
+  "maxImplementationAttempts": 3,
+  "publish": true,
+  "specPaths": [
+    "packages/krate/docs/jitsi/01-architecture.md",
+    "packages/krate/docs/jitsi/02-helm-deployment.md",
+    "packages/krate/docs/jitsi/03-crds-and-controllers.md",
+    "packages/krate/docs/jitsi/06-agent-meeting-participation.md",
+    "packages/krate/docs/jitsi/07-agent-meeting-runtime.md",
+    "packages/krate/docs/agent-identity/04-meeting-integration.md"
+  ],
+  "redTestCommand": "npm run test --workspace=@a5c-ai/krate",
+  "qualityCommands": [
+    "git diff --check",
+    "npm run test --workspace=@a5c-ai/krate",
+    "npm run build:krate",
+    "npm run verify:metadata"
+  ],
+  "localJitsiEnvVar": "JITSI_LOCAL_TEST_URL",
+  "localJitsiCommand": "npm run test --workspace=@a5c-ai/krate -- --runInBand --testNamePattern=local-jitsi"
+}
