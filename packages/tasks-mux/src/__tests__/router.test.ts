@@ -47,6 +47,51 @@ describe("routeTask", () => {
     expect(isHostDelegableRoute(decision)).toBe(false);
   });
 
+  it("selects a tracker responder by tracker backend metadata", () => {
+    const trackerBackend = {
+      name: "external-tracker",
+    } as never;
+    const decision = routeTask(
+      {
+        kind: "agent",
+        metadata: { responderType: "tracker", trackerBackend: "linear" },
+      },
+      {
+        trackerBackend,
+        responders: [
+          {
+            id: "jira-tracker",
+            type: "tracker",
+            name: "Jira Tracker",
+            title: "Jira Tracker",
+            domains: [],
+            tags: ["jira", "tracker"],
+            availability: true,
+            responseTimeSla: 300_000,
+            trackerBackend: "jira",
+          },
+          {
+            id: "linear-tracker",
+            type: "tracker",
+            name: "Linear Tracker",
+            title: "Linear Tracker",
+            domains: [],
+            tags: ["linear", "tracker"],
+            availability: true,
+            responseTimeSla: 300_000,
+            trackerBackend: "linear",
+          },
+        ],
+      },
+    );
+
+    expect(decision.responderType).toBe("tracker");
+    expect(decision.route).toBe("external-tracker");
+    expect(decision.backend).toBe(trackerBackend);
+    expect(decision.unavailable).toBe(false);
+    expect(decision.responder?.id).toBe("linear-tracker");
+  });
+
   it("auto routing prefers an available agent responder before human fallback", () => {
     const decision = routeTask(
       { kind: "agent", agent: { responderType: "auto", adapter: "codex" } },
