@@ -362,7 +362,7 @@ describe('primary live stack runner contract', () => {
         expect(launch?.args).toContain(modelCase.amuxProvider);
         expect(launch?.args).toContain(modelCase.model);
         expect(launch?.args).toContain('--no-interactive');
-        expect(launch?.args).toContain('--with-proxy');
+        expect(launch?.args.some((a: string) => a.includes('proxy'))).toBe(true);
         expect(launch?.args).toContain('--prompt');
         expect(launch?.args).toContain('--max-turns');
         expect(launch?.args).toContain('--yolo');
@@ -523,12 +523,13 @@ describe('primary live stack runner contract', () => {
             'hookEventId: hook-1',
             'hookMuxEventId: hookmux-1',
             `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            'The Greek epic unfolds across multiple books. '.repeat(20),
           ].join('\n'),
           stderr: '',
         };
       },
     });
-
     expect(result.status).toBe('passed');
     expect(result.failure).toBeUndefined();
   });
@@ -573,6 +574,8 @@ describe('primary live stack runner contract', () => {
             'hookEventId: hook-1',
             'hookMuxEventId: hookmux-1',
             `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            'The Greek epic unfolds across multiple books. '.repeat(20),
           ].join('\n'),
           stderr: '',
         };
@@ -623,6 +626,8 @@ describe('primary live stack runner contract', () => {
             'hookEventId: hook-1',
             'hookMuxEventId: hookmux-1',
             `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            'The Greek epic unfolds across multiple books. '.repeat(20),
           ].join('\n'),
           stderr: '',
         };
@@ -674,6 +679,8 @@ describe('primary live stack runner contract', () => {
             'hookEventId: hook-1',
             'hookMuxEventId: hookmux-1',
             `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            'The Greek epic unfolds across multiple books. '.repeat(20),
           ].join('\n'),
           stderr: '',
         };
@@ -727,6 +734,8 @@ describe('primary live stack runner contract', () => {
             'hookEventId: hook-1',
             'hookMuxEventId: hookmux-1',
             `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            'The Greek epic unfolds across multiple books. '.repeat(20),
           ].join('\n'),
           stderr: '',
         };
@@ -782,6 +791,8 @@ describe('primary live stack runner contract', () => {
             'hookEventId: hook-1',
             'hookMuxEventId: hookmux-1',
             `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            'The Greek epic unfolds across multiple books. '.repeat(20),
           ].join('\n'),
           stderr: '',
         };

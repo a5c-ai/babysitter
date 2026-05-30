@@ -5,8 +5,6 @@ export {
   BreakpointStrategySchema,
   UrgencySchema,
   InteractionKindSchema,
-  ResponderTypeSchema,
-  ResponderSchema,
   CodeSnippetSchema,
   BreakpointContextLinkSchema,
   BreakpointContextSectionSchema,
@@ -47,8 +45,6 @@ export type {
   BreakpointStrategy,
   Urgency,
   InteractionKind,
-  ResponderType,
-  Responder,
   CodeSnippet,
   BreakpointContextLink,
   BreakpointContextSection,
@@ -81,19 +77,6 @@ export type {
   RoutingRule,
   RoutingConfig,
 } from "./types.js";
-
-// ── Task Router ──────────────────────────────────────────────────────────
-export {
-  TaskRouter,
-  NoResponderAvailableError,
-  routeTask,
-} from "./router.js";
-
-export type {
-  TaskRouteHints,
-  TaskRouteRequest,
-  RoutingContext,
-} from "./router.js";
 
 // ── Backend Interface ────────────────────────────────────────────────────
 export type {

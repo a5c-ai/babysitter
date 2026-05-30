@@ -1,10 +1,37 @@
 /**
  * @process tasks-mux/responder-type-system
+ * @process tdd-quality-convergence
+ * @process processes/shared/tdd-triplet
+ * @process processes/shared/completeness-gate
  * @description Brownfield TDD implementation process for issue #630: add the ResponderType system and task router to packages/tasks-mux.
  * @skill babysit plugins/babysitter/skills/babysit/SKILL.md
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+
+const reuseAuditTask = defineTask('issue-630/reuse-audit', (args, taskCtx) => ({
+  kind: 'shell',
+  title: 'Phase 0: Reuse audit for ResponderType routing',
+  shell: {
+    command: [
+      'set -euo pipefail',
+      'printf "%s\\n" "Reuse-audit findings (REVIEW BEFORE PROCEEDING)"',
+      'printf "%s\\n" "Keywords: ResponderType, responderType, TaskRouter, routeTask, ResponderProfile, ResponderMatcher, BreakpointRouter, adapter, model, trackerBackend, capabilities"',
+      'printf "\\n%s\\n" "Existing source and docs matches:"',
+      'rg -n "ResponderType|responderType|TaskRouter|routeTask|ResponderProfile|ResponderMatcher|BreakpointRouter|adapter|model|trackerBackend|capabilities" packages/tasks-mux docs/agent-mux-babysitter-integrations -g "*.ts" -g "*.md" || true',
+      'printf "\\n%s\\n" "Existing process-library methodology matches:"',
+      'rg -n "TDD|quality gate|brownfield|runtimeCallPaths|reuse-audit|completeness|routing" /home/runner/.a5c/process-library/babysitter-repo/library -g "*.js" -g "*.md" | sed -n "1,220p" || true',
+    ].join('\n'),
+    cwd: args.projectRoot,
+    expectedExitCode: 0,
+    timeout: 120000,
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+  labels: ['reuse-audit', 'phase-0', 'issue-630'],
+}));
 
 const readSpecTask = defineTask('issue-630/read-spec', (args, taskCtx) => ({
   kind: 'shell',
@@ -46,9 +73,11 @@ const inspectCurrentTasksMuxTask = defineTask('issue-630/inspect-current-tasks-m
         projectRoot: args.projectRoot,
         package: 'packages/tasks-mux',
         specStdout: args.specStdout,
+        reuseAuditStdout: args.reuseAuditStdout,
       },
       instructions: [
         `Work inside "${args.projectRoot}".`,
+        'Start from the reuse-audit findings and avoid adding duplicate infrastructure when existing tasks-mux patterns can be extended.',
         'Read the current tasks-mux source and tests before proposing changes.',
         'Record runtimeCallPaths from public entry points and existing breakpoint responder paths to the files that must change.',
         'Identify the smallest implementation surface for the ResponderType system requested by issue #630.',
@@ -287,7 +316,7 @@ const reviewSpecAgainstArtifactsTask = defineTask('issue-630/spec-artifact-revie
 
 export async function process(inputs, ctx) {
   const {
-    projectRoot = process.cwd(),
+    projectRoot = globalThis.process.cwd(),
     targetScore = 90,
     maxAttempts = 3,
     analysisModel = 'claude-sonnet-4-6',
@@ -335,11 +364,14 @@ export async function process(inputs, ctx) {
     ],
   } = inputs;
 
+  const reuseAudit = await ctx.task(reuseAuditTask, { projectRoot });
+
   const spec = await ctx.task(readSpecTask, { projectRoot });
 
   const analysis = await ctx.task(inspectCurrentTasksMuxTask, {
     projectRoot,
     specStdout: spec.stdout,
+    reuseAuditStdout: reuseAudit.stdout,
     analysisModel,
   });
 
@@ -421,6 +453,7 @@ export async function process(inputs, ctx) {
     success: Boolean(review?.ready && (review?.score || 0) >= targetScore),
     issue: 630,
     processId: 'tasks-mux/responder-type-system',
+    reuseAuditSummary: reuseAudit.stdout,
     runtimeCallPaths: analysis.runtimeCallPaths,
     attempts: attempt,
     tests,
