@@ -9,6 +9,7 @@ import {
 import type { HarnessDiscoveryResult } from "../../types";
 import type { HarnessPromptContext } from "./prompts";
 import type { OutputMode, ProgressPayload } from "./utils";
+import type { SessionHistory } from "../../../session/types";
 
 export const DIM = "\x1b[2m";
 export const RESET = "\x1b[0m";
@@ -239,6 +240,7 @@ export function buildPromptContext(args: {
   selectedHarnessName?: string;
   discovered: HarnessDiscoveryResult[];
   compressionConfig: CompressionConfig | null;
+  sessionContext?: SessionHistory;
 }): HarnessPromptContext {
   const envNames = [
     "CI",
@@ -262,6 +264,7 @@ export function buildPromptContext(args: {
     selectedHarnessName: args.selectedHarnessName,
     ...hostContext,
     discoveredHarnesses: args.discovered,
+    sessionContext: args.sessionContext,
     compressionEnabled: Boolean(
       args.compressionConfig?.enabled &&
       args.compressionConfig.layers.sdkContextHook.enabled,

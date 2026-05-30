@@ -112,7 +112,7 @@ async function writeRaw(filePath: string, data: SessionCostState): Promise<void>
   await fs.rename(tempPath, filePath);
 }
 
-async function setSessionPaused(
+export async function setSessionPaused(
   stateDir: string,
   sessionId: string,
   paused: boolean,

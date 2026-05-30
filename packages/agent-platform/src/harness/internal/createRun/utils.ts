@@ -20,6 +20,16 @@ import {
   isBuiltInHarnessName,
   normalizeBuiltInHarnessName,
 } from "../../builtInHarness";
+import {
+  buildTaskRequirements,
+  type HarnessCandidate,
+} from "../../capabilityRouter";
+import { resolveFallbackHarness } from "../../fallbackChains";
+import { resolveModelForTask } from "../../modelSelection";
+import {
+  evaluatePolicy,
+  type PolicyName,
+} from "../../selectionPolicies";
 
 export type OutputMode = "cli" | "json" | "tui" | "amux-events";
 
@@ -190,6 +200,18 @@ export function resolveTaskHarness(
   }
 
   const meta = action.taskDef?.metadata as Record<string, unknown> | undefined;
+  const execution = (action.taskDef as Record<string, unknown> | undefined)?.execution as Record<string, unknown> | undefined;
+  if (typeof execution?.harness === "string") {
+    const requestedHarness = normalizeBuiltInHarnessName(execution.harness);
+    const match = discovered.find((h) => h.name === requestedHarness && h.installed);
+    if (match) return match.name;
+  }
+
+  const policyHarness = resolvePolicySelectedHarness(action, discovered);
+  if (policyHarness) {
+    return policyHarness;
+  }
+
   if (typeof meta?.harness === "string") {
     const requestedHarness = normalizeBuiltInHarnessName(meta.harness);
     const match = discovered.find((h) => h.name === requestedHarness && h.installed);
@@ -197,6 +219,91 @@ export function resolveTaskHarness(
   }
 
   return normalizeBuiltInHarnessName(defaultHarness);
+}
+
+function resolvePolicySelectedHarness(
+  action: EffectAction,
+  discovered: HarnessDiscoveryResult[],
+): string | undefined {
+  const taskDef = action.taskDef as Record<string, unknown> | undefined;
+  const execution = taskDef?.execution as Record<string, unknown> | undefined;
+  const meta = taskDef?.metadata as Record<string, unknown> | undefined;
+  const candidates = toHarnessCandidates(discovered);
+  if (candidates.length === 0) {
+    return undefined;
+  }
+
+  const policyName = coercePolicyName(execution?.policy ?? meta?.selectionPolicy);
+  if (policyName) {
+    const result = evaluatePolicy(
+      policyName,
+      candidates,
+      buildTaskRequirements(taskDef ?? {}),
+      { preferredHarness: stringValue(execution?.harness ?? meta?.preferredHarness) },
+    );
+    if (result.selected) {
+      return result.selected.name;
+    }
+  }
+
+  if (typeof execution?.model === "string") {
+    const result = resolveModelForTask(taskDef ?? {}, candidates);
+    if (result.selectedHarness) {
+      return result.selectedHarness;
+    }
+  }
+
+  const fallbackChain = arrayOfStrings(execution?.fallbackChain ?? meta?.fallbackChain);
+  if (fallbackChain.length > 0) {
+    const failedHarnesses = arrayOfStrings(meta?.failedHarnesses);
+    const result = resolveFallbackHarness(
+      { harnesses: fallbackChain.map(normalizeBuiltInHarnessName), maxRetries: fallbackChain.length - 1 },
+      failedHarnesses.map(normalizeBuiltInHarnessName),
+    );
+    if (result.harness && discovered.some((h) => h.name === result.harness && h.installed)) {
+      return result.harness;
+    }
+  }
+
+  return undefined;
+}
+
+function toHarnessCandidates(discovered: HarnessDiscoveryResult[]): HarnessCandidate[] {
+  return discovered
+    .filter((harness) => harness.installed)
+    .map((harness) => {
+      const extra = harness as HarnessDiscoveryResult & {
+        supportedModels?: string[];
+        availableTools?: string[];
+        permissions?: string[];
+      };
+      return {
+        name: harness.name,
+        capabilities: harness.capabilities,
+        supportedModels: extra.supportedModels ?? [],
+        availableTools: extra.availableTools ?? [],
+        permissions: extra.permissions ?? [],
+      };
+    });
+}
+
+function coercePolicyName(value: unknown): PolicyName | undefined {
+  return value === "cost-optimized" ||
+    value === "latency-optimized" ||
+    value === "capability-first" ||
+    value === "user-preferred"
+    ? value
+    : undefined;
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function arrayOfStrings(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
 }
 
 /**

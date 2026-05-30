@@ -30,10 +30,12 @@ import {
   emitProgress,
   discoverHarnesses,
 } from "./utils";
-import { DEFAULTS, resolveRunsDir } from "@a5c-ai/babysitter-sdk";
+import { DEFAULTS, getAdapterByName, resolveRunsDir } from "@a5c-ai/babysitter-sdk";
 import { getProcessOutputDir, runPlanProcessPhase } from "./planProcess";
 import { runOrchestrationPhase } from "./orchestration";
 import { normalizeBuiltInHarnessName } from "../../builtInHarness";
+import { getSessionHistory } from "../../../session/history";
+import type { SessionHistory } from "../../../session/types";
 
 // ── Re-exports for backward compatibility ────────────────────────────
 
@@ -91,11 +93,13 @@ export async function handleHarnessCreateRun(
     const discovered = await discoverHarnesses();
     const selectedHarnessName = normalizeBuiltInHarnessName(preferredHarness ?? "agent-core");
     const compressionConfig = loadSessionCompressionConfig(workspace);
+    const sessionContext = await loadPromptSessionContext(selectedHarnessName);
     const promptContext = buildPromptContext({
       workspace,
       selectedHarnessName,
       discovered,
       compressionConfig,
+      sessionContext,
     });
 
     let processPath = providedProcessPath;
@@ -165,6 +169,32 @@ export async function handleHarnessCreateRun(
   } finally {
     rl?.close();
   }
+}
+
+async function loadPromptSessionContext(
+  selectedHarnessName: string,
+): Promise<SessionHistory | undefined> {
+  const adapter = getAdapterByName(selectedHarnessName);
+  if (!adapter) {
+    return undefined;
+  }
+  const sessionId = adapter.resolveSessionId({});
+  if (!sessionId) {
+    return undefined;
+  }
+  const pluginRoot = adapter.resolvePluginRoot({});
+  const stateDir = adapter.resolveStateDir({ pluginRoot });
+  if (!stateDir) {
+    return undefined;
+  }
+  const history = await getSessionHistory(stateDir, sessionId);
+  const hasContext = history.notes.length > 0
+    || Object.keys(history.sharedKnowledge).length > 0
+    || Boolean(history.worktree)
+    || history.decisions.length > 0
+    || history.runSummaries.length > 0
+    || history.contextSnapshots.length > 0;
+  return hasContext ? history : undefined;
 }
 
 /** @deprecated Use handleHarnessCreateRun instead */

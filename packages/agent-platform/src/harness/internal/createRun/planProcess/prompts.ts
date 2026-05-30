@@ -4,6 +4,9 @@ import {
   type ExternalWorkspaceAssessment,
   type HarnessPromptContext as SessionCreatePromptContext,
 } from "../utils";
+import { formatSessionContextForPlanning } from "../prompts";
+
+export { formatSessionContextForPlanning };
 
 export function buildExternalProcessDefinitionPrompt(args: {
   prompt: string;
@@ -25,6 +28,7 @@ export function buildExternalProcessDefinitionPrompt(args: {
     : "(no files)";
   const preferAgentOnlyTasks = args.preferAgentOnlyTasks === true;
   const hostAgentContext = formatHostAgentContext(args.promptContext);
+  const sessionPlanningContext = formatSessionContextForPlanning(args.promptContext.sessionContext);
   const emptyWorkspaceAuthoringGuide = [
     "",
     "Empty-workspace authoring guide:",
@@ -87,6 +91,7 @@ export function buildExternalProcessDefinitionPrompt(args: {
     "- Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction` for ordinary internal agent-core work. Leave them unset unless the task truly requires stronger guardrails or long-running compaction.",
     "- External harnesses do not provide agent-core worker guardrails for their own tool execution. Keep security-sensitive shell work on the internal agent-core worker by using shell effects without routing them to an external harness.",
     ...(hostAgentContext.length > 0 ? ["", ...hostAgentContext] : []),
+    ...(sessionPlanningContext.length > 0 ? ["", ...sessionPlanningContext] : []),
     "",
     "Output rules:",
     `- Choose a descriptive kebab-case filename (e.g. "user-auth-tdd.mjs", "data-pipeline-setup.js") and write the file to the process output directory.`,

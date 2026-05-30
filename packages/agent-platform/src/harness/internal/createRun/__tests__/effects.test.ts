@@ -162,6 +162,8 @@ describe("issue #580 orchestration effect routing", () => {
       itemsCompacted: 1,
       compactedAt: "2026-05-30T00:00:00.000Z",
     }]);
+    const markThresholdsTriggered = vi.fn(async () => undefined);
+    const setSessionPaused = vi.fn(async () => undefined);
 
     const result = await applyPostEffectOrchestrationOverlays({
       runId: "run-1",
@@ -185,6 +187,8 @@ describe("issue #580 orchestration effect routing", () => {
       updateSessionCost,
       checkBudget,
       compactSession,
+      markThresholdsTriggered,
+      setSessionPaused,
     });
 
     expect(updateSessionCost).toHaveBeenCalledWith("/state", "session-1", {
@@ -203,6 +207,85 @@ describe("issue #580 orchestration effect routing", () => {
     expect(result).toMatchObject({
       budget: { shouldPause: true },
       compaction: { triggered: true },
+    });
+  });
+
+  it("records post-effect session history and context snapshots", async () => {
+    const addDecision = vi.fn(async () => undefined);
+    const saveContextSnapshot = vi.fn(async () => undefined);
+
+    await applyPostEffectOrchestrationOverlays({
+      runId: "run-1",
+      runDir: "/runs/run-1",
+      runsDir: "/runs",
+      stateDir: "/state",
+      sessionId: "session-1",
+      effectSummary: {
+        effectId: "eff-1",
+        taskId: "task-1",
+        kind: "agent",
+        title: "Implement routing",
+        status: "ok",
+      },
+      addDecision,
+      saveContextSnapshot,
+    });
+
+    expect(addDecision).toHaveBeenCalledWith("/state", "session-1", {
+      runId: "run-1",
+      description: "Resolved agent effect: Implement routing",
+      rationale: "Effect eff-1 completed with status ok",
+    });
+    expect(saveContextSnapshot).toHaveBeenCalledWith("/state", "session-1", {
+      runId: "run-1",
+      snapshot: expect.objectContaining({
+        effectId: "eff-1",
+        taskId: "task-1",
+        status: "ok",
+      }),
+    });
+  });
+
+  it("marks budget thresholds and returns an enforced pause only for explicit autoPause budgets", async () => {
+    const updateSessionCost = vi.fn(async () => ({
+      totalCostUsd: 0.12,
+      totalInputTokens: 400,
+      totalOutputTokens: 100,
+      runCosts: [],
+      budget: { maxCostUsd: 0.1, alertThresholds: [100], autoPause: true },
+      triggeredThresholds: [],
+      paused: false,
+      lastUpdatedAt: "2026-05-30T00:00:00.000Z",
+    }));
+    const checkBudget = vi.fn(() => ({
+      exceeded: true,
+      alerts: [{ thresholdPct: 100 }],
+      shouldPause: true,
+      pauseReason: "Session cost budget exceeded",
+    }));
+    const markThresholdsTriggered = vi.fn(async () => undefined);
+    const setSessionPaused = vi.fn(async () => undefined);
+
+    const result = await applyPostEffectOrchestrationOverlays({
+      runId: "run-1",
+      stateDir: "/state",
+      sessionId: "session-1",
+      effectCost: {
+        totalCostUsd: 0.12,
+        inputTokens: 400,
+        outputTokens: 100,
+      },
+      updateSessionCost,
+      checkBudget,
+      markThresholdsTriggered,
+      setSessionPaused,
+    });
+
+    expect(markThresholdsTriggered).toHaveBeenCalledWith("/state", "session-1", [100]);
+    expect(setSessionPaused).toHaveBeenCalledWith("/state", "session-1", true);
+    expect(result.budgetEnforcement).toEqual({
+      paused: true,
+      pauseReason: "Session cost budget exceeded",
     });
   });
 });

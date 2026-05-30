@@ -138,6 +138,7 @@ export async function getSessionHistory(
   return {
     notes: context.notes,
     sharedKnowledge: context.sharedKnowledge,
+    worktree: context.worktree,
     decisions: rawHistory.decisions,
     runSummaries: rawHistory.runSummaries,
     contextSnapshots: rawHistory.contextSnapshots,

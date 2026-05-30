@@ -34,9 +34,15 @@ import { McpToolRegistry } from "../../../../mcp/client/toolRegistry";
 import type { McpToolResult } from "../../../../mcp/client/types";
 import {
   checkBudget as checkSessionBudget,
+  markThresholdsTriggered as markSessionThresholdsTriggered,
+  setSessionPaused as setSessionCostPaused,
   updateSessionCost as updateSessionCostState,
   type BudgetCheckResult,
 } from "../../../../session/cost";
+import {
+  addDecision as addSessionDecision,
+  saveContextSnapshot as saveSessionContextSnapshot,
+} from "../../../../session/history";
 import { getAdapterByName } from "../../../";
 import type { StreamingOutputOptions } from "../../../types";
 import {
@@ -129,10 +135,25 @@ export interface PostEffectOverlayArgs {
   checkBudget?: typeof checkSessionBudget;
   compactSession?: typeof compactSessionOverlay;
   shouldAutoCompact?: typeof shouldAutoCompactSession;
+  markThresholdsTriggered?: typeof markSessionThresholdsTriggered;
+  setSessionPaused?: typeof setSessionCostPaused;
+  addDecision?: typeof addSessionDecision;
+  saveContextSnapshot?: typeof saveSessionContextSnapshot;
+  effectSummary?: {
+    effectId: string;
+    taskId?: string;
+    kind?: string;
+    title?: string;
+    status: "ok" | "error";
+  };
 }
 
 export interface PostEffectOverlayResult {
   budget?: BudgetCheckResult;
+  budgetEnforcement?: {
+    paused: boolean;
+    pauseReason?: string;
+  };
   compaction?: {
     triggered: boolean;
     results: CompactionResult[];
@@ -491,6 +512,10 @@ export async function applyPostEffectOrchestrationOverlays(
   const checkBudget = args.checkBudget ?? checkSessionBudget;
   const compactSession = args.compactSession ?? compactSessionOverlay;
   const shouldAutoCompact = args.shouldAutoCompact ?? shouldAutoCompactSession;
+  const markThresholdsTriggered = args.markThresholdsTriggered ?? markSessionThresholdsTriggered;
+  const setSessionPaused = args.setSessionPaused ?? setSessionCostPaused;
+  const addDecision = args.addDecision ?? addSessionDecision;
+  const saveContextSnapshot = args.saveContextSnapshot ?? saveSessionContextSnapshot;
 
   if (args.stateDir && args.sessionId && args.runId && args.effectCost) {
     const costState = await updateSessionCost(args.stateDir, args.sessionId, {
@@ -500,6 +525,39 @@ export async function applyPostEffectOrchestrationOverlays(
       outputTokens: args.effectCost.outputTokens ?? 0,
     });
     result.budget = checkBudget(costState);
+    await markThresholdsTriggered(
+      args.stateDir,
+      args.sessionId,
+      result.budget.alerts.map((alert) => alert.thresholdPct),
+    );
+    if (result.budget.shouldPause) {
+      await setSessionPaused(args.stateDir, args.sessionId, true);
+      result.budgetEnforcement = {
+        paused: true,
+        pauseReason: result.budget.pauseReason,
+      };
+    } else {
+      result.budgetEnforcement = { paused: false };
+    }
+  }
+
+  if (args.stateDir && args.sessionId && args.runId && args.effectSummary) {
+    const title = args.effectSummary.title ?? args.effectSummary.taskId ?? args.effectSummary.effectId;
+    await addDecision(args.stateDir, args.sessionId, {
+      runId: args.runId,
+      description: `Resolved ${args.effectSummary.kind ?? "unknown"} effect: ${title}`,
+      rationale: `Effect ${args.effectSummary.effectId} completed with status ${args.effectSummary.status}`,
+    });
+    await saveContextSnapshot(args.stateDir, args.sessionId, {
+      runId: args.runId,
+      snapshot: {
+        effectId: args.effectSummary.effectId,
+        taskId: args.effectSummary.taskId,
+        kind: args.effectSummary.kind,
+        title: args.effectSummary.title,
+        status: args.effectSummary.status,
+      },
+    });
   }
 
   if (

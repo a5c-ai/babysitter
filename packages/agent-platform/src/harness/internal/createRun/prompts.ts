@@ -1,4 +1,5 @@
 import type { HarnessDiscoveryResult } from "../../types";
+import type { SessionHistory } from "../../../session/types";
 import {
   createPromptContextFromCatalog,
   composeProcessCreatePrompt,
@@ -25,6 +26,7 @@ export interface HarnessPromptContext {
   piDefaultBashSandbox: "local" | "auto" | "secure";
   piIsolationDefault: boolean;
   envFlags: Array<{ name: string; value: string }>;
+  sessionContext?: SessionHistory;
 }
 
 /** @deprecated Use HarnessPromptContext instead */
@@ -102,6 +104,63 @@ function formatHostAgentContext(context: HarnessPromptContext): string[] {
   ];
 }
 
+function truncateSessionContextValue(value: string, maxChars = 240): string {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  return normalized.length > maxChars
+    ? `${normalized.slice(0, maxChars - 1)}…`
+    : normalized;
+}
+
+export function formatSessionContextForPlanning(context?: SessionHistory): string[] {
+  if (!context) {
+    return [];
+  }
+
+  const lines: string[] = [];
+  const notes = context.notes.slice(-5).map((note) => truncateSessionContextValue(note));
+  const sharedKnowledge = Object.entries(context.sharedKnowledge)
+    .slice(-8)
+    .map(([key, value]) => `${key}=${truncateSessionContextValue(value)}`);
+  const decisions = context.decisions.slice(-5)
+    .map((decision) => truncateSessionContextValue(
+      `${decision.description}${decision.rationale ? ` (${decision.rationale})` : ""}`,
+    ));
+  const runSummaries = context.runSummaries.slice(-3)
+    .map((summary) => truncateSessionContextValue(
+      `${summary.runId}: ${summary.status}${summary.outcome ? ` - ${summary.outcome}` : ""}`,
+    ));
+
+  if (context.worktree) {
+    lines.push("Worktree:");
+    for (const [key, value] of Object.entries(context.worktree)) {
+      if (value !== undefined && value !== null && value !== "") {
+        lines.push(`- ${key}=${truncateSessionContextValue(String(value))}`);
+      }
+    }
+  }
+  if (notes.length > 0) {
+    lines.push("Notes:", ...notes.map((note) => `- ${note}`));
+  }
+  if (sharedKnowledge.length > 0) {
+    lines.push("Shared knowledge:", ...sharedKnowledge.map((entry) => `- ${entry}`));
+  }
+  if (decisions.length > 0) {
+    lines.push("Recent decisions:", ...decisions.map((decision) => `- ${decision}`));
+  }
+  if (runSummaries.length > 0) {
+    lines.push("Recent run summaries:", ...runSummaries.map((summary) => `- ${summary}`));
+  }
+
+  return lines.length > 0
+    ? [
+      "Session planning context:",
+      "- Use this bounded, session-scoped context when it is relevant to the new process.",
+      "- Do not treat it as a substitute for the current user request or repository state.",
+      ...lines,
+    ]
+    : [];
+}
+
 function formatHarnessAssignmentGuidance(context: HarnessPromptContext): string[] {
   const installedHarnesses = context.discoveredHarnesses
     .filter((h) => h.installed)
@@ -131,6 +190,7 @@ function formatHarnessAssignmentGuidance(context: HarnessPromptContext): string[
 
 function formatSharedContext(context: HarnessPromptContext): string[] {
   const hostAgentContext = formatHostAgentContext(context);
+  const sessionContext = formatSessionContextForPlanning(context.sessionContext);
 
   return [
     "",
@@ -140,6 +200,9 @@ function formatSharedContext(context: HarnessPromptContext): string[] {
       : []),
     "",
     ...formatHarnessCatalog(context),
+    ...(sessionContext.length > 0
+      ? ["", ...sessionContext]
+      : []),
     "",
     ...formatHarnessAssignmentGuidance(context),
   ];

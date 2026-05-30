@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { HarnessCapability } from "../../../types";
 vi.mock("@a5c-ai/babysitter-sdk", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@a5c-ai/babysitter-sdk")>();
   return {
@@ -225,6 +226,86 @@ describe("harnessUtils", () => {
         },
       ],
     )).toBe("claude-code");
+  });
+
+  it("prefers task execution harness over legacy task metadata harness", () => {
+    expect(resolveTaskHarness(
+      {
+        effectId: "eff-1",
+        invocationKey: "inv-1",
+        kind: "agent",
+        taskDef: {
+          kind: "agent",
+          execution: { harness: "codex" },
+          metadata: { harness: "claude-code" },
+        },
+      },
+      "pi",
+      [
+        {
+          name: "claude-code",
+          installed: true,
+          cliCommand: "claude",
+          configFound: true,
+          capabilities: [],
+          platform: "linux",
+        },
+        {
+          name: "codex",
+          installed: true,
+          cliCommand: "codex",
+          configFound: true,
+          capabilities: [],
+          platform: "linux",
+        },
+      ],
+    )).toBe("codex");
+  });
+
+  it("uses opt-in selection policy routing without changing default routing", () => {
+    const discovered = [
+      {
+        name: "pi",
+        installed: true,
+        cliCommand: "pi",
+        configFound: true,
+        capabilities: [HarnessCapability.Programmatic],
+        platform: "linux",
+      },
+      {
+        name: "codex",
+        installed: true,
+        cliCommand: "codex",
+        configFound: true,
+        capabilities: [HarnessCapability.Programmatic, HarnessCapability.StopHook],
+        platform: "linux",
+      },
+    ];
+
+    expect(resolveTaskHarness(
+      {
+        effectId: "eff-default",
+        invocationKey: "inv-default",
+        kind: "agent",
+        taskDef: { kind: "agent" },
+      },
+      "pi",
+      discovered,
+    )).toBe("pi");
+
+    expect(resolveTaskHarness(
+      {
+        effectId: "eff-policy",
+        invocationKey: "inv-policy",
+        kind: "agent",
+        taskDef: {
+          kind: "agent",
+          metadata: { selectionPolicy: "latency-optimized" },
+        },
+      },
+      "pi",
+      discovered,
+    )).toBe("codex");
   });
 
   describe("promptPiWithRetry", () => {

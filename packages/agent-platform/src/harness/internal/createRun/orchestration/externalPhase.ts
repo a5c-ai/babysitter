@@ -5,6 +5,7 @@ import {
 } from "@a5c-ai/babysitter-sdk";
 import { DEFAULT_COMPACTION_CONFIG } from "../../../../compression/compaction";
 import { computeEffectCosts } from "../../../../cost/effectCost";
+import { addRunSummary } from "../../../../session/history";
 import {
   BabysitterRuntimeError,
   ErrorCategory,
@@ -210,7 +211,7 @@ export async function runExternalOrchestrationPhase(args: RunOrchestrationPhaseA
             const costResult = await buildEffectIndex({ runDir: state.runDir! })
               .then(computeEffectCosts)
               .catch(() => undefined);
-            await applyPostEffectOrchestrationOverlays({
+            const overlays = await applyPostEffectOrchestrationOverlays({
               runId: state.runId,
               runDir: state.runDir,
               runsDir: args.runsDir ?? path.dirname(state.runDir!),
@@ -229,7 +230,34 @@ export async function runExternalOrchestrationPhase(args: RunOrchestrationPhaseA
                 output: effectResult.stdout ?? effectResult.stderr ?? effectResult.value,
               }).length / 4),
               compactionConfig: DEFAULT_COMPACTION_CONFIG,
+              effectSummary: {
+                effectId: action.effectId,
+                taskId: action.taskId,
+                kind: action.kind,
+                title: action.taskDef?.title,
+                status: effectResult.status,
+              },
             });
+            if (overlays.budgetEnforcement?.paused) {
+              const error = overlays.budgetEnforcement.pauseReason ?? "Session cost budget pause requested";
+              emitProgress(
+                {
+                  phase: "2",
+                  status: "failed",
+                  iteration: state.iteration,
+                  runStatus: "failed",
+                  error,
+                },
+                args.json,
+                args.verbose,
+                args.outputMode,
+              );
+              throw new BabysitterRuntimeError(
+                "SessionBudgetPaused",
+                error,
+                { category: ErrorCategory.Runtime },
+              );
+            }
           },
         });
         emitProgress(
@@ -247,6 +275,7 @@ export async function runExternalOrchestrationPhase(args: RunOrchestrationPhaseA
         continue;
       }
       if (result.status === "completed") {
+        await recordExternalRunSummary(state, args, "completed", "Run completed");
         emitProgress(
           { phase: "2", status: "completed", iteration: state.iteration, runStatus: "completed" },
           args.json,
@@ -309,6 +338,7 @@ export async function runExternalOrchestrationPhase(args: RunOrchestrationPhaseA
         args.verbose,
         args.outputMode,
       );
+      await recordExternalRunSummary(state, args, "failed", extractErrorMessage(result.error));
       return 1;
     }
     emitProgress(
@@ -323,10 +353,32 @@ export async function runExternalOrchestrationPhase(args: RunOrchestrationPhaseA
       args.verbose,
       args.outputMode,
     );
+    await recordExternalRunSummary(state, args, "failed", `Max iterations (${args.maxIterations}) reached without completion`);
     return 1;
   } finally {
     await Promise.allSettled(Array.from(activePiSessions).map((session) => shutdownPiSession(session)));
   }
+}
+
+async function recordExternalRunSummary(
+  state: OrchestrationState,
+  args: RunOrchestrationPhaseArgs,
+  status: string,
+  outcome: string,
+): Promise<void> {
+  const stateFile = state.sessionBound?.stateFile;
+  const sessionId = state.sessionBound?.sessionId;
+  if (!stateFile || !sessionId || !state.runId) {
+    return;
+  }
+  await addRunSummary(path.dirname(stateFile), sessionId, {
+    runId: state.runId,
+    processId: path.basename(args.processPath, path.extname(args.processPath)),
+    status,
+    startedAt: new Date().toISOString(),
+    completedAt: new Date().toISOString(),
+    outcome,
+  });
 }
 
 async function resolveExternalAction(args: {

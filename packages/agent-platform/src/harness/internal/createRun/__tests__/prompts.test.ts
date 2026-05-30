@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest";
 import { HarnessCapability } from "../../../types";
-import { buildExternalProcessDefinitionPrompt } from "../planProcess/prompts";
+import {
+  buildExternalProcessDefinitionPrompt,
+  formatSessionContextForPlanning,
+} from "../planProcess/prompts";
 import {
   buildOrchestrationSystemPrompt,
   buildOrchestrationTurnPrompt,
@@ -107,6 +110,56 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("selected orchestration binding harness is agent-core");
     expect(prompt).toContain("distinct from the host agent identity");
     expect(prompt).toContain("Discovered external harnesses are routing options");
+  });
+
+  test("PhasePlanProcess prompt includes bounded session planning context", async () => {
+    const prompt = await buildProcessDefinitionSystemPrompt("/tmp/out.js", {
+      ...context,
+      sessionContext: {
+        notes: ["Remember staging release constraints", "Keep budget behavior opt-in"],
+        sharedKnowledge: {
+          issue: "#594",
+          owner: "agent-platform",
+        },
+        worktree: {
+          workspacePath: "/repo/workspace",
+          currentPath: "/repo/workspace/packages/agent-platform",
+          repoAlias: "babysitter",
+          branch: "staging",
+        },
+        decisions: [{
+          timestamp: "2026-05-30T00:00:00.000Z",
+          description: "Preserve resolveTaskHarness as the default routing path",
+          runId: "run-1",
+        }],
+        runSummaries: [{
+          runId: "run-1",
+          processId: "repo/previous",
+          status: "completed",
+          startedAt: "2026-05-30T00:00:00.000Z",
+          outcome: "Prior planning completed",
+        }],
+        contextSnapshots: [],
+      },
+    });
+
+    expect(prompt).toContain("Session planning context:");
+    expect(prompt).toContain("Remember staging release constraints");
+    expect(prompt).toContain("issue=#594");
+    expect(prompt).toContain("workspacePath=/repo/workspace");
+    expect(prompt).toContain("Preserve resolveTaskHarness as the default routing path");
+    expect(prompt).toContain("Prior planning completed");
+  });
+
+  test("session planning context formatter stays empty for missing or empty context", () => {
+    expect(formatSessionContextForPlanning()).toEqual([]);
+    expect(formatSessionContextForPlanning({
+      notes: [],
+      sharedKnowledge: {},
+      decisions: [],
+      runSummaries: [],
+      contextSnapshots: [],
+    })).toEqual([]);
   });
 
   test("PhasePlanProcess prompt includes Claude Code host identity", async () => {

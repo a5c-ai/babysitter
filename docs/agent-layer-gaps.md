@@ -100,7 +100,7 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 | ConcurrentEffects not implemented | `src/harness/types.ts:30` | Capability declared but effects processed sequentially. No Promise.all batching. |
 | Breakpoints not integrated | `src/breakpoints/*` | Approval chains, delegation, postures defined but never invoked during orchestration. |
 | Cost tracking not integrated | `src/cost/effectCost.ts` | Per-effect cost aggregation exists but not called during effect resolution. |
-| Session budget not enforced | `src/session/cost.ts` | Implemented but never checked in orchestration loop. No auto-pause on exceeded budget. |
+| Session budget enforcement partial | `src/session/cost.ts`, `src/harness/internal/createRun/orchestration/effects.ts` | Post-effect overlays now update session cost, mark thresholds, and set explicit auto-pause budgets paused; broader pre-dispatch admission control remains missing. |
 
 ### High
 
@@ -108,11 +108,11 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 |-----|------|-------------|
 | BackgroundEffects not implemented | `src/harness/types.ts:32` | Declared but no non-blocking effect dispatch. Orchestration blocks on every effect. |
 | MultiHarnessDispatch not implemented | `src/harness/types.ts:34` | No support for distributing effects across multiple harnesses. |
-| Session history not wired | `src/session/history.ts` | Decision trail and run summary defined but not captured during orchestration. |
-| Session compaction not triggered | `src/compression/compaction.ts` | Logic exists but never invoked based on state size thresholds. |
-| Capability router unused | `src/harness/capabilityRouter.ts` | Scorer implemented but not used for task routing. |
-| Model selection unused | `src/harness/modelSelection.ts` | Exists but not invoked during task dispatch. |
-| Fallback chains unused | `src/harness/fallbackChains.ts` | Implemented but never called. |
+| Session history partially wired | `src/session/history.ts`, `src/harness/internal/createRun/orchestration/effects.ts` | Post-effect decisions/context snapshots and external run summaries are captured; broader internal-orchestration summary coverage remains to be expanded. |
+| Session compaction partially triggered | `src/compression/compaction.ts`, `src/harness/internal/createRun/orchestration/effects.ts` | Post-effect overlays invoke compaction from estimated state size thresholds while preserving source journals/tasks. |
+| Capability router partially wired | `src/harness/capabilityRouter.ts`, `src/harness/internal/createRun/utils.ts` | Explicit task execution/policy hints can route through capability scoring; default dispatch remains compatibility-preserving. |
+| Model selection partially wired | `src/harness/modelSelection.ts`, `src/harness/internal/createRun/utils.ts` | Explicit `execution.model` hints can use model-aware harness selection; default routing is unchanged. |
+| Fallback chains partially wired | `src/harness/fallbackChains.ts`, `src/harness/internal/createRun/utils.ts` | Explicit fallback-chain metadata can select the next installed harness; runtime retry policy still needs broader integration. |
 | Sandbox policy not enforced | `src/governance/sandboxPolicy.ts` | Rules defined but not enforced on tool execution. |
 | MCP channels disconnected | `src/mcp/channels/*` | Allowlist, inbound queue, outbound sender exist but not connected to interaction routing. |
 | Streaming output not implemented | `src/harness/types.ts:93-100` | Type defined but no streaming callbacks in effect resolution. |
@@ -131,9 +131,9 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 | No rate limiting per harness | No token bucket or sliding window. |
 | No process dependency management | Tasks within a process can't declare dependencies. |
 | Orchestration dispatch partially concurrent | Agent-platform groups same-iteration actions by `schedulerHints.parallelGroupId`, honors `maxConcurrency`/`executionStrategy`, preserves deterministic commit order, and routes per-action harness hints; broader agent-pool scheduling remains missing. |
-| Session context not available in plan phase | Context injection missing in planProcess. |
+| Session context plan-phase coverage partial | Bounded session context is injected into planProcess prompts when a current harness session context is resolvable; sessions without resolvable context keep the old prompt shape. |
 | Daemon max concurrent runs defaults to 4 | Configurable via daemon config; the default may still need workload-specific tuning. |
-| Selection policies unused | `src/harness/selectionPolicies.ts` defined but never called. |
+| Selection policies partially wired | `src/harness/selectionPolicies.ts` can be invoked by explicit task metadata/execution policy hints; default dispatch remains unchanged. |
 
 ---
 
