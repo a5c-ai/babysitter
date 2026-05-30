@@ -52,6 +52,10 @@ async function importMcpServer() {
   return import("../mcp/server.js");
 }
 
+async function importTaskTools() {
+  return import("../mcp/tools/task-tools.js");
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Test Factories
 // ────────────────────────────────────────────────────────────────────────────
@@ -1106,6 +1110,57 @@ describe("MCP Server Tools", () => {
     it("exports startBreakpointMcpServer function", async () => {
       const mod = await importMcpServer();
       expect(typeof mod.startBreakpointMcpServer).toBe("function");
+    });
+
+    it("exports issue #597 task tool handlers", async () => {
+      const taskTools = await importTaskTools();
+
+      expect(typeof taskTools.handleCreateTodo).toBe("function");
+      expect(typeof taskTools.handleCreateTask).toBe("function");
+      expect(typeof taskTools.handleAssignTask).toBe("function");
+      expect(typeof taskTools.handleSearchTasks).toBe("function");
+      expect(typeof taskTools.handleCancelBreakpoint).toBe("function");
+      expect(typeof taskTools.handleEscalateBreakpoint).toBe("function");
+      expect(typeof taskTools.handleAddCommentToBreakpoint).toBe("function");
+    });
+
+    it("create_todo submits a todo-backed breakpoint and returns a resource URI", async () => {
+      const { handleCreateTodo } = await importTaskTools();
+      const breakpoint = makeBreakpoint({ id: "todo-1", text: "Write release notes" });
+      (mockBackend.submitBreakpoint as ReturnType<typeof vi.fn>).mockResolvedValue(breakpoint);
+
+      const result = await handleCreateTodo({
+        text: "Write release notes",
+        tags: ["docs"],
+      }, mockBackend);
+
+      const submitParams = (mockBackend.submitBreakpoint as ReturnType<typeof vi.fn>).mock.calls[0][0] as SubmitBreakpointParams;
+      expect(submitParams.text).toBe("Write release notes");
+      expect(submitParams.context.tags).toContain("docs");
+      expect(submitParams.context.metadata).toMatchObject({ taskKind: "todo" });
+      expect(result.resourceUri).toBe("breakpoint://todo-1");
+    });
+
+    it("search_tasks calls the backend search capability", async () => {
+      const { handleSearchTasks } = await importTaskTools();
+      const searchableBackend = createMockBackend({
+        searchTasks: vi.fn().mockResolvedValue({ tasks: [makeBreakpoint()], count: 1 }),
+      } as Partial<BreakpointBackend>);
+
+      const result = await handleSearchTasks({ query: "connection", status: "pending" }, searchableBackend);
+
+      expect(searchableBackend.searchTasks).toHaveBeenCalledWith({
+        query: "connection",
+        status: "pending",
+      });
+      expect(result.count).toBe(1);
+    });
+
+    it("exposes breakpoint resource helpers", async () => {
+      const resources = await import("../mcp/resources/breakpoint-resource.js");
+
+      expect(resources.breakpointResourceTemplate).toBe("breakpoint://{id}");
+      expect(typeof resources.readBreakpointResource).toBe("function");
     });
   });
 

@@ -187,6 +187,72 @@ export const BreakpointPublicAnswerSchema = z.union([
 ]);
 export type BreakpointPublicAnswer = z.infer<typeof BreakpointPublicAnswerSchema>;
 
+// ── Task Surface Types ─────────────────────────────────────────────────
+
+export const TaskSearchParamsSchema = z.object({
+  query: z.string().optional(),
+  status: BreakpointStatusSchema.optional(),
+  responderId: z.string().min(1).optional(),
+  limit: z.number().int().positive().optional(),
+}).strict();
+export type TaskSearchParams = z.infer<typeof TaskSearchParamsSchema>;
+
+export const TaskCommentSchema = z.object({
+  id: z.string().min(1),
+  breakpointId: z.string().min(1),
+  text: z.string().min(1),
+  responderId: z.string().min(1).optional(),
+  createdAt: z.string().datetime(),
+}).strict();
+export type TaskComment = z.infer<typeof TaskCommentSchema>;
+
+export const TaskAssignmentParamsSchema = z.object({
+  responderId: z.string().min(1),
+}).strict();
+export type TaskAssignmentParams = z.infer<typeof TaskAssignmentParamsSchema>;
+
+export const TaskCloseParamsSchema = z.object({
+  reason: z.string().optional(),
+}).strict();
+export type TaskCloseParams = z.infer<typeof TaskCloseParamsSchema>;
+
+export const TaskEscalationParamsSchema = z.object({
+  reason: z.string().optional(),
+  targetResponderId: z.string().min(1).optional(),
+}).strict();
+export type TaskEscalationParams = z.infer<typeof TaskEscalationParamsSchema>;
+
+export const TaskTemplateSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  description: z.string().optional(),
+  kind: z.enum(["todo", "task", "breakpoint"]).default("task").optional(),
+  tags: z.array(z.string()).optional(),
+}).strict();
+export type TaskTemplate = z.infer<typeof TaskTemplateSchema>;
+
+export const TaskRuleSchema = z.object({
+  id: z.string().min(1),
+  responderId: z.string().min(1),
+  domain: z.string().min(1).optional(),
+  tags: z.array(z.string()).optional(),
+}).strict();
+export type TaskRule = z.infer<typeof TaskRuleSchema>;
+
+export const TaskChangeEventSchema = z.object({
+  breakpointId: z.string().min(1),
+  uri: z.string().min(1),
+  changedAt: z.string().datetime(),
+  change: z.string().min(1),
+}).strict();
+export type TaskChangeEvent = z.infer<typeof TaskChangeEventSchema>;
+
+export const TaskSearchResultSchema = z.object({
+  tasks: z.array(z.lazy(() => BreakpointSchema)),
+  count: z.number().int().nonnegative(),
+});
+export type TaskSearchResult = z.infer<typeof TaskSearchResultSchema>;
+
 export function isProvenBreakpointAnswer(answer: unknown): answer is ProvenBreakpointAnswer {
   return ProvenBreakpointAnswerSchema.safeParse(answer).success;
 }
@@ -224,6 +290,7 @@ export const BreakpointSchema = z.object({
   createdBy: BreakpointSubmitterSchema.optional(),
   claimedByResponderId: z.string().min(1).optional(),
   claimedByResponderName: z.string().min(1).optional(),
+  comments: z.array(TaskCommentSchema).optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   expiresAt: z.string().datetime(),

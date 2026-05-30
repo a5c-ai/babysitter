@@ -129,6 +129,19 @@ function jsonRpcRequest(method: string, params?: Record<string, unknown>, id?: n
   };
 }
 
+async function parseMcpJsonResponse(response: Response): Promise<Record<string, unknown>> {
+  const text = await response.text();
+  if (!text.startsWith("event:")) {
+    return JSON.parse(text) as Record<string, unknown>;
+  }
+
+  const dataLine = text.split("\n").find((line) => line.startsWith("data: "));
+  if (!dataLine) {
+    throw new Error(`Missing SSE data line: ${text}`);
+  }
+  return JSON.parse(dataLine.slice("data: ".length)) as Record<string, unknown>;
+}
+
 /** Standard headers required by the MCP Streamable HTTP transport. */
 const MCP_HEADERS = {
   "Content-Type": "application/json",
@@ -596,17 +609,74 @@ describe("MCP HTTP Transport", () => {
       expect(toolsBody.result).toBeDefined();
       expect(toolsBody.result.tools).toBeInstanceOf(Array);
 
-      // Should expose the current 8 public tools
+      // Should expose the original public tools plus issue #597 task tools.
       const toolNames = toolsBody.result.tools.map((t: { name: string }) => t.name);
-      expect(toolNames).toContain("ask_breakpoint");
-      expect(toolNames).toContain("check_breakpoint_status");
-      expect(toolNames).toContain("list_breakpoints");
-      expect(toolNames).toContain("answer_breakpoint");
-      expect(toolNames).toContain("verify_breakpoint_answer");
-      expect(toolNames).toContain("list_responders");
-      expect(toolNames).toContain("claim_breakpoint");
-      expect(toolNames).toContain("poll_breakpoints");
-      expect(toolNames.length).toBe(8);
+      expect(toolNames).toEqual(expect.arrayContaining([
+        "ask_breakpoint",
+        "check_breakpoint_status",
+        "list_breakpoints",
+        "answer_breakpoint",
+        "verify_breakpoint_answer",
+        "list_responders",
+        "claim_breakpoint",
+        "poll_breakpoints",
+        "create_todo",
+        "create_task",
+        "assign_task",
+        "search_tasks",
+        "cancel_breakpoint",
+        "escalate_breakpoint",
+        "add_comment_to_breakpoint",
+      ]));
+      expect(toolNames.length).toBeGreaterThanOrEqual(15);
+    });
+
+    it("exposes breakpoint resources over Streamable HTTP", async () => {
+      const { startHttpMcpServer } = await importHttpTransport();
+      const { createBreakpointMcpServer } = await importMcpServer();
+
+      const mcpServer = createBreakpointMcpServer();
+      const result = await startHttpMcpServer(mcpServer, { port: 0 });
+      serverInstance = result;
+
+      const port = (result.httpServer.address() as { port: number }).port;
+      const initResponse = await fetch(`http://localhost:${port}/mcp`, {
+        method: "POST",
+        headers: { ...MCP_HEADERS },
+        body: JSON.stringify(jsonRpcRequest("initialize", {
+          protocolVersion: "2025-03-26",
+          clientInfo: { name: "test-client", version: "1.0.0" },
+          capabilities: {},
+        })),
+      });
+      const sessionId = initResponse.headers.get("mcp-session-id");
+
+      await fetch(`http://localhost:${port}/mcp`, {
+        method: "POST",
+        headers: {
+          ...MCP_HEADERS,
+          ...(sessionId ? { "mcp-session-id": sessionId } : {}),
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "notifications/initialized",
+        }),
+      });
+
+      const resourcesResponse = await fetch(`http://localhost:${port}/mcp`, {
+        method: "POST",
+        headers: {
+          ...MCP_HEADERS,
+          ...(sessionId ? { "mcp-session-id": sessionId } : {}),
+        },
+        body: JSON.stringify(jsonRpcRequest("resources/templates/list", {}, 3)),
+      });
+
+      expect(resourcesResponse.status).toBe(200);
+      const resourcesBody = await parseMcpJsonResponse(resourcesResponse);
+      const resourceListResult = resourcesBody.result as { resourceTemplates?: Array<{ uriTemplate: string }> };
+      const templates = resourceListResult.resourceTemplates ?? [];
+      expect(templates.map((r: { uriTemplate: string }) => r.uriTemplate)).toContain("breakpoint://{id}");
     });
   });
 

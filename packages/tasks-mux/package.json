@@ -48,7 +48,7 @@
     "clean": "rm -rf dist",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "test:packaged-surface-parity": "npm exec --yes --package=tsx@4.19.2 -- tsx src/__tests__/packaged-surface-parity.test.ts",
+    "test:packaged-surface-parity": "npm exec --yes --package=tsx@4.19.2 -- tsx src/__tests__/packaged-surface-parity.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/"
   },

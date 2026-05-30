@@ -23,6 +23,9 @@ import {
   BackendConfigSchema,
   RoutingRuleSchema,
   RoutingConfigSchema,
+  TaskSearchParamsSchema,
+  TaskTemplateSchema,
+  TaskRuleSchema,
   // Constants
   DEFAULT_POLL_INTERVAL_MS,
   DEFAULT_TIMEOUT_MS,
@@ -1839,6 +1842,63 @@ describe("Section 4: BreakpointBackend Interface", () => {
       expect(minimalBackend.name).toBe("minimal");
       expect(minimalBackend.listResponders).toBeUndefined();
       expect(minimalBackend.claimBreakpoint).toBeUndefined();
+    });
+
+    it("the backend contract exposes issue #597 optional task lifecycle capabilities", async () => {
+      const capableBackend: BreakpointBackend = {
+        name: "capable",
+        submitBreakpoint: async () => makeBreakpoint(),
+        getBreakpoint: async () => makeBreakpoint(),
+        waitForAnswer: async () => makeWaitResult(),
+        listPendingBreakpoints: async () => [],
+        answerBreakpoint: async () => makeAnswer(),
+        cancelBreakpoint: async () => {},
+        searchTasks: async () => ({ tasks: [makeBreakpoint()], count: 1 }),
+        assignTask: async () => makeBreakpoint({ claimedByResponderId: "responder-1" }),
+        reassignTask: async () => makeBreakpoint({ claimedByResponderId: "responder-2" }),
+        closeTask: async () => makeBreakpoint({ status: "cancelled" }),
+        approveTask: async () => makeAnswer({ approved: true }),
+        addTaskComment: async () => ({
+          id: "comment-1",
+          breakpointId: "bp-001",
+          text: "Looks good.",
+          createdAt: new Date().toISOString(),
+        }),
+        escalateTask: async () => makeBreakpoint({
+          context: { ...defaultContext, metadata: { escalated: true } },
+        }),
+        listTaskTemplates: async () => [],
+        getTaskTemplate: async () => undefined,
+        createTaskTemplate: async (template) => template,
+        listTaskRules: async () => [],
+        addTaskRule: async (rule) => rule,
+        removeTaskRule: async () => {},
+      };
+
+      await expect(capableBackend.searchTasks!({ query: "redis" })).resolves.toMatchObject({ count: 1 });
+      await expect(capableBackend.assignTask!("bp-001", { responderId: "responder-1" })).resolves.toMatchObject({
+        claimedByResponderId: "responder-1",
+      });
+    });
+
+    it("exports issue #597 task contract schemas", () => {
+      expect(TaskSearchParamsSchema.parse({
+        query: "redis",
+        status: "pending",
+        responderId: "responder-1",
+        limit: 10,
+      })).toMatchObject({ query: "redis" });
+
+      expect(TaskTemplateSchema.parse({
+        id: "approval",
+        title: "Approval",
+        kind: "task",
+      })).toMatchObject({ id: "approval" });
+
+      expect(TaskRuleSchema.parse({
+        id: "backend-rule",
+        responderId: "backend",
+      })).toMatchObject({ id: "backend-rule" });
     });
   });
 });

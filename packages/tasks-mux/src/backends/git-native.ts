@@ -13,6 +13,14 @@ import type {
   BreakpointWaitResult,
   ProvenBreakpointAnswer,
   ProvenVerificationResult,
+  TaskAssignmentParams,
+  TaskComment,
+  TaskCloseParams,
+  TaskEscalationParams,
+  TaskRule,
+  TaskSearchParams,
+  TaskSearchResult,
+  TaskTemplate,
 } from "../types.js";
 import {
   generateBreakpointId,
@@ -62,6 +70,14 @@ export class GitNativeBackend implements BreakpointBackend {
 
   private answerPath(id: string): string {
     return path.join(this.breakpointsDir, `${id}.answer.json`);
+  }
+
+  private async writeBreakpoint(breakpoint: Breakpoint): Promise<void> {
+    await fs.writeFile(
+      this.breakpointPath(breakpoint.id),
+      JSON.stringify(breakpoint, null, 2) + "\n",
+      "utf-8",
+    );
   }
 
   private provenPath(id: string): string {
@@ -400,6 +416,157 @@ export class GitNativeBackend implements BreakpointBackend {
 
     return breakpoint;
   }
+
+  async searchTasks(params: TaskSearchParams = {}): Promise<TaskSearchResult> {
+    let files: string[];
+    try {
+      files = await fs.readdir(this.breakpointsDir);
+    } catch {
+      return { tasks: [], count: 0 };
+    }
+
+    const query = params.query?.toLowerCase();
+    const tasks: Breakpoint[] = [];
+    for (const file of files) {
+      if (!file.endsWith(".json") || file.includes(".answer.") || file.includes(".proven.")) {
+        continue;
+      }
+
+      try {
+        const task = await this.getBreakpoint(path.basename(file, ".json"));
+        if (params.status && task.status !== params.status) continue;
+        if (params.responderId) {
+          const assigned = task.claimedByResponderId === params.responderId
+            || task.routing.targetResponders.includes(params.responderId);
+          if (!assigned) continue;
+        }
+        if (query) {
+          const haystack = [
+            task.id,
+            task.text,
+            task.context.description,
+            task.context.title,
+            task.context.summary,
+            task.context.domain,
+            ...(task.context.tags ?? []),
+            ...(task.routing.targetResponders ?? []),
+          ].filter(Boolean).join(" ").toLowerCase();
+          if (!haystack.includes(query)) continue;
+        }
+        tasks.push(task);
+      } catch {
+        // Skip malformed files.
+      }
+    }
+
+    tasks.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    const limited = params.limit ? tasks.slice(0, params.limit) : tasks;
+    return { tasks: limited, count: limited.length };
+  }
+
+  async assignTask(id: string, params: TaskAssignmentParams): Promise<Breakpoint> {
+    const breakpoint = await this.getBreakpoint(id) as Breakpoint & { provenVerification?: ProvenVerificationResult };
+    delete breakpoint.provenVerification;
+    breakpoint.status = "claimed";
+    breakpoint.claimedByResponderId = params.responderId;
+    breakpoint.routing = {
+      ...breakpoint.routing,
+      targetResponders: [params.responderId],
+    };
+    breakpoint.updatedAt = new Date().toISOString();
+    await this.writeBreakpoint(breakpoint);
+    return breakpoint;
+  }
+
+  async reassignTask(id: string, params: TaskAssignmentParams): Promise<Breakpoint> {
+    return this.assignTask(id, params);
+  }
+
+  async closeTask(id: string, params?: TaskCloseParams): Promise<Breakpoint> {
+    const breakpoint = await this.getBreakpoint(id) as Breakpoint & { provenVerification?: ProvenVerificationResult };
+    delete breakpoint.provenVerification;
+    breakpoint.status = "cancelled";
+    breakpoint.context = {
+      ...breakpoint.context,
+      metadata: {
+        ...breakpoint.context.metadata,
+        closeReason: params?.reason,
+      },
+    };
+    breakpoint.updatedAt = new Date().toISOString();
+    await this.writeBreakpoint(breakpoint);
+    return breakpoint;
+  }
+
+  async approveTask(id: string, answer: SubmitAnswerParams): Promise<BreakpointPublicAnswer> {
+    return this.answerBreakpoint(id, {
+      ...answer,
+      text: answer.text || "Approved.",
+      approved: true,
+    });
+  }
+
+  async addTaskComment(id: string, comment: { text: string; responderId?: string }): Promise<TaskComment> {
+    const breakpoint = await this.getBreakpoint(id) as Breakpoint & { provenVerification?: ProvenVerificationResult };
+    delete breakpoint.provenVerification;
+    const now = new Date().toISOString();
+    const taskComment: TaskComment = {
+      id: generateBreakpointId(),
+      breakpointId: id,
+      text: comment.text,
+      responderId: comment.responderId,
+      createdAt: now,
+    };
+    breakpoint.comments = [...(breakpoint.comments ?? []), taskComment];
+    breakpoint.updatedAt = now;
+    await this.writeBreakpoint(breakpoint);
+    return taskComment;
+  }
+
+  async escalateTask(id: string, params?: TaskEscalationParams): Promise<Breakpoint> {
+    const breakpoint = await this.getBreakpoint(id) as Breakpoint & { provenVerification?: ProvenVerificationResult };
+    delete breakpoint.provenVerification;
+    breakpoint.context = {
+      ...breakpoint.context,
+      metadata: {
+        ...breakpoint.context.metadata,
+        escalated: true,
+        escalationReason: params?.reason,
+      },
+    };
+    if (params?.targetResponderId) {
+      breakpoint.routing = {
+        ...breakpoint.routing,
+        targetResponders: [params.targetResponderId],
+      };
+      breakpoint.claimedByResponderId = params.targetResponderId;
+    }
+    breakpoint.updatedAt = new Date().toISOString();
+    await this.writeBreakpoint(breakpoint);
+    return breakpoint;
+  }
+
+  async listTaskTemplates(): Promise<TaskTemplate[]> {
+    return [];
+  }
+
+  async getTaskTemplate(_id: string): Promise<TaskTemplate | undefined> {
+    return undefined;
+  }
+
+  async createTaskTemplate(template: TaskTemplate): Promise<TaskTemplate> {
+    return template;
+  }
+
+  async listTaskRules(): Promise<TaskRule[]> {
+    return [];
+  }
+
+  async addTaskRule(rule: TaskRule): Promise<TaskRule> {
+    return rule;
+  }
+
+  async removeTaskRule(_id: string): Promise<void> {}
 
   /**
    * Verify the selected public answer against trusted public keys.

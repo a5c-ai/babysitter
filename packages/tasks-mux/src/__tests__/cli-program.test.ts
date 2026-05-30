@@ -1,4 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { describe, it, expect, vi } from "vitest";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Dynamic import
@@ -60,13 +63,55 @@ describe("CLI Program", () => {
       expect(commands).toContain("breakpoints");
     });
 
-    it("does not register adjacent breakpoints claim lifecycle command", async () => {
+    it("registers issue #597 breakpoint lifecycle commands", async () => {
       const { createProgram } = await importProgram();
       const program = createProgram();
       const breakpointsCommand = program.commands.find((c) => c.name() === "breakpoints");
 
       expect(breakpointsCommand).toBeDefined();
-      expect(breakpointsCommand!.commands.map((c) => c.name())).not.toContain("claim");
+      expect(breakpointsCommand!.commands.map((c) => c.name())).toEqual(
+        expect.arrayContaining([
+          "list",
+          "search",
+          "assign",
+          "reassign",
+          "close",
+          "approve",
+          "pending",
+          "answer",
+          "status",
+          "poll",
+        ]),
+      );
+    });
+
+    it("registers issue #597 responders search and stats commands", async () => {
+      const { createProgram } = await importProgram();
+      const program = createProgram();
+      const respondersCommand = program.commands.find((c) => c.name() === "responders");
+
+      expect(respondersCommand).toBeDefined();
+      expect(respondersCommand!.commands.map((c) => c.name())).toEqual(
+        expect.arrayContaining(["list", "show", "search", "stats"]),
+      );
+    });
+
+    it("registers templates and rules command groups", async () => {
+      const { createProgram } = await importProgram();
+      const program = createProgram();
+      const commands = program.commands.map((c) => c.name());
+
+      expect(commands).toEqual(expect.arrayContaining(["templates", "rules"]));
+
+      const templatesCommand = program.commands.find((c) => c.name() === "templates");
+      expect(templatesCommand!.commands.map((c) => c.name())).toEqual(
+        expect.arrayContaining(["list", "show", "create"]),
+      );
+
+      const rulesCommand = program.commands.find((c) => c.name() === "rules");
+      expect(rulesCommand!.commands.map((c) => c.name())).toEqual(
+        expect.arrayContaining(["list", "add", "remove"]),
+      );
     });
 
     it("registers server subcommand", async () => {
@@ -93,11 +138,11 @@ describe("CLI Program", () => {
       expect(commands).toContain("auth");
     });
 
-    it("has 6 registered subcommands", async () => {
+    it("has 8 registered subcommands", async () => {
       const { createProgram } = await importProgram();
       const program = createProgram();
 
-      expect(program.commands).toHaveLength(6);
+      expect(program.commands).toHaveLength(8);
     });
 
     it("defines --server-url global option", async () => {
@@ -164,6 +209,108 @@ describe("CLI Program", () => {
       const { createProgram } = await importProgram();
       const program = createProgram();
       expect(program.version()).toBe("5.0.0");
+    });
+  });
+
+  describe("issue #597 local config commands", () => {
+    it("persists templates across program instances", async () => {
+      const { createProgram } = await importProgram();
+      const configRoot = await mkdtemp(join(tmpdir(), "tasks-mux-templates-"));
+      const log = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      try {
+        await createProgram()
+          .exitOverride()
+          .parseAsync([
+            "node",
+            "tasks-mux",
+            "--config-root",
+            configRoot,
+            "--json",
+            "templates",
+            "create",
+            "handoff",
+            "--title",
+            "Handoff",
+          ]);
+
+        await createProgram()
+          .exitOverride()
+          .parseAsync([
+            "node",
+            "tasks-mux",
+            "--config-root",
+            configRoot,
+            "--json",
+            "templates",
+            "show",
+            "handoff",
+          ]);
+
+        expect(JSON.parse(log.mock.calls.at(-1)?.[0] as string)).toMatchObject({
+          id: "handoff",
+          title: "Handoff",
+          kind: "task",
+        });
+      } finally {
+        log.mockRestore();
+        await rm(configRoot, { recursive: true, force: true });
+      }
+    });
+
+    it("persists and removes rules across program instances", async () => {
+      const { createProgram } = await importProgram();
+      const configRoot = await mkdtemp(join(tmpdir(), "tasks-mux-rules-"));
+      const log = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      try {
+        await createProgram()
+          .exitOverride()
+          .parseAsync([
+            "node",
+            "tasks-mux",
+            "--config-root",
+            configRoot,
+            "--json",
+            "rules",
+            "add",
+            "frontend",
+            "--responder",
+            "frontend-responder",
+            "--domain",
+            "frontend",
+          ]);
+
+        expect(JSON.parse(await readFile(join(configRoot, "task-rules.json"), "utf-8"))).toEqual([
+          expect.objectContaining({
+            id: "frontend",
+            responderId: "frontend-responder",
+            domain: "frontend",
+          }),
+        ]);
+
+        await createProgram()
+          .exitOverride()
+          .parseAsync([
+            "node",
+            "tasks-mux",
+            "--config-root",
+            configRoot,
+            "--json",
+            "rules",
+            "remove",
+            "frontend",
+          ]);
+
+        expect(JSON.parse(log.mock.calls.at(-1)?.[0] as string)).toEqual({
+          id: "frontend",
+          removed: true,
+        });
+        expect(JSON.parse(await readFile(join(configRoot, "task-rules.json"), "utf-8"))).toEqual([]);
+      } finally {
+        log.mockRestore();
+        await rm(configRoot, { recursive: true, force: true });
+      }
     });
   });
 });

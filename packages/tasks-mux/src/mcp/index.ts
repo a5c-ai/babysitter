@@ -56,6 +56,35 @@ export {
 } from "./tools/poll-breakpoints.js";
 
 export {
+  handleCreateTodo,
+  handleCreateTask,
+  handleAssignTask,
+  handleSearchTasks,
+  handleCancelBreakpoint,
+  handleEscalateBreakpoint,
+  handleAddCommentToBreakpoint,
+  createTodoDescription,
+  createTodoParams,
+  createTaskDescription,
+  createTaskParams,
+  assignTaskDescription,
+  assignTaskParams,
+  searchTasksDescription,
+  searchTasksParams,
+  cancelBreakpointDescription,
+  cancelBreakpointParams,
+  escalateBreakpointDescription,
+  escalateBreakpointParams,
+  addCommentToBreakpointDescription,
+  addCommentToBreakpointParams,
+} from "./tools/task-tools.js";
+
+export {
+  breakpointResourceTemplate,
+  readBreakpointResource,
+} from "./resources/breakpoint-resource.js";
+
+export {
   resolveBreakpointBackend,
 } from "./backend-resolver.js";
 

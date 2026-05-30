@@ -1,4 +1,4 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import type { ZodRawShapeCompat } from "@modelcontextprotocol/sdk/server/zod-compat.js";
 
@@ -43,6 +43,33 @@ import {
   pollBreakpointsParams,
   handlePollBreakpoints,
 } from "./tools/poll-breakpoints.js";
+import {
+  addCommentToBreakpointDescription,
+  addCommentToBreakpointParams,
+  assignTaskDescription,
+  assignTaskParams,
+  cancelBreakpointDescription as cancelBreakpointToolDescription,
+  cancelBreakpointParams as cancelBreakpointToolParams,
+  createTaskDescription,
+  createTaskParams,
+  createTodoDescription,
+  createTodoParams,
+  escalateBreakpointDescription,
+  escalateBreakpointParams,
+  handleAddCommentToBreakpoint,
+  handleAssignTask,
+  handleCancelBreakpoint,
+  handleCreateTask,
+  handleCreateTodo,
+  handleEscalateBreakpoint,
+  handleSearchTasks,
+  searchTasksDescription,
+  searchTasksParams,
+} from "./tools/task-tools.js";
+import {
+  breakpointResourceTemplate,
+  readBreakpointResource,
+} from "./resources/breakpoint-resource.js";
 import { resolveBreakpointBackend } from "./backend-resolver.js";
 import { createDefaultBackend } from "../backends/index.js";
 import type { BreakpointBackend } from "../backend.js";
@@ -188,6 +215,119 @@ export function createBreakpointMcpServer(): McpServer {
       return {
         content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
       };
+    },
+  );
+
+  server.tool(
+    "create_todo",
+    createTodoDescription,
+    toCompatShape(createTodoParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleCreateTodo(args as Parameters<typeof handleCreateTodo>[0], backend);
+      server.sendResourceListChanged();
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "create_task",
+    createTaskDescription,
+    toCompatShape(createTaskParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleCreateTask(args as Parameters<typeof handleCreateTask>[0], backend);
+      server.sendResourceListChanged();
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "assign_task",
+    assignTaskDescription,
+    toCompatShape(assignTaskParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleAssignTask(args as Parameters<typeof handleAssignTask>[0], backend);
+      await server.server.sendResourceUpdated({ uri: `breakpoint://${result.id}` }).catch(() => {});
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "search_tasks",
+    searchTasksDescription,
+    toCompatShape(searchTasksParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleSearchTasks(args as Parameters<typeof handleSearchTasks>[0], backend);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "cancel_breakpoint",
+    cancelBreakpointToolDescription,
+    toCompatShape(cancelBreakpointToolParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleCancelBreakpoint(args as Parameters<typeof handleCancelBreakpoint>[0], backend);
+      await server.server.sendResourceUpdated({ uri: `breakpoint://${result.id}` }).catch(() => {});
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "escalate_breakpoint",
+    escalateBreakpointDescription,
+    toCompatShape(escalateBreakpointParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleEscalateBreakpoint(args as Parameters<typeof handleEscalateBreakpoint>[0], backend);
+      await server.server.sendResourceUpdated({ uri: `breakpoint://${result.id}` }).catch(() => {});
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "add_comment_to_breakpoint",
+    addCommentToBreakpointDescription,
+    toCompatShape(addCommentToBreakpointParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleAddCommentToBreakpoint(args as Parameters<typeof handleAddCommentToBreakpoint>[0], backend);
+      await server.server.sendResourceUpdated({ uri: `breakpoint://${result.breakpointId}` }).catch(() => {});
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.registerResource(
+    "breakpoint",
+    new ResourceTemplate(breakpointResourceTemplate, {
+      list: undefined,
+    }),
+    {
+      title: "Breakpoint",
+      description: "Current tasks-mux breakpoint state.",
+      mimeType: "application/json",
+    },
+    async (uri) => {
+      const backend = resolveToolBackend();
+      return readBreakpointResource(uri, backend);
     },
   );
 

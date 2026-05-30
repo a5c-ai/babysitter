@@ -159,11 +159,11 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 |-----|-------------|
 | No task priorities | Breakpoint schema has no priority field. Can't route high-priority to senior responders. |
 | No task dependencies | No `dependsOn[]` between breakpoints. Can't block resolution until prerequisites done. |
-| No search/filter API | Git-native backend only scans filesystem. No `searchBreakpoints(query)`. |
+| Search/filter API is partial | Git-native exposes `searchTasks` over breakpoint files; remote backend parity and indexing remain limited. |
 | No bulk operations | Can't bulk approve, close, or reassign. |
 | No subagent spawning via task system | Agent-to-agent delegation doesn't route through responder discovery/matching. |
 | No escalation chains | No fallback responders when initial responder times out. |
-| Missing MCP tools | No `create_todo`, `assign_task`, `search_tasks`, `cancel_breakpoint`, `add_comment`, `escalate` exposed as MCP tools. |
+| MCP task tools partially added | `create_todo`, `create_task`, `assign_task`, `search_tasks`, `cancel_breakpoint`, `add_comment_to_breakpoint`, and `escalate_breakpoint` are exposed by tasks-mux MCP; agent-stack auto-discovery remains separate. |
 | No interactive forms | Only simple question/answer. No structured multi-field forms, conditional fields, or file review. |
 
 ### Medium
@@ -174,11 +174,11 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 | No status history/timeline | Can't see when a breakpoint moved between states. |
 | No notifications | No email, Slack, Discord, or webhook notifications on state changes. |
 | No task metrics/SLA | No response time tracking, completion rates, or responder performance. |
-| No discussion threads | Can't add comments to a breakpoint. |
+| Discussion threads are partial | Git-native can attach comments to breakpoint records; richer threaded UX and remote backend parity remain incomplete. |
 | No offline queue | Server backend has no local fallback if server is down. |
 | No state machine validation | Backend accepts invalid state transitions. |
 | No audit log | No record of who changed what and when. |
-| Missing CLI commands | No `search`, `assign`, `reassign`, `close`, `approve`, `stats`, `templates`, `rules` commands. |
+| CLI surface parity is partial | tasks-mux now exposes `search`, `assign`, `reassign`, `close`, `approve`, `stats`, `templates`, and `rules`; templates and rules persist in local `.a5c` JSON, while remote/backend parity remains limited. |
 | Only 3 backends | git-native, server, github-issues. Missing: database, S3, Slack, Linear/Jira. |
 | No schema migration | Can't upgrade breakpoint format across versions. |
 | Responder matching not integrated | `responder-matcher.ts` exists but only used in CLI, not in agent routing decisions. |

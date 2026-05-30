@@ -69,6 +69,28 @@ The command surfaces involved are split by responsibility:
 | `omni discover`, `omni list`, `omni invoke` | Human-facing discovery and invocation surface for available runtime agents and services. |
 | `amux doctor`, `amux launch`, `amux auth`, `amux install` | agent-mux checks and adapter operations. See the agent-mux reference for the exact CLI flags. |
 
+## tasks-mux CLI And MCP
+
+`tasks-mux` exposes the human/task routing surface used by breakpoint-backed
+workflows:
+
+- `breakpoints list|search|assign|reassign|close|approve|pending|answer|status|poll`
+- `responders list|show|search|stats`
+- `templates list|show|create`
+- `rules list|add|remove`
+
+Template and rule commands store local JSON under the resolved `.a5c`
+configuration root, so `--config-root` and `--repo-root` select the repository
+configuration they update.
+
+The MCP server keeps the original breakpoint tools and adds task-oriented tools:
+`create_todo`, `create_task`, `assign_task`, `search_tasks`,
+`cancel_breakpoint`, `escalate_breakpoint`, and
+`add_comment_to_breakpoint`. It also registers `breakpoint://{id}` resources.
+Mutation tools send MCP resource-list or resource-updated notifications where
+the current transport/session supports them; clients on stateless transports
+should use resource reads or `search_tasks` polling.
+
 Troubleshooting common external agent failures:
 
 | Scenario | Expected behavior |

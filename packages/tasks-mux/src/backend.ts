@@ -5,6 +5,15 @@ import type {
   BreakpointRouting,
   BreakpointWaitResult,
   ResponderProfile,
+  TaskAssignmentParams,
+  TaskChangeEvent,
+  TaskCloseParams,
+  TaskComment,
+  TaskEscalationParams,
+  TaskRule,
+  TaskSearchParams,
+  TaskSearchResult,
+  TaskTemplate,
 } from "./types.js";
 
 /**
@@ -127,6 +136,40 @@ export interface BreakpointBackend {
    * Optional -- not all backends support explicit claiming.
    */
   claimBreakpoint?(id: string, responderId: string): Promise<Breakpoint>;
+
+  /**
+   * Search task/breakpoint records.
+   * Optional -- unsupported backends should surface a clear capability error.
+   */
+  searchTasks?(params: TaskSearchParams): Promise<TaskSearchResult>;
+
+  /** Assign a task to a responder. */
+  assignTask?(id: string, params: TaskAssignmentParams): Promise<Breakpoint>;
+
+  /** Reassign a task to a different responder. */
+  reassignTask?(id: string, params: TaskAssignmentParams): Promise<Breakpoint>;
+
+  /** Close or cancel a task. */
+  closeTask?(id: string, params?: TaskCloseParams): Promise<Breakpoint>;
+
+  /** Approve a task through the answer lifecycle. */
+  approveTask?(id: string, answer: SubmitAnswerParams): Promise<BreakpointPublicAnswer>;
+
+  /** Add a non-answer discussion comment to a task. */
+  addTaskComment?(id: string, comment: { text: string; responderId?: string }): Promise<TaskComment>;
+
+  /** Escalate a task to another responder or mark it as escalated. */
+  escalateTask?(id: string, params?: TaskEscalationParams): Promise<Breakpoint>;
+
+  listTaskTemplates?(): Promise<TaskTemplate[]>;
+  getTaskTemplate?(id: string): Promise<TaskTemplate | undefined>;
+  createTaskTemplate?(template: TaskTemplate): Promise<TaskTemplate>;
+
+  listTaskRules?(): Promise<TaskRule[]>;
+  addTaskRule?(rule: TaskRule): Promise<TaskRule>;
+  removeTaskRule?(id: string): Promise<void>;
+
+  subscribeToTaskChanges?(listener: (event: TaskChangeEvent) => void): () => void;
 }
 
 export function selectBreakpointAnswer(
@@ -148,5 +191,8 @@ export function supportsProvenAnswers(backendName: string): boolean {
 }
 
 export function unsupportedBackendFeatureMessage(backendName: string, feature: string): string {
-  return `Backend "${backendName}" does not support ${feature}. Proven signing is currently supported only by "git-native".`;
+  if (feature.includes("proven")) {
+    return `Backend "${backendName}" does not support ${feature}. Proven signing is currently supported only by "git-native".`;
+  }
+  return `Backend "${backendName}" does not support ${feature}.`;
 }
