@@ -38,6 +38,31 @@ export const InteractionKindSchema = z.enum([
 ]);
 export type InteractionKind = z.infer<typeof InteractionKindSchema>;
 
+// ── Responder Types ─────────────────────────────────────────────────────
+
+export const ResponderTypeSchema = z.enum([
+  "human",
+  "agent",
+  "tracker",
+  "internal",
+  "auto",
+]);
+export type ResponderType = z.infer<typeof ResponderTypeSchema>;
+
+export const ResponderSchema = z.object({
+  id: z.string().min(1),
+  type: ResponderTypeSchema,
+  name: z.string().min(1),
+  capabilities: z.array(z.string()),
+  availability: z.boolean().optional().default(true),
+  adapter: z.string().min(1).optional(),
+  model: z.string().min(1).optional(),
+  provider: z.string().min(1).optional(),
+  trackerBackend: z.string().min(1).optional(),
+  trackerConfig: z.record(z.string(), z.unknown()).optional(),
+}).strict();
+export type Responder = z.infer<typeof ResponderSchema>;
+
 // ── Code Snippet ─────────────────────────────────────────────────────────
 
 export const CodeSnippetSchema = z.union([
@@ -107,6 +132,7 @@ export type BreakpointRouting = z.infer<typeof BreakpointRoutingSchema>;
 
 export const ResponderProfileSchema = z.object({
   id: z.string().min(1),
+  type: ResponderTypeSchema.optional().default("human"),
   name: z.string().min(1),
   title: z.string(),
   domains: z.array(z.string()),
@@ -114,8 +140,13 @@ export const ResponderProfileSchema = z.object({
   availability: z.boolean(),
   responseTimeSla: z.number().positive(),
   publicKeyFingerprint: z.string().optional(),
+  adapter: z.string().min(1).optional(),
+  model: z.string().min(1).optional(),
+  provider: z.string().min(1).optional(),
+  trackerBackend: z.string().min(1).optional(),
+  trackerConfig: z.record(z.string(), z.unknown()).optional(),
 }).strict();
-export type ResponderProfile = z.infer<typeof ResponderProfileSchema>;
+export type ResponderProfile = z.input<typeof ResponderProfileSchema>;
 
 // ── BreakpointAnswer ─────────────────────────────────────────────────────
 

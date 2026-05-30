@@ -11,6 +11,8 @@ import {
   BreakpointContextSectionSchema,
   BreakpointContextArtifactSchema,
   BreakpointRoutingSchema,
+  ResponderTypeSchema,
+  ResponderSchema,
   ResponderProfileSchema,
   BreakpointAnswerSchema,
   BreakpointAnswerRatingSchema,
@@ -46,6 +48,8 @@ import type {
   BreakpointContext,
   BreakpointRouting,
   BreakpointWaitResult,
+  ResponderType,
+  Responder,
   ResponderProfile,
   BreakpointStatus,
   BreakpointStrategy,
@@ -130,6 +134,20 @@ function makeResponderProfile(overrides: Partial<ResponderProfile> = {}): Respon
     tags: ["node", "typescript"],
     availability: true,
     responseTimeSla: 60000,
+    ...overrides,
+  };
+}
+
+function makeResponder(overrides: Partial<Responder> = {}): Responder {
+  return {
+    id: "agent-responder-1",
+    type: "agent",
+    name: "Codex",
+    capabilities: ["code", "review"],
+    availability: true,
+    adapter: "codex",
+    model: "gpt-5-codex",
+    provider: "openai",
     ...overrides,
   };
 }
@@ -629,7 +647,66 @@ describe("Section 3: Domain Types and Zod Schemas", () => {
     });
   });
 
-  // ── 3.7 ResponderProfileSchema ─────────────────────────────────────────
+  // ── 3.7 Responder Types ────────────────────────────────────────────────
+
+  describe("ResponderTypeSchema", () => {
+    const validTypes: ResponderType[] = ["human", "agent", "tracker", "internal", "auto"];
+
+    it.each(validTypes)("accepts responder type '%s'", (type) => {
+      expect(ResponderTypeSchema.safeParse(type).success).toBe(true);
+    });
+
+    it("rejects unknown responder types", () => {
+      expect(ResponderTypeSchema.safeParse("robot").success).toBe(false);
+      expect(ResponderTypeSchema.safeParse("").success).toBe(false);
+    });
+  });
+
+  describe("ResponderSchema", () => {
+    it("accepts agent-specific responder fields", () => {
+      const result = ResponderSchema.safeParse(makeResponder({
+        type: "agent",
+        adapter: "claude-code",
+        model: "claude-sonnet-4-6",
+        provider: "anthropic",
+      }));
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.adapter).toBe("claude-code");
+        expect(result.data.model).toBe("claude-sonnet-4-6");
+      }
+    });
+
+    it("accepts tracker-specific responder fields", () => {
+      const result = ResponderSchema.safeParse(makeResponder({
+        id: "github-issues",
+        type: "tracker",
+        name: "GitHub Issues",
+        capabilities: ["issue-sync"],
+        trackerBackend: "github-issues",
+        trackerConfig: { owner: "a5c-ai", repo: "babysitter" },
+        adapter: undefined,
+        model: undefined,
+        provider: undefined,
+      }));
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.trackerBackend).toBe("github-issues");
+        expect(result.data.trackerConfig).toEqual({ owner: "a5c-ai", repo: "babysitter" });
+      }
+    });
+
+    it("requires id, type, name, and capabilities", () => {
+      expect(ResponderSchema.safeParse({ type: "agent", name: "Codex", capabilities: [] }).success).toBe(false);
+      expect(ResponderSchema.safeParse({ id: "codex", name: "Codex", capabilities: [] }).success).toBe(false);
+      expect(ResponderSchema.safeParse({ id: "codex", type: "agent", capabilities: [] }).success).toBe(false);
+      expect(ResponderSchema.safeParse({ id: "codex", type: "agent", name: "Codex" }).success).toBe(false);
+    });
+  });
+
+  // ── 3.8 ResponderProfileSchema ─────────────────────────────────────────
 
   describe("ResponderProfileSchema", () => {
     it("accepts a valid responder profile with required fields", () => {
@@ -665,6 +742,34 @@ describe("Section 3: Domain Types and Zod Schemas", () => {
     it("rejects responder profile missing required fields", () => {
       expect(ResponderProfileSchema.safeParse({}).success).toBe(false);
       expect(ResponderProfileSchema.safeParse({ id: "x" }).success).toBe(false);
+    });
+
+    it("accepts existing human responder profiles without type-specific fields", () => {
+      const result = ResponderProfileSchema.safeParse(makeResponderProfile());
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.type).toBe("human");
+        expect(result.data.adapter).toBeUndefined();
+        expect(result.data.trackerBackend).toBeUndefined();
+      }
+    });
+
+    it("accepts type-specific metadata on responder profiles", () => {
+      const agent = ResponderProfileSchema.safeParse(makeResponderProfile({
+        type: "agent",
+        adapter: "codex",
+        model: "gpt-5-codex",
+        provider: "openai",
+      }));
+      const tracker = ResponderProfileSchema.safeParse(makeResponderProfile({
+        type: "tracker",
+        trackerBackend: "linear",
+        trackerConfig: { team: "platform" },
+      }));
+
+      expect(agent.success).toBe(true);
+      expect(tracker.success).toBe(true);
     });
   });
 

@@ -350,19 +350,14 @@ export async function process(inputs, ctx) {
     implementationModel,
   });
 
-  let redTestResult = null;
-  try {
-    redTestResult = await ctx.task(shellTask, {
-      projectRoot,
-      title: 'Confirm new tests fail before implementation',
-      slug: 'red-tests',
-      command: `npm run test --workspace=@a5c-ai/tasks-mux -- ${tests.testFiles.join(' ')}`,
-      expectedExitCode: 1,
-      timeoutMs: 600000,
-    });
-  } catch (error) {
-    redTestResult = { ok: false, error: error?.message || String(error) };
-  }
+  const redTestResult = await ctx.task(shellTask, {
+    projectRoot,
+    title: 'Confirm new tests fail before implementation',
+    slug: 'red-tests',
+    command: `npm run test --workspace=@a5c-ai/tasks-mux -- ${tests.testFiles.join(' ')}`,
+    expectedExitCode: 1,
+    timeoutMs: 600000,
+  });
 
   let attempt = 0;
   let implementation = null;
@@ -389,23 +384,14 @@ export async function process(inputs, ctx) {
     let allPassed = true;
 
     for (const check of verificationCommands) {
-      try {
-        const result = await ctx.task(shellTask, {
-          projectRoot,
-          title: check.title,
-          slug: check.slug,
-          command: check.command,
-          timeoutMs: check.timeoutMs,
-        });
-        verificationResults.push({ ...check, ok: true, result });
-      } catch (error) {
-        allPassed = false;
-        verificationResults.push({
-          ...check,
-          ok: false,
-          error: error?.message || String(error),
-        });
-      }
+      const result = await ctx.task(shellTask, {
+        projectRoot,
+        title: check.title,
+        slug: check.slug,
+        command: check.command,
+        timeoutMs: check.timeoutMs,
+      });
+      verificationResults.push({ ...check, ok: true, result });
     }
 
     const artifacts = await ctx.task(readArtifactsTask, {
