@@ -1,0 +1,50 @@
+{
+  "issueNumber": 626,
+  "branchName": "agent/issue-626-jitsi-embedded-meeting",
+  "baseBranch": "staging",
+  "projectDir": "/home/runner/work/babysitter/babysitter",
+  "webDir": "/home/runner/work/babysitter/babysitter/packages/krate/web",
+  "coreDir": "/home/runner/work/babysitter/babysitter/packages/krate/core",
+  "specPaths": [
+    "packages/krate/docs/jitsi/05-human-meeting-experience.md",
+    "packages/krate/docs/jitsi/04-web-management.md",
+    "packages/krate/docs/jitsi/01-architecture.md",
+    "packages/krate/docs/agent-identity/04-meeting-integration.md"
+  ],
+  "dependencyIssues": [623, 624, 625],
+  "expectedRoutes": [
+    "/orgs/{org}/meetings/{id}",
+    "/api/orgs/{org}/jitsi/meetings/{id}/join",
+    "/api/orgs/{org}/jitsi/meetings/{id}/invite",
+    "/api/orgs/{org}/jitsi/meetings/{id}/record"
+  ],
+  "expectedComponents": [
+    "EmbeddedMeeting",
+    "Jitsi meeting context panel",
+    "Jitsi meeting controls",
+    "Jitsi participant list",
+    "Meeting detail page"
+  ],
+  "qualityCommands": [
+    "cd packages/krate/web && npm test",
+    "cd packages/krate/web && npm run build",
+    "cd packages/krate/web && npm run test:e2e",
+    "git diff --check"
+  ],
+  "jitsiExternalApiScript": "https://meet.krate.local/external_api.js",
+  "implementationScope": [
+    "Embedded Jitsi iframe lifecycle through Jitsi Meet External API",
+    "Authenticated join flow returning room URL and short-lived JWT",
+    "Meeting detail deep link in the Krate org console",
+    "Krate context panel with humans, agents, recording controls, invite actions, metadata, dispatch links, and post-meeting links",
+    "Responsive desktop and mobile layout",
+    "Mocked deterministic tests and browser checks for External API behavior"
+  ],
+  "outOfScope": [
+    "Jitsi Helm subchart deployment",
+    "Jitsi CRD/controller implementation beyond narrow integration adapters",
+    "Full meeting-management pages from issue #625 unless already present and needing extension",
+    "Agent sidecar meeting runtime",
+    "MCP meeting tools unless required by dependency contracts already landed"
+  ]
+}
