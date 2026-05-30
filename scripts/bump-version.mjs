@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { syncBabysitterMarketplaceManifestVersions } from "./plugin-marketplace-version-sync.mjs";
 
 const run = (cmd, fallback = "") => {
   try {
@@ -430,17 +431,7 @@ for (const path of versionsJsonPaths) {
   writeJson(path, data);
 }
 
-const marketplacePath = ".claude-plugin/marketplace.json";
-if (existsSync(marketplacePath)) {
-  const marketplaceData = JSON.parse(readFileSync(marketplacePath, "utf8"));
-  if (Array.isArray(marketplaceData.plugins)) {
-    const babysitterPlugin = marketplaceData.plugins.find((plugin) => plugin.name === "babysitter");
-    if (babysitterPlugin) {
-      babysitterPlugin.version = newVersion;
-    }
-  }
-  writeJson(marketplacePath, marketplaceData);
-}
+syncBabysitterMarketplaceManifestVersions(newVersion);
 
 for (const path of lockPaths) {
   updateLockVersion(path, newVersion);

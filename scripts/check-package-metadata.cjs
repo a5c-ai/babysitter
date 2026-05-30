@@ -36,6 +36,43 @@ function expectDeepEqual(actual, expected, label) {
   }
 }
 
+function findMarketplacePluginEntry(manifest, pluginName) {
+  if (Array.isArray(manifest.plugins)) {
+    return manifest.plugins.find((entry) => entry && entry.name === pluginName) || null;
+  }
+  if (manifest.plugins && typeof manifest.plugins === 'object') {
+    return manifest.plugins[pluginName] || null;
+  }
+  return null;
+}
+
+function verifyBabysitterPluginVersionSync() {
+  const versions = readJson('plugins/babysitter-unified/versions.json');
+  const unifiedPlugin = readJson('plugins/babysitter-unified/plugin.json');
+  const expectedVersion = versions.sdkVersion;
+  if (typeof expectedVersion !== 'string' || expectedVersion.trim() === '') {
+    fail('plugins/babysitter-unified/versions.json sdkVersion must be a non-empty string');
+  }
+  expectEqual(unifiedPlugin.version, expectedVersion, 'plugins/babysitter-unified/plugin.json version');
+
+  for (const manifestPath of [
+    '.claude-plugin/marketplace.json',
+    '.cursor-plugin/marketplace.json',
+    '.agents/plugins/marketplace.json',
+    '.github/plugin/marketplace.json',
+  ]) {
+    if (!fs.existsSync(path.join(repoRoot, manifestPath))) {
+      continue;
+    }
+    const manifest = readJson(manifestPath);
+    const entry = findMarketplacePluginEntry(manifest, 'babysitter');
+    if (!entry) {
+      continue;
+    }
+    expectEqual(entry.version, expectedVersion, `${manifestPath} babysitter version`);
+  }
+}
+
 function expectPublicPackage(manifest, label) {
   if (manifest.private !== undefined && manifest.private !== false) {
     fail(`${label} private expected undefined or false but found ${JSON.stringify(manifest.private)}`);
@@ -181,6 +218,7 @@ function walkPackageJsons(dirPath, output) {
 const rootManifest = readJson('package.json');
 expectEqual(rootManifest.private, true, 'package.json private');
 expectEqual(rootManifest.license, 'MIT', 'package.json license');
+verifyBabysitterPluginVersionSync();
 
 const docsCoverage = readJson(DOCS_SURFACE_PATH);
 const publicSurfaceEntries = docsCoverage.surfaces.filter((entry) => isPublicStatus(entry.status) && packageExists(entry.surface));
