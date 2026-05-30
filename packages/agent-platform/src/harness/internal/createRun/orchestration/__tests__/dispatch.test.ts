@@ -35,6 +35,7 @@ describe("dispatchEffectActions", () => {
         makeAction("alpha", { parallelGroupId: "group-1" }),
         makeAction("beta", { parallelGroupId: "group-1" }),
       ],
+      concurrentEffects: true,
       resolveAction: async (action) => {
         resolved.push(action.effectId);
         if (action.effectId === "alpha") {
@@ -64,6 +65,32 @@ describe("dispatchEffectActions", () => {
     expect(committed).toEqual(["alpha", "beta"]);
   });
 
+  test("keeps parallel groups sequential unless concurrent-effects is enabled", async () => {
+    const first = deferred<void>();
+    const resolved: string[] = [];
+
+    const dispatch = dispatchEffectActions({
+      actions: [
+        makeAction("alpha", { parallelGroupId: "group-1" }),
+        makeAction("beta", { parallelGroupId: "group-1" }),
+      ],
+      resolveAction: async (action) => {
+        resolved.push(action.effectId);
+        if (action.effectId === "alpha") {
+          await first.promise;
+        }
+        return { status: "ok", value: action.effectId };
+      },
+      commitAction: async () => undefined,
+    });
+
+    await Promise.resolve();
+    expect(resolved).toEqual(["alpha"]);
+    first.resolve();
+    await dispatch;
+    expect(resolved).toEqual(["alpha", "beta"]);
+  });
+
   test("respects maxConcurrency while preserving deterministic commits", async () => {
     let active = 0;
     let maxActive = 0;
@@ -75,6 +102,7 @@ describe("dispatchEffectActions", () => {
         makeAction("b", { parallelGroupId: "group-1", maxConcurrency: 2 }),
         makeAction("c", { parallelGroupId: "group-1", maxConcurrency: 2 }),
       ],
+      concurrentEffects: true,
       resolveAction: async (action) => {
         active += 1;
         maxActive = Math.max(maxActive, active);
@@ -101,6 +129,7 @@ describe("dispatchEffectActions", () => {
         makeAction("foreground", { parallelGroupId: "group-1" }),
         makeAction("background", { parallelGroupId: "group-1", background: true }),
       ],
+      concurrentEffects: true,
       resolveAction: async (action) => {
         resolved.push(action.effectId);
         if (action.effectId === "foreground") {
@@ -131,6 +160,7 @@ describe("dispatchEffectActions", () => {
         makeAction("ok", { parallelGroupId: "group-1" }),
         makeAction("bad", { parallelGroupId: "group-1" }),
       ],
+      concurrentEffects: true,
       resolveAction: async (action) => {
         if (action.effectId === "bad") {
           throw new Error("boom");

@@ -44,7 +44,11 @@
       "packages/hooks-mux/adapter-claude/src/normalizer.ts",
       "packages/hooks-mux/adapter-claude/src/renderer.ts",
       "packages/hooks-mux/cli/src/cli/commands/invoke.ts",
+      "packages/hooks-mux/cli/src/__tests__/e2e/e2e-invoke.test.ts",
       "packages/hooks-mux/cli/src/cli/commands/doctor.ts",
+      "packages/agent-mux/adapters/src/claude-code/runtime-hooks/ephemeral-config.ts",
+      "packages/agent-mux/adapters/src/claude-code/runtime-hooks/hook-socket-server.ts",
+      "packages/agent-mux/core/src/runtime-hooks.ts",
       "packages/atlas/graph/channels-hooks/hook-mappings/extended-mappings.yaml",
       "packages/atlas/graph/channels-hooks/hook-surfaces/native/claude-code-extended-hooks.yaml",
       "packages/agent-catalog/src/sdk.ts",
@@ -54,6 +58,46 @@
       "packages/agent-platform/src/harness/internal/createRun/orchestration"
     ],
     "planningConstraint": "Reuse existing hook contract, catalog, adapter, SDK runtime, and orchestration surfaces before adding new infrastructure."
+  },
+  "currentRepoFindings": {
+    "sourceBranchAudited": "staging",
+    "issueState": "Issue #636 has previous plan and implementation comments, prior planning/implementation PRs #643 and #696, and open refreshed plan PR #720 referenced in the issue thread. A maintainer comment says the implementation pipeline is active and work is tracked via PRs. Treat this process as a refreshed executable implementation plan, not as evidence that no prior work exists.",
+    "relatedPlanPrs": [
+      {
+        "number": 643,
+        "state": "MERGED",
+        "headRefName": "plan/issue-636",
+        "url": "https://github.com/a5c-ai/babysitter/pull/643",
+        "note": "Initial plan plus implementation changes landed into staging."
+      },
+      {
+        "number": 696,
+        "state": "MERGED",
+        "headRefName": "plan/issue-636",
+        "url": "https://github.com/a5c-ai/babysitter/pull/696",
+        "note": "Refreshed plan artifact update landed into staging."
+      },
+      {
+        "number": 720,
+        "state": "OPEN",
+        "headRefName": "plan/issue-636",
+        "url": "https://github.com/a5c-ai/babysitter/pull/720",
+        "note": "Current refreshed plan branch to update rather than duplicate."
+      }
+    ],
+    "observedPartialCoverage": [
+      "packages/hooks-mux/core/src/types/lifecycle.ts already includes the named canonical phases for the 13 target entries, including tool.after_failure, tool.after_batch, turn.prompt_expansion, turn.stop_failure, task.created, task.completed, team.idle, session.setup, session.instructions_loaded, message.received, model.before_request, model.after_response, and planner.before_tool_selection.",
+      "packages/hooks-mux/adapter-claude/src/mappings.ts now builds mappings from agent-catalog with validation against CANONICAL_PHASES and LIFECYCLE_SCOPES instead of accepting unknown strings by cast.",
+      "packages/hooks-mux/adapter-claude/src/normalizer.ts, renderer.ts, and claude-adapter tests reference the target Claude event names and block/additional-context behavior.",
+      "packages/hooks-mux/cli/src/__tests__/e2e/e2e-invoke.test.ts has fixture coverage for the target native event names."
+    ],
+    "observedRemainingRisks": [
+      "docs/agent-stack/hooks/coverage-matrix.md and docs/agent-stack/hooks/missing-events.md still describe the events as missing, so implementation must distinguish stale documentation from real runtime gaps.",
+      "packages/agent-mux/adapters/src/claude-code/runtime-hooks/ephemeral-config.ts currently registers only PreToolUse, PostToolUse, UserPromptSubmit, SessionStart, SessionEnd, and Stop.",
+      "packages/agent-mux/adapters/src/claude-code/runtime-hooks/hook-socket-server.ts currently dispatches only the same six Claude runtime hook events.",
+      "SDK and agent-platform runtime emission paths still need a concrete current-state audit before adding task/session/turn emission behavior."
+    ],
+    "planningImplication": "Execution should start with a current-state support matrix and then implement only gaps proven by code, tests, catalog data, runtime hook registration, and docs."
   },
   "targetEventClassification": {
     "claudeLifecycleGapsAndBlockingGaps": 10,
@@ -194,8 +238,13 @@
     "packages/hooks-mux/adapter-claude/src/normalizer.ts",
     "packages/hooks-mux/adapter-claude/src/renderer.ts",
     "packages/hooks-mux/adapter-claude/src/__tests__/claude-adapter.test.ts",
+    "packages/hooks-mux/cli/src/__tests__/e2e/e2e-invoke.test.ts",
     "packages/hooks-mux/core/src/__tests__/fixtures/claude-v1.json",
     "packages/hooks-mux/cli/src/cli/commands/invoke.ts",
+    "packages/agent-mux/core/src/runtime-hooks.ts",
+    "packages/agent-mux/adapters/src/claude-code/runtime-hooks/ephemeral-config.ts",
+    "packages/agent-mux/adapters/src/claude-code/runtime-hooks/hook-socket-server.ts",
+    "packages/agent-mux/adapters/tests/claude-adapter.test.ts",
     "packages/atlas/graph/channels-hooks/hook-mappings/extended-mappings.yaml",
     "packages/atlas/graph/channels-hooks/hook-surfaces/native/claude-code-extended-hooks.yaml",
     "packages/agent-catalog/src/sdk.ts",
@@ -211,6 +260,7 @@
     "npm run build:hooks-mux",
     "npm run test:hooks-mux",
     "npm run lint:hooks-mux",
+    "npm run build:agent-mux",
     "npm run build:sdk",
     "npm run test:sdk",
     "npm run verify:metadata",

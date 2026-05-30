@@ -1,6 +1,7 @@
 import type { EffectAction } from "@a5c-ai/babysitter-sdk";
 import { getEffectiveConcurrency } from "@a5c-ai/babysitter-sdk";
-import type { ResolveEffectResult } from "../utils";
+import type { HarnessDiscoveryResult, ResolveEffectResult } from "../utils";
+import { HarnessCapability } from "../../../types";
 
 export type EffectDispatchCommit = {
   action: EffectAction;
@@ -18,6 +19,7 @@ export type EffectDispatchSummary = {
 
 export type EffectDispatchOptions = {
   actions: EffectAction[];
+  concurrentEffects?: boolean;
   resolveAction(action: EffectAction): Promise<ResolveEffectResult>;
   commitAction(commit: EffectDispatchCommit): Promise<void>;
 };
@@ -33,12 +35,19 @@ type IndexedDispatchResult = {
 };
 
 const UNGROUPED_KEY = "__ungrouped__";
+export function harnessSupportsConcurrentEffects(
+  harnessName: string,
+  discovered: readonly HarnessDiscoveryResult[] = [],
+): boolean {
+  const harness = discovered.find((candidate) => candidate.name === harnessName);
+  return harness?.capabilities?.includes(HarnessCapability.ConcurrentEffects) ?? false;
+}
 
 export async function dispatchEffectActions(
   options: EffectDispatchOptions,
 ): Promise<EffectDispatchSummary> {
   const indexed = options.actions.map((action, index) => ({ action, index }));
-  const groups = buildDispatchGroups(indexed);
+  const groups = buildDispatchGroups(indexed, options.concurrentEffects === true);
   const resolved = new Map<number, EffectDispatchCommit>();
 
   for (const group of groups) {
@@ -75,14 +84,22 @@ export async function dispatchEffectActions(
   };
 }
 
-function buildDispatchGroups(actions: IndexedAction[]): IndexedAction[][] {
+function buildDispatchGroups(
+  actions: IndexedAction[],
+  concurrentEffects: boolean,
+): IndexedAction[][] {
   const groups: IndexedAction[][] = [];
   const grouped = new Map<string, IndexedAction[]>();
 
   for (const item of actions) {
     const groupId = normalizedGroupId(item.action);
     const strategy = item.action.schedulerHints?.executionStrategy;
-    if (!groupId || groupId === UNGROUPED_KEY || strategy === "sequential") {
+    if (
+      !concurrentEffects ||
+      !groupId ||
+      groupId === UNGROUPED_KEY ||
+      strategy === "sequential"
+    ) {
       groups.push([item]);
       continue;
     }

@@ -7,6 +7,24 @@
   "e2eRoot": "packages/krate/web/e2e",
   "playwrightConfig": "packages/krate/web/playwright.config.js",
   "dependencyIssues": [608],
+  "processLibrarySources": {
+    "requestedPath": ".a5c/process-library",
+    "requestedPathStatus": "Not present in this checkout at planning time.",
+    "localMethodologySources": [
+      "library/methodologies/atdd-tdd/README.md",
+      "library/methodologies/bdd-specification-by-example/README.md"
+    ],
+    "localSpecializationSources": [
+      "library/specializations/qa-testing-automation/README.md",
+      "library/specializations/web-development/README.md"
+    ],
+    "selectedGuidance": [
+      "Use ATDD/TDD outside-in acceptance criteria so Playwright tests encode the user-visible definition of done before implementation details.",
+      "Use BDD/specification-by-example to formulate concrete navigation, CRUD, provider sync, SSE, assistant, playground, and agent-flow examples.",
+      "Use QA testing automation guidance for maintainable E2E fixtures, data isolation, CI suitability, and flakiness controls.",
+      "Use web-development guidance for browser/API/auth/routing integration across the Next.js web console."
+    ]
+  },
   "issueSummary": {
     "currentState": "Commit 74a94a950 already added basic Playwright smoke coverage in packages/krate/web/e2e/smoke.spec.js, but workflows still lack browser-level E2E coverage.",
     "goal": "Add staging-backed Playwright tests that prove Krate web console navigation, CRUD flows, external provider sync, SSE/live updates, and service-dependent agent/assistant/playground paths work in a browser.",

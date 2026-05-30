@@ -3,9 +3,10 @@ import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { createRun } from "../../runtime/createRun";
 import { loadJournal } from "../../storage/journal";
+import { writeFileAtomic } from "../../storage/atomic";
 import { rebuildStateCache } from "../../runtime/replay/stateCache";
 import type { IterationMetadata } from "../../runtime/types";
-import type { JsonRecord } from "../../storage/types";
+import type { JournalEvent, JsonRecord } from "../../storage/types";
 import { nextUlid } from "../../storage/ulids";
 import {
   getAdapter,
@@ -410,4 +411,165 @@ export async function handleRunRepairJournal(parsed: ParsedArgs): Promise<number
     console.log(`[run:repair-journal] repaired originalFiles=${files.length} keptEvents=${kept.length} droppedCorrupt=${droppedCorrupt} droppedRequested=${droppedRequested} droppedResolved=${droppedResolved} backupDir=${backupDir}`);
   }
   return 0;
+}
+
+export async function handleRunRecoverProcessError(parsed: ParsedArgs): Promise<number> {
+  if (!parsed.runDirArg) {
+    console.error(USAGE);
+    return 1;
+  }
+  const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("run:recover-process-error", parsed, { runDir, dryRun: parsed.dryRun, json: parsed.json, patchEffect: parsed.patchEffect });
+  if (!(await readRunMetadataSafe(runDir, "run:recover-process-error"))) return 1;
+
+  let patch: ParsedPatch | null = null;
+  if (parsed.patchEffect) {
+    try {
+      patch = parsePatchEffect(parsed.patchEffect);
+    } catch (error) {
+      console.error(`[run:recover-process-error] ${error instanceof Error ? error.message : String(error)}`);
+      return 1;
+    }
+  }
+
+  const journal = await loadJournal(runDir);
+  const processError = findLatestProcessRuntimeError(journal);
+  if (!processError) {
+    console.error("[run:recover-process-error] no PROCESS_RUNTIME_ERROR event found");
+    return 1;
+  }
+
+  if (patch) {
+    const resultPath = path.join(runDir, "tasks", patch.effectId, "result.json");
+    try {
+      const parsedResult = JSON.parse(await fs.readFile(resultPath, "utf8")) as unknown;
+      applyJsonPath(parsedResult, patch.path, patch.value);
+    } catch (error) {
+      console.error(`[run:recover-process-error] ${error instanceof Error ? error.message : String(error)}`);
+      return 1;
+    }
+  }
+
+  const summaryBase = {
+    runDir,
+    dryRun: parsed.dryRun,
+    recovered: !parsed.dryRun,
+    processError: {
+      type: processError.type,
+      seq: processError.seq,
+      data: processError.data,
+    },
+    patchedEffect: patch ? { effectId: patch.effectId, path: patch.path.join(".") } : null,
+  };
+
+  if (parsed.dryRun) {
+    if (parsed.json) console.log(JSON.stringify(summaryBase, null, 2));
+    else console.log(`[run:recover-process-error] dry-run runDir=${runDir} processError=#${String(processError.seq).padStart(6, "0")}`);
+    return 0;
+  }
+
+  if (patch) {
+    const resultPath = path.join(runDir, "tasks", patch.effectId, "result.json");
+    const parsedResult = JSON.parse(await fs.readFile(resultPath, "utf8")) as unknown;
+    applyJsonPath(parsedResult, patch.path, patch.value);
+    await writeFileAtomic(resultPath, JSON.stringify(parsedResult, null, 2) + "\n");
+  }
+
+  const backupDir = await rewriteJournalWithoutEvent(runDir, processError);
+  const snapshot = await rebuildStateCache(runDir, { reason: "process_error_recovery" });
+  const summary = {
+    ...summaryBase,
+    backupDir,
+    metadata: formatIterationMetadata({
+      pendingEffectsByKind: snapshot.pendingEffectsByKind,
+      stateVersion: snapshot.stateVersion,
+      journalHead: snapshot.journalHead ?? null,
+      stateRebuilt: true,
+      stateRebuildReason: snapshot.rebuildReason ?? undefined,
+    }).jsonMetadata ?? null,
+  };
+  if (parsed.json) {
+    console.log(JSON.stringify(summary, null, 2));
+  } else {
+    console.log(`[run:recover-process-error] recovered runDir=${runDir} backupDir=${backupDir}`);
+  }
+  return 0;
+}
+
+interface ParsedPatch {
+  effectId: string;
+  path: string[];
+  value: unknown;
+}
+
+function findLatestProcessRuntimeError(events: JournalEvent[]): JournalEvent | undefined {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    if (events[index].type === "PROCESS_RUNTIME_ERROR") return events[index];
+  }
+  return undefined;
+}
+
+function parsePatchEffect(raw: string): ParsedPatch {
+  const colon = raw.indexOf(":");
+  const equals = raw.indexOf("=", colon + 1);
+  if (colon <= 0 || equals <= colon + 1) {
+    throw new Error("--patch-effect must use <effectId>:<jsonPath>=<json>");
+  }
+  const effectId = raw.slice(0, colon);
+  const pathText = raw.slice(colon + 1, equals);
+  const valueText = raw.slice(equals + 1);
+  const segments = pathText.split(".").filter(Boolean);
+  if (!effectId || segments.length === 0 || segments.some((segment) => !/^[A-Za-z0-9_-]+$/.test(segment))) {
+    throw new Error("--patch-effect path must contain dot-separated object keys");
+  }
+  let value: unknown;
+  try {
+    value = JSON.parse(valueText);
+  } catch {
+    throw new Error("--patch-effect value must be valid JSON");
+  }
+  return { effectId, path: segments, value };
+}
+
+function applyJsonPath(target: unknown, segments: string[], value: unknown): void {
+  if (!isJsonRecord(target)) {
+    throw new Error("task result artifact must contain a JSON object");
+  }
+  let cursor: JsonRecord = target;
+  for (const segment of segments.slice(0, -1)) {
+    const next = cursor[segment];
+    if (next === undefined) {
+      cursor[segment] = {};
+    } else if (!isJsonRecord(next)) {
+      throw new Error(`cannot patch through non-object path segment '${segment}'`);
+    }
+    cursor = cursor[segment] as JsonRecord;
+  }
+  cursor[segments.at(-1) as string] = value;
+}
+
+async function rewriteJournalWithoutEvent(runDir: string, target: JournalEvent): Promise<string> {
+  const journalDir = path.join(runDir, "journal");
+  const events = (await loadJournal(runDir)).filter((event) => event.path !== target.path);
+  const stamp = Date.now();
+  const repairedDir = path.join(runDir, `journal.process-error-recovered.${stamp}`);
+  await fs.mkdir(repairedDir, { recursive: true });
+  for (let i = 0; i < events.length; i += 1) {
+    const eventPayload: JsonRecord = {
+      type: events[i].type,
+      recordedAt: events[i].recordedAt,
+      data: events[i].data,
+    };
+    const contents = JSON.stringify(eventPayload, null, 2) + "\n";
+    const checksum = crypto.createHash("sha256").update(contents).digest("hex");
+    await fs.writeFile(
+      path.join(repairedDir, `${String(i + 1).padStart(6, "0")}.${nextUlid()}.json`),
+      JSON.stringify({ ...eventPayload, checksum }, null, 2) + "\n",
+      "utf8",
+    );
+  }
+  const backupDir = path.join(runDir, `journal.process-error.bak.${stamp}`);
+  await fs.rename(journalDir, backupDir);
+  await fs.rename(repairedDir, journalDir);
+  return backupDir;
 }

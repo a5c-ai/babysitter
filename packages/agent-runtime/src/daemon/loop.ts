@@ -4,7 +4,13 @@
 
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
-import type { DaemonConfig, TriggerCallback, TriggerEvent } from "./types";
+import type {
+  DaemonConfig,
+  TriggerAdmissionConfig,
+  TriggerAdmissionResult,
+  TriggerCallback,
+  TriggerEvent,
+} from "./types";
 import {
   isAutomationTriggerEvent,
   isFileTriggerConfig,
@@ -29,6 +35,9 @@ export interface DaemonLoopStatus {
   activeRuns: number;
   pendingRuns: number;
   deadLetterRuns?: number;
+  rejectedTriggers?: number;
+  duplicateTriggers?: number;
+  rateLimitedTriggers?: number;
   updatedAt: string;
 }
 
@@ -40,6 +49,7 @@ export async function runDaemonLoop(
   const handles: Array<{ dispose?: () => void; close?: () => Promise<void> }> = [];
   const activeRuns = new Set<Promise<void>>();
   const queue: TriggerEvent[] = [];
+  const admission = createAdmissionController(config.triggerAdmission);
   const retryTimers = new Set<NodeJS.Timeout>();
   const durableQueue = options?.logDir
     ? await DurableTriggerQueue.open(options.logDir, options.queue)
@@ -81,7 +91,7 @@ export async function runDaemonLoop(
 
   function dispatchTrigger(trigger: TriggerEvent): Promise<void> | void {
     if (options?.onTrigger) {
-      return options.onTrigger(trigger);
+      return Promise.resolve(options.onTrigger(trigger)).then(() => {});
     }
   }
 
@@ -139,6 +149,9 @@ export async function runDaemonLoop(
       activeRuns: durableQueue?.counts().active ?? activeRuns.size,
       pendingRuns: durableQueue?.counts().pending ?? queue.length,
       deadLetterRuns: durableQueue?.counts().deadLetter,
+      rejectedTriggers: admission.stats.rejected,
+      duplicateTriggers: admission.stats.duplicates,
+      rateLimitedTriggers: admission.stats.rateLimited,
       updatedAt: new Date().toISOString(),
     };
     const tmpPath = `${statusPath}.tmp-${process.pid}-${Date.now()}`;
@@ -146,7 +159,7 @@ export async function runDaemonLoop(
     await fs.rename(tmpPath, statusPath);
   }
 
-  const triggerCallback: TriggerCallback = (trigger) => {
+  const triggerCallback: TriggerCallback = async (trigger) => {
     // Log the activation
     if (options?.logDir) {
       const data = isAutomationTriggerEvent(trigger)
@@ -171,8 +184,30 @@ export async function runDaemonLoop(
       });
     }
 
+    const admissionResult = admission.evaluate(trigger, {
+      activeRuns: activeRuns.size,
+      pendingRuns: durableQueue?.counts().pending ?? queue.length,
+      maxConcurrent,
+    });
+    if (admissionResult.status === "rejected" || admissionResult.status === "duplicate") {
+      if (options?.logDir) {
+        void appendDaemonLog(options.logDir, {
+          timestamp: new Date().toISOString(),
+          event: admissionResult.status === "duplicate" ? "TRIGGER_DUPLICATE" : "TRIGGER_REJECTED",
+          data: {
+            reason: admissionResult.reason,
+            retryAfterMs: admissionResult.retryAfterMs,
+            queueDepth: admissionResult.queueDepth,
+            fingerprint: admissionResult.fingerprint,
+          },
+        }).catch(() => {});
+      }
+      scheduleStatusWrite();
+      return admissionResult;
+    }
+
     if (durableQueue) {
-      void durableQueue.enqueue(trigger).then(() => drainQueue()).catch((error) => {
+      await durableQueue.enqueue(trigger).then(() => drainQueue()).catch((error) => {
         void appendDaemonLog(options!.logDir!, {
           timestamp: new Date().toISOString(),
           event: "TRIGGER_QUEUE_ERROR",
@@ -180,17 +215,20 @@ export async function runDaemonLoop(
         }).catch(() => {});
       });
       scheduleStatusWrite();
-      return;
+      return admissionResult;
     }
 
     if (activeRuns.size >= maxConcurrent) {
       queue.push(trigger);
       scheduleStatusWrite();
-      return;
+      return admissionResult.status === "accepted"
+        ? { ...admissionResult, status: "deferred", queueDepth: queue.length }
+        : admissionResult;
     }
 
     dispatchMemoryTrigger(trigger);
     scheduleStatusWrite();
+    return admissionResult;
   };
 
   // Set up file triggers
@@ -254,6 +292,122 @@ export async function runDaemonLoop(
   // Wait for any in-flight status writes then write final status
   await statusWriteChain;
   try { await writeLoopStatus(); } catch { /* directory may be gone in tests */ }
+}
+
+interface AdmissionState {
+  activeRuns: number;
+  pendingRuns: number;
+  maxConcurrent: number;
+}
+
+interface AdmissionController {
+  stats: {
+    rejected: number;
+    duplicates: number;
+    rateLimited: number;
+  };
+  evaluate(trigger: TriggerEvent, state: AdmissionState): TriggerAdmissionResult;
+}
+
+function createAdmissionController(config?: TriggerAdmissionConfig): AdmissionController {
+  const seen = new Map<string, number>();
+  const rateWindow: number[] = [];
+  const stats = {
+    rejected: 0,
+    duplicates: 0,
+    rateLimited: 0,
+  };
+
+  return {
+    stats,
+    evaluate(trigger, state) {
+      const now = Date.now();
+      const fingerprint = fingerprintTrigger(trigger);
+      const dedupeWindowMs = config?.dedupeWindowMs ?? 0;
+      if (dedupeWindowMs > 0) {
+        for (const [key, expiresAt] of seen) {
+          if (expiresAt <= now) seen.delete(key);
+        }
+        const existing = seen.get(fingerprint);
+        if (existing && existing > now) {
+          stats.duplicates += 1;
+          return {
+            status: "duplicate",
+            reason: "dedupe-window",
+            retryAfterMs: existing - now,
+            queueDepth: state.pendingRuns,
+            fingerprint,
+          };
+        }
+      }
+
+      const rateLimit = config?.rateLimit;
+      if (rateLimit) {
+        while (rateWindow.length > 0 && rateWindow[0] <= now - rateLimit.windowMs) {
+          rateWindow.shift();
+        }
+        if (rateWindow.length >= rateLimit.maxTriggers) {
+          stats.rejected += 1;
+          stats.rateLimited += 1;
+          return {
+            status: "rejected",
+            reason: "rate-limit",
+            retryAfterMs: Math.max(0, rateWindow[0] + rateLimit.windowMs - now),
+            queueDepth: state.pendingRuns,
+            fingerprint,
+          };
+        }
+      }
+
+      const maxPendingRuns = config?.maxPendingRuns;
+      if (maxPendingRuns !== undefined && state.pendingRuns >= maxPendingRuns && state.activeRuns >= state.maxConcurrent) {
+        stats.rejected += 1;
+        return {
+          status: "rejected",
+          reason: "queue-full",
+          queueDepth: state.pendingRuns,
+          fingerprint,
+        };
+      }
+
+      if (dedupeWindowMs > 0) {
+        seen.set(fingerprint, now + dedupeWindowMs);
+      }
+      if (rateLimit) {
+        rateWindow.push(now);
+      }
+
+      return {
+        status: state.activeRuns >= state.maxConcurrent ? "deferred" : "accepted",
+        queueDepth: state.pendingRuns,
+        fingerprint,
+      };
+    },
+  };
+}
+
+function fingerprintTrigger(trigger: TriggerEvent): string {
+  if (trigger.type === "file") {
+    const path = typeof trigger.inputs?.path === "string" ? trigger.inputs.path : "";
+    return path ? `file:path:${path}` : `file:${trigger.processId}:${trigger.entrypoint}`;
+  }
+  const deliveryId = typeof trigger.inputs?.deliveryId === "string" ? trigger.inputs.deliveryId : "";
+  const sourceEvent = trigger.rule.trigger.type === "webhook" ? trigger.rule.trigger.sourceEvent ?? "" : "";
+  const inputs = stableStringify(trigger.inputs ?? {});
+  return `automation:${trigger.rule.trigger.type}:${trigger.rule.id}:${deliveryId}:${sourceEvent}:${inputs}`;
+}
+
+function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== "object") {
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => stableStringify(item)).join(",")}]`;
+  }
+  return `{${Object.entries(value as Record<string, unknown>)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, item]) => `${JSON.stringify(key)}:${stableStringify(item)}`)
+    .join(",")}}`;
 }
 
 /**

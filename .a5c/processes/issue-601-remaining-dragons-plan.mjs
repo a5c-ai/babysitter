@@ -1,57 +1,90 @@
 /**
  * @process repo/issue-601-remaining-dragons-plan
- * @description Implementation plan for issue #601: remaining here-be-dragons debt, process.env coupling coordination, and missing caveats.
- * @inputs { issueNumber: number, baseBranch: string, workBranch: string, prNumber?: number, relatedIssues: number[], maxImplementationLoops?: number }
- * @outputs { success: boolean, decomposition: object, implementation: object, verification: object, review: object }
+ * @description Gated implementation workflow for issue #601: remaining here-be-dragons debt and caveat cleanup.
+ * @inputs { issueNumber: number, baseBranch: string, workBranch: string, relatedIssues: number[], priorPlanningPr?: number, maxImplementationLoops?: number, verificationCommands?: string[] }
+ * @outputs { success: boolean, context: object, reuseAudit: object, decomposition: object, regressionPlan: object, implementation: object, verification: object, review: object }
  *
  * @process methodologies/spec-kit-brownfield
  * @process methodologies/planning-with-files/planning-orchestrator
  * @process methodologies/shared/root-cause-diagnosis
+ * @process methodologies/superpowers/test-driven-development
  * @process methodologies/superpowers/verification-before-completion
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
 
-function taskStdout(result) {
+function stdoutOf(result) {
   return result?.stdout ?? result?.value?.stdout ?? result?.result?.stdout ?? '';
 }
 
-const collectContextTask = defineTask('issue-601.collect-context', (args, taskCtx) => ({
+const readIssueContextTask = defineTask('issue-601.read-context', (args, taskCtx) => ({
   kind: 'shell',
-  title: 'Read issue #601, related issues, repo evidence, and process references',
-  labels: ['issue-601', 'context', 'repo-research'],
+  title: 'Read issue #601, related issues, prior PRs, and live repo evidence',
+  labels: ['issue-601', 'context', 'no-code-changes'],
   shell: {
     command: [
       'set -euo pipefail',
-      'printf "%s\\n" "--- issue 601 ---"',
       `gh issue view ${args.issueNumber} --json title,body,labels,comments,state,url`,
-      'printf "%s\\n" "--- related issue 584 ---"',
-      'gh issue view 584 --json title,body,labels,comments,state,url || true',
-      'printf "%s\\n" "--- related issue 586 ---"',
-      'gh issue view 586 --json title,body,labels,comments,state,url || true',
-      'printf "%s\\n" "--- open planning prs for related issues ---"',
-      'gh pr list --state open --search "issue-584 OR issue-586 OR #584 OR #586 in:body" --json number,title,headRefName,baseRefName,url,body',
-      'printf "%s\\n" "--- git status ---"',
+      'printf "%s\\n" "--- related issues ---"',
+      ...(args.relatedIssues ?? []).map(
+        (issueNumber) => `gh issue view ${issueNumber} --json title,body,labels,comments,state,url || true`,
+      ),
+      'printf "%s\\n" "--- prior planning or implementation PR ---"',
+      args.priorPlanningPr ? `gh pr view ${args.priorPlanningPr} --json number,title,state,headRefName,baseRefName,url,body,files,comments || true` : 'true',
+      'printf "%s\\n" "--- branch and worktree ---"',
       'git status --short --branch',
+      'git log --oneline --decorate --max-count=12 -- docs/here-be-dragons.md .a5c/processes/issue-601-remaining-dragons-plan.mjs .a5c/processes/issue-601-remaining-dragons-plan.inputs.json',
       'printf "%s\\n" "--- here-be-dragons doc ---"',
-      'nl -ba docs/here-be-dragons.md | sed -n "1,220p"',
-      'printf "%s\\n" "--- process.env writers and residual caveats ---"',
-      'nl -ba packages/agent-platform/src/harness/piWrapper/moduleSupport.ts | sed -n "120,150p"',
-      'nl -ba packages/agent-platform/src/harness/agenticTools/config/state.ts | sed -n "108,124p"',
-      'nl -ba packages/agent-core/src/agenticTools/config/state.ts | sed -n "108,124p"',
-      'nl -ba packages/agent-mux/cli/src/index.ts | sed -n "124,150p"',
-      'nl -ba packages/agent-core/src/agenticTools/index.ts | sed -n "1,60p"',
-      'nl -ba packages/agent-platform/src/harness/piWrapper.ts | sed -n "76,100p"',
-      'nl -ba packages/agent-core/src/agenticTools/tools/execution.ts | sed -n "50,68p"',
-      'nl -ba packages/agent-platform/src/harness/agenticTools/tools/execution.ts | sed -n "50,68p"',
-      'nl -ba packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx | sed -n "76,150p"',
-      'nl -ba tsconfig.json | sed -n "1,24p"',
-      'printf "%s\\n" "--- static debt scan ---"',
-      'rg -n "it\\.skip|skipLibCheck|WeakMap<CustomToolDefinition\\[\\]|initPromise|/bin/bash|process\\.env\\[[^\\]]+\\] =" docs packages/agent-core packages/agent-platform packages/agent-mux tsconfig.json -S',
-      'printf "%s\\n" "--- relevant process library references ---"',
-      'sed -n "1,120p" /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/spec-kit-brownfield.js || true',
-      'sed -n "1,140p" /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/shared/root-cause-diagnosis.js || true',
-      'sed -n "1,120p" /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/verification-before-completion.js || true',
+      'nl -ba docs/here-be-dragons.md | sed -n "1,260p"',
+      'printf "%s\\n" "--- targeted source evidence ---"',
+      'for path in \\',
+      '  packages/agent-core/src/agenticTools/index.ts \\',
+      '  packages/agent-core/src/agenticTools/tools/execution.ts \\',
+      '  packages/agent-platform/src/harness/piWrapper.ts \\',
+      '  packages/agent-platform/src/harness/piWrapper/moduleSupport.ts \\',
+      '  packages/agent-platform/src/harness/agenticTools/config/state.ts \\',
+      '  packages/agent-mux/cli/src/index.ts \\',
+      '  packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx \\',
+      '  tsconfig.json; do',
+      '  if [ -f "$path" ]; then',
+      '    printf "%s\\n" "--- $path ---"',
+      '    nl -ba "$path" | sed -n "1,220p"',
+      '  fi',
+      'done',
+      'printf "%s\\n" "--- debt scan ---"',
+      'rg -n "process\\.env\\[[^\\]]+\\] =|process\\.env\\.[A-Z0-9_]+ =|WeakMap|initPromise|/bin/bash|it\\.skip|skipLibCheck|here-be-dragons|path normalization|platform detection|config loading" docs packages tsconfig.json package.json -S || true',
+    ].join('\n'),
+    expectedExitCode: 0,
+    timeout: 300000,
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+const reuseAuditTask = defineTask('issue-601.reuse-audit', (args, taskCtx) => ({
+  kind: 'shell',
+  title: 'Phase 0 reuse audit for existing #601 infrastructure',
+  labels: ['issue-601', 'reuse-audit', 'no-code-changes'],
+  shell: {
+    command: [
+      'set -euo pipefail',
+      'printf "%s\\n" "## Reuse-audit findings (REVIEW BEFORE PROCEEDING)"',
+      'if [ -f .a5c/reuse-audit.json ]; then',
+      '  printf "%s\\n" "--- .a5c/reuse-audit.json ---"',
+      '  cat .a5c/reuse-audit.json',
+      'else',
+      '  printf "%s\\n" "No .a5c/reuse-audit.json found; using issue-derived keywords."',
+      'fi',
+      'printf "%s\\n" "--- migrations ---"',
+      'find . -path "./node_modules" -prune -o -path "./.git" -prune -o -path "*/migrations/*" -type f -print | sort | xargs -r rg -n "env|config|tool|dispose|shell|bash|skipLibCheck|SessionDetailScreen|e2e|platform|path" -S || true',
+      'printf "%s\\n" "--- routes ---"',
+      'find . -path "./node_modules" -prune -o -path "./.git" -prune -o \\( -path "*/api/*/route.ts" -o -path "*/api/*/route.js" -o -path "*/routes/*" \\) -type f -print | sort | xargs -r rg -n "env|config|tool|dispose|shell|bash|e2e|platform|path" -S || true',
+      'printf "%s\\n" "--- env vars and config writers ---"',
+      'rg -n "process\\.env|AZURE_OPENAI|OPENAI|AMUX_|BABYSITTER_|AGENT_|CODEX_|CLAUDE_" packages scripts docs .a5c/processes -S || true',
+      'printf "%s\\n" "--- SDKs and imports ---"',
+      'rg -n "from .*(agent-core|agent-platform|agent-mux|@a5c-ai)|@a5c-ai/agent|pi-coding-agent|shell|dispose|WeakMap|initPromise" package.json packages scripts -S || true',
     ].join('\n'),
     expectedExitCode: 0,
     timeout: 240000,
@@ -62,27 +95,61 @@ const collectContextTask = defineTask('issue-601.collect-context', (args, taskCt
   },
 }));
 
-const decomposeUmbrellaTask = defineTask('issue-601.decompose-umbrella', (args, taskCtx) => ({
+const processReferenceTask = defineTask('issue-601.process-library-research', (args, taskCtx) => ({
+  kind: 'shell',
+  title: 'Read matching process-library methodologies',
+  labels: ['issue-601', 'process-library', 'no-code-changes'],
+  shell: {
+    command: [
+      'set -euo pipefail',
+      'babysitter process-library:active --json',
+      'printf "%s\\n" "--- discovery excerpt ---"',
+      'babysitter skill:discover --process-path /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/spec-kit-brownfield.js --json | node -e "let s=JSON.parse(require(\\"fs\\").readFileSync(0,\\"utf8\\")); console.log(JSON.stringify({processes:(s.processes||[]).filter(p=>/planning|spec-kit|root-cause|test-driven|verification|github|branch|issue/.test(p.name+\\":\\"+p.category)).slice(0,40)}, null, 2))"',
+      'printf "%s\\n" "--- planning-with-files ---"',
+      'sed -n "1,180p" /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/planning-with-files/planning-orchestrator.js',
+      'printf "%s\\n" "--- spec-kit-brownfield ---"',
+      'sed -n "1,180p" /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/spec-kit-brownfield.js',
+      'printf "%s\\n" "--- root-cause-diagnosis ---"',
+      'sed -n "1,170p" /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/shared/root-cause-diagnosis.js',
+      'printf "%s\\n" "--- verification-before-completion ---"',
+      'sed -n "1,160p" /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/verification-before-completion.js',
+    ].join('\n'),
+    expectedExitCode: 0,
+    timeout: 240000,
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+const decomposeTask = defineTask('issue-601.decompose', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Decompose umbrella issue #601 into focused implementation streams',
-  labels: ['issue-601', 'planning', 'decomposition'],
+  title: 'Decompose #601 into focused implementation streams',
+  labels: ['issue-601', 'planning', 'no-code-changes'],
   agent: {
-    name: 'here-be-dragons-planner',
+    name: 'brownfield-implementation-planner',
     prompt: {
-      role: 'senior monorepo architecture planner',
-      task: 'Create the implementation decomposition for issue #601 without editing source files.',
+      role: 'senior TypeScript monorepo planner',
+      task: 'Plan issue #601 implementation without editing source files.',
       instructions: [
-        'CONTEXT (verbatim from runtime research):',
+        'ISSUE AND REPO CONTEXT (verbatim):',
         '---',
         args.contextStdout,
         '---',
+        'REUSE AUDIT (verbatim):',
+        '---',
+        args.reuseAuditStdout,
+        '---',
+        'PROCESS REFERENCES (verbatim excerpts):',
+        '---',
+        args.processReferenceStdout,
+        '---',
         'Do not edit files.',
-        'Treat #601 as an umbrella tracker unless the evidence proves a single focused change is safe.',
-        'Do not duplicate the #584 process.env coupling implementation plan or the #586 kanban exhaustiveness plan. Instead, list them as dependencies or already-covered work streams.',
-        'For each remaining non-fixed dragon, decide whether it needs a focused implementation stream, a follow-up issue, or a documentation-only disposition.',
-        'Required residual areas to evaluate: exact-array WeakMap tool disposal, piWrapper lazy-init retry storm, /bin/bash portability, unexplained SessionDetailScreen skipped tests, skipLibCheck, E2E coverage gaps, duplicated utility patterns, and missing caveats in docs/here-be-dragons.md.',
-        'For every stream, provide runtimeCallPaths, likelyFiles, testsFirstPlan, implementationPlan, qualityGates, risk, dependencies, and stopConditions.',
-        'Return JSON: { umbrellaDisposition: string, coveredByExistingIssues: object[], workStreams: object[], dependencyOrder: string[], breakpointRecommendation: string, outOfScope: object[], qualityGateMatrix: object[] }.',
+        'Treat #601 as an umbrella issue. Do not duplicate related issue work; identify covered items, already-fixed items, and residual items from current branch evidence.',
+        'For each residual stream, include runtimeCallPaths, affectedFiles, testsFirstPlan, implementationSteps, qualityGates, dependencies, risk, and stopConditions.',
+        'Include a decision for process.env coupling (#584) and kanban switch exhaustiveness (#586) as coordinated dependencies, not duplicate implementation unless current issue evidence proves they are still in scope.',
+        'Return JSON with keys: currentDisposition, coveredByRelatedIssues, alreadyResolved, residualStreams, dependencyOrder, qualityGateMatrix, proposedBreakpoints, outOfScope, deliveryPlan.',
       ],
     },
   },
@@ -92,17 +159,17 @@ const decomposeUmbrellaTask = defineTask('issue-601.decompose-umbrella', (args, 
   },
 }));
 
-const authorRegressionPlanTask = defineTask('issue-601.author-regression-plan', (args, taskCtx) => ({
+const regressionPlanTask = defineTask('issue-601.regression-plan', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Author tests-first plan for remaining #601 streams',
-  labels: ['issue-601', 'tests-first', 'quality'],
+  title: 'Author tests-first implementation plan for #601 residual streams',
+  labels: ['issue-601', 'tests-first', 'no-code-changes'],
   agent: {
-    name: 'dragon-regression-planner',
+    name: 'tests-first-planner',
     prompt: {
-      role: 'test-first TypeScript monorepo planner',
-      task: 'Turn the approved decomposition into concrete regression-test tasks before implementation.',
+      role: 'test-first implementation planner',
+      task: 'Convert the #601 decomposition into concrete red-green-refactor tasks.',
       instructions: [
-        'CONTEXT (verbatim):',
+        'ISSUE AND REPO CONTEXT (verbatim):',
         '---',
         args.contextStdout,
         '---',
@@ -111,9 +178,9 @@ const authorRegressionPlanTask = defineTask('issue-601.author-regression-plan', 
         JSON.stringify(args.decomposition ?? {}, null, 2),
         '---',
         'Do not edit files.',
-        'For each implementation stream not covered by #584 or #586, specify the exact test file candidates, test behavior to add before implementation, and the minimum command that should fail before the fix and pass after the fix.',
-        'Keep each test tied to a live runtime call path. Do not create tests that only assert comments or internal implementation shape unless the stream is documentation-only.',
-        'Return JSON: { testStreams: object[], sharedFixtures: object[], commands: string[], risks: string[] }.',
+        'For every residual stream, specify the test file to add or update before implementation, the failing behavior it proves, the minimal implementation files, and the command that must fail before and pass after.',
+        'If a stream is too broad for one PR, split it into follow-up issue proposals with acceptance criteria and quality gates.',
+        'Return JSON with keys: testStreams, implementationOrder, followupIssues, verificationCommands, reviewerChecklist.',
       ],
     },
   },
@@ -123,17 +190,17 @@ const authorRegressionPlanTask = defineTask('issue-601.author-regression-plan', 
   },
 }));
 
-const implementationTask = defineTask('issue-601.implement-approved-streams', (args, taskCtx) => ({
+const implementationTask = defineTask('issue-601.implement', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Implement approved remaining #601 streams',
-  labels: ['issue-601', 'implementation', 'refactor'],
+  title: 'Implement approved #601 residual streams',
+  labels: ['issue-601', 'implementation'],
   agent: {
     name: 'remaining-dragons-implementer',
     prompt: {
       role: 'senior TypeScript monorepo implementer',
-      task: 'Implement the approved remaining #601 streams with tests first.',
+      task: 'Implement the approved #601 residual streams tests-first.',
       instructions: [
-        'CONTEXT (verbatim):',
+        'ISSUE AND REPO CONTEXT (verbatim):',
         '---',
         args.contextStdout,
         '---',
@@ -145,14 +212,12 @@ const implementationTask = defineTask('issue-601.implement-approved-streams', (a
         '---',
         JSON.stringify(args.regressionPlan ?? {}, null, 2),
         '---',
-        'Edit the repository directly.',
-        'Do not implement #584 process.env coupling or #586 kanban exhaustiveness in this umbrella stream; only coordinate with those if comments/docs need linking.',
-        'For each remaining approved stream, add or unskip focused tests before changing behavior.',
-        'Keep changes scoped to the files identified in runtimeCallPaths unless fresh evidence proves another live-path file is necessary.',
-        'Preferred fixes: make tool disposal robust to copied/recreated arrays or expose a disposal handle; add deterministic piWrapper retry/backoff or circuit-breaker behavior; make shell selection portable while preserving explicit bash opt-in; resolve or justify skipped SessionDetailScreen tests; produce a staged quality-gate plan for skipLibCheck/E2E gaps if they cannot be fixed in one PR.',
-        'Update docs/here-be-dragons.md only to reflect work actually fixed or explicitly split into linked follow-up issues.',
-        'Do not commit unrelated dirty worktree files.',
-        'Return JSON: { changedFiles: string[], implementedStreams: object[], deferredStreams: object[], testsAdded: string[], docsUpdated: string[], verificationCommands: string[] }.',
+        'Edit only source, tests, docs, and process metadata needed for approved streams.',
+        'Do not stage or commit unrelated dirty worktree files.',
+        'Add or update regression tests before behavior changes.',
+        'Keep changes on live runtime call paths unless the implementation discovers a new required path; document any new path in the result.',
+        'Do not silently take over #584 or #586. If those related issues are still open or already handled elsewhere, link or defer instead.',
+        'Return JSON with keys: changedFiles, implementedStreams, deferredStreams, testsAdded, docsUpdated, commandsToRun, risks.',
       ],
     },
   },
@@ -162,26 +227,12 @@ const implementationTask = defineTask('issue-601.implement-approved-streams', (a
   },
 }));
 
-const verificationTask = defineTask('issue-601.verification-gate', (args, taskCtx) => ({
+const verificationTask = defineTask('issue-601.verify', (args, taskCtx) => ({
   kind: 'shell',
-  title: 'Run #601 verification and static guardrails',
+  title: 'Run deterministic #601 quality gates',
   labels: ['issue-601', 'verification', 'quality-gate'],
   shell: {
-    command: [
-      'set -euo pipefail',
-      'npm run test --workspace=@a5c-ai/agent-core',
-      'npm run test --workspace=@a5c-ai/agent-platform',
-      'npm run test:realtime --workspace=@a5c-ai/agent-mux-ui',
-      'npm run build:runtime',
-      'npm run test:agent-mux',
-      'npm run verify:metadata',
-      'git diff --check',
-      'if rg -n "it\\.skip\\(" packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx; then',
-      '  echo "Unexplained SessionDetailScreen skipped tests remain" >&2',
-      '  exit 1',
-      'fi',
-      'rg -n "HERE BE DRAGONS|process\\.env mutation couples modules|Tool dispose requires exact array reference|Lazy init race|Platform-specific shell" docs/here-be-dragons.md packages/agent-core packages/agent-platform packages/agent-mux -S',
-    ].join('\n'),
+    command: ['set -euo pipefail', ...(args.verificationCommands ?? [])].join('\n'),
     expectedExitCode: 0,
     timeout: 1200000,
   },
@@ -193,8 +244,8 @@ const verificationTask = defineTask('issue-601.verification-gate', (args, taskCt
 
 const readArtifactsTask = defineTask('issue-601.read-artifacts', (args, taskCtx) => ({
   kind: 'shell',
-  title: 'Read #601 implementation artifacts for final review',
-  labels: ['issue-601', 'artifacts', 'review'],
+  title: 'Read final #601 artifacts and diff for review',
+  labels: ['issue-601', 'review', 'quality-gate'],
   shell: {
     command: [
       'set -euo pipefail',
@@ -215,12 +266,12 @@ const finalReviewTask = defineTask('issue-601.final-review', (args, taskCtx) => 
   title: 'Review #601 artifacts against issue context',
   labels: ['issue-601', 'review', 'quality-gate'],
   agent: {
-    name: 'remaining-dragons-reviewer',
+    name: 'implementation-reviewer',
     prompt: {
       role: 'senior code-review and release-gate reviewer',
-      task: 'Compare #601 requirements to the final artifacts and verification output.',
+      task: 'Compare the #601 issue context to the produced artifacts and verification output.',
       instructions: [
-        'Ignore any narrative in your context about how the artifacts were built.',
+        'Ignore any narrative in your context about how ARTIFACTS were built.',
         'ARTIFACTS (verbatim):',
         '---',
         args.artifactsStdout,
@@ -230,8 +281,8 @@ const finalReviewTask = defineTask('issue-601.final-review', (args, taskCtx) => 
         args.contextStdout,
         '---',
         'Compare SPEC to ARTIFACTS directly.',
-        'Confirm that #584 and #586 were not duplicated, remaining streams were either implemented with tests or explicitly deferred with follow-up disposition, docs/here-be-dragons.md reflects reality, and deterministic quality gates ran.',
-        'Return JSON: { approved: boolean, issues: string[], residualRisks: string[], summary: string, requiredFollowups: object[] }.',
+        'Verify that residual streams were implemented with tests or explicitly deferred, #584/#586 were not duplicated, docs reflect reality, and deterministic gates ran.',
+        'Return JSON with keys: approved, issues, residualRisks, missingTests, requiredFollowups, summary.',
       ],
     },
   },
@@ -241,78 +292,56 @@ const finalReviewTask = defineTask('issue-601.final-review', (args, taskCtx) => 
   },
 }));
 
-const deliveryTask = defineTask('issue-601.delivery', (args, taskCtx) => ({
-  kind: 'shell',
-  title: 'Commit, push, open PR, and comment on #601',
-  labels: ['issue-601', 'delivery', 'github'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      'git status --short --branch',
-      'git add docs/here-be-dragons.md package-lock.json packages/agent-core/src/agenticTools/index.ts packages/agent-core/src/agenticTools/shared/process.ts packages/agent-core/src/agenticTools/tools/execution.ts packages/agent-core/src/session.ts packages/agent-core/src/tools.test.ts packages/agent-platform/src/harness/agenticTools/index.ts packages/agent-platform/src/harness/agenticTools/shared/process.ts packages/agent-platform/src/harness/agenticTools/tools/execution.ts packages/agent-platform/src/harness/backgroundProcessRegistry.ts packages/agent-platform/src/harness/piWrapper.ts packages/agent-platform/src/harness/piWrapper.test.ts packages/agent-platform/src/harness/types.ts packages/agent-runtime/src/backgroundProcessRegistry.ts packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx',
-      'git add -f .a5c/processes/issue-601-remaining-dragons-plan.mjs .a5c/processes/issue-601-remaining-dragons-plan.inputs.json',
-      'git diff --cached --check',
-      'git diff --cached --quiet && { echo "No staged changes to commit" >&2; exit 1; }',
-      'git commit -m "fix: address remaining here-be-dragons debt"',
-      `git push -u origin ${args.workBranch}`,
-      'PR_URL=$(gh pr view "${PR_NUMBER}" --json url --jq .url)',
-      'gh pr comment "${PR_NUMBER}" --body "Implemented the #601 plan on this PR branch.\\n\\nSummary:\\n- coordinated #601 with existing #584 and #586 plans\\n- addressed approved residual here-be-dragons streams with focused tests\\n- updated docs/here-be-dragons.md to reflect fixed and deferred items\\n\\nQuality gates:\\n- PASS: npm run test --workspace=@a5c-ai/agent-core\\n- PASS: npm run test --workspace=@a5c-ai/agent-platform\\n- PASS: npm run test:realtime --workspace=@a5c-ai/agent-mux-ui\\n- PASS: npm run build:runtime\\n- PASS: npm run verify:metadata\\n- PASS: git diff --check and SessionDetailScreen it.skip guard\\n- BLOCKED: npm run test:agent-mux still fails in unrelated agent-catalog tests: missing ./evidence-projection and stale catalog expectations for Hermes/Claude/OpenCode/Pi/Gemini."',
-      'gh issue comment "${ISSUE_NUMBER}" --body "Implemented the #601 plan on PR #${PR_NUMBER}: ${PR_URL}\\n\\nThe run coordinated with #584/#586, handled approved residual here-be-dragons streams with tests, and updated documentation to reflect fixed or deferred items.\\n\\nVerification note: the focused gates passed, but npm run test:agent-mux remains blocked by unrelated agent-catalog failures (missing ./evidence-projection and stale catalog expectations)."',
-      'printf "%s\\n" "$PR_URL"',
-    ].join('\n'),
-    env: {
-      BASE_BRANCH: args.baseBranch,
-      WORK_BRANCH: args.workBranch,
-      ISSUE_NUMBER: String(args.issueNumber),
-      PR_NUMBER: String(args.prNumber),
-      GIT_AUTHOR_NAME: 'a5c-ai',
-      GIT_AUTHOR_EMAIL: 'a5c-ai@users.noreply.github.com',
-      GIT_COMMITTER_NAME: 'a5c-ai',
-      GIT_COMMITTER_EMAIL: 'a5c-ai@users.noreply.github.com',
-    },
-    expectedExitCode: 0,
-    timeout: 180000,
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
-
 export async function process(inputs, ctx) {
   const issueNumber = inputs?.issueNumber ?? 601;
+  const relatedIssues = inputs?.relatedIssues ?? [584, 586];
+  const priorPlanningPr = inputs?.priorPlanningPr ?? 683;
   const baseBranch = inputs?.baseBranch ?? 'staging';
   const workBranch = inputs?.workBranch ?? 'plan/issue-601';
-  const prNumber = inputs?.prNumber ?? 683;
   const maxImplementationLoops = inputs?.maxImplementationLoops ?? 2;
+  const verificationCommands = inputs?.verificationCommands ?? [
+    'npm run test --workspace=@a5c-ai/agent-core',
+    'npm run test --workspace=@a5c-ai/agent-platform',
+    'npm run test:realtime --workspace=@a5c-ai/agent-mux-ui',
+    'npm run build:runtime',
+    'npm run test:agent-mux',
+    'npm run verify:metadata',
+    'git diff --check',
+    'if rg -n "it\\.skip\\(" packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx; then echo "Unexplained SessionDetailScreen skipped tests remain" >&2; exit 1; fi',
+  ];
 
-  const context = await ctx.task(collectContextTask, { issueNumber }, {
-    key: 'issue-601.context',
-  });
+  const context = await ctx.task(readIssueContextTask, {
+    issueNumber,
+    relatedIssues,
+    priorPlanningPr,
+  }, { key: 'issue-601.context' });
 
-  const decomposition = await ctx.task(decomposeUmbrellaTask, {
-    contextStdout: taskStdout(context),
-  }, {
-    key: 'issue-601.decomposition',
-  });
+  const [reuseAudit, processReferences] = await ctx.parallel.all([
+    ctx.task(reuseAuditTask, {}, { key: 'issue-601.reuse-audit' }),
+    ctx.task(processReferenceTask, {}, { key: 'issue-601.process-references' }),
+  ]);
+
+  const decomposition = await ctx.task(decomposeTask, {
+    contextStdout: stdoutOf(context),
+    reuseAuditStdout: stdoutOf(reuseAudit),
+    processReferenceStdout: stdoutOf(processReferences),
+  }, { key: 'issue-601.decomposition' });
 
   await ctx.breakpoint({
-    title: 'Approve #601 Decomposition',
-    question: 'Review the #601 decomposition before implementation. Approve the scoped residual streams and deferrals, especially anything not covered by #584 or #586?',
+    title: 'Approve #601 Scope',
+    question: `Review the #601 decomposition for ${baseBranch} -> ${workBranch}. Approve the residual streams, deferrals, and quality gates before implementation?`,
     context: {
       issueNumber,
-      baseBranch,
-      workBranch,
+      relatedIssues,
+      priorPlanningPr,
       decomposition,
     },
   });
 
-  const regressionPlan = await ctx.task(authorRegressionPlanTask, {
-    contextStdout: taskStdout(context),
+  const regressionPlan = await ctx.task(regressionPlanTask, {
+    contextStdout: stdoutOf(context),
     decomposition,
-  }, {
-    key: 'issue-601.regression-plan',
-  });
+  }, { key: 'issue-601.regression-plan' });
 
   let implementation = null;
   let verification = null;
@@ -320,63 +349,45 @@ export async function process(inputs, ctx) {
 
   for (let attempt = 1; attempt <= maxImplementationLoops; attempt += 1) {
     implementation = await ctx.task(implementationTask, {
-      contextStdout: taskStdout(context),
+      contextStdout: stdoutOf(context),
       decomposition,
       regressionPlan,
       attempt,
       previousReview: review,
-    }, {
-      key: `issue-601.implementation.${attempt}`,
-    });
+    }, { key: `issue-601.implementation.${attempt}` });
 
-    verification = await ctx.task(verificationTask, { implementation }, {
-      key: `issue-601.verification.${attempt}`,
-    });
+    verification = await ctx.task(verificationTask, {
+      verificationCommands,
+      implementation,
+    }, { key: `issue-601.verification.${attempt}` });
 
     const artifacts = await ctx.task(readArtifactsTask, {}, {
       key: `issue-601.artifacts.${attempt}`,
     });
 
     review = await ctx.task(finalReviewTask, {
-      contextStdout: taskStdout(context),
-      artifactsStdout: taskStdout(artifacts),
+      contextStdout: stdoutOf(context),
+      artifactsStdout: stdoutOf(artifacts),
       verification,
-    }, {
-      key: `issue-601.review.${attempt}`,
-    });
+    }, { key: `issue-601.review.${attempt}` });
 
     if (review?.approved !== false) {
       break;
     }
   }
 
-  if (review?.approved === false) {
-    return {
-      success: false,
-      decomposition,
-      regressionPlan,
-      implementation,
-      verification,
-      review,
-    };
-  }
-
-  const delivery = await ctx.task(deliveryTask, {
+  return {
+    success: review?.approved !== false,
     issueNumber,
     baseBranch,
     workBranch,
-    prNumber,
-  }, {
-    key: 'issue-601.delivery',
-  });
-
-  return {
-    success: true,
+    context,
+    reuseAudit,
+    processReferences,
     decomposition,
     regressionPlan,
     implementation,
     verification,
     review,
-    delivery,
   };
 }

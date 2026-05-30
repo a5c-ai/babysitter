@@ -6,6 +6,7 @@ import { resolveRunDir } from "./args";
 import {
   buildEffectIndexSafe,
   countPendingByKind,
+  deriveRunReason,
   deriveRunState,
   findLastLifecycleEvent,
   formatEventLine,
@@ -44,7 +45,9 @@ export async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
   const formattedMetadata = formatIterationMetadata(
     mergeMetadataSources({ pendingEffectsByKind: pendingByKind }, { snapshot: await readStateCacheSafe(runDir, "run:status"), pendingByKind })
   );
-  const state = deriveRunState(findLastLifecycleEvent(journal)?.type, pendingTotal);
+  const lastLifecycleEvent = findLastLifecycleEvent(journal);
+  const state = deriveRunState(lastLifecycleEvent?.type, pendingTotal);
+  const reason = deriveRunReason(lastLifecycleEvent?.type);
   const lastEvent = journal.at(-1);
   const pendingEffectsSummary = {
     totalPending: pendingTotal,
@@ -57,6 +60,7 @@ export async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
     console.log(
       JSON.stringify({
         state,
+        reason,
         lastEvent: lastEvent ? serializeJournalEvent(lastEvent, runDir) : null,
         pendingByKind,
         pendingEffectsSummary,

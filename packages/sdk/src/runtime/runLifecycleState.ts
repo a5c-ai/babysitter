@@ -6,6 +6,7 @@ const RUN_LIFECYCLE_TYPES: ReadonlySet<JournalEvent["type"]> = new Set([
   "RUN_CREATED",
   "RUN_COMPLETED",
   "RUN_FAILED",
+  "PROCESS_RUNTIME_ERROR",
 ]);
 
 export function findLastLifecycleEventType(events: JournalEvent[]): JournalEvent["type"] | undefined {
@@ -47,6 +48,9 @@ export function deriveObservedRunState(
 ): ObservedRunState {
   const lastLifecycleEventType = findLastLifecycleEventType(events);
   if (lastLifecycleEventType === "RUN_FAILED") {
+    return "failed";
+  }
+  if (lastLifecycleEventType === "PROCESS_RUNTIME_ERROR") {
     return "failed";
   }
   if (pendingCount > 0) {

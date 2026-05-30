@@ -26,6 +26,10 @@ export type {
   WebhookListenerOptions,
   WebhookListenerHandle,
   TriggerCallback,
+  TriggerAdmissionConfig,
+  TriggerAdmissionResult,
+  TriggerAdmissionStatus,
+  TriggerRateLimitConfig,
 } from "./types";
 export type { TimerSchedulerHandle } from "./timerScheduler";
 export type { DaemonLoopOptions, DaemonLoopStatus } from "./loop";

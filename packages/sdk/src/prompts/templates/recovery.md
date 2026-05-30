@@ -4,6 +4,18 @@ If at any point the run fails due to SDK issues or corrupted state or journal,
 analyze the error and the journal events. Recover the state and journal to the
 last known good state, adapt, and try to continue the run.
 
+If `run:events` or `run:status --json` shows `PROCESS_RUNTIME_ERROR`, prefer the
+targeted recovery command before manual journal edits:
+
+```bash
+$CLI run:recover-process-error <runId> --dry-run --json
+$CLI run:recover-process-error <runId> --patch-effect '<effectId>:value.checks=[]' --json
+```
+
+Patch the offending task result only when the fix is clear. Running recovery
+without a patch is allowed, but the next `run:iterate` should honestly rethrow if
+the bad result remains.
+
 When recovery requires it, repair the actual process/run artifacts instead of
 only describing the problem. If the process authored a bad loop, impossible
 shell command, or permanently failing effect pattern, edit the process file

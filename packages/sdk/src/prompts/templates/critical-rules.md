@@ -10,8 +10,10 @@ response is empty, no selection, or is dismissed, treat it as NOT approved and
 re-ask. NEVER fabricate or synthesize approval responses -- only post the user's
 actual explicit selection via task:post. An empty response is NOT approval.
 
-CRITICAL RULE: If a run is broken/failed/at unknown state, one way to recover is
-to remove last bad entries in the journal and rebuild the state.
+CRITICAL RULE: If a run is broken/failed/at unknown state because of
+`PROCESS_RUNTIME_ERROR`, first use `run:recover-process-error` with `--dry-run`
+and, when appropriate, `--patch-effect`. Manual journal removal is a fallback
+only for corruption that the targeted recovery command cannot represent.
 
 CRITICAL RULE: If the process reaches a dead-end, loops uselessly, or keeps
 emitting shell/tasks that always fail, do not keep replaying the same broken

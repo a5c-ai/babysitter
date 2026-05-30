@@ -104,6 +104,7 @@ export interface ParsedArgs {
   breakpointTags?: string;
   breakpointExpert?: string;
   cancelReason?: string;
+  patchEffect?: string;
   verbosity?: string;
   tuiFlag?: boolean;
   daemonDir?: string;

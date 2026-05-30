@@ -109,6 +109,42 @@ describe("EffectIndex", () => {
     expect(index.listEffects()).toHaveLength(0);
   });
 
+  test("accepts PROCESS_RUNTIME_ERROR as a typed lifecycle marker", async () => {
+    const events = [
+      makeEvent(1, "EFFECT_REQUESTED", {
+        effectId: "ef-process-error",
+        invocationKey: "proc:S000001:process-error",
+        stepId: "S000001",
+        taskId: "verify",
+        kind: "node",
+        taskDefRef: "tasks/ef-process-error/task.json",
+      }),
+      makeEvent(2, "EFFECT_RESOLVED", {
+        effectId: "ef-process-error",
+        status: "ok",
+        resultRef: "tasks/ef-process-error/result.json",
+      }),
+      makeEvent(3, "PROCESS_RUNTIME_ERROR", {
+        error: { message: "Cannot read properties of undefined" },
+        iteration: 2,
+        runId: "run-process-error",
+        processId: "process-id",
+        lastEffect: {
+          effectId: "ef-process-error",
+          status: "resolved_ok",
+        },
+        recovery: {
+          command: "run:recover-process-error",
+          recoverable: true,
+        },
+      }),
+    ];
+
+    const index = await buildEffectIndex({ runDir, events });
+    expect(index.getJournalHead()).toEqual({ seq: 3, ulid: "01BX0003" });
+    expect(index.getByEffectId("ef-process-error")?.status).toBe("resolved_ok");
+  });
+
   test("validates EFFECT_REQUESTED payload fields", async () => {
     const badEvent = makeEvent(1, "EFFECT_REQUESTED", {
       effectId: "",

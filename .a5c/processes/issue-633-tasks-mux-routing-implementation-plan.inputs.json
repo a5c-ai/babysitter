@@ -1,0 +1,69 @@
+{
+  "issueNumber": 633,
+  "baseBranch": "staging",
+  "dependencyIssues": [630, 631],
+  "designDocs": [
+    "docs/agent-mux-babysitter-integrations/tasks-mux-routing.md",
+    "docs/agent-mux-babysitter-integrations/effect-resolution.md",
+    "docs/agent-mux-babysitter-integrations/testing.md",
+    "docs/agent-mux-babysitter-integrations/overview.md"
+  ],
+  "maxImplementationIterations": 2,
+  "verificationCommands": [
+    "npm run test --workspace=@a5c-ai/tasks-mux",
+    "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+    "npm run build --workspace=@a5c-ai/tasks-mux",
+    "npm run test --workspace=@a5c-ai/agent-platform",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "npm run validate:processes",
+    "git diff --check"
+  ],
+  "routingAcceptance": [
+    "SDK task effect resolution must delegate routable task decisions through tasks-mux rather than direct agent-mux dispatch.",
+    "agent-platform CLI orchestration, including resolveAndPostEffect, must delegate routing decisions to tasks-mux.",
+    "Plugin stop-hook continuation must query tasks-mux before deciding host-agent delegation.",
+    "Internal responder effects must route to the agent-core path through tasks-mux.",
+    "Agent responder effects must route through AgentMuxResponderBackend.",
+    "Human responder effects must route through BreakpointBackend.",
+    "Tracker responder effects must route through ExternalTrackerBackend when configured, or produce explicit unavailable evidence when not configured.",
+    "Tests must prevent direct SDK or agent-platform bypass routing to agent-mux for task effects."
+  ],
+  "sourceScope": {
+    "primaryPackages": [
+      "packages/tasks-mux",
+      "packages/sdk",
+      "packages/agent-platform"
+    ],
+    "pluginSurfaces": [
+      "plugins/babysitter",
+      "plugins/babysitter-unified"
+    ],
+    "knownReusableFiles": [
+      "packages/tasks-mux/src/router.ts",
+      "packages/tasks-mux/src/types.ts",
+      "packages/tasks-mux/src/backends/agent-mux.ts",
+      "packages/tasks-mux/src/backends/external-tracker.ts",
+      "packages/tasks-mux/src/backends/index.ts",
+      "packages/sdk/src/harness/hooks/stopHookContinuation.ts",
+      "packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts",
+      "packages/agent-platform/src/harness/internal/createRun/orchestration/index.ts"
+    ]
+  },
+  "planningNotes": {
+    "processLibraryResearch": ".a5c/process-library/ is not present in this checkout; matching methodology research should use the repository library/ tree and docs/user-guide/features/process-library.md lookup guidance.",
+    "existingPlan": ".a5c/processes/issue-633-route-effect-resolution-through-tasks-mux.mjs already exists on staging; this artifact is a fresh plan-scoped process with an explicit completed-work audit.",
+    "issueDependencyCorrection": "Issue body references older dependency issue numbers, but the latest issue comment states dependencies are #630 and #631.",
+    "currentIssueCommentState": "Issue #633 contains a comment that implementation is complete in PR #685; execution should verify current checkout state before adding or changing implementation code.",
+    "currentStagingEvidence": [
+      "packages/tasks-mux/src/router.ts exposes routeTask and route decisions for internal, human, agent, tracker, and auto.",
+      "packages/tasks-mux/src/backends/agent-mux.ts exposes AgentMuxResponderBackend.",
+      "packages/tasks-mux/src/backends/external-tracker.ts exposes ExternalTrackerBackend.",
+      "packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts contains resolveViaTasksMuxIfRoutable.",
+      "packages/sdk/src/harness/hooks/stopHookContinuation.ts imports routeTask/isHostDelegableRoute before host delegation.",
+      "packages/sdk/src/tasks/types.ts and packages/sdk/src/tasks/defineTask.ts preserve and validate responderType routing metadata."
+    ],
+    "repoProcessOverride": "Use agent tasks for implementation and verification phases, and keep breakpoints sparse.",
+    "doNotImplementDuringPlanningArtifactCreation": true
+  }
+}

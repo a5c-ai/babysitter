@@ -33,7 +33,10 @@ import {
   orchestrateIterationWithProcessLoadRetry,
   resolveEffectWithRetry,
 } from "./effects";
-import { dispatchEffectActions } from "./dispatch";
+import {
+  dispatchEffectActions,
+  harnessSupportsConcurrentEffects,
+} from "./dispatch";
 import { ensureRunAndMaybeBindFromProcessDefinition } from "../planProcess/runState";
 import { subscribeVerbosePiEvents } from "./verbose";
 import type { RunOrchestrationPhaseArgs } from "./types";
@@ -175,6 +178,10 @@ export async function runExternalOrchestrationPhase(args: RunOrchestrationPhaseA
         const iterationStartTime = Date.now();
         await dispatchEffectActions({
           actions: result.nextActions,
+          concurrentEffects: harnessSupportsConcurrentEffects(
+            args.selectedHarnessName,
+            args.discovered,
+          ),
           resolveAction: (action) => resolveExternalAction({
             action,
             args,

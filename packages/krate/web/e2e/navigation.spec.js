@@ -25,7 +25,11 @@ test.describe('Krate browser navigation', () => {
       await page.goto(route.path, { waitUntil: 'domcontentloaded' });
       await expect(page.locator('body')).toBeVisible();
       await expectNoRawServerErrors(page);
-      expect([page.url().includes('/login'), page.locator('main, body')]).toBeTruthy();
+      if (page.url().includes('/login')) {
+        await expect(page.locator('h1')).toContainText('Sign in');
+      } else {
+        await expect(page.getByRole('heading', { name: route.heading }).first()).toBeVisible();
+      }
       expectNoBrowserErrors(errors);
     });
   }

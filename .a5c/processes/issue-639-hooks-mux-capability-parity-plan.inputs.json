@@ -1,0 +1,151 @@
+{
+  "issueNumber": 639,
+  "baseBranch": "staging",
+  "implementationBranchName": "fix/issue-639-hooks-mux-capability-parity",
+  "issueContext": {
+    "title": "hooks-mux: async execution, regex matchers, and per-hook config",
+    "body": "Async: async:true, asyncRewake:true, once:true. Matchers: regex, OR, if conditional. Config: per-hook timeout, shell selection, statusMessage, disableAllHooks. Env: CLAUDE_ENV_FILE, CLAUDE_EFFORT, CLAUDE_PLUGIN_DATA. Ref: docs/agent-stack/hooks/missing-capabilities.md sections 3-5, 7",
+    "labels": [
+      "enhancement",
+      "hooks-mux",
+      "priority:high",
+      "ready-for-dev",
+      "effort:large",
+      "agent-platform",
+      "P2",
+      "risk:high"
+    ],
+    "comments": [
+      {
+        "author": "tmuskal",
+        "body": "Depends on #637 for handler async support and relates to #636 for missing events and matcher patterns."
+      },
+      {
+        "author": "a5c-ai",
+        "body": "Triage confirmed gaps in matcher evaluation, async execution, per-hook runtime config, and Claude compatibility env propagation. Recommended approach: tests first, backward-compatible types, runner config gates, async/once/asyncRewake tracking, env allowlist and precedence, and agent-platform rewake integration only after callback/reminder path is defined."
+      },
+      {
+        "author": "a5c-ai",
+        "body": "Created the original implementation plan PR #674 with process .a5c/processes/issue-639-hooks-mux-async-matchers-config.mjs#process and matching inputs."
+      },
+      {
+        "author": "tmuskal",
+        "body": "Implementation complete in PR #674, with conflict-fix in progress for merge."
+      },
+      {
+        "author": "a5c-ai",
+        "body": "Created refreshed implementation plan PR #719 with a current-state gate, reuse audit, dependency readiness, runtime trace, contract design, regression test phase, scoped implementation phase, and quality gates."
+      }
+    ]
+  },
+  "priorPlan": {
+    "prNumber": 674,
+    "prUrl": "https://github.com/a5c-ai/babysitter/pull/674",
+    "stateAtPlanningTime": "MERGED",
+    "headRefName": "plan/issue-639",
+    "baseRefName": "staging",
+    "artifacts": [
+      ".a5c/processes/issue-639-hooks-mux-async-matchers-config.mjs",
+      ".a5c/processes/issue-639-hooks-mux-async-matchers-config.inputs.json"
+    ],
+    "note": "The issue comments now describe implementation as complete in PR #674, so executable work should start by verifying current staging before adding code."
+  },
+  "currentPlan": {
+    "prNumber": 719,
+    "prUrl": "https://github.com/a5c-ai/babysitter/pull/719",
+    "headRefName": "plan/issue-639",
+    "baseRefName": "staging",
+    "artifacts": [
+      ".a5c/processes/issue-639-hooks-mux-capability-parity-plan.mjs",
+      ".a5c/processes/issue-639-hooks-mux-capability-parity-plan.inputs.json"
+    ],
+    "note": "This refreshed plan branch is plan-only and should not modify implementation source files."
+  },
+  "processLibrary": {
+    "repoLocalRequestedPath": ".a5c/process-library",
+    "repoLocalPathPresent": false,
+    "activeRoot": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "activeRevision": "d97a2e46a84cbc3ca4589050a9bddbcbf792a785",
+    "referencesSearched": [
+      "methodologies/atdd-tdd/atdd-tdd.js",
+      "methodologies/process-hardening/process-hardening-patterns.js",
+      "methodologies/superpowers/verification-before-completion.js",
+      "methodologies/shared/root-cause-diagnosis.js",
+      "processes/shared/tdd-triplet.js",
+      "specializations/sdk-platform-development/sdk-testing-strategy.js",
+      "specializations/qa-testing-automation/quality-gates.js",
+      "specializations/collaboration/github/issue-linking.js"
+    ]
+  },
+  "dependencyIssues": {
+    "636": {
+      "title": "hooks-mux: implement 13 missing hook events (tool, turn, task, session lifecycle)",
+      "relationship": "Related and partly foundational for missing events and matcher patterns.",
+      "planningReference": ".a5c/processes/issue-636-hooks-mux-missing-events.mjs"
+    },
+    "637": {
+      "title": "hooks-mux: add HTTP, MCP tool, prompt, and agent handler types",
+      "relationship": "Dependency for async-capable and typed handler support."
+    },
+    "674": {
+      "title": "feat: hooks-mux async matchers and config",
+      "relationship": "Prior merged PR linked from issue comments; verify current landed behavior before implementing remaining gaps."
+    }
+  },
+  "scanRoots": [
+    "docs/agent-stack/hooks",
+    "docs/agent-reference",
+    "library/methodologies",
+    "library/specializations/sdk-platform-development",
+    "library/specializations/qa-testing-automation",
+    "packages/hooks-mux/core/src",
+    "packages/hooks-mux/cli/src",
+    "packages/hooks-mux/adapter-claude/src",
+    "packages/agent-platform/src/harness",
+    "packages/agent-platform/src/session",
+    "packages/agent-mux",
+    "packages/agent-catalog/src",
+    "packages/atlas/graph"
+  ],
+  "targetFiles": [
+    "docs/agent-stack/hooks/missing-capabilities.md",
+    "packages/hooks-mux/core/src/types/plan.ts",
+    "packages/hooks-mux/core/src/normalizer/plan-resolver.ts",
+    "packages/hooks-mux/core/src/normalizer/runner.ts",
+    "packages/hooks-mux/core/src/merge-engine/merge.ts",
+    "packages/hooks-mux/core/src/propagation/materialize.ts",
+    "packages/hooks-mux/core/src/propagation/env-file.ts",
+    "packages/hooks-mux/core/src/session-store",
+    "packages/hooks-mux/core/src/programmatic/engine.ts",
+    "packages/hooks-mux/core/src/__tests__/when-conditional.test.ts",
+    "packages/hooks-mux/core/src/__tests__/handler-timeout.test.ts",
+    "packages/hooks-mux/core/src/__tests__/integration/invoke-fanout.test.ts",
+    "packages/hooks-mux/core/src/propagation/__tests__/propagation.test.ts",
+    "packages/hooks-mux/cli/src/cli/commands/invoke.ts",
+    "packages/hooks-mux/cli/src/__tests__/e2e/e2e-invoke.test.ts",
+    "packages/agent-platform/src/harness/backgroundTracker.ts",
+    "packages/agent-platform/src/harness/backgroundProcessRegistry.ts",
+    "packages/agent-platform/src/harness/agenticTools/background/state.ts"
+  ],
+  "qualityCommands": [
+    "npm run build:hooks-mux",
+    "npm run test:hooks-mux",
+    "npm run lint:hooks-mux",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "acceptanceChecklist": [
+    "The process starts with a current-state gate because issue comments say PR #674 completed implementation.",
+    "Reuse-audit findings are rendered before design or implementation work.",
+    "Dependency readiness for #636, #637, and prior #674 work is explicit.",
+    "Runtime call paths are traced from invoke/programmatic entry points through plan resolution, runner, merge, propagation, and session persistence.",
+    "Literal matcher behavior remains compatible while OR, regex, negation, and if conditions are covered by tests.",
+    "Per-hook timeout, shell selection, statusMessage, and disableAllHooks semantics are deterministic and tested.",
+    "Async handlers do not block synchronous hook flow, once is tracked per session, and async exits are recorded without orphaned processes.",
+    "asyncRewake is wired only if its callback/reminder path is defined; otherwise it is dependency-gated with explicit evidence.",
+    "Claude compatibility env propagation uses an allowlist and tested precedence.",
+    "Quality commands pass and final review approves before delivery."
+  ]
+}

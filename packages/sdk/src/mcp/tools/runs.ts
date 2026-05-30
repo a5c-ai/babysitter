@@ -32,6 +32,7 @@ function deriveRunState(
     const type = events[index].type;
     if (type === "RUN_COMPLETED") return "completed";
     if (type === "RUN_FAILED") return "failed";
+    if (type === "PROCESS_RUNTIME_ERROR") return "failed";
   }
 
   const requested = new Set<string>();
@@ -52,6 +53,13 @@ function deriveRunState(
   const hasCreated = events.some((event) => event.type === "RUN_CREATED");
   if (hasCreated && resolved.size > 0) return "running";
   return "created";
+}
+
+function findLastProcessRuntimeError(events: JournalEvent[]): JournalEvent | undefined {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    if (events[index].type === "PROCESS_RUNTIME_ERROR") return events[index];
+  }
+  return undefined;
 }
 
 function derivePendingEffects(events: JournalEvent[]): Array<{ effectId: string; kind?: string }> {
@@ -163,6 +171,10 @@ export function registerRunTools(server: McpServer): void {
           runId: metadata.runId,
           processId: metadata.processId,
           state: deriveRunState(events),
+          ...(findLastProcessRuntimeError(events) ? {
+            reason: "process_runtime_error",
+            processRuntimeError: findLastProcessRuntimeError(events)?.data,
+          } : {}),
           pendingEffects,
           pendingByKind,
         });
@@ -213,8 +225,9 @@ export function registerRunTools(server: McpServer): void {
           return toolResult({
             status: "process-error",
             recoverable: true,
+            recoveryCommand: "run:recover-process-error",
             error: result.error instanceof Error ? result.error.message : result.error,
-            hint: "The process code has a bug. Fix the process file and retry the iteration.",
+            hint: "Inspect PROCESS_RUNTIME_ERROR and use run:recover-process-error after fixing or patching the offending result.",
             metadata: result.metadata,
           });
         }
@@ -259,7 +272,7 @@ export function registerRunTools(server: McpServer): void {
         const runDir = path.join(runsDir, args.runId);
         const allEvents = await loadJournal(runDir);
         const matchingEvents = filterType
-          ? allEvents.filter((event) => event.type === filterType)
+          ? allEvents.filter((event) => event.type.toUpperCase() === filterType)
           : allEvents;
         const ordered = args.reverse ? matchingEvents.slice().reverse() : matchingEvents;
         const limited = args.limit !== undefined ? ordered.slice(0, args.limit) : ordered;

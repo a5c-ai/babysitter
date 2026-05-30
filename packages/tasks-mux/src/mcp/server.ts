@@ -34,6 +34,20 @@ import {
   handleListResponders,
 } from "./tools/list-responders.js";
 import {
+  assignTaskDescription,
+  assignTaskParams,
+  createTodoDescription,
+  createTodoParams,
+  escalateDescription,
+  escalateParams,
+  handleAssignTask,
+  handleCreateTodo,
+  handleEscalate,
+  handleSearchTasks,
+  searchTasksDescription,
+  searchTasksParams,
+} from "./tools/native-tasks.js";
+import {
   claimBreakpointDescription,
   claimBreakpointParams,
   handleClaimBreakpoint,
@@ -75,7 +89,7 @@ function toCompatShape(shape: Record<string, unknown>): ZodRawShapeCompat {
 }
 
 /**
- * Create a tasks-mux MCP server with all 8 tools registered.
+ * Create a tasks-mux MCP server with breakpoint, responder, and native task tools registered.
  */
 export function createBreakpointMcpServer(): McpServer {
   const server = new McpServer({
@@ -118,6 +132,58 @@ export function createBreakpointMcpServer(): McpServer {
     async (args) => {
       const backend = resolveToolBackend(args);
       const result = await handleListBreakpoints(args as Parameters<typeof handleListBreakpoints>[0], backend);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "create_todo",
+    createTodoDescription,
+    toCompatShape(createTodoParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleCreateTodo(args as Parameters<typeof handleCreateTodo>[0], backend);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "assign_task",
+    assignTaskDescription,
+    toCompatShape(assignTaskParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleAssignTask(args as Parameters<typeof handleAssignTask>[0], backend);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "search_tasks",
+    searchTasksDescription,
+    toCompatShape(searchTasksParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleSearchTasks(args as Parameters<typeof handleSearchTasks>[0], backend);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "escalate",
+    escalateDescription,
+    toCompatShape(escalateParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleEscalate(args as Parameters<typeof handleEscalate>[0], backend);
       return {
         content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
       };

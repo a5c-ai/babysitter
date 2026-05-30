@@ -916,6 +916,29 @@ describe("run lifecycle inspection commands", () => {
       expect(line).toContain("pending[breakpoint]=1");
       expect(line).toContain("last=RUN_FAILED#000005");
     });
+
+    it("reports PROCESS_RUNTIME_ERROR as a distinct failed state", async () => {
+      const runDir = await createRunWithProcessRuntimeError();
+
+      const exitCode = await cli.run(["run:status", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload.state).toBe("failed");
+      expect(payload.reason).toBe("process_runtime_error");
+      expect(payload.lastEvent).toMatchObject({
+        type: "PROCESS_RUNTIME_ERROR",
+        data: {
+          error: {
+            message: "Cannot read properties of undefined",
+          },
+          recovery: {
+            command: "run:recover-process-error",
+            recoverable: true,
+          },
+        },
+      });
+    });
   });
 
   describe("run:events", () => {
@@ -1056,6 +1079,24 @@ describe("run lifecycle inspection commands", () => {
         })
       );
     });
+
+    it("filters PROCESS_RUNTIME_ERROR events", async () => {
+      const runDir = await createRunWithProcessRuntimeError();
+
+      const exitCode = await cli.run(["run:events", runDir, "--filter-type", "process_runtime_error", "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload.events).toHaveLength(1);
+      expect(payload.events[0]).toMatchObject({
+        type: "PROCESS_RUNTIME_ERROR",
+        data: {
+          error: {
+            message: "Cannot read properties of undefined",
+          },
+        },
+      });
+    });
   });
 
   describe("run:rebuild-state", () => {
@@ -1182,6 +1223,96 @@ describe("run lifecycle inspection commands", () => {
     });
   });
 
+  describe("run:recover-process-error", () => {
+    it("supports dry-run JSON without mutating the journal", async () => {
+      const runDir = await createRunWithProcessRuntimeError();
+      const before = await loadJournal(runDir);
+
+      const exitCode = await cli.run(["run:recover-process-error", runDir, "--dry-run", "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload).toMatchObject({
+        dryRun: true,
+        runDir,
+        recovered: false,
+        processError: {
+          type: "PROCESS_RUNTIME_ERROR",
+        },
+      });
+      const after = await loadJournal(runDir);
+      expect(after.map((event) => event.type)).toEqual(before.map((event) => event.type));
+    });
+
+    it("patches the offending task result and clears the latest process error marker", async () => {
+      const runDir = await createRunWithProcessRuntimeError();
+
+      const exitCode = await cli.run([
+        "run:recover-process-error",
+        runDir,
+        "--patch-effect",
+        "ef-process:value.checks=[]",
+        "--json",
+      ]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload).toMatchObject({
+        recovered: true,
+        patchedEffect: {
+          effectId: "ef-process",
+          path: "value.checks",
+        },
+      });
+      const result = JSON.parse(await fs.readFile(path.join(runDir, "tasks", "ef-process", "result.json"), "utf8"));
+      expect(result.value.checks).toEqual([]);
+      const journal = await loadJournal(runDir);
+      expect(journal.some((event) => event.type === "PROCESS_RUNTIME_ERROR")).toBe(false);
+    });
+
+    it("clears the marker without a patch so the next iterate can honestly rethrow", async () => {
+      const runDir = await createRunWithProcessRuntimeError();
+
+      const exitCode = await cli.run(["run:recover-process-error", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload).toMatchObject({ recovered: true, patchedEffect: null });
+      const journal = await loadJournal(runDir);
+      expect(journal.some((event) => event.type === "PROCESS_RUNTIME_ERROR")).toBe(false);
+      const result = JSON.parse(await fs.readFile(path.join(runDir, "tasks", "ef-process", "result.json"), "utf8"));
+      expect(result.value).toEqual({ verified: true });
+    });
+
+    it("rejects malformed patch input without mutating artifacts", async () => {
+      const runDir = await createRunWithProcessRuntimeError();
+      const beforeJournal = (await loadJournal(runDir)).map((event) => event.type);
+      const beforeResult = await fs.readFile(path.join(runDir, "tasks", "ef-process", "result.json"), "utf8");
+
+      const exitCode = await cli.run([
+        "run:recover-process-error",
+        runDir,
+        "--patch-effect",
+        "ef-process:value.checks",
+        "--json",
+      ]);
+
+      expect(exitCode).toBe(1);
+      expect(hasLineContaining(errorSpy, "[run:recover-process-error]")).toBe(true);
+      expect((await loadJournal(runDir)).map((event) => event.type)).toEqual(beforeJournal);
+      await expect(fs.readFile(path.join(runDir, "tasks", "ef-process", "result.json"), "utf8")).resolves.toBe(beforeResult);
+    });
+
+    it("fails cleanly when no process error marker exists", async () => {
+      const runDir = await createRunSkeleton("run-no-process-error");
+
+      const exitCode = await cli.run(["run:recover-process-error", runDir, "--json"]);
+
+      expect(exitCode).toBe(1);
+      expect(hasLineContaining(errorSpy, "no PROCESS_RUNTIME_ERROR event found")).toBe(true);
+    });
+  });
+
   async function createRunWithPendingEffects() {
     const runDir = await createRunSkeleton("run-pending");
     await appendRequestedEffect(runDir, "ef-node", "node", "build");
@@ -1198,6 +1329,57 @@ describe("run lifecycle inspection commands", () => {
       runDir,
       eventType: "RUN_FAILED",
       event: { reason: "boom" },
+    });
+    return runDir;
+  }
+
+  async function createRunWithProcessRuntimeError() {
+    const runDir = await createRunSkeleton("run-process-runtime-error");
+    await appendRequestedEffect(runDir, "ef-process", "node", "verify");
+    const taskDir = path.join(runDir, "tasks", "ef-process");
+    await fs.writeFile(
+      path.join(taskDir, "result.json"),
+      JSON.stringify({
+        schemaVersion: "test",
+        effectId: "ef-process",
+        taskId: "node-task",
+        invocationKey: "ef-process:inv",
+        status: "ok",
+        value: { verified: true },
+      }, null, 2),
+    );
+    await appendEvent({
+      runDir,
+      eventType: "EFFECT_RESOLVED",
+      event: {
+        effectId: "ef-process",
+        status: "ok",
+        resultRef: "tasks/ef-process/result.json",
+      },
+    });
+    await appendEvent({
+      runDir,
+      eventType: "PROCESS_RUNTIME_ERROR",
+      event: {
+        error: { name: "TypeError", message: "Cannot read properties of undefined" },
+        iteration: 2,
+        runId: "run-process-runtime-error",
+        processId: "process-id",
+        journalHead: { seq: 3, ulid: "01HPROCESS0000000000000" },
+        lastEffect: {
+          effectId: "ef-process",
+          invocationKey: "ef-process:inv",
+          taskId: "node-task",
+          stepId: "step-ef-process",
+          kind: "node",
+          status: "resolved_ok",
+          resultRef: "tasks/ef-process/result.json",
+        },
+        recovery: {
+          command: "run:recover-process-error",
+          recoverable: true,
+        },
+      },
     });
     return runDir;
   }

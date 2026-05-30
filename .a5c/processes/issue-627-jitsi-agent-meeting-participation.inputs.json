@@ -1,0 +1,142 @@
+{
+  "issueNumber": 627,
+  "baseBranch": "staging",
+  "implementationBranch": "feat/issue-627-jitsi-agent-meeting-participation",
+  "dependencyIssues": {
+    "jitsiCrdsAndControllers": 624,
+    "agentIdentity": 620,
+    "relatedWebConsole": 625
+  },
+  "issueTitle": "Jitsi: agent meeting participation - dispatch, sidecar, and MCP tools",
+  "objective": "Implement meeting-aware Krate agent dispatch so Jitsi-capable agents can join active meetings through AgentDispatchRun meeting context, a Kubernetes sidecar, in-meeting MCP tools, auto-dispatch from meeting templates, and web UI links.",
+  "trigger": "manual dispatch",
+  "planningNotes": {
+    "planOnlyArtifact": true,
+    "doNotModifySourceDuringPlanning": true,
+    "processEntrypoint": ".a5c/processes/issue-627-jitsi-agent-meeting-participation.mjs#process",
+    "processLibraryRequestedPath": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "processLibraryRequestedPathStatus": "active process library reported by babysitter process-library:active --json; repo-local .a5c/process-library is absent in this checkout",
+    "existingIssueCommentObservation": "Issue comments mention earlier planning PR #670 and open planning PR #715. This process should still read current issue/PR state before execution and not assume prior artifacts are authoritative."
+  },
+  "specFiles": [
+    "packages/krate/docs/jitsi/06-agent-meeting-participation.md",
+    "packages/krate/docs/jitsi/07-agent-meeting-runtime.md",
+    "packages/krate/docs/jitsi/03-crds-and-controllers.md",
+    "packages/krate/docs/jitsi/04-web-management.md",
+    "packages/krate/docs/agent-identity/01-resource-model.md",
+    "packages/krate/docs/agent-identity/04-meeting-integration.md",
+    "docs/agent-reference/process-authoring.md"
+  ],
+  "processLibraryFiles": [
+    "library/methodologies/atdd-tdd/atdd-tdd.js",
+    "library/cradle/feature-implementation-contribute.js",
+    "library/methodologies/spec-kit-brownfield.js",
+    "library/specializations/software-architecture/api-design-specification.js",
+    "library/specializations/software-architecture/security-architecture-review.js",
+    "library/specializations/security-compliance/secrets-management.js",
+    "library/specializations/security-compliance/container-security.js",
+    "library/specializations/cli-mcp-development/mcp-tool-implementation.js",
+    "library/specializations/cli-mcp-development/mcp-server-security-hardening.js",
+    "library/specializations/web-development/nextjs-fullstack-app.js",
+    "library/specializations/web-development/api-integration-testing.js",
+    "library/specializations/web-development/e2e-testing-playwright.js",
+    "library/specializations/qa-testing-automation/quality-gates.js"
+  ],
+  "targetSurfaces": {
+    "core": [
+      "packages/krate/core/src/agent-stack-controller.js",
+      "packages/krate/core/src/agent-dispatch-controller.js",
+      "packages/krate/core/src/agent-mux-client.js",
+      "packages/krate/core/src/api-controller.js",
+      "packages/krate/core/src/resource-model.js"
+    ],
+    "chartsAndCrds": [
+      "packages/krate/charts/crds/agent-resources.yaml",
+      "packages/krate/charts/crds/aggregated-resources.yaml",
+      "packages/krate/charts/values.yaml",
+      "packages/krate/charts/templates/deployments.yaml"
+    ],
+    "web": [
+      "packages/krate/web/app/api/orgs/[org]/agents/dispatch/route.js",
+      "packages/krate/web/app/components/agent/dispatch-button.jsx",
+      "packages/krate/web/app/pages/agent-overview-pages.jsx",
+      "packages/krate/web/app/pages/agent-run-pages.jsx",
+      "packages/krate/web/app/pages/jitsi-pages.jsx",
+      "packages/krate/web/app/components/jitsi/jitsi-participant-list.jsx",
+      "packages/krate/web/app/lib/jitsi-service.js"
+    ],
+    "cliAndMcp": [
+      "packages/krate/cli/src/mcp-server.js",
+      "packages/krate/cli/tests/jitsi-mcp-tools.test.js"
+    ],
+    "tests": [
+      "packages/krate/core/tests/agent-stack-controller.test.js",
+      "packages/krate/core/tests/agent-dispatch-controller.test.js",
+      "packages/krate/core/tests/agent-mux-client.test.js",
+      "packages/krate/core/tests/jitsi-resource-model.test.js",
+      "packages/krate/cli/tests/jitsi-mcp-tools.test.js",
+      "packages/krate/web/e2e/resource-crud.spec.js",
+      "packages/krate/web/e2e/smoke.spec.js"
+    ]
+  },
+  "acceptanceCriteria": [
+    "AgentStack or AgentDefinition exposes Jitsi capability fields without duplicating #620 identity contracts.",
+    "Manual dispatch accepts meetingRef only for Jitsi-capable stacks or definitions and rejects inactive, missing, or unauthorized meetings.",
+    "AgentDispatchRun records meetingRef and redacted/non-secret meetingContext; raw Jitsi JWT values are not persisted in long-lived CRD status/spec, UI models, comments, or logs.",
+    "The runtime Job manifest includes a jitsi-agent-sidecar, JITSI_ROOM_URL, JITSI_JWT, JITSI_ROOM_ID, JITSI_PARTICIPANT_NAME, JITSI_AUDIO_MODE, JITSI_CHAT_MODE, AGENT_SOCKET_PATH, main-agent socket env, and a shared emptyDir socket volume only when meetingContext is present.",
+    "The existing workspace volume behavior still works with the sidecar/socket volume.",
+    "Eight in-meeting MCP tools exist and are gated by role/capabilities: send_chat_message, get_meeting_transcript, get_participant_list, raise_hand, share_screen, invite_to_meeting, start_recording, react.",
+    "Meeting-template autoJoin or autoInvite dispatches agents when a meeting starts and is idempotent.",
+    "Web dispatch surfaces show a Meeting field only for Jitsi-capable stacks, forward meetingRef, show run detail meeting links, and show participant dispatch-run links.",
+    "Focused core, CLI/MCP, and web tests pass, along with repository metadata/build verification."
+  ],
+  "securityInvariants": [
+    "Raw JWT values must never appear in AgentDispatchRun status, JitsiMeeting status intended for UI, labels, annotations, PR body, issue comments, or logs.",
+    "JWT delivery to the sidecar must be runtime-only or secret-backed and covered by tests.",
+    "MCP meeting tools must deny actions outside the run meeting context and outside the configured role/capabilities.",
+    "Moderator-only actions include invite_to_meeting and start_recording.",
+    "Read-only chat configurations must deny send_chat_message while still allowing get_meeting_transcript where permitted.",
+    "Screenshare must be denied unless jitsiConfig capabilities allow screenshare share."
+  ],
+  "verificationCommands": [
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "focusedVerificationCandidates": [
+    "node --test packages/krate/core/tests/agent-dispatch-controller.test.js",
+    "node --test packages/krate/core/tests/agent-mux-client.test.js",
+    "node --test packages/krate/core/tests/agent-stack-controller.test.js",
+    "node --test packages/krate/core/tests/jitsi-resource-model.test.js",
+    "node --test packages/krate/cli/tests/jitsi-mcp-tools.test.js",
+    "npm --prefix packages/krate/web run test:e2e -- --grep \"meeting|dispatch|participant\""
+  ],
+  "expectedPlanPhases": [
+    "authoritative-context",
+    "phase-0-reuse-audit",
+    "dependency-contract-audit",
+    "process-library-research",
+    "implementation-strategy",
+    "acceptance-tests-first",
+    "implementation-loop",
+    "security-and-contract-review",
+    "final-quality-gate",
+    "delivery"
+  ],
+  "breakpointPolicy": {
+    "sparse": true,
+    "allowedBreakpoints": [
+      "Dependency contract is too unstable to proceed without choosing compatibility shims or waiting.",
+      "Final quality gate fails after automated remediation attempts."
+    ]
+  },
+  "repoPolicy": {
+    "avoidShellSubtasks": true,
+    "taskKinds": [
+      "agent"
+    ],
+    "includeInterviewIfRequirementsUnclear": true,
+    "doNotUseBabysitSkillInsideDelegatedSubtasks": true
+  }
+}

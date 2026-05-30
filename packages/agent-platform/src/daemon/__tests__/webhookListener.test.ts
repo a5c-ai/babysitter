@@ -102,7 +102,7 @@ describe("webhookListener", () => {
 
     const resp = await post(handle.port, rule.trigger.path!, JSON.stringify({}));
     expect(resp.status).toBe(200);
-    expect(JSON.parse(resp.body)).toEqual({ ok: true });
+    expect(JSON.parse(resp.body)).toMatchObject({ ok: true, status: "accepted" });
     expect(onTrigger).toHaveBeenCalledWith({
       type: "automation",
       rule,
@@ -181,6 +181,19 @@ describe("webhookListener", () => {
     });
     expect(resp.status).toBe(200);
     expect(onTrigger).toHaveBeenCalled();
+  });
+
+  it("returns 429 with retry-after when admission rate limits the trigger", async () => {
+    const rule = webhookRule();
+    const handle = await createWebhookListener({
+      rule,
+      onTrigger: () => ({ status: "rejected", reason: "rate-limit", retryAfterMs: 1_500 }),
+    });
+    handles.push(handle);
+
+    const resp = await post(handle.port, rule.trigger.path!, JSON.stringify({}));
+    expect(resp.status).toBe(429);
+    expect(JSON.parse(resp.body)).toMatchObject({ ok: false, status: "rejected", reason: "rate-limit" });
   });
 
   it("closes cleanly", async () => {

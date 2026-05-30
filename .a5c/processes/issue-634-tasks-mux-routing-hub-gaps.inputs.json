@@ -1,0 +1,208 @@
+{
+  "issueNumber": 634,
+  "baseBranch": "staging",
+  "targetBranch": "feat/issue-634-tasks-mux-routing-hub-gaps",
+  "title": "tasks-mux gaps: priorities, dependencies, search, status history, bulk ops",
+  "duplicateOf": 596,
+  "relatedIssues": [
+    596,
+    620
+  ],
+  "labels": [
+    "duplicate",
+    "tasks-mux",
+    "P1"
+  ],
+  "summary": "Implement the narrowed task-management primitives needed before tasks-mux can serve as the unified routing hub: canonical priority, dependsOn, searchBreakpoints, status history, bulk operations, state-machine validation, and audit logging.",
+  "designDocs": [
+    "docs/agent-layer-gaps.md",
+    "docs/agent-mux-babysitter-integrations/tasks-mux-routing.md",
+    "docs/agent-reference/process-authoring.md",
+    "packages/tasks-mux/specs/architecture.md",
+    "packages/tasks-mux/README.md"
+  ],
+  "contextFiles": [
+    "packages/tasks-mux/src/types.ts",
+    "packages/tasks-mux/src/backend.ts",
+    "packages/tasks-mux/src/backends/git-native.ts",
+    "packages/tasks-mux/src/backends/server.ts",
+    "packages/tasks-mux/src/backends/github-issues.ts",
+    "packages/tasks-mux/src/backends/external-tracker.ts",
+    "packages/tasks-mux/src/client/index.ts",
+    "packages/tasks-mux/src/client/server-client.ts",
+    "packages/tasks-mux/src/cli/program.ts",
+    "packages/tasks-mux/src/cli/commands/breakpoints.ts",
+    "packages/tasks-mux/src/mcp/server.ts"
+  ],
+  "mutableTestPaths": [
+    "packages/tasks-mux/src/__tests__",
+    "packages/tasks-mux/src/backends/__tests__",
+    "packages/tasks-mux/src/mcp/__tests__",
+    "packages/tasks-mux/src/cli/__tests__",
+    "packages/tasks-mux/specs"
+  ],
+  "mutableSourcePaths": [
+    "packages/tasks-mux/src/types.ts",
+    "packages/tasks-mux/src/backend.ts",
+    "packages/tasks-mux/src/index.ts",
+    "packages/tasks-mux/src/backends",
+    "packages/tasks-mux/src/client",
+    "packages/tasks-mux/src/cli",
+    "packages/tasks-mux/src/mcp",
+    "packages/tasks-mux/README.md",
+    "packages/tasks-mux/specs/architecture.md"
+  ],
+  "acceptanceCriteria": [
+    "Breakpoints expose canonical priority: low | medium | high | critical with compatibility behavior for existing context.urgency data.",
+    "Breakpoints expose dependsOn: string[] and dependency blocking prevents resolution or approval until prerequisites are complete.",
+    "The backend contract exposes searchBreakpoints(query) with filters for status, assignee/responder, priority, free text, projectId, and repoId.",
+    "Breakpoint state transitions append status history/timeline entries with timestamps.",
+    "Bulk approve, bulk close, and bulk reassign operations provide per-breakpoint success/failure results and preserve partial failure evidence.",
+    "Invalid status transitions are rejected consistently by direct operations and bulk operations.",
+    "Audit log entries record who changed what and when, including before/after values where available.",
+    "git-native, server, GitHub Issues, client, CLI, and MCP surfaces either support the new contract or fail with explicit backend capability errors covered by tests.",
+    "Existing breakpoint files, proven-answer behavior, ask/answer/status/poll/claim commands, and responder routing metadata remain backward-compatible."
+  ],
+  "nonGoals": [
+    "Do not implement broader #596 items unless needed as extension hooks: notifications, SLA metrics, discussion threads, escalation chains, interactive forms, data export, or backup.",
+    "Do not wire SDK or agent-platform routing through tasks-mux in this issue; #634 only makes tasks-mux ready for that routing work.",
+    "Do not replace git-native persistence with a database."
+  ],
+  "reuseAuditSearchTerms": [
+    "priority",
+    "dependsOn",
+    "searchBreakpoints",
+    "bulk",
+    "approve",
+    "close",
+    "reassign",
+    "audit",
+    "statusHistory",
+    "state transition",
+    "assignee",
+    "BreakpointStatus",
+    "BreakpointBackend"
+  ],
+  "reuseAuditScanGlobs": [
+    "packages/tasks-mux",
+    "packages/agent-runtime",
+    "packages/agent-platform",
+    "packages/agent-core",
+    "docs",
+    ".a5c/processes",
+    "package.json"
+  ],
+  "processLibraryResearch": {
+    "activeRoot": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "methodologyReferences": [
+      "methodologies/spec-kit/README.md",
+      "methodologies/spec-kit/spec-kit-planning.js",
+      "methodologies/atdd-tdd/README.md",
+      "methodologies/process-hardening/process-hardening-patterns.js",
+      "methodologies/superpowers/verification-before-completion.js",
+      "methodologies/superpowers/finishing-a-development-branch.js"
+    ],
+    "discoveryCommandsUsed": [
+      "babysitter process-library:active --json",
+      "babysitter skill:discover --process-path .a5c/processes/issue-634-tasks-mux-routing-hub-gaps.mjs --json",
+      "rg -n \"tasks-mux|backend|breakpoint|TDD|brownfield|github|quality gate|state machine|audit\" /home/runner/.a5c/process-library/babysitter-repo/library -S"
+    ]
+  },
+  "plannedPhases": [
+    {
+      "name": "Live context",
+      "purpose": "Read #634, duplicate parent #596, related issues, PR probe, design docs, current tasks-mux code, and git status at runtime."
+    },
+    {
+      "name": "Reuse audit",
+      "purpose": "Run the mandatory REVIEW BEFORE PROCEEDING scan for existing migrations, routes, environment variables, dependencies, imports, tests, and tasks-mux seams."
+    },
+    {
+      "name": "Scope classification",
+      "purpose": "Treat #634 as a narrowed duplicate unless live comments say otherwise, and separate #634 deliverables from broader #596 non-goals."
+    },
+    {
+      "name": "Architecture contract",
+      "purpose": "Design additive schema, backend, state-machine, dependency, audit/history, CLI/MCP/client, backend-parity, and compatibility contracts."
+    },
+    {
+      "name": "Red-first tests",
+      "purpose": "Author acceptance and compatibility tests before source changes, then prove targeted red failures."
+    },
+    {
+      "name": "Implementation slices",
+      "purpose": "Implement shared contract, git-native behavior, server/GitHub/client parity, and CLI/MCP/docs with slice gates."
+    },
+    {
+      "name": "Verification and review",
+      "purpose": "Run deterministic verification commands and maintainer-grade review until quality target is met."
+    },
+    {
+      "name": "Final acceptance",
+      "purpose": "Compare live spec bytes to final artifacts and produce a per-deliverable traceability matrix."
+    }
+  ],
+  "breakpoints": [
+    {
+      "when": "Issue #634's duplicate/closed state conflicts with implementation scope.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed with narrowed #634 plan",
+        "Switch to duplicate parent #596",
+        "Pause for maintainer guidance"
+      ]
+    },
+    {
+      "when": "Final acceptance finds an unresolved compatibility, backend parity, or status-model decision.",
+      "owner": "maintainer",
+      "options": [
+        "Accept current implementation",
+        "Iterate on blocking findings",
+        "Pause for maintainer guidance"
+      ]
+    }
+  ],
+  "qualityGates": [
+    "Reuse audit begins with the exact required REVIEW BEFORE PROCEEDING marker.",
+    "Architecture records runtimeCallPaths and affectedFiles before implementation.",
+    "Red tests are added before production source changes and fail for expected missing-feature reasons.",
+    "Priority and dependsOn are canonical schema fields and legacy breakpoint fixtures still parse.",
+    "Dependency blocking is enforced across answer, approve, complete, and bulk approval paths.",
+    "searchBreakpoints supports combined status, assignee/responder, priority, text, projectId, and repoId filters or returns explicit unsupported capability errors.",
+    "Bulk operations return per-id results, record audit entries, and reject invalid transitions without corrupting unrelated breakpoints.",
+    "Status history records every transition with timestamp, actor/source metadata where available, and before/after values where relevant.",
+    "CLI, MCP, and client surfaces expose search and bulk operations with tests.",
+    "Server, GitHub, and external tracker-adjacent mappings preserve hidden payload compatibility and explicit unsupported behavior.",
+    "Existing ask, answer, status, poll, claim, responder routing, and proven answer behavior remain covered.",
+    "npm run test --workspace=@a5c-ai/tasks-mux passes.",
+    "npm run typecheck --workspace=@a5c-ai/tasks-mux passes.",
+    "npm run build --workspace=@a5c-ai/tasks-mux passes.",
+    "npm run verify:metadata passes.",
+    "git diff --check passes.",
+    "Final review score is at least 90 with no blocking findings."
+  ],
+  "redGateCommands": [
+    "npm run test --workspace=@a5c-ai/tasks-mux"
+  ],
+  "verificationCommands": [
+    "npm run test --workspace=@a5c-ai/tasks-mux",
+    "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+    "npm run build --workspace=@a5c-ai/tasks-mux",
+    "npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-mux",
+    "npm pack --json --dry-run --workspace=@a5c-ai/tasks-mux",
+    "npm run verify:metadata"
+  ],
+  "finalArtifactCommand": "set -euo pipefail\ngit status --short --branch\ngit diff --stat\ngit diff -- . ':!node_modules'",
+  "targetQuality": 90,
+  "maxImplementationAttempts": 3,
+  "publishPlan": {
+    "branchName": "feat/issue-634-tasks-mux-routing-hub-gaps",
+    "prTitle": "Implement tasks-mux routing hub gaps",
+    "prBodyMustMention": [
+      "Closes #634",
+      "Duplicate of #596",
+      "Related to #620",
+      "Verification commands and compatibility evidence"
+    ]
+  }
+}

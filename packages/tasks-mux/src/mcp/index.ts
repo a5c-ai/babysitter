@@ -56,6 +56,26 @@ export {
 } from "./tools/poll-breakpoints.js";
 
 export {
+  handleCreateTodo,
+  createTodoDescription,
+  createTodoParams,
+  handleAssignTask,
+  assignTaskDescription,
+  assignTaskParams,
+  handleSearchTasks,
+  searchTasksDescription,
+  searchTasksParams,
+  handleEscalate,
+  escalateDescription,
+  escalateParams,
+} from "./tools/native-tasks.js";
+
+export type {
+  NativeTaskResult,
+  SearchTasksResult,
+} from "./tools/native-tasks.js";
+
+export {
   resolveBreakpointBackend,
 } from "./backend-resolver.js";
 

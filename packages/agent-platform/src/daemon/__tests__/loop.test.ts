@@ -141,14 +141,13 @@ describe("runDaemonLoop", () => {
     const dispose = vi.fn();
     timerSchedulerModule.createTimerScheduler.mockImplementationOnce((rules, onTrigger) => {
       queueMicrotask(() => {
-        void onTrigger({
+        void Promise.resolve(onTrigger({
           type: "automation",
           rule: rules[0],
           inputs: {
             scheduledAt: "2026-04-24T09:00:00.000Z",
           },
-        });
-        ac.abort();
+        })).then(() => ac.abort());
       });
       return { dispose };
     });
@@ -223,14 +222,13 @@ describe("runDaemonLoop", () => {
     const close = vi.fn().mockResolvedValue(undefined);
     webhookListenerModule.createWebhookListener.mockImplementationOnce(async ({ rule: listenerRule, onTrigger }) => {
       queueMicrotask(() => {
-        void onTrigger({
+        void Promise.resolve(onTrigger({
           type: "automation",
           rule: listenerRule,
           inputs: {
             deliveryId: "delivery-001",
           },
-        });
-        ac.abort();
+        })).then(() => ac.abort());
       });
       return {
         close,

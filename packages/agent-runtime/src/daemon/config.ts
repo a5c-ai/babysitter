@@ -113,6 +113,45 @@ function validateAutomationRule(raw: unknown, index: number): string | null {
   return null;
 }
 
+function validateAdmission(raw: unknown): string | null {
+  if (raw === undefined) return null;
+  if (!isRecord(raw)) {
+    return "triggerAdmission must be an object";
+  }
+  if (
+    raw.maxPendingRuns !== undefined
+    && (typeof raw.maxPendingRuns !== "number" || !Number.isInteger(raw.maxPendingRuns) || raw.maxPendingRuns < 0)
+  ) {
+    return "triggerAdmission.maxPendingRuns must be a non-negative integer";
+  }
+  if (
+    raw.dedupeWindowMs !== undefined
+    && (typeof raw.dedupeWindowMs !== "number" || !Number.isInteger(raw.dedupeWindowMs) || raw.dedupeWindowMs < 0)
+  ) {
+    return "triggerAdmission.dedupeWindowMs must be a non-negative integer";
+  }
+  if (raw.rateLimit !== undefined) {
+    if (!isRecord(raw.rateLimit)) {
+      return "triggerAdmission.rateLimit must be an object";
+    }
+    if (
+      typeof raw.rateLimit.maxTriggers !== "number"
+      || !Number.isInteger(raw.rateLimit.maxTriggers)
+      || raw.rateLimit.maxTriggers <= 0
+    ) {
+      return "triggerAdmission.rateLimit.maxTriggers must be a positive integer";
+    }
+    if (
+      typeof raw.rateLimit.windowMs !== "number"
+      || !Number.isInteger(raw.rateLimit.windowMs)
+      || raw.rateLimit.windowMs <= 0
+    ) {
+      return "triggerAdmission.rateLimit.windowMs must be a positive integer";
+    }
+  }
+  return null;
+}
+
 function validateConfig(raw: unknown): { valid: true; config: DaemonConfig } | { valid: false; error: string } {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
     return { valid: false, error: "Config must be a JSON object" };
@@ -142,12 +181,18 @@ function validateConfig(raw: unknown): { valid: true; config: DaemonConfig } | {
     ? obj.maxConcurrentRuns
     : DEFAULT_MAX_CONCURRENT_RUNS;
 
+  const admissionError = validateAdmission(obj.triggerAdmission);
+  if (admissionError) {
+    return { valid: false, error: admissionError };
+  }
+
   return {
     valid: true,
     config: {
       workspace: obj.workspace,
       triggers: obj.triggers as DaemonConfig["triggers"],
       maxConcurrentRuns: maxConcurrent,
+      triggerAdmission: obj.triggerAdmission as DaemonConfig["triggerAdmission"],
     },
   };
 }
