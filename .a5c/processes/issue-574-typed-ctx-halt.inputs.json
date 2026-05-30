@@ -1,0 +1,98 @@
+{
+  "issueNumber": 574,
+  "title": "sdk: typed ctx.halt() for honest early-exits (vs fake RUN_COMPLETED on halt:true return)",
+  "baseBranch": "staging",
+  "labels": [
+    "bug",
+    "sdk",
+    "priority:high",
+    "ready-for-dev",
+    "automated-triage",
+    "effort:large"
+  ],
+  "issueBody": "When a process function returns { success: false, halt: true } from an early-exit path, the SDK currently treats this as a clean run completion. Operators see RUN_COMPLETED with a completionProof even though the process halted without doing the intended work. Proposed core fix: add typed ctx.halt(reason, payload?) for honest early exits, record RUN_HALTED instead of RUN_COMPLETED, report run:status state=halted with reason/payload, and make CLI behavior distinguish halted from completed. Legacy { halt: true } returns should migrate by warning and recording halted. Broad static analysis/output validation for resolver-style task outputs should be scoped as follow-up unless it can be made narrow and reliable.",
+  "comments": [
+    {
+      "author": "a5c-ai",
+      "createdAt": "2026-05-30T06:20:09Z",
+      "summary": "Automated triage confirmed the root cause: normal process returns are always treated as successful completion. Recommended adding ctx.halt, RUN_HALTED, halted run:status, non-success CLI behavior, legacy halt:true migration warning, regression tests, and docs. It explicitly warned that broad static analysis should be follow-up unless small and reliable."
+    },
+    {
+      "author": "tmuskal",
+      "createdAt": "2026-05-30T12:27:54Z",
+      "summary": "Plan dispatched, implementation pipeline active."
+    }
+  ],
+  "acceptanceCriteria": [
+    "ctx.halt(reason: string, payload?: object) is exposed on ProcessContext as a typed early-exit API.",
+    "return ctx.halt('phase-0', { reason: 'invalid-input' }) records RUN_HALTED, not RUN_COMPLETED.",
+    "run:status --json reports state='halted', reason, payload, and completionProof=null for halted runs.",
+    "run:iterate/CLI behavior distinguishes halted from completed and returns non-zero for halted terminal runs.",
+    "Normal successful returns still record RUN_COMPLETED and expose completionProof.",
+    "Uncaught RunFailedError/failure behavior remains RUN_FAILED.",
+    "Legacy { success: false, halt: true } returns record RUN_HALTED, emit a one-line deprecation warning, and do not fake completion.",
+    "Terminal replay of halted runs is idempotent and does not re-execute process code.",
+    "Documentation explains RUN_COMPLETED, RUN_HALTED, and RUN_FAILED process exit conventions."
+  ],
+  "nonGoals": [
+    "Do not implement broad static analysis of arbitrary process JavaScript in the core halt lifecycle fix.",
+    "Do not remove legacy { halt: true } support immediately; keep a migration path.",
+    "Do not change completionProof behavior for genuinely completed runs.",
+    "Do not change failed/process-error semantics except where shared terminal-state helpers need to recognize halted."
+  ],
+  "targetFiles": [
+    "packages/sdk/src/runtime/types.ts",
+    "packages/sdk/src/runtime/processContext.ts",
+    "packages/sdk/src/runtime/exceptions.ts",
+    "packages/sdk/src/runtime/orchestrateIteration.ts",
+    "packages/sdk/src/runtime/runLifecycleState.ts",
+    "packages/sdk/src/runtime/replay/effectIndex.ts",
+    "packages/sdk/src/runtime/replay/stateCache.ts",
+    "packages/sdk/src/cli/main/runState.ts",
+    "packages/sdk/src/cli/main/runInspection.ts",
+    "packages/sdk/src/cli/commands/runIterate.ts",
+    "packages/sdk/src/harness/hooks/runState.ts",
+    "packages/sdk/src/harness/hooks/stopHookHandler.ts",
+    "packages/sdk/src/harness/hooks/stopHookContinuation.ts",
+    "packages/sdk/src/harness/hooks/utils.ts",
+    "packages/sdk/src/cli/commands/session/iterationMessage.ts",
+    "packages/sdk/src/session/types.ts"
+  ],
+  "testTargets": [
+    "packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts",
+    "packages/sdk/src/cli/__tests__/cliRuns.test.ts",
+    "packages/sdk/src/harness/__tests__/harness.test.ts",
+    "packages/sdk/src/cli/commands/session/__tests__/iterationMessage.test.ts",
+    "packages/sdk/src/runtime/__tests__/processSchemas.test.ts"
+  ],
+  "docsTargets": [
+    "library/reference/sdk.md",
+    "docs/reference/babysitter_cli_surface_spec.md",
+    "docs/user-guide/getting-started/quickstart.md",
+    "docs/user-guide/getting-started/first-run.md",
+    "docs/assimilation/harness/generic-harness-guide.md",
+    "docs/assimilation/harness/claude-code-integration.md"
+  ],
+  "relatedProcesses": [
+    ".a5c/processes/issue-181-run-completed-idempotency.mjs",
+    ".a5c/processes/sdk-runtime-bugfix.js"
+  ],
+  "processLibraryMatches": [
+    "library/methodologies/superpowers/systematic-debugging.js",
+    "library/methodologies/superpowers/test-driven-development.js",
+    "library/methodologies/superpowers/verification-before-completion.js",
+    "library/methodologies/v-model/v-model.js",
+    "library/processes/shared/runtime-call-tracer.js",
+    "library/processes/shared/deterministic-quality-gate.js"
+  ],
+  "qualityCommands": [
+    "npm exec --workspace=@a5c-ai/babysitter-sdk -- vitest run src/runtime/__tests__/orchestrateIteration.integration.test.ts",
+    "npm exec --workspace=@a5c-ai/babysitter-sdk -- vitest run src/cli/__tests__/cliRuns.test.ts src/harness/__tests__/harness.test.ts src/cli/commands/session/__tests__/iterationMessage.test.ts",
+    "npm run test:sdk",
+    "npm run build:sdk",
+    "npm run verify:metadata"
+  ],
+  "maxVerificationAttempts": 3,
+  "branch": "staging",
+  "plannedProcessEntry": ".a5c/processes/issue-574-typed-ctx-halt.mjs#process"
+}
