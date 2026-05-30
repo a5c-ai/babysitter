@@ -17,13 +17,14 @@ export async function AgentRunsPage({ org = null, linkToDetail = false } = {}) {
   const PAGE_SIZE = 25;
   const runs = allRuns.slice(0, PAGE_SIZE);
   const hasMore = allRuns.length > PAGE_SIZE;
-  const availableStacks = (agentView.stacks?.items || []).map(s => s.metadata?.name).filter(Boolean);
+  const availableStacks = agentView.stacks?.items || [];
   const agentProfiles = buildAgentIdentityProfiles(ui.model);
+  const meetings = agentView.meetings?.active || (ui.model.resources || []).find((resource) => resource.kind === 'JitsiMeeting')?.items || [];
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent dispatch runs" title="Dispatch runs" text="Track agent dispatch runs across stacks, repositories, and phases. Each run represents a dispatched agent task." actions={[['/agents', 'Overview'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/runs', 'Dispatch runs']]}>
     <DegradedBanner model={ui.model} />
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
-      <ManualDispatchButton org={activeOrg} stacks={availableStacks} agents={agentProfiles} />
-      <DispatchButton org={activeOrg} stacks={availableStacks} agents={agentProfiles} />
+      <ManualDispatchButton org={activeOrg} stacks={availableStacks.map(s => s.metadata?.name).filter(Boolean)} agents={agentProfiles} />
+      <DispatchButton org={activeOrg} stacks={availableStacks} agents={agentProfiles} meetings={meetings} />
       <LiveUpdates org={activeOrg} />
     </div>
     <div className="card">
@@ -37,7 +38,7 @@ export async function AgentRunsPage({ org = null, linkToDetail = false } = {}) {
         <small>Phase: {run.status?.phase || 'Pending'}{run.status?.startedAt ? ` / Started: ${run.status.startedAt}` : ''}</small>
         <RunActions org={activeOrg} runName={run.metadata?.name} stackRef={run.spec?.stackRef || run.spec?.agentStack} phase={run.status?.phase} />
       </li>;
-      })}</ul> : <EmptyState title="No dispatch runs" text="Dispatch runs appear when agent stacks are triggered by rules or manual dispatch. Configure trigger rules or dispatch manually to create runs."><DispatchButton org={activeOrg} stacks={availableStacks} agents={agentProfiles} /></EmptyState>}
+      })}</ul> : <EmptyState title="No dispatch runs" text="Dispatch runs appear when agent stacks are triggered by rules or manual dispatch. Configure trigger rules or dispatch manually to create runs."><DispatchButton org={activeOrg} stacks={availableStacks} agents={agentProfiles} meetings={meetings} /></EmptyState>}
     </div>
   </PageFrame>;
 }
@@ -54,6 +55,8 @@ export async function AgentRunDetailPage({ org = null, runId } = {}) {
   const contextSourceCount = run?.spec?.contextBundle?.sourceCount ?? run?.spec?.contextBundle?.sources?.length ?? null;
   const permissionDecision = run?.spec?.permission?.decision || run?.status?.permissionDecision || null;
   const repository = run?.spec?.repository || null;
+  const meetingRef = run?.spec?.meetingRef || null;
+  const meetingContext = run?.spec?.meetingContext || null;
   const phases = run?.status?.phaseTransitions || run?.status?.history || [];
   const runTranscripts = agentView.transcripts?.items || [];
   const sessionRef = run?.status?.sessionRef || run?.spec?.sessionRef || null;
@@ -112,6 +115,14 @@ export async function AgentRunDetailPage({ org = null, runId } = {}) {
           <div className="cardTitle"><h3>Repository</h3><StatusPill tone={repository ? 'good' : 'neutral'}>{repository ? 'linked' : 'none'}</StatusPill></div>
           <dl className="kv">
             <dt>Repository</dt><dd>{repository || 'not specified'}</dd>
+          </dl>
+        </div>
+        <div className="card">
+          <div className="cardTitle"><h3>Meeting</h3><StatusPill tone={meetingRef ? 'good' : 'neutral'}>{meetingRef ? 'linked' : 'none'}</StatusPill></div>
+          <dl className="kv">
+            <dt>Meeting</dt><dd>{meetingRef ? <a href={orgHref(activeOrg, `/meetings/${meetingRef}`)}>{meetingRef}</a> : 'not specified'}</dd>
+            {meetingContext?.roomUrl ? <><dt>Room</dt><dd><a href={meetingContext.roomUrl}>{meetingContext.roomId || meetingContext.roomUrl}</a></dd></> : null}
+            {meetingContext?.participantName ? <><dt>Participant</dt><dd>{meetingContext.participantName}</dd></> : null}
           </dl>
         </div>
       </section>

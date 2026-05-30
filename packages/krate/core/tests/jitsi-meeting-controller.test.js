@@ -89,3 +89,46 @@ test('Jitsi meeting controller delegates room lifecycle, recording, stats, and e
   assert.deepEqual(providerCalls.map(([name]) => name), ['createRoom', 'getRoom', 'getStats', 'startRecording', 'stopRecording', 'endRoom']);
   assert.ok(persisted.length >= 4);
 });
+
+test('Jitsi meeting controller auto-dispatches template agents when autoJoin is enabled', async () => {
+  const calls = [];
+  const activeMeeting = meeting({
+    spec: {
+      templateRef: 'standup-template',
+    },
+    status: { phase: 'Active', roomUrl: 'https://meet.example/daily-default' },
+  });
+  const controller = createJitsiMeetingController({
+    resourceGateway: {
+      async list() { return { items: [activeMeeting] }; },
+      async get() { return activeMeeting; },
+    },
+    dispatchController: {
+      async createManualDispatch(input) {
+        calls.push(input);
+        return { error: false, run: { metadata: { name: `run-${calls.length}` } } };
+      },
+    },
+  });
+
+  const results = await controller.dispatchAutoJoinAgents('daily', {
+    resources: {
+      JitsiMeetingTemplate: [
+        createResource('JitsiMeetingTemplate', { name: 'standup-template', namespace: 'krate-org-default' }, {
+          organizationRef: 'default',
+          providerRef: 'jitsi-prod',
+          displayName: 'Standup',
+          agentConfig: { autoJoin: true },
+          participants: { autoInvite: [{ type: 'agentStack', ref: 'standup-bot' }] },
+        }),
+      ],
+    },
+    repository: 'repo',
+    ref: 'main',
+  });
+
+  assert.equal(results.length, 1);
+  assert.equal(calls[0].agentStack, 'standup-bot');
+  assert.equal(calls[0].meetingRef, 'daily');
+  assert.equal(calls[0].taskKind, 'meeting');
+});

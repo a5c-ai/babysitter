@@ -143,20 +143,6 @@ test('Meeting-aware dispatch injects meeting context only for Jitsi-capable stac
   ];
   const controller = createAgentDispatchController({
     agentMuxClient: muxClient,
-    jitsiAgentBridge: {
-      hasMeetingCapability(stack) { return stack.spec?.jitsiCapability === true; },
-      async prepareMeetingContext(run, meetingRef, stack) {
-        run.spec.meetingRef = meetingRef;
-        run.spec.meetingContext = {
-          roomUrl: 'https://meet.example/daily-default',
-          roomId: 'daily-default',
-          jwt: 'krate-jitsi.jwt.sig',
-          role: stack.spec.jitsiConfig.role,
-          capabilities: stack.spec.jitsiConfig.capabilities,
-        };
-        return run.spec.meetingContext;
-      },
-    },
   });
 
   const result = await controller.createManualDispatch({
@@ -173,10 +159,13 @@ test('Meeting-aware dispatch injects meeting context only for Jitsi-capable stac
   assert.equal(result.error, false);
   assert.equal(result.run.spec.meetingRef, 'daily');
   assert.equal(result.run.spec.meetingContext.roomId, 'daily-default');
+  assert.equal(result.run.spec.meetingContext.jwt, undefined);
   assert.ok(gw.applied[0].spec.template.spec.containers.some((container) => container.name === 'jitsi-agent-sidecar'));
+  const sidecar = gw.applied[0].spec.template.spec.containers.find((container) => container.name === 'jitsi-agent-sidecar');
+  assert.match(sidecar.env.find((entry) => entry.name === 'JITSI_JWT').value, /^krate-jitsi\./);
 });
 
-test('Non-Jitsi stack with meetingRef dispatches without sidecar regression', async () => {
+test('Non-Jitsi stack with meetingRef is rejected before job creation', async () => {
   const gw = createMockResourceGateway();
   const muxClient = createAgentMuxClient({ resourceGateway: gw });
   const resources = buildValidResources('plain-stack');
@@ -193,9 +182,9 @@ test('Non-Jitsi stack with meetingRef dispatches without sidecar regression', as
     resources
   });
 
-  assert.equal(result.error, false);
-  assert.equal(result.run.spec.meetingRef, undefined);
-  assert.equal(gw.applied[0].spec.template.spec.containers.length, 1);
+  assert.equal(result.error, true);
+  assert.equal(result.reason, 'meeting-not-supported');
+  assert.equal(gw.applied.length, 0);
 });
 
 test('Dispatch with Agent Mux unavailable (no resource gateway)', async () => {

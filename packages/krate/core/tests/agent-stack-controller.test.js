@@ -62,6 +62,14 @@ function makeServiceAccount(name) {
   });
 }
 
+function makeJitsiProvider(name) {
+  return createResource('JitsiMeetProvider', { name, namespace: 'krate-org-default' }, {
+    organizationRef: 'default',
+    baseUrl: 'https://meet.example',
+    authMode: 'jwt',
+  });
+}
+
 function makeRoleBinding(name, subject) {
   return createResource('AgentRoleBinding', { name, namespace: 'krate-org-default' }, {
     organizationRef: 'default',
@@ -177,6 +185,60 @@ test('Minimal stack with no capability refs results in Ready=True', () => {
   assert.equal(result.capabilities.skills.length, 0);
   assert.equal(result.capabilities.subagents.length, 0);
   assert.equal(result.capabilities.contextLabels.length, 0);
+});
+
+test('Jitsi-capable stack requires provider, valid role, and valid meeting tools', () => {
+  const controller = createAgentStackController();
+  const stack = makeStack('meeting-stack', {
+    jitsiCapability: true,
+    jitsiMeetingProviderRef: 'jitsi-prod',
+    jitsiConfig: {
+      role: 'participant',
+      capabilities: { audio: 'listen', chat: 'readwrite' },
+      tools: ['krate_send_chat_message', 'krate_get_participant_list', 'krate_react'],
+    },
+  });
+
+  const resources = {
+    AgentStack: [stack],
+    JitsiMeetProvider: [makeJitsiProvider('jitsi-prod')],
+    AgentServiceAccount: [makeServiceAccount('sa-default')],
+    AgentRoleBinding: [makeRoleBinding('rb-1', 'sa-default')],
+    AgentSecretGrant: [makeSecretGrant('sg-model', 'sa-default', 'model-provider')]
+  };
+
+  const result = controller.reconcileStack(stack, resources);
+  const condition = result.conditions.find((c) => c.type === 'JitsiCapabilityReady');
+  assert.equal(condition.status, 'True');
+  assert.equal(result.validation, 'valid');
+});
+
+test('Jitsi-capable stack blocks observer speak mode and unknown meeting tools', () => {
+  const controller = createAgentStackController();
+  const stack = makeStack('bad-meeting-stack', {
+    jitsiCapability: true,
+    jitsiMeetingProviderRef: 'missing-provider',
+    jitsiConfig: {
+      role: 'observer',
+      capabilities: { audio: 'speak' },
+      tools: ['krate_send_chat_message', 'bad_tool'],
+    },
+  });
+
+  const resources = {
+    AgentStack: [stack],
+    AgentServiceAccount: [makeServiceAccount('sa-default')],
+    AgentRoleBinding: [makeRoleBinding('rb-1', 'sa-default')],
+    AgentSecretGrant: [makeSecretGrant('sg-model', 'sa-default', 'model-provider')]
+  };
+
+  const result = controller.reconcileStack(stack, resources);
+  const condition = result.conditions.find((c) => c.type === 'JitsiCapabilityReady');
+  assert.equal(condition.status, 'False');
+  assert.match(condition.message, /JitsiMeetProvider\/missing-provider not found/);
+  assert.match(condition.message, /observer role cannot use speak or both audio modes/);
+  assert.match(condition.message, /Invalid Jitsi tools: bad_tool/);
+  assert.equal(result.validation, 'invalid');
 });
 
 test('listStackCapabilities returns correct normalized capability list', () => {

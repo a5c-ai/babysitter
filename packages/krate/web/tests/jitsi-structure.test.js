@@ -167,6 +167,21 @@ test('Jitsi context panel includes metadata, invited agents, dispatch links, and
   assert.match(context, /Recording finalization/);
 });
 
+test('Agent dispatch UI and route pass meeting refs for Jitsi-capable stacks', () => {
+  const dispatchButton = read('app', 'components', 'agent', 'dispatch-button.jsx');
+  assert.match(dispatchButton, /jitsiCapability\s*===\s*true/);
+  assert.match(dispatchButton, /aria-label="Meeting"/);
+  assert.match(dispatchButton, /meetingRef/);
+
+  const route = read('app', 'api', 'orgs', '[org]', 'agents', 'dispatch', 'route.js');
+  assert.match(route, /meetingRef:\s*body\.meetingRef\s*\|\|\s*undefined/);
+
+  const runPage = read('app', 'pages', 'agent-run-pages.jsx');
+  assert.match(runPage, /spec\?\.meetingRef/);
+  assert.match(runPage, /\/meetings\/\$\{meetingRef\}/);
+  assert.match(runPage, /meetingContext\.roomUrl/);
+});
+
 test('Jitsi embedded meeting layout collapses context below iframe on mobile', () => {
   const css = read('app', 'globals.css');
   assert.match(css, /\.jitsiMeetingExperience\s*\{/);

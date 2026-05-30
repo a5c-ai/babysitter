@@ -113,6 +113,7 @@ export function createControllerUiModel(source, options = {}) {
   const agentProjects = filterByOrg(snapshot.resources.KrateProject || [], activeOrg?.slug);
   const agentGateway = filterByOrg(snapshot.resources.AgentGatewayConfig || [], activeOrg?.slug);
   const agentTranscripts = filterByOrg(snapshot.resources.AgentSessionTranscript || [], activeOrg?.slug);
+  const jitsiMeetings = filterByOrg(snapshot.resources.JitsiMeeting || [], activeOrg?.slug);
   const memoryRepositories = filterByOrg(snapshot.resources.AgentMemoryRepository || [], activeOrg?.slug);
   const memorySnapshots = filterByOrg(snapshot.resources.AgentMemorySnapshot || [], activeOrg?.slug);
   const memoryImports = filterByOrg(snapshot.resources.AgentRunMemoryImport || [], activeOrg?.slug);
@@ -130,6 +131,7 @@ export function createControllerUiModel(source, options = {}) {
     projects: { count: agentProjects.length, items: agentProjects },
     gateway: agentGateway[0] || null,
     transcripts: { count: agentTranscripts.length, items: agentTranscripts },
+    meetings: { count: jitsiMeetings.length, items: jitsiMeetings, active: jitsiMeetings.filter((meeting) => meeting.status?.phase === 'Active') },
     memoryRepositories: { count: memoryRepositories.length, items: memoryRepositories },
     memorySnapshots: { count: memorySnapshots.length, items: memorySnapshots },
     memoryImports: { count: memoryImports.length, items: memoryImports, pending: memoryImports.filter(i => !i.status?.phase || i.status.phase === 'Pending' || i.status.phase === 'AwaitingReview') },

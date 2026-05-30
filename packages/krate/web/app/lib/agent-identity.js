@@ -131,7 +131,7 @@ export function agentIdentityOptions(profiles = [], stacks = []) {
   });
   const stackOptions = stacks.map((stack) => {
     const name = typeof stack === 'string' ? stack : stack?.metadata?.name;
-    return name ? { type: 'agentStack', value: name, label: name, hint: 'Legacy stack', avatar: { type: 'initials', initials: fallbackInitials(name), color: '#64748b' } } : null;
+    return name ? { type: 'agentStack', value: name, label: name, hint: 'Legacy stack', stack, avatar: { type: 'initials', initials: fallbackInitials(name), color: '#64748b' } } : null;
   }).filter(Boolean);
   return [...definitionOptions, ...stackOptions];
 }

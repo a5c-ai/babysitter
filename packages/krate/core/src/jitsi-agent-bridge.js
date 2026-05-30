@@ -1,5 +1,8 @@
+import crypto from 'node:crypto';
+
 const DEFAULT_SIDECAR_IMAGE = 'ghcr.io/a5c-ai/jitsi-agent-sidecar:latest';
 const SOCKET_PATH = '/tmp/jitsi-agent.sock';
+const DEFAULT_TTL_MINUTES = 60;
 
 function isoNow(now) {
   return (typeof now === 'function' ? now() : new Date()).toISOString();
@@ -14,6 +17,41 @@ export function createJitsiAgentBridge(options = {}) {
     now = () => new Date(),
   } = options;
 
+  async function resolveMeeting(meetingRef, resources = {}) {
+    const meeting = await meetingController?.getMeeting?.(meetingRef);
+    if (meeting) return meeting;
+    return (resources.JitsiMeeting || []).find((candidate) => (
+      candidate.metadata?.name === meetingRef || candidate.spec?.roomId === meetingRef
+    )) || null;
+  }
+
+  function generateParticipantJwt(roomId, participant, ttlMinutes) {
+    if (meetingController?.generateParticipantJwt) {
+      return meetingController.generateParticipantJwt(roomId, participant, ttlMinutes);
+    }
+    const exp = Math.floor(now().getTime() / 1000) + Math.max(1, Number(ttlMinutes) || DEFAULT_TTL_MINUTES) * 60;
+    const claims = {
+      aud: 'jitsi',
+      iss: 'krate',
+      sub: participant.org || 'krate',
+      room: roomId,
+      exp,
+      context: {
+        user: {
+          id: participant.id,
+          name: participant.name,
+          type: 'agent',
+          role: participant.role || 'observer',
+          avatar: participant.avatar || '',
+        },
+      },
+    };
+    const encoded = Buffer.from(JSON.stringify(claims)).toString('base64url');
+    const secret = process.env.KRATE_JITSI_JWT_SECRET || process.env.JITSI_JWT_SECRET || 'dev-jitsi-secret';
+    const signature = crypto.createHmac('sha256', secret).update(encoded).digest('base64url');
+    return `krate-jitsi.${encoded}.${signature}`;
+  }
+
   return {
     role: 'jitsi-agent-bridge',
 
@@ -21,10 +59,10 @@ export function createJitsiAgentBridge(options = {}) {
       return stack?.spec?.jitsiCapability === true;
     },
 
-    async prepareMeetingContext(dispatchRun, meetingRef, stack = {}) {
+    async prepareMeetingContext(dispatchRun, meetingRef, stack = {}, { resources = {} } = {}) {
       if (!meetingRef) return null;
       if (!this.hasMeetingCapability(stack)) return null;
-      const meeting = await meetingController?.getMeeting?.(meetingRef);
+      const meeting = await resolveMeeting(meetingRef, resources);
       if (!meeting || meeting.status?.phase !== 'Active') {
         throw new Error(`Meeting ${meetingRef} is not active`);
       }
@@ -35,7 +73,7 @@ export function createJitsiAgentBridge(options = {}) {
         type: 'agent',
         role: stack.spec?.jitsiConfig?.role || 'observer',
       };
-      const jwt = meetingController.generateParticipantJwt(
+      const jwt = generateParticipantJwt(
         meeting.spec.roomId,
         participant,
         meeting.spec.ttlMinutes || 120,
@@ -49,7 +87,14 @@ export function createJitsiAgentBridge(options = {}) {
         capabilities: stack.spec?.jitsiConfig?.capabilities || {},
       };
       dispatchRun.spec.meetingRef = meetingRef;
-      dispatchRun.spec.meetingContext = context;
+      dispatchRun.spec.meetingContext = {
+        roomUrl: context.roomUrl,
+        roomId: context.roomId,
+        participantName: context.participantName,
+        role: context.role,
+        capabilities: context.capabilities,
+        tokenRef: { runtimeOnly: true },
+      };
       return context;
     },
 

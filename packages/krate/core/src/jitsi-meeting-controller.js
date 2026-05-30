@@ -16,6 +16,7 @@ export function createJitsiMeetingController(options = {}) {
     providerClient = {},
     resourceGateway = null,
     eventBus = null,
+    dispatchController = null,
     jwtSecret = process.env.KRATE_JITSI_JWT_SECRET || process.env.JITSI_JWT_SECRET || 'dev-jitsi-secret',
     now = () => new Date(),
   } = options;
@@ -156,6 +157,37 @@ export function createJitsiMeetingController(options = {}) {
 
     async getMeetingStats(roomId) {
       return providerClient.getStats?.(roomId) || { active: false, participantCount: 0 };
+    },
+
+    async dispatchAutoJoinAgents(meetingRef, { resources = {}, repository = 'default', ref = 'main', actor = 'jitsi-meeting-controller', namespace = null } = {}) {
+      const meeting = typeof meetingRef === 'string' ? await getMeeting(meetingRef) : meetingRef;
+      if (!meeting) throw new Error(`JitsiMeeting ${meetingRef} not found`);
+      const template = meeting.spec?.templateRef
+        ? (resources.JitsiMeetingTemplate || []).find((candidate) => candidate.metadata?.name === meeting.spec.templateRef)
+        : null;
+      const autoJoin = meeting.spec?.agentConfig?.autoJoin === true || template?.spec?.agentConfig?.autoJoin === true;
+      if (!autoJoin) return [];
+      const participants = [
+        ...(meeting.spec?.participants?.autoInvite || []),
+        ...(template?.spec?.participants?.autoInvite || []),
+      ];
+      const dispatched = [];
+      for (const participant of participants) {
+        if (!['agentStack', 'agentDefinition'].includes(participant.type)) continue;
+        const result = await dispatchController?.createManualDispatch?.({
+          repository,
+          ref,
+          actor,
+          namespace: namespace || meeting.metadata?.namespace || 'default',
+          organizationRef: meeting.spec?.organizationRef || 'default',
+          meetingRef: meeting.metadata?.name,
+          resources,
+          taskKind: participant.taskKind || 'meeting',
+          ...(participant.type === 'agentDefinition' ? { agentDefinition: participant.ref } : { agentStack: participant.ref }),
+        });
+        if (result) dispatched.push(result);
+      }
+      return dispatched;
     },
 
     async startRecording(meetingRef) {
