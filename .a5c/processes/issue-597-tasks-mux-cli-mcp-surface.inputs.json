@@ -1,0 +1,73 @@
+{
+  "issueNumber": 597,
+  "issueTitle": "tasks-mux: missing CLI commands and MCP tools",
+  "baseBranch": "staging",
+  "branchName": "agent/issue-597-tasks-mux-surface",
+  "maxVerificationIterations": 3,
+  "prompt": "Implement issue #597 by adding the missing tasks-mux CLI commands, MCP tools, MCP breakpoint resource, and resource subscription notifications while preserving existing behavior.",
+  "labels": [
+    "enhancement",
+    "ready-for-dev",
+    "priority:medium",
+    "effort:large",
+    "tasks-mux",
+    "P2",
+    "risk:medium"
+  ],
+  "relatedIssues": [
+    596,
+    577
+  ],
+  "requiredCliCommands": {
+    "breakpoints": [
+      "search",
+      "assign",
+      "reassign",
+      "close",
+      "approve",
+      "list --status"
+    ],
+    "responders": [
+      "search",
+      "stats"
+    ],
+    "templates": [
+      "list",
+      "show",
+      "create"
+    ],
+    "rules": [
+      "list",
+      "add",
+      "remove"
+    ]
+  },
+  "requiredMcpTools": [
+    "create_todo",
+    "create_task",
+    "assign_task",
+    "search_tasks",
+    "cancel_breakpoint",
+    "escalate_breakpoint",
+    "add_comment_to_breakpoint"
+  ],
+  "requiredMcpResources": [
+    "breakpoint://[id]",
+    "resource subscription notifications for breakpoint state changes"
+  ],
+  "knownCurrentSurface": {
+    "cliProgram": "packages/tasks-mux/src/cli/program.ts currently registers ask, responders, breakpoints, server, responder-loop, and auth.",
+    "breakpointsCli": "packages/tasks-mux/src/cli/commands/breakpoints.ts currently implements pending, answer, status, and poll.",
+    "respondersCli": "packages/tasks-mux/src/cli/commands/responders.ts currently implements list and show.",
+    "mcpServer": "packages/tasks-mux/src/mcp/server.ts currently registers ask_breakpoint, check_breakpoint_status, list_breakpoints, answer_breakpoint, verify_breakpoint_answer, list_responders, claim_breakpoint, and poll_breakpoints.",
+    "backend": "packages/tasks-mux/src/backend.ts already includes cancelBreakpoint and optional claimBreakpoint, but not broader search, assignment, comments, escalation, templates, or rules contracts."
+  },
+  "expectedVerificationCommands": [
+    "npm run build --workspace=@a5c-ai/tasks-mux",
+    "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+    "npm run test --workspace=@a5c-ai/tasks-mux",
+    "npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-mux",
+    "npm pack --json --dry-run --workspace=@a5c-ai/tasks-mux",
+    "npm run verify:metadata"
+  ]
+}
