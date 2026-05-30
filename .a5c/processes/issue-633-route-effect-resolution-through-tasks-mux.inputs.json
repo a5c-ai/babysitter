@@ -1,0 +1,49 @@
+{
+  "issueNumber": 633,
+  "branch": "staging",
+  "designDocPath": "docs/agent-mux-babysitter-integrations/tasks-mux-routing.md",
+  "dependencyIssues": [630, 631],
+  "targetQuality": 90,
+  "maxImplementationIterations": 3,
+  "requiredCommands": [
+    "npm run test --workspace=@a5c-ai/tasks-mux",
+    "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+    "npm run build --workspace=@a5c-ai/tasks-mux",
+    "npm run test:sdk",
+    "npm run test --workspace=@a5c-ai/agent-platform",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "sourceScope": {
+    "primaryPackages": [
+      "packages/sdk",
+      "packages/agent-platform",
+      "packages/tasks-mux"
+    ],
+    "pluginSurfaces": [
+      "plugins/babysitter",
+      "plugins/babysitter-unified"
+    ],
+    "referenceDocs": [
+      "docs/agent-mux-babysitter-integrations/tasks-mux-routing.md",
+      "docs/agent-mux-babysitter-integrations/effect-resolution.md",
+      "docs/agent-mux-babysitter-integrations/plugin-mode.md",
+      "docs/agent-mux-babysitter-integrations/testing.md"
+    ]
+  },
+  "acceptanceFocus": [
+    "orchestrateIteration and adjacent SDK effect surfaces no longer resolve routable task effects directly when tasks-mux routing applies",
+    "agent-platform CLI orchestration resolveAndPostEffect delegates routing decisions to tasks-mux",
+    "plugin stop-hook mode queries tasks-mux before deciding host-agent delegation versus internal resolution",
+    "internal responder tasks route to agent-core through tasks-mux",
+    "agent responder tasks route through AgentMuxResponderBackend",
+    "human responder tasks route through BreakpointBackend",
+    "tracker responder tasks route through ExternalTrackerBackend when available or fail with explicit unsupported/unavailable evidence",
+    "tests prevent direct SDK or agent-platform bypass routing to agent-mux for task effects"
+  ],
+  "planningNotes": {
+    "issueDependencyCorrection": "Issue #633 body references #620/#621, but the latest issue comment states dependencies are #630 and #631.",
+    "repoProcessOverride": "Use agent tasks for implementation and verification phases; keep breakpoints sparse and only for dependency/scope ambiguity.",
+    "doNotImplementDuringPlanning": true
+  }
+}
