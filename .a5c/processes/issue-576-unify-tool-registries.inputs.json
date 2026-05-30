@@ -1,0 +1,62 @@
+{
+  "issueNumber": 576,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-576-unify-tool-registries",
+  "maxFixAttempts": 3,
+  "relatedIssues": [
+    580,
+    588,
+    598,
+    600,
+    602
+  ],
+  "targetFiles": [
+    "docs/agent-layer-gaps.md",
+    "packages/tool-mux/src/types.ts",
+    "packages/tool-mux/src/registry.ts",
+    "packages/tool-mux/src/dispatch.ts",
+    "packages/tool-mux/src/hooks.ts",
+    "packages/tool-mux/src/mcp-bridge.ts",
+    "packages/tool-mux/src/index.ts",
+    "packages/tool-mux/src/__tests__/registry.test.ts",
+    "packages/tool-mux/src/__tests__/dispatch.test.ts",
+    "packages/tool-mux/src/__tests__/hooks.test.ts",
+    "packages/tool-mux/src/__tests__/mcp-bridge.test.ts",
+    "packages/agent-core/src/deferredToolRegistry.ts",
+    "packages/agent-core/src/deferredToolRegistry.test.ts",
+    "packages/agent-core/src/types.ts",
+    "packages/agent-core/src/index.ts",
+    "packages/agent-core/src/tools.test.ts",
+    "packages/agent-core/src/agenticTools/discovery/tools.ts",
+    "packages/agent-core/src/agenticTools/tools/programmaticToolCalling.ts",
+    "packages/agent-platform/src/harness/deferredToolRegistry.ts",
+    "packages/agent-platform/src/harness/agenticTools/types.ts",
+    "packages/agent-platform/src/harness/agenticTools/discovery/tools.ts",
+    "packages/agent-platform/src/harness/internal/createRun/planProcess/phaseHelpers.ts",
+    "packages/agent-platform/src/mcp/client/toolRegistry.ts",
+    "packages/agent-platform/src/mcp/client/executor.ts",
+    "packages/agent-platform/src/mcp/client/manager.ts",
+    "packages/agent-platform/src/mcp/client/index.ts",
+    "packages/hooks-mux/core/src",
+    "packages/hooks-mux/adapter-claude/src"
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/tool-mux/src/__tests__/registry.test.ts packages/tool-mux/src/__tests__/dispatch.test.ts packages/tool-mux/src/__tests__/hooks.test.ts packages/tool-mux/src/__tests__/mcp-bridge.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/agent-core/src/deferredToolRegistry.test.ts packages/agent-core/src/tools.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/agent-platform/src/mcp/client",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check",
+    "rg -n \"DeferredToolRegistry|McpToolRegistry|deferredToolRegistry|ToolDispatcher|ToolHookBridge|McpBridge\" packages docs"
+  ],
+  "qualityGates": [
+    "tool-mux registry supports source-qualified identity and duplicate tool names across builtin, plugin/custom, and MCP sources",
+    "tool_search/tool_fetch preserve current JSON output, source filtering, lazy schema loading, cache behavior, and error behavior",
+    "code_executor nested calls route through ToolDispatcher while preserving timeout and max_tool_calls limits",
+    "agent-platform MCP discovery registers through McpBridge and execution still uses McpToolExecutor/McpClientManager lifecycle",
+    "PreToolUse/PostToolUse hook bridge has allow, deny, audit, and failure coverage on production dispatch paths",
+    "duplicate registry implementations are removed or replaced by explicit compatibility shims with updated exports/docs",
+    "targeted Vitest suites, SDK build/test, metadata verification, and git diff whitespace checks pass"
+  ]
+}
