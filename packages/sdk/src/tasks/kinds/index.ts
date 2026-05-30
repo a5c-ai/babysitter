@@ -82,6 +82,7 @@ export function agentTask<TArgs = unknown, TResult = unknown>(
       name,
       prompt,
       outputSchema,
+      external,
       responderType,
       adapter,
       fallbackType,
@@ -99,6 +100,7 @@ export function agentTask<TArgs = unknown, TResult = unknown>(
       resolveOptionalValue(options.name, args, ctx),
       resolveOptionalValue(options.prompt, args, ctx),
       resolveOptionalValue(options.outputSchema, args, ctx),
+      resolveBoolean(options.external, args, ctx),
       resolveOptionalValue(options.responderType, args, ctx),
       resolveOptionalValue(options.adapter, args, ctx),
       resolveOptionalValue(options.fallbackType, args, ctx),
@@ -113,6 +115,7 @@ export function agentTask<TArgs = unknown, TResult = unknown>(
       name,
       prompt,
       outputSchema,
+      external,
       responderType,
       adapter,
       fallbackType,
@@ -133,6 +136,7 @@ export function externalAgentTask<TArgs = unknown, TResult = unknown>(
 ): DefinedTask<TArgs, TResult> {
   return agentTask<TArgs, TResult>(id, {
     ...options,
+    external: true,
     responderType: "agent",
   });
 }
@@ -298,6 +302,7 @@ function buildAgentOptions(options: AgentTaskOptions): AgentTaskOptions {
   if (typeof options.name === "string" && options.name.trim()) agent.name = options.name;
   if (options.prompt !== undefined) agent.prompt = options.prompt;
   if (options.outputSchema !== undefined) agent.outputSchema = options.outputSchema;
+  if (options.external === true) agent.external = true;
   if (options.responderType !== undefined) agent.responderType = options.responderType;
   if (typeof options.adapter === "string" && options.adapter.trim()) agent.adapter = options.adapter.trim();
   if (options.fallbackType !== undefined) agent.fallbackType = options.fallbackType;

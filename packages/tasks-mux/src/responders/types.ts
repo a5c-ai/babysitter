@@ -3,6 +3,7 @@ import type { ResponderProfile, ResponderType } from "../types.js";
 export type { ResponderProfile, ResponderType } from "../types.js";
 
 export interface TaskRoutingHints {
+  external?: boolean;
   responderType?: ResponderType;
   adapter?: string;
   model?: string;
@@ -14,4 +15,3 @@ export interface TaskRoutingHints {
 export interface RoutedResponder extends ResponderProfile {
   type: ResponderType;
 }
-

@@ -329,7 +329,7 @@ describe("AgentMuxResponderBackend", () => {
     }).name).toBe("agent-mux");
     expect(AgentMuxBackendConfigSchema.safeParse({
       type: "agent-mux",
-      agent: "codex",
+      adapter: "codex",
       model: "gpt-5.3-codex",
       timeoutMs: 30_000,
       collectEvents: true,

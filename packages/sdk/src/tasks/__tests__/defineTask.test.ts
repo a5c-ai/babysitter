@@ -269,21 +269,36 @@ describe("defineTask object-form (backward-compat for legacy library processes)"
     ).toThrow(/id.*name/);
   });
 
-  it("keeps custom agent task definitions valid when responderType is absent", async () => {
+  it("normalizes external agent task definitions to agent responder routing", async () => {
     const defined = defineTask({
       id: "legacy-agent",
       kind: "agent",
       agent: {
-        role: "legacy reviewer",
         external: true,
+        adapter: "codex",
+        role: "legacy reviewer",
       },
     });
 
     const built = await defined.build({}, fakeCtx());
 
     expect(built.agent).toMatchObject({
+      responderType: "agent",
+      adapter: "codex",
       role: "legacy reviewer",
       external: true,
     });
+  });
+
+  it("rejects external agent task definitions without an adapter", async () => {
+    const defined = defineTask({
+      id: "legacy-agent-missing-adapter",
+      kind: "agent",
+      agent: {
+        external: true,
+      },
+    });
+
+    await expect(defined.build({}, fakeCtx())).rejects.toThrow(/adapter/);
   });
 });

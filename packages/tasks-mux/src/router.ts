@@ -49,7 +49,7 @@ export type TaskRouteDecision =
 
 export function routeTask(task: RoutableTaskDef, context: TaskRouteContext = {}): TaskRouteDecision {
   const hints = routingHints(task);
-  const requested = hints.responderType ?? defaultResponderType(task);
+  const requested = hints.responderType ?? (hints.external ? "agent" : defaultResponderType(task));
 
   if (requested === "auto") {
     const agent = selectResponder(context.responders, "agent", hints.adapter);
@@ -89,6 +89,7 @@ export function routingHints(task: RoutableTaskDef): TaskRoutingHints {
   const source = task.agent ?? task.breakpoint ?? {};
   return {
     responderType: source.responderType ?? task.metadata?.responderType,
+    external: source.external ?? task.metadata?.external,
     adapter: source.adapter ?? task.metadata?.adapter,
     model: source.model ?? task.metadata?.model,
     provider: source.provider ?? task.metadata?.provider,

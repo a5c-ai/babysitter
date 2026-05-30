@@ -173,6 +173,9 @@ function normalizeTaskDef(taskDef: TaskDef): TaskDef {
 function validateAgentRouting(taskDef: TaskDef): void {
   const agent = taskDef.agent;
   if (!agent || typeof agent !== "object" || Array.isArray(agent)) return;
+  if (agent.external === true && agent.responderType === undefined) {
+    agent.responderType = "agent";
+  }
   if (agent.responderType !== "agent") return;
   if (typeof agent.adapter === "string" && agent.adapter.trim()) return;
   throw new Error("agent.responderType 'agent' requires a non-empty agent.adapter");
