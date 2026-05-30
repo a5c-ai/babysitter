@@ -912,15 +912,10 @@ async function invokeSubprocessEffect(
       };
     }
 
-    const message = iterationResult.status === "failed" || iterationResult.status === "process-error"
-      ? (
-          iterationResult.error instanceof Error
-            ? iterationResult.error.message
-            : summarizeSubprocessValue(iterationResult.error)
-        )
-      : iterationResult.status === "halted"
-        ? iterationResult.reason
-        : `Nested run ${childRun.runId} returned an unexpected non-completed status`;
+    const rawError = "error" in iterationResult ? iterationResult.error : iterationResult;
+    const message = rawError instanceof Error
+      ? rawError.message
+      : summarizeSubprocessValue(rawError);
     emitAmuxEvent(
       {
         type: "subagent_error",
