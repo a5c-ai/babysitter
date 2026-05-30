@@ -423,12 +423,15 @@ describe('handleSkillDiscover --summary-only flag', () => {
   let testDir: string;
   let pluginRoot: string;
   let originalCwd: string;
+  let originalGlobalStateDir: string | undefined;
 
   beforeEach(async () => {
     originalCwd = process.cwd();
+    originalGlobalStateDir = process.env.BABYSITTER_GLOBAL_STATE_DIR;
     testDir = path.join(os.tmpdir(), `skill-discover-cli-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
     pluginRoot = path.join(testDir, 'plugin');
     await fs.mkdir(pluginRoot, { recursive: true });
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = path.join(testDir, 'global-state');
     process.chdir(testDir);
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -436,6 +439,11 @@ describe('handleSkillDiscover --summary-only flag', () => {
 
   afterEach(async () => {
     process.chdir(originalCwd);
+    if (originalGlobalStateDir === undefined) {
+      delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
+    } else {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = originalGlobalStateDir;
+    }
     vi.restoreAllMocks();
     try {
       await fs.rm(testDir, { recursive: true, force: true });
@@ -527,12 +535,15 @@ describe('handleSkillDiscover --include-remote flag', () => {
   let testDir: string;
   let pluginRoot: string;
   let originalCwd: string;
+  let originalGlobalStateDir: string | undefined;
 
   beforeEach(async () => {
     originalCwd = process.cwd();
+    originalGlobalStateDir = process.env.BABYSITTER_GLOBAL_STATE_DIR;
     testDir = path.join(os.tmpdir(), `skill-discover-remote-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
     pluginRoot = path.join(testDir, 'plugin');
     await fs.mkdir(pluginRoot, { recursive: true });
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = path.join(testDir, 'global-state');
     process.chdir(testDir);
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -540,6 +551,11 @@ describe('handleSkillDiscover --include-remote flag', () => {
 
   afterEach(async () => {
     process.chdir(originalCwd);
+    if (originalGlobalStateDir === undefined) {
+      delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
+    } else {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = originalGlobalStateDir;
+    }
     vi.restoreAllMocks();
     try {
       await fs.rm(testDir, { recursive: true, force: true });
@@ -590,12 +606,15 @@ describe('handleSkillDiscover JSON output', () => {
   let testDir: string;
   let pluginRoot: string;
   let originalCwd: string;
+  let originalGlobalStateDir: string | undefined;
 
   beforeEach(async () => {
     originalCwd = process.cwd();
+    originalGlobalStateDir = process.env.BABYSITTER_GLOBAL_STATE_DIR;
     testDir = path.join(os.tmpdir(), `skill-discover-json-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
     pluginRoot = path.join(testDir, 'plugin');
     await fs.mkdir(pluginRoot, { recursive: true });
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = path.join(testDir, 'global-state');
     process.chdir(testDir);
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -603,6 +622,11 @@ describe('handleSkillDiscover JSON output', () => {
 
   afterEach(async () => {
     process.chdir(originalCwd);
+    if (originalGlobalStateDir === undefined) {
+      delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
+    } else {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = originalGlobalStateDir;
+    }
     vi.restoreAllMocks();
     try {
       await fs.rm(testDir, { recursive: true, force: true });

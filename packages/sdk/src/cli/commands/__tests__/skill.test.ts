@@ -14,12 +14,15 @@ describe('skill commands', () => {
   let testDir: string;
   let pluginRoot: string;
   let originalCwd: string;
+  let originalGlobalStateDir: string | undefined;
 
   beforeEach(async () => {
     originalCwd = process.cwd();
+    originalGlobalStateDir = process.env.BABYSITTER_GLOBAL_STATE_DIR;
     testDir = path.join(os.tmpdir(), `skill-test-${Date.now()}`);
     pluginRoot = path.join(testDir, 'plugin');
     await fs.mkdir(pluginRoot, { recursive: true });
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = path.join(testDir, 'global-state');
     process.chdir(testDir);
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -27,6 +30,11 @@ describe('skill commands', () => {
 
   afterEach(async () => {
     vi.restoreAllMocks();
+    if (originalGlobalStateDir === undefined) {
+      delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
+    } else {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = originalGlobalStateDir;
+    }
     process.chdir(originalCwd);
     try {
       await fs.rm(testDir, { recursive: true, force: true });

@@ -650,7 +650,15 @@ describe("handleHookRun stop", () => {
     });
   }
 
-  async function requestAgentEffect(runDir: string, effectId: string, requestedAt?: string) {
+  async function requestAgentEffect(
+    runDir: string,
+    effectId: string,
+    requestedAt?: string,
+    taskDef: Record<string, unknown> = { kind: "agent", title: `Agent ${effectId}` },
+  ) {
+    const taskPath = path.join(runDir, "tasks", effectId, "task.json");
+    await fs.mkdir(path.dirname(taskPath), { recursive: true });
+    await fs.writeFile(taskPath, JSON.stringify(taskDef));
     await appendEvent({
       runDir,
       eventType: "EFFECT_REQUESTED",
@@ -800,6 +808,53 @@ describe("handleHookRun stop", () => {
       ["effect-b", 0.001],
       ["effect-c", 0.001],
     ]);
+  });
+
+  it("continues for tasks-mux routed agent effects but exits for externally waiting routes", async () => {
+    process.env.BABYSITTER_HOOK_BACKOFF_BASE = "0.001";
+    process.env.BABYSITTER_HOOK_BACKOFF_CAP = "0.001";
+    const runsDir = path.join(tmpDir, "runs");
+
+    const agentRunId = "routed-agent-run";
+    const agentRunDir = path.join(runsDir, agentRunId);
+    await createRunMetadata(agentRunDir, agentRunId);
+    await requestAgentEffect(agentRunDir, "routed-agent", undefined, {
+      kind: "agent",
+      agent: {
+        responderType: "agent",
+        adapter: "codex",
+        prompt: { task: "review" },
+      },
+    });
+    await createActiveSession("routed-agent-session", agentRunId, agentRunDir);
+
+    let code = await callWithStdin(
+      JSON.stringify({ session_id: "routed-agent-session" }),
+      { ...baseArgs, stateDir, runsDir },
+    );
+    expect(code).toBe(0);
+    expect(JSON.parse(getStdout().trim()).decision).toBe("block");
+
+    stdoutChunks = [];
+
+    const trackerRunId = "routed-tracker-run";
+    const trackerRunDir = path.join(runsDir, trackerRunId);
+    await createRunMetadata(trackerRunDir, trackerRunId);
+    await requestAgentEffect(trackerRunDir, "routed-tracker", undefined, {
+      kind: "agent",
+      metadata: {
+        responderType: "tracker",
+        trackerBackend: "linear",
+      },
+    });
+    await createActiveSession("routed-tracker-session", trackerRunId, trackerRunDir);
+
+    code = await callWithStdin(
+      JSON.stringify({ session_id: "routed-tracker-session" }),
+      { ...baseArgs, stateDir, runsDir },
+    );
+    expect(code).toBe(0);
+    expect(JSON.parse(getStdout().trim()).decision).toBeUndefined();
   });
 
   it("does not apply stale backoff metadata after a pending effect resolves", async () => {

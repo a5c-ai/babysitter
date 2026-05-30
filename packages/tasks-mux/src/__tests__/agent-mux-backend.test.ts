@@ -179,6 +179,34 @@ describe("AgentMuxResponderBackend", () => {
     }));
   });
 
+  it("uses routing adapter when task routing targets an agent-mux adapter", async () => {
+    const runHandle = makeRunHandle(makeRunResult({ agent: "codex" }));
+    const client = makeClient(runHandle);
+    const backend = new AgentMuxResponderBackend({
+      adapter: "claude-code",
+      model: "claude-opus-4-5",
+      client,
+    });
+
+    await backend.submitBreakpoint(makeSubmitParams({
+      routing: {
+        strategy: "single",
+        targetResponders: [],
+        timeoutMs: 10_000,
+        presentToUser: false,
+        responderType: "agent",
+        adapter: "codex",
+        model: "gpt-5.3-codex",
+      },
+    }));
+
+    expect(client.run).toHaveBeenCalledWith(expect.objectContaining({
+      agent: "codex",
+      model: "gpt-5.3-codex",
+      nonInteractive: true,
+    }));
+  });
+
   it("records agent-mux cost, token, run, and event metadata in breakpoint context", async () => {
     const backend = makeBackend({}, makeClient(makeRunHandle(makeRunResult())));
 

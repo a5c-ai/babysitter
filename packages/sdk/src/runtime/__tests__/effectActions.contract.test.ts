@@ -84,6 +84,62 @@ describe("EffectAction contract", () => {
     const sanitized = sanitizeActions(actions);
     expect(sanitized).toMatchFileSnapshot("__snapshots__/effectActions.waiting.json");
   });
+
+  test("waiting actions preserve task responder routing metadata", async () => {
+    const processDir = path.join(tmpRoot, "processes");
+    await fs.mkdir(processDir, { recursive: true });
+    const processPath = path.join(processDir, "routedAgent.mjs");
+
+    await fs.writeFile(
+      processPath,
+      `
+      const externalAgentTask = {
+        id: "external-agent",
+        async build() {
+          return {
+            kind: "agent",
+            title: "external agent",
+            agent: {
+              responderType: "agent",
+              adapter: "codex",
+              model: "gpt-5.4",
+              prompt: { task: "review" }
+            },
+            metadata: { responderType: "agent", adapter: "codex" }
+          };
+        }
+      };
+
+      export async function process(inputs, ctx) {
+        return await ctx.task(externalAgentTask, {});
+      }
+    `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-routed-effect-actions",
+      request: "contract",
+      processPath,
+      inputs: {},
+    });
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-routed-effect-actions" } });
+
+    const iteration = await orchestrateIteration({ runDir });
+    expect(iteration.status).toBe("waiting");
+    if (iteration.status !== "waiting") throw new Error("Expected waiting iteration");
+
+    expect(iteration.nextActions[0]?.taskDef.agent).toMatchObject({
+      responderType: "agent",
+      adapter: "codex",
+      model: "gpt-5.4",
+    });
+    expect(iteration.nextActions[0]?.taskDef.metadata).toMatchObject({
+      responderType: "agent",
+      adapter: "codex",
+    });
+  });
 });
 
 function sanitizeActions(actions: EffectAction[]) {

@@ -8,6 +8,7 @@
 import * as path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { loadJournal } from "../../storage/journal";
+import { readTaskDefinition } from "../../storage/tasks";
 import { readRunMetadata } from "../../storage/runFiles";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { deriveObservedRunState } from "../../runtime/runLifecycleState";
@@ -176,9 +177,13 @@ export async function resolveStopHookRunState(
     if (kindKeys.length > 0) {
       pendingKinds = kindKeys.join(", ");
     }
-    onlyBreakpointsPending = pendingRecords.length > 0 && isOnlyBreakpoints(pendingByKind);
-    currentPendingEffectId = pendingRecords
-      .filter((record) => record.kind !== "breakpoint")
+    onlyBreakpointsPending = pendingRecords.length > 0 && (
+      isOnlyBreakpoints(pendingByKind) ||
+      await onlyExternallyRoutedEffectsPending(runDir, pendingRecords)
+    );
+    currentPendingEffectId = (
+      await hostDelegablePendingRecords(runDir, pendingRecords)
+    )
       .sort((left, right) =>
         (left.requestedAt ?? "").localeCompare(right.requestedAt ?? "")
         || left.effectId.localeCompare(right.effectId),
@@ -201,6 +206,45 @@ export async function resolveStopHookRunState(
     runDir,
     lookupError: runState ? undefined : `Unable to inspect run ${runId} at ${runDir}`,
   };
+}
+
+async function onlyExternallyRoutedEffectsPending(
+  runDir: string,
+  pendingRecords: Array<{ effectId: string; kind?: string }>,
+): Promise<boolean> {
+  const classified = await Promise.all(pendingRecords.map((record) => isHostDelegableEffect(runDir, record)));
+  return classified.length > 0 && classified.every((delegable) => !delegable);
+}
+
+async function hostDelegablePendingRecords<T extends { effectId: string; kind?: string }>(
+  runDir: string,
+  pendingRecords: T[],
+): Promise<T[]> {
+  const pairs = await Promise.all(pendingRecords.map(async (record) => ({
+    record,
+    delegable: await isHostDelegableEffect(runDir, record),
+  })));
+  return pairs.filter((pair) => pair.delegable).map((pair) => pair.record);
+}
+
+async function isHostDelegableEffect(
+  runDir: string,
+  record: { effectId: string; kind?: string },
+): Promise<boolean> {
+  if (record.kind && record.kind !== "agent" && record.kind !== "breakpoint") {
+    return true;
+  }
+  try {
+    const taskDef = await readTaskDefinition(runDir, record.effectId);
+    if (!taskDef) return record.kind !== "breakpoint";
+    const mux = await import("@a5c-ai/tasks-mux");
+    if (typeof mux.routeTask !== "function" || typeof mux.isHostDelegableRoute !== "function") {
+      return record.kind !== "breakpoint";
+    }
+    return mux.isHostDelegableRoute(mux.routeTask(taskDef as unknown as Parameters<typeof mux.routeTask>[0]));
+  } catch {
+    return record.kind !== "breakpoint";
+  }
 }
 
 // ---------------------------------------------------------------------------

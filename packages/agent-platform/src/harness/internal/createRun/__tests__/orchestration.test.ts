@@ -1,6 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentCoreSessionEvent } from "../../../types";
 import { subscribeVerbosePiEvents } from "../orchestration";
+import { resolveEffect } from "../orchestration/effects";
+
+const taskMuxMock = vi.hoisted(() => ({
+  submitBreakpoint: vi.fn(),
+  routeTask: vi.fn(),
+}));
+
+vi.mock("@a5c-ai/tasks-mux", () => ({
+  routeTask: taskMuxMock.routeTask,
+  AgentMuxResponderBackend: class {
+    submitBreakpoint = taskMuxMock.submitBreakpoint;
+  },
+}));
 
 describe("subscribeVerbosePiEvents", () => {
   let stderrSpy: ReturnType<typeof vi.spyOn>;
@@ -86,5 +99,55 @@ describe("subscribeVerbosePiEvents", () => {
     expect(output).toContain(".a5c/runs/run-1/process/process.mjs");
     expect(output).toContain("updated process file");
     expect(output).toContain("Wrote .a5c/runs/run-1/process/process.mjs");
+  });
+});
+
+describe("resolveEffect tasks-mux routing", () => {
+  beforeEach(() => {
+    taskMuxMock.routeTask.mockReset();
+    taskMuxMock.submitBreakpoint.mockReset();
+  });
+
+  it("delegates routable agent effects through tasks-mux AgentMuxResponderBackend", async () => {
+    taskMuxMock.routeTask.mockReturnValue({
+      responderType: "agent",
+      route: "agent-mux",
+      responder: { id: "codex", adapter: "codex", model: "gpt-5.4" },
+    });
+    taskMuxMock.submitBreakpoint.mockResolvedValue({
+      answers: [{ text: "{\"ok\":true}", responderId: "codex", responderName: "Codex" }],
+    });
+
+    const result = await resolveEffect(
+      {
+        effectId: "effect-1",
+        invocationKey: "invocation",
+        kind: "agent",
+        taskDef: {
+          kind: "agent",
+          title: "Routed agent",
+          agent: {
+            responderType: "agent",
+            adapter: "codex",
+            prompt: { task: "return JSON" },
+          },
+          outputSchema: { type: "object" },
+        },
+      },
+      "pi",
+      { workspace: "/tmp/workspace", model: "gpt-5.4" },
+    );
+
+    expect(taskMuxMock.routeTask).toHaveBeenCalledWith(expect.objectContaining({
+      kind: "agent",
+    }));
+    expect(taskMuxMock.submitBreakpoint).toHaveBeenCalledWith(expect.objectContaining({
+      routing: expect.objectContaining({
+        responderType: "agent",
+        adapter: "codex",
+      }),
+    }));
+    expect(result.status).toBe("ok");
+    expect(result.value).toBe("{\"ok\":true}");
   });
 });

@@ -73,7 +73,8 @@ export interface AgentMuxClientLike {
 
 export interface AgentMuxResponderBackendConfig {
   type?: "agent-mux";
-  agent: string;
+  agent?: string;
+  adapter?: string;
   model?: string;
   cwd?: string;
   timeoutMs?: number;
@@ -105,10 +106,10 @@ export class AgentMuxResponderBackend implements BreakpointBackend {
   private readonly clientFactory?: () => AgentMuxClientLike | Promise<AgentMuxClientLike>;
 
   constructor(private readonly config: AgentMuxResponderBackendConfig) {
-    if (!config.agent) {
+    if (!config.agent && !config.adapter) {
       throw new AgentMuxResponderBackendError(
         "CONFIG_ERROR",
-        'AgentMuxResponderBackend requires an "agent" config value.',
+        'AgentMuxResponderBackend requires an "agent" or "adapter" config value.',
       );
     }
     this.client = config.client;
@@ -120,12 +121,16 @@ export class AgentMuxResponderBackend implements BreakpointBackend {
     const createdAt = new Date().toISOString();
     const timeoutMs = params.routing.timeoutMs ?? this.config.timeoutMs ?? 30_000;
     const expiresAt = new Date(Date.now() + timeoutMs).toISOString();
-    const agent = params.routing.targetResponders[0] ?? this.config.agent;
+    const agent = params.routing.adapter
+      ?? params.routing.targetResponders[0]
+      ?? this.config.adapter
+      ?? this.config.agent
+      ?? "agent-mux";
 
     const runOptions: AgentMuxRunOptions = {
       agent,
       prompt: this.buildPrompt(params),
-      model: this.config.model,
+      model: params.routing.model ?? this.config.model,
       cwd: this.config.cwd,
       timeout: timeoutMs,
       collectEvents: this.config.collectEvents ?? true,
@@ -267,15 +272,18 @@ export class AgentMuxResponderBackend implements BreakpointBackend {
   }
 
   async listResponders(): Promise<ResponderProfile[]> {
+    const agent = this.config.agent ?? this.config.adapter ?? "agent-mux";
     return [
       {
-        id: this.config.agent,
-        name: this.config.agent,
+        id: agent,
+        name: agent,
         title: "Agent mux responder",
         domains: [],
-        tags: ["agent-mux", this.config.agent],
+        tags: ["agent-mux", agent],
         availability: true,
         responseTimeSla: (this.config.timeoutMs ?? 30_000) / 1000,
+        adapter: this.config.adapter,
+        model: this.config.model,
       },
     ];
   }
@@ -293,7 +301,7 @@ export class AgentMuxResponderBackend implements BreakpointBackend {
     ) => Promise<{ createClient: (options: Record<string, unknown>) => unknown }>;
     const mod = await importModule("@a5c-ai/agent-mux");
     return mod.createClient({
-      defaultAgent: this.config.agent,
+      defaultAgent: this.config.agent ?? this.config.adapter,
       defaultModel: this.config.model,
       approvalMode: this.config.approvalMode,
       timeout: this.config.timeoutMs,

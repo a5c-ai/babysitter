@@ -178,6 +178,12 @@ export async function resolveEffect(
   if (kind === "mcp" || getMcpTaskConfig(action)) {
     return resolveMcpEffect(action, options);
   }
+
+  const tasksMuxResult = await resolveViaTasksMuxIfRoutable(action, options);
+  if (tasksMuxResult) {
+    return tasksMuxResult;
+  }
+
   if (kind === "node" || kind === "orchestrator_task") {
     const meta = action.taskDef?.metadata as Record<string, unknown> | undefined;
     const prompt = typeof meta?.prompt === "string"
@@ -515,6 +521,103 @@ export async function applyPostEffectOrchestrationOverlays(
   }
 
   return result;
+}
+
+async function resolveViaTasksMuxIfRoutable(
+  action: EffectAction,
+  options: EffectResolverOptions,
+): Promise<ResolveEffectResult | undefined> {
+  if (action.kind !== "agent" && action.kind !== "breakpoint") {
+    return undefined;
+  }
+
+  let mux: {
+    routeTask?: (task: unknown, context?: unknown) => {
+      responderType: string;
+      route: string;
+      responder?: { adapter?: string; model?: string; id?: string };
+      unavailable?: boolean;
+      reason?: string;
+    };
+    AgentMuxResponderBackend?: new (config?: Record<string, unknown>) => {
+      submitBreakpoint(params: unknown): Promise<{
+        answers: Array<{ text: string; responderId: string; responderName: string }>;
+      }>;
+    };
+  };
+  try {
+    mux = await import("@a5c-ai/tasks-mux") as unknown as typeof mux;
+  } catch {
+    return undefined;
+  }
+
+  if (typeof mux.routeTask !== "function") {
+    return undefined;
+  }
+
+  const decision = mux.routeTask(action.taskDef);
+  if (decision.responderType === "internal") {
+    return undefined;
+  }
+  if (decision.responderType === "human") {
+    return undefined;
+  }
+  if (decision.responderType === "tracker") {
+    if (decision.unavailable) {
+      return {
+        status: "ok",
+        value: {
+          success: false,
+          routedThrough: "tasks-mux",
+          responderType: "tracker",
+          error: decision.reason ?? "ExternalTrackerBackend unavailable",
+        },
+        stdout: decision.reason,
+      };
+    }
+    return undefined;
+  }
+
+  if (decision.responderType !== "agent") {
+    return undefined;
+  }
+  if (typeof mux.AgentMuxResponderBackend !== "function") {
+    return {
+      status: "error",
+      error: new Error("tasks-mux AgentMuxResponderBackend is unavailable"),
+    };
+  }
+
+  const prompt = buildAgentPrompt(action.taskDef as Record<string, unknown>);
+  const backend = new mux.AgentMuxResponderBackend({
+    adapter: decision.responder?.adapter ?? decision.responder?.id,
+    model: decision.responder?.model ?? options.model,
+    cwd: options.workspace,
+  });
+  const breakpoint = await backend.submitBreakpoint({
+    text: prompt,
+    context: {
+      description: action.taskDef?.title ?? action.taskId ?? action.effectId,
+      codeSnippets: [],
+      fileReferences: [],
+      tags: action.labels ?? [],
+    },
+    routing: {
+      strategy: "single",
+      targetResponders: decision.responder?.id ? [decision.responder.id] : [],
+      timeoutMs: 300_000,
+      presentToUser: false,
+      responderType: "agent",
+      adapter: decision.responder?.adapter ?? decision.responder?.id,
+      model: decision.responder?.model ?? options.model,
+    },
+  });
+  const answer = breakpoint.answers[0];
+  return {
+    status: "ok",
+    value: coerceAgentResultValue(action.taskDef as Record<string, unknown>, answer?.text ?? ""),
+    stdout: answer?.text ?? "",
+  };
 }
 
 function parseSubprocessSpec(

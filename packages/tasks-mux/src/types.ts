@@ -22,6 +22,15 @@ export const BreakpointStrategySchema = z.enum([
 ]);
 export type BreakpointStrategy = z.infer<typeof BreakpointStrategySchema>;
 
+export const ResponderTypeSchema = z.enum([
+  "human",
+  "agent",
+  "tracker",
+  "internal",
+  "auto",
+]);
+export type ResponderType = z.infer<typeof ResponderTypeSchema>;
+
 // ── Urgency ──────────────────────────────────────────────────────────────
 
 export const UrgencySchema = z.enum(["low", "medium", "high"]);
@@ -100,6 +109,12 @@ export const BreakpointRoutingSchema = z.object({
   presentToUser: z.boolean(),
   breakpointId: z.string().optional(),
   autoApproveAfterN: z.number().int().optional(),
+  responderType: ResponderTypeSchema.optional(),
+  adapter: z.string().min(1).optional(),
+  model: z.string().min(1).optional(),
+  provider: z.string().min(1).optional(),
+  trackerBackend: z.string().min(1).optional(),
+  fallbackType: ResponderTypeSchema.optional(),
 });
 export type BreakpointRouting = z.infer<typeof BreakpointRoutingSchema>;
 
@@ -107,6 +122,7 @@ export type BreakpointRouting = z.infer<typeof BreakpointRoutingSchema>;
 
 export const ResponderProfileSchema = z.object({
   id: z.string().min(1),
+  type: ResponderTypeSchema.optional(),
   name: z.string().min(1),
   title: z.string(),
   domains: z.array(z.string()),
@@ -114,6 +130,11 @@ export const ResponderProfileSchema = z.object({
   availability: z.boolean(),
   responseTimeSla: z.number().positive(),
   publicKeyFingerprint: z.string().optional(),
+  adapter: z.string().min(1).optional(),
+  model: z.string().min(1).optional(),
+  provider: z.string().min(1).optional(),
+  trackerBackend: z.string().min(1).optional(),
+  trackerConfig: z.record(z.string(), z.unknown()).optional(),
 }).strict();
 export type ResponderProfile = z.infer<typeof ResponderProfileSchema>;
 

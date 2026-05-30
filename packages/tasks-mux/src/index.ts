@@ -3,6 +3,7 @@ export {
   // Zod schemas
   BreakpointStatusSchema,
   BreakpointStrategySchema,
+  ResponderTypeSchema,
   UrgencySchema,
   InteractionKindSchema,
   CodeSnippetSchema,
@@ -52,6 +53,7 @@ export {
 export type {
   BreakpointStatus,
   BreakpointStrategy,
+  ResponderType,
   Urgency,
   InteractionKind,
   CodeSnippet,
@@ -95,6 +97,23 @@ export type {
   RoutingRule,
   RoutingConfig,
 } from "./types.js";
+
+export {
+  routeTask,
+  routingHints,
+  isHostDelegableRoute,
+} from "./router.js";
+
+export type {
+  RoutableTaskDef,
+  TaskRouteContext,
+  TaskRouteDecision,
+} from "./router.js";
+
+export type {
+  TaskRoutingHints,
+  RoutedResponder,
+} from "./responders/types.js";
 
 // ── Backend Interface ────────────────────────────────────────────────────
 export type {
