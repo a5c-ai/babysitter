@@ -20,6 +20,8 @@ import {
 import { logVerbose } from "./runSupport";
 import type { ParsedArgs } from "./types";
 import { USAGE } from "./usage";
+import { getAdapter, getAdapterByName } from "../../harness/registry";
+import { detectCallerHarness } from "../../harness/discovery";
 
 export async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
   if (!parsed.runDirArg) {
@@ -94,7 +96,13 @@ export async function handleRunIterate(parsed: ParsedArgs): Promise<number> {
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
   logVerbose("run:iterate", parsed, { runDir, iteration: parsed.iteration, json: parsed.json, verbose: parsed.verbose });
   try {
-    const result = await runIterate({ runDir, iteration: parsed.iteration, verbose: parsed.verbose, json: parsed.json });
+    const result = await runIterate({
+      runDir,
+      iteration: parsed.iteration,
+      verbose: parsed.verbose,
+      json: parsed.json,
+      harnessCapabilities: resolveHarnessCapabilitiesForRunIterate(parsed),
+    });
     if (parsed.json) {
       console.log(JSON.stringify(result, null, 2));
     } else {
@@ -114,6 +122,15 @@ export async function handleRunIterate(parsed: ParsedArgs): Promise<number> {
     console.error(`[run:iterate] Error: ${error instanceof Error ? error.message : String(error)}`);
     return 1;
   }
+}
+
+function resolveHarnessCapabilitiesForRunIterate(parsed: ParsedArgs): string[] | undefined {
+  const adapter = parsed.harness ? getAdapterByName(parsed.harness) : getAdapter();
+  const adapterCaps = adapter?.getCapabilities?.();
+  if (adapterCaps && adapterCaps.length > 0) {
+    return adapterCaps;
+  }
+  return detectCallerHarness()?.capabilities;
 }
 
 export async function handleRunEvents(parsed: ParsedArgs): Promise<number> {

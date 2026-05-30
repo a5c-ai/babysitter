@@ -6,3 +6,4 @@ export * from "./types";
 export * from "./kinds";
 export * from "./batching";
 export * from "./grouping";
+export * from "./concurrentExecution";

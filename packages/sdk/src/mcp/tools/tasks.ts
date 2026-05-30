@@ -7,6 +7,7 @@ import { readTaskDefinition, readTaskResult } from "../../storage/tasks";
 import type { JournalEvent } from "../../storage/types";
 import { toolResult, toolError } from "../util/errors";
 import { resolveRunDir } from "../util/resolve-run-dir";
+import { registerMcpTool } from "../util/registerTool";
 
 /**
  * Build a task list from journal events by tracking requested effects and
@@ -105,24 +106,27 @@ function buildTaskList(events: JournalEvent[]): Array<{
 
 export function registerTaskTools(server: McpServer): void {
   // ── task_post ───────────────────────────────────────────────────────
-  server.tool(
+  registerMcpTool(
+    server,
     "task_post",
-    "Post a result for a pending task effect",
     {
-      runId: z.string().describe("The run ID the task belongs to"),
-      effectId: z.string().describe("The effect ID of the task to resolve"),
-      status: z
-        .enum(["ok", "error"])
-        .describe("Result status: ok for success, error for failure"),
-      value: z
-        .string()
-        .optional()
-        .describe("JSON-encoded result value (when status=ok)"),
-      error: z
-        .string()
-        .optional()
-        .describe("JSON-encoded error payload (when status=error)"),
-      runsDir: z.string().optional().describe("Override runs directory path"),
+      description: "Post a result for a pending task effect",
+      inputSchema: {
+        runId: z.string().describe("The run ID the task belongs to"),
+        effectId: z.string().describe("The effect ID of the task to resolve"),
+        status: z
+          .enum(["ok", "error"])
+          .describe("Result status: ok for success, error for failure"),
+        value: z
+          .string()
+          .optional()
+          .describe("JSON-encoded result value (when status=ok)"),
+        error: z
+          .string()
+          .optional()
+          .describe("JSON-encoded error payload (when status=error)"),
+        runsDir: z.string().optional().describe("Override runs directory path"),
+      },
     },
     async (args) => {
       try {
@@ -218,16 +222,19 @@ export function registerTaskTools(server: McpServer): void {
   );
 
   // ── task_list ───────────────────────────────────────────────────────
-  server.tool(
+  registerMcpTool(
+    server,
     "task_list",
-    "List all tasks for a run, optionally showing only pending tasks",
     {
-      runId: z.string().describe("The run ID to list tasks for"),
-      pendingOnly: z
-        .boolean()
-        .optional()
-        .describe("If true, only show pending (unresolved) tasks"),
-      runsDir: z.string().optional().describe("Override runs directory path"),
+      description: "List all tasks for a run, optionally showing only pending tasks",
+      inputSchema: {
+        runId: z.string().describe("The run ID to list tasks for"),
+        pendingOnly: z
+          .boolean()
+          .optional()
+          .describe("If true, only show pending (unresolved) tasks"),
+        runsDir: z.string().optional().describe("Override runs directory path"),
+      },
     },
     async (args) => {
       try {
@@ -254,13 +261,16 @@ export function registerTaskTools(server: McpServer): void {
   );
 
   // ── task_show ───────────────────────────────────────────────────────
-  server.tool(
+  registerMcpTool(
+    server,
     "task_show",
-    "Show details of a specific task including its definition and result",
     {
-      runId: z.string().describe("The run ID the task belongs to"),
-      effectId: z.string().describe("The effect ID of the task"),
-      runsDir: z.string().optional().describe("Override runs directory path"),
+      description: "Show details of a specific task including its definition and result",
+      inputSchema: {
+        runId: z.string().describe("The run ID the task belongs to"),
+        effectId: z.string().describe("The effect ID of the task"),
+        runsDir: z.string().optional().describe("Override runs directory path"),
+      },
     },
     async (args) => {
       try {

@@ -269,12 +269,13 @@ export function buildPromptContext(args: {
     secureSandboxImage: process.env.BABYSITTER_PI_SANDBOX_IMAGE || "node:22-bookworm",
     piDefaultBashSandbox: "local",
     piIsolationDefault: false,
-    envFlags: envNames.map((name) => ({
-      name,
-      value: process.env[name]
-        ? (name.endsWith("_API_KEY") ? "set" : process.env[name])
-        : "unset",
-    })),
+    envFlags: envNames.map((name) => {
+      const value = process.env[name];
+      return {
+        name,
+        value: value ? (name.endsWith("_API_KEY") ? "set" : value) : "unset",
+      };
+    }),
   };
 }
 

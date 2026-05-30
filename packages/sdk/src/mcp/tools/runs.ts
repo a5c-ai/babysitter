@@ -10,6 +10,7 @@ import { rebuildStateCache } from "../../runtime/replay/stateCache";
 import type { JournalEvent } from "../../storage/types";
 import { toolResult, toolError } from "../util/errors";
 import { resolveRunDir } from "../util/resolve-run-dir";
+import { registerMcpTool } from "../util/registerTool";
 
 /**
  * Parse an entrypoint specifier like "path/to/file.js#exportName" into its parts.
@@ -80,16 +81,19 @@ function derivePendingEffects(events: JournalEvent[]): Array<{ effectId: string;
 
 export function registerRunTools(server: McpServer): void {
   // ── run_create ──────────────────────────────────────────────────────
-  server.tool(
+  registerMcpTool(
+    server,
     "run_create",
-    "Create a new babysitter run for a given process definition",
     {
-      processId: z.string().describe("The process identifier to run"),
-      entrypoint: z.string().describe("Path to the process JS entrypoint file (optionally path#exportName)"),
-      inputs: z.string().optional().describe("JSON-encoded inputs for the process"),
-      runsDir: z.string().optional().describe("Override runs directory path"),
-      prompt: z.string().optional().describe("Prompt or description for the run"),
-      nonInteractive: z.boolean().optional().describe("When true, breakpoints are auto-approved without human interaction"),
+      description: "Create a new babysitter run for a given process definition",
+      inputSchema: {
+        processId: z.string().describe("The process identifier to run"),
+        entrypoint: z.string().describe("Path to the process JS entrypoint file (optionally path#exportName)"),
+        inputs: z.string().optional().describe("JSON-encoded inputs for the process"),
+        runsDir: z.string().optional().describe("Override runs directory path"),
+        prompt: z.string().optional().describe("Prompt or description for the run"),
+        nonInteractive: z.boolean().optional().describe("When true, breakpoints are auto-approved without human interaction"),
+      },
     },
     async (args) => {
       try {
@@ -129,12 +133,15 @@ export function registerRunTools(server: McpServer): void {
   );
 
   // ── run_status ──────────────────────────────────────────────────────
-  server.tool(
+  registerMcpTool(
+    server,
     "run_status",
-    "Get the current status and metadata of a run",
     {
-      runId: z.string().describe("The run ID to query"),
-      runsDir: z.string().optional().describe("Override runs directory path"),
+      description: "Get the current status and metadata of a run",
+      inputSchema: {
+        runId: z.string().describe("The run ID to query"),
+        runsDir: z.string().optional().describe("Override runs directory path"),
+      },
     },
     async (args) => {
       const runsDir = resolveRunDir(args.runsDir);
@@ -166,12 +173,15 @@ export function registerRunTools(server: McpServer): void {
   );
 
   // ── run_iterate ─────────────────────────────────────────────────────
-  server.tool(
+  registerMcpTool(
+    server,
     "run_iterate",
-    "Execute one orchestration iteration for a run",
     {
-      runId: z.string().describe("The run ID to iterate"),
-      runsDir: z.string().optional().describe("Override runs directory path"),
+      description: "Execute one orchestration iteration for a run",
+      inputSchema: {
+        runId: z.string().describe("The run ID to iterate"),
+        runsDir: z.string().optional().describe("Override runs directory path"),
+      },
     },
     async (args) => {
       try {
@@ -229,15 +239,18 @@ export function registerRunTools(server: McpServer): void {
   );
 
   // ── run_events ──────────────────────────────────────────────────────
-  server.tool(
+  registerMcpTool(
+    server,
     "run_events",
-    "List journal events for a run",
     {
-      runId: z.string().describe("The run ID to query"),
-      runsDir: z.string().optional().describe("Override runs directory path"),
-      limit: z.number().optional().describe("Maximum number of events to return"),
-      filterType: z.string().optional().describe("Filter events by type (e.g. EFFECT_REQUESTED)"),
-      reverse: z.boolean().optional().describe("Return events in reverse chronological order"),
+      description: "List journal events for a run",
+      inputSchema: {
+        runId: z.string().describe("The run ID to query"),
+        runsDir: z.string().optional().describe("Override runs directory path"),
+        limit: z.number().optional().describe("Maximum number of events to return"),
+        filterType: z.string().optional().describe("Filter events by type (e.g. EFFECT_REQUESTED)"),
+        reverse: z.boolean().optional().describe("Return events in reverse chronological order"),
+      },
     },
     async (args) => {
       const runsDir = resolveRunDir(args.runsDir);
@@ -269,12 +282,15 @@ export function registerRunTools(server: McpServer): void {
   );
 
   // ── run_rebuild_state ───────────────────────────────────────────────
-  server.tool(
+  registerMcpTool(
+    server,
     "run_rebuild_state",
-    "Rebuild the state cache for a run from its journal",
     {
-      runId: z.string().describe("The run ID to rebuild state for"),
-      runsDir: z.string().optional().describe("Override runs directory path"),
+      description: "Rebuild the state cache for a run from its journal",
+      inputSchema: {
+        runId: z.string().describe("The run ID to rebuild state for"),
+        runsDir: z.string().optional().describe("Override runs directory path"),
+      },
     },
     async (args) => {
       try {

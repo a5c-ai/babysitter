@@ -1,6 +1,11 @@
 import { orchestrateIteration } from "../runtime/orchestrateIteration";
 import { commitEffectResult } from "../runtime/commitEffectResult";
 import type { EffectAction, IterationMetadata, IterationResult, ProcessLogger, EffectSchedulerHints } from "../runtime/types";
+import {
+  buildEffectExecutionWaves,
+  hasConcurrentEffectsCapability,
+  mapWithConcurrency,
+} from "../tasks/concurrentExecution";
 import type { JsonRecord } from "../storage/types";
 import type { DeterministicUlidHandle, FixedClockHandle } from "./deterministic";
 import { DEFAULTS as _DEFAULTS } from "../config/defaults";
@@ -39,6 +44,7 @@ export interface RunToCompletionWithFakeRunnerOptions {
   now?: Date | (() => Date);
   clock?: FixedClockHandle;
   ulids?: DeterministicUlidHandle;
+  harnessCapabilities?: string[];
 }
 
 export interface ExecutedFakeAction {
@@ -145,21 +151,69 @@ export async function runToCompletionWithFakeRunner(
     const pendingActions = iteration.nextActions;
     const executedThisIteration: ExecutedFakeAction[] = [];
     let handled = false;
-    for (const action of pendingActions) {
-      const resolution = await resolve(action);
-      if (!resolution) {
-        continue;
+    const concurrentEffects = hasConcurrentEffectsCapability(options.harnessCapabilities);
+    if (!concurrentEffects) {
+      for (const action of pendingActions) {
+        const resolution = await resolve(action);
+        if (!resolution) {
+          continue;
+        }
+        handled = true;
+        await commitEffectResult({
+          runDir,
+          effectId: action.effectId,
+          invocationKey: action.invocationKey,
+          result: toCommitResult(resolution),
+        });
+        const entry = { action, resolution };
+        executedThisIteration.push(entry);
+        executed.push(entry);
       }
-      handled = true;
-      await commitEffectResult({
-        runDir,
-        effectId: action.effectId,
-        invocationKey: action.invocationKey,
-        result: toCommitResult(resolution),
+      iterationLog.executed = executedThisIteration.map(({ action }) => snapshotAction(action));
+      executionLog.push(iterationLog);
+
+      if (!handled) {
+        return {
+          status: "waiting",
+          pending: pendingActions,
+          metadata: iteration.metadata ?? null,
+          executed,
+          iterations,
+          executionLog,
+        };
+      }
+      continue;
+    }
+    const waves = buildEffectExecutionWaves(pendingActions, {
+      concurrentEffects,
+    });
+    for (const wave of waves) {
+      const settled = await mapWithConcurrency(wave.actions, wave.maxConcurrency, async (action) => {
+        const resolution = await resolve(action);
+        return { action, resolution };
       });
-      const entry = { action, resolution };
-      executedThisIteration.push(entry);
-      executed.push(entry);
+      for (const result of settled) {
+        const action = result.item;
+        const resolution = result.status === "fulfilled"
+          ? result.value?.resolution
+          : {
+            status: "error" as const,
+            error: result.reason instanceof Error ? result.reason : new Error(String(result.reason)),
+          };
+        if (!resolution) {
+          continue;
+        }
+        handled = true;
+        await commitEffectResult({
+          runDir,
+          effectId: action.effectId,
+          invocationKey: action.invocationKey,
+          result: toCommitResult(resolution),
+        });
+        const entry = { action, resolution };
+        executedThisIteration.push(entry);
+        executed.push(entry);
+      }
     }
     iterationLog.executed = executedThisIteration.map(({ action }) => snapshotAction(action));
     executionLog.push(iterationLog);

@@ -139,10 +139,11 @@ async function runWithConcurrencyLimit<T>(
 
 export async function runParallelMap<TItem, TOut>(
   items: TItem[],
-  fn: (item: TItem) => TOut | Promise<TOut>
+  fn: (item: TItem) => TOut | Promise<TOut>,
+  options?: ParallelAllOptions,
 ): Promise<TOut[]> {
   const thunks = items.map((item) => () => fn(item));
-  return runParallelAll(thunks);
+  return runParallelAll(thunks, options);
 }
 
 export function dedupeEffectActions(actions: EffectAction[]): EffectAction[] {

@@ -279,11 +279,9 @@ export function createOpenAICompletionEngine(options: {
             if (choice?.delta?.tool_calls) {
               for (const tc of choice.delta.tool_calls) {
                 const idx = tc.index;
-                if (!pendingToolCalls[idx]) {
-                  pendingToolCalls[idx] = { id: tc.id ?? `call_${idx}`, name: '', arguments: '' };
-                }
-                if (tc.function?.name) pendingToolCalls[idx].name += tc.function.name;
-                if (tc.function?.arguments) pendingToolCalls[idx].arguments += tc.function.arguments;
+                const pendingToolCall = pendingToolCalls[idx] ?? (pendingToolCalls[idx] = { id: tc.id ?? `call_${idx}`, name: '', arguments: '' });
+                if (tc.function?.name) pendingToolCall.name += tc.function.name;
+                if (tc.function?.arguments) pendingToolCall.arguments += tc.function.arguments;
               }
             }
 

@@ -66,8 +66,8 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
   };
 
   const parallelHelpers: ParallelHelpers = {
-    all: (thunks) => runParallelAll(thunks),
-    map: (items, fn) => runParallelMap(items, fn),
+    all: (thunks, options) => runParallelAll(thunks, options),
+    map: (items, fn, options) => runParallelMap(items, fn, options),
   };
 
   // Per-run artifacts directory — created up-front so processes can write to

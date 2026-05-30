@@ -1,7 +1,7 @@
 {
   "issueNumber": 579,
   "baseBranch": "staging",
-  "implementationBranch": "agent/issue-579-concurrent-effects",
+  "implementationBranch": "plan/issue-579",
   "relatedIssues": [593, 595, 598, 604],
   "scope": {
     "include": [

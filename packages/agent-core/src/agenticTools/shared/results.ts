@@ -15,10 +15,11 @@ export function errorResult(message: string): ToolResult {
 }
 
 export function normalizeToolErrorMessage(error: unknown): string {
+  const DOMExceptionCtor = (globalThis as { DOMException?: new (...args: any[]) => Error }).DOMException;
   if (
     (error instanceof Error && error.name === "AbortError")
-    || (typeof DOMException !== "undefined"
-      && error instanceof DOMException
+    || (DOMExceptionCtor
+      && error instanceof DOMExceptionCtor
       && error.name === "AbortError")
   ) {
     return TOOL_CANCELLED_MESSAGE;

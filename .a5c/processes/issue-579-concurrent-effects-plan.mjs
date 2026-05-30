@@ -293,21 +293,20 @@ const reviewTask = defineTask('issue-579.review-concurrent-effects', (args) => (
 
 const deliveryTask = defineTask('issue-579.prepare-delivery', (args) => ({
   kind: 'agent',
-  title: 'Prepare implementation PR and issue update',
+  title: 'Push implementation to existing PR and post update',
   labels: ['issue-579', 'delivery', 'github'],
   agent: {
     name: 'concurrent-effects-delivery-agent',
     prompt: {
       role: 'maintainer preparing a GitHub delivery',
-      task: 'Commit the issue #579 implementation, open a PR, and comment on the issue.',
+      task: 'Commit the issue #579 implementation to the existing PR branch and comment on PR #680.',
       instructions: [
         'Only proceed if review.approved is true and verification.passed is true.',
         'Preserve unrelated dirty worktree files. Stage only files changed for issue #579.',
-        `Use implementation branch ${args.implementationBranch} based on ${args.baseBranch}.`,
-        'Open a PR titled "Implement ConcurrentEffects within-harness dispatch" and link it to #579.',
-        'The PR body must summarize phases, implementation behavior, tests run, quality gates, and residual risks.',
-        'Post an issue comment on #579 with the implementation summary, verification commands, and PR URL.',
-        'Return JSON: { prUrl: string, commit: string, issueCommentUrl?: string, stagedFiles: string[] }.',
+        `Use the existing PR #680 branch ${args.implementationBranch} based on ${args.baseBranch}; do not create a second PR.`,
+        'Push the implementation commit(s) to the existing PR branch.',
+        'Post a PR comment on #680 with the implementation summary, verification commands, and residual risks.',
+        'Return JSON: { prUrl: string, commit: string, prCommentUrl?: string, stagedFiles: string[] }.',
       ],
     },
   },

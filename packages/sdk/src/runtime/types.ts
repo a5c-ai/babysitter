@@ -167,9 +167,18 @@ export interface SubprocessResult {
   output: unknown;
 }
 
+export interface ParallelOptions {
+  maxConcurrency?: number;
+  executionStrategy?: 'sequential' | 'concurrent' | 'adaptive';
+}
+
 export interface ParallelHelpers {
-  all<T>(thunks: Array<() => T | Promise<T>>): Promise<T[]>;
-  map<TItem, TOut>(items: TItem[], fn: (item: TItem) => TOut | Promise<TOut>): Promise<TOut[]>;
+  all<T>(thunks: Array<() => T | Promise<T>>, options?: ParallelOptions): Promise<T[]>;
+  map<TItem, TOut>(
+    items: TItem[],
+    fn: (item: TItem) => TOut | Promise<TOut>,
+    options?: ParallelOptions,
+  ): Promise<TOut[]>;
 }
 
 export interface ProcessContext {

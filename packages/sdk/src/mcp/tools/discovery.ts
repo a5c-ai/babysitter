@@ -6,30 +6,34 @@ import { configureShow } from "../../cli/commands/configure";
 import { discoverSkillsInternal } from "../../cli/commands/skill";
 import { getActiveProcessLibraryPath } from "../../processLibrary/active";
 import { toolResult, toolError } from "../util/errors";
+import { registerMcpTool } from "../util/registerTool";
 
 export function registerDiscoveryTools(server: McpServer): void {
   // ── skill_discover ──────────────────────────────────────────────────
-  server.tool(
+  registerMcpTool(
+    server,
     "skill_discover",
-    "Discover available skills, agents, and process definitions",
     {
-      pluginRoot: z
-        .string()
-        .optional()
-        .describe("Plugin root directory to scan for skills (resolved from env vars if omitted)"),
-      runId: z
-        .string()
-        .optional()
-        .describe("Run ID for domain-scoped discovery"),
-      runsDir: z.string().optional().describe("Override runs directory path"),
-      includeRemote: z
-        .boolean()
-        .optional()
-        .describe("Include remote skill sources"),
-      processPath: z
-        .string()
-        .optional()
-        .describe("Process file path for specialization scoping"),
+      description: "Discover available skills, agents, and process definitions",
+      inputSchema: {
+        pluginRoot: z
+          .string()
+          .optional()
+          .describe("Plugin root directory to scan for skills (resolved from env vars if omitted)"),
+        runId: z
+          .string()
+          .optional()
+          .describe("Run ID for domain-scoped discovery"),
+        runsDir: z.string().optional().describe("Override runs directory path"),
+        includeRemote: z
+          .boolean()
+          .optional()
+          .describe("Include remote skill sources"),
+        processPath: z
+          .string()
+          .optional()
+          .describe("Process file path for specialization scoping"),
+      },
     },
     async (args) => {
       try {
@@ -60,10 +64,13 @@ export function registerDiscoveryTools(server: McpServer): void {
   );
 
   // ── health ──────────────────────────────────────────────────────────
-  server.tool(
+  registerMcpTool(
+    server,
     "health",
-    "Check the health and configuration status of the babysitter installation",
-    {},
+    {
+      description: "Check the health and configuration status of the babysitter installation",
+      inputSchema: {},
+    },
     async () => {
       try {
         const result = await runHealthCheck({ json: true });
@@ -81,10 +88,13 @@ export function registerDiscoveryTools(server: McpServer): void {
   );
 
   // ── configure_show ──────────────────────────────────────────────────
-  server.tool(
+  registerMcpTool(
+    server,
     "configure_show",
-    "Show current babysitter configuration and environment",
-    {},
+    {
+      description: "Show current babysitter configuration and environment",
+      inputSchema: {},
+    },
     () => {
       try {
         const result = configureShow({});

@@ -56,7 +56,7 @@ export interface PlanProcessProgress {
 
 export interface OrchestrationProgress {
   phase: "2";
-  status: "started" | "resuming" | "skipped-plan-only" | "run-created" | "bound" | "iteration" | "iteration-start" | "effect-start" | "iteration-summary" | "effect" | "completed" | "failed" | "process-error-recovery";
+  status: "started" | "resuming" | "skipped-plan-only" | "run-created" | "bound" | "iteration" | "iteration-start" | "effect-start" | "effect-group-start" | "iteration-summary" | "effect" | "effect-group-summary" | "completed" | "failed" | "process-error-recovery";
   runId?: string;
   runDir?: string;
   harness?: string;
@@ -76,6 +76,8 @@ export interface OrchestrationProgress {
   maxAttempts?: number;
   elapsedMs?: number;
   effectsResolved?: number;
+  parallelGroupId?: string;
+  maxConcurrency?: number;
   tokenEstimate?: number;
 }
 

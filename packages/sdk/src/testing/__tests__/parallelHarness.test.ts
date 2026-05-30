@@ -57,9 +57,44 @@ describe("runToCompletionWithFakeRunner with parallel helpers", () => {
       await harness.cleanup();
     }
   });
+
+  test("can resolve explicit parallel groups concurrently when harness declares support", async () => {
+    const processPath = await writeParallelProcess(fixtureRoot, "maxConcurrency: 2");
+    const harness = await createDeterministicRunHarness({
+      processPath,
+      inputs: { base: 5 },
+    });
+    try {
+      let active = 0;
+      let maxActive = 0;
+      const result = await runToCompletionWithFakeRunner({
+        runDir: harness.runDir,
+        clock: harness.clock,
+        ulids: harness.ulids,
+        harnessCapabilities: ["concurrent-effects"],
+        async resolve(action) {
+          const branch = (action.taskDef.metadata as { branch: string }).branch;
+          active += 1;
+          maxActive = Math.max(maxActive, active);
+          await new Promise((resolve) => setTimeout(resolve, 5));
+          active -= 1;
+          return { status: "ok", value: { branch } };
+        },
+      });
+
+      expect(result.status).toBe("completed");
+      expect(maxActive).toBe(2);
+      expect(result.executed.map((entry) => (entry.action.taskDef.metadata as { branch: string }).branch).sort()).toEqual([
+        "alpha",
+        "beta",
+      ]);
+    } finally {
+      await harness.cleanup();
+    }
+  });
 });
 
-async function writeParallelProcess(root: string) {
+async function writeParallelProcess(root: string, parallelOptions = "") {
   const processPath = path.join(root, PROCESS_FILENAME);
   const contents = `
     const branchTask = {
@@ -77,7 +112,7 @@ async function writeParallelProcess(root: string) {
       const [alpha, beta] = await ctx.parallel.all([
         async () => ctx.task(branchTask, { branch: "alpha", value: inputs.base }),
         async () => ctx.task(branchTask, { branch: "beta", value: inputs.base + 1 }),
-      ]);
+      ]${parallelOptions ? `, { ${parallelOptions} }` : ""});
       return { alpha, beta };
     }
   `;
