@@ -98,6 +98,38 @@ describe("SubagentInvoker — delegate", () => {
     expect(reviewFn).toHaveBeenCalledTimes(1);
   });
 
+  it("uses configured oversight review retries", async () => {
+    const invokeFn = vi.fn(async () => "eventual output");
+    const reviewFn = vi
+      .fn()
+      .mockResolvedValueOnce({ accepted: false, feedback: "try again" })
+      .mockResolvedValueOnce({ accepted: false, feedback: "still no" })
+      .mockResolvedValueOnce({ accepted: true });
+    const invoker = new SubagentInvokerImpl(invokeFn, reviewFn);
+
+    const result = await invoker.delegate(makeDescriptor(), "task", {
+      oversight: { requireApproval: true, maxReviewRetries: 2 },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.output).toBe("eventual output");
+    expect(reviewFn).toHaveBeenCalledTimes(3);
+  });
+
+  it("enforces delegation timeoutMs", async () => {
+    const invokeFn = vi.fn(
+      async () => new Promise((resolve) => setTimeout(() => resolve("late"), 50)),
+    );
+    const invoker = new SubagentInvokerImpl(invokeFn);
+
+    const result = await invoker.delegate(makeDescriptor(), "task", {
+      oversight: { requireApproval: false, timeoutMs: 5 },
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("timed out");
+  });
+
   it("skips oversight when requireApproval is false", async () => {
     const invokeFn = vi.fn(async () => "output");
     const reviewFn = vi.fn(async () => ({ accepted: false }));

@@ -66,6 +66,12 @@ export interface OversightConfig {
   readonly timeoutMs?: number;
 
   /**
+   * Number of additional review attempts after the first rejection.
+   * Defaults to 0 for one review pass.
+   */
+  readonly maxReviewRetries?: number;
+
+  /**
    * When `true`, the parent can see the subagent's intermediate tool
    * calls and reasoning, not just the final result.
    */

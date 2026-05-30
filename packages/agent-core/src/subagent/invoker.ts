@@ -63,7 +63,7 @@ export class SubagentInvokerImpl<TOutput = unknown>
     const start = Date.now();
 
     try {
-      const output = await this.invokeFn(descriptor, input, options);
+      const output = await this.invokeWithTimeout(descriptor, input, options);
 
       return this.buildResult(descriptor, "as-tool-call", output, start, true);
     } catch (err) {
@@ -90,15 +90,16 @@ export class SubagentInvokerImpl<TOutput = unknown>
     const start = Date.now();
 
     try {
-      const output = await this.invokeFn(descriptor, input, options);
+      const output = await this.invokeWithTimeout(descriptor, input, options);
 
       // If oversight requires approval and we have a review function,
       // run the oversight loop.
       if (options.oversight.requireApproval && this.reviewFn) {
         const runner = new OversightRunner<TOutput>(this.reviewFn);
-        // Use a single review pass (maxRetries = 0) — the orchestration
-        // layer above can retry with new subagent output if needed.
-        const oversightResult = await runner.review(output, 0);
+        const oversightResult = await runner.review(
+          output,
+          options.oversight.maxReviewRetries ?? 0,
+        );
 
         return this.buildResult(
           descriptor,
@@ -130,7 +131,7 @@ export class SubagentInvokerImpl<TOutput = unknown>
     const start = Date.now();
 
     try {
-      const output = await this.invokeFn(descriptor, input, options);
+      const output = await this.invokeWithTimeout(descriptor, input, options);
 
       return {
         agentId: descriptor.id,
@@ -167,6 +168,37 @@ export class SubagentInvokerImpl<TOutput = unknown>
       durationMs: Date.now() - startMs,
       turnsUsed: 0,
     };
+  }
+
+  private async invokeWithTimeout(
+    descriptor: SubagentDescriptor,
+    input: string,
+    options?: SubagentInvocationOptions,
+  ): Promise<TOutput> {
+    const timeoutMs = options?.oversight?.timeoutMs;
+    const invocation = this.invokeFn(descriptor, input, options);
+
+    if (timeoutMs === undefined) {
+      return invocation;
+    }
+
+    return new Promise<TOutput>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(
+          new Error(`Subagent ${descriptor.id} timed out after ${timeoutMs}ms`),
+        );
+      }, timeoutMs);
+
+      invocation
+        .then((value) => {
+          clearTimeout(timer);
+          resolve(value);
+        })
+        .catch((err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
+    });
   }
 
   private buildErrorResult(
