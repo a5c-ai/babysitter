@@ -17,6 +17,7 @@ import type {
   DefinedTask,
   EffectRecord,
   ProcessLogger,
+  SubprocessSupportMode,
   TaskDef,
   TaskInvokeOptions,
 } from "../types";
@@ -50,7 +51,7 @@ export interface TaskIntrinsicContext {
   replayCursor: ReplayCursor;
   now: () => Date;
   logger?: ProcessLogger;
-  subprocessSupport?: "disabled" | "agent-platform";
+  subprocessSupport?: SubprocessSupportMode;
   policyEngine?: PolicyEngine;
   reportPolicyDecision?: PolicyDecisionReporter;
   invocationKeyCounts?: Map<string, number>;

@@ -14,7 +14,7 @@ import { readRunMetadata, writeRunMetadata } from "../../storage/runFiles";
 import { appendEvent } from "../../storage/journal";
 import { callRuntimeHook } from "../../runtime/hooks/runtime";
 import { orchestrateIteration } from "../../runtime/orchestrateIteration";
-import type { EffectAction } from "../../runtime/types";
+import type { EffectAction, SubprocessSupportMode } from "../../runtime/types";
 import type { JsonRecord } from "../../storage/types";
 import { resolveCompletionProof } from "../completionProof";
 import { groupActionsByParallelGroup } from "../../tasks/grouping";
@@ -102,7 +102,11 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
     for (const warning of warnings) console.error(`[run:iterate] Warning: ${warning}`);
   }
 
-  const iterationResult = await orchestrateIteration({ runDir });
+  const subprocessSupport = detectPluginModeSubprocessSupport();
+  const iterationResult = await orchestrateIteration({
+    runDir,
+    ...(subprocessSupport ? { subprocessSupport } : {}),
+  });
 
   if (iterationResult.status === "completed") {
     const completionProof = resolveCompletionProof(metadata);
@@ -262,4 +266,14 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
   }
 
   return result;
+}
+
+function detectPluginModeSubprocessSupport(): SubprocessSupportMode | undefined {
+  const hasSession = Boolean(process.env.AGENT_SESSION_ID);
+  const hasPluginRoot = Boolean(process.env.AGENT_PLUGIN_ROOT || process.env.CODEX_PLUGIN_ROOT);
+  const hasPluginCapabilities = Boolean(process.env.AGENT_CAPABILITIES_JSON);
+  if (hasSession && (hasPluginRoot || hasPluginCapabilities)) {
+    return "plugin-local";
+  }
+  return undefined;
 }

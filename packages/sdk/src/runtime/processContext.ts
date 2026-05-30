@@ -7,7 +7,7 @@ import { runSubprocessIntrinsic } from "./intrinsics/subprocess";
 import { runHookIntrinsic } from "./intrinsics/hook";
 import { callHook } from "../hooks/dispatcher";
 import { runParallelAll, runParallelMap } from "./intrinsics/parallel";
-import { ProcessContext, ParallelHelpers } from "./types";
+import { ProcessContext, ParallelHelpers, SubprocessSupportMode } from "./types";
 import { MissingProcessContextError } from "./exceptions";
 import { appendRunLog } from "../logging/runLogger";
 import { promises as fs } from "node:fs";
@@ -26,8 +26,8 @@ export interface ProcessContextInit extends Omit<TaskIntrinsicContext, "now"> {
   recordedLogSeqs?: Set<number>;
   /** When true, breakpoints are auto-approved without human interaction. */
   nonInteractive?: boolean;
-  /** Internal-only gate for agent-platform owned subprocess orchestration. */
-  subprocessSupport?: "disabled" | "agent-platform";
+  /** Internal-only gate for subprocess orchestration support. */
+  subprocessSupport?: SubprocessSupportMode;
 }
 
 export interface InternalProcessContext extends TaskIntrinsicContext {
@@ -39,7 +39,7 @@ export interface InternalProcessContext extends TaskIntrinsicContext {
   recordedLogSeqs: Set<number>;
   /** When true, breakpoints are auto-approved without human interaction. */
   nonInteractive: boolean;
-  subprocessSupport: "disabled" | "agent-platform";
+  subprocessSupport: SubprocessSupportMode;
   cleanupCallbacks: Array<() => void | Promise<void>>;
   cleanupFlushed: boolean;
 }

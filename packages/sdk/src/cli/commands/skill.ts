@@ -263,7 +263,7 @@ export async function handleSkillDiscover(args: SkillCommandArgs): Promise<numbe
     processPath,
   } = args;
 
-  const libraryPath = await getActiveProcessLibraryPath();
+  const libraryPath = pluginRoot ? null : await getActiveProcessLibraryPath();
   const result = await discoverSkillsInternal({
     pluginRoot: pluginRoot || undefined,
     libraryPath: libraryPath || undefined,

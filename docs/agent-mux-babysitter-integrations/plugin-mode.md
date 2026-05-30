@@ -82,13 +82,14 @@ SDK journals resolution → next iteration
 
 ### 5. Subprocess support in plugin mode
 
-**Current:** `subprocessSupport` is set to `"agent-platform"` only when agent-platform drives orchestration. In plugin mode, subprocess effects are blocked.
+**Status:** Plugin-mode CLI iteration now opts into explicit `"plugin-local"` subprocess support when the run is executing inside a host-agent plugin session. Agent-platform continues to use `"agent-platform"`, and ordinary local iteration keeps subprocess support disabled.
 
-**Needed:** Plugin mode should support subprocess effects by spawning them locally (the plugin process has access to the workspace).
+**Lifecycle:** Plugin-local subprocesses are emitted as subprocess effects. They stay tied to the parent run journal and existing `ctx.onCleanup()` terminal cleanup path, so cleanup callbacks are not flushed while the parent is waiting on the subprocess effect and are flushed on terminal run paths.
 
 **Files affected:**
-- `packages/sdk/src/runtime/intrinsics/subprocess.ts:53-54` — remove agent-platform gate
-- `packages/sdk/src/runtime/types.ts:228-229` — extend subprocess support detection
+- `packages/sdk/src/runtime/intrinsics/subprocess.ts` — allow explicit supported modes while preserving disabled as a hard block
+- `packages/sdk/src/runtime/types.ts` — include the plugin-local subprocess support mode
+- `packages/sdk/src/cli/commands/runIterate.ts` — detect plugin-mode iteration and opt into plugin-local support
 
 ### 6. Process creation context lacks host agent identity
 

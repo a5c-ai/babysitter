@@ -94,7 +94,7 @@ describe("sleep intrinsic", () => {
 });
 
 describe("subprocess intrinsic", () => {
-  test("fails fast unless agent-platform explicitly enables subprocess support", async () => {
+  test("fails fast when subprocess support is disabled", async () => {
     const { runDir, runId } = await createTestRun(tmpRoot);
     const context = await buildTaskContext(runDir, runId);
 
@@ -115,14 +115,18 @@ describe("subprocess intrinsic", () => {
         },
         context,
       )
-    ).toThrowError("only supported when the run is iterated by agent-platform");
+    ).toThrowError("Subprocess effects are disabled");
   });
 
-  test("requests a subprocess effect with typed child-run metadata", async () => {
+  test.each([
+    ["agent-platform"],
+    ["plugin-local"],
+  ] as const)("requests a subprocess effect with typed child-run metadata in %s mode", async (subprocessSupport) => {
     const { runDir, runId } = await createTestRun(tmpRoot);
     const context = await buildTaskContext(runDir, runId, {
       subprocessSupport: "agent-platform",
     });
+    context.subprocessSupport = subprocessSupport;
 
     await expect(
       runSubprocessIntrinsic(
