@@ -1,0 +1,33 @@
+{
+  "issueNumber": 631,
+  "baseBranch": "staging",
+  "branchName": "agent/issue-631-agent-mux-responder-backend",
+  "dependencyIssues": [
+    630,
+    604,
+    633
+  ],
+  "designDoc": "docs/agent-mux-babysitter-integrations/tasks-mux-routing.md",
+  "targetFiles": [
+    "packages/tasks-mux/src/backends/agent-mux.ts",
+    "packages/tasks-mux/src/backends/__tests__/agent-mux.test.ts",
+    "packages/tasks-mux/src/backends/index.ts",
+    "packages/tasks-mux/src/index.ts",
+    "packages/tasks-mux/src/types.ts",
+    "packages/tasks-mux/package.json"
+  ],
+  "verificationCommands": [
+    "npm exec --workspace=@a5c-ai/tasks-mux -- vitest run src/backends/__tests__/agent-mux.test.ts",
+    "npm run test --workspace=@a5c-ai/tasks-mux",
+    "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+    "npm run build --workspace=@a5c-ai/tasks-mux",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "planningNotes": {
+    "selectedShape": "flat phase list",
+    "reason": "Issue #631 is defined integration work with known target files and risks; no competing bug hypotheses are needed.",
+    "dependencyCaveat": "Issue #630 responder-type work is being implemented in parallel. The process starts with a dependency/reuse audit and adapts to the landed surface before implementation.",
+    "preferredIntegrationSeam": "Use current @a5c-ai/agent-mux createClient()/AgentMuxClient.run()/await RunHandle unless a stable amuxBridge/getAmuxClient seam exists on the execution branch."
+  }
+}
