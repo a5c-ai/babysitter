@@ -67,6 +67,7 @@ import {
   DeferredToolRegistry,
 } from "./index";
 import { BackgroundProcessRegistry } from "./backgroundProcessRegistry";
+import { AGENT_CORE_TOOL_NAMES } from "./types";
 
 function getText(result: Awaited<ReturnType<ReturnType<typeof getTool>["execute"]>>) {
   return result.content[0]?.text ?? "";
@@ -287,6 +288,49 @@ describe("agent-core tools", () => {
         action: "create_todo",
       },
     });
+  });
+
+  it("keeps advertised bundled tool names aligned with generated definitions", () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-tool-parity-"));
+    const advertised = [...AGENT_CORE_TOOL_NAMES].sort();
+
+    expect(getToolDefinitions(workspace).map((tool) => tool.name).sort()).toEqual(
+      advertised.filter((name) => name !== "code_executor"),
+    );
+    expect(getToolDefinitions(workspace, { programmaticToolCalling: true }).map((tool) => tool.name).sort()).toEqual(
+      advertised,
+    );
+  });
+
+  it("evaluates safe calc expressions", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-calc-"));
+    const calc = getTool("calc", workspace);
+
+    expect(getText(await Promise.resolve(calc.execute("calc-basic", { expression: "1 + 2 * 3" })))).toBe("7");
+    expect(getText(await Promise.resolve(calc.execute("calc-parens", { expression: "(1 + 2) * -3" })))).toBe("-9");
+    expect(getText(await Promise.resolve(calc.execute("calc-decimal", { expression: "0.5 + .25" })))).toBe("0.75");
+    expect(getText(await Promise.resolve(calc.execute("calc-power", { expression: "2 ** 3 ** 2" })))).toBe("512");
+  });
+
+  it("rejects unsafe or malformed calc expressions", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-calc-reject-"));
+    const calc = getTool("calc", workspace);
+
+    const rejected = [
+      "process.exit()",
+      "Math.max(1, 2)",
+      "({}).constructor",
+      "a = 1",
+      "1, 2",
+      "1 / 0",
+      "2 ** 1024",
+      "(".repeat(300),
+    ];
+
+    for (const expression of rejected) {
+      const result = await calc.execute(`calc-reject-${expression.length}`, { expression });
+      expect(getText(result)).toMatch(/^Error: /);
+    }
   });
 
   it("executes a programmatic tool chain against existing tools", async () => {

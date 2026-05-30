@@ -93,8 +93,8 @@ Error message now includes actual import error, not just "not installed."
 **Web search URL decode fallback** — `packages/agent-core/src/agenticTools/web/searchHelpers.ts:18-23`
 `decodeURIComponent` fails → uses raw DuckDuckGo-encoded URL. Broken URLs passed downstream.
 
-**Session abort is a no-op** — `packages/agent-core/src/session.ts:320-322`
-`abort()` does nothing. Callers hang until API timeout (900s).
+~~**Session abort is a no-op**~~ — `packages/agent-core/src/session.ts` **(hardened)**
+`abort()` now cancels the active provider request through the request `AbortController`; abort after completion is harmless and aborted prompts do not append partial history.
 
 **Directory walk silent failure** — `packages/agent-core/src/agenticTools/shared/paths.ts:61-65` **(logged)**
 Now logs the directory path and error before returning.

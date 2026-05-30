@@ -59,6 +59,28 @@ describe("AgentCoreSessionHandle", () => {
     });
   }
 
+  function deferredTextStream() {
+    let controllerRef!: ReadableStreamDefaultController<Uint8Array>;
+    const encoder = new TextEncoder();
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controllerRef = controller;
+      },
+    });
+    return {
+      body,
+      enqueue(text: string) {
+        controllerRef.enqueue(encoder.encode(text));
+      },
+      close() {
+        controllerRef.close();
+      },
+      error(error: unknown) {
+        controllerRef.error(error);
+      },
+    };
+  }
+
   function mockAnthropicResponse(text: string) {
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -521,6 +543,22 @@ describe("AgentCoreSessionHandle", () => {
     expect(secondBody.messages).toEqual([{ role: "user", content: "next" }]);
   });
 
+  it("trims prior history using the resolved provider and model estimate", async () => {
+    mockApiResponse("bbbb");
+    mockApiResponse("final");
+    const session = createAgentCoreSession({ model: "gpt-4o", maxHistoryTokens: 2 });
+
+    await session.prompt("aaaa");
+    await session.prompt("next");
+
+    const secondBody = JSON.parse(mockFetch.mock.calls[1]![1].body);
+    expect(secondBody.messages).toEqual([
+      { role: "user", content: "aaaa" },
+      { role: "assistant", content: "bbbb" },
+      { role: "user", content: "next" },
+    ]);
+  });
+
   it("does not append failed prompts or partial streamed output to history", async () => {
     mockApiResponse("ok");
     mockFetch.mockResolvedValueOnce({
@@ -572,6 +610,70 @@ describe("AgentCoreSessionHandle", () => {
     expect(result.output).toContain("aborted");
     expect(session.isStreaming).toBe(false);
     expect(session.getHistory()).toEqual([]);
+  });
+
+  it("treats abort after prompt completion as harmless", async () => {
+    mockApiResponse("complete");
+    const session = createAgentCoreSession({});
+
+    const result = await session.prompt("finish");
+    await session.abort();
+
+    expect(result.success).toBe(true);
+    expect(session.isStreaming).toBe(false);
+    expect(session.getHistory()).toEqual([
+      { role: "user", content: "finish" },
+      { role: "assistant", content: "complete" },
+    ]);
+  });
+
+  it("does not append partial streamed output when aborted after response starts", async () => {
+    const stream = deferredTextStream();
+    mockFetch.mockResolvedValueOnce({ ok: true, body: stream.body });
+    const session = createAgentCoreSession({});
+    const events: Array<Record<string, unknown>> = [];
+    session.subscribe((event) => events.push(event as Record<string, unknown>));
+
+    const prompt = session.prompt("abort stream");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    stream.enqueue(openAiDelta("partial"));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    stream.error(new Error("stream aborted"));
+    const result = await prompt;
+
+    expect(result.success).toBe(false);
+    expect(events.filter((event) => event.type === "text_delta").map((event) => event.delta)).toEqual(["partial"]);
+    expect(session.isStreaming).toBe(false);
+    expect(session.getHistory()).toEqual([]);
+  });
+
+  it("dispose aborts the active provider request and clears local session state", async () => {
+    let signal: AbortSignal | undefined;
+    mockFetch.mockImplementationOnce((_url, options) => {
+      signal = options.signal;
+      return new Promise((_resolve, reject) => {
+        signal!.addEventListener("abort", () => reject(signal!.reason), { once: true });
+      });
+    });
+    const session = createAgentCoreSession({});
+    await session.steer("pending follow-up");
+    const listener = vi.fn();
+    session.subscribe(listener);
+
+    const prompt = session.prompt("dispose me");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    session.dispose();
+    const result = await prompt;
+
+    expect(signal?.aborted).toBe(true);
+    expect(result.success).toBe(false);
+    expect(session.getHistory()).toEqual([]);
+    expect(listener).not.toHaveBeenCalledWith(expect.objectContaining({ type: "error" }));
+
+    mockApiResponse("fresh");
+    await session.prompt("after dispose");
+    const secondBody = JSON.parse(mockFetch.mock.calls[1]![1].body);
+    expect(secondBody.messages).toEqual([{ role: "user", content: "after dispose" }]);
   });
 
   it("rejects concurrent prompt attempts", async () => {

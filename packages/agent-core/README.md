@@ -101,7 +101,7 @@ Session behavior that matters to host integrations:
 | `model` | Forwarded to agent-mux as `model`. |
 | `timeout` | Forwarded to agent-mux as `timeout`. |
 | `maxHistoryTurns` | Maximum persisted user/assistant history entries retained on the session handle. Defaults to 20. |
-| `maxHistoryTokens` | Maximum estimated tokens from prior history sent with a prompt. Uses the package's rough token estimator and drops oldest entries first. |
+| `maxHistoryTokens` | Maximum estimated tokens from prior history sent with a prompt. Uses the package's provider/model-aware rough token estimator and drops oldest entries first. |
 | `thinkingLevel` | Translated to agent-mux `thinkingEffort` (`minimal`/`low` -> `low`, `medium` -> `medium`, `high` -> `high`, `xhigh` -> `max`). |
 | `systemPrompt` | Used as the base `systemPrompt`. |
 | `appendSystemPrompt` | Appended to the final `systemPrompt` before dispatch. |
@@ -193,6 +193,8 @@ If you still need the PI-era controls above, use the PI wrapper exposed from `@a
 - code tools: `calc`, `ast_grep`, `ast_edit`, `render_mermaid`, `notebook`
 - background/discovery/web tools: `background_status`, `background_list`, `tool_search`, `tool_fetch`, `web_search`, `fetch_process`
 - optional programmatic tool calling: `code_executor` when `programmaticToolCalling` is enabled
+
+The `calc` tool evaluates a constrained arithmetic language only: numeric literals, parentheses, unary `+`/`-`, and `+`, `-`, `*`, `/`, `%`, and `**`. It rejects identifiers, function calls, property access, assignment, malformed expressions, overlong input, and non-finite results. It does not use `eval`, `Function`, shell execution, or external processes.
 
 `AgentCoreToolOptions` controls how those definitions are wired into a host runtime:
 

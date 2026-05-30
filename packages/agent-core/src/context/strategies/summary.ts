@@ -9,6 +9,7 @@
 import type {
   ContextEntry,
   SummaryCompactionStrategy,
+  TokenEstimatorContext,
 } from "../types";
 import { estimateEntryTokens, estimateTokens } from "../token-estimator";
 
@@ -51,6 +52,7 @@ export function applySummaryCompaction(
   _strategy: SummaryCompactionStrategy,
   summarizeFn: SummarizeFn,
   preserveSystem = true,
+  tokenEstimatorContext?: TokenEstimatorContext,
 ): SummaryCompactionResult {
   if (entries.length === 0) {
     return { retained: [], evicted: [], summaryEntry: null };
@@ -69,7 +71,7 @@ export function applySummaryCompaction(
   }
 
   let systemTokens = 0;
-  for (const e of systemEntries) systemTokens += estimateEntryTokens(e);
+  for (const e of systemEntries) systemTokens += estimateEntryTokens(e, tokenEstimatorContext);
 
   const remainingBudget = maxTokens - systemTokens;
 
@@ -79,7 +81,7 @@ export function applySummaryCompaction(
 
   for (let i = nonSystem.length - 1; i >= 0; i--) {
     const entry = nonSystem[i]!;
-    const tokens = estimateEntryTokens(entry);
+    const tokens = estimateEntryTokens(entry, tokenEstimatorContext);
     if (keepTokens + tokens <= remainingBudget) {
       keep.unshift(entry);
       keepTokens += tokens;
@@ -101,7 +103,7 @@ export function applySummaryCompaction(
     role: "summary",
     content: summaryText,
     priority: 0.8,
-    tokenCount: estimateTokens(summaryText),
+    tokenCount: estimateTokens(summaryText, tokenEstimatorContext),
     timestamp: new Date(),
   };
 

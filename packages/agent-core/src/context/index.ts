@@ -5,6 +5,7 @@ export type {
   SummaryCompactionStrategy,
   CompactionStrategy,
   ContextEntry,
+  TokenEstimatorContext,
   ContextManagerConfig,
   ContextManager,
 } from "./types";

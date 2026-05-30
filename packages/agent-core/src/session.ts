@@ -13,6 +13,7 @@ import type {
   AgentCoreStructuredOutputOptions,
 } from "./types";
 import { estimateTokens } from "./context/token-estimator";
+import type { TokenEstimatorContext } from "./context/types";
 
 // 15 minutes — accommodates long-running model responses (e.g., gpt-5.5 thinking)
 // and Azure Foundry cold-start latency. Override per-call via session.prompt(text, timeout).
@@ -293,6 +294,13 @@ function resolveEndpoint(options: AgentCoreSessionOptions): ResolvedEndpoint {
   }
 
   return { apiBase: "https://api.openai.com/v1", apiKey: amuxApiKey, model, isAzure: false, isAnthropic: false };
+}
+
+function tokenEstimatorContextForEndpoint(endpoint: ResolvedEndpoint): TokenEstimatorContext {
+  return {
+    provider: endpoint.isAnthropic ? "anthropic" : endpoint.isAzure ? "azure" : "openai",
+    model: endpoint.model,
+  };
 }
 
 function toOpenAiMessage(message: ProviderMessage): { role: string; content: string | Array<Record<string, unknown>> } {
@@ -796,7 +804,12 @@ export class AgentCoreSessionHandle {
 
     const endpoint = resolveEndpoint(this.options);
     try {
-      const request = buildNormalizedRequest(promptInput, this.options, promptOptions, this.trimHistoryForPrompt());
+      const request = buildNormalizedRequest(
+        promptInput,
+        this.options,
+        promptOptions,
+        this.trimHistoryForPrompt(tokenEstimatorContextForEndpoint(endpoint)),
+      );
       const promptText = contentToText(request.messages[request.messages.length - 1]?.content ?? "");
 
       const sessionId = this.currentSessionId ?? `agent-core-${Date.now()}`;
@@ -949,9 +962,9 @@ export class AgentCoreSessionHandle {
     this.history = this.limitHistoryByTurns(this.history);
   }
 
-  private trimHistoryForPrompt(): ProviderMessage[] {
+  private trimHistoryForPrompt(tokenEstimatorContext?: TokenEstimatorContext): ProviderMessage[] {
     let entries = this.limitHistoryByTurns(this.history);
-    entries = this.limitHistoryByTokens(entries);
+    entries = this.limitHistoryByTokens(entries, tokenEstimatorContext);
     return entries.map((entry) => ({ role: entry.role, content: entry.content }));
   }
 
@@ -961,13 +974,16 @@ export class AgentCoreSessionHandle {
     return entries.slice(-maxHistoryTurns);
   }
 
-  private limitHistoryByTokens(entries: AgentCoreHistoryEntry[]): AgentCoreHistoryEntry[] {
+  private limitHistoryByTokens(
+    entries: AgentCoreHistoryEntry[],
+    tokenEstimatorContext?: TokenEstimatorContext,
+  ): AgentCoreHistoryEntry[] {
     const maxHistoryTokens = this.options.maxHistoryTokens;
     if (maxHistoryTokens === undefined) return entries;
     if (maxHistoryTokens <= 0) return [];
 
     const selected = entries.slice();
-    while (selected.length > 0 && historyTokenCount(selected) > maxHistoryTokens) {
+    while (selected.length > 0 && historyTokenCount(selected, tokenEstimatorContext) > maxHistoryTokens) {
       selected.shift();
       if (selected[0]?.role === "assistant") {
         selected.shift();
@@ -977,8 +993,8 @@ export class AgentCoreSessionHandle {
   }
 }
 
-function historyTokenCount(entries: AgentCoreHistoryEntry[]): number {
-  return entries.reduce((total, entry) => total + estimateTokens(entry.content), 0);
+function historyTokenCount(entries: AgentCoreHistoryEntry[], context?: TokenEstimatorContext): number {
+  return entries.reduce((total, entry) => total + estimateTokens(entry.content, context), 0);
 }
 
 export function createAgentCoreSession(options?: AgentCoreSessionOptions): AgentCoreSessionHandle {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ContextManagerImpl } from "../manager";
-import { estimateTokens } from "../token-estimator";
+import { estimateEntryTokens, estimateTokens } from "../token-estimator";
 import type { ContextEntry } from "../types";
 
 // ---------------------------------------------------------------------------
@@ -50,6 +50,7 @@ describe("ContextManager — inject and token counting", () => {
       config: {
         strategy: { kind: "sliding", windowSize: 1 },
         maxTokens: 20,
+        tokenEstimatorContext: { provider: "openai", model: "gpt-4o" },
       },
     });
 
@@ -65,6 +66,25 @@ describe("ContextManager — inject and token counting", () => {
     // (within token budget).
     const entries = manager.getEntries();
     expect(entries.length).toBeLessThanOrEqual(2);
+  });
+
+  it("uses configured provider/model context for token counting", async () => {
+    const manager = new ContextManagerImpl({
+      config: {
+        strategy: { kind: "sliding", windowSize: 2 },
+        maxTokens: 2,
+        compactionThreshold: 999_999,
+        tokenEstimatorContext: { provider: "openai", model: "gpt-4o" },
+      },
+    });
+
+    await manager.inject([
+      makeEntry("first", "abcd"),
+      makeEntry("second", "efgh"),
+    ]);
+
+    expect(manager.getTokenCount()).toBe(2);
+    expect(manager.getEntries().map((entry) => entry.id)).toEqual(["first", "second"]);
   });
 });
 
@@ -220,10 +240,23 @@ describe("ContextManager — getEntries", () => {
 // ---------------------------------------------------------------------------
 
 describe("Token estimator", () => {
-  it("estimateTokens returns chars/4 (ceil)", () => {
+  it("keeps the no-options estimator conservative and compatible", () => {
     expect(estimateTokens("")).toBe(0);
-    expect(estimateTokens("abcd")).toBe(1); // 4/4 = 1
-    expect(estimateTokens("abcde")).toBe(2); // ceil(5/4) = 2
-    expect(estimateTokens("a".repeat(100))).toBe(25); // 100/4 = 25
+    expect(estimateTokens("abc")).toBe(1);
+    expect(estimateTokens("abcd")).toBe(2);
+    expect(estimateTokens("a".repeat(99))).toBe(33);
+  });
+
+  it("supports model/provider-aware estimates", () => {
+    expect(estimateTokens("a".repeat(8), { provider: "openai", model: "gpt-4o" })).toBe(2);
+    expect(estimateTokens("a".repeat(7), { provider: "anthropic", model: "claude-sonnet-4-6" })).toBe(2);
+    expect(estimateTokens("a".repeat(7), { provider: "custom", model: "unknown-model" })).toBe(3);
+  });
+
+  it("estimateEntryTokens keeps explicit tokenCount authoritative", () => {
+    expect(estimateEntryTokens(makeEntry("counted", "a".repeat(100), { tokenCount: 7 }), {
+      provider: "openai",
+      model: "gpt-4o",
+    })).toBe(7);
   });
 });

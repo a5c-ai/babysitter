@@ -11,6 +11,7 @@ import type {
   ContextEntry,
   ContextManager,
   ContextManagerConfig,
+  TokenEstimatorContext,
 } from "./types";
 import { estimateEntryTokens, estimateTokens } from "./token-estimator";
 import { applyPriorityCompaction } from "./strategies/priority";
@@ -45,6 +46,7 @@ export class ContextManagerImpl implements ContextManager {
   private readonly compactionThreshold: number;
   private readonly preserveSystem: boolean;
   private readonly summarizeFn: SummarizeFn;
+  private readonly tokenEstimatorContext: TokenEstimatorContext | undefined;
 
   constructor(options: ContextManagerImplOptions) {
     this.config = options.config;
@@ -53,6 +55,7 @@ export class ContextManagerImpl implements ContextManager {
       Math.floor(options.config.maxTokens * 0.9);
     this.preserveSystem = options.config.preserveSystemPrompt ?? true;
     this.summarizeFn = options.summarizeFn ?? defaultSummarizeFn;
+    this.tokenEstimatorContext = options.config.tokenEstimatorContext;
   }
 
   // -----------------------------------------------------------------------
@@ -69,7 +72,7 @@ export class ContextManagerImpl implements ContextManager {
     for (const entry of toAdd) {
       this.entries.push({
         ...entry,
-        tokenCount: entry.tokenCount ?? estimateEntryTokens(entry),
+        tokenCount: entry.tokenCount ?? estimateEntryTokens(entry, this.tokenEstimatorContext),
         timestamp: entry.timestamp ?? new Date(),
       });
     }
@@ -91,7 +94,7 @@ export class ContextManagerImpl implements ContextManager {
       role: "summary",
       content: summaryText,
       priority: 0.8,
-      tokenCount: estimateTokens(summaryText),
+      tokenCount: estimateTokens(summaryText, this.tokenEstimatorContext),
       timestamp: new Date(),
     };
   }
@@ -99,7 +102,7 @@ export class ContextManagerImpl implements ContextManager {
   getTokenCount(): number {
     let total = 0;
     for (const entry of this.entries) {
-      total += estimateEntryTokens(entry);
+      total += estimateEntryTokens(entry, this.tokenEstimatorContext);
     }
     return total;
   }
@@ -135,6 +138,7 @@ export class ContextManagerImpl implements ContextManager {
           this.config.maxTokens,
           strategy,
           this.preserveSystem,
+          this.tokenEstimatorContext,
         );
         this.entries = [...result.retained];
         return result.evicted;
@@ -145,6 +149,7 @@ export class ContextManagerImpl implements ContextManager {
           this.config.maxTokens,
           strategy,
           this.preserveSystem,
+          this.tokenEstimatorContext,
         );
         this.entries = [...result.retained];
         return result.evicted;
@@ -156,6 +161,7 @@ export class ContextManagerImpl implements ContextManager {
           strategy,
           this.summarizeFn,
           this.preserveSystem,
+          this.tokenEstimatorContext,
         );
         this.entries = [...result.retained];
         return result.evicted;

@@ -19,6 +19,156 @@ interface NotebookCell {
   [key: string]: unknown;
 }
 
+const MAX_CALC_EXPRESSION_LENGTH = 256;
+const MAX_CALC_ABS_RESULT = 1e100;
+
+class CalcParser {
+  private index = 0;
+
+  constructor(private readonly source: string) {}
+
+  parse(): number {
+    const value = this.parseExpression();
+    this.skipWhitespace();
+    if (this.index !== this.source.length) {
+      throw new Error(`Unexpected token '${this.source[this.index]}' at position ${this.index}.`);
+    }
+    return this.requireFinite(value);
+  }
+
+  private parseExpression(): number {
+    let value = this.parseTerm();
+    while (true) {
+      this.skipWhitespace();
+      if (this.consume("+")) {
+        value += this.parseTerm();
+      } else if (this.consume("-")) {
+        value -= this.parseTerm();
+      } else {
+        return this.requireFinite(value);
+      }
+    }
+  }
+
+  private parseTerm(): number {
+    let value = this.parsePower();
+    while (true) {
+      this.skipWhitespace();
+      if (this.consume("*")) {
+        if (this.consume("*")) {
+          this.index -= 2;
+          return this.requireFinite(value);
+        }
+        value *= this.parsePower();
+      } else if (this.consume("/")) {
+        const divisor = this.parsePower();
+        if (divisor === 0) {
+          throw new Error("Division by zero is not allowed.");
+        }
+        value /= divisor;
+      } else if (this.consume("%")) {
+        const divisor = this.parsePower();
+        if (divisor === 0) {
+          throw new Error("Modulo by zero is not allowed.");
+        }
+        value %= divisor;
+      } else {
+        return this.requireFinite(value);
+      }
+    }
+  }
+
+  private parsePower(): number {
+    const base = this.parseUnary();
+    this.skipWhitespace();
+    if (!this.consume("**")) {
+      return this.requireFinite(base);
+    }
+    const exponent = this.parsePower();
+    return this.requireFinite(base ** exponent);
+  }
+
+  private parseUnary(): number {
+    this.skipWhitespace();
+    if (this.consume("+")) {
+      return this.parseUnary();
+    }
+    if (this.consume("-")) {
+      return this.requireFinite(-this.parseUnary());
+    }
+    return this.parsePrimary();
+  }
+
+  private parsePrimary(): number {
+    this.skipWhitespace();
+    if (this.consume("(")) {
+      const value = this.parseExpression();
+      this.skipWhitespace();
+      if (!this.consume(")")) {
+        throw new Error("Missing closing parenthesis.");
+      }
+      return value;
+    }
+    return this.parseNumber();
+  }
+
+  private parseNumber(): number {
+    this.skipWhitespace();
+    const start = this.index;
+    let sawDigit = false;
+    while (/[0-9]/.test(this.source[this.index] ?? "")) {
+      sawDigit = true;
+      this.index += 1;
+    }
+    if (this.source[this.index] === ".") {
+      this.index += 1;
+      while (/[0-9]/.test(this.source[this.index] ?? "")) {
+        sawDigit = true;
+        this.index += 1;
+      }
+    }
+    if (!sawDigit) {
+      throw new Error(`Expected a number at position ${start}.`);
+    }
+    return this.requireFinite(Number(this.source.slice(start, this.index)));
+  }
+
+  private consume(token: string): boolean {
+    if (!this.source.startsWith(token, this.index)) {
+      return false;
+    }
+    this.index += token.length;
+    return true;
+  }
+
+  private skipWhitespace(): void {
+    while (/\s/.test(this.source[this.index] ?? "")) {
+      this.index += 1;
+    }
+  }
+
+  private requireFinite(value: number): number {
+    if (!Number.isFinite(value) || Math.abs(value) > MAX_CALC_ABS_RESULT) {
+      throw new Error("Expression result is not finite.");
+    }
+    return Object.is(value, -0) ? 0 : value;
+  }
+}
+
+function evaluateCalcExpression(expression: string): number {
+  const source = expression.trim();
+  if (!source) {
+    throw new Error("Expression must not be empty.");
+  }
+  if (source.length > MAX_CALC_EXPRESSION_LENGTH) {
+    throw new Error(`Expression must be ${MAX_CALC_EXPRESSION_LENGTH} characters or fewer.`);
+  }
+  if (/[^0-9+\-*/%().\s]/.test(source)) {
+    throw new Error("Expression contains unsupported characters.");
+  }
+  return new CalcParser(source).parse();
+}
+
 function collectScopedAstEditFiles(
   targetPath: string,
   globPattern?: string,
@@ -77,6 +227,22 @@ export function createCodeTools(options: AgenticToolOptions): CustomToolDefiniti
   const { workspace } = options;
 
   return [
+    {
+      name: "calc",
+      label: "Calculator",
+      description: "Evaluate a safe arithmetic expression.",
+      parameters: Type.Object({
+        expression: Type.String({ description: "Arithmetic expression using numbers, parentheses, +, -, *, /, %, and **" }),
+      }),
+      execute: (_toolCallId, params) => {
+        try {
+          const result = evaluateCalcExpression(String(params.expression ?? ""));
+          return ok(String(result));
+        } catch (error) {
+          return errorResult(error instanceof Error ? error.message : String(error));
+        }
+      },
+    },
     {
       name: "ast_grep",
       label: "AST Search",

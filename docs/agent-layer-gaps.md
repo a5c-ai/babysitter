@@ -12,7 +12,6 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 |-----|------|-------------|
 | No streaming | `session.ts:200-257` | `prompt()` waits for full response, emits single `text_delta` with everything. No token-by-token streaming. |
 | No multi-turn history | `session.ts:217-223` | Messages rebuilt from scratch each call. No persistent conversation context across `prompt()` calls. |
-| `abort()` is no-op | `session.ts:332-334` | In-flight API calls cannot be cancelled. AbortController exists but isn't exposed. |
 | Structured output follow-up work | `session.ts`, `types.ts` | Agent-core now exposes opt-in `json_object`/`json_schema` prompt output, provider request mapping, local parsing, and focused schema validation. Remaining gaps: full JSON Schema validator coverage and streaming structured-output integration (#575). |
 | Token usage discarded | `session.ts:163-177` | Parsed from API response but never returned to caller or tracked cumulatively. |
 
@@ -22,8 +21,7 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 |-----|------|-------------|
 | Vision/multimodal follow-up work | `session.ts` | Agent-core now accepts direct prompt text/image URL/base64 content parts and maps them for OpenAI/Azure/Anthropic. Remaining gaps: streaming multimodal responses (#575), image-bearing `ToolResult` support (#588), and broader vision tool ergonomics. |
 | No tool AbortSignal | `types.ts:86-96` | Custom tools can't be cancelled by framework. Each must own its timeout. |
-| Token estimation broken | `context/token-estimator.ts` | Hardcoded `chars/4` for all models. Wrong for Claude (~3.5), GPT-4 (~4.2). Context overflow risk. |
-| `calc` tool missing | `types.ts:145` | Listed in `AGENT_CORE_TOOL_NAMES` but no implementation exists. Runtime error if called. |
+| Token estimation remains heuristic | `context/token-estimator.ts` | Estimation is now provider/model-aware for OpenAI/Azure, Anthropic/Claude, and conservative unknown-model defaults, but still does not use exact provider tokenizer libraries or cost tracking. |
 | `initialize()` is no-op | `session.ts:196-198` | No connection warmup, no schema cache, no health check. |
 | No DI for LLM client | `session.ts:40-97` | Endpoint resolution hardcoded. Cannot inject custom fetch for testing/mocking. |
 | Browser tool fragile | `agenticTools/browser/tool.ts` | Global singleton, no connection pool, no resource limits, screenshot returns metadata not images. |

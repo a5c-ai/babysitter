@@ -8,6 +8,7 @@
 import type {
   ContextEntry,
   PriorityCompactionStrategy,
+  TokenEstimatorContext,
 } from "../types";
 import { estimateEntryTokens } from "../token-estimator";
 
@@ -37,6 +38,7 @@ export function applyPriorityCompaction(
   maxTokens: number,
   strategy: PriorityCompactionStrategy,
   preserveSystem = true,
+  tokenEstimatorContext?: TokenEstimatorContext,
 ): PriorityCompactionResult {
   const minPriority = strategy.minPriority ?? 0;
 
@@ -58,8 +60,8 @@ export function applyPriorityCompaction(
   );
 
   let currentTokens = 0;
-  for (const e of safe) currentTokens += estimateEntryTokens(e);
-  for (const e of candidates) currentTokens += estimateEntryTokens(e);
+  for (const e of safe) currentTokens += estimateEntryTokens(e, tokenEstimatorContext);
+  for (const e of candidates) currentTokens += estimateEntryTokens(e, tokenEstimatorContext);
 
   const evicted: ContextEntry[] = [];
 
@@ -70,7 +72,7 @@ export function applyPriorityCompaction(
     const priority = candidate.priority ?? 0.5;
     if (priority >= minPriority && currentTokens <= maxTokens) break;
 
-    currentTokens -= estimateEntryTokens(candidate);
+    currentTokens -= estimateEntryTokens(candidate, tokenEstimatorContext);
     evicted.push(candidate);
   }
 

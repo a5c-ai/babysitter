@@ -8,6 +8,7 @@
 import type {
   ContextEntry,
   SlidingCompactionStrategy,
+  TokenEstimatorContext,
 } from "../types";
 import { estimateEntryTokens } from "../token-estimator";
 
@@ -35,6 +36,7 @@ export function applySlidingCompaction(
   maxTokens: number,
   strategy: SlidingCompactionStrategy,
   preserveSystem = true,
+  tokenEstimatorContext?: TokenEstimatorContext,
 ): SlidingCompactionResult {
   const { windowSize } = strategy;
   const effectivePreserveSystem =
@@ -59,7 +61,7 @@ export function applySlidingCompaction(
 
   // Further trim retained entries if they exceed the token budget.
   let tokenBudget = maxTokens;
-  for (const e of systemEntries) tokenBudget -= estimateEntryTokens(e);
+  for (const e of systemEntries) tokenBudget -= estimateEntryTokens(e, tokenEstimatorContext);
 
   const finalRetained: ContextEntry[] = [];
   const additionalEvicted: ContextEntry[] = [];
@@ -68,7 +70,7 @@ export function applySlidingCompaction(
   let usedTokens = 0;
   for (let i = retainedNonSystem.length - 1; i >= 0; i--) {
     const entry = retainedNonSystem[i]!;
-    const tokens = estimateEntryTokens(entry);
+    const tokens = estimateEntryTokens(entry, tokenEstimatorContext);
     if (usedTokens + tokens <= tokenBudget) {
       finalRetained.unshift(entry);
       usedTokens += tokens;

@@ -1,14 +1,33 @@
 /**
  * Token estimation utilities for context management.
  *
- * Uses a simple chars/4 heuristic — accurate enough for budget
- * planning without pulling in a full tokenizer dependency.
+ * Uses model/provider-aware character heuristics for budget planning without
+ * pulling in full tokenizer dependencies.
  */
 
-import type { ContextEntry } from "./types";
+import type { ContextEntry, TokenEstimatorContext } from "./types";
 
-/** Average characters per token (rough GPT-family heuristic). */
-const CHARS_PER_TOKEN = 4;
+const DEFAULT_CHARS_PER_TOKEN = 3;
+const OPENAI_CHARS_PER_TOKEN = 4;
+const ANTHROPIC_CHARS_PER_TOKEN = 3.5;
+
+function charsPerToken(context?: TokenEstimatorContext): number {
+  const provider = context?.provider?.toLowerCase();
+  const model = context?.model?.toLowerCase() ?? "";
+
+  if (provider === "anthropic" || model.includes("claude")) {
+    return ANTHROPIC_CHARS_PER_TOKEN;
+  }
+  if (
+    provider === "openai"
+    || provider === "azure"
+    || model.startsWith("gpt")
+    || model.startsWith("o")
+  ) {
+    return OPENAI_CHARS_PER_TOKEN;
+  }
+  return DEFAULT_CHARS_PER_TOKEN;
+}
 
 /**
  * Estimate the number of tokens in a plain-text string.
@@ -16,9 +35,9 @@ const CHARS_PER_TOKEN = 4;
  * @param text - The text to measure.
  * @returns Estimated token count (always >= 0).
  */
-export function estimateTokens(text: string): number {
+export function estimateTokens(text: string, context?: TokenEstimatorContext): number {
   if (!text) return 0;
-  return Math.ceil(text.length / CHARS_PER_TOKEN);
+  return Math.ceil(text.length / charsPerToken(context));
 }
 
 /**
@@ -30,9 +49,9 @@ export function estimateTokens(text: string): number {
  * @param entry - The context entry to measure.
  * @returns Estimated token count.
  */
-export function estimateEntryTokens(entry: ContextEntry): number {
+export function estimateEntryTokens(entry: ContextEntry, context?: TokenEstimatorContext): number {
   if (entry.tokenCount !== undefined && entry.tokenCount >= 0) {
     return entry.tokenCount;
   }
-  return estimateTokens(entry.content);
+  return estimateTokens(entry.content, context);
 }

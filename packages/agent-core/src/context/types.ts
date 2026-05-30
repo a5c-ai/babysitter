@@ -84,6 +84,11 @@ export interface ContextEntry {
   readonly metadata?: Record<string, unknown>;
 }
 
+export interface TokenEstimatorContext {
+  readonly provider?: "openai" | "azure" | "anthropic" | "custom" | string;
+  readonly model?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Context Manager Configuration
 // ---------------------------------------------------------------------------
@@ -108,6 +113,9 @@ export interface ContextManagerConfig {
    * Defaults to `true`.
    */
   readonly preserveSystemPrompt?: boolean;
+
+  /** Provider/model context used by heuristic token estimation. */
+  readonly tokenEstimatorContext?: TokenEstimatorContext;
 }
 
 // ---------------------------------------------------------------------------
