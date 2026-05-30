@@ -2,6 +2,64 @@
   "issueNumber": 636,
   "baseBranch": "staging",
   "branchName": "agent/issue-636-hooks-mux-missing-events",
+  "planArtifactBranch": "plan/issue-636",
+  "relatedIssues": [580, 637, 638],
+  "processLibraryFindings": {
+    "requestedPath": ".a5c/process-library/",
+    "requestedPathPresent": false,
+    "fallbackPathsUsed": [
+      "library/methodologies/atdd-tdd/atdd-tdd.js",
+      "library/methodologies/process-hardening/process-hardening-patterns.js",
+      "library/methodologies/superpowers/verification-before-completion.js"
+    ],
+    "methodologySummary": [
+      "ATDD/TDD: write acceptance and regression coverage before production changes.",
+      "Process hardening: keep bounded repair loops and block delivery on failed gates.",
+      "Verification before completion: require fresh command evidence before success claims."
+    ]
+  },
+  "reuseAudit": {
+    "reuseAuditConfigPresent": false,
+    "keywords": [
+      "hook",
+      "mux",
+      "lifecycle",
+      "canonical phase",
+      "Claude",
+      "atlas",
+      "config changed",
+      "PostToolUseFailure",
+      "PostToolBatch",
+      "StopFailure",
+      "UserPromptExpansion",
+      "TaskCreated",
+      "TaskCompleted",
+      "TeammateIdle",
+      "Setup",
+      "InstructionsLoaded"
+    ],
+    "matchingInfrastructure": [
+      "packages/hooks-mux/core/src/types/lifecycle.ts",
+      "packages/hooks-mux/adapter-claude/src/mappings.ts",
+      "packages/hooks-mux/adapter-claude/src/normalizer.ts",
+      "packages/hooks-mux/adapter-claude/src/renderer.ts",
+      "packages/hooks-mux/cli/src/cli/commands/invoke.ts",
+      "packages/hooks-mux/cli/src/cli/commands/doctor.ts",
+      "packages/atlas/graph/channels-hooks/hook-mappings/extended-mappings.yaml",
+      "packages/atlas/graph/channels-hooks/hook-surfaces/native/claude-code-extended-hooks.yaml",
+      "packages/agent-catalog/src/sdk.ts",
+      "packages/sdk/src/runtime/hooks/runtime.ts",
+      "packages/sdk/src/runtime/intrinsics/task.ts",
+      "packages/sdk/src/runtime/commitEffectResult.ts",
+      "packages/agent-platform/src/harness/internal/createRun/orchestration"
+    ],
+    "planningConstraint": "Reuse existing hook contract, catalog, adapter, SDK runtime, and orchestration surfaces before adding new infrastructure."
+  },
+  "targetEventClassification": {
+    "claudeLifecycleGapsAndBlockingGaps": 10,
+    "advancedAtlasGaps": 3,
+    "note": "Issue #636 names 13 target entries. The concrete lifecycle/blocking list contains 10 Claude Code items; docs/agent-stack/hooks/missing-events.md adds 3 lower-priority advanced Atlas entries that must be reconciled separately from Claude runtime emission."
+  },
   "targetEvents": [
     {
       "nativeName": "PostToolUseFailure",

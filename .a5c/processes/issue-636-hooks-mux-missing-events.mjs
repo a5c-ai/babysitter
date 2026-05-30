@@ -4,6 +4,17 @@
  * @inputs { issueNumber: number, baseBranch: string, branchName: string, targetEvents: object[], targetFiles: string[], verificationCommands: string[] }
  * @outputs { success: boolean, phases: string[], changedFiles: string[], verification: object, review: object, delivery: object }
  *
+ * Reuse-audit findings (REVIEW BEFORE PROCEEDING):
+ * - Matching existing infrastructure found in hooks-mux canonical lifecycle types, Claude adapter catalog-backed mappings, normalizer/renderer tests,
+ *   atlas hook mappings, agent-catalog SDK descriptors, SDK runtime hook dispatch, task intrinsic/result commit paths, and agent-platform orchestration effects.
+ * - `.a5c/process-library/` was not present in this checkout when this plan was refreshed; matching process-library methodology guidance was found under
+ *   `library/methodologies/atdd-tdd/atdd-tdd.js`, `library/methodologies/process-hardening/process-hardening-patterns.js`, and
+ *   `library/methodologies/superpowers/verification-before-completion.js`.
+ * - No `.a5c/reuse-audit.json` was present; keyword scan used: hook, mux, lifecycle, canonical phase, Claude, atlas, config changed,
+ *   PostToolUseFailure, PostToolBatch, StopFailure, UserPromptExpansion, TaskCreated, TaskCompleted, TeammateIdle, Setup, InstructionsLoaded.
+ * - The 13 target entries are treated as the 10 Claude Code lifecycle gaps/blocking gaps named by issue #636 plus 3 lower-priority advanced Atlas gaps
+ *   documented in `docs/agent-stack/hooks/missing-events.md`; contract reconciliation must separate representation support from runtime emission support.
+ *
  * References used while authoring:
  * - docs/agent-stack/hooks/missing-events.md
  * - docs/agent-stack/hooks/coverage-matrix.md
