@@ -26,7 +26,8 @@ import type { RunOrchestrationPhaseArgs } from "./types";
 import { runExternalOrchestrationPhase } from "./externalPhase";
 import { runInternalOrchestrationPhase } from "./internalPhase";
 import {
-  resolveAgentCoreBackendForHarness,
+  createApprovalAskUserQuestion,
+  createAskUserQuestionResponse,
 } from "../utils";
 
 export async function runOrchestrationPhase(
@@ -267,6 +268,9 @@ async function resolveViaTasksMuxForCli(
 
   const decision = mux.routeTask(action.taskDef);
   if (decision.responderType === "internal" || decision.responderType === "human") {
+    if (decision.responderType === "human") {
+      return JSON.stringify(buildCliBreakpointValue(action));
+    }
     return undefined;
   }
   if (decision.responderType === "tracker") {
@@ -310,6 +314,23 @@ async function resolveViaTasksMuxForCli(
     },
   });
   return JSON.stringify(breakpoint.answers[0]?.text ?? "");
+}
+
+function buildCliBreakpointValue(
+  action: { taskDef?: { title?: string } & Record<string, unknown>; taskId?: string; effectId: string },
+): Record<string, unknown> {
+  const question = (action.taskDef as Record<string, unknown> | undefined)?.question as string | undefined
+    ?? action.taskDef?.title
+    ?? action.taskId
+    ?? action.effectId;
+  const approvalPrompt = createApprovalAskUserQuestion(question);
+  const approvalKey = approvalPrompt.questions[0]?.header ?? "Decision";
+  const response = createAskUserQuestionResponse(approvalPrompt, { [approvalKey]: "Approve" });
+  return {
+    approved: true,
+    option: "Approve",
+    askUserQuestion: response,
+  };
 }
 
 function buildCliAgentPrompt(taskDef: { agent?: { prompt?: string | { instructions?: string[] } }; title?: string } | undefined): string {

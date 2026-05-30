@@ -169,6 +169,42 @@ describe("resolveEffect tasks-mux routing", () => {
     expect(result.value).toBe("{\"ok\":true}");
   });
 
+  it("routes human responder agent effects through the breakpoint path", async () => {
+    taskMuxMock.routeTask.mockReturnValue({
+      responderType: "human",
+      route: "breakpoint",
+      responder: { id: "human", type: "human" },
+    });
+
+    const result = await resolveEffect(
+      {
+        effectId: "effect-human",
+        invocationKey: "invocation",
+        kind: "agent",
+        taskDef: {
+          kind: "agent",
+          title: "Needs a human",
+          agent: {
+            responderType: "human",
+            prompt: { task: "review this" },
+          },
+        },
+      },
+      "pi",
+      { workspace: "/tmp/workspace", model: "gpt-5.4" },
+    );
+
+    expect(taskMuxMock.routeTask).toHaveBeenCalledWith(expect.objectContaining({
+      kind: "agent",
+    }));
+    expect(taskMuxMock.submitBreakpoint).not.toHaveBeenCalled();
+    expect(result.status).toBe("ok");
+    expect(result.value).toMatchObject({
+      approved: true,
+      option: "Approve",
+    });
+  });
+
   it("delegates legacy CLI resolveAndPostEffect agent routing through tasks-mux", async () => {
     taskMuxMock.routeTask.mockReturnValue({
       responderType: "agent",
@@ -216,6 +252,50 @@ describe("resolveEffect tasks-mux routing", () => {
     expect(childProcessMock.execFileSync).toHaveBeenCalledWith(
       "babysitter",
       expect.arrayContaining(["task:post", runDir, "effect-2", "--status", "ok"]),
+      expect.objectContaining({ cwd: "/tmp/workspace" }),
+    );
+  });
+
+  it("routes legacy CLI human responder agent effects through the breakpoint path", async () => {
+    taskMuxMock.routeTask.mockReturnValue({
+      responderType: "human",
+      route: "breakpoint",
+      responder: { id: "human", type: "human" },
+    });
+    childProcessMock.execFileSync.mockReturnValue("{}");
+
+    const runDir = await mkdtemp(path.join(tmpdir(), "issue-633-cli-human-"));
+    await resolveAndPostEffect(
+      {
+        effectId: "effect-human-cli",
+        invocationKey: "invocation",
+        kind: "agent",
+        taskDef: {
+          kind: "agent",
+          title: "Needs a human in CLI mode",
+          agent: {
+            responderType: "human",
+            prompt: { instructions: ["review this"] },
+          },
+        },
+      },
+      runDir,
+      "/tmp/workspace",
+      "gpt-5.4",
+    );
+
+    expect(taskMuxMock.routeTask).toHaveBeenCalledWith(expect.objectContaining({
+      kind: "agent",
+    }));
+    expect(taskMuxMock.submitBreakpoint).not.toHaveBeenCalled();
+    const output = JSON.parse(await readFile(path.join(runDir, "tasks/effect-human-cli/output.json"), "utf8"));
+    expect(output).toMatchObject({
+      approved: true,
+      option: "Approve",
+    });
+    expect(childProcessMock.execFileSync).toHaveBeenCalledWith(
+      "babysitter",
+      expect.arrayContaining(["task:post", runDir, "effect-human-cli", "--status", "ok"]),
       expect.objectContaining({ cwd: "/tmp/workspace" }),
     );
   });
