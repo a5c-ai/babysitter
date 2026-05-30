@@ -1,0 +1,111 @@
+{
+  "issueNumber": 578,
+  "title": "End-to-end token usage and cost tracking (L4 > transport-mux > SDK > L6)",
+  "baseBranch": "staging",
+  "targetBranch": "fix/issue-578-token-cost-tracking",
+  "labels": [
+    "bug",
+    "sdk",
+    "ready-for-dev",
+    "transport-mux",
+    "effort:large",
+    "agent-core",
+    "agent-platform",
+    "P0",
+    "integration",
+    "priority:critical",
+    "risk:high"
+  ],
+  "issueSummary": "Token usage is parsed in agent-core but omitted from AgentCorePromptResult; transport-mux exposes usage/cost data but does not feed SDK COST_TRACKED journal events; SDK can aggregate cost events but receives no live transport feedback; agent-platform has session budget APIs but orchestration does not enforce auto-pause.",
+  "triageComment": "The full chain to build is: agent-core session returns token usage in AgentCorePromptResult; transport-mux proxy feeds normalized cost records to the SDK journal; agent-platform enforces session cost budgets and auto-pauses when exceeded. Related: #575, #587, #599, #604.",
+  "relatedIssues": [575, 587, 599, 604],
+  "targetFiles": [
+    "packages/agent-core/src/types.ts",
+    "packages/agent-core/src/session.ts",
+    "packages/agent-core/src/session.test.ts",
+    "packages/agent-platform/src/harness/types.ts",
+    "packages/agent-platform/src/harness/internal/createRun/agent-core-loop.ts",
+    "packages/transport-mux/src/types.ts",
+    "packages/transport-mux/src/codec.ts",
+    "packages/transport-mux/src/server.ts",
+    "packages/transport-mux/src/codecs/anthropic.ts",
+    "packages/transport-mux/src/codecs/openai-chat.ts",
+    "packages/transport-mux/src/codecs/openai-responses.ts",
+    "packages/transport-mux/src/codecs/google.ts",
+    "packages/transport-mux/src/codecs/bedrock.ts",
+    "packages/transport-mux/src/__tests__/codecs.test.ts",
+    "packages/transport-mux/tests/server.test.ts",
+    "packages/transport-mux/tests/e2e/http-roundtrip.test.ts",
+    "packages/sdk/src/cost/types.ts",
+    "packages/sdk/src/cost/journal.ts",
+    "packages/sdk/src/cost/__tests__/journal.test.ts",
+    "packages/sdk/src/runtime/orchestrateIteration.ts",
+    "packages/sdk/src/runtime/replay/effectIndex.ts",
+    "packages/sdk/src/runtime/__tests__/effectCostTracking.test.ts",
+    "packages/agent-platform/src/session/cost.ts",
+    "packages/agent-platform/src/cost/effectCost.ts",
+    "packages/agent-platform/src/harness/amux/amuxEventMapper.ts",
+    "packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts",
+    "packages/agent-platform/src/harness/internal/createRun/orchestration/index.ts"
+  ],
+  "testTargets": [
+    "packages/agent-core/src/session.test.ts",
+    "packages/transport-mux/src/__tests__/codecs.test.ts",
+    "packages/transport-mux/tests/server.test.ts",
+    "packages/sdk/src/cost/__tests__/journal.test.ts",
+    "packages/sdk/src/runtime/__tests__/effectCostTracking.test.ts",
+    "packages/agent-platform/src/session/cost.test.ts",
+    "packages/agent-platform/src/harness/internal/createRun/orchestration/__tests__/costBudgetEnforcement.test.ts"
+  ],
+  "verificationCommands": [
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "npm --workspace @a5c-ai/agent-core test",
+    "npm --workspace @a5c-ai/transport-mux test",
+    "npm --workspace @a5c-ai/agent-platform test"
+  ],
+  "processLibraryReferences": [
+    "library/tdd-quality-convergence.js",
+    "library/specializations/sdk-platform-development/sdk-testing-strategy.js",
+    "library/specializations/sdk-platform-development/backward-compatibility-management.js",
+    "library/specializations/qa-testing-automation/contract-testing.js",
+    "library/processes/shared/README.md"
+  ],
+  "documentationReferences": [
+    "docs/agent-reference/process-authoring.md",
+    "docs/user-guide/features/process-library.md",
+    "docs/agent-layer-gaps.md",
+    "docs/agent-mux/tutorials/cost-tracking.md",
+    "docs/agent-mux-babysitter-integrations/effect-resolution.md"
+  ],
+  "constraints": [
+    "Do not expand scope to full streaming/history work from #575 except where needed to avoid double-counting streaming final usage events.",
+    "Do not rely on token estimation fixes from #587 for authoritative provider usage; preserve provider-reported usage when available.",
+    "Keep COST_TRACKED events backward-compatible with existing SDK cost journal consumers and old journals without cost events.",
+    "Avoid tight coupling between the generic transport-mux proxy and SDK storage; prefer injectable metadata and feedback sinks.",
+    "Do not write prompt text, raw credentials, or unsanitized provider payloads into cost events.",
+    "Budget auto-pause must happen at orchestrator-safe checkpoints and include an explicit budget reason."
+  ],
+  "acceptanceCriteria": [
+    "AgentCorePromptResult exposes optional normalized usage metadata for OpenAI/Azure and Anthropic direct API calls.",
+    "Transport-mux emits normalized cost feedback for non-streaming completions and exactly once for streaming completions with final usage.",
+    "SDK appends COST_TRACKED events containing provider/model, input/output/cache tokens, effect identity when available, and an idempotency key or duplicate guard.",
+    "SDK run cost stats and effect index include the journaled cost data without regressing replay of journals that lack cost events.",
+    "Agent-platform updates session cost state from run/effect cost data, emits threshold alerts once, and auto-pauses safely when a configured budget is exceeded.",
+    "A deterministic integration test proves a mocked completion/effect produces one COST_TRACKED event and triggers budget handling when over limit."
+  ],
+  "allowedChangedFiles": [
+    "packages/agent-core/**",
+    "packages/transport-mux/**",
+    "packages/sdk/src/cost/**",
+    "packages/sdk/src/runtime/**",
+    "packages/agent-platform/src/session/**",
+    "packages/agent-platform/src/cost/**",
+    "packages/agent-platform/src/harness/**",
+    "docs/agent-layer-gaps.md",
+    "docs/agent-mux/tutorials/cost-tracking.md",
+    "docs/agent-mux-babysitter-integrations/effect-resolution.md"
+  ],
+  "maxVerificationAttempts": 3
+}
