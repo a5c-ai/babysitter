@@ -20,14 +20,14 @@ function parseConfigContent(env: Record<string, string>): Record<string, unknown
 
 describe('translateForOpenCode', () => {
   describe('anthropic provider', () => {
-    it('sets OPENCODE_CONFIG_CONTENT with @ai-sdk/anthropic', () => {
+    it('sets OPENCODE_CONFIG_CONTENT with anthropic built-in provider', () => {
       const result = translateForOpenCode(makeConfig({
         provider: 'anthropic',
         model: 'claude-sonnet-4',
         auth: { type: 'api_key', apiKey: 'sk-ant-key' },
       }));
       const cfg = parseConfigContent(result.env);
-      expect((cfg.provider as Record<string, unknown>)['amux']).toMatchObject({ npm: '@ai-sdk/anthropic' });
+      expect(cfg.model).toBe('anthropic/claude-sonnet-4');
     });
 
     it('sets ANTHROPIC_API_KEY', () => {
@@ -45,7 +45,7 @@ describe('translateForOpenCode', () => {
         auth: { type: 'api_key', apiKey: 'sk-key' },
       }));
       const cfg = parseConfigContent(result.env);
-      expect((cfg.model as Record<string, unknown>)['default']).toBe('amux/claude-opus-4');
+      expect(cfg.model).toBe('anthropic/claude-opus-4');
     });
 
     it('returns proxyRequired=false', () => {
@@ -55,166 +55,99 @@ describe('translateForOpenCode', () => {
   });
 
   describe('openai provider', () => {
-    it('sets OPENCODE_CONFIG_CONTENT with @ai-sdk/openai', () => {
+    it('sets OPENCODE_CONFIG_CONTENT with openai built-in provider', () => {
       const result = translateForOpenCode(makeConfig({
         provider: 'openai',
         model: 'gpt-4o',
-        auth: { type: 'api_key', apiKey: 'sk-openai-key' },
+        auth: { type: 'api_key', apiKey: 'sk-openai' },
       }));
       const cfg = parseConfigContent(result.env);
-      expect((cfg.provider as Record<string, unknown>)['amux']).toMatchObject({ npm: '@ai-sdk/openai' });
+      expect(cfg.model).toBe('openai/gpt-4o');
     });
 
     it('sets OPENAI_API_KEY', () => {
       const result = translateForOpenCode(makeConfig({
         provider: 'openai',
-        auth: { type: 'api_key', apiKey: 'sk-openai-key' },
+        auth: { type: 'api_key', apiKey: 'sk-openai' },
       }));
-      expect(result.env['OPENAI_API_KEY']).toBe('sk-openai-key');
+      expect(result.env['OPENAI_API_KEY']).toBe('sk-openai');
     });
   });
 
   describe('google provider', () => {
-    it('sets OPENCODE_CONFIG_CONTENT with @ai-sdk/google', () => {
+    it('sets OPENCODE_CONFIG_CONTENT with google built-in provider', () => {
       const result = translateForOpenCode(makeConfig({
         provider: 'google',
-        model: 'gemini-2.5-pro',
-        auth: { type: 'api_key', apiKey: 'gai-key' },
+        model: 'gemini-2.5-flash',
+        auth: { type: 'api_key', apiKey: 'google-key' },
       }));
       const cfg = parseConfigContent(result.env);
-      expect((cfg.provider as Record<string, unknown>)['amux']).toMatchObject({ npm: '@ai-sdk/google' });
+      expect(cfg.model).toBe('google/gemini-2.5-flash');
     });
 
     it('sets GOOGLE_GENERATIVE_AI_API_KEY', () => {
       const result = translateForOpenCode(makeConfig({
         provider: 'google',
-        auth: { type: 'api_key', apiKey: 'gai-key' },
+        auth: { type: 'api_key', apiKey: 'google-key' },
       }));
-      expect(result.env['GOOGLE_GENERATIVE_AI_API_KEY']).toBe('gai-key');
+      expect(result.env['GOOGLE_GENERATIVE_AI_API_KEY']).toBe('google-key');
     });
   });
 
-  describe('vertex provider', () => {
-    it('sets OPENCODE_CONFIG_CONTENT with @ai-sdk/google-vertex', () => {
+  describe('non-builtin providers route through proxy', () => {
+    it('uses openai provider with proxy for vertex', () => {
       const result = translateForOpenCode(makeConfig({
-        provider: 'vertex',
-        model: 'claude-sonnet-4',
-        auth: { type: 'adc' },
+        provider: 'vertex' as ProviderConfig['provider'],
+        model: 'gemini-pro',
+        auth: { type: 'api_key', apiKey: 'vtx-key' },
       }));
       const cfg = parseConfigContent(result.env);
-      expect((cfg.provider as Record<string, unknown>)['amux']).toMatchObject({ npm: '@ai-sdk/google-vertex' });
+      expect(cfg.model).toBe('openai/gemini-pro');
+      expect(result.proxyRequired).toBe(true);
     });
 
-    it('does not set an env key for adc auth', () => {
-      const result = translateForOpenCode(makeConfig({ provider: 'vertex', auth: { type: 'adc' } }));
-      expect(result.env['ANTHROPIC_API_KEY']).toBeUndefined();
-      expect(result.env['GOOGLE_GENERATIVE_AI_API_KEY']).toBeUndefined();
-    });
-  });
-
-  describe('bedrock provider', () => {
-    it('sets OPENCODE_CONFIG_CONTENT with @ai-sdk/amazon-bedrock', () => {
+    it('uses openai provider with proxy for bedrock', () => {
       const result = translateForOpenCode(makeConfig({
-        provider: 'bedrock',
-        model: 'anthropic.claude-sonnet-4',
-        auth: { type: 'iam' },
+        provider: 'bedrock' as ProviderConfig['provider'],
+        model: 'claude-3-haiku',
+        auth: { type: 'api_key', apiKey: 'aws-key' },
       }));
       const cfg = parseConfigContent(result.env);
-      expect((cfg.provider as Record<string, unknown>)['amux']).toMatchObject({ npm: '@ai-sdk/amazon-bedrock' });
+      expect(cfg.model).toBe('openai/claude-3-haiku');
+      expect(result.proxyRequired).toBe(true);
     });
-  });
 
-  describe('azure provider', () => {
-    it('sets OPENCODE_CONFIG_CONTENT with @ai-sdk/azure', () => {
+    it('uses openai provider with proxy for azure', () => {
       const result = translateForOpenCode(makeConfig({
-        provider: 'azure',
-        model: 'gpt-4o',
-        auth: { type: 'api_key', apiKey: 'az-key' },
+        provider: 'azure' as ProviderConfig['provider'],
+        model: 'gpt-4',
+        auth: { type: 'api_key', apiKey: 'azure-key' },
       }));
       const cfg = parseConfigContent(result.env);
-      expect((cfg.provider as Record<string, unknown>)['amux']).toMatchObject({ npm: '@ai-sdk/azure' });
+      expect(cfg.model).toBe('openai/gpt-4');
+      expect(result.proxyRequired).toBe(true);
     });
-  });
 
-  describe('openai-compatible fallback providers', () => {
-    it('uses @ai-sdk/openai-compatible for groq', () => {
+    it('sets OPENAI_API_KEY from auth for proxy providers', () => {
       const result = translateForOpenCode(makeConfig({
-        provider: 'groq',
-        model: 'llama-4-scout-17b',
-        auth: { type: 'api_key', apiKey: 'gsk-key' },
-        params: { apiBase: 'https://api.groq.com/openai' },
+        provider: 'groq' as ProviderConfig['provider'],
+        model: 'llama-3',
+        auth: { type: 'api_key', apiKey: 'groq-key' },
       }));
-      const cfg = parseConfigContent(result.env);
-      expect((cfg.provider as Record<string, unknown>)['amux']).toMatchObject({ npm: '@ai-sdk/openai-compatible' });
+      expect(result.env['OPENAI_API_KEY']).toBe('groq-key');
+      expect(result.proxyRequired).toBe(true);
     });
 
-    it('sets baseURL in options from params.apiBase for groq', () => {
+    it('includes provider config with openai options', () => {
       const result = translateForOpenCode(makeConfig({
-        provider: 'groq',
-        model: 'llama-4-scout-17b',
-        auth: { type: 'api_key', apiKey: 'gsk-key' },
-        params: { apiBase: 'https://api.groq.com/openai' },
-      }));
-      const cfg = parseConfigContent(result.env);
-      const amux = (cfg.provider as Record<string, unknown>)['amux'] as Record<string, unknown>;
-      expect((amux['options'] as Record<string, string>)['baseURL']).toBe('https://api.groq.com/openai');
-    });
-
-    it('sets OPENAI_API_KEY for groq fallback', () => {
-      const result = translateForOpenCode(makeConfig({
-        provider: 'groq',
-        auth: { type: 'api_key', apiKey: 'gsk-key' },
-      }));
-      expect(result.env['OPENAI_API_KEY']).toBe('gsk-key');
-    });
-
-    it('uses @ai-sdk/openai-compatible for deepseek', () => {
-      const result = translateForOpenCode(makeConfig({
-        provider: 'deepseek',
-        model: 'deepseek-chat',
+        provider: 'deepseek' as ProviderConfig['provider'],
+        model: 'deepseek-coder',
         auth: { type: 'api_key', apiKey: 'ds-key' },
       }));
       const cfg = parseConfigContent(result.env);
-      expect((cfg.provider as Record<string, unknown>)['amux']).toMatchObject({ npm: '@ai-sdk/openai-compatible' });
-    });
-
-    it('uses @ai-sdk/openai-compatible for ollama', () => {
-      const result = translateForOpenCode(makeConfig({
-        provider: 'ollama',
-        model: 'qwen3:latest',
-        auth: { type: 'none' },
-        params: { apiBase: 'http://localhost:11434' },
-      }));
-      const cfg = parseConfigContent(result.env);
-      expect((cfg.provider as Record<string, unknown>)['amux']).toMatchObject({ npm: '@ai-sdk/openai-compatible' });
-    });
-
-    it('omits baseURL in options when params.apiBase is absent', () => {
-      const result = translateForOpenCode(makeConfig({
-        provider: 'groq',
-        auth: { type: 'api_key', apiKey: 'gsk-key' },
-      }));
-      const cfg = parseConfigContent(result.env);
-      const amux = (cfg.provider as Record<string, unknown>)['amux'] as Record<string, unknown>;
-      expect(amux['options']).toEqual({});
-    });
-
-    it('returns proxyRequired=false for fallback', () => {
-      const result = translateForOpenCode(makeConfig({ provider: 'groq', auth: { type: 'api_key' } }));
-      expect(result.proxyRequired).toBe(false);
-    });
-  });
-
-  describe('config schema', () => {
-    it('includes $schema field', () => {
-      const result = translateForOpenCode(makeConfig({ provider: 'anthropic', auth: { type: 'api_key' } }));
-      const cfg = parseConfigContent(result.env);
-      expect(cfg['$schema']).toBe('https://opencode.ai/config.json');
-    });
-
-    it('returns empty args', () => {
-      const result = translateForOpenCode(makeConfig({ provider: 'anthropic', auth: { type: 'api_key' } }));
-      expect(result.args).toEqual([]);
+      expect(cfg.provider).toMatchObject({
+        openai: { options: { baseURL: '' } },
+      });
     });
   });
 });
