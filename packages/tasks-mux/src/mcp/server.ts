@@ -1,6 +1,11 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import type { ZodRawShapeCompat } from "@modelcontextprotocol/sdk/server/zod-compat.js";
+import {
+  EmptyResultSchema,
+  SubscribeRequestSchema,
+  UnsubscribeRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
 
 import type { HttpMcpServerOptions, HttpMcpServerResult } from "./http-transport.js";
 import {
@@ -38,19 +43,31 @@ import {
   assignTaskParams,
   addCommentDescription,
   addCommentParams,
+  addCommentToBreakpointDescription,
+  addCommentToBreakpointParams,
   bulkUpdateTasksDescription,
   bulkUpdateTasksParams,
+  cancelBreakpointDescription,
+  cancelBreakpointParams,
+  createTaskDescription,
+  createTaskParams,
   createTodoDescription,
   createTodoParams,
   escalateDescription,
+  escalateBreakpointDescription,
+  escalateBreakpointParams,
   escalateParams,
   exportTasksDescription,
   exportTasksParams,
   handleAssignTask,
   handleAddComment,
+  handleAddCommentToBreakpoint,
   handleBulkUpdateTasks,
+  handleCancelBreakpoint,
+  handleCreateTask,
   handleCreateTodo,
   handleEscalate,
+  handleEscalateBreakpoint,
   handleExportTasks,
   handleSearchTasks,
   handleTaskStats,
@@ -107,7 +124,64 @@ export function createBreakpointMcpServer(): McpServer {
   const server = new McpServer({
     name: "tasks-mux",
     version: "0.1.0",
+  }, {
+    capabilities: {
+      resources: {
+        listChanged: true,
+        subscribe: true,
+      },
+    },
   });
+
+  const subscribedResources = new Set<string>();
+
+  server.server.setRequestHandler(SubscribeRequestSchema, (request) => {
+    subscribedResources.add(request.params.uri);
+    return EmptyResultSchema.parse({});
+  });
+
+  server.server.setRequestHandler(UnsubscribeRequestSchema, (request) => {
+    subscribedResources.delete(request.params.uri);
+    return EmptyResultSchema.parse({});
+  });
+
+  server.registerResource(
+    "breakpoint",
+    new ResourceTemplate("breakpoint://{id}", {
+      list: async () => {
+        const backend = resolveToolBackend();
+        if (!backend.searchBreakpoints) return { resources: [] };
+        const result = await backend.searchBreakpoints({});
+        return {
+          resources: result.items.map((breakpoint) => ({
+            uri: `breakpoint://${breakpoint.id}`,
+            name: breakpoint.id,
+            description: breakpoint.text,
+            mimeType: "application/json",
+          })),
+        };
+      },
+    }),
+    {
+      title: "Breakpoint",
+      description: "Read a breakpoint by id using breakpoint://[id]. Subscribe to the URI to receive resource update notifications from transports that support them.",
+      mimeType: "application/json",
+    },
+    async (uri, variables) => {
+      const id = String(variables.id);
+      const breakpoint = await resolveToolBackend().getBreakpoint(id);
+      return {
+        contents: [{
+          uri: uri.toString(),
+          mimeType: "application/json",
+          text: JSON.stringify({
+            ...breakpoint,
+            subscribed: subscribedResources.has(uri.toString()),
+          }, null, 2),
+        }],
+      };
+    },
+  );
 
   // ── Submitter-side tools ──────────────────────────────────────────────
 
@@ -164,6 +238,19 @@ export function createBreakpointMcpServer(): McpServer {
   );
 
   server.tool(
+    "create_task",
+    createTaskDescription,
+    toCompatShape(createTaskParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleCreateTask(args as Parameters<typeof handleCreateTask>[0], backend);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
     "assign_task",
     assignTaskDescription,
     toCompatShape(assignTaskParams),
@@ -190,12 +277,40 @@ export function createBreakpointMcpServer(): McpServer {
   );
 
   server.tool(
+    "cancel_breakpoint",
+    cancelBreakpointDescription,
+    toCompatShape(cancelBreakpointParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleCancelBreakpoint(args as Parameters<typeof handleCancelBreakpoint>[0], backend);
+      await server.server.sendResourceUpdated({ uri: `breakpoint://${args.breakpointId}` }).catch(() => {});
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
     "add_comment",
     addCommentDescription,
     toCompatShape(addCommentParams),
     async (args) => {
       const backend = resolveToolBackend(args);
       const result = await handleAddComment(args as Parameters<typeof handleAddComment>[0], backend);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "add_comment_to_breakpoint",
+    addCommentToBreakpointDescription,
+    toCompatShape(addCommentToBreakpointParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleAddCommentToBreakpoint(args as Parameters<typeof handleAddCommentToBreakpoint>[0], backend);
+      await server.server.sendResourceUpdated({ uri: `breakpoint://${args.breakpointId}` }).catch(() => {});
       return {
         content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
       };
@@ -248,6 +363,20 @@ export function createBreakpointMcpServer(): McpServer {
     async (args) => {
       const backend = resolveToolBackend(args);
       const result = await handleEscalate(args as Parameters<typeof handleEscalate>[0], backend);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "escalate_breakpoint",
+    escalateBreakpointDescription,
+    toCompatShape(escalateBreakpointParams),
+    async (args) => {
+      const backend = resolveToolBackend(args);
+      const result = await handleEscalateBreakpoint(args as Parameters<typeof handleEscalateBreakpoint>[0], backend);
+      await server.server.sendResourceUpdated({ uri: `breakpoint://${args.breakpointId}` }).catch(() => {});
       return {
         content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
       };

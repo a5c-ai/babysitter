@@ -101,11 +101,11 @@ describe("CLI Program", () => {
       expect(commands).toContain("auth");
     });
 
-    it("has 7 registered subcommands", async () => {
+    it("has 9 registered subcommands", async () => {
       const { createProgram } = await importProgram();
       const program = createProgram();
 
-      expect(program.commands).toHaveLength(7);
+      expect(program.commands).toHaveLength(9);
     });
 
     it("defines --server-url global option", async () => {

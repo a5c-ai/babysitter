@@ -3,10 +3,14 @@ import type { BreakpointBackend } from "../backend.js";
 import type { Breakpoint, BreakpointPublicAnswer, BreakpointWaitResult } from "../types.js";
 import {
   handleAddComment,
+  handleAddCommentToBreakpoint,
   handleAssignTask,
   handleBulkUpdateTasks,
+  handleCancelBreakpoint,
+  handleCreateTask,
   handleCreateTodo,
   handleEscalate,
+  handleEscalateBreakpoint,
   handleExportTasks,
   handleSearchTasks,
   handleTaskStats,
@@ -197,6 +201,32 @@ describe("native task MCP handlers", () => {
     }));
   });
 
+  it("create_task records the public alias in native metadata", async () => {
+    const backend = createMockBackend();
+
+    const result = await handleCreateTask({
+      title: "Implement CLI parity",
+      instructions: "Add breakpoint lifecycle aliases",
+      responderId: "codex",
+      responderType: "agent",
+    }, backend);
+
+    expect(result.tool).toBe("create_task");
+    expect(backend.submitBreakpoint).toHaveBeenCalledWith(expect.objectContaining({
+      context: expect.objectContaining({
+        interactionKind: "handoff",
+        metadata: expect.objectContaining({
+          nativeTool: "create_task",
+          nativeKind: "task",
+        }),
+      }),
+      routing: expect.objectContaining({
+        targetResponders: ["codex"],
+        responderType: "agent",
+      }),
+    }));
+  });
+
   it("search_tasks filters pending backend tasks by query, tags, responder, and limit", async () => {
     const backend = createMockBackend([
       makeBreakpoint({
@@ -258,6 +288,14 @@ describe("native task MCP handlers", () => {
       authorId: "maintainer",
       text: "Ready for review",
     }, backend)).resolves.toMatchObject({ tool: "add_comment", comment: { id: "comment-1" } });
+    await expect(handleAddCommentToBreakpoint({
+      breakpointId: "bp-existing",
+      authorId: "maintainer",
+      text: "Ready for review",
+    }, backend)).resolves.toMatchObject({ tool: "add_comment_to_breakpoint", breakpointId: "bp-existing" });
+    await expect(handleCancelBreakpoint({
+      breakpointId: "bp-existing",
+    }, backend)).resolves.toMatchObject({ tool: "cancel_breakpoint", breakpointId: "bp-existing", cancelled: true });
 
     await expect(handleBulkUpdateTasks({
       ids: ["bp-existing"],
@@ -296,5 +334,23 @@ describe("native task MCP handlers", () => {
         targetResponders: ["maintainer"],
       }),
     }));
+  });
+
+  it("escalate_breakpoint records the public alias in result metadata", async () => {
+    const backend = createMockBackend([
+      makeBreakpoint({ id: "bp-source", text: "Blocked routed task" }),
+    ]);
+
+    const result = await handleEscalateBreakpoint({
+      breakpointId: "bp-source",
+      reason: "Adapter timed out twice",
+    }, backend);
+
+    expect(result).toMatchObject({
+      tool: "escalate_breakpoint",
+      metadata: {
+        nativeTool: "escalate_breakpoint",
+      },
+    });
   });
 });
