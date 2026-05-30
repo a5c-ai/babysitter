@@ -181,6 +181,12 @@ export function resolveTaskHarness(
   defaultHarness: string,
   discovered: HarnessDiscoveryResult[],
 ): string {
+  if (typeof action.schedulerHints?.preferredHarness === "string") {
+    const requestedHarness = normalizeBuiltInHarnessName(action.schedulerHints.preferredHarness);
+    const match = discovered.find((h) => h.name === requestedHarness && h.installed);
+    if (match) return match.name;
+  }
+
   const meta = action.taskDef?.metadata as Record<string, unknown> | undefined;
   if (typeof meta?.harness === "string") {
     const requestedHarness = normalizeBuiltInHarnessName(meta.harness);

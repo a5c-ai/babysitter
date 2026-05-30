@@ -125,18 +125,18 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 
 | Gap | Description |
 |-----|-------------|
-| No conditional task routing | Can't branch orchestration based on effect results. |
-| No checkpointing | No mid-run savepoints for resuming complex workflows. |
-| No rollback/undo | Can't reverse completed effects. |
-| No nested orchestration | No sub-orchestrations or workflow composition. |
+| Conditional task routing partially integrated | Process JavaScript can branch on `ctx.task` results; remaining work is making declarative task dependencies and route metadata first-class. |
+| Checkpointing partially integrated | SDK effect-group checkpoint metadata exists; process-level savepoint/replay contracts still need a durable public API. |
+| No rollback/undo | Reversible effects and compensating actions still need an explicit non-rollbackable vs rollbackable contract. |
+| Nested orchestration partially integrated | `subprocess` effects create child runs; child pending actions now use the same grouped dispatch path as top-level orchestration. |
 | No process versioning | Breaking changes in process definitions unmanaged. |
 | No multi-agent orchestration | No agent pools, discovery, or load balancing. |
 | No tool discovery/registry population | `deferredToolRegistry.ts` exists but not populated. |
 | No rate limiting per harness | No token bucket or sliding window. |
 | No process dependency management | Tasks within a process can't declare dependencies. |
-| Sequential-only orchestration | Orchestration loop is single-stream, single-harness. |
+| Orchestration dispatch partially concurrent | Agent-platform groups same-iteration actions by `schedulerHints.parallelGroupId`, honors `maxConcurrency`/`executionStrategy`, preserves deterministic commit order, and routes per-action harness hints; broader agent-pool scheduling remains missing. |
 | Session context not available in plan phase | Context injection missing in planProcess. |
-| Daemon max concurrent runs hardcoded to 4 | Not configurable. |
+| Daemon max concurrent runs defaults to 4 | Configurable via daemon config; the default may still need workload-specific tuning. |
 | Selection policies unused | `src/harness/selectionPolicies.ts` defined but never called. |
 
 ---
@@ -364,7 +364,7 @@ Only `GitHubIssuesBackend` exists. Basic mapping of breakpoints to GitHub issues
 3. Unify tool registries: tool-mux ToolDispatcher replaces DeferredToolRegistry + McpToolRegistry
 4. Wire tasks-mux into agent stack (native tools: todo, task, ask, approve, assign)
 5. Wire MCP into agent-platform orchestration (connect tool-mux McpBridge)
-6. Implement ConcurrentEffects (parallel within-harness)
+6. Complete ConcurrentEffects coverage beyond grouped agent-platform dispatch
 7. Token usage tracking end-to-end (L4 → transport-mux → SDK journal → L6 cost)
 
 **P1 — Unblock platform features:**
