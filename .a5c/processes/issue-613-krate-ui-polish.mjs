@@ -6,34 +6,34 @@
  *
  * References used while authoring:
  * - docs/agent-reference/process-authoring.md
- * - docs/user-guide/features/process-library.md
- * - docs/user-guide/generated/process-library-inventory.json
  * - packages/krate/docs/gaps/ui-ux-remaining.md
  *
  * Process-library references used:
  * - methodologies/superpowers/test-driven-development.js
  * - methodologies/superpowers/verification-before-completion.js
- * - specializations/web-development/unit-testing-react.js
  * - specializations/web-development/keyboard-navigation-focus.js
- * - specializations/web-development/accessibility-audit-remediation.js
- * - specializations/qa-testing-automation/e2e-test-suite.js
- * - processes/shared/playwright-visual-smoke.js
+ * - specializations/web-development/e2e-testing-playwright.js
+ * - processes/shared/tdd-triplet.js
+ * - processes/shared/completeness-gate.js
+ * - processes/shared/prior-attempts-scanner.js
  *
  * This process intentionally uses agent tasks rather than kind: "shell" tasks to
  * respect the repository-specific authoring override for direct Babysitter
- * workflows. Verification agents must still run the listed commands and report
- * command, exit code, and relevant output.
+ * workflows. Agent tasks must runtime-read the issue, gap document, current
+ * files, and diff before deciding scope or acceptance.
  *
  * @process methodologies/superpowers/test-driven-development
  * @process methodologies/superpowers/verification-before-completion
- * @process specializations/web-development/unit-testing-react
  * @process specializations/web-development/keyboard-navigation-focus
- * @process specializations/web-development/accessibility-audit-remediation
- * @process specializations/qa-testing-automation/e2e-test-suite
- * @agent frontend-engineer specializations/web-development/agents/frontend-engineer/AGENT.md
+ * @process specializations/web-development/e2e-testing-playwright
+ * @process processes/shared/tdd-triplet
+ * @process processes/shared/completeness-gate
+ * @process processes/shared/prior-attempts-scanner
+ * @agent coder methodologies/maestro/agents/coder/AGENT.md
  * @agent test-engineer methodologies/maestro/agents/test-engineer/AGENT.md
- * @agent accessibility-reviewer specializations/ux-ui-design/agents/accessibility-reviewer/AGENT.md
  * @agent code-reviewer methodologies/maestro/agents/code-reviewer/AGENT.md
+ * @agent web-code-reviewer specializations/web-development/agents/code-reviewer/AGENT.md
+ * @agent e2e-testing specializations/web-development/agents/e2e-testing/AGENT.md
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -41,20 +41,23 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 const MAX_REFINEMENT_ATTEMPTS = 3;
 
 function specBlock(args) {
+  const runtimeIssue = args.issueContext?.rawIssueJson || args.issueContext?.issueSummary || args.issueBody || '';
+  const runtimeTriage = args.issueContext?.commentsSummary || args.triageComment || '';
+  const runtimeGapDoc = args.issueContext?.gapDocText || 'packages/krate/docs/gaps/ui-ux-remaining.md';
   return [
-    'ISSUE SPEC (runtime input, verbatim):',
+    'RUNTIME-READ ISSUE CONTEXT:',
     '---',
-    args.issueBody || '',
-    '---',
-    '',
-    'TRIAGE COMMENT (runtime input, verbatim):',
-    '---',
-    args.triageComment || '',
+    typeof runtimeIssue === 'string' ? runtimeIssue : JSON.stringify(runtimeIssue, null, 2),
     '---',
     '',
-    'REFERENCED GAP DOC:',
+    'RUNTIME-READ COMMENTS/TRIAGE:',
     '---',
-    'packages/krate/docs/gaps/ui-ux-remaining.md',
+    typeof runtimeTriage === 'string' ? runtimeTriage : JSON.stringify(runtimeTriage, null, 2),
+    '---',
+    '',
+    'RUNTIME-READ REFERENCED GAP DOC:',
+    '---',
+    runtimeGapDoc,
     '---',
   ].join('\n');
 }
@@ -235,13 +238,14 @@ export const readIssueContextTask = defineTask('issue-613.read-issue-context', (
         'Read all issue comments and labels carefully. Treat the issue body, triage comment, and gap document as the source of truth.',
         'Read packages/krate/docs/gaps/ui-ux-remaining.md.',
         'Inspect current target files only enough to determine which issue items are still unresolved on the execution branch.',
+        'Capture the raw issue JSON and gap document text in the returned JSON so downstream tasks compare against runtime-read context instead of authored paraphrase.',
         'Do not modify files in this phase.',
-        'Return JSON: { title, state, labels, issueSummary, commentsSummary, acceptanceCriteria, nonGoals, gapDocSummary, targetFiles, openQuestions }.',
+        'Return JSON: { title, state, labels, rawIssueJson, issueSummary, commentsSummary, acceptanceCriteria, nonGoals, gapDocText, gapDocSummary, targetFiles, openQuestions }.',
       ],
     },
     outputSchema: {
       type: 'object',
-      required: ['issueSummary', 'acceptanceCriteria', 'nonGoals', 'targetFiles'],
+      required: ['issueSummary', 'acceptanceCriteria', 'nonGoals', 'targetFiles', 'rawIssueJson', 'gapDocText'],
     },
   },
   io: {
@@ -380,6 +384,7 @@ export const implementUiPolishTask = defineTask('issue-613.implement-ui-polish',
         'Colors: migrate hardcoded colors only in files touched for this issue or in a small shared helper needed by those files. Prefer existing CSS variables and add narrowly named variables only when no existing token matches.',
         'Do not broaden into static markdown/render-only keys, unrelated console.warn calls, or a full 735-instance color migration.',
         'Run the narrow tests until they pass before returning.',
+        'Preserve unrelated dirty workspace files; stage or commit nothing in this implementation process unless a later publication task explicitly asks for it.',
         'Return JSON: { changedFiles, summary, keyChanges, deployErrorBehavior, keyboardBehavior, colorTokenChanges, testCommands, testResults, decisions }.',
       ],
     },
@@ -439,7 +444,7 @@ export const reviewAgainstSpecTask = defineTask('issue-613.review-against-spec',
       role: 'senior code reviewer and accessibility reviewer',
       task: 'Review the working tree diff against the issue spec, current-state scope, and verification evidence.',
       instructions: [
-        'Compare SPEC to ARTIFACTS directly. Ignore narrative claims unless the diff and verification support them.',
+        'Compare the runtime-read issue context to the artifacts directly. Ignore narrative claims unless the diff and verification support them.',
         '',
         specBlock(args),
         '',

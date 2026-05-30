@@ -19,26 +19,33 @@
   "existingPlanContext": {
     "previousPlanPr": "https://github.com/a5c-ai/babysitter/pull/651",
     "previousPlanPrState": "closed",
-    "previousIssueComment": "Issue #613 already has a prior plan comment and was marked work-in-progress, but this manual dispatch requests a fresh executable plan artifact.",
+    "currentPlanPr": "https://github.com/a5c-ai/babysitter/pull/718",
+    "currentPlanPrState": "open",
+    "previousIssueComment": "Issue #613 already has prior plan comments and was marked work-in-progress, but this manual dispatch requires the executable process artifacts to remain current against staging and the active process library.",
     "currentBranchNote": "Current staging may already contain partial CuratedModelCatalog route-warning behavior. The process must audit current state before implementing to avoid duplicate or regressive changes."
   },
   "processLibraryResearch": {
-    "documentedActiveLayout": "docs/user-guide/features/process-library.md states the built-in library lives under library/ and project-local .a5c/processes overrides shared definitions.",
+    "activeLibraryRoot": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "repoPolicyReference": "docs/agent-reference/process-authoring.md says this repo should keep direct Babysitter workflows sparse on breakpoints and avoid kind:'shell' subtasks for babysitter:call processes unless explicitly requested.",
     "methodologyReferences": [
       "library/methodologies/superpowers/test-driven-development.js",
       "library/methodologies/superpowers/verification-before-completion.js",
-      "library/specializations/web-development/unit-testing-react.js",
       "library/specializations/web-development/keyboard-navigation-focus.js",
-      "library/specializations/web-development/accessibility-audit-remediation.js",
-      "library/specializations/qa-testing-automation/e2e-test-suite.js",
-      "library/processes/shared/playwright-visual-smoke.js"
+      "library/specializations/web-development/e2e-testing-playwright.js",
+      "library/processes/shared/tdd-triplet.js",
+      "library/processes/shared/completeness-gate.js",
+      "library/processes/shared/prior-attempts-scanner.js",
+      "library/methodologies/spec-kit-brownfield.js",
+      "library/methodologies/feature-driven-development/feature-driven-development.js"
     ],
     "discoveryCommandsUsed": [
-      "find . -path './.git' -prune -o -path './node_modules' -prune -o -path '*/process-library*' -print",
-      "sed -n '1,220p' docs/user-guide/features/process-library.md",
-      "sed -n '1,220p' docs/user-guide/generated/process-library-inventory.json",
-      "find library -maxdepth 4 -type f \\( -name '*test-driven*' -o -name '*verification*' -o -name '*ui*' -o -name '*react*' -o -name '*accessib*' -o -name '*frontend*' \\) | head -120",
-      "rg -n \"React|frontend|UI polish|accessibility|TDD|quality gate|visual|keyboard|color\" library/methodologies library/specializations library/processes/shared -S --glob '*.js'"
+      "babysitter instructions:babysit-skill --harness codex --no-interactive",
+      "rg --files /home/runner/.a5c/process-library/babysitter-repo/library",
+      "rg --files /home/runner/.a5c/process-library/babysitter-repo/library/specializations /home/runner/.a5c/process-library/babysitter-repo/library/processes /home/runner/.a5c/process-library/babysitter-repo/library/methodologies | rg -n \"react|web|keyboard|accessib|test|verification|quality|github|branch|issue|pr|ui|automaker|rpikit|spec-kit|planning-with-files\"",
+      "sed -n '1,240p' docs/agent-reference/process-authoring.md",
+      "sed -n '1,160p' /home/runner/.a5c/process-library/babysitter-repo/library/specializations/web-development/keyboard-navigation-focus.js",
+      "sed -n '1,160p' /home/runner/.a5c/process-library/babysitter-repo/library/specializations/web-development/e2e-testing-playwright.js",
+      "babysitter skill:discover --process-path .a5c/processes/issue-613-krate-ui-polish.mjs --json"
     ]
   },
   "targetFiles": [
