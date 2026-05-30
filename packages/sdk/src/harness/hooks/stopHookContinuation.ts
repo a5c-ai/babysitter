@@ -27,6 +27,15 @@ import { getReadableRunsDirs, resolveExistingRunDir } from "../../config";
 import type { HookLogger } from "./utils";
 import { countPendingByKind, isOnlyBreakpoints, safeStr } from "./utils";
 
+type TasksMuxModuleLike = {
+  routeTask?: (taskDef: unknown) => unknown;
+  isHostDelegableRoute?: (route: unknown) => boolean;
+};
+
+const importOptionalModule = new Function("specifier", "return import(specifier)") as (
+  specifier: string,
+) => Promise<unknown>;
+
 // ---------------------------------------------------------------------------
 // Assistant state parsing
 // ---------------------------------------------------------------------------
@@ -237,11 +246,13 @@ async function isHostDelegableEffect(
   try {
     const taskDef = await readTaskDefinition(runDir, record.effectId);
     if (!taskDef) return record.kind !== "breakpoint";
-    const mux = await import("@a5c-ai/tasks-mux");
-    if (typeof mux.routeTask !== "function" || typeof mux.isHostDelegableRoute !== "function") {
+    const mux = await importOptionalModule("@a5c-ai/tasks-mux") as TasksMuxModuleLike;
+    const routeTask = mux.routeTask;
+    const isHostDelegableRoute = mux.isHostDelegableRoute;
+    if (typeof routeTask !== "function" || typeof isHostDelegableRoute !== "function") {
       return record.kind !== "breakpoint";
     }
-    return mux.isHostDelegableRoute(mux.routeTask(taskDef as unknown as Parameters<typeof mux.routeTask>[0]));
+    return isHostDelegableRoute(routeTask(taskDef));
   } catch {
     return record.kind !== "breakpoint";
   }
