@@ -13,6 +13,7 @@ export { createClient } from '@a5c-ai/agent-comm-mux';
 export { ExitCode, errorCodeToExitCode } from './exit-codes.js';
 export { parseArgs } from './parse-args.js';
 export { registerBuiltInAdapters } from './bootstrap.js';
+export { resolveCliLoggerConfig, type CliLoggerConfig } from './loggingConfig.js';
 export type { ParsedArgs, FlagDef } from './parse-args.js';
 // Re-exported so the meta-package shim (`@a5c-ai/agent-mux`) can drive the CLI.
 export { main as runCli };
@@ -47,6 +48,7 @@ import { launchCommand, LAUNCH_FLAGS } from './commands/launch.js';
 import { workspacesCommand, WORKSPACE_FLAGS } from './commands/workspaces.js';
 import { registerBuiltInAdapters } from './bootstrap.js';
 import { reconfigureLogger } from '@a5c-ai/agent-mux-observability';
+import { resolveCliLoggerConfig } from './loggingConfig.js';
 
 /**
  * Main CLI entry point.
@@ -127,25 +129,7 @@ export async function main(argv?: string[]): Promise<number> {
     if (agent) clientOpts['defaultAgent'] = agent;
     if (model) clientOpts['defaultModel'] = model;
 
-    // Set observability environment variables from CLI flags
-    if (logLevel) {
-      process.env['AMUX_LOG_LEVEL'] = logLevel;
-      process.env['AMUX_OBSERVABILITY_MODE'] = 'full';
-    }
-    if (logFile) {
-      process.env['AMUX_LOG_FILE'] = logFile;
-      process.env['AMUX_OBSERVABILITY_MODE'] = 'full';
-    }
-    if (debug && !logLevel) {
-      process.env['AMUX_LOG_LEVEL'] = 'debug';
-      process.env['AMUX_OBSERVABILITY_MODE'] = 'full';
-    }
-
-    // Apply logging configuration to the global logger
-    reconfigureLogger({
-      level: (process.env['AMUX_LOG_LEVEL'] as any) || (debug ? 'debug' : 'info'),
-      logFile: process.env['AMUX_LOG_FILE'],
-    });
+    reconfigureLogger(resolveCliLoggerConfig({ debug, logLevel, logFile }));
 
     const client = createClient(clientOpts as Parameters<typeof createClient>[0]);
     registerBuiltInAdapters(client);
