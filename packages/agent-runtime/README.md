@@ -38,6 +38,13 @@ Secure defaults are intentionally conservative:
   builder.
 - Background processes use the same environment and cwd policy semantics and
   can cap retained stdout/stderr with `policy.resources.maxOutputBytes`.
+  Snapshots and completion events include retained and dropped byte counts so
+  truncation is explicit.
+- Background process lifecycle controls support opt-in process-group signaling
+  on POSIX, direct-child fallback, grace-period SIGKILL escalation, timeout
+  status, platform-gated pause/resume, dependency queueing, and lifecycle hook
+  diagnostics. These controls are separate from daemon start/stop and session
+  pause policy.
 
 The policy layer records OS resource intent through `ResourceManagerImpl` but
 does not claim direct kernel enforcement. Concrete executors translate supported

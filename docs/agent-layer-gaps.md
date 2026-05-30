@@ -73,7 +73,7 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 | Docker — partial sandbox policy | `execution/modes/docker.ts` | Docker args now include secure defaults plus resource/network/DNS policy support. Live daemon availability and image verification preflight remain missing. |
 | No dead letter queue | `daemon/loop.ts` | Failed triggers not recorded or retried. No backoff, no failure metrics. |
 | No trigger deduplication | `daemon/fileWatcher.ts`, `daemon/timerScheduler.ts` | Same file matching multiple patterns fires multiple times. |
-| Background process isolation/backpressure is partial | `backgroundProcessRegistry.ts` | Background execution now uses ExecutionPolicy env/cwd handling and optional stdout/stderr retention caps. Broader lifecycle backpressure, queueing, and state transitions remain incomplete. |
+| Background process isolation/backpressure is partial | `backgroundProcessRegistry.ts` | Background execution now uses ExecutionPolicy env/cwd handling, retained/dropped stream byte metadata, optional process-group termination with grace escalation, timeout status, pause/resume capability checks, dependency queueing, and lifecycle hook diagnostics. Remaining gaps are OS-enforced isolation and daemon-level graceful drain/crash recovery. |
 
 ### Medium
 
