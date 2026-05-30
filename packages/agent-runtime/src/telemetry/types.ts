@@ -58,6 +58,22 @@ export interface TelemetrySpan {
   readonly events: TelemetryEvent[];
 }
 
+export interface TraceContext {
+  readonly version: "00";
+  readonly traceId: string;
+  readonly spanId: string;
+  readonly traceFlags: string;
+  readonly parentSpanId?: string;
+  readonly correlationId?: string;
+}
+
+export interface TelemetrySpanStartOptions {
+  readonly parentSpanId?: string;
+  readonly traceContext?: TraceContext;
+  readonly correlationId?: string;
+  readonly attributes?: Record<string, string | number | boolean>;
+}
+
 // ---------------------------------------------------------------------------
 // Provider
 // ---------------------------------------------------------------------------
@@ -72,6 +88,7 @@ export interface TelemetryProvider {
    * @returns The newly created span.
    */
   startSpan(name: string, parentSpanId?: string): Promise<TelemetrySpan>;
+  startSpan(name: string, options?: TelemetrySpanStartOptions): Promise<TelemetrySpan>;
 
   /**
    * End an in-flight span.
@@ -109,4 +126,15 @@ export interface TelemetryConfig {
   readonly sampleRate?: number;
   /** Named exporters to send telemetry data to (e.g. "otlp", "console", "file"). */
   readonly exporters?: string[];
+}
+
+export interface TelemetryExportResult {
+  readonly ok: boolean;
+  readonly exported: number;
+  readonly error?: string;
+}
+
+export interface TelemetryExporter {
+  export(spans: readonly TelemetrySpan[]): Promise<TelemetryExportResult>;
+  flush?(): Promise<TelemetryExportResult>;
 }

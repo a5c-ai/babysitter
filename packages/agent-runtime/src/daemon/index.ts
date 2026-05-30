@@ -26,7 +26,7 @@ export type {
 } from "./types";
 export type { TimerSchedulerHandle } from "./timerScheduler";
 export type { DaemonLoopOptions, DaemonLoopStatus } from "./loop";
-export type { DaemonLogEntry } from "./daemonLog";
+export type { DaemonLogEntry, DaemonLogLevel, DaemonLogPolicy } from "./daemonLog";
 
 // Re-export ApiResult from the local utility so consumers can use the same type
 export type { ApiResult } from "../apiResult";

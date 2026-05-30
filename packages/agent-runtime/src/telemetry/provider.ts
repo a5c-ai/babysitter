@@ -10,6 +10,7 @@ import type {
   TelemetryProvider,
   TelemetrySpan,
   TelemetryEvent,
+  TelemetrySpanStartOptions,
 } from "./types";
 import { TelemetrySpanStatus } from "./types";
 
@@ -54,11 +55,19 @@ export class InMemoryTelemetryProvider implements TelemetryProvider {
 
   // ---------- TelemetryProvider interface ----------
 
-  async startSpan(name: string, parentSpanId?: string): Promise<TelemetrySpan> {
+  async startSpan(name: string, parentSpanId?: string): Promise<TelemetrySpan>;
+  async startSpan(name: string, options?: TelemetrySpanStartOptions): Promise<TelemetrySpan>;
+  async startSpan(name: string, optionsOrParentSpanId?: string | TelemetrySpanStartOptions): Promise<TelemetrySpan> {
     const spanId = randomUUID();
+    const options = typeof optionsOrParentSpanId === "string"
+      ? { parentSpanId: optionsOrParentSpanId }
+      : optionsOrParentSpanId;
+    const parentSpanId = options?.traceContext?.spanId ?? options?.parentSpanId;
     let traceId: string;
 
-    if (parentSpanId) {
+    if (options?.traceContext) {
+      traceId = options.traceContext.traceId;
+    } else if (parentSpanId) {
       // Inherit traceId from the parent span.
       traceId = this.traceIndex.get(parentSpanId) ?? randomUUID();
     } else {
@@ -72,7 +81,15 @@ export class InMemoryTelemetryProvider implements TelemetryProvider {
       parentSpanId,
       startTime: new Date().toISOString(),
       status: TelemetrySpanStatus.Unset,
-      attributes: {},
+      attributes: {
+        ...options?.attributes,
+        ...(options?.correlationId
+          ? { "babysitter.correlation_id": options.correlationId }
+          : {}),
+        ...(options?.traceContext?.correlationId && !options?.correlationId
+          ? { "babysitter.correlation_id": options.traceContext.correlationId }
+          : {}),
+      },
       events: [],
     };
 

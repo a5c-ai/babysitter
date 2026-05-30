@@ -35,3 +35,13 @@ export {
   type WebhookRegistrationInput,
   WEBHOOK_SCHEMA_VERSION,
 } from "./webhooks";
+export {
+  buildDiagnosticsSnapshot,
+  handleDiagnosticsRequest,
+  redactDiagnosticsConfig,
+  renderPrometheusMetrics,
+  type DiagnosticsContext,
+  type DiagnosticsRequestPath,
+  type DiagnosticsResponse,
+  type DiagnosticsSnapshot,
+} from "./diagnostics";

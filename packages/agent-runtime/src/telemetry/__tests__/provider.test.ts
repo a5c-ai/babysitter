@@ -86,6 +86,27 @@ describe("InMemoryTelemetryProvider", () => {
     expect(child.traceId).toBe(parent.traceId);
     expect(child.parentSpanId).toBe(parent.spanId);
   });
+
+  it("starts spans from propagated W3C context and attaches correlation IDs", async () => {
+    const provider = new InMemoryTelemetryProvider();
+    const span = await provider.startSpan("propagated", {
+      traceContext: {
+        version: "00",
+        traceId: "4bf92f3577b34da6a3ce929d0e0e4736",
+        spanId: "00f067aa0ba902b7",
+        traceFlags: "01",
+      },
+      correlationId: "corr-123",
+      attributes: { component: "agent-runtime" },
+    });
+
+    expect(span.traceId).toBe("4bf92f3577b34da6a3ce929d0e0e4736");
+    expect(span.parentSpanId).toBe("00f067aa0ba902b7");
+    expect(span.attributes).toMatchObject({
+      "babysitter.correlation_id": "corr-123",
+      component: "agent-runtime",
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------

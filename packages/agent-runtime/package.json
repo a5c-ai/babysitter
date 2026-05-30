@@ -32,6 +32,11 @@
       "require": "./dist/observability/index.js",
       "default": "./dist/observability/index.js"
     },
+    "./telemetry": {
+      "types": "./dist/telemetry/index.d.ts",
+      "require": "./dist/telemetry/index.js",
+      "default": "./dist/telemetry/index.js"
+    },
     "./package.json": "./package.json"
   },
   "typesVersions": {
@@ -47,6 +52,9 @@
       ],
       "observability": [
         "dist/observability/index.d.ts"
+      ],
+      "telemetry": [
+        "dist/telemetry/index.d.ts"
       ]
     }
   },

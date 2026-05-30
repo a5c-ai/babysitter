@@ -50,6 +50,7 @@ export function computeRunHealthFromEvents(
   let failedEffects = 0;
   let totalLatency = 0;
   let latencyCount = 0;
+  const latencies: number[] = [];
   let lastActivityAt: string | null = null;
   let hasRunFailed = false;
   const iterations = new Set<number>();
@@ -79,8 +80,10 @@ export function computeRunHealthFromEvents(
         resolvedEffects.add(effectId);
         const reqTs = requestedAt.get(effectId);
         if (reqTs != null) {
-          totalLatency += ts - reqTs;
+          const latency = ts - reqTs;
+          totalLatency += latency;
           latencyCount++;
+          latencies.push(latency);
         }
         const status = typeof event.data.status === "string" ? event.data.status : undefined;
         if (status === "error") {
@@ -97,6 +100,9 @@ export function computeRunHealthFromEvents(
   const errorRate = resolvedCount > 0 ? failedEffects / resolvedCount : 0;
   const avgEffectLatencyMs =
     latencyCount > 0 ? Math.round(totalLatency / latencyCount) : 0;
+  const p50EffectLatencyMs = percentile(latencies, 0.5);
+  const p95EffectLatencyMs = percentile(latencies, 0.95);
+  const p99EffectLatencyMs = percentile(latencies, 0.99);
 
   // Oldest pending effect age
   let oldestPendingAgeMs = 0;
@@ -112,6 +118,9 @@ export function computeRunHealthFromEvents(
   const metrics: RunHealthMetrics = {
     errorRate,
     avgEffectLatencyMs,
+    p50EffectLatencyMs,
+    p95EffectLatencyMs,
+    p99EffectLatencyMs,
     pendingCount,
     oldestPendingAgeMs,
     iterationCount: iterations.size,
@@ -169,4 +178,11 @@ export function computeRunHealthFromEvents(
     issues,
     computedAt: new Date(now).toISOString(),
   };
+}
+
+function percentile(values: number[], quantile: number): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const rank = Math.max(1, Math.ceil(quantile * sorted.length));
+  return Math.round(sorted[rank - 1]);
 }

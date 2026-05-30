@@ -14,6 +14,9 @@ export type RunHealthStatus = "healthy" | "degraded" | "stuck" | "failed";
 export interface RunHealthMetrics {
   errorRate: number;
   avgEffectLatencyMs: number;
+  p50EffectLatencyMs: number;
+  p95EffectLatencyMs: number;
+  p99EffectLatencyMs: number;
   pendingCount: number;
   oldestPendingAgeMs: number;
   iterationCount: number;
