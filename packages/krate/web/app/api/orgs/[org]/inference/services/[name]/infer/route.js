@@ -36,7 +36,8 @@ export const POST = withAuth(async (request, { params }) => {
     // Load virtual models and match by service name
     let virtualModels = [];
     try {
-      virtualModels = await controller.listResources('KrateVirtualModel') || [];
+      const vmResult = await controller.listResourceForOrg(org, 'KrateVirtualModel');
+      virtualModels = vmResult?.items || vmResult || [];
     } catch (err) {
       // No virtual models available — proceed without hooks
       console.warn('[inference/infer] Failed to list virtual models:', err?.message || err);

@@ -124,6 +124,46 @@ test('external provider wizard creates multiple resources via Promise.all', () =
   assert.match(source, /Promise\.all/, 'wizard must use Promise.all for parallel resource creation');
 });
 
+// ── Contract: external sync forwards supported request options ────────────
+
+test('external sync route forwards supported body fields as sync options', () => {
+  const route = readFile('app', 'api', 'orgs', '[org]', 'external', 'sync', 'route.js');
+  assert.match(
+    route,
+    /syncExternalBinding\(\s*body\.bindingName\s*,/,
+    'syncExternalBinding must keep bindingName as the first positional argument and pass an options object'
+  );
+  for (const field of ['kind', 'localName', 'namespace', 'spec', 'externalEnvelope', 'watermark']) {
+    assert.match(route, new RegExp(`${field}\\s*:\\s*body\\.${field}`), `external sync route must forward body.${field}`);
+  }
+});
+
+// ── Contract: inference infer route uses an existing org-scoped list API ──
+
+test('inference infer route lists virtual models with the org-scoped controller API', () => {
+  const route = readFile('app', 'api', 'orgs', '[org]', 'inference', 'services', '[name]', 'infer', 'route.js');
+  assert.doesNotMatch(route, /controller\.listResources\(/, 'createKrateApiController does not expose listResources');
+  assert.match(
+    route,
+    /controller\.listResourceForOrg\(\s*org\s*,\s*['"]KrateVirtualModel['"]\s*\)/,
+    'inference infer must load KrateVirtualModel resources through listResourceForOrg(org, kind)'
+  );
+});
+
+// ── Contract: curated deploy route creation failures are visible ──────────
+
+test('curated model deploy surfaces route auto-create failures to the user', () => {
+  const source = readFile('app', 'components', 'inference', 'curated-model-catalog.jsx');
+  assert.match(source, /routeRes/, 'route auto-create response must be captured');
+  assert.match(source, /routeWarning/, 'route auto-create failure must produce a user-visible warning');
+  assert.match(source, /setDeployResult\(\{\s*success:\s*true[\s\S]*routeWarning/s);
+  assert.doesNotMatch(
+    source,
+    /fetch\(`\/api\/orgs\/\$\{org\}\/inference\/routes`[\s\S]{0,500}\.catch\(\(err\)\s*=>\s*console\.warn/,
+    'route auto-create failure must not be handled only by console.warn'
+  );
+});
+
 // ── Contract: memory ontology editor sends required fields ────────────────
 
 test('memory ontology editor emits required AgentMemoryOntology fields', () => {
