@@ -251,6 +251,8 @@ export function buildPromptContext(args: {
     "ANTHROPIC_API_KEY",
   ] as const;
 
+  const hostContext = readHostContextFromCapabilities();
+
   return {
     platform: process.platform,
     arch: process.arch,
@@ -258,6 +260,7 @@ export function buildPromptContext(args: {
     cwd: process.cwd(),
     workspace: path.resolve(args.workspace ?? process.cwd()),
     selectedHarnessName: args.selectedHarnessName,
+    ...hostContext,
     discoveredHarnesses: args.discovered,
     compressionEnabled: Boolean(
       args.compressionConfig?.enabled &&
@@ -273,6 +276,68 @@ export function buildPromptContext(args: {
         : "unset",
     })),
   };
+}
+
+function readHostContextFromCapabilities(): Pick<
+  HarnessPromptContext,
+  "hostAgentName" | "hostAgentLabel" | "hostCapabilities" | "hostTools"
+> {
+  const raw = process.env.AGENT_CAPABILITIES_JSON;
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw) as {
+      name?: unknown;
+      hostAgentName?: unknown;
+      hostAgentLabel?: unknown;
+      hostCapabilities?: unknown;
+      tools?: unknown;
+      hostTools?: unknown;
+      supportsBlock?: unknown;
+      supportsAsk?: unknown;
+    };
+    const hostAgentName = stringValue(parsed.hostAgentName) ?? stringValue(parsed.name);
+    if (!hostAgentName) return {};
+
+    const hostCapabilities = stringArrayValue(parsed.hostCapabilities)
+      ?? deriveHostCapabilities(parsed);
+
+    return {
+      hostAgentName,
+      hostAgentLabel: stringValue(parsed.hostAgentLabel) ?? formatHostAgentLabel(hostAgentName),
+      hostCapabilities,
+      hostTools: arrayValue(parsed.hostTools) ?? arrayValue(parsed.tools),
+    };
+  } catch {
+    return {};
+  }
+}
+
+function deriveHostCapabilities(parsed: { supportsBlock?: unknown; supportsAsk?: unknown }): string[] {
+  const capabilities = ["task-tool", "breakpoint-routing"];
+  if (parsed.supportsBlock === true) capabilities.push("hooks", "stop-hook");
+  if (parsed.supportsAsk === true) capabilities.push("ask-user-question");
+  return capabilities;
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function stringArrayValue(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const strings = value.filter((item): item is string => typeof item === "string" && item.length > 0);
+  return strings.length > 0 ? strings : undefined;
+}
+
+function arrayValue(value: unknown): unknown[] | undefined {
+  return Array.isArray(value) ? value : undefined;
+}
+
+function formatHostAgentLabel(name: string): string {
+  return name
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 export function selectHarness(

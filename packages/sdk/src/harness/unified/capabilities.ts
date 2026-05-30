@@ -32,6 +32,11 @@ export interface ProxyCapabilities {
   supportsOrderedFanout: boolean;
   supportsNativeAdditionalContext: boolean;
   notes?: string[];
+  hostAgentName?: string;
+  hostAgentLabel?: string;
+  hostCapabilities?: string[];
+  hostTools?: unknown[];
+  tools?: unknown[];
 }
 
 // ---------------------------------------------------------------------------
@@ -81,12 +86,20 @@ export function buildPromptContextFromProxy(
   const promptCapabilities: string[] = ["task-tool", "breakpoint-routing"];
   if (proxy.supportsBlock) promptCapabilities.push("hooks", "stop-hook");
   if (proxy.supportsAsk) promptCapabilities.push("ask-user-question");
+  const hostAgentName = proxy.hostAgentName || proxy.name || undefined;
+  const hostAgentLabel = hostAgentName
+    ? proxy.hostAgentLabel || formatHarnessLabel(hostAgentName)
+    : undefined;
 
   return createPromptContext(
     {
       harness: proxy.name || "unified",
       harnessLabel: formatHarnessLabel(proxy.name),
       capabilities: promptCapabilities,
+      hostAgentName,
+      hostAgentLabel,
+      hostCapabilities: hostAgentName ? proxy.hostCapabilities ?? promptCapabilities : undefined,
+      hostTools: proxy.hostTools ?? proxy.tools,
       pluginRootVar: "",
       loopControlTerm: proxy.supportsBlock ? "stop-hook" : "in-turn",
       sessionBindingFlags: "",

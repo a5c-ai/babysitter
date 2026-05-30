@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { HarnessCapability } from "../../../types";
+import { buildExternalProcessDefinitionPrompt } from "../planProcess/prompts";
 import {
   buildOrchestrationSystemPrompt,
   buildOrchestrationTurnPrompt,
@@ -87,6 +88,65 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("import.meta.url");
     expect(prompt).toContain("syntactically valid ESM");
     expect(prompt).toContain("raw nested template literals");
+  });
+
+  test("PhasePlanProcess prompt includes Codex host identity and delegation boundaries", async () => {
+    const prompt = await buildProcessDefinitionSystemPrompt("/tmp/out.js", {
+      ...context,
+      selectedHarnessName: "agent-core",
+      hostAgentName: "codex",
+      hostAgentLabel: "Codex",
+      hostCapabilities: ["task-tool", "breakpoint-routing", "stop-hook"],
+    });
+
+    expect(prompt).toContain("Host agent context:");
+    expect(prompt).toContain("Host agent running this planning session: Codex (codex).");
+    expect(prompt).toContain("Host-local capabilities: task-tool, breakpoint-routing, stop-hook.");
+    expect(prompt).toContain("Use the host agent for work it can perform locally");
+    expect(prompt).toContain("internal agent-core worker for default task execution and shell effects");
+    expect(prompt).toContain("selected orchestration binding harness is agent-core");
+    expect(prompt).toContain("distinct from the host agent identity");
+    expect(prompt).toContain("Discovered external harnesses are routing options");
+  });
+
+  test("PhasePlanProcess prompt includes Claude Code host identity", async () => {
+    const prompt = await buildProcessDefinitionSystemPrompt("/tmp/out.js", {
+      ...context,
+      selectedHarnessName: "agent-core",
+      hostAgentName: "claude-code",
+      hostAgentLabel: "Claude Code",
+      hostCapabilities: ["task-tool", "breakpoint-routing", "hooks", "stop-hook"],
+    });
+
+    expect(prompt).toContain("Host agent running this planning session: Claude Code (claude-code).");
+    expect(prompt).toContain("Host-local capabilities: task-tool, breakpoint-routing, hooks, stop-hook.");
+  });
+
+  test("PhasePlanProcess prompt remains backward-compatible without host identity", async () => {
+    const prompt = await buildProcessDefinitionSystemPrompt("/tmp/out.js", context);
+    expect(prompt).not.toContain("Host agent context:");
+    expect(prompt).toContain("The selected orchestration binding harness for this run is pi.");
+  });
+
+  test("external plan-process prompt includes host identity guidance", () => {
+    const prompt = buildExternalProcessDefinitionPrompt({
+      prompt: "implement the feature",
+      outputDir: "/tmp/processes",
+      workspace: "/repo/workspace",
+      workspaceAssessment: { kind: "non-empty", entries: ["package.json"] },
+      promptContext: {
+        ...context,
+        selectedHarnessName: "codex",
+        hostAgentName: "codex",
+        hostAgentLabel: "Codex",
+        hostCapabilities: ["task-tool", "breakpoint-routing", "ask-user-question"],
+      },
+    });
+
+    expect(prompt).toContain("Host agent context:");
+    expect(prompt).toContain("Host agent running this planning session: Codex (codex).");
+    expect(prompt).toContain("selected orchestration binding harness is codex");
+    expect(prompt).toContain("Discovered external harnesses are routing options");
   });
 
   test("PhaseOrchestration prompt includes selected harness and execution guidance", () => {
