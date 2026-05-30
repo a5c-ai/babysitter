@@ -7,7 +7,7 @@
  * Reuse-audit findings (REVIEW BEFORE PROCEEDING):
  * - Matching existing infrastructure found in hooks-mux plan types, matcher evaluation, runner execution, propagation/materialization, session-store markers, CLI invoke tests, programmatic engine tests, and agent-platform background process tracking.
  * - Existing issue #639 process artifacts are already present on staging from merged PR #674; this refreshed plan treats that as prior art and adds a current-state gate before any implementation work.
- * - `.a5c/process-library/` was not present in this checkout; matching process guidance was found under `library/methodologies/atdd-tdd/atdd-tdd.js`, `library/methodologies/process-hardening/process-hardening-patterns.js`, `library/methodologies/superpowers/verification-before-completion.js`, and `library/specializations/sdk-platform-development/sdk-testing-strategy.js`.
+ * - Repo-local `.a5c/process-library/` was not present in this checkout. The active process-library binding was available at `/home/runner/.a5c/process-library/babysitter-repo/library`, and matching guidance was found under `methodologies/atdd-tdd/atdd-tdd.js`, `methodologies/process-hardening/process-hardening-patterns.js`, `methodologies/superpowers/verification-before-completion.js`, `methodologies/shared/root-cause-diagnosis.js`, `processes/shared/tdd-triplet.js`, `specializations/sdk-platform-development/sdk-testing-strategy.js`, `specializations/qa-testing-automation/quality-gates.js`, and `specializations/collaboration/github/issue-linking.js`.
  * - No `.a5c/reuse-audit.json` was present; keyword scan used: hooks-mux, async, asyncRewake, once, matcher, regex, OR, if, timeout, shell, statusMessage, disableAllHooks, CLAUDE_ENV_FILE, CLAUDE_EFFORT, CLAUDE_PLUGIN_DATA, session-store, background.
  *
  * References used while authoring:
@@ -16,15 +16,24 @@
  * - .a5c/processes/issue-636-hooks-mux-missing-events.mjs
  * - .a5c/processes/issue-638-hooks-mux-decisions.mjs
  * - .a5c/processes/issue-639-hooks-mux-async-matchers-config.mjs
- * - library/methodologies/atdd-tdd/atdd-tdd.js
- * - library/methodologies/process-hardening/process-hardening-patterns.js
- * - library/methodologies/superpowers/verification-before-completion.js
- * - library/specializations/sdk-platform-development/sdk-testing-strategy.js
+ * - active process library: /home/runner/.a5c/process-library/babysitter-repo/library
+ * - methodologies/atdd-tdd/atdd-tdd.js
+ * - methodologies/process-hardening/process-hardening-patterns.js
+ * - methodologies/superpowers/verification-before-completion.js
+ * - methodologies/shared/root-cause-diagnosis.js
+ * - processes/shared/tdd-triplet.js
+ * - specializations/sdk-platform-development/sdk-testing-strategy.js
+ * - specializations/qa-testing-automation/quality-gates.js
+ * - specializations/collaboration/github/issue-linking.js
  *
  * @process methodologies/atdd-tdd/atdd-tdd
  * @process methodologies/process-hardening/process-hardening-patterns
  * @process methodologies/superpowers/verification-before-completion
+ * @process methodologies/shared/root-cause-diagnosis
+ * @process processes/shared/tdd-triplet
  * @process specializations/sdk-platform-development/sdk-testing-strategy
+ * @process specializations/qa-testing-automation/quality-gates
+ * @process specializations/collaboration/github/issue-linking
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -51,7 +60,7 @@ const currentStateGateTask = defineTask('issue-639.current-state-gate', (args, t
       instructions: [
         `Run: gh issue view ${args.issueNumber} --json title,body,labels,comments,state`,
         `If #${args.issueNumber} is a PR rather than an issue, also run: gh pr view ${args.issueNumber} --json files,title,body,comments,state`,
-        'Inspect the prior plan/implementation PR if provided. The latest issue comments may say implementation is complete in PR #674.',
+        'Inspect the prior plan/implementation PR if provided. The latest issue comments may say implementation is complete in PR #674 and may also link a refreshed plan PR.',
         'Read the issue description, every comment, labels, and any referenced PR body carefully.',
         'Classify the task as already-complete, verification-only, or needs-implementation.',
         'If the issue appears complete, plan verification of the landed behavior instead of duplicating implementation work.',
@@ -79,7 +88,7 @@ const reuseAuditTask = defineTask('issue-639.reuse-audit', (args, taskCtx) => ({
         'Follow docs/agent-reference/process-authoring.md for babysitter:plan reuse-audit requirements.',
         'Extract keyword nouns and verbs from issue #639 and the current-state result.',
         'Scan the provided roots for matching migrations, API routes, environment variables, SDK dependencies, imports, hook config models, background process helpers, session stores, and existing tests.',
-        'Research process-library guidance. The prompt requested `.a5c/process-library/`; if absent, record that and use matching checked-in `library/` methodologies.',
+        'Research process-library guidance. The prompt requested `.a5c/process-library/`; if that repo-local path is absent, record it and use the active process-library binding plus matching checked-in `library/` mirrors.',
         'Render a section titled exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
         'Do not edit files in this phase.',
         'Return JSON: { keywords, findingsMarkdown, existingInfrastructure, missingInfrastructure, matchingMethodologies, recommendedReuse, risks }.',
