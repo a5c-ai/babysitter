@@ -1112,7 +1112,9 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     const pipBin = join(homedir(), '.local', 'bin');
     const currentPath = plan.env['PATH'] ?? process.env['PATH'] ?? '';
     if (!currentPath.includes(pipBin)) {
-      plan.env['PATH'] = `${pipBin}${process.platform === 'win32' ? ';' : ':'}${currentPath}`;
+      const newPath = `${pipBin}${process.platform === 'win32' ? ';' : ':'}${currentPath}`;
+      plan.env['PATH'] = newPath;
+      process.env['PATH'] = newPath;
     }
     if (process.platform === 'win32') {
       plan.env['TERM'] = '';
