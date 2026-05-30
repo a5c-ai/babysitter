@@ -69,25 +69,19 @@ function hookMappingToPhaseMapping(mapping: HookMappingDescriptor): PhaseMapping
 }
 
 function buildFromCatalog(): PhaseMapping[] {
-  let mappings: HookMappingDescriptor[];
+  let catalogMappings: HookMappingDescriptor[];
   try {
-    mappings = listHookMappingsByAdapterFamily('hermes');
+    catalogMappings = listHookMappingsByAdapterFamily('hermes');
   } catch {
     return HERMES_FALLBACK_MAPPINGS;
   }
-  if (mappings.length === 0) {
-    return HERMES_FALLBACK_MAPPINGS;
-  }
-  const phaseMappings = mappings
+  const phaseMappings = catalogMappings
     .map(hookMappingToPhaseMapping)
     .filter((m): m is PhaseMapping => m !== null);
 
-  if (phaseMappings.length === 0) {
-    return HERMES_FALLBACK_MAPPINGS;
-  }
-
+  const merged = [...phaseMappings, ...HERMES_FALLBACK_MAPPINGS];
   const seen = new Set<string>();
-  return phaseMappings.filter((m) => {
+  return merged.filter((m) => {
     if (seen.has(m.nativeHook)) return false;
     seen.add(m.nativeHook);
     return true;
