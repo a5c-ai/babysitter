@@ -2,6 +2,12 @@
   "issueNumber": 611,
   "title": "Fix remaining API route issues and sync parameter forwarding",
   "issueUrl": "https://github.com/a5c-ai/babysitter/issues/611",
+  "baseBranch": "staging",
+  "branchName": "plan/issue-611",
+  "plannedArtifacts": [
+    ".a5c/processes/issue-611-api-route-sync-forwarding.mjs",
+    ".a5c/processes/issue-611-api-route-sync-forwarding.inputs.json"
+  ],
   "labels": [
     "bug",
     "effort:medium",
@@ -29,6 +35,35 @@
     "POST /api/orgs/{org}/inference/services/{name}/infer -> packages/krate/web/app/api/orgs/[org]/inference/services/[name]/infer/route.js -> controller.getResource('KrateInferenceService', name) -> controller.listResourceForOrg(org, 'KrateVirtualModel') -> createVirtualModelHookBridge",
     "CuratedModelCatalog deploy button -> packages/krate/web/app/components/inference/curated-model-catalog.jsx -> POST /api/orgs/{org}/inference/services -> POST /api/orgs/{org}/inference/routes -> visible success/partial failure state"
   ],
+  "processLibraryFindings": {
+    "requestedPath": ".a5c/process-library/",
+    "requestedPathPresentAtPlanning": false,
+    "fallbackProcessLibraryPaths": [
+      "library/processes/shared/README.md",
+      "library/processes/shared/runtime-call-tracer.js",
+      "library/processes/shared/tdd-triplet.js",
+      "library/processes/shared/completeness-gate.js",
+      "library/processes/shared/deterministic-quality-gate.js"
+    ],
+    "matchingExistingProcesses": [
+      ".a5c/processes/issue-609-krate-web-playwright-e2e.mjs",
+      ".a5c/processes/issue-625-jitsi-web-console-plan.mjs",
+      ".a5c/processes/issue-608-staging-env-vars.mjs",
+      ".a5c/processes/issue-620-agent-identity-decoupling.mjs"
+    ],
+    "selectedPatterns": [
+      "Phase 0 reuse audit before proposing or modifying infrastructure.",
+      "Agent-only task responders for direct babysitter process work in this repo.",
+      "Runtime call-path diagnosis before code changes.",
+      "Test-first regression phase before implementation.",
+      "Sparse breakpoint only if curated catalog deploy route semantics require maintainer input.",
+      "Verification and code-review gates with a bounded refinement loop."
+    ],
+    "rejectedPatterns": [
+      "kind: shell subtasks, because this direct babysitter workflow did not explicitly request a shell-oriented process.",
+      "Broad HYPOTHESES-tree structure, because the bug class and affected files are already known from issue triage."
+    ]
+  },
   "verificationCommands": [
     "npm run test --workspace=@a5c-ai/krate-web",
     "npm run build:krate-web"

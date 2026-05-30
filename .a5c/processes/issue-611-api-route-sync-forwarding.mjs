@@ -1,14 +1,25 @@
 /**
  * @process repo/issue-611-api-route-sync-forwarding
  * @description Implement issue #611 for Krate web API route/controller contract drift and curated catalog deploy error surfacing.
- * @inputs { issueNumber: number, title: string, issueUrl: string, issueBody: string, triageComment: string, targetFiles: string[], verificationCommands: string[] }
+ * @inputs { issueNumber: number, title: string, issueUrl: string, issueBody: string, triageComment: string, targetFiles: string[], verificationCommands: string[], processLibraryFindings?: object }
  * @outputs { success: boolean, phases: string[], changedFiles: string[], verification: object, review: object }
  *
  * References used when authoring this process:
- * - methodologies/shared/root-cause-diagnosis.js
- * - methodologies/superpowers/test-driven-development.js
- * - methodologies/maestro/maestro-development.js
- * - methodologies/pilot-shell/pilot-shell-bugfix.js
+ * - docs/agent-reference/process-authoring.md
+ * - docs/agent-reference/repo-map.md
+ * - docs/agent-reference/runtime-and-layout.md
+ * - library/processes/shared/README.md
+ * - library/processes/shared/runtime-call-tracer.js
+ * - library/processes/shared/tdd-triplet.js
+ * - .a5c/processes/issue-609-krate-web-playwright-e2e.mjs
+ * - .a5c/processes/issue-625-jitsi-web-console-plan.mjs
+ * - packages/krate/docs/gaps/api-route-issues.md
+ * - packages/krate/web/tests/resource-contract.test.js
+ *
+ * Process-library note: this checkout does not contain `.a5c/process-library/`.
+ * The repo-local process library material is under `library/processes/shared/`,
+ * and execution should re-check for `.a5c/process-library/` in case the run
+ * environment differs from the planning environment.
  *
  * This process intentionally uses agent tasks rather than kind: "shell" tasks to
  * respect the repository-specific authoring override for direct Babysitter
@@ -61,6 +72,32 @@ const reuseAuditTask = defineTask(
   { kind: 'agent', title: 'Phase 0: Reuse-audit findings', labels: ['krate', 'reuse-audit'] },
 );
 
+const processPatternResearchTask = defineTask(
+  'issue-611.process-pattern-research',
+  async (args) => ({
+    kind: 'agent',
+    title: 'Research matching process patterns',
+    labels: ['krate', 'process-library', 'planning'],
+    agent: {
+      name: 'process-pattern-researcher',
+      prompt: {
+        role: 'Babysitter process author',
+        task: 'Research process-library and existing process patterns before implementation planning proceeds.',
+        instructions: [
+          'Check whether `.a5c/process-library/` exists in this execution environment. If it is absent, state that explicitly.',
+          'Inspect matching repo-local process-library material under `library/processes/shared/`, especially runtime-call-tracer, tdd-triplet, completeness-gate, and deterministic quality gate patterns.',
+          'Inspect nearby Krate plan processes such as issue-609 and issue-625 for brownfield reuse-audit, sparse breakpoint, verification, and delivery patterns.',
+          'Use this authoring-time summary as a starting point, but prefer current repository evidence:',
+          JSON.stringify(args.processLibraryFindings ?? {}, null, 2),
+          'Do not modify files in this phase.',
+          'Return JSON: { processLibraryAvailable, matchedPatterns, selectedPatterns, rejectedPatterns, authoringNotes }.',
+        ],
+      },
+    },
+  }),
+  { kind: 'agent', title: 'Research matching process patterns', labels: ['krate', 'process-library'] },
+);
+
 const diagnosisTask = defineTask(
   'issue-611.diagnose-contract-drift',
   async (args) => ({
@@ -77,6 +114,9 @@ const diagnosisTask = defineTask(
           '',
           'Use the reuse audit below as context:',
           JSON.stringify(args.reuseAudit ?? {}, null, 2),
+          '',
+          'Use the process-pattern research below as process-shape guidance:',
+          JSON.stringify(args.processResearch ?? {}, null, 2),
           '',
           'Inspect only the Krate web/API/core files needed to confirm the live call paths.',
           'Confirm that assistant/generate already uses an existing controller method and should not be changed for that concern.',
@@ -260,10 +300,16 @@ export async function process(inputs, ctx) {
     triageComment: inputs?.triageComment,
     targetFiles: inputs?.targetFiles ?? [],
     verificationCommands: inputs?.verificationCommands ?? [],
+    processLibraryFindings: inputs?.processLibraryFindings ?? {},
   };
 
   const reuseAudit = await ctx.task(reuseAuditTask, shared, { key: 'issue-611.reuse-audit' });
-  const diagnosis = await ctx.task(diagnosisTask, { ...shared, reuseAudit }, { key: 'issue-611.diagnosis' });
+  const processResearch = await ctx.task(processPatternResearchTask, shared, { key: 'issue-611.process-pattern-research' });
+  const diagnosis = await ctx.task(
+    diagnosisTask,
+    { ...shared, reuseAudit, processResearch },
+    { key: 'issue-611.diagnosis' },
+  );
 
   if (diagnosis?.needsProductDecision) {
     await ctx.breakpoint({
@@ -326,9 +372,10 @@ export async function process(inputs, ctx) {
 
   return {
     success: review?.approved !== false && verification?.passed !== false,
-    phases: ['reuse-audit', 'diagnosis', 'test-first-regressions', 'implementation', 'verification', 'review', 'refinement'],
+    phases: ['reuse-audit', 'process-pattern-research', 'diagnosis', 'test-first-regressions', 'implementation', 'verification', 'review', 'refinement'],
     changedFiles: implementation?.changedFiles ?? review?.changedFiles ?? [],
     reuseAudit,
+    processResearch,
     diagnosis,
     tests,
     implementation,
