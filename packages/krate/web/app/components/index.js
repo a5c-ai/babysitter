@@ -20,6 +20,16 @@ export { ApprovalDecisionButtons } from './agent/approval-actions.jsx';
 export { ApprovalModeToggle } from './agent/approval-mode-toggle.jsx';
 export { LiveUpdates } from './agent/live-updates.jsx';
 export { AgentSettingsForm } from './agent/agent-settings-form.jsx';
+export { AgentDirectory } from './agent/agent-directory.jsx';
+export { AgentProfileCard } from './agent/agent-profile-card.jsx';
+export { AgentProfilePage } from './agent/agent-profile-page.jsx';
+export { AgentPersonaEditor } from './agent/agent-persona-editor.jsx';
+export { AgentSoulEditor } from './agent/agent-soul-editor.jsx';
+export { AgentAppearanceEditor } from './agent/agent-appearance-editor.jsx';
+export { AgentVoiceEditor } from './agent/agent-voice-editor.jsx';
+export { AgentDefinitionForm } from './agent/agent-definition-form.jsx';
+export { AgentCreateWizard } from './agent/agent-create-wizard.jsx';
+export { AgentPersonalityTraits } from './agent/agent-personality-traits.jsx';
 
 // ── Workspaces ──────────────────────────────────────────────────────────────
 export { WorkspacePanel } from './workspace/workspace-panel.jsx';

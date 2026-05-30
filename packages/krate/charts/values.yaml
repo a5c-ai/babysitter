@@ -41,6 +41,7 @@ demo:
     mode: local-dev-postgres
   nats:
     mode: local-dev-nats
+    image: nats:2.10-alpine
 
 
 api:

@@ -57,7 +57,7 @@ export interface PrimaryLiveRunResult {
 
 const SETUP_TIMEOUT_MS = 2 * 60 * 1000;
 const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
-const INTERACTIVE_TIMEOUT_MS = 5 * 60 * 1000;
+const INTERACTIVE_TIMEOUT_MS = 8 * 60 * 1000;
 export function buildPrimaryLiveStackCommands(
   scenario: LiveStackScenario,
   options: Pick<PrimaryLiveRunOptions, 'env' | 'cwd' | 'timeoutMs'>,

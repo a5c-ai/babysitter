@@ -230,6 +230,33 @@ describe("ExternalTrackerBackend generic REST sync", () => {
     expect(second.duplicate).toBe(true);
   });
 
+  it("exposes tracker responders with routable tracker metadata", async () => {
+    const backend = new ExternalTrackerBackend({
+      type: "external-tracker",
+      provider: "linear",
+      tracker: {
+        baseUrl: "https://api.linear.app",
+        teamId: "team-1",
+        responders: ["linear-tracker"],
+        apiToken: "must-not-leak",
+      },
+    });
+
+    await expect(backend.listResponders()).resolves.toEqual([
+      expect.objectContaining({
+        id: "linear-tracker",
+        type: "tracker",
+        trackerBackend: "linear",
+        trackerConfig: {
+          baseUrl: "https://api.linear.app",
+          teamId: "team-1",
+          responders: ["linear-tracker"],
+          apiToken: "[REDACTED]",
+        },
+      }),
+    ]);
+  });
+
   it("redacts secrets from nested tracker metadata", () => {
     expect(redactExternalTrackerSecrets({
       token: "secret-token",

@@ -53,7 +53,13 @@ test('degraded Krate UI renders recovery loader only for controller fetch failur
   assert.match(ui, /useCache: true/);
   assert.doesNotMatch(ui, /useCache: false/);
   assert.match(ui, /KrateControllerRecovery/);
-  assert.match(ui, /ORG_HYDRATED_RESOURCE_KINDS = \['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject', 'Issue'\]/);
+  assert.match(ui, /ORG_HYDRATED_RESOURCE_KINDS = \[/);
+  for (const kind of ['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject', 'Issue']) {
+    assert.match(ui, new RegExp(`'${kind}'`));
+  }
+  for (const kind of ['AgentPersona', 'AgentSoul', 'AgentAppearance', 'AgentVoiceProfile', 'AgentDefinition']) {
+    assert.match(ui, new RegExp(`'${kind}'`));
+  }
   assert.match(ui, /syncHydratedModel/);
   assert.match(ui, /model\.agents/);
   assert.match(controllerRoute, /'KrateProject'/);

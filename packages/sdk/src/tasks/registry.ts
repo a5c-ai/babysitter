@@ -8,6 +8,8 @@ export interface RegisteredTaskDefinition {
   labels: string[];
   description?: string;
   source?: string;
+  inputSchema?: JsonRecord;
+  outputSchema?: JsonRecord | false | null;
 }
 
 export interface RegistryEffectRecord {
@@ -55,6 +57,8 @@ export class TaskRegistry {
       labels: normalizeLabels(record.labels),
       description: record.description,
       source: record.source,
+      inputSchema: record.inputSchema,
+      outputSchema: record.outputSchema,
     };
     this.definitions.set(record.id, normalized);
     return normalized;

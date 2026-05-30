@@ -366,6 +366,41 @@ test('resources GET route parses limit and offset from searchParams', () => {
   assert.match(route, /total/);
 });
 
+test('agent identity typed routes persist the documented resource kinds', () => {
+  const routeChecks = [
+    { path: ['agents', 'personas', 'route.js'], kind: 'AgentPersona' },
+    { path: ['agents', 'personas', '[name]', 'route.js'], kind: 'AgentPersona' },
+    { path: ['agents', 'souls', '[name]', 'route.js'], kind: 'AgentSoul' },
+    { path: ['agents', 'appearances', '[name]', 'route.js'], kind: 'AgentAppearance' },
+    { path: ['agents', 'voices', '[name]', 'route.js'], kind: 'AgentVoiceProfile' },
+    { path: ['agents', 'definitions', 'route.js'], kind: 'AgentDefinition' },
+    { path: ['agents', 'definitions', '[name]', 'route.js'], kind: 'AgentDefinition' },
+  ];
+  for (const check of routeChecks) {
+    const route = readFile('app', 'api', 'orgs', '[org]', ...check.path);
+    assert.match(route, new RegExp(check.kind), `${check.path.join('/')} must reference ${check.kind}`);
+    assert.match(route, /validateResource/, `${check.path.join('/')} must validate resource writes`);
+    assert.match(route, /applyResource/, `${check.path.join('/')} must persist through controller`);
+    assert.match(route, /clearSnapshotCache/, `${check.path.join('/')} must clear snapshots after writes`);
+    assert.match(route, /invalidateApiCache/, `${check.path.join('/')} must invalidate API cache after writes`);
+  }
+});
+
+test('agent create wizard posts all identity resources with compensation', () => {
+  const wizard = readFile('app', 'components', 'agent', 'agent-create-wizard.jsx');
+  for (const kind of ['AgentPersona', 'AgentSoul', 'AgentAppearance', 'AgentVoiceProfile', 'AgentDefinition']) {
+    assert.match(wizard, new RegExp(kind), `wizard must create ${kind}`);
+  }
+  assert.match(wizard, /DELETE/, 'wizard compensation must delete already-created resources on failure');
+  assert.match(wizard, /createdResources/, 'wizard must track created resources for rollback');
+  assert.match(wizard, /personaRef/, 'wizard must bind identity resources to personaRef');
+  assert.match(wizard, /stackRef/, 'wizard must bind AgentDefinition to stackRef');
+  assert.match(wizard, /resources\/\$\{resource\.kind\}\/\$\{encodeURIComponent\(resource\.metadata\?\.name\)\}/, 'wizard rollback must target the generic resource DELETE route with kind and name');
+  const deleteRoute = readFile('app', 'api', 'orgs', '[org]', 'resources', '[kind]', '[name]', 'route.js');
+  assert.match(deleteRoute, /export\s+const\s+DELETE\s*=\s*withAuth/, 'generic resource route must expose authenticated DELETE for wizard rollback');
+  assert.match(deleteRoute, /deleteResourceForOrg\(\s*org\s*,\s*kind\s*,\s*name\s*\)/, 'generic resource DELETE must use org-scoped controller delete');
+});
+
 test('inference services GET route supports limit/offset pagination', () => {
   const route = readFile('app', 'api', 'orgs', '[org]', 'inference', 'services', 'route.js');
   assert.match(route, /searchParams\.get\(['"]limit['"]\)/);

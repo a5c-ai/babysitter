@@ -59,6 +59,7 @@ function createJitsiSidecarContainer(jitsi = {}) {
     { name: 'JITSI_ROOM_ID', value: jitsi.roomId || '' },
     { name: 'JITSI_PARTICIPANT_NAME', value: jitsi.participantName || jitsi.stackName || 'Krate Agent' },
     { name: 'JITSI_PARTICIPANT_ROLE', value: jitsi.role || 'observer' },
+    { name: 'JITSI_GOODBYE_MESSAGE', value: jitsi.goodbyeMessage || 'Krate agent is leaving the meeting.' },
     { name: 'JITSI_AUDIO_MODE', value: audioMode },
     { name: 'JITSI_CHAT_MODE', value: chatMode },
     { name: 'JITSI_SCREENSHARE_MODE', value: screenshareMode },
@@ -69,6 +70,7 @@ function createJitsiSidecarContainer(jitsi = {}) {
   if (tts.speed) env.push({ name: 'JITSI_TTS_SPEED', value: String(tts.speed) });
   if (stt.provider) env.push({ name: 'JITSI_STT_PROVIDER', value: stt.provider });
   if (vad.provider) env.push({ name: 'JITSI_VAD_PROVIDER', value: vad.provider });
+  if (jitsi.goodbyeMessage) env.push({ name: 'JITSI_GOODBYE_MESSAGE', value: jitsi.goodbyeMessage });
 
   return {
     name: 'jitsi-agent-sidecar',

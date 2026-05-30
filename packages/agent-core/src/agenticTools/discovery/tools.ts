@@ -14,9 +14,9 @@ export function createDiscoveryTools(options: AgenticToolOptions): CustomToolDef
         max_results: Type.Optional(Type.Number({ description: "Maximum results to return (default 20)" })),
       }),
       execute: (_toolCallId, params) => {
-        const registry = options.deferredToolRegistry;
+        const registry = options.toolRegistry ?? options.deferredToolRegistry;
         if (!registry) {
-          return errorResult("Tool search is not available — no deferred tool registry configured.");
+          return errorResult("Tool search is not available — no unified tool registry configured.");
         }
         const query = String(params.query ?? "");
         const maxResults = typeof params.max_results === "number" ? params.max_results : 20;
@@ -45,9 +45,9 @@ export function createDiscoveryTools(options: AgenticToolOptions): CustomToolDef
         source_qualifier: Type.Optional(Type.String({ description: "Source qualifier (e.g. MCP server name)" })),
       }),
       execute: async (_toolCallId, params) => {
-        const registry = options.deferredToolRegistry;
+        const registry = options.toolRegistry ?? options.deferredToolRegistry;
         if (!registry) {
-          return errorResult("Tool fetch is not available — no deferred tool registry configured.");
+          return errorResult("Tool fetch is not available — no unified tool registry configured.");
         }
 
         const toolName = String(params.name ?? "");

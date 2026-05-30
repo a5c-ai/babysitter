@@ -714,12 +714,15 @@ export class ExternalTrackerBackend implements BreakpointBackend {
     const responders = readStringArray(asRecord(this.config.tracker).responders);
     return responders.map((id) => ({
       id,
+      type: "tracker" as const,
       name: id,
       title: `${this.config.provider} tracker responder`,
       domains: [],
       tags: [this.config.provider, "tracker"],
       availability: true,
       responseTimeSla: this.defaultTimeoutMs / 1000,
+      trackerBackend: this.config.provider,
+      trackerConfig: redactExternalTrackerSecrets(asRecord(this.config.tracker)),
     }));
   }
 

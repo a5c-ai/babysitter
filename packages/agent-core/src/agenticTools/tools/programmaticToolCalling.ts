@@ -1,6 +1,6 @@
 import vm from "node:vm";
 import { Type } from "@sinclair/typebox";
-import type { AgenticToolOptions, CustomToolDefinition, ToolResult } from "../types";
+import type { AgenticToolOptions, CustomToolDefinition, ToolResult, ToolUpdateEvent } from "../types";
 import { jsonResult } from "../shared/results";
 
 const DEFAULT_TIMEOUT_MS = 120_000;
@@ -67,12 +67,31 @@ export function createProgrammaticToolCallingTool(
           throw new Error(`Tool "${name}" is not available to code_executor.`);
         }
         calls.push({ tool: name, params: toolParams });
-        return unwrapToolResult(await tool.execute(
+        const executeDirectly = async () => unwrapToolResult(await tool.execute(
           `code-executor:${calls.length}:${name}`,
           toolParams,
           onUpdate,
           toolContext,
         ));
+        if (!options.toolDispatcher) {
+          return executeDirectly();
+        }
+        const dispatched = await options.toolDispatcher.dispatch(
+          {
+            toolName: name,
+            input: toolParams,
+            caller: "code_executor",
+            signal: typeof toolContext === "object" && toolContext && "signal" in toolContext
+              ? toolContext.signal as AbortSignal | undefined
+              : undefined,
+            onUpdate: onUpdate as ((event: ToolUpdateEvent) => void | Promise<void>) | undefined,
+          },
+          async () => executeDirectly(),
+        );
+        if (dispatched.error) {
+          throw new Error(typeof dispatched.error === "string" ? dispatched.error : dispatched.error.message ?? "Tool dispatch failed");
+        }
+        return dispatched.output;
       };
 
       const tools = Object.create(null) as Record<string, (toolParams?: Record<string, unknown>) => Promise<unknown>>;

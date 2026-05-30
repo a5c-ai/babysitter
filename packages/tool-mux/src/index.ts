@@ -29,6 +29,12 @@ export { ToolExecutionError, serializeToolError } from './types.js';
 /* ------------------------------------------------------------------ */
 
 export { ToolRegistry } from './registry.js';
+export type {
+  DeferredToolEntry,
+  ResolvedToolEntry,
+  SchemaLoader,
+  ToolSchema,
+} from './registry.js';
 
 /* ------------------------------------------------------------------ */
 /*  Dispatch                                                           */
@@ -53,8 +59,16 @@ export type { NormalizedToolDefinition, CodecCapabilities } from './schema-trans
 /*  Hooks bridge                                                       */
 /* ------------------------------------------------------------------ */
 
-export { NoopToolHookBridge } from './hooks.js';
-export type { ToolHookBridge, ToolHookResult } from './hooks.js';
+export { HooksMuxToolHookBridge, NoopToolHookBridge } from './hooks.js';
+export type {
+  HooksMuxLikeEngine,
+  HooksMuxLikeEngineResult,
+  HooksMuxLikeResult,
+  HooksMuxToolEvent,
+  HooksMuxToolHookBridgeOptions,
+  ToolHookBridge,
+  ToolHookResult,
+} from './hooks.js';
 
 /* ------------------------------------------------------------------ */
 /*  MCP bridge                                                         */

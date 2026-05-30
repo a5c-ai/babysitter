@@ -71,6 +71,7 @@ const packageFamilies = {
     "@a5c-ai/krate-sdk",
     "@a5c-ai/krate-cli",
     "@a5c-ai/krate-web",
+    "@a5c-ai/krate-jitsi-agent-sidecar",
   ],
 };
 

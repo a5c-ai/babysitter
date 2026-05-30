@@ -165,8 +165,10 @@ export interface ToolDescriptor {
   description?: string;
   parameters?: Record<string, unknown>; // JSON Schema
   source: ToolSource;
+  sourceQualifier?: string;
   server?: string;
   permissions?: string[];
+  outputSchema?: Record<string, unknown>;
   metadata?: UnifiedToolMetadata | Record<string, unknown>;
 }
 

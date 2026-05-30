@@ -5,6 +5,7 @@ export function loadConfig(env = process.env) {
     roomId: env.JITSI_ROOM_ID || '',
     participantName: env.JITSI_PARTICIPANT_NAME || 'Krate Agent',
     role: env.JITSI_PARTICIPANT_ROLE || 'observer',
+    goodbyeMessage: env.JITSI_GOODBYE_MESSAGE || 'Krate agent is leaving the meeting.',
     socketPath: env.AGENT_SOCKET_PATH || '/tmp/jitsi-agent.sock',
     capabilities: {
       audio: env.JITSI_AUDIO_MODE || 'none',

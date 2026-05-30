@@ -489,6 +489,52 @@ test('index.js barrel covers all component groups', () => {
   }
 });
 
+test('agent identity components exist and expose expected symbols', () => {
+  const components = [
+    ['agent/agent-directory.jsx', 'AgentDirectory'],
+    ['agent/agent-profile-card.jsx', 'AgentProfileCard'],
+    ['agent/agent-profile-page.jsx', 'AgentProfilePage'],
+    ['agent/agent-persona-editor.jsx', 'AgentPersonaEditor'],
+    ['agent/agent-soul-editor.jsx', 'AgentSoulEditor'],
+    ['agent/agent-appearance-editor.jsx', 'AgentAppearanceEditor'],
+    ['agent/agent-voice-editor.jsx', 'AgentVoiceEditor'],
+    ['agent/agent-definition-form.jsx', 'AgentDefinitionForm'],
+    ['agent/agent-create-wizard.jsx', 'AgentCreateWizard'],
+    ['agent/agent-personality-traits.jsx', 'AgentPersonalityTraits'],
+  ];
+  for (const [file, symbol] of components) {
+    const src = readComponent(file);
+    assert.match(src, new RegExp(`export\\s+function\\s+${symbol}`), `${file} must export ${symbol}`);
+  }
+});
+
+test('agent create wizard encodes all documented steps and resource kinds', () => {
+  const src = readComponent('agent/agent-create-wizard.jsx');
+  for (const step of ['identity', 'soul', 'skills', 'appearance', 'voice', 'infrastructure', 'review']) {
+    assert.ok(src.includes(step), `wizard must include ${step} step`);
+  }
+  for (const kind of ['AgentPersona', 'AgentSoul', 'AgentAppearance', 'AgentVoiceProfile', 'AgentDefinition']) {
+    assert.ok(src.includes(kind), `wizard must create ${kind}`);
+  }
+  assert.match(src, /rollback|compensat/i, 'wizard must include rollback or compensation handling');
+});
+
+test('existing agent UI references persona identity with stack fallback', () => {
+  const files = [
+    'agent/dispatch-button.jsx',
+    'agent/run-actions.jsx',
+    'agent/session-shell.jsx',
+    'shell/notification-bell.jsx',
+    'shell/command-palette.jsx',
+    'jitsi/jitsi-participant-list.jsx',
+  ];
+  for (const file of files) {
+    const src = readComponent(file);
+    assert.match(src, /persona|AgentDefinition|agentDefinition|identity/i, `${file} must reference persona identity`);
+    assert.match(src, /agentStack|stackRef|AgentStack|stack/i, `${file} must preserve stack fallback`);
+  }
+});
+
 // ---------------------------------------------------------------------------
 // 21. Component local imports only reference sibling files (not deep parents)
 // ---------------------------------------------------------------------------

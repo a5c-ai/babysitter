@@ -88,7 +88,7 @@ describe("task kind helpers", () => {
   });
 
   describe("responder routing helpers", () => {
-    it("externalAgentTask emits agent responder metadata without external:true", async () => {
+    it("externalAgentTask emits external agent responder metadata", async () => {
       const helper = externalAgentTask(externalAgentKindFixtures.id, {
         adapter: externalAgentKindFixtures.adapter,
         prompt: () => externalAgentKindFixtures.prompt,
@@ -102,12 +102,12 @@ describe("task kind helpers", () => {
       expect(def.labels).toEqual(["ctx-agent"]);
       expect(def.metadata).toMatchObject(externalAgentKindFixtures.metadata);
       expect(def.agent).toMatchObject({
+        external: true,
         responderType: "agent",
         adapter: externalAgentKindFixtures.adapter,
         prompt: externalAgentKindFixtures.prompt,
         fallbackType: externalAgentKindFixtures.fallbackType,
       });
-      expect(def.agent).not.toHaveProperty("external");
     });
 
     it("humanTask emits breakpoint responder metadata", async () => {

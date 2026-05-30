@@ -1126,6 +1126,27 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     if (process.platform === 'win32') {
       plan.env['TERM'] = '';
       plan.env['PYTHONUNBUFFERED'] = '1';
+      const { writeFileSync, mkdirSync } = await import('node:fs');
+      const { join } = await import('node:path');
+      const patchDir = join(launchCwd, '.hermes-win-patch');
+      mkdirSync(patchDir, { recursive: true });
+      writeFileSync(join(patchDir, 'sitecustomize.py'), [
+        'import sys, os',
+        'if sys.platform == "win32":',
+        '    try:',
+        '        import prompt_toolkit.output.defaults as _ptd',
+        '        _orig_create = _ptd.create_output',
+        '        def _safe_create(*a, **kw):',
+        '            try: return _orig_create(*a, **kw)',
+        '            except Exception:',
+        '                from prompt_toolkit.output.plain_text import PlainTextOutput',
+        '                return PlainTextOutput(kw.get("stdout") or sys.stdout)',
+        '        _ptd.create_output = _safe_create',
+        '        import prompt_toolkit.output',
+        '        prompt_toolkit.output.create_output = _safe_create',
+        '    except Exception: pass',
+      ].join('\n'));
+      plan.env['PYTHONPATH'] = patchDir + (plan.env['PYTHONPATH'] ? `;${plan.env['PYTHONPATH']}` : '');
     }
   }
   if (plan.harness === 'hermes') {

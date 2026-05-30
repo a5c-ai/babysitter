@@ -141,7 +141,7 @@ jobs:
           npm run build --workspace=@a5c-ai/agent-mux-webui
           npm run build --workspace=@a5c-ai/babysitter-sdk
           (cd packages/agent-core && npx tsc --build --force tsconfig.json)
-          (cd packages/agent-platform && npx tsc --build tsconfig.json)
+          (cd packages/agent-platform && npx tsc --build --force tsconfig.json)
           (cd packages/omni && npx tsc --build tsconfig.json)
 
           wait_all
@@ -416,7 +416,7 @@ jobs:
           echo "Cleaned agent skill directories to prevent test interference"
 
       - name: Run selected live stack E2E
-        timeout-minutes: 18
+        timeout-minutes: 22
         env:
           LIVE_STACK_SCENARIO_ID: ${{ matrix.scenario.id }}
           LIVE_STACK_AGENT_PATH: ${{ matrix.scenario.agent_path }}

@@ -78,6 +78,9 @@ export function JitsiParticipantList({
               {dispatchRunRef(participant) ? (
                 <a href={`/orgs/${encodeURIComponent(org)}/agents/runs/${encodeURIComponent(dispatchRunRef(participant))}`}>Dispatch {dispatchRunRef(participant)}</a>
               ) : null}
+              <span aria-hidden="true">{participant.persona?.avatar?.emoji || participant.avatar || (participant.type === 'agentDefinition' ? 'AI' : '')}</span>
+              {participant.persona?.displayName || participant.name || participant.ref || participant.id} <span className="muted">{participant.persona?.roleTitle || participant.role || participant.agentStack || participant.stackRef || participant.type || 'user'}</span>
+              {participant.persona?.voiceProfile || participant.voiceProfile ? <span className="muted"> voice</span> : null}
             </li>
           ))}
         </ul>

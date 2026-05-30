@@ -154,6 +154,32 @@ test('fetch-dedup.js exists and exports dedupFetch', () => {
   assert.match(content, /export\s+function\s+dedupFetch/, 'must export dedupFetch');
 });
 
+test('agent identity typed API routes exist with expected methods and auth', () => {
+  const routes = [
+    { path: ['agents', 'personas', 'route.js'], methods: ['GET', 'POST'] },
+    { path: ['agents', 'personas', '[name]', 'route.js'], methods: ['GET', 'PATCH', 'DELETE'] },
+    { path: ['agents', 'souls', '[name]', 'route.js'], methods: ['GET', 'PATCH'] },
+    { path: ['agents', 'appearances', '[name]', 'route.js'], methods: ['GET', 'PATCH'] },
+    { path: ['agents', 'appearances', '[name]', 'avatar', 'route.js'], methods: ['POST'] },
+    { path: ['agents', 'voices', '[name]', 'route.js'], methods: ['GET', 'PATCH'] },
+    { path: ['agents', 'voices', '[name]', 'preview', 'route.js'], methods: ['POST'] },
+    { path: ['agents', 'definitions', 'route.js'], methods: ['GET', 'POST'] },
+    { path: ['agents', 'definitions', '[name]', 'route.js'], methods: ['GET', 'PATCH', 'DELETE'] },
+  ];
+  for (const route of routes) {
+    const routePath = path.join(webRoot, 'app', 'api', 'orgs', '[org]', ...route.path);
+    assert.ok(fs.existsSync(routePath), `Missing ${path.relative(webRoot, routePath)}`);
+    const src = fs.readFileSync(routePath, 'utf8');
+    assert.match(src, /dynamic\s*=\s*'force-dynamic'/, `${path.relative(webRoot, routePath)} missing force-dynamic`);
+    assert.match(src, /withAuth/, `${path.relative(webRoot, routePath)} must use withAuth`);
+    assert.match(src, /orgNamespaceName/, `${path.relative(webRoot, routePath)} must scope by org namespace`);
+    assert.match(src, /createKrateApiController/, `${path.relative(webRoot, routePath)} must use controller-backed resources`);
+    for (const method of route.methods) {
+      assert.match(src, new RegExp(`export\\s+const\\s+${method}\\s*=`), `${path.relative(webRoot, routePath)} missing ${method}`);
+    }
+  }
+});
+
 test('use-unsaved-changes.js exists and exports useUnsavedChanges', () => {
   const filePath = path.join(webRoot, 'app', 'hooks', 'use-unsaved-changes.js');
   assert.ok(fs.existsSync(filePath), 'use-unsaved-changes.js must exist');

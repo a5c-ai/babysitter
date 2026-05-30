@@ -125,6 +125,45 @@ describe('ToolRegistry', () => {
     expect(registry.size).toBe(1);
   });
 
+  it('keeps duplicate tool names isolated by source qualifier', () => {
+    registry.register(makeTool({ name: 'read', source: 'mcp', sourceQualifier: 'server-a', description: 'A' }));
+    registry.register(makeTool({ name: 'read', source: 'mcp', sourceQualifier: 'server-b', description: 'B' }));
+
+    expect(registry.size).toBe(2);
+    expect(registry.get('read', 'mcp', 'server-a')!.description).toBe('A');
+    expect(registry.get('read', 'mcp', 'server-b')!.description).toBe('B');
+  });
+
+  it('searches lightweight entries and lazily fetches schemas', async () => {
+    registry.registerLoader('plugin', async (entry) => ({
+      inputSchema: { type: 'object', properties: { plugin: { const: entry.sourceQualifier } } },
+      outputSchema: { type: 'object' },
+    }));
+    registry.registerTools([
+      {
+        name: 'deploy',
+        description: 'Deploy a plugin',
+        source: 'plugin',
+        sourceQualifier: 'shipper',
+        metadata: { tags: ['release'] },
+      },
+    ]);
+
+    expect(registry.searchTools('deploy')).toEqual([
+      expect.objectContaining({ name: 'deploy', source: 'plugin', sourceQualifier: 'shipper' }),
+    ]);
+
+    const resolved = await registry.fetchSchema('deploy', 'plugin', 'shipper');
+    expect(resolved).toEqual(expect.objectContaining({
+      name: 'deploy',
+      schema: {
+        inputSchema: { type: 'object', properties: { plugin: { const: 'shipper' } } },
+        outputSchema: { type: 'object' },
+      },
+    }));
+    expect(registry.loadedSchemaCount).toBe(1);
+  });
+
   it('size reflects the current tool count', () => {
     expect(registry.size).toBe(0);
     registry.register(makeTool({ name: 'a' }));

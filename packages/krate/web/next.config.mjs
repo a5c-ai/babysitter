@@ -9,6 +9,7 @@ const monorepoRoot = join(webRoot, '../../..');
 const nextConfig = {
   output: 'standalone',
   outputFileTracingRoot: monorepoRoot,
+  serverExternalPackages: ['@nats-io/transport-node', '@nats-io/jetstream'],
   turbopack: {
     root: monorepoRoot,
     resolveAlias: {
@@ -40,8 +41,12 @@ const nextConfig = {
   },
 };
 
-nextConfig.webpack = (config) => {
+nextConfig.webpack = (config, { isServer }) => {
   config.resolve.alias['@a5c-ai/krate-sdk'] = join(webRoot, '../sdk/src/index.js');
+  if (isServer) {
+    config.externals = config.externals || [];
+    config.externals.push('@nats-io/transport-node', '@nats-io/jetstream');
+  }
   return config;
 };
 

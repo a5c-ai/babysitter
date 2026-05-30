@@ -92,6 +92,41 @@ test('deriveSegments groups consecutive messages of the same kind', async () => 
 });
 
 // ---------------------------------------------------------------------------
+// agent-identity.js
+// ---------------------------------------------------------------------------
+
+test('agent-identity.js resolves profiles from grouped model resources', async () => {
+  const { buildAgentIdentityProfiles } = await import('../app/lib/agent-identity.js');
+  const profiles = buildAgentIdentityProfiles({
+    resources: [
+      { kind: 'AgentPersona', items: [{ kind: 'AgentPersona', metadata: { name: 'aria' }, spec: { organizationRef: 'default', displayName: 'Aria', role: { title: 'Reviewer' }, soul: { ref: 'aria-soul' }, appearance: { ref: 'aria-appearance' }, voiceProfile: { ref: 'aria-voice' } } }] },
+      { kind: 'AgentSoul', items: [{ kind: 'AgentSoul', metadata: { name: 'aria-soul' }, spec: { organizationRef: 'default', content: 'Soul' } }] },
+      { kind: 'AgentAppearance', items: [{ kind: 'AgentAppearance', metadata: { name: 'aria-appearance' }, spec: { organizationRef: 'default', avatar: { type: 'initials', fallbackInitials: 'AR' } } }] },
+      { kind: 'AgentVoiceProfile', items: [{ kind: 'AgentVoiceProfile', metadata: { name: 'aria-voice' }, spec: { organizationRef: 'default', ttsProvider: 'openai' } }] },
+      { kind: 'AgentDefinition', items: [{ kind: 'AgentDefinition', metadata: { name: 'aria-reviewer' }, spec: { organizationRef: 'default', personaRef: 'aria', stackRef: 'review-stack' } }] },
+      { kind: 'AgentStack', items: [{ kind: 'AgentStack', metadata: { name: 'review-stack' }, spec: { organizationRef: 'default', displayName: 'Review stack' } }] },
+    ],
+  });
+  assert.equal(profiles.length, 1);
+  assert.equal(profiles[0].displayName, 'Aria');
+  assert.equal(profiles[0].definitions[0].metadata.name, 'aria-reviewer');
+  assert.equal(profiles[0].stacks[0].metadata.name, 'review-stack');
+});
+
+test('agent-identity.js resolves profiles from kind-keyed resource maps', async () => {
+  const { buildAgentIdentityProfiles, resolveAgentIdentityForRef } = await import('../app/lib/agent-identity.js');
+  const resources = {
+    AgentPersona: [{ kind: 'AgentPersona', metadata: { name: 'aria' }, spec: { organizationRef: 'default', displayName: 'Aria', role: { title: 'Reviewer' } } }],
+    AgentDefinition: [{ kind: 'AgentDefinition', metadata: { name: 'aria-reviewer' }, spec: { organizationRef: 'default', personaRef: 'aria', stackRef: 'review-stack' } }],
+    AgentStack: [{ kind: 'AgentStack', metadata: { name: 'legacy-stack' }, spec: { organizationRef: 'default', displayName: 'Legacy Stack' } }],
+  };
+  const profiles = buildAgentIdentityProfiles(resources);
+  assert.equal(profiles.length, 1);
+  assert.equal(resolveAgentIdentityForRef('aria-reviewer', resources).displayName, 'Aria');
+  assert.equal(resolveAgentIdentityForRef('legacy-stack', resources).fallback, true);
+});
+
+// ---------------------------------------------------------------------------
 // model-catalog-data.js
 // ---------------------------------------------------------------------------
 

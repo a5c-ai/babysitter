@@ -68,6 +68,20 @@ function formatTokens(n) {
   return String(n);
 }
 
+function turnCostKey(turn) {
+  return turn.id ||
+    turn.turnId ||
+    turn.messageId ||
+    turn.timestamp ||
+    [
+      turn.model || turn.modelId || 'unknown-model',
+      turn.inputTokens || turn.input_tokens || 0,
+      turn.outputTokens || turn.output_tokens || 0,
+      turn.cacheReadTokens || turn.cache_read_input_tokens || 0,
+      turn.cacheWriteTokens || turn.cache_write_input_tokens || 0,
+    ].join(':');
+}
+
 function TurnCostRow({ turn, index }) {
   const [open, setOpen] = useState(false);
   const model = turn.model || turn.modelId || '—';
@@ -277,8 +291,8 @@ export function SessionCost({ turns = [], totalCost, compact = false }) {
 
       {turnsWithUsage.length > 0 ? (
         <div>
-          {turnsWithUsage.map((turn, i) => (
-            <TurnCostRow key={i} turn={turn} index={i} />
+          {turnsWithUsage.map((turn, turnIndex) => (
+            <TurnCostRow key={turnCostKey(turn)} turn={turn} index={turnIndex} />
           ))}
         </div>
       ) : (

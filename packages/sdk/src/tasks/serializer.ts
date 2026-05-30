@@ -61,6 +61,7 @@ export interface SerializedTaskDefinition extends JsonRecord {
   title?: string;
   description?: string;
   labels?: string[];
+  inputSchema?: JsonRecord;
   outputSchema?: JsonRecord | false | null;
   inputs?: unknown;
   inputsRef?: string;
@@ -102,6 +103,8 @@ export async function serializeTaskDefinition(
     title: normalized.title,
     description: normalized.description,
     labels: normalized.labels,
+    inputSchema: normalized.inputSchema,
+    outputSchema: normalized.outputSchema,
     io: normalized.io,
     agent: normalized.agent,
     node: normalized.node,
@@ -193,6 +196,8 @@ function normalizeTaskDef(task: TaskDef) {
     title: typeof task.title === "string" ? task.title : undefined,
     description: typeof task.description === "string" ? task.description : undefined,
     labels: normalizeLabels(task.labels),
+    inputSchema: normalizeJson(task.inputSchema),
+    outputSchema: normalizeOutputSchema(task.outputSchema),
     io: normalizeJson(task.io),
     agent: normalizeJson(task.agent),
     node: normalizeJson(task.node),
@@ -201,6 +206,13 @@ function normalizeTaskDef(task: TaskDef) {
     sleep: normalizeJson(task.sleep),
     metadata: normalizeJson(task.metadata),
   };
+}
+
+function normalizeOutputSchema(value: unknown): JsonRecord | false | null | undefined {
+  if (value === false || value === null) {
+    return value;
+  }
+  return normalizeJson(value);
 }
 
 function normalizeLabels(labels?: string[]) {

@@ -88,6 +88,10 @@ import {
   harnessSupportsConcurrentEffects,
 } from "./dispatch";
 
+const importOptionalModule = new Function("specifier", "return import(specifier)") as (
+  specifier: string,
+) => Promise<unknown>;
+
 type McpExecutorLike = {
   execute(request: McpToolExecutionRequest): Promise<McpToolResult>;
 };
@@ -96,6 +100,33 @@ interface McpRoutingOptions {
   executor?: McpExecutorLike;
   manager?: McpClientManager;
   registry?: McpToolRegistry;
+  toolRegistry?: {
+    registerServer(server: {
+      id: string;
+      name: string;
+      type: "mcp";
+      tools: Array<{
+        name: string;
+        description?: string;
+        parameters?: Record<string, unknown>;
+        source: "mcp";
+        sourceQualifier?: string;
+        server?: string;
+      }>;
+    }): void;
+  };
+  mcpBridge?: {
+    registerServer(
+      config: { id: string; name: string; transport: "stdio" },
+      tools: Array<{ name: string; description?: string; inputSchema?: Record<string, unknown> }>,
+    ): void;
+  };
+  dispatcher?: {
+    dispatch(
+      context: { toolName: string; input: unknown; caller?: string; runId?: string; sessionId?: string },
+      executor: () => Promise<unknown>,
+    ): Promise<{ output: unknown; durationMs: number; error?: string | { message?: string } }>;
+  };
   transportFactory?: McpTransportFactory;
   stateDir?: string;
   autoConnect?: boolean;
@@ -439,6 +470,8 @@ async function resolveMcpExecutor(options: EffectResolverOptions): Promise<McpEx
   await manager.initialize(options.mcp?.autoConnect ?? true);
   const registry = options.mcp?.registry ?? new McpToolRegistry(manager, {
     cacheTtlMs: options.mcp?.cacheTtlMs,
+    unifiedRegistry: options.mcp?.toolRegistry,
+    mcpBridge: options.mcp?.mcpBridge,
   });
   await registry.refreshAll();
   return new McpToolExecutor(manager);
@@ -468,7 +501,9 @@ async function resolveMcpEffect(
 ): Promise<ResolveEffectResult> {
   const executor = await resolveMcpExecutor(options);
   const request = getMcpRequest(action, options);
-  const result = await executor.execute(request);
+  const result = options.mcp?.dispatcher
+    ? await dispatchMcpTool(options.mcp.dispatcher, executor, request, options)
+    : await executor.execute(request);
   const stdout = mcpResultToStdout(result);
   streamMcpOutput(stdout, options.streaming);
   return {
@@ -478,6 +513,35 @@ async function resolveMcpEffect(
     stdout,
     stderr: result.success ? undefined : result.error,
   };
+}
+
+async function dispatchMcpTool(
+  dispatcher: NonNullable<McpRoutingOptions["dispatcher"]>,
+  executor: McpExecutorLike,
+  request: McpToolExecutionRequest,
+  options: EffectResolverOptions,
+): Promise<McpToolResult> {
+  const dispatched = await dispatcher.dispatch(
+    {
+      toolName: request.toolName,
+      input: request.args,
+      caller: "agent-platform:mcp",
+      ...(options.runId ? { runId: options.runId } : {}),
+      ...(options.sessionId ? { sessionId: options.sessionId } : {}),
+    },
+    async () => executor.execute(request),
+  );
+  if (dispatched.error) {
+    return {
+      success: false,
+      content: [],
+      error: typeof dispatched.error === "string"
+        ? dispatched.error
+        : dispatched.error.message ?? "MCP tool dispatch failed",
+      durationMs: dispatched.durationMs,
+    };
+  }
+  return dispatched.output as McpToolResult;
 }
 
 function resolveConfiguredApprovalChain(action: EffectAction): ReturnType<typeof evaluateApprovalChain> | undefined {
@@ -607,7 +671,7 @@ async function resolveViaTasksMuxIfRoutable(
     };
   };
   try {
-    mux = await import("@a5c-ai/tasks-mux") as unknown as typeof mux;
+    mux = await importOptionalModule("@a5c-ai/tasks-mux") as typeof mux;
   } catch {
     return undefined;
   }
@@ -908,9 +972,10 @@ async function invokeSubprocessEffect(
       };
     }
 
-    const message = iterationResult.error instanceof Error
-      ? iterationResult.error.message
-      : summarizeSubprocessValue(iterationResult.error);
+    const rawError = "error" in iterationResult ? iterationResult.error : iterationResult;
+    const message = rawError instanceof Error
+      ? rawError.message
+      : summarizeSubprocessValue(rawError);
     emitAmuxEvent(
       {
         type: "subagent_error",

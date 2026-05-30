@@ -254,6 +254,63 @@ describe("agent-core tools", () => {
       .toBe(true);
   });
 
+  it("registers built-in tools in the unified tool registry and uses it for discovery", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-unified-registry-"));
+    const tools = new Map<string, {
+      name: string;
+      description?: string;
+      parameters?: Record<string, unknown>;
+      source: "builtin" | "mcp" | "plugin" | "custom";
+    }>();
+    const toolRegistry = {
+      registerAll: vi.fn((entries: Array<{
+        name: string;
+        description?: string;
+        parameters?: Record<string, unknown>;
+        source: "builtin" | "mcp" | "plugin" | "custom";
+      }>) => {
+        for (const entry of entries) tools.set(entry.name, entry);
+      }),
+      searchTools: vi.fn((query: string, maxResults = 20) =>
+        [...tools.values()]
+          .filter((tool) => tool.name.includes(query) || tool.description?.includes(query))
+          .slice(0, maxResults)
+          .map((tool) => ({
+            name: tool.name,
+            description: tool.description ?? "",
+            source: tool.source,
+          }))),
+      fetchSchema: vi.fn(async (name: string) => {
+        const tool = tools.get(name);
+        return tool
+          ? {
+            name: tool.name,
+            description: tool.description ?? "",
+            source: tool.source,
+            schema: { inputSchema: tool.parameters ?? {} },
+          }
+          : undefined;
+      }),
+    };
+    const definitions = createAgentCoreToolDefinitions({ workspace, interactive: false, toolRegistry });
+    const toolSearch = definitions.find((tool) => tool.name === "tool_search");
+    const toolFetch = definitions.find((tool) => tool.name === "tool_fetch");
+    if (!toolSearch || !toolFetch) {
+      throw new Error("Expected discovery tools");
+    }
+
+    const searchResult = JSON.parse(getText(await toolSearch.execute("search", { query: "read" }))) as {
+      tools: Array<{ name: string }>;
+    };
+    const fetchResult = JSON.parse(getText(await toolFetch.execute("fetch", { name: "read" }))) as {
+      inputSchema: Record<string, unknown>;
+    };
+
+    expect(toolRegistry.registerAll).toHaveBeenCalledOnce();
+    expect(searchResult.tools.some((tool) => tool.name === "read")).toBe(true);
+    expect(fetchResult.inputSchema).toEqual(expect.objectContaining({ type: "object" }));
+  });
+
   it("exposes native task-router tools and delegates through taskHandler", async () => {
     const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-native-task-tools-"));
     const taskHandler = vi.fn(async (params) => ({ routed: true, params }));
@@ -374,6 +431,37 @@ describe("agent-core tools", () => {
       path: "copy.txt",
       content: expect.stringContaining("alpha"),
     });
+  });
+
+  it("routes code_executor nested tool calls through the unified dispatcher", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-code-mode-dispatcher-"));
+    writeFileSync(path.join(workspace, "note.txt"), "alpha\n", "utf8");
+    const dispatch = vi.fn(async (
+      _context: unknown,
+      executor: (_tool: { name: string }, context: { input: unknown }) => Promise<unknown>,
+    ) => ({
+      output: await executor({ name: "read" }, { input: { path: "note.txt" } }),
+      durationMs: 1,
+    }));
+    const definitions = getToolDefinitions(workspace, {
+      programmaticToolCalling: true,
+      toolDispatcher: { dispatch },
+    });
+    const codeExecutor = definitions.find((tool) => tool.name === "code_executor");
+    if (!codeExecutor) {
+      throw new Error("Expected code_executor to be registered");
+    }
+
+    const result = await codeExecutor.execute("code-mode-dispatch", {
+      code: "return await tools.read({ path: 'note.txt' });",
+    });
+    const payload = JSON.parse(getText(result)) as { result: string };
+
+    expect(payload.result).toContain("alpha");
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ toolName: "read", caller: "code_executor" }),
+      expect.any(Function),
+    );
   });
 
   it("propagates code_executor tool context into nested tool calls", async () => {

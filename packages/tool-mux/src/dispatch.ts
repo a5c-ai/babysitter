@@ -143,6 +143,8 @@ export class ToolDispatcher {
       };
     }
 
+    let effectiveContext = context;
+
     // --- before hook ---
     if (this.hooks) {
       const hookResult = await this.hooks.beforeToolUse(context, descriptor);
@@ -153,15 +155,21 @@ export class ToolDispatcher {
           error: hookResult.reason ?? 'Tool use denied by hook',
         };
       }
+      if (hookResult?.toolMutation) {
+        effectiveContext = {
+          ...context,
+          input: applyToolMutation(context.input, hookResult.toolMutation),
+        };
+      }
     }
 
     // --- execute ---
     const start = Date.now();
     let output: unknown;
-    let error: string | undefined;
+    let error: ToolCallResult['error'];
 
     try {
-      output = await executor(descriptor, context);
+      output = await executor(descriptor, effectiveContext);
     } catch (err: unknown) {
       error = err instanceof ToolExecutionError
         ? serializeToolError(err)
@@ -173,9 +181,32 @@ export class ToolDispatcher {
 
     // --- after hook ---
     if (this.hooks) {
-      await this.hooks.afterToolUse(context, descriptor, result);
+      await this.hooks.afterToolUse(effectiveContext, descriptor, result);
     }
 
     return result;
   }
+}
+
+function applyToolMutation(
+  input: unknown,
+  mutation: { mode: 'replace' | 'patch'; value: unknown },
+): unknown {
+  if (mutation.mode === 'replace') {
+    return mutation.value;
+  }
+  if (
+    input &&
+    typeof input === 'object' &&
+    !Array.isArray(input) &&
+    mutation.value &&
+    typeof mutation.value === 'object' &&
+    !Array.isArray(mutation.value)
+  ) {
+    return {
+      ...(input as Record<string, unknown>),
+      ...(mutation.value as Record<string, unknown>),
+    };
+  }
+  return mutation.value;
 }

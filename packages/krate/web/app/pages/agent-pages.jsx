@@ -36,6 +36,9 @@ export {
 // Agent overview pages (dashboard, stacks, stack detail, stack builder).
 export { AgentsDashboardPage, AgentStacksPage, AgentStackDetailPage, AgentStackBuilderPage } from './agent-overview-pages.jsx';
 
+// Agent identity directory, profile, and creation pages.
+export { AgentDirectoryPage, AgentProfileRoutePage, AgentCreateRoutePage } from './agent-identity-pages.jsx';
+
 // Dispatch run pages.
 export { AgentRunsPage, AgentRunDetailPage } from './agent-run-pages.jsx';
 

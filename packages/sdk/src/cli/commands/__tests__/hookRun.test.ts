@@ -23,6 +23,69 @@ import {
 import type { SessionState } from "../../../session";
 import { appendEvent, loadJournal } from "../../../storage/journal";
 
+vi.mock("@a5c-ai/tasks-mux", () => {
+  class AgentMuxResponderBackend {
+    constructor(readonly config: Record<string, unknown> = {}) {}
+
+    async submitBreakpoint(params: Record<string, unknown>) {
+      return {
+        answers: [{
+          text: `agent-mux answer for ${String((params.context as Record<string, unknown> | undefined)?.description ?? "task")}`,
+          responderId: String(this.config.adapter ?? "codex"),
+          responderName: String(this.config.adapter ?? "codex"),
+        }],
+        context: {
+          metadata: {
+            agentMux: {
+              runId: "amux-run-1",
+              agent: this.config.adapter ?? "codex",
+              model: this.config.model ?? "gpt-test",
+              durationMs: 123,
+              cost: { costUsd: 0.001 },
+              tokenUsage: { inputTokens: 10, outputTokens: 5 },
+            },
+          },
+        },
+      };
+    }
+  }
+
+  function routeTask(task: { kind?: string; agent?: Record<string, unknown>; metadata?: Record<string, unknown> }) {
+    const responderType = task.agent?.responderType ?? task.metadata?.responderType;
+    if (task.kind === "agent" && (responderType === "agent" || task.agent?.external === true)) {
+      return {
+        responderType: "agent",
+        route: "agent-mux",
+        responder: {
+          id: String(task.agent?.adapter ?? task.metadata?.adapter ?? "codex"),
+          adapter: String(task.agent?.adapter ?? task.metadata?.adapter ?? "codex"),
+          model: task.agent?.model as string | undefined,
+        },
+      };
+    }
+    if (responderType === "tracker") {
+      return {
+        responderType: "tracker",
+        route: "external-tracker",
+        unavailable: true,
+        reason: "ExternalTrackerBackend unavailable for test",
+      };
+    }
+    return {
+      responderType: "internal",
+      route: "agent-core",
+      responder: { id: "agent-core" },
+    };
+  }
+
+  return {
+    AgentMuxResponderBackend,
+    routeTask,
+    isHostDelegableRoute: (decision: { responderType: string }) =>
+      decision.responderType === "internal" || decision.responderType === "agent",
+  };
+});
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -834,6 +897,16 @@ describe("handleHookRun stop", () => {
     );
     expect(code).toBe(0);
     expect(JSON.parse(getStdout().trim()).decision).toBe("block");
+    const routedAgentEvents = await loadJournal(agentRunDir);
+    expect(routedAgentEvents.find((event) => event.type === "EFFECT_RESOLVED")?.data).toMatchObject({
+      effectId: "routed-agent",
+      status: "ok",
+    });
+    expect(routedAgentEvents.find((event) => event.type === "COST_TRACKED")?.data).toMatchObject({
+      effectId: "routed-agent",
+      source: "tasks-mux:agent-mux",
+      costUsd: 0.001,
+    });
 
     stdoutChunks = [];
 
@@ -855,6 +928,49 @@ describe("handleHookRun stop", () => {
     );
     expect(code).toBe(0);
     expect(JSON.parse(getStdout().trim()).decision).toBeUndefined();
+  });
+
+  it("resolves external agent effects internally and leaves host-resolvable effects pending", async () => {
+    process.env.BABYSITTER_HOOK_BACKOFF_BASE = "0.001";
+    process.env.BABYSITTER_HOOK_BACKOFF_CAP = "0.001";
+    const runId = "mixed-external-agent-run";
+    const sessionId = "mixed-external-agent-session";
+    const runsDir = path.join(tmpDir, "runs");
+    const runDir = path.join(runsDir, runId);
+    await createRunMetadata(runDir, runId);
+    await requestAgentEffect(runDir, "external-agent", "2026-01-01T00:00:00.000Z", {
+      kind: "agent",
+      title: "External agent",
+      agent: {
+        external: true,
+        adapter: "codex",
+        prompt: { task: "review externally" },
+      },
+    });
+    await requestAgentEffect(runDir, "internal-agent", "2026-01-01T00:00:01.000Z", {
+      kind: "agent",
+      title: "Internal agent",
+      agent: {
+        prompt: { task: "review internally" },
+      },
+    });
+    await createActiveSession(sessionId, runId, runDir);
+
+    const code = await callWithStdin(
+      JSON.stringify({ session_id: sessionId }),
+      { ...baseArgs, stateDir, runsDir },
+    );
+
+    expect(code).toBe(0);
+    expect(JSON.parse(getStdout().trim()).decision).toBe("block");
+    const events = await loadJournal(runDir);
+    expect(events.find((event) => event.type === "EFFECT_RESOLVED")?.data).toMatchObject({
+      effectId: "external-agent",
+      status: "ok",
+    });
+    const stopEvent = events.filter((event) => event.type === "STOP_HOOK_INVOKED").at(-1);
+    expect(stopEvent?.data.effectId).toBe("internal-agent");
+    expect(events.filter((event) => event.type === "EFFECT_RESOLVED")).toHaveLength(1);
   });
 
   it("does not apply stale backoff metadata after a pending effect resolves", async () => {

@@ -16,6 +16,7 @@ export interface TaskIOHints {
 export type ResponderType = "internal" | "human" | "agent" | "tracker" | "auto";
 
 export interface ResponderRoutingOptions {
+  external?: boolean;
   responderType?: ResponderType;
   adapter?: string;
   fallbackType?: ResponderType;
@@ -95,6 +96,7 @@ export interface TaskDef {
   title?: string;
   description?: string;
   labels?: string[];
+  inputSchema?: Record<string, unknown>;
   outputSchema?: Record<string, unknown> | false | null;
   io?: TaskIOHints;
   metadata?: JsonRecord;
@@ -219,6 +221,7 @@ export interface AgentTaskDefinitionOptions<TArgs = unknown> {
   name?: TaskValueOrFactory<TArgs, string | undefined>;
   prompt?: TaskValueOrFactory<TArgs, AgentPrompt | undefined>;
   outputSchema?: TaskValueOrFactory<TArgs, Record<string, unknown> | undefined>;
+  external?: TaskValueOrFactory<TArgs, boolean | undefined>;
   responderType?: TaskValueOrFactory<TArgs, ResponderType | undefined>;
   adapter?: TaskValueOrFactory<TArgs, string | undefined>;
   fallbackType?: TaskValueOrFactory<TArgs, ResponderType | undefined>;

@@ -43,6 +43,7 @@ import {
   resolveStopHookRunState,
   type StopHookRunStateDetails,
 } from "./stopHookContinuation";
+import { resolveExternalAgentEffectsForStopHook } from "./externalAgentEffect";
 
 export interface StopHookCommonResult {
   shouldContinue: boolean;
@@ -661,6 +662,37 @@ export async function handleStopHookCommon(
     }, options.harness);
     process.stdout.write("{}\n");
     return makeExit(log, options.useDetailedRunState ? 1 : 0, "run_state_unknown", { sessionId: activeSessionId, filePath, state, prompt, resolvedPluginRoot, runsDir });
+  }
+
+  if (runState === "waiting") {
+    const externalResolution = await resolveExternalAgentEffectsForStopHook({
+      runDir: runEventDir,
+      workspace: process.cwd(),
+      log,
+    });
+    if (externalResolution.attempted > 0) {
+      log.info(`Resolved ${externalResolution.resolved.length} external agent effect(s) before returning to host`);
+      if (options.useDetailedRunState) {
+        runStateDetails = await resolveStopHookRunState({
+          runId,
+          runsDir,
+          preferredRunDir: boundRunDir,
+          log,
+        });
+        runState = runStateDetails.runState;
+        completionProof = runStateDetails.completionProof;
+        pendingKinds = runStateDetails.pendingKinds;
+        onlyBreakpointsPending = runStateDetails.onlyBreakpointsPending;
+        currentPendingEffectId = runStateDetails.currentPendingEffectId;
+      } else {
+        runStateSummary = await resolveHookRunState({ runId, runsDir, log });
+        runState = runStateSummary.runState;
+        completionProof = runStateSummary.completionProof;
+        pendingKinds = runStateSummary.pendingKinds;
+        onlyBreakpointsPending = runStateSummary.onlyBreakpointsPending;
+        currentPendingEffectId = runStateSummary.currentPendingEffectId;
+      }
+    }
   }
 
   if (runState === "waiting" && onlyBreakpointsPending) {

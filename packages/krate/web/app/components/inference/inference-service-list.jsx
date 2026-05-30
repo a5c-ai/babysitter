@@ -8,6 +8,16 @@ import {
   FrameworkBadge, StatusBadge, CopyButton,
 } from './inference-helpers.jsx';
 
+function serviceConditionKey(condition) {
+  return [
+    condition.type,
+    condition.reason,
+    condition.status,
+    condition.lastTransitionTime,
+    condition.message,
+  ].filter(Boolean).join(':');
+}
+
 // ─── Service Card ───────────────────────────────────────────────────────────
 
 export const ServiceCard = memo(function ServiceCard({ service, onView, onDelete }) {
@@ -243,8 +253,8 @@ export function ServiceDetailPanel({ service, org, onClose }) {
             <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>No conditions reported</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-              {conditions.map((c, i) => (
-                <div key={i} style={{ ...cardStyle, padding: '0.5rem 0.75rem' }}>
+              {conditions.map((c) => (
+                <div key={serviceConditionKey(c)} style={{ ...cardStyle, padding: '0.5rem 0.75rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ fontWeight: 600, fontSize: '0.8125rem' }}>{c.type}</span>
                     <span style={{ fontSize: '0.8125rem', color: c.status === 'True' ? '#16a34a' : '#dc2626' }}>{c.status}</span>

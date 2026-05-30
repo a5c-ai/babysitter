@@ -42,6 +42,7 @@ function buildCommands(org) {
     { id: 'nav-dashboard', label: 'Go to Dashboard', hint: 'Home workspace', href: prefix('/'), group: 'Navigate' },
     { id: 'nav-repos', label: 'Go to Repositories', hint: 'Code and files', href: prefix('/repositories'), group: 'Navigate' },
     { id: 'nav-stacks', label: 'Go to Agent Stacks', hint: 'Stack configurations', href: prefix('/agents/stacks'), group: 'Navigate' },
+    { id: 'nav-agent-directory', label: 'Go to Agent Directory', hint: 'Personas and profiles', href: prefix('/agents/directory'), group: 'Navigate' },
     { id: 'nav-sessions', label: 'Go to Sessions', hint: 'Chat sessions', href: prefix('/agents/sessions'), group: 'Navigate' },
     { id: 'nav-runs', label: 'Go to Dispatch Runs', hint: 'Dispatch runs', href: prefix('/agents/runs'), group: 'Navigate' },
     { id: 'nav-rules', label: 'Go to Trigger Rules', hint: 'Rule definitions', href: prefix('/agents/rules'), group: 'Navigate' },
@@ -53,11 +54,12 @@ function buildCommands(org) {
     { id: 'nav-deployments', label: 'Go to Deployments', hint: 'Releases and envs', href: prefix('/deployments'), group: 'Navigate' },
     // Create
     { id: 'create-stack', label: 'New Agent Stack', hint: 'Create a new stack', href: prefix('/agents/stacks/new'), group: 'Create' },
+    { id: 'create-agent-persona', label: 'New Agent Persona', hint: 'Create identity and deployment', href: prefix('/agents/directory/new'), group: 'Create' },
     { id: 'create-project', label: 'New Project', hint: 'Create a project board', href: prefix('/agents/projects/new'), group: 'Create' },
     { id: 'create-rule', label: 'New Trigger Rule', hint: 'Create a trigger rule', href: prefix('/agents/rules/new'), group: 'Create' },
     { id: 'create-repo', label: 'New Repository', hint: 'Create a repository', href: prefix('/repositories/new'), group: 'Create' },
     // Actions
-    { id: 'action-dispatch', label: 'Dispatch Agent', hint: 'Run an agent now', href: prefix('/agents/runs'), group: 'Actions' },
+    { id: 'action-dispatch', label: 'Dispatch Agent Persona', hint: 'Run an agent identity with stack fallback', href: prefix('/agents/runs'), group: 'Actions' },
     { id: 'action-toggle-dark', label: 'Toggle Dark Mode', hint: 'Switch color theme', action: () => document.documentElement.classList.toggle('dark'), group: 'Actions' },
   ];
 }

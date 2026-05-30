@@ -1,4 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
+import { promises as fs } from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import { GitNativeBackend } from "../backends/git-native.js";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Dynamic import
@@ -7,6 +11,29 @@ import { describe, it, expect } from "vitest";
 async function importProgram() {
   return import("../cli/program.js");
 }
+
+function makeTaskInput(text: string) {
+  return {
+    text,
+    context: {
+      description: text,
+      codeSnippets: [],
+      fileReferences: [],
+      tags: [],
+    },
+    routing: {
+      strategy: "single" as const,
+      targetResponders: [],
+      timeoutMs: 1_800_000,
+      presentToUser: true,
+    },
+  };
+}
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  process.exitCode = undefined;
+});
 
 // ────────────────────────────────────────────────────────────────────────────
 // Tests
@@ -66,6 +93,28 @@ describe("CLI Program", () => {
       const commands = program.commands.map((c) => c.name());
 
       expect(commands).toContain("tasks");
+    });
+
+    it("registers task-management operation commands", async () => {
+      const { createProgram } = await importProgram();
+      const program = createProgram();
+      const tasksCommand = program.commands.find((c) => c.name() === "tasks");
+
+      expect(tasksCommand).toBeDefined();
+      expect(tasksCommand!.commands.map((c) => c.name())).toEqual(
+        expect.arrayContaining([
+          "search",
+          "assign",
+          "approve",
+          "close",
+          "cancel",
+          "transition",
+          "comment",
+          "bulk",
+          "stats",
+          "export",
+        ]),
+      );
     });
 
     it("does not register adjacent breakpoints claim lifecycle command", async () => {
@@ -172,6 +221,60 @@ describe("CLI Program", () => {
       const { createProgram } = await importProgram();
       const program = createProgram();
       expect(program.version()).toBe("5.0.0");
+    });
+  });
+
+  describe("tasks command", () => {
+    it("bulk reassign reports backend per-item success and failure results", async () => {
+      const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "tasks-mux-cli-"));
+      const breakpointsDir = path.join(tmpDir, ".breakpoints");
+      try {
+        const backend = new GitNativeBackend({ breakpointsDir });
+        const first = await backend.submitBreakpoint(makeTaskInput("First CLI task"));
+        const second = await backend.submitBreakpoint(makeTaskInput("Second CLI task"));
+        const logs: string[] = [];
+        vi.spyOn(console, "log").mockImplementation((value: string) => {
+          logs.push(value);
+        });
+
+        const { createProgram } = await importProgram();
+        const program = createProgram();
+        await program.parseAsync([
+          "node",
+          "tasks-mux",
+          "--json",
+          "tasks",
+          "--breakpoints-dir",
+          breakpointsDir,
+          "bulk",
+          "--ids",
+          `${first.id},${second.id},missing`,
+          "--action",
+          "reassign",
+          "--assignee",
+          "maintainer",
+          "--actor",
+          "cli-test",
+        ]);
+
+        expect(process.exitCode).toBe(1);
+        const output = JSON.parse(logs.at(-1) ?? "{}") as {
+          total: number;
+          succeeded: number;
+          failed: number;
+          items: Array<{ id: string; ok: boolean; errorCode?: string }>;
+        };
+        expect(output.total).toBe(3);
+        expect(output.succeeded).toBe(2);
+        expect(output.failed).toBe(1);
+        expect(output.items).toEqual([
+          expect.objectContaining({ id: first.id, ok: true }),
+          expect.objectContaining({ id: second.id, ok: true }),
+          expect.objectContaining({ id: "missing", ok: false, errorCode: "not_found" }),
+        ]);
+      } finally {
+        await fs.rm(tmpDir, { recursive: true, force: true });
+      }
     });
   });
 });

@@ -233,6 +233,56 @@ test('NATS event transport renders inline and secret-backed broker URLs', () => 
   assert.doesNotMatch(secretBacked, /nats:\/\/[^"\s]+/);
 });
 
+test('demo NATS renders JetStream broker and wires event transport by default', () => {
+  const rendered = execFileSync('helm', [
+    'template', 'krate', '../charts', '-n', 'krate-system',
+    '--set', 'argocd.enabled=false',
+    '--set', 'demo.enabled=true',
+    '--set', 'demo.nats.mode=local-dev-nats'
+  ], { encoding: 'utf8' });
+
+  assert.match(rendered, /name: krate-krate-nats/);
+  assert.match(rendered, /args: \["--jetstream", "--store_dir=\/data\/jetstream"\]/);
+  assert.match(rendered, /name: KRATE_EVENT_TRANSPORT\s+value: "nats"/);
+  assert.match(rendered, /name: KRATE_EVENT_NATS_URL\s+value: "nats:\/\/krate-krate-nats\.krate-system\.svc\.cluster\.local:4222"/);
+});
+
+test('controller healthz returns deep dependency and event transport probe details', async () => {
+  const server = createKrateHttpServer({
+    controller: fixtureKubernetesController(),
+    healthProbeOptions: {
+      env: {
+        KRATE_GITEA_HTTP_URL: 'https://gitea.internal',
+        AGENT_MUX_URL: 'https://mux.internal',
+        KRATE_CONTROLLER_URL: 'https://controller.internal',
+        ANTHROPIC_API_KEY: 'sk-ant-api03-test-health-key',
+        KRATE_KUBECTL: 'kubectl-test',
+      },
+      fetchImpl: async () => ({ ok: true, status: 200 }),
+      execFileImpl: async () => ({ stdout: 'Kubernetes control plane is running', stderr: '' }),
+      eventBus: {
+        status: () => ({ transport: 'nats-jetstream', status: 'ok', durable: true }),
+      },
+    },
+  });
+  await new Promise((resolve) => server.listen(0, resolve));
+  try {
+    const response = await fetch(`http://127.0.0.1:${server.address().port}/healthz`);
+    const body = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(body.ok, true);
+    assert.equal(body.status, 'ok');
+    assert.equal(body.health.gitea, 'ok');
+    assert.equal(body.health.agentMux, 'ok');
+    assert.equal(body.health.controller, 'ok');
+    assert.equal(body.health.eventTransport, 'ok');
+    assert.equal(body.health.details.eventTransport.transport, 'nats-jetstream');
+    assert.doesNotMatch(JSON.stringify(body), /sk-ant-api03-test-health-key/);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
 
 test('web UI and controller API expose live Kubernetes deployment and publishing metadata', async () => {
   const controller = fixtureKubernetesController();
