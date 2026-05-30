@@ -1,0 +1,183 @@
+{
+  "issueNumber": 589,
+  "title": "agent-core: loop strategy gaps -- concurrent, group-chat, handoff",
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-589",
+  "labels": [
+    "enhancement",
+    "priority:high",
+    "ready-for-dev",
+    "effort:large",
+    "agent-core",
+    "P2",
+    "risk:high"
+  ],
+  "issueBody": "## Summary\nAgent loop strategies have several weaknesses:\n\n- Concurrent: Promise.allSettled with no per-agent timeout, no partial results\n- Group-chat: moderator selection is naive string matching, no validation\n- Handoff: no context transfer between agents, no validation of handoff target\n- No loop cancellation token (can't cancel from outside)\n- Oversight is single-pass (maxRetries=0 hardcoded)\n- Delegation timeout accepted but never enforced\n- Strategies are isolated (can't mix/compose)\n\nRef: `docs/agent-layer-gaps.md`",
+  "issueComments": [
+    {
+      "author": "tmuskal",
+      "createdAt": "2026-05-30T06:54:53Z",
+      "body": "**Related:** #579 (concurrent effects -- loop strategies should leverage parallel dispatch)\n**Related:** #581 (subagent effect -- handoff strategy should use external agents)"
+    },
+    {
+      "author": "a5c-ai",
+      "createdAt": "2026-05-30T10:11:59Z",
+      "body": "Triage summary confirms issue #589 is an architectural enhancement/hardening issue for @a5c-ai/agent-core. Evidence cited: concurrent runner uses Promise.allSettled without per-agent timeout or partial-result surface; group-chat moderator uses String(output).includes(id); handoff changes currentAgentId without structured context transfer; SubagentInvoker hardcodes runner.review(output, 0); timeoutMs exists but is not enforced. Recommended approach: add failing behavioral tests first, then implement per-agent timeout/partial results, structured moderator selection, structured handoff context and target validation, external cancellation, configurable oversight retry, enforced delegation timeout, and compatibility-preserving typed options."
+    },
+    {
+      "author": "a5c-ai",
+      "createdAt": "2026-05-30T11:31:35Z",
+      "body": "Historical context: a prior plan PR was opened at https://github.com/a5c-ai/babysitter/pull/692 and summarized phases for runtime issue reading, reuse audit, runtime call path tracing, failing Vitest tests, implementation, verification, and semantic review. Treat as context only; this process should be executable independently and should not include implementation source changes."
+    },
+    {
+      "author": "tmuskal",
+      "createdAt": "2026-05-30T11:31:40Z",
+      "body": "Plan dispatched and implementation pipeline active. Closing as work is tracked via PRs."
+    }
+  ],
+  "relatedIssues": [
+    {
+      "number": 579,
+      "summary": "Concurrent effects; loop strategies should leverage parallel dispatch."
+    },
+    {
+      "number": 581,
+      "summary": "Subagent effect; handoff strategy should use external agents."
+    },
+    {
+      "number": 216,
+      "summary": "Initial L4 Agent-Core strategy and subagent surfaces."
+    }
+  ],
+  "processLibraryReferences": [
+    "/home/runner/.a5c/process-library/babysitter-repo/library/tdd-quality-convergence.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/spec-kit-brownfield.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/test-driven-development.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/process-hardening/process-hardening-patterns.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/qa-testing-automation/quality-gates.js",
+    "docs/agent-reference/process-authoring.md",
+    ".a5c/processes/issue-575-agent-core-streaming-history.mjs",
+    ".a5c/processes/issue-588-agent-core-tool-system-gaps.mjs",
+    ".a5c/processes/issue-181-run-completed-idempotency.mjs"
+  ],
+  "targetFiles": [
+    "docs/agent-layer-gaps.md",
+    "packages/agent-core/README.md",
+    "packages/agent-core/src/index.ts",
+    "packages/agent-core/src/loop/agent-loop.ts",
+    "packages/agent-core/src/loop/types.ts",
+    "packages/agent-core/src/loop/index.ts",
+    "packages/agent-core/src/loop/strategies/concurrent.ts",
+    "packages/agent-core/src/loop/strategies/group-chat.ts",
+    "packages/agent-core/src/loop/strategies/handoff.ts",
+    "packages/agent-core/src/loop/strategies/sequential.ts",
+    "packages/agent-core/src/subagent/invoker.ts",
+    "packages/agent-core/src/subagent/oversight.ts",
+    "packages/agent-core/src/subagent/types.ts",
+    "packages/sdk/src/harness/unified/capabilities.ts"
+  ],
+  "testTargets": [
+    "packages/agent-core/src/loop/__tests__/agent-loop.test.ts",
+    "packages/agent-core/src/subagent/__tests__/invoker.test.ts",
+    "packages/agent-core/src/session.test.ts"
+  ],
+  "implementationSlices": [
+    {
+      "id": "contracts-and-cancellation",
+      "title": "Add typed loop contracts and external cancellation",
+      "scope": [
+        "Extend PromptFn and AgentLoop run/iterate options with cancellation semantics.",
+        "Propagate AbortSignal through strategy dispatch where possible.",
+        "Define cancelled/error state behavior and timer cleanup."
+      ],
+      "acceptanceCriteria": [
+        "External cancellation prevents additional iterations.",
+        "Prompt functions can observe the cancellation signal.",
+        "Tests cover state transitions and cleanup."
+      ]
+    },
+    {
+      "id": "concurrent-timeouts-partials",
+      "title": "Harden concurrent strategy timeout and partial-result semantics",
+      "scope": [
+        "Add per-agent timeout semantics while preserving maxParallelism batching.",
+        "Return deterministic partial results for fulfilled, rejected, timed-out, and cancelled agents.",
+        "Avoid hanging the whole batch on one unresolved prompt."
+      ],
+      "acceptanceCriteria": [
+        "One slow agent records a timeout result without losing faster agent outputs.",
+        "Result ordering is predictable.",
+        "Timeout errors are structured enough for callers to distinguish from normal rejections."
+      ]
+    },
+    {
+      "id": "group-chat-validation",
+      "title": "Replace fragile moderator matching with validated structured speaker selection",
+      "scope": [
+        "Prefer structured moderator output for next speaker selection.",
+        "Validate selected agents against configured agent IDs.",
+        "Handle ambiguous or invalid moderator output with clear behavior."
+      ],
+      "acceptanceCriteria": [
+        "Unknown speaker selections fail or fall back exactly as documented.",
+        "Ambiguous string output no longer silently selects the first substring match.",
+        "Existing round-robin behavior still works without a moderator."
+      ]
+    },
+    {
+      "id": "handoff-context-validation",
+      "title": "Add handoff target validation and context transfer",
+      "scope": [
+        "Validate entry and handoff targets against configured agent IDs.",
+        "Define and implement structured handoff context transfer.",
+        "Preserve termination behavior when no handoff is requested."
+      ],
+      "acceptanceCriteria": [
+        "Unknown handoff target is rejected clearly.",
+        "Next agent receives transferred context deterministically.",
+        "Handoff count and termination semantics remain bounded."
+      ]
+    },
+    {
+      "id": "subagent-timeout-oversight",
+      "title": "Enforce delegation timeout and configurable oversight retries",
+      "scope": [
+        "Enforce OversightConfig.timeoutMs in SubagentInvokerImpl.",
+        "Add configurable oversight retry behavior.",
+        "Clarify whether retries re-review existing output or reinvoke the subagent with feedback."
+      ],
+      "acceptanceCriteria": [
+        "Delegation timeout returns a failed SubagentResult.",
+        "Oversight retries are configurable and tested.",
+        "Side-effect/idempotency risks are documented where reinvocation is allowed."
+      ]
+    },
+    {
+      "id": "composition-exports-docs",
+      "title": "Address strategy composition, public exports, and documentation",
+      "scope": [
+        "Implement a minimal tested strategy composition contract or document a precise adapter boundary.",
+        "Update public exports for any new public types.",
+        "Update README/docs and docs/agent-layer-gaps.md once behavior is complete."
+      ],
+      "acceptanceCriteria": [
+        "Composition gap has a tested implementation or explicit documented non-goal.",
+        "Public API changes are exported.",
+        "Docs no longer claim completed gaps are missing."
+      ]
+    }
+  ],
+  "qualityCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/agent-core/src/loop/__tests__/agent-loop.test.ts packages/agent-core/src/subagent/__tests__/invoker.test.ts packages/agent-core/src/session.test.ts",
+    "npm run test --workspace=@a5c-ai/agent-core",
+    "npm run build --workspace=@a5c-ai/agent-core",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "maxVerificationAttempts": 3,
+  "nonGoals": [
+    "Do not implement unrelated agent-layer gaps from docs/agent-layer-gaps.md.",
+    "Do not replace AgentLoop or SubagentInvoker wholesale.",
+    "Do not change unrelated SDK or agent-platform behavior unless necessary for public capability metadata."
+  ]
+}
