@@ -8,6 +8,7 @@ function coreAgentUsage(commandName: string): string {
   ${commandName} run:events <runDir> [--json] [--limit <n>] [--reverse] [--filter-type <type>]
   ${commandName} run:rebuild-state <runDir> [--json] [--dry-run]
   ${commandName} run:repair-journal <runDir> [--json] [--dry-run]
+  ${commandName} run:recover-process-error <runDir> [--patch-effect <effectId>:<jsonPath>=<json>] [--json] [--dry-run]
   ${commandName} run:iterate <runDir> [--json] [--verbose] [--iteration <n>]
   ${commandName} task:post <runDir> <effectId> --status <ok|error> [--json] [--dry-run] [--value <file>] [--value-inline <json>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
   ${commandName} task:list <runDir> [--pending] [--kind <kind>] [--json]

@@ -72,6 +72,10 @@ export const FLAG_PARSERS: Record<string, FlagParser> = {
     parsed.filterType = expectFlagValue(args, index + 1, "--filter-type");
     return index + 1;
   },
+  "--patch-effect": (parsed, args, index) => {
+    parsed.patchEffect = expectFlagValue(args, index + 1, "--patch-effect");
+    return index + 1;
+  },
   "--status": (parsed, args, index) => {
     parsed.taskStatus = parseStatus(expectFlagValue(args, index + 1, "--status"));
     return index + 1;

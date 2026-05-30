@@ -7,6 +7,8 @@ import { rebuildStateCache } from "../../runtime/replay/stateCache";
 import type { IterationMetadata } from "../../runtime/types";
 import type { JsonRecord } from "../../storage/types";
 import { nextUlid } from "../../storage/ulids";
+import { writeFileAtomic } from "../../storage/atomic";
+import { withSdkVersion } from "../../sdkVersion";
 import {
   getAdapter,
   getAdapterByName,
@@ -410,4 +412,213 @@ export async function handleRunRepairJournal(parsed: ParsedArgs): Promise<number
     console.log(`[run:repair-journal] repaired originalFiles=${files.length} keptEvents=${kept.length} droppedCorrupt=${droppedCorrupt} droppedRequested=${droppedRequested} droppedResolved=${droppedResolved} backupDir=${backupDir}`);
   }
   return 0;
+}
+
+export async function handleRunRecoverProcessError(parsed: ParsedArgs): Promise<number> {
+  if (!parsed.runDirArg) {
+    console.error(USAGE);
+    return 1;
+  }
+  const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("run:recover-process-error", parsed, { runDir, dryRun: parsed.dryRun, json: parsed.json, patchEffect: parsed.patchEffect });
+  if (!(await readRunMetadataSafe(runDir, "run:recover-process-error"))) return 1;
+
+  try {
+    const plan = await buildProcessErrorRecoveryPlan(runDir, parsed.patchEffect);
+    if (parsed.dryRun) {
+      const dryRun = { dryRun: true, ...plan.summary };
+      if (parsed.json) {
+        console.log(JSON.stringify(dryRun, null, 2));
+      } else {
+        console.log(`[run:recover-process-error] dry-run marker=${plan.marker.filename} patch=${plan.patch ? "yes" : "no"} keptEvents=${plan.keptEvents.length}`);
+      }
+      return 0;
+    }
+
+    if (plan.patch) {
+      await applyResultPatch(plan.patch);
+    }
+
+    const backupDir = await rewriteJournalWithoutMarker(runDir, plan.marker.path);
+    const snapshot = await rebuildStateCache(runDir, { reason: "cli_recover_process_error" });
+    const metadata: IterationMetadata = {
+      pendingEffectsByKind: snapshot.pendingEffectsByKind,
+      stateVersion: snapshot.stateVersion,
+      journalHead: snapshot.journalHead ?? null,
+      stateRebuilt: true,
+      stateRebuildReason: snapshot.rebuildReason ?? undefined,
+    };
+    const formatted = formatIterationMetadata(metadata);
+    const output = {
+      status: "ok",
+      recovered: true,
+      runDir,
+      marker: plan.summary.marker,
+      patchedEffect: plan.patch ? { effectId: plan.patch.effectId, path: plan.patch.pathSegments.join(".") } : null,
+      backupDir,
+      metadata: formatted.jsonMetadata ?? null,
+    };
+    if (parsed.json) {
+      console.log(JSON.stringify(output, null, 2));
+    } else {
+      const suffix = formatted.textParts.length ? ` ${formatted.textParts.join(" ")}` : "";
+      console.log(`[run:recover-process-error] recovered marker=${plan.marker.filename} backupDir=${backupDir}${suffix}`);
+    }
+    return 0;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (parsed.json) {
+      console.log(JSON.stringify({ status: "error", error: message }, null, 2));
+    } else {
+      console.error(`[run:recover-process-error] ${message}`);
+    }
+    return 1;
+  }
+}
+
+interface ProcessErrorRecoveryPlan {
+  marker: Awaited<ReturnType<typeof loadJournal>>[number];
+  keptEvents: Awaited<ReturnType<typeof loadJournal>>;
+  patch?: ParsedResultPatch;
+  summary: {
+    runDir: string;
+    marker: {
+      seq: number;
+      ulid: string;
+      filename: string;
+      recordedAt: string;
+      error?: unknown;
+    };
+    patch: {
+      effectId: string;
+      path: string;
+      value: unknown;
+    } | null;
+    keptEvents: number;
+    droppedEvents: number;
+  };
+}
+
+interface ParsedResultPatch {
+  effectId: string;
+  resultPath: string;
+  pathSegments: Array<string | number>;
+  value: unknown;
+}
+
+async function buildProcessErrorRecoveryPlan(runDir: string, patchArg?: string): Promise<ProcessErrorRecoveryPlan> {
+  const journal = await loadJournal(runDir);
+  const marker = [...journal].reverse().find((event) => event.type === "PROCESS_RUNTIME_ERROR");
+  if (!marker) {
+    throw new Error("no PROCESS_RUNTIME_ERROR marker found");
+  }
+  const patch = patchArg ? await parseResultPatch(runDir, patchArg) : undefined;
+  const keptEvents = journal.filter((event) => event.path !== marker.path);
+  return {
+    marker,
+    keptEvents,
+    patch,
+    summary: {
+      runDir,
+      marker: {
+        seq: marker.seq,
+        ulid: marker.ulid,
+        filename: marker.filename,
+        recordedAt: marker.recordedAt,
+        error: marker.data.error,
+      },
+      patch: patch ? { effectId: patch.effectId, path: patch.pathSegments.join("."), value: patch.value } : null,
+      keptEvents: keptEvents.length,
+      droppedEvents: 1,
+    },
+  };
+}
+
+async function parseResultPatch(runDir: string, raw: string): Promise<ParsedResultPatch> {
+  const separator = raw.indexOf(":");
+  const equals = raw.indexOf("=", separator + 1);
+  if (separator <= 0 || equals <= separator + 1 || equals === raw.length - 1) {
+    throw new Error("--patch-effect must use <effectId>:<jsonPath>=<json>");
+  }
+  const effectId = raw.slice(0, separator);
+  const pathExpression = raw.slice(separator + 1, equals);
+  const valueExpression = raw.slice(equals + 1);
+  const pathSegments = parsePatchPath(pathExpression);
+  let value: unknown;
+  try {
+    value = JSON.parse(valueExpression) as unknown;
+  } catch (error) {
+    throw new Error(`invalid --patch-effect JSON value: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  const resultPath = path.join(runDir, "tasks", effectId, "result.json");
+  try {
+    await fs.access(resultPath);
+  } catch {
+    throw new Error(`task result not found for effect ${effectId}`);
+  }
+  return { effectId, resultPath, pathSegments, value };
+}
+
+function parsePatchPath(pathExpression: string): Array<string | number> {
+  if (!pathExpression || pathExpression.startsWith(".") || pathExpression.endsWith(".")) {
+    throw new Error("--patch-effect jsonPath must not be empty or dotted at the edges");
+  }
+  return pathExpression.split(".").map((segment) => {
+    if (!/^[A-Za-z0-9_-]+$/.test(segment)) {
+      throw new Error(`invalid --patch-effect path segment '${segment}'`);
+    }
+    return /^\d+$/.test(segment) ? Number(segment) : segment;
+  });
+}
+
+async function applyResultPatch(patch: ParsedResultPatch): Promise<void> {
+  const raw = await fs.readFile(patch.resultPath, "utf8");
+  const result = JSON.parse(raw) as unknown;
+  setJsonPath(result, patch.pathSegments, patch.value);
+  await writeFileAtomic(patch.resultPath, JSON.stringify(withSdkVersion(result as JsonRecord), null, 2) + "\n");
+}
+
+function setJsonPath(target: unknown, pathSegments: Array<string | number>, value: unknown): void {
+  if (!target || typeof target !== "object") {
+    throw new Error("task result JSON must be an object");
+  }
+  let cursor = target as Record<string, unknown>;
+  for (let index = 0; index < pathSegments.length - 1; index += 1) {
+    const segment = pathSegments[index];
+    const existing = cursor[segment];
+    if (!existing || typeof existing !== "object") {
+      cursor[segment] = typeof pathSegments[index + 1] === "number" ? [] : {};
+    }
+    cursor = cursor[segment] as Record<string, unknown>;
+  }
+  cursor[pathSegments[pathSegments.length - 1]] = value;
+}
+
+async function rewriteJournalWithoutMarker(runDir: string, markerPath: string): Promise<string> {
+  const journal = await loadJournal(runDir);
+  const keptEvents = journal.filter((event) => event.path !== markerPath);
+  const journalDir = path.join(runDir, "journal");
+  const backupDir = path.join(runDir, `journal.backup-before-process-error-recovery-${Date.now()}`);
+  await fs.mkdir(backupDir, { recursive: true });
+  const files = (await fs.readdir(journalDir)).filter((name) => name.endsWith(".json")).sort();
+  for (const file of files) {
+    await fs.copyFile(path.join(journalDir, file), path.join(backupDir, file));
+    await fs.rm(path.join(journalDir, file), { force: true });
+  }
+  for (const event of keptEvents) {
+    await writeRecoveredJournalEvent(journalDir, event.type, event.recordedAt, event.data);
+  }
+  return backupDir;
+}
+
+async function writeRecoveredJournalEvent(journalDir: string, eventType: string, recordedAt: string, data: JsonRecord): Promise<void> {
+  const entries = await fs.readdir(journalDir).catch(() => []);
+  const seqs = entries.map((name) => Number(name.split(".")[0])).filter((seq) => Number.isFinite(seq));
+  const seq = (seqs.length ? Math.max(...seqs) : 0) + 1;
+  const ulid = nextUlid();
+  const filename = `${seq.toString().padStart(6, "0")}.${ulid}.json`;
+  const payload = withSdkVersion({ type: eventType, recordedAt, data });
+  const contents = JSON.stringify(payload, null, 2) + "\n";
+  const checksum = crypto.createHash("sha256").update(contents).digest("hex");
+  await writeFileAtomic(path.join(journalDir, filename), JSON.stringify({ ...payload, checksum }, null, 2) + "\n");
 }

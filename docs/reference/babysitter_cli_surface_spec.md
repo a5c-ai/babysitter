@@ -18,9 +18,10 @@ Behavior
 2. **Run lifecycle management**
    - `run:create` writes `run.json`, optional `inputs.json`, and appends `RUN_CREATED` via the runtime API. Required flags: `--process-id`, `--entry`. Optional `--inputs`, `--run-id`, `--process-revision`, `--request`. When `--entry` is omitted, creates a bare run (`entrypoint.importPath = "bare-run"`) that must be assigned a process via `run:assign-process` before iteration.
    - `run:assign-process` attaches a process to an existing bare run. Required: `<runDir>` positional, `--entry`. Optional: `--process-id`, `--process-revision`, `--force`, `--dry-run`. Updates `run.json` under the run lock and appends `PROCESS_ASSIGNED` journal event. Rejects if the run already has a process unless `--force`.
-   - `run:status` prints `[run:status] state=<created|waiting|completed|failed> last=<TYPE#SEQ ISO> pending[...]` plus one line per pending kind; JSON mirrors `{ state, lastEvent, pendingByKind }`. Works even if journal/state files are missing by treating them as empty.
+   - `run:status` prints `[run:status] state=<created|waiting|completed|failed|process-error> last=<TYPE#SEQ ISO> pending[...]` plus one line per pending kind; JSON mirrors `{ state, lastEvent, pendingByKind }`. Works even if journal/state files are missing by treating them as empty.
    - `run:events` streams journal entries with `--limit`, `--reverse`, `--filter-type`, and `--json`. Missing run directory or unreadable event files emit a single error line and exit `1`.
    - `run:rebuild-state` (surface for `rebuildStateCache`) locks the run, replays the journal, writes `state/state.json`, and prints/returns the rebuild reason, event counts, and resulting `stateVersion`.
+   - `run:recover-process-error` finds the latest `PROCESS_RUNTIME_ERROR`, optionally patches `tasks/<effectId>/result.json` via `--patch-effect <effectId>:<jsonPath>=<json>`, backs up and rewrites the journal without only that typed marker, rebuilds state, and reports the recovered metadata. `--dry-run` previews the mutation.
 
 3. **Orchestration control loops**
    - `run:continue` was removed; callers should loop `run:iterate`, execute pending effects externally, and commit via `task:post`.

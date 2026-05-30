@@ -2,6 +2,7 @@ import { colors, colorize } from "../ansi";
 import { renderEffectRequestedMessage } from "./effectRequested";
 import { renderEffectResolvedMessage } from "./effectResolved";
 import { renderProcessAssignedMessage } from "./processAssigned";
+import { renderProcessRuntimeErrorMessage } from "./processRuntimeError";
 import { renderRunCompletedMessage } from "./runCompleted";
 import { renderRunCreatedMessage } from "./runCreated";
 import { renderRunFailedMessage } from "./runFailed";
@@ -10,6 +11,7 @@ import type { JournalEvent } from "./types";
 const EVENT_RENDERERS: Record<string, (event: JournalEvent) => string> = {
   RUN_CREATED: renderRunCreatedMessage,
   PROCESS_ASSIGNED: renderProcessAssignedMessage,
+  PROCESS_RUNTIME_ERROR: renderProcessRuntimeErrorMessage,
   EFFECT_REQUESTED: renderEffectRequestedMessage,
   EFFECT_RESOLVED: renderEffectResolvedMessage,
   RUN_COMPLETED: renderRunCompletedMessage,

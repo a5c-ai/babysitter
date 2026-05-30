@@ -11,6 +11,19 @@ itself. If the run metadata is what is blocking replay, repair the journal
 entries and/or task files/results so the next `run:iterate` can proceed from a
 coherent state.
 
+If `run:iterate` reports a process-code exception or the journal contains
+`PROCESS_RUNTIME_ERROR`, prefer the targeted recovery flow before any manual
+journal edit:
+
+```bash
+babysitter run:recover-process-error <runDir> --dry-run --json
+babysitter run:recover-process-error <runDir> --patch-effect <effectId>:<jsonPath>=<json>
+```
+
+Patch the offending `tasks/<effectId>/result.json` or process file first when
+needed. Recovery without a patch only clears the marker; the next iteration may
+honestly rethrow if the underlying bad result remains.
+
 {{#hasNonNegotiables}}
 ### Failure Protocol (required)
 

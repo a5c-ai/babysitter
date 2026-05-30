@@ -239,11 +239,29 @@ export interface IterationMetadata {
   journalHead?: StateCacheJournalHead | null;
 }
 
+export interface SerializedRuntimeError {
+  name: string;
+  message: string;
+  stack?: string;
+  data?: unknown;
+}
+
+export interface ProcessRuntimeErrorInfo {
+  type: "process_runtime_error";
+  error: SerializedRuntimeError;
+  eventRef?: {
+    seq: number;
+    ulid: string;
+    filename: string;
+  };
+  recoveryCommand?: string;
+}
+
 export type IterationResult =
   | { status: "completed"; output: unknown; metadata?: IterationMetadata }
   | { status: "waiting"; nextActions: EffectAction[]; metadata?: IterationMetadata }
   | { status: "failed"; error: unknown; metadata?: IterationMetadata }
-  | { status: "process-error"; error: unknown; metadata?: IterationMetadata };
+  | { status: "process-error"; error: unknown; metadata?: IterationMetadata; processRuntimeError?: ProcessRuntimeErrorInfo };
 
 export interface CommitEffectResultOptions {
   runDir: string;

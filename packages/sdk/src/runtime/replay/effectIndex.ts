@@ -10,7 +10,7 @@ export interface BuildEffectIndexOptions {
   events?: JournalEvent[];
 }
 
-type SupportedEventType = "RUN_CREATED" | "RUN_COMPLETED" | "RUN_FAILED" | "EFFECT_REQUESTED" | "EFFECT_RESOLVED" | "EFFECT_CANCELLED" | "EFFECT_PROGRESS" | "COST_TRACKED" | "PROCESS_ASSIGNED";
+type SupportedEventType = "RUN_CREATED" | "RUN_COMPLETED" | "RUN_FAILED" | "PROCESS_RUNTIME_ERROR" | "EFFECT_REQUESTED" | "EFFECT_RESOLVED" | "EFFECT_CANCELLED" | "EFFECT_PROGRESS" | "COST_TRACKED" | "PROCESS_ASSIGNED";
 
 interface EffectRequestedPayload {
   effectId: string;
@@ -96,6 +96,7 @@ export class EffectIndex {
       case "RUN_CREATED":
       case "RUN_COMPLETED":
       case "RUN_FAILED":
+      case "PROCESS_RUNTIME_ERROR":
         return;
       case "EFFECT_REQUESTED":
         this.handleEffectRequested(event);

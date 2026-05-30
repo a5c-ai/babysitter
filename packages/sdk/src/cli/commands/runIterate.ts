@@ -64,6 +64,16 @@ export interface RunIterateResult {
     processId: string;
     hookStatus?: string;
   };
+  processRuntimeError?: {
+    type: "process_runtime_error";
+    error?: unknown;
+    eventRef?: {
+      seq: number;
+      ulid: string;
+      filename: string;
+    };
+    recoveryCommand?: string;
+  };
 }
 
 export async function runIterate(options: RunIterateOptions): Promise<RunIterateResult> {
@@ -137,6 +147,7 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
   if (iterationResult.status === "process-error") {
     const processError = (iterationResult as { error?: { message?: string } }).error;
     process.stderr.write(`[run:iterate] process-error: ${processError?.message ?? 'unknown'}\n`);
+    process.stderr.write(`[run:iterate] recover with: babysitter run:recover-process-error ${runDir}\n`);
     return {
       iteration,
       iterationCount,
@@ -145,6 +156,7 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
       reason: `process-error: ${processError?.message ?? 'unknown'}`,
       warnings: warnings.length ? warnings : undefined,
       metadata: { runId, processId: metadata.processId, hookStatus: "executed" },
+      processRuntimeError: iterationResult.processRuntimeError,
     };
   }
 

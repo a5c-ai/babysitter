@@ -15,6 +15,7 @@ import type {
   IterationResult,
   OrchestrateOptions,
   EffectAction,
+  EffectRecord,
   ProcessContext,
 } from "./types";
 import type { JournalEvent } from "../storage/types";
@@ -149,7 +150,37 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
 
       const failure = serializeUnknownError(error);
       if (!(error instanceof RunFailedError)) {
-        const result: IterationResult = { status: "process-error", error: failure, metadata: createIterationMetadata(engine) };
+        const metadata = createIterationMetadata(engine);
+        const eventResult = await appendEvent({
+          runDir: options.runDir,
+          eventType: "PROCESS_RUNTIME_ERROR",
+          event: {
+            runId: engine.runId,
+            processId: engine.metadata.processId,
+            error: failure,
+            iteration: engine.replayCursor.value,
+            metadata,
+            journalHeadBeforeError: engine.effectIndex.getJournalHead() ?? null,
+            lastEffect: summarizeLastEffect(engine.effectIndex.listEffects()),
+            recoverable: true,
+          },
+        });
+        await rebuildStateCache(options.runDir, { reason: "post_process_runtime_error" });
+        const result: IterationResult = {
+          status: "process-error",
+          error: failure,
+          metadata,
+          processRuntimeError: {
+            type: "process_runtime_error",
+            error: failure,
+            eventRef: {
+              seq: eventResult.seq,
+              ulid: eventResult.ulid,
+              filename: eventResult.filename,
+            },
+            recoveryCommand: `babysitter run:recover-process-error ${options.runDir}`,
+          },
+        };
         finalStatus = result.status;
         return result;
       }
@@ -225,6 +256,30 @@ async function getTerminalReplayResult(runDir: string, engine: ReplayEngine): Pr
     return { status: "completed", output, metadata };
   }
 
+  if (terminalEvent.type === "PROCESS_RUNTIME_ERROR") {
+    const error = readObjectField(terminalEvent.data, "error") ?? { message: "Process runtime error" };
+    return {
+      status: "process-error",
+      error,
+      metadata,
+      processRuntimeError: {
+        type: "process_runtime_error",
+        error: {
+          name: typeof error.name === "string" ? error.name : "Error",
+          message: typeof error.message === "string" ? error.message : "Process runtime error",
+          stack: typeof error.stack === "string" ? error.stack : undefined,
+          data: error.data,
+        },
+        eventRef: {
+          seq: terminalEvent.seq,
+          ulid: terminalEvent.ulid,
+          filename: terminalEvent.filename,
+        },
+        recoveryCommand: `babysitter run:recover-process-error ${runDir}`,
+      },
+    };
+  }
+
   return {
     status: "failed",
     error: readObjectField(terminalEvent.data, "error") ?? { message: "Run failed" },
@@ -235,9 +290,30 @@ async function getTerminalReplayResult(runDir: string, engine: ReplayEngine): Pr
 function findLastTerminalEvent(events: JournalEvent[]): JournalEvent | undefined {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
-    if (event.type === "RUN_COMPLETED" || event.type === "RUN_FAILED") return event;
+    if (event.type === "RUN_COMPLETED" || event.type === "RUN_FAILED" || event.type === "PROCESS_RUNTIME_ERROR") return event;
   }
   return undefined;
+}
+
+function summarizeLastEffect(records: EffectRecord[]) {
+  const record = records.at(-1);
+  if (!record) return null;
+  return {
+    effectId: record.effectId,
+    invocationKey: record.invocationKey,
+    stepId: record.stepId,
+    taskId: record.taskId,
+    status: record.status,
+    kind: record.kind,
+    label: record.label,
+    labels: record.labels,
+    resultRef: record.resultRef,
+    error: record.error,
+    stdoutRef: record.stdoutRef,
+    stderrRef: record.stderrRef,
+    requestedAt: record.requestedAt,
+    resolvedAt: record.resolvedAt,
+  };
 }
 
 function readStringField(value: unknown, key: string): string | undefined {

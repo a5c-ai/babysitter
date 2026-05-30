@@ -5,6 +5,7 @@ const COMMAND_TYPOS: Record<string, string[]> = {
   "run:events": ["run:event", "runevents", "events:run", "run-events"],
   "run:rebuild-state": ["run:rebuild", "run:rebuildstate", "rebuild-state", "run-rebuild-state"],
   "run:repair-journal": ["run:repair", "run:repairjournal", "repair-journal", "run-repair-journal"],
+  "run:recover-process-error": ["run:recover", "run:recoverprocesserror", "recover-process-error", "run-recover-process-error"],
   "task:post": ["task:pst", "taskpost", "post:task", "task-post"],
   "task:list": ["task:lst", "tasklist", "list:task", "task-list", "tasks:list"],
   "task:show": ["task:shw", "taskshow", "show:task", "task-show"],

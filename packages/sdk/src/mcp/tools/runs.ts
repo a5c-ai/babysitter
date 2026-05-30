@@ -26,11 +26,12 @@ function parseEntrypoint(entrypoint: string): { importPath: string; exportName?:
 
 function deriveRunState(
   events: JournalEvent[],
-): "created" | "running" | "waiting" | "completed" | "failed" {
+): "created" | "running" | "waiting" | "completed" | "failed" | "process-error" {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const type = events[index].type;
     if (type === "RUN_COMPLETED") return "completed";
     if (type === "RUN_FAILED") return "failed";
+    if (type === "PROCESS_RUNTIME_ERROR") return "process-error";
   }
 
   const requested = new Set<string>();
@@ -204,7 +205,9 @@ export function registerRunTools(server: McpServer): void {
             status: "process-error",
             recoverable: true,
             error: result.error instanceof Error ? result.error.message : result.error,
-            hint: "The process code has a bug. Fix the process file and retry the iteration.",
+            hint: "The process code threw. Use run:recover-process-error after fixing or patching the bad result.",
+            recoveryCommand: `babysitter run:recover-process-error ${runDir}`,
+            processRuntimeError: result.processRuntimeError,
             metadata: result.metadata,
           });
         }

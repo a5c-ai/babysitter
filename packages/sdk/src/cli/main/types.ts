@@ -19,6 +19,7 @@ export interface ParsedArgs {
   reverseOrder: boolean;
   filterType?: string;
   runDirArg?: string;
+  patchEffect?: string;
   effectId?: string;
   taskStatus?: "ok" | "error";
   valuePath?: string;

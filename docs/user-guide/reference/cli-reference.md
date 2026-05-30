@@ -569,6 +569,21 @@ babysitter run:status run-20260125-143012 --json
 
 ---
 
+### run:recover-process-error
+
+Clears a recoverable `PROCESS_RUNTIME_ERROR` marker after you fix the process or
+patch the bad task result.
+
+```bash
+babysitter run:recover-process-error <runId> [--patch-effect <effectId>:<jsonPath>=<json>] [--dry-run] [--json]
+```
+
+Use `--dry-run --json` first to inspect the marker. With `--patch-effect`, the
+CLI updates only `tasks/<effectId>/result.json`, backs up the journal, removes
+the typed process-error marker, and rebuilds state.
+
+---
+
 ## Task Commands
 
 ### task:list

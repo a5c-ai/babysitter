@@ -58,7 +58,7 @@ export const HARNESS_INSTALL_COMMANDS = [
 ] as const;
 
 const SHARED_VALID_COMMANDS = [
-  "run:create", "run:assign-process", "run:status", "run:iterate", "run:events", "run:rebuild-state", "run:repair-journal",
+  "run:create", "run:assign-process", "run:status", "run:iterate", "run:events", "run:rebuild-state", "run:repair-journal", "run:recover-process-error",
   "task:post", "task:cancel", "task:list", "task:show",
   "log", "hook:log", "hook:run", "skill:discover", "skill:fetch-remote",
   "process-library:clone", "process-library:update", "process-library:use", "process-library:active",

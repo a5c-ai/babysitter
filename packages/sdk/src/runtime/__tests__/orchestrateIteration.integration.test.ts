@@ -339,6 +339,78 @@ describe("orchestrateIteration integration", () => {
     expect(journal.filter((event) => event.type === "RUN_COMPLETED")).toHaveLength(1);
   });
 
+  test("journals process runtime errors without converting effect failures", async () => {
+    const processDir = path.join(tmpRoot, "processes-runtime-error");
+    await fs.mkdir(processDir, { recursive: true });
+    const processPath = path.join(processDir, "runtime-error.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      const verifyTask = {
+        id: "verify-task",
+        async build() {
+          return { kind: "node", title: "verify" };
+        }
+      };
+
+      export async function process(_inputs, ctx) {
+        const verifyResult = await ctx.task(verifyTask, {});
+        return { checkCount: verifyResult.checks.length };
+      }
+      `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-process-runtime-error",
+      request: "runtime error",
+      processPath,
+      inputs: {},
+    });
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-process-runtime-error" } });
+
+    const firstIteration = await orchestrateIteration({ runDir });
+    expect(firstIteration.status).toBe("waiting");
+    if (firstIteration.status !== "waiting") {
+      throw new Error("Expected waiting status");
+    }
+
+    const effectId = firstIteration.nextActions[0].effectId;
+    await commitEffectResult({
+      runDir,
+      effectId,
+      result: {
+        status: "ok",
+        value: { verified: true },
+      },
+    });
+
+    const secondIteration = await orchestrateIteration({ runDir });
+    expect(secondIteration.status).toBe("process-error");
+    if (secondIteration.status !== "process-error") {
+      throw new Error("Expected process-error status");
+    }
+    expect(secondIteration.processRuntimeError?.type).toBe("process_runtime_error");
+
+    const journal = await loadJournal(runDir);
+    const processErrors = journal.filter((event) => event.type === "PROCESS_RUNTIME_ERROR");
+    expect(processErrors).toHaveLength(1);
+    expect(processErrors[0].data).toMatchObject({
+      runId: "run-process-runtime-error",
+      recoverable: true,
+      lastEffect: {
+        effectId,
+        status: "resolved_ok",
+      },
+    });
+    expect(processErrors[0].data.error).toMatchObject({
+      name: "TypeError",
+    });
+    expect(journal.filter((event) => event.type === "RUN_FAILED")).toHaveLength(0);
+    expect(journal.filter((event) => event.type === "EFFECT_RESOLVED")).toHaveLength(1);
+  });
+
   test("emits replay iteration metrics with logger instrumentation", async () => {
     const processDir = path.join(tmpRoot, "processes-metrics");
     await fs.mkdir(processDir, { recursive: true });

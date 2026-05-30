@@ -1,11 +1,12 @@
 import type { JournalEvent } from "../storage/types";
 
-export type ObservedRunState = "created" | "waiting" | "completed" | "failed";
+export type ObservedRunState = "created" | "waiting" | "completed" | "failed" | "process-error";
 
 const RUN_LIFECYCLE_TYPES: ReadonlySet<JournalEvent["type"]> = new Set([
   "RUN_CREATED",
   "RUN_COMPLETED",
   "RUN_FAILED",
+  "PROCESS_RUNTIME_ERROR",
 ]);
 
 export function findLastLifecycleEventType(events: JournalEvent[]): JournalEvent["type"] | undefined {
@@ -49,6 +50,9 @@ export function deriveObservedRunState(
   if (lastLifecycleEventType === "RUN_FAILED") {
     return "failed";
   }
+  if (lastLifecycleEventType === "PROCESS_RUNTIME_ERROR") {
+    return "process-error";
+  }
   if (pendingCount > 0) {
     return "waiting";
   }
@@ -59,5 +63,5 @@ export function deriveObservedRunState(
 }
 
 export function isTerminalRunState(state: ObservedRunState): boolean {
-  return state === "completed" || state === "failed";
+  return state === "completed" || state === "failed" || state === "process-error";
 }
