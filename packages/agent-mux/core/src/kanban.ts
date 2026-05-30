@@ -994,6 +994,50 @@ const WORKFLOW_STATE_ORDER: readonly KanbanWorkflowState[] = [
   'done',
 ];
 
+const WORKFLOW_STATE_COLUMNS = {
+  todo: {
+    name: 'Todo',
+    enforcesWipLimit: false,
+    allowedMoveStates: ['in-progress'],
+    defaultStatus: 'ready',
+  },
+  'in-progress': {
+    name: 'In Progress',
+    enforcesWipLimit: true,
+    allowedMoveStates: ['todo', 'review'],
+    defaultStatus: 'in-progress',
+  },
+  review: {
+    name: 'Review',
+    enforcesWipLimit: true,
+    allowedMoveStates: ['in-progress', 'done'],
+    defaultStatus: 'review',
+  },
+  done: {
+    name: 'Done',
+    enforcesWipLimit: false,
+    allowedMoveStates: ['review'],
+    defaultStatus: 'done',
+  },
+} satisfies Record<
+  KanbanWorkflowState,
+  {
+    readonly name: string;
+    readonly enforcesWipLimit: boolean;
+    readonly allowedMoveStates: readonly KanbanWorkflowState[];
+    readonly defaultStatus: KanbanIssueStatus;
+  }
+>;
+
+const ISSUE_STATUS_WORKFLOW_STATES = {
+  backlog: 'todo',
+  ready: 'todo',
+  'in-progress': 'in-progress',
+  blocked: 'in-progress',
+  review: 'review',
+  done: 'done',
+} satisfies Record<KanbanIssueStatus, KanbanWorkflowState>;
+
 const DEFAULT_SWIMLANES: readonly Omit<KanbanBoardSwimlane, 'issueIds'>[] = [
   { id: 'expedite', name: 'Expedite' },
   { id: 'standard', name: 'Standard' },
@@ -1741,23 +1785,14 @@ function normalizeIssueRepositoryLifecycle(
 }
 
 function getColumnName(state: KanbanWorkflowState): string {
-  switch (state) {
-    case 'todo':
-      return 'Todo';
-    case 'in-progress':
-      return 'In Progress';
-    case 'review':
-      return 'Review';
-    case 'done':
-      return 'Done';
-  }
+  return WORKFLOW_STATE_COLUMNS[state].name;
 }
 
 function getColumnWipLimit(
   project: KanbanProject,
   state: KanbanWorkflowState,
 ): number | undefined {
-  if (state === 'todo' || state === 'done') {
+  if (!WORKFLOW_STATE_COLUMNS[state].enforcesWipLimit) {
     return undefined;
   }
 
@@ -1765,16 +1800,7 @@ function getColumnWipLimit(
 }
 
 function getAllowedMoveStates(currentState: KanbanWorkflowState): readonly KanbanWorkflowState[] {
-  switch (currentState) {
-    case 'todo':
-      return ['in-progress'];
-    case 'in-progress':
-      return ['todo', 'review'];
-    case 'review':
-      return ['in-progress', 'done'];
-    case 'done':
-      return ['review'];
-  }
+  return WORKFLOW_STATE_COLUMNS[currentState].allowedMoveStates;
 }
 
 function acceptanceProgress(issue: KanbanIssue): { satisfied: number; total: number } {
@@ -1940,19 +1966,7 @@ export function normalizeKanbanIssue(
 }
 
 export function resolveKanbanWorkflowState(issue: Pick<KanbanIssue, 'status'>): KanbanWorkflowState {
-  switch (issue.status) {
-    case 'in-progress':
-    case 'blocked':
-      return 'in-progress';
-    case 'review':
-      return 'review';
-    case 'done':
-      return 'done';
-    case 'backlog':
-    case 'ready':
-    default:
-      return 'todo';
-  }
+  return ISSUE_STATUS_WORKFLOW_STATES[issue.status];
 }
 
 export function resolveKanbanSwimlane(
@@ -1973,18 +1987,13 @@ export function resolveKanbanStatusForWorkflowState(
   issue: Pick<KanbanIssue, 'status' | 'dispatch'>,
   state: KanbanWorkflowState,
 ): KanbanIssueStatus {
-  switch (state) {
-    case 'todo':
-      return issue.status === 'backlog' || issue.dispatch.readiness === 'needs-decomposition'
-        ? 'backlog'
-        : 'ready';
-    case 'in-progress':
-      return 'in-progress';
-    case 'review':
-      return 'review';
-    case 'done':
-      return 'done';
+  if (state === 'todo') {
+    return issue.status === 'backlog' || issue.dispatch.readiness === 'needs-decomposition'
+      ? 'backlog'
+      : 'ready';
   }
+
+  return WORKFLOW_STATE_COLUMNS[state].defaultStatus;
 }
 
 export function evaluateKanbanIssueMove(input: {

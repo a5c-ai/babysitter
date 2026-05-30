@@ -17,11 +17,15 @@ import {
   normalizeKanbanTaskTags,
   renderKanbanExecutionContextBlock,
   renderDispatchContextLabels,
+  resolveKanbanStatusForWorkflowState,
+  resolveKanbanWorkflowState,
   buildDispatchContextExecutionEnvelope,
   type KanbanLabel,
   type KanbanDispatchContextLabelDefinition,
   type KanbanIssue,
   type KanbanBacklogOverview,
+  type KanbanIssueStatus,
+  type KanbanWorkflowState,
   type KanbanWorkspaceInventory,
   type KanbanTaskTag,
 } from '../src/kanban.js';
@@ -694,6 +698,67 @@ describe('buildKanbanBacklogSnapshot', () => {
 });
 
 describe('evaluateKanbanIssueMove', () => {
+  it('maps every issue status to its workflow state', () => {
+    const expectedStates = [
+      ['backlog', 'todo'],
+      ['ready', 'todo'],
+      ['in-progress', 'in-progress'],
+      ['blocked', 'in-progress'],
+      ['review', 'review'],
+      ['done', 'done'],
+    ] satisfies readonly (readonly [KanbanIssueStatus, KanbanWorkflowState])[];
+
+    expect(expectedStates.map(([status]) => status)).toEqual([
+      'backlog',
+      'ready',
+      'in-progress',
+      'blocked',
+      'review',
+      'done',
+    ] satisfies readonly KanbanIssueStatus[]);
+    expect(
+      expectedStates.map(([status, workflowState]) => [
+        status,
+        resolveKanbanWorkflowState(makeIssue({ status })),
+      ]),
+    ).toEqual(expectedStates);
+  });
+
+  it('maps every workflow state back to the persisted status', () => {
+    const readyIssue = makeIssue({ status: 'ready' });
+    const backlogIssue = makeIssue({ status: 'backlog' });
+    const decompositionIssue = makeIssue({
+      status: 'ready',
+      dispatch: {
+        readiness: 'needs-decomposition',
+        blockedReasons: [],
+        runIds: [],
+        sessionIds: [],
+      },
+    });
+    const expectedStatuses = [
+      ['todo', 'ready'],
+      ['in-progress', 'in-progress'],
+      ['review', 'review'],
+      ['done', 'done'],
+    ] satisfies readonly (readonly [KanbanWorkflowState, KanbanIssueStatus])[];
+
+    expect(expectedStatuses.map(([state]) => state)).toEqual([
+      'todo',
+      'in-progress',
+      'review',
+      'done',
+    ] satisfies readonly KanbanWorkflowState[]);
+    expect(
+      expectedStatuses.map(([state]) => [
+        state,
+        resolveKanbanStatusForWorkflowState(readyIssue, state),
+      ]),
+    ).toEqual(expectedStatuses);
+    expect(resolveKanbanStatusForWorkflowState(backlogIssue, 'todo')).toBe('backlog');
+    expect(resolveKanbanStatusForWorkflowState(decompositionIssue, 'todo')).toBe('backlog');
+  });
+
   it('blocks moves into in-progress when the target column would exceed WIP', () => {
     const issueA = makeIssue({ id: 'a', key: 'KANBAN-1', status: 'in-progress' });
     const issueB = makeIssue({ id: 'b', key: 'KANBAN-2', status: 'in-progress' });
