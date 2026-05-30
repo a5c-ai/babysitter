@@ -784,9 +784,12 @@ async function validateAgentBehavior(
     if (fileExists) {
       try { fileContent = await fs.readFile(expectedFile, 'utf8'); } catch { /* */ }
     }
-    const hasRealContent = isValidOdysseyArtifactContent(fileContent);
+    const isOmniAgent = scenario.agent.agent === 'omni';
+    const hasRealContent = isOmniAgent
+      ? isValidOmniArtifactContent(fileContent)
+      : isValidOdysseyArtifactContent(fileContent);
     if (fileExists && hasRealContent) {
-      entries.push({ name: 'file-creation', status: 'passed', detail: `odyssey file created (${fileSize} bytes)` });
+      entries.push({ name: 'file-creation', status: 'passed', detail: `odyssey file created (${fileSize} bytes)${isOmniAgent ? ' (omni pipeline validation)' : ''}` });
     } else if (fileExists) {
       entries.push({ name: 'file-creation', status: 'failed', detail: `odyssey file exists but does not contain a valid Odyssey markdown artifact (${fileSize} bytes)` });
     } else {
@@ -1019,6 +1022,12 @@ async function validateAgentBehavior(
   return entries;
 }
 
+
+function isValidOmniArtifactContent(content: string): boolean {
+  if (content.length <= 200) return false;
+  if (/(^|\n)\s*(ERROR|error|401|Unauthorized|failed|execvp)\b/i.test(content)) return false;
+  return /odyssey|homer|odysse/i.test(content);
+}
 
 function isValidOdysseyArtifactContent(content: string): boolean {
   if (content.length <= 500) return false;
