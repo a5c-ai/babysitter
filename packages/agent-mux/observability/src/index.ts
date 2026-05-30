@@ -35,8 +35,14 @@ export * from './types.js';
  */
 export type ObservabilityMode = 'full' | 'simple';
 
+let modeOverride: ObservabilityMode | undefined;
+
+export function setObservabilityMode(mode: ObservabilityMode | undefined): void {
+  modeOverride = mode;
+}
+
 function getMode(): ObservabilityMode {
-  return (process.env.AMUX_OBSERVABILITY_MODE as ObservabilityMode) || 'simple';
+  return modeOverride ?? ((process.env.AMUX_OBSERVABILITY_MODE as ObservabilityMode) || 'simple');
 }
 
 // Exported Logger

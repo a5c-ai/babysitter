@@ -28,9 +28,11 @@ Files/modules that concentrate the most danger across multiple categories.
 ## Critical Dragons
 
 ### process.env mutation couples modules through ambient state
-**Files:** `packages/agent-platform/src/harness/piWrapper/moduleSupport.ts:126-144`, `packages/agent-core/src/agenticTools/config/state.ts:112-122`, `packages/agent-platform/src/harness/agenticTools/config/state.ts:112-122`, `packages/agent-mux/cli/src/index.ts:132-147`
+**Files:** `packages/agent-mux/observability/src/logger.ts`, `packages/agent-mux/observability/src/logger-simple.ts`, `packages/agent-mux/observability/src/index.ts`
 
-`configureAzureOpenAiEnvDefaults()` writes `AZURE_OPENAI_RESOURCE_NAME`, `AZURE_OPENAI_BASE_URL`, `AZURE_OPENAI_DEPLOYMENT_NAME_MAP` to `process.env`. `setConfigValue()` with `scope: "global"` permanently mutates `process.env` in both agent-core and agent-platform copies of the config state helper. The CLI writes `AMUX_LOG_LEVEL`, `AMUX_OBSERVABILITY_MODE`. Any code reading these env vars is coupled to the initialization order of the writers. No central registry of these contracts.
+**FIXED for package writers:** Pi Azure defaults now return an overlay instead of writing `AZURE_OPENAI_*`; agent-core and agent-platform config helpers delegate to explicit scoped runtime config state; agent-mux CLI and TUI logging setup reconfigure observability without writing `AMUX_OBSERVABILITY_MODE` into `process.env`.
+
+**Remaining caveat:** observability defaults still read `AMUX_LOG_LEVEL`, `AMUX_LOG_FILE`, `AMUX_LOG_PRETTY`, and `AMUX_OBSERVABILITY_MODE` from ambient env at module/runtime boundaries. Keep future changes on explicit config surfaces rather than adding new in-process env writers.
 
 **Tracked separately:** #584 is the focused implementation issue for replacing these ambient in-process writes with an explicit env/config contract. Keep #601 changes from duplicating that larger refactor.
 
@@ -198,4 +200,4 @@ The timeout sets an abort signal but doesn't guarantee the request stops. Fetch 
 
 ### #601 disposition
 
-#601 is an umbrella tracker, not a single safe refactor boundary. Its previously listed WeakMap disposal, piWrapper lazy-init retry, shell invocation, skipped UI-test, and kanban exhaustiveness streams are fixed. The remaining critical env-coupling work belongs to #584. The duplicated utilities, root `skipLibCheck`, and E2E coverage gaps remain active debt and need focused follow-up issues with their own acceptance criteria before implementation.
+#601 is an umbrella tracker, not a single safe refactor boundary. Its previously listed WeakMap disposal, piWrapper lazy-init retry, shell invocation, skipped UI-test, kanban exhaustiveness, and in-process env writer streams are fixed. Further observability env-reader cleanup, duplicated utilities, root `skipLibCheck`, and E2E coverage gaps remain active debt and need focused follow-up issues with their own acceptance criteria before implementation.
