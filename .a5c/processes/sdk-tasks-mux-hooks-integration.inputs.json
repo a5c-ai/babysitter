@@ -1,0 +1,91 @@
+{
+  "issueNumber": 598,
+  "baseBranch": "staging",
+  "branchName": "agent/issue-598",
+  "relatedIssues": [576, 579, 580, 598, 630, 631, 633],
+  "architectureDocs": [
+    "docs/agent-layer-gaps.md",
+    "docs/agent-mux-babysitter-integrations/tasks-mux-routing.md",
+    "docs/agent-reference/process-authoring.md",
+    "docs/agent-reference/runtime-and-layout.md",
+    "docs/agent-reference/command-surfaces.md"
+  ],
+  "targetPackages": [
+    "packages/sdk",
+    "packages/tasks-mux",
+    "packages/tool-mux",
+    "packages/hooks-mux/core",
+    "packages/agent-core",
+    "packages/agent-platform",
+    "packages/agent-mux"
+  ],
+  "likelyRuntimeFiles": [
+    "packages/sdk/src/runtime/intrinsics/task.ts",
+    "packages/sdk/src/runtime/orchestrateIteration.ts",
+    "packages/sdk/src/runtime/hooks/runtime.ts",
+    "packages/sdk/src/hooks/dispatcher.ts",
+    "packages/sdk/src/tasks/types.ts",
+    "packages/sdk/src/tasks/serializer.ts",
+    "packages/sdk/src/tasks/defineTask.ts",
+    "packages/sdk/src/plugins/registry.ts",
+    "packages/tasks-mux/src/types.ts",
+    "packages/tasks-mux/src/backend.ts",
+    "packages/tasks-mux/src/backends/index.ts",
+    "packages/tasks-mux/src/harness/interaction-provider.ts",
+    "packages/tasks-mux/src/mcp/server.ts",
+    "packages/tool-mux/src/dispatch.ts",
+    "packages/tool-mux/src/hooks.ts",
+    "packages/tool-mux/src/registry.ts",
+    "packages/tool-mux/src/mcp-bridge.ts",
+    "packages/hooks-mux/core/src/types/lifecycle.ts",
+    "packages/hooks-mux/core/src/programmatic/engine.ts",
+    "packages/hooks-mux/core/src/sdk-interface/builder.ts",
+    "packages/agent-core/src/deferredToolRegistry.ts",
+    "packages/agent-core/src/agenticTools/discovery/tools.ts",
+    "packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts",
+    "packages/agent-platform/src/mcp/client/toolRegistry.ts",
+    "packages/agent-platform/src/mcp/client/executor.ts",
+    "packages/agent-mux/adapters/src/mcp-plugins.ts"
+  ],
+  "acceptanceCriteria": [
+    "Effect resolution for the SDK/agent-platform integration path delegates routing through tasks-mux rather than a standalone SDK executor.",
+    "tasks-mux remains the routing authority for internal, human, agent, tracker, and auto responder paths where those surfaces exist or are implemented by dependency issues.",
+    "tool-mux remains the canonical registry/dispatcher boundary for concrete tool execution, including hook mediation and MCP/tool descriptor compatibility.",
+    "SDK runtime hooks and tool hooks are wired to hooks-mux lifecycle events, including PreToolUse/PostToolUse and run/iteration lifecycle events.",
+    "SDK TaskDef exposes first-class JSON Schema parameter metadata for tool discovery without breaking historical serialized task replay.",
+    "SDK MCP server registration participates in the unified tool-mux/MCP path without losing live MCP lifecycle/executor behavior.",
+    "SDK plugin registry responsibilities are reconciled with platform/plugin package flows through an explicit adapter, migration path, or documented compatibility boundary with tests.",
+    "Existing SDK replay determinism, task:list/task:show/task:post behavior, stop-hook continuation, and no-hook CLI iteration behavior remain compatible."
+  ],
+  "nonGoals": [
+    "Do not create a standalone SDK unified effect executor.",
+    "Do not replace tasks-mux routing with direct agent-mux dispatch.",
+    "Do not require live provider credentials for the regression suite.",
+    "Do not delete DeferredToolRegistry or McpToolRegistry until parity tests prove source-qualified identity, deferred schema loading, caching, MCP lifecycle, and plugin tool semantics are preserved.",
+    "Do not implement unrelated background effects, full concurrent effect scheduling, external tracker sync, or broad plugin marketplace redesign unless the traced live path proves it is required for issue #598."
+  ],
+  "verificationCommands": [
+    "npm run test:sdk",
+    "npm run build:sdk",
+    "npm run test --workspace=@a5c-ai/tasks-mux",
+    "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+    "npm run test --workspace=@a5c-ai/tool-mux",
+    "npm run typecheck --workspace=@a5c-ai/tool-mux",
+    "npm run test:hooks-mux",
+    "npm run build:hooks-mux",
+    "npm run test --workspace=@a5c-ai/agent-core",
+    "npm run test --workspace=@a5c-ai/agent-platform",
+    "npm run test --workspace=@a5c-ai/agent-mux-adapters",
+    "npm run test --workspace=@a5c-ai/agent-mux-cli",
+    "npm run verify:metadata",
+    "npm run validate:processes"
+  ],
+  "qualityGates": {
+    "contractTestsFirst": true,
+    "maxImplementationAttempts": 3,
+    "requiresBackwardCompatibilityTests": true,
+    "requiresSourceAudit": true,
+    "requiresCrossPackageReview": true,
+    "requiresPrAndIssueComment": true
+  }
+}
