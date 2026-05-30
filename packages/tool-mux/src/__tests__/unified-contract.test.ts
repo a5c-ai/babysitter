@@ -38,7 +38,7 @@ describe('unified tool contract', () => {
     const dispatcher = new ToolDispatcher({ registry });
     const controller = new AbortController();
     const events: UnifiedToolEvent[] = [];
-    const onUpdate = vi.fn((event: UnifiedToolEvent) => events.push(event));
+    const onUpdate = vi.fn((event: UnifiedToolEvent) => { events.push(event); });
     const context: ToolCallContext = {
       toolName: 'contract_tool',
       input: { value: 1 },
