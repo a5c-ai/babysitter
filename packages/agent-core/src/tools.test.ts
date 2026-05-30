@@ -841,7 +841,7 @@ describe("agent-core tools", () => {
     expect(beforeDispose.tasks[0]?.stdout).toBe("captured output");
     expect(beforeDispose.tasks[0]?.status).toBe("completed");
 
-    disposeAgentCoreToolDefinitions(definitions);
+    disposeAgentCoreToolDefinitions([...definitions]);
 
     const afterDispose = JSON.parse(getText(await listTool.execute("background-list-after-dispose", {}))) as {
       tasks: unknown[];

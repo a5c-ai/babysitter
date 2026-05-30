@@ -15,11 +15,8 @@ import {
   shouldEnableProgrammaticToolCalling,
 } from "./tools/programmaticToolCalling";
 
-// HERE BE DRAGONS: WeakMap keyed by exact array reference. Dispose MUST be called
-// with the same array object returned by createAgentCoreToolDefinitions().
-// Passing a copy, spread, or recreated array will silently fail to clean up
-// background processes, causing resource leaks.
 const toolDefinitionScopes = new WeakMap<CustomToolDefinition[], AgenticToolOptions>();
+const toolDefinitionOwners = new WeakMap<CustomToolDefinition, AgenticToolOptions>();
 
 export function createAgentCoreToolDefinitions(options: AgenticToolOptions): CustomToolDefinition[] {
   const baseTools = [
@@ -42,16 +39,23 @@ export function createAgentCoreToolDefinitions(options: AgenticToolOptions): Cus
     : baseTools;
 
   toolDefinitionScopes.set(tools, options);
+  for (const tool of tools) {
+    toolDefinitionOwners.set(tool, options);
+  }
   return tools;
 }
 
 export function disposeAgentCoreToolDefinitions(definitions: CustomToolDefinition[]): void {
-  const options = toolDefinitionScopes.get(definitions);
+  const options = toolDefinitionScopes.get(definitions)
+    ?? definitions.map((definition) => toolDefinitionOwners.get(definition)).find(Boolean);
   if (!options) {
     return;
   }
   disposeBackgroundRegistry(options);
   toolDefinitionScopes.delete(definitions);
+  for (const definition of definitions) {
+    toolDefinitionOwners.delete(definition);
+  }
 }
 
 export const createAgenticToolDefinitions = createAgentCoreToolDefinitions;
