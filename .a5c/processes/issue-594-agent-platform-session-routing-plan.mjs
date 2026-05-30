@@ -6,6 +6,11 @@
  *
  * Planning research performed before authoring:
  * - gh issue view 594 --json title,body,labels,comments
+ * - gh pr list --head plan/issue-594 --json number,title,state,url,baseRefName,headRefName
+ * - gh pr view 717 --json files,title,body,comments,headRefOid,baseRefOid,url
+ * - babysitter process-library:active --json
+ * - babysitter skill:discover --process-path /home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/sdk-testing-strategy.js --json
+ * - babysitter skill:discover --process-path /home/runner/.a5c/process-library/babysitter-repo/library/specializations/qa-testing-automation/quality-gates.js --json
  * - docs/agent-reference/process-authoring.md
  * - docs/agent-layer-gaps.md
  * - packages/agent-platform/src/harness/internal/createRun/planProcess/runState.ts
@@ -17,8 +22,16 @@
  * - packages/agent-platform/src/harness/{capabilityRouter,modelSelection,fallbackChains,selectionPolicies}.ts
  * - /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/{spec-kit-brownfield,plan-and-execute}.js
  * - /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/{test-driven-development,verification-before-completion}.js
- * - /home/runner/.a5c/process-library/babysitter-repo/library/specializations/software-architecture/{migration-strategy,system-design-review}.js
+ * - /home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/{sdk-testing-strategy,backward-compatibility-management,compatibility-testing}.js
  * - /home/runner/.a5c/process-library/babysitter-repo/library/specializations/qa-testing-automation/quality-gates.js
+ *
+ * @process methodologies/spec-kit-brownfield
+ * @process methodologies/plan-and-execute
+ * @process methodologies/superpowers/test-driven-development
+ * @process methodologies/superpowers/verification-before-completion
+ * @process specializations/sdk-platform-development/sdk-testing-strategy
+ * @process specializations/sdk-platform-development/backward-compatibility-management
+ * @process specializations/qa-testing-automation/quality-gates
  *
  * Repo policy note: direct babysitter:call processes in this repo should avoid
  * kind: "shell" subtasks unless the user explicitly asks for a shell-oriented
@@ -282,9 +295,9 @@ export const issueAndLibraryResearchTask = defineTask('issue-594.issue-and-libra
       instructions: [
         'Do not edit files.',
         `Run gh issue view ${args.issueNumber} --json title,body,labels,comments and preserve the issue title, labels, body, and all comments.`,
-        `Also run gh pr view ${args.issueNumber} --json files,title,body,comments and record whether GitHub reports that #${args.issueNumber} is not a PR.`,
+        `Check whether #${args.issueNumber} is also a PR before reading PR-only fields. If it is a PR, run gh pr view ${args.issueNumber} --json files,title,body,comments; if it is an issue only, record that and do not treat a gh pr view failure as blocking.`,
         'Record that the local project path .a5c/process-library may be absent; use /home/runner/.a5c/process-library/babysitter-repo/library as the active shared process-library when present.',
-        'Research process-library references for brownfield integration, plan-and-execute, TDD, verification-before-completion, migration strategy, system design review, and quality gates.',
+        'Research process-library references for brownfield integration, plan-and-execute, TDD, verification-before-completion, SDK testing, backward compatibility, compatibility testing, and quality gates.',
         'Apply docs/agent-reference/process-authoring.md, especially the direct babysitter:call rule to avoid kind: shell subtasks unless explicitly requested.',
         'Summarize related issue comments: #580 MCP wiring dependency, #578 cost tracking dependency, prior closed planning PR #657, and any note that implementation may already be in progress or stale.',
         'Return JSON: { issue, isPullRequest, relatedIssues, priorPlanPr, processLibraryRoot, references, applicablePatterns, repoPolicyConstraints, recommendedProcessShape, breakpointPolicy, qualityGatePattern }.',

@@ -9,6 +9,7 @@
     580
   ],
   "priorPlanningPr": 657,
+  "currentPlanningPr": 717,
   "targetFiles": [
     "packages/agent-platform/src/harness/internal/createRun/planProcess/runState.ts",
     "packages/agent-platform/src/harness/internal/createRun/planProcess/prompts.ts",
@@ -44,8 +45,9 @@
     "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/plan-and-execute.js",
     "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/test-driven-development.js",
     "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/verification-before-completion.js",
-    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/software-architecture/migration-strategy.js",
-    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/software-architecture/system-design-review.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/sdk-testing-strategy.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/backward-compatibility-management.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/compatibility-testing.js",
     "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/qa-testing-automation/quality-gates.js"
   ],
   "reportedGaps": [
