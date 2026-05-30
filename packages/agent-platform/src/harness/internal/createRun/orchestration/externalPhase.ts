@@ -1,7 +1,5 @@
 import * as path from "node:path";
-import {
-  commitEffectResult,
-} from "@a5c-ai/babysitter-sdk";
+import { commitEffectResult } from "@a5c-ai/babysitter-sdk";
 import {
   BabysitterRuntimeError,
   ErrorCategory,
@@ -17,6 +15,7 @@ import {
   writeVerboseLine,
   type EffectAction,
   type OrchestrationState,
+  type ResolveEffectResult,
 } from "../utils";
 import { MAX_PROCESS_ERROR_RECOVERIES } from "./constants";
 
@@ -25,6 +24,7 @@ const MAX_SHELL_OUTPUT_TAIL_CHARS = 1500;
 /** Max characters of non-shell output head included in progress events. */
 const MAX_NON_SHELL_OUTPUT_HEAD_CHARS = 300;
 import { orchestrateIterationWithProcessLoadRetry, resolveEffectWithRetry } from "./effects";
+import { dispatchEffectActions } from "./dispatch";
 import { ensureRunAndMaybeBindFromProcessDefinition } from "../planProcess/runState";
 import { subscribeVerbosePiEvents } from "./verbose";
 import type { RunOrchestrationPhaseArgs } from "./types";
@@ -164,15 +164,32 @@ export async function runExternalOrchestrationPhase(args: RunOrchestrationPhaseA
           args.outputMode,
         );
         const iterationStartTime = Date.now();
-        for (const action of result.nextActions) {
-          await resolveExternalAction({
+        await dispatchEffectActions({
+          actions: result.nextActions,
+          resolveAction: (action) => resolveExternalAction({
             action,
             args,
             state,
             registerPiSession,
             shutdownPiSession,
-          });
-        }
+          }),
+          commitAction: async ({ action, result: effectResult, startedAt, finishedAt }) => {
+            await commitEffectResult({
+              runDir: state.runDir!,
+              effectId: action.effectId,
+              invocationKey: action.invocationKey,
+              result: {
+                status: effectResult.status,
+                value: effectResult.value,
+                error: effectResult.error,
+                stdout: effectResult.stdout,
+                stderr: effectResult.stderr,
+                startedAt,
+                finishedAt,
+              },
+            });
+          },
+        });
         emitProgress(
           {
             phase: "2",
@@ -278,7 +295,7 @@ async function resolveExternalAction(args: {
   shutdownPiSession: (
     session: ReturnType<typeof createAgentCoreSession> | null | undefined,
   ) => Promise<void>;
-}): Promise<void> {
+}): Promise<ResolveEffectResult> {
   const taskHarness = resolveTaskHarness(
     args.action,
     args.args.selectedHarnessName,
@@ -380,20 +397,6 @@ async function resolveExternalAction(args: {
       piSessionFactory,
       args.shutdownPiSession,
     );
-    await commitEffectResult({
-      runDir: args.state.runDir!,
-      effectId: args.action.effectId,
-      invocationKey: args.action.invocationKey,
-      result: {
-        status: effectResult.status,
-        value: effectResult.value,
-        error: effectResult.error,
-        stdout: effectResult.stdout,
-        stderr: effectResult.stderr,
-        startedAt: new Date().toISOString(),
-        finishedAt: new Date().toISOString(),
-      },
-    });
     emitProgress(
       {
         phase: "2",
@@ -416,6 +419,7 @@ async function resolveExternalAction(args: {
       args.args.verbose,
       args.args.outputMode,
     );
+    return effectResult;
   } finally {
     workerUnsub?.();
     await args.shutdownPiSession(workerSession);

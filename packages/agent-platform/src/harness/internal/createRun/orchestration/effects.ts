@@ -48,6 +48,7 @@ import {
   EFFECT_RETRY_DELAYS_OVERRIDE,
   PROCESS_MODULE_LOAD_RETRY_DELAYS_MS,
 } from "./constants";
+import { dispatchEffectActions } from "./dispatch";
 
 export function resolveHarnessSessionIdForBinding(
   args: { selectedHarnessName: string },
@@ -385,47 +386,55 @@ async function invokeSubprocessEffect(
   for (let iteration = 0; iteration < maxIterations; iteration += 1) {
     const iterationResult = await orchestrateIterationWithProcessLoadRetry({ runDir: childRun.runDir });
     if (iterationResult.status === "waiting") {
-      for (const childAction of iterationResult.nextActions) {
-        const effectiveHarness = discovered
-          ? resolveTaskHarness(childAction, childHarness, discovered)
-          : childHarness;
-        let workerSession: AgentCoreSessionHandle | null = null;
-        let workerSessionFactory: (() => AgentCoreSessionHandle) | undefined;
-        if (childAction.kind === "shell" || isInternalHarness(effectiveHarness)) {
-          const createWorkerSession = () => createAgentCoreSession(buildPiWorkerSessionOptions({
-            action: childAction,
-            workspace: options.workspace,
-            model: childModel,
-          }));
-          workerSession = createWorkerSession();
-          workerSessionFactory = createWorkerSession;
-        }
-        try {
-          const childEffectResult = await resolveEffectWithRetry(
-            childAction,
-            childHarness,
-            {
+      await dispatchEffectActions({
+        actions: iterationResult.nextActions,
+        resolveAction: async (childAction) => {
+          const effectiveHarness = discovered
+            ? resolveTaskHarness(childAction, childHarness, discovered)
+            : childHarness;
+          let workerSession: AgentCoreSessionHandle | null = null;
+          let workerSessionFactory: (() => AgentCoreSessionHandle) | undefined;
+          if (childAction.kind === "shell" || isInternalHarness(effectiveHarness)) {
+            const createWorkerSession = () => createAgentCoreSession(buildPiWorkerSessionOptions({
+              action: childAction,
               workspace: options.workspace,
               model: childModel,
-              interactive: options.interactive,
-              compressionConfig: options.compressionConfig,
-              streaming: options.streaming,
-              runsDir: options.runsDir,
-              runId: childRun.runId,
-              runDir: childRun.runDir,
-              sessionId: spec.shareSession ? options.sessionId : undefined,
-              maxIterations,
-              verbose: options.verbose,
-              outputMode: options.outputMode,
-            },
-            workerSession,
-            discovered,
-            rl,
-            json,
-            workerSessionFactory,
-            disposeWorkerSession,
-            askUserQuestionHandler,
-          );
+            }));
+            workerSession = createWorkerSession();
+            workerSessionFactory = createWorkerSession;
+          }
+          try {
+            const childEffectResult = await resolveEffectWithRetry(
+              childAction,
+              childHarness,
+              {
+                workspace: options.workspace,
+                model: childModel,
+                interactive: options.interactive,
+                compressionConfig: options.compressionConfig,
+                streaming: options.streaming,
+                runsDir: options.runsDir,
+                runId: childRun.runId,
+                runDir: childRun.runDir,
+                sessionId: spec.shareSession ? options.sessionId : undefined,
+                maxIterations,
+                verbose: options.verbose,
+                outputMode: options.outputMode,
+              },
+              workerSession,
+              discovered,
+              rl,
+              json,
+              workerSessionFactory,
+              disposeWorkerSession,
+              askUserQuestionHandler,
+            );
+            return childEffectResult;
+          } finally {
+            await disposeWorkerSession(workerSession);
+          }
+        },
+        commitAction: async ({ action: childAction, result: childEffectResult, startedAt, finishedAt }) => {
           await commitEffectResult({
             runDir: childRun.runDir,
             effectId: childAction.effectId,
@@ -436,14 +445,12 @@ async function invokeSubprocessEffect(
               error: childEffectResult.error,
               stdout: childEffectResult.stdout,
               stderr: childEffectResult.stderr,
-              startedAt: new Date().toISOString(),
-              finishedAt: new Date().toISOString(),
+              startedAt,
+              finishedAt,
             },
           });
-        } finally {
-          await disposeWorkerSession(workerSession);
-        }
-      }
+        },
+      });
       continue;
     }
 

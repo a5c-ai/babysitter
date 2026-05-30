@@ -14,6 +14,7 @@ import {
   DEFAULT_INTERACTIVE_ASK_TIMEOUT_MS,
   PI_WORKER_TIMEOUT_MS,
   resolveAgentCoreBackendForHarness,
+  resolveTaskHarness,
 } from "../utils";
 import {
   BabysitterRuntimeError,
@@ -190,6 +191,40 @@ describe("harnessUtils", () => {
     expect(resolveAgentCoreBackendForHarness("codex")).toBe("codex");
     expect(resolveAgentCoreBackendForHarness("github-copilot")).toBe("copilot");
     expect(resolveAgentCoreBackendForHarness("oh-my-pi")).toBe("omp");
+  });
+
+  it("prefers scheduler preferredHarness over task metadata harness", () => {
+    expect(resolveTaskHarness(
+      {
+        effectId: "eff-1",
+        invocationKey: "inv-1",
+        kind: "agent",
+        taskDef: {
+          kind: "agent",
+          metadata: { harness: "codex" },
+        },
+        schedulerHints: { preferredHarness: "claude-code" },
+      },
+      "pi",
+      [
+        {
+          name: "claude-code",
+          installed: true,
+          cliCommand: "claude",
+          configFound: true,
+          capabilities: [],
+          platform: "linux",
+        },
+        {
+          name: "codex",
+          installed: true,
+          cliCommand: "codex",
+          configFound: true,
+          capabilities: [],
+          platform: "linux",
+        },
+      ],
+    )).toBe("claude-code");
   });
 
   describe("promptPiWithRetry", () => {
