@@ -39,4 +39,10 @@ export {
 } from "./registry";
 
 export { discoverHarnesses, detectCallerHarness, checkCliAvailable, KNOWN_HARNESSES } from "./discovery";
+export {
+  discoverExternalAgents,
+  type ExternalAgentDiscovery,
+  type ExternalAgentDiscoveryOptions,
+  type ExternalAgentInfo,
+} from "./externalAgentDiscovery";
 export { installHarnessViaAmux, installHarnessPlugin, discoverHarnessesViaAmux } from "./install";
