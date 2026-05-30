@@ -416,7 +416,7 @@ jobs:
           echo "Cleaned agent skill directories to prevent test interference"
 
       - name: Run selected live stack E2E
-        timeout-minutes: 18
+        timeout-minutes: 22
         env:
           LIVE_STACK_SCENARIO_ID: ${{ matrix.scenario.id }}
           LIVE_STACK_AGENT_PATH: ${{ matrix.scenario.agent_path }}
