@@ -1,0 +1,7 @@
+{
+  "issueNumber": 601,
+  "baseBranch": "staging",
+  "workBranch": "agent/issue-601-remaining-dragons",
+  "relatedIssues": [584, 586],
+  "maxImplementationLoops": 2
+}
