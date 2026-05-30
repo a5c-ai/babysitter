@@ -262,6 +262,9 @@ jitsi:
         appSecretKey: appSecret
         issuer: krate
         audience: jitsi
+    jwt:
+      secret: ""
+      existingSecretName: ""
     http:
       enabled: true
       port: 5280
@@ -339,11 +342,16 @@ jitsi-subchart:
   extraCommonEnvs:
     AUTH_TYPE: jwt
     JWT_APP_ID: krate
-    JWT_APP_SECRET: ""
     JWT_ACCEPTED_ISSUERS: krate
     JWT_ACCEPTED_AUDIENCES: jitsi
   web: *jitsiWeb
-  prosody: *jitsiProsody
+  prosody:
+    <<: *jitsiProsody
+    secretEnvs:
+      JWT_APP_SECRET: ""
+    jwt:
+      secret: ""
+      existingSecretName: ""
   jicofo: *jitsiJicofo
   jvb: *jitsiJvb
   jibri: *jitsiJibri

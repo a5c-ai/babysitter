@@ -7,6 +7,9 @@ const values = readFileSync(new URL('../../charts/values.yaml', import.meta.url)
 const networkPolicy = readFileSync(new URL('../../charts/templates/networkpolicy.yaml', import.meta.url), 'utf8');
 const secrets = readFileSync(new URL('../../charts/templates/jitsi-secrets.yaml', import.meta.url), 'utf8');
 const jitsiCrds = readFileSync(new URL('../../charts/crds/jitsi-resources.yaml', import.meta.url), 'utf8');
+const agentCrds = readFileSync(new URL('../../charts/crds/agent-resources.yaml', import.meta.url), 'utf8');
+const aggregatedCrds = readFileSync(new URL('../../charts/crds/aggregated-resources.yaml', import.meta.url), 'utf8');
+const externalCrds = readFileSync(new URL('../../charts/crds/external-resources.yaml', import.meta.url), 'utf8');
 
 test('Krate chart declares the Jitsi Meet subchart dependency behind jitsi.install', () => {
   assert.match(chart, /name:\s+jitsi-meet/);
@@ -25,6 +28,7 @@ test('values expose internal and external Jitsi deployment settings', () => {
     'web:',
     'prosody:',
     'type: jwt',
+    'existingSecretName:',
     'jicofo:',
     'jvb:',
     'useNodeIP: true',
@@ -36,6 +40,7 @@ test('values expose internal and external Jitsi deployment settings', () => {
   ]) {
     assert.ok(values.includes(term), `values.yaml should include ${term}`);
   }
+  assert.match(values, /jitsi-subchart:[\s\S]*prosody:\n\s+<<: \*jitsiProsody[\s\S]*secretEnvs:\n\s+JWT_APP_SECRET: ""[\s\S]*jwt:\n\s+secret: ""\n\s+existingSecretName: ""/);
 });
 
 test('Jitsi CRDs are installed from a dedicated chart CRD file', () => {
@@ -46,6 +51,12 @@ test('Jitsi CRDs are installed from a dedicated chart CRD file', () => {
   assert.match(jitsiCrds, /required:\n\s+- organizationRef/);
   assert.match(jitsiCrds, /name:\s+jitsimeetproviders\.krate\.a5c\.ai/);
   assert.match(jitsiCrds, /name:\s+jitsimeetings\.krate\.a5c\.ai/);
+});
+
+test('Jitsi CRDs are not duplicated in non-Jitsi chart CRD bundles', () => {
+  for (const crdBundle of [agentCrds, aggregatedCrds, externalCrds]) {
+    assert.doesNotMatch(crdBundle, /name:\s+jitsi(?:meetproviders|meetingtemplates|meetings|recordings)\.krate\.a5c\.ai/);
+  }
 });
 
 test('chart templates manage Jitsi secrets without committing literal credentials', () => {
