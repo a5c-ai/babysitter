@@ -7,7 +7,7 @@ let ipc = null;
 let runtime = null;
 
 async function shutdown(reason) {
-  if (runtime) await runtime.stop(reason);
+  if (runtime) await runtime.stop(reason, { graceful: false });
   if (ipc) await ipc.stop();
 }
 

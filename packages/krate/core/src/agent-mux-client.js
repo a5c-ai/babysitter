@@ -59,6 +59,7 @@ function createJitsiSidecarContainer(jitsi = {}) {
     { name: 'JITSI_ROOM_ID', value: jitsi.roomId || '' },
     { name: 'JITSI_PARTICIPANT_NAME', value: jitsi.participantName || jitsi.stackName || 'Krate Agent' },
     { name: 'JITSI_PARTICIPANT_ROLE', value: jitsi.role || 'observer' },
+    { name: 'JITSI_GOODBYE_MESSAGE', value: jitsi.goodbyeMessage || 'Krate agent is leaving the meeting.' },
     { name: 'JITSI_AUDIO_MODE', value: audioMode },
     { name: 'JITSI_CHAT_MODE', value: chatMode },
     { name: 'JITSI_SCREENSHARE_MODE', value: screenshareMode },

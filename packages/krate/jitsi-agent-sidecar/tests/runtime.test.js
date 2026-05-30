@@ -129,13 +129,39 @@ describe('Jitsi sidecar runtime command/event contract', () => {
   it('disconnect command performs graceful Jitsi leave', async () => {
     const jitsi = adapter();
     const runtime = createJitsiSidecarRuntime({
-      config: { roomUrl: 'https://meet.example.test/standup', jwt: 'jwt', roomId: 'standup' },
+      config: {
+        roomUrl: 'https://meet.example.test/standup',
+        jwt: 'jwt',
+        roomId: 'standup',
+        goodbyeMessage: 'Standup Bot leaving.',
+      },
       jitsi,
       broadcast: () => {},
     });
 
     await runtime.handleCommand({ action: 'disconnect', reason: 'task_complete' });
 
-    assert.deepEqual(jitsi.calls, [['disconnect', 'task_complete']]);
+    assert.deepEqual(jitsi.calls, [
+      ['sendChat', 'Standup Bot leaving.'],
+      ['disconnect', 'task_complete'],
+    ]);
+  });
+
+  it('forced shutdown disconnects immediately without graceful goodbye chat', async () => {
+    const jitsi = adapter();
+    const runtime = createJitsiSidecarRuntime({
+      config: {
+        roomUrl: 'https://meet.example.test/standup',
+        jwt: 'jwt',
+        roomId: 'standup',
+        goodbyeMessage: 'Standup Bot leaving.',
+      },
+      jitsi,
+      broadcast: () => {},
+    });
+
+    await runtime.stop('sigterm', { graceful: false });
+
+    assert.deepEqual(jitsi.calls, [['disconnect', 'sigterm']]);
   });
 });

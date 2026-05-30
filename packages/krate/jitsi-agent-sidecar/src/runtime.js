@@ -99,8 +99,12 @@ export function createJitsiSidecarRuntime({ config, jitsi, broadcast = () => {},
       }
     },
 
-    async stop(reason = 'shutdown') {
+    async stop(reason = 'shutdown', options = {}) {
       stopped = true;
+      const graceful = options.graceful ?? !['sigterm', 'sigint', 'startup_failed'].includes(reason);
+      if (graceful && config.goodbyeMessage && typeof jitsi.sendChat === 'function') {
+        await jitsi.sendChat(config.goodbyeMessage);
+      }
       if (typeof jitsi.disconnect === 'function') {
         await jitsi.disconnect(reason);
       }
