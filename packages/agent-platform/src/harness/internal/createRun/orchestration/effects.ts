@@ -908,9 +908,11 @@ async function invokeSubprocessEffect(
       };
     }
 
-    const message = iterationResult.error instanceof Error
-      ? iterationResult.error.message
-      : summarizeSubprocessValue(iterationResult.error);
+    const message = iterationResult.status === "halted"
+      ? iterationResult.reason
+      : iterationResult.error instanceof Error
+        ? iterationResult.error.message
+        : summarizeSubprocessValue(iterationResult.error);
     emitAmuxEvent(
       {
         type: "subagent_error",
