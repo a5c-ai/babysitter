@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { createKrateApiController, createResource } from '../src/index.js';
 import { createAgentMemoryController } from '../src/agent-memory-controller.js';
 
 function makeRecords() {
@@ -51,6 +52,82 @@ function makeDocuments() {
     { path: 'src/auth/handler.ts', content: 'export function handleAuth(req) {\n  const token = req.headers.authorization;\n  return validateToken(token);\n}' },
     { path: 'configs/prod.yaml', content: 'database:\n  host: prod-db.internal\n  port: 5432\n  password: [redacted]' },
   ];
+}
+
+function createRecordingGateway({ snapshotResources = {}, failKinds = new Set() } = {}) {
+  const applied = [];
+  return {
+    namespace: 'krate-system',
+    resourceDefinitions: {},
+    applied,
+    async snapshot() {
+      return { resources: snapshotResources, namespace: 'krate-system' };
+    },
+    async list() {
+      return { items: [] };
+    },
+    async get() {
+      return null;
+    },
+    async apply(resource) {
+      if (failKinds.has(resource.kind)) {
+        throw new Error(`apply failed for ${resource.kind}`);
+      }
+      applied.push(JSON.parse(JSON.stringify(resource)));
+      return { operation: 'apply', resource };
+    },
+    async delete() {
+      return { operation: 'delete' };
+    },
+    watch() {
+      return { close: () => {} };
+    },
+  };
+}
+
+function makeDispatchResources() {
+  return {
+    AgentStack: [
+      createResource('AgentStack', { name: 'mem-stack', namespace: 'krate-org-acme' }, {
+        organizationRef: 'acme',
+        baseAgent: 'claude-code',
+        adapter: 'claude-code',
+        provider: 'anthropic',
+        runtimeIdentity: { serviceAccountRef: 'sa-default' },
+      }),
+    ],
+    AgentServiceAccount: [
+      createResource('AgentServiceAccount', { name: 'sa-default', namespace: 'krate-org-acme' }, {
+        organizationRef: 'acme',
+        namespace: 'krate-org-acme',
+        serviceAccountName: 'sa-default',
+      }),
+    ],
+    AgentRoleBinding: [
+      createResource('AgentRoleBinding', { name: 'rb-default', namespace: 'krate-org-acme' }, {
+        organizationRef: 'acme',
+        subject: 'sa-default',
+        roleRef: 'agent-developer',
+        scope: 'namespace',
+      }),
+    ],
+    AgentSecretGrant: [
+      createResource('AgentSecretGrant', { name: 'sg-model', namespace: 'krate-org-acme' }, {
+        organizationRef: 'acme',
+        subject: 'sa-default',
+        secretRef: 'model-secret',
+        purpose: 'model-provider',
+      }),
+    ],
+    AgentMemoryRepository: [
+      createResource('AgentMemoryRepository', { name: 'company-brain', namespace: 'krate-org-acme' }, {
+        organizationRef: 'acme',
+        repositoryRef: 'memory-repo',
+        defaultBranch: 'main',
+        layoutProfile: 'standard',
+      }),
+    ],
+  };
 }
 
 test('createMemorySnapshot creates valid resource with digests', () => {
@@ -269,6 +346,82 @@ test('createImport sets phase=Pending', () => {
   assert.equal(importResource.spec.memoryRepository, 'company-brain');
   assert.equal(importResource.spec.source, 'babysitter-run/run-123');
   assert.equal(importResource.spec.validationPolicy, 'strict');
+});
+
+test('api-controller createMemoryImport applies returned AgentRunMemoryImport in org namespace', async () => {
+  const gateway = createRecordingGateway();
+  const controller = createKrateApiController({ resourceGateway: gateway });
+
+  const result = await controller.createMemoryImport({
+    organizationRef: 'acme',
+    memoryRepository: 'company-brain',
+    source: 'babysitter-run/run-123',
+    include: { kinds: ['decision'] },
+    validationPolicy: 'strict',
+  });
+
+  const appliedImport = gateway.applied.find((resource) => resource.kind === 'AgentRunMemoryImport');
+  assert.ok(appliedImport, 'AgentRunMemoryImport must be applied durably');
+  assert.equal(appliedImport.metadata.namespace, 'krate-org-acme');
+  assert.equal(appliedImport.spec.organizationRef, 'acme');
+  assert.equal(result.importResource?.metadata?.name || result.metadata?.name, appliedImport.metadata.name);
+  assert.ok(result.applyResult, 'result should expose the apply result');
+});
+
+test('api-controller createMemoryImport propagates apply failures', async () => {
+  const gateway = createRecordingGateway({ failKinds: new Set(['AgentRunMemoryImport']) });
+  const controller = createKrateApiController({ resourceGateway: gateway });
+
+  await assert.rejects(
+    () => controller.createMemoryImport({
+      organizationRef: 'acme',
+      memoryRepository: 'company-brain',
+      source: 'babysitter-run/run-123',
+      include: { kinds: ['decision'] },
+    }),
+    /apply failed for AgentRunMemoryImport/
+  );
+});
+
+test('api-controller createMemoryUpdate applies returned AgentMemoryUpdate in org namespace', async () => {
+  const gateway = createRecordingGateway();
+  const controller = createKrateApiController({ resourceGateway: gateway });
+
+  assert.equal(typeof controller.createMemoryUpdate, 'function', 'controller must expose createMemoryUpdate');
+  const result = await controller.createMemoryUpdate({
+    organizationRef: 'acme',
+    memoryRepository: 'company-brain',
+    sourceRun: 'dispatch-123',
+    changes: [{ op: 'add', path: 'records/service-api' }],
+  });
+
+  const appliedUpdate = gateway.applied.find((resource) => resource.kind === 'AgentMemoryUpdate');
+  assert.ok(appliedUpdate, 'AgentMemoryUpdate must be applied durably');
+  assert.equal(appliedUpdate.metadata.namespace, 'krate-org-acme');
+  assert.equal(appliedUpdate.spec.organizationRef, 'acme');
+  assert.equal(result.update?.metadata?.name || result.metadata?.name, appliedUpdate.metadata.name);
+});
+
+test('api-controller dispatchAgent applies returned AgentMemorySnapshot in org namespace', async () => {
+  const gateway = createRecordingGateway({ snapshotResources: makeDispatchResources() });
+  const controller = createKrateApiController({ resourceGateway: gateway });
+
+  const result = await controller.dispatchAgent({
+    agentStack: 'mem-stack',
+    repository: 'repo',
+    ref: 'main',
+    taskKind: 'diagnostic',
+    actor: 'owner',
+    organizationRef: 'acme',
+    namespace: 'krate-org-acme',
+  });
+
+  assert.equal(result.error, false);
+  const appliedSnapshot = gateway.applied.find((resource) => resource.kind === 'AgentMemorySnapshot');
+  assert.ok(appliedSnapshot, 'AgentMemorySnapshot returned by dispatch must be applied durably');
+  assert.equal(appliedSnapshot.metadata.namespace, 'krate-org-acme');
+  assert.equal(appliedSnapshot.spec.organizationRef, 'acme');
+  assert.equal(result.memorySnapshot.metadata.name, appliedSnapshot.metadata.name);
 });
 
 test('processImport advances phases', () => {

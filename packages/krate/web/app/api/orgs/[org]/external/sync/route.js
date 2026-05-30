@@ -13,8 +13,8 @@ export const POST = withAuth(async (request, { params }) => {
       kind: body.kind,
       localName: body.localName,
       namespace: body.namespace ?? orgNamespaceName(org),
-      spec: body.spec,
-      externalEnvelope: body.externalEnvelope,
+      spec: body.spec || {},
+      externalEnvelope: body.externalEnvelope || { nativeId: '', url: '', etag: '', providerRef: '' },
       watermark: body.watermark,
     });
     return Response.json(result);
