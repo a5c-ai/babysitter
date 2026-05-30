@@ -111,7 +111,8 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
         throw new Error(err.message || `Failed with status ${res.status}`);
       }
       // Auto-create a model route so it's immediately available through the gateway
-      fetch(`/api/orgs/${org}/inference/routes`, {
+      let routeWarning = null;
+      const routeRes = await fetch(`/api/orgs/${org}/inference/routes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -121,8 +122,12 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
           inferenceServiceRef: model.id,
           protocol: 'v2',
         }),
-      }).catch((err) => console.warn('[krate]', err.message || err));
-      setDeployResult({ success: true, model });
+      });
+      if (!routeRes.ok) {
+        const err = await routeRes.json().catch(() => ({}));
+        routeWarning = err.message || `Model route creation failed with status ${routeRes.status}`;
+      }
+      setDeployResult({ success: true, model, routeWarning });
       if (onDeploy) onDeploy();
     } catch (err) {
       setDeployResult({ success: false, error: err.message });
@@ -307,6 +312,11 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
                     <strong>{deployResult.model.name}</strong> is being deployed. It may take a few minutes to become ready.
                   </div>
                 </div>
+                {deployResult.routeWarning && (
+                  <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '0.375rem', padding: '0.75rem', fontSize: '0.8125rem', color: '#92400e', marginBottom: '1rem' }}>
+                    Service deployment started, but the model route was not created: {deployResult.routeWarning}
+                  </div>
+                )}
                 <a
                   href={`/orgs/${org}/inference?service=${encodeURIComponent(deployResult.model.id)}`}
                   style={{ ...btnStyle('#2563eb'), display: 'inline-block', textDecoration: 'none' }}
