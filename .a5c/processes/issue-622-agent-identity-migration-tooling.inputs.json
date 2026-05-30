@@ -1,0 +1,126 @@
+{
+  "issueNumber": 622,
+  "title": "Agent identity: migration tooling and backward compatibility",
+  "branch": "staging",
+  "dependencyIssue": 620,
+  "labels": [
+    "effort:medium",
+    "ready-for-dev",
+    "feature",
+    "priority:medium",
+    "triggers",
+    "krate",
+    "krate-core",
+    "risk:medium"
+  ],
+  "issueBody": "Build migration tooling to convert existing AgentStack resources (with inline prompts) into the new AgentPersona + AgentDefinition model. Ensure backward compatibility so existing workflows don't break.\n\nScope:\n1. Compatibility layer in dispatch controller - accept agentDefinition OR agentStack, resolve both paths\n2. Migration script - extract persona from stack (prompts, skills -> AgentPersona), create binding (AgentDefinition), clean stack\n3. Deprecation warnings - log warning when dispatch resolves a stack with inline prompts\n4. TriggerRule update - accept agentDefinition field alongside existing agentStack\n5. Stack builder UI - continues creating AgentStack (infra only), separate from persona editor\n6. MCP tool update - krate_dispatch_agent accepts definition or stack ref\n\nReference: packages/krate/docs/agent-identity/02-migration.md\nDependency: #620 (agent identity core)",
+  "comments": [
+    {
+      "author": "a5c-ai",
+      "body": "Triage confirms this should be implemented as a phased compatibility change. Add AgentPersona and AgentDefinition resource definitions/CRDs after or with #620, centralize dispatch target resolution, preserve legacy stack behavior indefinitely, add prompt composition with explicit precedence, update AgentTriggerRule/web/MCP surfaces, add dry-run-first migration tooling with backup/reversible behavior, and add deprecation warnings for inline AgentStack identity fields. Suggested first tests: packages/krate/core/tests/agent-dispatch-controller.test.js for legacy and definition dispatch, packages/krate/core/tests/agent-trigger-controller.test.js for both fields, packages/krate/core/tests/agent-resources.test.js for identity kinds and compatibility required fields, plus web/resource contract tests."
+    }
+  ],
+  "referenceDocs": [
+    "packages/krate/docs/agent-identity/01-resource-model.md",
+    "packages/krate/docs/agent-identity/02-migration.md",
+    "packages/krate/docs/agent-identity/03-web-experience.md",
+    "docs/agent-reference/process-authoring.md"
+  ],
+  "initialFindings": {
+    "reuseAuditConfig": "No .a5c/reuse-audit.json file was present during planning.",
+    "processLibraryReferences": [
+      "methodologies/spec-kit/spec-kit-implementation.js",
+      "methodologies/atdd-tdd/atdd-tdd.js",
+      "specializations/web-development/nextjs-fullstack-app.js",
+      "specializations/web-development/api-integration-testing.js"
+    ],
+    "currentCoreState": [
+      "packages/krate/core/src/resource-model.js currently includes AgentStack, AgentTriggerRule, AgentDispatchRun, and AgentDispatchAttempt around agentStack, but no AgentPersona or AgentDefinition entries on staging.",
+      "packages/krate/core/src/agent-dispatch-controller.js currently accepts agentStack, finds resources.AgentStack, snapshots stack.spec, and resolves prompt fields directly from stack.spec.systemPrompt, developerPrompt, taskPrompt, and skillRefs.",
+      "packages/krate/core/src/agent-trigger-controller.js currently forwards rule.spec.agentStack into dispatch paths.",
+      "packages/krate/charts/crds/agent-resources.yaml currently requires AgentTriggerRule.spec.agentStack and has no agentDefinition alternative.",
+      "packages/krate/web/app/api/orgs/[org]/agents/dispatch/route.js currently accepts stackRef or agentStack only.",
+      "packages/krate/cli/src/mcp-server.js and packages/atlas/graph/extensions/tool-servers/krate-mcp-server.yaml currently expose krate_dispatch_agent with stackRef required."
+    ]
+  },
+  "targetFiles": {
+    "core": [
+      "packages/krate/core/src/resource-model.js",
+      "packages/krate/core/src/kubernetes-controller.js",
+      "packages/krate/core/src/agent-dispatch-controller.js",
+      "packages/krate/core/src/agent-trigger-controller.js",
+      "packages/krate/core/src/api-controller.js",
+      "packages/krate/charts/crds/agent-resources.yaml"
+    ],
+    "migrationTooling": [
+      "packages/krate/core/scripts",
+      "packages/krate/cli/bin/krate.mjs",
+      "packages/krate/cli/src/index.js"
+    ],
+    "web": [
+      "packages/krate/web/app/api/orgs/[org]/agents/dispatch/route.js",
+      "packages/krate/web/app/components/agent/dispatch-button.jsx",
+      "packages/krate/web/app/components/agent/trigger-rule-form.jsx",
+      "packages/krate/web/app/components/agent/trigger-rule-edit-form.jsx",
+      "packages/krate/web/app/components/agent/stack-builder.jsx",
+      "packages/krate/web/app/pages/agent-rule-pages.jsx",
+      "packages/krate/web/app/pages/agent-run-pages.jsx"
+    ],
+    "mcp": [
+      "packages/krate/cli/src/mcp-server.js",
+      "packages/atlas/graph/extensions/tool-servers/krate-mcp-server.yaml"
+    ],
+    "tests": [
+      "packages/krate/core/tests/agent-dispatch-controller.test.js",
+      "packages/krate/core/tests/agent-trigger-controller.test.js",
+      "packages/krate/core/tests/agent-resources.test.js",
+      "packages/krate/core/tests/integration/full-flow.test.js",
+      "packages/krate/cli/tests/mcp-server.test.js",
+      "packages/krate/cli/tests/cli-commands.test.js",
+      "packages/krate/web/tests/resource-contract.test.js",
+      "packages/krate/web/tests/api-routes.test.js",
+      "packages/krate/web/tests/component-structure.test.js"
+    ],
+    "docs": [
+      "packages/krate/docs/agent-identity/02-migration.md",
+      "packages/krate/cli/README.md",
+      "packages/krate/web/README.md"
+    ]
+  },
+  "runtimeCallPathsToConfirm": [
+    "Web dispatch: packages/krate/web/app/api/orgs/[org]/agents/dispatch/route.js -> createKrateApiController.dispatchAgent -> createAgentDispatchController.createManualDispatch -> resolve dispatch target -> resolveStack -> createAgentJob.",
+    "CLI/MCP dispatch: packages/krate/cli/src/mcp-server.js krate_dispatch_agent -> controller.dispatchAgent -> createManualDispatch.",
+    "Trigger dispatch: createAgentTriggerController.processEvent/evaluateWebhookEvent -> dispatchController.createManualDispatch with rule.spec.agentStack or rule.spec.agentDefinition.",
+    "Resource/CRD validation: resource-model.js requiredSpec and packages/krate/charts/crds/agent-resources.yaml required fields must allow either agentDefinition or agentStack where appropriate.",
+    "Migration tool: selected CLI/script entrypoint -> list/get/apply resources -> create AgentPersona and AgentDefinition -> backup output -> clean legacy stack fields only after successful writes."
+  ],
+  "implementationPhases": [
+    "Phase 0 reuse audit",
+    "Phase 1 dependency and scope confirmation for #620 identity resources",
+    "Phase 2 runtime path tracing",
+    "Phase 3 acceptance tests before implementation",
+    "Phase 4 core compatibility implementation",
+    "Phase 5 migration, web, CLI, and MCP surface implementation",
+    "Phase 6 quality gate verification",
+    "Phase 7 final review against the issue and migration docs"
+  ],
+  "qualityCommands": [
+    "npm run test --workspace=@a5c-ai/krate",
+    "npm run build --workspace=@a5c-ai/krate",
+    "npm run test --workspace=@a5c-ai/krate-web",
+    "npm run build --workspace=@a5c-ai/krate-web",
+    "npm test --workspace=@a5c-ai/krate-cli",
+    "npm run verify:metadata"
+  ],
+  "qualityGates": [
+    "Legacy AgentStack dispatch still resolves inline prompts and skillRefs and continues to create runs/jobs.",
+    "AgentDefinition dispatch resolves persona and stack through one centralized dispatch target resolver.",
+    "AgentTriggerRule accepts agentDefinition alongside agentStack without requiring both.",
+    "Migration tooling is dry-run by default, emits backup/reversible output, and only cleans stack fields after successful persona and definition writes.",
+    "Deprecation warning is observable when dispatch resolves a legacy AgentStack with inline prompt or skill identity fields.",
+    "Web dispatch, trigger rule forms, CLI MCP server, and Atlas MCP descriptor accept definition or stack references.",
+    "Stack builder remains able to create AgentStack infrastructure resources without breaking legacy stack editing."
+  ],
+  "maxImplementationAttempts": 2,
+  "plannedProcessEntry": ".a5c/processes/issue-622-agent-identity-migration-tooling.mjs#process"
+}
