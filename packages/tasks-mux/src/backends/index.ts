@@ -5,6 +5,7 @@ import type {
   RoutingConfig,
   GitHubIssuesBackendConfig,
   ExternalTrackerBackendConfig,
+  AgentMuxBackendConfig,
 } from "../types.js";
 import { GitNativeBackend } from "./git-native.js";
 import type { GitNativeBackendOptions } from "./git-native.js";
@@ -12,6 +13,8 @@ import { GitHubIssuesBackend } from "./github-issues.js";
 import { ExternalTrackerBackend } from "./external-tracker.js";
 import { ServerBreakpointBackend } from "./server.js";
 import type { ServerBreakpointBackendConfig } from "./server.js";
+import { AgentMuxResponderBackend } from "./agent-mux.js";
+import type { AgentMuxResponderBackendConfig } from "./agent-mux.js";
 export { ServerBreakpointBackend, ServerBackendError } from "./server.js";
 export type { ServerBreakpointBackendConfig } from "./server.js";
 export {
@@ -31,6 +34,17 @@ export type {
   ExternalTrackerWebhookEvent,
   ExternalTrackerWebhookResult,
 } from "./external-tracker.js";
+export {
+  AgentMuxResponderBackend,
+  AgentMuxResponderBackendError,
+} from "./agent-mux.js";
+export type {
+  AgentMuxClientLike,
+  AgentMuxResponderBackendConfig,
+  AgentMuxRunHandleLike,
+  AgentMuxRunOptions,
+  AgentMuxRunResult,
+} from "./agent-mux.js";
 
 /**
  * Factory function type for creating backends from config.
@@ -55,6 +69,11 @@ backendFactories.set("github-issues", (config) => {
 // Register the provider-neutral external tracker backend
 backendFactories.set("external-tracker", (config) => {
   return new ExternalTrackerBackend(config as ExternalTrackerBackendConfig);
+});
+
+// Register the agent-mux responder backend
+backendFactories.set("agent-mux", (config) => {
+  return new AgentMuxResponderBackend(config as unknown as AgentMuxResponderBackendConfig & AgentMuxBackendConfig);
 });
 
 // Register the breakpoints-pro server backend

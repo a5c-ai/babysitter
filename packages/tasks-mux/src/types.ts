@@ -464,11 +464,25 @@ export const ExternalTrackerBackendConfigSchema = z.object({
 });
 export type ExternalTrackerBackendConfig = z.infer<typeof ExternalTrackerBackendConfigSchema>;
 
+export const AgentMuxBackendConfigSchema = z.object({
+  type: z.literal("agent-mux"),
+  agent: z.string().min(1),
+  model: z.string().min(1).optional(),
+  cwd: z.string().min(1).optional(),
+  timeoutMs: z.number().positive().optional(),
+  collectEvents: z.boolean().optional(),
+  tags: z.array(z.string()).optional(),
+  approvalMode: z.enum(["yolo", "prompt", "deny"]).optional(),
+  nonInteractive: z.boolean().optional(),
+});
+export type AgentMuxBackendConfig = z.infer<typeof AgentMuxBackendConfigSchema>;
+
 export const BackendConfigSchema = z.discriminatedUnion("type", [
   GitNativeBackendConfigSchema,
   ServerBackendConfigSchema,
   GitHubIssuesBackendConfigSchema,
   ExternalTrackerBackendConfigSchema,
+  AgentMuxBackendConfigSchema,
 ]);
 export type BackendConfig = z.infer<typeof BackendConfigSchema>;
 

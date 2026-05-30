@@ -34,6 +34,7 @@ export {
   ExternalTrackerFieldMappingSchema,
   ExternalTrackerWebhookConfigSchema,
   ExternalTrackerBackendConfigSchema,
+  AgentMuxBackendConfigSchema,
   BackendConfigSchema,
   RoutingRuleSchema,
   RoutingConfigSchema,
@@ -81,6 +82,7 @@ export type {
   ExternalTrackerFieldMapping,
   ExternalTrackerWebhookConfig,
   ExternalTrackerBackendConfig,
+  AgentMuxBackendConfig,
   GitHubRepo,
   ProjectMember,
   TeamMember,
@@ -145,6 +147,19 @@ export type {
 // ── Server Backend ─────────────────────────────────────────────────
 export { ServerBreakpointBackend, ServerBackendError } from "./backends/server.js";
 export type { ServerBreakpointBackendConfig } from "./backends/server.js";
+
+// ── Agent Mux Backend ──────────────────────────────────────────────
+export {
+  AgentMuxResponderBackend,
+  AgentMuxResponderBackendError,
+} from "./backends/agent-mux.js";
+export type {
+  AgentMuxClientLike,
+  AgentMuxResponderBackendConfig,
+  AgentMuxRunHandleLike,
+  AgentMuxRunOptions,
+  AgentMuxRunResult,
+} from "./backends/agent-mux.js";
 
 // ── Proven Breakpoints ──────────────────────────────────────────────
 export {
