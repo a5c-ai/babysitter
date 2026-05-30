@@ -100,6 +100,19 @@ describe('ToolDispatcher', () => {
       expect(dispatcher.resolveServer('my_tool')).toBe('desc-server');
     });
 
+    it('resolves server from a qualified tool identity', () => {
+      registry.register(makeTool({
+        name: 'lookup',
+        source: 'mcp',
+        sourceQualifier: 'docs',
+        server: 'docs',
+      }));
+
+      const dispatcher = new ToolDispatcher({ registry });
+
+      expect(dispatcher.resolveServer('mcp:docs:lookup')).toBe('docs');
+    });
+
     it('falls back to defaultServer when no rules or descriptor match', () => {
       registry.register(makeTool({ name: 'orphan' }));
 
@@ -199,6 +212,47 @@ describe('ToolDispatcher', () => {
       expect(result.output).toBe('hello world');
       expect(result.error).toBeUndefined();
       expect(result.durationMs).toBeGreaterThanOrEqual(0);
+    });
+
+    it('dispatches duplicate tool names by qualified identity', async () => {
+      registry.register(makeTool({ name: 'fetch', source: 'plugin', sourceQualifier: 'plugin-a' }));
+      registry.register(makeTool({ name: 'fetch', source: 'mcp', sourceQualifier: 'web', server: 'web' }));
+
+      const dispatcher = new ToolDispatcher({ registry });
+      const executor = vi.fn(async (tool: ToolDescriptor) => tool.sourceQualifier);
+
+      const result = await dispatcher.dispatch(
+        makeContext({ toolName: 'mcp:web:fetch', input: { url: 'https://example.com' } }),
+        executor,
+      );
+
+      expect(result.output).toBe('web');
+      expect(executor).toHaveBeenCalledWith(
+        expect.objectContaining({ source: 'mcp', sourceQualifier: 'web', server: 'web' }),
+        expect.objectContaining({ toolName: 'mcp:web:fetch' }),
+      );
+    });
+
+    it('uses dispatch policy server resolution to select duplicate bare tool names', async () => {
+      registry.register(makeTool({ name: 'fetch', source: 'mcp', sourceQualifier: 'docs', server: 'docs' }));
+      registry.register(makeTool({ name: 'fetch', source: 'mcp', sourceQualifier: 'web', server: 'web' }));
+
+      const dispatcher = new ToolDispatcher({
+        registry,
+        policy: { rules: [{ match: 'fetch', server: 'web', priority: 10 }] },
+      });
+      const executor = vi.fn(async (tool: ToolDescriptor) => tool.server);
+
+      const result = await dispatcher.dispatch(
+        makeContext({ toolName: 'fetch', input: { url: 'https://example.com' } }),
+        executor,
+      );
+
+      expect(result.output).toBe('web');
+      expect(executor).toHaveBeenCalledWith(
+        expect.objectContaining({ server: 'web', sourceQualifier: 'web' }),
+        expect.objectContaining({ toolName: 'fetch' }),
+      );
     });
 
     it('catches executor errors and returns them in the result', async () => {

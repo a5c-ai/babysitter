@@ -18,7 +18,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --build",
     "clean": "rm -rf dist",
     "test": "vitest run",
     "test:watch": "vitest watch",

@@ -5,6 +5,10 @@
 export type {
   ToolSource,
   ToolDescriptor,
+  ToolLookupOptions,
+  ToolSchema,
+  ResolvedToolDescriptor,
+  SchemaLoader,
   ToolServer,
   ToolDispatchRule,
   ToolDispatchPolicy,
@@ -53,8 +57,14 @@ export type { NormalizedToolDefinition, CodecCapabilities } from './schema-trans
 /*  Hooks bridge                                                       */
 /* ------------------------------------------------------------------ */
 
-export { NoopToolHookBridge } from './hooks.js';
-export type { ToolHookBridge, ToolHookResult } from './hooks.js';
+export { NoopToolHookBridge, ProductionToolHookBridge } from './hooks.js';
+export type {
+  ProductionToolHookBridgeOptions,
+  ToolHookBridge,
+  ToolHookEvent,
+  ToolHookProcessor,
+  ToolHookResult,
+} from './hooks.js';
 
 /* ------------------------------------------------------------------ */
 /*  MCP bridge                                                         */

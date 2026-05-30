@@ -1,7 +1,8 @@
 {
   "issueNumber": 576,
   "baseBranch": "staging",
-  "implementationBranch": "agent/issue-576-unify-tool-registries",
+  "implementationBranch": "plan/issue-576",
+  "deliveryPrNumber": 687,
   "maxFixAttempts": 3,
   "relatedIssues": [
     580,

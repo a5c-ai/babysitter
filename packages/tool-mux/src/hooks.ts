@@ -15,13 +15,27 @@ import type { ToolCallContext, ToolCallResult, ToolDescriptor } from './types.js
 /* ------------------------------------------------------------------ */
 
 export interface ToolHookResult {
-  decision?: 'allow' | 'deny' | 'ask' | 'continue' | 'noop';
+  decision?: 'allow' | 'deny' | 'block' | 'ask' | 'continue' | 'noop';
   reason?: string;
   toolMutation?: {
     mode: 'replace' | 'patch';
     value: unknown;
   };
   metadata?: Record<string, unknown>;
+}
+
+export interface ToolHookEvent {
+  phase: 'tool.before' | 'tool.after' | 'tool.after_failure';
+  context: ToolCallContext;
+  descriptor: ToolDescriptor;
+  payload: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+export type ToolHookProcessor = (event: ToolHookEvent) => Promise<ToolHookResult | undefined>;
+
+export interface ProductionToolHookBridgeOptions {
+  processHook: ToolHookProcessor;
 }
 
 /* ------------------------------------------------------------------ */
@@ -73,5 +87,76 @@ export class NoopToolHookBridge implements ToolHookBridge {
     _result: ToolCallResult,
   ): Promise<ToolHookResult | undefined> {
     return undefined;
+  }
+}
+
+export class ProductionToolHookBridge implements ToolHookBridge {
+  private readonly processHook: ToolHookProcessor;
+
+  constructor(options: ProductionToolHookBridgeOptions) {
+    this.processHook = options.processHook;
+  }
+
+  async beforeToolUse(
+    context: ToolCallContext,
+    descriptor: ToolDescriptor,
+  ): Promise<ToolHookResult | undefined> {
+    try {
+      const result = await this.processHook({
+        phase: 'tool.before',
+        context,
+        descriptor,
+        payload: {
+          toolName: descriptor.name,
+          input: context.input,
+          source: descriptor.source,
+          sourceQualifier: descriptor.sourceQualifier,
+          server: descriptor.server,
+        },
+      });
+      if (result?.decision === 'block') {
+        return {
+          ...result,
+          decision: 'deny',
+          metadata: { ...result.metadata, phase: 'tool.before' },
+        };
+      }
+      return result ? { ...result, metadata: { ...result.metadata, phase: 'tool.before' } } : undefined;
+    } catch (error) {
+      return {
+        decision: 'allow',
+        reason: error instanceof Error ? error.message : String(error),
+        metadata: { hookError: true, phase: 'tool.before' },
+      };
+    }
+  }
+
+  async afterToolUse(
+    context: ToolCallContext,
+    descriptor: ToolDescriptor,
+    result: ToolCallResult,
+  ): Promise<ToolHookResult | undefined> {
+    const phase = result.error ? 'tool.after_failure' : 'tool.after';
+    try {
+      return await this.processHook({
+        phase,
+        context,
+        descriptor,
+        payload: {
+          toolName: descriptor.name,
+          input: context.input,
+          result,
+          source: descriptor.source,
+          sourceQualifier: descriptor.sourceQualifier,
+          server: descriptor.server,
+        },
+      });
+    } catch (error) {
+      return {
+        decision: 'noop',
+        reason: error instanceof Error ? error.message : String(error),
+        metadata: { hookError: true, phase },
+      };
+    }
   }
 }

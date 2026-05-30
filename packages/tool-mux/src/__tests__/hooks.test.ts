@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { NoopToolHookBridge } from '../hooks.js';
+import { NoopToolHookBridge, ProductionToolHookBridge } from '../hooks.js';
 import type { ToolHookBridge, ToolHookResult } from '../hooks.js';
 import type { ToolCallContext, ToolCallResult, ToolDescriptor } from '../types.js';
 
@@ -122,5 +122,54 @@ describe('Custom ToolHookBridge', () => {
     expect(capturedResult).toBeDefined();
     expect(capturedResult!.output).toEqual({ data: [1, 2, 3] });
     expect(capturedResult!.durationMs).toBe(150);
+  });
+});
+
+describe('ProductionToolHookBridge', () => {
+  it('maps deny and block hook decisions to dispatcher denial results', async () => {
+    const bridge = new ProductionToolHookBridge({
+      processHook: async () => ({ decision: 'block', reason: 'blocked by PreToolUse' }),
+    });
+
+    const result = await bridge.beforeToolUse(makeContext(), makeDescriptor());
+
+    expect(result).toEqual({
+      decision: 'deny',
+      reason: 'blocked by PreToolUse',
+      metadata: expect.objectContaining({ phase: 'tool.before' }),
+    });
+  });
+
+  it('emits PostToolUse audit events for success and failure results', async () => {
+    const processHook = vi.fn(async (): Promise<ToolHookResult> => ({ decision: 'allow' }));
+    const bridge = new ProductionToolHookBridge({ processHook });
+
+    await bridge.afterToolUse(makeContext(), makeDescriptor(), makeResult({ output: 'ok' }));
+    await bridge.afterToolUse(makeContext(), makeDescriptor(), makeResult({ error: 'boom' }));
+
+    expect(processHook).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      phase: 'tool.after',
+      payload: expect.objectContaining({ result: expect.objectContaining({ output: 'ok' }) }),
+    }));
+    expect(processHook).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      phase: 'tool.after_failure',
+      payload: expect.objectContaining({ result: expect.objectContaining({ error: 'boom' }) }),
+    }));
+  });
+
+  it('fails open when the hook processor throws', async () => {
+    const bridge = new ProductionToolHookBridge({
+      processHook: async () => {
+        throw new Error('hook exploded');
+      },
+    });
+
+    const result = await bridge.beforeToolUse(makeContext(), makeDescriptor());
+
+    expect(result).toEqual({
+      decision: 'allow',
+      reason: 'hook exploded',
+      metadata: expect.objectContaining({ hookError: true }),
+    });
   });
 });

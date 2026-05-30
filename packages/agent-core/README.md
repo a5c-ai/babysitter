@@ -241,7 +241,7 @@ Call `resetRunScopedConfig()` between independent runs if your host process reus
 
 ## DeferredToolRegistry API
 
-`DeferredToolRegistry` is the package's lazy schema registry for non-bundled tools.
+`DeferredToolRegistry` is the package's compatibility facade for the tool-mux lazy schema registry used by non-bundled tools.
 
 Typical flow:
 
@@ -262,7 +262,7 @@ Useful methods:
 - `clear()`
 - `size` / `loadedSchemaCount`
 
-Source disambiguation uses `(source, sourceQualifier, name)`, so duplicate tool names from different MCP servers or plugins can coexist safely.
+Source disambiguation uses `(source, sourceQualifier, name)`, so duplicate tool names from different MCP servers or plugins can coexist safely. New integrations should use `@a5c-ai/tool-mux` directly when they do not need the historical agent-core facade.
 
 ## Integration points
 
