@@ -51,6 +51,40 @@ Use it for human-invoked orchestration sessions and runtime services:
 - `daemon:*`, `cost:stats`, `start-server`
 - `discover`, `list`, `invoke`
 
+## External Agent Dispatch
+
+External agent tasks start as normal `ctx.task()` effects. The difference is the
+agent routing hint: `agent.responderType: "agent"` plus a required `adapter`.
+During orchestration, tasks-mux chooses the responder backend. Internal
+responders continue through the normal agent-core path, human responders use the
+breakpoint path, and agent responders route to `AgentMuxResponderBackend`, which
+uses agent-mux and the lower-level `amuxBridge` integration.
+
+The command surfaces involved are split by responsibility:
+
+| Surface | Use |
+| --- | --- |
+| `babysitter run:create`, `run:iterate`, `task:list`, `task:post` | Create and replay the run, inspect pending effects, and post resolved task results. |
+| `babysitter process-library:active`, `skill:discover`, `profile:*` | Gather process-authoring context, available skills, and user/project preferences before deciding whether an external responder is appropriate. |
+| `omni discover`, `omni list`, `omni invoke` | Human-facing discovery and invocation surface for available runtime agents and services. |
+| `amux doctor`, `amux launch`, `amux auth`, `amux install` | agent-mux checks and adapter operations. See the agent-mux reference for the exact CLI flags. |
+
+Troubleshooting common external agent failures:
+
+| Scenario | Expected behavior |
+| --- | --- |
+| agent-mux is missing | If the task explicitly allows internal fallback, route internally; otherwise fail the task with an unavailable agent-mux error. |
+| Adapter is missing | Fail with an adapter-not-installed message and install guidance for the selected adapter. |
+| Adapter is unauthenticated | Fail with an authentication message and run the adapter auth flow before retrying. |
+| Task times out | Fail the task with timeout details; include partial output only when the responder backend provides it. |
+| Adapter process crashes | Fail the task with the adapter stderr or exit details so the next iteration can diagnose the crash. |
+| Fallback is disabled | Do not silently switch to an internal agent. The failed external responder is part of the task result. |
+
+Older design docs may still say `agent.external: true`,
+`fallbackToInternal`, or direct `amuxBridge` dispatch. The current contributor
+surface should describe the tasks-mux responder route and use
+`responderType: "agent"` in new examples.
+
 ## Runs Directory Defaults
 
 The repo source now treats global runs storage as the default:

@@ -74,6 +74,28 @@ When launching agents through `amux launch`, two bridge flags control how babysi
 
 The `hookSupport` and `bridgeCapabilities` attributes in the atlas graph agent version nodes describe which harnesses support these flags natively. See the [amux CLI reference](agent-mux/reference/10-cli-reference.md) for the full flag table.
 
+## Plugin Mode And External Responders
+
+When Babysitter runs inside a host agent plugin, most effects are
+host-resolvable: the host agent can edit files, run approved tools, answer
+breakpoints, and post task results back to the run. External agent responder
+effects are different. A process can mark an agent task with
+`responderType: "agent"` and an agent-mux `adapter`; tasks-mux then resolves
+that effect through agent-mux instead of handing it back to the host as ordinary
+tool work.
+
+This keeps the plugin contract small:
+
+- host-resolvable effects stay with the current host agent;
+- external agent responder effects route through tasks-mux, agent-mux, and the
+  `amuxBridge` integration;
+- fallback to the internal agent path must be explicit, using the current
+  fallback field documented in the agent-reference docs.
+
+For task shape, fallback behavior, and troubleshooting, see
+[Process Authoring Policy](agent-reference/process-authoring.md#agent-task-responders)
+and [Command Surfaces](agent-reference/command-surfaces.md#external-agent-dispatch).
+
 ---
 
 ## How a Plugin Install Actually Works

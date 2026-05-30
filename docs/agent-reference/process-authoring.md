@@ -16,6 +16,67 @@ Choose the process shape before writing `process.js`:
 - Use a HYPOTHESES tree when the bug class is unknown and forensics are required. Multiple causal models should compete explicitly, with each hypothesis carrying its own evidence to gather, falsifying observations, and follow-up phases.
 - Rule of thumb: if the first phase is "investigate", use HYPOTHESES-tree mode. If the first phase is "implement X", use flat-phase-list mode.
 
+## Agent Task Responders
+
+Use internal agent tasks for most contributor-facing process work. They are the
+default `kind: "agent"` shape and are best for synthesis, review, planning,
+classification, and other text-first work that does not require a separate agent
+workspace.
+
+```javascript
+export const summarizeTask = defineTask("summarize-docs", () => ({
+  kind: "agent",
+  title: "Summarize documentation gaps",
+  agent: {
+    name: "docs-gap-summarizer",
+    prompt: {
+      role: "technical documentation reviewer",
+      task: "Read the target docs and summarize missing contributor guidance.",
+    },
+  },
+}));
+```
+
+Use an external agent responder only when the work benefits from another
+agent-mux adapter: for example, tool-heavy code editing, browser or shell access,
+a specialist harness, or an isolated conversation context. The current
+tasks-mux routing model uses `responderType: "agent"` plus an `adapter` routing
+hint on the agent task.
+
+```javascript
+export const implementationReviewTask = defineTask("implementation-review", () => ({
+  kind: "agent",
+  title: "Review implementation with an external responder",
+  agent: {
+    name: "external-reviewer",
+    responderType: "agent",
+    adapter: "codex",
+    prompt: "Review the working tree diff and report blocking issues.",
+    model: "gpt-5.5",
+    provider: "openai",
+    timeout: 300_000,
+    approvalMode: "yolo",
+    maxTurns: 10,
+    fallbackType: "internal",
+  },
+}));
+```
+
+External agent responders require `adapter`; `model`, `provider`, `timeout`,
+`approvalMode`, and `maxTurns` are optional routing hints passed through to the
+agent responder when the backend supports them. `fallbackType: "internal"`
+means the task may degrade to the normal internal agent path when agent-mux or
+the preferred adapter is unavailable. Without an explicit fallback, a missing
+agent-mux install, missing adapter, authentication failure, timeout, or adapter
+crash should surface as a failed task result rather than silently changing
+responders.
+
+Some design notes and older planning artifacts refer to
+`agent.external: true` and `fallbackToInternal`. Treat those as legacy
+terminology for the same authoring intent; new contributor examples should use
+`responderType: "agent"` and `fallbackType: "internal"` so tasks-mux can route
+the effect consistently.
+
 ## `babysitter:call` Override For This Repo
 
 When authoring a Babysitter process for a direct user request in this repository:
