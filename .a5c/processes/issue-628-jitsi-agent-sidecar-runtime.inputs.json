@@ -1,0 +1,31 @@
+{
+  "issueNumber": 628,
+  "baseBranch": "staging",
+  "targetBranch": "agent/issue-628-jitsi-sidecar",
+  "localJitsiRequired": false,
+  "publish": false,
+  "specPaths": [
+    "packages/krate/docs/jitsi/07-agent-meeting-runtime.md",
+    "packages/krate/docs/jitsi/06-agent-meeting-participation.md",
+    "packages/krate/docs/jitsi/02-helm-deployment.md",
+    "packages/krate/docs/jitsi/03-crds-and-controllers.md",
+    "packages/krate/docs/agent-identity/04-meeting-integration.md"
+  ],
+  "targetPaths": [
+    "packages/krate/core/src/agent-mux-client.js",
+    "packages/krate/core/src/agent-dispatch-controller.js",
+    "packages/krate/core/src/agent-stack-controller.js",
+    "packages/krate/core/src/agent-secret-config-grant-controller.js",
+    "packages/krate/charts/values.yaml",
+    "packages/krate/charts/templates",
+    "packages/krate/core/tests/agent-mux-client.test.js",
+    "packages/krate/core/tests/agent-dispatch-controller.test.js",
+    "packages/krate/core/tests/agent-stack-controller.test.js",
+    "packages/krate/docs/jitsi"
+  ],
+  "verificationCommands": [
+    "npm run test --workspace=@a5c-ai/krate",
+    "npm run build:krate",
+    "npm run verify:metadata"
+  ]
+}
