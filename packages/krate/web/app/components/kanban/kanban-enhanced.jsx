@@ -214,7 +214,7 @@ export function EnhancedKanbanBoard({
           })
         );
       } catch (err) {
-        console.warn('[krate] workspace creation failed:', err.message ?? err);
+        setBoardError(`Workspace creation failed: ${err.message || 'unknown error'}`);
       } finally {
         setPendingWorkspaceItem(null);
       }

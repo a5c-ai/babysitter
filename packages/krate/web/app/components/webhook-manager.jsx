@@ -122,7 +122,7 @@ function WebhookRow({ webhook, org, onPingResult, onDeleted }) {
               try {
                 const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/ExternalWebhookConfig/${encodeURIComponent(webhook.metadata?.name)}`, { method: 'DELETE' });
                 if (res.ok) { if (onDeleted) onDeleted(webhook.metadata?.name); }
-              } catch (err) { console.warn('Webhook delete failed:', err.message || err); } finally { setDeleting(false); }
+              } catch (err) { setPingMsg(`Delete failed: ${err.message || 'unknown error'}`); } finally { setDeleting(false); }
             }} style={{ ...smallGhostStyle, color: '#fff', backgroundColor: 'var(--danger)', borderColor: 'var(--danger)' }} aria-label={`Confirm delete webhook ${webhook.metadata?.name || 'unnamed'}`}>
               Confirm
             </button>
